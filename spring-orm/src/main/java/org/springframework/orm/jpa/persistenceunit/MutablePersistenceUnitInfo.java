@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,16 @@
 package org.springframework.orm.jpa.persistenceunit;
 
 import java.net.URL;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import javax.persistence.SharedCacheMode;
-import javax.persistence.ValidationMode;
-import javax.persistence.spi.ClassTransformer;
-import javax.persistence.spi.PersistenceUnitTransactionType;
+
 import javax.sql.DataSource;
+
+import jakarta.persistence.SharedCacheMode;
+import jakarta.persistence.ValidationMode;
+import jakarta.persistence.spi.ClassTransformer;
+import jakarta.persistence.spi.PersistenceUnitTransactionType;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -32,7 +34,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Spring's base implementation of the JPA
- * {@link javax.persistence.spi.PersistenceUnitInfo} interface,
+ * {@link jakarta.persistence.spi.PersistenceUnitInfo} interface,
  * used to bootstrap an {@code EntityManagerFactory} in a container.
  *
  * <p>This implementation is largely a JavaBean, offering mutators
@@ -60,16 +62,16 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	@Nullable
 	private DataSource jtaDataSource;
 
-	private final List<String> mappingFileNames = new LinkedList<>();
+	private final List<String> mappingFileNames = new ArrayList<>();
 
-	private List<URL> jarFileUrls = new LinkedList<>();
+	private final List<URL> jarFileUrls = new ArrayList<>();
 
 	@Nullable
 	private URL persistenceUnitRootUrl;
 
-	private final List<String> managedClassNames = new LinkedList<>();
+	private final List<String> managedClassNames = new ArrayList<>();
 
-	private final List<String> managedPackages = new LinkedList<>();
+	private final List<String> managedPackages = new ArrayList<>();
 
 	private boolean excludeUnlistedClasses = false;
 
@@ -170,7 +172,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 
 	/**
 	 * Add a managed class name to the persistence provider's metadata.
-	 * @see javax.persistence.spi.PersistenceUnitInfo#getManagedClassNames()
+	 * @see jakarta.persistence.spi.PersistenceUnitInfo#getManagedClassNames()
 	 * @see #addManagedPackage
 	 */
 	public void addManagedClassName(String managedClassName) {

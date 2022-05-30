@@ -26,15 +26,15 @@
 
 	<bean id="debugInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor"/>
 
-	<bean id="service" class="org.springframework.cache.config.DefaultCacheableService"/>
+	<bean id="service" class="org.springframework.context.testfixture.cache.beans.DefaultCacheableService"/>
 
-	<bean id="classService" class="org.springframework.cache.config.AnnotatedClassCacheableService"/>
+	<bean id="classService" class="org.springframework.context.testfixture.cache.beans.AnnotatedClassCacheableService"/>
 
-	<bean id="keyGenerator" class="org.springframework.cache.config.SomeKeyGenerator"/>
+	<bean id="keyGenerator" class="org.springframework.context.testfixture.cache.SomeKeyGenerator"/>
 
 	<bean id="errorHandler" class="org.springframework.cache.interceptor.SimpleCacheErrorHandler"/>
 
-	<bean id="customKeyGenerator" class="org.springframework.cache.config.SomeCustomKeyGenerator"/>
+	<bean id="customKeyGenerator" class="org.springframework.context.testfixture.cache.SomeCustomKeyGenerator"/>
 
 	<bean id="customCacheManager" class="org.springframework.cache.support.SimpleCacheManager">
 		<property name="caches">

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.context.event;
+
+import java.util.function.Predicate;
 
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
@@ -39,31 +41,68 @@ public interface ApplicationEventMulticaster {
 	/**
 	 * Add a listener to be notified of all events.
 	 * @param listener the listener to add
+	 * @see #removeApplicationListener(ApplicationListener)
+	 * @see #removeApplicationListeners(Predicate)
 	 */
 	void addApplicationListener(ApplicationListener<?> listener);
 
 	/**
 	 * Add a listener bean to be notified of all events.
 	 * @param listenerBeanName the name of the listener bean to add
+	 * @see #removeApplicationListenerBean(String)
+	 * @see #removeApplicationListenerBeans(Predicate)
 	 */
 	void addApplicationListenerBean(String listenerBeanName);
 
 	/**
 	 * Remove a listener from the notification list.
 	 * @param listener the listener to remove
+	 * @see #addApplicationListener(ApplicationListener)
+	 * @see #removeApplicationListeners(Predicate)
 	 */
 	void removeApplicationListener(ApplicationListener<?> listener);
 
 	/**
 	 * Remove a listener bean from the notification list.
 	 * @param listenerBeanName the name of the listener bean to remove
+	 * @see #addApplicationListenerBean(String)
+	 * @see #removeApplicationListenerBeans(Predicate)
 	 */
 	void removeApplicationListenerBean(String listenerBeanName);
+
+	/**
+	 * Remove all matching listeners from the set of registered
+	 * {@code ApplicationListener} instances (which includes adapter classes
+	 * such as {@link ApplicationListenerMethodAdapter}, e.g. for annotated
+	 * {@link EventListener} methods).
+	 * <p>Note: This just applies to instance registrations, not to listeners
+	 * registered by bean name.
+	 * @param predicate the predicate to identify listener instances to remove,
+	 * e.g. checking {@link SmartApplicationListener#getListenerId()}
+	 * @since 5.3.5
+	 * @see #addApplicationListener(ApplicationListener)
+	 * @see #removeApplicationListener(ApplicationListener)
+	 */
+	void removeApplicationListeners(Predicate<ApplicationListener<?>> predicate);
+
+	/**
+	 * Remove all matching listener beans from the set of registered
+	 * listener bean names (referring to bean classes which in turn
+	 * implement the {@link ApplicationListener} interface directly).
+	 * <p>Note: This just applies to bean name registrations, not to
+	 * programmatically registered {@code ApplicationListener} instances.
+	 * @param predicate the predicate to identify listener bean names to remove
+	 * @since 5.3.5
+	 * @see #addApplicationListenerBean(String)
+	 * @see #removeApplicationListenerBean(String)
+	 */
+	void removeApplicationListenerBeans(Predicate<String> predicate);
 
 	/**
 	 * Remove all listeners registered with this multicaster.
 	 * <p>After a remove call, the multicaster will perform no action
 	 * on event notification until new listeners are registered.
+	 * @see #removeApplicationListeners(Predicate)
 	 */
 	void removeAllListeners();
 

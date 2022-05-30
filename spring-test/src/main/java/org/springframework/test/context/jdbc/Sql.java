@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,8 @@ import org.springframework.core.annotation.AliasFor;
  * SQL {@link #scripts} and {@link #statements} to be executed against a given
  * database during integration tests.
  *
- * <p>Method-level declarations override class-level declarations.
+ * <p>Method-level declarations override class-level declarations by default,
+ * but this behavior can be configured via {@link SqlMergeMode @SqlMergeMode}.
  *
  * <p>Script execution is performed by the {@link SqlScriptsTestExecutionListener},
  * which is enabled by default.
@@ -44,10 +45,9 @@ import org.springframework.core.annotation.AliasFor;
  * XML namespace element. Consult the javadocs of individual attributes in this
  * annotation and {@link SqlConfig @SqlConfig} for details.
  *
- * <p>Beginning with Java 8, {@code @Sql} can be used as a
- * <em>{@linkplain Repeatable repeatable}</em> annotation. Otherwise,
- * {@link SqlGroup @SqlGroup} can be used as an explicit container for declaring
- * multiple instances of {@code @Sql}.
+ * <p>{@code @Sql} can be used as a <em>{@linkplain Repeatable repeatable}</em>
+ * annotation. Otherwise, {@link SqlGroup @SqlGroup} can be used as an explicit
+ * container for declaring multiple instances of {@code @Sql}.
  *
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em> with attribute overrides.
@@ -55,6 +55,7 @@ import org.springframework.core.annotation.AliasFor;
  * @author Sam Brannen
  * @since 4.1
  * @see SqlConfig
+ * @see SqlMergeMode
  * @see SqlGroup
  * @see SqlScriptsTestExecutionListener
  * @see org.springframework.transaction.annotation.Transactional

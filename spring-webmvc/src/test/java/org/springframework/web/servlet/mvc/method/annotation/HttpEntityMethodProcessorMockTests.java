@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Set;
 
-import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.core.MethodParameter;
@@ -47,23 +47,44 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.web.ErrorResponse;
+import org.springframework.web.ErrorResponseException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
-import static java.time.Instant.*;
-import static java.time.format.DateTimeFormatter.*;
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-import static org.springframework.http.MediaType.*;
-import static org.springframework.web.servlet.HandlerMapping.*;
+import static java.time.Instant.ofEpochMilli;
+import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
+import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON;
+import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE;
+import static org.springframework.http.MediaType.TEXT_PLAIN;
+import static org.springframework.web.servlet.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
 
 /**
  * Test fixture for {@link HttpEntityMethodProcessor} delegating to a mock
@@ -80,9 +101,6 @@ public class HttpEntityMethodProcessorMockTests {
 	private static final ZoneId GMT = ZoneId.of("GMT");
 
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
 	private HttpEntityMethodProcessor processor;
 
 	private HttpMessageConverter<String> stringHttpMessageConverter;
@@ -90,6 +108,8 @@ public class HttpEntityMethodProcessorMockTests {
 	private HttpMessageConverter<Resource> resourceMessageConverter;
 
 	private HttpMessageConverter<Object> resourceRegionMessageConverter;
+
+	private HttpMessageConverter<Object> jsonMessageConverter;
 
 	private MethodParameter paramHttpEntity;
 
@@ -111,6 +131,10 @@ public class HttpEntityMethodProcessorMockTests {
 
 	private MethodParameter returnTypeInt;
 
+	private MethodParameter returnTypeErrorResponse;
+
+	private MethodParameter returnTypeProblemDetail;
+
 	private ModelAndViewContainer mavContainer;
 
 	private MockHttpServletRequest servletRequest;
@@ -120,24 +144,27 @@ public class HttpEntityMethodProcessorMockTests {
 	private ServletWebRequest webRequest;
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("unchecked")
 	public void setup() throws Exception {
 
 		stringHttpMessageConverter = mock(HttpMessageConverter.class);
-		given(stringHttpMessageConverter.getSupportedMediaTypes())
-				.willReturn(Collections.singletonList(TEXT_PLAIN));
+		given(stringHttpMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(TEXT_PLAIN));
 
 		resourceMessageConverter = mock(HttpMessageConverter.class);
-		given(resourceMessageConverter.getSupportedMediaTypes())
-				.willReturn(Collections.singletonList(MediaType.ALL));
+		given(resourceMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.ALL));
+		given(resourceMessageConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.ALL));
 
 		resourceRegionMessageConverter = mock(HttpMessageConverter.class);
-		given(resourceRegionMessageConverter.getSupportedMediaTypes())
-				.willReturn(Collections.singletonList(MediaType.ALL));
+		given(resourceRegionMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.ALL));
+		given(resourceRegionMessageConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.ALL));
+
+		jsonMessageConverter = mock(HttpMessageConverter.class);
+		given(jsonMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.APPLICATION_PROBLEM_JSON));
+		given(jsonMessageConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.APPLICATION_PROBLEM_JSON));
 
 		processor = new HttpEntityMethodProcessor(Arrays.asList(
-				stringHttpMessageConverter, resourceMessageConverter, resourceRegionMessageConverter));
+				stringHttpMessageConverter, resourceMessageConverter, resourceRegionMessageConverter, jsonMessageConverter));
 
 		Method handle1 = getClass().getMethod("handle1", HttpEntity.class, ResponseEntity.class,
 				Integer.TYPE, RequestEntity.class);
@@ -152,6 +179,8 @@ public class HttpEntityMethodProcessorMockTests {
 		returnTypeHttpEntitySubclass = new MethodParameter(getClass().getMethod("handle2x", HttpEntity.class), -1);
 		returnTypeInt = new MethodParameter(getClass().getMethod("handle3"), -1);
 		returnTypeResponseEntityResource = new MethodParameter(getClass().getMethod("handle5"), -1);
+		returnTypeErrorResponse = new MethodParameter(getClass().getMethod("handle6"), -1);
+		returnTypeProblemDetail = new MethodParameter(getClass().getMethod("handle7"), -1);
 
 		mavContainer = new ModelAndViewContainer();
 		servletRequest = new MockHttpServletRequest("GET", "/foo");
@@ -162,20 +191,21 @@ public class HttpEntityMethodProcessorMockTests {
 
 	@Test
 	public void supportsParameter() {
-		assertTrue("HttpEntity parameter not supported", processor.supportsParameter(paramHttpEntity));
-		assertTrue("RequestEntity parameter not supported", processor.supportsParameter(paramRequestEntity));
-		assertFalse("ResponseEntity parameter supported", processor.supportsParameter(paramResponseEntity));
-		assertFalse("non-entity parameter supported", processor.supportsParameter(paramInt));
+		assertThat(processor.supportsParameter(paramHttpEntity)).as("HttpEntity parameter not supported").isTrue();
+		assertThat(processor.supportsParameter(paramRequestEntity)).as("RequestEntity parameter not supported").isTrue();
+		assertThat(processor.supportsParameter(paramResponseEntity)).as("ResponseEntity parameter supported").isFalse();
+		assertThat(processor.supportsParameter(paramInt)).as("non-entity parameter supported").isFalse();
 	}
 
 	@Test
 	public void supportsReturnType() {
-		assertTrue("ResponseEntity return type not supported", processor.supportsReturnType(returnTypeResponseEntity));
-		assertTrue("HttpEntity return type not supported", processor.supportsReturnType(returnTypeHttpEntity));
-		assertTrue("Custom HttpEntity subclass not supported", processor.supportsReturnType(returnTypeHttpEntitySubclass));
-		assertFalse("RequestEntity parameter supported",
-				processor.supportsReturnType(paramRequestEntity));
-		assertFalse("non-ResponseBody return type supported", processor.supportsReturnType(returnTypeInt));
+		assertThat(processor.supportsReturnType(returnTypeResponseEntity)).as("ResponseEntity return type not supported").isTrue();
+		assertThat(processor.supportsReturnType(returnTypeHttpEntity)).as("HttpEntity return type not supported").isTrue();
+		assertThat(processor.supportsReturnType(returnTypeHttpEntitySubclass)).as("Custom HttpEntity subclass not supported").isTrue();
+		assertThat(processor.supportsReturnType(returnTypeErrorResponse)).isTrue();
+		assertThat(processor.supportsReturnType(returnTypeProblemDetail)).isTrue();
+		assertThat(processor.supportsReturnType(paramRequestEntity)).as("RequestEntity parameter supported").isFalse();
+		assertThat(processor.supportsReturnType(returnTypeInt)).as("non-ResponseBody return type supported").isFalse();
 	}
 
 	@Test
@@ -191,9 +221,9 @@ public class HttpEntityMethodProcessorMockTests {
 
 		Object result = processor.resolveArgument(paramHttpEntity, mavContainer, webRequest, null);
 
-		assertTrue(result instanceof HttpEntity);
-		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
-		assertEquals("Invalid argument", body, ((HttpEntity<?>) result).getBody());
+		assertThat(result instanceof HttpEntity).isTrue();
+		assertThat(mavContainer.isRequestHandled()).as("The requestHandled flag shouldn't change").isFalse();
+		assertThat(((HttpEntity<?>) result).getBody()).as("Invalid argument").isEqualTo(body);
 	}
 
 	@Test
@@ -213,14 +243,14 @@ public class HttpEntityMethodProcessorMockTests {
 
 		Object result = processor.resolveArgument(paramRequestEntity, mavContainer, webRequest, null);
 
-		assertTrue(result instanceof RequestEntity);
-		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
+		assertThat(result instanceof RequestEntity).isTrue();
+		assertThat(mavContainer.isRequestHandled()).as("The requestHandled flag shouldn't change").isFalse();
 		RequestEntity<?> requestEntity = (RequestEntity<?>) result;
-		assertEquals("Invalid method", HttpMethod.GET, requestEntity.getMethod());
+		assertThat(requestEntity.getMethod()).as("Invalid method").isEqualTo(HttpMethod.GET);
 		// using default port (which is 80), so do not need to append the port (-1 means ignore)
 		URI uri = new URI("http", null, "www.example.com", -1, "/path", null, null);
-		assertEquals("Invalid url", uri, requestEntity.getUrl());
-		assertEquals("Invalid argument", body, requestEntity.getBody());
+		assertThat(requestEntity.getUrl()).as("Invalid url").isEqualTo(uri);
+		assertThat(requestEntity.getBody()).as("Invalid argument").isEqualTo(body);
 	}
 
 	@Test
@@ -229,19 +259,19 @@ public class HttpEntityMethodProcessorMockTests {
 		servletRequest.setMethod("POST");
 		servletRequest.addHeader("Content-Type", contentType.toString());
 
-		given(stringHttpMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(contentType));
+		given(stringHttpMessageConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(contentType));
 		given(stringHttpMessageConverter.canRead(String.class, contentType)).willReturn(false);
 
-		this.thrown.expect(HttpMediaTypeNotSupportedException.class);
-		processor.resolveArgument(paramHttpEntity, mavContainer, webRequest, null);
+		assertThatExceptionOfType(HttpMediaTypeNotSupportedException.class).isThrownBy(() ->
+				processor.resolveArgument(paramHttpEntity, mavContainer, webRequest, null));
 	}
 
 	@Test
 	public void shouldFailResolvingWhenContentTypeNotSupported() throws Exception {
 		servletRequest.setMethod("POST");
 		servletRequest.setContent("some content".getBytes(StandardCharsets.UTF_8));
-		this.thrown.expect(HttpMediaTypeNotSupportedException.class);
-		processor.resolveArgument(paramHttpEntity, mavContainer, webRequest, null);
+		assertThatExceptionOfType(HttpMediaTypeNotSupportedException.class).isThrownBy(() ->
+				processor.resolveArgument(paramHttpEntity, mavContainer, webRequest, null));
 	}
 
 	@Test
@@ -254,8 +284,69 @@ public class HttpEntityMethodProcessorMockTests {
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
-		assertTrue(mavContainer.isRequestHandled());
+		assertThat(mavContainer.isRequestHandled()).isTrue();
 		verify(stringHttpMessageConverter).write(eq(body), eq(accepted), isA(HttpOutputMessage.class));
+	}
+
+	@Test
+	public void shouldHandleErrorResponse() throws Exception {
+		ErrorResponseException ex = new ErrorResponseException(HttpStatus.BAD_REQUEST);
+		ex.getHeaders().add("foo", "bar");
+		servletRequest.addHeader("Accept", APPLICATION_PROBLEM_JSON_VALUE);
+		given(jsonMessageConverter.canWrite(ProblemDetail.class, APPLICATION_PROBLEM_JSON)).willReturn(true);
+
+		processor.handleReturnValue(ex, returnTypeProblemDetail, mavContainer, webRequest);
+
+		assertThat(mavContainer.isRequestHandled()).isTrue();
+		assertThat(webRequest.getNativeResponse(HttpServletResponse.class).getStatus()).isEqualTo(400);
+		verify(jsonMessageConverter).write(eq(ex.getBody()), eq(APPLICATION_PROBLEM_JSON), isA(HttpOutputMessage.class));
+
+		assertThat(ex.getBody()).isNotNull()
+				.extracting(ProblemDetail::getInstance).isNotNull()
+				.extracting(URI::toString)
+				.as("Instance was not set to the request path")
+				.isEqualTo(servletRequest.getRequestURI());
+
+
+		// But if instance is set, it should be respected
+		ex.getBody().setInstance(URI.create("/something/else"));
+		processor.handleReturnValue(ex, returnTypeProblemDetail, mavContainer, webRequest);
+
+		assertThat(ex.getBody()).isNotNull()
+				.extracting(ProblemDetail::getInstance).isNotNull()
+				.extracting(URI::toString)
+				.as("Instance was not set to the request path")
+				.isEqualTo("/something/else");
+	}
+
+	@Test
+	public void shouldHandleProblemDetail() throws Exception {
+		ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+		servletRequest.addHeader("Accept", APPLICATION_PROBLEM_JSON_VALUE);
+		given(jsonMessageConverter.canWrite(ProblemDetail.class, APPLICATION_PROBLEM_JSON)).willReturn(true);
+
+		processor.handleReturnValue(problemDetail, returnTypeProblemDetail, mavContainer, webRequest);
+
+		assertThat(mavContainer.isRequestHandled()).isTrue();
+		assertThat(webRequest.getNativeResponse(HttpServletResponse.class).getStatus()).isEqualTo(400);
+		verify(jsonMessageConverter).write(eq(problemDetail), eq(APPLICATION_PROBLEM_JSON), isA(HttpOutputMessage.class));
+
+		assertThat(problemDetail)
+				.extracting(ProblemDetail::getInstance).isNotNull()
+				.extracting(URI::toString)
+				.as("Instance was not set to the request path")
+				.isEqualTo(servletRequest.getRequestURI());
+
+
+		// But if instance is set, it should be respected
+		problemDetail.setInstance(URI.create("/something/else"));
+		processor.handleReturnValue(problemDetail, returnTypeProblemDetail, mavContainer, webRequest);
+
+		assertThat(problemDetail).isNotNull()
+				.extracting(ProblemDetail::getInstance).isNotNull()
+				.extracting(URI::toString)
+				.as("Instance was not set to the request path")
+				.isEqualTo("/something/else");
 	}
 
 	@Test
@@ -268,7 +359,7 @@ public class HttpEntityMethodProcessorMockTests {
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntityProduces, mavContainer, webRequest);
 
-		assertTrue(mavContainer.isRequestHandled());
+		assertThat(mavContainer.isRequestHandled()).isTrue();
 		verify(stringHttpMessageConverter).write(eq(body), eq(MediaType.TEXT_HTML), isA(HttpOutputMessage.class));
 	}
 
@@ -290,7 +381,7 @@ public class HttpEntityMethodProcessorMockTests {
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
-		assertTrue(mavContainer.isRequestHandled());
+		assertThat(mavContainer.isRequestHandled()).isTrue();
 		verify(stringHttpMessageConverter).write(eq("Foo"), eq(MediaType.TEXT_HTML), isA(HttpOutputMessage.class));
 	}
 
@@ -302,11 +393,44 @@ public class HttpEntityMethodProcessorMockTests {
 		servletRequest.addHeader("Accept", accepted.toString());
 
 		given(stringHttpMessageConverter.canWrite(String.class, null)).willReturn(true);
-		given(stringHttpMessageConverter.getSupportedMediaTypes())
+		given(stringHttpMessageConverter.getSupportedMediaTypes(any()))
 				.willReturn(Collections.singletonList(TEXT_PLAIN));
 
-		this.thrown.expect(HttpMediaTypeNotAcceptableException.class);
-		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+		assertThatExceptionOfType(HttpMediaTypeNotAcceptableException.class).isThrownBy(() ->
+				processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest));
+	}
+
+	@Test // gh-23205
+	public void shouldFailWithServerErrorIfContentTypeFromResponseEntity() {
+		ResponseEntity<String> returnValue = ResponseEntity.ok()
+				.contentType(MediaType.APPLICATION_XML)
+				.body("<foo/>");
+
+		given(stringHttpMessageConverter.canWrite(String.class, TEXT_PLAIN)).willReturn(true);
+		given(stringHttpMessageConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(TEXT_PLAIN));
+
+		assertThatThrownBy(() ->
+				processor.handleReturnValue(
+						returnValue, returnTypeResponseEntity, mavContainer, webRequest))
+				.isInstanceOf(HttpMessageNotWritableException.class)
+				.hasMessageContaining("with preset Content-Type");
+	}
+
+	@Test // gh-23287
+	public void shouldFailWithServerErrorIfContentTypeFromProducibleAttribute() {
+		Set<MediaType> mediaTypes = Collections.singleton(MediaType.APPLICATION_XML);
+		servletRequest.setAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, mediaTypes);
+
+		ResponseEntity<String> returnValue = ResponseEntity.ok().body("<foo/>");
+
+		given(stringHttpMessageConverter.canWrite(String.class, TEXT_PLAIN)).willReturn(true);
+		given(stringHttpMessageConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(TEXT_PLAIN));
+
+		assertThatThrownBy(() ->
+				processor.handleReturnValue(
+						returnValue, returnTypeResponseEntity, mavContainer, webRequest))
+				.isInstanceOf(HttpMessageNotWritableException.class)
+				.hasMessageContaining("with preset Content-Type");
 	}
 
 	@Test
@@ -317,12 +441,12 @@ public class HttpEntityMethodProcessorMockTests {
 		servletRequest.addHeader("Accept", accepted.toString());
 
 		given(stringHttpMessageConverter.canWrite(String.class, null)).willReturn(true);
-		given(stringHttpMessageConverter.getSupportedMediaTypes())
+		given(stringHttpMessageConverter.getSupportedMediaTypes(any()))
 				.willReturn(Collections.singletonList(TEXT_PLAIN));
 		given(stringHttpMessageConverter.canWrite(String.class, accepted)).willReturn(false);
 
-		this.thrown.expect(HttpMediaTypeNotAcceptableException.class);
-		processor.handleReturnValue(returnValue, returnTypeResponseEntityProduces, mavContainer, webRequest);
+		assertThatExceptionOfType(HttpMediaTypeNotAcceptableException.class).isThrownBy(() ->
+				processor.handleReturnValue(returnValue, returnTypeResponseEntityProduces, mavContainer, webRequest));
 	}
 
 	@Test  // SPR-9142
@@ -330,8 +454,8 @@ public class HttpEntityMethodProcessorMockTests {
 		ResponseEntity<String> returnValue = new ResponseEntity<>("Body", HttpStatus.ACCEPTED);
 		servletRequest.addHeader("Accept", "01");
 
-		this.thrown.expect(HttpMediaTypeNotAcceptableException.class);
-		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+		assertThatExceptionOfType(HttpMediaTypeNotAcceptableException.class).isThrownBy(() ->
+				processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest));
 	}
 
 	@Test
@@ -342,8 +466,8 @@ public class HttpEntityMethodProcessorMockTests {
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
-		assertTrue(mavContainer.isRequestHandled());
-		assertEquals("headerValue", servletResponse.getHeader("headerName"));
+		assertThat(mavContainer.isRequestHandled()).isTrue();
+		assertThat(servletResponse.getHeader("headerName")).isEqualTo("headerValue");
 	}
 
 	@Test
@@ -357,8 +481,8 @@ public class HttpEntityMethodProcessorMockTests {
 
 		ArgumentCaptor<HttpOutputMessage> outputMessage = ArgumentCaptor.forClass(HttpOutputMessage.class);
 		verify(stringHttpMessageConverter).write(eq("body"), eq(TEXT_PLAIN), outputMessage.capture());
-		assertTrue(mavContainer.isRequestHandled());
-		assertEquals("headerValue", outputMessage.getValue().getHeaders().get("header").get(0));
+		assertThat(mavContainer.isRequestHandled()).isTrue();
+		assertThat(outputMessage.getValue().getHeaders().get("header").get(0)).isEqualTo("headerValue");
 	}
 
 	@Test
@@ -385,6 +509,28 @@ public class HttpEntityMethodProcessorMockTests {
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
 		assertConditionalResponse(HttpStatus.NOT_MODIFIED, null, etagValue, -1);
+	}
+
+	@Test
+	public void handleEtagWithHttp304AndEtagFilterHasNoImpact() throws Exception {
+
+		String eTagValue = "\"deadb33f8badf00d\"";
+
+		FilterChain chain = (req, res) -> {
+			servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, eTagValue);
+			ResponseEntity<String> returnValue = ResponseEntity.ok().eTag(eTagValue).body("body");
+			initStringMessageConversion(TEXT_PLAIN);
+			try {
+				processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+			}
+			catch (Exception ex) {
+				throw new IllegalStateException(ex);
+			}
+		};
+
+		new ShallowEtagHeaderFilter().doFilter(this.servletRequest, this.servletResponse, chain);
+
+		assertConditionalResponse(HttpStatus.NOT_MODIFIED, null, eTagValue, -1);
 	}
 
 	@Test  // SPR-14559
@@ -508,14 +654,14 @@ public class HttpEntityMethodProcessorMockTests {
 				.ok(new ByteArrayResource("Content".getBytes(StandardCharsets.UTF_8)));
 
 		given(resourceMessageConverter.canWrite(ByteArrayResource.class, null)).willReturn(true);
-		given(resourceMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.ALL));
+		given(resourceMessageConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.ALL));
 		given(resourceMessageConverter.canWrite(ByteArrayResource.class, APPLICATION_OCTET_STREAM)).willReturn(true);
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntityResource, mavContainer, webRequest);
 
 		then(resourceMessageConverter).should(times(1)).write(
 				any(ByteArrayResource.class), eq(APPLICATION_OCTET_STREAM), any(HttpOutputMessage.class));
-		assertEquals(200, servletResponse.getStatus());
+		assertThat(servletResponse.getStatus()).isEqualTo(200);
 	}
 
 	@Test
@@ -532,7 +678,7 @@ public class HttpEntityMethodProcessorMockTests {
 		then(resourceRegionMessageConverter).should(times(1)).write(
 				anyCollection(), eq(APPLICATION_OCTET_STREAM),
 				argThat(outputMessage -> "bytes".equals(outputMessage.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES))));
-		assertEquals(206, servletResponse.getStatus());
+		assertThat(servletResponse.getStatus()).isEqualTo(206);
 	}
 
 	@Test
@@ -548,7 +694,7 @@ public class HttpEntityMethodProcessorMockTests {
 
 		then(resourceRegionMessageConverter).should(never()).write(
 				anyCollection(), eq(APPLICATION_OCTET_STREAM), any(HttpOutputMessage.class));
-		assertEquals(416, servletResponse.getStatus());
+		assertThat(servletResponse.getStatus()).isEqualTo(416);
 	}
 
 	@Test //SPR-16754
@@ -564,8 +710,8 @@ public class HttpEntityMethodProcessorMockTests {
 		processor.handleReturnValue(returnValue, returnTypeResponseEntityResource, mavContainer, webRequest);
 		then(resourceMessageConverter).should(times(1)).write(
 				any(InputStreamResource.class), eq(APPLICATION_OCTET_STREAM), any(HttpOutputMessage.class));
-		assertEquals(200, servletResponse.getStatus());
-		assertThat(servletResponse.getHeader(HttpHeaders.ACCEPT_RANGES), Matchers.isEmptyOrNullString());
+		assertThat(servletResponse.getStatus()).isEqualTo(200);
+		assertThat(servletResponse.getHeader(HttpHeaders.ACCEPT_RANGES)).isNull();
 	}
 
 	@Test //SPR-16921
@@ -581,7 +727,7 @@ public class HttpEntityMethodProcessorMockTests {
 		processor.handleReturnValue(returnValue, returnTypeResponseEntityResource, mavContainer, webRequest);
 
 		then(resourceRegionMessageConverter).should(never()).write(anyCollection(), any(), any());
-		assertEquals(206, servletResponse.getStatus());
+		assertThat(servletResponse.getStatus()).isEqualTo(206);
 	}
 
 	@Test  //SPR-14767
@@ -660,14 +806,15 @@ public class HttpEntityMethodProcessorMockTests {
 		initStringMessageConversion(TEXT_PLAIN);
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
-		assertTrue(mavContainer.isRequestHandled());
-		assertEquals(Arrays.asList(expected), servletResponse.getHeaders("Vary"));
+		assertThat(mavContainer.isRequestHandled()).isTrue();
+		assertThat(servletResponse.getHeaders("Vary")).isEqualTo(Arrays.asList(expected));
 		verify(stringHttpMessageConverter).write(eq("Foo"), eq(TEXT_PLAIN), isA(HttpOutputMessage.class));
 	}
 
 	private void initStringMessageConversion(MediaType accepted) {
 		given(stringHttpMessageConverter.canWrite(String.class, null)).willReturn(true);
 		given(stringHttpMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(TEXT_PLAIN));
+		given(stringHttpMessageConverter.getSupportedMediaTypes(String.class)).willReturn(Collections.singletonList(TEXT_PLAIN));
 		given(stringHttpMessageConverter.canWrite(String.class, accepted)).willReturn(true);
 	}
 
@@ -679,21 +826,21 @@ public class HttpEntityMethodProcessorMockTests {
 	private void assertConditionalResponse(HttpStatus status, String body, String etag, long lastModified)
 			throws IOException {
 
-		assertEquals(status.value(), servletResponse.getStatus());
-		assertTrue(mavContainer.isRequestHandled());
+		assertThat(servletResponse.getStatus()).isEqualTo(status.value());
+		assertThat(mavContainer.isRequestHandled()).isTrue();
 		if (body != null) {
 			assertResponseBody(body);
 		}
 		else {
-			assertEquals(0, servletResponse.getContentAsByteArray().length);
+			assertThat(servletResponse.getContentAsByteArray().length).isEqualTo(0);
 		}
 		if (etag != null) {
-			assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
-			assertEquals(etag, servletResponse.getHeader(HttpHeaders.ETAG));
+			assertThat(servletResponse.getHeaderValues(HttpHeaders.ETAG).size()).isEqualTo(1);
+			assertThat(servletResponse.getHeader(HttpHeaders.ETAG)).isEqualTo(etag);
 		}
 		if (lastModified != -1) {
-			assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.LAST_MODIFIED).size());
-			assertEquals(lastModified / 1000, servletResponse.getDateHeader(HttpHeaders.LAST_MODIFIED) / 1000);
+			assertThat(servletResponse.getHeaderValues(HttpHeaders.LAST_MODIFIED).size()).isEqualTo(1);
+			assertThat((servletResponse.getDateHeader(HttpHeaders.LAST_MODIFIED) / 1000)).isEqualTo((lastModified / 1000));
 		}
 	}
 
@@ -728,6 +875,16 @@ public class HttpEntityMethodProcessorMockTests {
 
 	@SuppressWarnings("unused")
 	public ResponseEntity<Resource> handle5() {
+		return null;
+	}
+
+	@SuppressWarnings("unused")
+	public ErrorResponse handle6() {
+		return null;
+	}
+
+	@SuppressWarnings("unused")
+	public ProblemDetail handle7() {
 		return null;
 	}
 

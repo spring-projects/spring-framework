@@ -3,7 +3,7 @@
 
 <beans>
 
-	<bean id="prototypeTest" class="org.springframework.tests.sample.beans.SideEffectBean" scope="prototype">
+	<bean id="prototypeTest" class="org.springframework.beans.testfixture.beans.SideEffectBean" scope="prototype">
 		<property name="count"><value>10</value></property>
 	</bean>
 
@@ -17,7 +17,7 @@
 		<property name="targetMethod"><value>getPoolingConfigMixin</value></property>
 	</bean>
 
-	<bean id="nop" class="org.springframework.tests.aop.interceptor.NopInterceptor"/>
+	<bean id="nop" class="org.springframework.aop.testfixture.interceptor.NopInterceptor"/>
 
 	<!--
 		This will create a bean for each thread ("apartment")
@@ -40,9 +40,9 @@
 	</bean>
 
 	<!-- Serialization tests using serializable target and advice -->
-	<bean id="serializableNop" class="org.springframework.tests.aop.interceptor.SerializableNopInterceptor" />
+	<bean id="serializableNop" class="org.springframework.aop.testfixture.interceptor.SerializableNopInterceptor" />
 
-	<bean id="prototypePerson" class="org.springframework.tests.sample.beans.SerializablePerson" scope="prototype"/>
+	<bean id="prototypePerson" class="org.springframework.beans.testfixture.beans.SerializablePerson" scope="prototype"/>
 
 	<bean id="personPoolTargetSource" class="org.springframework.aop.target.CommonsPool2TargetSource">
 		<property name="targetBeanName"><value>prototypePerson</value></property>

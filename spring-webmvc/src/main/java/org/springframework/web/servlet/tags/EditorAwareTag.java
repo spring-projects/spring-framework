@@ -17,7 +17,8 @@
 package org.springframework.web.servlet.tags;
 
 import java.beans.PropertyEditor;
-import javax.servlet.jsp.JspException;
+
+import jakarta.servlet.jsp.JspException;
 
 import org.springframework.lang.Nullable;
 

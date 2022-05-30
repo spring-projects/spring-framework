@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -38,8 +39,8 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see javax.servlet.ServletRequest#getAttribute
- * @see javax.servlet.http.HttpSession#getAttribute
+ * @see jakarta.servlet.ServletRequest#getAttribute
+ * @see jakarta.servlet.http.HttpSession#getAttribute
  */
 public class ServletRequestAttributes extends AbstractRequestAttributes {
 
@@ -188,8 +189,8 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	public void removeAttribute(String name, int scope) {
 		if (scope == SCOPE_REQUEST) {
 			if (isRequestActive()) {
-				this.request.removeAttribute(name);
 				removeRequestDestructionCallback(name);
+				this.request.removeAttribute(name);
 			}
 		}
 		else {
@@ -197,9 +198,8 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 			if (session != null) {
 				this.sessionAttributesToUpdate.remove(name);
 				try {
-					session.removeAttribute(name);
-					// Remove any registered destruction callback as well.
 					session.removeAttribute(DESTRUCTION_CALLBACK_NAME_PREFIX + name);
+					session.removeAttribute(name);
 				}
 				catch (IllegalStateException ex) {
 					// Session invalidated - shouldn't usually happen.

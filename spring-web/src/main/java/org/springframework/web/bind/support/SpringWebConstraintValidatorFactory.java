@@ -16,8 +16,8 @@
 
 package org.springframework.web.bind.support;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorFactory;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorFactory;
 
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
@@ -45,6 +45,7 @@ public class SpringWebConstraintValidatorFactory implements ConstraintValidatorF
 	}
 
 	// Bean Validation 1.1 releaseInstance method
+	@Override
 	public void releaseInstance(ConstraintValidator<?, ?> instance) {
 		getWebApplicationContext().getAutowireCapableBeanFactory().destroyBean(instance);
 	}

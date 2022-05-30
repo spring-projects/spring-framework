@@ -21,13 +21,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.OverridingClassLoader;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests that trigger annotation introspection failures and ensure that they are
@@ -38,10 +39,10 @@ import static org.assertj.core.api.Assertions.*;
  * @see AnnotationUtils
  * @see AnnotatedElementUtils
  */
-public class AnnotationIntrospectionFailureTests {
+class AnnotationIntrospectionFailureTests {
 
 	@Test
-	public void filteredTypeThrowsTypeNotPresentException() throws Exception {
+	void filteredTypeThrowsTypeNotPresentException() throws Exception {
 		FilteringClassLoader classLoader = new FilteringClassLoader(
 				getClass().getClassLoader());
 		Class<?> withExampleAnnotation = ClassUtils.forName(
@@ -49,14 +50,14 @@ public class AnnotationIntrospectionFailureTests {
 		Annotation annotation = withExampleAnnotation.getAnnotations()[0];
 		Method method = annotation.annotationType().getMethod("value");
 		method.setAccessible(true);
-		assertThatExceptionOfType(TypeNotPresentException.class).isThrownBy(() -> {
-			ReflectionUtils.invokeMethod(method, annotation);
-		}).withCauseInstanceOf(ClassNotFoundException.class);
+		assertThatExceptionOfType(TypeNotPresentException.class).isThrownBy(() ->
+				ReflectionUtils.invokeMethod(method, annotation))
+			.withCauseInstanceOf(ClassNotFoundException.class);
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void filteredTypeInMetaAnnotationWhenUsingAnnotatedElementUtilsHandlesException() throws Exception {
+	void filteredTypeInMetaAnnotationWhenUsingAnnotatedElementUtilsHandlesException() throws Exception {
 		FilteringClassLoader classLoader = new FilteringClassLoader(
 				getClass().getClassLoader());
 		Class<?> withExampleMetaAnnotation = ClassUtils.forName(
@@ -77,7 +78,7 @@ public class AnnotationIntrospectionFailureTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void filteredTypeInMetaAnnotationWhenUsingMergedAnnotationsHandlesException() throws Exception {
+	void filteredTypeInMetaAnnotationWhenUsingMergedAnnotationsHandlesException() throws Exception {
 		FilteringClassLoader classLoader = new FilteringClassLoader(
 				getClass().getClassLoader());
 		Class<?> withExampleMetaAnnotation = ClassUtils.forName(

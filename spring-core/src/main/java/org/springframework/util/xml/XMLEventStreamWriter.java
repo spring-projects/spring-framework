@@ -19,6 +19,7 @@ package org.springframework.util.xml;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventFactory;
@@ -160,9 +161,8 @@ class XMLEventStreamWriter implements XMLStreamWriter {
 	public void writeEndElement() throws XMLStreamException {
 		closeEmptyElementIfNecessary();
 		int last = this.endElements.size() - 1;
-		EndElement lastEndElement = this.endElements.get(last);
+		EndElement lastEndElement = this.endElements.remove(last);
 		this.eventWriter.add(lastEndElement);
-		this.endElements.remove(last);
 	}
 
 	@Override

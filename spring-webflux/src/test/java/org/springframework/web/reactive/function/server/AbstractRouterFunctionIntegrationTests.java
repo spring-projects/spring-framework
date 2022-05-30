@@ -16,8 +16,8 @@
 
 package org.springframework.web.reactive.function.server;
 
-import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
 
 /**
  * @author Arjen Poutsma

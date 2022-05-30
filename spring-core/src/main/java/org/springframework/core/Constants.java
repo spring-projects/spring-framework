@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -310,10 +310,10 @@ public class Constants {
 	 * Convert the given bean property name to a constant name prefix.
 	 * <p>Uses a common naming idiom: turning all lower case characters to
 	 * upper case, and prepending upper case characters with an underscore.
-	 * <p>Example: "imageSize" -> "IMAGE_SIZE"<br>
-	 * Example: "imagesize" -> "IMAGESIZE".<br>
-	 * Example: "ImageSize" -> "_IMAGE_SIZE".<br>
-	 * Example: "IMAGESIZE" -> "_I_M_A_G_E_S_I_Z_E"
+	 * <p>Example: "imageSize" &rarr; "IMAGE_SIZE"<br>
+	 * Example: "imagesize" &rarr; "IMAGESIZE".<br>
+	 * Example: "ImageSize" &rarr; "_IMAGE_SIZE".<br>
+	 * Example: "IMAGESIZE" &rarr; "_I_M_A_G_E_S_I_Z_E"
 	 * @param propertyName the name of the bean property
 	 * @return the corresponding constant name prefix
 	 * @see #getValuesForProperty
@@ -324,7 +324,7 @@ public class Constants {
 		for (int i = 0; i < propertyName.length(); i++) {
 			char c = propertyName.charAt(i);
 			if (Character.isUpperCase(c)) {
-				parsedPrefix.append("_");
+				parsedPrefix.append('_');
 				parsedPrefix.append(c);
 			}
 			else {

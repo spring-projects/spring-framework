@@ -176,11 +176,11 @@ public class InjectionPoint {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
-		if (getClass() != other.getClass()) {
+		if (other == null || getClass() != other.getClass()) {
 			return false;
 		}
 		InjectionPoint otherPoint = (InjectionPoint) other;

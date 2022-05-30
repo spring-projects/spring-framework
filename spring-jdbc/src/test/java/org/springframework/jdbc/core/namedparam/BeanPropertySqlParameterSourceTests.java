@@ -19,12 +19,12 @@ package org.springframework.jdbc.core.namedparam;
 import java.sql.Types;
 import java.util.Arrays;
 
-import org.hamcrest.Matchers;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Rick Evans
@@ -34,88 +34,88 @@ import static org.junit.Assert.*;
  */
 public class BeanPropertySqlParameterSourceTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void withNullBeanPassedToCtor() {
-		new BeanPropertySqlParameterSource(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new BeanPropertySqlParameterSource(null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void getValueWhereTheUnderlyingBeanHasNoSuchProperty() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean());
-		source.getValue("thisPropertyDoesNotExist");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				source.getValue("thisPropertyDoesNotExist"));
 	}
 
 	@Test
 	public void successfulPropertyAccess() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean("tb", 99));
-		assertTrue(Arrays.asList(source.getReadablePropertyNames()).contains("name"));
-		assertTrue(Arrays.asList(source.getReadablePropertyNames()).contains("age"));
-		assertEquals("tb", source.getValue("name"));
-		assertEquals(99, source.getValue("age"));
-		assertEquals(Types.VARCHAR, source.getSqlType("name"));
-		assertEquals(Types.INTEGER, source.getSqlType("age"));
+		assertThat(Arrays.asList(source.getReadablePropertyNames()).contains("name")).isTrue();
+		assertThat(Arrays.asList(source.getReadablePropertyNames()).contains("age")).isTrue();
+		assertThat(source.getValue("name")).isEqualTo("tb");
+		assertThat(source.getValue("age")).isEqualTo(99);
+		assertThat(source.getSqlType("name")).isEqualTo(Types.VARCHAR);
+		assertThat(source.getSqlType("age")).isEqualTo(Types.INTEGER);
 	}
 
 	@Test
 	public void successfulPropertyAccessWithOverriddenSqlType() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean("tb", 99));
 		source.registerSqlType("age", Types.NUMERIC);
-		assertEquals("tb", source.getValue("name"));
-		assertEquals(99, source.getValue("age"));
-		assertEquals(Types.VARCHAR, source.getSqlType("name"));
-		assertEquals(Types.NUMERIC, source.getSqlType("age"));
+		assertThat(source.getValue("name")).isEqualTo("tb");
+		assertThat(source.getValue("age")).isEqualTo(99);
+		assertThat(source.getSqlType("name")).isEqualTo(Types.VARCHAR);
+		assertThat(source.getSqlType("age")).isEqualTo(Types.NUMERIC);
 	}
 
 	@Test
 	public void hasValueWhereTheUnderlyingBeanHasNoSuchProperty() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean());
-		assertFalse(source.hasValue("thisPropertyDoesNotExist"));
+		assertThat(source.hasValue("thisPropertyDoesNotExist")).isFalse();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void getValueWhereTheUnderlyingBeanPropertyIsNotReadable() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new NoReadableProperties());
-		source.getValue("noOp");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				source.getValue("noOp"));
 	}
 
 	@Test
 	public void hasValueWhereTheUnderlyingBeanPropertyIsNotReadable() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new NoReadableProperties());
-		assertFalse(source.hasValue("noOp"));
+		assertThat(source.hasValue("noOp")).isFalse();
 	}
 
 	@Test
 	public void toStringShowsParameterDetails() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean("tb", 99));
-		assertThat(source.toString(), Matchers.allOf(
-				Matchers.startsWith("BeanPropertySqlParameterSource {"),
-				Matchers.endsWith("}"),
-				Matchers.containsString("name=tb (type:VARCHAR)"),
-				Matchers.containsString("age=99 (type:INTEGER)")
-		));
+		assertThat(source.toString())
+			.startsWith("BeanPropertySqlParameterSource {")
+			.contains("name=tb (type:VARCHAR)")
+			.contains("age=99 (type:INTEGER)")
+			.endsWith("}");
 	}
 
 	@Test
 	public void toStringShowsCustomSqlType() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean("tb", 99));
 		source.registerSqlType("name", Integer.MAX_VALUE);
-		assertThat(source.toString(), Matchers.allOf(
-				Matchers.startsWith("BeanPropertySqlParameterSource {"),
-				Matchers.endsWith("}"),
-				Matchers.containsString("name=tb (type:" + Integer.MAX_VALUE + ")"),
-				Matchers.containsString("age=99 (type:INTEGER)")
-		));
+		assertThat(source.toString())
+				.startsWith("BeanPropertySqlParameterSource {")
+				.contains("name=tb (type:" + Integer.MAX_VALUE + ")")
+				.contains("age=99 (type:INTEGER)")
+				.endsWith("}");
 	}
 
 	@Test
 	public void toStringDoesNotShowTypeUnknown() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean("tb", 99));
-		assertThat(source.toString(), Matchers.allOf(
-				Matchers.startsWith("BeanPropertySqlParameterSource {"),
-				Matchers.endsWith("}"),
-				Matchers.containsString("beanFactory=null"),
-				Matchers.not(Matchers.containsString("beanFactory=null (type:"))
-		));
+		assertThat(source.toString())
+				.startsWith("BeanPropertySqlParameterSource {")
+				.contains("beanFactory=null")
+				.doesNotContain("beanFactory=null (type:")
+				.endsWith("}");
 	}
 
 

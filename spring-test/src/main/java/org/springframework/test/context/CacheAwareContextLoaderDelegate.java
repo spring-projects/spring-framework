@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,20 @@ import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 public interface CacheAwareContextLoaderDelegate {
 
 	/**
+	 * System property used to configure the fully qualified class name of the
+	 * default {@code CacheAwareContextLoaderDelegate}.
+	 * <p>May alternatively be configured via the
+	 * {@link org.springframework.core.SpringProperties} mechanism.
+	 * <p>If this property is not defined, the
+	 * {@link org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate
+	 * DefaultCacheAwareContextLoaderDelegate} will be used as the default.
+	 * @since 5.3.11
+	 */
+	String DEFAULT_CACHE_AWARE_CONTEXT_LOADER_DELEGATE_PROPERTY_NAME =
+			"spring.test.context.default.CacheAwareContextLoaderDelegate";
+
+
+	/**
 	 * Determine if the {@linkplain ApplicationContext application context} for
 	 * the supplied {@link MergedContextConfiguration} has been loaded (i.e.,
 	 * is present in the {@code ContextCache}).
@@ -51,7 +65,7 @@ public interface CacheAwareContextLoaderDelegate {
 	 * implementation in Spring overrides this method appropriately.
 	 * @param mergedContextConfiguration the merged context configuration used
 	 * to load the application context; never {@code null}
-	 * @return {@code true} if the the application context has been loaded
+	 * @return {@code true} if the application context has been loaded
 	 * @since 5.2
 	 * @see #loadContext
 	 * @see #closeContext

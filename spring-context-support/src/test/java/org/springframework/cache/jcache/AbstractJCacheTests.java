@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,8 @@ package org.springframework.cache.jcache;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Rule;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInfo;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -35,14 +34,18 @@ import org.springframework.cache.support.SimpleCacheManager;
 
 /**
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 public abstract class AbstractJCacheTests {
 
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
+	protected String cacheName;
 
-	@Rule
-	public final TestName name = new TestName();
+
+	@BeforeEach
+	void trackCacheName(TestInfo testInfo) {
+		this.cacheName = testInfo.getTestMethod().get().getName();
+	}
+
 
 	protected final CacheManager cacheManager = createSimpleCacheManager("default", "simpleCache");
 

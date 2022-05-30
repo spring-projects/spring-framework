@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,10 @@ package org.springframework.orm.jpa.vendor;
 
 import java.util.Collections;
 import java.util.Map;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.spi.PersistenceUnitInfo;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.spi.PersistenceUnitInfo;
 
 import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.JpaDialect;
@@ -87,8 +88,8 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	 * <p>Note that the exact semantics of this flag depend on the underlying
 	 * persistence provider. For any more advanced needs, specify the appropriate
 	 * vendor-specific settings as "jpaProperties".
-	 * <p><b>NOTE: Do not set this flag to 'true' while also setting JPA 2.1's
-	 * {@code javax.persistence.schema-generation.database.action} property.</b>
+	 * <p><b>NOTE: Do not set this flag to 'true' while also setting JPA's
+	 * {@code jakarta.persistence.schema-generation.database.action} property.</b>
 	 * These two schema generation mechanisms - standard JPA versus provider-native -
 	 * are mutually exclusive, e.g. with Hibernate 5.
 	 * @see org.springframework.orm.jpa.AbstractEntityManagerFactoryBean#setJpaProperties
@@ -157,6 +158,10 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 
 	@Override
 	public void postProcessEntityManagerFactory(EntityManagerFactory emf) {
+	}
+
+	@Override
+	public void postProcessEntityManager(EntityManager em) {
 	}
 
 }

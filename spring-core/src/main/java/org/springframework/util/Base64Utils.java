@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ public abstract class Base64Utils {
 
 	/**
 	 * Base64-encode the given byte array to a String.
-	 * @param src the original byte array (may be {@code null})
+	 * @param src the original byte array
 	 * @return the encoded byte array as a UTF-8 String
 	 */
 	public static String encodeToString(byte[] src) {

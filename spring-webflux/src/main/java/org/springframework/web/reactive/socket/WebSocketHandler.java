@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,18 +40,18 @@ import reactor.core.publisher.Mono;
  *
  * <pre class="code">
  * class ExampleHandler implements WebSocketHandler {
-
+ *
  * 	&#064;Override
  * 	public Mono&lt;Void&gt; handle(WebSocketSession session) {
  *
  * 		Flux&lt;WebSocketMessage&gt; output = session.receive()
- *			.doOnNext(message -> {
+ *			.doOnNext(message -&gt; {
  * 				// ...
  * 			})
- * 			.concatMap(message -> {
+ * 			.concatMap(message -&gt; {
  * 				// ...
  * 			})
- * 			.map(value -> session.textMessage("Echo " + value));
+ * 			.map(value -&gt; session.textMessage("Echo " + value));
  *
  * 		return session.send(output);
  * 	}
@@ -63,15 +63,15 @@ import reactor.core.publisher.Mono;
  *
  * <pre class="code">
  * class ExampleHandler implements WebSocketHandler {
-
+ *
  * 	&#064;Override
  * 	public Mono&lt;Void&gt; handle(WebSocketSession session) {
  *
  * 		Mono&lt;Void&gt; input = session.receive()
- *			.doOnNext(message -> {
+ *			.doOnNext(message -&gt; {
  * 				// ...
  * 			})
- * 			.concatMap(message -> {
+ * 			.concatMap(message -&gt; {
  * 				// ...
  * 			})
  * 			.then();
@@ -108,14 +108,13 @@ public interface WebSocketHandler {
 	 * Invoked when a new WebSocket connection is established, and allows
 	 * handling of the session.
 	 *
-	 * <p>See the class-level doc and the reference for more details and
+	 * <p>See the class-level doc and the reference manual for more details and
 	 * examples of how to handle the session.
-	 *
 	 * @param session the session to handle
-	 * @return indicates when appilcation handling of the session is complete,
+	 * @return indicates when application handling of the session is complete,
 	 * which should reflect the completion of the inbound message stream
 	 * (i.e. connection closing) and possibly the completion of the outbound
-	 * message stream and the writing of messages.
+	 * message stream and the writing of messages
 	 */
 	Mono<Void> handle(WebSocketSession session);
 

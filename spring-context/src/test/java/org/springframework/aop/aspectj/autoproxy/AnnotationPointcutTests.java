@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,39 +18,45 @@ package org.springframework.aop.aspectj.autoproxy;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class AnnotationPointcutTests {
+class AnnotationPointcutTests {
+
+	private ClassPathXmlApplicationContext ctx;
 
 	private AnnotatedTestBean testBean;
 
 
-	@Before
-	public void setup() {
-		ClassPathXmlApplicationContext ctx =
-				new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
+	@BeforeEach
+	void setup() {
+		this.ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
+		this.testBean = ctx.getBean("testBean", AnnotatedTestBean.class);
+	}
 
-		testBean = (AnnotatedTestBean) ctx.getBean("testBean");
+	@AfterEach
+	void tearDown() {
+		this.ctx.close();
 	}
 
 
 	@Test
-	public void testAnnotationBindingInAroundAdvice() {
-		assertEquals("this value", testBean.doThis());
+	void annotationBindingInAroundAdvice() {
+		assertThat(testBean.doThis()).isEqualTo("this value");
 	}
 
 	@Test
-	public void testNoMatchingWithoutAnnotationPresent() {
-		assertEquals("doTheOther", testBean.doTheOther());
+	void noMatchingWithoutAnnotationPresent() {
+		assertThat(testBean.doTheOther()).isEqualTo("doTheOther");
 	}
 
 }

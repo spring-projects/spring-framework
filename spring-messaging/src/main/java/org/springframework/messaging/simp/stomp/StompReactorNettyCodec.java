@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.simp.stomp;
 
 import java.nio.ByteBuffer;
@@ -53,6 +54,7 @@ public class StompReactorNettyCodec extends AbstractNioBufferReactorNettyCodec<b
 		return this.decoder.decode(nioBuffer);
 	}
 
+	@Override
 	protected ByteBuffer encodeInternal(Message<byte[]> message) {
 		return ByteBuffer.wrap(this.encoder.encode(message));
 	}

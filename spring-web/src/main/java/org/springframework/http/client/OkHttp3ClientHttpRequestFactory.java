@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,9 +42,7 @@ import org.springframework.util.StringUtils;
  * @author Roy Clarkson
  * @since 4.3
  */
-@SuppressWarnings("deprecation")
-public class OkHttp3ClientHttpRequestFactory
-		implements ClientHttpRequestFactory, AsyncClientHttpRequestFactory, DisposableBean {
+public class OkHttp3ClientHttpRequestFactory implements ClientHttpRequestFactory, DisposableBean {
 
 	private OkHttpClient client;
 
@@ -106,11 +104,6 @@ public class OkHttp3ClientHttpRequestFactory
 		return new OkHttp3ClientHttpRequest(this.client, uri, httpMethod);
 	}
 
-	@Override
-	public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) {
-		return new OkHttp3AsyncClientHttpRequest(this.client, uri, httpMethod);
-	}
-
 
 	@Override
 	public void destroy() throws IOException {
@@ -121,6 +114,7 @@ public class OkHttp3ClientHttpRequestFactory
 				cache.close();
 			}
 			this.client.dispatcher().executorService().shutdown();
+			this.client.connectionPool().evictAll();
 		}
 	}
 

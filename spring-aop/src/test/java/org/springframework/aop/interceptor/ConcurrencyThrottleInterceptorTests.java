@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,16 @@ package org.springframework.aop.interceptor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.tests.sample.beans.DerivedTestBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.util.SerializationTestUtils;
+import org.springframework.beans.testfixture.beans.DerivedTestBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -54,11 +54,11 @@ public class ConcurrencyThrottleInterceptorTests {
 		ITestBean proxy = (ITestBean) proxyFactory.getProxy();
 		proxy.getAge();
 
-		ITestBean serializedProxy = (ITestBean) SerializationTestUtils.serializeAndDeserialize(proxy);
+		ITestBean serializedProxy = SerializationTestUtils.serializeAndDeserialize(proxy);
 		Advised advised = (Advised) serializedProxy;
 		ConcurrencyThrottleInterceptor serializedCti =
 				(ConcurrencyThrottleInterceptor) advised.getAdvisors()[0].getAdvice();
-		assertEquals(cti.getConcurrencyLimit(), serializedCti.getConcurrencyLimit());
+		assertThat(serializedCti.getConcurrencyLimit()).isEqualTo(cti.getConcurrencyLimit());
 		serializedProxy.getAge();
 	}
 
@@ -125,16 +125,7 @@ public class ConcurrencyThrottleInterceptorTests {
 				try {
 					this.proxy.exceptional(this.ex);
 				}
-				catch (RuntimeException ex) {
-					if (ex == this.ex) {
-						logger.debug("Expected exception thrown", ex);
-					}
-					else {
-						// should never happen
-						ex.printStackTrace();
-					}
-				}
-				catch (Error err) {
+				catch (RuntimeException | Error err) {
 					if (err == this.ex) {
 						logger.debug("Expected exception thrown", err);
 					}

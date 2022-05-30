@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,22 +84,19 @@ final class LogAdapter {
 	 * @param name the logger name
 	 */
 	public static Log createLog(String name) {
-		switch (logApi) {
-			case LOG4J:
-				return Log4jAdapter.createLog(name);
-			case SLF4J_LAL:
-				return Slf4jAdapter.createLocationAwareLog(name);
-			case SLF4J:
-				return Slf4jAdapter.createLog(name);
-			default:
-				// Defensively use lazy-initializing adapter class here as well since the
-				// java.logging module is not present by default on JDK 9. We are requiring
-				// its presence if neither Log4j nor SLF4J is available; however, in the
-				// case of Log4j or SLF4J, we are trying to prevent early initialization
-				// of the JavaUtilLog adapter - e.g. by a JVM in debug mode - when eagerly
-				// trying to parse the bytecode for all the cases of this switch clause.
-				return JavaUtilAdapter.createLog(name);
-		}
+		return switch (logApi) {
+			case LOG4J -> Log4jAdapter.createLog(name);
+			case SLF4J_LAL -> Slf4jAdapter.createLocationAwareLog(name);
+			case SLF4J -> Slf4jAdapter.createLog(name);
+			default ->
+					// Defensively use lazy-initializing adapter class here as well since the
+					// java.logging module is not present by default on JDK 9. We are requiring
+					// its presence if neither Log4j nor SLF4J is available; however, in the
+					// case of Log4j or SLF4J, we are trying to prevent early initialization
+					// of the JavaUtilLog adapter - e.g. by a JVM in debug mode - when eagerly
+					// trying to parse the bytecode for all the cases of this switch clause.
+					JavaUtilAdapter.createLog(name);
+		};
 	}
 
 	private static boolean isPresent(String className) {
@@ -157,7 +154,12 @@ final class LogAdapter {
 		private final ExtendedLogger logger;
 
 		public Log4jLog(String name) {
-			this.logger = loggerContext.getLogger(name);
+			LoggerContext context = loggerContext;
+			if (context == null) {
+				// Circular call in early-init scenario -> static field not initialized yet
+				context = LogManager.getContext(Log4jLog.class.getClassLoader(), false);
+			}
+			this.logger = context.getLogger(name);
 		}
 
 		@Override
@@ -273,99 +275,117 @@ final class LogAdapter {
 
 		protected final String name;
 
-		protected transient T logger;
+		protected final transient T logger;
 
 		public Slf4jLog(T logger) {
 			this.name = logger.getName();
 			this.logger = logger;
 		}
 
+		@Override
 		public boolean isFatalEnabled() {
 			return isErrorEnabled();
 		}
 
+		@Override
 		public boolean isErrorEnabled() {
 			return this.logger.isErrorEnabled();
 		}
 
+		@Override
 		public boolean isWarnEnabled() {
 			return this.logger.isWarnEnabled();
 		}
 
+		@Override
 		public boolean isInfoEnabled() {
 			return this.logger.isInfoEnabled();
 		}
 
+		@Override
 		public boolean isDebugEnabled() {
 			return this.logger.isDebugEnabled();
 		}
 
+		@Override
 		public boolean isTraceEnabled() {
 			return this.logger.isTraceEnabled();
 		}
 
+		@Override
 		public void fatal(Object message) {
 			error(message);
 		}
 
+		@Override
 		public void fatal(Object message, Throwable exception) {
 			error(message, exception);
 		}
 
+		@Override
 		public void error(Object message) {
 			if (message instanceof String || this.logger.isErrorEnabled()) {
 				this.logger.error(String.valueOf(message));
 			}
 		}
 
+		@Override
 		public void error(Object message, Throwable exception) {
 			if (message instanceof String || this.logger.isErrorEnabled()) {
 				this.logger.error(String.valueOf(message), exception);
 			}
 		}
 
+		@Override
 		public void warn(Object message) {
 			if (message instanceof String || this.logger.isWarnEnabled()) {
 				this.logger.warn(String.valueOf(message));
 			}
 		}
 
+		@Override
 		public void warn(Object message, Throwable exception) {
 			if (message instanceof String || this.logger.isWarnEnabled()) {
 				this.logger.warn(String.valueOf(message), exception);
 			}
 		}
 
+		@Override
 		public void info(Object message) {
 			if (message instanceof String || this.logger.isInfoEnabled()) {
 				this.logger.info(String.valueOf(message));
 			}
 		}
 
+		@Override
 		public void info(Object message, Throwable exception) {
 			if (message instanceof String || this.logger.isInfoEnabled()) {
 				this.logger.info(String.valueOf(message), exception);
 			}
 		}
 
+		@Override
 		public void debug(Object message) {
 			if (message instanceof String || this.logger.isDebugEnabled()) {
 				this.logger.debug(String.valueOf(message));
 			}
 		}
 
+		@Override
 		public void debug(Object message, Throwable exception) {
 			if (message instanceof String || this.logger.isDebugEnabled()) {
 				this.logger.debug(String.valueOf(message), exception);
 			}
 		}
 
+		@Override
 		public void trace(Object message) {
 			if (message instanceof String || this.logger.isTraceEnabled()) {
 				this.logger.trace(String.valueOf(message));
 			}
 		}
 
+		@Override
 		public void trace(Object message, Throwable exception) {
 			if (message instanceof String || this.logger.isTraceEnabled()) {
 				this.logger.trace(String.valueOf(message), exception);
@@ -477,83 +497,101 @@ final class LogAdapter {
 	@SuppressWarnings("serial")
 	private static class JavaUtilLog implements Log, Serializable {
 
-		private String name;
+		private final String name;
 
-		private transient java.util.logging.Logger logger;
+		private final transient java.util.logging.Logger logger;
 
 		public JavaUtilLog(String name) {
 			this.name = name;
 			this.logger = java.util.logging.Logger.getLogger(name);
 		}
 
+		@Override
 		public boolean isFatalEnabled() {
 			return isErrorEnabled();
 		}
 
+		@Override
 		public boolean isErrorEnabled() {
 			return this.logger.isLoggable(java.util.logging.Level.SEVERE);
 		}
 
+		@Override
 		public boolean isWarnEnabled() {
 			return this.logger.isLoggable(java.util.logging.Level.WARNING);
 		}
 
+		@Override
 		public boolean isInfoEnabled() {
 			return this.logger.isLoggable(java.util.logging.Level.INFO);
 		}
 
+		@Override
 		public boolean isDebugEnabled() {
 			return this.logger.isLoggable(java.util.logging.Level.FINE);
 		}
 
+		@Override
 		public boolean isTraceEnabled() {
 			return this.logger.isLoggable(java.util.logging.Level.FINEST);
 		}
 
+		@Override
 		public void fatal(Object message) {
 			error(message);
 		}
 
+		@Override
 		public void fatal(Object message, Throwable exception) {
 			error(message, exception);
 		}
 
+		@Override
 		public void error(Object message) {
 			log(java.util.logging.Level.SEVERE, message, null);
 		}
 
+		@Override
 		public void error(Object message, Throwable exception) {
 			log(java.util.logging.Level.SEVERE, message, exception);
 		}
 
+		@Override
 		public void warn(Object message) {
 			log(java.util.logging.Level.WARNING, message, null);
 		}
 
+		@Override
 		public void warn(Object message, Throwable exception) {
 			log(java.util.logging.Level.WARNING, message, exception);
 		}
 
+		@Override
 		public void info(Object message) {
 			log(java.util.logging.Level.INFO, message, null);
 		}
 
+		@Override
 		public void info(Object message, Throwable exception) {
 			log(java.util.logging.Level.INFO, message, exception);
 		}
 
+		@Override
 		public void debug(Object message) {
 			log(java.util.logging.Level.FINE, message, null);
 		}
 
+		@Override
 		public void debug(Object message, Throwable exception) {
 			log(java.util.logging.Level.FINE, message, exception);
 		}
 
+		@Override
 		public void trace(Object message) {
 			log(java.util.logging.Level.FINEST, message, null);
 		}
 
+		@Override
 		public void trace(Object message, Throwable exception) {
 			log(java.util.logging.Level.FINEST, message, exception);
 		}
@@ -567,8 +605,8 @@ final class LogAdapter {
 				else {
 					rec = new LocationResolvingLogRecord(level, String.valueOf(message));
 					rec.setLoggerName(this.name);
-					rec.setResourceBundleName(logger.getResourceBundleName());
-					rec.setResourceBundle(logger.getResourceBundle());
+					rec.setResourceBundleName(this.logger.getResourceBundleName());
+					rec.setResourceBundle(this.logger.getResourceBundle());
 					rec.setThrown(exception);
 				}
 				logger.log(rec);
@@ -640,7 +678,6 @@ final class LogAdapter {
 			setSourceMethodName(sourceMethodName);
 		}
 
-		@SuppressWarnings("deprecation")  // setMillis is deprecated in JDK 9
 		protected Object writeReplace() {
 			LogRecord serialized = new LogRecord(getLevel(), getMessage());
 			serialized.setLoggerName(getLoggerName());
@@ -650,8 +687,8 @@ final class LogAdapter {
 			serialized.setSourceMethodName(getSourceMethodName());
 			serialized.setSequenceNumber(getSequenceNumber());
 			serialized.setParameters(getParameters());
-			serialized.setThreadID(getThreadID());
-			serialized.setMillis(getMillis());
+			serialized.setLongThreadID(getLongThreadID());
+			serialized.setInstant(getInstant());
 			serialized.setThrown(getThrown());
 			return serialized;
 		}

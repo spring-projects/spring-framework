@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.core.serializer;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -24,8 +25,10 @@ import java.io.InputStream;
  *
  * @author Gary Russell
  * @author Mark Fisher
+ * @author Juergen Hoeller
  * @since 3.0.5
  * @param <T> the object type
+ * @see Serializer
  */
 @FunctionalInterface
 public interface Deserializer<T> {
@@ -40,5 +43,16 @@ public interface Deserializer<T> {
 	 * @throws IOException in case of errors reading from the stream
 	 */
 	T deserialize(InputStream inputStream) throws IOException;
+
+	/**
+	 * Read (assemble) an object of type T from the given byte array.
+	 * @param serialized the byte array
+	 * @return the deserialized object
+	 * @throws IOException in case of deserialization failure
+	 * @since 5.2.7
+	 */
+	default T deserializeFromByteArray(byte[] serialized) throws IOException {
+		return deserialize(new ByteArrayInputStream(serialized));
+	}
 
 }

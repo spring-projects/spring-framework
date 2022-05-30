@@ -26,7 +26,7 @@ import java.io.Writer
  * @author Sebastien Deleuze
  * @since 5.2
  */
-class MockMvcResultHandlersDsl(private val actions: ResultActions) {
+class MockMvcResultHandlersDsl internal constructor (private val actions: ResultActions) {
 
 	/**
 	 * @see MockMvcResultHandlers.print

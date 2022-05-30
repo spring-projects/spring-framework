@@ -47,7 +47,7 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 
 
 	/**
-	 * Register a SQL type for the given parameter.
+	 * Register an SQL type for the given parameter.
 	 * @param paramName the name of the parameter
 	 * @param sqlType the SQL type of the parameter
 	 */
@@ -57,7 +57,7 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 	}
 
 	/**
-	 * Register a SQL type for the given parameter.
+	 * Register an SQL type for the given parameter.
 	 * @param paramName the name of the parameter
 	 * @param typeName the type name of the parameter
 	 */

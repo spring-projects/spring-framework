@@ -40,7 +40,7 @@ import org.springframework.core.Ordered;
  * order which is an orthogonal concern determined by dependency relationships and
  * {@code @DependsOn} declarations (influencing a runtime-determined dependency graph).
  *
- * <p>Since Spring 4.1, the standard {@link javax.annotation.Priority} annotation
+ * <p>Since Spring 4.1, the standard {@link jakarta.annotation.Priority} annotation
  * can be used as a drop-in replacement for this annotation in ordering scenarios.
  * Note that {@code @Priority} may have additional semantics when a single element
  * has to be picked (see {@link AnnotationAwareOrderComparator#getPriority}).
@@ -58,7 +58,7 @@ import org.springframework.core.Ordered;
  * @see org.springframework.core.Ordered
  * @see AnnotationAwareOrderComparator
  * @see OrderUtils
- * @see javax.annotation.Priority
+ * @see jakarta.annotation.Priority
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})

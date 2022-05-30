@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,13 @@ package org.springframework.aop.aspectj;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for target selection matching (see SPR-3783).
@@ -32,87 +33,83 @@ import static org.junit.Assert.*;
  * @author Ramnivas Laddad
  * @author Chris Beams
  */
-public class TargetPointcutSelectionTests {
+class TargetPointcutSelectionTests {
 
-	public TestInterface testImpl1;
+	private ClassPathXmlApplicationContext ctx;
 
-	public TestInterface testImpl2;
+	private TestInterface testImpl1;
 
-	public TestAspect testAspectForTestImpl1;
+	private TestInterface testImpl2;
 
-	public TestAspect testAspectForAbstractTestImpl;
+	private TestAspect testAspectForTestImpl1;
 
-	public TestInterceptor testInterceptor;
+	private TestAspect testAspectForAbstractTestImpl;
+
+	private TestInterceptor testInterceptor;
 
 
-	@Before
-	public void setup() {
-		ClassPathXmlApplicationContext ctx =
-				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+	@BeforeEach
+	void setup() {
+		this.ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		testImpl1 = (TestInterface) ctx.getBean("testImpl1");
 		testImpl2 = (TestInterface) ctx.getBean("testImpl2");
 		testAspectForTestImpl1 = (TestAspect) ctx.getBean("testAspectForTestImpl1");
 		testAspectForAbstractTestImpl = (TestAspect) ctx.getBean("testAspectForAbstractTestImpl");
 		testInterceptor = (TestInterceptor) ctx.getBean("testInterceptor");
+	}
 
-		testAspectForTestImpl1.count = 0;
-		testAspectForAbstractTestImpl.count = 0;
-		testInterceptor.count = 0;
+	@AfterEach
+	void tearDown() {
+		this.ctx.close();
 	}
 
 
 	@Test
-	public void targetSelectionForMatchedType() {
+	void targetSelectionForMatchedType() {
 		testImpl1.interfaceMethod();
-		assertEquals("Should have been advised by POJO advice for impl", 1, testAspectForTestImpl1.count);
-		assertEquals("Should have been advised by POJO advice for base type", 1, testAspectForAbstractTestImpl.count);
-		assertEquals("Should have been advised by advisor", 1, testInterceptor.count);
+		assertThat(testAspectForTestImpl1.count).as("Should have been advised by POJO advice for impl").isEqualTo(1);
+		assertThat(testAspectForAbstractTestImpl.count).as("Should have been advised by POJO advice for base type").isEqualTo(1);
+		assertThat(testInterceptor.count).as("Should have been advised by advisor").isEqualTo(1);
 	}
 
 	@Test
-	public void targetNonSelectionForMismatchedType() {
+	void targetNonSelectionForMismatchedType() {
 		testImpl2.interfaceMethod();
-		assertEquals("Shouldn't have been advised by POJO advice for impl", 0, testAspectForTestImpl1.count);
-		assertEquals("Should have been advised by POJO advice for base type", 1, testAspectForAbstractTestImpl.count);
-		assertEquals("Shouldn't have been advised by advisor", 0, testInterceptor.count);
+		assertThat(testAspectForTestImpl1.count).as("Shouldn't have been advised by POJO advice for impl").isZero();
+		assertThat(testAspectForAbstractTestImpl.count).as("Should have been advised by POJO advice for base type").isEqualTo(1);
+		assertThat(testInterceptor.count).as("Shouldn't have been advised by advisor").isZero();
 	}
 
 
-	public static interface TestInterface {
-
-		public void interfaceMethod();
+	interface TestInterface {
+		void interfaceMethod();
 	}
-
 
 	// Reproducing bug requires that the class specified in target() pointcut doesn't
 	// include the advised method's implementation (instead a base class should include it)
-	public static abstract class AbstractTestImpl implements TestInterface {
+	static abstract class AbstractTestImpl implements TestInterface {
 
 		@Override
 		public void interfaceMethod() {
 		}
 	}
 
-
-	public static class TestImpl1 extends AbstractTestImpl {
+	static class TestImpl1 extends AbstractTestImpl {
 	}
 
-
-	public static class TestImpl2 extends AbstractTestImpl {
+	static class TestImpl2 extends AbstractTestImpl {
 	}
 
+	static class TestAspect {
 
-	public static class TestAspect {
+		int count;
 
-		public int count;
-
-		public void increment() {
+		void increment() {
 			count++;
 		}
 	}
 
-
-	public static class TestInterceptor extends TestAspect implements MethodInterceptor {
+	static class TestInterceptor extends TestAspect implements MethodInterceptor {
 
 		@Override
 		public Object invoke(MethodInvocation mi) throws Throwable {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,22 +31,22 @@ import io.undertow.websockets.spi.WebSocketHttpExchange;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.http.server.reactive.AbstractServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
+import org.springframework.web.reactive.socket.adapter.ContextWebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.UndertowWebSocketHandlerAdapter;
 import org.springframework.web.reactive.socket.adapter.UndertowWebSocketSession;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
-* A {@link RequestUpgradeStrategy} for use with Undertow.
-  *
+ * A {@link RequestUpgradeStrategy} for use with Undertow.
+ *
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  */
 public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
@@ -55,9 +55,7 @@ public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler,
 			@Nullable String subProtocol, Supplier<HandshakeInfo> handshakeInfoFactory) {
 
-		ServerHttpRequest request = exchange.getRequest();
-		Assert.isInstanceOf(AbstractServerHttpRequest.class, request);
-		HttpServerExchange httpExchange = ((AbstractServerHttpRequest) request).getNativeRequest();
+		HttpServerExchange httpExchange = ServerHttpRequestDecorator.getNativeRequest(exchange.getRequest());
 
 		Set<String> protocols = (subProtocol != null ? Collections.singleton(subProtocol) : Collections.emptySet());
 		Hybi13Handshake handshake = new Hybi13Handshake(protocols, false);
@@ -66,19 +64,25 @@ public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		HandshakeInfo handshakeInfo = handshakeInfoFactory.get();
 		DataBufferFactory bufferFactory = exchange.getResponse().bufferFactory();
 
-		try {
-			DefaultCallback callback = new DefaultCallback(handshakeInfo, handler, bufferFactory);
-			new WebSocketProtocolHandshakeHandler(handshakes, callback).handleRequest(httpExchange);
-		}
-		catch (Exception ex) {
-			return Mono.error(ex);
-		}
-
-		return Mono.empty();
+		// Trigger WebFlux preCommit actions and upgrade
+		return exchange.getResponse().setComplete()
+				.then(Mono.deferContextual(contextView -> {
+					DefaultCallback callback = new DefaultCallback(
+							handshakeInfo,
+							ContextWebSocketHandler.decorate(handler, contextView),
+							bufferFactory);
+					try {
+						new WebSocketProtocolHandshakeHandler(handshakes, callback).handleRequest(httpExchange);
+					}
+					catch (Exception ex) {
+						return Mono.error(ex);
+					}
+					return Mono.empty();
+				}));
 	}
 
 
-	private class DefaultCallback implements WebSocketConnectionCallback {
+	private static class DefaultCallback implements WebSocketConnectionCallback {
 
 		private final HandshakeInfo handshakeInfo;
 

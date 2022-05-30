@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.jdbc.core;
 import org.springframework.lang.Nullable;
 
 /**
- * Object to represent a SQL parameter value, including parameter meta-data
+ * Object to represent an SQL parameter value, including parameter meta-data
  * such as the SQL type and the scale for numeric values.
  *
  * <p>Designed for use with {@link JdbcTemplate}'s operations that take an array of
@@ -31,9 +31,9 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @since 2.0.5
  * @see java.sql.Types
- * @see JdbcTemplate#query(String, Object[], ResultSetExtractor)
- * @see JdbcTemplate#query(String, Object[], RowCallbackHandler)
- * @see JdbcTemplate#query(String, Object[], RowMapper)
+ * @see JdbcTemplate#query(String, ResultSetExtractor, Object[])
+ * @see JdbcTemplate#query(String, RowCallbackHandler, Object[])
+ * @see JdbcTemplate#query(String, RowMapper, Object[])
  * @see JdbcTemplate#update(String, Object[])
  */
 public class SqlParameterValue extends SqlParameter {

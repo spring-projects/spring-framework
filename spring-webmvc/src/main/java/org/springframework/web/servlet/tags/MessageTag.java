@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,13 @@
 package org.springframework.web.servlet.tags;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspTagException;
+
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspTagException;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
@@ -226,7 +227,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 	 * Set PageContext attribute name under which to expose
 	 * a variable that contains the resolved message.
 	 * @see #setScope
-	 * @see javax.servlet.jsp.PageContext#setAttribute
+	 * @see jakarta.servlet.jsp.PageContext#setAttribute
 	 */
 	public void setVar(String var) {
 		this.var = var;
@@ -237,7 +238,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 	 * Default is SCOPE_PAGE ("page").
 	 * @see #setVar
 	 * @see org.springframework.web.util.TagUtils#SCOPE_PAGE
-	 * @see javax.servlet.jsp.PageContext#setAttribute
+	 * @see jakarta.servlet.jsp.PageContext#setAttribute
 	 */
 	public void setScope(String scope) {
 		this.scope = scope;
@@ -254,7 +255,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 
 	@Override
 	protected final int doStartTagInternal() throws JspException, IOException {
-		this.nestedArguments = new LinkedList<>();
+		this.nestedArguments = new ArrayList<>();
 		return EVAL_BODY_INCLUDE;
 	}
 
@@ -357,20 +358,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 	@Nullable
 	protected Object[] resolveArguments(@Nullable Object arguments) throws JspException {
 		if (arguments instanceof String) {
-			String[] stringArray =
-					StringUtils.delimitedListToStringArray((String) arguments, this.argumentSeparator);
-			if (stringArray.length == 1) {
-				Object argument = stringArray[0];
-				if (argument != null && argument.getClass().isArray()) {
-					return ObjectUtils.toObjectArray(argument);
-				}
-				else {
-					return new Object[] {argument};
-				}
-			}
-			else {
-				return stringArray;
-			}
+			return StringUtils.delimitedListToStringArray((String) arguments, this.argumentSeparator);
 		}
 		else if (arguments instanceof Object[]) {
 			return (Object[]) arguments;
@@ -394,7 +382,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 	 * @throws IOException if writing failed
 	 */
 	protected void writeMessage(String msg) throws IOException {
-		this.pageContext.getOut().write(String.valueOf(msg));
+		this.pageContext.getOut().write(msg);
 	}
 
 	/**

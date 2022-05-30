@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,14 @@ package org.springframework.test.web.client;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.mock.http.client.MockClientHttpRequest;
 
-import static junit.framework.TestCase.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.http.HttpMethod.GET;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.test.web.client.ExpectedCount.once;
 import static org.springframework.test.web.client.ExpectedCount.twice;
@@ -42,23 +40,20 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  */
 public class DefaultRequestExpectationTests {
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
 
 	@Test
 	public void match() throws Exception {
 		RequestExpectation expectation = new DefaultRequestExpectation(once(), requestTo("/foo"));
-		expectation.match(createRequest(GET, "/foo"));
+		expectation.match(createRequest());
 	}
 
 	@Test
-	public void matchWithFailedExpectation() throws Exception {
+	public void matchWithFailedExpectation() {
 		RequestExpectation expectation = new DefaultRequestExpectation(once(), requestTo("/foo"));
 		expectation.andExpect(method(POST));
-
-		this.thrown.expectMessage("Unexpected HttpMethod expected:<POST> but was:<GET>");
-		expectation.match(createRequest(GET, "/foo"));
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				expectation.match(createRequest()))
+			.withMessageContaining("Unexpected HttpMethod expected:<POST> but was:<GET>");
 	}
 
 	@Test
@@ -67,10 +62,10 @@ public class DefaultRequestExpectationTests {
 		expectation.andRespond(withSuccess());
 
 		expectation.incrementAndValidate();
-		assertTrue(expectation.hasRemainingCount());
+		assertThat(expectation.hasRemainingCount()).isTrue();
 
 		expectation.incrementAndValidate();
-		assertFalse(expectation.hasRemainingCount());
+		assertThat(expectation.hasRemainingCount()).isFalse();
 	}
 
 	@Test
@@ -79,18 +74,16 @@ public class DefaultRequestExpectationTests {
 		expectation.andRespond(withSuccess());
 
 		expectation.incrementAndValidate();
-		assertFalse(expectation.isSatisfied());
+		assertThat(expectation.isSatisfied()).isFalse();
 
 		expectation.incrementAndValidate();
-		assertTrue(expectation.isSatisfied());
+		assertThat(expectation.isSatisfied()).isTrue();
 	}
 
 
-
-	@SuppressWarnings("deprecation")
-	private ClientHttpRequest createRequest(HttpMethod method, String url) {
+	private ClientHttpRequest createRequest() {
 		try {
-			return new org.springframework.mock.http.client.MockAsyncClientHttpRequest(method,  new URI(url));
+			return new MockClientHttpRequest(HttpMethod.GET,  new URI("/foo"));
 		}
 		catch (URISyntaxException ex) {
 			throw new IllegalStateException(ex);

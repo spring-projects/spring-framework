@@ -137,6 +137,7 @@ public class TestWebSocketSession implements WebSocketSession {
 		this.remoteAddress = remoteAddress;
 	}
 
+	@Override
 	public String getAcceptedProtocol() {
 		return this.protocol;
 	}

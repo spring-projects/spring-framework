@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class XhrStreamingTransportHandler extends AbstractHttpSendingTransportHa
 
 	@Override
 	public boolean checkSessionType(SockJsSession session) {
-		return session instanceof XhrStreamingSockJsSession;
+		return (session instanceof XhrStreamingSockJsSession);
 	}
 
 	@Override
@@ -75,7 +75,7 @@ public class XhrStreamingTransportHandler extends AbstractHttpSendingTransportHa
 	}
 
 
-	private class XhrStreamingSockJsSession extends StreamingSockJsSession {
+	private static class XhrStreamingSockJsSession extends StreamingSockJsSession {
 
 		public XhrStreamingSockJsSession(String sessionId, SockJsServiceConfig config,
 				WebSocketHandler wsHandler, Map<String, Object> attributes) {

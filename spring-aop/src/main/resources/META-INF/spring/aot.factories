@@ -1,0 +1,2 @@
+org.springframework.beans.factory.aot.registration.BeanRegistrationCodeFragmentsCustomizer=\
+org.springframework.aop.scope.ScopedProxyBeanRegistrationCodeFragmentsCustomizer

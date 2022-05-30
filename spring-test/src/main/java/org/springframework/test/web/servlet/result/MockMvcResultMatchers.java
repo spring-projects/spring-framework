@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.test.web.servlet.result;
 
 import java.util.Map;
+
 import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
@@ -106,15 +107,16 @@ public abstract class MockMvcResultMatchers {
 	 * Asserts the request was forwarded to the given URL.
 	 * <p>This method accepts {@link org.springframework.util.AntPathMatcher}
 	 * patterns.
-	 * @param urlPattern an AntPath pattern to match against
+	 * @param urlPattern an Ant-style path pattern to match against
 	 * @since 4.0
 	 * @see org.springframework.util.AntPathMatcher
 	 */
 	public static ResultMatcher forwardedUrlPattern(String urlPattern) {
 		return result -> {
-			assertTrue("AntPath pattern", pathMatcher.isPattern(urlPattern));
+			assertTrue("'" + urlPattern + "' is not an Ant-style path pattern",
+					pathMatcher.isPattern(urlPattern));
 			String url = result.getResponse().getForwardedUrl();
-			assertTrue("Forwarded URL does not match the expected URL pattern",
+			assertTrue("Forwarded URL '" + url + "' does not match the expected URL pattern '" + urlPattern + "'",
 					(url != null && pathMatcher.match(urlPattern, url)));
 		};
 	}
@@ -144,15 +146,16 @@ public abstract class MockMvcResultMatchers {
 	 * Asserts the request was redirected to the given URL.
 	 * <p>This method accepts {@link org.springframework.util.AntPathMatcher}
 	 * patterns.
-	 * @param urlPattern an AntPath pattern to match against
+	 * @param urlPattern an Ant-style path pattern to match against
 	 * @since 4.0
 	 * @see org.springframework.util.AntPathMatcher
 	 */
 	public static ResultMatcher redirectedUrlPattern(String urlPattern) {
 		return result -> {
-			assertTrue("No Ant-style path pattern", pathMatcher.isPattern(urlPattern));
+			assertTrue("'" + urlPattern + "' is not an Ant-style path pattern",
+					pathMatcher.isPattern(urlPattern));
 			String url = result.getResponse().getRedirectedUrl();
-			assertTrue("Redirected URL does not match the expected URL pattern",
+			assertTrue("Redirected URL '" + url + "' does not match the expected URL pattern '" + urlPattern + "'",
 					(url != null && pathMatcher.match(urlPattern, url)));
 		};
 	}
@@ -187,21 +190,42 @@ public abstract class MockMvcResultMatchers {
 	 * {@link String#format(String, Object...)}.
 	 * @param expression the JSON path expression, optionally parameterized with arguments
 	 * @param args arguments to parameterize the JSON path expression with
+	 * @see #jsonPath(String, Matcher)
+	 * @see #jsonPath(String, Matcher, Class)
 	 */
 	public static JsonPathResultMatchers jsonPath(String expression, Object... args) {
 		return new JsonPathResultMatchers(expression, args);
 	}
 
 	/**
-	 * Access to response body assertions using a
-	 * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expression
-	 * to inspect a specific subset of the body and a Hamcrest matcher for
-	 * asserting the value found at the JSON path.
+	 * Evaluate the given <a href="https://github.com/jayway/JsonPath">JsonPath</a>
+	 * expression against the response body and assert the resulting value with
+	 * the given Hamcrest {@link Matcher}.
 	 * @param expression the JSON path expression
 	 * @param matcher a matcher for the value expected at the JSON path
+	 * @see #jsonPath(String, Object...)
+	 * @see #jsonPath(String, Matcher, Class)
 	 */
-	public static <T> ResultMatcher jsonPath(String expression, Matcher<T> matcher) {
+	public static <T> ResultMatcher jsonPath(String expression, Matcher<? super T> matcher) {
 		return new JsonPathResultMatchers(expression).value(matcher);
+	}
+
+	/**
+	 * Evaluate the given <a href="https://github.com/jayway/JsonPath">JsonPath</a>
+	 * expression against the response body and assert the resulting value with
+	 * the given Hamcrest {@link Matcher}, coercing the resulting value into the
+	 * given target type before applying the matcher.
+	 * <p>This can be useful for matching numbers reliably &mdash; for example,
+	 * to coerce an integer into a double.
+	 * @param expression the JSON path expression
+	 * @param matcher a matcher for the value expected at the JSON path
+	 * @param targetType the target type to coerce the matching value into
+	 * @since 5.2
+	 * @see #jsonPath(String, Object...)
+	 * @see #jsonPath(String, Matcher)
+	 */
+	public static <T> ResultMatcher jsonPath(String expression, Matcher<? super T> matcher, Class<T> targetType) {
+		return new JsonPathResultMatchers(expression).value(matcher, targetType);
 	}
 
 	/**
@@ -222,7 +246,7 @@ public abstract class MockMvcResultMatchers {
 	 * <p>The XPath expression can be a parameterized string using formatting
 	 * specifiers as defined in {@link String#format(String, Object...)}.
 	 * @param expression the XPath expression, optionally parameterized with arguments
-	 * @param namespaces namespaces referenced in the XPath expression
+	 * @param namespaces the namespaces referenced in the XPath expression
 	 * @param args arguments to parameterize the XPath expression with
 	 */
 	public static XpathResultMatchers xpath(String expression, Map<String, String> namespaces, Object... args)

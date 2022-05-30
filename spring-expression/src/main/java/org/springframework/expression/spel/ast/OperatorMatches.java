@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.expression.spel.support.BooleanTypedValue;
  *
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 public class OperatorMatches extends Operator {
@@ -69,13 +70,12 @@ public class OperatorMatches extends Operator {
 			throw new SpelEvaluationException(leftOp.getStartPosition(),
 					SpelMessage.INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR, (Object) null);
 		}
-		if (!(right instanceof String)) {
+		if (!(right instanceof String rightString)) {
 			throw new SpelEvaluationException(rightOp.getStartPosition(),
 					SpelMessage.INVALID_SECOND_OPERAND_FOR_MATCHES_OPERATOR, right);
 		}
 
 		try {
-			String rightString = (String) right;
 			Pattern pattern = this.patternCache.get(rightString);
 			if (pattern == null) {
 				pattern = Pattern.compile(rightString);
@@ -111,22 +111,25 @@ public class OperatorMatches extends Operator {
 
 		private final CharSequence value;
 
-		private AccessCount access;
+		private final AccessCount access;
 
 		public MatcherInput(CharSequence value, AccessCount access) {
 			this.value = value;
 			this.access = access;
 		}
 
+		@Override
 		public char charAt(int index) {
 			this.access.check();
 			return this.value.charAt(index);
 		}
 
+		@Override
 		public CharSequence subSequence(int start, int end) {
 			return new MatcherInput(this.value.subSequence(start, end), this.access);
 		}
 
+		@Override
 		public int length() {
 			return this.value.length();
 		}

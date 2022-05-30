@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,12 +41,11 @@ import java.lang.annotation.Target;
  * regular constructors: i.e. lookup methods cannot get replaced on beans returned
  * from factory methods where we cannot dynamically provide a subclass for them.
  *
- * <p><b>Concrete limitations in typical Spring configuration scenarios:</b>
- * When used with component scanning or any other mechanism that filters out abstract
- * beans, provide stub implementations of your lookup methods to be able to declare
- * them as concrete classes. And please remember that lookup methods won't work on
- * beans returned from {@code @Bean} methods in configuration classes; you'll have
- * to resort to {@code @Inject Provider<TargetBean>} or the like instead.
+ * <p><b>Recommendations for typical Spring configuration scenarios:</b>
+ * When a concrete class may be needed in certain scenarios, consider providing stub
+ * implementations of your lookup methods. And please remember that lookup methods
+ * won't work on beans returned from {@code @Bean} methods in configuration classes;
+ * you'll have to resort to {@code @Inject Provider<TargetBean>} or the like instead.
  *
  * @author Juergen Hoeller
  * @since 4.1

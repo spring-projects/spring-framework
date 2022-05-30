@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,8 +94,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 
 		ApplicationContext applicationContext;
 
-		if (contextLoader instanceof SmartContextLoader) {
-			SmartContextLoader smartContextLoader = (SmartContextLoader) contextLoader;
+		if (contextLoader instanceof SmartContextLoader smartContextLoader) {
 			applicationContext = smartContextLoader.loadContext(mergedContextConfiguration);
 		}
 		else {
@@ -123,8 +122,8 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 				try {
 					context = loadContextInternal(mergedContextConfiguration);
 					if (logger.isDebugEnabled()) {
-						logger.debug(String.format("Storing ApplicationContext in cache under key [%s]",
-								mergedContextConfiguration));
+						logger.debug(String.format("Storing ApplicationContext [%s] in cache under key [%s]",
+								System.identityHashCode(context), mergedContextConfiguration));
 					}
 					this.contextCache.put(mergedContextConfiguration, context);
 				}
@@ -134,8 +133,8 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 			}
 			else {
 				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("Retrieved ApplicationContext from cache with key [%s]",
-							mergedContextConfiguration));
+					logger.debug(String.format("Retrieved ApplicationContext [%s] from cache with key [%s]",
+							System.identityHashCode(context), mergedContextConfiguration));
 				}
 			}
 

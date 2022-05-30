@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.management.Attribute;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
@@ -65,6 +66,7 @@ import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -300,13 +302,13 @@ public class MBeanClientInterceptor
 			MBeanInfo info = server.getMBeanInfo(this.objectName);
 
 			MBeanAttributeInfo[] attributeInfo = info.getAttributes();
-			this.allowedAttributes = new HashMap<>(attributeInfo.length);
+			this.allowedAttributes = CollectionUtils.newHashMap(attributeInfo.length);
 			for (MBeanAttributeInfo infoEle : attributeInfo) {
 				this.allowedAttributes.put(infoEle.getName(), infoEle);
 			}
 
 			MBeanOperationInfo[] operationInfo = info.getOperations();
-			this.allowedOperations = new HashMap<>(operationInfo.length);
+			this.allowedOperations = CollectionUtils.newHashMap(operationInfo.length);
 			for (MBeanOperationInfo infoEle : operationInfo) {
 				Class<?>[] paramTypes = JmxUtils.parameterInfoToTypes(infoEle.getSignature(), this.beanClassLoader);
 				this.allowedOperations.put(new MethodCacheKey(infoEle.getName(), paramTypes), infoEle);
@@ -564,8 +566,7 @@ public class MBeanClientInterceptor
 				Method fromMethod = targetClass.getMethod("from", CompositeData.class);
 				return ReflectionUtils.invokeMethod(fromMethod, null, result);
 			}
-			else if (result instanceof CompositeData[]) {
-				CompositeData[] array = (CompositeData[]) result;
+			else if (result instanceof CompositeData[] array) {
 				if (targetClass.isArray()) {
 					return convertDataArrayToTargetArray(array, targetClass);
 				}
@@ -581,8 +582,7 @@ public class MBeanClientInterceptor
 				Method fromMethod = targetClass.getMethod("from", TabularData.class);
 				return ReflectionUtils.invokeMethod(fromMethod, null, result);
 			}
-			else if (result instanceof TabularData[]) {
-				TabularData[] array = (TabularData[]) result;
+			else if (result instanceof TabularData[] array) {
 				if (targetClass.isArray()) {
 					return convertDataArrayToTargetArray(array, targetClass);
 				}
@@ -619,8 +619,8 @@ public class MBeanClientInterceptor
 
 		Method fromMethod = elementType.getMethod("from", array.getClass().getComponentType());
 		Collection<Object> resultColl = CollectionFactory.createCollection(collectionType, Array.getLength(array));
-		for (int i = 0; i < array.length; i++) {
-			resultColl.add(ReflectionUtils.invokeMethod(fromMethod, null, array[i]));
+		for (Object element : array) {
+			resultColl.add(ReflectionUtils.invokeMethod(fromMethod, null, element));
 		}
 		return resultColl;
 	}
@@ -654,11 +654,13 @@ public class MBeanClientInterceptor
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
 			}
-			MethodCacheKey otherKey = (MethodCacheKey) other;
+			if (!(other instanceof MethodCacheKey otherKey)) {
+				return false;
+			}
 			return (this.name.equals(otherKey.name) && Arrays.equals(this.parameterTypes, otherKey.parameterTypes));
 		}
 

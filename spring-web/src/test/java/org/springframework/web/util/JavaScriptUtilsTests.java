@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2013 the original author or authors.
+ * Copyright 2004-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package org.springframework.web.util;
 
 import java.io.UnsupportedEncodingException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test fixture for {@link JavaScriptUtils}.
@@ -33,16 +33,16 @@ public class JavaScriptUtilsTests {
 	public void escape() {
 		StringBuilder sb = new StringBuilder();
 		sb.append('"');
-		sb.append("'");
-		sb.append("\\");
-		sb.append("/");
-		sb.append("\t");
-		sb.append("\n");
-		sb.append("\r");
-		sb.append("\f");
-		sb.append("\b");
-		sb.append("\013");
-		assertEquals("\\\"\\'\\\\\\/\\t\\n\\n\\f\\b\\v", JavaScriptUtils.javaScriptEscape(sb.toString()));
+		sb.append('\'');
+		sb.append('\\');
+		sb.append('/');
+		sb.append('\t');
+		sb.append('\n');
+		sb.append('\r');
+		sb.append('\f');
+		sb.append('\b');
+		sb.append('\013');
+		assertThat(JavaScriptUtils.javaScriptEscape(sb.toString())).isEqualTo("\\\"\\'\\\\\\/\\t\\n\\n\\f\\b\\v");
 	}
 
 	// SPR-9983
@@ -54,14 +54,14 @@ public class JavaScriptUtilsTests {
 		sb.append('\u2029');
 		String result = JavaScriptUtils.javaScriptEscape(sb.toString());
 
-		assertEquals("\\u2028\\u2029", result);
+		assertThat(result).isEqualTo("\\u2028\\u2029");
 	}
 
 	// SPR-9983
 
 	@Test
 	public void escapeLessThanGreaterThanSigns() throws UnsupportedEncodingException {
-		assertEquals("\\u003C\\u003E", JavaScriptUtils.javaScriptEscape("<>"));
+		assertThat(JavaScriptUtils.javaScriptEscape("<>")).isEqualTo("\\u003C\\u003E");
 	}
 
 }

@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-import java.util.EnumSet;
 import java.util.Set;
 
 import reactor.core.publisher.Mono;
@@ -42,7 +41,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 class ResourceHandlerFunction implements HandlerFunction<ServerResponse> {
 
 	private static final Set<HttpMethod> SUPPORTED_METHODS =
-			EnumSet.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS);
+			Set.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS);
 
 
 	private final Resource resource;
@@ -56,20 +55,19 @@ class ResourceHandlerFunction implements HandlerFunction<ServerResponse> {
 	@Override
 	public Mono<ServerResponse> handle(ServerRequest request) {
 		HttpMethod method = request.method();
-		if (method != null) {
-			switch (method) {
-				case GET:
-					return EntityResponse.fromObject(this.resource).build()
-							.map(response -> response);
-				case HEAD:
-					Resource headResource = new HeadMethodResource(this.resource);
-					return EntityResponse.fromObject(headResource).build()
-							.map(response -> response);
-				case OPTIONS:
-					return ServerResponse.ok()
-							.allow(SUPPORTED_METHODS)
-							.body(BodyInserters.empty());
-			}
+		if (HttpMethod.GET.equals(method)) {
+			return EntityResponse.fromObject(this.resource).build()
+					.map(response -> response);
+		}
+		else if (HttpMethod.HEAD.equals(method)) {
+			Resource headResource = new HeadMethodResource(this.resource);
+			return EntityResponse.fromObject(headResource).build()
+					.map(response -> response);
+		}
+		else if (HttpMethod.OPTIONS.equals(method)) {
+			return ServerResponse.ok()
+					.allow(SUPPORTED_METHODS)
+					.body(BodyInserters.empty());
 		}
 		return ServerResponse.status(HttpStatus.METHOD_NOT_ALLOWED)
 				.allow(SUPPORTED_METHODS)

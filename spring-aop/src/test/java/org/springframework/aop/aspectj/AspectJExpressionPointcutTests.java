@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,26 +17,34 @@
 package org.springframework.aop.aspectj;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.weaver.tools.PointcutExpression;
 import org.aspectj.weaver.tools.PointcutPrimitive;
 import org.aspectj.weaver.tools.UnsupportedPointcutPrimitiveException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import test.annotation.EmptySpringAnnotation;
+import test.annotation.transaction.Tx;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
-import org.springframework.tests.sample.beans.IOther;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.tests.sample.beans.subpkg.DeepBean;
+import org.springframework.beans.testfixture.beans.IOther;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.beans.testfixture.beans.subpkg.DeepBean;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * @author Rob Harrop
@@ -53,18 +61,25 @@ public class AspectJExpressionPointcutTests {
 
 	private Method setSomeNumber;
 
+	private final Map<String, Method> methodsOnHasGeneric = new HashMap<>();
 
-	@Before
+
+	@BeforeEach
 	public void setUp() throws NoSuchMethodException {
 		getAge = TestBean.class.getMethod("getAge");
 		setAge = TestBean.class.getMethod("setAge", int.class);
 		setSomeNumber = TestBean.class.getMethod("setSomeNumber", Number.class);
+
+		// Assumes no overloading
+		for (Method method : HasGeneric.class.getMethods()) {
+			methodsOnHasGeneric.put(method.getName(), method);
+		}
 	}
 
 
 	@Test
 	public void testMatchExplicit() {
-		String expression = "execution(int org.springframework.tests.sample.beans.TestBean.getAge())";
+		String expression = "execution(int org.springframework.beans.testfixture.beans.TestBean.getAge())";
 
 		Pointcut pointcut = getPointcut(expression);
 		ClassFilter classFilter = pointcut.getClassFilter();
@@ -75,9 +90,9 @@ public class AspectJExpressionPointcutTests {
 		// not currently testable in a reliable fashion
 		//assertDoesNotMatchStringClass(classFilter);
 
-		assertFalse("Should not be a runtime match", methodMatcher.isRuntime());
+		assertThat(methodMatcher.isRuntime()).as("Should not be a runtime match").isFalse();
 		assertMatchesGetAge(methodMatcher);
-		assertFalse("Expression should match setAge() method", methodMatcher.matches(setAge, TestBean.class));
+		assertThat(methodMatcher.matches(setAge, TestBean.class)).as("Expression should match setAge() method").isFalse();
 	}
 
 	@Test
@@ -93,9 +108,9 @@ public class AspectJExpressionPointcutTests {
 		// not currently testable in a reliable fashion
 		//assertDoesNotMatchStringClass(classFilter);
 
-		assertFalse("Should not be a runtime match", methodMatcher.isRuntime());
+		assertThat(methodMatcher.isRuntime()).as("Should not be a runtime match").isFalse();
 		assertMatchesGetAge(methodMatcher);
-		assertTrue("Expression should match setAge(int) method", methodMatcher.matches(setAge, TestBean.class));
+		assertThat(methodMatcher.matches(setAge, TestBean.class)).as("Expression should match setAge(int) method").isTrue();
 	}
 
 
@@ -114,18 +129,18 @@ public class AspectJExpressionPointcutTests {
 	 * @param which this or target
 	 */
 	private void testThisOrTarget(String which) throws SecurityException, NoSuchMethodException {
-		String matchesTestBean = which + "(org.springframework.tests.sample.beans.TestBean)";
-		String matchesIOther = which + "(org.springframework.tests.sample.beans.IOther)";
+		String matchesTestBean = which + "(org.springframework.beans.testfixture.beans.TestBean)";
+		String matchesIOther = which + "(org.springframework.beans.testfixture.beans.IOther)";
 		AspectJExpressionPointcut testBeanPc = new AspectJExpressionPointcut();
 		testBeanPc.setExpression(matchesTestBean);
 
 		AspectJExpressionPointcut iOtherPc = new AspectJExpressionPointcut();
 		iOtherPc.setExpression(matchesIOther);
 
-		assertTrue(testBeanPc.matches(TestBean.class));
-		assertTrue(testBeanPc.matches(getAge, TestBean.class));
-		assertTrue(iOtherPc.matches(OtherIOther.class.getMethod("absquatulate"), OtherIOther.class));
-		assertFalse(testBeanPc.matches(OtherIOther.class.getMethod("absquatulate"), OtherIOther.class));
+		assertThat(testBeanPc.matches(TestBean.class)).isTrue();
+		assertThat(testBeanPc.matches(getAge, TestBean.class)).isTrue();
+		assertThat(iOtherPc.matches(OtherIOther.class.getMethod("absquatulate"), OtherIOther.class)).isTrue();
+		assertThat(testBeanPc.matches(OtherIOther.class.getMethod("absquatulate"), OtherIOther.class)).isFalse();
 	}
 
 	@Test
@@ -139,7 +154,7 @@ public class AspectJExpressionPointcutTests {
 	}
 
 	private void testWithinPackage(boolean matchSubpackages) throws SecurityException, NoSuchMethodException {
-		String withinBeansPackage = "within(org.springframework.tests.sample.beans.";
+		String withinBeansPackage = "within(org.springframework.beans.testfixture.beans.";
 		// Subpackages are matched by **
 		if (matchSubpackages) {
 			withinBeansPackage += ".";
@@ -148,55 +163,43 @@ public class AspectJExpressionPointcutTests {
 		AspectJExpressionPointcut withinBeansPc = new AspectJExpressionPointcut();
 		withinBeansPc.setExpression(withinBeansPackage);
 
-		assertTrue(withinBeansPc.matches(TestBean.class));
-		assertTrue(withinBeansPc.matches(getAge, TestBean.class));
-		assertEquals(matchSubpackages, withinBeansPc.matches(DeepBean.class));
-		assertEquals(matchSubpackages, withinBeansPc.matches(
-				DeepBean.class.getMethod("aMethod", String.class), DeepBean.class));
-		assertFalse(withinBeansPc.matches(String.class));
-		assertFalse(withinBeansPc.matches(OtherIOther.class.getMethod("absquatulate"), OtherIOther.class));
+		assertThat(withinBeansPc.matches(TestBean.class)).isTrue();
+		assertThat(withinBeansPc.matches(getAge, TestBean.class)).isTrue();
+		assertThat(withinBeansPc.matches(DeepBean.class)).isEqualTo(matchSubpackages);
+		assertThat(withinBeansPc.matches(
+				DeepBean.class.getMethod("aMethod", String.class), DeepBean.class)).isEqualTo(matchSubpackages);
+		assertThat(withinBeansPc.matches(String.class)).isFalse();
+		assertThat(withinBeansPc.matches(OtherIOther.class.getMethod("absquatulate"), OtherIOther.class)).isFalse();
 	}
 
 	@Test
 	public void testFriendlyErrorOnNoLocationClassMatching() {
 		AspectJExpressionPointcut pc = new AspectJExpressionPointcut();
-		try {
-			pc.matches(ITestBean.class);
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertTrue(ex.getMessage().contains("expression"));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				pc.matches(ITestBean.class))
+			.withMessageContaining("expression");
 	}
 
 	@Test
 	public void testFriendlyErrorOnNoLocation2ArgMatching() {
 		AspectJExpressionPointcut pc = new AspectJExpressionPointcut();
-		try {
-			pc.matches(getAge, ITestBean.class);
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertTrue(ex.getMessage().contains("expression"));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				pc.matches(getAge, ITestBean.class))
+			.withMessageContaining("expression");
 	}
 
 	@Test
 	public void testFriendlyErrorOnNoLocation3ArgMatching() {
 		AspectJExpressionPointcut pc = new AspectJExpressionPointcut();
-		try {
-			pc.matches(getAge, ITestBean.class, (Object[]) null);
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertTrue(ex.getMessage().contains("expression"));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				pc.matches(getAge, ITestBean.class, (Object[]) null))
+			.withMessageContaining("expression");
 	}
 
 
 	@Test
 	public void testMatchWithArgs() throws Exception {
-		String expression = "execution(void org.springframework.tests.sample.beans.TestBean.setSomeNumber(Number)) && args(Double)";
+		String expression = "execution(void org.springframework.beans.testfixture.beans.TestBean.setSomeNumber(Number)) && args(Double)";
 
 		Pointcut pointcut = getPointcut(expression);
 		ClassFilter classFilter = pointcut.getClassFilter();
@@ -207,52 +210,44 @@ public class AspectJExpressionPointcutTests {
 		// not currently testable in a reliable fashion
 		//assertDoesNotMatchStringClass(classFilter);
 
-		assertTrue("Should match with setSomeNumber with Double input",
-				methodMatcher.matches(setSomeNumber, TestBean.class, new Double(12)));
-		assertFalse("Should not match setSomeNumber with Integer input",
-				methodMatcher.matches(setSomeNumber, TestBean.class, new Integer(11)));
-		assertFalse("Should not match getAge", methodMatcher.matches(getAge, TestBean.class));
-		assertTrue("Should be a runtime match", methodMatcher.isRuntime());
+		assertThat(methodMatcher.matches(setSomeNumber, TestBean.class, 12D)).as("Should match with setSomeNumber with Double input").isTrue();
+		assertThat(methodMatcher.matches(setSomeNumber, TestBean.class, 11)).as("Should not match setSomeNumber with Integer input").isFalse();
+		assertThat(methodMatcher.matches(getAge, TestBean.class)).as("Should not match getAge").isFalse();
+		assertThat(methodMatcher.isRuntime()).as("Should be a runtime match").isTrue();
 	}
 
 	@Test
 	public void testSimpleAdvice() {
-		String expression = "execution(int org.springframework.tests.sample.beans.TestBean.getAge())";
+		String expression = "execution(int org.springframework.beans.testfixture.beans.TestBean.getAge())";
 		CallCountingInterceptor interceptor = new CallCountingInterceptor();
 		TestBean testBean = getAdvisedProxy(expression, interceptor);
 
-		assertEquals("Calls should be 0", 0, interceptor.getCount());
+		assertThat(interceptor.getCount()).as("Calls should be 0").isEqualTo(0);
 		testBean.getAge();
-		assertEquals("Calls should be 1", 1, interceptor.getCount());
+		assertThat(interceptor.getCount()).as("Calls should be 1").isEqualTo(1);
 		testBean.setAge(90);
-		assertEquals("Calls should still be 1", 1, interceptor.getCount());
+		assertThat(interceptor.getCount()).as("Calls should still be 1").isEqualTo(1);
 	}
 
 	@Test
 	public void testDynamicMatchingProxy() {
-		String expression = "execution(void org.springframework.tests.sample.beans.TestBean.setSomeNumber(Number)) && args(Double)";
+		String expression = "execution(void org.springframework.beans.testfixture.beans.TestBean.setSomeNumber(Number)) && args(Double)";
 		CallCountingInterceptor interceptor = new CallCountingInterceptor();
 		TestBean testBean = getAdvisedProxy(expression, interceptor);
 
-		assertEquals("Calls should be 0", 0, interceptor.getCount());
-		testBean.setSomeNumber(new Double(30));
-		assertEquals("Calls should be 1", 1, interceptor.getCount());
+		assertThat(interceptor.getCount()).as("Calls should be 0").isEqualTo(0);
+		testBean.setSomeNumber(30D);
+		assertThat(interceptor.getCount()).as("Calls should be 1").isEqualTo(1);
 
-		testBean.setSomeNumber(new Integer(90));
-		assertEquals("Calls should be 1", 1, interceptor.getCount());
+		testBean.setSomeNumber(90);
+		assertThat(interceptor.getCount()).as("Calls should be 1").isEqualTo(1);
 	}
 
 	@Test
 	public void testInvalidExpression() {
-		String expression = "execution(void org.springframework.tests.sample.beans.TestBean.setSomeNumber(Number) && args(Double)";
-
-		try {
-			getPointcut(expression).getClassFilter();  // call to getClassFilter forces resolution
-			fail("Invalid expression should throw IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			assertTrue(true);
-		}
+		String expression = "execution(void org.springframework.beans.testfixture.beans.TestBean.setSomeNumber(Number) && args(Double)";
+		assertThatIllegalArgumentException().isThrownBy(
+				getPointcut(expression)::getClassFilter);  // call to getClassFilter forces resolution
 	}
 
 	private TestBean getAdvisedProxy(String pointcutExpression, CallCountingInterceptor interceptor) {
@@ -272,38 +267,33 @@ public class AspectJExpressionPointcutTests {
 	}
 
 	private void assertMatchesGetAge(MethodMatcher methodMatcher) {
-		assertTrue("Expression should match getAge() method", methodMatcher.matches(getAge, TestBean.class));
+		assertThat(methodMatcher.matches(getAge, TestBean.class)).as("Expression should match getAge() method").isTrue();
 	}
 
 	private void assertMatchesTestBeanClass(ClassFilter classFilter) {
-		assertTrue("Expression should match TestBean class", classFilter.matches(TestBean.class));
+		assertThat(classFilter.matches(TestBean.class)).as("Expression should match TestBean class").isTrue();
 	}
 
 	@Test
 	public void testWithUnsupportedPointcutPrimitive() {
-		String expression = "call(int org.springframework.tests.sample.beans.TestBean.getAge())";
-
-		try {
-			getPointcut(expression).getClassFilter(); // call to getClassFilter forces resolution...
-			fail("Should not support call pointcuts");
-		}
-		catch (UnsupportedPointcutPrimitiveException ex) {
-			assertEquals("Should not support call pointcut", PointcutPrimitive.CALL, ex.getUnsupportedPrimitive());
-		}
+		String expression = "call(int org.springframework.beans.testfixture.beans.TestBean.getAge())";
+		assertThatExceptionOfType(UnsupportedPointcutPrimitiveException.class).isThrownBy(() ->
+				getPointcut(expression).getClassFilter()) // call to getClassFilter forces resolution...
+			.satisfies(ex -> assertThat(ex.getUnsupportedPrimitive()).isEqualTo(PointcutPrimitive.CALL));
 	}
 
 	@Test
 	public void testAndSubstitution() {
 		Pointcut pc = getPointcut("execution(* *(..)) and args(String)");
 		PointcutExpression expr = ((AspectJExpressionPointcut) pc).getPointcutExpression();
-		assertEquals("execution(* *(..)) && args(String)",expr.getPointcutExpression());
+		assertThat(expr.getPointcutExpression()).isEqualTo("execution(* *(..)) && args(String)");
 	}
 
 	@Test
 	public void testMultipleAndSubstitutions() {
 		Pointcut pc = getPointcut("execution(* *(..)) and args(String) and this(Object)");
 		PointcutExpression expr = ((AspectJExpressionPointcut) pc).getPointcutExpression();
-		assertEquals("execution(* *(..)) && args(String) && this(Object)",expr.getPointcutExpression());
+		assertThat(expr.getPointcutExpression()).isEqualTo("execution(* *(..)) && args(String) && this(Object)");
 	}
 
 	private Pointcut getPointcut(String expression) {
@@ -318,6 +308,279 @@ public class AspectJExpressionPointcutTests {
 		@Override
 		public void absquatulate() {
 			// Empty
+		}
+	}
+
+	@Test
+	public void testMatchGenericArgument() {
+		String expression = "execution(* set*(java.util.List<org.springframework.beans.testfixture.beans.TestBean>) )";
+		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
+		ajexp.setExpression(expression);
+
+		// TODO this will currently map, would be nice for optimization
+		//assertTrue(ajexp.matches(HasGeneric.class));
+		//assertFalse(ajexp.matches(TestBean.class));
+
+		Method takesGenericList = methodsOnHasGeneric.get("setFriends");
+		assertThat(ajexp.matches(takesGenericList, HasGeneric.class)).isTrue();
+		assertThat(ajexp.matches(methodsOnHasGeneric.get("setEnemies"), HasGeneric.class)).isTrue();
+		assertThat(ajexp.matches(methodsOnHasGeneric.get("setPartners"), HasGeneric.class)).isFalse();
+		assertThat(ajexp.matches(methodsOnHasGeneric.get("setPhoneNumbers"), HasGeneric.class)).isFalse();
+
+		assertThat(ajexp.matches(getAge, TestBean.class)).isFalse();
+	}
+
+	@Test
+	public void testMatchVarargs() throws Exception {
+
+		@SuppressWarnings("unused")
+		class MyTemplate {
+			public int queryForInt(String sql, Object... params) {
+				return 0;
+			}
+		}
+
+		String expression = "execution(int *.*(String, Object...))";
+		AspectJExpressionPointcut jdbcVarArgs = new AspectJExpressionPointcut();
+		jdbcVarArgs.setExpression(expression);
+
+		assertThat(jdbcVarArgs.matches(
+				MyTemplate.class.getMethod("queryForInt", String.class, Object[].class),
+				MyTemplate.class)).isTrue();
+
+		Method takesGenericList = methodsOnHasGeneric.get("setFriends");
+		assertThat(jdbcVarArgs.matches(takesGenericList, HasGeneric.class)).isFalse();
+		assertThat(jdbcVarArgs.matches(methodsOnHasGeneric.get("setEnemies"), HasGeneric.class)).isFalse();
+		assertThat(jdbcVarArgs.matches(methodsOnHasGeneric.get("setPartners"), HasGeneric.class)).isFalse();
+		assertThat(jdbcVarArgs.matches(methodsOnHasGeneric.get("setPhoneNumbers"), HasGeneric.class)).isFalse();
+		assertThat(jdbcVarArgs.matches(getAge, TestBean.class)).isFalse();
+	}
+
+	@Test
+	public void testMatchAnnotationOnClassWithAtWithin() throws Exception {
+		String expression = "@within(test.annotation.transaction.Tx)";
+		testMatchAnnotationOnClass(expression);
+	}
+
+	@Test
+	public void testMatchAnnotationOnClassWithoutBinding() throws Exception {
+		String expression = "within(@test.annotation.transaction.Tx *)";
+		testMatchAnnotationOnClass(expression);
+	}
+
+	@Test
+	public void testMatchAnnotationOnClassWithSubpackageWildcard() throws Exception {
+		String expression = "within(@(test.annotation..*) *)";
+		AspectJExpressionPointcut springAnnotatedPc = testMatchAnnotationOnClass(expression);
+		assertThat(springAnnotatedPc.matches(TestBean.class.getMethod("setName", String.class), TestBean.class)).isFalse();
+		assertThat(springAnnotatedPc.matches(SpringAnnotated.class.getMethod("foo"), SpringAnnotated.class)).isTrue();
+
+		expression = "within(@(test.annotation.transaction..*) *)";
+		AspectJExpressionPointcut springTxAnnotatedPc = testMatchAnnotationOnClass(expression);
+		assertThat(springTxAnnotatedPc.matches(SpringAnnotated.class.getMethod("foo"), SpringAnnotated.class)).isFalse();
+	}
+
+	@Test
+	public void testMatchAnnotationOnClassWithExactPackageWildcard() throws Exception {
+		String expression = "within(@(test.annotation.transaction.*) *)";
+		testMatchAnnotationOnClass(expression);
+	}
+
+	private AspectJExpressionPointcut testMatchAnnotationOnClass(String expression) throws Exception {
+		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
+		ajexp.setExpression(expression);
+
+		assertThat(ajexp.matches(getAge, TestBean.class)).isFalse();
+		assertThat(ajexp.matches(HasTransactionalAnnotation.class.getMethod("foo"), HasTransactionalAnnotation.class)).isTrue();
+		assertThat(ajexp.matches(HasTransactionalAnnotation.class.getMethod("bar", String.class), HasTransactionalAnnotation.class)).isTrue();
+		assertThat(ajexp.matches(BeanB.class.getMethod("setName", String.class), BeanB.class)).isTrue();
+		assertThat(ajexp.matches(BeanA.class.getMethod("setName", String.class), BeanA.class)).isFalse();
+		return ajexp;
+	}
+
+	@Test
+	public void testAnnotationOnMethodWithFQN() throws Exception {
+		String expression = "@annotation(test.annotation.transaction.Tx)";
+		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
+		ajexp.setExpression(expression);
+
+		assertThat(ajexp.matches(getAge, TestBean.class)).isFalse();
+		assertThat(ajexp.matches(HasTransactionalAnnotation.class.getMethod("foo"), HasTransactionalAnnotation.class)).isFalse();
+		assertThat(ajexp.matches(HasTransactionalAnnotation.class.getMethod("bar", String.class), HasTransactionalAnnotation.class)).isFalse();
+		assertThat(ajexp.matches(BeanA.class.getMethod("setName", String.class), BeanA.class)).isFalse();
+		assertThat(ajexp.matches(BeanA.class.getMethod("getAge"), BeanA.class)).isTrue();
+		assertThat(ajexp.matches(BeanA.class.getMethod("setName", String.class), BeanA.class)).isFalse();
+	}
+
+	@Test
+	public void testAnnotationOnCglibProxyMethod() throws Exception {
+		String expression = "@annotation(test.annotation.transaction.Tx)";
+		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
+		ajexp.setExpression(expression);
+
+		ProxyFactory factory = new ProxyFactory(new BeanA());
+		factory.setProxyTargetClass(true);
+		BeanA proxy = (BeanA) factory.getProxy();
+		assertThat(ajexp.matches(BeanA.class.getMethod("getAge"), proxy.getClass())).isTrue();
+	}
+
+	@Test
+	public void testAnnotationOnDynamicProxyMethod() throws Exception {
+		String expression = "@annotation(test.annotation.transaction.Tx)";
+		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
+		ajexp.setExpression(expression);
+
+		ProxyFactory factory = new ProxyFactory(new BeanA());
+		factory.setProxyTargetClass(false);
+		IBeanA proxy = (IBeanA) factory.getProxy();
+		assertThat(ajexp.matches(IBeanA.class.getMethod("getAge"), proxy.getClass())).isTrue();
+	}
+
+	@Test
+	public void testAnnotationOnMethodWithWildcard() throws Exception {
+		String expression = "execution(@(test.annotation..*) * *(..))";
+		AspectJExpressionPointcut anySpringMethodAnnotation = new AspectJExpressionPointcut();
+		anySpringMethodAnnotation.setExpression(expression);
+
+		assertThat(anySpringMethodAnnotation.matches(getAge, TestBean.class)).isFalse();
+		assertThat(anySpringMethodAnnotation.matches(
+				HasTransactionalAnnotation.class.getMethod("foo"), HasTransactionalAnnotation.class)).isFalse();
+		assertThat(anySpringMethodAnnotation.matches(
+				HasTransactionalAnnotation.class.getMethod("bar", String.class), HasTransactionalAnnotation.class)).isFalse();
+		assertThat(anySpringMethodAnnotation.matches(BeanA.class.getMethod("setName", String.class), BeanA.class)).isFalse();
+		assertThat(anySpringMethodAnnotation.matches(BeanA.class.getMethod("getAge"), BeanA.class)).isTrue();
+		assertThat(anySpringMethodAnnotation.matches(BeanA.class.getMethod("setName", String.class), BeanA.class)).isFalse();
+	}
+
+	@Test
+	public void testAnnotationOnMethodArgumentsWithFQN() throws Exception {
+		String expression = "@args(*, test.annotation.EmptySpringAnnotation))";
+		AspectJExpressionPointcut takesSpringAnnotatedArgument2 = new AspectJExpressionPointcut();
+		takesSpringAnnotatedArgument2.setExpression(expression);
+
+		assertThat(takesSpringAnnotatedArgument2.matches(getAge, TestBean.class)).isFalse();
+		assertThat(takesSpringAnnotatedArgument2.matches(
+				HasTransactionalAnnotation.class.getMethod("foo"), HasTransactionalAnnotation.class)).isFalse();
+		assertThat(takesSpringAnnotatedArgument2.matches(
+				HasTransactionalAnnotation.class.getMethod("bar", String.class), HasTransactionalAnnotation.class)).isFalse();
+		assertThat(takesSpringAnnotatedArgument2.matches(BeanA.class.getMethod("setName", String.class), BeanA.class)).isFalse();
+		assertThat(takesSpringAnnotatedArgument2.matches(BeanA.class.getMethod("getAge"), BeanA.class)).isFalse();
+		assertThat(takesSpringAnnotatedArgument2.matches(BeanA.class.getMethod("setName", String.class), BeanA.class)).isFalse();
+
+		assertThat(takesSpringAnnotatedArgument2.matches(
+				ProcessesSpringAnnotatedParameters.class.getMethod("takesAnnotatedParameters", TestBean.class, SpringAnnotated.class),
+				ProcessesSpringAnnotatedParameters.class)).isTrue();
+
+		// True because it maybeMatches with potential argument subtypes
+		assertThat(takesSpringAnnotatedArgument2.matches(
+				ProcessesSpringAnnotatedParameters.class.getMethod("takesNoAnnotatedParameters", TestBean.class, BeanA.class),
+				ProcessesSpringAnnotatedParameters.class)).isTrue();
+
+		assertThat(takesSpringAnnotatedArgument2.matches(
+				ProcessesSpringAnnotatedParameters.class.getMethod("takesNoAnnotatedParameters", TestBean.class, BeanA.class),
+				ProcessesSpringAnnotatedParameters.class, new TestBean(), new BeanA())).isFalse();
+	}
+
+	@Test
+	public void testAnnotationOnMethodArgumentsWithWildcards() throws Exception {
+		String expression = "execution(* *(*, @(test..*) *))";
+		AspectJExpressionPointcut takesSpringAnnotatedArgument2 = new AspectJExpressionPointcut();
+		takesSpringAnnotatedArgument2.setExpression(expression);
+
+		assertThat(takesSpringAnnotatedArgument2.matches(getAge, TestBean.class)).isFalse();
+		assertThat(takesSpringAnnotatedArgument2.matches(
+				HasTransactionalAnnotation.class.getMethod("foo"), HasTransactionalAnnotation.class)).isFalse();
+		assertThat(takesSpringAnnotatedArgument2.matches(
+				HasTransactionalAnnotation.class.getMethod("bar", String.class), HasTransactionalAnnotation.class)).isFalse();
+		assertThat(takesSpringAnnotatedArgument2.matches(BeanA.class.getMethod("setName", String.class), BeanA.class)).isFalse();
+		assertThat(takesSpringAnnotatedArgument2.matches(BeanA.class.getMethod("getAge"), BeanA.class)).isFalse();
+		assertThat(takesSpringAnnotatedArgument2.matches(BeanA.class.getMethod("setName", String.class), BeanA.class)).isFalse();
+
+		assertThat(takesSpringAnnotatedArgument2.matches(
+				ProcessesSpringAnnotatedParameters.class.getMethod("takesAnnotatedParameters", TestBean.class, SpringAnnotated.class),
+				ProcessesSpringAnnotatedParameters.class)).isTrue();
+		assertThat(takesSpringAnnotatedArgument2.matches(
+				ProcessesSpringAnnotatedParameters.class.getMethod("takesNoAnnotatedParameters", TestBean.class, BeanA.class),
+				ProcessesSpringAnnotatedParameters.class)).isFalse();
+	}
+
+
+	public static class HasGeneric {
+
+		public void setFriends(List<TestBean> friends) {
+		}
+		public void setEnemies(List<TestBean> enemies) {
+		}
+		public void setPartners(List<?> partners) {
+		}
+		public void setPhoneNumbers(List<String> numbers) {
+		}
+	}
+
+
+	public static class ProcessesSpringAnnotatedParameters {
+
+		public void takesAnnotatedParameters(TestBean tb, SpringAnnotated sa) {
+		}
+
+		public void takesNoAnnotatedParameters(TestBean tb, BeanA tb3) {
+		}
+	}
+
+
+	@Tx
+	public static class HasTransactionalAnnotation {
+
+		public void foo() {
+		}
+		public Object bar(String foo) {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+
+	@EmptySpringAnnotation
+	public static class SpringAnnotated {
+
+		public void foo() {
+		}
+	}
+
+
+	interface IBeanA {
+
+		@Tx
+		int getAge();
+	}
+
+
+	static class BeanA implements IBeanA {
+
+		@SuppressWarnings("unused")
+		private String name;
+
+		private int age;
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		@Tx
+		@Override
+		public int getAge() {
+			return age;
+		}
+	}
+
+
+	@Tx
+	static class BeanB {
+
+		@SuppressWarnings("unused")
+		private String name;
+
+		public void setName(String name) {
+			this.name = name;
 		}
 	}
 

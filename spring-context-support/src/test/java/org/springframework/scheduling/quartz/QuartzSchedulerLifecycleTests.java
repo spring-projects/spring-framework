@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package org.springframework.scheduling.quartz;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.util.StopWatch;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Fisher
@@ -34,26 +34,26 @@ public class QuartzSchedulerLifecycleTests {
 	public void destroyLazyInitSchedulerWithDefaultShutdownOrderDoesNotHang() {
 		ConfigurableApplicationContext context =
 				new ClassPathXmlApplicationContext("quartzSchedulerLifecycleTests.xml", getClass());
-		assertNotNull(context.getBean("lazyInitSchedulerWithDefaultShutdownOrder"));
+		assertThat(context.getBean("lazyInitSchedulerWithDefaultShutdownOrder")).isNotNull();
 		StopWatch sw = new StopWatch();
 		sw.start("lazyScheduler");
 		context.close();
 		sw.stop();
-		assertTrue("Quartz Scheduler with lazy-init is hanging on destruction: " +
-				sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 500);
+		assertThat(sw.getTotalTimeMillis() < 500).as("Quartz Scheduler with lazy-init is hanging on destruction: " +
+				sw.getTotalTimeMillis()).isTrue();
 	}
 
 	@Test  // SPR-6354
 	public void destroyLazyInitSchedulerWithCustomShutdownOrderDoesNotHang() {
 		ConfigurableApplicationContext context =
 				new ClassPathXmlApplicationContext("quartzSchedulerLifecycleTests.xml", getClass());
-		assertNotNull(context.getBean("lazyInitSchedulerWithCustomShutdownOrder"));
+		assertThat(context.getBean("lazyInitSchedulerWithCustomShutdownOrder")).isNotNull();
 		StopWatch sw = new StopWatch();
 		sw.start("lazyScheduler");
 		context.close();
 		sw.stop();
-		assertTrue("Quartz Scheduler with lazy-init is hanging on destruction: " +
-				sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 500);
+		assertThat(sw.getTotalTimeMillis() < 500).as("Quartz Scheduler with lazy-init is hanging on destruction: " +
+				sw.getTotalTimeMillis()).isTrue();
 	}
 
 }

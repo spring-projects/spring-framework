@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,12 @@ import java.sql.SQLException;
  * and handled correctly by the JdbcUtils class.
  *
  * @author Thomas Risberg
- * @see JdbcUtils#extractDatabaseMetaData
+ * @author Juergen Hoeller
+ * @param <T> the result type
+ * @see JdbcUtils#extractDatabaseMetaData(javax.sql.DataSource, DatabaseMetaDataCallback)
  */
 @FunctionalInterface
-public interface DatabaseMetaDataCallback {
+public interface DatabaseMetaDataCallback<T> {
 
 	/**
 	 * Implementations must implement this method to process the meta-data
@@ -37,11 +39,11 @@ public interface DatabaseMetaDataCallback {
 	 * @param dbmd the DatabaseMetaData to process
 	 * @return a result object extracted from the meta-data
 	 * (can be an arbitrary object, as needed by the implementation)
-	 * @throws SQLException if a SQLException is encountered getting
+	 * @throws SQLException if an SQLException is encountered getting
 	 * column values (that is, there's no need to catch SQLException)
 	 * @throws MetaDataAccessException in case of other failures while
 	 * extracting meta-data (for example, reflection failure)
 	 */
-	Object processMetaData(DatabaseMetaData dbmd) throws SQLException, MetaDataAccessException;
+	T processMetaData(DatabaseMetaData dbmd) throws SQLException, MetaDataAccessException;
 
 }

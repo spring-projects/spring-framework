@@ -1,84 +1,65 @@
 description = "Spring Web MVC"
 
-dependencyManagement {
-	imports {
-		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
-		mavenBom "org.eclipse.jetty:jetty-bom:${jettyVersion}"
-	}
-}
+apply plugin: "kotlin"
 
 dependencies {
-	provided("javax.servlet:javax.servlet-api:4.0.1")
-	compile(project(":spring-aop"))
-	compile(project(":spring-beans"))
-	compile(project(":spring-context"))
-	compile(project(":spring-core"))
-	compile(project(":spring-expression"))
-	compile(project(":spring-web"))
+	api(project(":spring-aop"))
+	api(project(":spring-beans"))
+	api(project(":spring-context"))
+	api(project(":spring-core"))
+	api(project(":spring-expression"))
+	api(project(":spring-web"))
+	compileOnly("jakarta.servlet:jakarta.servlet-api")
+	compileOnly("com.google.code.findbugs:findbugs")  // for groovy-templates
 	optional(project(":spring-context-support"))  // for FreeMarker support
 	optional(project(":spring-oxm"))
-	optional("javax.servlet.jsp:javax.servlet.jsp-api:2.3.2-b02")
-	optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
-	optional("javax.el:javax.el-api:3.0.1-b04")
-	optional("javax.xml.bind:jaxb-api:2.3.1")
-	optional("org.webjars:webjars-locator-core:0.37")
-	optional("com.rometools:rome:1.12.0")
-	optional("com.github.librepdf:openpdf:1.2.12")
-	optional("org.apache.poi:poi-ooxml:4.0.1")
-	optional("org.freemarker:freemarker:${freemarkerVersion}")
-	optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
-	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
-	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jackson2Version}")
-	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${jackson2Version}")
-	optional("org.apache.tiles:tiles-api:${tiles3Version}", withoutJclOverSlf4J)
-	optional("org.apache.tiles:tiles-core:${tiles3Version}", withoutJclOverSlf4J)
-	optional("org.apache.tiles:tiles-servlet:${tiles3Version}", withoutJclOverSlf4J)
-	optional("org.apache.tiles:tiles-jsp:${tiles3Version}", withoutJclOverSlf4J)
-	optional("org.apache.tiles:tiles-el:${tiles3Version}", withoutJclOverSlf4J)
-	optional("org.apache.tiles:tiles-extras:${tiles3Version}") {
-		exclude group: "org.springframework", module: "spring-web"
-		exclude group: "org.slf4j", module: "jcl-over-slf4j"
-	}
-	optional("org.codehaus.groovy:groovy-templates:${groovyVersion}")
-	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+	optional("jakarta.servlet.jsp:jakarta.servlet.jsp-api")
+	optional("jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api")
+	optional("jakarta.el:jakarta.el-api")
+	optional("jakarta.xml.bind:jakarta.xml.bind-api")
+	optional("org.webjars:webjars-locator-core")
+	optional("com.rometools:rome")
+	optional("com.github.librepdf:openpdf")
+	optional("org.apache.poi:poi-ooxml")
+	optional("org.freemarker:freemarker")
+	optional("com.fasterxml.jackson.core:jackson-databind")
+	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml")
+	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile")
+	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-cbor")
+	optional("org.apache.groovy:groovy-templates")
+	optional("org.jetbrains.kotlin:kotlin-reflect")
+	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("org.reactivestreams:reactive-streams")
-	testCompile("javax.servlet:javax.servlet-api:4.0.1")
-	testCompile("org.eclipse.jetty:jetty-servlet") {
-		exclude group: "javax.servlet", module: "javax.servlet"
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	testImplementation(testFixtures(project(":spring-beans")))
+	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation(testFixtures(project(":spring-context")))
+	testImplementation(testFixtures(project(":spring-web")))
+	testImplementation("jakarta.servlet:jakarta.servlet-api")
+	testImplementation("org.eclipse.jetty:jetty-servlet") {
+		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
 	}
-	testCompile("org.eclipse.jetty:jetty-server") {
-		exclude group: "javax.servlet", module: "javax.servlet"
+	testImplementation("org.eclipse.jetty:jetty-server") {
+		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
 	}
-	testCompile("org.apache.httpcomponents:httpclient:4.5.8") {
-		exclude group: "commons-logging", module: "commons-logging"
-	}
-	testCompile("commons-fileupload:commons-fileupload:1.4")
-	testCompile("commons-io:commons-io:2.5")
-	testCompile("joda-time:joda-time:2.10.1")
-	testCompile("org.mozilla:rhino:1.7.10")
-	testCompile("dom4j:dom4j:1.6.1") {
-		exclude group: "xml-apis", module: "xml-apis"
-	}
-	testCompile("jaxen:jaxen:1.1.1") {
-		exclude group: "xml-apis", module: "xml-apis"
-		exclude group: "xom", module: "xom"
-		exclude group: "xerces", module: "xercesImpl"
-	}
-	testCompile("org.xmlunit:xmlunit-matchers:2.6.2")
-	testCompile("org.hibernate:hibernate-validator:6.0.16.Final")
-	testCompile("io.projectreactor:reactor-core")
-	testCompile("io.reactivex:rxjava:${rxjavaVersion}")
-	testCompile("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
-	testCompile("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
-	testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
-	testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}")
-	testRuntime("org.jetbrains.kotlin:kotlin-compiler-embeddable:${kotlinVersion}")
-	testRuntime("org.jruby:jruby:9.2.6.0")
-	testRuntime("org.python:jython-standalone:2.7.1")
-	testRuntime("org.webjars:underscorejs:1.8.3")
-	testRuntime("org.glassfish:javax.el:3.0.1-b08")
-	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0.1")
-	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0.1")
-	testRuntime("com.sun.activation:javax.activation:1.2.0")
+	testImplementation("org.apache.httpcomponents:httpclient")
+	testImplementation("commons-io:commons-io")
+	testImplementation("org.mozilla:rhino")
+	testImplementation("org.dom4j:dom4j")
+	testImplementation("jaxen:jaxen")
+	testImplementation("org.xmlunit:xmlunit-assertj")
+	testImplementation("org.xmlunit:xmlunit-matchers")
+	testImplementation("org.hibernate:hibernate-validator")
+	testImplementation("jakarta.validation:jakarta.validation-api")
+	testImplementation("io.projectreactor:reactor-core")
+	testImplementation("io.reactivex.rxjava3:rxjava")
+	testImplementation("org.jetbrains.kotlin:kotlin-script-runtime")
+	testRuntimeOnly("org.jetbrains.kotlin:kotlin-scripting-jsr223")
+	testRuntimeOnly("org.jruby:jruby")
+	testRuntimeOnly("org.python:jython-standalone")
+	testRuntimeOnly("org.webjars:underscorejs")
+	testRuntimeOnly("org.glassfish:jakarta.el")
+	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
+	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
+	testRuntimeOnly("com.sun.activation:jakarta.activation")
 }

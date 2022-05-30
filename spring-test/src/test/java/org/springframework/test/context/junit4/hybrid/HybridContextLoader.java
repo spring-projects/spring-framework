@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.test.context.SmartContextLoader;
 import org.springframework.test.context.support.AbstractGenericContextLoader;
 import org.springframework.util.Assert;
 
-import static org.springframework.test.context.support.AnnotationConfigContextLoaderUtils.*;
+import static org.springframework.test.context.support.AnnotationConfigContextLoaderUtils.detectDefaultConfigurationClasses;
 
 /**
  * Hybrid {@link SmartContextLoader} that supports path-based and class-based

@@ -16,9 +16,11 @@
 
 package org.springframework.beans.factory
 
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.Test
+import org.junit.jupiter.api.Test
+import kotlin.reflect.full.createInstance
 
 /**
  * Mock object based tests for ListableBeanFactory Kotlin extensions
@@ -77,10 +79,12 @@ class ListableBeanFactoryExtensionsTests {
 		verify { lbf.getBeansWithAnnotation(Bar::class.java) }
 	}
 
+	@Suppress("UNUSED_VARIABLE")
 	@Test
 	fun `findAnnotationOnBean with String and reified type parameters`() {
 		val name = "bar"
-		lbf.findAnnotationOnBean<Bar>(name)
+		every { lbf.findAnnotationOnBean(name, Bar::class.java) } returns Bar::class.createInstance()
+		val annotation: Bar? = lbf.findAnnotationOnBean(name)
 		verify { lbf.findAnnotationOnBean(name, Bar::class.java) }
 	}
 

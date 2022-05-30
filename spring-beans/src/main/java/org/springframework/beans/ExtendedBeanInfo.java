@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,8 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Decorator for a standard {@link BeanInfo} object, e.g. as created by
- * {@link Introspector#getBeanInfo(Class)}, designed to discover and register static
- * and/or non-void returning setter methods. For example:
+ * {@link Introspector#getBeanInfo(Class)}, designed to discover and register
+ * static and/or non-void returning setter methods. For example:
  *
  * <pre class="code">
  * public class Bean {
@@ -137,19 +137,19 @@ class ExtendedBeanInfo implements BeanInfo {
 			}
 		}
 		// Sort non-void returning write methods to guard against the ill effects of
-		// non-deterministic sorting of methods returned from Class#getDeclaredMethods
-		// under JDK 7. See https://bugs.java.com/view_bug.do?bug_id=7023180
-		matches.sort((m1, m2) -> m2.toString().compareTo(m1.toString()));
+		// non-deterministic sorting of methods returned from Class#getMethods.
+		// For historical reasons, the natural sort order is reversed.
+		// See https://github.com/spring-projects/spring-framework/issues/14744.
+		matches.sort(Comparator.comparing(Method::toString).reversed());
 		return matches;
 	}
 
 	public static boolean isCandidateWriteMethod(Method method) {
 		String methodName = method.getName();
-		Class<?>[] parameterTypes = method.getParameterTypes();
-		int nParams = parameterTypes.length;
+		int nParams = method.getParameterCount();
 		return (methodName.length() > 3 && methodName.startsWith("set") && Modifier.isPublic(method.getModifiers()) &&
 				(!void.class.isAssignableFrom(method.getReturnType()) || Modifier.isStatic(method.getModifiers())) &&
-				(nParams == 1 || (nParams == 2 && int.class == parameterTypes[0])));
+				(nParams == 1 || (nParams == 2 && int.class == method.getParameterTypes()[0])));
 	}
 
 	private void handleCandidateWriteMethod(Method method) throws IntrospectionException {
@@ -189,8 +189,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		for (PropertyDescriptor pd : this.propertyDescriptors) {
 			final Class<?> candidateType;
 			final String candidateName = pd.getName();
-			if (pd instanceof IndexedPropertyDescriptor) {
-				IndexedPropertyDescriptor ipd = (IndexedPropertyDescriptor) pd;
+			if (pd instanceof IndexedPropertyDescriptor ipd) {
 				candidateType = ipd.getIndexedPropertyType();
 				if (candidateName.equals(propertyName) &&
 						(candidateType.equals(propertyType) || candidateType.equals(propertyType.getComponentType()))) {
@@ -209,7 +208,7 @@ class ExtendedBeanInfo implements BeanInfo {
 	}
 
 	private String propertyNameFor(Method method) {
-		return Introspector.decapitalize(method.getName().substring(3, method.getName().length()));
+		return Introspector.decapitalize(method.getName().substring(3));
 	}
 
 
@@ -339,7 +338,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			return (this == other || (other instanceof PropertyDescriptor &&
 					PropertyDescriptorUtils.equals(this, (PropertyDescriptor) other)));
 		}
@@ -488,17 +487,16 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		/*
-		 * See java.beans.IndexedPropertyDescriptor#equals(java.lang.Object)
+		 * See java.beans.IndexedPropertyDescriptor#equals
 		 */
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof IndexedPropertyDescriptor)) {
+			if (!(other instanceof IndexedPropertyDescriptor otherPd)) {
 				return false;
 			}
-			IndexedPropertyDescriptor otherPd = (IndexedPropertyDescriptor) other;
 			return (ObjectUtils.nullSafeEquals(getIndexedReadMethod(), otherPd.getIndexedReadMethod()) &&
 					ObjectUtils.nullSafeEquals(getIndexedWriteMethod(), otherPd.getIndexedWriteMethod()) &&
 					ObjectUtils.nullSafeEquals(getIndexedPropertyType(), otherPd.getIndexedPropertyType()) &&
@@ -535,11 +533,13 @@ class ExtendedBeanInfo implements BeanInfo {
 		public int compare(PropertyDescriptor desc1, PropertyDescriptor desc2) {
 			String left = desc1.getName();
 			String right = desc2.getName();
+			byte[] leftBytes = left.getBytes();
+			byte[] rightBytes = right.getBytes();
 			for (int i = 0; i < left.length(); i++) {
 				if (right.length() == i) {
 					return 1;
 				}
-				int result = left.getBytes()[i] - right.getBytes()[i];
+				int result = leftBytes[i] - rightBytes[i];
 				if (result != 0) {
 					return result;
 				}

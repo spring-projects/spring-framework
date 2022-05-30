@@ -17,6 +17,7 @@
 package org.springframework.util.xml;
 
 import java.util.NoSuchElementException;
+
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLStreamException;
 

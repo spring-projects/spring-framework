@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,20 +122,6 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	}
 
 	/**
-	 * Construct a new {@code ProtobufHttpMessageConverter} with an
-	 * initializer that allows the registration of message extensions.
-	 * @param registryInitializer an initializer for message extensions
-	 * @deprecated as of Spring Framework 5.1, use {@link #ProtobufHttpMessageConverter(ExtensionRegistry)} instead
-	 */
-	@Deprecated
-	public ProtobufHttpMessageConverter(@Nullable ExtensionRegistryInitializer registryInitializer) {
-		this(null, null);
-		if (registryInitializer != null) {
-			registryInitializer.initializeExtensionRegistry(this.extensionRegistry);
-		}
-	}
-
-	/**
 	 * Construct a new {@code ProtobufHttpMessageConverter} with a registry that specifies
 	 * protocol message extensions.
 	 * @param extensionRegistry the registry to populate
@@ -231,6 +217,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 				(this.protobufFormatSupport != null && this.protobufFormatSupport.supportsWriteOnly(mediaType)));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void writeInternal(Message message, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
@@ -253,7 +240,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		}
 		else if (TEXT_PLAIN.isCompatibleWith(contentType)) {
 			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputMessage.getBody(), charset);
-			TextFormat.print(message, outputStreamWriter);
+			TextFormat.print(message, outputStreamWriter);  // deprecated on Protobuf 3.9
 			outputStreamWriter.flush();
 			outputMessage.getBody().flush();
 		}

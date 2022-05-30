@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,16 @@ package org.springframework.beans;
 
 import java.beans.BeanInfo;
 import java.beans.IndexedPropertyDescriptor;
-import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.math.BigDecimal;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 /**
  * @author Chris Beams
@@ -38,10 +35,10 @@ import static org.junit.Assert.*;
  * @author Sam Brannen
  * @since 3.1
  */
-public class ExtendedBeanInfoTests {
+class ExtendedBeanInfoTests {
 
 	@Test
-	public void standardReadMethodOnly() throws IntrospectionException {
+	void standardReadMethodOnly() throws Exception {
 		@SuppressWarnings("unused") class C {
 			public String getFoo() { return null; }
 		}
@@ -49,15 +46,15 @@ public class ExtendedBeanInfoTests {
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 		ExtendedBeanInfo ebi = new ExtendedBeanInfo(bi);
 
-		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
+		assertThat(hasReadMethodForProperty(bi, "foo")).isTrue();
+		assertThat(hasWriteMethodForProperty(bi, "foo")).isFalse();
 
-		assertThat(hasReadMethodForProperty(ebi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(ebi, "foo"), is(false));
+		assertThat(hasReadMethodForProperty(ebi, "foo")).isTrue();
+		assertThat(hasWriteMethodForProperty(ebi, "foo")).isFalse();
 	}
 
 	@Test
-	public void standardWriteMethodOnly() throws IntrospectionException {
+	void standardWriteMethodOnly() throws Exception {
 		@SuppressWarnings("unused") class C {
 			public void setFoo(String f) { }
 		}
@@ -65,15 +62,15 @@ public class ExtendedBeanInfoTests {
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 		ExtendedBeanInfo ebi = new ExtendedBeanInfo(bi);
 
-		assertThat(hasReadMethodForProperty(bi, "foo"), is(false));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(true));
+		assertThat(hasReadMethodForProperty(bi, "foo")).isFalse();
+		assertThat(hasWriteMethodForProperty(bi, "foo")).isTrue();
 
-		assertThat(hasReadMethodForProperty(ebi, "foo"), is(false));
-		assertThat(hasWriteMethodForProperty(ebi, "foo"), is(true));
+		assertThat(hasReadMethodForProperty(ebi, "foo")).isFalse();
+		assertThat(hasWriteMethodForProperty(ebi, "foo")).isTrue();
 	}
 
 	@Test
-	public void standardReadAndWriteMethods() throws IntrospectionException {
+	void standardReadAndWriteMethods() throws Exception {
 		@SuppressWarnings("unused") class C {
 			public void setFoo(String f) { }
 			public String getFoo() { return null; }
@@ -82,15 +79,15 @@ public class ExtendedBeanInfoTests {
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 		ExtendedBeanInfo ebi = new ExtendedBeanInfo(bi);
 
-		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(true));
+		assertThat(hasReadMethodForProperty(bi, "foo")).isTrue();
+		assertThat(hasWriteMethodForProperty(bi, "foo")).isTrue();
 
-		assertThat(hasReadMethodForProperty(ebi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(ebi, "foo"), is(true));
+		assertThat(hasReadMethodForProperty(ebi, "foo")).isTrue();
+		assertThat(hasWriteMethodForProperty(ebi, "foo")).isTrue();
 	}
 
 	@Test
-	public void nonStandardWriteMethodOnly() throws IntrospectionException {
+	void nonStandardWriteMethodOnly() throws Exception {
 		@SuppressWarnings("unused") class C {
 			public C setFoo(String foo) { return this; }
 		}
@@ -98,15 +95,15 @@ public class ExtendedBeanInfoTests {
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 		ExtendedBeanInfo ebi = new ExtendedBeanInfo(bi);
 
-		assertThat(hasReadMethodForProperty(bi, "foo"), is(false));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
+		assertThat(hasReadMethodForProperty(bi, "foo")).isFalse();
+		assertThat(hasWriteMethodForProperty(bi, "foo")).isFalse();
 
-		assertThat(hasReadMethodForProperty(ebi, "foo"), is(false));
-		assertThat(hasWriteMethodForProperty(ebi, "foo"), is(true));
+		assertThat(hasReadMethodForProperty(ebi, "foo")).isFalse();
+		assertThat(hasWriteMethodForProperty(ebi, "foo")).isTrue();
 	}
 
 	@Test
-	public void standardReadAndNonStandardWriteMethods() throws IntrospectionException {
+	void standardReadAndNonStandardWriteMethods() throws Exception {
 		@SuppressWarnings("unused") class C {
 			public String getFoo() { return null; }
 			public C setFoo(String foo) { return this; }
@@ -114,20 +111,17 @@ public class ExtendedBeanInfoTests {
 
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 
-		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
+		assertThat(hasReadMethodForProperty(bi, "foo")).isTrue();
+		assertThat(hasWriteMethodForProperty(bi, "foo")).isFalse();
 
 		ExtendedBeanInfo ebi = new ExtendedBeanInfo(bi);
 
-		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
-
-		assertThat(hasReadMethodForProperty(ebi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(ebi, "foo"), is(true));
+		assertThat(hasReadMethodForProperty(ebi, "foo")).isTrue();
+		assertThat(hasWriteMethodForProperty(ebi, "foo")).isTrue();
 	}
 
 	@Test
-	public void standardReadAndNonStandardIndexedWriteMethod() throws IntrospectionException {
+	void standardReadAndNonStandardIndexedWriteMethod() throws Exception {
 		@SuppressWarnings("unused") class C {
 			public String[] getFoo() { return null; }
 			public C setFoo(int i, String foo) { return this; }
@@ -135,19 +129,19 @@ public class ExtendedBeanInfoTests {
 
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 
-		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
-		assertThat(hasIndexedWriteMethodForProperty(bi, "foo"), is(false));
+		assertThat(hasReadMethodForProperty(bi, "foo")).isTrue();
+		assertThat(hasWriteMethodForProperty(bi, "foo")).isFalse();
+		assertThat(hasIndexedWriteMethodForProperty(bi, "foo")).isFalse();
 
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
-		assertThat(hasReadMethodForProperty(ebi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(ebi, "foo"), is(false));
-		assertThat(hasIndexedWriteMethodForProperty(ebi, "foo"), is(true));
+		assertThat(hasReadMethodForProperty(ebi, "foo")).isTrue();
+		assertThat(hasWriteMethodForProperty(ebi, "foo")).isFalse();
+		assertThat(hasIndexedWriteMethodForProperty(ebi, "foo")).isTrue();
 	}
 
 	@Test
-	public void standardReadMethodsAndOverloadedNonStandardWriteMethods() throws Exception {
+	void standardReadMethodsAndOverloadedNonStandardWriteMethods() throws Exception {
 		@SuppressWarnings("unused") class C {
 			public String getFoo() { return null; }
 			public C setFoo(String foo) { return this; }
@@ -156,28 +150,25 @@ public class ExtendedBeanInfoTests {
 
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 
-		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
+		assertThat(hasReadMethodForProperty(bi, "foo")).isTrue();
+		assertThat(hasWriteMethodForProperty(bi, "foo")).isFalse();
 
 		ExtendedBeanInfo ebi = new ExtendedBeanInfo(bi);
 
-		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
-
-		assertThat(hasReadMethodForProperty(ebi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(ebi, "foo"), is(true));
+		assertThat(hasReadMethodForProperty(ebi, "foo")).isTrue();
+		assertThat(hasWriteMethodForProperty(ebi, "foo")).isTrue();
 
 		for (PropertyDescriptor pd : ebi.getPropertyDescriptors()) {
 			if (pd.getName().equals("foo")) {
-				assertThat(pd.getWriteMethod(), is(C.class.getMethod("setFoo", String.class)));
+				assertThat(pd.getWriteMethod()).isEqualTo(C.class.getMethod("setFoo", String.class));
 				return;
 			}
 		}
-		fail("never matched write method");
+		throw new AssertionError("never matched write method");
 	}
 
 	@Test
-	public void cornerSpr9414() throws IntrospectionException {
+	void cornerSpr9414() throws Exception {
 		@SuppressWarnings("unused") class Parent {
 			public Number getProperty1() {
 				return 1;
@@ -191,17 +182,17 @@ public class ExtendedBeanInfoTests {
 		}
 		{ // always passes
 			ExtendedBeanInfo bi = new ExtendedBeanInfo(Introspector.getBeanInfo(Parent.class));
-			assertThat(hasReadMethodForProperty(bi, "property1"), is(true));
+			assertThat(hasReadMethodForProperty(bi, "property1")).isTrue();
 		}
 		{ // failed prior to fix for SPR-9414
 			ExtendedBeanInfo bi = new ExtendedBeanInfo(Introspector.getBeanInfo(Child.class));
-			assertThat(hasReadMethodForProperty(bi, "property1"), is(true));
+			assertThat(hasReadMethodForProperty(bi, "property1")).isTrue();
 		}
 	}
 
 	@Test
-	public void cornerSpr9453() throws IntrospectionException {
-		final class Bean implements Spr9453<Class<?>> {
+	void cornerSpr9453() throws Exception {
+		class Bean implements Spr9453<Class<?>> {
 			@Override
 			public Class<?> getProp() {
 				return null;
@@ -209,16 +200,16 @@ public class ExtendedBeanInfoTests {
 		}
 		{ // always passes
 			BeanInfo info = Introspector.getBeanInfo(Bean.class);
-			assertThat(info.getPropertyDescriptors().length, equalTo(2));
+			assertThat(info.getPropertyDescriptors().length).isEqualTo(2);
 		}
 		{ // failed prior to fix for SPR-9453
 			BeanInfo info = new ExtendedBeanInfo(Introspector.getBeanInfo(Bean.class));
-			assertThat(info.getPropertyDescriptors().length, equalTo(2));
+			assertThat(info.getPropertyDescriptors().length).isEqualTo(2);
 		}
 	}
 
 	@Test
-	public void standardReadMethodInSuperclassAndNonStandardWriteMethodInSubclass() throws Exception {
+	void standardReadMethodInSuperclassAndNonStandardWriteMethodInSubclass() throws Exception {
 		@SuppressWarnings("unused") class B {
 			public String getFoo() { return null; }
 		}
@@ -228,20 +219,17 @@ public class ExtendedBeanInfoTests {
 
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 
-		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
+		assertThat(hasReadMethodForProperty(bi, "foo")).isTrue();
+		assertThat(hasWriteMethodForProperty(bi, "foo")).isFalse();
 
 		ExtendedBeanInfo ebi = new ExtendedBeanInfo(bi);
 
-		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
-
-		assertThat(hasReadMethodForProperty(ebi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(ebi, "foo"), is(true));
+		assertThat(hasReadMethodForProperty(ebi, "foo")).isTrue();
+		assertThat(hasWriteMethodForProperty(ebi, "foo")).isTrue();
 	}
 
 	@Test
-	public void standardReadMethodInSuperAndSubclassesAndGenericBuilderStyleNonStandardWriteMethodInSuperAndSubclasses() throws Exception {
+	void standardReadMethodInSuperAndSubclassesAndGenericBuilderStyleNonStandardWriteMethodInSuperAndSubclasses() throws Exception {
 		abstract class B<This extends B<This>> {
 			@SuppressWarnings("unchecked")
 			protected final This instance = (This) this;
@@ -266,34 +254,28 @@ public class ExtendedBeanInfoTests {
 			.setFoo("blue")
 			.setBar(42);
 
-		assertThat(c.getFoo(), is("blue"));
-		assertThat(c.getBar(), is(42));
+		assertThat(c.getFoo()).isEqualTo("blue");
+		assertThat(c.getBar()).isEqualTo(42);
 
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 
-		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
+		assertThat(hasReadMethodForProperty(bi, "foo")).isTrue();
+		assertThat(hasWriteMethodForProperty(bi, "foo")).isFalse();
 
-		assertThat(hasReadMethodForProperty(bi, "bar"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "bar"), is(false));
+		assertThat(hasReadMethodForProperty(bi, "bar")).isTrue();
+		assertThat(hasWriteMethodForProperty(bi, "bar")).isFalse();
 
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
-		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
+		assertThat(hasReadMethodForProperty(ebi, "foo")).isTrue();
+		assertThat(hasWriteMethodForProperty(ebi, "foo")).isTrue();
 
-		assertThat(hasReadMethodForProperty(bi, "bar"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "bar"), is(false));
-
-		assertThat(hasReadMethodForProperty(ebi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(ebi, "foo"), is(true));
-
-		assertThat(hasReadMethodForProperty(ebi, "bar"), is(true));
-		assertThat(hasWriteMethodForProperty(ebi, "bar"), is(true));
+		assertThat(hasReadMethodForProperty(ebi, "bar")).isTrue();
+		assertThat(hasWriteMethodForProperty(ebi, "bar")).isTrue();
 	}
 
 	@Test
-	public void nonPublicStandardReadAndWriteMethods() throws Exception {
+	void nonPublicStandardReadAndWriteMethods() throws Exception {
 		@SuppressWarnings("unused") class C {
 			String getFoo() { return null; }
 			C setFoo(String foo) { return this; }
@@ -302,11 +284,11 @@ public class ExtendedBeanInfoTests {
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
-		assertThat(hasReadMethodForProperty(bi, "foo"), is(false));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
+		assertThat(hasReadMethodForProperty(bi, "foo")).isFalse();
+		assertThat(hasWriteMethodForProperty(bi, "foo")).isFalse();
 
-		assertThat(hasReadMethodForProperty(ebi, "foo"), is(false));
-		assertThat(hasWriteMethodForProperty(ebi, "foo"), is(false));
+		assertThat(hasReadMethodForProperty(ebi, "foo")).isFalse();
+		assertThat(hasWriteMethodForProperty(ebi, "foo")).isFalse();
 	}
 
 	/**
@@ -314,7 +296,7 @@ public class ExtendedBeanInfoTests {
 	 * in strange edge cases.
 	 */
 	@Test
-	public void readMethodReturnsSupertypeOfWriteMethodParameter() throws IntrospectionException {
+	void readMethodReturnsSupertypeOfWriteMethodParameter() throws Exception {
 		@SuppressWarnings("unused") class C {
 			public Number getFoo() { return null; }
 			public void setFoo(Integer foo) { }
@@ -323,13 +305,13 @@ public class ExtendedBeanInfoTests {
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
-		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
-		assertThat(hasReadMethodForProperty(ebi, "foo"), is(true));
-		assertEquals(hasWriteMethodForProperty(bi, "foo"), hasWriteMethodForProperty(ebi, "foo"));
+		assertThat(hasReadMethodForProperty(bi, "foo")).isTrue();
+		assertThat(hasReadMethodForProperty(ebi, "foo")).isTrue();
+		assertThat(hasWriteMethodForProperty(ebi, "foo")).isEqualTo(hasWriteMethodForProperty(bi, "foo"));
 	}
 
 	@Test
-	public void indexedReadMethodReturnsSupertypeOfIndexedWriteMethodParameter() throws IntrospectionException {
+	void indexedReadMethodReturnsSupertypeOfIndexedWriteMethodParameter() throws Exception {
 		@SuppressWarnings("unused") class C {
 			public Number getFoos(int index) { return null; }
 			public void setFoos(int index, Integer foo) { }
@@ -338,9 +320,9 @@ public class ExtendedBeanInfoTests {
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
-		assertThat(hasIndexedReadMethodForProperty(bi, "foos"), is(true));
-		assertThat(hasIndexedReadMethodForProperty(ebi, "foos"), is(true));
-		assertEquals(hasIndexedWriteMethodForProperty(bi, "foos"), hasIndexedWriteMethodForProperty(ebi, "foos"));
+		assertThat(hasIndexedReadMethodForProperty(bi, "foos")).isTrue();
+		assertThat(hasIndexedReadMethodForProperty(ebi, "foos")).isTrue();
+		assertThat(hasIndexedWriteMethodForProperty(ebi, "foos")).isEqualTo(hasIndexedWriteMethodForProperty(bi, "foos"));
 	}
 
 	/**
@@ -348,7 +330,7 @@ public class ExtendedBeanInfoTests {
 	 * in strange edge cases.
 	 */
 	@Test
-	public void readMethodReturnsSubtypeOfWriteMethodParameter() throws IntrospectionException {
+	void readMethodReturnsSubtypeOfWriteMethodParameter() throws Exception {
 		@SuppressWarnings("unused") class C {
 			public Integer getFoo() { return null; }
 			public void setFoo(Number foo) { }
@@ -357,15 +339,15 @@ public class ExtendedBeanInfoTests {
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
-		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
+		assertThat(hasReadMethodForProperty(bi, "foo")).isTrue();
+		assertThat(hasWriteMethodForProperty(bi, "foo")).isFalse();
 
-		assertThat(hasReadMethodForProperty(ebi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(ebi, "foo"), is(false));
+		assertThat(hasReadMethodForProperty(ebi, "foo")).isTrue();
+		assertThat(hasWriteMethodForProperty(ebi, "foo")).isFalse();
 	}
 
 	@Test
-	public void indexedReadMethodReturnsSubtypeOfIndexedWriteMethodParameter() throws IntrospectionException {
+	void indexedReadMethodReturnsSubtypeOfIndexedWriteMethodParameter() throws Exception {
 		@SuppressWarnings("unused") class C {
 			public Integer getFoos(int index) { return null; }
 			public void setFoo(int index, Number foo) { }
@@ -374,15 +356,15 @@ public class ExtendedBeanInfoTests {
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
-		assertThat(hasIndexedReadMethodForProperty(bi, "foos"), is(true));
-		assertThat(hasIndexedWriteMethodForProperty(bi, "foos"), is(false));
+		assertThat(hasIndexedReadMethodForProperty(bi, "foos")).isTrue();
+		assertThat(hasIndexedWriteMethodForProperty(bi, "foos")).isFalse();
 
-		assertThat(hasIndexedReadMethodForProperty(ebi, "foos"), is(true));
-		assertThat(hasIndexedWriteMethodForProperty(ebi, "foos"), is(false));
+		assertThat(hasIndexedReadMethodForProperty(ebi, "foos")).isTrue();
+		assertThat(hasIndexedWriteMethodForProperty(ebi, "foos")).isFalse();
 	}
 
 	@Test
-	public void indexedReadMethodOnly() throws IntrospectionException {
+	void indexedReadMethodOnly() throws Exception {
 		@SuppressWarnings("unused")
 		class C {
 			// indexed read method
@@ -392,15 +374,15 @@ public class ExtendedBeanInfoTests {
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 		BeanInfo ebi = new ExtendedBeanInfo(Introspector.getBeanInfo(C.class));
 
-		assertThat(hasReadMethodForProperty(bi, "foos"), is(false));
-		assertThat(hasIndexedReadMethodForProperty(bi, "foos"), is(true));
+		assertThat(hasReadMethodForProperty(bi, "foos")).isFalse();
+		assertThat(hasIndexedReadMethodForProperty(bi, "foos")).isTrue();
 
-		assertThat(hasReadMethodForProperty(ebi, "foos"), is(false));
-		assertThat(hasIndexedReadMethodForProperty(ebi, "foos"), is(true));
+		assertThat(hasReadMethodForProperty(ebi, "foos")).isFalse();
+		assertThat(hasIndexedReadMethodForProperty(ebi, "foos")).isTrue();
 	}
 
 	@Test
-	public void indexedWriteMethodOnly() throws IntrospectionException {
+	void indexedWriteMethodOnly() throws Exception {
 		@SuppressWarnings("unused")
 		class C {
 			// indexed write method
@@ -410,15 +392,15 @@ public class ExtendedBeanInfoTests {
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 		BeanInfo ebi = new ExtendedBeanInfo(Introspector.getBeanInfo(C.class));
 
-		assertThat(hasWriteMethodForProperty(bi, "foos"), is(false));
-		assertThat(hasIndexedWriteMethodForProperty(bi, "foos"), is(true));
+		assertThat(hasWriteMethodForProperty(bi, "foos")).isFalse();
+		assertThat(hasIndexedWriteMethodForProperty(bi, "foos")).isTrue();
 
-		assertThat(hasWriteMethodForProperty(ebi, "foos"), is(false));
-		assertThat(hasIndexedWriteMethodForProperty(ebi, "foos"), is(true));
+		assertThat(hasWriteMethodForProperty(ebi, "foos")).isFalse();
+		assertThat(hasIndexedWriteMethodForProperty(ebi, "foos")).isTrue();
 	}
 
 	@Test
-	public void indexedReadAndIndexedWriteMethods() throws IntrospectionException {
+	void indexedReadAndIndexedWriteMethods() throws Exception {
 		@SuppressWarnings("unused")
 		class C {
 			// indexed read method
@@ -430,19 +412,19 @@ public class ExtendedBeanInfoTests {
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 		BeanInfo ebi = new ExtendedBeanInfo(Introspector.getBeanInfo(C.class));
 
-		assertThat(hasReadMethodForProperty(bi, "foos"), is(false));
-		assertThat(hasIndexedReadMethodForProperty(bi, "foos"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "foos"), is(false));
-		assertThat(hasIndexedWriteMethodForProperty(bi, "foos"), is(true));
+		assertThat(hasReadMethodForProperty(bi, "foos")).isFalse();
+		assertThat(hasIndexedReadMethodForProperty(bi, "foos")).isTrue();
+		assertThat(hasWriteMethodForProperty(bi, "foos")).isFalse();
+		assertThat(hasIndexedWriteMethodForProperty(bi, "foos")).isTrue();
 
-		assertThat(hasReadMethodForProperty(ebi, "foos"), is(false));
-		assertThat(hasIndexedReadMethodForProperty(ebi, "foos"), is(true));
-		assertThat(hasWriteMethodForProperty(ebi, "foos"), is(false));
-		assertThat(hasIndexedWriteMethodForProperty(ebi, "foos"), is(true));
+		assertThat(hasReadMethodForProperty(ebi, "foos")).isFalse();
+		assertThat(hasIndexedReadMethodForProperty(ebi, "foos")).isTrue();
+		assertThat(hasWriteMethodForProperty(ebi, "foos")).isFalse();
+		assertThat(hasIndexedWriteMethodForProperty(ebi, "foos")).isTrue();
 	}
 
 	@Test
-	public void readAndWriteAndIndexedReadAndIndexedWriteMethods() throws IntrospectionException {
+	void readAndWriteAndIndexedReadAndIndexedWriteMethods() throws Exception {
 		@SuppressWarnings("unused")
 		class C {
 			// read method
@@ -458,19 +440,19 @@ public class ExtendedBeanInfoTests {
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 		BeanInfo ebi = new ExtendedBeanInfo(Introspector.getBeanInfo(C.class));
 
-		assertThat(hasReadMethodForProperty(bi, "foos"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "foos"), is(true));
-		assertThat(hasIndexedReadMethodForProperty(bi, "foos"), is(true));
-		assertThat(hasIndexedWriteMethodForProperty(bi, "foos"), is(true));
+		assertThat(hasReadMethodForProperty(bi, "foos")).isTrue();
+		assertThat(hasWriteMethodForProperty(bi, "foos")).isTrue();
+		assertThat(hasIndexedReadMethodForProperty(bi, "foos")).isTrue();
+		assertThat(hasIndexedWriteMethodForProperty(bi, "foos")).isTrue();
 
-		assertThat(hasReadMethodForProperty(ebi, "foos"), is(true));
-		assertThat(hasWriteMethodForProperty(ebi, "foos"), is(true));
-		assertThat(hasIndexedReadMethodForProperty(ebi, "foos"), is(true));
-		assertThat(hasIndexedWriteMethodForProperty(ebi, "foos"), is(true));
+		assertThat(hasReadMethodForProperty(ebi, "foos")).isTrue();
+		assertThat(hasWriteMethodForProperty(ebi, "foos")).isTrue();
+		assertThat(hasIndexedReadMethodForProperty(ebi, "foos")).isTrue();
+		assertThat(hasIndexedWriteMethodForProperty(ebi, "foos")).isTrue();
 	}
 
 	@Test
-	public void indexedReadAndNonStandardIndexedWrite() throws IntrospectionException {
+	void indexedReadAndNonStandardIndexedWrite() throws Exception {
 		@SuppressWarnings("unused")
 		class C {
 			// indexed read method
@@ -481,18 +463,18 @@ public class ExtendedBeanInfoTests {
 
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 
-		assertThat(hasIndexedReadMethodForProperty(bi, "foos"), is(true));
+		assertThat(hasIndexedReadMethodForProperty(bi, "foos")).isTrue();
 		// interesting! standard Inspector picks up non-void return types on indexed write methods by default
-		assertThat(hasIndexedWriteMethodForProperty(bi, "foos"), is(false));
+		assertThat(hasIndexedWriteMethodForProperty(bi, "foos")).isFalse();
 
 		BeanInfo ebi = new ExtendedBeanInfo(Introspector.getBeanInfo(C.class));
 
-		assertThat(hasIndexedReadMethodForProperty(ebi, "foos"), is(true));
-		assertThat(hasIndexedWriteMethodForProperty(ebi, "foos"), is(true));
+		assertThat(hasIndexedReadMethodForProperty(ebi, "foos")).isTrue();
+		assertThat(hasIndexedWriteMethodForProperty(ebi, "foos")).isTrue();
 	}
 
 	@Test
-	public void indexedReadAndNonStandardWriteAndNonStandardIndexedWrite() throws IntrospectionException {
+	void indexedReadAndNonStandardWriteAndNonStandardIndexedWrite() throws Exception {
 		@SuppressWarnings("unused")
 		class C {
 			// non-standard write method
@@ -505,24 +487,24 @@ public class ExtendedBeanInfoTests {
 
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 
-		assertThat(hasIndexedReadMethodForProperty(bi, "foos"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "foos"), is(false));
+		assertThat(hasIndexedReadMethodForProperty(bi, "foos")).isTrue();
+		assertThat(hasWriteMethodForProperty(bi, "foos")).isFalse();
 		// again as above, standard Inspector picks up non-void return types on indexed write methods by default
-		assertThat(hasIndexedWriteMethodForProperty(bi, "foos"), is(false));
+		assertThat(hasIndexedWriteMethodForProperty(bi, "foos")).isFalse();
 
 		BeanInfo ebi = new ExtendedBeanInfo(Introspector.getBeanInfo(C.class));
 
-		assertThat(hasIndexedReadMethodForProperty(bi, "foos"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "foos"), is(false));
-		assertThat(hasIndexedWriteMethodForProperty(bi, "foos"), is(false));
+		assertThat(hasIndexedReadMethodForProperty(bi, "foos")).isTrue();
+		assertThat(hasWriteMethodForProperty(bi, "foos")).isFalse();
+		assertThat(hasIndexedWriteMethodForProperty(bi, "foos")).isFalse();
 
-		assertThat(hasIndexedReadMethodForProperty(ebi, "foos"), is(true));
-		assertThat(hasWriteMethodForProperty(ebi, "foos"), is(true));
-		assertThat(hasIndexedWriteMethodForProperty(ebi, "foos"), is(true));
+		assertThat(hasIndexedReadMethodForProperty(ebi, "foos")).isTrue();
+		assertThat(hasWriteMethodForProperty(ebi, "foos")).isTrue();
+		assertThat(hasIndexedWriteMethodForProperty(ebi, "foos")).isTrue();
 	}
 
 	@Test
-	public void cornerSpr9702() throws IntrospectionException {
+	void cornerSpr9702() throws Exception {
 		{ // baseline with standard write method
 			@SuppressWarnings("unused")
 			class C {
@@ -533,16 +515,16 @@ public class ExtendedBeanInfoTests {
 			}
 
 			BeanInfo bi = Introspector.getBeanInfo(C.class);
-			assertThat(hasReadMethodForProperty(bi, "foos"), is(false));
-			assertThat(hasIndexedReadMethodForProperty(bi, "foos"), is(true));
-			assertThat(hasWriteMethodForProperty(bi, "foos"), is(true));
-			assertThat(hasIndexedWriteMethodForProperty(bi, "foos"), is(false));
+			assertThat(hasReadMethodForProperty(bi, "foos")).isFalse();
+			assertThat(hasIndexedReadMethodForProperty(bi, "foos")).isTrue();
+			assertThat(hasWriteMethodForProperty(bi, "foos")).isTrue();
+			assertThat(hasIndexedWriteMethodForProperty(bi, "foos")).isFalse();
 
 			BeanInfo ebi = Introspector.getBeanInfo(C.class);
-			assertThat(hasReadMethodForProperty(ebi, "foos"), is(false));
-			assertThat(hasIndexedReadMethodForProperty(ebi, "foos"), is(true));
-			assertThat(hasWriteMethodForProperty(ebi, "foos"), is(true));
-			assertThat(hasIndexedWriteMethodForProperty(ebi, "foos"), is(false));
+			assertThat(hasReadMethodForProperty(ebi, "foos")).isFalse();
+			assertThat(hasIndexedReadMethodForProperty(ebi, "foos")).isTrue();
+			assertThat(hasWriteMethodForProperty(ebi, "foos")).isTrue();
+			assertThat(hasIndexedWriteMethodForProperty(ebi, "foos")).isFalse();
 		}
 		{ // variant with non-standard write method
 			@SuppressWarnings("unused")
@@ -554,16 +536,16 @@ public class ExtendedBeanInfoTests {
 			}
 
 			BeanInfo bi = Introspector.getBeanInfo(C.class);
-			assertThat(hasReadMethodForProperty(bi, "foos"), is(false));
-			assertThat(hasIndexedReadMethodForProperty(bi, "foos"), is(true));
-			assertThat(hasWriteMethodForProperty(bi, "foos"), is(false));
-			assertThat(hasIndexedWriteMethodForProperty(bi, "foos"), is(false));
+			assertThat(hasReadMethodForProperty(bi, "foos")).isFalse();
+			assertThat(hasIndexedReadMethodForProperty(bi, "foos")).isTrue();
+			assertThat(hasWriteMethodForProperty(bi, "foos")).isFalse();
+			assertThat(hasIndexedWriteMethodForProperty(bi, "foos")).isFalse();
 
 			BeanInfo ebi = new ExtendedBeanInfo(Introspector.getBeanInfo(C.class));
-			assertThat(hasReadMethodForProperty(ebi, "foos"), is(false));
-			assertThat(hasIndexedReadMethodForProperty(ebi, "foos"), is(true));
-			assertThat(hasWriteMethodForProperty(ebi, "foos"), is(true));
-			assertThat(hasIndexedWriteMethodForProperty(ebi, "foos"), is(false));
+			assertThat(hasReadMethodForProperty(ebi, "foos")).isFalse();
+			assertThat(hasIndexedReadMethodForProperty(ebi, "foos")).isTrue();
+			assertThat(hasWriteMethodForProperty(ebi, "foos")).isTrue();
+			assertThat(hasIndexedWriteMethodForProperty(ebi, "foos")).isFalse();
 		}
 	}
 
@@ -572,16 +554,16 @@ public class ExtendedBeanInfoTests {
 	 * IntrospectionException regarding a "type mismatch between indexed and non-indexed
 	 * methods" intermittently (approximately one out of every four times) under JDK 7
 	 * due to non-deterministic results from {@link Class#getDeclaredMethods()}.
-	 * See https://bugs.java.com/view_bug.do?bug_id=7023180
+	 * See https://bugs.java.com/bugdatabase/view_bug.do?bug_id=7023180
 	 * @see #cornerSpr9702()
 	 */
 	@Test
-	public void cornerSpr10111() throws Exception {
-		new ExtendedBeanInfo(Introspector.getBeanInfo(BigDecimal.class));
+	void cornerSpr10111() throws Exception {
+		assertThatNoException().isThrownBy(() -> new ExtendedBeanInfo(Introspector.getBeanInfo(BigDecimal.class)));
 	}
 
 	@Test
-	public void subclassWriteMethodWithCovariantReturnType() throws IntrospectionException {
+	void subclassWriteMethodWithCovariantReturnType() throws Exception {
 		@SuppressWarnings("unused") class B {
 			public String getFoo() { return null; }
 			public Number setFoo(String foo) { return null; }
@@ -595,22 +577,19 @@ public class ExtendedBeanInfoTests {
 
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 
-		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
+		assertThat(hasReadMethodForProperty(bi, "foo")).isTrue();
+		assertThat(hasWriteMethodForProperty(bi, "foo")).isFalse();
 
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
-		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
+		assertThat(hasReadMethodForProperty(ebi, "foo")).isTrue();
+		assertThat(hasWriteMethodForProperty(ebi, "foo")).isTrue();
 
-		assertThat(hasReadMethodForProperty(ebi, "foo"), is(true));
-		assertThat(hasWriteMethodForProperty(ebi, "foo"), is(true));
-
-		assertThat(ebi.getPropertyDescriptors().length, equalTo(bi.getPropertyDescriptors().length));
+		assertThat(ebi.getPropertyDescriptors().length).isEqualTo(bi.getPropertyDescriptors().length);
 	}
 
 	@Test
-	public void nonStandardReadMethodAndStandardWriteMethod() throws IntrospectionException {
+	void nonStandardReadMethodAndStandardWriteMethod() throws Exception {
 		@SuppressWarnings("unused") class C {
 			public void getFoo() { }
 			public void setFoo(String foo) { }
@@ -619,11 +598,11 @@ public class ExtendedBeanInfoTests {
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
-		assertThat(hasReadMethodForProperty(bi, "foo"), is(false));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(true));
+		assertThat(hasReadMethodForProperty(bi, "foo")).isFalse();
+		assertThat(hasWriteMethodForProperty(bi, "foo")).isTrue();
 
-		assertThat(hasReadMethodForProperty(ebi, "foo"), is(false));
-		assertThat(hasWriteMethodForProperty(ebi, "foo"), is(true));
+		assertThat(hasReadMethodForProperty(ebi, "foo")).isFalse();
+		assertThat(hasWriteMethodForProperty(ebi, "foo")).isTrue();
 	}
 
 	/**
@@ -631,7 +610,7 @@ public class ExtendedBeanInfoTests {
 	 * could occur when handling ArrayList.set(int,Object)
 	 */
 	@Test
-	public void emptyPropertiesIgnored() throws IntrospectionException {
+	void emptyPropertiesIgnored() throws Exception {
 		@SuppressWarnings("unused") class C {
 			public Object set(Object o) { return null; }
 			public Object set(int i, Object o) { return null; }
@@ -640,63 +619,57 @@ public class ExtendedBeanInfoTests {
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
-		assertThat(ebi.getPropertyDescriptors(), equalTo(bi.getPropertyDescriptors()));
+		assertThat(ebi.getPropertyDescriptors()).isEqualTo(bi.getPropertyDescriptors());
 	}
 
 	@Test
-	public void overloadedNonStandardWriteMethodsOnly_orderA() throws IntrospectionException, SecurityException, NoSuchMethodException {
+	void overloadedNonStandardWriteMethodsOnly_orderA() throws Exception {
 		@SuppressWarnings("unused") class C {
 			public Object setFoo(String p) { return new Object(); }
 			public Object setFoo(int p) { return new Object(); }
 		}
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 
-		assertThat(hasReadMethodForProperty(bi, "foo"), is(false));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
+		assertThat(hasReadMethodForProperty(bi, "foo")).isFalse();
+		assertThat(hasWriteMethodForProperty(bi, "foo")).isFalse();
 
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
-		assertThat(hasReadMethodForProperty(bi, "foo"), is(false));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
-
-		assertThat(hasReadMethodForProperty(ebi, "foo"), is(false));
-		assertThat(hasWriteMethodForProperty(ebi, "foo"), is(true));
+		assertThat(hasReadMethodForProperty(ebi, "foo")).isFalse();
+		assertThat(hasWriteMethodForProperty(ebi, "foo")).isTrue();
 
 		for (PropertyDescriptor pd : ebi.getPropertyDescriptors()) {
 			if (pd.getName().equals("foo")) {
-				assertThat(pd.getWriteMethod(), is(C.class.getMethod("setFoo", String.class)));
+				assertThat(pd.getWriteMethod()).isEqualTo(C.class.getMethod("setFoo", String.class));
 				return;
 			}
 		}
-		fail("never matched write method");
+		throw new AssertionError("never matched write method");
 	}
 
 	@Test
-	public void overloadedNonStandardWriteMethodsOnly_orderB() throws IntrospectionException, SecurityException, NoSuchMethodException {
+	void overloadedNonStandardWriteMethodsOnly_orderB() throws Exception {
 		@SuppressWarnings("unused") class C {
 			public Object setFoo(int p) { return new Object(); }
 			public Object setFoo(String p) { return new Object(); }
 		}
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 
-		assertThat(hasReadMethodForProperty(bi, "foo"), is(false));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
+		assertThat(hasReadMethodForProperty(bi, "foo")).isFalse();
+		assertThat(hasWriteMethodForProperty(bi, "foo")).isFalse();
 
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
-		assertThat(hasReadMethodForProperty(bi, "foo"), is(false));
-		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
-
-		assertThat(hasReadMethodForProperty(ebi, "foo"), is(false));
-		assertThat(hasWriteMethodForProperty(ebi, "foo"), is(true));
+		assertThat(hasReadMethodForProperty(ebi, "foo")).isFalse();
+		assertThat(hasWriteMethodForProperty(ebi, "foo")).isTrue();
 
 		for (PropertyDescriptor pd : ebi.getPropertyDescriptors()) {
 			if (pd.getName().equals("foo")) {
-				assertThat(pd.getWriteMethod(), is(C.class.getMethod("setFoo", String.class)));
+				assertThat(pd.getWriteMethod()).isEqualTo(C.class.getMethod("setFoo", String.class));
 				return;
 			}
 		}
-		fail("never matched write method");
+		throw new AssertionError("never matched write method");
 	}
 
 	/**
@@ -707,7 +680,7 @@ public class ExtendedBeanInfoTests {
 	 * not actually intended to serve as an indexed write method; it just appears that way.
 	 */
 	@Test
-	public void reproSpr8522() throws IntrospectionException {
+	void reproSpr8522() throws Exception {
 		@SuppressWarnings("unused") class C {
 			public Object setDateFormat(String pattern) { return new Object(); }
 			public Object setDateFormat(int style) { return new Object(); }
@@ -715,34 +688,34 @@ public class ExtendedBeanInfoTests {
 		}
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
 
-		assertThat(hasReadMethodForProperty(bi, "dateFormat"), is(false));
-		assertThat(hasWriteMethodForProperty(bi, "dateFormat"), is(false));
-		assertThat(hasIndexedReadMethodForProperty(bi, "dateFormat"), is(false));
-		assertThat(hasIndexedWriteMethodForProperty(bi, "dateFormat"), is(false));
+		assertThat(hasReadMethodForProperty(bi, "dateFormat")).isFalse();
+		assertThat(hasWriteMethodForProperty(bi, "dateFormat")).isFalse();
+		assertThat(hasIndexedReadMethodForProperty(bi, "dateFormat")).isFalse();
+		assertThat(hasIndexedWriteMethodForProperty(bi, "dateFormat")).isFalse();
 
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
-		assertThat(hasReadMethodForProperty(bi, "dateFormat"), is(false));
-		assertThat(hasWriteMethodForProperty(bi, "dateFormat"), is(false));
-		assertThat(hasIndexedReadMethodForProperty(bi, "dateFormat"), is(false));
-		assertThat(hasIndexedWriteMethodForProperty(bi, "dateFormat"), is(false));
+		assertThat(hasReadMethodForProperty(bi, "dateFormat")).isFalse();
+		assertThat(hasWriteMethodForProperty(bi, "dateFormat")).isFalse();
+		assertThat(hasIndexedReadMethodForProperty(bi, "dateFormat")).isFalse();
+		assertThat(hasIndexedWriteMethodForProperty(bi, "dateFormat")).isFalse();
 
-		assertThat(hasReadMethodForProperty(ebi, "dateFormat"), is(false));
-		assertThat(hasWriteMethodForProperty(ebi, "dateFormat"), is(true));
-		assertThat(hasIndexedReadMethodForProperty(ebi, "dateFormat"), is(false));
-		assertThat(hasIndexedWriteMethodForProperty(ebi, "dateFormat"), is(false));
+		assertThat(hasReadMethodForProperty(ebi, "dateFormat")).isFalse();
+		assertThat(hasWriteMethodForProperty(ebi, "dateFormat")).isTrue();
+		assertThat(hasIndexedReadMethodForProperty(ebi, "dateFormat")).isFalse();
+		assertThat(hasIndexedWriteMethodForProperty(ebi, "dateFormat")).isFalse();
 	}
 
 	@Test
-	public void propertyCountsMatch() throws IntrospectionException {
+	void propertyCountsMatch() throws Exception {
 		BeanInfo bi = Introspector.getBeanInfo(TestBean.class);
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
-		assertThat(ebi.getPropertyDescriptors().length, equalTo(bi.getPropertyDescriptors().length));
+		assertThat(ebi.getPropertyDescriptors().length).isEqualTo(bi.getPropertyDescriptors().length);
 	}
 
 	@Test
-	public void propertyCountsWithNonStandardWriteMethod() throws IntrospectionException {
+	void propertyCountsWithNonStandardWriteMethod() throws Exception {
 		class ExtendedTestBean extends TestBean {
 			@SuppressWarnings("unused")
 			public ExtendedTestBean setFoo(String s) { return this; }
@@ -757,8 +730,8 @@ public class ExtendedBeanInfoTests {
 				break;
 			}
 		}
-		assertThat(found, is(true));
-		assertThat(ebi.getPropertyDescriptors().length, equalTo(bi.getPropertyDescriptors().length+1));
+		assertThat(found).isTrue();
+		assertThat(ebi.getPropertyDescriptors().length).isEqualTo(bi.getPropertyDescriptors().length+1);
 	}
 
 	/**
@@ -766,37 +739,36 @@ public class ExtendedBeanInfoTests {
 	 * Test that {@link ExtendedBeanInfo#getPropertyDescriptors()} does the same.
 	 */
 	@Test
-	public void propertyDescriptorOrderIsEqual() throws IntrospectionException {
+	void propertyDescriptorOrderIsEqual() throws Exception {
 		BeanInfo bi = Introspector.getBeanInfo(TestBean.class);
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
 		for (int i = 0; i < bi.getPropertyDescriptors().length; i++) {
-			assertThat("element " + i + " in BeanInfo and ExtendedBeanInfo propertyDescriptor arrays do not match",
-					ebi.getPropertyDescriptors()[i].getName(), equalTo(bi.getPropertyDescriptors()[i].getName()));
+			assertThat(ebi.getPropertyDescriptors()[i].getName()).isEqualTo(bi.getPropertyDescriptors()[i].getName());
 		}
 	}
 
 	@Test
-	public void propertyDescriptorComparator() throws IntrospectionException {
+	void propertyDescriptorComparator() throws Exception {
 		ExtendedBeanInfo.PropertyDescriptorComparator c = new ExtendedBeanInfo.PropertyDescriptorComparator();
 
-		assertThat(c.compare(new PropertyDescriptor("a", null, null), new PropertyDescriptor("a", null, null)), equalTo(0));
-		assertThat(c.compare(new PropertyDescriptor("abc", null, null), new PropertyDescriptor("abc", null, null)), equalTo(0));
-		assertThat(c.compare(new PropertyDescriptor("a", null, null), new PropertyDescriptor("b", null, null)), lessThan(0));
-		assertThat(c.compare(new PropertyDescriptor("b", null, null), new PropertyDescriptor("a", null, null)), greaterThan(0));
-		assertThat(c.compare(new PropertyDescriptor("abc", null, null), new PropertyDescriptor("abd", null, null)), lessThan(0));
-		assertThat(c.compare(new PropertyDescriptor("xyz", null, null), new PropertyDescriptor("123", null, null)), greaterThan(0));
-		assertThat(c.compare(new PropertyDescriptor("a", null, null), new PropertyDescriptor("abc", null, null)), lessThan(0));
-		assertThat(c.compare(new PropertyDescriptor("abc", null, null), new PropertyDescriptor("a", null, null)), greaterThan(0));
-		assertThat(c.compare(new PropertyDescriptor("abc", null, null), new PropertyDescriptor("b", null, null)), lessThan(0));
+		assertThat(c.compare(new PropertyDescriptor("a", null, null), new PropertyDescriptor("a", null, null))).isEqualTo(0);
+		assertThat(c.compare(new PropertyDescriptor("abc", null, null), new PropertyDescriptor("abc", null, null))).isEqualTo(0);
+		assertThat(c.compare(new PropertyDescriptor("a", null, null), new PropertyDescriptor("b", null, null))).isLessThan(0);
+		assertThat(c.compare(new PropertyDescriptor("b", null, null), new PropertyDescriptor("a", null, null))).isGreaterThan(0);
+		assertThat(c.compare(new PropertyDescriptor("abc", null, null), new PropertyDescriptor("abd", null, null))).isLessThan(0);
+		assertThat(c.compare(new PropertyDescriptor("xyz", null, null), new PropertyDescriptor("123", null, null))).isGreaterThan(0);
+		assertThat(c.compare(new PropertyDescriptor("a", null, null), new PropertyDescriptor("abc", null, null))).isLessThan(0);
+		assertThat(c.compare(new PropertyDescriptor("abc", null, null), new PropertyDescriptor("a", null, null))).isGreaterThan(0);
+		assertThat(c.compare(new PropertyDescriptor("abc", null, null), new PropertyDescriptor("b", null, null))).isLessThan(0);
 
-		assertThat(c.compare(new PropertyDescriptor(" ", null, null), new PropertyDescriptor("a", null, null)), lessThan(0));
-		assertThat(c.compare(new PropertyDescriptor("1", null, null), new PropertyDescriptor("a", null, null)), lessThan(0));
-		assertThat(c.compare(new PropertyDescriptor("a", null, null), new PropertyDescriptor("A", null, null)), greaterThan(0));
+		assertThat(c.compare(new PropertyDescriptor(" ", null, null), new PropertyDescriptor("a", null, null))).isLessThan(0);
+		assertThat(c.compare(new PropertyDescriptor("1", null, null), new PropertyDescriptor("a", null, null))).isLessThan(0);
+		assertThat(c.compare(new PropertyDescriptor("a", null, null), new PropertyDescriptor("A", null, null))).isGreaterThan(0);
 	}
 
 	@Test
-	public void reproSpr8806() throws IntrospectionException {
+	void reproSpr8806() throws Exception {
 		// does not throw
 		Introspector.getBeanInfo(LawLibrary.class);
 
@@ -805,7 +777,7 @@ public class ExtendedBeanInfoTests {
 	}
 
 	@Test
-	public void cornerSpr8949() throws IntrospectionException {
+	void cornerSpr8949() throws Exception {
 		class A {
 			@SuppressWarnings("unused")
 			public boolean isTargetMethod() {
@@ -828,15 +800,15 @@ public class ExtendedBeanInfoTests {
 		// helps out here, and is now put into use in ExtendedBeanInfo as well.
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
-		assertThat(hasReadMethodForProperty(bi, "targetMethod"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "targetMethod"), is(false));
+		assertThat(hasReadMethodForProperty(bi, "targetMethod")).isTrue();
+		assertThat(hasWriteMethodForProperty(bi, "targetMethod")).isFalse();
 
-		assertThat(hasReadMethodForProperty(ebi, "targetMethod"), is(true));
-		assertThat(hasWriteMethodForProperty(ebi, "targetMethod"), is(false));
+		assertThat(hasReadMethodForProperty(ebi, "targetMethod")).isTrue();
+		assertThat(hasWriteMethodForProperty(ebi, "targetMethod")).isFalse();
 	}
 
 	@Test
-	public void cornerSpr8937AndSpr12582() throws IntrospectionException {
+	void cornerSpr8937AndSpr12582() throws Exception {
 		@SuppressWarnings("unused") class A {
 			public void setAddress(String addr){ }
 			public void setAddress(int index, String addr) { }
@@ -852,37 +824,37 @@ public class ExtendedBeanInfoTests {
 
 		// ExtendedBeanInfo needs to behave exactly like BeanInfo...
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
-		assertEquals(hasReadMethod, hasReadMethodForProperty(ebi, "address"));
-		assertEquals(hasWriteMethod, hasWriteMethodForProperty(ebi, "address"));
-		assertEquals(hasIndexedReadMethod, hasIndexedReadMethodForProperty(ebi, "address"));
-		assertEquals(hasIndexedWriteMethod, hasIndexedWriteMethodForProperty(ebi, "address"));
+		assertThat(hasReadMethodForProperty(ebi, "address")).isEqualTo(hasReadMethod);
+		assertThat(hasWriteMethodForProperty(ebi, "address")).isEqualTo(hasWriteMethod);
+		assertThat(hasIndexedReadMethodForProperty(ebi, "address")).isEqualTo(hasIndexedReadMethod);
+		assertThat(hasIndexedWriteMethodForProperty(ebi, "address")).isEqualTo(hasIndexedWriteMethod);
 	}
 
 	@Test
-	public void shouldSupportStaticWriteMethod() throws IntrospectionException {
+	void shouldSupportStaticWriteMethod() throws Exception {
 		{
 			BeanInfo bi = Introspector.getBeanInfo(WithStaticWriteMethod.class);
-			assertThat(hasReadMethodForProperty(bi, "prop1"), is(false));
-			assertThat(hasWriteMethodForProperty(bi, "prop1"), is(false));
-			assertThat(hasIndexedReadMethodForProperty(bi, "prop1"), is(false));
-			assertThat(hasIndexedWriteMethodForProperty(bi, "prop1"), is(false));
+			assertThat(hasReadMethodForProperty(bi, "prop1")).isFalse();
+			assertThat(hasWriteMethodForProperty(bi, "prop1")).isFalse();
+			assertThat(hasIndexedReadMethodForProperty(bi, "prop1")).isFalse();
+			assertThat(hasIndexedWriteMethodForProperty(bi, "prop1")).isFalse();
 		}
 		{
 			BeanInfo bi = new ExtendedBeanInfo(Introspector.getBeanInfo(WithStaticWriteMethod.class));
-			assertThat(hasReadMethodForProperty(bi, "prop1"), is(false));
-			assertThat(hasWriteMethodForProperty(bi, "prop1"), is(true));
-			assertThat(hasIndexedReadMethodForProperty(bi, "prop1"), is(false));
-			assertThat(hasIndexedWriteMethodForProperty(bi, "prop1"), is(false));
+			assertThat(hasReadMethodForProperty(bi, "prop1")).isFalse();
+			assertThat(hasWriteMethodForProperty(bi, "prop1")).isTrue();
+			assertThat(hasIndexedReadMethodForProperty(bi, "prop1")).isFalse();
+			assertThat(hasIndexedWriteMethodForProperty(bi, "prop1")).isFalse();
 		}
 	}
 
 	@Test  // SPR-12434
-	public void shouldDetectValidPropertiesAndIgnoreInvalidProperties() throws IntrospectionException {
+	void shouldDetectValidPropertiesAndIgnoreInvalidProperties() throws Exception {
 		BeanInfo bi = new ExtendedBeanInfo(Introspector.getBeanInfo(java.awt.Window.class));
-		assertThat(hasReadMethodForProperty(bi, "locationByPlatform"), is(true));
-		assertThat(hasWriteMethodForProperty(bi, "locationByPlatform"), is(true));
-		assertThat(hasIndexedReadMethodForProperty(bi, "locationByPlatform"), is(false));
-		assertThat(hasIndexedWriteMethodForProperty(bi, "locationByPlatform"), is(false));
+		assertThat(hasReadMethodForProperty(bi, "locationByPlatform")).isTrue();
+		assertThat(hasWriteMethodForProperty(bi, "locationByPlatform")).isTrue();
+		assertThat(hasIndexedReadMethodForProperty(bi, "locationByPlatform")).isFalse();
+		assertThat(hasIndexedWriteMethodForProperty(bi, "locationByPlatform")).isFalse();
 	}
 
 

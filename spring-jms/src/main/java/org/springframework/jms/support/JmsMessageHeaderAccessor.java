@@ -18,7 +18,8 @@ package org.springframework.jms.support;
 
 import java.util.List;
 import java.util.Map;
-import javax.jms.Destination;
+
+import jakarta.jms.Destination;
 
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;

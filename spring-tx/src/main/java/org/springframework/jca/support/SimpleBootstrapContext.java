@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,19 @@
 package org.springframework.jca.support;
 
 import java.util.Timer;
-import javax.resource.spi.BootstrapContext;
-import javax.resource.spi.UnavailableException;
-import javax.resource.spi.XATerminator;
-import javax.resource.spi.work.WorkContext;
-import javax.resource.spi.work.WorkManager;
-import javax.transaction.TransactionSynchronizationRegistry;
+
+import jakarta.resource.spi.BootstrapContext;
+import jakarta.resource.spi.UnavailableException;
+import jakarta.resource.spi.XATerminator;
+import jakarta.resource.spi.work.WorkContext;
+import jakarta.resource.spi.work.WorkManager;
+import jakarta.transaction.TransactionSynchronizationRegistry;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Simple implementation of the JCA 1.7 {@link javax.resource.spi.BootstrapContext}
+ * Simple implementation of the JCA 1.7 {@link jakarta.resource.spi.BootstrapContext}
  * interface, used for bootstrapping a JCA ResourceAdapter in a local environment.
  *
  * <p>Delegates to the given WorkManager and XATerminator, if any. Creates simple
@@ -36,13 +37,13 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 2.0.3
- * @see javax.resource.spi.ResourceAdapter#start(javax.resource.spi.BootstrapContext)
+ * @see jakarta.resource.spi.ResourceAdapter#start(jakarta.resource.spi.BootstrapContext)
  * @see ResourceAdapterFactoryBean
  */
 public class SimpleBootstrapContext implements BootstrapContext {
 
 	@Nullable
-	private WorkManager workManager;
+	private final WorkManager workManager;
 
 	@Nullable
 	private XATerminator xaTerminator;

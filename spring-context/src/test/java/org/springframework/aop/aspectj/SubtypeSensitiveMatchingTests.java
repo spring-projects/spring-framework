@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,22 @@ package org.springframework.aop.aspectj;
 
 import java.io.Serializable;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public class SubtypeSensitiveMatchingTests {
+class SubtypeSensitiveMatchingTests {
+
+	private ClassPathXmlApplicationContext ctx;
 
 	private NonSerializableFoo nonSerializableBean;
 
@@ -39,32 +42,39 @@ public class SubtypeSensitiveMatchingTests {
 	private Bar bar;
 
 
-	@Before
-	public void setup() {
-		ClassPathXmlApplicationContext ctx =
-				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+	@BeforeEach
+	void setup() {
+		this.ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		nonSerializableBean = (NonSerializableFoo) ctx.getBean("testClassA");
 		serializableBean = (SerializableFoo) ctx.getBean("testClassB");
 		bar = (Bar) ctx.getBean("testClassC");
 	}
 
+	@AfterEach
+	void tearDown() {
+		this.ctx.close();
+	}
+
 
 	@Test
-	public void testBeansAreProxiedOnStaticMatch() {
-		assertTrue("bean with serializable type should be proxied",
-				this.serializableBean instanceof Advised);
+	void beansAreProxiedOnStaticMatch() {
+		assertThat(this.serializableBean)
+			.as("bean with serializable type should be proxied")
+			.isInstanceOf(Advised.class);
 	}
 
 	@Test
-	public void testBeansThatDoNotMatchBasedSolelyOnRuntimeTypeAreNotProxied() {
-		assertFalse("bean with non-serializable type should not be proxied",
-				this.nonSerializableBean instanceof Advised);
+	void beansThatDoNotMatchBasedSolelyOnRuntimeTypeAreNotProxied() {
+		assertThat(this.nonSerializableBean)
+			.as("bean with non-serializable type should not be proxied")
+			.isNotInstanceOf(Advised.class);
 	}
 
 	@Test
-	public void testBeansThatDoNotMatchBasedOnOtherTestAreProxied() {
-		assertTrue("bean with args check should be proxied",
-				this.bar instanceof Advised);
+	void beansThatDoNotMatchBasedOnOtherTestAreProxied() {
+		assertThat(this.bar)
+			.as("bean with args check should be proxied")
+			.isInstanceOf(Advised.class);
 	}
 
 }

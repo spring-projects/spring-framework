@@ -71,7 +71,7 @@ public abstract class AbstractInterruptibleBatchPreparedStatementSetter
 	 * @return whether there were values to apply (that is, whether the applied
 	 * parameters should be added to the batch and this method should be called
 	 * for a further iteration)
-	 * @throws SQLException if a SQLException is encountered
+	 * @throws SQLException if an SQLException is encountered
 	 * (i.e. there is no need to catch SQLException)
 	 */
 	protected abstract boolean setValuesIfAvailable(PreparedStatement ps, int i) throws SQLException;

@@ -17,7 +17,8 @@
 package org.springframework.web.servlet.support;
 
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 public class RequestDataValueProcessorWrapper implements RequestDataValueProcessor {
 

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- comment #1 -->  <!-- comment #2 -->  <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd"><!--
+trailing  
+      comment
+-->
+
+<beans>
+
+</beans>

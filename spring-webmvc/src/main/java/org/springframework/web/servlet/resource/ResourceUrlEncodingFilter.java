@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,20 @@
 package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -53,13 +54,15 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
-		if (!(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse)) {
+		if (!(request instanceof HttpServletRequest httpRequest) || !(response instanceof HttpServletResponse httpResponse)) {
 			throw new ServletException("ResourceUrlEncodingFilter only supports HTTP requests");
 		}
+
 		ResourceUrlEncodingRequestWrapper wrappedRequest =
-				new ResourceUrlEncodingRequestWrapper((HttpServletRequest) request);
+				new ResourceUrlEncodingRequestWrapper(httpRequest);
 		ResourceUrlEncodingResponseWrapper wrappedResponse =
-				new ResourceUrlEncodingResponseWrapper(wrappedRequest, (HttpServletResponse) response);
+				new ResourceUrlEncodingResponseWrapper(wrappedRequest, httpResponse);
+
 		filterChain.doFilter(wrappedRequest, wrappedResponse);
 	}
 
@@ -86,7 +89,6 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 					initLookupPath((ResourceUrlProvider) value);
 				}
 			}
-
 		}
 
 		private void initLookupPath(ResourceUrlProvider urlProvider) {
@@ -96,8 +98,11 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 				String requestUri = pathHelper.getRequestUri(this);
 				String lookupPath = pathHelper.getLookupPathForRequest(this);
 				this.indexLookupPath = requestUri.lastIndexOf(lookupPath);
+				if (this.indexLookupPath == -1) {
+					throw new LookupPathIndexException(lookupPath, requestUri);
+				}
 				this.prefixLookupPath = requestUri.substring(0, this.indexLookupPath);
-				if ("/".equals(lookupPath) && !"/".equals(requestUri)) {
+				if (StringUtils.matchesCharacter(lookupPath, '/') && !StringUtils.matchesCharacter(requestUri, '/')) {
 					String contextPath = pathHelper.getContextPath(this);
 					if (requestUri.equals(contextPath)) {
 						this.indexLookupPath = requestUri.length();
@@ -111,7 +116,7 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 		public String resolveUrlPath(String url) {
 			if (this.resourceUrlProvider == null) {
 				logger.trace("ResourceUrlProvider not available via request attribute " +
-						"ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR");
+						ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR);
 				return null;
 			}
 			if (this.indexLookupPath != null && url.startsWith(this.prefixLookupPath)) {
@@ -156,6 +161,21 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 				return super.encodeURL(urlPath);
 			}
 			return super.encodeURL(url);
+		}
+	}
+
+
+	/**
+	 * Runtime exception to get far enough (to ResourceUrlProviderExposingInterceptor)
+	 * where it can be re-thrown as ServletRequestBindingException to result in
+	 * a 400 response.
+	 */
+	@SuppressWarnings("serial")
+	static class LookupPathIndexException extends IllegalArgumentException {
+
+		LookupPathIndexException(String lookupPath, String requestUri) {
+			super("Failed to find lookupPath '" + lookupPath + "' within requestUri '" + requestUri + "'. " +
+					"This could be because the path has invalid encoded characters or isn't normalized.");
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -378,7 +378,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Failed to evaluate join point for arguments " + Arrays.asList(args) +
+				logger.debug("Failed to evaluate join point for arguments " + Arrays.toString(args) +
 						" - falling back to non-match", ex);
 			}
 			return false;
@@ -519,14 +519,13 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof AspectJExpressionPointcut)) {
+		if (!(other instanceof AspectJExpressionPointcut otherPc)) {
 			return false;
 		}
-		AspectJExpressionPointcut otherPc = (AspectJExpressionPointcut) other;
 		return ObjectUtils.nullSafeEquals(this.getExpression(), otherPc.getExpression()) &&
 				ObjectUtils.nullSafeEquals(this.pointcutDeclarationScope, otherPc.pointcutDeclarationScope) &&
 				ObjectUtils.nullSafeEquals(this.pointcutParameterNames, otherPc.pointcutParameterNames) &&
@@ -544,19 +543,16 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("AspectJExpressionPointcut: ");
-		sb.append("(");
+		StringBuilder sb = new StringBuilder("AspectJExpressionPointcut: (");
 		for (int i = 0; i < this.pointcutParameterTypes.length; i++) {
 			sb.append(this.pointcutParameterTypes[i].getName());
-			sb.append(" ");
+			sb.append(' ');
 			sb.append(this.pointcutParameterNames[i]);
 			if ((i+1) < this.pointcutParameterTypes.length) {
 				sb.append(", ");
 			}
 		}
-		sb.append(")");
-		sb.append(" ");
+		sb.append(") ");
 		if (getExpression() != null) {
 			sb.append(getExpression());
 		}

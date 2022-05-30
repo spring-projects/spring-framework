@@ -33,8 +33,7 @@ public class ByteArrayMultipartFileEditor extends ByteArrayPropertyEditor {
 
 	@Override
 	public void setValue(@Nullable Object value) {
-		if (value instanceof MultipartFile) {
-			MultipartFile multipartFile = (MultipartFile) value;
+		if (value instanceof MultipartFile multipartFile) {
 			try {
 				super.setValue(multipartFile.getBytes());
 			}

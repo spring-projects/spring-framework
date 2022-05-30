@@ -38,11 +38,11 @@ import org.springframework.util.Assert;
  * <p>A usage example:
  *
  * <pre class="code">
- * &lt;bean class="org.springframework.http.converter.ObjectToStringHttpMessageConverter">
- *   &lt;constructor-arg>
- *     &lt;bean class="org.springframework.context.support.ConversionServiceFactoryBean"/>
- *   &lt;/constructor-arg>
- * &lt;/bean>
+ * &lt;bean class="org.springframework.http.converter.ObjectToStringHttpMessageConverter"&gt;
+ *   &lt;constructor-arg&gt;
+ *     &lt;bean class="org.springframework.context.support.ConversionServiceFactoryBean"/&gt;
+ *   &lt;/constructor-arg&gt;
+ * &lt;/bean&gt;
  * </pre>
  *
  * @author <a href="mailto:dmitry.katsubo@gmail.com">Dmitry Katsubo</a>
@@ -81,8 +81,7 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 
 
 	/**
-	 * Indicates whether the {@code Accept-Charset} should be written to any outgoing request.
-	 * <p>Default is {@code true}.
+	 * Delegates to {@link StringHttpMessageConverter#setWriteAcceptCharset(boolean)}.
 	 */
 	public void setWriteAcceptCharset(boolean writeAcceptCharset) {
 		this.stringHttpMessageConverter.setWriteAcceptCharset(writeAcceptCharset);

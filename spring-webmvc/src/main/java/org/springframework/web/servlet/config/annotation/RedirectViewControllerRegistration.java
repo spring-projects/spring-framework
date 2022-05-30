@@ -17,7 +17,7 @@
 package org.springframework.web.servlet.config.annotation;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;
@@ -53,7 +53,7 @@ public class RedirectViewControllerRegistration {
 	 * <p>If not set, {@link org.springframework.web.servlet.view.RedirectView}
 	 * will select {@code HttpStatus.MOVED_TEMPORARILY (302)} by default.
 	 */
-	public RedirectViewControllerRegistration setStatusCode(HttpStatus statusCode) {
+	public RedirectViewControllerRegistration setStatusCode(HttpStatusCode statusCode) {
 		Assert.isTrue(statusCode.is3xxRedirection(), "Not a redirect status code");
 		this.redirectView.setStatusCode(statusCode);
 		return this;

@@ -17,8 +17,9 @@
 package org.springframework.mail.javamail;
 
 import java.beans.PropertyEditorSupport;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
+
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
 
 import org.springframework.util.StringUtils;
 
@@ -31,7 +32,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @since 1.2.3
- * @see javax.mail.internet.InternetAddress
+ * @see jakarta.mail.internet.InternetAddress
  */
 public class InternetAddressEditor extends PropertyEditorSupport {
 

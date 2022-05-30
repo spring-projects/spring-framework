@@ -10,10 +10,12 @@ class GroovyCallCounter implements CallCounter {
 		count = 0;
 	}
 
+	@Override
 	void before() {
 		count++;
 	}
 
+	@Override
 	int getCalls() {
 		return count;
 	}

@@ -63,6 +63,7 @@ public final class MockMvcWebConnection implements WebConnection {
 
 	private final MockMvc mockMvc;
 
+	@Nullable
 	private final String contextPath;
 
 	private WebClient webClient;
@@ -84,14 +85,14 @@ public final class MockMvcWebConnection implements WebConnection {
 	 * Create a new instance with the specified context path.
 	 * <p>The path may be {@code null} in which case the first path segment
 	 * of the URL is turned into the contextPath. Otherwise it must conform
-	 * to {@link javax.servlet.http.HttpServletRequest#getContextPath()}
+	 * to {@link jakarta.servlet.http.HttpServletRequest#getContextPath()}
 	 * which states that it can be an empty string and otherwise must start
 	 * with a "/" character and not end with a "/" character.
 	 * @param mockMvc the {@code MockMvc} instance to use (never {@code null})
 	 * @param webClient the {@link WebClient} to use (never {@code null})
 	 * @param contextPath the contextPath to use
 	 */
-	public MockMvcWebConnection(MockMvc mockMvc, WebClient webClient, String contextPath) {
+	public MockMvcWebConnection(MockMvc mockMvc, WebClient webClient, @Nullable String contextPath) {
 		Assert.notNull(mockMvc, "MockMvc must not be null");
 		Assert.notNull(webClient, "WebClient must not be null");
 		validateContextPath(contextPath);
@@ -104,7 +105,7 @@ public final class MockMvcWebConnection implements WebConnection {
 	/**
 	 * Validate the supplied {@code contextPath}.
 	 * <p>If the value is not {@code null}, it must conform to
-	 * {@link javax.servlet.http.HttpServletRequest#getContextPath()} which
+	 * {@link jakarta.servlet.http.HttpServletRequest#getContextPath()} which
 	 * states that it can be an empty string and otherwise must start with
 	 * a "/" character and not end with a "/" character.
 	 * @param contextPath the path to validate
@@ -124,6 +125,7 @@ public final class MockMvcWebConnection implements WebConnection {
 	}
 
 
+	@Override
 	public WebResponse getResponse(WebRequest webRequest) throws IOException {
 		long startTime = System.currentTimeMillis();
 		HtmlUnitRequestBuilder requestBuilder = new HtmlUnitRequestBuilder(this.sessions, this.webClient, webRequest);
@@ -153,10 +155,10 @@ public final class MockMvcWebConnection implements WebConnection {
 		return resultActions.andReturn().getResponse();
 	}
 
-	private void storeCookies(WebRequest webRequest, javax.servlet.http.Cookie[] cookies) {
+	private void storeCookies(WebRequest webRequest, jakarta.servlet.http.Cookie[] cookies) {
 		Date now = new Date();
 		CookieManager cookieManager = this.webClient.getCookieManager();
-		for (javax.servlet.http.Cookie cookie : cookies) {
+		for (jakarta.servlet.http.Cookie cookie : cookies) {
 			if (cookie.getDomain() == null) {
 				cookie.setDomain(webRequest.getUrl().getHost());
 			}
@@ -171,7 +173,7 @@ public final class MockMvcWebConnection implements WebConnection {
 		}
 	}
 
-	private static com.gargoylesoftware.htmlunit.util.Cookie createCookie(javax.servlet.http.Cookie cookie) {
+	private static com.gargoylesoftware.htmlunit.util.Cookie createCookie(jakarta.servlet.http.Cookie cookie) {
 		Date expires = null;
 		if (cookie.getMaxAge() > -1) {
 			expires = new Date(System.currentTimeMillis() + cookie.getMaxAge() * 1000);

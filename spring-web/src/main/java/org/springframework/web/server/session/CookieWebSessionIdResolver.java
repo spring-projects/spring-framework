@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 
 
 	/**
-	 * Set the name of the cookie to use for the session id.
+	 * Set the name of the cookie to use for the session ID.
 	 * <p>By default set to "SESSION".
 	 * @param cookieName the cookie name
 	 */
@@ -57,7 +57,7 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 	}
 
 	/**
-	 * Return the configured cookie name.
+	 * Get the configured cookie name.
 	 */
 	public String getCookieName() {
 		return this.cookieName;
@@ -65,7 +65,8 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 
 	/**
 	 * Set the value for the "Max-Age" attribute of the cookie that holds the
-	 * session id. For the range of values see {@link ResponseCookie#getMaxAge()}.
+	 * session ID.
+	 * <p>For the range of values see {@link ResponseCookie#getMaxAge()}.
 	 * <p>By default set to -1.
 	 * @param maxAge the maxAge duration value
 	 */
@@ -74,7 +75,7 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 	}
 
 	/**
-	 * Return the configured "Max-Age" attribute value for the session cookie.
+	 * Get the configured "Max-Age" attribute value for the session cookie.
 	 */
 	public Duration getCookieMaxAge() {
 		return this.cookieMaxAge;

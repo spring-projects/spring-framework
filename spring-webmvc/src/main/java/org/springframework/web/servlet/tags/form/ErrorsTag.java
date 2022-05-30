@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,10 @@ package org.springframework.web.servlet.tags.form;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.tagext.BodyTag;
+
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.tagext.BodyTag;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -259,7 +260,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	@Override
 	protected String autogenerateId() throws JspException {
 		String path = getPropertyPath();
-		if ("".equals(path) || "*".equals(path)) {
+		if (!StringUtils.hasLength(path) || "*".equals(path)) {
 			path = (String) this.pageContext.getAttribute(
 					FormTag.MODEL_ATTRIBUTE_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.core
 
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 
 class KotlinDefaultParameterNameDiscovererTests {
 
@@ -31,6 +31,6 @@ class KotlinDefaultParameterNameDiscovererTests {
 	fun getParameterNamesOnEnum() {
 		val constructor = MyEnum::class.java.declaredConstructors[0]
 		val actualParams = parameterNameDiscoverer.getParameterNames(constructor)
-		assertEquals(2, actualParams!!.size)
+		assertThat(actualParams!!.size).isEqualTo(2)
 	}
 }

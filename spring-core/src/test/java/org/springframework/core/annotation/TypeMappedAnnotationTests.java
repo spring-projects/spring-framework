@@ -16,13 +16,17 @@
 
 package org.springframework.core.annotation;
 
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link TypeMappedAnnotation}. See also
@@ -30,10 +34,10 @@ import static org.assertj.core.api.Assertions.*;
  *
  * @author Phillip Webb
  */
-public class TypeMappedAnnotationTests {
+class TypeMappedAnnotationTests {
 
 	@Test
-	public void mappingWhenMirroredReturnsMirroredValues() {
+	void mappingWhenMirroredReturnsMirroredValues() {
 		testExplicitMirror(WithExplicitMirrorA.class);
 		testExplicitMirror(WithExplicitMirrorB.class);
 	}
@@ -46,7 +50,7 @@ public class TypeMappedAnnotationTests {
 	}
 
 	@Test
-	public void mappingExplicitAliasToMetaAnnotationReturnsMappedValues() {
+	void mappingExplicitAliasToMetaAnnotationReturnsMappedValues() {
 		TypeMappedAnnotation<?> annotation = getTypeMappedAnnotation(
 				WithExplicitAliasToMetaAnnotation.class,
 				ExplicitAliasToMetaAnnotation.class,
@@ -56,13 +60,61 @@ public class TypeMappedAnnotationTests {
 	}
 
 	@Test
-	public void mappingConventionAliasToMetaAnnotationReturnsMappedValues() {
+	void mappingConventionAliasToMetaAnnotationReturnsMappedValues() {
 		TypeMappedAnnotation<?> annotation = getTypeMappedAnnotation(
 				WithConventionAliasToMetaAnnotation.class,
 				ConventionAliasToMetaAnnotation.class,
 				ConventionAliasMetaAnnotationTarget.class);
 		assertThat(annotation.getString("value")).isEqualTo("");
 		assertThat(annotation.getString("convention")).isEqualTo("convention");
+	}
+
+	@Test
+	void adaptFromEmptyArrayToAnyComponentType() {
+		AttributeMethods methods = AttributeMethods.forAnnotationType(ArrayTypes.class);
+		Map<String, Object> attributes = new HashMap<>();
+		for (int i = 0; i < methods.size(); i++) {
+			attributes.put(methods.get(i).getName(), new Object[] {});
+		}
+		MergedAnnotation<ArrayTypes> annotation = TypeMappedAnnotation.of(null, null,
+				ArrayTypes.class, attributes);
+		assertThat(annotation.getValue("stringValue")).contains(new String[] {});
+		assertThat(annotation.getValue("byteValue")).contains(new byte[] {});
+		assertThat(annotation.getValue("shortValue")).contains(new short[] {});
+		assertThat(annotation.getValue("intValue")).contains(new int[] {});
+		assertThat(annotation.getValue("longValue")).contains(new long[] {});
+		assertThat(annotation.getValue("booleanValue")).contains(new boolean[] {});
+		assertThat(annotation.getValue("charValue")).contains(new char[] {});
+		assertThat(annotation.getValue("doubleValue")).contains(new double[] {});
+		assertThat(annotation.getValue("floatValue")).contains(new float[] {});
+		assertThat(annotation.getValue("classValue")).contains(new Class<?>[] {});
+		assertThat(annotation.getValue("annotationValue")).contains(new MergedAnnotation<?>[] {});
+		assertThat(annotation.getValue("enumValue")).contains(new ExampleEnum[] {});
+	}
+
+	@Test
+	void adaptFromNestedMergedAnnotation() {
+		MergedAnnotation<Nested> nested = MergedAnnotation.of(Nested.class);
+		MergedAnnotation<?> annotation = TypeMappedAnnotation.of(null, null,
+				NestedContainer.class, Collections.singletonMap("value", nested));
+		assertThat(annotation.getAnnotation("value", Nested.class)).isSameAs(nested);
+	}
+
+	@Test
+	void adaptFromStringToClass() {
+		MergedAnnotation<?> annotation = TypeMappedAnnotation.of(null, null,
+				ClassAttributes.class,
+				Collections.singletonMap("classValue", InputStream.class.getName()));
+		assertThat(annotation.getString("classValue")).isEqualTo(InputStream.class.getName());
+		assertThat(annotation.getClass("classValue")).isEqualTo(InputStream.class);
+	}
+
+	@Test
+	void adaptFromStringArrayToClassArray() {
+		MergedAnnotation<?> annotation = TypeMappedAnnotation.of(null, null, ClassAttributes.class,
+				Collections.singletonMap("classArrayValue", new String[] { InputStream.class.getName() }));
+		assertThat(annotation.getStringArray("classArrayValue")).containsExactly(InputStream.class.getName());
+		assertThat(annotation.getClassArray("classArrayValue")).containsExactly(InputStream.class);
 	}
 
 	private <A extends Annotation> TypeMappedAnnotation<A> getTypeMappedAnnotation(
@@ -157,6 +209,60 @@ public class TypeMappedAnnotationTests {
 
 	@ConventionAliasToMetaAnnotation(value = "value", convention = "convention")
 	private static class WithConventionAliasToMetaAnnotation {
+
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface ArrayTypes {
+
+		String[] stringValue();
+
+		byte[] byteValue();
+
+		short[] shortValue();
+
+		int[] intValue();
+
+		long[] longValue();
+
+		boolean[] booleanValue();
+
+		char[] charValue();
+
+		double[] doubleValue();
+
+		float[] floatValue();
+
+		Class<?>[] classValue();
+
+		ExplicitMirror[] annotationValue();
+
+		ExampleEnum[] enumValue();
+
+	}
+
+	enum ExampleEnum {ONE,TWO,THREE}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface NestedContainer {
+
+		Nested value();
+
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface Nested {
+
+		String value() default "";
+
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface ClassAttributes {
+
+		Class<?> classValue();
+
+		Class<?>[] classArrayValue();
 
 	}
 

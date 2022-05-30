@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,12 +135,10 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 	 * @see #getAliases()
 	 */
 	public String getShortDescription() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("Bean definition with name '").append(this.beanName).append("'");
-		if (this.aliases != null) {
-			sb.append(" and aliases [").append(StringUtils.arrayToCommaDelimitedString(this.aliases)).append("]");
+		if (this.aliases == null) {
+			return "Bean definition with name '" + this.beanName + "'";
 		}
-		return sb.toString();
+		return "Bean definition with name '" + this.beanName + "' and aliases [" + StringUtils.arrayToCommaDelimitedString(this.aliases) + ']';
 	}
 
 	/**
@@ -166,14 +164,13 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof BeanDefinitionHolder)) {
+		if (!(other instanceof BeanDefinitionHolder otherHolder)) {
 			return false;
 		}
-		BeanDefinitionHolder otherHolder = (BeanDefinitionHolder) other;
 		return this.beanDefinition.equals(otherHolder.beanDefinition) &&
 				this.beanName.equals(otherHolder.beanName) &&
 				ObjectUtils.nullSafeEquals(this.aliases, otherHolder.aliases);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,9 +42,9 @@ public abstract class AbstractMessageChannel implements MessageChannel, Intercep
 
 	protected Log logger = LogFactory.getLog(getClass());
 
-	private final List<ChannelInterceptor> interceptors = new ArrayList<>(5);
-
 	private String beanName;
+
+	private final List<ChannelInterceptor> interceptors = new ArrayList<>(5);
 
 
 	public AbstractMessageChannel() {
@@ -87,17 +87,20 @@ public abstract class AbstractMessageChannel implements MessageChannel, Intercep
 
 	@Override
 	public void setInterceptors(List<ChannelInterceptor> interceptors) {
+		Assert.noNullElements(interceptors, "'interceptors' must not contain null elements");
 		this.interceptors.clear();
 		this.interceptors.addAll(interceptors);
 	}
 
 	@Override
 	public void addInterceptor(ChannelInterceptor interceptor) {
+		Assert.notNull(interceptor, "'interceptor' must not be null");
 		this.interceptors.add(interceptor);
 	}
 
 	@Override
 	public void addInterceptor(int index, ChannelInterceptor interceptor) {
+		Assert.notNull(interceptor, "'interceptor' must not be null");
 		this.interceptors.add(index, interceptor);
 	}
 

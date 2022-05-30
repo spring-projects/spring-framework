@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.jdbc.datasource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -27,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
@@ -71,7 +72,8 @@ public abstract class DataSourceUtils {
 	 * @return a JDBC Connection from the given DataSource
 	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException
 	 * if the attempt to get a Connection failed
-	 * @see #releaseConnection
+	 * @see #releaseConnection(Connection, DataSource)
+	 * @see #isConnectionTransactional(Connection, DataSource)
 	 */
 	public static Connection getConnection(DataSource dataSource) throws CannotGetJdbcConnectionException {
 		try {
@@ -168,6 +170,8 @@ public abstract class DataSourceUtils {
 	 * @return the previous isolation level, if any
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #resetConnectionAfterTransaction
+	 * @see Connection#setTransactionIsolation
+	 * @see Connection#setReadOnly
 	 */
 	@Nullable
 	public static Integer prepareConnectionForTransaction(Connection con, @Nullable TransactionDefinition definition)
@@ -175,10 +179,11 @@ public abstract class DataSourceUtils {
 
 		Assert.notNull(con, "No Connection specified");
 
+		boolean debugEnabled = logger.isDebugEnabled();
 		// Set read-only flag.
 		if (definition != null && definition.isReadOnly()) {
 			try {
-				if (logger.isDebugEnabled()) {
+				if (debugEnabled) {
 					logger.debug("Setting JDBC Connection [" + con + "] read-only");
 				}
 				con.setReadOnly(true);
@@ -200,7 +205,7 @@ public abstract class DataSourceUtils {
 		// Apply specific isolation level, if any.
 		Integer previousIsolationLevel = null;
 		if (definition != null && definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
-			if (logger.isDebugEnabled()) {
+			if (debugEnabled) {
 				logger.debug("Changing isolation level of JDBC Connection [" + con + "] to " +
 						definition.getIsolationLevel());
 			}
@@ -219,8 +224,49 @@ public abstract class DataSourceUtils {
 	 * regarding read-only flag and isolation level.
 	 * @param con the Connection to reset
 	 * @param previousIsolationLevel the isolation level to restore, if any
+	 * @param resetReadOnly whether to reset the connection's read-only flag
+	 * @since 5.2.1
 	 * @see #prepareConnectionForTransaction
+	 * @see Connection#setTransactionIsolation
+	 * @see Connection#setReadOnly
 	 */
+	public static void resetConnectionAfterTransaction(
+			Connection con, @Nullable Integer previousIsolationLevel, boolean resetReadOnly) {
+
+		Assert.notNull(con, "No Connection specified");
+		boolean debugEnabled = logger.isDebugEnabled();
+		try {
+			// Reset transaction isolation to previous value, if changed for the transaction.
+			if (previousIsolationLevel != null) {
+				if (debugEnabled) {
+					logger.debug("Resetting isolation level of JDBC Connection [" +
+							con + "] to " + previousIsolationLevel);
+				}
+				con.setTransactionIsolation(previousIsolationLevel);
+			}
+
+			// Reset read-only flag if we originally switched it to true on transaction begin.
+			if (resetReadOnly) {
+				if (debugEnabled) {
+					logger.debug("Resetting read-only flag of JDBC Connection [" + con + "]");
+				}
+				con.setReadOnly(false);
+			}
+		}
+		catch (Throwable ex) {
+			logger.debug("Could not reset JDBC Connection after transaction", ex);
+		}
+	}
+
+	/**
+	 * Reset the given Connection after a transaction,
+	 * regarding read-only flag and isolation level.
+	 * @param con the Connection to reset
+	 * @param previousIsolationLevel the isolation level to restore, if any
+	 * @deprecated as of 5.1.11, in favor of
+	 * {@link #resetConnectionAfterTransaction(Connection, Integer, boolean)}
+	 */
+	@Deprecated
 	public static void resetConnectionAfterTransaction(Connection con, @Nullable Integer previousIsolationLevel) {
 		Assert.notNull(con, "No Connection specified");
 		try {
@@ -253,6 +299,7 @@ public abstract class DataSourceUtils {
 	 * @param dataSource the DataSource that the Connection was obtained from
 	 * (may be {@code null})
 	 * @return whether the Connection is transactional
+	 * @see #getConnection(DataSource)
 	 */
 	public static boolean isConnectionTransactional(Connection con, @Nullable DataSource dataSource) {
 		if (dataSource == null) {
@@ -355,7 +402,7 @@ public abstract class DataSourceUtils {
 	 * @see SmartDataSource#shouldClose(Connection)
 	 */
 	public static void doCloseConnection(Connection con, @Nullable DataSource dataSource) throws SQLException {
-		if (!(dataSource instanceof SmartDataSource) || ((SmartDataSource) dataSource).shouldClose(con)) {
+		if (!(dataSource instanceof SmartDataSource smartDataSource) || smartDataSource.shouldClose(con)) {
 			con.close();
 		}
 	}
@@ -421,13 +468,13 @@ public abstract class DataSourceUtils {
 	 * (e.g. when participating in a JtaTransactionManager transaction).
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 */
-	private static class ConnectionSynchronization extends TransactionSynchronizationAdapter {
+	private static class ConnectionSynchronization implements TransactionSynchronization {
 
 		private final ConnectionHolder connectionHolder;
 
 		private final DataSource dataSource;
 
-		private int order;
+		private final int order;
 
 		private boolean holderActive = true;
 

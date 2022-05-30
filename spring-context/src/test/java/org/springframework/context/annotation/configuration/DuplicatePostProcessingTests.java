@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.context.annotation.configuration;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -33,13 +33,13 @@ import org.springframework.context.annotation.Bean;
  * @author Andy Wilkinson
  * @author Juergen Hoeller
  */
-public class DuplicatePostProcessingTests {
+class DuplicatePostProcessingTests {
 
 	@Test
-	public void testWithFactoryBeanAndEventListener() {
+	@SuppressWarnings("resource")
+	void withFactoryBeanAndEventListener() {
 		new AnnotationConfigApplicationContext(Config.class).getBean(ExampleBean.class);
 	}
-
 
 
 	static class Config {

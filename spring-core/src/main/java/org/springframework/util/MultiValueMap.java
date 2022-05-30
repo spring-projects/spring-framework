@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,19 @@ public interface MultiValueMap<K, V> extends Map<K, List<V>> {
 	 * @since 5.0
 	 */
 	void addAll(MultiValueMap<K, V> values);
+
+	/**
+	 * {@link #add(Object, Object) Add} the given value, only when the map does not
+	 * {@link #containsKey(Object) contain} the given key.
+	 * @param key the key
+	 * @param value the value to be added
+	 * @since 5.2
+	 */
+	default void addIfAbsent(K key, @Nullable V value) {
+		if (!containsKey(key)) {
+			add(key, value);
+		}
+	}
 
 	/**
 	 * Set the given single value under the given key.

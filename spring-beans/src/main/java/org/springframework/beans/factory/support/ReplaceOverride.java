@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,15 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Method;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Extension of MethodOverride that represents an arbitrary
+ * Extension of {@link MethodOverride} that represents an arbitrary
  * override of a method by the IoC container.
  *
  * <p>Any non-final method can be overridden, irrespective of its
@@ -38,17 +39,17 @@ public class ReplaceOverride extends MethodOverride {
 
 	private final String methodReplacerBeanName;
 
-	private List<String> typeIdentifiers = new LinkedList<>();
+	private final List<String> typeIdentifiers = new ArrayList<>();
 
 
 	/**
 	 * Construct a new ReplaceOverride.
 	 * @param methodName the name of the method to override
-	 * @param methodReplacerBeanName the bean name of the MethodReplacer
+	 * @param methodReplacerBeanName the bean name of the {@link MethodReplacer}
 	 */
 	public ReplaceOverride(String methodName, String methodReplacerBeanName) {
 		super(methodName);
-		Assert.notNull(methodName, "Method replacer bean name must not be null");
+		Assert.notNull(methodReplacerBeanName, "Method replacer bean name must not be null");
 		this.methodReplacerBeanName = methodReplacerBeanName;
 	}
 
@@ -68,6 +69,7 @@ public class ReplaceOverride extends MethodOverride {
 	public void addTypeIdentifier(String identifier) {
 		this.typeIdentifiers.add(identifier);
 	}
+
 
 	@Override
 	public boolean matches(Method method) {
@@ -94,11 +96,10 @@ public class ReplaceOverride extends MethodOverride {
 
 
 	@Override
-	public boolean equals(Object other) {
-		if (!(other instanceof ReplaceOverride) || !super.equals(other)) {
+	public boolean equals(@Nullable Object other) {
+		if (!(other instanceof ReplaceOverride that) || !super.equals(other)) {
 			return false;
 		}
-		ReplaceOverride that = (ReplaceOverride) other;
 		return (ObjectUtils.nullSafeEquals(this.methodReplacerBeanName, that.methodReplacerBeanName) &&
 				ObjectUtils.nullSafeEquals(this.typeIdentifiers, that.typeIdentifiers));
 	}

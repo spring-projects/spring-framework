@@ -19,6 +19,8 @@ package org.springframework.util.comparator;
 import java.io.Serializable;
 import java.util.Comparator;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A {@link Comparator} for {@link Boolean} objects that can sort either
  * {@code true} or {@code false} first.
@@ -67,7 +69,7 @@ public class BooleanComparator implements Comparator<Boolean>, Serializable {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof BooleanComparator &&
 				this.trueLow == ((BooleanComparator) other).trueLow));
 	}

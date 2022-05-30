@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,9 @@ package org.springframework.web.reactive.function.client
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Test
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -33,6 +31,7 @@ import reactor.core.publisher.Mono
  * Mock object based tests for [ClientResponse] Kotlin extensions.
  *
  * @author Sebastien Deleuze
+ * @author Igor Manushin
  */
 class ClientResponseExtensionsTests {
 
@@ -51,10 +50,15 @@ class ClientResponseExtensionsTests {
 	}
 
 	@Test
-	@FlowPreview
 	fun `bodyToFlow with reified type parameters`() {
 		response.bodyToFlow<List<Foo>>()
 		verify { response.bodyToFlux(object : ParameterizedTypeReference<List<Foo>>() {}) }
+	}
+
+	@Test
+	fun `bodyToFlow with KClass parameter`() {
+		response.bodyToFlow(Foo::class)
+		verify { response.bodyToFlux(Foo::class.java) }
 	}
 
 	@Test
@@ -74,7 +78,16 @@ class ClientResponseExtensionsTests {
 		val response = mockk<ClientResponse>()
 		every { response.bodyToMono<String>() } returns Mono.just("foo")
 		runBlocking {
-			assertEquals("foo", response.awaitBody<String>())
+			assertThat(response.awaitBody<String>()).isEqualTo("foo")
+		}
+	}
+
+	@Test
+	fun `awaitBody with KClass parameter`() {
+		val response = mockk<ClientResponse>()
+		every { response.bodyToMono(String::class.java) } returns Mono.just("foo")
+		runBlocking {
+			assertThat(response.awaitBody(String::class)).isEqualTo("foo")
 		}
 	}
 
@@ -83,7 +96,16 @@ class ClientResponseExtensionsTests {
 		val response = mockk<ClientResponse>()
 		every { response.bodyToMono<String>() } returns Mono.empty()
 		runBlocking {
-			assertNull(response.awaitBodyOrNull<String>())
+			assertThat(response.awaitBodyOrNull<String>()).isNull()
+		}
+	}
+
+	@Test
+	fun `awaitBodyOrNullGeneric with KClass parameter`() {
+		val response = mockk<ClientResponse>()
+		every { response.bodyToMono(String::class.java) } returns Mono.empty()
+		runBlocking {
+			assertThat(response.awaitBodyOrNull(String::class)).isNull()
 		}
 	}
 
@@ -93,7 +115,17 @@ class ClientResponseExtensionsTests {
 		val entity = ResponseEntity("foo", HttpStatus.OK)
 		every { response.toEntity<String>() } returns Mono.just(entity)
 		runBlocking {
-			assertEquals(entity, response.awaitEntity<String>())
+			assertThat(response.awaitEntity<String>()).isEqualTo(entity)
+		}
+	}
+
+	@Test
+	fun `awaitEntity with KClass parameter`() {
+		val response = mockk<ClientResponse>()
+		val entity = ResponseEntity("foo", HttpStatus.OK)
+		every { response.toEntity(String::class.java) } returns Mono.just(entity)
+		runBlocking {
+			assertThat(response.awaitEntity(String::class)).isEqualTo(entity)
 		}
 	}
 
@@ -103,7 +135,37 @@ class ClientResponseExtensionsTests {
 		val entity = ResponseEntity(listOf("foo"), HttpStatus.OK)
 		every { response.toEntityList<String>() } returns Mono.just(entity)
 		runBlocking {
-			assertEquals(entity, response.awaitEntityList<String>())
+			assertThat(response.awaitEntityList<String>()).isEqualTo(entity)
+		}
+	}
+
+	@Test
+	fun `awaitEntityList with KClass parameter`() {
+		val response = mockk<ClientResponse>()
+		val entity = ResponseEntity(listOf("foo"), HttpStatus.OK)
+		every { response.toEntityList(String::class.java) } returns Mono.just(entity)
+		runBlocking {
+			assertThat(response.awaitEntityList(String::class)).isEqualTo(entity)
+		}
+	}
+
+	@Test
+	fun awaitBodilessEntity() {
+		val response = mockk<ClientResponse>()
+		val entity = mockk<ResponseEntity<Void>>()
+		every { response.toBodilessEntity() } returns Mono.just(entity)
+		runBlocking {
+			assertThat(response.awaitBodilessEntity()).isEqualTo(entity)
+		}
+	}
+
+	@Test
+	fun createExceptionAndAwait() {
+		val response = mockk<ClientResponse>()
+		val exception = mockk<WebClientResponseException>()
+		every { response.createException() } returns Mono.just(exception)
+		runBlocking {
+			assertThat(response.createExceptionAndAwait()).isEqualTo(exception)
 		}
 	}
 

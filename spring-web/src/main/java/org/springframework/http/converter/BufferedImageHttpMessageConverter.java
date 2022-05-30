@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
@@ -44,6 +45,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -168,6 +170,8 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 
 		ImageInputStream imageInputStream = null;
 		ImageReader imageReader = null;
+		// We cannot use try-with-resources here for the ImageInputStream, since we have
+		// custom handling of the close() method in a finally-block.
 		try {
 			imageInputStream = createImageInputStream(inputMessage.getBody());
 			MediaType contentType = inputMessage.getHeaders().getContentType();
@@ -204,6 +208,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 	}
 
 	private ImageInputStream createImageInputStream(InputStream is) throws IOException {
+		is = StreamUtils.nonClosing(is);
 		if (this.cacheDir != null) {
 			return new FileCacheImageInputStream(is, this.cacheDir);
 		}
@@ -220,8 +225,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 		final MediaType selectedContentType = getContentType(contentType);
 		outputMessage.getHeaders().setContentType(selectedContentType);
 
-		if (outputMessage instanceof StreamingHttpOutputMessage) {
-			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;
+		if (outputMessage instanceof StreamingHttpOutputMessage streamingOutputMessage) {
 			streamingOutputMessage.setBody(outputStream -> writeInternal(image, selectedContentType, outputStream));
 		}
 		else {

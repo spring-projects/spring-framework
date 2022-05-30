@@ -191,9 +191,9 @@ public abstract class AbstractBeanFactoryBasedTargetSource implements TargetSour
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(getClass().getSimpleName());
-		sb.append(" for target bean '").append(this.targetBeanName).append("'");
+		sb.append(" for target bean '").append(this.targetBeanName).append('\'');
 		if (this.targetClass != null) {
-			sb.append(" of type [").append(this.targetClass.getName()).append("]");
+			sb.append(" of type [").append(this.targetClass.getName()).append(']');
 		}
 		return sb.toString();
 	}

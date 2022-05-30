@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,10 +67,8 @@ import org.springframework.core.annotation.AliasFor;
  * @see PutMapping
  * @see DeleteMapping
  * @see PatchMapping
- * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
- * @see org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter
  */
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Mapping
@@ -94,10 +92,8 @@ public @interface RequestMapping {
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings inherit
 	 * this primary mapping, narrowing it for a specific handler method.
-	 * <p><strong>NOTE</strong>: Each handler method must be mapped to a
-	 * non-empty path, either at the type level, at the method level, or a
-	 * combination of the two. If you wish to map to all paths, please map
-	 * explicitly to {@code "/**"} or {@code "**"}.
+	 * <p><strong>NOTE</strong>: A handler method that is not mapped to any path
+	 * explicitly is effectively mapped to an empty path.
 	 */
 	@AliasFor("path")
 	String[] value() default {};
@@ -111,10 +107,8 @@ public @interface RequestMapping {
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings inherit
 	 * this primary mapping, narrowing it for a specific handler method.
-	 * <p><strong>NOTE</strong>: Each handler method must be mapped to a
-	 * non-empty path, either at the type level, at the method level, or a
-	 * combination of the two. If you wish to map to all paths, please map
-	 * explicitly to {@code "/**"} or {@code "**"}.
+	 * <p><strong>NOTE</strong>: A handler method that is not mapped to any path
+	 * explicitly is effectively mapped to an empty path.
 	 * @since 4.2
 	 */
 	@AliasFor("value")
@@ -124,9 +118,8 @@ public @interface RequestMapping {
 	 * The HTTP request methods to map to, narrowing the primary mapping:
 	 * GET, POST, HEAD, OPTIONS, PUT, PATCH, DELETE, TRACE.
 	 * <p><b>Supported at the type level as well as at the method level!</b>
-	 * When used at the type level, all method-level mappings inherit
-	 * this HTTP method restriction (i.e. the type-level restriction
-	 * gets checked before the handler method is even resolved).
+	 * When used at the type level, all method-level mappings inherit this
+	 * HTTP method restriction.
 	 */
 	RequestMethod[] method() default {};
 
@@ -140,13 +133,8 @@ public @interface RequestMapping {
 	 * any value). Finally, "!myParam" style expressions indicate that the
 	 * specified parameter is <i>not</i> supposed to be present in the request.
 	 * <p><b>Supported at the type level as well as at the method level!</b>
-	 * When used at the type level, all method-level mappings inherit
-	 * this parameter restriction (i.e. the type-level restriction
-	 * gets checked before the handler method is even resolved).
-	 * <p>Parameter mappings are considered as restrictions that are enforced at
-	 * the type level. The primary path mapping (i.e. the specified URI value)
-	 * still has to uniquely identify the target handler, with parameter mappings
-	 * simply expressing preconditions for invoking the handler.
+	 * When used at the type level, all method-level mappings inherit this
+	 * parameter restriction.
 	 */
 	String[] params() default {};
 
@@ -166,9 +154,8 @@ public @interface RequestMapping {
 	 * </pre>
 	 * will match requests with a Content-Type of "text/html", "text/plain", etc.
 	 * <p><b>Supported at the type level as well as at the method level!</b>
-	 * When used at the type level, all method-level mappings inherit
-	 * this header restriction (i.e. the type-level restriction
-	 * gets checked before the handler method is even resolved).
+	 * When used at the type level, all method-level mappings inherit this
+	 * header restriction.
 	 * @see org.springframework.http.MediaType
 	 */
 	String[] headers() default {};
@@ -182,14 +169,19 @@ public @interface RequestMapping {
 	 * consumes = {"text/plain", "application/*"}
 	 * consumes = MediaType.TEXT_PLAIN_VALUE
 	 * </pre>
-	 * Expressions can be negated by using the "!" operator, as in
+	 * <p>If a declared media type contains a parameter, and if the
+	 * {@code "content-type"} from the request also has that parameter, then
+	 * the parameter values must match. Otherwise, if the media type from the
+	 * request {@code "content-type"} does not contain the parameter, then the
+	 * parameter is ignored for matching purposes.
+	 * <p>Expressions can be negated by using the "!" operator, as in
 	 * "!text/plain", which matches all requests with a {@code Content-Type}
 	 * other than "text/plain".
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * If specified at both levels, the method level consumes condition overrides
 	 * the type level condition.
 	 * @see org.springframework.http.MediaType
-	 * @see javax.servlet.http.HttpServletRequest#getContentType()
+	 * @see jakarta.servlet.http.HttpServletRequest#getContentType()
 	 */
 	String[] consumes() default {};
 
@@ -206,8 +198,8 @@ public @interface RequestMapping {
 	 * produces = "text/plain;charset=UTF-8"
 	 * </pre>
 	 * <p>If a declared media type contains a parameter (e.g. "charset=UTF-8",
-	 * "type=feed", type="entry") and if a compatible media type from the request
-	 * has that parameter too, then the parameter values must match. Otherwise
+	 * "type=feed", "type=entry") and if a compatible media type from the request
+	 * has that parameter too, then the parameter values must match. Otherwise,
 	 * if the media type from the request does not contain the parameter, it is
 	 * assumed the client accepts any value.
 	 * <p>Expressions can be negated by using the "!" operator, as in "!text/plain",
@@ -215,7 +207,6 @@ public @interface RequestMapping {
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * If specified at both levels, the method level produces condition overrides
 	 * the type level condition.
-	 * @see org.springframework.http.MediaType
 	 * @see org.springframework.http.MediaType
 	 */
 	String[] produces() default {};

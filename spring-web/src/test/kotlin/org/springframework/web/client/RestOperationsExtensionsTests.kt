@@ -19,9 +19,8 @@ package org.springframework.web.client
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.Assert
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.*
 import org.springframework.util.ReflectionUtils
@@ -48,7 +47,7 @@ class RestOperationsExtensionsTests {
 		val var1 = "var1"
 		val var2 = "var2"
 		every { template.getForObject(url, Foo::class.java, var1, var2) } returns foo
-		assertEquals(foo, template.getForObject<Foo>(url, var1, var2))
+		assertThat(template.getForObject<Foo>(url, var1, var2)).isEqualTo(foo)
 		verify { template.getForObject(url, Foo::class.java, var1, var2) }
 	}
 
@@ -57,7 +56,7 @@ class RestOperationsExtensionsTests {
 		val url = "https://spring.io"
 		val vars = mapOf(Pair("key1", "value1"), Pair("key2", "value2"))
 		every { template.getForObject(url, Foo::class.java, vars) } returns foo
-		assertEquals(foo, template.getForObject<Foo>(url, vars))
+		assertThat(template.getForObject<Foo>(url, vars)).isEqualTo(foo)
 		verify { template.getForObject(url, Foo::class.java, vars) }
 	}
 
@@ -65,7 +64,7 @@ class RestOperationsExtensionsTests {
 	fun `getForObject with reified type parameters and URI`() {
 		val url = URI("https://spring.io")
 		every { template.getForObject(url, Foo::class.java) } returns foo
-		assertEquals(foo, template.getForObject<Foo>(url))
+		assertThat(template.getForObject<Foo>(url)).isEqualTo(foo)
 		verify { template.getForObject(url, Foo::class.java) }
 	}
 
@@ -73,7 +72,7 @@ class RestOperationsExtensionsTests {
 	fun `getForEntity with reified type parameters, String and URI`() {
 		val url = URI("https://spring.io")
 		every { template.getForEntity(url, Foo::class.java) } returns entity
-		assertEquals(entity, template.getForEntity<Foo>(url))
+		assertThat(template.getForEntity<Foo>(url)).isEqualTo(entity)
 		verify { template.getForEntity(url, Foo::class.java) }
 	}
 
@@ -83,7 +82,7 @@ class RestOperationsExtensionsTests {
 		val var1 = "var1"
 		val var2 = "var2"
 		every { template.getForEntity(url, Foo::class.java, var1, var2) } returns entity
-		assertEquals(entity, template.getForEntity<Foo>(url, var1, var2))
+		assertThat(template.getForEntity<Foo>(url, var1, var2)).isEqualTo(entity)
 		verify { template.getForEntity(url, Foo::class.java, var1, var2) }
 	}
 
@@ -92,7 +91,7 @@ class RestOperationsExtensionsTests {
 		val url = "https://spring.io"
 		val vars = mapOf(Pair("key1", "value1"), Pair("key2", "value2"))
 		every { template.getForEntity(url, Foo::class.java, vars) } returns entity
-		assertEquals(entity, template.getForEntity<Foo>(url, vars))
+		assertThat(template.getForEntity<Foo>(url, vars)).isEqualTo(entity)
 		verify { template.getForEntity(url, Foo::class.java, vars) }
 	}
 
@@ -103,7 +102,7 @@ class RestOperationsExtensionsTests {
 		val var1 = "var1"
 		val var2 = "var2"
 		every { template.patchForObject(url, body, Foo::class.java, var1, var2) } returns foo
-		assertEquals(foo, template.patchForObject<Foo>(url, body, var1, var2))
+		assertThat(template.patchForObject<Foo>(url, body, var1, var2)).isEqualTo(foo)
 		verify { template.patchForObject(url, body, Foo::class.java, var1, var2) }
 	}
 
@@ -113,7 +112,7 @@ class RestOperationsExtensionsTests {
 		val body: Any = "body"
 		val vars = mapOf(Pair("key1", "value1"), Pair("key2", "value2"))
 		every { template.patchForObject(url, body, Foo::class.java, vars) } returns foo
-		assertEquals(foo, template.patchForObject<Foo>(url, body, vars))
+		assertThat(template.patchForObject<Foo>(url, body, vars)).isEqualTo(foo)
 		verify { template.patchForObject(url, body, Foo::class.java, vars) }
 	}
 
@@ -122,7 +121,7 @@ class RestOperationsExtensionsTests {
 		val url = "https://spring.io"
 		val body: Any = "body"
 		every { template.patchForObject(url, body, Foo::class.java) } returns foo
-		assertEquals(foo, template.patchForObject<Foo>(url, body))
+		assertThat(template.patchForObject<Foo>(url, body)).isEqualTo(foo)
 		verify { template.patchForObject(url, body, Foo::class.java) }
 	}
 
@@ -130,7 +129,7 @@ class RestOperationsExtensionsTests {
 	fun `patchForObject with reified type parameters`() {
 		val url = "https://spring.io"
 		every { template.patchForObject(url, null, Foo::class.java) } returns foo
-		assertEquals(foo, template.patchForObject<Foo>(url))
+		assertThat(template.patchForObject<Foo>(url)).isEqualTo(foo)
 		verify { template.patchForObject(url, null, Foo::class.java) }
 	}
 
@@ -141,7 +140,7 @@ class RestOperationsExtensionsTests {
 		val var1 = "var1"
 		val var2 = "var2"
 		every { template.postForObject(url, body, Foo::class.java, var1, var2) } returns foo
-		assertEquals(foo, template.postForObject<Foo>(url, body, var1, var2))
+		assertThat(template.postForObject<Foo>(url, body, var1, var2)).isEqualTo(foo)
 		verify { template.postForObject(url, body, Foo::class.java, var1, var2) }
 	}
 
@@ -151,7 +150,7 @@ class RestOperationsExtensionsTests {
 		val body: Any = "body"
 		val vars = mapOf(Pair("key1", "value1"), Pair("key2", "value2"))
 		every { template.postForObject(url, body, Foo::class.java, vars) } returns foo
-		assertEquals(foo, template.postForObject<Foo>(url, body, vars))
+		assertThat(template.postForObject<Foo>(url, body, vars)).isEqualTo(foo)
 		verify { template.postForObject(url, body, Foo::class.java, vars) }
 	}
 
@@ -160,7 +159,7 @@ class RestOperationsExtensionsTests {
 		val url = "https://spring.io"
 		val body: Any = "body"
 		every { template.postForObject(url, body, Foo::class.java) } returns foo
-		assertEquals(foo, template.postForObject<Foo>(url, body))
+		assertThat(template.postForObject<Foo>(url, body)).isEqualTo(foo)
 		verify { template.postForObject(url, body, Foo::class.java) }
 	}
 
@@ -168,7 +167,7 @@ class RestOperationsExtensionsTests {
 	fun `postForObject with reified type parameters`() {
 		val url = "https://spring.io"
 		every { template.postForObject(url, null, Foo::class.java) } returns foo
-		assertEquals(foo, template.postForObject<Foo>(url))
+		assertThat(template.postForObject<Foo>(url)).isEqualTo(foo)
 		verify { template.postForObject(url, null, Foo::class.java) }
 	}
 
@@ -179,7 +178,7 @@ class RestOperationsExtensionsTests {
 		val var1 = "var1"
 		val var2 = "var2"
 		every { template.postForEntity(url, body, Foo::class.java, var1, var2) } returns entity
-		assertEquals(entity, template.postForEntity<Foo>(url, body, var1, var2))
+		assertThat(template.postForEntity<Foo>(url, body, var1, var2)).isEqualTo(entity)
 		verify { template.postForEntity(url, body, Foo::class.java, var1, var2) }
 	}
 
@@ -189,7 +188,7 @@ class RestOperationsExtensionsTests {
 		val body: Any = "body"
 		val vars = mapOf(Pair("key1", "value1"), Pair("key2", "value2"))
 		every { template.postForEntity(url, body, Foo::class.java, vars) } returns entity
-		assertEquals(entity, template.postForEntity<Foo>(url, body, vars))
+		assertThat(template.postForEntity<Foo>(url, body, vars)).isEqualTo(entity)
 		verify { template.postForEntity(url, body, Foo::class.java, vars) }
 	}
 
@@ -198,7 +197,7 @@ class RestOperationsExtensionsTests {
 		val url = "https://spring.io"
 		val body: Any = "body"
 		every { template.postForEntity(url, body, Foo::class.java) } returns entity
-		assertEquals(entity, template.postForEntity<Foo>(url, body))
+		assertThat(template.postForEntity<Foo>(url, body)).isEqualTo(entity)
 		verify { template.postForEntity(url, body, Foo::class.java) }
 	}
 
@@ -206,7 +205,7 @@ class RestOperationsExtensionsTests {
 	fun `postForEntity with reified type parameters`() {
 		val url = "https://spring.io"
 		every  { template.postForEntity(url, null, Foo::class.java) } returns entity
-		assertEquals(entity, template.postForEntity<Foo>(url))
+		assertThat(template.postForEntity<Foo>(url)).isEqualTo(entity)
 		verify { template.postForEntity(url, null, Foo::class.java) }
 	}
 
@@ -219,7 +218,7 @@ class RestOperationsExtensionsTests {
 		val entityList = mockk<ResponseEntity<List<Foo>>>()
 		val responseType = object : ParameterizedTypeReference<List<Foo>>() {}
 		every { template.exchange(url, method, entity, responseType, var1, var2) } returns entityList
-		assertEquals(entityList, template.exchange<List<Foo>>(url, method, entity, var1, var2))
+		assertThat(template.exchange<List<Foo>>(url, method, entity, var1, var2)).isEqualTo(entityList)
 		verify { template.exchange(url, method, entity, responseType, var1, var2) }
 	}
 
@@ -232,7 +231,7 @@ class RestOperationsExtensionsTests {
 		val entityList = mockk<ResponseEntity<List<Foo>>>()
 		val responseType = object : ParameterizedTypeReference<List<Foo>>() {}
 		every { template.exchange(url, method, entity, responseType, vars) } returns entityList
-		assertEquals(entityList, template.exchange<List<Foo>>(url, method, entity, vars))
+		assertThat(template.exchange<List<Foo>>(url, method, entity, vars)).isEqualTo(entityList)
 		verify { template.exchange(url, method, entity, responseType, vars) }
 	}
 
@@ -244,7 +243,7 @@ class RestOperationsExtensionsTests {
 		val entityList = mockk<ResponseEntity<List<Foo>>>()
 		val responseType = object : ParameterizedTypeReference<List<Foo>>() {}
 		every { template.exchange(url, method, entity, responseType) } returns entityList
-		assertEquals(entityList, template.exchange<List<Foo>>(url, method, entity))
+		assertThat(template.exchange<List<Foo>>(url, method, entity)).isEqualTo(entityList)
 		verify { template.exchange(url, method, entity, responseType) }
 	}
 
@@ -255,7 +254,7 @@ class RestOperationsExtensionsTests {
 		val entityList = mockk<ResponseEntity<List<Foo>>>()
 		val responseType = object : ParameterizedTypeReference<List<Foo>>() {}
 		every { template.exchange(url, method, null, responseType) } returns entityList
-		assertEquals(entityList, template.exchange<List<Foo>>(url, method))
+		assertThat(template.exchange<List<Foo>>(url, method)).isEqualTo(entityList)
 		verify { template.exchange(url, method, null, responseType) }
 	}
 
@@ -265,7 +264,7 @@ class RestOperationsExtensionsTests {
 		val entityList = mockk<ResponseEntity<List<Foo>>>()
 		val responseType = object : ParameterizedTypeReference<List<Foo>>() {}
 		every { template.exchange(entity, responseType) } returns entityList
-		assertEquals(entityList, template.exchange<List<Foo>>(entity))
+		assertThat(template.exchange<List<Foo>>(entity)).isEqualTo(entityList)
 		verify { template.exchange(entity, responseType) }
 	}
 
@@ -277,9 +276,8 @@ class RestOperationsExtensionsTests {
 				if (method.parameterTypes.contains(kClass.java)) {
 					val parameters = mutableListOf<Class<*>>(RestOperations::class.java).apply { addAll(method.parameterTypes.filter { it !=  kClass.java }) }
 					val f = extensions.getDeclaredMethod(method.name, *parameters.toTypedArray()).kotlinFunction!!
-					Assert.assertEquals(1, f.typeParameters.size)
-					System.out.println(method.name + f.typeParameters)
-					Assert.assertEquals("Failed: " + method.name, listOf(Any::class.createType(nullable = true)), f.typeParameters[0].upperBounds)
+					assertThat(f.typeParameters.size).isEqualTo(1)
+					assertThat(f.typeParameters[0].upperBounds).isEqualTo(listOf(Any::class.createType(nullable = true)))
 				}
 			}
 		}

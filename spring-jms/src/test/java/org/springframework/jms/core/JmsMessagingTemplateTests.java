@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,23 +19,20 @@ package org.springframework.jms.core;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.MessageFormatException;
-import javax.jms.MessageNotWriteableException;
-import javax.jms.Session;
-import javax.jms.TextMessage;
 
-import org.hamcrest.core.StringContains;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.MessageFormatException;
+import jakarta.jms.MessageNotWriteableException;
+import jakarta.jms.Session;
+import jakarta.jms.TextMessage;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.BDDMockito;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
 import org.springframework.beans.DirectFieldAccessor;
@@ -51,18 +48,25 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.converter.GenericMessageConverter;
 import org.springframework.messaging.support.MessageBuilder;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willAnswer;
+import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Tests for {@link JmsMessagingTemplate}.
  *
  * @author Stephane Nicoll
  */
+@ExtendWith(MockitoExtension.class)
 public class JmsMessagingTemplateTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 	@Captor
 	private ArgumentCaptor<MessageCreator> messageCreator;
@@ -73,15 +77,14 @@ public class JmsMessagingTemplateTests {
 	private JmsMessagingTemplate messagingTemplate;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
-		MockitoAnnotations.initMocks(this);
 		this.messagingTemplate = new JmsMessagingTemplate(this.jmsTemplate);
 	}
 
 	@Test
 	public void validateJmsTemplate() {
-		assertSame(this.jmsTemplate, this.messagingTemplate.getJmsTemplate());
+		assertThat(this.messagingTemplate.getJmsTemplate()).isSameAs(this.jmsTemplate);
 	}
 
 	@Test
@@ -105,8 +108,6 @@ public class JmsMessagingTemplateTests {
 
 	@Test
 	public void customConverterAlwaysTakesPrecedence() {
-		MessageConverter messageConverter = mock(MessageConverter.class);
-		given(this.jmsTemplate.getMessageConverter()).willReturn(messageConverter);
 		MessageConverter customMessageConverter = mock(MessageConverter.class);
 		JmsMessagingTemplate messagingTemplate = new JmsMessagingTemplate();
 		messagingTemplate.setJmsMessageConverter(
@@ -119,10 +120,10 @@ public class JmsMessagingTemplateTests {
 	private void assertPayloadConverter(JmsMessagingTemplate messagingTemplate,
 			MessageConverter messageConverter) {
 		MessageConverter jmsMessageConverter = messagingTemplate.getJmsMessageConverter();
-		assertNotNull(jmsMessageConverter);
-		assertEquals(MessagingMessageConverter.class, jmsMessageConverter.getClass());
-		assertSame(messageConverter, new DirectFieldAccessor(jmsMessageConverter)
-				.getPropertyValue("payloadConverter"));
+		assertThat(jmsMessageConverter).isNotNull();
+		assertThat(jmsMessageConverter.getClass()).isEqualTo(MessagingMessageConverter.class);
+		assertThat(new DirectFieldAccessor(jmsMessageConverter)
+				.getPropertyValue("payloadConverter")).isSameAs(messageConverter);
 	}
 
 	@Test
@@ -169,8 +170,8 @@ public class JmsMessagingTemplateTests {
 	public void sendNoDefaultSet() {
 		Message<String> message = createTextMessage();
 
-		this.thrown.expect(IllegalStateException.class);
-		this.messagingTemplate.send(message);
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.messagingTemplate.send(message));
 	}
 
 	@Test
@@ -193,7 +194,7 @@ public class JmsMessagingTemplateTests {
 		this.messagingTemplate.convertAndSend(destination, "my Payload");
 		verify(this.jmsTemplate).send(eq(destination), this.messageCreator.capture());
 		TextMessage textMessage = createTextMessage(this.messageCreator.getValue());
-		assertEquals("my Payload", textMessage.getText());
+		assertThat(textMessage.getText()).isEqualTo("my Payload");
 	}
 
 	@Test
@@ -201,7 +202,7 @@ public class JmsMessagingTemplateTests {
 		this.messagingTemplate.convertAndSend("myQueue", "my Payload");
 		verify(this.jmsTemplate).send(eq("myQueue"), this.messageCreator.capture());
 		TextMessage textMessage = createTextMessage(this.messageCreator.getValue());
-		assertEquals("my Payload", textMessage.getText());
+		assertThat(textMessage.getText()).isEqualTo("my Payload");
 	}
 
 	@Test
@@ -212,7 +213,7 @@ public class JmsMessagingTemplateTests {
 		this.messagingTemplate.convertAndSend("my Payload");
 		verify(this.jmsTemplate).send(eq(destination), this.messageCreator.capture());
 		TextMessage textMessage = createTextMessage(this.messageCreator.getValue());
-		assertEquals("my Payload", textMessage.getText());
+		assertThat(textMessage.getText()).isEqualTo("my Payload");
 	}
 
 	@Test
@@ -222,20 +223,20 @@ public class JmsMessagingTemplateTests {
 		this.messagingTemplate.convertAndSend("my Payload");
 		verify(this.jmsTemplate).send(eq("myQueue"), this.messageCreator.capture());
 		TextMessage textMessage = createTextMessage(this.messageCreator.getValue());
-		assertEquals("my Payload", textMessage.getText());
+		assertThat(textMessage.getText()).isEqualTo("my Payload");
 	}
 
 	@Test
 	public void convertAndSendNoDefaultSet() throws JMSException {
-		this.thrown.expect(IllegalStateException.class);
-		this.messagingTemplate.convertAndSend("my Payload");
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.messagingTemplate.convertAndSend("my Payload"));
 	}
 
 	@Test
 	public void convertAndSendCustomJmsMessageConverter() throws JMSException {
 		this.messagingTemplate.setJmsMessageConverter(new SimpleMessageConverter() {
 			@Override
-			public javax.jms.Message toMessage(Object object, Session session)
+			public jakarta.jms.Message toMessage(Object object, Session session)
 					throws JMSException, org.springframework.jms.support.converter.MessageConversionException {
 				throw new org.springframework.jms.support.converter.MessageConversionException("Test exception");
 			}
@@ -244,9 +245,9 @@ public class JmsMessagingTemplateTests {
 		this.messagingTemplate.convertAndSend("myQueue", "msg to convert");
 		verify(this.jmsTemplate).send(eq("myQueue"), this.messageCreator.capture());
 
-		this.thrown.expect(org.springframework.messaging.converter.MessageConversionException.class);
-		this.thrown.expectMessage(new StringContains("Test exception"));
-		this.messageCreator.getValue().createMessage(mock(Session.class));
+		assertThatExceptionOfType(org.springframework.messaging.converter.MessageConversionException.class).isThrownBy(() ->
+				this.messageCreator.getValue().createMessage(mock(Session.class)))
+			.withMessageContaining("Test exception");
 	}
 
 	@Test
@@ -273,7 +274,7 @@ public class JmsMessagingTemplateTests {
 	@Test
 	public void receive() {
 		Destination destination = new Destination() {};
-		javax.jms.Message jmsMessage = createJmsTextMessage();
+		jakarta.jms.Message jmsMessage = createJmsTextMessage();
 		given(this.jmsTemplate.receive(destination)).willReturn(jmsMessage);
 
 		Message<?> message = this.messagingTemplate.receive(destination);
@@ -283,7 +284,7 @@ public class JmsMessagingTemplateTests {
 
 	@Test
 	public void receiveName() {
-		javax.jms.Message jmsMessage = createJmsTextMessage();
+		jakarta.jms.Message jmsMessage = createJmsTextMessage();
 		given(this.jmsTemplate.receive("myQueue")).willReturn(jmsMessage);
 
 		Message<?> message = this.messagingTemplate.receive("myQueue");
@@ -295,7 +296,7 @@ public class JmsMessagingTemplateTests {
 	public void receiveDefaultDestination() {
 		Destination destination = new Destination() {};
 		this.messagingTemplate.setDefaultDestination(destination);
-		javax.jms.Message jmsMessage = createJmsTextMessage();
+		jakarta.jms.Message jmsMessage = createJmsTextMessage();
 		given(this.jmsTemplate.receive(destination)).willReturn(jmsMessage);
 
 		Message<?> message = this.messagingTemplate.receive();
@@ -306,7 +307,7 @@ public class JmsMessagingTemplateTests {
 	@Test
 	public void receiveDefaultDestinationName() {
 		this.messagingTemplate.setDefaultDestinationName("myQueue");
-		javax.jms.Message jmsMessage = createJmsTextMessage();
+		jakarta.jms.Message jmsMessage = createJmsTextMessage();
 		given(this.jmsTemplate.receive("myQueue")).willReturn(jmsMessage);
 
 		Message<?> message = this.messagingTemplate.receive();
@@ -316,28 +317,28 @@ public class JmsMessagingTemplateTests {
 
 	@Test
 	public void receiveNoDefaultSet() {
-		this.thrown.expect(IllegalStateException.class);
-		this.messagingTemplate.receive();
+		assertThatIllegalStateException().isThrownBy(
+				this.messagingTemplate::receive);
 	}
 
 	@Test
 	public void receiveAndConvert() {
 		Destination destination = new Destination() {};
-		javax.jms.Message jmsMessage = createJmsTextMessage("my Payload");
+		jakarta.jms.Message jmsMessage = createJmsTextMessage("my Payload");
 		given(this.jmsTemplate.receive(destination)).willReturn(jmsMessage);
 
 		String payload = this.messagingTemplate.receiveAndConvert(destination, String.class);
-		assertEquals("my Payload", payload);
+		assertThat(payload).isEqualTo("my Payload");
 		verify(this.jmsTemplate).receive(destination);
 	}
 
 	@Test
 	public void receiveAndConvertName() {
-		javax.jms.Message jmsMessage = createJmsTextMessage("my Payload");
+		jakarta.jms.Message jmsMessage = createJmsTextMessage("my Payload");
 		given(this.jmsTemplate.receive("myQueue")).willReturn(jmsMessage);
 
 		String payload = this.messagingTemplate.receiveAndConvert("myQueue", String.class);
-		assertEquals("my Payload", payload);
+		assertThat(payload).isEqualTo("my Payload");
 		verify(this.jmsTemplate).receive("myQueue");
 	}
 
@@ -345,58 +346,58 @@ public class JmsMessagingTemplateTests {
 	public void receiveAndConvertDefaultDestination() {
 		Destination destination = new Destination() {};
 		this.messagingTemplate.setDefaultDestination(destination);
-		javax.jms.Message jmsMessage = createJmsTextMessage("my Payload");
+		jakarta.jms.Message jmsMessage = createJmsTextMessage("my Payload");
 		given(this.jmsTemplate.receive(destination)).willReturn(jmsMessage);
 
 		String payload = this.messagingTemplate.receiveAndConvert(String.class);
-		assertEquals("my Payload", payload);
+		assertThat(payload).isEqualTo("my Payload");
 		verify(this.jmsTemplate).receive(destination);
 	}
 
 	@Test
 	public void receiveAndConvertDefaultDestinationName() {
 		this.messagingTemplate.setDefaultDestinationName("myQueue");
-		javax.jms.Message jmsMessage = createJmsTextMessage("my Payload");
+		jakarta.jms.Message jmsMessage = createJmsTextMessage("my Payload");
 		given(this.jmsTemplate.receive("myQueue")).willReturn(jmsMessage);
 
 		String payload = this.messagingTemplate.receiveAndConvert(String.class);
-		assertEquals("my Payload", payload);
+		assertThat(payload).isEqualTo("my Payload");
 		verify(this.jmsTemplate).receive("myQueue");
 	}
 
 	@Test
 	public void receiveAndConvertWithConversion() {
-		javax.jms.Message jmsMessage = createJmsTextMessage("123");
+		jakarta.jms.Message jmsMessage = createJmsTextMessage("123");
 		given(this.jmsTemplate.receive("myQueue")).willReturn(jmsMessage);
 
 		this.messagingTemplate.setMessageConverter(new GenericMessageConverter());
 
 		Integer payload = this.messagingTemplate.receiveAndConvert("myQueue", Integer.class);
-		assertEquals(Integer.valueOf(123), payload);
+		assertThat(payload).isEqualTo(Integer.valueOf(123));
 		verify(this.jmsTemplate).receive("myQueue");
 	}
 
 	@Test
 	public void receiveAndConvertNoConverter() {
-		javax.jms.Message jmsMessage = createJmsTextMessage("Hello");
+		jakarta.jms.Message jmsMessage = createJmsTextMessage("Hello");
 		given(this.jmsTemplate.receive("myQueue")).willReturn(jmsMessage);
 
-		this.thrown.expect(org.springframework.messaging.converter.MessageConversionException.class);
-		this.messagingTemplate.receiveAndConvert("myQueue", Writer.class);
+		assertThatExceptionOfType(org.springframework.messaging.converter.MessageConversionException.class).isThrownBy(() ->
+				this.messagingTemplate.receiveAndConvert("myQueue", Writer.class));
 	}
 
 	@Test
 	public void receiveAndConvertNoInput() {
 		given(this.jmsTemplate.receive("myQueue")).willReturn(null);
 
-		assertNull(this.messagingTemplate.receiveAndConvert("myQueue", String.class));
+		assertThat(this.messagingTemplate.receiveAndConvert("myQueue", String.class)).isNull();
 	}
 
 	@Test
 	public void sendAndReceive() {
 		Destination destination = new Destination() {};
 		Message<String> request = createTextMessage();
-		javax.jms.Message replyJmsMessage = createJmsTextMessage();
+		jakarta.jms.Message replyJmsMessage = createJmsTextMessage();
 		given(this.jmsTemplate.sendAndReceive(eq(destination), any())).willReturn(replyJmsMessage);
 
 		Message<?> actual = this.messagingTemplate.sendAndReceive(destination, request);
@@ -407,7 +408,7 @@ public class JmsMessagingTemplateTests {
 	@Test
 	public void sendAndReceiveName() {
 		Message<String> request = createTextMessage();
-		javax.jms.Message replyJmsMessage = createJmsTextMessage();
+		jakarta.jms.Message replyJmsMessage = createJmsTextMessage();
 		given(this.jmsTemplate.sendAndReceive(eq("myQueue"), any())).willReturn(replyJmsMessage);
 
 		Message<?> actual = this.messagingTemplate.sendAndReceive("myQueue", request);
@@ -420,7 +421,7 @@ public class JmsMessagingTemplateTests {
 		Destination destination = new Destination() {};
 		this.messagingTemplate.setDefaultDestination(destination);
 		Message<String> request = createTextMessage();
-		javax.jms.Message replyJmsMessage = createJmsTextMessage();
+		jakarta.jms.Message replyJmsMessage = createJmsTextMessage();
 		given(this.jmsTemplate.sendAndReceive(eq(destination), any())).willReturn(replyJmsMessage);
 
 		Message<?> actual = this.messagingTemplate.sendAndReceive(request);
@@ -432,7 +433,7 @@ public class JmsMessagingTemplateTests {
 	public void sendAndReceiveDefaultDestinationName() {
 		this.messagingTemplate.setDefaultDestinationName("myQueue");
 		Message<String> request = createTextMessage();
-		javax.jms.Message replyJmsMessage = createJmsTextMessage();
+		jakarta.jms.Message replyJmsMessage = createJmsTextMessage();
 		given(this.jmsTemplate.sendAndReceive(eq("myQueue"), any())).willReturn(replyJmsMessage);
 
 		Message<?> actual = this.messagingTemplate.sendAndReceive(request);
@@ -444,58 +445,58 @@ public class JmsMessagingTemplateTests {
 	public void sendAndReceiveNoDefaultSet() {
 		Message<String> message = createTextMessage();
 
-		this.thrown.expect(IllegalStateException.class);
-		this.messagingTemplate.sendAndReceive(message);
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.messagingTemplate.sendAndReceive(message));
 	}
 
 	@Test
 	public void convertSendAndReceivePayload() throws JMSException {
 		Destination destination = new Destination() {};
-		javax.jms.Message replyJmsMessage = createJmsTextMessage("My reply");
+		jakarta.jms.Message replyJmsMessage = createJmsTextMessage("My reply");
 		given(this.jmsTemplate.sendAndReceive(eq(destination), any())).willReturn(replyJmsMessage);
 
 		String reply = this.messagingTemplate.convertSendAndReceive(destination, "my Payload", String.class);
 		verify(this.jmsTemplate, times(1)).sendAndReceive(eq(destination), any());
-		assertEquals("My reply", reply);
+		assertThat(reply).isEqualTo("My reply");
 	}
 
 	@Test
 	public void convertSendAndReceivePayloadName() throws JMSException {
-		javax.jms.Message replyJmsMessage = createJmsTextMessage("My reply");
+		jakarta.jms.Message replyJmsMessage = createJmsTextMessage("My reply");
 		given(this.jmsTemplate.sendAndReceive(eq("myQueue"), any())).willReturn(replyJmsMessage);
 
 		String reply = this.messagingTemplate.convertSendAndReceive("myQueue", "my Payload", String.class);
 		verify(this.jmsTemplate, times(1)).sendAndReceive(eq("myQueue"), any());
-		assertEquals("My reply", reply);
+		assertThat(reply).isEqualTo("My reply");
 	}
 
 	@Test
 	public void convertSendAndReceiveDefaultDestination() throws JMSException {
 		Destination destination = new Destination() {};
 		this.messagingTemplate.setDefaultDestination(destination);
-		javax.jms.Message replyJmsMessage = createJmsTextMessage("My reply");
+		jakarta.jms.Message replyJmsMessage = createJmsTextMessage("My reply");
 		given(this.jmsTemplate.sendAndReceive(eq(destination), any())).willReturn(replyJmsMessage);
 
 		String reply = this.messagingTemplate.convertSendAndReceive("my Payload", String.class);
 		verify(this.jmsTemplate, times(1)).sendAndReceive(eq(destination), any());
-		assertEquals("My reply", reply);
+		assertThat(reply).isEqualTo("My reply");
 	}
 
 	@Test
 	public void convertSendAndReceiveDefaultDestinationName() throws JMSException {
 		this.messagingTemplate.setDefaultDestinationName("myQueue");
-		javax.jms.Message replyJmsMessage = createJmsTextMessage("My reply");
+		jakarta.jms.Message replyJmsMessage = createJmsTextMessage("My reply");
 		given(this.jmsTemplate.sendAndReceive(eq("myQueue"), any())).willReturn(replyJmsMessage);
 
 		String reply = this.messagingTemplate.convertSendAndReceive("my Payload", String.class);
 		verify(this.jmsTemplate, times(1)).sendAndReceive(eq("myQueue"), any());
-		assertEquals("My reply", reply);
+		assertThat(reply).isEqualTo("My reply");
 	}
 
 	@Test
 	public void convertSendAndReceiveNoDefaultSet() throws JMSException {
-		this.thrown.expect(IllegalStateException.class);
-		this.messagingTemplate.convertSendAndReceive("my Payload", String.class);
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.messagingTemplate.convertSendAndReceive("my Payload", String.class));
 	}
 
 	@Test
@@ -507,29 +508,29 @@ public class JmsMessagingTemplateTests {
 		this.messagingTemplate.setJmsMessageConverter(messageConverter);
 		invokeMessageCreator();
 
-		this.thrown.expect(org.springframework.messaging.converter.MessageConversionException.class);
-		this.messagingTemplate.send("myQueue", message);
+		assertThatExceptionOfType(org.springframework.messaging.converter.MessageConversionException.class).isThrownBy(() ->
+				this.messagingTemplate.send("myQueue", message));
 	}
 
 	@Test
 	public void convertMessageConversionExceptionOnReceive() throws JMSException {
-		javax.jms.Message message = createJmsTextMessage();
+		jakarta.jms.Message message = createJmsTextMessage();
 		MessageConverter messageConverter = mock(MessageConverter.class);
 		willThrow(org.springframework.jms.support.converter.MessageConversionException.class)
 				.given(messageConverter).fromMessage(message);
 		this.messagingTemplate.setJmsMessageConverter(messageConverter);
 		given(this.jmsTemplate.receive("myQueue")).willReturn(message);
 
-		this.thrown.expect(org.springframework.messaging.converter.MessageConversionException.class);
-		this.messagingTemplate.receive("myQueue");
+		assertThatExceptionOfType(org.springframework.messaging.converter.MessageConversionException.class).isThrownBy(() ->
+				this.messagingTemplate.receive("myQueue"));
 	}
 
 	@Test
 	public void convertMessageNotReadableException() throws JMSException {
 		willThrow(MessageNotReadableException.class).given(this.jmsTemplate).receive("myQueue");
 
-		this.thrown.expect(MessagingException.class);
-		this.messagingTemplate.receive("myQueue");
+		assertThatExceptionOfType(MessagingException.class).isThrownBy(() ->
+				this.messagingTemplate.receive("myQueue"));
 	}
 
 	@Test
@@ -537,8 +538,8 @@ public class JmsMessagingTemplateTests {
 		Destination destination = new Destination() {};
 		willThrow(DestinationResolutionException.class).given(this.jmsTemplate).send(eq(destination), any());
 
-		this.thrown.expect(org.springframework.messaging.core.DestinationResolutionException.class);
-		this.messagingTemplate.send(destination, createTextMessage());
+		assertThatExceptionOfType(org.springframework.messaging.core.DestinationResolutionException.class).isThrownBy(() ->
+				this.messagingTemplate.send(destination, createTextMessage()));
 	}
 
 	@Test
@@ -546,8 +547,8 @@ public class JmsMessagingTemplateTests {
 		Destination destination = new Destination() {};
 		willThrow(DestinationResolutionException.class).given(this.jmsTemplate).receive(destination);
 
-		this.thrown.expect(org.springframework.messaging.core.DestinationResolutionException.class);
-		this.messagingTemplate.receive(destination);
+		assertThatExceptionOfType(org.springframework.messaging.core.DestinationResolutionException.class).isThrownBy(() ->
+				this.messagingTemplate.receive(destination));
 	}
 
 	@Test
@@ -558,8 +559,8 @@ public class JmsMessagingTemplateTests {
 		this.messagingTemplate.setJmsMessageConverter(messageConverter);
 		invokeMessageCreator();
 
-		this.thrown.expect(org.springframework.messaging.converter.MessageConversionException.class);
-		this.messagingTemplate.send("myQueue", message);
+		assertThatExceptionOfType(org.springframework.messaging.converter.MessageConversionException.class).isThrownBy(() ->
+				this.messagingTemplate.send("myQueue", message));
 	}
 
 	@Test
@@ -570,16 +571,16 @@ public class JmsMessagingTemplateTests {
 		this.messagingTemplate.setJmsMessageConverter(messageConverter);
 		invokeMessageCreator();
 
-		this.thrown.expect(org.springframework.messaging.converter.MessageConversionException.class);
-		this.messagingTemplate.send("myQueue", message);
+		assertThatExceptionOfType(org.springframework.messaging.converter.MessageConversionException.class).isThrownBy(() ->
+				this.messagingTemplate.send("myQueue", message));
 	}
 
 	@Test
 	public void convertInvalidDestinationExceptionOnSendAndReceiveWithName() {
 		willThrow(InvalidDestinationException.class).given(this.jmsTemplate).sendAndReceive(eq("unknownQueue"), any());
 
-		this.thrown.expect(org.springframework.messaging.core.DestinationResolutionException.class);
-		this.messagingTemplate.sendAndReceive("unknownQueue", createTextMessage());
+		assertThatExceptionOfType(org.springframework.messaging.core.DestinationResolutionException.class).isThrownBy(() ->
+				this.messagingTemplate.sendAndReceive("unknownQueue", createTextMessage()));
 	}
 
 	@Test
@@ -587,8 +588,8 @@ public class JmsMessagingTemplateTests {
 		Destination destination = new Destination() {};
 		willThrow(InvalidDestinationException.class).given(this.jmsTemplate).sendAndReceive(eq(destination), any());
 
-		this.thrown.expect(org.springframework.messaging.core.DestinationResolutionException.class);
-		this.messagingTemplate.sendAndReceive(destination, createTextMessage());
+		assertThatExceptionOfType(org.springframework.messaging.core.DestinationResolutionException.class).isThrownBy(() ->
+				this.messagingTemplate.sendAndReceive(destination, createTextMessage()));
 	}
 
 	private void invokeMessageCreator() {
@@ -609,7 +610,7 @@ public class JmsMessagingTemplateTests {
 		return createTextMessage("Hello");
 	}
 
-	private javax.jms.Message createJmsTextMessage(String payload) {
+	private jakarta.jms.Message createJmsTextMessage(String payload) {
 		try {
 			StubTextMessage jmsMessage = new StubTextMessage(payload);
 			jmsMessage.setStringProperty("foo", "bar");
@@ -620,7 +621,7 @@ public class JmsMessagingTemplateTests {
 		}
 	}
 
-	private javax.jms.Message createJmsTextMessage() {
+	private jakarta.jms.Message createJmsTextMessage() {
 		return createJmsTextMessage("Hello");
 	}
 
@@ -628,8 +629,8 @@ public class JmsMessagingTemplateTests {
 	private void assertTextMessage(MessageCreator messageCreator) {
 		try {
 			TextMessage jmsMessage = createTextMessage(messageCreator);
-			assertEquals("Wrong body message", "Hello", jmsMessage.getText());
-			assertEquals("Invalid foo property", "bar", jmsMessage.getStringProperty("foo"));
+			assertThat(jmsMessage.getText()).as("Wrong body message").isEqualTo("Hello");
+			assertThat(jmsMessage.getStringProperty("foo")).as("Invalid foo property").isEqualTo("bar");
 		}
 		catch (JMSException e) {
 			throw new IllegalStateException("Wrong text message", e);
@@ -637,20 +638,20 @@ public class JmsMessagingTemplateTests {
 	}
 
 	private void assertTextMessage(Message<?> message) {
-		assertNotNull("message should not be null", message);
-		assertEquals("Wrong payload", "Hello", message.getPayload());
-		assertEquals("Invalid foo property", "bar", message.getHeaders().get("foo"));
+		assertThat(message).as("message should not be null").isNotNull();
+		assertThat(message.getPayload()).as("Wrong payload").isEqualTo("Hello");
+		assertThat(message.getHeaders().get("foo")).as("Invalid foo property").isEqualTo("bar");
 	}
 
 
 	protected TextMessage createTextMessage(MessageCreator creator) throws JMSException {
 		Session mock = mock(Session.class);
-		given(mock.createTextMessage(BDDMockito.any())).willAnswer(
+		given(mock.createTextMessage(any())).willAnswer(
 				(Answer<TextMessage>) invocation ->
 						new StubTextMessage((String) invocation.getArguments()[0]));
-		javax.jms.Message message = creator.createMessage(mock);
-		verify(mock).createTextMessage(BDDMockito.any());
-		return TextMessage.class.cast(message);
+		jakarta.jms.Message message = creator.createMessage(mock);
+		verify(mock).createTextMessage(any());
+		return (TextMessage) message;
 	}
 
 }

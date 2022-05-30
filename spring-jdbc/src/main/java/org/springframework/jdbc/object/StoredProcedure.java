@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.jdbc.object;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -49,7 +50,7 @@ public abstract class StoredProcedure extends SqlCall {
 	 * Create a new object wrapper for a stored procedure.
 	 * @param ds the DataSource to use throughout the lifetime
 	 * of this object to obtain connections
-	 * @param name name of the stored procedure in the database
+	 * @param name the name of the stored procedure in the database
 	 */
 	protected StoredProcedure(DataSource ds, String name) {
 		setDataSource(ds);
@@ -59,7 +60,7 @@ public abstract class StoredProcedure extends SqlCall {
 	/**
 	 * Create a new object wrapper for a stored procedure.
 	 * @param jdbcTemplate the JdbcTemplate which wraps DataSource
-	 * @param name name of the stored procedure in the database
+	 * @param name the name of the stored procedure in the database
 	 */
 	protected StoredProcedure(JdbcTemplate jdbcTemplate, String name) {
 		setJdbcTemplate(jdbcTemplate);
@@ -77,15 +78,17 @@ public abstract class StoredProcedure extends SqlCall {
 	}
 
 	/**
-	 * Declare a parameter. Overridden method.
-	 * Parameters declared as {@code SqlParameter} and {@code SqlInOutParameter}
-	 * will always be used to provide input values.  In addition to this any parameter declared
-	 * as {@code SqlOutParameter} where an non-null input value is provided will also be used
-	 * as an input paraneter.
+	 * Declare a parameter.
+	 * <p>Parameters declared as {@code SqlParameter} and {@code SqlInOutParameter}
+	 * will always be used to provide input values. In addition to this, any parameter declared
+	 * as {@code SqlOutParameter} where a non-null input value is provided will also be used
+	 * as an input parameter.
 	 * <b>Note: Calls to declareParameter must be made in the same order as
 	 * they appear in the database's stored procedure parameter list.</b>
-	 * Names are purely used to help mapping.
-	 * @param param parameter object
+	 * <p>Names are purely used to help mapping.
+	 * @param param the parameter object
+	 * @throws InvalidDataAccessApiUsageException if the parameter has no name, or if the
+	 * operation is already compiled, and hence cannot be configured further
 	 */
 	@Override
 	public void declareParameter(SqlParameter param) throws InvalidDataAccessApiUsageException {

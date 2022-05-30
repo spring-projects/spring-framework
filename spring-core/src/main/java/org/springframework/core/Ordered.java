@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ package org.springframework.core;
  * priority.
  *
  * <p>Note that there is also a <em>priority</em> marker for this interface:
- * {@link PriorityOrdered}. Order values expressed by {@code PriorityOrdered}
- * objects always apply before same order values expressed by <em>plain</em>
- * {@link Ordered} objects.
+ * {@link PriorityOrdered}. Consult the Javadoc for {@code PriorityOrdered} for
+ * details on how {@code PriorityOrdered} objects are ordered relative to
+ * <em>plain</em> {@link Ordered} objects.
  *
  * <p>Consult the Javadoc for {@link OrderComparator} for details on the
  * sort semantics for non-ordered objects.

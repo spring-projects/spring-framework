@@ -4,7 +4,7 @@
 <beans>
 
 
-	<bean id="default" class="org.springframework.beans.factory.xml.FactoryMethods"
+	<bean id="default" class="org.springframework.beans.testfixture.beans.FactoryMethods"
 			factory-method="defaultInstance">
 		<!-- No constructor-arg elements -->
 		<property name="stringValue"><value>setterString</value></property>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,112 +16,177 @@
 
 package org.springframework.beans.factory.config;
 
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
+import org.yaml.snakeyaml.constructor.ConstructorException;
 import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
 import org.springframework.core.io.ByteArrayResource;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.entry;
 
 /**
  * Tests for {@link YamlProcessor}.
  *
  * @author Dave Syer
  * @author Juergen Hoeller
+ * @author Sam Brannen
+ * @author Brian Clozel
  */
-public class YamlProcessorTests {
+class YamlProcessorTests {
 
-	private final YamlProcessor processor = new YamlProcessor() {};
-
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
+	private final YamlProcessor processor = new YamlProcessor() {
+	};
 
 
 	@Test
-	public void arrayConvertedToIndexedBeanReference() {
-		this.processor.setResources(new ByteArrayResource("foo: bar\nbar: [1,2,3]".getBytes()));
+	void arrayConvertedToIndexedBeanReference() {
+		setYaml("foo: bar\nbar: [1,2,3]");
 		this.processor.process((properties, map) -> {
-			assertEquals(4, properties.size());
-			assertEquals("bar", properties.get("foo"));
-			assertEquals("bar", properties.getProperty("foo"));
-			assertEquals(1, properties.get("bar[0]"));
-			assertEquals("1", properties.getProperty("bar[0]"));
-			assertEquals(2, properties.get("bar[1]"));
-			assertEquals("2", properties.getProperty("bar[1]"));
-			assertEquals(3, properties.get("bar[2]"));
-			assertEquals("3", properties.getProperty("bar[2]"));
+			assertThat(properties.size()).isEqualTo(4);
+			assertThat(properties.get("foo")).isEqualTo("bar");
+			assertThat(properties.getProperty("foo")).isEqualTo("bar");
+			assertThat(properties.get("bar[0]")).isEqualTo(1);
+			assertThat(properties.getProperty("bar[0]")).isEqualTo("1");
+			assertThat(properties.get("bar[1]")).isEqualTo(2);
+			assertThat(properties.getProperty("bar[1]")).isEqualTo("2");
+			assertThat(properties.get("bar[2]")).isEqualTo(3);
+			assertThat(properties.getProperty("bar[2]")).isEqualTo("3");
 		});
 	}
 
 	@Test
-	public void testStringResource() {
-		this.processor.setResources(new ByteArrayResource("foo # a document that is a literal".getBytes()));
-		this.processor.process((properties, map) -> assertEquals("foo", map.get("document")));
+	void stringResource() {
+		setYaml("foo # a document that is a literal");
+		this.processor.process((properties, map) -> assertThat(map.get("document")).isEqualTo("foo"));
 	}
 
 	@Test
-	public void testBadDocumentStart() {
-		this.processor.setResources(new ByteArrayResource("foo # a document\nbar: baz".getBytes()));
-		this.exception.expect(ParserException.class);
-		this.exception.expectMessage("line 2, column 1");
-		this.processor.process((properties, map) -> {});
+	void badDocumentStart() {
+		setYaml("foo # a document\nbar: baz");
+		assertThatExceptionOfType(ParserException.class)
+			.isThrownBy(() -> this.processor.process((properties, map) -> {}))
+			.withMessageContaining("line 2, column 1");
 	}
 
 	@Test
-	public void testBadResource() {
-		this.processor.setResources(new ByteArrayResource("foo: bar\ncd\nspam:\n  foo: baz".getBytes()));
-		this.exception.expect(ScannerException.class);
-		this.exception.expectMessage("line 3, column 1");
-		this.processor.process((properties, map) -> {});
+	void badResource() {
+		setYaml("foo: bar\ncd\nspam:\n  foo: baz");
+		assertThatExceptionOfType(ScannerException.class)
+				.isThrownBy(() -> this.processor.process((properties, map) -> {}))
+				.withMessageContaining("line 3, column 1");
 	}
 
 	@Test
-	public void mapConvertedToIndexedBeanReference() {
-		this.processor.setResources(new ByteArrayResource("foo: bar\nbar:\n spam: bucket".getBytes()));
+	void mapConvertedToIndexedBeanReference() {
+		setYaml("foo: bar\nbar:\n spam: bucket");
 		this.processor.process((properties, map) -> {
-			assertEquals("bucket", properties.get("bar.spam"));
-			assertEquals(2, properties.size());
+			assertThat(properties.get("bar.spam")).isEqualTo("bucket");
+			assertThat(properties).hasSize(2);
 		});
 	}
 
 	@Test
-	public void integerKeyBehaves() {
-		this.processor.setResources(new ByteArrayResource("foo: bar\n1: bar".getBytes()));
+	void integerKeyBehaves() {
+		setYaml("foo: bar\n1: bar");
 		this.processor.process((properties, map) -> {
-			assertEquals("bar", properties.get("[1]"));
-			assertEquals(2, properties.size());
+			assertThat(properties.get("[1]")).isEqualTo("bar");
+			assertThat(properties).hasSize(2);
 		});
 	}
 
 	@Test
-	public void integerDeepKeyBehaves() {
-		this.processor.setResources(new ByteArrayResource("foo:\n  1: bar".getBytes()));
+	void integerDeepKeyBehaves() {
+		setYaml("foo:\n  1: bar");
 		this.processor.process((properties, map) -> {
-			assertEquals("bar", properties.get("foo[1]"));
-			assertEquals(1, properties.size());
+			assertThat(properties.get("foo[1]")).isEqualTo("bar");
+			assertThat(properties).hasSize(1);
 		});
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void flattenedMapIsSameAsPropertiesButOrdered() {
-		this.processor.setResources(new ByteArrayResource("foo: bar\nbar:\n spam: bucket".getBytes()));
+	void flattenedMapIsSameAsPropertiesButOrdered() {
+		setYaml("cat: dog\nfoo: bar\nbar:\n spam: bucket");
 		this.processor.process((properties, map) -> {
-			assertEquals("bucket", properties.get("bar.spam"));
-			assertEquals(2, properties.size());
 			Map<String, Object> flattenedMap = processor.getFlattenedMap(map);
-			assertEquals("bucket", flattenedMap.get("bar.spam"));
-			assertEquals(2, flattenedMap.size());
-			assertTrue(flattenedMap instanceof LinkedHashMap);
+			assertThat(flattenedMap).isInstanceOf(LinkedHashMap.class);
+
+			assertThat(properties).hasSize(3);
+			assertThat(flattenedMap).hasSize(3);
+
+			assertThat(properties.get("bar.spam")).isEqualTo("bucket");
+			assertThat(flattenedMap.get("bar.spam")).isEqualTo("bucket");
+
 			Map<String, Object> bar = (Map<String, Object>) map.get("bar");
-			assertEquals("bucket", bar.get("spam"));
+			assertThat(bar.get("spam")).isEqualTo("bucket");
+
+			List<Object> keysFromProperties = new ArrayList<>(properties.keySet());
+			List<String> keysFromFlattenedMap = new ArrayList<>(flattenedMap.keySet());
+			assertThat(keysFromProperties).containsExactlyInAnyOrderElementsOf(keysFromFlattenedMap);
+			// Keys in the Properties object are sorted.
+			assertThat(keysFromProperties).containsExactly("bar.spam", "cat", "foo");
+			// But the flattened map retains the order from the input.
+			assertThat(keysFromFlattenedMap).containsExactly("cat", "foo", "bar.spam");
 		});
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void standardTypesSupportedByDefault() throws Exception {
+		setYaml("value: !!set\n  ? first\n  ? second");
+		this.processor.process((properties, map) -> {
+			assertThat(properties).containsExactly(entry("value[0]", "first"), entry("value[1]", "second"));
+			assertThat(map.get("value")).isInstanceOf(Set.class);
+			Set<String> set = (Set<String>) map.get("value");
+			assertThat(set).containsExactly("first", "second");
+		});
+	}
+
+	@Test
+	void customTypeNotSupportedByDefault() throws Exception {
+		URL url = new URL("https://localhost:9000/");
+		setYaml("value: !!java.net.URL [\"" + url + "\"]");
+		assertThatExceptionOfType(ConstructorException.class)
+				.isThrownBy(() -> this.processor.process((properties, map) -> {}))
+				.withMessageContaining("Unsupported type encountered in YAML document: java.net.URL");
+	}
+
+	@Test
+	void customTypesSupportedDueToExplicitConfiguration() throws Exception {
+		this.processor.setSupportedTypes(URL.class, String.class);
+
+		URL url = new URL("https://localhost:9000/");
+		setYaml("value: !!java.net.URL [!!java.lang.String [\"" + url + "\"]]");
+
+		this.processor.process((properties, map) -> {
+			assertThat(properties).containsExactly(entry("value", url));
+			assertThat(map).containsExactly(entry("value", url));
+		});
+	}
+
+	@Test
+	void customTypeNotSupportedDueToExplicitConfiguration() {
+		this.processor.setSupportedTypes(List.class);
+
+		setYaml("value: !!java.net.URL [\"https://localhost:9000/\"]");
+
+		assertThatExceptionOfType(ConstructorException.class)
+				.isThrownBy(() -> this.processor.process((properties, map) -> {}))
+				.withMessageContaining("Unsupported type encountered in YAML document: java.net.URL");
+	}
+
+	private void setYaml(String yaml) {
+		this.processor.setResources(new ByteArrayResource(yaml.getBytes()));
 	}
 
 }

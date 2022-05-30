@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.messaging.Message;
@@ -41,7 +40,8 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Test fixture for
@@ -59,7 +59,7 @@ public class MethodMessageHandlerTests {
 	private TestController testController;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 
 		List<String> destinationPrefixes = Arrays.asList("/test");
@@ -73,9 +73,10 @@ public class MethodMessageHandlerTests {
 		this.messageHandler.registerHandler(this.testController);
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void duplicateMapping() {
-		this.messageHandler.registerHandler(new DuplicateMappingsController());
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.messageHandler.registerHandler(new DuplicateMappingsController()));
 	}
 
 	@Test
@@ -83,8 +84,8 @@ public class MethodMessageHandlerTests {
 
 		Map<String, HandlerMethod> handlerMethods = this.messageHandler.getHandlerMethods();
 
-		assertNotNull(handlerMethods);
-		assertThat(handlerMethods.keySet(), Matchers.hasSize(3));
+		assertThat(handlerMethods).isNotNull();
+		assertThat(handlerMethods).hasSize(3);
 	}
 
 	@Test
@@ -95,7 +96,7 @@ public class MethodMessageHandlerTests {
 
 		this.messageHandler.handleMessage(toDestination("/test/handlerPathMatchFoo"));
 
-		assertEquals("pathMatchWildcard", this.testController.method);
+		assertThat(this.testController.method).isEqualTo("pathMatchWildcard");
 	}
 
 	@Test
@@ -109,7 +110,7 @@ public class MethodMessageHandlerTests {
 
 		this.messageHandler.handleMessage(toDestination("/test/bestmatch/bar/path"));
 
-		assertEquals("bestMatch", this.testController.method);
+		assertThat(this.testController.method).isEqualTo("bestMatch");
 	}
 
 	@Test
@@ -117,8 +118,8 @@ public class MethodMessageHandlerTests {
 
 		this.messageHandler.handleMessage(toDestination("/test/handlerArgumentResolver"));
 
-		assertEquals("handlerArgumentResolver", this.testController.method);
-		assertNotNull(this.testController.arguments.get("message"));
+		assertThat(this.testController.method).isEqualTo("handlerArgumentResolver");
+		assertThat(this.testController.arguments.get("message")).isNotNull();
 	}
 
 	@Test
@@ -126,8 +127,8 @@ public class MethodMessageHandlerTests {
 
 		this.messageHandler.handleMessage(toDestination("/test/handlerThrowsExc"));
 
-		assertEquals("illegalStateException", this.testController.method);
-		assertNotNull(this.testController.arguments.get("exception"));
+		assertThat(this.testController.method).isEqualTo("illegalStateException");
+		assertThat(this.testController.arguments.get("exception")).isNotNull();
 	}
 
 	private Message<?> toDestination(String destination) {
@@ -189,6 +190,7 @@ public class MethodMessageHandlerTests {
 			super.detectHandlerMethods(handler);
 		}
 
+		@Override
 		public void registerHandlerMethod(Object handler, Method method, String mapping) {
 			super.registerHandlerMethod(handler, method, mapping);
 		}
@@ -203,8 +205,7 @@ public class MethodMessageHandlerTests {
 
 		@Override
 		protected List<? extends HandlerMethodReturnValueHandler> initReturnValueHandlers() {
-			List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>();
-			handlers.addAll(getCustomReturnValueHandlers());
+			List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>(getCustomReturnValueHandlers());
 			return handlers;
 		}
 

@@ -31,7 +31,7 @@ public interface ReactiveMessageHandler {
 	/**
 	 * Handle the given message.
 	 * @param message the message to be handled
-	 * @return a completion {@link Mono} for the result of the message handling.
+	 * @return a completion {@link Mono} for the result of the message handling
 	 */
 	Mono<Void> handleMessage(Message<?> message);
 

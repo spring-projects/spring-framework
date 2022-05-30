@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.cache.annotation.CacheInvocationParameter;
 import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheMethodDetails;
@@ -137,7 +138,7 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 
 	@Override
 	public String toString() {
-		return getOperationDescription().append("]").toString();
+		return getOperationDescription().append(']').toString();
 	}
 
 	/**
@@ -147,7 +148,7 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 	protected StringBuilder getOperationDescription() {
 		StringBuilder result = new StringBuilder();
 		result.append(getClass().getSimpleName());
-		result.append("[");
+		result.append('[');
 		result.append(this.methodDetails);
 		return result;
 	}

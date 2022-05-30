@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.cache.annotation.CacheDefaults;
 import javax.cache.annotation.CacheKeyGenerator;
 import javax.cache.annotation.CacheMethodDetails;
@@ -212,10 +213,9 @@ public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJC
 			parameters.add(parameterType.getName());
 		}
 
-		StringBuilder sb = new StringBuilder(method.getDeclaringClass().getName());
-		sb.append(".").append(method.getName());
-		sb.append("(").append(StringUtils.collectionToCommaDelimitedString(parameters)).append(")");
-		return sb.toString();
+		return method.getDeclaringClass().getName()
+				+ '.' + method.getName()
+				+ '(' + StringUtils.collectionToCommaDelimitedString(parameters) + ')';
 	}
 
 	private int countNonNull(Object... instances) {

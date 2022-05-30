@@ -18,6 +18,7 @@ package org.springframework.cache.jcache;
 
 import java.net.URI;
 import java.util.Properties;
+
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 

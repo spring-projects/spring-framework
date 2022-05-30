@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 
@@ -126,14 +127,13 @@ public class CompositeMessageCondition implements MessageCondition<CompositeMess
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof CompositeMessageCondition)) {
+		if (!(other instanceof CompositeMessageCondition otherComposite)) {
 			return false;
 		}
-		CompositeMessageCondition otherComposite = (CompositeMessageCondition) other;
 		checkCompatible(otherComposite);
 		List<MessageCondition<?>> otherConditions = otherComposite.getMessageConditions();
 		for (int i = 0; i < this.messageConditions.size(); i++) {

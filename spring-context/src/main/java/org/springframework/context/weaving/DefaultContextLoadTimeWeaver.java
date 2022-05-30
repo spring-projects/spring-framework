@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,6 @@ import org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver;
 import org.springframework.instrument.classloading.glassfish.GlassFishLoadTimeWeaver;
 import org.springframework.instrument.classloading.jboss.JBossLoadTimeWeaver;
 import org.springframework.instrument.classloading.tomcat.TomcatLoadTimeWeaver;
-import org.springframework.instrument.classloading.weblogic.WebLogicLoadTimeWeaver;
-import org.springframework.instrument.classloading.websphere.WebSphereLoadTimeWeaver;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -45,10 +43,9 @@ import org.springframework.util.Assert;
  * on a {@code @Configuration} class.
  *
  * <p>This class implements a runtime environment check for obtaining the
- * appropriate weaver implementation. As of Spring Framework 5.0, it detects
- * Oracle WebLogic 10+, GlassFish 4+, Tomcat 8+, WildFly 8+, IBM WebSphere 8.5+,
- * {@link InstrumentationSavingAgent Spring's VM agent}, and any {@link ClassLoader}
- * supported by Spring's {@link ReflectiveLoadTimeWeaver} (such as Liberty's).
+ * appropriate weaver implementation, including
+ * {@link InstrumentationSavingAgent Spring's VM agent} and any {@link ClassLoader}
+ * supported by Spring's {@link ReflectiveLoadTimeWeaver}.
  *
  * @author Juergen Hoeller
  * @author Ramnivas Laddad
@@ -119,12 +116,6 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 			}
 			else if (name.startsWith("org.jboss.modules")) {
 				return new JBossLoadTimeWeaver(classLoader);
-			}
-			else if (name.startsWith("com.ibm.ws.classloader")) {
-				return new WebSphereLoadTimeWeaver(classLoader);
-			}
-			else if (name.startsWith("weblogic")) {
-				return new WebLogicLoadTimeWeaver(classLoader);
 			}
 		}
 		catch (Exception ex) {

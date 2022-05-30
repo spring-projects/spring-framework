@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,17 @@
 
 package org.springframework.aop.aspectj;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.aspectj.AfterThrowingAdviceBindingTestAspect.AfterThrowingAdviceBindingCollaborator;
+import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.sample.beans.ITestBean;
 
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * Tests for various parameter binding scenarios with before advice.
@@ -31,7 +34,9 @@ import static org.mockito.BDDMockito.*;
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public class AfterThrowingAdviceBindingTests {
+class AfterThrowingAdviceBindingTests {
+
+	private ClassPathXmlApplicationContext ctx;
 
 	private ITestBean testBean;
 
@@ -40,10 +45,9 @@ public class AfterThrowingAdviceBindingTests {
 	private AfterThrowingAdviceBindingCollaborator mockCollaborator;
 
 
-	@Before
-	public void setup() {
-		ClassPathXmlApplicationContext ctx =
-				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+	@BeforeEach
+	void setup() {
+		this.ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 
 		testBean = (ITestBean) ctx.getBean("testBean");
 		afterThrowingAdviceAspect = (AfterThrowingAdviceBindingTestAspect) ctx.getBean("testAspect");
@@ -52,45 +56,56 @@ public class AfterThrowingAdviceBindingTests {
 		afterThrowingAdviceAspect.setCollaborator(mockCollaborator);
 	}
 
+	@AfterEach
+	void tearDown() {
+		this.ctx.close();
+	}
 
-	@Test(expected = Throwable.class)
-	public void testSimpleAfterThrowing() throws Throwable {
-		this.testBean.exceptional(new Throwable());
+
+	@Test
+	void simpleAfterThrowing() throws Throwable {
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
+				this.testBean.exceptional(new Throwable()));
 		verify(mockCollaborator).noArgs();
 	}
 
-	@Test(expected = Throwable.class)
-	public void testAfterThrowingWithBinding() throws Throwable {
+	@Test
+	void afterThrowingWithBinding() throws Throwable {
 		Throwable t = new Throwable();
-		this.testBean.exceptional(t);
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
+				this.testBean.exceptional(t));
 		verify(mockCollaborator).oneThrowable(t);
 	}
 
-	@Test(expected = Throwable.class)
-	public void testAfterThrowingWithNamedTypeRestriction() throws Throwable {
+	@Test
+	void afterThrowingWithNamedTypeRestriction() throws Throwable {
 		Throwable t = new Throwable();
-		this.testBean.exceptional(t);
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
+				this.testBean.exceptional(t));
 		verify(mockCollaborator).noArgs();
 		verify(mockCollaborator).oneThrowable(t);
 		verify(mockCollaborator).noArgsOnThrowableMatch();
 	}
 
-	@Test(expected = Throwable.class)
-	public void testAfterThrowingWithRuntimeExceptionBinding() throws Throwable {
+	@Test
+	void afterThrowingWithRuntimeExceptionBinding() throws Throwable {
 		RuntimeException ex = new RuntimeException();
-		this.testBean.exceptional(ex);
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
+				this.testBean.exceptional(ex));
 		verify(mockCollaborator).oneRuntimeException(ex);
 	}
 
-	@Test(expected = Throwable.class)
-	public void testAfterThrowingWithTypeSpecified() throws Throwable {
-		this.testBean.exceptional(new Throwable());
+	@Test
+	void afterThrowingWithTypeSpecified() throws Throwable {
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
+					this.testBean.exceptional(new Throwable()));
 		verify(mockCollaborator).noArgsOnThrowableMatch();
 	}
 
-	@Test(expected = Throwable.class)
-	public void testAfterThrowingWithRuntimeTypeSpecified() throws Throwable {
-		this.testBean.exceptional(new RuntimeException());
+	@Test
+	void afterThrowingWithRuntimeTypeSpecified() throws Throwable {
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
+				this.testBean.exceptional(new RuntimeException()));
 		verify(mockCollaborator).noArgsOnRuntimeExceptionMatch();
 	}
 

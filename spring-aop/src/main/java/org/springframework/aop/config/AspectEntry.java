@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public class AspectEntry implements ParseState.Entry {
 
 
 	/**
-	 * Create a new AspectEntry.
+	 * Create a new {@code AspectEntry} instance.
 	 * @param id the id of the aspect element
 	 * @param ref the bean name referenced by this aspect element
 	 */
@@ -42,6 +42,7 @@ public class AspectEntry implements ParseState.Entry {
 		this.id = id;
 		this.ref = ref;
 	}
+
 
 	@Override
 	public String toString() {

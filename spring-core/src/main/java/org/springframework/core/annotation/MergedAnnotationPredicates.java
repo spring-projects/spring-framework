@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ public abstract class MergedAnnotationPredicates {
 
 
 	/**
-	 * Create a new {@link Predicate} that evaluates to {@code true} if the
+	 * Create a new {@link Predicate} that evaluates to {@code true} if the name of the
 	 * {@linkplain MergedAnnotation#getType() merged annotation type} is contained in
 	 * the specified array.
 	 * @param <A> the annotation type
@@ -67,24 +67,27 @@ public abstract class MergedAnnotationPredicates {
 	/**
 	 * Create a new {@link Predicate} that evaluates to {@code true} if the
 	 * {@linkplain MergedAnnotation#getType() merged annotation type} is contained in
-	 * the collection.
+	 * the specified collection.
 	 * @param <A> the annotation type
 	 * @param types the type names or classes that should be matched
 	 * @return a {@link Predicate} to test the annotation type
 	 */
 	public static <A extends Annotation> Predicate<MergedAnnotation<? extends A>> typeIn(Collection<?> types) {
 		return annotation -> types.stream()
-				.map(type -> type instanceof Class ? ((Class<?>) type).getName() : type.toString())
+				.map(type -> type instanceof Class<?> clazz ? clazz.getName() : type.toString())
 				.anyMatch(typeName -> typeName.equals(annotation.getType().getName()));
 	}
 
 	/**
 	 * Create a new stateful, single use {@link Predicate} that matches only
 	 * the first run of an extracted value. For example,
-	 * {@code MergedAnnotationPredicates.firstRunOf(MergedAnnotation::depth)}
-	 * will return the first annotation and a subsequent run of the same depth.
-	 * <p>NOTE: This predicate only matches the first first run. Once the extracted
-	 * value changes, the predicate always returns {@code false}.
+	 * {@code MergedAnnotationPredicates.firstRunOf(MergedAnnotation::distance)}
+	 * will match the first annotation, and any subsequent runs that have the
+	 * same distance.
+	 * <p>NOTE: This predicate only matches the first run. Once the extracted
+	 * value changes, the predicate always returns {@code false}. For example,
+	 * if you have a set of annotations with distances {@code [1, 1, 2, 1]} then
+	 * only the first two will match.
 	 * @param valueExtractor function used to extract the value to check
 	 * @return a {@link Predicate} that matches the first run of the extracted
 	 * values
@@ -98,7 +101,7 @@ public abstract class MergedAnnotationPredicates {
 	/**
 	 * Create a new stateful, single use {@link Predicate} that matches
 	 * annotations that are unique based on the extracted key. For example
-	 * {@code MergedAnnotationPredicates.unique(MergedAnnotation::type)} will
+	 * {@code MergedAnnotationPredicates.unique(MergedAnnotation::getType)} will
 	 * match the first time a unique type is encountered.
 	 * @param keyExtractor function used to extract the key used to test for
 	 * uniqueness

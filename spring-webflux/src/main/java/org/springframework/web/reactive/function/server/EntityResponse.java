@@ -30,7 +30,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.codec.json.Jackson2CodecSupport;
@@ -64,12 +64,36 @@ public interface EntityResponse<T> extends ServerResponse {
 
 	/**
 	 * Create a builder with the given object.
-	 * @param t the object that represents the body of the response
-	 * @param <T> the type of the elements contained in the publisher
+	 * @param body the object that represents the body of the response
+	 * @param <T> the type of the body
 	 * @return the created builder
 	 */
-	static <T> Builder<T> fromObject(T t) {
-		return new DefaultEntityResponseBuilder<>(t, BodyInserters.fromObject(t));
+	static <T> Builder<T> fromObject(T body) {
+		return new DefaultEntityResponseBuilder<>(body, BodyInserters.fromValue(body));
+	}
+
+	/**
+	 * Create a builder with the given producer.
+	 * @param producer the producer that represents the body of the response
+	 * @param elementClass the class of elements contained in the publisher
+	 * @return the created builder
+	 * @since 5.2
+	 */
+	static <T> Builder<T> fromProducer(T producer, Class<?> elementClass) {
+		return new DefaultEntityResponseBuilder<>(producer,
+				BodyInserters.fromProducer(producer, elementClass));
+	}
+
+	/**
+	 * Create a builder with the given producer.
+	 * @param producer the producer that represents the body of the response
+	 * @param typeReference the type of elements contained in the producer
+	 * @return the created builder
+	 * @since 5.2
+	 */
+	static <T> Builder<T> fromProducer(T producer, ParameterizedTypeReference<?> typeReference) {
+		return new DefaultEntityResponseBuilder<>(producer,
+				BodyInserters.fromProducer(producer, typeReference));
 	}
 
 	/**
@@ -130,7 +154,7 @@ public interface EntityResponse<T> extends ServerResponse {
 		 * @param status the response status
 		 * @return this builder
 		 */
-		Builder<T> status(HttpStatus status);
+		Builder<T> status(HttpStatusCode status);
 
 		/**
 		 * Set the HTTP status.
@@ -264,8 +288,7 @@ public interface EntityResponse<T> extends ServerResponse {
 		Builder<T> hint(String key, Object value);
 
 		/**
-		 * Manipulate serialization hint with the given consumer.
-		 *
+		 * Customize the serialization hints with the given consumer.
 		 * @param hintsConsumer a function that consumes the hints
 		 * @return this builder
 		 * @since 5.1.6

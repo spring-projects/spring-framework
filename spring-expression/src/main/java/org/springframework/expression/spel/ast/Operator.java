@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -36,6 +35,7 @@ import org.springframework.util.ObjectUtils;
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Giovanni Dall'Oglio Risso
+ * @author Sam Brannen
  * @since 3.0
  */
 public abstract class Operator extends SpelNodeImpl {
@@ -81,10 +81,10 @@ public abstract class Operator extends SpelNodeImpl {
 		StringBuilder sb = new StringBuilder("(");
 		sb.append(getChild(0).toStringAST());
 		for (int i = 1; i < getChildCount(); i++) {
-			sb.append(" ").append(getOperatorName()).append(" ");
+			sb.append(' ').append(getOperatorName()).append(' ');
 			sb.append(getChild(i).toStringAST());
 		}
-		sb.append(")");
+		sb.append(')');
 		return sb.toString();
 	}
 
@@ -113,7 +113,8 @@ public abstract class Operator extends SpelNodeImpl {
 		SpelNodeImpl right = getRightOperand();
 		String leftDesc = left.exitTypeDescriptor;
 		String rightDesc = right.exitTypeDescriptor;
-
+		Label elseTarget = new Label();
+		Label endOfIf = new Label();
 		boolean unboxLeft = !CodeFlow.isPrimitive(leftDesc);
 		boolean unboxRight = !CodeFlow.isPrimitive(rightDesc);
 		DescriptorComparison dc = DescriptorComparison.checkNumericCompatibility(
@@ -123,20 +124,104 @@ public abstract class Operator extends SpelNodeImpl {
 		cf.enterCompilationScope();
 		left.generateCode(mv, cf);
 		cf.exitCompilationScope();
-		if (unboxLeft) {
-			CodeFlow.insertUnboxInsns(mv, targetType, leftDesc);
+		if (CodeFlow.isPrimitive(leftDesc)) {
+			CodeFlow.insertBoxIfNecessary(mv, leftDesc);
+			unboxLeft = true;
 		}
 
 		cf.enterCompilationScope();
 		right.generateCode(mv, cf);
 		cf.exitCompilationScope();
+		if (CodeFlow.isPrimitive(rightDesc)) {
+			CodeFlow.insertBoxIfNecessary(mv, rightDesc);
+			unboxRight = true;
+		}
+
+		// This code block checks whether the left or right operand is null and handles
+		// those cases before letting the original code (that only handled actual numbers) run
+		Label rightIsNonNull = new Label();
+		mv.visitInsn(DUP);  // stack: left/right/right
+		mv.visitJumpInsn(IFNONNULL, rightIsNonNull);  // stack: left/right
+		// here: RIGHT==null LEFT==unknown
+		mv.visitInsn(SWAP);  // right/left
+		Label leftNotNullRightIsNull = new Label();
+		mv.visitJumpInsn(IFNONNULL, leftNotNullRightIsNull);  // stack: right
+		// here: RIGHT==null LEFT==null
+		mv.visitInsn(POP);  // stack: <nothing>
+		// load 0 or 1 depending on comparison instruction
+		switch (compInstruction1) {
+		case IFGE: // OpLT
+		case IFLE: // OpGT
+			mv.visitInsn(ICONST_0);  // false - null is not < or > null
+			break;
+		case IFGT: // OpLE
+		case IFLT: // OpGE
+			mv.visitInsn(ICONST_1);  // true - null is <= or >= null
+			break;
+		default:
+			throw new IllegalStateException("Unsupported: " + compInstruction1);
+		}
+		mv.visitJumpInsn(GOTO, endOfIf);
+		mv.visitLabel(leftNotNullRightIsNull);  // stack: right
+		// RIGHT==null LEFT!=null
+		mv.visitInsn(POP);  // stack: <nothing>
+		// load 0 or 1 depending on comparison instruction
+		switch (compInstruction1) {
+		case IFGE: // OpLT
+		case IFGT: // OpLE
+			mv.visitInsn(ICONST_0);  // false - something is not < or <= null
+			break;
+		case IFLE: // OpGT
+		case IFLT: // OpGE
+			mv.visitInsn(ICONST_1);  // true - something is > or >= null
+			break;
+		default:
+			throw new IllegalStateException("Unsupported: " + compInstruction1);
+		}
+		mv.visitJumpInsn(GOTO, endOfIf);
+
+		mv.visitLabel(rightIsNonNull);  // stack: left/right
+		// here: RIGHT!=null LEFT==unknown
+		mv.visitInsn(SWAP);  // stack: right/left
+		mv.visitInsn(DUP);  // stack: right/left/left
+		Label neitherRightNorLeftAreNull = new Label();
+		mv.visitJumpInsn(IFNONNULL, neitherRightNorLeftAreNull);  // stack: right/left
+		// here: RIGHT!=null LEFT==null
+		mv.visitInsn(POP2);  // stack: <nothing>
+		switch (compInstruction1) {
+		case IFGE: // OpLT
+		case IFGT: // OpLE
+			mv.visitInsn(ICONST_1);  // true - null is < or <= something
+			break;
+		case IFLE: // OpGT
+		case IFLT: // OpGE
+			mv.visitInsn(ICONST_0);  // false - null is not > or >= something
+			break;
+		default:
+			throw new IllegalStateException("Unsupported: " + compInstruction1);
+		}
+		mv.visitJumpInsn(GOTO, endOfIf);
+		mv.visitLabel(neitherRightNorLeftAreNull);  // stack: right/left
+		// neither were null so unbox and proceed with numeric comparison
+		if (unboxLeft) {
+			CodeFlow.insertUnboxInsns(mv, targetType, leftDesc);
+		}
+		// What we just unboxed might be a double slot item (long/double)
+		// so can't just use SWAP
+		// stack: right/left(1or2slots)
+		if (targetType == 'D' || targetType == 'J') {
+			mv.visitInsn(DUP2_X1);
+			mv.visitInsn(POP2);
+		}
+		else {
+			mv.visitInsn(SWAP);
+		}
+		// stack: left(1or2)/right
 		if (unboxRight) {
 			CodeFlow.insertUnboxInsns(mv, targetType, rightDesc);
 		}
 
 		// assert: SpelCompiler.boxingCompatible(leftDesc, rightDesc)
-		Label elseTarget = new Label();
-		Label endOfIf = new Label();
 		if (targetType == 'D') {
 			mv.visitInsn(DCMPG);
 			mv.visitJumpInsn(compInstruction1, elseTarget);
@@ -176,10 +261,7 @@ public abstract class Operator extends SpelNodeImpl {
 	 * @param right the right-hand operand value
 	 */
 	public static boolean equalityCheck(EvaluationContext context, @Nullable Object left, @Nullable Object right) {
-		if (left instanceof Number && right instanceof Number) {
-			Number leftNumber = (Number) left;
-			Number rightNumber = (Number) right;
-
+		if (left instanceof Number leftNumber && right instanceof Number rightNumber) {
 			if (leftNumber instanceof BigDecimal || rightNumber instanceof BigDecimal) {
 				BigDecimal leftBigDecimal = NumberUtils.convertNumberToTargetClass(leftNumber, BigDecimal.class);
 				BigDecimal rightBigDecimal = NumberUtils.convertNumberToTargetClass(rightNumber, BigDecimal.class);
@@ -226,11 +308,8 @@ public abstract class Operator extends SpelNodeImpl {
 			return true;
 		}
 
-		if (left instanceof Comparable && right instanceof Comparable) {
-			Class<?> ancestor = ClassUtils.determineCommonAncestor(left.getClass(), right.getClass());
-			if (ancestor != null && Comparable.class.isAssignableFrom(ancestor)) {
-				return (context.getTypeComparator().compare(left, right) == 0);
-			}
+		if (context.getTypeComparator().canCompare(left, right)) {
+			return context.getTypeComparator().compare(left, right) == 0;
 		}
 
 		return false;

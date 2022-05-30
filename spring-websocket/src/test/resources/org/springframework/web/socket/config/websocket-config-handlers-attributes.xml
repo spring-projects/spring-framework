@@ -5,7 +5,7 @@
         http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/websocket https://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
-	<websocket:handlers order="2" allowed-origins="https://mydomain1.com, https://mydomain2.com">
+	<websocket:handlers order="2" allowed-origins="https://mydomain1.example, https://mydomain2.example">
 		<websocket:mapping path="/foo" handler="fooHandler"/>
 		<websocket:mapping path="/test" handler="testHandler"/>
 		<websocket:handshake-handler ref="testHandshakeHandler"/>

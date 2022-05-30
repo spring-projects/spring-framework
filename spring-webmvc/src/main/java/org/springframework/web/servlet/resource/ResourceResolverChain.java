@@ -17,7 +17,8 @@
 package org.springframework.web.servlet.resource;
 
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;

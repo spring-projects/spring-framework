@@ -36,9 +36,9 @@ import org.springframework.util.MimeType;
  */
 public abstract class AbstractEncoder<T> implements Encoder<T> {
 
-	protected Log logger = LogFactory.getLog(getClass());
-
 	private final List<MimeType> encodableMimeTypes;
+
+	protected Log logger = LogFactory.getLog(getClass());
 
 
 	protected AbstractEncoder(MimeType... supportedMimeTypes) {
@@ -74,7 +74,7 @@ public abstract class AbstractEncoder<T> implements Encoder<T> {
 		if (mimeType == null) {
 			return true;
 		}
-		for(MimeType candidate : this.encodableMimeTypes) {
+		for (MimeType candidate : this.encodableMimeTypes) {
 			if (candidate.isCompatibleWith(mimeType)) {
 				return true;
 			}

@@ -18,12 +18,13 @@ package org.springframework.context.index.processor;
 
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 
 /**
  * A {@link StereotypesProvider} implementation that provides the
- * {@value STEREOTYPE} stereotype for each package-info.
+ * {@value #STEREOTYPE} stereotype for each package-info.
  *
  * @author Stephane Nicoll
  * @since 5.0

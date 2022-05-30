@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
-import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -28,18 +27,20 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Violeta Georgieva
  * @since 5.0
  */
-public class WriteOnlyHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+class WriteOnlyHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private static final int REQUEST_SIZE = 4096 * 3;
 
-	private Random rnd = new Random();
+	private final Random rnd = new Random();
 
 	private byte[] body;
 
@@ -49,8 +50,10 @@ public class WriteOnlyHandlerIntegrationTests extends AbstractHttpHandlerIntegra
 		return new WriteOnlyHandler();
 	}
 
-	@Test
-	public void writeOnly() throws Exception {
+	@ParameterizedHttpServerTest
+	void writeOnly(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		RestTemplate restTemplate = new RestTemplate();
 
 		this.body = randomBytes();
@@ -59,7 +62,7 @@ public class WriteOnlyHandlerIntegrationTests extends AbstractHttpHandlerIntegra
 						"".getBytes(StandardCharsets.UTF_8));
 		ResponseEntity<byte[]> response = restTemplate.exchange(request, byte[].class);
 
-		assertArrayEquals(body, response.getBody());
+		assertThat(response.getBody()).isEqualTo(body);
 	}
 
 	private byte[] randomBytes() {
@@ -69,7 +72,7 @@ public class WriteOnlyHandlerIntegrationTests extends AbstractHttpHandlerIntegra
 	}
 
 
-	public class WriteOnlyHandler implements HttpHandler {
+	class WriteOnlyHandler implements HttpHandler {
 
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {

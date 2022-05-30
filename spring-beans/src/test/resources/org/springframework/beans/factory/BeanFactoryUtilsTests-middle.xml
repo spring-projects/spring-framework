@@ -4,7 +4,7 @@
 <beans>
 
 	<!-- Simple target -->
-	<bean id="test" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="test" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>custom</value></property>
 		<property name="age"><value>666</value></property>
 	</bean>
@@ -13,7 +13,7 @@
 		Check that invoker is automatically added to wrap target.
 		Non pointcut bean name should be wrapped in invoker.
 	-->
-	<bean id="numberTestBean" class="org.springframework.tests.sample.beans.NumberTestBean"/>
+	<bean id="numberTestBean" class="org.springframework.beans.testfixture.beans.NumberTestBean"/>
 
 </beans>
 

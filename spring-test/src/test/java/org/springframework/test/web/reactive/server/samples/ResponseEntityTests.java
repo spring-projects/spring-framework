@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hamcrest.MatcherAssert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
@@ -39,10 +38,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static java.time.Duration.*;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.http.MediaType.*;
+import static java.time.Duration.ofMillis;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.startsWith;
+import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
 
 /**
  * Annotated controllers accepting and returning typed Objects.
@@ -50,7 +49,7 @@ import static org.springframework.http.MediaType.*;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ResponseEntityTests {
+class ResponseEntityTests {
 
 	private final WebTestClient client = WebTestClient.bindToController(new PersonController())
 			.configureClient()
@@ -59,61 +58,58 @@ public class ResponseEntityTests {
 
 
 	@Test
-	public void entity() {
+	void entity() {
 		this.client.get().uri("/John")
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+				.expectHeader().contentType(MediaType.APPLICATION_JSON)
 				.expectBody(Person.class).isEqualTo(new Person("John"));
 	}
 
 	@Test
-	public void entityMatcher() {
+	void entityMatcher() {
 		this.client.get().uri("/John")
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+				.expectHeader().contentType(MediaType.APPLICATION_JSON)
 				.expectBody(Person.class).value(Person::getName, startsWith("Joh"));
 	}
 
 	@Test
-	public void entityWithConsumer() {
+	void entityWithConsumer() {
 		this.client.get().uri("/John")
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+				.expectHeader().contentType(MediaType.APPLICATION_JSON)
 				.expectBody(Person.class)
-				.consumeWith(result -> assertEquals(new Person("John"), result.getResponseBody()));
+				.consumeWith(result -> assertThat(result.getResponseBody()).isEqualTo(new Person("John")));
 	}
 
 	@Test
-	public void entityList() {
-
+	void entityList() {
 		List<Person> expected = Arrays.asList(
 				new Person("Jane"), new Person("Jason"), new Person("John"));
 
 		this.client.get()
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+				.expectHeader().contentType(MediaType.APPLICATION_JSON)
 				.expectBodyList(Person.class).isEqualTo(expected);
 	}
 
 	@Test
-	public void entityListWithConsumer() {
-
+	void entityListWithConsumer() {
 		this.client.get()
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
-				.expectBodyList(Person.class).value(people -> {
-					MatcherAssert.assertThat(people, hasItem(new Person("Jason")));
-				});
+				.expectHeader().contentType(MediaType.APPLICATION_JSON)
+				.expectBodyList(Person.class).value(people ->
+					assertThat(people).contains(new Person("Jason"))
+				);
 	}
 
 	@Test
-	public void entityMap() {
-
+	void entityMap() {
 		Map<String, Person> map = new LinkedHashMap<>();
 		map.put("Jane", new Person("Jane"));
 		map.put("Jason", new Person("Jason"));
@@ -126,8 +122,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void entityStream() {
-
+	void entityStream() {
 		FluxExchangeResult<Person> result = this.client.get()
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
@@ -138,15 +133,15 @@ public class ResponseEntityTests {
 		StepVerifier.create(result.getResponseBody())
 				.expectNext(new Person("N0"), new Person("N1"), new Person("N2"))
 				.expectNextCount(4)
-				.consumeNextWith(person -> assertThat(person.getName(), endsWith("7")))
+				.consumeNextWith(person -> assertThat(person.getName()).endsWith("7"))
 				.thenCancel()
 				.verify();
 	}
 
 	@Test
-	public void postEntity() {
+	void postEntity() {
 		this.client.post()
-				.syncBody(new Person("John"))
+				.bodyValue(new Person("John"))
 				.exchange()
 				.expectStatus().isCreated()
 				.expectHeader().valueEquals("location", "/persons/John")

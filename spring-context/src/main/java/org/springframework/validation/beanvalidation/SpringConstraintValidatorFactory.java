@@ -16,8 +16,8 @@
 
 package org.springframework.validation.beanvalidation;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorFactory;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorFactory;
 
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.util.Assert;
@@ -57,6 +57,7 @@ public class SpringConstraintValidatorFactory implements ConstraintValidatorFact
 	}
 
 	// Bean Validation 1.1 releaseInstance method
+	@Override
 	public void releaseInstance(ConstraintValidator<?, ?> instance) {
 		this.beanFactory.destroyBean(instance);
 	}

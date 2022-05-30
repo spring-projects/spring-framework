@@ -154,22 +154,27 @@ public class GroovyWebApplicationContext extends AbstractRefreshableWebApplicati
 
 	// Implementation of the GroovyObject interface
 
+	@Override
 	public void setMetaClass(MetaClass metaClass) {
 		this.metaClass = metaClass;
 	}
 
+	@Override
 	public MetaClass getMetaClass() {
 		return this.metaClass;
 	}
 
+	@Override
 	public Object invokeMethod(String name, Object args) {
 		return this.metaClass.invokeMethod(this, name, args);
 	}
 
+	@Override
 	public void setProperty(String property, Object newValue) {
 		this.metaClass.setProperty(this, property, newValue);
 	}
 
+	@Override
 	@Nullable
 	public Object getProperty(String property) {
 		if (containsBean(property)) {

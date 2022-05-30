@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,16 @@
 package org.springframework.jms.connection;
 
 import java.lang.reflect.Method;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.JMSException;
-import javax.jms.Session;
-import javax.jms.TransactionInProgressException;
 
+import jakarta.jms.Connection;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.JMSException;
+import jakarta.jms.Session;
+import jakarta.jms.TransactionInProgressException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -57,11 +58,11 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 
 	private boolean frozen = false;
 
-	private final LinkedList<Connection> connections = new LinkedList<>();
+	private final Deque<Connection> connections = new ArrayDeque<>();
 
-	private final LinkedList<Session> sessions = new LinkedList<>();
+	private final Deque<Session> sessions = new ArrayDeque<>();
 
-	private final Map<Connection, LinkedList<Session>> sessionsPerConnection = new HashMap<>();
+	private final Map<Connection, Deque<Session>> sessionsPerConnection = new HashMap<>();
 
 
 	/**
@@ -154,8 +155,8 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 		if (!this.sessions.contains(session)) {
 			this.sessions.add(session);
 			if (connection != null) {
-				LinkedList<Session> sessions =
-						this.sessionsPerConnection.computeIfAbsent(connection, k -> new LinkedList<>());
+				Deque<Session> sessions =
+						this.sessionsPerConnection.computeIfAbsent(connection, k -> new ArrayDeque<>());
 				sessions.add(session);
 			}
 		}
@@ -222,7 +223,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	 */
 	@Nullable
 	public <S extends Session> S getSession(Class<S> sessionType, @Nullable Connection connection) {
-		LinkedList<Session> sessions =
+		Deque<Session> sessions =
 				(connection != null ? this.sessionsPerConnection.get(connection) : this.sessions);
 		return CollectionUtils.findValueOfType(sessions, sessionType);
 	}
@@ -241,7 +242,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 			catch (TransactionInProgressException ex) {
 				// Ignore -> can only happen in case of a JTA transaction.
 			}
-			catch (javax.jms.IllegalStateException ex) {
+			catch (jakarta.jms.IllegalStateException ex) {
 				if (this.connectionFactory != null) {
 					try {
 						Method getDataSourceMethod = this.connectionFactory.getClass().getMethod("getDataSource");

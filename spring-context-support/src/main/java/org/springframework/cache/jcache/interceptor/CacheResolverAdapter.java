@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.cache.jcache.interceptor;
 
 import java.util.Collection;
 import java.util.Collections;
+
 import javax.cache.annotation.CacheInvocationContext;
 
 import org.springframework.cache.Cache;
@@ -58,10 +59,9 @@ class CacheResolverAdapter implements CacheResolver {
 
 	@Override
 	public Collection<? extends Cache> resolveCaches(CacheOperationInvocationContext<?> context) {
-		if (!(context instanceof CacheInvocationContext<?>)) {
+		if (!(context instanceof CacheInvocationContext<?> cacheInvocationContext)) {
 			throw new IllegalStateException("Unexpected context " + context);
 		}
-		CacheInvocationContext<?> cacheInvocationContext = (CacheInvocationContext<?>) context;
 		javax.cache.Cache<Object, Object> cache = this.target.resolveCache(cacheInvocationContext);
 		if (cache == null) {
 			throw new IllegalStateException("Could not resolve cache for " + context + " using " + this.target);

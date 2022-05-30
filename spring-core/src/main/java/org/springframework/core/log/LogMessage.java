@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.util.Assert;
  * A simple log message type for use with Commons Logging, allowing
  * for convenient lazy resolution of a given {@link Supplier} instance
  * (typically bound to a Java 8 lambda expression) or a printf-style
- * format string ({@link String#format})in its {@link #toString()}.
+ * format string ({@link String#format}) in its {@link #toString()}.
  *
  * @author Juergen Hoeller
  * @since 5.2
@@ -143,7 +143,7 @@ public abstract class LogMessage implements CharSequence {
 
 	private static final class SupplierMessage extends LogMessage {
 
-		private Supplier<? extends CharSequence> supplier;
+		private final Supplier<? extends CharSequence> supplier;
 
 		SupplierMessage(Supplier<? extends CharSequence> supplier) {
 			Assert.notNull(supplier, "Supplier must not be null");

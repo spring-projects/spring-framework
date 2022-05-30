@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package org.springframework.scheduling.quartz;
 
 import java.text.ParseException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.quartz.SimpleTrigger;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Stephane Nicoll
@@ -36,8 +36,8 @@ public class SimpleTriggerFactoryBeanTests {
 		factory.setRepeatInterval(1000L);
 		factory.afterPropertiesSet();
 		SimpleTrigger trigger = factory.getObject();
-		assertEquals(5, trigger.getRepeatCount());
-		assertEquals(1000L, trigger.getRepeatInterval());
+		assertThat(trigger.getRepeatCount()).isEqualTo(5);
+		assertThat(trigger.getRepeatInterval()).isEqualTo(1000L);
 	}
 
 }

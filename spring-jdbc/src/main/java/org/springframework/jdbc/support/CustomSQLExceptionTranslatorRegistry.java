@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,13 +74,15 @@ public final class CustomSQLExceptionTranslatorRegistry {
 	 */
 	public void registerTranslator(String dbName, SQLExceptionTranslator translator) {
 		SQLExceptionTranslator replaced = this.translatorMap.put(dbName, translator);
-		if (replaced != null) {
-			logger.debug("Replacing custom translator [" + replaced + "] for database '" + dbName +
-					"' with [" + translator + "]");
-		}
-		else {
-			logger.debug("Adding custom translator of type [" + translator.getClass().getName() +
-					"] for database '" + dbName + "'");
+		if (logger.isDebugEnabled()) {
+			if (replaced != null) {
+				logger.debug("Replacing custom translator [" + replaced + "] for database '" + dbName +
+						"' with [" + translator + "]");
+			}
+			else {
+				logger.debug("Adding custom translator of type [" + translator.getClass().getName() +
+						"] for database '" + dbName + "'");
+			}
 		}
 	}
 

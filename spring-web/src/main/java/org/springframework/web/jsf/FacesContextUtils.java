@@ -16,8 +16,8 @@
 
 package org.springframework.web.jsf;
 
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;

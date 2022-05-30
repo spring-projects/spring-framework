@@ -21,13 +21,14 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Set;
 import java.util.function.Consumer;
-import javax.servlet.http.Cookie;
+
+import jakarta.servlet.http.Cookie;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.util.MultiValueMap;
 
@@ -51,7 +52,7 @@ public interface EntityResponse<T> extends ServerResponse {
 	/**
 	 * Create a builder with the given object.
 	 * @param t the object that represents the body of the response
-	 * @param <T> the type of element contained in the publisher
+	 * @param <T> the type of element contained in the entity
 	 * @return the created builder
 	 */
 	static <T> Builder<T> fromObject(T t) {
@@ -62,7 +63,7 @@ public interface EntityResponse<T> extends ServerResponse {
 	 * Create a builder with the given object and type reference.
 	 * @param t the object that represents the body of the response
 	 * @param entityType the type of the entity, used to capture the generic type
-	 * @param <T> the type of element contained in the publisher
+	 * @param <T> the type of element contained in the entity
 	 * @return the created builder
 	 */
 	static <T> Builder<T> fromObject(T t, ParameterizedTypeReference<T> entityType) {
@@ -101,7 +102,7 @@ public interface EntityResponse<T> extends ServerResponse {
 		 * @param status the response status
 		 * @return this builder
 		 */
-		Builder<T> status(HttpStatus status);
+		Builder<T> status(HttpStatusCode status);
 
 		/**
 		 * Set the HTTP status.

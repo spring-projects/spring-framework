@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 
 package org.springframework.test.context.junit4.spr4868;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
@@ -34,7 +33,7 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests that investigate the applicability of JSR-250 lifecycle
@@ -107,13 +106,13 @@ public class Jsr250LifecycleTests {
 	@Test
 	public void test1() {
 		logger.info("test1()");
-		assertNotNull(lifecycleBean);
+		assertThat(lifecycleBean).isNotNull();
 	}
 
 	@Test
 	public void test2() {
 		logger.info("test2()");
-		assertNotNull(lifecycleBean);
+		assertThat(lifecycleBean).isNotNull();
 	}
 
 }

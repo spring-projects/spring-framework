@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ public interface PathMatcher {
 	 * <p>If the return value is {@code false}, then the {@link #match}
 	 * method does not have to be used because direct equality comparisons
 	 * on the static path Strings will lead to the same result.
-	 * @param path the path String to check
+	 * @param path the path to check
 	 * @return {@code true} if the given {@code path} represents a pattern
 	 */
 	boolean isPattern(String path);
@@ -50,7 +50,7 @@ public interface PathMatcher {
 	 * Match the given {@code path} against the given {@code pattern},
 	 * according to this PathMatcher's matching strategy.
 	 * @param pattern the pattern to match against
-	 * @param path the path String to test
+	 * @param path the path to test
 	 * @return {@code true} if the supplied {@code path} matched,
 	 * {@code false} if it didn't
 	 */
@@ -62,7 +62,7 @@ public interface PathMatcher {
 	 * <p>Determines whether the pattern at least matches as far as the given base
 	 * path goes, assuming that a full path may then match as well.
 	 * @param pattern the pattern to match against
-	 * @param path the path String to test
+	 * @param path the path to test
 	 * @return {@code true} if the supplied {@code path} matched,
 	 * {@code false} if it didn't
 	 */
@@ -94,7 +94,7 @@ public interface PathMatcher {
 	 * Given a pattern and a full path, extract the URI template variables. URI template
 	 * variables are expressed through curly brackets ('{' and '}').
 	 * <p>For example: For pattern "/hotels/{hotel}" and path "/hotels/1", this method will
-	 * return a map containing "hotel"->"1".
+	 * return a map containing "hotel" &rarr; "1".
 	 * @param pattern the path pattern, possibly containing URI templates
 	 * @param path the full path to extract template variables from
 	 * @return a map, containing variable names as keys; variables values as values

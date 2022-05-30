@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ package org.springframework.core;
  * class there anyway.
  *
  * <p>Defined in the core module in order to allow
- * #{@link org.springframework.core.annotation.AnnotationAwareOrderComparator}
+ * {@link org.springframework.core.annotation.AnnotationAwareOrderComparator}
  * (and potential other candidates without spring-aop dependencies) to use it
  * for introspection purposes, in particular annotation lookups.
  *

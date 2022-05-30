@@ -5,7 +5,7 @@
 		https://www.springframework.org/schema/beans/spring-beans-3.1.xsd"
 		default-merge="false">
 
-	<bean id="abstractTestBean" class="org.springframework.tests.sample.beans.TestBean" abstract="true">
+	<bean id="abstractTestBean" class="org.springframework.beans.testfixture.beans.TestBean" abstract="true">
 		<property name="someList">
 			<list>
 				<value>alpha</value>

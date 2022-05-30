@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,51 @@ public class LogAccessor {
 	 */
 	public final Log getLog() {
 		return this.log;
+	}
+
+
+	// Log level checks
+
+	/**
+	 * Is fatal logging currently enabled?
+	 */
+	public boolean isFatalEnabled() {
+		return this.log.isFatalEnabled();
+	}
+
+	/**
+	 * Is error logging currently enabled?
+	 */
+	public boolean isErrorEnabled() {
+		return this.log.isErrorEnabled();
+	}
+
+	/**
+	 * Is warn logging currently enabled?
+	 */
+	public boolean isWarnEnabled() {
+		return this.log.isWarnEnabled();
+	}
+
+	/**
+	 * Is info logging currently enabled?
+	 */
+	public boolean isInfoEnabled() {
+		return this.log.isInfoEnabled();
+	}
+
+	/**
+	 * Is debug logging currently enabled?
+	 */
+	public boolean isDebugEnabled() {
+		return this.log.isDebugEnabled();
+	}
+
+	/**
+	 * Is trace logging currently enabled?
+	 */
+	public boolean isTraceEnabled() {
+		return this.log.isTraceEnabled();
 	}
 
 
@@ -180,7 +225,9 @@ public class LogAccessor {
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */
 	public void fatal(Supplier<? extends CharSequence> messageSupplier) {
-		this.log.fatal(LogMessage.of(messageSupplier));
+		if (this.log.isFatalEnabled()) {
+			this.log.fatal(LogMessage.of(messageSupplier));
+		}
 	}
 
 	/**
@@ -189,7 +236,9 @@ public class LogAccessor {
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */
 	public void fatal(Throwable cause, Supplier<? extends CharSequence> messageSupplier) {
-		this.log.fatal(LogMessage.of(messageSupplier), cause);
+		if (this.log.isFatalEnabled()) {
+			this.log.fatal(LogMessage.of(messageSupplier), cause);
+		}
 	}
 
 	/**
@@ -197,7 +246,9 @@ public class LogAccessor {
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */
 	public void error(Supplier<? extends CharSequence> messageSupplier) {
-		this.log.error(LogMessage.of(messageSupplier));
+		if (this.log.isErrorEnabled()) {
+			this.log.error(LogMessage.of(messageSupplier));
+		}
 	}
 
 	/**
@@ -206,7 +257,9 @@ public class LogAccessor {
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */
 	public void error(Throwable cause, Supplier<? extends CharSequence> messageSupplier) {
-		this.log.error(LogMessage.of(messageSupplier), cause);
+		if (this.log.isErrorEnabled()) {
+			this.log.error(LogMessage.of(messageSupplier), cause);
+		}
 	}
 
 	/**
@@ -214,7 +267,9 @@ public class LogAccessor {
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */
 	public void warn(Supplier<? extends CharSequence> messageSupplier) {
-		this.log.warn(LogMessage.of(messageSupplier));
+		if (this.log.isWarnEnabled()) {
+			this.log.warn(LogMessage.of(messageSupplier));
+		}
 	}
 
 	/**
@@ -223,7 +278,9 @@ public class LogAccessor {
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */
 	public void warn(Throwable cause, Supplier<? extends CharSequence> messageSupplier) {
-		this.log.warn(LogMessage.of(messageSupplier), cause);
+		if (this.log.isWarnEnabled()) {
+			this.log.warn(LogMessage.of(messageSupplier), cause);
+		}
 	}
 
 	/**
@@ -231,7 +288,9 @@ public class LogAccessor {
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */
 	public void info(Supplier<? extends CharSequence> messageSupplier) {
-		this.log.info(LogMessage.of(messageSupplier));
+		if (this.log.isInfoEnabled()) {
+			this.log.info(LogMessage.of(messageSupplier));
+		}
 	}
 
 	/**
@@ -240,7 +299,9 @@ public class LogAccessor {
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */
 	public void info(Throwable cause, Supplier<? extends CharSequence> messageSupplier) {
-		this.log.info(LogMessage.of(messageSupplier), cause);
+		if (this.log.isInfoEnabled()) {
+			this.log.info(LogMessage.of(messageSupplier), cause);
+		}
 	}
 
 	/**
@@ -248,7 +309,9 @@ public class LogAccessor {
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */
 	public void debug(Supplier<? extends CharSequence> messageSupplier) {
-		this.log.debug(LogMessage.of(messageSupplier));
+		if (this.log.isDebugEnabled()) {
+			this.log.debug(LogMessage.of(messageSupplier));
+		}
 	}
 
 	/**
@@ -257,7 +320,9 @@ public class LogAccessor {
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */
 	public void debug(Throwable cause, Supplier<? extends CharSequence> messageSupplier) {
-		this.log.debug(LogMessage.of(messageSupplier), cause);
+		if (this.log.isDebugEnabled()) {
+			this.log.debug(LogMessage.of(messageSupplier), cause);
+		}
 	}
 
 	/**
@@ -265,7 +330,9 @@ public class LogAccessor {
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */
 	public void trace(Supplier<? extends CharSequence> messageSupplier) {
-		this.log.trace(LogMessage.of(messageSupplier));
+		if (this.log.isTraceEnabled()) {
+			this.log.trace(LogMessage.of(messageSupplier));
+		}
 	}
 
 	/**
@@ -274,7 +341,9 @@ public class LogAccessor {
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */
 	public void trace(Throwable cause, Supplier<? extends CharSequence> messageSupplier) {
-		this.log.trace(LogMessage.of(messageSupplier), cause);
+		if (this.log.isTraceEnabled()) {
+			this.log.trace(LogMessage.of(messageSupplier), cause);
+		}
 	}
 
 }

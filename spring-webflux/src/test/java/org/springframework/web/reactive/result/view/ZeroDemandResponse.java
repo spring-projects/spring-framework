@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.view;
 
 import java.util.function.Supplier;
 
-import io.netty.buffer.PooledByteBufAllocator;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.BaseSubscriber;
@@ -25,10 +25,9 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.LeakAwareDataBufferFactory;
-import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.core.testfixture.io.buffer.LeakAwareDataBufferFactory;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.MultiValueMap;
@@ -47,8 +46,7 @@ public class ZeroDemandResponse implements ServerHttpResponse {
 
 
 	public ZeroDemandResponse() {
-		NettyDataBufferFactory delegate = new NettyDataBufferFactory(PooledByteBufAllocator.DEFAULT);
-		this.bufferFactory = new LeakAwareDataBufferFactory(delegate);
+		this.bufferFactory = new LeakAwareDataBufferFactory();
 	}
 
 
@@ -74,12 +72,12 @@ public class ZeroDemandResponse implements ServerHttpResponse {
 
 
 	@Override
-	public boolean setStatusCode(HttpStatus status) {
+	public boolean setStatusCode(HttpStatusCode status) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public HttpStatus getStatusCode() {
+	public HttpStatusCode getStatusCode() {
 		throw new UnsupportedOperationException();
 	}
 

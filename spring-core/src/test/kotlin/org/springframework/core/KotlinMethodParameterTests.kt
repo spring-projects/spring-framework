@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import java.lang.reflect.Method
 import java.lang.reflect.TypeVariable
+import kotlin.coroutines.Continuation
 import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.jvm.javaMethod
 
@@ -48,59 +48,65 @@ class KotlinMethodParameterTests {
 
 	@Test
 	fun `Method parameter nullability`() {
-		assertTrue(MethodParameter(nullableMethod, 0).isOptional)
-		assertFalse(MethodParameter(nonNullableMethod, 0).isOptional)
+		assertThat(MethodParameter(nullableMethod, 0).isOptional).isTrue()
+		assertThat(MethodParameter(nonNullableMethod, 0).isOptional).isFalse()
 	}
 
 	@Test
 	fun `Method return type nullability`() {
-		assertTrue(MethodParameter(nullableMethod, -1).isOptional)
-		assertFalse(MethodParameter(nonNullableMethod, -1).isOptional)
+		assertThat(MethodParameter(nullableMethod, -1).isOptional).isTrue()
+		assertThat(MethodParameter(nonNullableMethod, -1).isOptional).isFalse()
 	}
 
 	@Test  // SPR-17222
 	fun `Inner class constructor`() {
-		assertFalse(MethodParameter(innerClassConstructor, 0).isOptional)
-
-		assertFalse(MethodParameter(innerClassWithParametersConstructor, 0).isOptional)
-		assertFalse(MethodParameter(innerClassWithParametersConstructor, 1).isOptional)
-		assertTrue(MethodParameter(innerClassWithParametersConstructor, 2).isOptional)
+		assertThat(MethodParameter(innerClassConstructor, 0).isOptional).isFalse()
+		assertThat(MethodParameter(innerClassWithParametersConstructor, 0).isOptional).isFalse()
+		assertThat(MethodParameter(innerClassWithParametersConstructor, 1).isOptional).isFalse()
+		assertThat(MethodParameter(innerClassWithParametersConstructor, 2).isOptional).isTrue()
 	}
 
 	@Test
 	fun `Regular class constructor`() {
-		assertFalse(MethodParameter(regularClassConstructor, 0).isOptional)
-		assertTrue(MethodParameter(regularClassConstructor, 1).isOptional)
+		assertThat(MethodParameter(regularClassConstructor, 0).isOptional).isFalse()
+		assertThat(MethodParameter(regularClassConstructor, 1).isOptional).isTrue()
 	}
 
 	@Test
 	fun `Suspending function return type`() {
-		assertEquals(Number::class.java, returnParameterType("suspendFun"))
-		assertEquals(Number::class.java, returnGenericParameterType("suspendFun"))
+		assertThat(returnParameterType("suspendFun")).isEqualTo(Number::class.java)
+		assertThat(returnGenericParameterType("suspendFun")).isEqualTo(Number::class.java)
 
-		assertEquals(Producer::class.java, returnParameterType("suspendFun2"))
-		assertEquals("org.springframework.core.Producer<? extends java.lang.Number>", returnGenericParameterTypeName("suspendFun2"))
+		assertThat(returnParameterType("suspendFun2")).isEqualTo(Producer::class.java)
+		assertThat(returnGenericParameterTypeName("suspendFun2")).isEqualTo("org.springframework.core.Producer<? extends java.lang.Number>")
 
-		assertEquals(Wrapper::class.java, returnParameterType("suspendFun3"))
-		assertEquals("org.springframework.core.Wrapper<java.lang.Number>", returnGenericParameterTypeName("suspendFun3"))
+		assertThat(returnParameterType("suspendFun3")).isEqualTo(Wrapper::class.java)
+		assertThat(returnGenericParameterTypeName("suspendFun3")).isEqualTo("org.springframework.core.Wrapper<java.lang.Number>")
 
-		assertEquals(Consumer::class.java, returnParameterType("suspendFun4"))
-		assertEquals("org.springframework.core.Consumer<? super java.lang.Number>", returnGenericParameterTypeName("suspendFun4"))
+		assertThat(returnParameterType("suspendFun4")).isEqualTo(Consumer::class.java)
+		assertThat(returnGenericParameterTypeName("suspendFun4")).isEqualTo("org.springframework.core.Consumer<? super java.lang.Number>")
 
-		assertEquals(Producer::class.java, returnParameterType("suspendFun5"))
-		assertTrue(returnGenericParameterType("suspendFun5") is TypeVariable<*>)
-		assertEquals("org.springframework.core.Producer<? extends java.lang.Number>", returnGenericParameterTypeBoundName("suspendFun5"))
+		assertThat(returnParameterType("suspendFun5")).isEqualTo(Producer::class.java)
+		assertThat(returnGenericParameterType("suspendFun5")).isInstanceOf(TypeVariable::class.java)
+		assertThat(returnGenericParameterTypeBoundName("suspendFun5")).isEqualTo("org.springframework.core.Producer<? extends java.lang.Number>")
 
-		assertEquals(Wrapper::class.java, returnParameterType("suspendFun6"))
-		assertTrue(returnGenericParameterType("suspendFun6") is TypeVariable<*>)
-		assertEquals("org.springframework.core.Wrapper<java.lang.Number>", returnGenericParameterTypeBoundName("suspendFun6"))
+		assertThat(returnParameterType("suspendFun6")).isEqualTo(Wrapper::class.java)
+		assertThat(returnGenericParameterType("suspendFun6")).isInstanceOf(TypeVariable::class.java)
+		assertThat(returnGenericParameterTypeBoundName("suspendFun6")).isEqualTo("org.springframework.core.Wrapper<java.lang.Number>")
 
-		assertEquals(Consumer::class.java, returnParameterType("suspendFun7"))
-		assertTrue(returnGenericParameterType("suspendFun7") is TypeVariable<*>)
-		assertEquals("org.springframework.core.Consumer<? super java.lang.Number>", returnGenericParameterTypeBoundName("suspendFun7"))
+		assertThat(returnParameterType("suspendFun7")).isEqualTo(Consumer::class.java)
+		assertThat(returnGenericParameterType("suspendFun7")).isInstanceOf(TypeVariable::class.java)
+		assertThat(returnGenericParameterTypeBoundName("suspendFun7")).isEqualTo("org.springframework.core.Consumer<? super java.lang.Number>")
 
-		assertEquals(Object::class.java, returnParameterType("suspendFun8"))
-		assertEquals(Object::class.java, returnGenericParameterType("suspendFun8"))
+		assertThat(returnParameterType("suspendFun8")).isEqualTo(Object::class.java)
+		assertThat(returnGenericParameterType("suspendFun8")).isEqualTo(Object::class.java)
+	}
+
+	@Test
+	fun `Continuation parameter is optional`() {
+		val method = this::class.java.getDeclaredMethod("suspendFun", String::class.java, Continuation::class.java)
+		assertThat(MethodParameter(method, 0).isOptional).isFalse()
+		assertThat(MethodParameter(method, 1).isOptional).isTrue()
 	}
 
 	private fun returnParameterType(funName: String) = returnMethodParameter(funName).parameterType

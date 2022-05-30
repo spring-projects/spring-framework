@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,9 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.ModelAndView;
@@ -60,7 +61,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	@Nullable
 	private Integer defaultStatusCode;
 
-	private Map<String, Integer> statusCodes = new HashMap<>();
+	private final Map<String, Integer> statusCodes = new HashMap<>();
 
 	@Nullable
 	private String exceptionAttribute = DEFAULT_EXCEPTION_ATTRIBUTE;
@@ -69,7 +70,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	/**
 	 * Set the mappings between exception class names and error view names.
 	 * The exception class name can be a substring, with no wildcard support at present.
-	 * A value of "ServletException" would match {@code javax.servlet.ServletException}
+	 * A value of "ServletException" would match {@code jakarta.servlet.ServletException}
 	 * and subclasses, for example.
 	 * <p><b>NB:</b> Consider carefully how
 	 * specific the pattern is, and whether to include package information (which isn't mandatory).

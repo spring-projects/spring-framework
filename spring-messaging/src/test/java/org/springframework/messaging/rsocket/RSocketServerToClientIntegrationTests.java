@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,108 +17,104 @@
 package org.springframework.messaging.rsocket;
 
 import java.time.Duration;
-import java.util.Collections;
 
-import io.netty.buffer.PooledByteBufAllocator;
-import io.rsocket.Closeable;
-import io.rsocket.RSocket;
-import io.rsocket.RSocketFactory;
+import io.rsocket.SocketAcceptor;
+import io.rsocket.core.RSocketServer;
 import io.rsocket.frame.decoder.PayloadDecoder;
-import io.rsocket.transport.netty.client.TcpClientTransport;
+import io.rsocket.transport.netty.server.CloseableChannel;
 import io.rsocket.transport.netty.server.TcpServerTransport;
-import io.rsocket.util.DefaultPayload;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
-import reactor.core.publisher.ReplayProcessor;
+import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.core.codec.StringDecoder;
-import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.rsocket.annotation.ConnectMapping;
+import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler;
 import org.springframework.stereotype.Controller;
 
 /**
  * Client-side handling of requests initiated from the server side.
  *
- *  @author Rossen Stoyanchev
+ * @author Rossen Stoyanchev
+ * @author Brian Clozel
  */
-public class RSocketServerToClientIntegrationTests {
+class RSocketServerToClientIntegrationTests {
 
 	private static AnnotationConfigApplicationContext context;
 
-	private static Closeable server;
+	private static CloseableChannel server;
 
 
-	@BeforeClass
+	@BeforeAll
 	@SuppressWarnings("ConstantConditions")
-	public static void setupOnce() {
+	static void setupOnce() {
 		context = new AnnotationConfigApplicationContext(RSocketConfig.class);
+		RSocketMessageHandler messageHandler = context.getBean(RSocketMessageHandler.class);
+		SocketAcceptor responder = messageHandler.responder();
 
-		server = RSocketFactory.receive()
-				.frameDecoder(PayloadDecoder.ZERO_COPY)
-				.acceptor(context.getBean("serverAcceptor", MessageHandlerAcceptor.class))
-				.transport(TcpServerTransport.create("localhost", 7000))
-				.start()
+		server = RSocketServer.create(responder)
+				.payloadDecoder(PayloadDecoder.ZERO_COPY)
+				.bind(TcpServerTransport.create("localhost", 0))
 				.block();
 	}
 
-	@AfterClass
-	public static void tearDownOnce() {
+	@AfterAll
+	static void tearDownOnce() {
 		server.dispose();
 	}
 
 
 	@Test
-	public void echo() {
-		connectAndVerify("connect.echo");
+	void echo() {
+		connectAndRunTest("echo");
 	}
 
 	@Test
-	public void echoAsync() {
-		connectAndVerify("connect.echo-async");
+	void echoAsync() {
+		connectAndRunTest("echo-async");
 	}
 
 	@Test
-	public void echoStream() {
-		connectAndVerify("connect.echo-stream");
+	void echoStream() {
+		connectAndRunTest("echo-stream");
 	}
 
 	@Test
-	public void echoChannel() {
-		connectAndVerify("connect.echo-channel");
+	void echoChannel() {
+		connectAndRunTest("echo-channel");
 	}
 
 
-	private static void connectAndVerify(String destination) {
+	private static void connectAndRunTest(String connectionRoute) {
+		context.getBean(ServerController.class).reset();
 
-		ServerController serverController = context.getBean(ServerController.class);
-		serverController.reset();
+		RSocketStrategies strategies = context.getBean(RSocketStrategies.class);
+		SocketAcceptor responder = RSocketMessageHandler.responder(strategies, new ClientHandler());
 
-		RSocket rsocket = null;
+		RSocketRequester requester = null;
 		try {
-			rsocket = RSocketFactory.connect()
-					.setupPayload(DefaultPayload.create("", destination))
-					.dataMimeType("text/plain")
-					.frameDecoder(PayloadDecoder.ZERO_COPY)
-					.acceptor(context.getBean("clientAcceptor", MessageHandlerAcceptor.class))
-					.transport(TcpClientTransport.create("localhost", 7000))
-					.start()
-					.block();
+			requester = RSocketRequester.builder()
+					.setupRoute(connectionRoute)
+					.rsocketStrategies(strategies)
+					.rsocketConnector(connector -> connector.acceptor(responder))
+					.tcp("localhost", server.address().getPort());
 
-			serverController.await(Duration.ofSeconds(5));
+			// Trigger connection establishment.
+			requester.rsocketClient().source().block();
+
+			context.getBean(ServerController.class).await(Duration.ofSeconds(5));
 		}
 		finally {
-			if (rsocket != null) {
-				rsocket.dispose();
+			if (requester != null) {
+				requester.rsocketClient().dispose();
 			}
 		}
 	}
@@ -129,19 +125,19 @@ public class RSocketServerToClientIntegrationTests {
 	static class ServerController {
 
 		// Must be initialized by @Test method...
-		volatile MonoProcessor<Void> result;
+		volatile Sinks.Empty<Void> resultSink;
 
 
-		public void reset() {
-			this.result = MonoProcessor.create();
+		void reset() {
+			this.resultSink = Sinks.empty();
 		}
 
-		public void await(Duration duration) {
-			this.result.block(duration);
+		void await(Duration duration) {
+			this.resultSink.asMono().block(duration);
 		}
 
 
-		@MessageMapping("connect.echo")
+		@ConnectMapping("echo")
 		void echo(RSocketRequester requester) {
 			runTest(() -> {
 				Flux<String> flux = Flux.range(1, 3).concatMap(i ->
@@ -151,11 +147,12 @@ public class RSocketServerToClientIntegrationTests {
 						.expectNext("Hello 1")
 						.expectNext("Hello 2")
 						.expectNext("Hello 3")
-						.verifyComplete();
+						.expectComplete()
+						.verify(Duration.ofSeconds(5));
 			});
 		}
 
-		@MessageMapping("connect.echo-async")
+		@ConnectMapping("echo-async")
 		void echoAsync(RSocketRequester requester) {
 			runTest(() -> {
 				Flux<String> flux = Flux.range(1, 3).concatMap(i ->
@@ -165,11 +162,12 @@ public class RSocketServerToClientIntegrationTests {
 						.expectNext("Hello 1 async")
 						.expectNext("Hello 2 async")
 						.expectNext("Hello 3 async")
-						.verifyComplete();
+						.expectComplete()
+						.verify(Duration.ofSeconds(5));
 			});
 		}
 
-		@MessageMapping("connect.echo-stream")
+		@ConnectMapping("echo-stream")
 		void echoStream(RSocketRequester requester) {
 			runTest(() -> {
 				Flux<String> flux = requester.route("echo-stream").data("Hello").retrieveFlux(String.class);
@@ -180,11 +178,11 @@ public class RSocketServerToClientIntegrationTests {
 						.expectNext("Hello 6")
 						.expectNext("Hello 7")
 						.thenCancel()
-						.verify();
+						.verify(Duration.ofSeconds(5));
 			});
 		}
 
-		@MessageMapping("connect.echo-channel")
+		@ConnectMapping("echo-channel")
 		void echoChannel(RSocketRequester requester) {
 			runTest(() -> {
 				Flux<String> flux = requester.route("echo-channel")
@@ -200,24 +198,29 @@ public class RSocketServerToClientIntegrationTests {
 			});
 		}
 
-
 		private void runTest(Runnable testEcho) {
 			Mono.fromRunnable(testEcho)
-					.doOnError(ex -> result.onError(ex))
-					.doOnSuccess(o -> result.onComplete())
-					.subscribeOn(Schedulers.elastic()) // StepVerifier will block
-					.subscribe();
+					.subscribeOn(Schedulers.boundedElastic()) // StepVerifier will block
+					.subscribe(
+							aVoid -> {},
+							ex -> resultSink.tryEmitError(ex), // Ignore result: signals cannot compete
+							() -> resultSink.tryEmitEmpty()
+					);
+		}
+
+		@MessageMapping("fnf")
+		void handleFireAndForget() {
 		}
 	}
 
 
 	private static class ClientHandler {
 
-		final ReplayProcessor<String> fireForgetPayloads = ReplayProcessor.create();
+		final Sinks.Many<String> fireForgetPayloads = Sinks.many().replay().all();
 
 		@MessageMapping("receive")
 		void receive(String payload) {
-			this.fireForgetPayloads.onNext(payload);
+			this.fireForgetPayloads.emitNext(payload, Sinks.EmitFailureHandler.FAIL_FAST);
 		}
 
 		@MessageMapping("echo")
@@ -246,38 +249,20 @@ public class RSocketServerToClientIntegrationTests {
 	static class RSocketConfig {
 
 		@Bean
-		public ClientHandler clientHandler() {
-			return new ClientHandler();
-		}
-
-		@Bean
-		public ServerController serverController() {
+		ServerController serverController() {
 			return new ServerController();
 		}
 
 		@Bean
-		public MessageHandlerAcceptor clientAcceptor() {
-			MessageHandlerAcceptor acceptor = new MessageHandlerAcceptor();
-			acceptor.setHandlers(Collections.singletonList(clientHandler()));
-			acceptor.setAutoDetectDisabled();
-			acceptor.setRSocketStrategies(rsocketStrategies());
-			return acceptor;
-		}
-
-		@Bean
-		public MessageHandlerAcceptor serverAcceptor() {
-			MessageHandlerAcceptor handler = new MessageHandlerAcceptor();
+		RSocketMessageHandler serverMessageHandler() {
+			RSocketMessageHandler handler = new RSocketMessageHandler();
 			handler.setRSocketStrategies(rsocketStrategies());
 			return handler;
 		}
 
 		@Bean
-		public RSocketStrategies rsocketStrategies() {
-			return RSocketStrategies.builder()
-					.decoder(StringDecoder.allMimeTypes())
-					.encoder(CharSequenceEncoder.allMimeTypes())
-					.dataBufferFactory(new NettyDataBufferFactory(PooledByteBufAllocator.DEFAULT))
-					.build();
+		RSocketStrategies rsocketStrategies() {
+			return RSocketStrategies.create();
 		}
 	}
 

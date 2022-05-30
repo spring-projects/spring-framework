@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
 package org.springframework.web.servlet.handler;
 
 import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.lang.Nullable;
+import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
  * Interceptor that checks the authorization of the current user via the
@@ -29,9 +31,9 @@ import org.springframework.lang.Nullable;
  *
  * @author Juergen Hoeller
  * @since 20.06.2003
- * @see javax.servlet.http.HttpServletRequest#isUserInRole
+ * @see jakarta.servlet.http.HttpServletRequest#isUserInRole
  */
-public class UserRoleAuthorizationInterceptor extends HandlerInterceptorAdapter {
+public class UserRoleAuthorizationInterceptor implements HandlerInterceptor {
 
 	@Nullable
 	private String[] authorizedRoles;
@@ -69,7 +71,7 @@ public class UserRoleAuthorizationInterceptor extends HandlerInterceptorAdapter 
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler chosen handler to execute, for type and/or instance evaluation
-	 * @throws javax.servlet.ServletException if there is an internal error
+	 * @throws jakarta.servlet.ServletException if there is an internal error
 	 * @throws java.io.IOException in case of an I/O error when writing the response
 	 */
 	protected void handleNotAuthorized(HttpServletRequest request, HttpServletResponse response, Object handler)

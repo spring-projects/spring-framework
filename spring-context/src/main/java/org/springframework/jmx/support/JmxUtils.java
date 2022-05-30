@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.util.Hashtable;
 import java.util.List;
+
 import javax.management.DynamicMBean;
 import javax.management.JMX;
 import javax.management.MBeanParameterInfo;
@@ -254,7 +255,7 @@ public abstract class JmxUtils {
 	 * Determine whether the given bean class qualifies as an MBean as-is.
 	 * <p>This implementation checks for {@link javax.management.DynamicMBean}
 	 * classes as well as classes with corresponding "*MBean" interface
-	 * (Standard MBeans) or corresponding "*MXBean" interface (Java 6 MXBeans).
+	 * (Standard MBeans) or corresponding "*MXBean" interface (Java MXBeans).
 	 * @param clazz the bean class to analyze
 	 * @return whether the class qualifies as an MBean
 	 * @see org.springframework.jmx.export.MBeanExporter#isMBean(Class)
@@ -288,7 +289,7 @@ public abstract class JmxUtils {
 	}
 
 	/**
-	 * Return the Java 6 MXBean interface exists for the given class, if any
+	 * Return the Java MXBean interface for the given class, if any
 	 * (that is, an interface whose name ends with "MXBean" and/or
 	 * carries an appropriate MXBean annotation).
 	 * @param clazz the class to check

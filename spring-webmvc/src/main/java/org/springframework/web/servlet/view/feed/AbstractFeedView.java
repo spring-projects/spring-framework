@@ -18,12 +18,12 @@ package org.springframework.web.servlet.view.feed;
 
 import java.io.OutputStreamWriter;
 import java.util.Map;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import com.rometools.rome.feed.WireFeed;
 import com.rometools.rome.io.WireFeedOutput;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.view.AbstractView;
@@ -32,7 +32,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * Abstract base class for Atom and RSS Feed views, using the
  * <a href="https://github.com/rometools/rome">ROME</a> package.
  *
- * <p>><b>NOTE: As of Spring 4.1, this is based on the {@code com.rometools}
+ * <p><b>NOTE: As of Spring 4.1, this is based on the {@code com.rometools}
  * variant of ROME, version 1.5. Please upgrade your build dependency.</b>
  *
  * <p>Application-specific view classes will typically extend from either

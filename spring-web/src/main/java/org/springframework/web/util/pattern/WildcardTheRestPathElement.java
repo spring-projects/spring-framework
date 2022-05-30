@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,17 +48,19 @@ class WildcardTheRestPathElement extends PathElement {
 	}
 
 	@Override
+	public char[] getChars() {
+		return (this.separator + "**").toCharArray();
+	}
+
+	@Override
 	public int getWildcardCount() {
 		return 1;
 	}
 
 
+	@Override
 	public String toString() {
 		return "WildcardTheRest(" + this.separator + "**)";
 	}
 
-	@Override
-	public char[] getChars() {
-		return (this.separator+"**").toCharArray();
-	}
 }

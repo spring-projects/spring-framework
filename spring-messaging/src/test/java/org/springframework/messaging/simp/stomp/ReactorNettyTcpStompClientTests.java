@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.lang.reflect.Type;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,51 +25,46 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.activemq.broker.BrokerService;
+import org.apache.activemq.broker.TransportConnector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.stomp.StompSession.Subscription;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.Assert;
-import org.springframework.util.SocketUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link ReactorNettyTcpStompClient}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class ReactorNettyTcpStompClientTests {
 
 	private static final Log logger = LogFactory.getLog(ReactorNettyTcpStompClientTests.class);
 
-	@Rule
-	public final TestName testName = new TestName();
 
 	private BrokerService activeMQBroker;
 
 	private ReactorNettyTcpStompClient client;
 
 
-	@Before
-	public void setUp() throws Exception {
+	@BeforeEach
+	public void setup(TestInfo testInfo) throws Exception {
+		logger.debug("Setting up before '" + testInfo.getTestMethod().get().getName() + "'");
 
-		logger.debug("Setting up before '" + this.testName.getMethodName() + "'");
-
-		int port = SocketUtils.findAvailableTcpPort(61613);
-
+		TransportConnector stompConnector = createStompConnector();
 		this.activeMQBroker = new BrokerService();
-		this.activeMQBroker.addConnector("stomp://127.0.0.1:" + port);
+		this.activeMQBroker.addConnector(stompConnector);
 		this.activeMQBroker.setStartAsync(false);
 		this.activeMQBroker.setPersistent(false);
 		this.activeMQBroker.setUseJmx(false);
@@ -79,13 +75,19 @@ public class ReactorNettyTcpStompClientTests {
 		ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
 		taskScheduler.afterPropertiesSet();
 
-		this.client = new ReactorNettyTcpStompClient("127.0.0.1", port);
+		this.client = new ReactorNettyTcpStompClient("127.0.0.1", stompConnector.getServer().getSocketAddress().getPort());
 		this.client.setMessageConverter(new StringMessageConverter());
 		this.client.setTaskScheduler(taskScheduler);
 	}
 
-	@After
-	public void tearDown() throws Exception {
+	private TransportConnector createStompConnector() throws Exception {
+		TransportConnector connector = new TransportConnector();
+		connector.setUri(new URI("stomp://127.0.0.1:0"));
+		return connector;
+	}
+
+	@AfterEach
+	public void shutdown() throws Exception {
 		try {
 			this.client.shutdown();
 		}
@@ -110,19 +112,19 @@ public class ReactorNettyTcpStompClientTests {
 		ConsumingHandler consumingHandler2 = new ConsumingHandler(destination);
 		ListenableFuture<StompSession> consumerFuture2 = this.client.connect(consumingHandler2);
 
-		assertTrue(consumingHandler1.awaitForSubscriptions(5000));
-		assertTrue(consumingHandler2.awaitForSubscriptions(5000));
+		assertThat(consumingHandler1.awaitForSubscriptions(5000)).isTrue();
+		assertThat(consumingHandler2.awaitForSubscriptions(5000)).isTrue();
 
 		ProducingHandler producingHandler = new ProducingHandler();
 		producingHandler.addToSend(destination, "foo1");
 		producingHandler.addToSend(destination, "foo2");
 		ListenableFuture<StompSession> producerFuture = this.client.connect(producingHandler);
 
-		assertTrue(consumingHandler1.awaitForMessageCount(2, 5000));
-		assertThat(consumingHandler1.getReceived(), containsInAnyOrder("foo1", "foo2"));
+		assertThat(consumingHandler1.awaitForMessageCount(2, 5000)).isTrue();
+		assertThat(consumingHandler1.getReceived()).containsExactly("foo1", "foo2");
 
-		assertTrue(consumingHandler2.awaitForMessageCount(2, 5000));
-		assertThat(consumingHandler2.getReceived(), containsInAnyOrder("foo1", "foo2"));
+		assertThat(consumingHandler2.awaitForMessageCount(2, 5000)).isTrue();
+		assertThat(consumingHandler2.getReceived()).containsExactly("foo1", "foo2");
 
 		consumerFuture1.get().disconnect();
 		consumerFuture2.get().disconnect();

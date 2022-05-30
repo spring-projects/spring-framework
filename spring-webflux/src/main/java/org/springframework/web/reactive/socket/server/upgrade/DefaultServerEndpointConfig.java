@@ -20,16 +20,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.websocket.Decoder;
-import javax.websocket.Encoder;
-import javax.websocket.Endpoint;
-import javax.websocket.Extension;
-import javax.websocket.server.ServerEndpointConfig;
+
+import jakarta.websocket.Decoder;
+import jakarta.websocket.Encoder;
+import jakarta.websocket.Endpoint;
+import jakarta.websocket.Extension;
+import jakarta.websocket.server.ServerEndpointConfig;
 
 import org.springframework.util.Assert;
 
 /**
- * Default implementation of {@link javax.websocket.server.ServerEndpointConfig}
+ * Default implementation of {@link jakarta.websocket.server.ServerEndpointConfig}
  * for use in {@code RequestUpgradeStrategy} implementations.
  *
  * @author Violeta Georgieva
@@ -47,7 +48,7 @@ class DefaultServerEndpointConfig extends ServerEndpointConfig.Configurator
 
 
 	/**
-	 * Constructor with a path and an {@code javax.websocket.Endpoint}.
+	 * Constructor with a path and an {@code jakarta.websocket.Endpoint}.
 	 * @param path the endpoint path
 	 * @param endpoint the endpoint instance
 	 */

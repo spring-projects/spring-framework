@@ -1,0 +1,102 @@
+apply plugin: 'java-library'
+apply plugin: 'org.springframework.build.compile'
+apply plugin: 'org.springframework.build.optional-dependencies'
+// Uncomment the following for Shadow support in the jmhJar block.
+// Currently commented out due to ZipException: archive is not a ZIP archive
+// apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'me.champeau.jmh'
+apply from: "$rootDir/gradle/publications.gradle"
+
+dependencies {
+	jmh 'org.openjdk.jmh:jmh-core:1.32'
+	jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.32'
+	jmh 'net.sf.jopt-simple:jopt-simple'
+}
+
+jmh {
+	duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.findByName("processJmhResources").configure {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+jmhJar {
+	// Uncomment the following for Shadow's Transformer support.
+	// mergeServiceFiles()
+	// append('META-INF/spring.handlers')
+	// append('META-INF/spring.schemas')
+	// append('META-INF/spring.tooling')
+	exclude 'LICENSE'
+	exclude 'THIRD-PARTY'
+	exclude 'META-INF/license.txt'
+	exclude 'META-INF/notice.txt'
+	exclude 'META-INF/DEPENDENCIES'
+	exclude 'META-INF/LICENSE*'
+	exclude 'META-INF/NOTICE'
+	exclude 'META-INF/THIRD-PARTY'
+}
+
+jar {
+	manifest.attributes["Implementation-Title"] = project.name
+	manifest.attributes["Implementation-Version"] = project.version
+	manifest.attributes["Automatic-Module-Name"] = project.name.replace('-', '.')  // for Jigsaw
+	manifest.attributes["Created-By"] =
+			"${System.getProperty("java.version")} (${System.getProperty("java.specification.vendor")})"
+
+	from("${rootDir}/src/docs/dist") {
+		include "license.txt"
+		include "notice.txt"
+		into "META-INF"
+		expand(copyright: new Date().format("yyyy"), version: project.version)
+	}
+}
+
+normalization {
+	runtimeClasspath {
+		ignore "META-INF/MANIFEST.MF"
+	}
+}
+
+javadoc {
+	description = "Generates project-level javadoc for use in -javadoc jar"
+
+	options.encoding = "UTF-8"
+	options.memberLevel = JavadocMemberLevel.PROTECTED
+	options.author = true
+	options.header = project.name
+	options.use = true
+	options.links(project.ext.javadocLinks)
+	options.addStringOption("Xdoclint:none", "-quiet")
+
+	// Suppress warnings due to cross-module @see and @link references.
+	// Note that global 'api' task does display all warnings.
+	logging.captureStandardError LogLevel.INFO
+	logging.captureStandardOutput LogLevel.INFO  // suppress "## warnings" message
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	archiveClassifier.set("sources")
+	from sourceSets.main.allSource
+	// Don't include or exclude anything explicitly by default. See SPR-12085.
+}
+
+task javadocJar(type: Jar) {
+	archiveClassifier.set("javadoc")
+	from javadoc
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+			artifact sourcesJar
+			artifact javadocJar
+		}
+	}
+}
+
+// Disable publication of test fixture artifacts.
+components.java.withVariantsFromConfiguration(configurations.testFixturesApiElements) { skip() }
+components.java.withVariantsFromConfiguration(configurations.testFixturesRuntimeElements) { skip() }

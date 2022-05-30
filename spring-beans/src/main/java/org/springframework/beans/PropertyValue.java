@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,7 +169,7 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 	}
 
 	/**
-	 * Set the converted value of the constructor argument,
+	 * Set the converted value of this property value,
 	 * after processed type conversion.
 	 */
 	public synchronized void setConvertedValue(@Nullable Object value) {
@@ -178,7 +178,7 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 	}
 
 	/**
-	 * Return the converted value of the constructor argument,
+	 * Return the converted value of this property value,
 	 * after processed type conversion.
 	 */
 	@Nullable
@@ -188,14 +188,13 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof PropertyValue)) {
+		if (!(other instanceof PropertyValue otherPv)) {
 			return false;
 		}
-		PropertyValue otherPv = (PropertyValue) other;
 		return (this.name.equals(otherPv.name) &&
 				ObjectUtils.nullSafeEquals(this.value, otherPv.value) &&
 				ObjectUtils.nullSafeEquals(getSource(), otherPv.getSource()));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -243,7 +243,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		if (rawValues == null) {
 			return Arrays.copyOf(DEFAULT_HEARTBEAT, 2);
 		}
-		return new long[] {Long.valueOf(rawValues[0]), Long.valueOf(rawValues[1])};
+		return new long[] {Long.parseLong(rawValues[0]), Long.parseLong(rawValues[1])};
 	}
 
 	public void setAcceptVersion(String acceptVersion) {
@@ -452,7 +452,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 			return super.getDetailedLogMessage(payload);
 		}
 		StringBuilder sb = new StringBuilder();
-		sb.append(command.name()).append(" ");
+		sb.append(command.name()).append(' ');
 		Map<String, List<String>> nativeHeaders = getNativeHeaders();
 		if (nativeHeaders != null) {
 			sb.append(nativeHeaders);

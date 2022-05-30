@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,9 @@ package org.springframework.web.server.adapter;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,8 +31,10 @@ import org.springframework.core.NestedExceptionUtils;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.codec.LoggingCodecSupport;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -59,7 +63,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	/**
 	 * Dedicated log category for disconnected client exceptions.
-	 * <p>Servlet containers dn't expose a a client disconnected callback, see
+	 * <p>Servlet containers don't expose a client disconnected callback; see
 	 * <a href="https://github.com/eclipse-ee4j/servlet-api/issues/44">eclipse-ee4j/servlet-api#44</a>.
 	 * <p>To avoid filling logs with unnecessary stack traces, we make an
 	 * effort to identify such network failures on a per-server basis, and then
@@ -81,7 +85,8 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	private WebSessionManager sessionManager = new DefaultWebSessionManager();
 
-	private ServerCodecConfigurer codecConfigurer = ServerCodecConfigurer.create();
+	@Nullable
+	private ServerCodecConfigurer codecConfigurer;
 
 	private LocaleContextResolver localeContextResolver = new AcceptHeaderLocaleContextResolver();
 
@@ -143,6 +148,9 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	 * Return the configured {@link ServerCodecConfigurer}.
 	 */
 	public ServerCodecConfigurer getCodecConfigurer() {
+		if (this.codecConfigurer == null) {
+			setCodecConfigurer(ServerCodecConfigurer.create());
+		}
 		return this.codecConfigurer;
 	}
 
@@ -224,7 +232,16 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	@Override
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 		if (this.forwardedHeaderTransformer != null) {
-			request = this.forwardedHeaderTransformer.apply(request);
+			try {
+				request = this.forwardedHeaderTransformer.apply(request);
+			}
+			catch (Throwable ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Failed to apply forwarded headers to " + formatRequest(request), ex);
+				}
+				response.setStatusCode(HttpStatus.BAD_REQUEST);
+				return response.setComplete();
+			}
 		}
 		ServerWebExchange exchange = createExchange(request, response);
 
@@ -235,6 +252,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 		return getDelegate().handle(exchange)
 				.doOnSuccess(aVoid -> logResponse(exchange))
 				.onErrorResume(ex -> handleUnresolvedError(exchange, ex))
+				.then(cleanupMultipart(exchange))
 				.then(Mono.defer(response::setComplete));
 	}
 
@@ -243,7 +261,13 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 				getCodecConfigurer(), getLocaleContextResolver(), this.applicationContext);
 	}
 
-	private String formatRequest(ServerHttpRequest request) {
+	/**
+	 * Format the request for logging purposes including HTTP method and URL.
+	 * <p>By default this prints the HTTP method, the URL path, and the query.
+	 * @param request the request to format
+	 * @return the String to display, never empty or {@code null}
+	 */
+	protected String formatRequest(ServerHttpRequest request) {
 		String rawQuery = request.getURI().getRawQuery();
 		String query = StringUtils.hasText(rawQuery) ? "?" + rawQuery : "";
 		return "HTTP " + request.getMethod() + " \"" + request.getPath() + query + "\"";
@@ -251,7 +275,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	private void logResponse(ServerWebExchange exchange) {
 		LogFormatUtils.traceDebug(logger, traceOn -> {
-			HttpStatus status = exchange.getResponse().getStatusCode();
+			HttpStatusCode status = exchange.getResponse().getStatusCode();
 			return exchange.getLogPrefix() + "Completed " + (status != null ? status : "200 OK") +
 					(traceOn ? ", headers=" + formatHeaders(exchange.getResponse().getHeaders()) : "");
 		});
@@ -267,7 +291,14 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 		ServerHttpResponse response = exchange.getResponse();
 		String logPrefix = exchange.getLogPrefix();
 
-		if (isDisconnectedClientError(ex)) {
+		// Sometimes a remote call error can look like a disconnected client.
+		// Try to set the response first before the "isDisconnectedClient" check.
+
+		if (response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR)) {
+			logger.error(logPrefix + "500 Server Error for " + formatRequest(request), ex);
+			return Mono.empty();
+		}
+		else if (isDisconnectedClientError(ex)) {
 			if (lostClientLogger.isTraceEnabled()) {
 				lostClientLogger.trace(logPrefix + "Client went away", ex);
 			}
@@ -275,10 +306,6 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 				lostClientLogger.debug(logPrefix + "Client went away: " + ex +
 						" (stacktrace at TRACE level for '" + DISCONNECTED_CLIENT_LOG_CATEGORY + "')");
 			}
-			return Mono.empty();
-		}
-		else if (response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR)) {
-			logger.error(logPrefix + "500 Server Error for " + formatRequest(request), ex);
 			return Mono.empty();
 		}
 		else {
@@ -299,5 +326,24 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 		}
 		return DISCONNECTED_CLIENT_EXCEPTIONS.contains(ex.getClass().getSimpleName());
 	}
+
+	private Mono<Void> cleanupMultipart(ServerWebExchange exchange) {
+		return exchange.getMultipartData()
+				.onErrorResume(t -> Mono.empty()) // ignore errors reading multipart data
+				.flatMapIterable(Map::values)
+				.flatMapIterable(Function.identity())
+				.flatMap(this::deletePart)
+				.then();
+	}
+
+	private Mono<Void> deletePart(Part part) {
+		return part.delete().onErrorResume(ex -> {
+					if (logger.isWarnEnabled()) {
+						logger.warn("Failed to perform cleanup of multipart items", ex);
+					}
+					return Mono.empty();
+				});
+	}
+
 
 }

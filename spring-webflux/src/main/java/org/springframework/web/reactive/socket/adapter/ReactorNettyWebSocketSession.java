@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.socket.adapter;
 
+import java.util.function.Consumer;
+
+import io.netty.channel.ChannelId;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.netty.Connection;
 import reactor.netty.NettyInbound;
 import reactor.netty.NettyOutbound;
-import reactor.netty.NettyPipeline;
+import reactor.netty.channel.ChannelOperations;
 import reactor.netty.http.websocket.WebsocketInbound;
 import reactor.netty.http.websocket.WebsocketOutbound;
 
@@ -30,7 +35,6 @@ import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
-
 
 /**
  * {@link WebSocketSession} implementation for use with the Reactor Netty's
@@ -43,6 +47,8 @@ public class ReactorNettyWebSocketSession
 		extends NettyWebSocketSessionSupport<ReactorNettyWebSocketSession.WebSocketConnection> {
 
 	private final int maxFramePayloadLength;
+
+	private final ChannelId channelId;
 
 
 	/**
@@ -58,12 +64,23 @@ public class ReactorNettyWebSocketSession
 	 * Constructor with an additional maxFramePayloadLength argument.
 	 * @since 5.1
 	 */
+	@SuppressWarnings("rawtypes")
 	public ReactorNettyWebSocketSession(WebsocketInbound inbound, WebsocketOutbound outbound,
 			HandshakeInfo info, NettyDataBufferFactory bufferFactory,
 			int maxFramePayloadLength) {
 
 		super(new WebSocketConnection(inbound, outbound), info, bufferFactory);
 		this.maxFramePayloadLength = maxFramePayloadLength;
+		this.channelId = ((ChannelOperations) inbound).channel().id();
+	}
+
+
+	/**
+	 * Return the id of the underlying Netty channel.
+	 * @since 5.3.4
+	 */
+	public ChannelId getChannelId() {
+		return this.channelId;
 	}
 
 
@@ -90,16 +107,28 @@ public class ReactorNettyWebSocketSession
 				})
 				.map(this::toFrame);
 		return getDelegate().getOutbound()
-				.options(NettyPipeline.SendOptions::flushOnEach)
 				.sendObject(frames)
 				.then();
 	}
 
 	@Override
+	public boolean isOpen() {
+		DisposedCallback callback = new DisposedCallback();
+		getDelegate().getInbound().withConnection(callback);
+		return !callback.isDisposed();
+	}
+
+	@Override
 	public Mono<Void> close(CloseStatus status) {
+		// this will notify WebSocketInbound.receiveCloseStatus()
 		return getDelegate().getOutbound().sendClose(status.getCode(), status.getReason());
 	}
 
+	@Override
+	public Mono<CloseStatus> closeStatus() {
+		return getDelegate().getInbound().receiveCloseStatus()
+				.map(status -> CloseStatus.create(status.code(), status.reasonText()));
+	}
 
 	/**
 	 * Simple container for {@link NettyInbound} and {@link NettyOutbound}.
@@ -122,6 +151,21 @@ public class ReactorNettyWebSocketSession
 
 		public WebsocketOutbound getOutbound() {
 			return this.outbound;
+		}
+	}
+
+
+	private static class DisposedCallback implements Consumer<Connection> {
+
+		private boolean disposed;
+
+		public boolean isDisposed() {
+			return this.disposed;
+		}
+
+		@Override
+		public void accept(Connection connection) {
+			this.disposed = connection.isDisposed();
 		}
 	}
 

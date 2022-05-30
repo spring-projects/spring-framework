@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,8 +43,6 @@ public class PropertyComparator<T> implements Comparator<T> {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final SortDefinition sortDefinition;
-
-	private final BeanWrapperImpl beanWrapper = new BeanWrapperImpl(false);
 
 
 	/**
@@ -115,8 +113,9 @@ public class PropertyComparator<T> implements Comparator<T> {
 		// (similar to JSTL EL). If the property doesn't exist in the
 		// first place, let the exception through.
 		try {
-			this.beanWrapper.setWrappedInstance(obj);
-			return this.beanWrapper.getPropertyValue(this.sortDefinition.getProperty());
+			BeanWrapperImpl beanWrapper = new BeanWrapperImpl(false);
+			beanWrapper.setWrappedInstance(obj);
+			return beanWrapper.getPropertyValue(this.sortDefinition.getProperty());
 		}
 		catch (BeansException ex) {
 			logger.debug("PropertyComparator could not access property - treating as null for sorting", ex);

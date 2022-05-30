@@ -5,7 +5,7 @@
  * {@link org.springframework.http.server.reactive.HttpHandler} for processing.
  *
  * <p>Also provides implementations adapting to different runtimes
- * including Servlet 3.1 containers, Netty + Reactor IO, and Undertow.
+ * including Servlet containers, Netty + Reactor IO, and Undertow.
  */
 @NonNullApi
 @NonNullFields

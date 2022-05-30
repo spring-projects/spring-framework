@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,8 +66,7 @@ abstract class PropertyDescriptorUtils {
 		Class<?> propertyType = null;
 
 		if (readMethod != null) {
-			Class<?>[] params = readMethod.getParameterTypes();
-			if (params.length != 0) {
+			if (readMethod.getParameterCount() != 0) {
 				throw new IntrospectionException("Bad read method arg count: " + readMethod);
 			}
 			propertyType = readMethod.getReturnType();

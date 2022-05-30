@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,19 @@ public class CandidateComponentsIndex {
 		this.index = parseIndex(content);
 	}
 
+	private static MultiValueMap<String, Entry> parseIndex(List<Properties> content) {
+		MultiValueMap<String, Entry> index = new LinkedMultiValueMap<>();
+		for (Properties entry : content) {
+			entry.forEach((type, values) -> {
+				String[] stereotypes = ((String) values).split(",");
+				for (String stereotype : stereotypes) {
+					index.add(stereotype, new Entry((String) type));
+				}
+			});
+		}
+		return index;
+	}
+
 
 	/**
 	 * Return the candidate types that are associated with the specified stereotype.
@@ -76,21 +89,11 @@ public class CandidateComponentsIndex {
 		return Collections.emptySet();
 	}
 
-	private static MultiValueMap<String, Entry> parseIndex(List<Properties> content) {
-		MultiValueMap<String, Entry> index = new LinkedMultiValueMap<>();
-		for (Properties entry : content) {
-			entry.forEach((type, values) -> {
-				String[] stereotypes = ((String) values).split(",");
-				for (String stereotype : stereotypes) {
-					index.add(stereotype, new Entry((String) type));
-				}
-			});
-		}
-		return index;
-	}
 
 	private static class Entry {
+
 		private final String type;
+
 		private final String packageName;
 
 		Entry(String type) {
@@ -106,7 +109,6 @@ public class CandidateComponentsIndex {
 				return this.type.startsWith(basePackage);
 			}
 		}
-
 	}
 
 }

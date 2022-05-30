@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,8 @@ import org.springframework.core.annotation.AliasFor;
  *
  * <p>In contrast to the {@link Cacheable @Cacheable} annotation, this annotation
  * does not cause the advised method to be skipped. Rather, it always causes the
- * method to be invoked and its result to be stored in the associated cache. Note
+ * method to be invoked and its result to be stored in the associated cache if the
+ * {@link #condition()} and {@link #unless()} expressions match accordingly. Note
  * that Java8's {@code Optional} return types are automatically handled and its
  * content is stored in the cache if present.
  *
@@ -45,7 +46,7 @@ import org.springframework.core.annotation.AliasFor;
  * @since 3.1
  * @see CacheConfig
  */
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
@@ -118,6 +119,8 @@ public @interface CachePut {
 	/**
 	 * Spring Expression Language (SpEL) expression used for making the cache
 	 * put operation conditional.
+	 * <p>This expression is evaluated after the method has been called due to the
+	 * nature of the put operation and can therefore refer to the {@code result}.
 	 * <p>Default is {@code ""}, meaning the method result is always cached.
 	 * <p>The SpEL expression evaluates against a dedicated context that provides the
 	 * following meta-data:

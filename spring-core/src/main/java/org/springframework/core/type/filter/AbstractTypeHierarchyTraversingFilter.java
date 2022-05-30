@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,8 +85,10 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 						}
 					}
 					catch (IOException ex) {
-						logger.debug("Could not read super class [" + metadata.getSuperClassName() +
-								"] of type-filtered class [" + metadata.getClassName() + "]");
+						if (logger.isDebugEnabled()) {
+							logger.debug("Could not read super class [" + metadata.getSuperClassName() +
+									"] of type-filtered class [" + metadata.getClassName() + "]");
+						}
 					}
 				}
 			}
@@ -109,8 +111,10 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 						}
 					}
 					catch (IOException ex) {
-						logger.debug("Could not read interface [" + ifc + "] for type-filtered class [" +
-								metadata.getClassName() + "]");
+						if (logger.isDebugEnabled()) {
+							logger.debug("Could not read interface [" + ifc + "] for type-filtered class [" +
+									metadata.getClassName() + "]");
+						}
 					}
 				}
 			}

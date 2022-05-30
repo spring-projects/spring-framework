@@ -16,8 +16,8 @@
 
 package org.springframework.core
 
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.springframework.core.GenericTypeResolver.resolveReturnTypeArgument
 import java.lang.reflect.Method
 
@@ -31,14 +31,14 @@ class KotlinGenericTypeResolverTests {
 
 	@Test
 	fun methodReturnTypes() {
-		assertEquals(Integer::class.java, resolveReturnTypeArgument(findMethod(MyTypeWithMethods::class.java, "integer")!!,
-				MyInterfaceType::class.java))
-		assertEquals(String::class.java, resolveReturnTypeArgument(findMethod(MyTypeWithMethods::class.java, "string")!!,
-				MyInterfaceType::class.java))
-		assertEquals(null, resolveReturnTypeArgument(findMethod(MyTypeWithMethods::class.java, "raw")!!,
-				MyInterfaceType::class.java))
-		assertEquals(null, resolveReturnTypeArgument(findMethod(MyTypeWithMethods::class.java, "object")!!,
-				MyInterfaceType::class.java))
+		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods::class.java, "integer")!!,
+				MyInterfaceType::class.java)).isEqualTo(Integer::class.java)
+		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods::class.java, "string")!!,
+				MyInterfaceType::class.java)).isEqualTo(String::class.java)
+		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods::class.java, "raw")!!,
+				MyInterfaceType::class.java)).isNull()
+		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods::class.java, "object")!!,
+				MyInterfaceType::class.java)).isNull()
 	}
 
 	private fun findMethod(clazz: Class<*>, name: String): Method? =

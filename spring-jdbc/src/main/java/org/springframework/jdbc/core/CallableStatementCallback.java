@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,11 +68,10 @@ public interface CallableStatementCallback<T> {
 	 * a domain object or a collection of domain objects. A thrown RuntimeException
 	 * is treated as application exception: it gets propagated to the caller of
 	 * the template.
-	 *
 	 * @param cs active JDBC CallableStatement
 	 * @return a result object, or {@code null} if none
 	 * @throws SQLException if thrown by a JDBC method, to be auto-converted
-	 * into a DataAccessException by a SQLExceptionTranslator
+	 * into a DataAccessException by an SQLExceptionTranslator
 	 * @throws DataAccessException in case of custom exceptions
 	 */
 	@Nullable

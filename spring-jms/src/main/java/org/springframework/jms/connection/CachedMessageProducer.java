@@ -16,15 +16,15 @@
 
 package org.springframework.jms.connection;
 
-import javax.jms.CompletionListener;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageProducer;
-import javax.jms.Queue;
-import javax.jms.QueueSender;
-import javax.jms.Topic;
-import javax.jms.TopicPublisher;
+import jakarta.jms.CompletionListener;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.MessageProducer;
+import jakarta.jms.Queue;
+import jakarta.jms.QueueSender;
+import jakarta.jms.Topic;
+import jakarta.jms.TopicPublisher;
 
 import org.springframework.lang.Nullable;
 
@@ -89,6 +89,7 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 		return this.target.getDisableMessageTimestamp();
 	}
 
+	@Override
 	public void setDeliveryDelay(long deliveryDelay) throws JMSException {
 		if (this.originalDeliveryDelay == null) {
 			this.originalDeliveryDelay = this.target.getDeliveryDelay();
@@ -96,6 +97,7 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 		this.target.setDeliveryDelay(deliveryDelay);
 	}
 
+	@Override
 	public long getDeliveryDelay() throws JMSException {
 		return this.target.getDeliveryDelay();
 	}

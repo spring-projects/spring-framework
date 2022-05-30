@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import org.springframework.util.ClassUtils;
  * @since 4.0
  */
 public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCandidateResolver
-		implements BeanFactoryAware {
+		implements BeanFactoryAware, Cloneable {
 
 	@Nullable
 	private BeanFactory beanFactory;
@@ -142,8 +142,7 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 	@Nullable
 	protected RootBeanDefinition getResolvedDecoratedDefinition(RootBeanDefinition rbd) {
 		BeanDefinitionHolder decDef = rbd.getDecoratedDefinition();
-		if (decDef != null && this.beanFactory instanceof ConfigurableListableBeanFactory) {
-			ConfigurableListableBeanFactory clbf = (ConfigurableListableBeanFactory) this.beanFactory;
+		if (decDef != null && this.beanFactory instanceof ConfigurableListableBeanFactory clbf) {
 			if (clbf.containsBeanDefinition(decDef.getBeanName())) {
 				BeanDefinition dbd = clbf.getMergedBeanDefinition(decDef.getBeanName());
 				if (dbd instanceof RootBeanDefinition) {
@@ -175,6 +174,23 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 			}
 		}
 		return null;
+	}
+
+
+	/**
+	 * This implementation clones all instance fields through standard
+	 * {@link Cloneable} support, allowing for subsequent reconfiguration
+	 * of the cloned instance through a fresh {@link #setBeanFactory} call.
+	 * @see #clone()
+	 */
+	@Override
+	public AutowireCandidateResolver cloneIfNecessary() {
+		try {
+			return (AutowireCandidateResolver) clone();
+		}
+		catch (CloneNotSupportedException ex) {
+			throw new IllegalStateException(ex);
+		}
 	}
 
 }

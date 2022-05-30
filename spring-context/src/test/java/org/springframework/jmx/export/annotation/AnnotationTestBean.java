@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
  */
 @Service("testBean")
 @ManagedResource(objectName = "bean:name=testBean4", description = "My Managed Bean", log = true,
-		logFile = "jmx.log", currencyTimeLimit = 15, persistPolicy = "OnUpdate", persistPeriod = 200,
+		logFile = "build/jmx.log", currencyTimeLimit = 15, persistPolicy = "OnUpdate", persistPeriod = 200,
 		persistLocation = "./foo", persistName = "bar.jmx")
 @ManagedNotification(name = "My Notification", notificationTypes = { "type.foo", "type.bar" })
 public class AnnotationTestBean implements IJmxTestBean {

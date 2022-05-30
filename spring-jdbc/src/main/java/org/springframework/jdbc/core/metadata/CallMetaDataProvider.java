@@ -110,7 +110,7 @@ public interface CallMetaDataProvider {
 	SqlParameter createDefaultOutParameter(String parameterName, CallParameterMetaData meta);
 
 	/**
-	 * Create a default inout parameter based on the provided meta-data.
+	 * Create a default in/out parameter based on the provided meta-data.
 	 * This is used when no explicit parameter declaration has been made.
 	 * @param parameterName the name of the parameter
 	 * @param meta meta-data used for this call

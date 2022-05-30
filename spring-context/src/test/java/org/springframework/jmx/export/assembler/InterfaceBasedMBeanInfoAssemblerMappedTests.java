@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,15 @@
 package org.springframework.jmx.export.assembler;
 
 import java.util.Properties;
+
 import javax.management.MBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Rob Harrop
@@ -38,30 +40,20 @@ public class InterfaceBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAsse
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = info.getAttribute(AGE_ATTRIBUTE);
 
-		assertTrue("Age is not readable", attr.isReadable());
-		assertFalse("Age is not writable", attr.isWritable());
+		assertThat(attr.isReadable()).as("Age is not readable").isTrue();
+		assertThat(attr.isWritable()).as("Age is not writable").isFalse();
 	}
 
 	@Test
 	public void testWithUnknownClass() throws Exception {
-		try {
-			getWithMapping("com.foo.bar.Unknown");
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				getWithMapping("com.foo.bar.Unknown"));
 	}
 
 	@Test
 	public void testWithNonInterface() throws Exception {
-		try {
-			getWithMapping("JmxTestBean");
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				getWithMapping("JmxTestBean"));
 	}
 
 	@Test
@@ -125,9 +117,9 @@ public class InterfaceBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAsse
 	}
 
 	private void assertNickName(MBeanAttributeInfo attr) {
-		assertNotNull("Nick Name should not be null", attr);
-		assertTrue("Nick Name should be writable", attr.isWritable());
-		assertTrue("Nick Name should be readable", attr.isReadable());
+		assertThat(attr).as("Nick Name should not be null").isNotNull();
+		assertThat(attr.isWritable()).as("Nick Name should be writable").isTrue();
+		assertThat(attr.isReadable()).as("Nick Name should be readable").isTrue();
 	}
 
 }

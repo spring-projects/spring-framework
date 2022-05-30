@@ -17,7 +17,8 @@
 package org.springframework.orm.jpa.persistenceunit;
 
 import java.util.List;
-import javax.persistence.spi.PersistenceUnitInfo;
+
+import jakarta.persistence.spi.PersistenceUnitInfo;
 
 /**
  * Extension of the standard JPA PersistenceUnitInfo interface, for advanced collaboration
@@ -41,7 +42,7 @@ public interface SmartPersistenceUnitInfo extends PersistenceUnitInfo {
 
 	/**
 	 * Set the persistence provider's own package name, for exclusion from class transformation.
-	 * @see #addTransformer(javax.persistence.spi.ClassTransformer)
+	 * @see #addTransformer(jakarta.persistence.spi.ClassTransformer)
 	 * @see #getNewTempClassLoader()
 	 */
 	void setPersistenceProviderPackageName(String persistenceProviderPackageName);

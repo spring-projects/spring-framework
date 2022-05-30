@@ -17,7 +17,8 @@
 package org.springframework.web.servlet.tags.form;
 
 import java.util.Collection;
-import javax.servlet.jsp.JspException;
+
+import jakarta.servlet.jsp.JspException;
 
 import org.springframework.web.bind.WebDataBinder;
 

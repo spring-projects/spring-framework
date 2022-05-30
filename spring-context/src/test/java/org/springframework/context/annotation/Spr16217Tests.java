@@ -16,8 +16,8 @@
 
 package org.springframework.context.annotation;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
@@ -28,7 +28,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 public class Spr16217Tests {
 
 	@Test
-	@Ignore("TODO")
+	@Disabled("TODO")
 	public void baseConfigurationIsIncludedWhenFirstSuperclassReferenceIsSkippedInRegisterBeanPhase() {
 		try (AnnotationConfigApplicationContext context =
 					new AnnotationConfigApplicationContext(RegisterBeanPhaseImportingConfiguration.class)) {

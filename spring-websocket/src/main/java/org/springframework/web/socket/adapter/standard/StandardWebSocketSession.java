@@ -24,10 +24,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import javax.websocket.CloseReason;
-import javax.websocket.CloseReason.CloseCodes;
-import javax.websocket.Extension;
-import javax.websocket.Session;
+
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.CloseReason.CloseCodes;
+import jakarta.websocket.Extension;
+import jakarta.websocket.Session;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
@@ -76,7 +77,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	/**
 	 * Constructor for a standard WebSocket session.
 	 * @param headers the headers of the handshake request
-	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket
+	 * @param attributes the attributes from the HTTP handshake to associate with the WebSocket
 	 * session; the provided attributes are copied, the original map is not used.
 	 * @param localAddress the address on which the request was received
 	 * @param remoteAddress the address of the remote client
@@ -90,7 +91,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	/**
 	 * Constructor that associates a user with the WebSocket session.
 	 * @param headers the headers of the handshake request
-	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket session
+	 * @param attributes the attributes from the HTTP handshake to associate with the WebSocket session
 	 * @param localAddress the address on which the request was received
 	 * @param remoteAddress the address of the remote client
 	 * @param user the user associated with the session; if {@code null} we'll
@@ -139,6 +140,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 		return this.extensions;
 	}
 
+	@Override
 	public Principal getPrincipal() {
 		return this.user;
 	}

@@ -116,6 +116,13 @@ public interface StompSession {
 	 */
 	void disconnect();
 
+	/**
+	 * Variant of {@link #disconnect()} with headers.
+	 * @param headers the headers for the disconnect message frame
+	 * @since 5.2.2
+	 */
+	void disconnect(StompHeaders headers);
+
 
 	/**
 	 * A handle to use to track receipts.

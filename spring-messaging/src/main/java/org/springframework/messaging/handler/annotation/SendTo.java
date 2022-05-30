@@ -39,7 +39,7 @@ import org.springframework.messaging.Message;
  * @author Stephane Nicoll
  * @since 4.0
  */
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface SendTo {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpServletResponse;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
@@ -109,22 +110,23 @@ public class FormContentFilter extends OncePerRequestFilter {
 	}
 
 	private boolean shouldParse(HttpServletRequest request) {
-		if (!HTTP_METHODS.contains(request.getMethod())) {
-			return false;
+		String contentType = request.getContentType();
+		String method = request.getMethod();
+		if (StringUtils.hasLength(contentType) && HTTP_METHODS.contains(method)) {
+			try {
+				MediaType mediaType = MediaType.parseMediaType(contentType);
+				return MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType);
+			}
+			catch (IllegalArgumentException ex) {
+			}
 		}
-		try {
-			MediaType mediaType = MediaType.parseMediaType(request.getContentType());
-			return MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType);
-		}
-		catch (IllegalArgumentException ex) {
-			return false;
-		}
+		return false;
 	}
 
 
 	private static class FormContentRequestWrapper extends HttpServletRequestWrapper {
 
-		private MultiValueMap<String, String> formParams;
+		private final MultiValueMap<String, String> formParams;
 
 		public FormContentRequestWrapper(HttpServletRequest request, MultiValueMap<String, String> params) {
 			super(request);

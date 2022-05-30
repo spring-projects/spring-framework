@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,22 +17,28 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Single;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
-import rx.Completable;
-import rx.Single;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,18 +46,19 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.web.method.ResolvableMethod.on;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get;
+import static org.springframework.web.testfixture.method.ResolvableMethod.on;
 
 /**
  * Unit tests for {@link ResponseBodyResultHandler}.When adding a test also
  * consider whether the logic under test is in a parent class, then see:
  * <ul>
- * 	<li>{@code MessageWriterResultHandlerTests},
- *  <li>{@code ContentNegotiatingResultHandlerSupportTests}
+ * <li>{@code MessageWriterResultHandlerTests},
+ * <li>{@code ContentNegotiatingResultHandlerSupportTests}
  * </ul>
  *
  * @author Sebastien Deleuze
@@ -62,7 +69,7 @@ public class ResponseBodyResultHandlerTests {
 	private ResponseBodyResultHandler resultHandler;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		List<HttpMessageWriter<?>> writerList = new ArrayList<>(5);
 		writerList.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
@@ -76,7 +83,7 @@ public class ResponseBodyResultHandlerTests {
 
 
 	@Test
-	public void supports() throws NoSuchMethodException {
+	public void supports() {
 		Object controller = new TestController();
 		Method method;
 
@@ -84,12 +91,12 @@ public class ResponseBodyResultHandlerTests {
 		testSupports(controller, method);
 
 		method = on(TestController.class).annotNotPresent(ResponseBody.class).resolveMethod("doWork");
-		HandlerResult handlerResult = getHandlerResult(controller, method);
-		assertFalse(this.resultHandler.supports(handlerResult));
+		HandlerResult handlerResult = getHandlerResult(controller, null, method);
+		assertThat(this.resultHandler.supports(handlerResult)).isFalse();
 	}
 
 	@Test
-	public void supportsRestController() throws NoSuchMethodException {
+	public void supportsRestController() {
 		Object controller = new TestRestController();
 		Method method;
 
@@ -107,24 +114,65 @@ public class ResponseBodyResultHandlerTests {
 	}
 
 	private void testSupports(Object controller, Method method) {
-		HandlerResult handlerResult = getHandlerResult(controller, method);
-		assertTrue(this.resultHandler.supports(handlerResult));
-	}
-
-	private HandlerResult getHandlerResult(Object controller, Method method) {
-		HandlerMethod handlerMethod = new HandlerMethod(controller, method);
-		return new HandlerResult(handlerMethod, null, handlerMethod.getReturnType());
+		HandlerResult handlerResult = getHandlerResult(controller, null, method);
+		assertThat(this.resultHandler.supports(handlerResult)).isTrue();
 	}
 
 	@Test
-	public void defaultOrder() throws Exception {
-		assertEquals(100, this.resultHandler.getOrder());
+	void problemDetailContentNegotiation() {
+
+		// Default
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path"));
+		testProblemDetailMediaType(exchange, MediaType.APPLICATION_PROBLEM_JSON);
+
+		// JSON requested
+		exchange = MockServerWebExchange.from(get("/path").accept(MediaType.APPLICATION_JSON));
+		testProblemDetailMediaType(exchange, MediaType.APPLICATION_JSON);
+
+		// No match fallback
+		exchange = MockServerWebExchange.from(get("/path").accept(MediaType.APPLICATION_PDF));
+		testProblemDetailMediaType(exchange, MediaType.APPLICATION_PROBLEM_JSON);
+	}
+
+	private void testProblemDetailMediaType(MockServerWebExchange exchange, MediaType expectedMediaType) {
+		ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+
+		Method method = on(TestRestController.class).returning(ProblemDetail.class).resolveMethod();
+		HandlerResult result = getHandlerResult(new TestRestController(), problemDetail, method);
+
+		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
+
+		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+		assertThat(exchange.getResponse().getHeaders().getContentType()).isEqualTo(expectedMediaType);
+		assertResponseBody(exchange,
+				"{\"type\":\"about:blank\"," +
+						"\"title\":\"Bad Request\"," +
+						"\"status\":400," +
+						"\"detail\":null," +
+						"\"instance\":\"/path\"}");
+	}
+
+	@Test
+	public void defaultOrder() {
+		assertThat(this.resultHandler.getOrder()).isEqualTo(100);
+	}
+
+	private HandlerResult getHandlerResult(Object controller, @Nullable Object returnValue, Method method) {
+		HandlerMethod handlerMethod = new HandlerMethod(controller, method);
+		return new HandlerResult(handlerMethod, returnValue, handlerMethod.getReturnType());
+	}
+
+	@SuppressWarnings("SameParameterValue")
+	private void assertResponseBody(MockServerWebExchange exchange, @Nullable String responseBody) {
+		StepVerifier.create(exchange.getResponse().getBody())
+				.consumeNextWith(buf -> assertThat(buf.toString(UTF_8)).isEqualTo(responseBody))
+				.expectComplete()
+				.verify();
 	}
 
 
-
 	@RestController
-	@SuppressWarnings("unused")
+	@SuppressWarnings({"unused", "ConstantConditions"})
 	private static class TestRestController {
 
 		public Mono<Void> handleToMonoVoid() { return null;}
@@ -144,11 +192,16 @@ public class ResponseBodyResultHandlerTests {
 		public Completable handleToCompletable() {
 			return null;
 		}
+
+		public ProblemDetail handleToProblemDetail() {
+			return null;
+		}
+
 	}
 
 
 	@Controller
-	@SuppressWarnings("unused")
+	@SuppressWarnings({"unused", "ConstantConditions"})
 	private static class TestController {
 
 		@ResponseBody

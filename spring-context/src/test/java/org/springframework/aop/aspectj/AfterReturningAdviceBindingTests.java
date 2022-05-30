@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,21 @@
 
 package org.springframework.aop.aspectj;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.aspectj.AfterReturningAdviceBindingTestAspect.AfterReturningAdviceBindingCollaborator;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Tests for various parameter binding scenarios with before advice.
@@ -37,7 +40,9 @@ import static org.mockito.BDDMockito.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class AfterReturningAdviceBindingTests {
+class AfterReturningAdviceBindingTests {
+
+	private ClassPathXmlApplicationContext ctx;
 
 	private AfterReturningAdviceBindingTestAspect afterAdviceAspect;
 
@@ -48,10 +53,9 @@ public class AfterReturningAdviceBindingTests {
 	private AfterReturningAdviceBindingCollaborator mockCollaborator;
 
 
-	@Before
-	public void setup() throws Exception {
-		ClassPathXmlApplicationContext ctx =
-				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+	@BeforeEach
+	void setup() throws Exception {
+		this.ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 
 		afterAdviceAspect = (AfterReturningAdviceBindingTestAspect) ctx.getBean("testAspect");
 
@@ -59,64 +63,69 @@ public class AfterReturningAdviceBindingTests {
 		afterAdviceAspect.setCollaborator(mockCollaborator);
 
 		testBeanProxy = (ITestBean) ctx.getBean("testBean");
-		assertTrue(AopUtils.isAopProxy(testBeanProxy));
+		assertThat(AopUtils.isAopProxy(testBeanProxy)).isTrue();
 
 		// we need the real target too, not just the proxy...
 		this.testBeanTarget = (TestBean) ((Advised)testBeanProxy).getTargetSource().getTarget();
 	}
 
+	@AfterEach
+	void tearDown() {
+		this.ctx.close();
+	}
+
 
 	@Test
-	public void testOneIntArg() {
+	void oneIntArg() {
 		testBeanProxy.setAge(5);
 		verify(mockCollaborator).oneIntArg(5);
 	}
 
 	@Test
-	public void testOneObjectArg() {
+	void oneObjectArg() {
 		testBeanProxy.getAge();
 		verify(mockCollaborator).oneObjectArg(this.testBeanProxy);
 	}
 
 	@Test
-	public void testOneIntAndOneObjectArgs() {
+	void oneIntAndOneObjectArgs() {
 		testBeanProxy.setAge(5);
 		verify(mockCollaborator).oneIntAndOneObject(5,this.testBeanProxy);
 	}
 
 	@Test
-	public void testNeedsJoinPoint() {
+	void needsJoinPoint() {
 		testBeanProxy.getAge();
 		verify(mockCollaborator).needsJoinPoint("getAge");
 	}
 
 	@Test
-	public void testNeedsJoinPointStaticPart() {
+	void needsJoinPointStaticPart() {
 		testBeanProxy.getAge();
 		verify(mockCollaborator).needsJoinPointStaticPart("getAge");
 	}
 
 	@Test
-	public void testReturningString() {
+	void returningString() {
 		testBeanProxy.setName("adrian");
 		testBeanProxy.getName();
 		verify(mockCollaborator).oneString("adrian");
 	}
 
 	@Test
-	public void testReturningObject() {
+	void returningObject() {
 		testBeanProxy.returnsThis();
 		verify(mockCollaborator).oneObjectArg(this.testBeanTarget);
 	}
 
 	@Test
-	public void testReturningBean() {
+	void returningBean() {
 		testBeanProxy.returnsThis();
 		verify(mockCollaborator).oneTestBeanArg(this.testBeanTarget);
 	}
 
 	@Test
-	public void testReturningBeanArray() {
+	void returningBeanArray() {
 		this.testBeanTarget.setSpouse(new TestBean());
 		ITestBean[] spouses = this.testBeanTarget.getSpouses();
 		testBeanProxy.getSpouses();
@@ -124,20 +133,20 @@ public class AfterReturningAdviceBindingTests {
 	}
 
 	@Test
-	public void testNoInvokeWhenReturningParameterTypeDoesNotMatch() {
+	void noInvokeWhenReturningParameterTypeDoesNotMatch() {
 		testBeanProxy.setSpouse(this.testBeanProxy);
 		testBeanProxy.getSpouse();
-		verifyZeroInteractions(mockCollaborator);
+		verifyNoInteractions(mockCollaborator);
 	}
 
 	@Test
-	public void testReturningByType() {
+	void returningByType() {
 		testBeanProxy.returnsThis();
 		verify(mockCollaborator).objectMatchNoArgs();
 	}
 
 	@Test
-	public void testReturningPrimitive() {
+	void returningPrimitive() {
 		testBeanProxy.setAge(20);
 		testBeanProxy.haveBirthday();
 		verify(mockCollaborator).oneInt(20);

@@ -16,34 +16,39 @@
 
 package org.springframework.scheduling.config;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 
 /**
- * Tests ensuring that tasks scheduled using the <task:scheduled> element
- * are never marked lazy, even if the enclosing <beans> element declares
+ * Tests ensuring that tasks scheduled using the &lt;task:scheduled&gt; element
+ * are never marked lazy, even if the enclosing &lt;beans&gt; element declares
  * default-lazy-init="true". See  SPR-8498
  *
  * @author Mike Youngstrom
  * @author Chris Beams
+ * @author Sam Brannen
  */
-public class LazyScheduledTasksBeanDefinitionParserTests {
+class LazyScheduledTasksBeanDefinitionParserTests {
 
-	@Test(timeout = 5000)
-	@SuppressWarnings("resource")
-	public void checkTarget() {
-		Task task =
-			new GenericXmlApplicationContext(
-					LazyScheduledTasksBeanDefinitionParserTests.class,
-					"lazyScheduledTasksContext.xml")
-				.getBean(Task.class);
+	@Test
+	@Timeout(5)
+	void checkTarget() {
+		try (ConfigurableApplicationContext applicationContext =
+				new GenericXmlApplicationContext(getClass(), "lazyScheduledTasksContext.xml")) {
 
-		while (!task.executed) {
-			try {
-				Thread.sleep(10);
+			Task task = applicationContext.getBean(Task.class);
+
+			while (!task.executed) {
+				try {
+					Thread.sleep(10);
+				}
+				catch (Exception ex) {
+					/* Do Nothing */
+				}
 			}
-			catch (Exception ex) { /* Do Nothing */ }
 		}
 	}
 

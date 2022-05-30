@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,33 +17,34 @@
 package org.springframework.web.servlet.resource;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link ResourceUrlProvider}.
  *
  * @author Jeremy Grelle
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  */
 public class ResourceUrlProviderTests {
 
@@ -56,8 +57,8 @@ public class ResourceUrlProviderTests {
 	private final ResourceUrlProvider urlProvider = new ResourceUrlProvider();
 
 
-	@Before
-	public void setUp() throws Exception {
+	@BeforeEach
+	void setUp() throws Exception {
 		this.locations.add(new ClassPathResource("test/", getClass()));
 		this.locations.add(new ClassPathResource("testalternatepath/", getClass()));
 		this.handler.setServletContext(new MockServletContext());
@@ -69,38 +70,38 @@ public class ResourceUrlProviderTests {
 
 
 	@Test
-	public void getStaticResourceUrl() {
+	void getStaticResourceUrl() {
 		String url = this.urlProvider.getForLookupPath("/resources/foo.css");
-		assertEquals("/resources/foo.css", url);
+		assertThat(url).isEqualTo("/resources/foo.css");
 	}
 
 	@Test // SPR-13374
-	public void getStaticResourceUrlRequestWithQueryOrHash() {
+	void getStaticResourceUrlRequestWithQueryOrHash() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setContextPath("/");
 		request.setRequestURI("/");
 
 		String url = "/resources/foo.css?foo=bar&url=https://example.org";
 		String resolvedUrl = this.urlProvider.getForRequestUrl(request, url);
-		assertEquals("/resources/foo.css?foo=bar&url=https://example.org", resolvedUrl);
+		assertThat(resolvedUrl).isEqualTo("/resources/foo.css?foo=bar&url=https://example.org");
 
 		url = "/resources/foo.css#hash";
 		resolvedUrl = this.urlProvider.getForRequestUrl(request, url);
-		assertEquals("/resources/foo.css#hash", resolvedUrl);
+		assertThat(resolvedUrl).isEqualTo("/resources/foo.css#hash");
 	}
 
 	@Test // SPR-16526
-	public void getStaticResourceWithMissingContextPath() {
+	void getStaticResourceWithMissingContextPath() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setContextPath("/contextpath-longer-than-request-path");
 		request.setRequestURI("/contextpath-longer-than-request-path/style.css");
 		String url = "/resources/foo.css";
 		String resolvedUrl = this.urlProvider.getForRequestUrl(request, url);
-		assertNull(resolvedUrl);
+		assertThat((Object) resolvedUrl).isNull();
 	}
 
 	@Test
-	public void getFingerprintedResourceUrl() {
+	void getFingerprintedResourceUrl() {
 		Map<String, VersionStrategy> versionStrategyMap = new HashMap<>();
 		versionStrategyMap.put("/**", new ContentVersionStrategy());
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
@@ -112,11 +113,11 @@ public class ResourceUrlProviderTests {
 		this.handler.setResourceResolvers(resolvers);
 
 		String url = this.urlProvider.getForLookupPath("/resources/foo.css");
-		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
+		assertThat(url).isEqualTo("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css");
 	}
 
 	@Test // SPR-12647
-	public void bestPatternMatch() throws Exception {
+	void bestPatternMatch() throws Exception {
 		ResourceHttpRequestHandler otherHandler = new ResourceHttpRequestHandler();
 		otherHandler.setLocations(this.locations);
 		Map<String, VersionStrategy> versionStrategyMap = new HashMap<>();
@@ -133,27 +134,50 @@ public class ResourceUrlProviderTests {
 		this.urlProvider.setHandlerMap(this.handlerMap);
 
 		String url = this.urlProvider.getForLookupPath("/resources/foo.css");
-		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
+		assertThat(url).isEqualTo("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css");
 	}
 
 	@Test // SPR-12592
 	@SuppressWarnings("resource")
-	public void initializeOnce() throws Exception {
+	void initializeOnce() throws Exception {
 		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
 		context.setServletContext(new MockServletContext());
 		context.register(HandlerMappingConfiguration.class);
 		context.refresh();
 
 		ResourceUrlProvider urlProviderBean = context.getBean(ResourceUrlProvider.class);
-		assertThat(urlProviderBean.getHandlerMap(), Matchers.hasKey("/resources/**"));
-		assertFalse(urlProviderBean.isAutodetect());
+		assertThat(urlProviderBean.getHandlerMap()).containsKey("/resources/**");
+		assertThat(urlProviderBean.isAutodetect()).isFalse();
+	}
+
+	@Test
+	@SuppressWarnings("resource")
+	void initializeOnCurrentContext() {
+		AnnotationConfigWebApplicationContext parentContext = new AnnotationConfigWebApplicationContext();
+		parentContext.setServletContext(new MockServletContext());
+		parentContext.register(ParentHandlerMappingConfiguration.class);
+
+		AnnotationConfigWebApplicationContext childContext = new AnnotationConfigWebApplicationContext();
+		childContext.setParent(parentContext);
+		childContext.setServletContext(new MockServletContext());
+		childContext.register(HandlerMappingConfiguration.class);
+
+		parentContext.refresh();
+		childContext.refresh();
+
+		ResourceUrlProvider parentUrlProvider = parentContext.getBean(ResourceUrlProvider.class);
+		assertThat(parentUrlProvider.getHandlerMap()).isEmpty();
+		assertThat(parentUrlProvider.isAutodetect()).isTrue();
+		ResourceUrlProvider childUrlProvider = childContext.getBean(ResourceUrlProvider.class);
+		assertThat(childUrlProvider.getHandlerMap()).containsOnlyKeys("/resources/**");
+		assertThat(childUrlProvider.isAutodetect()).isFalse();
 	}
 
 	@Test // SPR-16296
-	public void getForLookupPathShouldNotFailIfPathContainsDoubleSlashes() {
+	void getForLookupPathShouldNotFailIfPathContainsDoubleSlashes() {
 		// given
 		ResourceResolver mockResourceResolver = mock(ResourceResolver.class);
-		when(mockResourceResolver.resolveUrlPath(any(), any(), any())).thenReturn("some-path");
+		given(mockResourceResolver.resolveUrlPath(any(), any(), any())).willReturn("some-path");
 
 		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
 		handler.getResourceResolvers().add(mockResourceResolver);
@@ -165,7 +189,7 @@ public class ResourceUrlProviderTests {
 		String lookupForPath = provider.getForLookupPath("/some-pattern/some-lib//some-resource");
 
 		// then
-		assertEquals("/some-pattern/some-path", lookupForPath);
+		assertThat(lookupForPath).isEqualTo("/some-pattern/some-path");
 	}
 
 
@@ -175,13 +199,19 @@ public class ResourceUrlProviderTests {
 
 		@Bean
 		public SimpleUrlHandlerMapping simpleUrlHandlerMapping() {
-			ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
-			HashMap<String, ResourceHttpRequestHandler> handlerMap = new HashMap<>();
-			handlerMap.put("/resources/**", handler);
-			SimpleUrlHandlerMapping hm = new SimpleUrlHandlerMapping();
-			hm.setUrlMap(handlerMap);
-			return hm;
+			return new SimpleUrlHandlerMapping(
+				Collections.singletonMap("/resources/**", new ResourceHttpRequestHandler()));
 		}
+
+		@Bean
+		public ResourceUrlProvider resourceUrlProvider() {
+			return new ResourceUrlProvider();
+		}
+	}
+
+	@Configuration
+	@SuppressWarnings({"unused", "WeakerAccess"})
+	static class ParentHandlerMappingConfiguration {
 
 		@Bean
 		public ResourceUrlProvider resourceUrlProvider() {

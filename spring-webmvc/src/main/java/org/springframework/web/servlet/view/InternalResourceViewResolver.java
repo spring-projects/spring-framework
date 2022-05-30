@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import org.springframework.util.ClassUtils;
 public class InternalResourceViewResolver extends UrlBasedViewResolver {
 
 	private static final boolean jstlPresent = ClassUtils.isPresent(
-			"javax.servlet.jsp.jstl.core.Config", InternalResourceViewResolver.class.getClassLoader());
+			"jakarta.servlet.jsp.jstl.core.Config", InternalResourceViewResolver.class.getClassLoader());
 
 	@Nullable
 	private Boolean alwaysInclude;
@@ -83,14 +83,6 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 
 
 	/**
-	 * This resolver requires {@link InternalResourceView}.
-	 */
-	@Override
-	protected Class<?> requiredViewClass() {
-		return InternalResourceView.class;
-	}
-
-	/**
 	 * Specify whether to always include the view rather than forward to it.
 	 * <p>Default is "false". Switch this flag on to enforce the use of a
 	 * Servlet include, even if a forward would be possible.
@@ -100,6 +92,17 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 		this.alwaysInclude = alwaysInclude;
 	}
 
+
+	@Override
+	protected Class<?> requiredViewClass() {
+		return InternalResourceView.class;
+	}
+
+	@Override
+	protected AbstractUrlBasedView instantiateView() {
+		return (getViewClass() == InternalResourceView.class ? new InternalResourceView() :
+				(getViewClass() == JstlView.class ? new JstlView() : super.instantiateView()));
+	}
 
 	@Override
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {

@@ -16,7 +16,7 @@
 
 package org.springframework.expression.spel;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests the messages and exceptions that come out for badly formed expressions

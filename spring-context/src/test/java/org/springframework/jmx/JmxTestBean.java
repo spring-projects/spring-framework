@@ -21,7 +21,7 @@ import java.io.IOException;
 /**
  * @@org.springframework.jmx.export.metadata.ManagedResource
  *    (description="My Managed Bean", objectName="spring:bean=test",
- *    log=true, logFile="jmx.log", currencyTimeLimit=15, persistPolicy="OnUpdate",
+ *    log=true, logFile="build/jmx.log", currencyTimeLimit=15, persistPolicy="OnUpdate",
  *    persistPeriod=200, persistLocation="./foo", persistName="bar.jmx")
  * @@org.springframework.jmx.export.metadata.ManagedNotification
  *    (name="My Notification", description="A Notification", notificationType="type.foo,type.bar")

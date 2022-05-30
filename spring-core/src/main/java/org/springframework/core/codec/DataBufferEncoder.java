@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,15 +53,25 @@ public class DataBufferEncoder extends AbstractEncoder<DataBuffer> {
 			@Nullable Map<String, Object> hints) {
 
 		Flux<DataBuffer> flux = Flux.from(inputStream);
+		if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
+			flux = flux.doOnNext(buffer -> logValue(buffer, hints));
+		}
+		return flux;
+	}
+
+	@Override
+	public DataBuffer encodeValue(DataBuffer buffer, DataBufferFactory bufferFactory,
+			ResolvableType valueType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
-			flux = flux.doOnNext(buffer -> {
-				String logPrefix = Hints.getLogPrefix(hints);
-				logger.debug(logPrefix + "Writing " + buffer.readableByteCount() + " bytes");
-			});
+			logValue(buffer, hints);
 		}
+		return buffer;
+	}
 
-		return flux;
+	private void logValue(DataBuffer buffer, @Nullable Map<String, Object> hints) {
+		String logPrefix = Hints.getLogPrefix(hints);
+		logger.debug(logPrefix + "Writing " + buffer.readableByteCount() + " bytes");
 	}
 
 }

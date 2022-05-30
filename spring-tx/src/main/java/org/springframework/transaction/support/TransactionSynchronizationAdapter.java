@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,10 @@ import org.springframework.core.Ordered;
  *
  * @author Juergen Hoeller
  * @since 22.01.2004
+ * @deprecated as of 5.3, in favor of the default methods on the
+ * {@link TransactionSynchronization} interface
  */
+@Deprecated
 public abstract class TransactionSynchronizationAdapter implements TransactionSynchronization, Ordered {
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,8 +49,9 @@ abstract class AbstractJndiLocatingBeanDefinitionParser extends AbstractSimpleBe
 
 	@Override
 	protected boolean isEligibleAttribute(String attributeName) {
-		return (super.isEligibleAttribute(attributeName) && !ENVIRONMENT_REF.equals(attributeName) && !LAZY_INIT_ATTRIBUTE
-				.equals(attributeName));
+		return (super.isEligibleAttribute(attributeName) &&
+				!ENVIRONMENT_REF.equals(attributeName) &&
+				!LAZY_INIT_ATTRIBUTE.equals(attributeName));
 	}
 
 	@Override

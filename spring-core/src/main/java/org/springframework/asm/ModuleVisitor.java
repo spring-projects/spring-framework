@@ -53,7 +53,7 @@ public abstract class ModuleVisitor {
    * @param api the ASM API version implemented by this visitor. Must be one of {@link Opcodes#ASM6}
    *     or {@link Opcodes#ASM7}.
    */
-  public ModuleVisitor(final int api) {
+  protected ModuleVisitor(final int api) {
     this(api, null);
   }
 
@@ -65,10 +65,17 @@ public abstract class ModuleVisitor {
    * @param moduleVisitor the module visitor to which this visitor must delegate method calls. May
    *     be null.
    */
-  public ModuleVisitor(final int api, final ModuleVisitor moduleVisitor) {
-    if (api != Opcodes.ASM7 && api != Opcodes.ASM6) {
+  protected ModuleVisitor(final int api, final ModuleVisitor moduleVisitor) {
+    if (api != Opcodes.ASM9
+        && api != Opcodes.ASM8
+        && api != Opcodes.ASM7
+        && api != Opcodes.ASM6
+        && api != Opcodes.ASM5
+        && api != Opcodes.ASM4
+        && api != Opcodes.ASM10_EXPERIMENTAL) {
       throw new IllegalArgumentException("Unsupported api " + api);
     }
+    // SPRING PATCH: no preview mode check for ASM experimental
     this.api = api;
     this.mv = moduleVisitor;
   }

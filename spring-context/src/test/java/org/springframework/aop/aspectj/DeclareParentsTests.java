@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,41 +16,49 @@
 
 package org.springframework.aop.aspectj;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import test.mixin.Lockable;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.sample.beans.ITestBean;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * @author Rod Johnson
  * @author Chris Beams
  */
-public class DeclareParentsTests {
+class DeclareParentsTests {
+
+	private ClassPathXmlApplicationContext ctx;
 
 	private ITestBean testBeanProxy;
 
 	private Object introductionObject;
 
 
-	@Before
-	public void setup() {
-		ClassPathXmlApplicationContext ctx =
-				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+	@BeforeEach
+	void setup() {
+		this.ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		testBeanProxy = (ITestBean) ctx.getBean("testBean");
 		introductionObject = ctx.getBean("introduction");
 	}
 
+	@AfterEach
+	void tearDown() {
+		this.ctx.close();
+	}
+
 
 	@Test
-	public void testIntroductionWasMade() {
-		assertTrue(AopUtils.isAopProxy(testBeanProxy));
-		assertFalse("Introduction should not be proxied", AopUtils.isAopProxy(introductionObject));
-		assertTrue("Introduction must have been made", testBeanProxy instanceof Lockable);
+	void introductionWasMade() {
+		assertThat(AopUtils.isAopProxy(testBeanProxy)).isTrue();
+		assertThat(AopUtils.isAopProxy(introductionObject)).as("Introduction should not be proxied").isFalse();
+		assertThat(testBeanProxy).as("Introduction must have been made").isInstanceOf(Lockable.class);
 	}
 
 	// TODO if you change type pattern from org.springframework.beans..*
@@ -58,22 +66,16 @@ public class DeclareParentsTests {
 	// Perhaps generated advisor bean definition could be made to depend
 	// on the introduction, in which case this would not be a problem.
 	@Test
-	public void testLockingWorks() {
+	void lockingWorks() {
 		Lockable lockable = (Lockable) testBeanProxy;
-		assertFalse(lockable.locked());
+		assertThat(lockable.locked()).isFalse();
 
 		// Invoke a non-advised method
 		testBeanProxy.getAge();
 
 		testBeanProxy.setName("");
 		lockable.lock();
-		try {
-			testBeanProxy.setName(" ");
-			fail("Should be locked");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().as("should be locked").isThrownBy(() -> testBeanProxy.setName(" "));
 	}
 
 }

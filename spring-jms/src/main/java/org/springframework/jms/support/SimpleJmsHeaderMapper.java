@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,14 @@
 
 package org.springframework.jms.support;
 
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
+
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.AbstractHeaderMapper;
@@ -55,12 +54,12 @@ import org.springframework.util.StringUtils;
  */
 public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> implements JmsHeaderMapper {
 
-	private static final Set<Class<?>> SUPPORTED_PROPERTY_TYPES = new HashSet<>(Arrays.asList(
-			Boolean.class, Byte.class, Double.class, Float.class, Integer.class, Long.class, Short.class, String.class));
+	private static final Set<Class<?>> SUPPORTED_PROPERTY_TYPES = Set.of(Boolean.class, Byte.class,
+			Double.class, Float.class, Integer.class, Long.class, Short.class, String.class, byte[].class);
 
 
 	@Override
-	public void fromHeaders(MessageHeaders headers, javax.jms.Message jmsMessage) {
+	public void fromHeaders(MessageHeaders headers, jakarta.jms.Message jmsMessage) {
 		try {
 			Object jmsCorrelationId = headers.get(JmsHeaders.CORRELATION_ID);
 			if (jmsCorrelationId instanceof Number) {
@@ -92,13 +91,13 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 					logger.debug("Failed to set JMSType - skipping", ex);
 				}
 			}
-			Set<String> headerNames = headers.keySet();
-			for (String headerName : headerNames) {
+			for (Map.Entry<String, Object> entry : headers.entrySet()) {
+				String headerName = entry.getKey();
 				if (StringUtils.hasText(headerName) && !headerName.startsWith(JmsHeaders.PREFIX)) {
-					Object value = headers.get(headerName);
+					Object value = entry.getValue();
 					if (value != null && SUPPORTED_PROPERTY_TYPES.contains(value.getClass())) {
 						try {
-							String propertyName = this.fromHeaderName(headerName);
+							String propertyName = fromHeaderName(headerName);
 							jmsMessage.setObjectProperty(propertyName, value);
 						}
 						catch (Exception ex) {
@@ -124,7 +123,7 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 	}
 
 	@Override
-	public MessageHeaders toHeaders(javax.jms.Message jmsMessage) {
+	public MessageHeaders toHeaders(jakarta.jms.Message jmsMessage) {
 		Map<String, Object> headers = new HashMap<>();
 		try {
 			try {
@@ -210,7 +209,7 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 				while (jmsPropertyNames.hasMoreElements()) {
 					String propertyName = jmsPropertyNames.nextElement().toString();
 					try {
-						String headerName = this.toHeaderName(propertyName);
+						String headerName = toHeaderName(propertyName);
 						headers.put(headerName, jmsMessage.getObjectProperty(propertyName));
 					}
 					catch (Exception ex) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ package org.springframework.orm.hibernate5;
 
 import java.lang.reflect.Method;
 import java.util.Map;
-import javax.persistence.PersistenceException;
+
 import javax.sql.DataSource;
 
+import jakarta.persistence.PersistenceException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.JDBCException;
 import org.hibernate.NonUniqueObjectException;
@@ -64,7 +64,6 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -93,39 +92,6 @@ public abstract class SessionFactoryUtils {
 
 	static final Log logger = LogFactory.getLog(SessionFactoryUtils.class);
 
-
-	private static Method getFlushMode;
-
-	static {
-		try {
-			// Hibernate 5.2+ getHibernateFlushMode()
-			getFlushMode = Session.class.getMethod("getHibernateFlushMode");
-		}
-		catch (NoSuchMethodException ex) {
-			try {
-				// Hibernate 5.0/5.1 getFlushMode() with FlushMode return type
-				getFlushMode = Session.class.getMethod("getFlushMode");
-			}
-			catch (NoSuchMethodException ex2) {
-				throw new IllegalStateException("No compatible Hibernate getFlushMode signature found", ex2);
-			}
-		}
-		// Check that it is the Hibernate FlushMode type, not JPA's...
-		Assert.state(FlushMode.class == getFlushMode.getReturnType(), "Could not find Hibernate getFlushMode method");
-	}
-
-
-	/**
-	 * Get the native Hibernate FlushMode, adapting between Hibernate 5.0/5.1 and 5.2+.
-	 * @param session the Hibernate Session to get the flush mode from
-	 * @return the FlushMode (never {@code null})
-	 * @since 4.3
-	 */
-	static FlushMode getFlushMode(Session session) {
-		FlushMode flushMode = (FlushMode) ReflectionUtils.invokeMethod(getFlushMode, session);
-		Assert.state(flushMode != null, "No FlushMode from Session");
-		return flushMode;
-	}
 
 	/**
 	 * Trigger a flush on the given Hibernate Session, converting regular
@@ -167,13 +133,12 @@ public abstract class SessionFactoryUtils {
 	public static void closeSession(@Nullable Session session) {
 		if (session != null) {
 			try {
-				session.close();
-			}
-			catch (HibernateException ex) {
-				logger.debug("Could not close Hibernate Session", ex);
+				if (session.isOpen()) {
+					session.close();
+				}
 			}
 			catch (Throwable ex) {
-				logger.debug("Unexpected exception on closing Hibernate Session", ex);
+				logger.error("Failed to release Hibernate Session", ex);
 			}
 		}
 	}
@@ -196,8 +161,7 @@ public abstract class SessionFactoryUtils {
 				}
 			}
 		}
-		if (sessionFactory instanceof SessionFactoryImplementor) {
-			SessionFactoryImplementor sfi = (SessionFactoryImplementor) sessionFactory;
+		if (sessionFactory instanceof SessionFactoryImplementor sfi) {
 			try {
 				ConnectionProvider cp = sfi.getServiceRegistry().getService(ConnectionProvider.class);
 				if (cp != null) {
@@ -225,29 +189,23 @@ public abstract class SessionFactoryUtils {
 		if (ex instanceof JDBCConnectionException) {
 			return new DataAccessResourceFailureException(ex.getMessage(), ex);
 		}
-		if (ex instanceof SQLGrammarException) {
-			SQLGrammarException jdbcEx = (SQLGrammarException) ex;
+		if (ex instanceof SQLGrammarException jdbcEx) {
 			return new InvalidDataAccessResourceUsageException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof QueryTimeoutException) {
-			QueryTimeoutException jdbcEx = (QueryTimeoutException) ex;
+		if (ex instanceof QueryTimeoutException jdbcEx) {
 			return new org.springframework.dao.QueryTimeoutException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof LockAcquisitionException) {
-			LockAcquisitionException jdbcEx = (LockAcquisitionException) ex;
+		if (ex instanceof LockAcquisitionException jdbcEx) {
 			return new CannotAcquireLockException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof PessimisticLockException) {
-			PessimisticLockException jdbcEx = (PessimisticLockException) ex;
+		if (ex instanceof PessimisticLockException jdbcEx) {
 			return new PessimisticLockingFailureException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof ConstraintViolationException) {
-			ConstraintViolationException jdbcEx = (ConstraintViolationException) ex;
+		if (ex instanceof ConstraintViolationException jdbcEx) {
 			return new DataIntegrityViolationException(ex.getMessage()  + "; SQL [" + jdbcEx.getSQL() +
 					"]; constraint [" + jdbcEx.getConstraintName() + "]", ex);
 		}
-		if (ex instanceof DataException) {
-			DataException jdbcEx = (DataException) ex;
+		if (ex instanceof DataException jdbcEx) {
 			return new DataIntegrityViolationException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL() + "]", ex);
 		}
 		if (ex instanceof JDBCException) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,23 +160,23 @@ public class ReflectiveMethodResolver implements MethodResolver {
 
 			for (Method method : methodsToIterate) {
 				if (method.getName().equals(name)) {
-					Class<?>[] paramTypes = method.getParameterTypes();
-					List<TypeDescriptor> paramDescriptors = new ArrayList<>(paramTypes.length);
-					for (int i = 0; i < paramTypes.length; i++) {
+					int paramCount = method.getParameterCount();
+					List<TypeDescriptor> paramDescriptors = new ArrayList<>(paramCount);
+					for (int i = 0; i < paramCount; i++) {
 						paramDescriptors.add(new TypeDescriptor(new MethodParameter(method, i)));
 					}
 					ReflectionHelper.ArgumentsMatchInfo matchInfo = null;
-					if (method.isVarArgs() && argumentTypes.size() >= (paramTypes.length - 1)) {
+					if (method.isVarArgs() && argumentTypes.size() >= (paramCount - 1)) {
 						// *sigh* complicated
 						matchInfo = ReflectionHelper.compareArgumentsVarargs(paramDescriptors, argumentTypes, typeConverter);
 					}
-					else if (paramTypes.length == argumentTypes.size()) {
+					else if (paramCount == argumentTypes.size()) {
 						// Name and parameter number match, check the arguments
 						matchInfo = ReflectionHelper.compareArguments(paramDescriptors, argumentTypes, typeConverter);
 					}
 					if (matchInfo != null) {
 						if (matchInfo.isExactMatch()) {
-							return new ReflectiveMethodExecutor(method);
+							return new ReflectiveMethodExecutor(method, type);
 						}
 						else if (matchInfo.isCloseMatch()) {
 							if (this.useDistance) {
@@ -204,13 +204,13 @@ public class ReflectiveMethodResolver implements MethodResolver {
 				}
 			}
 			if (closeMatch != null) {
-				return new ReflectiveMethodExecutor(closeMatch);
+				return new ReflectiveMethodExecutor(closeMatch, type);
 			}
 			else if (matchRequiringConversion != null) {
 				if (multipleOptions) {
 					throw new SpelEvaluationException(SpelMessage.MULTIPLE_POSSIBLE_METHODS, name);
 				}
-				return new ReflectiveMethodExecutor(matchRequiringConversion);
+				return new ReflectiveMethodExecutor(matchRequiringConversion, type);
 			}
 			else {
 				return null;

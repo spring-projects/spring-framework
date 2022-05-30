@@ -10,22 +10,22 @@
 
 	<alias name="testBean" alias="testBeanAlias2"/>
 
-	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean">
 		<constructor-arg type="java.lang.String" value="Rob Harrop"/>
 		<property name="friends">
 			<ref bean="testBean2"/>
 		</property>
 		<property name="doctor">
-			<bean class="org.springframework.tests.sample.beans.NestedTestBean">
+			<bean class="org.springframework.beans.testfixture.beans.NestedTestBean">
 				<constructor-arg type="java.lang.String" value="ACME"/>
 			</bean>
 		</property>
 	</bean>
 
-	<bean id="testBean2" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="testBean2" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name" value="Juergen Hoeller"/>
 		<property name="spouse">
-			<bean class="org.springframework.tests.sample.beans.TestBean">
+			<bean class="org.springframework.beans.testfixture.beans.TestBean">
 				<property name="name" value="Eva Schallmeiner"/>
 			</bean>
 		</property>

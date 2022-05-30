@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Map;
+
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXServiceURL;
@@ -142,7 +143,7 @@ public class NotificationListenerRegistrar extends NotificationListenerHolder
 			this.actualObjectNames = getResolvedObjectNames();
 			if (this.actualObjectNames != null) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Registering NotificationListener for MBeans " + Arrays.asList(this.actualObjectNames));
+					logger.debug("Registering NotificationListener for MBeans " + Arrays.toString(this.actualObjectNames));
 				}
 				for (ObjectName actualObjectName : this.actualObjectNames) {
 					this.server.addNotificationListener(

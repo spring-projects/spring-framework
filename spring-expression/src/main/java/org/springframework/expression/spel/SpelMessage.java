@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,11 @@ import java.text.MessageFormat;
  * <p>When a message is formatted, it will have this kind of form, capturing the prefix
  * and the error kind:
  *
- * <pre class="code">EL1004E: Type cannot be found 'String'</pre>
+ * <pre class="code">EL1005E: Type cannot be found 'String'</pre>
  *
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 public enum SpelMessage {
@@ -255,7 +256,15 @@ public enum SpelMessage {
 
 	/** @since 4.3.17 */
 	FLAWED_PATTERN(Kind.ERROR, 1073,
-			"Failed to efficiently evaluate pattern ''{0}'': consider redesigning it");
+			"Failed to efficiently evaluate pattern ''{0}'': consider redesigning it"),
+
+	/** @since 5.3.17 */
+	EXCEPTION_COMPILING_EXPRESSION(Kind.ERROR, 1074,
+			"An exception occurred while compiling an expression"),
+
+	/** @since 5.3.17 */
+	MAX_ARRAY_ELEMENTS_THRESHOLD_EXCEEDED(Kind.ERROR, 1075,
+			"Array declares too many elements, exceeding the threshold of ''{0}''");
 
 
 	private final Kind kind;
@@ -282,10 +291,8 @@ public enum SpelMessage {
 	public String formatMessage(Object... inserts) {
 		StringBuilder formattedMessage = new StringBuilder();
 		formattedMessage.append("EL").append(this.code);
-		switch (this.kind) {
-			case ERROR:
-				formattedMessage.append("E");
-				break;
+		if (this.kind == Kind.ERROR) {
+			formattedMessage.append('E');
 		}
 		formattedMessage.append(": ");
 		formattedMessage.append(MessageFormat.format(this.message, inserts));

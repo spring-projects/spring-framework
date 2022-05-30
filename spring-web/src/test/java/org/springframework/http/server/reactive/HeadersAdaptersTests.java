@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,99 +16,129 @@
 
 package org.springframework.http.server.reactive;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Locale;
+import java.util.stream.Stream;
 
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.undertow.util.HeaderMap;
 import org.apache.tomcat.util.http.MimeHeaders;
 import org.eclipse.jetty.http.HttpFields;
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
  * Unit tests for {@code HeadersAdapters} {@code MultiValueMap} implementations.
  *
  * @author Brian Clozel
+ * @author Sam Brannen
  */
-@RunWith(Parameterized.class)
-public class HeadersAdaptersTests {
+class HeadersAdaptersTests {
 
-	@Parameterized.Parameter(0)
-	public MultiValueMap<String, String> headers;
-
-	@Parameterized.Parameters(name = "headers [{0}]")
-	public static Object[][] arguments() {
-		return new Object[][] {
-				{CollectionUtils.toMultiValueMap(
-						new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH))},
-				{new NettyHeadersAdapter(new DefaultHttpHeaders())},
-				{new TomcatHeadersAdapter(new MimeHeaders())},
-				{new UndertowHeadersAdapter(new HeaderMap())},
-				{new JettyHeadersAdapter(new HttpFields())}
-		};
+	@ParameterizedHeadersTest
+	void getWithUnknownHeaderShouldReturnNull(MultiValueMap<String, String> headers) {
+		assertThat(headers.get("Unknown")).isNull();
 	}
 
-	@After
-	public void tearDown() {
-		this.headers.clear();
+	@ParameterizedHeadersTest
+	void getFirstWithUnknownHeaderShouldReturnNull(MultiValueMap<String, String> headers) {
+		assertThat(headers.getFirst("Unknown")).isNull();
 	}
 
-	@Test
-	public void getWithUnknownHeaderShouldReturnNull() {
-		assertNull(this.headers.get("Unknown"));
+	@ParameterizedHeadersTest
+	void sizeWithMultipleValuesForHeaderShouldCountHeaders(MultiValueMap<String, String> headers) {
+		headers.add("TestHeader", "first");
+		headers.add("TestHeader", "second");
+		assertThat(headers.size()).isEqualTo(1);
 	}
 
-	@Test
-	public void getFirstWithUnknownHeaderShouldReturnNull() {
-		assertNull(this.headers.getFirst("Unknown"));
+	@ParameterizedHeadersTest
+	void keySetShouldNotDuplicateHeaderNames(MultiValueMap<String, String> headers) {
+		headers.add("TestHeader", "first");
+		headers.add("OtherHeader", "test");
+		headers.add("TestHeader", "second");
+		assertThat(headers.keySet().size()).isEqualTo(2);
 	}
 
-	@Test
-	public void sizeWithMultipleValuesForHeaderShouldCountHeaders() {
-		this.headers.add("TestHeader", "first");
-		this.headers.add("TestHeader", "second");
-		assertEquals(1, this.headers.size());
+	@ParameterizedHeadersTest
+	void containsKeyShouldBeCaseInsensitive(MultiValueMap<String, String> headers) {
+		headers.add("TestHeader", "first");
+		assertThat(headers.containsKey("testheader")).isTrue();
 	}
 
-	@Test
-	public void keySetShouldNotDuplicateHeaderNames() {
-		this.headers.add("TestHeader", "first");
-		this.headers.add("OtherHeader", "test");
-		this.headers.add("TestHeader", "second");
-		assertEquals(2, this.headers.keySet().size());
+	@ParameterizedHeadersTest
+	void addShouldKeepOrdering(MultiValueMap<String, String> headers) {
+		headers.add("TestHeader", "first");
+		headers.add("TestHeader", "second");
+		assertThat(headers.getFirst("TestHeader")).isEqualTo("first");
+		assertThat(headers.get("TestHeader").get(0)).isEqualTo("first");
 	}
 
-	@Test
-	public void containsKeyShouldBeCaseInsensitive() {
-		this.headers.add("TestHeader", "first");
-		assertTrue(this.headers.containsKey("testheader"));
+	@ParameterizedHeadersTest
+	void putShouldOverrideExisting(MultiValueMap<String, String> headers) {
+		headers.add("TestHeader", "first");
+		headers.put("TestHeader", Arrays.asList("override"));
+		assertThat(headers.getFirst("TestHeader")).isEqualTo("override");
+		assertThat(headers.get("TestHeader").size()).isEqualTo(1);
 	}
 
-	@Test
-	public void addShouldKeepOrdering() {
-		this.headers.add("TestHeader", "first");
-		this.headers.add("TestHeader", "second");
-		assertEquals("first", this.headers.getFirst("TestHeader"));
-		assertEquals("first", this.headers.get("TestHeader").get(0));
+	@ParameterizedHeadersTest
+	void nullValuesShouldNotFail(MultiValueMap<String, String> headers) {
+		headers.add("TestHeader", null);
+		assertThat(headers.getFirst("TestHeader")).isNull();
+		headers.set("TestHeader", null);
+		assertThat(headers.getFirst("TestHeader")).isNull();
 	}
 
-	@Test
-	public void putShouldOverrideExisting() {
-		this.headers.add("TestHeader", "first");
-		this.headers.put("TestHeader", Arrays.asList("override"));
-		assertEquals("override", this.headers.getFirst("TestHeader"));
-		assertEquals(1, this.headers.get("TestHeader").size());
+	@ParameterizedHeadersTest
+	void shouldReflectChangesOnKeyset(MultiValueMap<String, String> headers) {
+		headers.add("TestHeader", "first");
+		assertThat(headers.keySet()).hasSize(1);
+		headers.keySet().removeIf("TestHeader"::equals);
+		assertThat(headers.keySet()).hasSize(0);
+	}
+
+	@ParameterizedHeadersTest
+	void shouldFailIfHeaderRemovedFromKeyset(MultiValueMap<String, String> headers) {
+		headers.add("TestHeader", "first");
+		assertThat(headers.keySet()).hasSize(1);
+		Iterator<String> names = headers.keySet().iterator();
+		assertThat(names.hasNext()).isTrue();
+		assertThat(names.next()).isEqualTo("TestHeader");
+		names.remove();
+		assertThatThrownBy(names::remove).isInstanceOf(IllegalStateException.class);
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	@ParameterizedTest(name = "[{index}] {0}")
+	@MethodSource("headers")
+	@interface ParameterizedHeadersTest {
+	}
+
+	static Stream<Arguments> headers() {
+		return Stream.of(
+			arguments(named("Map", CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH)))),
+			arguments(named("Netty", new NettyHeadersAdapter(new DefaultHttpHeaders()))),
+			arguments(named("Tomcat", new TomcatHeadersAdapter(new MimeHeaders()))),
+			arguments(named("Undertow", new UndertowHeadersAdapter(new HeaderMap()))),
+			arguments(named("Jetty", new JettyHeadersAdapter(HttpFields.build())))
+		);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,9 @@ public interface AsyncHandlerMethodReturnValueHandler extends HandlerMethodRetur
 
 	/**
 	 * Whether the given return value represents asynchronous computation.
-	 * @param returnValue the return value
+	 * @param returnValue the value returned from the handler method
 	 * @param returnType the return type
-	 * @return {@code true} if the return value is asynchronous
+	 * @return {@code true} if the return value type represents an async value
 	 */
 	boolean isAsyncReturnValue(@Nullable Object returnValue, MethodParameter returnType);
 

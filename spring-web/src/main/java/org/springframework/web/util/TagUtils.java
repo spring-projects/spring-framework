@@ -16,8 +16,8 @@
 
 package org.springframework.web.util;
 
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.tagext.Tag;
+import jakarta.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.tagext.Tag;
 
 import org.springframework.util.Assert;
 
@@ -28,13 +28,13 @@ import org.springframework.util.Assert;
  * <p>
  * <ul>
  * <li>{@code page} will be transformed to
- * {@link javax.servlet.jsp.PageContext#PAGE_SCOPE PageContext.PAGE_SCOPE}
+ * {@link jakarta.servlet.jsp.PageContext#PAGE_SCOPE PageContext.PAGE_SCOPE}
  * <li>{@code request} will be transformed to
- * {@link javax.servlet.jsp.PageContext#REQUEST_SCOPE PageContext.REQUEST_SCOPE}
+ * {@link jakarta.servlet.jsp.PageContext#REQUEST_SCOPE PageContext.REQUEST_SCOPE}
  * <li>{@code session} will be transformed to
- * {@link javax.servlet.jsp.PageContext#SESSION_SCOPE PageContext.SESSION_SCOPE}
+ * {@link jakarta.servlet.jsp.PageContext#SESSION_SCOPE PageContext.SESSION_SCOPE}
  * <li>{@code application} will be transformed to
- * {@link javax.servlet.jsp.PageContext#APPLICATION_SCOPE PageContext.APPLICATION_SCOPE}
+ * {@link jakarta.servlet.jsp.PageContext#APPLICATION_SCOPE PageContext.APPLICATION_SCOPE}
  * </ul>
  *
  * @author Alef Arendsen
@@ -123,7 +123,7 @@ public abstract class TagUtils {
 	 * or in the case of the {@link String}-typed arguments, is composed wholly
 	 * of whitespace; or if the supplied {@code ancestorTagClass} is not
 	 * type-assignable to the {@link Tag} class
-	 * @see #hasAncestorOfType(javax.servlet.jsp.tagext.Tag, Class)
+	 * @see #hasAncestorOfType(jakarta.servlet.jsp.tagext.Tag, Class)
 	 */
 	public static void assertHasAncestorOfType(Tag tag, Class<?> ancestorTagClass, String tagName,
 			String ancestorTagName) {

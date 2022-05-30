@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.http.client;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
+import java.util.function.BiFunction;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -65,6 +66,9 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	private RequestConfig requestConfig;
 
 	private boolean bufferRequestBody = true;
+
+	@Nullable
+	private BiFunction<HttpMethod, URI, HttpContext> httpContextFactory;
 
 
 	/**
@@ -157,6 +161,19 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		this.bufferRequestBody = bufferRequestBody;
 	}
 
+	/**
+	 * Configure a factory to pre-create the {@link HttpContext} for each request.
+	 * <p>This may be useful for example in mutual TLS authentication where a
+	 * different {@code RestTemplate} for each client certificate such that
+	 * all calls made through a given {@code RestTemplate} instance as associated
+	 * for the same client identity. {@link HttpClientContext#setUserToken(Object)}
+	 * can be used to specify a fixed user token for all requests.
+	 * @param httpContextFactory the context factory to use
+	 * @since 5.2.7
+	 */
+	public void setHttpContextFactory(BiFunction<HttpMethod, URI, HttpContext> httpContextFactory) {
+		this.httpContextFactory = httpContextFactory;
+	}
 
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
@@ -256,26 +273,31 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * @return the Commons HttpMethodBase object
 	 */
 	protected HttpUriRequest createHttpUriRequest(HttpMethod httpMethod, URI uri) {
-		switch (httpMethod) {
-			case GET:
-				return new HttpGet(uri);
-			case HEAD:
-				return new HttpHead(uri);
-			case POST:
-				return new HttpPost(uri);
-			case PUT:
-				return new HttpPut(uri);
-			case PATCH:
-				return new HttpPatch(uri);
-			case DELETE:
-				return new HttpDelete(uri);
-			case OPTIONS:
-				return new HttpOptions(uri);
-			case TRACE:
-				return new HttpTrace(uri);
-			default:
-				throw new IllegalArgumentException("Invalid HTTP method: " + httpMethod);
+		if (HttpMethod.GET.equals(httpMethod)) {
+			return new HttpGet(uri);
 		}
+		else if (HttpMethod.HEAD.equals(httpMethod)) {
+			return new HttpHead(uri);
+		}
+		else if (HttpMethod.POST.equals(httpMethod)) {
+			return new HttpPost(uri);
+		}
+		else if (HttpMethod.PUT.equals(httpMethod)) {
+			return new HttpPut(uri);
+		}
+		else if (HttpMethod.PATCH.equals(httpMethod)) {
+			return new HttpPatch(uri);
+		}
+		else if (HttpMethod.DELETE.equals(httpMethod)) {
+			return new HttpDelete(uri);
+		}
+		else if (HttpMethod.OPTIONS.equals(httpMethod)) {
+			return new HttpOptions(uri);
+		}
+		else if (HttpMethod.TRACE.equals(httpMethod)) {
+			return new HttpTrace(uri);
+		}
+		throw new IllegalArgumentException("Invalid HTTP method: " + httpMethod);
 	}
 
 	/**
@@ -296,7 +318,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 */
 	@Nullable
 	protected HttpContext createHttpContext(HttpMethod httpMethod, URI uri) {
-		return null;
+		return (this.httpContextFactory != null ? this.httpContextFactory.apply(httpMethod, uri) : null);
 	}
 
 

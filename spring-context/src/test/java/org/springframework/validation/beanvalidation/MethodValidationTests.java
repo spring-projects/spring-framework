@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,13 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import javax.validation.Validator;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.NotNull;
-import javax.validation.groups.Default;
 
-import org.junit.Test;
+import jakarta.validation.ValidationException;
+import jakarta.validation.Validator;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.groups.Default;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.MutablePropertyValues;
@@ -38,7 +39,8 @@ import org.springframework.scheduling.annotation.AsyncAnnotationAdvisor;
 import org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
 import org.springframework.validation.annotation.Validated;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Juergen Hoeller
@@ -46,15 +48,17 @@ import static org.junit.Assert.*;
 public class MethodValidationTests {
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testMethodValidationInterceptor() {
 		MyValidBean bean = new MyValidBean();
 		ProxyFactory proxyFactory = new ProxyFactory(bean);
 		proxyFactory.addAdvice(new MethodValidationInterceptor());
 		proxyFactory.addAdvisor(new AsyncAnnotationAdvisor());
-		doTestProxyValidation((MyValidInterface) proxyFactory.getProxy());
+		doTestProxyValidation((MyValidInterface<String>) proxyFactory.getProxy());
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testMethodValidationPostProcessor() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerSingleton("mvpp", MethodValidationPostProcessor.class);
@@ -67,58 +71,27 @@ public class MethodValidationTests {
 		ac.close();
 	}
 
-	private void doTestProxyValidation(MyValidInterface proxy) {
-		assertNotNull(proxy.myValidMethod("value", 5));
-		try {
-			assertNotNull(proxy.myValidMethod("value", 15));
-			fail("Should have thrown ValidationException");
-		}
-		catch (javax.validation.ValidationException ex) {
-			// expected
-		}
-		try {
-			assertNotNull(proxy.myValidMethod(null, 5));
-			fail("Should have thrown ValidationException");
-		}
-		catch (javax.validation.ValidationException ex) {
-			// expected
-		}
-		try {
-			assertNotNull(proxy.myValidMethod("value", 0));
-			fail("Should have thrown ValidationException");
-		}
-		catch (javax.validation.ValidationException ex) {
-			// expected
-		}
-
+	private void doTestProxyValidation(MyValidInterface<String> proxy) {
+		assertThat(proxy.myValidMethod("value", 5)).isNotNull();
+		assertThatExceptionOfType(ValidationException.class).isThrownBy(() ->
+				proxy.myValidMethod("value", 15));
+		assertThatExceptionOfType(ValidationException.class).isThrownBy(() ->
+				proxy.myValidMethod(null, 5));
+		assertThatExceptionOfType(ValidationException.class).isThrownBy(() ->
+				proxy.myValidMethod("value", 0));
 		proxy.myValidAsyncMethod("value", 5);
-		try {
-			proxy.myValidAsyncMethod("value", 15);
-			fail("Should have thrown ValidationException");
-		}
-		catch (javax.validation.ValidationException ex) {
-			// expected
-		}
-		try {
-			proxy.myValidAsyncMethod(null, 5);
-			fail("Should have thrown ValidationException");
-		}
-		catch (javax.validation.ValidationException ex) {
-			// expected
-		}
-
-		assertEquals("myValue", proxy.myGenericMethod("myValue"));
-		try {
-			proxy.myGenericMethod(null);
-			fail("Should have thrown ValidationException");
-		}
-		catch (javax.validation.ValidationException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ValidationException.class).isThrownBy(() ->
+				proxy.myValidAsyncMethod("value", 15));
+		assertThatExceptionOfType(ValidationException.class).isThrownBy(() ->
+				proxy.myValidAsyncMethod(null, 5));
+		assertThat(proxy.myGenericMethod("myValue")).isEqualTo("myValue");
+		assertThatExceptionOfType(ValidationException.class).isThrownBy(() ->
+				proxy.myGenericMethod(null));
 	}
 
 	@Test
 	public void testLazyValidatorForMethodValidation() {
+		@SuppressWarnings("resource")
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 				LazyMethodValidationConfig.class, CustomValidatorBean.class,
 				MyValidBean.class, MyValidFactoryBean.class);
@@ -127,6 +100,7 @@ public class MethodValidationTests {
 
 	@Test
 	public void testLazyValidatorForMethodValidationWithProxyTargetClass() {
+		@SuppressWarnings("resource")
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 				LazyMethodValidationConfigWithProxyTargetClass.class, CustomValidatorBean.class,
 				MyValidBean.class, MyValidFactoryBean.class);

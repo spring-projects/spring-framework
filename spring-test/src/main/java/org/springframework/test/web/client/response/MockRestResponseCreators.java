@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 
 package org.springframework.test.web.client.response;
 
+import java.io.IOException;
 import java.net.URI;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.test.web.client.ResponseCreator;
@@ -112,8 +114,29 @@ public abstract class MockRestResponseCreators {
 	 * {@code ResponseCreator} with a specific HTTP status.
 	 * @param status the response status
 	 */
-	public static DefaultResponseCreator withStatus(HttpStatus status) {
+	public static DefaultResponseCreator withStatus(HttpStatusCode status) {
 		return new DefaultResponseCreator(status);
+	}
+
+	/**
+	 * Variant of {@link #withStatus(HttpStatusCode)} with an integer.
+	 * @param status the response status
+	 * @since 5.3.17
+	 */
+	public static DefaultResponseCreator withRawStatus(int status) {
+		return new DefaultResponseCreator(status);
+	}
+
+	/**
+	 * {@code ResponseCreator} with an internal application {@code IOException}.
+	 * <p>For example, one could use this to simulate a {@code SocketTimeoutException}.
+	 * @param ex the {@code Exception} to be thrown at HTTP call time
+	 * @since 5.2.2
+	 */
+	public static ResponseCreator withException(IOException ex) {
+		return request -> {
+			throw ex;
+		};
 	}
 
 }

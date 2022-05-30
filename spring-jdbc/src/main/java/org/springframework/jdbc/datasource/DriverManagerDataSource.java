@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.util.ClassUtils;
  * connection pool, implementing the same standard interface, but creating new
  * Connections on every call.
  *
- * <p>Useful for test or standalone environments outside of a Java EE container, either
+ * <p>Useful for test or standalone environments outside of a Jakarta EE container, either
  * as a DataSource bean in a corresponding ApplicationContext or in conjunction with
  * a simple JNDI environment. Pool-assuming {@code Connection.close()} calls will
  * simply close the Connection, so any DataSource-aware persistence code should work.
@@ -44,7 +44,7 @@ import org.springframework.util.ClassUtils;
  * loading issues with the JDBC DriverManager that be resolved through direct Driver
  * usage (which is exactly what SimpleDriverDataSource does).</b>
  *
- * <p>In a Java EE container, it is recommended to use a JNDI DataSource provided by
+ * <p>In a Jakarta EE container, it is recommended to use a JNDI DataSource provided by
  * the container. Such a DataSource can be exposed as a DataSource bean in a Spring
  * ApplicationContext via {@link org.springframework.jndi.JndiObjectFactoryBean},
  * for seamless switching to and from a local DataSource bean like this class.
@@ -52,12 +52,13 @@ import org.springframework.util.ClassUtils;
  * {@link org.springframework.mock.jndi.SimpleNamingContextBuilder}, or switch the
  * bean definition to a local DataSource (which is simpler and thus recommended).
  *
- * <p>If you need a "real" connection pool outside of a Java EE container, consider
+ * <p>This {@code DriverManagerDataSource} class was originally designed alongside
  * <a href="https://commons.apache.org/proper/commons-dbcp">Apache Commons DBCP</a>
- * or <a href="https://sourceforge.net/projects/c3p0">C3P0</a>.
- * Commons DBCP's BasicDataSource and C3P0's ComboPooledDataSource are full
- * connection pool beans, supporting the same basic properties as this class
- * plus specific settings (such as minimal/maximal pool size etc).
+ * and <a href="https://sourceforge.net/projects/c3p0">C3P0</a>, featuring bean-style
+ * {@code BasicDataSource}/{@code ComboPooledDataSource} classes with configuration
+ * properties for local resource setups. For a modern JDBC connection pool, consider
+ * <a href="https://github.com/brettwooldridge/HikariCP">HikariCP</a> instead,
+ * exposing a corresponding {@code HikariDataSource} instance to the application.
  *
  * @author Juergen Hoeller
  * @since 14.03.2003

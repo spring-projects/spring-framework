@@ -9,14 +9,14 @@
 
 <beans>
 
-	<bean id="nopInterceptor" class="org.springframework.tests.aop.interceptor.NopInterceptor">
+	<bean id="nopInterceptor" class="org.springframework.aop.testfixture.interceptor.NopInterceptor">
 	</bean>
 
 	<bean id="testBean"
 		class="org.springframework.aop.framework.ProxyFactoryBean"
 	>
 			<property name="target">
-				<bean class="org.springframework.tests.sample.beans.TestBean">
+				<bean class="org.springframework.beans.testfixture.beans.TestBean">
 					<property name="name"><value>innerBeanTarget</value></property>
 				</bean>
 			</property>

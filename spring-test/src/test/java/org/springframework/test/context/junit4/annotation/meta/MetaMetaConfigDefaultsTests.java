@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for meta-meta-annotation support, relying on default attribute
@@ -42,6 +42,6 @@ public class MetaMetaConfigDefaultsTests {
 
 	@Test
 	public void foo() {
-		assertEquals("Production Foo", foo);
+		assertThat(foo).isEqualTo("Production Foo");
 	}
 }

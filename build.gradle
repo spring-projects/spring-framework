@@ -1,319 +1,397 @@
-buildscript {
-	repositories {
-		maven { url "https://repo.spring.io/plugins-release" }
-	}
-	dependencies {
-		classpath("io.spring.gradle:propdeps-plugin:0.0.9.RELEASE")
-		classpath("org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.16")
-	}
-}
-
-// 3rd party plugin repositories can be configured in settings.gradle
 plugins {
-	id "io.spring.dependency-management" version "1.0.5.RELEASE" apply false
-	id "org.jetbrains.kotlin.jvm" version "1.3.21" apply false
-	id "org.jetbrains.dokka" version "0.9.18"
-	id "org.asciidoctor.convert" version "1.5.8"
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE' apply false
+	id 'io.spring.nohttp' version '0.0.10'
+	id "io.freefair.aspectj" version '6.4.0' apply false
+	id 'org.jetbrains.dokka' version '1.6.10' apply false
+	id 'org.jetbrains.kotlin.jvm' version '1.6.20' apply false
+	id "org.jetbrains.kotlin.plugin.serialization" version '1.6.20' apply false
+	id 'org.asciidoctor.jvm.convert' version '3.3.2'
+	id 'org.asciidoctor.jvm.pdf' version '3.3.2'
+	id "org.unbroken-dome.xjc" version '2.0.0' apply false
+	id "com.github.ben-manes.versions" version '0.39.0'
+	id "com.github.johnrengelman.shadow" version '7.0.0' apply false
+	id 'de.undercouch.download' version '4.1.2'
+	id "me.champeau.jmh" version "0.6.6" apply false
 }
 
 ext {
-	linkHomepage = "https://projects.spring.io/spring-framework"
-	linkCi = "https://build.spring.io/browse/SPR"
-	linkIssue = "https://github.com/spring-projects/spring-framework/issues"
-	linkScmUrl = "https://github.com/spring-projects/spring-framework"
-	linkScmConnection = "scm:git:git://github.com/spring-projects/spring-framework.git"
-	linkScmDevConnection = "scm:git:ssh://git@github.com:spring-projects/spring-framework.git"
-
-	moduleProjects = subprojects.findAll {
-		(it.name != "spring-build-src") && (it.name != "spring-framework-bom") && (it.name != "spring-core-coroutines")
-	}
-
-	aspectjVersion       = "1.9.2"
-	coroutinesVersion    = "1.2.0-alpha-2"
-	freemarkerVersion    = "2.3.28"
-	groovyVersion        = "2.5.6"
-	hsqldbVersion        = "2.4.1"
-	jackson2Version      = "2.9.8"
-	jettyVersion         = "9.4.15.v20190215"
-	junit5Version        = "5.4.2"
-	kotlinVersion        = "1.3.21"
-	log4jVersion         = "2.11.2"
-	nettyVersion         = "4.1.34.Final"
-	quartzVersion        = "2.3.1"
-	reactorVersion       = "Californium-SR6"
-	rxjavaVersion        = "1.3.8"
-	rxjavaAdapterVersion = "1.2.1"
-	rxjava2Version       = "2.2.8"
-	slf4jVersion         = "1.7.26"	  // spring-jcl + consistent 3rd party deps
-	tiles3Version        = "3.0.8"
-	tomcatVersion        = "9.0.17"
-	undertowVersion      = "2.0.20.Final"
-
-	gradleScriptDir = "${rootProject.projectDir}/gradle"
-	withoutJclOverSlf4J = {
-		exclude group: "org.slf4j", module: "jcl-over-slf4j"
+	moduleProjects = subprojects.findAll { it.name.startsWith("spring-") }
+	javaProjects = subprojects - project(":framework-bom")
+	withoutJclOverSlf4j = {
+		exclude group: "org.slf4j", name: "jcl-over-slf4j"
 	}
 }
 
 configure(allprojects) { project ->
-	group = "org.springframework"
-	version = qualifyVersionIfNecessary(version)
-
-	apply plugin: "java"
-	apply plugin: "kotlin"
-	apply plugin: "checkstyle"
-	apply plugin: "propdeps"
-	apply plugin: "test-source-set-dependencies"
 	apply plugin: "io.spring.dependency-management"
-	apply from: "${gradleScriptDir}/ide.gradle"
 
 	dependencyManagement {
-		resolutionStrategy {
-			cacheChangingModulesFor 0, "seconds"
+		imports {
+			mavenBom "com.fasterxml.jackson:jackson-bom:2.13.1"
+			mavenBom "io.netty:netty-bom:4.1.77.Final"
+			mavenBom "io.projectreactor:reactor-bom:2022.0.0-M2"
+			mavenBom "io.r2dbc:r2dbc-bom:Borca-SR1"
+			mavenBom "io.rsocket:rsocket-bom:1.1.2"
+			mavenBom "org.eclipse.jetty:jetty-bom:11.0.9"
+			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.6.20"
+			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.0"
+			mavenBom "org.jetbrains.kotlinx:kotlinx-serialization-bom:1.3.2"
+			mavenBom "org.junit:junit-bom:5.8.2"
 		}
-		applyMavenExclusions = false
+		dependencies {
+			dependencySet(group: 'org.apache.logging.log4j', version: '2.17.2') {
+				entry 'log4j-api'
+				entry 'log4j-core'
+				entry 'log4j-jul'
+				entry 'log4j-slf4j-impl'
+			}
+			dependency "org.slf4j:slf4j-api:1.7.36"
+			dependency("com.google.code.findbugs:findbugs:3.0.1") {
+				exclude group: "dom4j", name: "dom4j"
+			}
+			dependency "com.google.code.findbugs:jsr305:3.0.2"
+
+			dependencySet(group: 'org.aspectj', version: '1.9.9.1') {
+				entry 'aspectjrt'
+				entry 'aspectjtools'
+				entry 'aspectjweaver'
+			}
+			dependencySet(group: 'org.apache.groovy', version: '4.0.2') {
+				entry 'groovy'
+				entry 'groovy-jsr223'
+				entry 'groovy-templates'  // requires findbugs for warning-free compilation
+				entry 'groovy-xml'
+			}
+
+			dependency "io.reactivex.rxjava3:rxjava:3.1.4"
+			dependency "io.smallrye.reactive:mutiny:1.4.0"
+			dependency "io.projectreactor.tools:blockhound:1.0.6.RELEASE"
+
+			dependency "com.fasterxml:aalto-xml:1.3.1"
+			dependency("com.fasterxml.woodstox:woodstox-core:6.2.8") {
+				exclude group: "stax", name: "stax-api"
+			}
+			dependency "com.google.code.gson:gson:2.8.9"
+			dependency "com.google.protobuf:protobuf-java-util:3.19.3"
+			dependency "com.googlecode.protobuf-java-format:protobuf-java-format:1.4"
+			dependency "com.thoughtworks.qdox:qdox:2.0.1"
+			dependency("com.thoughtworks.xstream:xstream:1.4.18") {
+				exclude group: "xpp3", name: "xpp3_min"
+				exclude group: "xmlpull", name: "xmlpull"
+			}
+			dependency "org.eclipse:yasson:2.0.4"
+			dependency("org.codehaus.jettison:jettison:1.3.8") {
+				exclude group: "stax", name: "stax-api"
+			}
+			dependency "org.ogce:xpp3:1.1.6"
+			dependency "org.yaml:snakeyaml:1.30"
+
+			dependency "com.h2database:h2:2.1.210"
+			dependency "com.github.ben-manes.caffeine:caffeine:3.1.0"
+			dependency "com.github.librepdf:openpdf:1.3.27"
+			dependency "com.rometools:rome:1.18.0"
+			dependency "commons-io:commons-io:2.11.0"
+			dependency "io.vavr:vavr:0.10.4"
+			dependency "net.sf.jopt-simple:jopt-simple:5.0.4"
+			dependencySet(group: 'org.apache.activemq', version: '5.16.2') {
+				entry 'activemq-broker'
+				entry('activemq-kahadb-store') {
+					exclude group: "org.springframework", name: "spring-context"
+				}
+				entry 'activemq-stomp'
+			}
+			dependency "org.apache.commons:commons-pool2:2.9.0"
+			dependencySet(group: 'org.apache.derby', version: '10.14.2.0') {
+				entry 'derby'
+				entry 'derbyclient'
+			}
+			dependency "org.apache.poi:poi-ooxml:5.2.2"
+			dependency "org.apache-extras.beanshell:bsh:2.0b6"
+			dependency "org.freemarker:freemarker:2.3.31"
+			dependency "org.hsqldb:hsqldb:2.5.2"
+			dependency "org.quartz-scheduler:quartz:2.3.2"
+			dependency "org.ehcache:jcache:1.0.1"
+			dependency "org.ehcache:ehcache:3.4.0"
+			dependency "org.hibernate:hibernate-core-jakarta:5.6.8.Final"
+			dependency "org.hibernate:hibernate-validator:7.0.4.Final"
+			dependency "org.webjars:webjars-locator-core:0.48"
+			dependency "org.webjars:underscorejs:1.8.3"
+
+			dependencySet(group: 'org.apache.tomcat', version: '10.0.20') {
+				entry 'tomcat-util'
+				entry('tomcat-websocket') {
+					exclude group: "org.apache.tomcat", name: "tomcat-servlet-api"
+					exclude group: "org.apache.tomcat", name: "tomcat-websocket-api"
+				}
+			}
+			dependencySet(group: 'org.apache.tomcat.embed', version: '10.0.20') {
+				entry 'tomcat-embed-core'
+				entry 'tomcat-embed-websocket'
+			}
+			dependencySet(group: 'io.undertow', version: '2.2.17.Final') {
+				entry 'undertow-core'
+				entry 'undertow-servlet-jakarta'
+				entry 'undertow-websockets-jsr-jakarta'
+			}
+
+			dependency "org.eclipse.jetty:jetty-reactive-httpclient:3.0.5"
+			dependency 'org.apache.httpcomponents.client5:httpclient5:5.1.3'
+			dependency 'org.apache.httpcomponents.core5:httpcore5-reactive:5.1.3'
+			dependency("org.apache.httpcomponents:httpclient:4.5.13") {
+				exclude group: "commons-logging", name: "commons-logging"
+			}
+			dependencySet(group: 'com.squareup.okhttp3', version: '3.14.9') {
+				entry 'okhttp'
+				entry 'mockwebserver'
+			}
+
+			dependency "org.jruby:jruby:9.3.4.0"
+			dependency "org.python:jython-standalone:2.7.1"
+			dependency "org.mozilla:rhino:1.7.11"
+
+			dependency("org.dom4j:dom4j:2.1.3") {
+				exclude group: 'javax.xml.bind', name: "jaxb-api"
+				exclude group: "jaxen", name: "jaxen"
+				exclude group: "net.java.dev.msv", name: "xsdlib"
+				exclude group: "pull-parser", name: "pull-parser"
+				exclude group: "xpp3", name: "xpp3"
+			}
+			dependency("jaxen:jaxen:1.2.0") {
+				exclude group: "dom4j", name: "dom4j"
+			}
+
+			dependency("junit:junit:4.13.2") {
+				exclude group: "org.hamcrest", name: "hamcrest-core"
+			}
+			dependency("de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1") {
+				exclude group: "junit", name: "junit"
+			}
+			dependency "org.testng:testng:7.4.0"
+			dependency "org.junit.support:testng-engine:1.0.1"
+			dependency "org.hamcrest:hamcrest:2.1"
+			dependency "org.awaitility:awaitility:3.1.6"
+			dependency "org.assertj:assertj-core:3.22.0"
+			dependencySet(group: 'org.xmlunit', version: '2.9.0') {
+				entry 'xmlunit-assertj'
+				entry('xmlunit-matchers') {
+					exclude group: "org.hamcrest", name: "hamcrest-core"
+				}
+			}
+			dependencySet(group: 'org.mockito', version: '4.5.1') {
+				entry('mockito-core') {
+					exclude group: "org.hamcrest", name: "hamcrest-core"
+				}
+				entry 'mockito-junit-jupiter'
+			}
+			dependency "io.mockk:mockk:1.12.1"
+
+			dependency("net.sourceforge.htmlunit:htmlunit:2.61.0") {
+				exclude group: "commons-logging", name: "commons-logging"
+			}
+			dependency("org.seleniumhq.selenium:htmlunit-driver:2.61.0") {
+				exclude group: "commons-logging", name: "commons-logging"
+			}
+			dependency("org.seleniumhq.selenium:selenium-java:3.141.59") {
+				exclude group: "commons-logging", name: "commons-logging"
+				exclude group: "io.netty", name: "netty"
+			}
+			dependency "org.skyscreamer:jsonassert:1.5.0"
+			dependency "com.jayway.jsonpath:json-path:2.6.0"
+			dependency "org.bouncycastle:bcpkix-jdk15on:1.66"
+
+			dependency "javax.cache:cache-api:1.1.1"
+			dependency "javax.money:money-api:1.1"
+			dependency "org.javamoney:moneta:1.4.2"
+
+			dependency "jakarta.activation:jakarta.activation-api:2.0.1"
+			dependency "jakarta.annotation:jakarta.annotation-api:2.0.0"
+			dependency "jakarta.ejb:jakarta.ejb-api:4.0.0"
+			dependency "jakarta.el:jakarta.el-api:4.0.0"
+			dependency "jakarta.enterprise.concurrent:jakarta.enterprise.concurrent-api:2.0.0"
+			dependency "jakarta.faces:jakarta.faces-api:3.0.0"
+			dependency "jakarta.inject:jakarta.inject-api:2.0.0"
+			dependency "jakarta.inject:jakarta.inject-tck:2.0.1"
+			dependency "jakarta.interceptor:jakarta.interceptor-api:2.0.0"
+			dependency "jakarta.jms:jakarta.jms-api:3.0.0"
+			dependency "jakarta.json:jakarta.json-api:2.0.1"
+			dependency "jakarta.json.bind:jakarta.json.bind-api:2.0.0"
+			dependency "jakarta.mail:jakarta.mail-api:2.0.1"
+			dependency "jakarta.persistence:jakarta.persistence-api:3.0.0"
+			dependency "jakarta.resource:jakarta.resource-api:2.0.0"
+			dependency "jakarta.servlet:jakarta.servlet-api:5.0.0"
+			dependency "jakarta.servlet.jsp:jakarta.servlet.jsp-api:3.0.0"
+			dependency "jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:2.0.0"
+			dependency "jakarta.transaction:jakarta.transaction-api:2.0.0"
+			dependency "jakarta.validation:jakarta.validation-api:3.0.0"
+			dependency "jakarta.websocket:jakarta.websocket-api:2.0.0"
+			dependency "jakarta.xml.bind:jakarta.xml.bind-api:3.0.1"
+
+			dependency "com.sun.activation:jakarta.activation:2.0.1"
+			dependency "com.sun.mail:jakarta.mail:2.0.1"
+			dependencySet(group: 'com.sun.xml.bind', version: '3.0.2') {
+				entry 'jaxb-core'
+				entry 'jaxb-impl'
+				entry 'jaxb-xjc'
+			}
+
+			// Substitute for "javax.management:jmxremote_optional:1.0.1_04" which
+			// is not available on Maven Central
+			dependency "org.glassfish.external:opendmk_jmxremote_optional_jar:1.0-b01-ea"
+			dependency "org.glassfish:jakarta.el:4.0.2"
+			dependency "org.glassfish.tyrus:tyrus-container-servlet:2.0.1"
+			dependency "org.eclipse.persistence:org.eclipse.persistence.jpa:3.0.2"
+		}
 		generatedPomCustomization {
 			enabled = false
 		}
+		resolutionStrategy {
+			cacheChangingModulesFor 0, "seconds"
+		}
+		repositories {
+			mavenCentral()
+			maven { url "https://repo.spring.io/libs-spring-framework-build" }
+			maven { url "https://repo.spring.io/milestone"}
+		}
 	}
-
 	configurations.all {
-		// Check for updates every build
-		resolutionStrategy.cacheChangingModulesFor 0, "seconds"
+		resolutionStrategy {
+			cacheChangingModulesFor 0, "seconds"
+			cacheDynamicVersionsFor 0, "seconds"
+		}
+	}
+}
 
-		// Consistent slf4j version (e.g. clashes between slf4j versions)
-		resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-			if (details.requested.group == "org.slf4j") {
-				details.useVersion slf4jVersion
+configure([rootProject] + javaProjects) { project ->
+	group = "org.springframework"
+
+	apply plugin: "java"
+	apply plugin: "java-test-fixtures"
+	apply plugin: "checkstyle"
+	apply plugin: 'org.springframework.build.compile'
+	apply from: "${rootDir}/gradle/toolchains.gradle"
+	apply from: "${rootDir}/gradle/ide.gradle"
+
+	pluginManager.withPlugin("kotlin") {
+		apply plugin: "org.jetbrains.dokka"
+		apply from: "${rootDir}/gradle/docs-dokka.gradle"
+
+		compileKotlin {
+			kotlinOptions {
+				languageVersion = "1.6"
+				apiVersion = "1.6"
+				freeCompilerArgs = ["-Xjsr305=strict", "-Xsuppress-version-warnings", "-opt-in=kotlin.RequiresOptIn"]
+				allWarningsAsErrors = true
+			}
+		}
+		compileTestKotlin {
+			kotlinOptions {
+				freeCompilerArgs = ["-Xjsr305=strict", "-opt-in=kotlin.RequiresOptIn"]
 			}
 		}
 	}
 
-	def commonCompilerArgs =
-			["-Xlint:serial", "-Xlint:cast", "-Xlint:classfile", "-Xlint:dep-ann",
-			 "-Xlint:divzero", "-Xlint:empty", "-Xlint:finally", "-Xlint:overrides",
-			 "-Xlint:path", "-Xlint:processing", "-Xlint:static", "-Xlint:try", "-Xlint:-options"]
-
-	compileJava.options*.compilerArgs = commonCompilerArgs +
-			["-Xlint:varargs", "-Xlint:fallthrough", "-Xlint:rawtypes",
-			 "-Xlint:deprecation", "-Xlint:unchecked", "-Werror"]
-
-	compileTestJava.options*.compilerArgs = commonCompilerArgs +
-			["-Xlint:-varargs", "-Xlint:-fallthrough", "-Xlint:-rawtypes",
-			 "-Xlint:-deprecation", "-Xlint:-unchecked"]
-
-	compileJava {
-		sourceCompatibility = 1.8  // can be switched to 11 for testing
-		targetCompatibility = 1.8
-		options.encoding = "UTF-8"
-	}
-
-	compileTestJava {
-		sourceCompatibility = 1.8  // can be switched to 11 for testing
-		targetCompatibility = 1.8
-		options.encoding = "UTF-8"
-		options.compilerArgs += "-parameters"
-	}
-
-	compileKotlin {
-		kotlinOptions {
-			jvmTarget = "1.8"
-			freeCompilerArgs = ["-Xjsr305=strict"]
-		}
-	}
-
-	compileTestKotlin {
-		kotlinOptions {
-			jvmTarget = "1.8"
-			freeCompilerArgs = ["-Xjsr305=strict"]
-		}
-	}
-
 	test {
+		useJUnitPlatform()
+		include(["**/*Tests.class", "**/*Test.class"])
 		systemProperty("java.awt.headless", "true")
 		systemProperty("testGroups", project.properties.get("testGroups"))
 		systemProperty("io.netty.leakDetection.level", "paranoid")
-		scanForTestClasses = false
-		include(["**/*Tests.class", "**/*Test.class"])
-		// Since we set scanForTestClasses to false, we need to filter out inner
-		// classes with the "$" pattern; otherwise, using -Dtest.single=MyTests to
-		// run MyTests by itself will fail if MyTests contains any inner classes.
-		exclude(["**/Abstract*.class", '**/*$*'])
-		reports.junitXml.setDestination(file("$buildDir/test-results"))
 	}
 
 	checkstyle {
-		toolVersion = "8.19"
-		configDir = rootProject.file("src/checkstyle")
-	}
-
-	repositories {
-		maven { url "https://repo.spring.io/libs-release" }
-		maven { url "https://oss.jfrog.org/artifactory/libs-snapshot" } // RSocket
-		mavenLocal()
+		toolVersion = "10.1"
+		configDirectory.set(rootProject.file("src/checkstyle"))
 	}
 
 	dependencies {
-		testCompile("junit:junit:4.12") {
-			exclude group: "org.hamcrest", module: "hamcrest-core"
-		}
-		testCompile("org.mockito:mockito-core:2.26.0") {
-			exclude group: "org.hamcrest", module: "hamcrest-core"
-		}
-		testCompile("io.mockk:mockk:1.9.1")
-		testCompile("org.hamcrest:hamcrest-all:1.3")
-		testCompile("org.assertj:assertj-core:3.11.0")
-		testRuntime("org.apache.logging.log4j:log4j-core:${log4jVersion}")
-		testRuntime("org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}")
-		testRuntime("org.apache.logging.log4j:log4j-jul:${log4jVersion}")
+		testImplementation("org.junit.jupiter:junit-jupiter-api")
+		testImplementation("org.junit.jupiter:junit-jupiter-params")
+		testImplementation("org.junit.platform:junit-platform-suite-api")
+		testImplementation("org.mockito:mockito-core")
+		testImplementation("org.mockito:mockito-junit-jupiter")
+		testImplementation("io.mockk:mockk")
+		testImplementation("org.assertj:assertj-core")
+		// Pull in the latest JUnit 5 Launcher API to ensure proper support in IDEs.
+		testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+		testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+		testRuntimeOnly("org.junit.platform:junit-platform-suite-engine")
+		testRuntimeOnly("org.apache.logging.log4j:log4j-core")
+		testRuntimeOnly("org.apache.logging.log4j:log4j-jul")
+		testRuntimeOnly("org.apache.logging.log4j:log4j-slf4j-impl")
 		// JSR-305 only used for non-required meta-annotations
-		compileOnly("com.google.code.findbugs:jsr305:3.0.2")
-		testCompileOnly("com.google.code.findbugs:jsr305:3.0.2")
-		checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.7")
+		compileOnly("com.google.code.findbugs:jsr305")
+		testCompileOnly("com.google.code.findbugs:jsr305")
+		checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.31")
 	}
 
 	ext.javadocLinks = [
-		"https://docs.oracle.com/javase/8/docs/api/",
-		"https://docs.oracle.com/javaee/7/api/",
-		"https://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/",  // CommonJ
-		"https://www.ibm.com/support/knowledgecenter/SS7JFU_8.5.5/com.ibm.websphere.javadoc.doc/web/apidocs/",
-		"https://glassfish.java.net/nonav/docs/v3/api/",
-		"https://docs.jboss.org/jbossas/javadoc/4.0.5/connector/",
-		"https://docs.jboss.org/jbossas/javadoc/7.1.2.Final/",
-		"https://tiles.apache.org/tiles-request/apidocs/",
-		"https://tiles.apache.org/framework/apidocs/",
-		"https://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
-		"https://www.ehcache.org/apidocs/2.10.4",
-		"https://www.quartz-scheduler.org/api/2.3.0/",
-		"https://fasterxml.github.io/jackson-core/javadoc/2.9/",
-		"https://fasterxml.github.io/jackson-databind/javadoc/2.9/",
-		"https://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.9/",
-		"https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/",
-		"https://junit.org/junit4/javadoc/4.12/",
-		"https://junit.org/junit5/docs/${junit5Version}/api/"
+			"https://docs.oracle.com/en/java/javase/17/docs/api/",
+			"https://jakarta.ee/specifications/platform/9/apidocs/",
+			"https://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/",  // CommonJ
+			"https://www.ibm.com/docs/api/v1/content/SSEQTP_8.5.5/com.ibm.websphere.javadoc.doc/web/apidocs/",
+			"https://docs.jboss.org/jbossas/javadoc/4.0.5/connector/",
+			"https://docs.jboss.org/jbossas/javadoc/7.1.2.Final/",
+			"https://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
+			"https://www.quartz-scheduler.org/api/2.3.0/",
+			"https://fasterxml.github.io/jackson-core/javadoc/2.10/",
+			"https://fasterxml.github.io/jackson-databind/javadoc/2.10/",
+			"https://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.10/",
+			"https://hc.apache.org/httpcomponents-client-5.1.x/current/httpclient5/apidocs/",
+			"https://projectreactor.io/docs/test/release/api/",
+			"https://junit.org/junit4/javadoc/4.13.2/",
+			// TODO Uncomment link to JUnit 5 docs once we have sorted out
+			// the following warning in the build.
+			//
+			// warning: The code being documented uses packages in the unnamed module, but the packages defined in https://junit.org/junit5/docs/5.8.1/api/ are in named modules.
+			//
+			// "https://junit.org/junit5/docs/5.8.2/api/",
+			"https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/",
+			"https://javadoc.io/static/io.rsocket/rsocket-core/1.1.1/",
+			"https://r2dbc.io/spec/0.9.1.RELEASE/api/",
+			// The external Javadoc link for JSR 305 must come last to ensure that types from
+			// JSR 250 (such as @PostConstruct) are still supported. This is due to the fact
+			// that JSR 250 and JSR 305 both define types in javax.annotation, which results
+			// in a split package, and the javadoc tool does not support split packages
+			// across multiple external Javadoc sites.
+			"https://www.javadoc.io/doc/com.google.code.findbugs/jsr305/3.0.2/"
 	] as String[]
 }
 
-configure(subprojects.findAll { (it.name != "spring-build-src") && (it.name != "spring-core-coroutines") } ) { subproject ->
-	apply from: "${gradleScriptDir}/publish-maven.gradle"
-
-	jar {
-		manifest.attributes["Implementation-Title"] = subproject.name
-		manifest.attributes["Implementation-Version"] = subproject.version
-		manifest.attributes["Automatic-Module-Name"] = subproject.name.replace('-', '.')  // for Jigsaw
-		manifest.attributes["Created-By"] =
-				"${System.getProperty("java.version")} (${System.getProperty("java.specification.vendor")})"
-
-		from("${rootProject.projectDir}/src/docs/dist") {
-			include "license.txt"
-			include "notice.txt"
-			into "META-INF"
-			expand(copyright: new Date().format("yyyy"), version: project.version)
-		}
-	}
-
-	javadoc {
-		description = "Generates project-level javadoc for use in -javadoc jar"
-
-		options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
-		options.author = true
-		options.header = project.name
-		options.use = true
-		options.links(project.ext.javadocLinks)
-		options.addStringOption("Xdoclint:none", "-quiet")
-
-		// Suppress warnings due to cross-module @see and @link references.
-		// Note that global 'api' task does display all warnings.
-		logging.captureStandardError LogLevel.INFO
-		logging.captureStandardOutput LogLevel.INFO  // suppress "## warnings" message
-	}
-
-	task sourcesJar(type: Jar, dependsOn: classes) {
-		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-		classifier = "sources"
-		from sourceSets.main.allSource
-		// Don't include or exclude anything explicitly by default. See SPR-12085.
-	}
-
-	task javadocJar(type: Jar) {
-		classifier = "javadoc"
-		from javadoc
-	}
-
-	artifacts {
-		archives sourcesJar
-		archives javadocJar
-	}
+configure(moduleProjects) { project ->
+	apply from: "${rootDir}/gradle/spring-module.gradle"
 }
 
 configure(rootProject) {
 	description = "Spring Framework"
 
-	apply plugin: "groovy"
-	apply from: "${gradleScriptDir}/jdiff.gradle"
-	apply from: "${gradleScriptDir}/docs.gradle"
+	apply plugin: "kotlin"
+	apply plugin: "io.spring.nohttp"
+	apply plugin: 'org.springframework.build.api-diff'
+	apply from: "${rootDir}/gradle/publications.gradle"
+	apply from: "${rootDir}/gradle/docs.gradle"
 
-	dependencyManagement {
-		imports {
-			mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
+	nohttp {
+		source.exclude "**/test-output/**"
+		allowlistFile = project.file("src/nohttp/allowlist.lines")
+		def rootPath = file(rootDir).toPath()
+		def projectDirs = allprojects.collect { it.projectDir } + "${rootDir}/buildSrc"
+		projectDirs.forEach { dir ->
+			[ 'bin', 'build', 'out', '.settings' ]
+				.collect { rootPath.relativize(new File(dir, it).toPath()) }
+				.forEach { source.exclude "$it/**" }
+			[ '.classpath', '.project' ]
+				.collect { rootPath.relativize(new File(dir, it).toPath()) }
+				.forEach { source.exclude "$it" }
 		}
 	}
 
-	// Don't publish the default jar for the root project
-	configurations.archives.artifacts.clear()
-
-	dependencies {  // for integration tests
-		testCompile(project(":spring-aop"))
-		testCompile(project(":spring-beans"))
-		testCompile(project(":spring-context"))
-		testCompile(project(":spring-core"))
-		testCompile(project(":spring-expression"))
-		testCompile(project(":spring-jdbc"))
-		testCompile(project(":spring-orm"))
-		testCompile(project(":spring-test"))
-		testCompile(project(":spring-tx"))
-		testCompile(project(":spring-web"))
-		testCompile("javax.inject:javax.inject:1")
-		testCompile("javax.resource:javax.resource-api:1.7.1")
-		testCompile("javax.servlet:javax.servlet-api:3.1.0")
-		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
-		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-		testCompile("org.hibernate:hibernate-core:5.1.17.Final")
-	}
-
-	artifacts {
-		archives docsZip
-		archives schemaZip
-		archives distZip
-	}
-
-	wrapper {
-		doLast() {
-			def gradleOpts = "-XX:MaxMetaspaceSize=1024m -Xmx1024m"
-			def gradleBatOpts = "$gradleOpts -XX:MaxHeapSize=256m"
-			File wrapperFile = file("gradlew")
-			wrapperFile.text = wrapperFile.text.replace("DEFAULT_JVM_OPTS=",
-					"GRADLE_OPTS=\"$gradleOpts \$GRADLE_OPTS\"\nDEFAULT_JVM_OPTS=")
-			File wrapperBatFile = file("gradlew.bat")
-			wrapperBatFile.text = wrapperBatFile.text.replace("set DEFAULT_JVM_OPTS=",
-					"set GRADLE_OPTS=$gradleBatOpts %GRADLE_OPTS%\nset DEFAULT_JVM_OPTS=")
+	publishing {
+		publications {
+			mavenJava(MavenPublication) {
+				artifact docsZip
+				artifact schemaZip
+				artifact distZip
+			}
 		}
 	}
-}
-
-/*
- * Support publication of artifacts versioned by topic branch.
- * CI builds supply `-P BRANCH_NAME=<TOPIC>` to gradle at build time.
- * If <TOPIC> starts with 'SPR-', change version
- *     from BUILD-SNAPSHOT => <TOPIC>-SNAPSHOT
- *     e.g. 3.2.1.BUILD-SNAPSHOT => 3.2.1.SPR-1234-SNAPSHOT
- */
-def qualifyVersionIfNecessary(version) {
-	if (rootProject.hasProperty("BRANCH_NAME")) {
-		def qualifier = rootProject.getProperty("BRANCH_NAME")
-		if (qualifier.startsWith("SPR-")) {
-			return version.replace("BUILD", qualifier)
-		}
-	}
-	return version
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -220,21 +220,18 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 		}
 		else {
 			switch (aspectJAnnotation.getAnnotationType()) {
-				case AtPointcut:
-				case AtAround:
+				case AtPointcut, AtAround -> {
 					this.isBeforeAdvice = false;
 					this.isAfterAdvice = false;
-					break;
-				case AtBefore:
+				}
+				case AtBefore -> {
 					this.isBeforeAdvice = true;
 					this.isAfterAdvice = false;
-					break;
-				case AtAfter:
-				case AtAfterReturning:
-				case AtAfterThrowing:
+				}
+				case AtAfter, AtAfterReturning, AtAfterThrowing -> {
 					this.isBeforeAdvice = false;
 					this.isAfterAdvice = true;
-					break;
+				}
 			}
 		}
 	}
@@ -263,7 +260,7 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 	 * Note that this is a <i>dynamic</i> pointcut; otherwise it might be optimized out
 	 * if it does not at first match statically.
 	 */
-	private final class PerTargetInstantiationModelPointcut extends DynamicMethodMatcherPointcut {
+	private static final class PerTargetInstantiationModelPointcut extends DynamicMethodMatcherPointcut {
 
 		private final AspectJExpressionPointcut declaredPointcut;
 

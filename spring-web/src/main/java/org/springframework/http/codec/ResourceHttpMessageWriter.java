@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,8 +116,27 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 	private Mono<Void> writeResource(Resource resource, ResolvableType type, @Nullable MediaType mediaType,
 			ReactiveHttpOutputMessage message, Map<String, Object> hints) {
 
+		addHeaders(message, resource, mediaType, hints);
+
+		return zeroCopy(resource, null, message, hints)
+				.orElseGet(() -> {
+					Mono<Resource> input = Mono.just(resource);
+					DataBufferFactory factory = message.bufferFactory();
+					Flux<DataBuffer> body = this.encoder.encode(input, factory, type, message.getHeaders().getContentType(), hints);
+					if (logger.isDebugEnabled()) {
+						body = body.doOnNext(buffer -> Hints.touchDataBuffer(buffer, hints, logger));
+					}
+					return message.writeWith(body);
+				});
+	}
+
+	/**
+	 * Adds the default headers for the given resource to the given message.
+	 * @since 6.0
+	 */
+	public void addHeaders(ReactiveHttpOutputMessage message, Resource resource, @Nullable MediaType contentType, Map<String, Object> hints) {
 		HttpHeaders headers = message.getHeaders();
-		MediaType resourceMediaType = getResourceMediaType(mediaType, resource, hints);
+		MediaType resourceMediaType = getResourceMediaType(contentType, resource, hints);
 		headers.setContentType(resourceMediaType);
 
 		if (headers.getContentLength() < 0) {
@@ -126,14 +145,10 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 				headers.setContentLength(length);
 			}
 		}
-
-		return zeroCopy(resource, null, message, hints)
-				.orElseGet(() -> {
-					Mono<Resource> input = Mono.just(resource);
-					DataBufferFactory factory = message.bufferFactory();
-					Flux<DataBuffer> body = this.encoder.encode(input, factory, type, resourceMediaType, hints);
-					return message.writeWith(body);
-				});
+		if (message instanceof ServerHttpResponse) {
+			// server side
+			headers.set(HttpHeaders.ACCEPT_RANGES, "bytes");
+		}
 	}
 
 	private static MediaType getResourceMediaType(

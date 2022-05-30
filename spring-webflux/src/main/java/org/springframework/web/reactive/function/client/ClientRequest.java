@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
 
@@ -95,12 +96,19 @@ public interface ClientRequest {
 	Map<String, Object> attributes();
 
 	/**
+	 * Return consumer(s) configured to access to the {@link ClientHttpRequest}.
+	 * @since 5.3
+	 */
+	@Nullable
+	Consumer<ClientHttpRequest> httpRequest();
+
+
+	/**
 	 * Return a log message prefix to use to correlate messages for this request.
-	 * The prefix is based on the value of the attribute {@link #LOG_ID_ATTRIBUTE}
-	 * along with some extra formatting so that the prefix can be conveniently
-	 * prepended with no further formatting no separators required.
+	 * The prefix is based on the value of the attribute {@link #LOG_ID_ATTRIBUTE
+	 * LOG_ID_ATTRIBUTE} surrounded with "[" and "]".
 	 * @return the log message prefix or an empty String if the
-	 * {@link #LOG_ID_ATTRIBUTE} is not set.
+	 * {@link #LOG_ID_ATTRIBUTE LOG_ID_ATTRIBUTE} is not set.
 	 * @since 5.1
 	 */
 	String logPrefix();
@@ -117,16 +125,17 @@ public interface ClientRequest {
 	// Static builder methods
 
 	/**
-	 * Create a builder with the method, URI, headers, and cookies of the given request.
-	 * @param other the request to copy the method, URI, headers, and cookies from
-	 * @return the created builder
+	 * Create a builder initialized with the HTTP method, url, headers, cookies,
+	 * attributes, and body of the given request.
+	 * @param other the request to copy from
+	 * @return the builder instance
 	 */
 	static Builder from(ClientRequest other) {
 		return new DefaultClientRequestBuilder(other);
 	}
 
 	/**
-	 * Create a builder with the given method and url.
+	 * Create a builder with the given HTTP method and url.
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param url the url (as a URI instance)
 	 * @return the created builder
@@ -138,7 +147,7 @@ public interface ClientRequest {
 	}
 
 	/**
-	 * Create a request builder with the given method and url.
+	 * Create a request builder with the given HTTP method and url.
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param url the url (as a URI instance)
 	 * @return the created builder
@@ -200,8 +209,8 @@ public interface ClientRequest {
 		/**
 		 * Manipulate this request's cookies with the given consumer. The
 		 * map provided to the consumer is "live", so that the consumer can be used to
-		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing header values,
-		 * {@linkplain MultiValueMap#remove(Object) remove} values, or use any of the other
+		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing cookie values,
+		 * {@linkplain MultiValueMap#remove(Object) remove} cookies, or use any of the other
 		 * {@link MultiValueMap} methods.
 		 * @param cookiesConsumer a function that consumes the cookies map
 		 * @return this builder
@@ -251,6 +260,18 @@ public interface ClientRequest {
 		 * @return this builder
 		 */
 		Builder attributes(Consumer<Map<String, Object>> attributesConsumer);
+
+		/**
+		 * Callback for access to the {@link ClientHttpRequest} that in turn
+		 * provides access to the native request of the underlying HTTP library.
+		 * This could be useful for setting advanced, per-request options that
+		 * exposed by the underlying library.
+		 * @param requestConsumer a consumer to access the
+		 * {@code ClientHttpRequest} with
+		 * @return this builder
+		 * @since 5.3
+		 */
+		Builder httpRequest(Consumer<ClientHttpRequest> requestConsumer);
 
 		/**
 		 * Build the request.

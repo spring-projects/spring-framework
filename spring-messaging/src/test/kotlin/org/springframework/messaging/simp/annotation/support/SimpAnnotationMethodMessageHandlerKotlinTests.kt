@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,12 @@
 package org.springframework.messaging.simp.annotation.support
 
 import io.mockk.mockk
+import org.assertj.core.api.Assertions.assertThat
 import java.util.Collections
 import java.util.HashMap
 
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 import org.springframework.context.support.StaticApplicationContext
 import org.springframework.messaging.Message
@@ -36,7 +37,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Controller
 
-import org.junit.Assert.*
 import org.springframework.messaging.MessageHandlingException
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler
 
@@ -47,7 +47,6 @@ import org.springframework.messaging.handler.annotation.MessageExceptionHandler
  */
 class SimpAnnotationMethodMessageHandlerKotlinTests {
 
-
 	lateinit var messageHandler: TestSimpAnnotationMethodMessageHandler
 
 	lateinit var testController: TestController
@@ -56,7 +55,7 @@ class SimpAnnotationMethodMessageHandlerKotlinTests {
 
     val converter = mockk<MessageConverter>(relaxed = true)
 
-    @Before
+    @BeforeEach
     fun setup() {
         val brokerTemplate = SimpMessagingTemplate(channel)
         brokerTemplate.messageConverter = converter
@@ -71,8 +70,8 @@ class SimpAnnotationMethodMessageHandlerKotlinTests {
         val message = createMessage("/nullableHeader", Collections.singletonMap("foo", "bar"))
         messageHandler.registerHandler(testController)
         messageHandler.handleMessage(message)
-        assertNull(testController.exception)
-        assertEquals("bar", testController.header)
+        assertThat(testController.exception).isNull()
+		assertThat(testController.header).isEqualTo("bar")
     }
 
     @Test
@@ -80,8 +79,8 @@ class SimpAnnotationMethodMessageHandlerKotlinTests {
         val message = createMessage("/nullableHeader", Collections.emptyMap())
         messageHandler.registerHandler(testController)
         messageHandler.handleMessage(message)
-        assertNull(testController.exception)
-        assertNull(testController.header)
+		assertThat(testController.exception).isNull()
+		assertThat(testController.header).isNull()
     }
 
     @Test
@@ -89,7 +88,7 @@ class SimpAnnotationMethodMessageHandlerKotlinTests {
         val message = createMessage("/nonNullableHeader", Collections.singletonMap("foo", "bar"))
         messageHandler.registerHandler(testController)
         messageHandler.handleMessage(message)
-        assertEquals("bar", testController.header)
+		assertThat(testController.header).isEqualTo("bar")
     }
 
     @Test
@@ -97,8 +96,8 @@ class SimpAnnotationMethodMessageHandlerKotlinTests {
         val message = createMessage("/nonNullableHeader", Collections.emptyMap())
         messageHandler.registerHandler(testController)
         messageHandler.handleMessage(message)
-        assertNotNull(testController.exception)
-        assertTrue(testController.exception is MessageHandlingException)
+        assertThat(testController.exception).isNotNull()
+        assertThat(testController.exception).isInstanceOf(MessageHandlingException::class.java)
     }
 
     @Test
@@ -106,8 +105,8 @@ class SimpAnnotationMethodMessageHandlerKotlinTests {
         val message = createMessage("/nullableHeaderNotRequired", Collections.singletonMap("foo", "bar"))
         messageHandler.registerHandler(testController)
         messageHandler.handleMessage(message)
-        assertNull(testController.exception)
-        assertEquals("bar", testController.header)
+		assertThat(testController.exception).isNull()
+		assertThat(testController.header).isEqualTo("bar")
     }
 
     @Test
@@ -115,8 +114,8 @@ class SimpAnnotationMethodMessageHandlerKotlinTests {
         val message = createMessage("/nullableHeaderNotRequired", Collections.emptyMap())
         messageHandler.registerHandler(testController)
         messageHandler.handleMessage(message)
-        assertNull(testController.exception)
-        assertNull(testController.header)
+		assertThat(testController.exception).isNull()
+		assertThat(testController.header).isNull()
     }
 
     @Test
@@ -124,7 +123,7 @@ class SimpAnnotationMethodMessageHandlerKotlinTests {
         val message = createMessage("/nonNullableHeaderNotRequired", Collections.singletonMap("foo", "bar"))
         messageHandler.registerHandler(testController)
         messageHandler.handleMessage(message)
-        assertEquals("bar", testController.header)
+		assertThat(testController.header).isEqualTo("bar")
     }
 
     @Test
@@ -132,8 +131,8 @@ class SimpAnnotationMethodMessageHandlerKotlinTests {
         val message = createMessage("/nonNullableHeaderNotRequired", Collections.emptyMap())
         messageHandler.registerHandler(testController)
         messageHandler.handleMessage(message)
-        assertNotNull(testController.exception)
-        assertTrue(testController.exception is IllegalArgumentException)
+        assertThat(testController.exception).isNotNull()
+		assertThat(testController.exception).isInstanceOf(NullPointerException::class.java)
     }
 
     private fun createMessage(destination: String, headers: Map<String, String?>): Message<ByteArray> {

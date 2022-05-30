@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,15 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.core.metrics.ApplicationStartup;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -58,6 +61,10 @@ import org.springframework.util.Assert;
  * internal BeanFactory instance for each refresh, the internal BeanFactory of
  * this context is available right from the start, to be able to register bean
  * definitions on it. {@link #refresh()} may only be called once.
+ *
+ * <p>This ApplicationContext implementation is suitable for Ahead of Time
+ * processing, using {@link #refreshForAotProcessing()} as an alternative to the
+ * regular {@link #refresh()}.
  *
  * <p>Usage example:
  *
@@ -85,6 +92,7 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Stephane Nicoll
  * @since 1.1.2
  * @see #registerBeanDefinition
  * @see #refresh()
@@ -156,6 +164,12 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	public void setParent(@Nullable ApplicationContext parent) {
 		super.setParent(parent);
 		this.beanFactory.setParentBeanFactory(getInternalParentBeanFactory());
+	}
+
+	@Override
+	public void setApplicationStartup(ApplicationStartup applicationStartup) {
+		super.setApplicationStartup(applicationStartup);
+		this.beanFactory.setApplicationStartup(applicationStartup);
 	}
 
 	/**
@@ -353,6 +367,35 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 		return this.beanFactory.isAlias(beanName);
 	}
 
+
+	//---------------------------------------------------------------------
+	// AOT processing
+	//---------------------------------------------------------------------
+
+	/**
+	 * Load or refresh the persistent representation of the configuration up to
+	 * a point where the underlying bean factory is ready to create bean
+	 * instances.
+	 * <p>This variant of {@link #refresh()} is used by Ahead of Time processing
+	 * that optimizes the application context, typically at build-time.
+	 * <p>In this mode, only {@link BeanDefinitionRegistryPostProcessor} and
+	 * {@link MergedBeanDefinitionPostProcessor} are invoked.
+	 * @throws BeansException if the bean factory could not be initialized
+	 * @throws IllegalStateException if already initialized and multiple refresh
+	 * attempts are not supported
+	 * @since 6.0
+	 */
+	public void refreshForAotProcessing() {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Preparing bean factory for AOT processing");
+		}
+		prepareRefresh();
+		obtainFreshBeanFactory();
+		prepareBeanFactory(this.beanFactory);
+		postProcessBeanFactory(this.beanFactory);
+		invokeBeanFactoryPostProcessors(this.beanFactory);
+		PostProcessorRegistrationDelegate.invokeMergedBeanDefinitionPostProcessors(this.beanFactory);
+	}
 
 	//---------------------------------------------------------------------
 	// Convenient methods for registering individual beans

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,14 @@ package org.springframework.test.web.client;
 
 import java.io.IOException;
 import java.net.URI;
+import java.time.Duration;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.lang.Nullable;
+import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.support.RestGatewaySupport;
@@ -63,7 +64,6 @@ import org.springframework.web.client.support.RestGatewaySupport;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-@SuppressWarnings("deprecation")
 public final class MockRestServiceServer {
 
 	private final RequestExpectationManager expectationManager;
@@ -110,10 +110,23 @@ public final class MockRestServiceServer {
 	/**
 	 * Verify that all expected requests set up via
 	 * {@link #expect(RequestMatcher)} were indeed performed.
-	 * @throws AssertionError when some expectations were not met
+	 * @throws AssertionError if not all expectations are met
 	 */
 	public void verify() {
 		this.expectationManager.verify();
+	}
+
+	/**
+	 * Variant of {@link #verify()} that waits for up to the specified time for
+	 * all expectations to be fulfilled. This can be useful for tests that
+	 * involve asynchronous requests.
+	 * @param timeout how long to wait for all expecations to be met
+	 * @throws AssertionError if not all expectations are met by the specified
+	 * timeout, or if any expectation fails at any time before that.
+	 * @since 5.3.4
+	 */
+	public void verify(Duration timeout) {
+		this.expectationManager.verify(timeout);
 	}
 
 	/**
@@ -135,24 +148,12 @@ public final class MockRestServiceServer {
 
 	/**
 	 * Return a builder for a {@code MockRestServiceServer} that should be used
-	 * to reply to the given {@code AsyncRestTemplate}.
-	 * @since 4.3
-	 * @deprecated see deprecation notice on
-	 * {@link org.springframework.web.client.AsyncRestTemplate} itself
-	 */
-	@Deprecated
-	public static MockRestServiceServerBuilder bindTo(org.springframework.web.client.AsyncRestTemplate asyncRestTemplate) {
-		return new DefaultBuilder(asyncRestTemplate);
-	}
-
-	/**
-	 * Return a builder for a {@code MockRestServiceServer} that should be used
 	 * to reply to the given {@code RestGatewaySupport}.
 	 * @since 4.3
 	 */
-	public static MockRestServiceServerBuilder bindTo(RestGatewaySupport restGateway) {
-		Assert.notNull(restGateway, "'gatewaySupport' must not be null");
-		return new DefaultBuilder(restGateway.getRestTemplate());
+	public static MockRestServiceServerBuilder bindTo(RestGatewaySupport restGatewaySupport) {
+		Assert.notNull(restGatewaySupport, "'restGatewaySupport' must not be null");
+		return new DefaultBuilder(restGatewaySupport.getRestTemplate());
 	}
 
 
@@ -163,18 +164,6 @@ public final class MockRestServiceServer {
 	 */
 	public static MockRestServiceServer createServer(RestTemplate restTemplate) {
 		return bindTo(restTemplate).build();
-	}
-
-	/**
-	 * A shortcut for {@code bindTo(asyncRestTemplate).build()}.
-	 * @param asyncRestTemplate the AsyncRestTemplate to set up for mock testing
-	 * @return the created mock server
-	 * @deprecated see deprecation notice on
-	 * {@link org.springframework.web.client.AsyncRestTemplate} itself
-	 */
-	@Deprecated
-	public static MockRestServiceServer createServer(org.springframework.web.client.AsyncRestTemplate asyncRestTemplate) {
-		return bindTo(asyncRestTemplate).build();
 	}
 
 	/**
@@ -212,8 +201,8 @@ public final class MockRestServiceServer {
 
 		/**
 		 * Build the {@code MockRestServiceServer} and set up the underlying
-		 * {@code RestTemplate} or {@code AsyncRestTemplate} with a
-		 * {@link ClientHttpRequestFactory} that creates mock requests.
+		 * {@code RestTemplate} with a {@link ClientHttpRequestFactory} that
+		 * creates mock requests.
 		 */
 		MockRestServiceServer build();
 
@@ -227,11 +216,7 @@ public final class MockRestServiceServer {
 
 	private static class DefaultBuilder implements MockRestServiceServerBuilder {
 
-		@Nullable
 		private final RestTemplate restTemplate;
-
-		@Nullable
-		private final org.springframework.web.client.AsyncRestTemplate asyncRestTemplate;
 
 		private boolean ignoreExpectOrder;
 
@@ -241,13 +226,6 @@ public final class MockRestServiceServer {
 		public DefaultBuilder(RestTemplate restTemplate) {
 			Assert.notNull(restTemplate, "RestTemplate must not be null");
 			this.restTemplate = restTemplate;
-			this.asyncRestTemplate = null;
-		}
-
-		public DefaultBuilder(org.springframework.web.client.AsyncRestTemplate asyncRestTemplate) {
-			Assert.notNull(asyncRestTemplate, "AsyncRestTemplate must not be null");
-			this.restTemplate = null;
-			this.asyncRestTemplate = asyncRestTemplate;
 		}
 
 		@Override
@@ -276,16 +254,11 @@ public final class MockRestServiceServer {
 		public MockRestServiceServer build(RequestExpectationManager manager) {
 			MockRestServiceServer server = new MockRestServiceServer(manager);
 			MockClientHttpRequestFactory factory = server.new MockClientHttpRequestFactory();
-			if (this.restTemplate != null) {
-				if (this.bufferContent) {
-					this.restTemplate.setRequestFactory(new BufferingClientHttpRequestFactory(factory));
-				}
-				else {
-					this.restTemplate.setRequestFactory(factory);
-				}
+			if (this.bufferContent) {
+				this.restTemplate.setRequestFactory(new BufferingClientHttpRequestFactory(factory));
 			}
-			if (this.asyncRestTemplate != null) {
-				this.asyncRestTemplate.setAsyncRequestFactory(factory);
+			else {
+				this.restTemplate.setRequestFactory(factory);
 			}
 			return server;
 		}
@@ -296,28 +269,18 @@ public final class MockRestServiceServer {
 	 * Mock ClientHttpRequestFactory that creates requests by iterating
 	 * over the list of expected {@link DefaultRequestExpectation}'s.
 	 */
-	private class MockClientHttpRequestFactory implements ClientHttpRequestFactory,
-			org.springframework.http.client.AsyncClientHttpRequestFactory {
+	private class MockClientHttpRequestFactory implements ClientHttpRequestFactory {
 
 		@Override
 		public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) {
 			return createRequestInternal(uri, httpMethod);
 		}
 
-		@Override
-		public org.springframework.http.client.AsyncClientHttpRequest createAsyncRequest(
-				URI uri, HttpMethod httpMethod) {
-
-			return createRequestInternal(uri, httpMethod);
-		}
-
-		private org.springframework.mock.http.client.MockAsyncClientHttpRequest createRequestInternal(
-				URI uri, HttpMethod method) {
-
+		private MockClientHttpRequest createRequestInternal(URI uri, HttpMethod httpMethod) {
 			Assert.notNull(uri, "'uri' must not be null");
-			Assert.notNull(method, "'httpMethod' must not be null");
+			Assert.notNull(httpMethod, "'httpMethod' must not be null");
 
-			return new org.springframework.mock.http.client.MockAsyncClientHttpRequest(method, uri) {
+			return new MockClientHttpRequest(httpMethod, uri) {
 
 				@Override
 				protected ClientHttpResponse executeInternal() throws IOException {

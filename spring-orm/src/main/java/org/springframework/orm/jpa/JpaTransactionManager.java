@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,15 @@ package org.springframework.orm.jpa;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.PersistenceException;
-import javax.persistence.RollbackException;
+import java.util.function.Consumer;
+
 import javax.sql.DataSource;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.RollbackException;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -56,7 +59,7 @@ import org.springframework.util.CollectionUtils;
 
 /**
  * {@link org.springframework.transaction.PlatformTransactionManager} implementation
- * for a single JPA {@link javax.persistence.EntityManagerFactory}. Binds a JPA
+ * for a single JPA {@link jakarta.persistence.EntityManagerFactory}. Binds a JPA
  * EntityManager from the specified factory to the thread, potentially allowing for
  * one thread-bound EntityManager per factory. {@link SharedEntityManagerCreator} and
  * {@code @PersistenceContext} are aware of thread-bound entity managers and participate
@@ -126,6 +129,9 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	private DataSource dataSource;
 
 	private JpaDialect jpaDialect = new DefaultJpaDialect();
+
+	@Nullable
+	private Consumer<EntityManager> entityManagerInitializer;
 
 
 	/**
@@ -204,7 +210,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * {@code EntityManagerFactory.createEntityManager(Map)} (if any).
 	 * <p>Can be populated with a String "value" (parsed via PropertiesEditor)
 	 * or a "props" element in XML bean definitions.
-	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
+	 * @see jakarta.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 */
 	public void setJpaProperties(@Nullable Properties jpaProperties) {
 		CollectionUtils.mergePropertiesIntoMap(jpaProperties, this.jpaPropertyMap);
@@ -214,7 +220,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * Specify JPA properties as a Map, to be passed into
 	 * {@code EntityManagerFactory.createEntityManager(Map)} (if any).
 	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
-	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
+	 * @see jakarta.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 */
 	public void setJpaPropertyMap(@Nullable Map<String, ?> jpaProperties) {
 		if (jpaProperties != null) {
@@ -298,6 +304,21 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 	/**
+	 * Specify a callback for customizing every {@code EntityManager} resource
+	 * created for a new transaction managed by this {@code JpaTransactionManager}.
+	 * <p>This is an alternative to a factory-level {@code EntityManager} customizer
+	 * and to a {@code JpaVendorAdapter}-level {@code postProcessEntityManager}
+	 * callback, enabling specific customizations of transactional resources.
+	 * @since 5.3
+	 * @see #createEntityManagerForTransaction()
+	 * @see AbstractEntityManagerFactoryBean#setEntityManagerInitializer
+	 * @see JpaVendorAdapter#postProcessEntityManager
+	 */
+	public void setEntityManagerInitializer(Consumer<EntityManager> entityManagerInitializer) {
+		this.entityManagerInitializer = entityManagerInitializer;
+	}
+
+	/**
 	 * Retrieves an EntityManagerFactory by persistence unit name, if none set explicitly.
 	 * Falls back to a default EntityManagerFactory bean if no persistence unit specified.
 	 * @see #setPersistenceUnitName
@@ -305,11 +326,10 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (getEntityManagerFactory() == null) {
-			if (!(beanFactory instanceof ListableBeanFactory)) {
+			if (!(beanFactory instanceof ListableBeanFactory lbf)) {
 				throw new IllegalStateException("Cannot retrieve EntityManagerFactory by persistence unit name " +
 						"in a non-listable BeanFactory: " + beanFactory);
 			}
-			ListableBeanFactory lbf = (ListableBeanFactory) beanFactory;
 			setEntityManagerFactory(EntityManagerFactoryUtils.findEntityManagerFactory(lbf, getPersistenceUnitName()));
 		}
 	}
@@ -397,10 +417,11 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			EntityManager em = txObject.getEntityManagerHolder().getEntityManager();
 
 			// Delegate to JpaDialect for actual transaction begin.
-			final int timeoutToUse = determineTimeout(definition);
+			int timeoutToUse = determineTimeout(definition);
 			Object transactionData = getJpaDialect().beginTransaction(em,
 					new JpaTransactionDefinition(definition, timeoutToUse, txObject.isNewEntityManagerHolder()));
 			txObject.setTransactionData(transactionData);
+			txObject.setReadOnly(definition.isReadOnly());
 
 			// Register transaction timeout.
 			if (timeoutToUse != TransactionDefinition.TIMEOUT_DEFAULT) {
@@ -450,18 +471,27 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Create a JPA EntityManager to be used for a transaction.
 	 * <p>The default implementation checks whether the EntityManagerFactory
-	 * is a Spring proxy and unwraps it first.
-	 * @see javax.persistence.EntityManagerFactory#createEntityManager()
-	 * @see EntityManagerFactoryInfo#getNativeEntityManagerFactory()
+	 * is a Spring proxy and delegates to
+	 * {@link EntityManagerFactoryInfo#createNativeEntityManager}
+	 * if possible which in turns applies
+	 * {@link JpaVendorAdapter#postProcessEntityManager(EntityManager)}.
+	 * @see jakarta.persistence.EntityManagerFactory#createEntityManager()
 	 */
 	protected EntityManager createEntityManagerForTransaction() {
 		EntityManagerFactory emf = obtainEntityManagerFactory();
-		if (emf instanceof EntityManagerFactoryInfo) {
-			emf = ((EntityManagerFactoryInfo) emf).getNativeEntityManagerFactory();
-		}
 		Map<String, Object> properties = getJpaPropertyMap();
-		return (!CollectionUtils.isEmpty(properties) ?
-				emf.createEntityManager(properties) : emf.createEntityManager());
+		EntityManager em;
+		if (emf instanceof EntityManagerFactoryInfo) {
+			em = ((EntityManagerFactoryInfo) emf).createNativeEntityManager(properties);
+		}
+		else {
+			em = (!CollectionUtils.isEmpty(properties) ?
+					emf.createEntityManager(properties) : emf.createEntityManager());
+		}
+		if (this.entityManagerInitializer != null) {
+			this.entityManagerInitializer.accept(em);
+		}
+		return em;
 	}
 
 	/**
@@ -602,9 +632,9 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 					getJpaDialect().releaseJdbcConnection(conHandle,
 							txObject.getEntityManagerHolder().getEntityManager());
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					// Just log it, to keep a transaction-related exception.
-					logger.error("Could not close JDBC connection after transaction", ex);
+					logger.error("Failed to release JDBC connection after transaction", ex);
 				}
 			}
 		}

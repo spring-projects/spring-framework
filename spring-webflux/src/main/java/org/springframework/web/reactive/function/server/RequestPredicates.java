@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,11 @@ package org.springframework.web.reactive.function.server;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -47,11 +45,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.PathContainer;
+import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
@@ -70,8 +71,6 @@ import org.springframework.web.util.pattern.PathPatternParser;
 public abstract class RequestPredicates {
 
 	private static final Log logger = LogFactory.getLog(RequestPredicates.class);
-
-	private static final PathPatternParser DEFAULT_PATTERN_PARSER = new PathPatternParser();
 
 
 	/**
@@ -111,7 +110,10 @@ public abstract class RequestPredicates {
 	 */
 	public static RequestPredicate path(String pattern) {
 		Assert.notNull(pattern, "'pattern' must not be null");
-		return pathPredicates(DEFAULT_PATTERN_PARSER).apply(pattern);
+		if (!pattern.isEmpty() && !pattern.startsWith("/")) {
+			pattern = "/" + pattern;
+		}
+		return pathPredicates(PathPatternParser.defaultInstance).apply(pattern);
 	}
 
 	/**
@@ -277,7 +279,7 @@ public abstract class RequestPredicates {
 	 * Return a {@code RequestPredicate} that tests the request's query parameter of the given name
 	 * against the given predicate.
 	 * @param name the name of the query parameter to test against
-	 * @param predicate predicate to test against the query parameter value
+	 * @param predicate the predicate to test against the query parameter value
 	 * @return a predicate that matches the given predicate against the query parameter of the given name
 	 * @see ServerRequest#queryParam(String)
 	 */
@@ -349,7 +351,7 @@ public abstract class RequestPredicates {
 		void pathExtension(String extension);
 
 		/**
-		 * Receive notification of a HTTP header predicate.
+		 * Receive notification of an HTTP header predicate.
 		 * @param name the name of the HTTP header to check
 		 * @param value the desired value of the HTTP header
 		 * @see RequestPredicates#headers(Predicate)
@@ -435,20 +437,31 @@ public abstract class RequestPredicates {
 
 		public HttpMethodPredicate(HttpMethod httpMethod) {
 			Assert.notNull(httpMethod, "HttpMethod must not be null");
-			this.httpMethods = EnumSet.of(httpMethod);
+			this.httpMethods = Collections.singleton(httpMethod);
 		}
 
 		public HttpMethodPredicate(HttpMethod... httpMethods) {
 			Assert.notEmpty(httpMethods, "HttpMethods must not be empty");
-
-			this.httpMethods = EnumSet.copyOf(Arrays.asList(httpMethods));
+			this.httpMethods = new LinkedHashSet<>(Arrays.asList(httpMethods));
 		}
 
 		@Override
 		public boolean test(ServerRequest request) {
-			boolean match = this.httpMethods.contains(request.method());
-			traceMatch("Method", this.httpMethods, request.method(), match);
+			HttpMethod method = method(request);
+			boolean match = this.httpMethods.contains(method);
+			traceMatch("Method", this.httpMethods, method, match);
 			return match;
+		}
+
+		private static HttpMethod method(ServerRequest request) {
+			if (CorsUtils.isPreFlightRequest(request.exchange().getRequest())) {
+				String accessControlRequestMethod =
+						request.headers().firstHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD);
+				if (accessControlRequestMethod != null) {
+					return HttpMethod.valueOf(accessControlRequestMethod);
+				}
+			}
+			return request.method();
 		}
 
 		@Override
@@ -468,9 +481,9 @@ public abstract class RequestPredicates {
 	}
 
 
-	private static class PathPatternPredicate implements RequestPredicate {
+	private static class PathPatternPredicate implements RequestPredicate, ChangePathPatternParserVisitor.Target {
 
-		private final PathPattern pattern;
+		private PathPattern pattern;
 
 		public PathPatternPredicate(PathPattern pattern) {
 			Assert.notNull(pattern, "'pattern' must not be null");
@@ -479,7 +492,7 @@ public abstract class RequestPredicates {
 
 		@Override
 		public boolean test(ServerRequest request) {
-			PathContainer pathContainer = request.pathContainer();
+			PathContainer pathContainer = request.requestPath().pathWithinApplication();
 			PathPattern.PathMatchInfo info = this.pattern.matchAndExtract(pathContainer);
 			traceMatch("Pattern", this.pattern.getPatternString(), request.path(), info != null);
 			if (info != null) {
@@ -505,13 +518,19 @@ public abstract class RequestPredicates {
 
 		@Override
 		public Optional<ServerRequest> nest(ServerRequest request) {
-			return Optional.ofNullable(this.pattern.matchStartOfPath(request.pathContainer()))
+			return Optional.ofNullable(this.pattern.matchStartOfPath(request.requestPath().pathWithinApplication()))
 					.map(info -> new SubPathServerRequestWrapper(request, info, this.pattern));
 		}
 
 		@Override
 		public void accept(Visitor visitor) {
 			visitor.path(this.pattern.getPatternString());
+		}
+
+		@Override
+		public void changeParser(PathPatternParser parser) {
+			String patternString = this.pattern.getPatternString();
+			this.pattern = parser.parse(patternString);
 		}
 
 		@Override
@@ -532,7 +551,12 @@ public abstract class RequestPredicates {
 
 		@Override
 		public boolean test(ServerRequest request) {
-			return this.headersPredicate.test(request.headers());
+			if (CorsUtils.isPreFlightRequest(request.exchange().getRequest())) {
+				return true;
+			}
+			else {
+				return this.headersPredicate.test(request.headers());
+			}
 		}
 
 		@Override
@@ -541,12 +565,13 @@ public abstract class RequestPredicates {
 		}
 	}
 
+
 	private static class ContentTypePredicate extends HeadersPredicate {
 
 		private final Set<MediaType> mediaTypes;
 
 		public ContentTypePredicate(MediaType... mediaTypes) {
-			this(new HashSet<>(Arrays.asList(mediaTypes)));
+			this(Set.of(mediaTypes));
 		}
 
 		private ContentTypePredicate(Set<MediaType> mediaTypes) {
@@ -578,12 +603,13 @@ public abstract class RequestPredicates {
 		}
 	}
 
+
 	private static class AcceptPredicate extends HeadersPredicate {
 
 		private final Set<MediaType> mediaTypes;
 
 		public AcceptPredicate(MediaType... mediaTypes) {
-			this(new HashSet<>(Arrays.asList(mediaTypes)));
+			this(Set.of(mediaTypes));
 		}
 
 		private AcceptPredicate(Set<MediaType> mediaTypes) {
@@ -605,7 +631,7 @@ public abstract class RequestPredicates {
 				acceptedMediaTypes = Collections.singletonList(MediaType.ALL);
 			}
 			else {
-				MediaType.sortBySpecificityAndQuality(acceptedMediaTypes);
+				MimeTypeUtils.sortBySpecificity(acceptedMediaTypes);
 			}
 			return acceptedMediaTypes;
 		}
@@ -673,7 +699,6 @@ public abstract class RequestPredicates {
 							this.extension :
 							this.extensionPredicate);
 		}
-
 	}
 
 
@@ -730,7 +755,7 @@ public abstract class RequestPredicates {
 	 * {@link RequestPredicate} for where both {@code left} and {@code right} predicates
 	 * must match.
 	 */
-	static class AndRequestPredicate implements RequestPredicate {
+	static class AndRequestPredicate implements RequestPredicate, ChangePathPatternParserVisitor.Target {
 
 		private final RequestPredicate left;
 
@@ -769,15 +794,27 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public void changeParser(PathPatternParser parser) {
+			if (this.left instanceof ChangePathPatternParserVisitor.Target) {
+				((ChangePathPatternParserVisitor.Target) this.left).changeParser(parser);
+			}
+			if (this.right instanceof ChangePathPatternParserVisitor.Target) {
+				((ChangePathPatternParserVisitor.Target) this.right).changeParser(parser);
+			}
+		}
+
+		@Override
 		public String toString() {
 			return String.format("(%s && %s)", this.left, this.right);
 		}
 	}
 
+
 	/**
 	 * {@link RequestPredicate} that negates a delegate predicate.
 	 */
-	static class NegateRequestPredicate implements RequestPredicate {
+	static class NegateRequestPredicate implements RequestPredicate, ChangePathPatternParserVisitor.Target {
+
 		private final RequestPredicate delegate;
 
 		public NegateRequestPredicate(RequestPredicate delegate) {
@@ -803,16 +840,24 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public void changeParser(PathPatternParser parser) {
+			if (this.delegate instanceof ChangePathPatternParserVisitor.Target) {
+				((ChangePathPatternParserVisitor.Target) this.delegate).changeParser(parser);
+			}
+		}
+
+		@Override
 		public String toString() {
 			return "!" + this.delegate.toString();
 		}
 	}
 
+
 	/**
 	 * {@link RequestPredicate} where either {@code left} or {@code right} predicates
 	 * may match.
 	 */
-	static class OrRequestPredicate implements RequestPredicate {
+	static class OrRequestPredicate implements RequestPredicate, ChangePathPatternParserVisitor.Target {
 
 		private final RequestPredicate left;
 
@@ -862,6 +907,15 @@ public abstract class RequestPredicates {
 			visitor.endOr();
 		}
 
+		@Override
+		public void changeParser(PathPatternParser parser) {
+			if (this.left instanceof ChangePathPatternParserVisitor.Target) {
+				((ChangePathPatternParserVisitor.Target) this.left).changeParser(parser);
+			}
+			if (this.right instanceof ChangePathPatternParserVisitor.Target) {
+				((ChangePathPatternParserVisitor.Target) this.right).changeParser(parser);
+			}
+		}
 
 		@Override
 		public String toString() {
@@ -874,15 +928,25 @@ public abstract class RequestPredicates {
 
 		private final ServerRequest request;
 
-		private final PathContainer pathContainer;
+		private final RequestPath requestPath;
 
 		private final Map<String, Object> attributes;
 
 		public SubPathServerRequestWrapper(ServerRequest request,
 				PathPattern.PathRemainingMatchInfo info, PathPattern pattern) {
 			this.request = request;
-			this.pathContainer = new SubPathContainer(info.getPathRemaining());
+			this.requestPath = requestPath(request.requestPath(), info);
 			this.attributes = mergeAttributes(request, info.getUriVariables(), pattern);
+		}
+
+		private static RequestPath requestPath(RequestPath original, PathPattern.PathRemainingMatchInfo info) {
+			StringBuilder contextPath = new StringBuilder(original.contextPath().value());
+			contextPath.append(info.getPathMatched().value());
+			int length = contextPath.length();
+			if (length > 0 && contextPath.charAt(length - 1) == '/') {
+				contextPath.setLength(length - 1);
+			}
+			return original.modifyContextPath(contextPath.toString());
 		}
 
 		private static Map<String, Object> mergeAttributes(ServerRequest request,
@@ -905,6 +969,7 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		@Deprecated
 		public String methodName() {
 			return this.request.methodName();
 		}
@@ -920,13 +985,8 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
-		public String path() {
-			return this.pathContainer.value();
-		}
-
-		@Override
-		public PathContainer pathContainer() {
-			return this.pathContainer;
+		public RequestPath requestPath() {
+			return this.requestPath;
 		}
 
 		@Override
@@ -942,6 +1002,11 @@ public abstract class RequestPredicates {
 		@Override
 		public Optional<InetSocketAddress> remoteAddress() {
 			return this.request.remoteAddress();
+		}
+
+		@Override
+		public Optional<InetSocketAddress> localAddress() {
+			return this.request.localAddress();
 		}
 
 		@Override
@@ -1030,47 +1095,6 @@ public abstract class RequestPredicates {
 		@Override
 		public String toString() {
 			return method() + " " +  path();
-		}
-
-		private static class SubPathContainer implements PathContainer {
-
-			private static final PathContainer.Separator SEPARATOR = () -> "/";
-
-
-			private final String value;
-
-			private final List<Element> elements;
-
-			public SubPathContainer(PathContainer original) {
-				this.value = prefixWithSlash(original.value());
-				this.elements = prependWithSeparator(original.elements());
-			}
-
-			private static String prefixWithSlash(String path) {
-				if (!path.startsWith("/")) {
-					path = "/" + path;
-				}
-				return path;
-			}
-
-			private static List<Element> prependWithSeparator(List<Element> elements) {
-				List<Element> result = new ArrayList<>(elements);
-				if (result.isEmpty() || !(result.get(0) instanceof Separator)) {
-					result.add(0, SEPARATOR);
-				}
-				return Collections.unmodifiableList(result);
-			}
-
-
-			@Override
-			public String value() {
-				return this.value;
-			}
-
-			@Override
-			public List<Element> elements() {
-				return this.elements;
-			}
 		}
 	}
 

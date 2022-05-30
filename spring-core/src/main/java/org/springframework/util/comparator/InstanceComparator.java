@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,12 @@ import org.springframework.util.Assert;
 
 /**
  * Compares objects based on an arbitrary class order. Allows objects to be sorted based
- * on the types of class that they inherit, for example: this comparator can be used to
- * sort a list {@code Number}s such that {@code Long}s occur before {@code Integer}s.
+ * on the types of class that they inherit &mdash; for example, this comparator can be used
+ * to sort a list of {@code Number}s such that {@code Long}s occur before {@code Integer}s.
  *
  * <p>Only the specified {@code instanceOrder} classes are considered during comparison.
  * If two objects are both instances of the ordered type this comparator will return a
- * {@code 0}. Consider combining with {@link Comparator#thenComparing(Comparator)}
+ * value of {@code 0}. Consider combining with {@link Comparator#thenComparing(Comparator)}
  * if additional sorting is required.
  *
  * @author Phillip Webb
@@ -56,7 +56,7 @@ public class InstanceComparator<T> implements Comparator<T> {
 	public int compare(T o1, T o2) {
 		int i1 = getOrder(o1);
 		int i2 = getOrder(o2);
-		return (i1 < i2 ? -1 : (i1 == i2 ? 0 : 1));
+		return (Integer.compare(i1, i2));
 	}
 
 	private int getOrder(@Nullable T object) {

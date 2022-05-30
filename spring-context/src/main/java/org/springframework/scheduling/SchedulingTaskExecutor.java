@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.core.task.AsyncTaskExecutor;
  *
  * <p>Note: {@link SchedulingTaskExecutor} implementations are encouraged to also
  * implement the {@link org.springframework.core.task.AsyncListenableTaskExecutor}
- * interface. This is not required due to the dependency on Spring 4.0's new
+ * interface. This is not required due to the dependency on Spring 4.0's
  * {@link org.springframework.util.concurrent.ListenableFuture} interface,
  * which would make it impossible for third-party executor implementations
  * to remain compatible with both Spring 4.0 and Spring 3.x.
@@ -37,7 +37,6 @@ import org.springframework.core.task.AsyncTaskExecutor;
  * @since 2.0
  * @see SchedulingAwareRunnable
  * @see org.springframework.core.task.TaskExecutor
- * @see org.springframework.scheduling.commonj.WorkManagerTaskExecutor
  */
 public interface SchedulingTaskExecutor extends AsyncTaskExecutor {
 

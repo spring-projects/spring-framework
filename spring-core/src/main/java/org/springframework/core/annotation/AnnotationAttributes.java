@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -369,10 +369,10 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	}
 
 	private void assertNotException(String attributeName, Object attributeValue) {
-		if (attributeValue instanceof Exception) {
+		if (attributeValue instanceof Throwable throwable) {
 			throw new IllegalArgumentException(String.format(
 					"Attribute '%s' for annotation [%s] was not resolvable due to exception [%s]",
-					attributeName, this.displayName, attributeValue), (Exception) attributeValue);
+					attributeName, this.displayName, attributeValue), throwable);
 		}
 	}
 
@@ -385,26 +385,6 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		}
 	}
 
-	/**
-	 * Store the supplied {@code value} in this map under the specified
-	 * {@code key}, unless a value is already stored under the key.
-	 * @param key the key under which to store the value
-	 * @param value the value to store
-	 * @return the current value stored in this map, or {@code null} if no
-	 * value was previously stored in this map
-	 * @see #get
-	 * @see #put
-	 * @since 4.2
-	 */
-	@Override
-	public Object putIfAbsent(String key, Object value) {
-		Object obj = get(key);
-		if (obj == null) {
-			obj = put(key, value);
-		}
-		return obj;
-	}
-
 	@Override
 	public String toString() {
 		Iterator<Map.Entry<String, Object>> entries = entrySet().iterator();
@@ -414,9 +394,11 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 			sb.append(entry.getKey());
 			sb.append('=');
 			sb.append(valueToString(entry.getValue()));
-			sb.append(entries.hasNext() ? ", " : "");
+			if (entries.hasNext()) {
+				sb.append(", ");
+			}
 		}
-		sb.append("}");
+		sb.append('}');
 		return sb.toString();
 	}
 
@@ -424,8 +406,8 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		if (value == this) {
 			return "(this Map)";
 		}
-		if (value instanceof Object[]) {
-			return "[" + StringUtils.arrayToDelimitedString((Object[]) value, ", ") + "]";
+		if (value instanceof Object[] objects) {
+			return "[" + StringUtils.arrayToDelimitedString(objects, ", ") + "]";
 		}
 		return String.valueOf(value);
 	}
@@ -444,8 +426,8 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		if (map == null) {
 			return null;
 		}
-		if (map instanceof AnnotationAttributes) {
-			return (AnnotationAttributes) map;
+		if (map instanceof AnnotationAttributes annotationAttributes) {
+			return annotationAttributes;
 		}
 		return new AnnotationAttributes(map);
 	}

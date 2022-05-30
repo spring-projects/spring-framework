@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,11 +38,10 @@ public class SpringJtaSessionContext extends JTASessionContext {
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	protected Session buildOrObtainSession() {
 		Session session = super.buildOrObtainSession();
 		if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
-			session.setFlushMode(FlushMode.MANUAL);
+			session.setHibernateFlushMode(FlushMode.MANUAL);
 		}
 		return session;
 	}

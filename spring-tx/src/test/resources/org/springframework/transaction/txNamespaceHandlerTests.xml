@@ -7,13 +7,17 @@
 				http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop-2.5.xsd
 				http://www.springframework.org/schema/tx https://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
+	<bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
+		<property name="properties" value="myTimeout=5"/>
+	</bean>
+
 	<aop:config>
 		<aop:advisor pointcut="execution(* *..ITestBean.*(..))" advice-ref="txAdvice"/>
 	</aop:config>
 
 	<tx:advice id="txAdvice">
 		<tx:attributes>
-			<tx:method name="get*" read-only="true"/>
+			<tx:method name="get*" timeout="5" read-only="true"/>
 			<tx:method name="set*"/>
 			<tx:method name="exceptional"/>
 		</tx:attributes>
@@ -26,8 +30,8 @@
 		</tx:attributes>
 	</tx:advice>
 
-	<bean id="transactionManager" class="org.springframework.tests.transaction.CallCountingTransactionManager"/>
+	<bean id="transactionManager" class="org.springframework.transaction.testfixture.CallCountingTransactionManager"/>
 
-	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean"/>
+	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 </beans>

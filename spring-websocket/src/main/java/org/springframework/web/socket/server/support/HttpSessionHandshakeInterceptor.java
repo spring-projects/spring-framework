@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
-import javax.servlet.http.HttpSession;
+
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -32,9 +33,9 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 
 /**
  * An interceptor to copy information from the HTTP session to the "handshake
- * attributes" map to made available via{@link WebSocketSession#getAttributes()}.
+ * attributes" map to be made available via {@link WebSocketSession#getAttributes()}.
  *
- * <p>Copies a subset or all HTTP session attributes and/or the HTTP session id
+ * <p>Copies a subset or all HTTP session attributes and/or the HTTP session ID
  * under the key {@link #HTTP_SESSION_ID_ATTR_NAME}.
  *
  * @author Rossen Stoyanchev
@@ -127,7 +128,7 @@ public class HttpSessionHandshakeInterceptor implements HandshakeInterceptor {
 	/**
 	 * Whether to allow the HTTP session to be created while accessing it.
 	 * <p>By default set to {@code false}.
-	 * @see javax.servlet.http.HttpServletRequest#getSession(boolean)
+	 * @see jakarta.servlet.http.HttpServletRequest#getSession(boolean)
 	 */
 	public void setCreateSession(boolean createSession) {
 		this.createSession = createSession;
@@ -163,8 +164,7 @@ public class HttpSessionHandshakeInterceptor implements HandshakeInterceptor {
 
 	@Nullable
 	private HttpSession getSession(ServerHttpRequest request) {
-		if (request instanceof ServletServerHttpRequest) {
-			ServletServerHttpRequest serverRequest = (ServletServerHttpRequest) request;
+		if (request instanceof ServletServerHttpRequest serverRequest) {
 			return serverRequest.getServletRequest().getSession(isCreateSession());
 		}
 		return null;

@@ -247,14 +247,14 @@ class TypeConverterDelegate {
 				// Definitely doesn't match: throw IllegalArgumentException/IllegalStateException
 				StringBuilder msg = new StringBuilder();
 				msg.append("Cannot convert value of type '").append(ClassUtils.getDescriptiveType(newValue));
-				msg.append("' to required type '").append(ClassUtils.getQualifiedName(requiredType)).append("'");
+				msg.append("' to required type '").append(ClassUtils.getQualifiedName(requiredType)).append('\'');
 				if (propertyName != null) {
-					msg.append(" for property '").append(propertyName).append("'");
+					msg.append(" for property '").append(propertyName).append('\'');
 				}
 				if (editor != null) {
 					msg.append(": PropertyEditor [").append(editor.getClass().getName()).append(
 							"] returned inappropriate value of type '").append(
-							ClassUtils.getDescriptiveType(convertedValue)).append("'");
+							ClassUtils.getDescriptiveType(convertedValue)).append('\'');
 					throw new IllegalArgumentException(msg.toString());
 				}
 				else {
@@ -522,8 +522,7 @@ class TypeConverterDelegate {
 			return original;
 		}
 
-		int i = 0;
-		for (; it.hasNext(); i++) {
+		for (int i = 0; it.hasNext(); i++) {
 			Object element = it.next();
 			String indexedPropertyName = buildIndexedPropertyName(propertyName, i);
 			Object convertedElement = convertIfNecessary(indexedPropertyName, null, element,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,18 +46,18 @@ import org.springframework.lang.Nullable;
  *
  * def context = new GenericGroovyApplicationContext()
  * context.reader.beans {
- *     dataSource(BasicDataSource) {                  // <--- invokeMethod
+ *     dataSource(BasicDataSource) {                  // &lt;--- invokeMethod
  *         driverClassName = "org.hsqldb.jdbcDriver"
  *         url = "jdbc:hsqldb:mem:grailsDB"
- *         username = "sa"                            // <-- setProperty
+ *         username = "sa"                            // &lt;-- setProperty
  *         password = ""
  *         settings = [mynew:"setting"]
  *     }
  *     sessionFactory(SessionFactory) {
- *         dataSource = dataSource                    // <-- getProperty for retrieving references
+ *         dataSource = dataSource                    // &lt;-- getProperty for retrieving references
  *     }
  *     myService(MyService) {
- *         nestedBean = { AnotherBean bean ->         // <-- setProperty with closure for nested bean
+ *         nestedBean = { AnotherBean bean -&gt;         // &lt;-- setProperty with closure for nested bean
  *             dataSource = dataSource
  *         }
  *     }
@@ -84,7 +84,7 @@ import org.springframework.lang.Nullable;
  *         dataSource = dataSource
  *     }
  *     myService(MyService) {
- *         nestedBean = { AnotherBean bean ->
+ *         nestedBean = { AnotherBean bean -&gt;
  *             dataSource = dataSource
  *         }
  *     }
@@ -225,18 +225,22 @@ public class GenericGroovyApplicationContext extends GenericApplicationContext i
 
 	// Implementation of the GroovyObject interface
 
+	@Override
 	public void setMetaClass(MetaClass metaClass) {
 		this.metaClass = metaClass;
 	}
 
+	@Override
 	public MetaClass getMetaClass() {
 		return this.metaClass;
 	}
 
+	@Override
 	public Object invokeMethod(String name, Object args) {
 		return this.metaClass.invokeMethod(this, name, args);
 	}
 
+	@Override
 	public void setProperty(String property, Object newValue) {
 		if (newValue instanceof BeanDefinition) {
 			registerBeanDefinition(property, (BeanDefinition) newValue);
@@ -246,6 +250,7 @@ public class GenericGroovyApplicationContext extends GenericApplicationContext i
 		}
 	}
 
+	@Override
 	@Nullable
 	public Object getProperty(String property) {
 		if (containsBean(property)) {

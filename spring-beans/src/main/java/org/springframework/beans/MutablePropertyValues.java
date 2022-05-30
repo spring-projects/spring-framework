@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	@Nullable
 	private Set<String> processedProperties;
 
-	private volatile boolean converted = false;
+	private volatile boolean converted;
 
 
 	/**
@@ -221,8 +221,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 */
 	private PropertyValue mergeIfRequired(PropertyValue newPv, PropertyValue currentPv) {
 		Object value = newPv.getValue();
-		if (value instanceof Mergeable) {
-			Mergeable mergeable = (Mergeable) value;
+		if (value instanceof Mergeable mergeable) {
 			if (mergeable.isMergeEnabled()) {
 				Object merged = mergeable.merge(currentPv.getValue());
 				return new PropertyValue(newPv.getName(), merged);
@@ -367,7 +366,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof MutablePropertyValues &&
 				this.propertyValueList.equals(((MutablePropertyValues) other).propertyValueList)));
 	}
@@ -380,11 +379,10 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	@Override
 	public String toString() {
 		PropertyValue[] pvs = getPropertyValues();
-		StringBuilder sb = new StringBuilder("PropertyValues: length=").append(pvs.length);
 		if (pvs.length > 0) {
-			sb.append("; ").append(StringUtils.arrayToDelimitedString(pvs, "; "));
+			return "PropertyValues: length=" + pvs.length + "; " + StringUtils.arrayToDelimitedString(pvs, "; ");
 		}
-		return sb.toString();
+		return "PropertyValues: length=0";
 	}
 
 }

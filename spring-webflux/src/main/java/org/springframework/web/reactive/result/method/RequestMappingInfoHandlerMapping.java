@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,14 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -35,13 +37,16 @@ import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.result.condition.NameValueExpression;
+import org.springframework.web.reactive.result.condition.ProducesRequestCondition;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
+import org.springframework.web.server.UnsatisfiedRequestParameterException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.util.pattern.PathPattern;
 
@@ -50,6 +55,7 @@ import org.springframework.web.util.pattern.PathPattern;
  * the mapping between a request and a handler method.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0
  */
 public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMethodMapping<RequestMappingInfo> {
@@ -66,6 +72,11 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		}
 	}
 
+
+	@Override
+	protected Set<String> getDirectPaths(RequestMappingInfo info) {
+		return info.getDirectPaths();
+	}
 
 	/**
 	 * Check if the given RequestMappingInfo matches the current request and
@@ -84,6 +95,13 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	@Override
 	protected Comparator<RequestMappingInfo> getMappingComparator(final ServerWebExchange exchange) {
 		return (info1, info2) -> info1.compareTo(info2, exchange);
+	}
+
+	@Override
+	public Mono<HandlerMethod> getHandlerInternal(ServerWebExchange exchange) {
+		exchange.getAttributes().remove(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
+		return super.getHandlerInternal(exchange)
+				.doOnTerminate(() -> ProducesRequestCondition.clearMediaTypesAttribute(exchange));
 	}
 
 	/**
@@ -154,10 +172,11 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		ServerHttpRequest request = exchange.getRequest();
 
 		if (helper.hasMethodsMismatch()) {
-			String httpMethod = request.getMethodValue();
+			HttpMethod httpMethod = request.getMethod();
 			Set<HttpMethod> methods = helper.getAllowedMethods();
-			if (HttpMethod.OPTIONS.matches(httpMethod)) {
-				HttpOptionsHandler handler = new HttpOptionsHandler(methods);
+			if (HttpMethod.OPTIONS.equals(httpMethod)) {
+				Set<MediaType> mediaTypes = helper.getConsumablePatchMediaTypes();
+				HttpOptionsHandler handler = new HttpOptionsHandler(methods, mediaTypes);
 				return new HandlerMethod(handler, HTTP_OPTIONS_HANDLE_METHOD);
 			}
 			throw new MethodNotAllowedException(httpMethod, methods);
@@ -172,7 +191,8 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			catch (InvalidMediaTypeException ex) {
 				throw new UnsupportedMediaTypeStatusException(ex.getMessage());
 			}
-			throw new UnsupportedMediaTypeStatusException(contentType, new ArrayList<>(mediaTypes));
+			throw new UnsupportedMediaTypeStatusException(
+					contentType, new ArrayList<>(mediaTypes), exchange.getRequest().getMethod());
 		}
 
 		if (helper.hasProducesMismatch()) {
@@ -181,9 +201,9 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		}
 
 		if (helper.hasParamsMismatch()) {
-			throw new ServerWebInputException(
-					"Unsatisfied query parameter conditions: " + helper.getParamConditions() +
-							", actual parameters: " + request.getQueryParams());
+			throw new UnsatisfiedRequestParameterException(
+					helper.getParamConditions().stream().map(Object::toString).toList(),
+					request.getQueryParams());
 		}
 
 		return null;
@@ -199,10 +219,9 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 
 		public PartialMatchHelper(Set<RequestMappingInfo> infos, ServerWebExchange exchange) {
-			this.partialMatches.addAll(infos.stream().
-					filter(info -> info.getPatternsCondition().getMatchingCondition(exchange) != null).
-					map(info -> new PartialMatch(info, exchange)).
-					collect(Collectors.toList()));
+			this.partialMatches.addAll(infos.stream()
+					.filter(info -> info.getPatternsCondition().getMatchingCondition(exchange) != null)
+					.map(info -> new PartialMatch(info, exchange)).toList());
 		}
 
 
@@ -217,42 +236,38 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		 * Any partial matches for "methods"?
 		 */
 		public boolean hasMethodsMismatch() {
-			return this.partialMatches.stream().
-					noneMatch(PartialMatch::hasMethodsMatch);
+			return this.partialMatches.stream().noneMatch(PartialMatch::hasMethodsMatch);
 		}
 
 		/**
 		 * Any partial matches for "methods" and "consumes"?
 		 */
 		public boolean hasConsumesMismatch() {
-			return this.partialMatches.stream().
-					noneMatch(PartialMatch::hasConsumesMatch);
+			return this.partialMatches.stream().noneMatch(PartialMatch::hasConsumesMatch);
 		}
 
 		/**
 		 * Any partial matches for "methods", "consumes", and "produces"?
 		 */
 		public boolean hasProducesMismatch() {
-			return this.partialMatches.stream().
-					noneMatch(PartialMatch::hasProducesMatch);
+			return this.partialMatches.stream().noneMatch(PartialMatch::hasProducesMatch);
 		}
 
 		/**
 		 * Any partial matches for "methods", "consumes", "produces", and "params"?
 		 */
 		public boolean hasParamsMismatch() {
-			return this.partialMatches.stream().
-					noneMatch(PartialMatch::hasParamsMatch);
+			return this.partialMatches.stream().noneMatch(PartialMatch::hasParamsMatch);
 		}
 
 		/**
 		 * Return declared HTTP methods.
 		 */
 		public Set<HttpMethod> getAllowedMethods() {
-			return this.partialMatches.stream().
-					flatMap(m -> m.getInfo().getMethodsCondition().getMethods().stream()).
-					map(requestMethod -> HttpMethod.resolve(requestMethod.name())).
-					collect(Collectors.toSet());
+			return this.partialMatches.stream()
+					.flatMap(m -> m.getInfo().getMethodsCondition().getMethods().stream())
+					.map(requestMethod -> HttpMethod.valueOf(requestMethod.name()))
+					.collect(Collectors.toSet());
 		}
 
 		/**
@@ -260,9 +275,10 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		 * match the "methods" condition.
 		 */
 		public Set<MediaType> getConsumableMediaTypes() {
-			return this.partialMatches.stream().filter(PartialMatch::hasMethodsMatch).
-					flatMap(m -> m.getInfo().getConsumesCondition().getConsumableMediaTypes().stream()).
-					collect(Collectors.toCollection(LinkedHashSet::new));
+			return this.partialMatches.stream()
+					.filter(PartialMatch::hasMethodsMatch)
+					.flatMap(m -> m.getInfo().getConsumesCondition().getConsumableMediaTypes().stream())
+					.collect(Collectors.toCollection(LinkedHashSet::new));
 		}
 
 		/**
@@ -270,9 +286,10 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		 * match the "methods" and "consumes" conditions.
 		 */
 		public Set<MediaType> getProducibleMediaTypes() {
-			return this.partialMatches.stream().filter(PartialMatch::hasConsumesMatch).
-					flatMap(m -> m.getInfo().getProducesCondition().getProducibleMediaTypes().stream()).
-					collect(Collectors.toCollection(LinkedHashSet::new));
+			return this.partialMatches.stream()
+					.filter(PartialMatch::hasConsumesMatch)
+					.flatMap(m -> m.getInfo().getProducesCondition().getProducibleMediaTypes().stream())
+					.collect(Collectors.toCollection(LinkedHashSet::new));
 		}
 
 		/**
@@ -280,10 +297,27 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		 * match the "methods", "consumes", and "params" conditions.
 		 */
 		public List<Set<NameValueExpression<String>>> getParamConditions() {
-			return this.partialMatches.stream().filter(PartialMatch::hasProducesMatch).
-					map(match -> match.getInfo().getParamsCondition().getExpressions()).
-					collect(Collectors.toList());
+			return this.partialMatches.stream()
+					.filter(PartialMatch::hasProducesMatch)
+					.map(match -> match.getInfo().getParamsCondition().getExpressions())
+					.collect(Collectors.toList());
 		}
+
+		/**
+		 * Return declared "consumable" types but only among those that have
+		 * PATCH specified, or that have no methods at all.
+		 */
+		public Set<MediaType> getConsumablePatchMediaTypes() {
+			Set<MediaType> result = new LinkedHashSet<>();
+			for (PartialMatch match : this.partialMatches) {
+				Set<RequestMethod> methods = match.getInfo().getMethodsCondition().getMethods();
+				if (methods.isEmpty() || methods.contains(RequestMethod.PATCH)) {
+					result.addAll(match.getInfo().getConsumesCondition().getConsumableMediaTypes());
+				}
+			}
+			return result;
+		}
+
 
 
 		/**
@@ -351,14 +385,15 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		private final HttpHeaders headers = new HttpHeaders();
 
 
-		public HttpOptionsHandler(Set<HttpMethod> declaredMethods) {
+		public HttpOptionsHandler(Set<HttpMethod> declaredMethods, Set<MediaType> acceptPatch) {
 			this.headers.setAllow(initAllowedHttpMethods(declaredMethods));
+			this.headers.setAcceptPatch(new ArrayList<>(acceptPatch));
 		}
 
 		private static Set<HttpMethod> initAllowedHttpMethods(Set<HttpMethod> declaredMethods) {
 			if (declaredMethods.isEmpty()) {
-				return EnumSet.allOf(HttpMethod.class).stream()
-						.filter(method -> method != HttpMethod.TRACE)
+				return Stream.of(HttpMethod.values())
+						.filter(method -> !HttpMethod.TRACE.equals(method))
 						.collect(Collectors.toSet());
 			}
 			else {

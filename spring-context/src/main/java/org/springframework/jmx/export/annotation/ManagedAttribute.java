@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,10 @@ import java.lang.annotation.Target;
 
 /**
  * Method-level annotation that indicates to expose a given bean property as a
- * JMX attribute, corresponding to the {@code ManagedAttribute} attribute.
- * Only valid when used on a JavaBean getter or setter.
+ * JMX attribute, corresponding to the
+ * {@link org.springframework.jmx.export.metadata.ManagedAttribute}.
+ *
+ * <p>Only valid when used on a JavaBean getter or setter.
  *
  * @author Rob Harrop
  * @since 1.2
@@ -36,14 +38,29 @@ import java.lang.annotation.Target;
 @Documented
 public @interface ManagedAttribute {
 
+	/**
+	 * Set the default value for the attribute in a {@link javax.management.Descriptor}.
+	 */
 	String defaultValue() default "";
 
+	/**
+	 * Set the description for the attribute in a {@link javax.management.Descriptor}.
+	 */
 	String description() default "";
 
+	/**
+	 * Set the currency time limit field in a {@link javax.management.Descriptor}.
+	 */
 	int currencyTimeLimit() default -1;
 
+	/**
+	 * Set the persistPolicy field in a {@link javax.management.Descriptor}.
+	 */
 	String persistPolicy() default "";
 
+	/**
+	 * Set the persistPeriod field in a {@link javax.management.Descriptor}.
+	 */
 	int persistPeriod() default -1;
 
 }

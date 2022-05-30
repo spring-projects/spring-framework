@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -299,7 +299,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 	@Override
 	@Nullable
-	public V remove(Object key) {
+	public V remove(@Nullable Object key) {
 		return doTask(key, new Task<V>(TaskOption.RESTRUCTURE_AFTER, TaskOption.SKIP_IF_EMPTY) {
 			@Override
 			@Nullable
@@ -316,7 +316,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	}
 
 	@Override
-	public boolean remove(Object key, final Object value) {
+	public boolean remove(@Nullable Object key, final @Nullable Object value) {
 		Boolean result = doTask(key, new Task<Boolean>(TaskOption.RESTRUCTURE_AFTER, TaskOption.SKIP_IF_EMPTY) {
 			@Override
 			protected Boolean execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry) {
@@ -329,11 +329,11 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 				return false;
 			}
 		});
-		return (result == Boolean.TRUE);
+		return (Boolean.TRUE.equals(result));
 	}
 
 	@Override
-	public boolean replace(K key, final V oldValue, final V newValue) {
+	public boolean replace(@Nullable K key, final @Nullable V oldValue, final @Nullable V newValue) {
 		Boolean result = doTask(key, new Task<Boolean>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.SKIP_IF_EMPTY) {
 			@Override
 			protected Boolean execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry) {
@@ -344,12 +344,12 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 				return false;
 			}
 		});
-		return (result == Boolean.TRUE);
+		return (Boolean.TRUE.equals(result));
 	}
 
 	@Override
 	@Nullable
-	public V replace(K key, final V value) {
+	public V replace(@Nullable K key, final @Nullable V value) {
 		return doTask(key, new Task<V>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.SKIP_IF_EMPTY) {
 			@Override
 			@Nullable
@@ -474,7 +474,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		 * The total number of references contained in this segment. This includes chained
 		 * references and references that have been garbage collected but not purged.
 		 */
-		private final AtomicInteger count = new AtomicInteger(0);
+		private final AtomicInteger count = new AtomicInteger();
 
 		/**
 		 * The threshold when resizing of the references should occur. When {@code count}
@@ -758,14 +758,13 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 		@Override
 		@SuppressWarnings("rawtypes")
-		public final boolean equals(Object other) {
+		public final boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof Map.Entry)) {
+			if (!(other instanceof Map.Entry otherEntry)) {
 				return false;
 			}
-			Map.Entry otherEntry = (Map.Entry) other;
 			return (ObjectUtils.nullSafeEquals(getKey(), otherEntry.getKey()) &&
 					ObjectUtils.nullSafeEquals(getValue(), otherEntry.getValue()));
 		}
@@ -853,12 +852,11 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 		@Override
 		public boolean contains(@Nullable Object o) {
-			if (o instanceof Map.Entry<?, ?>) {
-				Map.Entry<?, ?> entry = (Map.Entry<?, ?>) o;
+			if (o instanceof Map.Entry<?, ?> entry) {
 				Reference<K, V> ref = ConcurrentReferenceHashMap.this.getReference(entry.getKey(), Restructure.NEVER);
 				Entry<K, V> otherEntry = (ref != null ? ref.get() : null);
 				if (otherEntry != null) {
-					return ObjectUtils.nullSafeEquals(otherEntry.getValue(), otherEntry.getValue());
+					return ObjectUtils.nullSafeEquals(entry.getValue(), otherEntry.getValue());
 				}
 			}
 			return false;
@@ -866,8 +864,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 		@Override
 		public boolean remove(Object o) {
-			if (o instanceof Map.Entry<?, ?>) {
-				Map.Entry<?, ?> entry = (Map.Entry<?, ?>) o;
+			if (o instanceof Map.Entry<?, ?> entry) {
 				return ConcurrentReferenceHashMap.this.remove(entry.getKey(), entry.getValue());
 			}
 			return false;
@@ -966,6 +963,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		public void remove() {
 			Assert.state(this.last != null, "No element to remove");
 			ConcurrentReferenceHashMap.this.remove(this.last.getKey());
+			this.last = null;
 		}
 	}
 
@@ -980,8 +978,8 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 
 	/**
-	 * Strategy class used to manage {@link Reference References}. This class can be overridden if
-	 * alternative reference types need to be supported.
+	 * Strategy class used to manage {@link Reference References}.
+	 * This class can be overridden if alternative reference types need to be supported.
 	 */
 	protected class ReferenceManager {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests that verify proper scoping of beans created in
@@ -48,7 +48,7 @@ public class AtBeanLiteModeScopeTests {
 		@Bean
 		public LifecycleBean singleton() {
 			LifecycleBean bean = new LifecycleBean("singleton");
-			assertFalse(bean.isInitialized());
+			assertThat(bean.isInitialized()).isFalse();
 			return bean;
 		}
 
@@ -56,7 +56,7 @@ public class AtBeanLiteModeScopeTests {
 		@Scope("prototype")
 		public LifecycleBean prototype() {
 			LifecycleBean bean = new LifecycleBean("prototype");
-			assertFalse(bean.isInitialized());
+			assertThat(bean.isInitialized()).isFalse();
 			return bean;
 		}
 	}
@@ -76,26 +76,26 @@ public class AtBeanLiteModeScopeTests {
 
 	@Test
 	public void singletonLiteBean() {
-		assertNotNull(injectedSingletonBean);
-		assertTrue(injectedSingletonBean.isInitialized());
+		assertThat(injectedSingletonBean).isNotNull();
+		assertThat(injectedSingletonBean.isInitialized()).isTrue();
 
 		LifecycleBean retrievedSingletonBean = applicationContext.getBean("singleton", LifecycleBean.class);
-		assertNotNull(retrievedSingletonBean);
-		assertTrue(retrievedSingletonBean.isInitialized());
+		assertThat(retrievedSingletonBean).isNotNull();
+		assertThat(retrievedSingletonBean.isInitialized()).isTrue();
 
-		assertSame(injectedSingletonBean, retrievedSingletonBean);
+		assertThat(retrievedSingletonBean).isSameAs(injectedSingletonBean);
 	}
 
 	@Test
 	public void prototypeLiteBean() {
-		assertNotNull(injectedPrototypeBean);
-		assertTrue(injectedPrototypeBean.isInitialized());
+		assertThat(injectedPrototypeBean).isNotNull();
+		assertThat(injectedPrototypeBean.isInitialized()).isTrue();
 
 		LifecycleBean retrievedPrototypeBean = applicationContext.getBean("prototype", LifecycleBean.class);
-		assertNotNull(retrievedPrototypeBean);
-		assertTrue(retrievedPrototypeBean.isInitialized());
+		assertThat(retrievedPrototypeBean).isNotNull();
+		assertThat(retrievedPrototypeBean.isInitialized()).isTrue();
 
-		assertNotSame(injectedPrototypeBean, retrievedPrototypeBean);
+		assertThat(retrievedPrototypeBean).isNotSameAs(injectedPrototypeBean);
 	}
 
 }

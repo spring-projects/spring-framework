@@ -19,6 +19,7 @@ package org.springframework.jdbc.datasource;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.logging.Logger;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;

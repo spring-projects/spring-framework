@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,21 @@
 
 package org.springframework.web.reactive.function.server
 
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.reactive.flow.asFlow
+import kotlinx.coroutines.reactive.asFlow
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.Part
+import org.springframework.util.CollectionUtils
 import org.springframework.util.MultiValueMap
 import org.springframework.web.server.WebSession
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.net.InetSocketAddress
 import java.security.Principal
+import kotlin.reflect.KClass
 
 /**
  * Extension for [ServerRequest.bodyToMono] providing a `bodyToMono<Foo>()` variant
@@ -54,15 +57,21 @@ inline fun <reified T : Any> ServerRequest.bodyToFlux(): Flux<T> =
 /**
  * Coroutines [kotlinx.coroutines.flow.Flow] based variant of [ServerRequest.bodyToFlux].
  *
- * Backpressure is controlled by [batchSize] parameter that controls the size of in-flight elements
- * and [org.reactivestreams.Subscription.request] size.
- *
  * @author Sebastien Deleuze
  * @since 5.2
  */
-@FlowPreview
-inline fun <reified T : Any> ServerRequest.bodyToFlow(batchSize: Int = 1): Flow<T> =
-		bodyToFlux<T>().asFlow(batchSize)
+inline fun <reified T : Any> ServerRequest.bodyToFlow(): Flow<T> =
+		bodyToFlux<T>().asFlow()
+
+/**
+ * `KClass` coroutines [kotlinx.coroutines.flow.Flow] based variant of [ServerRequest.bodyToFlux].
+ * Please consider `bodyToFlow<Foo>` variant if possible.
+ *
+ * @author Igor Manushin
+ * @since 5.3
+ */
+fun <T : Any> ServerRequest.bodyToFlow(clazz: KClass<T>): Flow<T> =
+		bodyToFlux(clazz.java).asFlow()
 
 /**
  * Non-nullable Coroutines variant of [ServerRequest.bodyToMono].
@@ -74,13 +83,35 @@ suspend inline fun <reified T : Any> ServerRequest.awaitBody(): T =
 		bodyToMono<T>().awaitSingle()
 
 /**
+ * `KClass` non-nullable Coroutines variant of [ServerRequest.bodyToMono].
+ * Please consider `awaitBody<Foo>` variant if possible.
+ *
+ * @author Igor Manushin
+ * @since 5.3
+ */
+suspend fun <T : Any> ServerRequest.awaitBody(clazz: KClass<T>): T =
+		bodyToMono(clazz.java).awaitSingle()
+
+/**
  * Nullable Coroutines variant of [ServerRequest.bodyToMono].
  *
  * @author Sebastien Deleuze
  * @since 5.2
  */
+@Suppress("DEPRECATION")
 suspend inline fun <reified T : Any> ServerRequest.awaitBodyOrNull(): T? =
-		bodyToMono<T>().awaitFirstOrNull()
+		bodyToMono<T>().awaitSingleOrNull()
+
+/**
+ * `KClass` nullable Coroutines variant of [ServerRequest.bodyToMono].
+ * Please consider `awaitBodyOrNull<Foo>` variant if possible.
+ *
+ * @author Igor Manushin
+ * @since 5.3
+ */
+@Suppress("DEPRECATION")
+suspend fun <T : Any> ServerRequest.awaitBodyOrNull(clazz: KClass<T>): T? =
+		bodyToMono(clazz.java).awaitSingleOrNull()
 
 /**
  * Coroutines variant of [ServerRequest.formData].
@@ -106,8 +137,9 @@ suspend fun ServerRequest.awaitMultipartData(): MultiValueMap<String, Part> =
  * @author Sebastien Deleuze
  * @since 5.2
  */
-suspend fun ServerRequest.awaitPrincipalOrNull(): Principal? =
-		principal().awaitFirstOrNull()
+@Suppress("DEPRECATION")
+suspend fun ServerRequest.awaitPrincipal(): Principal? =
+		principal().awaitSingleOrNull()
 
 /**
  * Coroutines variant of [ServerRequest.session].
@@ -117,3 +149,56 @@ suspend fun ServerRequest.awaitPrincipalOrNull(): Principal? =
  */
 suspend fun ServerRequest.awaitSession(): WebSession =
 		session().awaitSingle()
+
+/**
+ * Nullable variant of [ServerRequest.remoteAddress]
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2.2
+ */
+fun ServerRequest.remoteAddressOrNull(): InetSocketAddress? = remoteAddress().orElse(null)
+
+/**
+ * Nullable variant of [ServerRequest.attribute]
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2.2
+ */
+fun ServerRequest.attributeOrNull(name: String): Any? = attributes()[name]
+
+/**
+ * Nullable variant of [ServerRequest.queryParam]
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2.2
+ */
+fun ServerRequest.queryParamOrNull(name: String): String? {
+	val queryParamValues = queryParams()[name]
+	return if (CollectionUtils.isEmpty(queryParamValues)) {
+		null
+	} else {
+		var value: String? = queryParamValues!![0]
+		if (value == null) {
+			value = ""
+		}
+		value
+	}
+}
+
+/**
+ * Nullable variant of [ServerRequest.Headers.contentLength]
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2.2
+ */
+fun ServerRequest.Headers.contentLengthOrNull(): Long? =
+		contentLength().run { if (isPresent) asLong else null }
+
+/**
+ * Nullable variant of [ServerRequest.Headers.contentType]
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2.2
+ */
+fun ServerRequest.Headers.contentTypeOrNull(): MediaType? =
+		contentType().orElse(null)

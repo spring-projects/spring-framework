@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,27 +18,28 @@ package org.springframework.cache.config;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.CacheTestUtils;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.CachingConfigurerSupport;
+import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.testfixture.cache.CacheTestUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.mock.env.MockEnvironment;
 
-import static org.junit.Assert.*;
-import static org.springframework.cache.CacheTestUtils.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.context.testfixture.cache.CacheTestUtils.assertCacheHit;
+import static org.springframework.context.testfixture.cache.CacheTestUtils.assertCacheMiss;
 
 /**
  * Tests that represent real use cases with advanced configuration.
@@ -50,7 +51,7 @@ public class EnableCachingIntegrationTests {
 	private ConfigurableApplicationContext context;
 
 
-	@After
+	@AfterEach
 	public void closeContext() {
 		if (this.context != null) {
 			this.context.close();
@@ -83,6 +84,19 @@ public class EnableCachingIntegrationTests {
 	}
 
 	@Test
+	public void barServiceWithCacheableInterfaceCglib() {
+		this.context = new AnnotationConfigApplicationContext(BarConfigCglib.class);
+		BarService service = this.context.getBean(BarService.class);
+		Cache cache = getCache();
+
+		Object key = new Object();
+		assertCacheMiss(key, cache);
+
+		Object value = service.getSimple(key);
+		assertCacheHit(key, value, cache);
+	}
+
+	@Test
 	public void beanConditionOff() {
 		this.context = new AnnotationConfigApplicationContext(BeanConditionConfig.class);
 		FooService service = this.context.getBean(FooService.class);
@@ -94,7 +108,7 @@ public class EnableCachingIntegrationTests {
 		service.getWithCondition(key);
 		assertCacheMiss(key, cache);
 
-		assertEquals(2, this.context.getBean(BeanConditionConfig.Bar.class).count);
+		assertThat(this.context.getBean(BeanConditionConfig.Bar.class).count).isEqualTo(2);
 	}
 
 	@Test
@@ -114,7 +128,7 @@ public class EnableCachingIntegrationTests {
 		value = service.getWithCondition(key);
 		assertCacheHit(key, value, cache);
 
-		assertEquals(2, this.context.getBean(BeanConditionConfig.Bar.class).count);
+		assertThat(this.context.getBean(BeanConditionConfig.Bar.class).count).isEqualTo(2);
 	}
 
 	private Cache getCache() {
@@ -123,7 +137,7 @@ public class EnableCachingIntegrationTests {
 
 
 	@Configuration
-	static class SharedConfig extends CachingConfigurerSupport {
+	static class SharedConfig implements CachingConfigurer {
 
 		@Override
 		@Bean
@@ -185,6 +199,36 @@ public class EnableCachingIntegrationTests {
 
 
 	@Configuration
+	@Import(SharedConfig.class)
+	@EnableCaching(proxyTargetClass = true)
+	static class BarConfigCglib {
+
+		@Bean
+		public BarService barService() {
+			return new BarServiceImpl();
+		}
+	}
+
+
+	interface BarService {
+
+		@Cacheable(cacheNames = "testCache")
+		Object getSimple(Object key);
+	}
+
+
+	static class BarServiceImpl implements BarService {
+
+		private final AtomicLong counter = new AtomicLong();
+
+		@Override
+		public Object getSimple(Object key) {
+			return this.counter.getAndIncrement();
+		}
+	}
+
+
+	@Configuration
 	@Import(FooConfig.class)
 	@EnableCaching
 	static class BeanConditionConfig {
@@ -194,7 +238,7 @@ public class EnableCachingIntegrationTests {
 
 		@Bean
 		public Bar bar() {
-			return new Bar(Boolean.valueOf(env.getProperty("bar.enabled")));
+			return new Bar(Boolean.parseBoolean(env.getProperty("bar.enabled")));
 		}
 
 

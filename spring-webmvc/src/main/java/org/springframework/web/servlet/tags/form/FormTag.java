@@ -18,12 +18,13 @@ package org.springframework.web.servlet.tags.form;
 
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Map;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.PageContext;
+
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.PageContext;
 
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.core.Conventions;
@@ -254,7 +255,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	private static final String MODEL_ATTRIBUTE = "modelAttribute";
 
 	/**
-	 * The name of the {@link javax.servlet.jsp.PageContext} attribute under which the
+	 * The name of the {@link jakarta.servlet.jsp.PageContext} attribute under which the
 	 * form object name is exposed.
 	 */
 	public static final String MODEL_ATTRIBUTE_VARIABLE_NAME =
@@ -536,9 +537,9 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Writes the opening part of the block	'{@code form}' tag and exposes
-	 * the form object name in the {@link javax.servlet.jsp.PageContext}.
+	 * the form object name in the {@link jakarta.servlet.jsp.PageContext}.
 	 * @param tagWriter the {@link TagWriter} to which the form content is to be written
-	 * @return {@link javax.servlet.jsp.tagext.Tag#EVAL_BODY_INCLUDE}
+	 * @return {@link jakarta.servlet.jsp.tagext.Tag#EVAL_BODY_INCLUDE}
 	 */
 	@Override
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
@@ -683,7 +684,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Closes the '{@code form}' block tag and removes the form object name
-	 * from the {@link javax.servlet.jsp.PageContext}.
+	 * from the {@link jakarta.servlet.jsp.PageContext}.
 	 */
 	@Override
 	public int doEndTag() throws JspException {
@@ -704,9 +705,9 @@ public class FormTag extends AbstractHtmlElementTag {
 		if (!CollectionUtils.isEmpty(hiddenFields)) {
 			Assert.state(this.tagWriter != null, "No TagWriter set");
 			this.tagWriter.appendValue("<div>\n");
-			for (String name : hiddenFields.keySet()) {
+			for (Map.Entry<String, String> entry : hiddenFields.entrySet()) {
 				this.tagWriter.appendValue("<input type=\"hidden\" ");
-				this.tagWriter.appendValue("name=\"" + name + "\" value=\"" + hiddenFields.get(name) + "\" ");
+				this.tagWriter.appendValue("name=\"" + entry.getKey() + "\" value=\"" + entry.getValue() + "\" ");
 				this.tagWriter.appendValue("/>\n");
 			}
 			this.tagWriter.appendValue("</div>");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.orm.hibernate5;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -27,14 +28,15 @@ import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
 
+import javax.sql.DataSource;
+
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.transaction.TransactionManager;
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
 import org.hibernate.SessionFactory;
@@ -46,6 +48,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.InfrastructureProxy;
@@ -75,12 +78,12 @@ import org.springframework.util.ClassUtils;
  * Typically combined with {@link HibernateTransactionManager} for declarative
  * transactions against the {@code SessionFactory} and its JDBC {@code DataSource}.
  *
- * <p>Compatible with Hibernate 5.0/5.1 as well as 5.2/5.3, as of Spring 5.1.
- * Set up with Hibernate 5.2/5.3, this builder is also a convenient way to set up
+ * <p>Compatible with Hibernate 5.5/5.6, as of Spring 6.0.
+ * This Hibernate-specific factory builder can also be a convenient way to set up
  * a JPA {@code EntityManagerFactory} since the Hibernate {@code SessionFactory}
  * natively exposes the JPA {@code EntityManagerFactory} interface as well now.
  *
- * <p>This builder supports Hibernate 5.3 {@code BeanContainer} integration,
+ * <p>This builder supports Hibernate {@code BeanContainer} integration,
  * {@link MetadataSources} from custom {@link BootstrapServiceRegistryBuilder}
  * setup, as well as other advanced Hibernate configuration options beyond the
  * standard JPA bootstrap contract.
@@ -161,23 +164,8 @@ public class LocalSessionFactoryBuilder extends Configuration {
 		if (dataSource != null) {
 			getProperties().put(AvailableSettings.DATASOURCE, dataSource);
 		}
-
-		// Hibernate 5.1/5.2: manually enforce connection release mode ON_CLOSE (the former default)
-		try {
-			// Try Hibernate 5.2
-			AvailableSettings.class.getField("CONNECTION_HANDLING");
-			getProperties().put("hibernate.connection.handling_mode", "DELAYED_ACQUISITION_AND_HOLD");
-		}
-		catch (NoSuchFieldException ex) {
-			// Try Hibernate 5.1
-			try {
-				AvailableSettings.class.getField("ACQUIRE_CONNECTIONS");
-				getProperties().put("hibernate.connection.release_mode", "ON_CLOSE");
-			}
-			catch (NoSuchFieldException ex2) {
-				// on Hibernate 5.0.x or lower - no need to change the default there
-			}
-		}
+		getProperties().put(AvailableSettings.CONNECTION_HANDLING,
+				PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_HOLD);
 
 		getProperties().put(AvailableSettings.CLASSLOADERS, Collections.singleton(resourceLoader.getClassLoader()));
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
@@ -224,22 +212,9 @@ public class LocalSessionFactoryBuilder extends Configuration {
 					"Unknown transaction manager type: " + jtaTransactionManager.getClass().getName());
 		}
 
-		// Hibernate 5.1/5.2: manually enforce connection release mode AFTER_STATEMENT (the JTA default)
-		try {
-			// Try Hibernate 5.2
-			AvailableSettings.class.getField("CONNECTION_HANDLING");
-			getProperties().put("hibernate.connection.handling_mode", "DELAYED_ACQUISITION_AND_RELEASE_AFTER_STATEMENT");
-		}
-		catch (NoSuchFieldException ex) {
-			// Try Hibernate 5.1
-			try {
-				AvailableSettings.class.getField("ACQUIRE_CONNECTIONS");
-				getProperties().put("hibernate.connection.release_mode", "AFTER_STATEMENT");
-			}
-			catch (NoSuchFieldException ex2) {
-				// on Hibernate 5.0.x or lower - no need to change the default there
-			}
-		}
+		getProperties().put(AvailableSettings.TRANSACTION_COORDINATOR_STRATEGY, "jta");
+		getProperties().put(AvailableSettings.CONNECTION_HANDLING,
+				PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_RELEASE_AFTER_STATEMENT);
 
 		return this;
 	}
@@ -247,8 +222,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	/**
 	 * Set a Hibernate {@link org.hibernate.resource.beans.container.spi.BeanContainer}
 	 * for the given Spring {@link ConfigurableListableBeanFactory}.
-	 * <p>Note: Bean container integration requires Hibernate 5.3 or higher.
-	 * It enables autowiring of Hibernate attribute converters and entity listeners.
+	 * <p>This enables autowiring of Hibernate attribute converters and entity listeners.
 	 * @since 5.1
 	 * @see SpringBeanContainer
 	 * @see AvailableSettings#BEAN_CONTAINER
@@ -295,8 +269,8 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	/**
 	 * Specify custom type filters for Spring-based scanning for entity classes.
 	 * <p>Default is to search all specified packages for classes annotated with
-	 * {@code @javax.persistence.Entity}, {@code @javax.persistence.Embeddable}
-	 * or {@code @javax.persistence.MappedSuperclass}.
+	 * {@code @jakarta.persistence.Entity}, {@code @jakarta.persistence.Embeddable}
+	 * or {@code @jakarta.persistence.MappedSuperclass}.
 	 * @see #scanPackages
 	 */
 	public LocalSessionFactoryBuilder setEntityTypeFilters(TypeFilter... entityTypeFilters) {
@@ -346,7 +320,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 				Resource[] resources = this.resourcePatternResolver.getResources(pattern);
 				MetadataReaderFactory readerFactory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
 				for (Resource resource : resources) {
-					if (resource.isReadable()) {
+					try {
 						MetadataReader reader = readerFactory.getMetadataReader(resource);
 						String className = reader.getClassMetadata().getClassName();
 						if (matchesEntityTypeFilter(reader, readerFactory)) {
@@ -358,6 +332,9 @@ public class LocalSessionFactoryBuilder extends Configuration {
 						else if (className.endsWith(PACKAGE_INFO_SUFFIX)) {
 							packageNames.add(className.substring(0, className.length() - PACKAGE_INFO_SUFFIX.length()));
 						}
+					}
+					catch (FileNotFoundException ex) {
+						// Ignore non-readable resource
 					}
 				}
 			}
@@ -436,24 +413,23 @@ public class LocalSessionFactoryBuilder extends Configuration {
 
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			try {
-				if (method.getName().equals("equals")) {
+			switch (method.getName()) {
+				case "equals":
 					// Only consider equal when proxies are identical.
 					return (proxy == args[0]);
-				}
-				else if (method.getName().equals("hashCode")) {
+				case "hashCode":
 					// Use hashCode of EntityManagerFactory proxy.
 					return System.identityHashCode(proxy);
-				}
-				else if (method.getName().equals("getProperties")) {
+				case "getProperties":
 					return getProperties();
-				}
-				else if (method.getName().equals("getWrappedObject")) {
+				case "getWrappedObject":
 					// Call coming in through InfrastructureProxy interface...
 					return getSessionFactory();
-				}
-				// Regular delegation to the target SessionFactory,
-				// enforcing its full initialization...
+			}
+
+			// Regular delegation to the target SessionFactory,
+			// enforcing its full initialization...
+			try {
 				return method.invoke(getSessionFactory(), args);
 			}
 			catch (InvocationTargetException ex) {

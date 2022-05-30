@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -222,14 +222,13 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof SimpleMailMessage)) {
+		if (!(other instanceof SimpleMailMessage otherMessage)) {
 			return false;
 		}
-		SimpleMailMessage otherMessage = (SimpleMailMessage) other;
 		return (ObjectUtils.nullSafeEquals(this.from, otherMessage.from) &&
 				ObjectUtils.nullSafeEquals(this.replyTo, otherMessage.replyTo) &&
 				ObjectUtils.nullSafeEquals(this.to, otherMessage.to) &&
@@ -276,9 +275,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	}
 
 	private static String[] copy(String[] state) {
-		String[] copy = new String[state.length];
-		System.arraycopy(state, 0, copy, 0, state.length);
-		return copy;
+		return state.clone();
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,19 @@ package org.springframework.web.reactive.function.client
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.ResponseEntity
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.util.concurrent.CompletableFuture
+import java.util.function.Function
 
 /**
  * Mock object based tests for [WebClient] Kotlin extensions
@@ -48,11 +53,17 @@ class WebClientExtensionsTests {
 	}
 
 	@Test
-	@FlowPreview
 	fun `RequestBodySpec#body with Flow and reified type parameters`() {
 		val body = mockk<Flow<List<Foo>>>()
 		requestBodySpec.body(body)
-		verify { requestBodySpec.body(ofType<Publisher<List<Foo>>>(), object : ParameterizedTypeReference<List<Foo>>() {}) }
+		verify { requestBodySpec.body(ofType<Any>(), object : ParameterizedTypeReference<List<Foo>>() {}) }
+	}
+
+	@Test
+	fun `RequestBodySpec#body with CompletableFuture and reified type parameters`() {
+		val body = mockk<CompletableFuture<List<Foo>>>()
+		requestBodySpec.body<List<Foo>>(body)
+		verify { requestBodySpec.body(ofType<Any>(), object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 
 	@Test
@@ -68,31 +79,59 @@ class WebClientExtensionsTests {
 	}
 
 	@Test
-	@FlowPreview
 	fun `bodyToFlow with reified type parameters`() {
 		responseSpec.bodyToFlow<List<Foo>>()
 		verify { responseSpec.bodyToFlux(object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 
 	@Test
+	@Suppress("DEPRECATION")
 	fun awaitExchange() {
 		val response = mockk<ClientResponse>()
 		every { requestBodySpec.exchange() } returns Mono.just(response)
 		runBlocking {
-			assertEquals(response, requestBodySpec.awaitExchange())
+			assertThat(requestBodySpec.awaitExchange()).isEqualTo(response)
 		}
 	}
 
 	@Test
-	fun body() {
-		val headerSpec = mockk<WebClient.RequestHeadersSpec<*>>()
-		val supplier: suspend () -> String = mockk()
-		every { requestBodySpec.body(ofType<Mono<String>>()) } returns headerSpec
+	fun `awaitExchange with function parameter`() {
+		val foo = mockk<Foo>()
+		every { requestBodySpec.exchangeToMono(any<Function<ClientResponse, Mono<Foo>>>()) } returns Mono.just(foo)
 		runBlocking {
-			requestBodySpec.body(supplier)
+			assertThat(requestBodySpec.awaitExchange { foo }).isEqualTo(foo)
 		}
-		verify {
-			requestBodySpec.body(ofType<Mono<String>>())
+	}
+
+	@Test
+	fun `awaitExchangeOrNull returning null`() {
+		val foo = mockk<Foo>()
+		every { requestBodySpec.exchangeToMono(any<Function<ClientResponse, Mono<Foo?>>>()) } returns Mono.empty()
+		runBlocking {
+			assertThat(requestBodySpec.awaitExchangeOrNull { foo }).isEqualTo(null)
+		}
+	}
+
+	@Test
+	fun `awaitExchangeOrNull returning object`() {
+		val foo = mockk<Foo>()
+		every { requestBodySpec.exchangeToMono(any<Function<ClientResponse, Mono<Foo>>>()) } returns Mono.just(foo)
+		runBlocking {
+			assertThat(requestBodySpec.awaitExchangeOrNull { foo }).isEqualTo(foo)
+		}
+	}
+
+	@Test
+	fun exchangeToFlow() {
+		val foo = mockk<Foo>()
+		every { requestBodySpec.exchangeToFlux(any<Function<ClientResponse, Flux<Foo>>>()) } returns Flux.just(foo, foo)
+		runBlocking {
+			assertThat(requestBodySpec.exchangeToFlow {
+				flow {
+					emit(foo)
+					emit(foo)
+				}
+			}.toList()).isEqualTo(listOf(foo, foo))
 		}
 	}
 
@@ -101,8 +140,65 @@ class WebClientExtensionsTests {
 		val spec = mockk<WebClient.ResponseSpec>()
 		every { spec.bodyToMono<String>() } returns Mono.just("foo")
 		runBlocking {
-			assertEquals("foo", spec.awaitBody<String>())
+			assertThat(spec.awaitBody<String>()).isEqualTo("foo")
 		}
+	}
+
+	@Test
+	fun `awaitBody of type Unit`() {
+		val spec = mockk<WebClient.ResponseSpec>()
+		val entity = mockk<ResponseEntity<Void>>()
+		every { spec.toBodilessEntity() } returns Mono.just(entity)
+		runBlocking {
+			assertThat(spec.awaitBody<Unit>()).isEqualTo(Unit)
+		}
+	}
+
+	@Test
+	fun awaitBodyOrNull() {
+		val spec = mockk<WebClient.ResponseSpec>()
+		every { spec.bodyToMono<String>() } returns Mono.just("foo")
+		runBlocking {
+			assertThat(spec.awaitBodyOrNull<String>()).isEqualTo("foo")
+		}
+	}
+
+	@Test
+	fun `awaitBodyOrNull of type Unit`() {
+		val spec = mockk<WebClient.ResponseSpec>()
+		val entity = mockk<ResponseEntity<Void>>()
+		every { spec.toBodilessEntity() } returns Mono.just(entity)
+		runBlocking {
+			assertThat(spec.awaitBodyOrNull<Unit>()).isEqualTo(Unit)
+		}
+	}
+
+	@Test
+	fun awaitBodilessEntity() {
+		val spec = mockk<WebClient.ResponseSpec>()
+		val entity = mockk<ResponseEntity<Void>>()
+		every { spec.toBodilessEntity() } returns Mono.just(entity)
+		runBlocking {
+			assertThat(spec.awaitBodilessEntity()).isEqualTo(entity)
+		}
+	}
+
+	@Test
+	fun `ResponseSpec#toEntity with reified type parameters`() {
+		responseSpec.toEntity<List<Foo>>()
+		verify { responseSpec.toEntity(object : ParameterizedTypeReference<List<Foo>>() {}) }
+	}
+
+	@Test
+	fun `ResponseSpec#toEntityList with reified type parameters`() {
+		responseSpec.toEntityList<List<Foo>>()
+		verify { responseSpec.toEntityList(object : ParameterizedTypeReference<List<Foo>>() {}) }
+	}
+
+	@Test
+	fun `ResponseSpec#toEntityFlux with reified type parameters`() {
+		responseSpec.toEntityFlux<List<Foo>>()
+		verify { responseSpec.toEntityFlux(object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 
 	class Foo

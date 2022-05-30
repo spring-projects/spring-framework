@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.management.modelmbean.ModelMBeanNotificationInfo;
 
 import org.springframework.jmx.export.metadata.JmxMetadataUtils;
@@ -72,19 +73,16 @@ public abstract class AbstractConfigurableMBeanInfoAssembler extends AbstractRef
 	}
 
 	private ModelMBeanNotificationInfo[] extractNotificationMetadata(Object mapValue) {
-		if (mapValue instanceof ManagedNotification) {
-			ManagedNotification mn = (ManagedNotification) mapValue;
+		if (mapValue instanceof ManagedNotification mn) {
 			return new ModelMBeanNotificationInfo[] {JmxMetadataUtils.convertToModelMBeanNotificationInfo(mn)};
 		}
-		else if (mapValue instanceof Collection) {
-			Collection<?> col = (Collection<?>) mapValue;
+		else if (mapValue instanceof Collection<?> col) {
 			List<ModelMBeanNotificationInfo> result = new ArrayList<>();
 			for (Object colValue : col) {
-				if (!(colValue instanceof ManagedNotification)) {
+				if (!(colValue instanceof ManagedNotification mn)) {
 					throw new IllegalArgumentException(
 							"Property 'notificationInfoMappings' only accepts ManagedNotifications for Map values");
 				}
-				ManagedNotification mn = (ManagedNotification) colValue;
 				result.add(JmxMetadataUtils.convertToModelMBeanNotificationInfo(mn));
 			}
 			return result.toArray(new ModelMBeanNotificationInfo[0]);

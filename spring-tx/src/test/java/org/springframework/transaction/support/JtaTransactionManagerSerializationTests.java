@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,16 @@
 
 package org.springframework.transaction.support;
 
-import javax.transaction.TransactionManager;
-import javax.transaction.UserTransaction;
+import jakarta.transaction.TransactionManager;
+import jakarta.transaction.UserTransaction;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Test;
-
-import org.springframework.tests.mock.jndi.SimpleNamingContextBuilder;
+import org.springframework.context.testfixture.jndi.SimpleNamingContextBuilder;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.transaction.jta.JtaTransactionManager;
-import org.springframework.util.SerializationTestUtils;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Rod Johnson
@@ -48,17 +47,15 @@ public class JtaTransactionManagerSerializationTests {
 		SimpleNamingContextBuilder jndiEnv = SimpleNamingContextBuilder
 				.emptyActivatedContextBuilder();
 		jndiEnv.bind(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut2);
-		JtaTransactionManager serializedJtatm = (JtaTransactionManager) SerializationTestUtils
-				.serializeAndDeserialize(jtam);
+		JtaTransactionManager serializedJtatm = SerializationTestUtils.serializeAndDeserialize(jtam);
 
 		// should do client-side lookup
-		assertNotNull("Logger must survive serialization",
-				serializedJtatm.logger);
-		assertTrue("UserTransaction looked up on client", serializedJtatm
-				.getUserTransaction() == ut2);
-		assertNull("TransactionManager didn't survive", serializedJtatm
-				.getTransactionManager());
-		assertEquals(true, serializedJtatm.isRollbackOnCommitFailure());
+		assertThat(serializedJtatm.logger).as("Logger must survive serialization").isNotNull();
+		assertThat(serializedJtatm
+				.getUserTransaction() == ut2).as("UserTransaction looked up on client").isTrue();
+		assertThat(serializedJtatm
+				.getTransactionManager()).as("TransactionManager didn't survive").isNull();
+		assertThat(serializedJtatm.isRollbackOnCommitFailure()).isTrue();
 	}
 
 }

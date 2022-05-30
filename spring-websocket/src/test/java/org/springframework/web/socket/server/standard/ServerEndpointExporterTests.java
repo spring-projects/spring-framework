@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,22 @@
 
 package org.springframework.web.socket.server.standard;
 
-import javax.servlet.ServletContext;
-import javax.websocket.Endpoint;
-import javax.websocket.EndpointConfig;
-import javax.websocket.Session;
-import javax.websocket.server.ServerContainer;
-import javax.websocket.server.ServerEndpoint;
-
-import org.junit.Before;
-import org.junit.Test;
+import jakarta.servlet.ServletContext;
+import jakarta.websocket.Endpoint;
+import jakarta.websocket.EndpointConfig;
+import jakarta.websocket.Session;
+import jakarta.websocket.server.ServerContainer;
+import jakarta.websocket.server.ServerEndpoint;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * Test fixture for {@link ServerEndpointExporter}.
@@ -50,12 +50,12 @@ public class ServerEndpointExporterTests {
 	private ServerEndpointExporter exporter;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.serverContainer = mock(ServerContainer.class);
 
 		this.servletContext = new MockServletContext();
-		this.servletContext.setAttribute("javax.websocket.server.ServerContainer", this.serverContainer);
+		this.servletContext.setAttribute("jakarta.websocket.server.ServerContainer", this.serverContainer);
 
 		this.webAppContext = new AnnotationConfigWebApplicationContext();
 		this.webAppContext.register(Config.class);
@@ -128,7 +128,7 @@ public class ServerEndpointExporterTests {
 	public void addServerEndpointConfigBeanWithExplicitServerContainer() throws Exception {
 		ServerEndpointRegistration endpointRegistration = new ServerEndpointRegistration("/dummy", new DummyEndpoint());
 		this.webAppContext.getBeanFactory().registerSingleton("dummyEndpoint", endpointRegistration);
-		this.servletContext.removeAttribute("javax.websocket.server.ServerContainer");
+		this.servletContext.removeAttribute("jakarta.websocket.server.ServerContainer");
 
 		this.exporter.setServerContainer(this.serverContainer);
 		this.exporter.setApplicationContext(this.webAppContext);

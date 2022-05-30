@@ -1,0 +1,95 @@
+In the context of web applications, _data binding_ involves the binding of HTTP request
+parameters (that is, form data or query parameters) to properties in a model object and
+its nested objects.
+
+Only `public` properties following the
+https://www.oracle.com/java/technologies/javase/javabeans-spec.html[JavaBeans naming conventions]
+are exposed for data binding — for example, `public String getFirstName()` and
+`public void setFirstName(String)` methods for a `firstName` property.
+
+TIP: The model object, and its nested object graph, is also sometimes referred to as a
+_command object_, _form-backing object_, or _POJO_ (Plain Old Java Object).
+
+By default, Spring permits binding to all public properties in the model object graph.
+This means you need to carefully consider what public properties the model has, since a
+client could target any public property path, even some that are not expected to be
+targeted for a given use case.
+
+For example, given an HTTP form data endpoint, a malicious client could supply values for
+properties that exist in the model object graph but are not part of the HTML form
+presented in the browser. This could lead to data being set on the model object and any
+of its nested objects, that is not expected to be updated.
+
+The recommended approach is to use a _dedicated model object_ that exposes only
+properties that are relevant for the form submission. For example, on a form for changing
+a user's email address, the model object should declare a minimum set of properties such
+as in the following `ChangeEmailForm`.
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public class ChangeEmailForm {
+
+		private String oldEmailAddress;
+		private String newEmailAddress;
+
+		public void setOldEmailAddress(String oldEmailAddress) {
+			this.oldEmailAddress = oldEmailAddress;
+		}
+
+		public String getOldEmailAddress() {
+			return this.oldEmailAddress;
+		}
+
+		public void setNewEmailAddress(String newEmailAddress) {
+			this.newEmailAddress = newEmailAddress;
+		}
+
+		public String getNewEmailAddress() {
+			return this.newEmailAddress;
+		}
+
+	}
+----
+
+If you cannot or do not want to use a _dedicated model object_ for each data
+binding use case, you **must** limit the properties that are allowed for data binding.
+Ideally, you can achieve this by registering _allowed field patterns_ via the
+`setAllowedFields()` method on `WebDataBinder`.
+
+For example, to register allowed field patterns in your application, you can implement an
+`@InitBinder` method in a `@Controller` or `@ControllerAdvice` component as shown below:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Controller
+	public class ChangeEmailController {
+
+		@InitBinder
+		void initBinder(WebDataBinder binder) {
+			binder.setAllowedFields("oldEmailAddress", "newEmailAddress");
+		}
+
+		// @RequestMapping methods, etc.
+
+	}
+----
+
+In addition to registering allowed patterns, it is also possible to register _disallowed
+field patterns_ via the `setDisallowedFields()` method in `DataBinder` and its subclasses.
+Please note, however, that an "allow list" is safer than a "deny list". Consequently,
+`setAllowedFields()` should be favored over `setDisallowedFields()`.
+
+Note that matching against allowed field patterns is case-sensitive; whereas, matching
+against disallowed field patterns is case-insensitive. In addition, a field matching a
+disallowed pattern will not be accepted even if it also happens to match a pattern in the
+allowed list.
+
+[WARNING]
+====
+It is extremely important to properly configure allowed and disallowed field patterns
+when exposing your domain model directly for data binding purposes. Otherwise, it is a
+big security risk.
+
+Furthermore, it is strongly recommended that you do **not** use types from your domain
+model such as JPA or Hibernate entities as the model object in data binding scenarios.
+====

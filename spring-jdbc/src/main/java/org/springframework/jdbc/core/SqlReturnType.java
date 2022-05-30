@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public interface SqlReturnType {
 	/**
 	 * Constant that indicates an unknown (or unspecified) SQL type.
 	 * Passed into setTypeValue if the original operation method does
-	 * not specify a SQL type.
+	 * not specify an SQL type.
 	 * @see java.sql.Types
 	 * @see JdbcOperations#update(String, Object[])
 	 */
@@ -56,12 +56,12 @@ public interface SqlReturnType {
 	 * @param sqlType the SQL type of the parameter we are setting
 	 * @param typeName the type name of the parameter (optional)
 	 * @return the target value
-	 * @throws SQLException if a SQLException is encountered setting parameter values
+	 * @throws SQLException if an SQLException is encountered setting parameter values
 	 * (that is, there's no need to catch SQLException)
 	 * @see java.sql.Types
 	 * @see java.sql.CallableStatement#getObject
 	 */
-	Object getTypeValue(CallableStatement cs, int paramIndex, int sqlType, @Nullable  String typeName)
+	Object getTypeValue(CallableStatement cs, int paramIndex, int sqlType, @Nullable String typeName)
 			throws SQLException;
 
 }

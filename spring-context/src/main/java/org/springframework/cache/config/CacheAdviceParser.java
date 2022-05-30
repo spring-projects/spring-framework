@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,13 +111,9 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			CacheableOperation.Builder builder = prop.merge(opElement,
 					parserContext.getReaderContext(), new CacheableOperation.Builder());
 			builder.setUnless(getAttributeValue(opElement, "unless", ""));
-			builder.setSync(Boolean.valueOf(getAttributeValue(opElement, "sync", "false")));
+			builder.setSync(Boolean.parseBoolean(getAttributeValue(opElement, "sync", "false")));
 
-			Collection<CacheOperation> col = cacheOpMap.get(nameHolder);
-			if (col == null) {
-				col = new ArrayList<>(2);
-				cacheOpMap.put(nameHolder, col);
-			}
+			Collection<CacheOperation> col = cacheOpMap.computeIfAbsent(nameHolder, k -> new ArrayList<>(2));
 			col.add(builder.build());
 		}
 
@@ -132,19 +128,15 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
 			String wide = opElement.getAttribute("all-entries");
 			if (StringUtils.hasText(wide)) {
-				builder.setCacheWide(Boolean.valueOf(wide.trim()));
+				builder.setCacheWide(Boolean.parseBoolean(wide.trim()));
 			}
 
 			String after = opElement.getAttribute("before-invocation");
 			if (StringUtils.hasText(after)) {
-				builder.setBeforeInvocation(Boolean.valueOf(after.trim()));
+				builder.setBeforeInvocation(Boolean.parseBoolean(after.trim()));
 			}
 
-			Collection<CacheOperation> col = cacheOpMap.get(nameHolder);
-			if (col == null) {
-				col = new ArrayList<>(2);
-				cacheOpMap.put(nameHolder, col);
-			}
+			Collection<CacheOperation> col = cacheOpMap.computeIfAbsent(nameHolder, k -> new ArrayList<>(2));
 			col.add(builder.build());
 		}
 
@@ -158,11 +150,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 					parserContext.getReaderContext(), new CachePutOperation.Builder());
 			builder.setUnless(getAttributeValue(opElement, "unless", ""));
 
-			Collection<CacheOperation> col = cacheOpMap.get(nameHolder);
-			if (col == null) {
-				col = new ArrayList<>(2);
-				cacheOpMap.put(nameHolder, col);
-			}
+			Collection<CacheOperation> col = cacheOpMap.computeIfAbsent(nameHolder, k -> new ArrayList<>(2));
 			col.add(builder.build());
 		}
 
@@ -187,15 +175,15 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 	 */
 	private static class Props {
 
-		private String key;
+		private final String key;
 
-		private String keyGenerator;
+		private final String keyGenerator;
 
-		private String cacheManager;
+		private final String cacheManager;
 
-		private String condition;
+		private final String condition;
 
-		private String method;
+		private final String method;
 
 		@Nullable
 		private String[] caches;
