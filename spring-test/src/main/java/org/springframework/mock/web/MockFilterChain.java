@@ -17,7 +17,6 @@
 package org.springframework.mock.web;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -94,7 +93,7 @@ public class MockFilterChain implements FilterChain {
 
 	private static List<Filter> initFilterList(Servlet servlet, Filter... filters) {
 		Filter[] allFilters = ObjectUtils.addObjectToArray(filters, new ServletFilterProxy(servlet));
-		return Arrays.asList(allFilters);
+		return List.of(allFilters);
 	}
 
 

@@ -552,7 +552,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 				constructorArgs[i] = manageMapIfNecessary(map);
 			}
 		}
-		return Arrays.asList(constructorArgs);
+		return List.of(constructorArgs);
 	}
 
 	/**
