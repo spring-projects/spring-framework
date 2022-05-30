@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,14 +47,14 @@ public final class ConversionServiceFactory {
 	 */
 	public static void registerConverters(@Nullable Set<?> converters, ConverterRegistry registry) {
 		if (converters != null) {
-			for (Object converter : converters) {
-				if (converter instanceof GenericConverter genericConverter) {
+			for (Object candidate : converters) {
+				if (candidate instanceof GenericConverter genericConverter) {
 					registry.addConverter(genericConverter);
 				}
-				else if (converter instanceof Converter<?, ?> iConverter) {
-					registry.addConverter(iConverter);
+				else if (candidate instanceof Converter<?, ?> converter) {
+					registry.addConverter(converter);
 				}
-				else if (converter instanceof ConverterFactory<?, ?> converterFactory) {
+				else if (candidate instanceof ConverterFactory<?, ?> converterFactory) {
 					registry.addConverterFactory(converterFactory);
 				}
 				else {

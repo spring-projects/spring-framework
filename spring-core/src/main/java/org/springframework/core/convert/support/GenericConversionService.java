@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,8 +110,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 	@Override
 	public void addConverterFactory(ConverterFactory<?, ?> factory) {
 		ResolvableType[] typeInfo = getRequiredTypeInfo(factory.getClass(), ConverterFactory.class);
-		if (typeInfo == null && factory instanceof DecoratingProxy proxy) {
-			typeInfo = getRequiredTypeInfo(proxy.getDecoratedClass(), ConverterFactory.class);
+		if (typeInfo == null && factory instanceof DecoratingProxy decoratingProxy) {
+			typeInfo = getRequiredTypeInfo(decoratingProxy.getDecoratedClass(), ConverterFactory.class);
 		}
 		if (typeInfo == null) {
 			throw new IllegalArgumentException("Unable to determine source type <S> and target type <T> for your " +
@@ -373,8 +373,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 					!this.targetType.hasUnresolvableGenerics()) {
 				return false;
 			}
-			return !(this.converter instanceof ConditionalConverter converter) ||
-					converter.matches(sourceType, targetType);
+			return !(this.converter instanceof ConditionalConverter conditionalConverter) ||
+					conditionalConverter.matches(sourceType, targetType);
 		}
 
 		@Override

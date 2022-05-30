@@ -480,8 +480,8 @@ public abstract class DataBufferUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T extends DataBuffer> T retain(T dataBuffer) {
-		if (dataBuffer instanceof PooledDataBuffer buffer) {
-			return (T) buffer.retain();
+		if (dataBuffer instanceof PooledDataBuffer pooledDataBuffer) {
+			return (T) pooledDataBuffer.retain();
 		}
 		else {
 			return dataBuffer;
@@ -498,8 +498,8 @@ public abstract class DataBufferUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T extends DataBuffer> T touch(T dataBuffer, Object hint) {
-		if (dataBuffer instanceof PooledDataBuffer buffer) {
-			return (T) buffer.touch(hint);
+		if (dataBuffer instanceof PooledDataBuffer pooledDataBuffer) {
+			return (T) pooledDataBuffer.touch(hint);
 		}
 		else {
 			return dataBuffer;
