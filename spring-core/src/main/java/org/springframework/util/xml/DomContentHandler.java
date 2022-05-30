@@ -50,6 +50,8 @@ class DomContentHandler implements ContentHandler {
 	 */
 	DomContentHandler(Node node) {
 		this.node = node;
+		// The following pattern variable "doc" cannot be named "document" due to lacking
+		// support in Checkstyle: https://github.com/checkstyle/checkstyle/issues/10969
 		if (node instanceof Document doc) {
 			this.document = doc;
 		}
