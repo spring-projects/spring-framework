@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
  * @author Juergen Hoeller
@@ -57,20 +58,17 @@ public class TransactionSupportTests {
 		DefaultTransactionStatus status1 = (DefaultTransactionStatus)
 				tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS));
 		assertThat(status1.getTransaction() != null).as("Must have transaction").isTrue();
-		boolean condition2 = !status1.isNewTransaction();
-		assertThat(condition2).as("Must not be new transaction").isTrue();
+		assertThat(!status1.isNewTransaction()).as("Must not be new transaction").isTrue();
 
 		DefaultTransactionStatus status2 = (DefaultTransactionStatus)
 				tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED));
 		assertThat(status2.getTransaction() != null).as("Must have transaction").isTrue();
-		boolean condition1 = !status2.isNewTransaction();
-		assertThat(condition1).as("Must not be new transaction").isTrue();
+		assertThat(!status2.isNewTransaction()).as("Must not be new transaction").isTrue();
 
 		DefaultTransactionStatus status3 = (DefaultTransactionStatus)
 				tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_MANDATORY));
 		assertThat(status3.getTransaction() != null).as("Must have transaction").isTrue();
-		boolean condition = !status3.isNewTransaction();
-		assertThat(condition).as("Must not be new transaction").isTrue();
+		assertThat(!status3.isNewTransaction()).as("Must not be new transaction").isTrue();
 	}
 
 	@Test
@@ -181,8 +179,8 @@ public class TransactionSupportTests {
 	public void transactionTemplateWithException() {
 		TestTransactionManager tm = new TestTransactionManager(false, true);
 		TransactionTemplate template = new TransactionTemplate(tm);
-		final RuntimeException ex = new RuntimeException("Some application exception");
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+		RuntimeException ex = new RuntimeException("Some application exception");
+		assertThatRuntimeException().isThrownBy(() ->
 				template.execute(new TransactionCallbackWithoutResult() {
 					@Override
 					protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -208,14 +206,9 @@ public class TransactionSupportTests {
 			}
 		};
 		TransactionTemplate template = new TransactionTemplate(tm);
-		final RuntimeException ex = new RuntimeException("Some application exception");
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
-				template.execute(new TransactionCallbackWithoutResult() {
-					@Override
-					protected void doInTransactionWithoutResult(TransactionStatus status) {
-						throw ex;
-					}
-				}))
+		RuntimeException ex = new RuntimeException("Some application exception");
+		assertThatRuntimeException()
+			.isThrownBy(() -> template.executeWithoutResult(status -> { throw ex; }))
 			.isSameAs(tex);
 		assertThat(tm.begin).as("triggered begin").isTrue();
 		assertThat(tm.commit).as("no commit").isFalse();
@@ -227,13 +220,8 @@ public class TransactionSupportTests {
 	public void transactionTemplateWithError() {
 		TestTransactionManager tm = new TestTransactionManager(false, true);
 		TransactionTemplate template = new TransactionTemplate(tm);
-		assertThatExceptionOfType(Error.class).isThrownBy(() ->
-				template.execute(new TransactionCallbackWithoutResult() {
-					@Override
-					protected void doInTransactionWithoutResult(TransactionStatus status) {
-						throw new Error("Some application error");
-					}
-				}));
+		assertThatExceptionOfType(Error.class)
+			.isThrownBy(() -> template.executeWithoutResult(status -> { throw new Error("Some application error"); }));
 		assertThat(tm.begin).as("triggered begin").isTrue();
 		assertThat(tm.commit).as("no commit").isFalse();
 		assertThat(tm.rollback).as("triggered rollback").isTrue();
@@ -247,23 +235,19 @@ public class TransactionSupportTests {
 		template.setTransactionManager(tm);
 		assertThat(template.getTransactionManager() == tm).as("correct transaction manager set").isTrue();
 
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				template.setPropagationBehaviorName("TIMEOUT_DEFAULT"));
+		assertThatIllegalArgumentException().isThrownBy(() -> template.setPropagationBehaviorName("TIMEOUT_DEFAULT"));
 		template.setPropagationBehaviorName("PROPAGATION_SUPPORTS");
 		assertThat(template.getPropagationBehavior() == TransactionDefinition.PROPAGATION_SUPPORTS).as("Correct propagation behavior set").isTrue();
 
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				template.setPropagationBehavior(999));
+		assertThatIllegalArgumentException().isThrownBy(() -> template.setPropagationBehavior(999));
 		template.setPropagationBehavior(TransactionDefinition.PROPAGATION_MANDATORY);
 		assertThat(template.getPropagationBehavior() == TransactionDefinition.PROPAGATION_MANDATORY).as("Correct propagation behavior set").isTrue();
 
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				template.setIsolationLevelName("TIMEOUT_DEFAULT"));
+		assertThatIllegalArgumentException().isThrownBy(() -> template.setIsolationLevelName("TIMEOUT_DEFAULT"));
 		template.setIsolationLevelName("ISOLATION_SERIALIZABLE");
 		assertThat(template.getIsolationLevel() == TransactionDefinition.ISOLATION_SERIALIZABLE).as("Correct isolation level set").isTrue();
 
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				template.setIsolationLevel(999));
+		assertThatIllegalArgumentException().isThrownBy(() -> template.setIsolationLevel(999));
 
 		template.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
 		assertThat(template.getIsolationLevel() == TransactionDefinition.ISOLATION_REPEATABLE_READ).as("Correct isolation level set").isTrue();

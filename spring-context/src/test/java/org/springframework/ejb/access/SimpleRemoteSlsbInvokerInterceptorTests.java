@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.jndi.JndiTemplate;
 import org.springframework.remoting.RemoteAccessException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -195,8 +196,7 @@ public class SimpleRemoteSlsbInvokerInterceptorTests {
 		SimpleRemoteSlsbInvokerInterceptor si = configuredInterceptor(mockContext, jndiName);
 
 		RemoteInterface target = (RemoteInterface) configuredProxy(si, RemoteInterface.class);
-		assertThatExceptionOfType(RemoteException.class).isThrownBy(
-				target::targetMethod);
+		assertThatExceptionOfType(RemoteException.class).isThrownBy(target::targetMethod);
 
 		verify(mockContext).close();
 		verify(ejb, times(2)).remove();
@@ -245,8 +245,7 @@ public class SimpleRemoteSlsbInvokerInterceptorTests {
 		si.setCacheHome(cacheHome);
 
 		RemoteInterface target = (RemoteInterface) configuredProxy(si, RemoteInterface.class);
-		assertThatExceptionOfType(ConnectException.class).isThrownBy(
-				target::targetMethod);
+		assertThatExceptionOfType(ConnectException.class).isThrownBy(target::targetMethod);
 
 		verify(mockContext, times(lookupCount)).close();
 		verify(ejb, times(2)).remove();
@@ -281,8 +280,7 @@ public class SimpleRemoteSlsbInvokerInterceptorTests {
 		SimpleRemoteSlsbInvokerInterceptor si = configuredInterceptor(mockContext, jndiName);
 
 		BusinessInterface target = (BusinessInterface) configuredProxy(si, BusinessInterface.class);
-		assertThatExceptionOfType(RemoteAccessException.class).isThrownBy(
-				target::targetMethod);
+		assertThatExceptionOfType(RemoteAccessException.class).isThrownBy(target::targetMethod);
 
 		verify(mockContext).close();
 		verify(ejb).remove();
@@ -308,7 +306,7 @@ public class SimpleRemoteSlsbInvokerInterceptorTests {
 		SimpleRemoteSlsbInvokerInterceptor si = configuredInterceptor(mockContext, jndiName);
 
 		RemoteInterface target = (RemoteInterface) configuredProxy(si, RemoteInterface.class);
-		assertThatExceptionOfType(Exception.class)
+		assertThatException()
 			.isThrownBy(target::targetMethod)
 			.isSameAs(expected);
 		verify(mockContext).close();

@@ -58,6 +58,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.testfixture.security.TestPrincipal;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
@@ -303,14 +304,14 @@ public class CallbacksSecurityTests {
 		Method method = bean.getClass().getMethod("destroy");
 		method.setAccessible(true);
 
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+		assertThatException().isThrownBy(() ->
 				AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () -> {
 						method.invoke(bean);
 						return null;
 					}, acc));
 
 		Class<ConstructorBean> cl = ConstructorBean.class;
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+		assertThatException().isThrownBy(() ->
 				AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () ->
 						cl.newInstance(), acc));
 	}

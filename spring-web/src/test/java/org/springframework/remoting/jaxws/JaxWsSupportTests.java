@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.remoting.RemoteAccessException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatException;
 
 /**
  * @author Juergen Hoeller
@@ -102,19 +102,17 @@ public class JaxWsSupportTests {
 
 			String order = orderService.getOrder(1000);
 			assertThat(order).isEqualTo("order 1000");
-			assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-					orderService.getOrder(0))
-				.matches(ex -> ex instanceof OrderNotFoundException ||
-						ex instanceof RemoteAccessException);
+			assertThatException()
+				.isThrownBy(() -> orderService.getOrder(0))
+				.matches(ex -> ex instanceof OrderNotFoundException || ex instanceof RemoteAccessException);
 			// ignore RemoteAccessException as probably setup issue with JAX-WS provider vs JAXB
 
 			ServiceAccessor serviceAccessor = ac.getBean("accessor", ServiceAccessor.class);
 			order = serviceAccessor.orderService.getOrder(1000);
 			assertThat(order).isEqualTo("order 1000");
-			assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-					serviceAccessor.orderService.getOrder(0))
-				.matches(ex -> ex instanceof OrderNotFoundException ||
-							ex instanceof WebServiceException);
+			assertThatException()
+				.isThrownBy(() -> serviceAccessor.orderService.getOrder(0))
+				.matches(ex -> ex instanceof OrderNotFoundException || ex instanceof WebServiceException);
 			// ignore WebServiceException as probably setup issue with JAX-WS provider vs JAXB
 		}
 		catch (BeanCreationException ex) {

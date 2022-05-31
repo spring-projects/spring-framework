@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.stereotype.Repository;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
  * Tests for PersistenceExceptionTranslationAdvisor's exception translation, as applied by
@@ -69,11 +70,11 @@ public class PersistenceExceptionTranslationAdvisorTests {
 		ri.throwsPersistenceException();
 
 		target.setBehavior(persistenceException1);
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(
-				ri::noThrowsClause)
+		assertThatRuntimeException()
+			.isThrownBy(ri::noThrowsClause)
 			.isSameAs(persistenceException1);
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(
-				ri::throwsPersistenceException)
+		assertThatRuntimeException()
+			.isThrownBy(ri::throwsPersistenceException)
 			.isSameAs(persistenceException1);
 	}
 
@@ -86,11 +87,11 @@ public class PersistenceExceptionTranslationAdvisorTests {
 		ri.throwsPersistenceException();
 
 		target.setBehavior(doNotTranslate);
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(
-				ri::noThrowsClause)
+		assertThatRuntimeException()
+			.isThrownBy(ri::noThrowsClause)
 			.isSameAs(doNotTranslate);
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(
-				ri::throwsPersistenceException)
+		assertThatRuntimeException()
+			.isThrownBy(ri::throwsPersistenceException)
 			.isSameAs(doNotTranslate);
 	}
 
@@ -123,12 +124,12 @@ public class PersistenceExceptionTranslationAdvisorTests {
 		RepositoryInterface ri = createProxy(target);
 
 		target.setBehavior(persistenceException1);
-		assertThatExceptionOfType(DataAccessException.class).isThrownBy(
-				ri::noThrowsClause)
+		assertThatExceptionOfType(DataAccessException.class)
+			.isThrownBy(ri::noThrowsClause)
 			.withCause(persistenceException1);
 
-		assertThatExceptionOfType(PersistenceException.class).isThrownBy(
-				ri::throwsPersistenceException)
+		assertThatExceptionOfType(PersistenceException.class)
+			.isThrownBy(ri::throwsPersistenceException)
 			.isSameAs(persistenceException1);
 	}
 

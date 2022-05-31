@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.contextsupport.testfixture.jcache.JCacheableService;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
  * @author Stephane Nicoll
@@ -86,8 +86,8 @@ public class JCacheCustomInterceptorTests {
 
 	@Test
 	public void customInterceptorAppliesWithCheckedException() {
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
-				cs.cacheWithCheckedException("id", true))
+		assertThatRuntimeException()
+			.isThrownBy(() -> cs.cacheWithCheckedException("id", true))
 			.withCauseExactlyInstanceOf(IOException.class);
 	}
 

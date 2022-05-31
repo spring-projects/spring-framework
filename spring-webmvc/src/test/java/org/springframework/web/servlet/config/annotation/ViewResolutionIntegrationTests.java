@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.web.testfixture.servlet.MockServletConfig;
 import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
  * Integration tests for view resolution with {@code @EnableWebMvc}.
@@ -70,22 +70,22 @@ public class ViewResolutionIntegrationTests {
 
 	@Test
 	public void freemarkerInvalidConfig() throws Exception {
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
-				runTest(InvalidFreeMarkerWebConfig.class))
+		assertThatRuntimeException()
+			.isThrownBy(() -> runTest(InvalidFreeMarkerWebConfig.class))
 			.withMessageContaining("In addition to a FreeMarker view resolver ");
 	}
 
 	@Test
 	public void tilesInvalidConfig() throws Exception {
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
-				runTest(InvalidTilesWebConfig.class))
+		assertThatRuntimeException()
+			.isThrownBy(() -> runTest(InvalidTilesWebConfig.class))
 			.withMessageContaining("In addition to a Tiles view resolver ");
 	}
 
 	@Test
 	public void groovyMarkupInvalidConfig() throws Exception {
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
-				runTest(InvalidGroovyMarkupWebConfig.class))
+		assertThatRuntimeException()
+			.isThrownBy(() -> runTest(InvalidGroovyMarkupWebConfig.class))
 			.withMessageContaining("In addition to a Groovy markup view resolver ");
 	}
 
