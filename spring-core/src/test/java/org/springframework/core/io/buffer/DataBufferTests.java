@@ -25,6 +25,7 @@ import java.util.Arrays;
 import org.springframework.core.testfixture.io.buffer.AbstractDataBufferAllocatingTests;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
@@ -83,8 +84,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 
 		DataBuffer buffer = createDataBuffer(1);
 		try {
-			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
-					buffer.readPosition(-1));
+			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() -> buffer.readPosition(-1));
 		}
 		finally {
 			release(buffer);
@@ -97,8 +97,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 
 		DataBuffer buffer = createDataBuffer(1);
 		try {
-			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
-					buffer.readPosition(1));
+			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() -> buffer.readPosition(1));
 		}
 		finally {
 			release(buffer);
@@ -113,8 +112,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 		try {
 			buffer.write((byte) 'a');
 			buffer.read();
-			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
-					buffer.writePosition(0));
+			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() -> buffer.writePosition(0));
 		}
 		finally {
 			release(buffer);
@@ -127,8 +125,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 
 		DataBuffer buffer = createDataBuffer(1);
 		try {
-			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
-					buffer.writePosition(2));
+			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() -> buffer.writePosition(2));
 		}
 		finally {
 			release(buffer);
@@ -641,8 +638,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 
 		DataBuffer slice = buffer.slice(1, 2);
 		assertThat(slice.readableByteCount()).isEqualTo(2);
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-				slice.write((byte) 0));
+		assertThatException().isThrownBy(() -> slice.write((byte) 0));
 		buffer.write((byte) 'c');
 
 		assertThat(buffer.readableByteCount()).isEqualTo(3);
@@ -670,8 +666,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 
 		DataBuffer slice = buffer.retainedSlice(1, 2);
 		assertThat(slice.readableByteCount()).isEqualTo(2);
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-				slice.write((byte) 0));
+		assertThatException().isThrownBy(() -> slice.write((byte) 0));
 		buffer.write((byte) 'c');
 
 		assertThat(buffer.readableByteCount()).isEqualTo(3);
@@ -734,11 +729,8 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 		assertThat(buffer.getByte(0)).isEqualTo((byte) 'a');
 		assertThat(buffer.getByte(1)).isEqualTo((byte) 'b');
 		assertThat(buffer.getByte(2)).isEqualTo((byte) 'c');
-		assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
-				buffer.getByte(-1));
-
-		assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
-			buffer.getByte(3));
+		assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() -> buffer.getByte(-1));
+		assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() -> buffer.getByte(3));
 
 		release(buffer);
 	}

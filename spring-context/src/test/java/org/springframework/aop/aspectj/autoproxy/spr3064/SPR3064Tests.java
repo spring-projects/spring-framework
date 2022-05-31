@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
  * @author Adrian Colyer
@@ -35,12 +35,12 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class SPR3064Tests {
 
 	@Test
-	void testServiceIsAdvised() {
+	void serviceIsAdvised() {
 		ClassPathXmlApplicationContext ctx =
 			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 
 		Service service  = ctx.getBean(Service.class);
-		assertThatExceptionOfType(RuntimeException.class)
+		assertThatRuntimeException()
 			.isThrownBy(service::serveMe)
 			.withMessage("advice invoked");
 
