@@ -1669,7 +1669,7 @@ specific value (`myParam=myValue`). The following examples tests for a parameter
 ----
 <1> Check that `myParam` equals `myValue`.
 
-You can also use the same with request header conditions, as the follwing example shows:
+You can also use the same with request header conditions, as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
