@@ -22,6 +22,7 @@ import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfColumnsException;
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
@@ -62,6 +63,17 @@ public class SqlUpdate extends SqlOperation {
 	 */
 	private int requiredRowsAffected = 0;
 
+	/**
+	 * Maximum number of columns the update may affect. If more are
+	 * affected, an exception will be thrown. Ignored if 0.
+	 */
+	private int maxColumnsAffected = 0;
+
+	/**
+	 * An exact number of columns that must be affected.
+	 * Ignored if 0.
+	 */
+	private int requiredColumnsAffected = 0;
 
 	/**
 	 * Constructor to allow use as a JavaBean. DataSource and SQL
@@ -128,6 +140,16 @@ public class SqlUpdate extends SqlOperation {
 	}
 
 	/**
+	 * Set the maximum number of columns that may be affected by this update.
+	 * The default value is 0, which does not limit the number of columns affected.
+	 * @param maxColumnsAffected the maximum number of columns that can be affected by
+	 * this update without this class's update method considering it an error
+	 */
+	public void setMaxColumnsAffected(int maxColumnsAffected) {
+		this.maxColumnsAffected = maxColumnsAffected;
+	}
+
+	/**
 	 * Set the <i>exact</i> number of rows that must be affected by this update.
 	 * The default value is 0, which allows any number of rows to be affected.
 	 * <p>This is an alternative to setting the <i>maximum</i> number of rows
@@ -137,6 +159,18 @@ public class SqlUpdate extends SqlOperation {
 	 */
 	public void setRequiredRowsAffected(int requiredRowsAffected) {
 		this.requiredRowsAffected = requiredRowsAffected;
+	}
+
+	/**
+	 * Set the <i>exact</i> number of columns that must be affected by this update.
+	 * The default value is 0, which allows any number of columns to be affected.
+	 * <p>This is an alternative to setting the <i>maximum</i> number of columns
+	 * that may be affected.
+	 * @param requiredColumnsAffected the exact number of columns that must be affected
+	 * by this update without this class's update method considering it an error
+	 */
+	public void setRequiredColumnsAffected(int requiredColumnsAffected) {
+		this.requiredColumnsAffected = requiredColumnsAffected;
 	}
 
 	/**
@@ -157,6 +191,23 @@ public class SqlUpdate extends SqlOperation {
 		}
 	}
 
+	/**
+	 * Check the given number of affected columns against the
+	 * specified maximum number or required number.
+	 * @param columnsAffected the number of affected columns
+	 * @throws JdbcUpdateAffectedIncorrectNumberOfColumnsException
+	 * if the actually affected columns are out of bounds
+	 * @see #setMaxColumnsAffected
+	 * @see #setRequiredColumnsAffected
+	 */
+	protected void checkColumnsAffected(int columnsAffected) throws JdbcUpdateAffectedIncorrectNumberOfColumnsException {
+		if (this.maxColumnsAffected > 0 && columnsAffected > this.maxColumnsAffected) {
+			throw new JdbcUpdateAffectedIncorrectNumberOfColumnsException(resolveSql(), this.maxColumnsAffected, columnsAffected);
+		}
+		if (this.requiredColumnsAffected > 0 && columnsAffected != this.requiredColumnsAffected) {
+			throw new JdbcUpdateAffectedIncorrectNumberOfColumnsException(resolveSql(), this.requiredColumnsAffected, columnsAffected);
+		}
+	}
 
 	/**
 	 * Generic method to execute the update given parameters.
