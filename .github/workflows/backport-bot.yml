@@ -1,0 +1,21 @@
+name: Backport Bot
+
+on:
+  issues:
+    types: [labeled]
+  pull_request:
+    types: [labeled]
+  push:
+    branches:
+      - '*.x'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - run: wget https://github.com/spring-io/backport-bot/releases/download/latest/backport-bot-0.0.1-SNAPSHOT.jar
+      - run: java -jar backport-bot-0.0.1-SNAPSHOT.jar --github.accessToken="${{ secrets.GITHUB_TOKEN }}" --github.event_name "${{ github.event_name }}" --github.event '${{ toJSON(github.event) }}'
