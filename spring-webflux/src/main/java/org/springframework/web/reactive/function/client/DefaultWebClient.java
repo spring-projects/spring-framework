@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ class DefaultWebClient implements WebClient {
 	private static final String URI_TEMPLATE_ATTRIBUTE = WebClient.class.getName() + ".uriTemplate";
 
 	private static final Mono<ClientResponse> NO_HTTP_CLIENT_RESPONSE_ERROR = Mono.error(
-			new IllegalStateException("The underlying HTTP client completed without emitting a response."));
+			() -> new IllegalStateException("The underlying HTTP client completed without emitting a response."));
 
 
 	private final ExchangeFunction exchangeFunction;
