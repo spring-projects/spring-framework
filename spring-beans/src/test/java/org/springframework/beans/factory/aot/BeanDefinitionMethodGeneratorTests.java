@@ -196,7 +196,7 @@ class BeanDefinitionMethodGeneratorTests {
 					RootBeanDefinition beanDefinition,
 					Predicate<String> attributeFilter) {
 				return super.generateSetBeanDefinitionPropertiesCode(generationContext,
-						beanRegistrationCode, beanDefinition, name -> "a".equals(name));
+						beanRegistrationCode, beanDefinition, "a"::equals);
 			}
 
 		};

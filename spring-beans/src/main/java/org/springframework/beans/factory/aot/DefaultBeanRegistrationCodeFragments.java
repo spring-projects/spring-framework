@@ -138,6 +138,7 @@ class DefaultBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments
 		return null;
 	}
 
+	@Override
 	public CodeBlock generateSetBeanInstanceSupplierCode(
 			GenerationContext generationContext,
 			BeanRegistrationCode beanRegistrationCode, CodeBlock instanceSupplierCode,

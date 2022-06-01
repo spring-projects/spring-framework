@@ -371,7 +371,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 	void attributesWhenSomeFiltered() {
 		this.beanDefinition.setAttribute("a", "A");
 		this.beanDefinition.setAttribute("b", "B");
-		Predicate<String> attributeFilter = attribute -> "a".equals(attribute);
+		Predicate<String> attributeFilter = "a"::equals;
 		this.generator = new BeanDefinitionPropertiesCodeGenerator(this.hints,
 				attributeFilter, this.generatedMethods, (name, value) -> null);
 		testCompiledResult(this.beanDefinition, (actual, compiled) -> {
