@@ -68,7 +68,7 @@ class DefaultWebClient implements WebClient {
 	private static final String URI_TEMPLATE_ATTRIBUTE = WebClient.class.getName() + ".uriTemplate";
 
 	private static final Mono<ClientResponse> NO_HTTP_CLIENT_RESPONSE_ERROR = Mono.error(
-			new IllegalStateException("The underlying HTTP client completed without emitting a response."));
+			() -> new IllegalStateException("The underlying HTTP client completed without emitting a response."));
 
 
 	private final ExchangeFunction exchangeFunction;
