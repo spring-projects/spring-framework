@@ -17,5 +17,10 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-      - run: wget https://github.com/spring-io/backport-bot/releases/download/latest/backport-bot-0.0.1-SNAPSHOT.jar
-      - run: java -jar backport-bot-0.0.1-SNAPSHOT.jar --github.accessToken="${{ secrets.GITHUB_TOKEN }}" --github.event_name "${{ github.event_name }}" --github.event '${{ toJSON(github.event) }}'
+      - name: Download BackportBot
+        run: wget https://github.com/spring-io/backport-bot/releases/download/latest/backport-bot-0.0.1-SNAPSHOT.jar
+      - name: Backport
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_EVENT: ${{ toJSON(github.event) }}
+        run: java -jar backport-bot-0.0.1-SNAPSHOT.jar --github.accessToken="$GITHUB_TOKEN" --github.event_name "$GITHUB_EVENT_NAME" --github.event "$GITHUB_EVENT"
