@@ -15,6 +15,8 @@
  */
 package org.springframework.web.service.invoker
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
@@ -48,6 +50,13 @@ class HttpServiceMethodKotlinTests {
 
 			val entity = service.entity()
 			assertThat(entity.body).isEqualTo("requestToEntity")
+
+			val flowEntity = service.flowEntity()
+			assertThat(flowEntity.body?.toList()).containsExactly("request", "To", "Entity", "Flux");
+
+			val flow = service.flow()
+			assertThat(flow.toList()).containsExactly("request", "To", "Body", "Flux");
+
 		}
 	}
 
@@ -68,6 +77,12 @@ class HttpServiceMethodKotlinTests {
 
 		@GetExchange
 		suspend fun entity(): ResponseEntity<String>
+
+		@GetExchange
+		suspend fun flowEntity(): ResponseEntity<Flow<String>>
+
+		@GetExchange
+		fun flow() : Flow<String>
 
 	}
 
