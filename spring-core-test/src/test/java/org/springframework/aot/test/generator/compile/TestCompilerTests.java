@@ -100,8 +100,7 @@ class TestCompilerTests {
 	@Test
 	void compileAndGetSourceFile() {
 		TestCompiler.forSystem().withSources(SourceFile.of(HELLO_SPRING)).compile(
-				compiled -> assertThat(compiled.getSourceFile()).hasMethodNamed(
-						"get").withBodyContaining("// !!"));
+				compiled -> assertThat(compiled.getSourceFile()).contains("// !!"));
 	}
 
 	@Test
