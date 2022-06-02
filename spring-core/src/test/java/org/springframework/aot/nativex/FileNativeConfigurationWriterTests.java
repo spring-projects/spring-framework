@@ -32,12 +32,12 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import org.springframework.aot.hint.ExecutableMode;
-import org.springframework.aot.hint.JavaSerializationHints;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ProxyHints;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.ResourceHints;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.SerializationHints;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.util.MimeType;
@@ -66,7 +66,7 @@ public class FileNativeConfigurationWriterTests {
 	void serializationConfig() throws IOException, JSONException {
 		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
 		RuntimeHints hints = new RuntimeHints();
-		JavaSerializationHints serializationHints = hints.javaSerialization();
+		SerializationHints serializationHints = hints.serialization();
 		serializationHints.registerType(Integer.class);
 		serializationHints.registerType(Long.class);
 		generator.write(hints);

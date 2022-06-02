@@ -23,20 +23,20 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link JavaSerializationHints}.
+ * Tests for {@link SerializationHints}.
  *
  * @author Stephane Nicoll
  */
-class JavaSerializationHintsTests {
+class SerializationHintsTests {
 
-	private final JavaSerializationHints javaSerializationHints = new JavaSerializationHints();
+	private final SerializationHints serializationHints = new SerializationHints();
 
 	@Test
 	void registerTypeTwiceExposesOneHint() {
-		this.javaSerializationHints.registerType(URL.class);
-		this.javaSerializationHints.registerType(TypeReference.of(URL.class.getName()));
-		assertThat(this.javaSerializationHints.types()).singleElement()
-				.isEqualTo(TypeReference.of(URL.class));
+		this.serializationHints.registerType(URL.class);
+		this.serializationHints.registerType(TypeReference.of(URL.class.getName()));
+		assertThat(this.serializationHints.javaSerialization()).singleElement()
+				.extracting(JavaSerializationHint::getType).isEqualTo(TypeReference.of(URL.class));
 	}
 
 }

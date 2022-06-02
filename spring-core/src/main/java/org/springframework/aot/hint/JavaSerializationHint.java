@@ -16,41 +16,41 @@
 
 package org.springframework.aot.hint;
 
+
+import java.io.Serializable;
 import java.util.Objects;
-import java.util.ResourceBundle;
 
 import org.springframework.lang.Nullable;
 
 /**
- * A hint that describes the need to access a {@link ResourceBundle}.
+ * A hint that describes the need for Java serialization at runtime.
  *
- * @author Stephane Nicoll
  * @author Brian Clozel
  * @since 6.0
  */
-public final class ResourceBundleHint implements ConditionalHint {
+public class JavaSerializationHint implements ConditionalHint {
 
-	private final String baseName;
+	private final TypeReference type;
 
 	@Nullable
-	private TypeReference reachableType;
+	private final TypeReference reachableType;
 
-
-	ResourceBundleHint(Builder builder) {
-		this.baseName = builder.baseName;
+	JavaSerializationHint(Builder builder) {
+		this.type = builder.type;
 		this.reachableType = builder.reachableType;
 	}
 
 	/**
-	 * Return the {@code baseName} of the resource bundle.
-	 * @return the base name
+	 * Return the {@link TypeReference type} that needs to be serialized using
+	 * Java serialization at runtime.
+	 * @return a {@link Serializable} type
 	 */
-	public String getBaseName() {
-		return this.baseName;
+	public TypeReference getType() {
+		return this.type;
 	}
 
-	@Nullable
 	@Override
+	@Nullable
 	public TypeReference getReachableType() {
 		return this.reachableType;
 	}
@@ -63,25 +63,31 @@ public final class ResourceBundleHint implements ConditionalHint {
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		ResourceBundleHint that = (ResourceBundleHint) o;
-		return this.baseName.equals(that.baseName)
+		JavaSerializationHint that = (JavaSerializationHint) o;
+		return this.type.equals(that.type)
 				&& Objects.equals(this.reachableType, that.reachableType);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.baseName, this.reachableType);
+		return Objects.hash(this.type, this.reachableType);
 	}
 
+
 	/**
-	 * Builder for {@link ResourceBundleHint}.
+	 * Builder for {@link JavaSerializationHint}.
 	 */
 	public static class Builder {
 
-		private String baseName;
+		private final TypeReference type;
 
 		@Nullable
 		private TypeReference reachableType;
+
+
+		Builder(TypeReference type) {
+			this.type = type;
+		}
 
 		/**
 		 * Make this hint conditional on the fact that the specified type
@@ -96,23 +102,12 @@ public final class ResourceBundleHint implements ConditionalHint {
 		}
 
 		/**
-		 * Use the the {@code baseName} of the resource bundle.
-		 * @return {@code this}, to facilitate method chaining
+		 * Create a {@link JavaSerializationHint} based on the state of this builder.
+		 * @return a java serialization hint
 		 */
-		public Builder baseName(String baseName) {
-			this.baseName = baseName;
-			return this;
-		}
-
-		/**
-		 * Creates a {@link ResourceBundleHint} based on the state of this
-		 * builder.
-		 * @return a resource bundle hint
-		 */
-		ResourceBundleHint build() {
-			return new ResourceBundleHint(this);
+		JavaSerializationHint build() {
+			return new JavaSerializationHint(this);
 		}
 
 	}
-
 }

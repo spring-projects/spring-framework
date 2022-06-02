@@ -20,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.ResourcePatternHint;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeHint;
@@ -48,7 +49,7 @@ class SpringFactoriesLoaderRuntimeHintsRegistrarTests {
 	@Test
 	void resourceLocationHasHints() {
 		assertThat(this.hints.resources().resourcePatterns())
-				.anySatisfy(hint -> assertThat(hint.getIncludes())
+				.anySatisfy(hint -> assertThat(hint.getIncludes()).map(ResourcePatternHint::getPattern)
 						.contains(SpringFactoriesLoader.FACTORIES_RESOURCE_LOCATION));
 	}
 

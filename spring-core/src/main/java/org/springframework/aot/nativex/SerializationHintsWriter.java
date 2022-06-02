@@ -19,39 +19,37 @@ package org.springframework.aot.nativex;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.springframework.aot.hint.JdkProxyHint;
-import org.springframework.aot.hint.ProxyHints;
-import org.springframework.aot.hint.TypeReference;
+import org.springframework.aot.hint.ConditionalHint;
+import org.springframework.aot.hint.JavaSerializationHint;
+import org.springframework.aot.hint.SerializationHints;
 
 /**
- * Write {@link JdkProxyHint}s contained in a {@link ProxyHints} to the JSON
- * output expected by the GraalVM {@code native-image} compiler, typically named
- * {@code proxy-config.json}.
+ * Write a {@link SerializationHints} to the JSON output expected by the
+ * GraalVM {@code native-image} compiler, typically named
+ * {@code serialization-config.json}.
  *
  * @author Sebastien Deleuze
  * @author Stephane Nicoll
  * @author Brian Clozel
  * @since 6.0
- * @see <a href="https://www.graalvm.org/22.1/reference-manual/native-image/DynamicProxy/">Dynamic Proxy in Native Image</a>
  * @see <a href="https://www.graalvm.org/22.1/reference-manual/native-image/BuildConfiguration/">Native Image Build Configuration</a>
  */
-class ProxyHintsWriter {
+class SerializationHintsWriter {
 
-	public static final ProxyHintsWriter INSTANCE = new ProxyHintsWriter();
+	public static final SerializationHintsWriter INSTANCE = new SerializationHintsWriter();
 
-	public void write(BasicJsonWriter writer, ProxyHints hints) {
-		writer.writeArray(hints.jdkProxies().map(this::toAttributes).toList());
+	public void write(BasicJsonWriter writer, SerializationHints hints) {
+		writer.writeArray(hints.javaSerialization().map(this::toAttributes).toList());
 	}
 
-	private Map<String, Object> toAttributes(JdkProxyHint hint) {
-		Map<String, Object> attributes = new LinkedHashMap<>();
-		handleCondition(attributes, hint);
-		attributes.put("interfaces", hint.getProxiedInterfaces().stream()
-				.map(TypeReference::getCanonicalName).toList());
+	private Map<String, Object> toAttributes(JavaSerializationHint serializationHint) {
+		LinkedHashMap<String, Object> attributes = new LinkedHashMap<>();
+		handleCondition(attributes, serializationHint);
+		attributes.put("name", serializationHint.getType());
 		return attributes;
 	}
 
-	private void handleCondition(Map<String, Object> attributes, JdkProxyHint hint) {
+	private void handleCondition(Map<String, Object> attributes, ConditionalHint hint) {
 		if (hint.getReachableType() != null) {
 			Map<String, Object> conditionAttributes = new LinkedHashMap<>();
 			conditionAttributes.put("typeReachable", hint.getReachableType());

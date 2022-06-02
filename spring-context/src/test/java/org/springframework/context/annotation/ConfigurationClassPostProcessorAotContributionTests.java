@@ -31,6 +31,7 @@ import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.generate.MethodGenerator;
 import org.springframework.aot.generate.MethodReference;
+import org.springframework.aot.hint.ResourcePatternHint;
 import org.springframework.aot.test.generator.compile.Compiled;
 import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
@@ -90,6 +91,7 @@ class ConfigurationClassPostProcessorAotContributionTests {
 		assertThat(generationContext.getRuntimeHints().resources().resourcePatterns())
 				.singleElement()
 				.satisfies(resourceHint -> assertThat(resourceHint.getIncludes())
+						.map(ResourcePatternHint::getPattern)
 						.containsOnly(
 								"org/springframework/context/testfixture/context/generator/annotation/ImportConfiguration.class"));
 	}
