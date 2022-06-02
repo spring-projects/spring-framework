@@ -26,9 +26,10 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GenerationContext;
+import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
+import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.aot.BeanRegistrationCodeFragments;
-import org.springframework.beans.factory.aot.BeanRegistrationCodeFragmentsCustomizer;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.InstanceSupplier;
@@ -39,39 +40,37 @@ import org.springframework.javapoet.CodeBlock;
 import org.springframework.lang.Nullable;
 
 /**
- * {@link BeanRegistrationCodeFragmentsCustomizer} for
- * {@link ScopedProxyFactoryBean}.
+ * {@link BeanRegistrationAotProcessor} for {@link ScopedProxyFactoryBean}.
  *
  * @author Stephane Nicoll
  * @author Phillip Webb
  * @since 6.0
  */
-class ScopedProxyBeanRegistrationCodeFragmentsCustomizer
-		implements BeanRegistrationCodeFragmentsCustomizer {
+class ScopedProxyBeanRegistrationAotProcessor
+		implements BeanRegistrationAotProcessor {
 
 	private static final Log logger = LogFactory
-			.getLog(ScopedProxyBeanRegistrationCodeFragmentsCustomizer.class);
+			.getLog(ScopedProxyBeanRegistrationAotProcessor.class);
 
 
 	@Override
-	public BeanRegistrationCodeFragments customizeBeanRegistrationCodeFragments(
-			RegisteredBean registeredBean, BeanRegistrationCodeFragments codeFragments) {
-
+	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		Class<?> beanType = registeredBean.getBeanType().toClass();
-		if (!beanType.equals(ScopedProxyFactoryBean.class)) {
-			return codeFragments;
+		if (beanType.equals(ScopedProxyFactoryBean.class)) {
+			String targetBeanName = getTargetBeanName(
+					registeredBean.getMergedBeanDefinition());
+			BeanDefinition targetBeanDefinition = getTargetBeanDefinition(
+					registeredBean.getBeanFactory(), targetBeanName);
+			if (targetBeanDefinition == null) {
+				logger.warn("Could not handle " + ScopedProxyFactoryBean.class.getSimpleName()
+						+ ": no target bean definition found with name " + targetBeanName);
+				return null;
+			}
+			return BeanRegistrationAotContribution.ofBeanRegistrationCodeFragmentsCustomizer(codeFragments ->
+				new ScopedProxyBeanRegistrationCodeFragments(codeFragments, registeredBean,
+						targetBeanName, targetBeanDefinition));
 		}
-		String targetBeanName = getTargetBeanName(
-				registeredBean.getMergedBeanDefinition());
-		BeanDefinition targetBeanDefinition = getTargetBeanDefinition(
-				registeredBean.getBeanFactory(), targetBeanName);
-		if (targetBeanDefinition == null) {
-			logger.warn("Could not handle " + ScopedProxyFactoryBean.class.getSimpleName()
-					+ ": no target bean definition found with name " + targetBeanName);
-			return codeFragments;
-		}
-		return new ScopedProxyBeanRegistrationCodeFragments(codeFragments, registeredBean,
-				targetBeanName, targetBeanDefinition);
+		return null;
 	}
 
 	@Nullable

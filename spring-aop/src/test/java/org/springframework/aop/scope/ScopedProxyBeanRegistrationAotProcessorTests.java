@@ -50,13 +50,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * Tests for {@link ScopedProxyBeanRegistrationCodeFragmentsCustomizer}.
+ * Tests for {@link ScopedProxyBeanRegistrationAotProcessor}.
  *
  * @author Stephane Nicoll
  * @author Phillip Webb
  * @since 6.0
  */
-class ScopedProxyBeanRegistrationCodeFragmentsCustomizerTests {
+class ScopedProxyBeanRegistrationAotProcessorTests {
 
 	private DefaultListableBeanFactory beanFactory;
 

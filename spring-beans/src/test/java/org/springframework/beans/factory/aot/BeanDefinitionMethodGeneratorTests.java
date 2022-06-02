@@ -96,7 +96,7 @@ class BeanDefinitionMethodGeneratorTests {
 				new RootBeanDefinition(TestBean.class));
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
 				this.methodGeneratorFactory, registeredBean, null,
-				Collections.emptyList(), Collections.emptyList());
+				Collections.emptyList());
 		MethodReference method = generator.generateBeanDefinitionMethod(
 				this.generationContext, this.beanRegistrationsCode);
 		testCompiledResult(method, (actual, compiled) -> {
@@ -114,7 +114,7 @@ class BeanDefinitionMethodGeneratorTests {
 				ResolvableType.forClassWithGenerics(GenericBean.class, Integer.class)));
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
 				this.methodGeneratorFactory, registeredBean, null,
-				Collections.emptyList(), Collections.emptyList());
+				Collections.emptyList());
 		MethodReference method = generator.generateBeanDefinitionMethod(
 				this.generationContext, this.beanRegistrationsCode);
 		testCompiledResult(method, (actual, compiled) -> {
@@ -147,8 +147,7 @@ class BeanDefinitionMethodGeneratorTests {
 		List<BeanRegistrationAotContribution> aotContributions = Collections
 				.singletonList(aotContribution);
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
-				this.methodGeneratorFactory, registeredBean, null, aotContributions,
-				Collections.emptyList());
+				this.methodGeneratorFactory, registeredBean, null, aotContributions);
 		MethodReference method = generator.generateBeanDefinitionMethod(
 				this.generationContext, this.beanRegistrationsCode);
 		testCompiledResult(method, (actual, compiled) -> {
@@ -167,16 +166,54 @@ class BeanDefinitionMethodGeneratorTests {
 	}
 
 	@Test
+	void generateBeanDefinitionMethodWhenHasCodeFragmentsCustomizerGeneratesMethod() {
+		RegisteredBean registeredBean = registerBean(
+				new RootBeanDefinition(TestBean.class));
+		BeanRegistrationAotContribution aotContribution = BeanRegistrationAotContribution
+				.ofBeanRegistrationCodeFragmentsCustomizer(this::customizeBeanDefinitionCode);
+		List<BeanRegistrationAotContribution> aotContributions = Collections.singletonList(aotContribution);
+		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
+				this.methodGeneratorFactory, registeredBean, null, aotContributions);
+		MethodReference method = generator.generateBeanDefinitionMethod(
+				this.generationContext, this.beanRegistrationsCode);
+		testCompiledResult(method, (actual, compiled) -> {
+			assertThat(actual.getBeanClass()).isEqualTo(TestBean.class);
+			SourceFile sourceFile = compiled.getSourceFile(".*BeanDefinitions");
+			assertThat(sourceFile).contains("I am custom");
+		});
+	}
+
+	private BeanRegistrationCodeFragments customizeBeanDefinitionCode(
+			BeanRegistrationCodeFragments codeFragments) {
+		return new BeanRegistrationCodeFragments(codeFragments) {
+
+			@Override
+			public CodeBlock generateNewBeanDefinitionCode(
+					GenerationContext generationContext,
+					ResolvableType beanType,
+					BeanRegistrationCode beanRegistrationCode) {
+				CodeBlock.Builder builder = CodeBlock.builder();
+				builder.addStatement("// I am custom");
+				builder.add(super.generateNewBeanDefinitionCode(generationContext, beanType, beanRegistrationCode));
+				return builder.build();
+			}
+
+		};
+	}
+
+	@Test
 	void generateBeanDefinitionMethodWhenHasAttributeFilterGeneratesMethod() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(TestBean.class);
 		beanDefinition.setAttribute("a", "A");
 		beanDefinition.setAttribute("b", "B");
 		RegisteredBean registeredBean = registerBean(beanDefinition);
-		List<BeanRegistrationCodeFragmentsCustomizer> fragmentCustomizers = Collections
-				.singletonList(this::customizeWithAttributeFilter);
+		BeanRegistrationAotContribution aotContribution = BeanRegistrationAotContribution
+				.ofBeanRegistrationCodeFragmentsCustomizer(this::customizeAttributeFilter);
+		List<BeanRegistrationAotContribution> aotContributions = Collections
+				.singletonList(aotContribution);
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
 				this.methodGeneratorFactory, registeredBean, null,
-				Collections.emptyList(), fragmentCustomizers);
+				aotContributions);
 		MethodReference method = generator.generateBeanDefinitionMethod(
 				this.generationContext, this.beanRegistrationsCode);
 		testCompiledResult(method, (actual, compiled) -> {
@@ -185,8 +222,8 @@ class BeanDefinitionMethodGeneratorTests {
 		});
 	}
 
-	private BeanRegistrationCodeFragments customizeWithAttributeFilter(
-			RegisteredBean registeredBean, BeanRegistrationCodeFragments codeFragments) {
+	private BeanRegistrationCodeFragments customizeAttributeFilter(
+			BeanRegistrationCodeFragments codeFragments) {
 		return new BeanRegistrationCodeFragments(codeFragments) {
 
 			@Override
@@ -209,7 +246,7 @@ class BeanDefinitionMethodGeneratorTests {
 				new RootBeanDefinition(AnnotatedBean.class));
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
 				this.methodGeneratorFactory, innerBean, "testInnerBean",
-				Collections.emptyList(), Collections.emptyList());
+				Collections.emptyList());
 		MethodReference method = generator.generateBeanDefinitionMethod(
 				this.generationContext, this.beanRegistrationsCode);
 		testCompiledResult(method, (actual, compiled) -> {
@@ -230,7 +267,7 @@ class BeanDefinitionMethodGeneratorTests {
 		RegisteredBean registeredBean = registerBean(beanDefinition);
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
 				this.methodGeneratorFactory, registeredBean, null,
-				Collections.emptyList(), Collections.emptyList());
+				Collections.emptyList());
 		MethodReference method = generator.generateBeanDefinitionMethod(
 				this.generationContext, this.beanRegistrationsCode);
 		testCompiledResult(method, (actual, compiled) -> {
@@ -264,7 +301,7 @@ class BeanDefinitionMethodGeneratorTests {
 		RegisteredBean registeredBean = registerBean(beanDefinition);
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
 				this.methodGeneratorFactory, registeredBean, null,
-				Collections.emptyList(), Collections.emptyList());
+				Collections.emptyList());
 		MethodReference method = generator.generateBeanDefinitionMethod(
 				this.generationContext, this.beanRegistrationsCode);
 		testCompiledResult(method, (actual, compiled) -> {
@@ -297,8 +334,7 @@ class BeanDefinitionMethodGeneratorTests {
 						.getMethodGenerator().generateMethod("aotContributedMethod")
 						.using(builder -> builder.addComment("Example Contribution")));
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
-				this.methodGeneratorFactory, registeredBean, null, aotContributions,
-				Collections.emptyList());
+				this.methodGeneratorFactory, registeredBean, null, aotContributions);
 		MethodReference method = generator.generateBeanDefinitionMethod(
 				this.generationContext, this.beanRegistrationsCode);
 		testCompiledResult(method, (actual, compiled) -> {
@@ -309,47 +345,13 @@ class BeanDefinitionMethodGeneratorTests {
 	}
 
 	@Test
-	void generateBeanDefinitionMethodWhenHasBeanRegistrationCodeFragmentsCustomizerReturnsCodeGeneratesMethod() {
-		RegisteredBean registeredBean = registerBean(
-				new RootBeanDefinition(TestBean.class));
-		List<BeanRegistrationCodeFragmentsCustomizer> codeFragmentsCustomizers = new ArrayList<>();
-		codeFragmentsCustomizers.add(this::customizeBeanRegistrationCodeFragments);
-		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
-				this.methodGeneratorFactory, registeredBean, null,
-				Collections.emptyList(), codeFragmentsCustomizers);
-		MethodReference method = generator.generateBeanDefinitionMethod(
-				this.generationContext, this.beanRegistrationsCode);
-		testCompiledResult(method,
-				(actual, compiled) -> assertThat(
-						compiled.getSourceFile(".*BeanDefinitions"))
-								.contains("// Custom Code"));
-	}
-
-	private BeanRegistrationCodeFragments customizeBeanRegistrationCodeFragments(
-			RegisteredBean registeredBean, BeanRegistrationCodeFragments codeFragments) {
-		return new BeanRegistrationCodeFragments(codeFragments) {
-
-			@Override
-			public CodeBlock generateReturnCode(GenerationContext generationContext,
-					BeanRegistrationCode beanRegistrationCode) {
-				CodeBlock.Builder builder = CodeBlock.builder();
-				builder.addStatement("// Custom Code");
-				builder.add(super.generateReturnCode(generationContext,
-						beanRegistrationCode));
-				return builder.build();
-			}
-
-		};
-	}
-
-	@Test
 	@CompileWithTargetClassAccess(classes = PackagePrivateTestBean.class)
 	void generateBeanDefinitionMethodWhenPackagePrivateBean() {
 		RegisteredBean registeredBean = registerBean(
 				new RootBeanDefinition(PackagePrivateTestBean.class));
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
 				this.methodGeneratorFactory, registeredBean, null,
-				Collections.emptyList(), Collections.emptyList());
+				Collections.emptyList());
 		MethodReference method = generator.generateBeanDefinitionMethod(
 				this.generationContext, this.beanRegistrationsCode);
 		testCompiledResult(method, false, (actual, compiled) -> {

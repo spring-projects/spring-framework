@@ -86,7 +86,7 @@ class BeanRegistrationsAotContributionTests {
 				new RootBeanDefinition(TestBean.class));
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
 				this.methodGeneratorFactory, registeredBean, null,
-				Collections.emptyList(), Collections.emptyList());
+				Collections.emptyList());
 		registrations.put("testBean", generator);
 		BeanRegistrationsAotContribution contribution = new BeanRegistrationsAotContribution(
 				registrations);
@@ -106,7 +106,7 @@ class BeanRegistrationsAotContributionTests {
 				new RootBeanDefinition(TestBean.class));
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
 				this.methodGeneratorFactory, registeredBean, null,
-				Collections.emptyList(), Collections.emptyList()) {
+				Collections.emptyList()) {
 
 			@Override
 			MethodReference generateBeanDefinitionMethod(
