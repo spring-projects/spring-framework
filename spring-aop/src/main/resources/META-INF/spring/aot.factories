@@ -1,2 +1,2 @@
-org.springframework.beans.factory.aot.registration.BeanRegistrationAotProcessor=\
+org.springframework.beans.factory.aot.BeanRegistrationAotProcessor=\
 org.springframework.aop.scope.ScopedProxyBeanRegistrationAotProcessor
