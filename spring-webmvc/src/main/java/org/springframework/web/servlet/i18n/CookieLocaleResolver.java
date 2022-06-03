@@ -36,8 +36,8 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * {@link LocaleResolver} implementation that uses a cookie sent back to the user
- * in case of a custom setting, with a fallback to the specified default locale
- * or the request's accept-header locale.
+ * in case of a custom setting, with a fallback to the configured default locale,
+ * the request's {@code Accept-Language} header, or the default locale for the server.
  *
  * <p>This is particularly useful for stateless applications without user sessions.
  * The cookie may optionally contain an associated time zone value as well;
@@ -96,8 +96,8 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 
 
 	/**
-	 * Create a new instance of the {@link CookieLocaleResolver} class
-	 * using the {@link #DEFAULT_COOKIE_NAME default cookie name}.
+	 * Create a new instance of {@link CookieLocaleResolver} using the
+	 * {@linkplain #DEFAULT_COOKIE_NAME default cookie name}.
 	 */
 	public CookieLocaleResolver() {
 		setCookieName(DEFAULT_COOKIE_NAME);
@@ -153,14 +153,14 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	}
 
 	/**
-	 * Set a fixed locale that this resolver will return if no cookie found.
+	 * Set a fixed locale that this resolver will return if no cookie is found.
 	 */
 	public void setDefaultLocale(@Nullable Locale defaultLocale) {
 		this.defaultLocale = defaultLocale;
 	}
 
 	/**
-	 * Return the fixed locale that this resolver will return if no cookie found,
+	 * Return the fixed locale that this resolver will return if no cookie is found,
 	 * if any.
 	 */
 	@Nullable
@@ -169,7 +169,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	}
 
 	/**
-	 * Set a fixed time zone that this resolver will return if no cookie found.
+	 * Set a fixed time zone that this resolver will return if no cookie is found.
 	 * @since 4.0
 	 */
 	public void setDefaultTimeZone(@Nullable TimeZone defaultTimeZone) {
@@ -177,7 +177,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	}
 
 	/**
-	 * Return the fixed time zone that this resolver will return if no cookie found,
+	 * Return the fixed time zone that this resolver will return if no cookie is found,
 	 * if any.
 	 * @since 4.0
 	 */
@@ -326,10 +326,11 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	}
 
 	/**
-	 * Determine the default locale for the given request,
-	 * Called if no locale cookie has been found.
-	 * <p>The default implementation returns the specified default locale,
-	 * if any, else falls back to the request's accept-header locale.
+	 * Determine the default locale for the given request, called if no locale
+	 * cookie has been found.
+	 * <p>The default implementation returns the configured default locale, if any,
+	 * and otherwise falls back to the request's {@code Accept-Language} header
+	 * locale or the default locale for the server.
 	 * @param request the request to resolve the locale for
 	 * @return the default locale (never {@code null})
 	 * @see #setDefaultLocale
@@ -344,9 +345,9 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	}
 
 	/**
-	 * Determine the default time zone for the given request,
-	 * Called if no time zone cookie has been found.
-	 * <p>The default implementation returns the specified default time zone,
+	 * Determine the default time zone for the given request, called if no locale
+	 * cookie has been found.
+	 * <p>The default implementation returns the configured default time zone,
 	 * if any, or {@code null} otherwise.
 	 * @param request the request to resolve the time zone for
 	 * @return the default time zone (or {@code null} if none defined)
