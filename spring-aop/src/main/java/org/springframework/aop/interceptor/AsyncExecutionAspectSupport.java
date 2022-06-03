@@ -174,8 +174,8 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 		if (executor == null) {
 			Executor targetExecutor;
 			String qualifier = getExecutorQualifier(method);
-			if (stringValueResolver != null && StringUtils.hasLength(qualifier)) {
-				qualifier = stringValueResolver.resolveStringValue(qualifier);
+			if (this.stringValueResolver != null && StringUtils.hasLength(qualifier)) {
+				qualifier = this.stringValueResolver.resolveStringValue(qualifier);
 			}
 			if (StringUtils.hasLength(qualifier)) {
 				targetExecutor = findQualifiedExecutor(this.beanFactory, qualifier);
