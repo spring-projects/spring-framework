@@ -34,6 +34,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BeanRegistrationsAotProcessorTests {
 
 	@Test
+	void beanRegistrationsAotProcessorIsRegistered() {
+		assertThat(new AotFactoriesLoader(new DefaultListableBeanFactory())
+				.load(BeanFactoryInitializationAotProcessor.class))
+				.anyMatch(BeanRegistrationsAotProcessor.class::isInstance);
+	}
+
+	@Test
 	void processAheadOfTimeReturnsBeanRegistrationsAotContributionWithRegistrations() {
 		BeanRegistrationsAotProcessor processor = new BeanRegistrationsAotProcessor();
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
