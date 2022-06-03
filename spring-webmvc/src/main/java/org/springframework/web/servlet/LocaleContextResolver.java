@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.context.i18n.LocaleContext;
 import org.springframework.lang.Nullable;
 
 /**
- * Extension of {@link LocaleResolver}, adding support for a rich locale context
+ * Extension of {@link LocaleResolver} that adds support for a rich locale context
  * (potentially including locale and time zone information).
  *
  * @author Juergen Hoeller

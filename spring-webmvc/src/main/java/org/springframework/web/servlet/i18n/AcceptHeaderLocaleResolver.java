@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,11 @@ import org.springframework.web.servlet.LocaleResolver;
 
 /**
  * {@link LocaleResolver} implementation that simply uses the primary locale
- * specified in the "accept-language" header of the HTTP request (that is,
+ * specified in the {@code Accept-Language} header of the HTTP request (that is,
  * the locale sent by the client browser, normally that of the client's OS).
  *
- * <p>Note: Does not support {@code setLocale}, since the accept header
- * can only be changed through changing the client's locale settings.
+ * <p>Note: Does not support {@link #setLocale} since the {@code Accept-Language}
+ * header can only be changed by changing the client's locale settings.
  *
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
@@ -62,7 +62,7 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 	}
 
 	/**
-	 * Return the configured list of supported locales.
+	 * Get the configured list of supported locales.
 	 * @since 4.3
 	 */
 	public List<Locale> getSupportedLocales() {
@@ -140,7 +140,7 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 	@Override
 	public void setLocale(HttpServletRequest request, @Nullable HttpServletResponse response, @Nullable Locale locale) {
 		throw new UnsupportedOperationException(
-				"Cannot change HTTP accept header - use a different locale resolution strategy");
+				"Cannot change HTTP Accept-Language header - use a different locale resolution strategy");
 	}
 
 }
