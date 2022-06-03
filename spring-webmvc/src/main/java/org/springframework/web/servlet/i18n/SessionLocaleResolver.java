@@ -90,10 +90,7 @@ public class SessionLocaleResolver extends AbstractLocaleContextResolver {
 
 	private Function<HttpServletRequest, Locale> defaultLocaleFunction = request -> {
 		Locale defaultLocale = getDefaultLocale();
-		if (defaultLocale == null) {
-			defaultLocale = request.getLocale();
-		}
-		return defaultLocale;
+		return (defaultLocale != null ? defaultLocale : request.getLocale());
 	};
 
 	private Function<HttpServletRequest, TimeZone> defaultTimeZoneFunction = request -> getDefaultTimeZone();
@@ -121,8 +118,10 @@ public class SessionLocaleResolver extends AbstractLocaleContextResolver {
 	/**
 	 * Set the function used to determine the default locale for the given request,
 	 * called if no {@link Locale} session attribute has been found.
-	 * <p>The default implementation returns the specified default locale,
-	 * if any, else falls back to the request's accept-header locale.
+	 * <p>The default implementation returns the configured
+	 * {@linkplain #setDefaultLocale(Locale) default locale}, if any, and otherwise
+	 * falls back to the request's {@code Accept-Language} header locale or the
+	 * default locale for the server.
 	 * @param defaultLocaleFunction the function used to determine the default locale
 	 * @since 6.0
 	 * @see #setDefaultLocale
@@ -136,7 +135,7 @@ public class SessionLocaleResolver extends AbstractLocaleContextResolver {
 	/**
 	 * Set the function used to determine the default time zone for the given request,
 	 * called if no {@link TimeZone} session attribute has been found.
-	 * <p>The default implementation returns the specified default time zone,
+	 * <p>The default implementation returns the configured default time zone,
 	 * if any, or {@code null} otherwise.
 	 * @param defaultTimeZoneFunction the function used to determine the default time zone
 	 * @since 6.0
@@ -163,7 +162,7 @@ public class SessionLocaleResolver extends AbstractLocaleContextResolver {
 			public Locale getLocale() {
 				Locale locale = (Locale) WebUtils.getSessionAttribute(request, localeAttributeName);
 				if (locale == null) {
-					locale = SessionLocaleResolver.this.defaultLocaleFunction.apply(request);
+					locale = defaultLocaleFunction.apply(request);
 				}
 				return locale;
 			}
@@ -172,7 +171,7 @@ public class SessionLocaleResolver extends AbstractLocaleContextResolver {
 			public TimeZone getTimeZone() {
 				TimeZone timeZone = (TimeZone) WebUtils.getSessionAttribute(request, timeZoneAttributeName);
 				if (timeZone == null) {
-					timeZone = SessionLocaleResolver.this.defaultTimeZoneFunction.apply(request);
+					timeZone = defaultTimeZoneFunction.apply(request);
 				}
 				return timeZone;
 			}
@@ -187,8 +186,8 @@ public class SessionLocaleResolver extends AbstractLocaleContextResolver {
 		TimeZone timeZone = null;
 		if (localeContext != null) {
 			locale = localeContext.getLocale();
-			if (localeContext instanceof TimeZoneAwareLocaleContext) {
-				timeZone = ((TimeZoneAwareLocaleContext) localeContext).getTimeZone();
+			if (localeContext instanceof TimeZoneAwareLocaleContext timeZoneAwareLocaleContext) {
+				timeZone = timeZoneAwareLocaleContext.getTimeZone();
 			}
 		}
 		WebUtils.setSessionAttribute(request, this.localeAttributeName, locale);

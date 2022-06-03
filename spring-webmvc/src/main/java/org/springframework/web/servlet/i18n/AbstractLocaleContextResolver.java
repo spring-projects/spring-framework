@@ -24,8 +24,8 @@ import org.springframework.web.servlet.LocaleContextResolver;
 /**
  * Abstract base class for {@link LocaleContextResolver} implementations.
  *
- * <p>Provides support for a {@linkplain #setDefaultLocale(Locale) default locale}
- * and a {@linkplain #setDefaultTimeZone(TimeZone) default time zone}.
+ * <p>Provides support for a {@linkplain #setDefaultLocale(java.util.Locale) default
+ * locale} and a {@linkplain #setDefaultTimeZone(TimeZone) default time zone}.
  *
  * @author Juergen Hoeller
  * @since 4.0

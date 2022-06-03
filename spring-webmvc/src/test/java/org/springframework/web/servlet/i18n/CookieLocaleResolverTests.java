@@ -412,7 +412,7 @@ class CookieLocaleResolverTests {
 	}
 
 	@Test
-	void testCustomDefaultLocaleFunction() {
+	void customDefaultLocaleFunction() {
 		request.addPreferredLocale(Locale.TAIWAN);
 
 		resolver.setDefaultLocaleFunction(request -> Locale.GERMAN);
@@ -421,7 +421,7 @@ class CookieLocaleResolverTests {
 	}
 
 	@Test
-	void testCustomDefaultTimeZoneFunction() {
+	void customDefaultTimeZoneFunction() {
 		request.addPreferredLocale(Locale.TAIWAN);
 
 		resolver.setDefaultTimeZoneFunction(request -> TimeZone.getTimeZone("GMT+1"));

@@ -52,6 +52,7 @@ import org.springframework.web.util.WebUtils;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @author Vedran Pavic
+ * @author Sam Brannen
  * @since 27.02.2003
  * @see #setDefaultLocale
  * @see #setDefaultTimeZone
@@ -98,10 +99,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 
 	private Function<HttpServletRequest, Locale> defaultLocaleFunction = request -> {
 		Locale defaultLocale = getDefaultLocale();
-		if (defaultLocale == null) {
-			defaultLocale = request.getLocale();
-		}
-		return defaultLocale;
+		return (defaultLocale != null ? defaultLocale : request.getLocale());
 	};
 
 	private Function<HttpServletRequest, TimeZone> defaultTimeZoneFunction = request -> getDefaultTimeZone();
@@ -199,9 +197,11 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 
 	/**
 	 * Set the function used to determine the default locale for the given request,
-	 * called if no {@link Locale} session attribute has been found.
-	 * <p>The default implementation returns the specified default locale,
-	 * if any, else falls back to the request's accept-header locale.
+	 * called if no locale cookie has been found.
+	 * <p>The default implementation returns the configured
+	 * {@linkplain #setDefaultLocale(Locale) default locale}, if any, and otherwise
+	 * falls back to the request's {@code Accept-Language} header locale or the
+	 * default locale for the server.
 	 * @param defaultLocaleFunction the function used to determine the default locale
 	 * @since 6.0
 	 * @see #setDefaultLocale
@@ -214,8 +214,8 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 
 	/**
 	 * Set the function used to determine the default time zone for the given request,
-	 * called if no {@link TimeZone} session attribute has been found.
-	 * <p>The default implementation returns the specified default time zone,
+	 * called if no locale cookie has been found.
+	 * <p>The default implementation returns the configured default time zone,
 	 * if any, or {@code null} otherwise.
 	 * @param defaultTimeZoneFunction the function used to determine the default time zone
 	 * @since 6.0
@@ -321,8 +321,8 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 		TimeZone timeZone = null;
 		if (localeContext != null) {
 			locale = localeContext.getLocale();
-			if (localeContext instanceof TimeZoneAwareLocaleContext) {
-				timeZone = ((TimeZoneAwareLocaleContext) localeContext).getTimeZone();
+			if (localeContext instanceof TimeZoneAwareLocaleContext timeZoneAwareLocaleContext) {
+				timeZone = timeZoneAwareLocaleContext.getTimeZone();
 			}
 			addCookie(response,
 					(locale != null ? toLocaleValue(locale) : "-") + (timeZone != null ? '/' + timeZone.getID() : ""));

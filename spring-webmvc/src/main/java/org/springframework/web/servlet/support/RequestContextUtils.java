@@ -171,10 +171,10 @@ public abstract class RequestContextUtils {
 	@Nullable
 	public static TimeZone getTimeZone(HttpServletRequest request) {
 		LocaleResolver localeResolver = getLocaleResolver(request);
-		if (localeResolver instanceof LocaleContextResolver) {
-			LocaleContext localeContext = ((LocaleContextResolver) localeResolver).resolveLocaleContext(request);
-			if (localeContext instanceof TimeZoneAwareLocaleContext) {
-				return ((TimeZoneAwareLocaleContext) localeContext).getTimeZone();
+		if (localeResolver instanceof LocaleContextResolver localeContextResolver) {
+			LocaleContext localeContext = localeContextResolver.resolveLocaleContext(request);
+			if (localeContext instanceof TimeZoneAwareLocaleContext timeZoneAwareLocaleContext) {
+				return timeZoneAwareLocaleContext.getTimeZone();
 			}
 		}
 		return null;

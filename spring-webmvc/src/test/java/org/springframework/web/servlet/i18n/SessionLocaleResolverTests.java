@@ -98,17 +98,16 @@ class SessionLocaleResolverTests {
 	}
 
 	@Test
-	void testCustomDefaultLocaleFunction() {
+	void customDefaultLocaleFunction() {
 		request.addPreferredLocale(Locale.TAIWAN);
 
-		SessionLocaleResolver resolver = new SessionLocaleResolver();
 		resolver.setDefaultLocaleFunction(request -> Locale.GERMAN);
 
 		assertThat(resolver.resolveLocale(request)).isEqualTo(Locale.GERMAN);
 	}
 
 	@Test
-	void testCustomDefaultTimeZoneFunction() {
+	void customDefaultTimeZoneFunction() {
 		request.addPreferredLocale(Locale.TAIWAN);
 
 		resolver.setDefaultTimeZoneFunction(request -> TimeZone.getTimeZone("GMT+1"));
