@@ -69,35 +69,11 @@ class GeneratedClassesTests {
 	}
 
 	@Test
-	void getOrGenerateWithStringTargetWhenJavaFileGeneratorIsNullThrowsException() {
-		assertThatIllegalArgumentException()
-				.isThrownBy(() -> this.generatedClasses.getOrGenerateClass(null,
-						TestTarget.class.getName(), "test"))
-				.withMessage("'javaFileGenerator' must not be null");
-	}
-
-	@Test
-	void getOrGenerateWithStringTargetWhenTargetIsNullThrowsException() {
-		assertThatIllegalArgumentException()
-				.isThrownBy(() -> this.generatedClasses
-						.getOrGenerateClass(JAVA_FILE_GENERATOR, (String) null, "test"))
-				.withMessage("'target' must not be empty");
-	}
-
-	@Test
-	void getOrGenerateWithStringTargetWhenFeatureIsNullThrowsException() {
-		assertThatIllegalArgumentException()
-				.isThrownBy(() -> this.generatedClasses.getOrGenerateClass(
-						JAVA_FILE_GENERATOR, TestTarget.class.getName(), null))
-				.withMessage("'featureName' must not be empty");
-	}
-
-	@Test
 	void getOrGenerateWhenNewReturnsGeneratedMethod() {
 		GeneratedClass generatedClass1 = this.generatedClasses
 				.getOrGenerateClass(JAVA_FILE_GENERATOR, TestTarget.class, "one");
-		GeneratedClass generatedClass2 = this.generatedClasses.getOrGenerateClass(
-				JAVA_FILE_GENERATOR, TestTarget.class.getName(), "two");
+		GeneratedClass generatedClass2 = this.generatedClasses
+				.getOrGenerateClass(JAVA_FILE_GENERATOR, TestTarget.class, "two");
 		assertThat(generatedClass1).isNotNull().isNotEqualTo(generatedClass2);
 		assertThat(generatedClass2).isNotNull();
 	}
@@ -110,7 +86,7 @@ class GeneratedClassesTests {
 		GeneratedClass generatedClass2 = generated.getOrGenerateClass(JAVA_FILE_GENERATOR,
 				TestTarget.class, "one");
 		GeneratedClass generatedClass3 = generated.getOrGenerateClass(JAVA_FILE_GENERATOR,
-				TestTarget.class.getName(), "one");
+				TestTarget.class, "one");
 		GeneratedClass generatedClass4 = generated.getOrGenerateClass(JAVA_FILE_GENERATOR,
 				TestTarget.class, "two");
 		assertThat(generatedClass1).isNotNull().isSameAs(generatedClass2)

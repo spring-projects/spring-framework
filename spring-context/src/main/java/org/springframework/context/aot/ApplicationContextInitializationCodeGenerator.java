@@ -35,6 +35,7 @@ import org.springframework.javapoet.JavaFile;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
 import org.springframework.javapoet.TypeSpec;
+import org.springframework.util.StringUtils;
 
 /**
  * Internal code generator to create the application context initializer.
@@ -48,10 +49,30 @@ class ApplicationContextInitializationCodeGenerator
 	private static final String APPLICATION_CONTEXT_VARIABLE = "applicationContext";
 
 
+	private final Class<?> target;
+
+	private final String id;
+
 	private final GeneratedMethods generatedMethods = new GeneratedMethods();
 
 	private final List<MethodReference> initializers = new ArrayList<>();
 
+
+	ApplicationContextInitializationCodeGenerator(Class<?> target, String id) {
+		this.target=target;
+		this.id = (!StringUtils.hasText(id)) ? "" : id;
+	}
+
+
+	@Override
+	public Class<?> getTarget() {
+		return this.target;
+	}
+
+	@Override
+	public String getId() {
+		return this.id;
+	}
 
 	@Override
 	public MethodGenerator getMethodGenerator() {

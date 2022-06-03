@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.javapoet.ClassName;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -38,8 +39,9 @@ public final class ClassNameGenerator {
 
 	private static final String SEPARATOR = "__";
 
-	private static final String AOT_PACKAGE = "__";
+	private static final String AOT_PACKAGE = "__.";
 
+	private static final String AOT_FEATURE = "Aot";
 
 	private final Map<String, AtomicInteger> sequenceGenerator = new ConcurrentHashMap<>();
 
@@ -47,53 +49,37 @@ public final class ClassNameGenerator {
 	/**
 	 * Generate a new class name for the given {@code target} /
 	 * {@code featureName} combination.
-	 * @param target the target of the newly generated class
+	 * @param target the target of the newly generated class or {@code null} if
+	 * there is not target.
 	 * @param featureName the name of the feature that the generated class
 	 * supports
 	 * @return a unique generated class name
 	 */
-	public ClassName generateClassName(Class<?> target, String featureName) {
-		Assert.notNull(target, "'target' must not be null");
-		String rootName = target.getName().replace("$", "_");
-		return generateSequencedClassName(rootName, featureName);
-	}
-
-	/**
-	 * Generate a new class name for the given {@code name} /
-	 * {@code featureName} combination.
-	 * @param target the target of the newly generated class. When possible,
-	 * this should be a class name
-	 * @param featureName the name of the feature that the generated class
-	 * supports
-	 * @return a unique generated class name
-	 */
-	public ClassName generateClassName(String target, String featureName) {
-		Assert.hasLength(target, "'target' must not be empty");
-		target = clean(target);
-		String rootName = AOT_PACKAGE + "." + ((!target.isEmpty()) ? target : "Aot");
-		return generateSequencedClassName(rootName, featureName);
+	public ClassName generateClassName(@Nullable Class<?> target, String featureName) {
+		Assert.hasLength(featureName, "'featureName' must not be empty");
+		featureName = clean(featureName);
+		if(target != null) {
+			return generateSequencedClassName(target.getName().replace("$", "_") + SEPARATOR + StringUtils.capitalize(featureName));
+		}
+		return generateSequencedClassName(AOT_PACKAGE+ featureName);
 	}
 
 	private String clean(String name) {
-		StringBuilder rootName = new StringBuilder();
+		StringBuilder clean = new StringBuilder();
 		boolean lastNotLetter = true;
 		for (char ch : name.toCharArray()) {
 			if (!Character.isLetter(ch)) {
 				lastNotLetter = true;
 				continue;
 			}
-			rootName.append(lastNotLetter ? Character.toUpperCase(ch) : ch);
+			clean.append(lastNotLetter ? Character.toUpperCase(ch) : ch);
 			lastNotLetter = false;
 		}
-		return rootName.toString();
+		return (!clean.isEmpty()) ? clean.toString() : AOT_FEATURE;
 	}
 
-	private ClassName generateSequencedClassName(String rootName, String featureName) {
-		Assert.hasLength(featureName, "'featureName' must not be empty");
-		Assert.isTrue(featureName.chars().allMatch(Character::isLetter),
-				"'featureName' must contain only letters");
-		String name = addSequence(
-				rootName + SEPARATOR + StringUtils.capitalize(featureName));
+	private ClassName generateSequencedClassName(String name) {
+		name = addSequence(name);
 		return ClassName.get(ClassUtils.getPackageName(name),
 				ClassUtils.getShortName(name));
 	}

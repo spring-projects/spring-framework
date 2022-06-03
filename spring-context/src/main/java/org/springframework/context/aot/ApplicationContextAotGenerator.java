@@ -23,6 +23,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.JavaFile;
+import org.springframework.lang.Nullable;
 
 /**
  * Process an {@link ApplicationContext} and its {@link BeanFactory} to generate
@@ -48,10 +49,29 @@ public class ApplicationContextAotGenerator {
 			GenerationContext generationContext,
 			ClassName generatedInitializerClassName) {
 
+		generateApplicationContext(applicationContext, null, generationContext,
+				generatedInitializerClassName);
+	}
+
+	/**
+	 * Refresh the specified {@link GenericApplicationContext} and generate the
+	 * necessary code to restore the state of its {@link BeanFactory}, using the
+	 * specified {@link GenerationContext}.
+	 * @param applicationContext the application context to handle
+	 * @param target the target class for the generated initializer
+	 * @param generationContext the generation context to use
+	 * @param generatedInitializerClassName the class name to use for the
+	 * generated application context initializer
+	 */
+	public void generateApplicationContext(GenericApplicationContext applicationContext,
+			@Nullable Class<?> target, GenerationContext generationContext,
+			ClassName generatedInitializerClassName) {
+
 		applicationContext.refreshForAotProcessing();
 		DefaultListableBeanFactory beanFactory = applicationContext
 				.getDefaultListableBeanFactory();
-		ApplicationContextInitializationCodeGenerator codeGenerator = new ApplicationContextInitializationCodeGenerator();
+		ApplicationContextInitializationCodeGenerator codeGenerator = new ApplicationContextInitializationCodeGenerator(
+				target, applicationContext.getId());
 		new BeanFactoryInitializationAotContributions(beanFactory).applyTo(generationContext,
 				codeGenerator);
 		JavaFile javaFile = codeGenerator.generateJavaFile(generatedInitializerClassName);
