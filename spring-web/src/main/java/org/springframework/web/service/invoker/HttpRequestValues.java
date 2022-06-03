@@ -365,7 +365,6 @@ public final class HttpRequestValues {
 		 * Set the Continuation parameter.
 		 */
 		public Builder setContinuation(Object continuation) {
-			Assert.notNull(continuation, "HttpMethod is required");
 			this.continuation = continuation;
 			return this;
 		}
