@@ -16,8 +16,11 @@
 
 package org.springframework.cache.config;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -33,8 +36,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.testfixture.cache.CacheTestUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.mock.env.MockEnvironment;
-
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.context.testfixture.cache.CacheTestUtils.assertCacheHit;

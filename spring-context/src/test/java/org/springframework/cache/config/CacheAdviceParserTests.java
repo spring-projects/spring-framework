@@ -17,6 +17,7 @@
 package org.springframework.cache.config;
 
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.context.support.GenericXmlApplicationContext;
 
@@ -31,8 +32,9 @@ class CacheAdviceParserTests {
 
 	@Test
 	void keyAndKeyGeneratorCannotBeSetTogether() {
-		assertThatThrownBy(() -> new GenericXmlApplicationContext("/org/springframework/cache/config/cache-advice-invalid.xml"))
-				.isInstanceOf(BeanDefinitionStoreException.class);
+		assertThatThrownBy(() -> new GenericXmlApplicationContext(
+				"/org/springframework/cache/config/cache-advice-invalid.xml")
+		).isInstanceOf(BeanDefinitionStoreException.class);
 		// TODO better exception handling
 	}
 

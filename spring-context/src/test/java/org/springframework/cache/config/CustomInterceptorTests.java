@@ -16,9 +16,13 @@
 
 package org.springframework.cache.config;
 
+import java.io.IOException;
+import java.util.Map;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheInterceptor;
@@ -31,9 +35,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.testfixture.cache.CacheTestUtils;
 import org.springframework.context.testfixture.cache.beans.CacheableService;
 import org.springframework.context.testfixture.cache.beans.DefaultCacheableService;
-
-import java.io.IOException;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -115,7 +116,8 @@ class CustomInterceptorTests {
 		protected Object invokeOperation(CacheOperationInvoker invoker) {
 			try {
 				return super.invokeOperation(invoker);
-			} catch (CacheOperationInvoker.ThrowableWrapper e) {
+			}
+			catch (CacheOperationInvoker.ThrowableWrapper e) {
 				Throwable original = e.getOriginal();
 				if (original.getClass() == UnsupportedOperationException.class) {
 					return 55L;

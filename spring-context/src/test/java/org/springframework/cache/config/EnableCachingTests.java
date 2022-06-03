@@ -17,6 +17,7 @@
 package org.springframework.cache.config;
 
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.cache.CacheManager;
@@ -55,9 +56,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 class EnableCachingTests extends AbstractCacheAnnotationTests {
 
-	/**
-	 * hook into superclass suite of tests
-	 */
+	/** hook into superclass suite of tests */
 	@Override
 	protected ConfigurableApplicationContext getApplicationContext() {
 		return new AnnotationConfigApplicationContext(EnableCachingConfig.class);
@@ -126,9 +125,8 @@ class EnableCachingTests extends AbstractCacheAnnotationTests {
 	void emptyConfigSupport() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(EmptyConfigSupportConfig.class);
 		CacheInterceptor ci = context.getBean(CacheInterceptor.class);
-		assertThat(ci.getCacheResolver()).isInstanceOfSatisfying(SimpleCacheResolver.class, cacheResolver -> {
-			assertThat(cacheResolver.getCacheManager()).isSameAs(context.getBean(CacheManager.class));
-		});
+		assertThat(ci.getCacheResolver()).isInstanceOfSatisfying(SimpleCacheResolver.class, cacheResolver ->
+				assertThat(cacheResolver.getCacheManager()).isSameAs(context.getBean(CacheManager.class)));
 		context.close();
 	}
 
