@@ -16,11 +16,8 @@
 
 package org.springframework.cache.config;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -37,6 +34,8 @@ import org.springframework.context.testfixture.cache.CacheTestUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.mock.env.MockEnvironment;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.context.testfixture.cache.CacheTestUtils.assertCacheHit;
 import static org.springframework.context.testfixture.cache.CacheTestUtils.assertCacheMiss;
@@ -46,7 +45,7 @@ import static org.springframework.context.testfixture.cache.CacheTestUtils.asser
  *
  * @author Stephane Nicoll
  */
-public class EnableCachingIntegrationTests {
+class EnableCachingIntegrationTests {
 
 	private ConfigurableApplicationContext context;
 
@@ -60,14 +59,14 @@ public class EnableCachingIntegrationTests {
 
 
 	@Test
-	public void fooServiceWithInterface() {
+	void fooServiceWithInterface() {
 		this.context = new AnnotationConfigApplicationContext(FooConfig.class);
 		FooService service = this.context.getBean(FooService.class);
 		fooGetSimple(service);
 	}
 
 	@Test
-	public void fooServiceWithInterfaceCglib() {
+	void fooServiceWithInterfaceCglib() {
 		this.context = new AnnotationConfigApplicationContext(FooConfigCglib.class);
 		FooService service = this.context.getBean(FooService.class);
 		fooGetSimple(service);
@@ -84,7 +83,7 @@ public class EnableCachingIntegrationTests {
 	}
 
 	@Test
-	public void barServiceWithCacheableInterfaceCglib() {
+	void barServiceWithCacheableInterfaceCglib() {
 		this.context = new AnnotationConfigApplicationContext(BarConfigCglib.class);
 		BarService service = this.context.getBean(BarService.class);
 		Cache cache = getCache();
@@ -97,7 +96,7 @@ public class EnableCachingIntegrationTests {
 	}
 
 	@Test
-	public void beanConditionOff() {
+	void beanConditionOff() {
 		this.context = new AnnotationConfigApplicationContext(BeanConditionConfig.class);
 		FooService service = this.context.getBean(FooService.class);
 		Cache cache = getCache();
@@ -112,7 +111,7 @@ public class EnableCachingIntegrationTests {
 	}
 
 	@Test
-	public void beanConditionOn() {
+	void beanConditionOn() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.setEnvironment(new MockEnvironment().withProperty("bar.enabled", "true"));
 		ctx.register(BeanConditionConfig.class);
