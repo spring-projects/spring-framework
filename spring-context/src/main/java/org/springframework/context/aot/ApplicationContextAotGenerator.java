@@ -49,7 +49,7 @@ public class ApplicationContextAotGenerator {
 			GenerationContext generationContext,
 			ClassName generatedInitializerClassName) {
 
-		generateApplicationContext(applicationContext, null, generationContext,
+		generateApplicationContext(applicationContext, null, null, generationContext,
 				generatedInitializerClassName);
 	}
 
@@ -58,20 +58,21 @@ public class ApplicationContextAotGenerator {
 	 * necessary code to restore the state of its {@link BeanFactory}, using the
 	 * specified {@link GenerationContext}.
 	 * @param applicationContext the application context to handle
-	 * @param target the target class for the generated initializer
+	 * @param target the target class for the generated initializer (used when generating class names)
+	 * @param name the name of the application context (used when generating class names)
 	 * @param generationContext the generation context to use
 	 * @param generatedInitializerClassName the class name to use for the
 	 * generated application context initializer
 	 */
 	public void generateApplicationContext(GenericApplicationContext applicationContext,
-			@Nullable Class<?> target, GenerationContext generationContext,
+			@Nullable Class<?> target, @Nullable String name, GenerationContext generationContext,
 			ClassName generatedInitializerClassName) {
 
 		applicationContext.refreshForAotProcessing();
 		DefaultListableBeanFactory beanFactory = applicationContext
 				.getDefaultListableBeanFactory();
 		ApplicationContextInitializationCodeGenerator codeGenerator = new ApplicationContextInitializationCodeGenerator(
-				target, applicationContext.getId());
+				target, name);
 		new BeanFactoryInitializationAotContributions(beanFactory).applyTo(generationContext,
 				codeGenerator);
 		JavaFile javaFile = codeGenerator.generateJavaFile(generatedInitializerClassName);

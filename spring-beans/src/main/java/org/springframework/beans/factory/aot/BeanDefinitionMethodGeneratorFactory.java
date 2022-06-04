@@ -75,6 +75,7 @@ class BeanDefinitionMethodGeneratorFactory {
 	 * {@link BeanDefinitionMethodGenerator} will include all
 	 * {@link BeanRegistrationAotProcessor} provided contributions.
 	 * @param registeredBean the registered bean
+	 * @param innerBeanPropertyName the inner bean property name or {@code null}
 	 * @return a new {@link BeanDefinitionMethodGenerator} instance or
 	 * {@code null}
 	 */

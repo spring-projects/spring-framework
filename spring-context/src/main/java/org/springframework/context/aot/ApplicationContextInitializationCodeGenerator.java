@@ -35,6 +35,7 @@ import org.springframework.javapoet.JavaFile;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
 import org.springframework.javapoet.TypeSpec;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -51,16 +52,16 @@ class ApplicationContextInitializationCodeGenerator
 
 	private final Class<?> target;
 
-	private final String id;
+	private final String name;
 
 	private final GeneratedMethods generatedMethods = new GeneratedMethods();
 
 	private final List<MethodReference> initializers = new ArrayList<>();
 
 
-	ApplicationContextInitializationCodeGenerator(Class<?> target, String id) {
+	ApplicationContextInitializationCodeGenerator(Class<?> target, @Nullable String name) {
 		this.target=target;
-		this.id = (!StringUtils.hasText(id)) ? "" : id;
+		this.name = (!StringUtils.hasText(name)) ? "" : name;
 	}
 
 
@@ -70,8 +71,8 @@ class ApplicationContextInitializationCodeGenerator
 	}
 
 	@Override
-	public String getId() {
-		return this.id;
+	public String getName() {
+		return this.name;
 	}
 
 	@Override

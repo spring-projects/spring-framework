@@ -81,19 +81,21 @@ class BeanDefinitionMethodGenerator {
 	 * Generate the method that returns the {@link BeanDefinition} to be
 	 * registered.
 	 * @param generationContext the generation context
+	 * @param featureNamePrefix the prefix to use for the feature name
 	 * @param beanRegistrationsCode the bean registrations code
 	 * @return a reference to the generated method.
 	 */
 	MethodReference generateBeanDefinitionMethod(GenerationContext generationContext,
-			BeanRegistrationsCode beanRegistrationsCode) {
+			String featureNamePrefix, BeanRegistrationsCode beanRegistrationsCode) {
 
-		BeanRegistrationCodeFragments codeFragments = getCodeFragments(beanRegistrationsCode);
+		BeanRegistrationCodeFragments codeFragments = getCodeFragments(beanRegistrationsCode, featureNamePrefix);
 		Class<?> target = codeFragments.getTarget(this.registeredBean,
 				this.constructorOrFactoryMethod);
 		if (!target.getName().startsWith("java.")) {
+			String featureName = featureNamePrefix + "BeanDefinitions";
 			GeneratedClass generatedClass = generationContext.getClassGenerator()
 					.getOrGenerateClass(new BeanDefinitionsJavaFileGenerator(target),
-							target, "BeanDefinitions");
+							target, featureName);
 			MethodGenerator methodGenerator = generatedClass.getMethodGenerator()
 					.withName(getName());
 			GeneratedMethod generatedMethod = generateBeanDefinitionMethod(
@@ -112,10 +114,11 @@ class BeanDefinitionMethodGenerator {
 	}
 
 	private BeanRegistrationCodeFragments getCodeFragments(
-			BeanRegistrationsCode beanRegistrationsCode) {
+			BeanRegistrationsCode beanRegistrationsCode, String featureNamePrefix) {
 
 		BeanRegistrationCodeFragments codeFragments = new DefaultBeanRegistrationCodeFragments(
-				beanRegistrationsCode, this.registeredBean, this.methodGeneratorFactory);
+				beanRegistrationsCode, this.registeredBean, this.methodGeneratorFactory,
+				featureNamePrefix);
 		for (BeanRegistrationAotContribution aotContribution : this.aotContributions) {
 			codeFragments = aotContribution.customizeBeanRegistrationCodeFragments(codeFragments);
 		}

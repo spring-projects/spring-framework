@@ -46,10 +46,10 @@ public interface BeanFactoryInitializationCode {
 	}
 
 	/**
-	 * Return the ID of the bean factory or and empty string if no ID is avaialble.
-	 * @return the bean factory ID
+	 * Return the name of the bean factory or and empty string if no ID is available.
+	 * @return the bean factory name
 	 */
-	default String getId() {
+	default String getName() {
 		return "";
 	}
 
