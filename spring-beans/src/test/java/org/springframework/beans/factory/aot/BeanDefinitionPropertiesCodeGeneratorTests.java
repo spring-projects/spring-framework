@@ -37,6 +37,7 @@ import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.config.RuntimeBeanNameReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
@@ -230,6 +231,13 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 	}
 
 	@Test
+	void setInitMethodWhenSingleInferredInitMethod() {
+		this.beanDefinition.setTargetType(InitDestroyBean.class);
+		this.beanDefinition.setInitMethodName(AbstractBeanDefinition.INFER_METHOD);
+		testCompiledResult((actual, compiled) -> assertThat(actual.getInitMethodNames()).isNull());
+	}
+
+	@Test
 	void setInitMethodWhenMultipleInitMethods() {
 		this.beanDefinition.setTargetType(InitDestroyBean.class);
 		this.beanDefinition.setInitMethodNames("i1", "i2");
@@ -248,6 +256,13 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 						.containsExactly("d1"));
 		String[] methodNames = { "d1" };
 		assertHasMethodInvokeHints(InitDestroyBean.class, methodNames);
+	}
+
+	@Test
+	void setDestroyMethodWhenSingleInferredInitMethod() {
+		this.beanDefinition.setTargetType(InitDestroyBean.class);
+		this.beanDefinition.setDestroyMethodName(AbstractBeanDefinition.INFER_METHOD);
+		testCompiledResult((actual, compiled) -> assertThat(actual.getDestroyMethodNames()).isNull());
 	}
 
 	@Test

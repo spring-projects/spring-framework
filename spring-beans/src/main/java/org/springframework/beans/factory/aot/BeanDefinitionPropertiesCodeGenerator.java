@@ -151,7 +151,9 @@ class BeanDefinitionPropertiesCodeGenerator {
 					addInitDestroyHint(beanType, methodName);
 				}
 			}
-			builder.addStatement(format, BEAN_DEFINITION_VARIABLE, arguments.build());
+			if (!arguments.isEmpty()) {
+				builder.addStatement(format, BEAN_DEFINITION_VARIABLE, arguments.build());
+			}
 		}
 	}
 
