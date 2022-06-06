@@ -75,4 +75,9 @@ final class CompileWithTargetClassAccessClassLoader extends ClassLoader {
 		return this.testClassLoader.getResources(name);
 	}
 
+	@Override
+	protected URL findResource(String name) {
+		return this.testClassLoader.getResource(name);
+	}
+
 }
