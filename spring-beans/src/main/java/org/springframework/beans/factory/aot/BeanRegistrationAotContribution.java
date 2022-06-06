@@ -36,12 +36,13 @@ public interface BeanRegistrationAotContribution {
 	 * Customize the {@link BeanRegistrationCodeFragments} that will be used to
 	 * generate the bean registration code. Custom code fragments can be used if
 	 * default code generation isn't suitable.
+	 * @param generationContext the generation context
 	 * @param codeFragments the existing code fragments
 	 * @return the code fragments to use, may be the original instance or a
 	 * wrapper
 	 */
 	default BeanRegistrationCodeFragments customizeBeanRegistrationCodeFragments(
-			BeanRegistrationCodeFragments codeFragments) {
+			GenerationContext generationContext, BeanRegistrationCodeFragments codeFragments) {
 		return codeFragments;
 	}
 
@@ -70,7 +71,7 @@ public interface BeanRegistrationAotContribution {
 
 			@Override
 			public BeanRegistrationCodeFragments customizeBeanRegistrationCodeFragments(
-					BeanRegistrationCodeFragments codeFragments) {
+					GenerationContext generationContext, BeanRegistrationCodeFragments codeFragments) {
 				return beanRegistrationCodeFragmentsCustomizer.apply(codeFragments);
 			}
 

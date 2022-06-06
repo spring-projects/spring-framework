@@ -88,7 +88,8 @@ class BeanDefinitionMethodGenerator {
 	MethodReference generateBeanDefinitionMethod(GenerationContext generationContext,
 			String featureNamePrefix, BeanRegistrationsCode beanRegistrationsCode) {
 
-		BeanRegistrationCodeFragments codeFragments = getCodeFragments(beanRegistrationsCode, featureNamePrefix);
+		BeanRegistrationCodeFragments codeFragments = getCodeFragments(generationContext,
+				beanRegistrationsCode, featureNamePrefix);
 		Class<?> target = codeFragments.getTarget(this.registeredBean,
 				this.constructorOrFactoryMethod);
 		if (!target.getName().startsWith("java.")) {
@@ -113,14 +114,14 @@ class BeanDefinitionMethodGenerator {
 				generatedMethod.getName().toString());
 	}
 
-	private BeanRegistrationCodeFragments getCodeFragments(
+	private BeanRegistrationCodeFragments getCodeFragments(GenerationContext generationContext,
 			BeanRegistrationsCode beanRegistrationsCode, String featureNamePrefix) {
 
 		BeanRegistrationCodeFragments codeFragments = new DefaultBeanRegistrationCodeFragments(
 				beanRegistrationsCode, this.registeredBean, this.methodGeneratorFactory,
 				featureNamePrefix);
 		for (BeanRegistrationAotContribution aotContribution : this.aotContributions) {
-			codeFragments = aotContribution.customizeBeanRegistrationCodeFragments(codeFragments);
+			codeFragments = aotContribution.customizeBeanRegistrationCodeFragments(generationContext, codeFragments);
 		}
 		return codeFragments;
 	}
