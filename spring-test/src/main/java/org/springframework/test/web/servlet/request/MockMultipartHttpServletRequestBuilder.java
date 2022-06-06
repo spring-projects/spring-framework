@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,16 +69,22 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 	}
 
 	/**
-	 * Package-private constructor. Use static factory methods in
-	 * {@link MockMvcRequestBuilders}.
-	 * <p>For other ways to initialize a {@code MockMultipartHttpServletRequest},
-	 * see {@link #with(RequestPostProcessor)} and the
-	 * {@link RequestPostProcessor} extension point.
-	 * @param uri the URL
+	 * Variant of {@link #MockMultipartHttpServletRequestBuilder(String, Object...)}
+	 * with a {@link URI}.
 	 * @since 4.0.3
 	 */
 	MockMultipartHttpServletRequestBuilder(URI uri) {
 		super(HttpMethod.POST, uri);
+		super.contentType(MediaType.MULTIPART_FORM_DATA);
+	}
+
+	/**
+	 * Variant of {@link #MockMultipartHttpServletRequestBuilder(String, Object...)}
+	 * with a {@link URI} and an {@link HttpMethod}.
+	 * @since 5.3.21
+	 */
+	MockMultipartHttpServletRequestBuilder(HttpMethod httpMethod, URI uri) {
+		super(httpMethod, uri);
 		super.contentType(MediaType.MULTIPART_FORM_DATA);
 	}
 
