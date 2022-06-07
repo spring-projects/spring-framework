@@ -35,8 +35,6 @@ import org.springframework.util.Assert;
  *
  * @author Phillip Webb
  * @since 6.0
- * @see BeanRegistrationCodeFragmentsWrapper
- * @see BeanRegistrationCodeFragmentsCustomizer
  */
 public abstract class BeanRegistrationCodeFragments {
 
@@ -55,7 +53,7 @@ public abstract class BeanRegistrationCodeFragments {
 
 
 	protected BeanRegistrationCodeFragments(BeanRegistrationCodeFragments codeFragments) {
-		Assert.notNull(codeFragments, "'codeFragments' must not be null");
+		Assert.notNull(codeFragments, "CodeFragments must not be null");
 		this.codeFragments = codeFragments;
 	}
 

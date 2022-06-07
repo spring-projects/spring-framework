@@ -48,7 +48,7 @@ public interface BeanRegistrationAotContribution {
 
 	/**
 	 * Apply this contribution to the given {@link BeanRegistrationCode}.
-	 * @param generationContext the active generation context
+	 * @param generationContext the generation context
 	 * @param beanRegistrationCode the generated registration
 	 */
 	void applyTo(GenerationContext generationContext,
@@ -61,7 +61,7 @@ public interface BeanRegistrationAotContribution {
 	 * @param beanRegistrationCodeFragmentsCustomizer the
 	 * {@link BeanRegistrationCodeFragments} customizer
 	 * @return a new {@link BeanRegistrationAotContribution} instance
-	 * @see #customizeBeanRegistrationCodeFragments(BeanRegistrationCodeFragments)
+	 * @see #customizeBeanRegistrationCodeFragments(GenerationContext, BeanRegistrationCodeFragments)
 	 */
 	static BeanRegistrationAotContribution ofBeanRegistrationCodeFragmentsCustomizer(
 			UnaryOperator<BeanRegistrationCodeFragments> beanRegistrationCodeFragmentsCustomizer) {

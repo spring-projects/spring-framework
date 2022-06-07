@@ -28,6 +28,7 @@ import org.springframework.lang.Nullable;
  * {@link org.springframework.beans.factory.aot.BeanRegistrationExcludeFilter}.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 6.0
  * @see BeanFactoryInitializationAotContribution
  */
@@ -39,15 +40,14 @@ public interface BeanFactoryInitializationAotProcessor {
 	 * ahead-of-time and return a contribution or {@code null}.
 	 * <p>
 	 * Processors are free to use any techniques they like to analyze the given
-	 * instance. Most typically use reflection to find fields or methods to use
-	 * in the contribution. Contributions typically generate source code or
+	 * bean factory. Most typically use reflection to find fields or methods to
+	 * use in the contribution. Contributions typically generate source code or
 	 * resource files that can be used when the AOT optimized application runs.
 	 * <p>
-	 * If the given instance isn't relevant to the processor, it should return a
-	 * {@code null} contribution.
+	 * If the given bean factory does not contain anything that is relevant to
+	 * the processor, it should return a {@code null} contribution.
 	 * @param beanFactory the bean factory to process
-	 * @return a {@link BeanFactoryInitializationAotContribution} or
-	 * {@code null}
+	 * @return a {@link BeanFactoryInitializationAotContribution} or {@code null}
 	 */
 	@Nullable
 	BeanFactoryInitializationAotContribution processAheadOfTime(

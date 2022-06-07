@@ -20,6 +20,7 @@ import org.springframework.aot.generate.MethodGenerator;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.beans.factory.support.InstanceSupplier;
 import org.springframework.javapoet.ClassName;
+import org.springframework.util.function.ThrowingBiFunction;
 
 /**
  * Interface that can be used to configure the code that will be generated to
@@ -28,7 +29,6 @@ import org.springframework.javapoet.ClassName;
  * @author Phillip Webb
  * @since 6.0
  * @see BeanRegistrationCodeFragments
- * @see BeanRegistrationCodeFragmentsCustomizer
  */
 public interface BeanRegistrationCode {
 
@@ -50,7 +50,7 @@ public interface BeanRegistrationCode {
 	 * @param methodReference a reference to the post-process method to call.
 	 * The referenced method must have a functional signature compatible with
 	 * {@link InstanceSupplier#andThen}.
-	 * @see InstanceSupplier#andThen(org.springframework.util.function.ThrowableBiFunction)
+	 * @see InstanceSupplier#andThen(ThrowingBiFunction)
 	 */
 	void addInstancePostProcessor(MethodReference methodReference);
 
