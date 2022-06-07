@@ -103,8 +103,8 @@ class ScopedProxyBeanRegistrationAotProcessorTests {
 		this.beanFactory.registerBeanDefinition("test", beanDefinition);
 		testCompile((freshBeanFactory,
 				compiled) -> assertThatExceptionOfType(BeanCreationException.class)
-						.isThrownBy(() -> freshBeanFactory.getBean("test"))
-						.withMessageContaining("'targetBeanName' is required"));
+				.isThrownBy(() -> freshBeanFactory.getBean("test"))
+				.withMessageContaining("'targetBeanName' is required"));
 	}
 
 	@Test
@@ -116,8 +116,8 @@ class ScopedProxyBeanRegistrationAotProcessorTests {
 		this.beanFactory.registerBeanDefinition("test", beanDefinition);
 		testCompile((freshBeanFactory,
 				compiled) -> assertThatExceptionOfType(BeanCreationException.class)
-						.isThrownBy(() -> freshBeanFactory.getBean("test"))
-						.withMessageContaining("No bean named 'testDoesNotExist'"));
+				.isThrownBy(() -> freshBeanFactory.getBean("test"))
+				.withMessageContaining("No bean named 'testDoesNotExist'"));
 	}
 
 	@Test
@@ -144,19 +144,18 @@ class ScopedProxyBeanRegistrationAotProcessorTests {
 		assertThat(contribution).isNotNull();
 		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
 		this.generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(this.generatedFiles).printFiles(System.out)
-				.compile(compiled -> {
-					MethodReference reference = this.beanFactoryInitializationCode
-							.getInitializers().get(0);
-					Object instance = compiled.getInstance(Object.class,
-							reference.getDeclaringClass().toString());
-					Method method = ReflectionUtils.findMethod(instance.getClass(),
-							reference.getMethodName(), DefaultListableBeanFactory.class);
-					DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory();
-					freshBeanFactory.setBeanClassLoader(compiled.getClassLoader());
-					ReflectionUtils.invokeMethod(method, instance, freshBeanFactory);
-					result.accept(freshBeanFactory, compiled);
-				});
+		TestCompiler.forSystem().withFiles(this.generatedFiles).compile(compiled -> {
+			MethodReference reference = this.beanFactoryInitializationCode
+					.getInitializers().get(0);
+			Object instance = compiled.getInstance(Object.class,
+					reference.getDeclaringClass().toString());
+			Method method = ReflectionUtils.findMethod(instance.getClass(),
+					reference.getMethodName(), DefaultListableBeanFactory.class);
+			DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory();
+			freshBeanFactory.setBeanClassLoader(compiled.getClassLoader());
+			ReflectionUtils.invokeMethod(method, instance, freshBeanFactory);
+			result.accept(freshBeanFactory, compiled);
+		});
 	}
 
 

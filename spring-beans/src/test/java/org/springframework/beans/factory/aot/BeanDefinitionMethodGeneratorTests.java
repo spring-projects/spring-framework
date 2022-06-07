@@ -72,8 +72,6 @@ class BeanDefinitionMethodGeneratorTests {
 
 	private DefaultListableBeanFactory beanFactory;
 
-	private MockSpringFactoriesLoader springFactoriesLoader;
-
 	private MockBeanRegistrationsCode beanRegistrationsCode;
 
 	private BeanDefinitionMethodGeneratorFactory methodGeneratorFactory;
@@ -83,9 +81,8 @@ class BeanDefinitionMethodGeneratorTests {
 		this.generatedFiles = new InMemoryGeneratedFiles();
 		this.generationContext = new DefaultGenerationContext(this.generatedFiles);
 		this.beanFactory = new DefaultListableBeanFactory();
-		this.springFactoriesLoader = new MockSpringFactoriesLoader();
 		this.methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
-				new AotFactoriesLoader(this.beanFactory, this.springFactoriesLoader));
+				new AotFactoriesLoader(this.beanFactory, new MockSpringFactoriesLoader()));
 		this.beanRegistrationsCode = new MockBeanRegistrationsCode(
 				ClassName.get("__", "Registration"));
 	}
@@ -142,7 +139,7 @@ class BeanDefinitionMethodGeneratorTests {
 							.returns(TestBean.class).addCode("return new $T($S);",
 									TestBean.class, "postprocessed"));
 			beanRegistrationCode.addInstancePostProcessor(MethodReference.ofStatic(
-					beanRegistrationCode.getClassName(), method.getName().toString()));
+					beanRegistrationCode.getClassName(), method.getName()));
 		};
 		List<BeanRegistrationAotContribution> aotContributions = Collections
 				.singletonList(aotContribution);
@@ -354,7 +351,7 @@ class BeanDefinitionMethodGeneratorTests {
 				Collections.emptyList());
 		MethodReference method = generator.generateBeanDefinitionMethod(
 				this.generationContext, "", this.beanRegistrationsCode);
-		testCompiledResult(method, false, (actual, compiled) -> {
+		testCompiledResult(method, (actual, compiled) -> {
 			DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory();
 			freshBeanFactory.registerBeanDefinition("test", actual);
 			Object bean = freshBeanFactory.getBean("test");
@@ -367,23 +364,15 @@ class BeanDefinitionMethodGeneratorTests {
 	private RegisteredBean registerBean(RootBeanDefinition beanDefinition) {
 		String beanName = "testBean";
 		this.beanFactory.registerBeanDefinition(beanName, beanDefinition);
-		RegisteredBean registeredBean = RegisteredBean.of(this.beanFactory, beanName);
-		return registeredBean;
+		return RegisteredBean.of(this.beanFactory, beanName);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void testCompiledResult(MethodReference method,
-			BiConsumer<RootBeanDefinition, Compiled> result) {
-		testCompiledResult(method, false, result);
-	}
-
-	@SuppressWarnings("unchecked")
-	private void testCompiledResult(MethodReference method, boolean targetClassAccess,
 			BiConsumer<RootBeanDefinition, Compiled> result) {
 		this.generationContext.writeGeneratedContent();
 		JavaFile javaFile = generateJavaFile(method);
-		TestCompiler.forSystem().withFiles(this.generatedFiles).printFiles(System.out)
-				.compile(javaFile::writeTo, compiled -> result.accept(
+		TestCompiler.forSystem().withFiles(this.generatedFiles).compile(
+				javaFile::writeTo, compiled -> result.accept(
 						(RootBeanDefinition) compiled.getInstance(Supplier.class).get(),
 						compiled));
 	}
