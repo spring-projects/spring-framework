@@ -1540,9 +1540,9 @@ extracts the name, version, and file extension:
 ----
 
 URI path patterns can also have embedded `${...}` placeholders that are resolved on startup
-through `PropertyPlaceHolderConfigurer` against local, system, environment, and other property
-sources. You ca use this to, for example, parameterize a base URL based on some external
-configuration.
+through `PropertySourcesPlaceholderConfigurer` against local, system, environment, and
+other property sources. You ca use this to, for example, parameterize a base URL based on
+some external configuration.
 
 NOTE: Spring WebFlux uses `PathPattern` and the `PathPatternParser` for URI path matching support.
 Both classes are located in `spring-web` and are expressly designed for use with HTTP URL
