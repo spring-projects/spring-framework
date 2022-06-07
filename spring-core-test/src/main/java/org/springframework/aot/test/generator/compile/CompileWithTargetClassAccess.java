@@ -21,16 +21,13 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodHandles.Lookup;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Annotation that can be used on tests that need a {@link TestCompiler} with
- * non-public access to a target class. Allows the compiler to use
- * {@link MethodHandles#privateLookupIn} to {@link Lookup#defineClass define the
- * class} without polluting the test {@link ClassLoader}.
+ * non-public access to target classes. Allows the compiler to define classes
+ * without polluting the test {@link ClassLoader}.
  *
  * @author Phillip Webb
  * @since 6.0
@@ -40,17 +37,5 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Documented
 @ExtendWith(CompileWithTargetClassAccessExtension.class)
 public @interface CompileWithTargetClassAccess {
-
-	/**
-	 * The target class names.
-	 * @return the class name
-	 */
-	String[] classNames() default {};
-
-	/**
-	 * The target classes.
-	 * @return the classes
-	 */
-	Class<?>[] classes() default {};
 
 }

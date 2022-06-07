@@ -91,7 +91,7 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 	}
 
 	@Test
-	@CompileWithTargetClassAccess(classes = PackagePrivateFieldInjectionSample.class)
+	@CompileWithTargetClassAccess
 	void contributeWhenPackagePrivateFieldInjectionInjectsUsingConsumer() {
 		Environment environment = new StandardEnvironment();
 		this.beanFactory.registerSingleton("environment", environment);
@@ -122,7 +122,7 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 	}
 
 	@Test
-	@CompileWithTargetClassAccess(classes = PackagePrivateMethodInjectionSample.class)
+	@CompileWithTargetClassAccess
 	void contributeWhenPackagePrivateMethodInjectionInjectsUsingConsumer() {
 		Environment environment = new StandardEnvironment();
 		this.beanFactory.registerSingleton("environment", environment);
