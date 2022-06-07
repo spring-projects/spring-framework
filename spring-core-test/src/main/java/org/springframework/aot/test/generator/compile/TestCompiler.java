@@ -104,7 +104,7 @@ public final class TestCompiler {
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with addition source files.
+	 * Return a new {@link TestCompiler} instance with additional source files.
 	 * @param sourceFiles the additional source files
 	 * @return a new {@link TestCompiler} instance
 	 */
@@ -114,7 +114,7 @@ public final class TestCompiler {
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with addition source files.
+	 * Return a new {@link TestCompiler} instance with additional source files.
 	 * @param sourceFiles the additional source files
 	 * @return a new {@link TestCompiler} instance
 	 */
@@ -124,7 +124,7 @@ public final class TestCompiler {
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with addition source files.
+	 * Return a new {@link TestCompiler} instance with additional source files.
 	 * @param sourceFiles the additional source files
 	 * @return a new {@link TestCompiler} instance
 	 */
@@ -134,7 +134,7 @@ public final class TestCompiler {
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with addition resource files.
+	 * Return a new {@link TestCompiler} instance with additional resource files.
 	 * @param resourceFiles the additional resource files
 	 * @return a new {@link TestCompiler} instance
 	 */
@@ -144,7 +144,7 @@ public final class TestCompiler {
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with addition source files.
+	 * Return a new {@link TestCompiler} instance with additional source files.
 	 * @param resourceFiles the additional source files
 	 * @return a new {@link TestCompiler} instance
 	 */
@@ -154,7 +154,7 @@ public final class TestCompiler {
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with addition resource files.
+	 * Return a new {@link TestCompiler} instance with additional resource files.
 	 * @param resourceFiles the additional resource files
 	 * @return a new {@link TestCompiler} instance
 	 */
