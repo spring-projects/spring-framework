@@ -57,6 +57,9 @@ public class DynamicClassLoader extends ClassLoader {
 		this.resourceFiles = resourceFiles;
 		this.classFiles = classFiles;
 		this.defineClassMethod = findDefineClassMethod(parent);
+		if (this.defineClassMethod != null) {
+			classFiles.forEach(this::defineClass);
+		}
 	}
 
 	@Nullable
