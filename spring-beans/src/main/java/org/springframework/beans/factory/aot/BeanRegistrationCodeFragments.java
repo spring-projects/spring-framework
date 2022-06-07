@@ -60,10 +60,11 @@ public abstract class BeanRegistrationCodeFragments {
 
 	/**
 	 * Package-private constructor exclusively for
-	 * {@link DefaultBeanRegistrationCodeFragments}.
+	 * {@link DefaultBeanRegistrationCodeFragments}. All methods are overridden
+	 * so {@code this.codeFragments} is never actually used.
 	 */
 	BeanRegistrationCodeFragments() {
-		this.codeFragments = null;
+		this.codeFragments = this;
 	}
 
 	/**
