@@ -21,22 +21,29 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A hint that describes the need for a proxy against a concrete class.
  *
  * @author Stephane Nicoll
+ * @author Brian Clozel
  * @since 6.0
  */
-public final class ClassProxyHint {
+public final class ClassProxyHint implements ConditionalHint {
 
 	private final TypeReference targetClass;
 
 	private final List<TypeReference> proxiedInterfaces;
 
+	@Nullable
+	private final TypeReference reachableType;
+
 
 	private ClassProxyHint(Builder builder) {
 		this.targetClass = builder.targetClass;
 		this.proxiedInterfaces = builder.proxiedInterfaces.stream().distinct().toList();
+		this.reachableType = builder.reachableType;
 	}
 
 	/**
@@ -76,6 +83,12 @@ public final class ClassProxyHint {
 		return this.proxiedInterfaces;
 	}
 
+	@Nullable
+	@Override
+	public TypeReference getReachableType() {
+		return this.reachableType;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -86,7 +99,8 @@ public final class ClassProxyHint {
 		}
 		ClassProxyHint that = (ClassProxyHint) o;
 		return this.targetClass.equals(that.targetClass)
-				&& this.proxiedInterfaces.equals(that.proxiedInterfaces);
+				&& this.proxiedInterfaces.equals(that.proxiedInterfaces)
+				&& Objects.equals(this.reachableType, that.reachableType);
 	}
 
 	@Override
@@ -103,6 +117,9 @@ public final class ClassProxyHint {
 		private final TypeReference targetClass;
 
 		private final LinkedList<TypeReference> proxiedInterfaces = new LinkedList<>();
+
+		@Nullable
+		private TypeReference reachableType;
 
 
 		Builder(TypeReference targetClass) {
@@ -127,6 +144,18 @@ public final class ClassProxyHint {
 		public Builder proxiedInterfaces(Class<?>... proxiedInterfaces) {
 			this.proxiedInterfaces.addAll(Arrays.stream(proxiedInterfaces)
 					.map(TypeReference::of).toList());
+			return this;
+		}
+
+		/**
+		 * Make this hint conditional on the fact that the specified type
+		 * can be resolved.
+		 * @param reachableType the type that should be reachable for this
+		 * hint to apply
+		 * @return {@code this}, to facilitate method chaining
+		 */
+		public Builder onReachableType(TypeReference reachableType) {
+			this.reachableType = reachableType;
 			return this;
 		}
 

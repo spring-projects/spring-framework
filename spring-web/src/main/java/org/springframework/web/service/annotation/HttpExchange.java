@@ -26,21 +26,23 @@ import org.springframework.core.annotation.AliasFor;
 import org.springframework.web.bind.annotation.Mapping;
 
 /**
- * Annotation that declares an HTTP service method as an HTTP endpoint defined
- * through attributes of the annotation and method argument values.
+ * Annotation to declare a method on an HTTP service interface as an HTTP
+ * endpoint. The endpoint details are defined statically through attributes of
+ * the annotation, as well as through the input method argument values.
  *
- * <p>The annotation may only be used at the type level &mdash; for example to
- * specify a base URL path. At the method level, use one of the HTTP method
- * specific, shortcut annotations, each of which is <em>meta-annotated</em> with
- * {@link HttpExchange}:
+ * <p>Supported at the type level to express common attributes, to be inherited
+ * by all methods, such as a base URL path.
+ *
+ * <p>At the method level, it's more common to use one of the below HTTP method
+ * specific, shortcut annotation, each of which is itself <em>meta-annotated</em>
+ * with {@code HttpExchange}:
+ *
  * <ul>
  * <li>{@link GetExchange}
  * <li>{@link PostExchange}
  * <li>{@link PutExchange}
  * <li>{@link PatchExchange}
  * <li>{@link DeleteExchange}
- * <li>{@link OptionsExchange}
- * <li>{@link HeadExchange}
  * </ul>
  *
  * <p>Supported method arguments:
@@ -99,7 +101,7 @@ import org.springframework.web.bind.annotation.Mapping;
  * @author Rossen Stoyanchev
  * @since 6.0
  */
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Mapping

@@ -170,7 +170,7 @@ configure(allprojects) { project ->
 			dependency "org.junit.support:testng-engine:1.0.1"
 			dependency "org.hamcrest:hamcrest:2.1"
 			dependency "org.awaitility:awaitility:3.1.6"
-			dependency "org.assertj:assertj-core:3.22.0"
+			dependency "org.assertj:assertj-core:3.23.1"
 			dependencySet(group: 'org.xmlunit', version: '2.9.0') {
 				entry 'xmlunit-assertj'
 				entry('xmlunit-matchers') {

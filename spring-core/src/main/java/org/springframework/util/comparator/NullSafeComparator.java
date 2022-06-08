@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,11 +112,11 @@ public class NullSafeComparator<T> implements Comparator<T> {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof NullSafeComparator)) {
+		if (!(other instanceof NullSafeComparator<?> otherComparator)) {
 			return false;
 		}
-		NullSafeComparator<T> otherComp = (NullSafeComparator<T>) other;
-		return (this.nonNullComparator.equals(otherComp.nonNullComparator) && this.nullsLow == otherComp.nullsLow);
+		return (this.nonNullComparator.equals(otherComparator.nonNullComparator)
+				&& this.nullsLow == otherComparator.nullsLow);
 	}
 
 	@Override

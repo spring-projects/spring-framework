@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.io.support;
+package org.springframework.aot.hint.support;
 
 import java.util.List;
 import java.util.Map;
@@ -27,6 +27,7 @@ import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeHint;
+import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.core.log.LogMessage;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
@@ -41,13 +42,13 @@ import org.springframework.util.ClassUtils;
  */
 class SpringFactoriesLoaderRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
 
-	private static List<String> RESOURCE_LOCATIONS = List
-			.of(SpringFactoriesLoader.FACTORIES_RESOURCE_LOCATION);
+	private static final List<String> RESOURCE_LOCATIONS =
+			List.of(SpringFactoriesLoader.FACTORIES_RESOURCE_LOCATION);
 
-	private static final Consumer<TypeHint.Builder> HINT = builder -> builder
-			.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+	private static final Consumer<TypeHint.Builder> HINT = builder ->
+			builder.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 
-	private final Log logger = LogFactory.getLog(SpringFactoriesLoaderRuntimeHintsRegistrar.class);
+	private static final Log logger = LogFactory.getLog(SpringFactoriesLoaderRuntimeHintsRegistrar.class);
 
 
 	@Override
@@ -57,11 +58,10 @@ class SpringFactoriesLoaderRuntimeHintsRegistrar implements RuntimeHintsRegistra
 		}
 	}
 
-	private void registerHints(RuntimeHints hints, ClassLoader classLoader,
-			String resourceLocation) {
+	private void registerHints(RuntimeHints hints, ClassLoader classLoader, String resourceLocation) {
 		hints.resources().registerPattern(resourceLocation);
-		Map<String, List<String>> factories = SpringFactoriesLoader
-				.loadFactoriesResource(classLoader, resourceLocation);
+		Map<String, List<String>> factories =
+				ExtendedSpringFactoriesLoader.accessLoadFactoriesResource(classLoader, resourceLocation);
 		factories.forEach((factoryClassName, implementationClassNames) ->
 				registerHints(hints, classLoader, factoryClassName, implementationClassNames));
 	}
@@ -69,16 +69,23 @@ class SpringFactoriesLoaderRuntimeHintsRegistrar implements RuntimeHintsRegistra
 	private void registerHints(RuntimeHints hints, ClassLoader classLoader,
 			String factoryClassName, List<String> implementationClassNames) {
 		Class<?> factoryClass = resolveClassName(classLoader, factoryClassName);
-		if(factoryClass == null) {
-			logger.trace(LogMessage.format("Skipping factories for [%s]", factoryClassName));
+		if (factoryClass == null) {
+			if (logger.isTraceEnabled()) {
+				logger.trace(LogMessage.format("Skipping factories for [%s]", factoryClassName));
+			}
 			return;
 		}
-		logger.trace(LogMessage.format("Processing factories for [%s]", factoryClassName));
+		if (logger.isTraceEnabled()) {
+			logger.trace(LogMessage.format("Processing factories for [%s]", factoryClassName));
+		}
 		hints.reflection().registerType(factoryClass, HINT);
 		for (String implementationClassName : implementationClassNames) {
 			Class<?> implementationType = resolveClassName(classLoader, implementationClassName);
-			logger.trace(LogMessage.format("%s factory type [%s] and implementation [%s]",
-					(implementationType != null) ? "Processing" : "Skipping", factoryClassName, implementationClassName));
+			if (logger.isTraceEnabled()) {
+				logger.trace(LogMessage.format("%s factory type [%s] and implementation [%s]",
+						(implementationType != null ? "Processing" : "Skipping"), factoryClassName,
+						implementationClassName));
+			}
 			if (implementationType != null) {
 				hints.reflection().registerType(implementationType, HINT);
 			}
@@ -96,6 +103,18 @@ class SpringFactoriesLoaderRuntimeHintsRegistrar implements RuntimeHintsRegistra
 		catch (Throwable ex) {
 			return null;
 		}
+	}
+
+	private static class ExtendedSpringFactoriesLoader extends SpringFactoriesLoader {
+
+		public ExtendedSpringFactoriesLoader(@Nullable ClassLoader classLoader, Map<String, List<String>> factories) {
+			super(classLoader, factories);
+		}
+
+		static Map<String, List<String>> accessLoadFactoriesResource(ClassLoader classLoader, String resourceLocation) {
+			return SpringFactoriesLoader.loadFactoriesResource(classLoader, resourceLocation);
+		}
+
 	}
 
 }

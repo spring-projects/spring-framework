@@ -43,13 +43,15 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+
+	@Nullable
 	private final ConversionService conversionService;
 
 	private final Map<MethodParameter, NamedValueInfo> namedValueInfoCache = new ConcurrentHashMap<>(256);
 
 
 	/**
-	 * Create an instance.
+	 * Constructor for a resolver to a String value.
 	 * @param conversionService the {@link ConversionService} to use to format
 	 * Object to String values
 	 */
@@ -58,12 +60,11 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 		this.conversionService = conversionService;
 	}
 
-
 	/**
-	 * Return the configured {@link ConversionService}.
+	 * Constructor for a resolver to an Object value, without conversion.
 	 */
-	public ConversionService getConversionService() {
-		return this.conversionService;
+	protected AbstractNamedValueArgumentResolver() {
+		this.conversionService = null;
 	}
 
 
@@ -166,8 +167,8 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 			value = defaultValue;
 		}
 
-		if (!(value instanceof String)) {
-			value = getConversionService().convert(value, String.class);
+		if (this.conversionService != null && !(value instanceof String)) {
+			value = this.conversionService.convert(value, String.class);
 		}
 
 		if (value == null) {
@@ -179,17 +180,19 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 			logger.trace("Resolved " + valueLabel + " value '" + name + ":" + value + "'");
 		}
 
-		addRequestValue(name, (String) value, requestValues);
+		addRequestValue(name, value, requestValues);
 	}
 
 	/**
 	 * Add the given, single request value. This may be called multiples times
 	 * if the request value is multivalued.
+	 * <p>If the resolver was created with a {@link ConversionService}, the value
+	 * will have been converted to a String and may be cast down.
 	 * @param name the request value name
 	 * @param value the value
 	 * @param requestValues builder to add the request value to
 	 */
-	protected abstract void addRequestValue(String name, String value, HttpRequestValues.Builder requestValues);
+	protected abstract void addRequestValue(String name, Object value, HttpRequestValues.Builder requestValues);
 
 
 	/**

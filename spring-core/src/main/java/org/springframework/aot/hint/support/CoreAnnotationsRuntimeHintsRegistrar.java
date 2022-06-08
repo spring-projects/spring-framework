@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.core.annotation;
+package org.springframework.aot.hint.support;
 
-import java.util.function.Consumer;
+import java.util.stream.Stream;
 
-import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
-import org.springframework.aot.hint.TypeHint;
+import org.springframework.core.annotation.AliasFor;
+import org.springframework.core.annotation.Order;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link RuntimeHintsRegistrar} for core annotations.
@@ -31,13 +32,10 @@ import org.springframework.aot.hint.TypeHint;
  */
 class CoreAnnotationsRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
 
-	private static final Consumer<TypeHint.Builder> HINT = builder -> builder.withMembers(
-			MemberCategory.INVOKE_DECLARED_METHODS);
-
 	@Override
-	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
-		hints.reflection().registerType(AliasFor.class, HINT);
-		hints.reflection().registerType(Order.class, HINT);
+	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
+		Stream.of(AliasFor.class, Order.class).forEach(annotationType ->
+				RuntimeHintsUtils.registerAnnotation(hints, annotationType));
 	}
 
 }

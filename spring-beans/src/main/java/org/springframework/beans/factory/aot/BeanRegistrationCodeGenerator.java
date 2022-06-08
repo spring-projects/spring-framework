@@ -89,8 +89,7 @@ class BeanRegistrationCodeGenerator implements BeanRegistrationCode {
 		CodeBlock instanceSupplierCode = this.codeFragments.generateInstanceSupplierCode(
 				generationContext, this, this.constructorOrFactoryMethod,
 				this.instancePostProcessors.isEmpty());
-		builder.add(
-				this.codeFragments.generateSetBeanInstanceSupplierCode(generationContext,
+		builder.add(this.codeFragments.generateSetBeanInstanceSupplierCode(generationContext,
 						this, instanceSupplierCode, this.instancePostProcessors));
 		builder.add(this.codeFragments.generateReturnCode(generationContext, this));
 		return builder.build();

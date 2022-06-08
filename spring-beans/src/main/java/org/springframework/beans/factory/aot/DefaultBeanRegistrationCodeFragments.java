@@ -54,14 +54,18 @@ class DefaultBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments
 
 	private final BeanDefinitionMethodGeneratorFactory beanDefinitionMethodGeneratorFactory;
 
+	private final String featureNamePrefix;
+
 
 	DefaultBeanRegistrationCodeFragments(BeanRegistrationsCode beanRegistrationsCode,
 			RegisteredBean registeredBean,
-			BeanDefinitionMethodGeneratorFactory beanDefinitionMethodGeneratorFactory) {
+			BeanDefinitionMethodGeneratorFactory beanDefinitionMethodGeneratorFactory,
+			String featureNamePrefix) {
 
 		this.beanRegistrationsCode = beanRegistrationsCode;
 		this.registeredBean = registeredBean;
 		this.beanDefinitionMethodGeneratorFactory = beanDefinitionMethodGeneratorFactory;
+		this.featureNamePrefix = featureNamePrefix;
 	}
 
 
@@ -120,7 +124,7 @@ class DefaultBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments
 					.getBeanDefinitionMethodGenerator(innerRegisteredBean, name);
 			Assert.state(methodGenerator != null, "Unexpected filtering of inner-bean");
 			MethodReference generatedMethod = methodGenerator
-					.generateBeanDefinitionMethod(generationContext,
+					.generateBeanDefinitionMethod(generationContext, this.featureNamePrefix,
 							this.beanRegistrationsCode);
 			return generatedMethod.toInvokeCodeBlock();
 		}
@@ -138,6 +142,7 @@ class DefaultBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments
 		return null;
 	}
 
+	@Override
 	public CodeBlock generateSetBeanInstanceSupplierCode(
 			GenerationContext generationContext,
 			BeanRegistrationCode beanRegistrationCode, CodeBlock instanceSupplierCode,

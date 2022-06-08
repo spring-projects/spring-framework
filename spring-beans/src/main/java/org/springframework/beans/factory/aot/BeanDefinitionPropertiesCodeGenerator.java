@@ -21,7 +21,6 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -138,7 +137,7 @@ class BeanDefinitionPropertiesCodeGenerator {
 	}
 
 	private void addInitDestroyMethods(Builder builder,
-			AbstractBeanDefinition beanDefinition, String[] methodNames, String format) {
+			AbstractBeanDefinition beanDefinition, @Nullable String[] methodNames, String format) {
 
 		if (!ObjectUtils.isEmpty(methodNames)) {
 			Class<?> beanType = ClassUtils
@@ -151,7 +150,9 @@ class BeanDefinitionPropertiesCodeGenerator {
 					addInitDestroyHint(beanType, methodName);
 				}
 			}
-			builder.addStatement(format, BEAN_DEFINITION_VARIABLE, arguments.build());
+			if (!arguments.isEmpty()) {
+				builder.addStatement(format, BEAN_DEFINITION_VARIABLE, arguments.build());
+			}
 		}
 	}
 
@@ -234,15 +235,6 @@ class BeanDefinitionPropertiesCodeGenerator {
 		}
 		return Collections.unmodifiableMap(writeMethods);
 	}
-
-	@Nullable
-	private Method findWriteMethod(BeanInfo beanInfo, String propertyName) {
-		return Arrays.stream(beanInfo.getPropertyDescriptors())
-				.filter(pd -> propertyName.equals(pd.getName()))
-				.map(java.beans.PropertyDescriptor::getWriteMethod)
-				.filter(Objects::nonNull).findFirst().orElse(null);
-	}
-
 
 	private void addAttributes(CodeBlock.Builder builder, BeanDefinition beanDefinition) {
 		String[] attributeNames = beanDefinition.attributeNames();

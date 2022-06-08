@@ -86,7 +86,7 @@ public class WebClientAdapter implements HttpClientAdapter {
 	private WebClient.RequestBodySpec toBodySpec(HttpRequestValues requestValues) {
 
 		HttpMethod httpMethod = requestValues.getHttpMethod();
-		Assert.notNull(httpMethod, "No HttpMethod");
+		Assert.notNull(httpMethod, "HttpMethod is required");
 
 		WebClient.RequestBodyUriSpec uriSpec = this.webClient.method(httpMethod);
 
@@ -103,6 +103,7 @@ public class WebClientAdapter implements HttpClientAdapter {
 
 		bodySpec.headers(headers -> headers.putAll(requestValues.getHeaders()));
 		bodySpec.cookies(cookies -> cookies.putAll(requestValues.getCookies()));
+		bodySpec.attributes(attributes -> attributes.putAll(requestValues.getAttributes()));
 
 		if (requestValues.getBodyValue() != null) {
 			bodySpec.bodyValue(requestValues.getBodyValue());

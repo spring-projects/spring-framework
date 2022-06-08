@@ -32,20 +32,12 @@ final class CompileWithTargetClassAccessClassLoader extends ClassLoader {
 
 	private final ClassLoader testClassLoader;
 
-	private final String[] targetClasses;
 
-
-	public CompileWithTargetClassAccessClassLoader(ClassLoader testClassLoader,
-			String[] targetClasses) {
+	public CompileWithTargetClassAccessClassLoader(ClassLoader testClassLoader) {
 		super(testClassLoader.getParent());
 		this.testClassLoader = testClassLoader;
-		this.targetClasses = targetClasses;
 	}
 
-
-	public String[] getTargetClasses() {
-		return this.targetClasses;
-	}
 
 	@Override
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
@@ -70,9 +62,19 @@ final class CompileWithTargetClassAccessClassLoader extends ClassLoader {
 		return super.findClass(name);
 	}
 
+
+	Class<?> defineClassWithTargetAccess(String name, byte[] b, int off, int len) {
+		return super.defineClass(name, b, off, len);
+	}
+
 	@Override
 	protected Enumeration<URL> findResources(String name) throws IOException {
 		return this.testClassLoader.getResources(name);
+	}
+
+	@Override
+	protected URL findResource(String name) {
+		return this.testClassLoader.getResource(name);
 	}
 
 }

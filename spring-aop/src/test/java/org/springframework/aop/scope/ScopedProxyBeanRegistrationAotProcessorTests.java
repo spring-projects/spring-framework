@@ -34,8 +34,10 @@ import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.test.generator.compile.Compiled;
 import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.aot.AotFactoriesLoader;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
+import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.TestBeanRegistrationsAotProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
@@ -50,13 +52,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * Tests for {@link ScopedProxyBeanRegistrationCodeFragmentsCustomizer}.
+ * Tests for {@link ScopedProxyBeanRegistrationAotProcessor}.
  *
  * @author Stephane Nicoll
  * @author Phillip Webb
  * @since 6.0
  */
-class ScopedProxyBeanRegistrationCodeFragmentsCustomizerTests {
+class ScopedProxyBeanRegistrationAotProcessorTests {
 
 	private DefaultListableBeanFactory beanFactory;
 
@@ -78,6 +80,12 @@ class ScopedProxyBeanRegistrationCodeFragmentsCustomizerTests {
 	}
 
 	@Test
+	void scopedProxyBeanRegistrationAotProcessorIsRegistered() {
+		assertThat(new AotFactoriesLoader(this.beanFactory).load(BeanRegistrationAotProcessor.class))
+				.anyMatch(ScopedProxyBeanRegistrationAotProcessor.class::isInstance);
+	}
+
+	@Test
 	void getBeanRegistrationCodeGeneratorWhenNotScopedProxy() {
 		BeanDefinition beanDefinition = BeanDefinitionBuilder
 				.rootBeanDefinition(PropertiesFactoryBean.class).getBeanDefinition();
@@ -95,8 +103,8 @@ class ScopedProxyBeanRegistrationCodeFragmentsCustomizerTests {
 		this.beanFactory.registerBeanDefinition("test", beanDefinition);
 		testCompile((freshBeanFactory,
 				compiled) -> assertThatExceptionOfType(BeanCreationException.class)
-						.isThrownBy(() -> freshBeanFactory.getBean("test"))
-						.withMessageContaining("'targetBeanName' is required"));
+				.isThrownBy(() -> freshBeanFactory.getBean("test"))
+				.withMessageContaining("'targetBeanName' is required"));
 	}
 
 	@Test
@@ -108,8 +116,8 @@ class ScopedProxyBeanRegistrationCodeFragmentsCustomizerTests {
 		this.beanFactory.registerBeanDefinition("test", beanDefinition);
 		testCompile((freshBeanFactory,
 				compiled) -> assertThatExceptionOfType(BeanCreationException.class)
-						.isThrownBy(() -> freshBeanFactory.getBean("test"))
-						.withMessageContaining("No bean named 'testDoesNotExist'"));
+				.isThrownBy(() -> freshBeanFactory.getBean("test"))
+				.withMessageContaining("No bean named 'testDoesNotExist'"));
 	}
 
 	@Test
@@ -133,25 +141,25 @@ class ScopedProxyBeanRegistrationCodeFragmentsCustomizerTests {
 	private void testCompile(BiConsumer<DefaultListableBeanFactory, Compiled> result) {
 		BeanFactoryInitializationAotContribution contribution = this.processor
 				.processAheadOfTime(this.beanFactory);
+		assertThat(contribution).isNotNull();
 		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
 		this.generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(this.generatedFiles).printFiles(System.out)
-				.compile(compiled -> {
-					MethodReference reference = this.beanFactoryInitializationCode
-							.getInitializers().get(0);
-					Object instance = compiled.getInstance(Object.class,
-							reference.getDeclaringClass().toString());
-					Method method = ReflectionUtils.findMethod(instance.getClass(),
-							reference.getMethodName(), DefaultListableBeanFactory.class);
-					DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory();
-					freshBeanFactory.setBeanClassLoader(compiled.getClassLoader());
-					ReflectionUtils.invokeMethod(method, instance, freshBeanFactory);
-					result.accept(freshBeanFactory, compiled);
-				});
+		TestCompiler.forSystem().withFiles(this.generatedFiles).compile(compiled -> {
+			MethodReference reference = this.beanFactoryInitializationCode
+					.getInitializers().get(0);
+			Object instance = compiled.getInstance(Object.class,
+					reference.getDeclaringClass().toString());
+			Method method = ReflectionUtils.findMethod(instance.getClass(),
+					reference.getMethodName(), DefaultListableBeanFactory.class);
+			DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory();
+			freshBeanFactory.setBeanClassLoader(compiled.getClassLoader());
+			ReflectionUtils.invokeMethod(method, instance, freshBeanFactory);
+			result.accept(freshBeanFactory, compiled);
+		});
 	}
 
 
-	class MockBeanFactoryInitializationCode implements BeanFactoryInitializationCode {
+	static class MockBeanFactoryInitializationCode implements BeanFactoryInitializationCode {
 
 		private final GeneratedMethods generatedMethods = new GeneratedMethods();
 
@@ -168,7 +176,7 @@ class ScopedProxyBeanRegistrationCodeFragmentsCustomizerTests {
 		}
 
 		List<MethodReference> getInitializers() {
-			return initializers;
+			return this.initializers;
 		}
 
 	}

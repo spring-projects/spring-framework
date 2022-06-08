@@ -18,10 +18,13 @@ package org.springframework.aot.test.generator.compile;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
+import javax.annotation.processing.Processor;
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticListener;
 import javax.tools.JavaCompiler;
@@ -43,6 +46,7 @@ import org.springframework.lang.Nullable;
  * Utility that can be used to dynamically compile and test Java source code.
  *
  * @author Phillip Webb
+ * @author Scott Frederick
  * @since 6.0
  * @see #forSystem()
  */
@@ -57,13 +61,18 @@ public final class TestCompiler {
 
 	private final ResourceFiles resourceFiles;
 
+	private final List<Processor> processors;
+
 
 	private TestCompiler(@Nullable ClassLoader classLoader, JavaCompiler compiler,
-			SourceFiles sourceFiles, ResourceFiles resourceFiles) {
+			SourceFiles sourceFiles, ResourceFiles resourceFiles,
+			List<Processor> processors) {
+
 		this.classLoader = classLoader;
 		this.compiler = compiler;
 		this.sourceFiles = sourceFiles;
 		this.resourceFiles = resourceFiles;
+		this.processors = processors;
 	}
 
 
@@ -83,7 +92,7 @@ public final class TestCompiler {
 	 */
 	public static TestCompiler forCompiler(JavaCompiler javaCompiler) {
 		return new TestCompiler(null, javaCompiler, SourceFiles.none(),
-				ResourceFiles.none());
+				ResourceFiles.none(), Collections.emptyList());
 	}
 
 	/**
@@ -104,65 +113,88 @@ public final class TestCompiler {
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with addition source files.
+	 * Return a new {@link TestCompiler} instance with additional source files.
 	 * @param sourceFiles the additional source files
 	 * @return a new {@link TestCompiler} instance
 	 */
 	public TestCompiler withSources(SourceFile... sourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler,
-				this.sourceFiles.and(sourceFiles), this.resourceFiles);
+				this.sourceFiles.and(sourceFiles), this.resourceFiles, this.processors);
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with addition source files.
+	 * Return a new {@link TestCompiler} instance with additional source files.
 	 * @param sourceFiles the additional source files
 	 * @return a new {@link TestCompiler} instance
 	 */
 	public TestCompiler withSources(Iterable<SourceFile> sourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler,
-				this.sourceFiles.and(sourceFiles), this.resourceFiles);
+				this.sourceFiles.and(sourceFiles), this.resourceFiles, this.processors);
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with addition source files.
+	 * Return a new {@link TestCompiler} instance with additional source files.
 	 * @param sourceFiles the additional source files
 	 * @return a new {@link TestCompiler} instance
 	 */
 	public TestCompiler withSources(SourceFiles sourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler,
-				this.sourceFiles.and(sourceFiles), this.resourceFiles);
+				this.sourceFiles.and(sourceFiles), this.resourceFiles, this.processors);
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with addition resource files.
+	 * Return a new {@link TestCompiler} instance with additional resource files.
 	 * @param resourceFiles the additional resource files
 	 * @return a new {@link TestCompiler} instance
 	 */
 	public TestCompiler withResources(ResourceFile... resourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler, this.sourceFiles,
-				this.resourceFiles.and(resourceFiles));
+				this.resourceFiles.and(resourceFiles), this.processors);
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with addition source files.
+	 * Return a new {@link TestCompiler} instance with additional source files.
 	 * @param resourceFiles the additional source files
 	 * @return a new {@link TestCompiler} instance
 	 */
 	public TestCompiler withResources(Iterable<ResourceFile> resourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler, this.sourceFiles,
-				this.resourceFiles.and(resourceFiles));
+				this.resourceFiles.and(resourceFiles), this.processors);
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with addition resource files.
+	 * Return a new {@link TestCompiler} instance with additional resource files.
 	 * @param resourceFiles the additional resource files
 	 * @return a new {@link TestCompiler} instance
 	 */
 	public TestCompiler withResources(ResourceFiles resourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler, this.sourceFiles,
-				this.resourceFiles.and(resourceFiles));
+				this.resourceFiles.and(resourceFiles), this.processors);
 	}
 
+	/**
+	 * Return a new {@link TestCompiler} instance with additional annotation processors.
+	 * @param processors the additional annotation processors
+	 * @return a new {@link TestCompiler} instance
+	 */
+	public TestCompiler withProcessors(Processor... processors) {
+		List<Processor> mergedProcessors = new ArrayList<>(this.processors);
+		mergedProcessors.addAll(Arrays.asList(processors));
+		return new TestCompiler(this.classLoader, this.compiler, this.sourceFiles,
+				this.resourceFiles, mergedProcessors);
+	}
+
+	/**
+	 * Return a new {@link TestCompiler} instance with additional annotation processors.
+	 * @param processors the additional annotation processors
+	 * @return a new {@link TestCompiler} instance
+	 */
+	public TestCompiler withProcessors(Iterable<Processor> processors) {
+		List<Processor> mergedProcessors = new ArrayList<>(this.processors);
+		processors.forEach(mergedProcessors::add);
+		return new TestCompiler(this.classLoader, this.compiler, this.sourceFiles,
+				this.resourceFiles, mergedProcessors);
+	}
 
 	/**
 	 * Compile content from this instance along with the additional provided
@@ -244,6 +276,9 @@ public final class TestCompiler {
 			Errors errors = new Errors();
 			CompilationTask task = this.compiler.getTask(null, fileManager, errors, null,
 					null, compilationUnits);
+			if (!this.processors.isEmpty()) {
+				task.setProcessors(this.processors);
+			}
 			boolean result = task.call();
 			if (!result || errors.hasReportedErrors()) {
 				throw new CompilationException(errors.toString(), this.sourceFiles, this.resourceFiles);

@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 
 /**
  * An immutable collection of {@link SourceFile} instances.
@@ -155,7 +156,7 @@ public final class SourceFiles implements Iterable<SourceFile> {
 	 */
 	public SourceFile getSingleFromPackage(String packageName) {
 		return this.files.getSingle(candidate -> Objects.equals(packageName,
-				candidate.getJavaSource().getPackageName()));
+				ClassUtils.getPackageName(candidate.getClassName())));
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
@@ -320,7 +321,8 @@ public class JdbcTemplateTests {
 		given(this.connection.createStatement()).willReturn(this.preparedStatement);
 
 		try {
-			assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+			assertThatRuntimeException()
+				.isThrownBy(() ->
 					this.template.query(sql, (RowCallbackHandler) rs -> {
 						throw runtimeException;
 					}))

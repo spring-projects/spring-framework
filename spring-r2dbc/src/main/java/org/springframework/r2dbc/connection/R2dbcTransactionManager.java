@@ -209,32 +209,30 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 				connectionMono = Mono.just(txObject.getConnectionHolder().getConnection());
 			}
 
-			return connectionMono.flatMap(con -> {
-				return prepareTransactionalConnection(con, definition, transaction)
-						.then(Mono.from(doBegin(definition, con)))
-						.doOnSuccess(v -> {
-							txObject.getConnectionHolder().setTransactionActive(true);
-							Duration timeout = determineTimeout(definition);
-							if (!timeout.isNegative() && !timeout.isZero()) {
-								txObject.getConnectionHolder().setTimeoutInMillis(timeout.toMillis());
-							}
-							// Bind the connection holder to the thread.
-							if (txObject.isNewConnectionHolder()) {
-								synchronizationManager.bindResource(obtainConnectionFactory(), txObject.getConnectionHolder());
-							}
-						}).thenReturn(con).onErrorResume(e -> {
-							if (txObject.isNewConnectionHolder()) {
-								return ConnectionFactoryUtils.releaseConnection(con, obtainConnectionFactory())
-										.doOnTerminate(() -> txObject.setConnectionHolder(null, false))
-										.then(Mono.error(e));
-							}
-							return Mono.error(e);
-						});
-			}).onErrorResume(e -> {
-				CannotCreateTransactionException ex = new CannotCreateTransactionException(
-						"Could not open R2DBC Connection for transaction", e);
-				return Mono.error(ex);
-			});
+			return connectionMono.flatMap(con -> prepareTransactionalConnection(con, definition, transaction)
+					.then(Mono.from(doBegin(definition, con)))
+					.doOnSuccess(v -> {
+						txObject.getConnectionHolder().setTransactionActive(true);
+						Duration timeout = determineTimeout(definition);
+						if (!timeout.isNegative() && !timeout.isZero()) {
+							txObject.getConnectionHolder().setTimeoutInMillis(timeout.toMillis());
+						}
+						// Bind the connection holder to the thread.
+						if (txObject.isNewConnectionHolder()) {
+							synchronizationManager.bindResource(obtainConnectionFactory(), txObject.getConnectionHolder());
+						}
+					}).thenReturn(con).onErrorResume(e -> {
+						if (txObject.isNewConnectionHolder()) {
+							return ConnectionFactoryUtils.releaseConnection(con, obtainConnectionFactory())
+									.doOnTerminate(() -> txObject.setConnectionHolder(null, false))
+									.then(Mono.error(e));
+						}
+						return Mono.error(e);
+					})).onErrorResume(e -> {
+						CannotCreateTransactionException ex = new CannotCreateTransactionException(
+								"Could not open R2DBC Connection for transaction", e);
+						return Mono.error(ex);
+					});
 		}).then();
 	}
 

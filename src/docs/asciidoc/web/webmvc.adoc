@@ -1718,9 +1718,9 @@ extracts the name, version, and file extension:
 ----
 
 URI path patterns can also have embedded `${...}` placeholders that are resolved on startup
-by using `PropertyPlaceHolderConfigurer` against local, system, environment, and other property
-sources. You can use this, for example, to parameterize a base URL based on some external
-configuration.
+by using `PropertySourcesPlaceholderConfigurer` against local, system, environment, and
+other property sources. You can use this, for example, to parameterize a base URL based on
+some external configuration.
 
 
 

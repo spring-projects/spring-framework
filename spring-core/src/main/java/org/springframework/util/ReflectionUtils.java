@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,11 +106,11 @@ public abstract class ReflectionUtils {
 		if (ex instanceof IllegalAccessException) {
 			throw new IllegalStateException("Could not access method or field: " + ex.getMessage());
 		}
-		if (ex instanceof InvocationTargetException) {
-			handleInvocationTargetException((InvocationTargetException) ex);
+		if (ex instanceof InvocationTargetException invocationTargetException) {
+			handleInvocationTargetException(invocationTargetException);
 		}
-		if (ex instanceof RuntimeException) {
-			throw (RuntimeException) ex;
+		if (ex instanceof RuntimeException runtimeException) {
+			throw runtimeException;
 		}
 		throw new UndeclaredThrowableException(ex);
 	}
@@ -138,11 +138,11 @@ public abstract class ReflectionUtils {
 	 * @throws RuntimeException the rethrown exception
 	 */
 	public static void rethrowRuntimeException(Throwable ex) {
-		if (ex instanceof RuntimeException) {
-			throw (RuntimeException) ex;
+		if (ex instanceof RuntimeException runtimeException) {
+			throw runtimeException;
 		}
-		if (ex instanceof Error) {
-			throw (Error) ex;
+		if (ex instanceof Error error) {
+			throw error;
 		}
 		throw new UndeclaredThrowableException(ex);
 	}
@@ -155,17 +155,17 @@ public abstract class ReflectionUtils {
 	 * <p>Rethrows the underlying exception cast to an {@link Exception} or
 	 * {@link Error} if appropriate; otherwise, throws an
 	 * {@link UndeclaredThrowableException}.
-	 * @param ex the exception to rethrow
+	 * @param throwable the exception to rethrow
 	 * @throws Exception the rethrown exception (in case of a checked exception)
 	 */
-	public static void rethrowException(Throwable ex) throws Exception {
-		if (ex instanceof Exception) {
-			throw (Exception) ex;
+	public static void rethrowException(Throwable throwable) throws Exception {
+		if (throwable instanceof Exception exception) {
+			throw exception;
 		}
-		if (ex instanceof Error) {
-			throw (Error) ex;
+		if (throwable instanceof Error error) {
+			throw error;
 		}
-		throw new UndeclaredThrowableException(ex);
+		throw new UndeclaredThrowableException(throwable);
 	}
 
 

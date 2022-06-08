@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 import org.springframework.core.annotation.AliasFor;
 
 /**
- * Shortcut for {@link HttpExchange} for HTTP GET requests.
+ * Shortcut for {@link HttpExchange @HttpExchange} for HTTP GET requests.
  *
  * @author Rossen Stoyanchev
  * @since 6.0

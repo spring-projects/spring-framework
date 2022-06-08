@@ -91,7 +91,7 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 	}
 
 	@Test
-	@CompileWithTargetClassAccess(classes = PackagePrivateFieldInjectionSample.class)
+	@CompileWithTargetClassAccess
 	void contributeWhenPackagePrivateFieldInjectionInjectsUsingConsumer() {
 		Environment environment = new StandardEnvironment();
 		this.beanFactory.registerSingleton("environment", environment);
@@ -122,7 +122,7 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 	}
 
 	@Test
-	@CompileWithTargetClassAccess(classes = PackagePrivateMethodInjectionSample.class)
+	@CompileWithTargetClassAccess
 	void contributeWhenPackagePrivateMethodInjectionInjectsUsingConsumer() {
 		Environment environment = new StandardEnvironment();
 		this.beanFactory.registerSingleton("environment", environment);
@@ -183,11 +183,6 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 		private final List<MethodReference> instancePostProcessors = new ArrayList<>();
 
 		@Override
-		public void addInstancePostProcessor(MethodReference methodReference) {
-			this.instancePostProcessors.add(methodReference);
-		}
-
-		@Override
 		public ClassName getClassName() {
 			return null;
 		}
@@ -195,6 +190,11 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 		@Override
 		public MethodGenerator getMethodGenerator() {
 			return null;
+		}
+
+		@Override
+		public void addInstancePostProcessor(MethodReference methodReference) {
+			this.instancePostProcessors.add(methodReference);
 		}
 
 	}

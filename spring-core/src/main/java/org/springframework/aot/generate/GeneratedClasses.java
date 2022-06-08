@@ -58,19 +58,6 @@ public class GeneratedClasses implements ClassGenerator {
 						this.classNameGenerator.generateClassName(target, featureName)));
 	}
 
-	@Override
-	public GeneratedClass getOrGenerateClass(JavaFileGenerator javaFileGenerator,
-			String target, String featureName) {
-
-		Assert.notNull(javaFileGenerator, "'javaFileGenerator' must not be null");
-		Assert.hasLength(target, "'target' must not be empty");
-		Assert.hasLength(featureName, "'featureName' must not be empty");
-		Owner owner = new Owner(javaFileGenerator, target, featureName);
-		return this.classes.computeIfAbsent(owner,
-				key -> new GeneratedClass(javaFileGenerator,
-						this.classNameGenerator.generateClassName(target, featureName)));
-	}
-
 	/**
 	 * Write generated Spring {@code .factories} files to the given
 	 * {@link GeneratedFiles} instance.

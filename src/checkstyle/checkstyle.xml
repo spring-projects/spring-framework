@@ -24,8 +24,7 @@
 		<module name="com.puppycrawl.tools.checkstyle.checks.annotation.MissingOverrideCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.annotation.PackageAnnotationCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.annotation.AnnotationLocationCheck">
-			<property name="allowSamelineSingleParameterlessAnnotation"
-				value="false"/>
+			<property name="allowSamelineSingleParameterlessAnnotation" value="false"/>
 		</module>
 
 		<!-- Block Checks -->
@@ -78,8 +77,7 @@
 		<module name="io.spring.javaformat.checkstyle.filter.RequiresOuterThisFilter"/>
 		<module name="io.spring.javaformat.checkstyle.filter.IdentCheckFilter">
 			<property name="names" value="logger"/>
-			<module
-				name="com.puppycrawl.tools.checkstyle.checks.coding.RequireThisCheck">
+			<module name="com.puppycrawl.tools.checkstyle.checks.coding.RequireThisCheck">
 				<property name="checkMethods" value="false"/>
 				<property name="validateOnlyOverlapping" value="false"/>
 			</module>

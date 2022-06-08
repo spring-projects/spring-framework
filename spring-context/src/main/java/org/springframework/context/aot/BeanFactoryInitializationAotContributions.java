@@ -35,16 +35,16 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
  * @author Phillip Webb
  * @since 6.0
  */
-class BeanFactoryInitializationContributions {
+class BeanFactoryInitializationAotContributions {
 
 	private final List<BeanFactoryInitializationAotContribution> contributions;
 
 
-	BeanFactoryInitializationContributions(DefaultListableBeanFactory beanFactory) {
+	BeanFactoryInitializationAotContributions(DefaultListableBeanFactory beanFactory) {
 		this(beanFactory, new AotFactoriesLoader(beanFactory));
 	}
 
-	BeanFactoryInitializationContributions(DefaultListableBeanFactory beanFactory,
+	BeanFactoryInitializationAotContributions(DefaultListableBeanFactory beanFactory,
 			AotFactoriesLoader loader) {
 		this.contributions = getContributions(beanFactory, getProcessors(loader));
 	}

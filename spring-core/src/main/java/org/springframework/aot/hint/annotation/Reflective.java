@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.service.annotation;
+package org.springframework.aot.hint.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -25,33 +25,33 @@ import java.lang.annotation.Target;
 import org.springframework.core.annotation.AliasFor;
 
 /**
- * Shortcut for {@link HttpExchange} for HTTP HEAD requests.
+ * Indicate that the annotated element requires reflection.
  *
- * @author Rossen Stoyanchev
+ * <p>When present, either directly or as a meta-annotation, this annotation
+ * triggers the configured {@linkplain ReflectiveProcessor processors} against
+ * the annotated element. By default, a reflection hint is added on the
+ * annotated element so that it can be discovered and invoked if necessary.
+ *
+ * @author Stephane Nicoll
  * @since 6.0
+ * @see SimpleReflectiveProcessor
  */
-@Target(ElementType.METHOD)
+@Target({ ElementType.ANNOTATION_TYPE, ElementType.TYPE, ElementType.CONSTRUCTOR,
+		ElementType.FIELD, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@HttpExchange(method = "HEAD")
-public @interface HeadExchange {
+public @interface Reflective {
 
 	/**
-	 * Alias for {@link HttpExchange#value}.
+	 * Alias for {@link #processors()}.
 	 */
-	@AliasFor(annotation = HttpExchange.class)
-	String value() default "";
+	Class<? extends ReflectiveProcessor>[] value() default SimpleReflectiveProcessor.class;
 
 	/**
-	 * Alias for {@link HttpExchange#url()}.
+	 * {@link ReflectiveProcessor} implementations to invoke against the
+	 * annotated element.
 	 */
-	@AliasFor(annotation = HttpExchange.class)
-	String url() default "";
-
-	/**
-	 * Alias for {@link HttpExchange#accept()}.
-	 */
-	@AliasFor(annotation = HttpExchange.class)
-	String[] accept() default {};
+	@AliasFor("value")
+	Class<? extends ReflectiveProcessor>[] processors() default SimpleReflectiveProcessor.class;
 
 }

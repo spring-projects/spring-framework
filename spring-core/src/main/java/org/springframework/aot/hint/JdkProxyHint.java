@@ -22,20 +22,27 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A hint that describes the need of a JDK {@link Proxy}, that is an
  * interfaces-based proxy.
  *
  * @author Stephane Nicoll
+ * @author Brian Clozel
  * @since 6.0
  */
-public final class JdkProxyHint {
+public final class JdkProxyHint implements ConditionalHint {
 
 	private final List<TypeReference> proxiedInterfaces;
+
+	@Nullable
+	private final TypeReference reachableType;
 
 
 	private JdkProxyHint(Builder builder) {
 		this.proxiedInterfaces = List.copyOf(builder.proxiedInterfaces);
+		this.reachableType = builder.reachableType;
 	}
 
 	/**
@@ -64,6 +71,12 @@ public final class JdkProxyHint {
 		return this.proxiedInterfaces;
 	}
 
+	@Nullable
+	@Override
+	public TypeReference getReachableType() {
+		return this.reachableType;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -73,7 +86,8 @@ public final class JdkProxyHint {
 			return false;
 		}
 		JdkProxyHint that = (JdkProxyHint) o;
-		return this.proxiedInterfaces.equals(that.proxiedInterfaces);
+		return this.proxiedInterfaces.equals(that.proxiedInterfaces)
+				&& Objects.equals(this.reachableType, that.reachableType);
 	}
 
 	@Override
@@ -88,6 +102,10 @@ public final class JdkProxyHint {
 	public static class Builder {
 
 		private final LinkedList<TypeReference> proxiedInterfaces;
+
+		@Nullable
+		private TypeReference reachableType;
+
 
 		Builder() {
 			this.proxiedInterfaces = new LinkedList<>();
@@ -110,6 +128,18 @@ public final class JdkProxyHint {
 		 */
 		public Builder proxiedInterfaces(Class<?>... proxiedInterfaces) {
 			this.proxiedInterfaces.addAll(toTypeReferences(proxiedInterfaces));
+			return this;
+		}
+
+		/**
+		 * Make this hint conditional on the fact that the specified type
+		 * can be resolved.
+		 * @param reachableType the type that should be reachable for this
+		 * hint to apply
+		 * @return {@code this}, to facilitate method chaining
+		 */
+		public Builder onReachableType(TypeReference reachableType) {
+			this.reachableType = reachableType;
 			return this;
 		}
 

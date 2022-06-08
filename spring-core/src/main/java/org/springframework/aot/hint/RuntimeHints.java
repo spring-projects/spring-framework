@@ -36,7 +36,7 @@ public class RuntimeHints {
 
 	private final ResourceHints resources = new ResourceHints();
 
-	private final JavaSerializationHints javaSerialization = new JavaSerializationHints();
+	private final SerializationHints serialization = new SerializationHints();
 
 	private final ProxyHints proxies = new ProxyHints();
 
@@ -59,10 +59,10 @@ public class RuntimeHints {
 
 	/**
 	 * Provide access to serialization-based hints.
-	 * @return java serialization hints
+	 * @return serialization hints
 	 */
-	public JavaSerializationHints javaSerialization() {
-		return this.javaSerialization;
+	public SerializationHints serialization() {
+		return this.serialization;
 	}
 
 	/**

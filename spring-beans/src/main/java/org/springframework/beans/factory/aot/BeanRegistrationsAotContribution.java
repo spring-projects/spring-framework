@@ -61,13 +61,15 @@ class BeanRegistrationsAotContribution
 	public void applyTo(GenerationContext generationContext,
 			BeanFactoryInitializationCode beanFactoryInitializationCode) {
 
-		ClassName className = generationContext.getClassNameGenerator()
-				.generateClassName("BeanFactory", "Registrations");
+		ClassName className = generationContext.getClassNameGenerator().generateClassName(
+				beanFactoryInitializationCode.getTarget(),
+				beanFactoryInitializationCode.getName() + "BeanFactoryRegistrations");
 		BeanRegistrationsCodeGenerator codeGenerator = new BeanRegistrationsCodeGenerator(
 				className);
 		GeneratedMethod registerMethod = codeGenerator.getMethodGenerator()
 				.generateMethod("registerBeanDefinitions")
 				.using(builder -> generateRegisterMethod(builder, generationContext,
+						beanFactoryInitializationCode.getName(),
 						codeGenerator));
 		JavaFile javaFile = codeGenerator.generatedJavaFile(className);
 		generationContext.getGeneratedFiles().addSourceFile(javaFile);
@@ -76,7 +78,7 @@ class BeanRegistrationsAotContribution
 	}
 
 	private void generateRegisterMethod(MethodSpec.Builder builder,
-			GenerationContext generationContext,
+			GenerationContext generationContext, String featureNamePrefix,
 			BeanRegistrationsCode beanRegistrationsCode) {
 
 		builder.addJavadoc("Register the bean definitions.");
@@ -86,7 +88,7 @@ class BeanRegistrationsAotContribution
 		CodeBlock.Builder code = CodeBlock.builder();
 		this.registrations.forEach((beanName, beanDefinitionMethodGenerator) -> {
 			MethodReference beanDefinitionMethod = beanDefinitionMethodGenerator
-					.generateBeanDefinitionMethod(generationContext,
+					.generateBeanDefinitionMethod(generationContext, featureNamePrefix,
 							beanRegistrationsCode);
 			code.addStatement("$L.registerBeanDefinition($S, $L)",
 					BEAN_FACTORY_PARAMETER_NAME, beanName,

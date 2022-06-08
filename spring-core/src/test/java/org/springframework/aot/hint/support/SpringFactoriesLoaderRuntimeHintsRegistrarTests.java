@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package org.springframework.core.io.support;
+package org.springframework.aot.hint.support;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.ResourcePatternHint;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeHint;
 import org.springframework.aot.hint.TypeReference;
+import org.springframework.core.io.support.DummyFactory;
+import org.springframework.core.io.support.MyDummyFactory1;
+import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,7 +52,7 @@ class SpringFactoriesLoaderRuntimeHintsRegistrarTests {
 	@Test
 	void resourceLocationHasHints() {
 		assertThat(this.hints.resources().resourcePatterns())
-				.anySatisfy(hint -> assertThat(hint.getIncludes())
+				.anySatisfy(hint -> assertThat(hint.getIncludes()).map(ResourcePatternHint::getPattern)
 						.contains(SpringFactoriesLoader.FACTORIES_RESOURCE_LOCATION));
 	}
 

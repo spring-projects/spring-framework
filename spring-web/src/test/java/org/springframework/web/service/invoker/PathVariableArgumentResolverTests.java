@@ -16,6 +16,7 @@
 
 package org.springframework.web.service.invoker;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.lang.Nullable;
@@ -35,7 +36,15 @@ class PathVariableArgumentResolverTests {
 
 	private final TestHttpClientAdapter client = new TestHttpClientAdapter();
 
-	private final Service service = HttpServiceProxyFactory.builder(this.client).build().createClient(Service.class);
+	private Service service;
+
+
+	@BeforeEach
+	void setUp() throws Exception {
+		HttpServiceProxyFactory proxyFactory = new HttpServiceProxyFactory(this.client);
+		proxyFactory.afterPropertiesSet();
+		this.service = proxyFactory.createClient(Service.class);
+	}
 
 
 	// Base class functionality should be tested in NamedValueArgumentResolverTests.
@@ -48,8 +57,7 @@ class PathVariableArgumentResolverTests {
 
 	@SuppressWarnings("SameParameterValue")
 	private void assertPathVariable(String name, @Nullable String expectedValue) {
-		assertThat(this.client.getRequestValues().getUriVariables().get(name))
-				.isEqualTo(expectedValue);
+		assertThat(this.client.getRequestValues().getUriVariables().get(name)).isEqualTo(expectedValue);
 	}
 
 

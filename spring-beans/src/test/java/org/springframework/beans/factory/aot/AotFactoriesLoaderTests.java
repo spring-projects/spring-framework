@@ -56,22 +56,14 @@ class AotFactoriesLoaderTests {
 		beanFactory.registerSingleton("b1", new TestFactoryImpl(0, "b1"));
 		beanFactory.registerSingleton("b2", new TestFactoryImpl(2, "b2"));
 		MockSpringFactoriesLoader springFactoriesLoader = new MockSpringFactoriesLoader();
-		springFactoriesLoader.addInstance(TestFactory.class,
-				new TestFactoryImpl(1, "l1"));
-		springFactoriesLoader.addInstance(TestFactory.class,
-				new TestFactoryImpl(3, "l2"));
-		AotFactoriesLoader loader = new AotFactoriesLoader(beanFactory,
-				springFactoriesLoader);
+		springFactoriesLoader.addInstance(TestFactory.class, new TestFactoryImpl(1, "l1"));
+		springFactoriesLoader.addInstance(TestFactory.class, new TestFactoryImpl(3, "l2"));
+		AotFactoriesLoader loader = new AotFactoriesLoader(beanFactory, springFactoriesLoader);
 		List<TestFactory> loaded = loader.load(TestFactory.class);
-		assertThat(loaded).hasSize(4);
-		assertThat(loaded.get(0)).hasToString("b1");
-		assertThat(loaded.get(1)).hasToString("l1");
-		assertThat(loaded.get(2)).hasToString("b2");
-		assertThat(loaded.get(3)).hasToString("l2");
+		assertThat(loaded).map(Object::toString).containsExactly("b1", "l1", "b2", "l2");
 	}
 
-	static interface TestFactory {
-
+	interface TestFactory {
 	}
 
 	static class TestFactoryImpl implements TestFactory, Ordered {

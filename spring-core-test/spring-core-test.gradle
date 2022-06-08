@@ -8,7 +8,3 @@ dependencies {
 	compileOnly("org.junit.platform:junit-platform-engine")
 	compileOnly("org.junit.platform:junit-platform-launcher")
 }
-
-tasks.withType(PublishToMavenRepository).configureEach {
-	it.enabled = false
-}

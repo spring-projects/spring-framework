@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,8 +91,8 @@ final class SerializableTypeWrapper {
 	@SuppressWarnings("unchecked")
 	public static <T extends Type> T unwrap(T type) {
 		Type unwrapped = null;
-		if (type instanceof SerializableTypeProxy) {
-			unwrapped = ((SerializableTypeProxy) type).getTypeProvider().getType();
+		if (type instanceof SerializableTypeProxy proxy) {
+			unwrapped = proxy.getTypeProvider().getType();
 		}
 		return (unwrapped != null ? (T) unwrapped : type);
 	}
@@ -190,8 +190,8 @@ final class SerializableTypeWrapper {
 				case "equals":
 					Object other = args[0];
 					// Unwrap proxies for speed
-					if (other instanceof Type) {
-						other = unwrap((Type) other);
+					if (other instanceof Type otherType) {
+						other = unwrap(otherType);
 					}
 					return ObjectUtils.nullSafeEquals(this.provider.getType(), other);
 				case "hashCode":

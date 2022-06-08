@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,10 @@ package org.springframework.core.io.support;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.lang.module.ModuleFinder;
+import java.lang.module.ModuleReader;
+import java.lang.module.ResolvedModule;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.JarURLConnection;
@@ -32,9 +36,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipException;
 
 import org.apache.commons.logging.Log;
@@ -140,6 +148,14 @@ import org.springframework.util.StringUtils;
  *
  * <p><b>Other notes:</b>
  *
+ * <p>As of Spring Framework 6.0, if {@link #getResources(String)} is invoked
+ * with a location pattern using the "classpath*:" prefix it will first search
+ * all modules in the {@linkplain ModuleLayer#boot() boot layer}, excluding
+ * {@linkplain ModuleFinder#ofSystem() system modules}. It will then search the
+ * classpath using {@link Classloader} APIs as described previously and return the
+ * combined results. Consequently, some of the limitations of classpath searches
+ * may not apply when applications are deployed as modules.
+ *
  * <p><b>WARNING:</b> Note that "{@code classpath*:}" when combined with
  * Ant-style patterns will only work reliably with at least one root directory
  * before the pattern starts, unless the actual target files reside in the file
@@ -174,6 +190,7 @@ import org.springframework.util.StringUtils;
  * @author Marius Bogoevici
  * @author Costin Leau
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 1.0.2
  * @see #CLASSPATH_ALL_URL_PREFIX
  * @see org.springframework.util.AntPathMatcher
@@ -183,6 +200,23 @@ import org.springframework.util.StringUtils;
 public class PathMatchingResourcePatternResolver implements ResourcePatternResolver {
 
 	private static final Log logger = LogFactory.getLog(PathMatchingResourcePatternResolver.class);
+
+	/**
+	 * {@link Set} of {@linkplain ModuleFinder#ofSystem() system module} names.
+	 * @since 6.0
+	 * @see #isNotSystemModule
+	 */
+	private static final Set<String> systemModuleNames = ModuleFinder.ofSystem().findAll().stream()
+			.map(moduleReference -> moduleReference.descriptor().name()).collect(Collectors.toSet());
+
+	/**
+	 * {@link Predicate} that tests whether the supplied {@link ResolvedModule}
+	 * is not a {@linkplain ModuleFinder#ofSystem() system module}.
+	 * @since 6.0
+	 * @see #systemModuleNames
+	 */
+	private static final Predicate<ResolvedModule> isNotSystemModule =
+			resolvedModule -> !systemModuleNames.contains(resolvedModule.name());
 
 	@Nullable
 	private static Method equinoxResolveMethod;
@@ -279,14 +313,18 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		Assert.notNull(locationPattern, "Location pattern must not be null");
 		if (locationPattern.startsWith(CLASSPATH_ALL_URL_PREFIX)) {
 			// a class path resource (multiple resources for same name possible)
-			if (getPathMatcher().isPattern(locationPattern.substring(CLASSPATH_ALL_URL_PREFIX.length()))) {
+			String locationPatternWithoutPrefix = locationPattern.substring(CLASSPATH_ALL_URL_PREFIX.length());
+			// Search the module path first.
+			Set<Resource> resources = findAllModulePathResources(locationPatternWithoutPrefix);
+			if (getPathMatcher().isPattern(locationPatternWithoutPrefix)) {
 				// a class path resource pattern
-				return findPathMatchingResources(locationPattern);
+				Collections.addAll(resources, findPathMatchingResources(locationPattern));
 			}
 			else {
 				// all class path resources with the given name
-				return findAllClassPathResources(locationPattern.substring(CLASSPATH_ALL_URL_PREFIX.length()));
+				Collections.addAll(resources, findAllClassPathResources(locationPatternWithoutPrefix));
 			}
+			return resources.toArray(new Resource[0]);
 		}
 		else {
 			// Generally only look for a pattern after a prefix here,
@@ -314,13 +352,10 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see #convertClassLoaderURL
 	 */
 	protected Resource[] findAllClassPathResources(String location) throws IOException {
-		String path = location;
-		if (path.startsWith("/")) {
-			path = path.substring(1);
-		}
+		String path = stripLeadingSlash(location);
 		Set<Resource> result = doFindAllClassPathResources(path);
 		if (logger.isTraceEnabled()) {
-			logger.trace("Resolved classpath location [" + location + "] to resources " + result);
+			logger.trace("Resolved classpath location [" + path + "] to resources " + result);
 		}
 		return result.toArray(new Resource[0]);
 	}
@@ -830,6 +865,86 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 		Arrays.sort(files, Comparator.comparing(File::getName));
 		return files;
+	}
+
+	/**
+	 * Resolve the given location pattern into {@code Resource} objects for all
+	 * matching resources found in the module path.
+	 * <p>The location pattern may be an explicit resource path such as
+	 * {@code "com/example/config.xml"} or a pattern such as
+	 * <code>"com/example/**&#47;config-*.xml"</code> to be matched using the
+	 * configured {@link #getPathMatcher() PathMatcher}.
+	 * <p>The default implementation scans all modules in the {@linkplain ModuleLayer#boot()
+	 * boot layer}, excluding {@linkplain ModuleFinder#ofSystem() system modules}.
+	 * @param locationPattern the location pattern to resolve
+	 * @return a modifiable {@code Set} containing the corresponding {@code Resource}
+	 * objects
+	 * @throws IOException in case of I/O errors
+	 * @since 6.0
+	 * @see ModuleLayer#boot()
+	 * @see ModuleFinder#ofSystem()
+	 * @see ModuleReader
+	 * @see PathMatcher#match(String, String)
+	 */
+	protected Set<Resource> findAllModulePathResources(String locationPattern) throws IOException {
+		Set<Resource> result = new LinkedHashSet<>(16);
+		String resourcePattern = stripLeadingSlash(locationPattern);
+		Predicate<String> resourcePatternMatches = (getPathMatcher().isPattern(resourcePattern) ?
+				path -> getPathMatcher().match(resourcePattern, path) :
+				resourcePattern::equals);
+
+		try {
+			ModuleLayer.boot().configuration().modules().stream()
+				.filter(isNotSystemModule)
+				.forEach(resolvedModule -> {
+					// NOTE: a ModuleReader and a Stream returned from ModuleReader.list() must be closed.
+					try (ModuleReader moduleReader = resolvedModule.reference().open();
+							Stream<String> names = moduleReader.list()) {
+						names.filter(resourcePatternMatches)
+								.map(name -> findResource(moduleReader, name))
+								.filter(Objects::nonNull)
+								.forEach(result::add);
+					}
+					catch (IOException ex) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Failed to read contents of module [%s]".formatted(resolvedModule), ex);
+						}
+						throw new UncheckedIOException(ex);
+					}
+				});
+		}
+		catch (UncheckedIOException ex) {
+			// Unwrap IOException to conform to this method's contract.
+			throw ex.getCause();
+		}
+
+		if (logger.isTraceEnabled()) {
+			logger.trace("Resolved module-path location pattern [%s] to resources %s".formatted(resourcePattern, result));
+		}
+		return result;
+	}
+
+	@Nullable
+	private static Resource findResource(ModuleReader moduleReader, String name) {
+		try {
+			return moduleReader.find(name)
+					// If it's a "file:" URI, use FileSystemResource to avoid duplicates
+					// for the same path discovered via class-path scanning.
+					.map(uri -> ResourceUtils.URL_PROTOCOL_FILE.equals(uri.getScheme()) ?
+							new FileSystemResource(uri.getPath()) :
+							UrlResource.from(uri))
+					.orElse(null);
+		}
+		catch (Exception ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Failed to find resource [%s] in module path".formatted(name), ex);
+			}
+			return null;
+		}
+	}
+
+	private static String stripLeadingSlash(String path) {
+		return (path.startsWith("/") ? path.substring(1) : path);
 	}
 
 

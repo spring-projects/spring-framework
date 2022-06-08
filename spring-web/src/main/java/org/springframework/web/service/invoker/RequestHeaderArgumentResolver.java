@@ -64,8 +64,8 @@ public class RequestHeaderArgumentResolver extends AbstractNamedValueArgumentRes
 	}
 
 	@Override
-	protected void addRequestValue(String name, String value, HttpRequestValues.Builder requestValues) {
-		requestValues.addHeader(name, value);
+	protected void addRequestValue(String name, Object value, HttpRequestValues.Builder requestValues) {
+		requestValues.addHeader(name, (String) value);
 	}
 
 }

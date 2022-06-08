@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.groovy.util.Maps;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
@@ -53,11 +54,17 @@ class NamedValueArgumentResolverTests {
 
 	private final TestNamedValueArgumentResolver argumentResolver = new TestNamedValueArgumentResolver();
 
-	private final Service service =
-			HttpServiceProxyFactory.builder(this.client)
-					.addCustomResolver(this.argumentResolver)
-					.build()
-					.createClient(Service.class);
+	private Service service;
+
+
+	@BeforeEach
+	void setUp() throws Exception {
+		HttpServiceProxyFactory proxyFactory = new HttpServiceProxyFactory(this.client);
+		proxyFactory.addCustomArgumentResolver(this.argumentResolver);
+		proxyFactory.afterPropertiesSet();
+
+		this.service = proxyFactory.createClient(Service.class);
+	}
 
 
 	@Test
@@ -220,8 +227,8 @@ class NamedValueArgumentResolverTests {
 		}
 
 		@Override
-		protected void addRequestValue(String name, String value, HttpRequestValues.Builder requestValues) {
-			this.testValues.add(name, value);
+		protected void addRequestValue(String name, Object value, HttpRequestValues.Builder requestValues) {
+			this.testValues.add(name, (String) value);
 		}
 	}
 

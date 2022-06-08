@@ -901,7 +901,7 @@ public class RequestResponseBodyMethodProcessorTests {
 	}
 
 
-	@SuppressWarnings("NotNullFieldNotInitialized")
+	@SuppressWarnings({"serial", "NotNullFieldNotInitialized"})
 	private static class SimpleBean implements Identifiable {
 
 		private Long id;

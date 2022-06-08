@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 import org.springframework.core.annotation.AliasFor;
 
 /**
- * Shortcut for {@link HttpExchange} for HTTP PATCH requests.
+ * Shortcut for {@link HttpExchange @HttpExchange} for HTTP PATCH requests.
  *
  * @author Rossen Stoyanchev
  * @since 6.0
@@ -40,13 +40,13 @@ public @interface PatchExchange {
 	 * Alias for {@link HttpExchange#value}.
 	 */
 	@AliasFor(annotation = HttpExchange.class)
-	String[] value() default {};
+	String value() default "";
 
 	/**
 	 * Alias for {@link HttpExchange#url()}.
 	 */
 	@AliasFor(annotation = HttpExchange.class)
-	String[] url() default {};
+	String url() default "";
 
 	/**
 	 * Alias for {@link HttpExchange#contentType()}.

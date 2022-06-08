@@ -56,6 +56,7 @@ public final class HttpRequestValues {
 			CollectionUtils.toMultiValueMap(Collections.emptyMap());
 
 
+	@Nullable
 	private final HttpMethod httpMethod;
 
 	@Nullable
@@ -70,6 +71,8 @@ public final class HttpRequestValues {
 
 	private final MultiValueMap<String, String> cookies;
 
+	private final Map<String, Object> attributes;
+
 	@Nullable
 	private final Object bodyValue;
 
@@ -80,9 +83,9 @@ public final class HttpRequestValues {
 	private final ParameterizedTypeReference<?> bodyElementType;
 
 
-	private HttpRequestValues(HttpMethod httpMethod,
+	private HttpRequestValues(@Nullable HttpMethod httpMethod,
 			@Nullable URI uri, @Nullable String uriTemplate, Map<String, String> uriVariables,
-			HttpHeaders headers, MultiValueMap<String, String> cookies,
+			HttpHeaders headers, MultiValueMap<String, String> cookies, Map<String, Object> attributes,
 			@Nullable Object bodyValue,
 			@Nullable Publisher<?> body, @Nullable ParameterizedTypeReference<?> bodyElementType) {
 
@@ -94,6 +97,7 @@ public final class HttpRequestValues {
 		this.uriVariables = uriVariables;
 		this.headers = headers;
 		this.cookies = cookies;
+		this.attributes = attributes;
 		this.bodyValue = bodyValue;
 		this.body = body;
 		this.bodyElementType = bodyElementType;
@@ -103,6 +107,7 @@ public final class HttpRequestValues {
 	/**
 	 * Return the HTTP method to use for the request.
 	 */
+	@Nullable
 	public HttpMethod getHttpMethod() {
 		return this.httpMethod;
 	}
@@ -142,10 +147,17 @@ public final class HttpRequestValues {
 	}
 
 	/**
-	 * Return the cookies for the request, if any.
+	 * Return the cookies for the request, or an empty map.
 	 */
 	public MultiValueMap<String, String> getCookies() {
 		return this.cookies;
+	}
+
+	/**
+	 * Return the attributes associated with the request, or an empty map.
+	 */
+	public Map<String, Object> getAttributes() {
+		return this.attributes;
 	}
 
 	/**
@@ -177,8 +189,8 @@ public final class HttpRequestValues {
 	}
 
 
-	public static Builder builder(HttpMethod httpMethod) {
-		return new Builder(httpMethod);
+	public static Builder builder() {
+		return new Builder();
 	}
 
 
@@ -189,6 +201,7 @@ public final class HttpRequestValues {
 
 		private static final Function<MultiValueMap<String, String>, byte[]> FORM_DATA_SERIALIZER = new FormDataSerializer();
 
+		@Nullable
 		private HttpMethod httpMethod;
 
 		@Nullable
@@ -210,6 +223,9 @@ public final class HttpRequestValues {
 		private MultiValueMap<String, String> requestParams;
 
 		@Nullable
+		private Map<String, Object> attributes;
+
+		@Nullable
 		private Object bodyValue;
 
 		@Nullable
@@ -218,16 +234,10 @@ public final class HttpRequestValues {
 		@Nullable
 		private ParameterizedTypeReference<?> bodyElementType;
 
-		private Builder(HttpMethod httpMethod) {
-			Assert.notNull(httpMethod, "HttpMethod is required");
-			this.httpMethod = httpMethod;
-		}
-
 		/**
 		 * Set the HTTP method for the request.
 		 */
 		public Builder setHttpMethod(HttpMethod httpMethod) {
-			Assert.notNull(httpMethod, "HttpMethod is required");
 			this.httpMethod = httpMethod;
 			return this;
 		}
@@ -326,6 +336,17 @@ public final class HttpRequestValues {
 		}
 
 		/**
+		 * Configure an attribute to associate with the request.
+		 * @param name the attribute name
+		 * @param value the attribute value
+		 */
+		public Builder addAttribute(String name, Object value) {
+			this.attributes = (this.attributes != null ? this.attributes : new HashMap<>());
+			this.attributes.put(name, value);
+			return this;
+		}
+
+		/**
 		 * Set the request body as a concrete value to be serialized.
 		 * <p>This is mutually exclusive with, and resets any previously set
 		 * {@linkplain #setBody(Publisher, ParameterizedTypeReference) body Publisher}.
@@ -388,9 +409,12 @@ public final class HttpRequestValues {
 			MultiValueMap<String, String> cookies = (this.cookies != null ?
 					new LinkedMultiValueMap<>(this.cookies) : EMPTY_COOKIES_MAP);
 
+			Map<String, Object> attributes = (this.attributes != null ?
+					new HashMap<>(this.attributes) : Collections.emptyMap());
+
 			return new HttpRequestValues(
-					this.httpMethod, uri, uriTemplate, uriVars, headers, cookies, bodyValue,
-					this.body, this.bodyElementType);
+					this.httpMethod, uri, uriTemplate, uriVars, headers, cookies, attributes,
+					bodyValue, this.body, this.bodyElementType);
 		}
 
 		private String appendQueryParams(

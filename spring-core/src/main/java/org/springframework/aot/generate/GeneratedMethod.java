@@ -20,6 +20,7 @@ import java.util.function.Consumer;
 
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.MethodSpec.Builder;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -34,6 +35,7 @@ public final class GeneratedMethod {
 
 	private final String name;
 
+	@Nullable
 	private MethodSpec spec;
 
 
@@ -84,7 +86,7 @@ public final class GeneratedMethod {
 	}
 
 	private void assertNameHasNotBeenChanged(MethodSpec spec) {
-		Assert.isTrue(this.name.toString().equals(spec.name), () -> String
+		Assert.isTrue(this.name.equals(spec.name), () -> String
 				.format("'spec' must use the generated name \"%s\"", this.name));
 	}
 

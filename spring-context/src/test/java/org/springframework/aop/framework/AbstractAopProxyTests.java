@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,9 +74,11 @@ import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
  * @author Rod Johnson
@@ -431,7 +433,7 @@ public abstract class AbstractAopProxyTests {
 		pc.setTargetSource(mockTargetSource);
 		AopProxy aop = createAopProxy(pc);
 
-		assertThatExceptionOfType(Exception.class).isThrownBy(() -> {
+		assertThatException().isThrownBy(() -> {
 				ITestBean tb = (ITestBean) aop.getProxy();
 				// Note: exception param below isn't used
 				tb.exceptional(expectedException);
@@ -459,8 +461,7 @@ public abstract class AbstractAopProxyTests {
 		AopProxy aop = createAopProxy(pc);
 		ITestBean tb = (ITestBean) aop.getProxy();
 
-		assertThatExceptionOfType(UndeclaredThrowableException.class).isThrownBy(
-				tb::getAge)
+		assertThatExceptionOfType(UndeclaredThrowableException.class).isThrownBy(tb::getAge)
 			.satisfies(ex -> assertThat(ex.getUndeclaredThrowable()).isEqualTo(unexpectedException));
 	}
 
@@ -480,8 +481,8 @@ public abstract class AbstractAopProxyTests {
 		AopProxy aop = createAopProxy(pc);
 		ITestBean tb = (ITestBean) aop.getProxy();
 
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(
-				tb::getAge)
+		assertThatRuntimeException()
+			.isThrownBy(tb::getAge)
 			.matches(unexpectedException::equals);
 	}
 
@@ -571,8 +572,7 @@ public abstract class AbstractAopProxyTests {
 		lockable.lock();
 
 		assertThat(itb.getAge()).isEqualTo(newAge);
-		assertThatExceptionOfType(LockedException.class).isThrownBy(() ->
-				itb.setAge(1));
+		assertThatExceptionOfType(LockedException.class).isThrownBy(() -> itb.setAge(1));
 		assertThat(itb.getAge()).isEqualTo(newAge);
 
 		// Unlock
@@ -675,7 +675,7 @@ public abstract class AbstractAopProxyTests {
 		target.setAge(21);
 		ProxyFactory pc = new ProxyFactory(target);
 		pc.addAdvisor(new DefaultIntroductionAdvisor(new DummyIntroductionAdviceImpl(), Comparable.class));
-		assertThatExceptionOfType(Exception.class).isThrownBy(() -> {
+		assertThatException().isThrownBy(() -> {
 			// TODO May fail on either call: may want to tighten up definition
 			ITestBean proxied = (ITestBean) createProxy(pc);
 			proxied.getName();
@@ -725,8 +725,7 @@ public abstract class AbstractAopProxyTests {
 		pc.addAdvisor(new DefaultIntroductionAdvisor(new MyDi()));
 
 		TimeStamped ts = (TimeStamped) createProxy(pc);
-		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(
-				ts::getTimeStamp);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(ts::getTimeStamp);
 	}
 
 	/**
@@ -754,8 +753,8 @@ public abstract class AbstractAopProxyTests {
 		pc.addAdvice(new NopInterceptor());
 		ITestBean proxied = (ITestBean) createProxy(pc);
 		pc.setFrozen(true);
-		assertThatExceptionOfType(AopConfigException.class).as("Shouldn't be able to add interceptor when frozen").isThrownBy(() ->
-				pc.addAdvice(0, new NopInterceptor()))
+		assertThatExceptionOfType(AopConfigException.class).as("Shouldn't be able to add interceptor when frozen")
+			.isThrownBy(() -> pc.addAdvice(0, new NopInterceptor()))
 			.withMessageContaining("frozen");
 		// Check it still works: proxy factory state shouldn't have been corrupted
 		assertThat(proxied.getAge()).isEqualTo(target.getAge());
@@ -777,8 +776,8 @@ public abstract class AbstractAopProxyTests {
 		Advised advised = (Advised) proxied;
 
 		assertThat(pc.isFrozen()).isTrue();
-		assertThatExceptionOfType(AopConfigException.class).as("Shouldn't be able to add Advisor when frozen").isThrownBy(() ->
-				advised.addAdvisor(new DefaultPointcutAdvisor(new NopInterceptor())))
+		assertThatExceptionOfType(AopConfigException.class).as("Shouldn't be able to add Advisor when frozen")
+			.isThrownBy(() -> advised.addAdvisor(new DefaultPointcutAdvisor(new NopInterceptor())))
 			.withMessageContaining("frozen");
 		// Check it still works: proxy factory state shouldn't have been corrupted
 		assertThat(proxied.getAge()).isEqualTo(target.getAge());
@@ -797,8 +796,8 @@ public abstract class AbstractAopProxyTests {
 		Advised advised = (Advised) proxied;
 
 		assertThat(pc.isFrozen()).isTrue();
-		assertThatExceptionOfType(AopConfigException.class).as("Shouldn't be able to remove Advisor when frozen").isThrownBy(() ->
-				advised.removeAdvisor(0))
+		assertThatExceptionOfType(AopConfigException.class).as("Shouldn't be able to remove Advisor when frozen")
+			.isThrownBy(() -> advised.removeAdvisor(0))
 			.withMessageContaining("frozen");
 		// Didn't get removed
 		assertThat(advised.getAdvisors().length).isEqualTo(1);
@@ -1311,8 +1310,8 @@ public abstract class AbstractAopProxyTests {
 		assertThat(cca.getCalls()).isEqualTo(2);
 		assertThat(proxied.getAge()).isEqualTo(26);
 		assertThat(cca.getCalls()).isEqualTo(4);
-		assertThatExceptionOfType(SpecializedUncheckedException.class).as("Should have thrown CannotGetJdbcConnectionException").isThrownBy(() ->
-				proxied.exceptional(new SpecializedUncheckedException("foo", (SQLException)null)));
+		assertThatExceptionOfType(SpecializedUncheckedException.class).as("Should have thrown CannotGetJdbcConnectionException")
+			.isThrownBy(() -> proxied.exceptional(new SpecializedUncheckedException("foo", (SQLException)null)));
 		assertThat(cca.getCalls()).isEqualTo(6);
 	}
 
@@ -1346,8 +1345,8 @@ public abstract class AbstractAopProxyTests {
 		assertThat(nop1.getCount()).isEqualTo(1);
 		assertThat(nop2.getCount()).isEqualTo(1);
 		// Will fail, after invoking Nop1
-		assertThatExceptionOfType(RuntimeException.class).as("before advice should have ended chain").isThrownBy(() ->
-				proxied.setAge(26))
+		assertThatRuntimeException().as("before advice should have ended chain")
+			.isThrownBy(() -> proxied.setAge(26))
 			.matches(rex::equals);
 		assertThat(ba.getCalls()).isEqualTo(2);
 		assertThat(nop1.getCount()).isEqualTo(2);
@@ -1411,8 +1410,7 @@ public abstract class AbstractAopProxyTests {
 		assertThat(car.getCalls()).isEqualTo(2);
 		Exception exc = new Exception();
 		// On exception it won't be invoked
-		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
-				proxied.exceptional(exc))
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() -> proxied.exceptional(exc))
 			.satisfies(ex -> assertThat(ex).isSameAs(exc));
 		assertThat(car.getCalls()).isEqualTo(2);
 	}
@@ -1442,12 +1440,11 @@ public abstract class AbstractAopProxyTests {
 		assertThat(th.getCalls()).isEqualTo(0);
 		Exception ex = new Exception();
 		// Will be advised but doesn't match
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-				proxied.echoException(1, ex))
+		assertThatException().isThrownBy(() -> proxied.echoException(1, ex))
 			.matches(ex::equals);
 		FileNotFoundException fex = new FileNotFoundException();
-		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() ->
-				proxied.echoException(1, fex))
+		assertThatExceptionOfType(FileNotFoundException.class)
+			.isThrownBy(() -> proxied.echoException(1, fex))
 			.matches(fex::equals);
 		assertThat(th.getCalls("ioException")).isEqualTo(1);
 	}
@@ -1468,14 +1465,12 @@ public abstract class AbstractAopProxyTests {
 		assertThat(th.getCalls()).isEqualTo(0);
 		Exception ex = new Exception();
 		// Will be advised but doesn't match
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-				proxied.echoException(1, ex))
+		assertThatException().isThrownBy(() -> proxied.echoException(1, ex))
 			.matches(ex::equals);
 
 		// Subclass of RemoteException
 		MarshalException mex = new MarshalException("");
-		assertThatExceptionOfType(MarshalException.class).isThrownBy(() ->
-				proxied.echoException(1, mex))
+		assertThatExceptionOfType(MarshalException.class).isThrownBy(() -> proxied.echoException(1, mex))
 			.matches(mex::equals);
 
 		assertThat(th.getCalls("remoteException")).isEqualTo(1);

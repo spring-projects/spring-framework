@@ -22,12 +22,14 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * {@link HttpServiceArgumentResolver} that resolves the target
  * request's HTTP method from an {@link HttpMethod} argument.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Rossen Stoyanchev
  * @since 6.0
  */
 public class HttpMethodArgumentResolver implements HttpServiceArgumentResolver {
@@ -43,12 +45,11 @@ public class HttpMethodArgumentResolver implements HttpServiceArgumentResolver {
 			return false;
 		}
 
-		if (argument != null) {
-			HttpMethod httpMethod = (HttpMethod) argument;
-			requestValues.setHttpMethod(httpMethod);
-			if (logger.isTraceEnabled()) {
-				logger.trace("Resolved HTTP method to: " + httpMethod.name());
-			}
+		Assert.notNull(argument, "HttpMethod is required");
+		HttpMethod httpMethod = (HttpMethod) argument;
+		requestValues.setHttpMethod(httpMethod);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Resolved HTTP method to: " + httpMethod.name());
 		}
 
 		return true;

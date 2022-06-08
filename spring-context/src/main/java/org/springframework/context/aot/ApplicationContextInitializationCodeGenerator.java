@@ -35,6 +35,8 @@ import org.springframework.javapoet.JavaFile;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
 import org.springframework.javapoet.TypeSpec;
+import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 /**
  * Internal code generator to create the application context initializer.
@@ -48,10 +50,32 @@ class ApplicationContextInitializationCodeGenerator
 	private static final String APPLICATION_CONTEXT_VARIABLE = "applicationContext";
 
 
+	@Nullable
+	private final Class<?> target;
+
+	private final String name;
+
 	private final GeneratedMethods generatedMethods = new GeneratedMethods();
 
 	private final List<MethodReference> initializers = new ArrayList<>();
 
+
+	ApplicationContextInitializationCodeGenerator(@Nullable Class<?> target, @Nullable String name) {
+		this.target = target;
+		this.name = (!StringUtils.hasText(name)) ? "" : name;
+	}
+
+
+	@Override
+	@Nullable
+	public Class<?> getTarget() {
+		return this.target;
+	}
+
+	@Override
+	public String getName() {
+		return this.name;
+	}
 
 	@Override
 	public MethodGenerator getMethodGenerator() {

@@ -68,7 +68,7 @@ public abstract class ExchangeFilterFunctions {
 	 * Return a filter that generates an error signal when the given
 	 * {@link HttpStatusCode} predicate matches.
 	 * @param statusPredicate the predicate to check the HTTP status with
-	 * @param exceptionFunction the function that to create the exception
+	 * @param exceptionFunction the function to create the exception
 	 * @return the filter to generate an error signal
 	 */
 	public static ExchangeFilterFunction statusError(Predicate<HttpStatusCode> statusPredicate,

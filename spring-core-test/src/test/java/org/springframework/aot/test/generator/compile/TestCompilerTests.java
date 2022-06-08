@@ -16,7 +16,16 @@
 
 package org.springframework.aot.test.generator.compile;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
+
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Processor;
+import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.lang.model.element.TypeElement;
 
 import com.example.PublicInterface;
 import org.junit.jupiter.api.Test;
@@ -33,9 +42,9 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link TestCompiler}.
- *
  * @author Phillip Webb
  * @author Andy Wilkinson
+ * @author Scott Frederick
  */
 class TestCompilerTests {
 
@@ -100,8 +109,7 @@ class TestCompilerTests {
 	@Test
 	void compileAndGetSourceFile() {
 		TestCompiler.forSystem().withSources(SourceFile.of(HELLO_SPRING)).compile(
-				compiled -> assertThat(compiled.getSourceFile()).hasMethodNamed(
-						"get").withBodyContaining("// !!"));
+				compiled -> assertThat(compiled.getSourceFile()).contains("// !!"));
 	}
 
 	@Test
@@ -142,6 +150,29 @@ class TestCompilerTests {
 	}
 
 	@Test
+	void withProcessorsArrayAddsProcessors() {
+		SourceFile sourceFile = SourceFile.of(HELLO_WORLD);
+		TestProcessor processor = new TestProcessor();
+		TestCompiler.forSystem().withSources(sourceFile).withProcessors(processor).compile((compiled -> {
+			assertThat(processor.getProcessedAnnotations()).isNotEmpty();
+			assertThat(processor.getProcessedAnnotations()).satisfiesExactly(element ->
+					assertThat(element.getQualifiedName().toString()).isEqualTo("java.lang.Deprecated"));
+		}));
+	}
+
+	@Test
+	void withProcessorsAddsProcessors() {
+		SourceFile sourceFile = SourceFile.of(HELLO_WORLD);
+		TestProcessor processor = new TestProcessor();
+		List<Processor> processors = List.of(processor);
+		TestCompiler.forSystem().withSources(sourceFile).withProcessors(processors).compile((compiled -> {
+			assertThat(processor.getProcessedAnnotations()).isNotEmpty();
+			assertThat(processor.getProcessedAnnotations()).satisfiesExactly(element ->
+					assertThat(element.getQualifiedName().toString()).isEqualTo("java.lang.Deprecated"));
+		}));
+	}
+
+	@Test
 	void compileWithWritableContent() {
 		WritableContent content = appendable -> appendable.append(HELLO_WORLD);
 		TestCompiler.forSystem().compile(content, this::assertSuppliesHelloWorld);
@@ -171,7 +202,7 @@ class TestCompilerTests {
 	}
 
 	@Test
-	@CompileWithTargetClassAccess(classNames = "com.example.PackagePrivate")
+	@CompileWithTargetClassAccess
 	void compiledCodeCanAccessExistingPackagePrivateClassIfAnnotated() throws ClassNotFoundException, LinkageError {
 		SourceFiles sourceFiles = SourceFiles.of(SourceFile.of("""
 				package com.example;
@@ -216,6 +247,22 @@ class TestCompilerTests {
 	private void assertHasResource(Compiled compiled) {
 		assertThat(compiled.getClassLoader().getResourceAsStream(
 				"META-INF/myfile")).hasContent("test");
+	}
+
+	@SupportedAnnotationTypes("java.lang.Deprecated")
+	static class TestProcessor extends AbstractProcessor {
+
+		private final List<TypeElement> processedAnnotations = new ArrayList<>();
+
+		@Override
+		public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+			this.processedAnnotations.addAll(annotations);
+			return true;
+		}
+
+		public List<TypeElement> getProcessedAnnotations() {
+			return this.processedAnnotations;
+		}
 	}
 
 }

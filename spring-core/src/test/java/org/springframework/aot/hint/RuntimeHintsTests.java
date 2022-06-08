@@ -48,15 +48,16 @@ class RuntimeHintsTests {
 	void resourceHintWithClass() {
 		this.hints.resources().registerType(String.class);
 		assertThat(this.hints.resources().resourcePatterns()).singleElement().satisfies(resourceHint -> {
-			assertThat(resourceHint.getIncludes()).containsExactly("java/lang/String.class");
+			assertThat(resourceHint.getIncludes()).map(ResourcePatternHint::getPattern).containsExactly("java/lang/String.class");
 			assertThat(resourceHint.getExcludes()).isEmpty();
 		});
 	}
 
 	@Test
 	void javaSerializationHintWithClass() {
-		this.hints.javaSerialization().registerType(String.class);
-		assertThat(this.hints.javaSerialization().types()).containsExactly(TypeReference.of(String.class));
+		this.hints.serialization().registerType(String.class);
+		assertThat(this.hints.serialization().javaSerialization().map(JavaSerializationHint::getType))
+				.containsExactly(TypeReference.of(String.class));
 	}
 
 	@Test

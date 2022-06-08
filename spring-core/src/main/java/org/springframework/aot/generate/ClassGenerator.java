@@ -43,18 +43,6 @@ public interface ClassGenerator {
 	GeneratedClass getOrGenerateClass(JavaFileGenerator javaFileGenerator,
 			Class<?> target, String featureName);
 
-	/**
-	 * Get or generate a new {@link GeneratedClass} for a given java file
-	 * generator, target and feature name.
-	 * @param javaFileGenerator the java file generator
-	 * @param target the target of the newly generated class
-	 * @param featureName the name of the feature that the generated class
-	 * supports
-	 * @return a {@link GeneratedClass} instance
-	 */
-	GeneratedClass getOrGenerateClass(JavaFileGenerator javaFileGenerator, String target,
-			String featureName);
-
 
 	/**
 	 * Strategy used to generate the java file for the generated class.

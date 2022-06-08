@@ -56,8 +56,6 @@ class BeanDefinitionMethodGenerator {
 
 	private final List<BeanRegistrationAotContribution> aotContributions;
 
-	private final List<BeanRegistrationCodeFragmentsCustomizer> codeFragmentsCustomizers;
-
 
 	/**
 	 * Create a new {@link BeanDefinitionMethodGenerator} instance.
@@ -65,13 +63,11 @@ class BeanDefinitionMethodGenerator {
 	 * @param registeredBean the registered bean
 	 * @param innerBeanPropertyName the inner bean property name
 	 * @param aotContributions the AOT contributions
-	 * @param codeFragmentsCustomizers the code fragments customizers
 	 */
 	BeanDefinitionMethodGenerator(
 			BeanDefinitionMethodGeneratorFactory methodGeneratorFactory,
 			RegisteredBean registeredBean, @Nullable String innerBeanPropertyName,
-			List<BeanRegistrationAotContribution> aotContributions,
-			List<BeanRegistrationCodeFragmentsCustomizer> codeFragmentsCustomizers) {
+			List<BeanRegistrationAotContribution> aotContributions) {
 
 		this.methodGeneratorFactory = methodGeneratorFactory;
 		this.registeredBean = registeredBean;
@@ -79,27 +75,28 @@ class BeanDefinitionMethodGenerator {
 				.resolve(registeredBean);
 		this.innerBeanPropertyName = innerBeanPropertyName;
 		this.aotContributions = aotContributions;
-		this.codeFragmentsCustomizers = codeFragmentsCustomizers;
 	}
 
 	/**
 	 * Generate the method that returns the {@link BeanDefinition} to be
 	 * registered.
 	 * @param generationContext the generation context
+	 * @param featureNamePrefix the prefix to use for the feature name
 	 * @param beanRegistrationsCode the bean registrations code
 	 * @return a reference to the generated method.
 	 */
 	MethodReference generateBeanDefinitionMethod(GenerationContext generationContext,
-			BeanRegistrationsCode beanRegistrationsCode) {
+			String featureNamePrefix, BeanRegistrationsCode beanRegistrationsCode) {
 
-		BeanRegistrationCodeFragments codeFragments = getCodeFragments(
-				beanRegistrationsCode);
+		BeanRegistrationCodeFragments codeFragments = getCodeFragments(generationContext,
+				beanRegistrationsCode, featureNamePrefix);
 		Class<?> target = codeFragments.getTarget(this.registeredBean,
 				this.constructorOrFactoryMethod);
 		if (!target.getName().startsWith("java.")) {
+			String featureName = featureNamePrefix + "BeanDefinitions";
 			GeneratedClass generatedClass = generationContext.getClassGenerator()
 					.getOrGenerateClass(new BeanDefinitionsJavaFileGenerator(target),
-							target, "BeanDefinitions");
+							target, featureName);
 			MethodGenerator methodGenerator = generatedClass.getMethodGenerator()
 					.withName(getName());
 			GeneratedMethod generatedMethod = generateBeanDefinitionMethod(
@@ -115,7 +112,18 @@ class BeanDefinitionMethodGenerator {
 				Modifier.PRIVATE);
 		return MethodReference.ofStatic(beanRegistrationsCode.getClassName(),
 				generatedMethod.getName().toString());
+	}
 
+	private BeanRegistrationCodeFragments getCodeFragments(GenerationContext generationContext,
+			BeanRegistrationsCode beanRegistrationsCode, String featureNamePrefix) {
+
+		BeanRegistrationCodeFragments codeFragments = new DefaultBeanRegistrationCodeFragments(
+				beanRegistrationsCode, this.registeredBean, this.methodGeneratorFactory,
+				featureNamePrefix);
+		for (BeanRegistrationAotContribution aotContribution : this.aotContributions) {
+			codeFragments = aotContribution.customizeBeanRegistrationCodeFragments(generationContext, codeFragments);
+		}
+		return codeFragments;
 	}
 
 	private GeneratedMethod generateBeanDefinitionMethod(
@@ -126,8 +134,7 @@ class BeanDefinitionMethodGenerator {
 		BeanRegistrationCodeGenerator codeGenerator = new BeanRegistrationCodeGenerator(
 				className, methodGenerator, this.registeredBean,
 				this.constructorOrFactoryMethod, codeFragments);
-		GeneratedMethod method = methodGenerator.generateMethod("get", "bean",
-				"definition");
+		GeneratedMethod method = methodGenerator.generateMethod("get", "bean", "definition");
 		this.aotContributions.forEach(aotContribution -> aotContribution
 				.applyTo(generationContext, codeGenerator));
 		return method.using(builder -> {
@@ -138,18 +145,6 @@ class BeanDefinitionMethodGenerator {
 			builder.returns(BeanDefinition.class);
 			builder.addCode(codeGenerator.generateCode(generationContext));
 		});
-	}
-
-	private BeanRegistrationCodeFragments getCodeFragments(
-			BeanRegistrationsCode beanRegistrationsCode) {
-
-		BeanRegistrationCodeFragments codeFragments = new DefaultBeanRegistrationCodeFragments(
-				beanRegistrationsCode, this.registeredBean, this.methodGeneratorFactory);
-		for (BeanRegistrationCodeFragmentsCustomizer customizer : this.codeFragmentsCustomizers) {
-			codeFragments = customizer.customizeBeanRegistrationCodeFragments(
-					this.registeredBean, codeFragments);
-		}
-		return codeFragments;
 	}
 
 	private String getName() {

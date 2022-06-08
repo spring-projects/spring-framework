@@ -42,6 +42,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.StringValueResolver;
 import org.springframework.web.service.annotation.HttpExchange;
 
 /**
@@ -67,13 +68,13 @@ final class HttpServiceMethod {
 
 	HttpServiceMethod(
 			Method method, Class<?> containingClass, List<HttpServiceArgumentResolver> argumentResolvers,
-			HttpClientAdapter client, ReactiveAdapterRegistry reactiveRegistry,
-			Duration blockTimeout) {
+			HttpClientAdapter client, @Nullable StringValueResolver embeddedValueResolver,
+			ReactiveAdapterRegistry reactiveRegistry, Duration blockTimeout) {
 
 		this.method = method;
 		this.parameters = initMethodParameters(method);
 		this.argumentResolvers = argumentResolvers;
-		this.requestValuesInitializer = HttpRequestValuesInitializer.create(method, containingClass);
+		this.requestValuesInitializer = HttpRequestValuesInitializer.create(method, containingClass, embeddedValueResolver);
 		this.responseFunction = ResponseFunction.create(client, method, reactiveRegistry, blockTimeout);
 	}
 
@@ -130,7 +131,7 @@ final class HttpServiceMethod {
 	 * and method-level {@link HttpExchange @HttpRequest} annotations.
 	 */
 	private record HttpRequestValuesInitializer(
-			HttpMethod httpMethod, @Nullable String url,
+			@Nullable HttpMethod httpMethod, @Nullable String url,
 			@Nullable MediaType contentType, @Nullable List<MediaType> acceptMediaTypes) {
 
 		private HttpRequestValuesInitializer(
@@ -144,7 +145,10 @@ final class HttpServiceMethod {
 		}
 
 		public HttpRequestValues.Builder initializeRequestValuesBuilder() {
-			HttpRequestValues.Builder requestValues = HttpRequestValues.builder(this.httpMethod);
+			HttpRequestValues.Builder requestValues = HttpRequestValues.builder();
+			if (this.httpMethod != null) {
+				requestValues.setHttpMethod(this.httpMethod);
+			}
 			if (this.url != null) {
 				requestValues.setUriTemplate(this.url);
 			}
@@ -161,7 +165,8 @@ final class HttpServiceMethod {
 		/**
 		 * Introspect the method and create the request factory for it.
 		 */
-		public static HttpRequestValuesInitializer create(Method method, Class<?> containingClass) {
+		public static HttpRequestValuesInitializer create(
+				Method method, Class<?> containingClass, @Nullable StringValueResolver embeddedValueResolver) {
 
 			HttpExchange annot1 = AnnotatedElementUtils.findMergedAnnotation(containingClass, HttpExchange.class);
 			HttpExchange annot2 = AnnotatedElementUtils.findMergedAnnotation(method, HttpExchange.class);
@@ -169,14 +174,14 @@ final class HttpServiceMethod {
 			Assert.notNull(annot2, "Expected HttpRequest annotation");
 
 			HttpMethod httpMethod = initHttpMethod(annot1, annot2);
-			String url = initUrl(annot1, annot2);
+			String url = initUrl(annot1, annot2, embeddedValueResolver);
 			MediaType contentType = initContentType(annot1, annot2);
 			List<MediaType> acceptableMediaTypes = initAccept(annot1, annot2);
 
 			return new HttpRequestValuesInitializer(httpMethod, url, contentType, acceptableMediaTypes);
 		}
 
-
+		@Nullable
 		private static HttpMethod initHttpMethod(@Nullable HttpExchange typeAnnot, HttpExchange annot) {
 
 			String value1 = (typeAnnot != null ? typeAnnot.method() : null);
@@ -190,14 +195,20 @@ final class HttpServiceMethod {
 				return HttpMethod.valueOf(value1);
 			}
 
-			throw new IllegalStateException("HttpMethod is required");
+			return null;
 		}
 
 		@Nullable
-		private static String initUrl(@Nullable HttpExchange typeAnnot, HttpExchange annot) {
+		private static String initUrl(
+				@Nullable HttpExchange typeAnnot, HttpExchange annot, @Nullable StringValueResolver embeddedValueResolver) {
 
 			String url1 = (typeAnnot != null ? typeAnnot.url() : null);
 			String url2 = annot.url();
+
+			if (embeddedValueResolver != null) {
+				url1 = (url1 != null ? embeddedValueResolver.resolveStringValue(url1) : null);
+				url2 = embeddedValueResolver.resolveStringValue(url2);
+			}
 
 			boolean hasUrl1 = StringUtils.hasText(url1);
 			boolean hasUrl2 = StringUtils.hasText(url2);
@@ -324,7 +335,7 @@ final class HttpServiceMethod {
 				responseFunction = initBodyFunction(client, actualParam, reactiveAdapter);
 			}
 
-			boolean blockForOptional = actualType.equals(Optional.class);
+			boolean blockForOptional = returnType.equals(Optional.class);
 			return new ResponseFunction(responseFunction, reactiveAdapter, blockForOptional, blockTimeout);
 		}
 

@@ -19,10 +19,6 @@ package org.springframework.aot.test.generator.compile;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -35,7 +31,6 @@ import java.util.Map;
 import org.springframework.aot.test.generator.file.ResourceFile;
 import org.springframework.aot.test.generator.file.ResourceFiles;
 import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -47,12 +42,12 @@ import org.springframework.util.ReflectionUtils;
  */
 public class DynamicClassLoader extends ClassLoader {
 
-	private static final Logger logger = System.getLogger(DynamicClassLoader.class.getName());
-
-
 	private final ResourceFiles resourceFiles;
 
 	private final Map<String, DynamicClassFileObject> classFiles;
+
+	@Nullable
+	private final Method defineClassMethod;
 
 
 	public DynamicClassLoader(ClassLoader parent, ResourceFiles resourceFiles,
@@ -61,6 +56,22 @@ public class DynamicClassLoader extends ClassLoader {
 		super(parent);
 		this.resourceFiles = resourceFiles;
 		this.classFiles = classFiles;
+		this.defineClassMethod = findDefineClassMethod(parent);
+		if (this.defineClassMethod != null) {
+			classFiles.forEach(this::defineClass);
+		}
+	}
+
+	@Nullable
+	private Method findDefineClassMethod(ClassLoader parent) {
+		Class<? extends ClassLoader> parentClass = parent.getClass();
+		if (parentClass.getName().equals(CompileWithTargetClassAccessClassLoader.class.getName())) {
+			Method defineClassMethod = ReflectionUtils.findMethod(parentClass,
+					"defineClassWithTargetAccess", String.class, byte[].class, int.class, int.class);
+			ReflectionUtils.makeAccessible(defineClassMethod);
+			return defineClassMethod;
+		}
+		return null;
 	}
 
 
@@ -75,37 +86,13 @@ public class DynamicClassLoader extends ClassLoader {
 
 	private Class<?> defineClass(String name, DynamicClassFileObject classFile) {
 		byte[] bytes = classFile.getBytes();
-		Class<?> targetClass = getTargetClass(name);
-		if (targetClass != null) {
-			try {
-				Lookup lookup = MethodHandles.privateLookupIn(targetClass, MethodHandles.lookup());
-				return lookup.defineClass(bytes);
-			}
-			catch (IllegalAccessException ex) {
-				logger.log(Level.WARNING, "Unable to define class using MethodHandles Lookup, "
-						+ "only public methods and classes will be accessible");
-			}
+		if (this.defineClassMethod != null) {
+			return (Class<?>) ReflectionUtils.invokeMethod(this.defineClassMethod,
+					getParent(), name, bytes, 0, bytes.length);
 		}
-		return defineClass(name, bytes, 0, bytes.length, null);
+		return defineClass(name, bytes, 0, bytes.length);
 	}
 
-	private Class<?> getTargetClass(String name) {
-		ClassLoader parentClassLoader = getParent();
-		if (parentClassLoader.getClass().getName()
-				.equals(CompileWithTargetClassAccessClassLoader.class.getName())) {
-			String packageName = ClassUtils.getPackageName(name);
-			Method method = ReflectionUtils.findMethod(parentClassLoader.getClass(), "getTargetClasses");
-			ReflectionUtils.makeAccessible(method);
-			String[] targetCasses = (String[]) ReflectionUtils.invokeMethod(method, parentClassLoader);
-			for (String targetClass : targetCasses) {
-				String targetPackageName = ClassUtils.getPackageName(targetClass);
-				if (targetPackageName.equals(packageName)) {
-					return ClassUtils.resolveClassName(targetClass, this);
-				}
-			}
-		}
-		return null;
-	}
 
 	@Override
 	protected Enumeration<URL> findResources(String name) throws IOException {

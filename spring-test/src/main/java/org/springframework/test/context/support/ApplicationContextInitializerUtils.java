@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,12 +52,13 @@ abstract class ApplicationContextInitializerUtils {
 	 * <p>Note that the {@link ContextConfiguration#inheritInitializers inheritInitializers}
 	 * flag of {@link ContextConfiguration @ContextConfiguration} will be taken into
 	 * consideration. Specifically, if the {@code inheritInitializers} flag is set to
-	 * {@code true} for a given level in the class hierarchy represented by the provided
-	 * configuration attributes, context initializer classes defined at the given level
-	 * will be merged with those defined in higher levels of the class hierarchy.
+	 * {@code true} for a given level in the class hierarchy and enclosing class
+	 * hierarchy represented by the provided configuration attributes, context
+	 * initializer classes defined at the given level will be merged with those
+	 * defined in higher levels of the class hierarchy or enclosing class hierarchy.
 	 * @param configAttributesList the list of configuration attributes to process; must
 	 * not be {@code null} or <em>empty</em>; must be ordered <em>bottom-up</em>
-	 * (i.e., as if we were traversing up the class hierarchy)
+	 * (i.e., as if we were traversing up the class hierarchy or enclosing class hierarchy)
 	 * @return the set of merged context initializer classes, including those from
 	 * superclasses if appropriate (never {@code null})
 	 * @since 3.2

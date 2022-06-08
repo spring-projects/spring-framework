@@ -16,7 +16,10 @@
 
 package org.springframework.beans.factory.aot;
 
+import java.util.function.UnaryOperator;
+
 import org.springframework.aot.generate.GenerationContext;
+import org.springframework.util.Assert;
 
 /**
  * AOT contribution from a {@link BeanRegistrationAotProcessor} used to register
@@ -30,11 +33,54 @@ import org.springframework.aot.generate.GenerationContext;
 public interface BeanRegistrationAotContribution {
 
 	/**
+	 * Customize the {@link BeanRegistrationCodeFragments} that will be used to
+	 * generate the bean registration code. Custom code fragments can be used if
+	 * default code generation isn't suitable.
+	 * @param generationContext the generation context
+	 * @param codeFragments the existing code fragments
+	 * @return the code fragments to use, may be the original instance or a
+	 * wrapper
+	 */
+	default BeanRegistrationCodeFragments customizeBeanRegistrationCodeFragments(
+			GenerationContext generationContext, BeanRegistrationCodeFragments codeFragments) {
+		return codeFragments;
+	}
+
+	/**
 	 * Apply this contribution to the given {@link BeanRegistrationCode}.
-	 * @param generationContext the active generation context
+	 * @param generationContext the generation context
 	 * @param beanRegistrationCode the generated registration
 	 */
 	void applyTo(GenerationContext generationContext,
 			BeanRegistrationCode beanRegistrationCode);
+
+	/**
+	 * Factory method that can be used to create a
+	 * {@link BeanRegistrationAotContribution} that applies the given
+	 * {@link BeanRegistrationCodeFragments} customizer.
+	 * @param beanRegistrationCodeFragmentsCustomizer the
+	 * {@link BeanRegistrationCodeFragments} customizer
+	 * @return a new {@link BeanRegistrationAotContribution} instance
+	 * @see #customizeBeanRegistrationCodeFragments(GenerationContext, BeanRegistrationCodeFragments)
+	 */
+	static BeanRegistrationAotContribution ofBeanRegistrationCodeFragmentsCustomizer(
+			UnaryOperator<BeanRegistrationCodeFragments> beanRegistrationCodeFragmentsCustomizer) {
+		Assert.notNull(beanRegistrationCodeFragmentsCustomizer,
+				"BeanRegistrationCodeFragmentsCustomizer must not be null");
+		return new BeanRegistrationAotContribution() {
+
+			@Override
+			public BeanRegistrationCodeFragments customizeBeanRegistrationCodeFragments(
+					GenerationContext generationContext, BeanRegistrationCodeFragments codeFragments) {
+				return beanRegistrationCodeFragmentsCustomizer.apply(codeFragments);
+			}
+
+			@Override
+			public void applyTo(GenerationContext generationContext,
+					BeanRegistrationCode beanRegistrationCode) {
+			}
+
+		};
+	}
 
 }

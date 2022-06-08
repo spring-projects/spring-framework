@@ -23,26 +23,26 @@ import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
-import org.springframework.aot.hint.JavaSerializationHints;
+import org.springframework.aot.hint.SerializationHints;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.core.env.Environment;
 
 /**
- * Tests for {@link JavaSerializationHintsWriter}.
+ * Tests for {@link SerializationHintsWriter}.
  *
  * @author Sebastien Deleuze
  */
-public class JavaSerializationHintsWriterTests {
+public class SerializationHintsWriterTests {
 
 	@Test
-	void empty() throws JSONException {
-		JavaSerializationHints hints = new JavaSerializationHints();
+	void shouldWriteEmptyHint() throws JSONException {
+		SerializationHints hints = new SerializationHints();
 		assertEquals("[]", hints);
 	}
 
 	@Test
-	void one() throws JSONException {
-		JavaSerializationHints hints = new JavaSerializationHints().registerType(TypeReference.of(String.class));
+	void shouldWriteSingleHint() throws JSONException {
+		SerializationHints hints = new SerializationHints().registerType(TypeReference.of(String.class));
 		assertEquals("""
 				[
 					{ "name": "java.lang.String" }
@@ -50,8 +50,8 @@ public class JavaSerializationHintsWriterTests {
 	}
 
 	@Test
-	void two() throws JSONException {
-		JavaSerializationHints hints = new JavaSerializationHints()
+	void shouldWriteMultipleHints() throws JSONException {
+		SerializationHints hints = new SerializationHints()
 				.registerType(TypeReference.of(String.class))
 				.registerType(TypeReference.of(Environment.class));
 		assertEquals("""
@@ -61,10 +61,20 @@ public class JavaSerializationHintsWriterTests {
 				]""", hints);
 	}
 
-	private void assertEquals(String expectedString, JavaSerializationHints hints) throws JSONException {
+	@Test
+	void shouldWriteSingleHintWithCondition() throws JSONException {
+		SerializationHints hints = new SerializationHints().registerType(TypeReference.of(String.class),
+				builder -> builder.onReachableType(TypeReference.of("org.example.Test")));
+		assertEquals("""
+				[
+					{ "condition": { "typeReachable": "org.example.Test" }, "name": "java.lang.String" }
+				]""", hints);
+	}
+
+	private void assertEquals(String expectedString, SerializationHints hints) throws JSONException {
 		StringWriter out = new StringWriter();
 		BasicJsonWriter writer = new BasicJsonWriter(out, "\t");
-		JavaSerializationHintsWriter.INSTANCE.write(writer, hints);
+		SerializationHintsWriter.INSTANCE.write(writer, hints);
 		JSONAssert.assertEquals(expectedString, out.toString(), JSONCompareMode.NON_EXTENSIBLE);
 	}
 

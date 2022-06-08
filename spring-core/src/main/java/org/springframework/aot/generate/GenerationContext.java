@@ -16,11 +16,11 @@
 
 package org.springframework.aot.generate;
 
-import org.springframework.aot.hint.JavaSerializationHints;
 import org.springframework.aot.hint.ProxyHints;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.ResourceHints;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.SerializationHints;
 
 /**
  * Central interface used for code generation.
@@ -67,7 +67,7 @@ public interface GenerationContext {
 	/**
 	 * Return the {@link RuntimeHints} being used by the context. Used to record
 	 * {@link ReflectionHints reflection}, {@link ResourceHints resource},
-	 * {@link JavaSerializationHints serialization} and {@link ProxyHints proxy}
+	 * {@link SerializationHints serialization} and {@link ProxyHints proxy}
 	 * hints so that the application can run as a native image.
 	 * @return the runtime hints
 	 */

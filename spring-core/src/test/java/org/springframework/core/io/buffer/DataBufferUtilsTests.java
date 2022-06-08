@@ -769,8 +769,8 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	private static void assertReleased(DataBuffer dataBuffer) {
-		if (dataBuffer instanceof NettyDataBuffer) {
-			ByteBuf byteBuf = ((NettyDataBuffer) dataBuffer).getNativeBuffer();
+		if (dataBuffer instanceof NettyDataBuffer nettyDataBuffer) {
+			ByteBuf byteBuf = nettyDataBuffer.getNativeBuffer();
 			assertThat(byteBuf.refCnt()).isEqualTo(0);
 		}
 	}
