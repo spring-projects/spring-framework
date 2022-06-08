@@ -315,6 +315,20 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 		}
 		return this.threadPoolExecutor.getPoolSize();
 	}
+	
+	/**
+	 * Return the current number of threads waiting in the queue
+	 */
+	public int getCurrentQueueSize() {
+		return this.getThreadPoolExecutor().getQueue().size();
+	}
+
+	/**
+	* Return the maximum capacity of the queue
+	*/
+	public int getQueueCapacity() {
+		return this.queueCapacity;
+	}
 
 	/**
 	 * Return the number of currently active threads.
