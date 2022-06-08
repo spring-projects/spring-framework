@@ -327,7 +327,7 @@ public class SpringFactoriesLoader {
 				new SpringFactoriesLoader(classLoader, loadFactoriesResource(resourceClassLoader, resourceLocation)));
 	}
 
-	static Map<String, List<String>> loadFactoriesResource(ClassLoader classLoader, String resourceLocation) {
+	protected static Map<String, List<String>> loadFactoriesResource(ClassLoader classLoader, String resourceLocation) {
 		Map<String, List<String>> result = new LinkedHashMap<>();
 		try {
 			Enumeration<URL> urls = classLoader.getResources(resourceLocation);
