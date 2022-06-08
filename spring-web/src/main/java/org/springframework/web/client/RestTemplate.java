@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -195,6 +195,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			this.messageConverters.add(new MappingJackson2CborHttpMessageConverter());
 		}
 
+		updateErrorHandlerConverters();
 		this.uriTemplateHandler = initUriTemplateHandler();
 	}
 
@@ -219,8 +220,15 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		validateConverters(messageConverters);
 		this.messageConverters.addAll(messageConverters);
 		this.uriTemplateHandler = initUriTemplateHandler();
+		updateErrorHandlerConverters();
 	}
 
+
+	private void updateErrorHandlerConverters() {
+		if (this.errorHandler instanceof DefaultResponseErrorHandler handler) {
+			handler.setMessageConverters(this.messageConverters);
+		}
+	}
 
 	private static DefaultUriBuilderFactory initUriTemplateHandler() {
 		DefaultUriBuilderFactory uriFactory = new DefaultUriBuilderFactory();
@@ -240,6 +248,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			this.messageConverters.clear();
 			this.messageConverters.addAll(messageConverters);
 		}
+		updateErrorHandlerConverters();
 	}
 
 	private void validateConverters(List<HttpMessageConverter<?>> messageConverters) {
@@ -262,6 +271,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	public void setErrorHandler(ResponseErrorHandler errorHandler) {
 		Assert.notNull(errorHandler, "ResponseErrorHandler must not be null");
 		this.errorHandler = errorHandler;
+		updateErrorHandlerConverters();
 	}
 
 	/**

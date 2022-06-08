@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,7 +117,7 @@ public class SpringConfigurator extends Configurator {
 				beanNamesByType.put(endpointClass, NO_VALUE);
 				if (names.length > 1) {
 					throw new IllegalStateException("Found multiple @ServerEndpoint's of type [" +
-							endpointClass.getName() + "]: bean names " + Arrays.asList(names));
+							endpointClass.getName() + "]: bean names " + Arrays.toString(names));
 				}
 			}
 		}

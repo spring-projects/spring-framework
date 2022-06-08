@@ -33,12 +33,12 @@ is a sub-interface of `BeanFactory`. It adds:
 * Application-layer specific contexts such as the `WebApplicationContext`
 for use in web applications.
 
-In short, the `BeanFactory` provides the configuration framework and basic
-functionality, and the `ApplicationContext` adds more enterprise-specific functionality.
-The `ApplicationContext` is a complete superset of the `BeanFactory` and is used
-exclusively in this chapter in descriptions of Spring's IoC container. For more
-information on using the `BeanFactory` instead of the `ApplicationContext,` see
-<<beans-beanfactory>>.
+In short, the `BeanFactory` provides the configuration framework and basic functionality,
+and the `ApplicationContext` adds more enterprise-specific functionality. The
+`ApplicationContext` is a complete superset of the `BeanFactory` and is used exclusively
+in this chapter in descriptions of Spring's IoC container. For more information on using
+the `BeanFactory` instead of the `ApplicationContext,` see the section covering the
+<<beans-beanfactory, `BeanFactory` API>>.
 
 In Spring, the objects that form the backbone of your application and that are managed
 by the Spring IoC container are called beans. A bean is an object that is
@@ -503,11 +503,11 @@ The following table describes these properties:
 In addition to bean definitions that contain information on how to create a specific
 bean, the `ApplicationContext` implementations also permit the registration of existing
 objects that are created outside the container (by users). This is done by accessing the
-ApplicationContext's BeanFactory through the `getBeanFactory()` method, which returns the
-BeanFactory `DefaultListableBeanFactory` implementation. `DefaultListableBeanFactory`
-supports this registration through the `registerSingleton(..)` and
-`registerBeanDefinition(..)` methods. However, typical applications work solely with beans
-defined through regular bean definition metadata.
+ApplicationContext's `BeanFactory` through the `getBeanFactory()` method, which returns
+the `DefaultListableBeanFactory` implementation. `DefaultListableBeanFactory` supports
+this registration through the `registerSingleton(..)` and `registerBeanDefinition(..)`
+methods. However, typical applications work solely with beans defined through regular
+bean definition metadata.
 
 [NOTE]
 ====
@@ -693,10 +693,11 @@ able to call this method (with optional arguments, as described later) and retur
 object, which subsequently is treated as if it had been created through a constructor.
 One use for such a bean definition is to call `static` factories in legacy code.
 
-The following bean definition specifies that the bean be created by calling a
+The following bean definition specifies that the bean will be created by calling a
 factory method. The definition does not specify the type (class) of the returned object,
-only the class containing the factory method. In this example, the `createInstance()`
-method must be a static method. The following example shows how to specify a factory method:
+but rather the class containing the factory method. In this example, the
+`createInstance()` method must be a `static` method. The following example shows how to
+specify a factory method:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -725,6 +726,7 @@ The following example shows a class that would work with the preceding bean defi
 	class ClientService private constructor() {
 		companion object {
 			private val clientService = ClientService()
+			@JvmStatic
 			fun createInstance() = clientService
 		}
 	}
@@ -11155,7 +11157,7 @@ by other application modules on the same machine.
 
 
 [[beans-beanfactory]]
-== The `BeanFactory`
+== The `BeanFactory` API
 
 The `BeanFactory` API provides the underlying basis for Spring's IoC functionality.
 Its specific contracts are mostly used in integration with other parts of Spring and

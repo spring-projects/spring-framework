@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,8 +125,8 @@ public abstract class DigestUtils {
 
 	private static byte[] digest(String algorithm, InputStream inputStream) throws IOException {
 		MessageDigest messageDigest = getDigest(algorithm);
-		if (inputStream instanceof UpdateMessageDigestInputStream){
-			((UpdateMessageDigestInputStream) inputStream).updateMessageDigest(messageDigest);
+		if (inputStream instanceof UpdateMessageDigestInputStream digestIntputStream){
+			digestIntputStream.updateMessageDigest(messageDigest);
 			return messageDigest.digest();
 		}
 		else {

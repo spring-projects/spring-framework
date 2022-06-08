@@ -26,6 +26,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import org.springframework.aot.hint.ProxyHints;
+import org.springframework.aot.hint.TypeReference;
 
 /**
  * Tests for {@link ProxyHintsWriter}.
@@ -41,7 +42,7 @@ public class ProxyHintsWriterTests {
 	}
 
 	@Test
-	void one() throws JSONException {
+	void shouldWriteOneEntry() throws JSONException {
 		ProxyHints hints = new ProxyHints();
 		hints.registerJdkProxy(Function.class);
 		assertEquals("""
@@ -51,7 +52,7 @@ public class ProxyHintsWriterTests {
 	}
 
 	@Test
-	void two() throws JSONException {
+	void shouldWriteMultipleEntries() throws JSONException {
 		ProxyHints hints = new ProxyHints();
 		hints.registerJdkProxy(Function.class);
 		hints.registerJdkProxy(Function.class, Consumer.class);
@@ -59,6 +60,17 @@ public class ProxyHintsWriterTests {
 				[
 					{ "interfaces": [ "java.util.function.Function" ] },
 					{ "interfaces": [ "java.util.function.Function", "java.util.function.Consumer" ] }
+				]""", hints);
+	}
+
+	@Test
+	void shouldWriteCondition() throws JSONException {
+		ProxyHints hints = new ProxyHints();
+		hints.registerJdkProxy(builder -> builder.proxiedInterfaces(Function.class)
+				.onReachableType(TypeReference.of("org.example.Test")));
+		assertEquals("""
+				[
+					{ "condition": { "typeReachable": "org.example.Test"}, "interfaces": [ "java.util.function.Function" ] }
 				]""", hints);
 	}
 

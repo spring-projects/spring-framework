@@ -29,14 +29,14 @@ import org.springframework.http.ProblemDetail;
  * <p>{@link ErrorResponseException} is a default implementation of this
  * interface and a convenient base class for other exceptions to use.
  *
- * <p>An {@code @ExceptionHandler} method can use
- * {@link org.springframework.http.ResponseEntity#of(ErrorResponse)} to map an
- * {@code ErrorResponse} to a {@code ResponseEntity}.
+ * <p>{@code ErrorResponse} is supported as a return value from
+ * {@code @ExceptionHandler} methods that render directly to the response, e.g.
+ * by being marked {@code @ResponseBody}, or declared in an
+ * {@code @RestController} or {@code RestControllerAdvice} class.
  *
  * @author Rossen Stoyanchev
  * @since 6.0
  * @see ErrorResponseException
- * @see org.springframework.http.ResponseEntity#of(ErrorResponse)
  */
 public interface ErrorResponse {
 

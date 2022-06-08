@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -30,6 +30,8 @@ import org.springframework.lang.Nullable;
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 21.01.2004
  * @param <E> the element type
  */
@@ -54,16 +56,17 @@ public class ManagedSet<E> extends LinkedHashSet<E> implements Mergeable, BeanMe
 
 
 	/**
-	 * Return a new instance containing an arbitrary number of elements.
+	 * Create a new instance containing an arbitrary number of elements.
 	 * @param elements the elements to be contained in the set
 	 * @param <E> the {@code Set}'s element type
-	 * @return a {@code Set} containing the specified elements
+	 * @return a {@code ManagedSet} containing the specified elements
 	 * @since 5.3.16
 	 */
-	@SuppressWarnings("unchecked")
+	@SafeVarargs
+	@SuppressWarnings("varargs")
 	public static <E> ManagedSet<E> of(E... elements) {
 		ManagedSet<E> set = new ManagedSet<>();
-		set.addAll(Arrays.asList(elements));
+		Collections.addAll(set, elements);
 		return set;
 	}
 

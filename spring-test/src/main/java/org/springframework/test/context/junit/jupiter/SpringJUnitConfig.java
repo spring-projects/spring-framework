@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,11 @@ import org.springframework.test.context.ContextConfiguration;
  * {@link ExtendWith @ExtendWith(SpringExtension.class)} from JUnit Jupiter with
  * {@link ContextConfiguration @ContextConfiguration} from the <em>Spring TestContext
  * Framework</em>.
+ *
+ * <p>As of Spring Framework 5.3, this annotation will effectively be inherited
+ * from an enclosing test class by default. See
+ * {@link org.springframework.test.context.NestedTestConfiguration @NestedTestConfiguration}
+ * for details.
  *
  * @author Sam Brannen
  * @since 5.0

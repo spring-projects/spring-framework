@@ -25,9 +25,11 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.springframework.aot.hint.ConditionalHint;
 import org.springframework.aot.hint.ResourceBundleHint;
 import org.springframework.aot.hint.ResourceHints;
 import org.springframework.aot.hint.ResourcePatternHint;
+import org.springframework.aot.hint.ResourcePatternHints;
 import org.springframework.lang.Nullable;
 
 /**
@@ -36,9 +38,10 @@ import org.springframework.lang.Nullable;
  *
  * @author Sebastien Deleuze
  * @author Stephane Nicoll
+ * @author Brian Clozel
  * @since 6.0
- * @see <a href="https://www.graalvm.org/22.0/reference-manual/native-image/Resources/">Accessing Resources in Native Images</a>
- * @see <a href="https://www.graalvm.org/22.0/reference-manual/native-image/BuildConfiguration/">Native Image Build Configuration</a>
+ * @see <a href="https://www.graalvm.org/22.1/reference-manual/native-image/Resources/">Accessing Resources in Native Images</a>
+ * @see <a href="https://www.graalvm.org/22.1/reference-manual/native-image/BuildConfiguration/">Native Image Build Configuration</a>
  */
 class ResourceHintsWriter {
 
@@ -53,9 +56,9 @@ class ResourceHintsWriter {
 
 	private Map<String, Object> toAttributes(ResourceHints hint) {
 		Map<String, Object> attributes = new LinkedHashMap<>();
-		addIfNotEmpty(attributes, "includes", hint.resourcePatterns().map(ResourcePatternHint::getIncludes)
+		addIfNotEmpty(attributes, "includes", hint.resourcePatterns().map(ResourcePatternHints::getIncludes)
 				.flatMap(List::stream).distinct().map(this::toAttributes).toList());
-		addIfNotEmpty(attributes, "excludes", hint.resourcePatterns().map(ResourcePatternHint::getExcludes)
+		addIfNotEmpty(attributes, "excludes", hint.resourcePatterns().map(ResourcePatternHints::getExcludes)
 				.flatMap(List::stream).distinct().map(this::toAttributes).toList());
 		return attributes;
 	}
@@ -66,13 +69,15 @@ class ResourceHintsWriter {
 
 	private Map<String, Object> toAttributes(ResourceBundleHint hint) {
 		Map<String, Object> attributes = new LinkedHashMap<>();
+		handleCondition(attributes, hint);
 		attributes.put("name", hint.getBaseName());
 		return attributes;
 	}
 
-	private Map<String, Object> toAttributes(String pattern) {
+	private Map<String, Object> toAttributes(ResourcePatternHint hint) {
 		Map<String, Object> attributes = new LinkedHashMap<>();
-		attributes.put("pattern", patternToRegexp(pattern));
+		handleCondition(attributes, hint);
+		attributes.put("pattern", patternToRegexp(hint.getPattern()));
 		return attributes;
 	}
 
@@ -93,6 +98,14 @@ class ResourceHintsWriter {
 		}
 		else if (value != null) {
 			attributes.put(name, value);
+		}
+	}
+
+	private void handleCondition(Map<String, Object> attributes, ConditionalHint hint) {
+		if (hint.getReachableType() != null) {
+			Map<String, Object> conditionAttributes = new LinkedHashMap<>();
+			conditionAttributes.put("typeReachable", hint.getReachableType());
+			attributes.put("condition", conditionAttributes);
 		}
 	}
 

@@ -50,8 +50,8 @@ import org.springframework.util.Assert;
  *
  * DatabaseClient client = DatabaseClient.create(factory);
  * Mono&lt;Actor&gt; actor = client.sql("select first_name, last_name from t_actor")
- *     .map(row -&gt; new Actor(row.get("first_name, String.class"),
- *          row.get("last_name, String.class")))
+ *     .map(row -&gt; new Actor(row.get("first_name", String.class),
+ *          row.get("last_name", String.class)))
  *     .first();
  * </pre>
  *

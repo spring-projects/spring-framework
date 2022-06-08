@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -81,7 +80,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	 * @see #indicatesDisconnectedClient(Throwable)
 	 */
 	private static final Set<String> DISCONNECTED_CLIENT_EXCEPTIONS =
-			new HashSet<>(Arrays.asList("ClientAbortException", "EOFException", "EofException"));
+			Set.of("ClientAbortException", "EOFException", "EofException");
 
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,8 +100,8 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 		// TODO: Consider optimization by caching the list of the aspect names
 		List<Advisor> candidateAdvisors = findCandidateAdvisors();
 		for (Advisor advisor : candidateAdvisors) {
-			if (advisor instanceof AspectJPointcutAdvisor &&
-					((AspectJPointcutAdvisor) advisor).getAspectName().equals(beanName)) {
+			if (advisor instanceof AspectJPointcutAdvisor pointcutAdvisor &&
+					pointcutAdvisor.getAspectName().equals(beanName)) {
 				return true;
 			}
 		}
@@ -143,13 +143,12 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 			Advice advice = this.advisor.getAdvice();
 			StringBuilder sb = new StringBuilder(ClassUtils.getShortName(advice.getClass()));
 			boolean appended = false;
-			if (this.advisor instanceof Ordered) {
-				sb.append(": order = ").append(((Ordered) this.advisor).getOrder());
+			if (this.advisor instanceof Ordered ordered) {
+				sb.append(": order = ").append(ordered.getOrder());
 				appended = true;
 			}
-			if (advice instanceof AbstractAspectJAdvice) {
+			if (advice instanceof AbstractAspectJAdvice ajAdvice) {
 				sb.append(!appended ? ": " : ", ");
-				AbstractAspectJAdvice ajAdvice = (AbstractAspectJAdvice) advice;
 				sb.append("aspect name = ");
 				sb.append(ajAdvice.getAspectName());
 				sb.append(", declaration order = ");

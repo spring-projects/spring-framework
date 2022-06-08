@@ -35,6 +35,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +45,7 @@ import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.FormFieldPart;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
 import org.springframework.http.codec.multipart.Part;
+import org.springframework.http.codec.multipart.PartEvent;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.MultiValueMap;
@@ -200,6 +203,22 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.verifyComplete();
 	}
 
+	@ParameterizedHttpServerTest
+	void partData(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
+		Mono<String> result = webClient
+				.post()
+				.uri("/partData")
+				.bodyValue(generateBody())
+				.retrieve()
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.consumeNextWith(body -> assertThat(body).isEqualTo("fieldPart,foo.txt:fileParts,logo.png:fileParts,jsonPart,"))
+				.verifyComplete();
+	}
+
 	private MultiValueMap<String, HttpEntity<?>> generateBody() {
 		MultipartBodyBuilder builder = new MultipartBodyBuilder();
 		builder.part("fieldPart", "fieldValue");
@@ -277,7 +296,7 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		}
 
 		private Mono<Path> createTempFile(String suffix) {
-					return Mono.defer(() -> {
+			return Mono.defer(() -> {
 						try {
 							return Mono.just(Files.createTempFile("MultipartIntegrationTests", suffix));
 						}
@@ -285,13 +304,38 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 							return Mono.error(ex);
 						}
 					})
-							.subscribeOn(Schedulers.boundedElastic());
-				}
+					.subscribeOn(Schedulers.boundedElastic());
+		}
 
 		@PostMapping("/modelAttribute")
 		String modelAttribute(@ModelAttribute FormBean formBean) {
 			return formBean.toString();
 		}
+
+		@PostMapping("/partData")
+		Flux<String> tokens(@RequestBody Flux<PartEvent> partData) {
+			return partData.map(data -> {
+				if (data.isLast()) {
+					ContentDisposition cd = data.headers().getContentDisposition();
+					StringBuilder sb = new StringBuilder();
+					if (cd.getFilename() != null) {
+						sb.append(cd.getFilename())
+								.append(':')
+								.append(cd.getName());
+					}
+					else if (cd.getName() != null) {
+						sb.append(cd.getName());
+					}
+					sb.append(',');
+					DataBufferUtils.release(data.content());
+					return sb.toString();
+				}
+				else {
+					return "";
+				}
+			});
+		}
+
 	}
 
 	private static String partMapDescription(MultiValueMap<String, Part> partsMap) {

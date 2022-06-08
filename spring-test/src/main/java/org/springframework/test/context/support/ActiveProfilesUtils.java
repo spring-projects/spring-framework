@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,11 +60,12 @@ abstract class ActiveProfilesUtils {
 	 * <p>Note that the {@link ActiveProfiles#inheritProfiles inheritProfiles} flag of
 	 * {@link ActiveProfiles @ActiveProfiles} will be taken into consideration.
 	 * Specifically, if the {@code inheritProfiles} flag is set to {@code true}, profiles
-	 * defined in the test class will be merged with those defined in superclasses.
+	 * defined in the test class will be merged with those defined in superclasses
+	 * and enclosing classes.
 	 * @param testClass the class for which to resolve the active profiles (must not be
 	 * {@code null})
 	 * @return the set of active profiles for the specified class, including active
-	 * profiles from superclasses if appropriate (never {@code null})
+	 * profiles from superclasses and enclosing classes if appropriate (never {@code null})
 	 * @see ActiveProfiles
 	 * @see ActiveProfilesResolver
 	 * @see org.springframework.context.annotation.Profile

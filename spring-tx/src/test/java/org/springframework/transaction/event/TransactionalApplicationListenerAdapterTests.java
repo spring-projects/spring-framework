@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
  * @author Juergen Hoeller
@@ -58,7 +58,7 @@ public class TransactionalApplicationListenerAdapterTests {
 						TransactionPhase.BEFORE_COMMIT, p -> {throw ex;});
 		adapter.addCallback(callback);
 
-		assertThatExceptionOfType(RuntimeException.class)
+		assertThatRuntimeException()
 				.isThrownBy(() -> runInTransaction(() -> adapter.onApplicationEvent(event)))
 				.withMessage("event");
 

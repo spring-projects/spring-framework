@@ -16,6 +16,11 @@
 
 package org.springframework.aot.test.generator.compile;
 
+import org.springframework.aot.test.generator.file.ResourceFile;
+import org.springframework.aot.test.generator.file.ResourceFiles;
+import org.springframework.aot.test.generator.file.SourceFile;
+import org.springframework.aot.test.generator.file.SourceFiles;
+
 /**
  * Exception thrown when code cannot compile.
  *
@@ -25,8 +30,29 @@ package org.springframework.aot.test.generator.compile;
 @SuppressWarnings("serial")
 public class CompilationException extends RuntimeException {
 
-	CompilationException(String message) {
-		super(message);
+
+	CompilationException(String errors, SourceFiles sourceFiles, ResourceFiles resourceFiles) {
+		super(buildMessage(errors, sourceFiles, resourceFiles));
+	}
+
+
+	private static String buildMessage(String errors, SourceFiles sourceFiles,
+			ResourceFiles resourceFiles) {
+		StringBuilder message = new StringBuilder();
+		message.append("Unable to compile source\n\n");
+		message.append(errors);
+		message.append("\n\n");
+		for (SourceFile sourceFile : sourceFiles) {
+			message.append("---- source:   " + sourceFile.getPath() + "\n\n");
+			message.append(sourceFile.getContent());
+			message.append("\n\n");
+		}
+		for (ResourceFile resourceFile : resourceFiles) {
+			message.append("---- resource: " + resourceFile.getPath() + "\n\n");
+			message.append(resourceFile.getContent());
+			message.append("\n\n");
+		}
+		return message.toString();
 	}
 
 }

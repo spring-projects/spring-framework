@@ -16,16 +16,22 @@
 
 package org.springframework.aot.test.generator.file;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.StringReader;
-
-import javax.annotation.Nullable;
+import java.nio.charset.StandardCharsets;
 
 import com.thoughtworks.qdox.JavaProjectBuilder;
 import com.thoughtworks.qdox.model.JavaClass;
-import com.thoughtworks.qdox.model.JavaPackage;
 import com.thoughtworks.qdox.model.JavaSource;
 import org.assertj.core.api.AssertProvider;
-import org.assertj.core.util.Strings;
+
+import org.springframework.core.io.InputStreamSource;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link DynamicFile} that holds Java source code and provides
@@ -43,12 +49,12 @@ public final class SourceFile extends DynamicFile
 		implements AssertProvider<SourceFileAssert> {
 
 
-	private final JavaSource javaSource;
+	private final String className;
 
 
-	private SourceFile(String path, String content, JavaSource javaSource) {
+	private SourceFile(String path, String content, String className) {
 		super(path, content);
-		this.javaSource = javaSource;
+		this.className = className;
 	}
 
 
@@ -59,7 +65,7 @@ public final class SourceFile extends DynamicFile
 	 * @return a {@link SourceFile} instance
 	 */
 	public static SourceFile of(CharSequence charSequence) {
-		return of(null, appendable -> appendable.append(charSequence));
+		return of(null, charSequence);
 	}
 
 	/**
@@ -72,6 +78,33 @@ public final class SourceFile extends DynamicFile
 	 */
 	public static SourceFile of(@Nullable String path, CharSequence charSequence) {
 		return of(path, appendable -> appendable.append(charSequence));
+	}
+
+	/**
+	 * Factory method to create a new {@link SourceFile} from the given
+	 * {@link InputStreamSource}.
+	 * @param inputStreamSource the source for the file
+	 * @return a {@link SourceFile} instance
+	 */
+	public static SourceFile of(InputStreamSource inputStreamSource) {
+		return of(null, inputStreamSource);
+	}
+
+	/**
+	 * Factory method to create a new {@link SourceFile} from the given
+	 * {@link InputStreamSource}.
+	 * @param path the relative path of the file or {@code null} to have the
+	 * path deduced
+	 * @param inputStreamSource the source for the file
+	 * @return a {@link SourceFile} instance
+	 */
+	public static SourceFile of(@Nullable String path, InputStreamSource inputStreamSource) {
+		return of(path, appendable -> appendable.append(copyToString(inputStreamSource)));
+	}
+
+	private static String copyToString(InputStreamSource inputStreamSource) throws IOException {
+		InputStreamReader reader = new InputStreamReader(inputStreamSource.getInputStream(), StandardCharsets.UTF_8);
+		return FileCopyUtils.copyToString(reader);
 	}
 
 	/**
@@ -94,57 +127,36 @@ public final class SourceFile extends DynamicFile
 	 */
 	public static SourceFile of(@Nullable String path, WritableContent writableContent) {
 		String content = toString(writableContent);
-		if (Strings.isNullOrEmpty(content)) {
-			throw new IllegalStateException("WritableContent did not append any content");
+		Assert.state(StringUtils.hasLength(content), "WritableContent did not append any content");
+		String className = getClassName(content);
+		if (!StringUtils.hasLength(path)) {
+			path = ClassUtils.convertClassNameToResourcePath(className) + ".java";
 		}
-		JavaSource javaSource = parse(content);
-		if (path == null || path.isEmpty()) {
-			path = deducePath(javaSource);
-		}
-		return new SourceFile(path, content, javaSource);
+		return new SourceFile(path, content, className);
 	}
 
-	private static JavaSource parse(String content) {
+	/**
+	 * Return the fully-qualified class name.
+	 * @return the fully qualified class name
+	 */
+	public String getClassName() {
+		return this.className;
+	}
+
+	private static String getClassName(String content) {
 		JavaProjectBuilder builder = new JavaProjectBuilder();
 		try {
 			JavaSource javaSource = builder.addSource(new StringReader(content));
-			if (javaSource.getClasses().size() != 1) {
-				throw new IllegalStateException("Source must define a single class");
-			}
-			return javaSource;
+			Assert.state(javaSource.getClasses().size() == 1, "Source must define a single class");
+			JavaClass javaClass = javaSource.getClasses().get(0);
+			return (javaSource.getPackage() != null)
+					? javaSource.getPackageName() + "." + javaClass.getName()
+					: javaClass.getName();
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(
 					"Unable to parse source file content:\n\n" + content, ex);
 		}
-	}
-
-	private static String deducePath(JavaSource javaSource) {
-		JavaPackage javaPackage = javaSource.getPackage();
-		JavaClass javaClass = javaSource.getClasses().get(0);
-		String path = javaClass.getName() + ".java";
-		if (javaPackage != null) {
-			path = javaPackage.getName().replace('.', '/') + "/" + path;
-		}
-		return path;
-	}
-
-	JavaSource getJavaSource() {
-		return this.javaSource;
-	}
-
-	/**
-	 * Return the target class for this source file or {@code null}. The target
-	 * class can be used if private lookup access is required.
-	 * @return the target class
-	 */
-	@Nullable
-	public Class<?> getTarget() {
-		return null; // Not yet supported
-	}
-
-	public String getClassName() {
-		return this.javaSource.getClasses().get(0).getFullyQualifiedName();
 	}
 
 	/**
@@ -157,5 +169,7 @@ public final class SourceFile extends DynamicFile
 	public SourceFileAssert assertThat() {
 		return new SourceFileAssert(this);
 	}
+
+
 
 }

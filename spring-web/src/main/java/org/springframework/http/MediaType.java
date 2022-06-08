@@ -97,12 +97,14 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/graphql+json}.
+	 * @since 5.3.19
 	 * @see <a href="https://github.com/graphql/graphql-over-http">GraphQL over HTTP spec</a>
 	 */
 	public static final MediaType APPLICATION_GRAPHQL;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_GRAPHQL}.
+	 * @since 5.3.19
 	 */
 	public static final String APPLICATION_GRAPHQL_VALUE = "application/graphql+json";
 

@@ -19,11 +19,7 @@ package org.springframework.aot.test.generator.compile;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodHandles.Lookup;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -34,9 +30,8 @@ import java.util.Map;
 
 import org.springframework.aot.test.generator.file.ResourceFile;
 import org.springframework.aot.test.generator.file.ResourceFiles;
-import org.springframework.aot.test.generator.file.SourceFile;
-import org.springframework.aot.test.generator.file.SourceFiles;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link ClassLoader} used to expose dynamically generated content.
@@ -47,25 +42,36 @@ import org.springframework.lang.Nullable;
  */
 public class DynamicClassLoader extends ClassLoader {
 
-	private static final Logger logger = System.getLogger(DynamicClassLoader.class.getName());
-
-
-	private final SourceFiles sourceFiles;
-
 	private final ResourceFiles resourceFiles;
 
 	private final Map<String, DynamicClassFileObject> classFiles;
 
-	private final ClassLoader sourceLoader;
+	@Nullable
+	private final Method defineClassMethod;
 
 
-	public DynamicClassLoader(ClassLoader sourceLoader, SourceFiles sourceFiles,
-			ResourceFiles resourceFiles, Map<String, DynamicClassFileObject> classFiles) {
-		super(sourceLoader.getParent());
-		this.sourceLoader = sourceLoader;
-		this.sourceFiles = sourceFiles;
+	public DynamicClassLoader(ClassLoader parent, ResourceFiles resourceFiles,
+			Map<String, DynamicClassFileObject> classFiles) {
+
+		super(parent);
 		this.resourceFiles = resourceFiles;
 		this.classFiles = classFiles;
+		this.defineClassMethod = findDefineClassMethod(parent);
+		if (this.defineClassMethod != null) {
+			classFiles.forEach(this::defineClass);
+		}
+	}
+
+	@Nullable
+	private Method findDefineClassMethod(ClassLoader parent) {
+		Class<? extends ClassLoader> parentClass = parent.getClass();
+		if (parentClass.getName().equals(CompileWithTargetClassAccessClassLoader.class.getName())) {
+			Method defineClassMethod = ReflectionUtils.findMethod(parentClass,
+					"defineClassWithTargetAccess", String.class, byte[].class, int.class, int.class);
+			ReflectionUtils.makeAccessible(defineClassMethod);
+			return defineClassMethod;
+		}
+		return null;
 	}
 
 
@@ -75,41 +81,18 @@ public class DynamicClassLoader extends ClassLoader {
 		if (classFile != null) {
 			return defineClass(name, classFile);
 		}
-		try {
-			Class<?> fromSourceLoader = this.sourceLoader.loadClass(name);
-			if (Modifier.isPublic(fromSourceLoader.getModifiers())) {
-				return fromSourceLoader;
-			}
-		}
-		catch (Exception ex) {
-			// Continue
-		}
-		try (InputStream classStream = this.sourceLoader.getResourceAsStream(name.replace(".", "/") + ".class")) {
-			byte[] bytes = classStream.readAllBytes();
-			return defineClass(name, bytes, 0, bytes.length, null);
-		}
-		catch (IOException ex) {
-			throw new ClassNotFoundException(name);
-		}
+		return super.findClass(name);
 	}
 
 	private Class<?> defineClass(String name, DynamicClassFileObject classFile) {
 		byte[] bytes = classFile.getBytes();
-		SourceFile sourceFile = this.sourceFiles.get(name);
-		if (sourceFile != null && sourceFile.getTarget() != null) {
-			try {
-				Lookup lookup = MethodHandles.privateLookupIn(sourceFile.getTarget(),
-						MethodHandles.lookup());
-				return lookup.defineClass(bytes);
-			}
-			catch (IllegalAccessException ex) {
-				logger.log(Level.WARNING,
-						"Unable to define class using MethodHandles Lookup, "
-								+ "only public methods and classes will be accessible");
-			}
+		if (this.defineClassMethod != null) {
+			return (Class<?>) ReflectionUtils.invokeMethod(this.defineClassMethod,
+					getParent(), name, bytes, 0, bytes.length);
 		}
-		return defineClass(name, bytes, 0, bytes.length, null);
+		return defineClass(name, bytes, 0, bytes.length);
 	}
+
 
 	@Override
 	protected Enumeration<URL> findResources(String name) throws IOException {

@@ -22,7 +22,7 @@ import org.springframework.lang.Nullable;
  * Contract for registering {@link RuntimeHints} in a static fashion.
  * <p>Implementations will contribute hints without any knowledge of the application context
  * and can only use the given {@link ClassLoader} to conditionally contribute hints.
- * <p>{@code RuntimeHintsRegistrar} can be declared as {@code spring.factories} entries;
+ * <p>{@code RuntimeHintsRegistrar} can be declared as {@code spring/aot.factories} entries;
  * the registrar will be processed as soon as its declaration is found in the classpath.
  * A standard no-arg constructor is required for implementations.
  *

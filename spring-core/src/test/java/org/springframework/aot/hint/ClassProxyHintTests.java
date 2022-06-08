@@ -32,24 +32,25 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link ClassProxyHint}.
  *
  * @author Stephane Nicoll
+ * @author Brian Clozel
  */
 class ClassProxyHintTests {
 
 	@Test
-	void equalsWithWithSameInstanceIsTrue() {
+	void equalsWithSameInstanceIsTrue() {
 		ClassProxyHint hint = ClassProxyHint.of(Properties.class).build();
 		assertThat(hint).isEqualTo(hint);
 	}
 
 	@Test
-	void equalsWithWithSameTargetClassIsTrue() {
+	void equalsWithSameTargetClassIsTrue() {
 		ClassProxyHint first = ClassProxyHint.of(Properties.class).build();
 		ClassProxyHint second = ClassProxyHint.of(TypeReference.of(Properties.class)).build();
 		assertThat(first).isEqualTo(second);
 	}
 
 	@Test
-	void equalsWithWithSameProxiedInterfacesIsTrue() {
+	void equalsWithSameProxiedInterfacesIsTrue() {
 		ClassProxyHint first = ClassProxyHint.of(Properties.class)
 				.proxiedInterfaces(Serializable.class).build();
 		ClassProxyHint second = ClassProxyHint.of(Properties.class)
@@ -58,14 +59,14 @@ class ClassProxyHintTests {
 	}
 
 	@Test
-	void equalsWithWithDifferentTargetClassIsFalse() {
+	void equalsWithDifferentTargetClassIsFalse() {
 		ClassProxyHint first = ClassProxyHint.of(Properties.class).build();
 		ClassProxyHint second = ClassProxyHint.of(Hashtable.class).build();
 		assertThat(first).isNotEqualTo(second);
 	}
 
 	@Test
-	void equalsWithWithSameProxiedInterfacesDifferentOrderIsFalse() {
+	void equalsWithSameProxiedInterfacesDifferentOrderIsFalse() {
 		ClassProxyHint first = ClassProxyHint.of(Properties.class)
 				.proxiedInterfaces(Serializable.class, Closeable.class).build();
 		ClassProxyHint second = ClassProxyHint.of(Properties.class)
@@ -75,7 +76,7 @@ class ClassProxyHintTests {
 	}
 
 	@Test
-	void equalsWithWithDifferentProxiedInterfacesIsFalse() {
+	void equalsWithDifferentProxiedInterfacesIsFalse() {
 		ClassProxyHint first = ClassProxyHint.of(Properties.class)
 				.proxiedInterfaces(Serializable.class).build();
 		ClassProxyHint second = ClassProxyHint.of(Properties.class)
@@ -87,6 +88,13 @@ class ClassProxyHintTests {
 	void equalsWithNonClassProxyHintIsFalse() {
 		ClassProxyHint first = ClassProxyHint.of(Properties.class).build();
 		JdkProxyHint second = new Builder().proxiedInterfaces(Function.class).build();
+		assertThat(first).isNotEqualTo(second);
+	}
+
+	@Test
+	void equalsWithDifferentConditionIsFalse() {
+		ClassProxyHint first = ClassProxyHint.of(Properties.class).build();
+		ClassProxyHint second = ClassProxyHint.of(Properties.class).onReachableType(TypeReference.of("org.example.test")).build();
 		assertThat(first).isNotEqualTo(second);
 	}
 

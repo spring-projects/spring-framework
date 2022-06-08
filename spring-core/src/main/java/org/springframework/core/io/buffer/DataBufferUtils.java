@@ -480,8 +480,8 @@ public abstract class DataBufferUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T extends DataBuffer> T retain(T dataBuffer) {
-		if (dataBuffer instanceof PooledDataBuffer) {
-			return (T) ((PooledDataBuffer) dataBuffer).retain();
+		if (dataBuffer instanceof PooledDataBuffer pooledDataBuffer) {
+			return (T) pooledDataBuffer.retain();
 		}
 		else {
 			return dataBuffer;
@@ -498,8 +498,8 @@ public abstract class DataBufferUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T extends DataBuffer> T touch(T dataBuffer, Object hint) {
-		if (dataBuffer instanceof PooledDataBuffer) {
-			return (T) ((PooledDataBuffer) dataBuffer).touch(hint);
+		if (dataBuffer instanceof PooledDataBuffer pooledDataBuffer) {
+			return (T) pooledDataBuffer.touch(hint);
 		}
 		else {
 			return dataBuffer;
@@ -568,12 +568,12 @@ public abstract class DataBufferUtils {
 	 * @throws DataBufferLimitException if maxByteCount is exceeded
 	 * @since 5.1.11
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static Mono<DataBuffer> join(Publisher<? extends DataBuffer> buffers, int maxByteCount) {
 		Assert.notNull(buffers, "'dataBuffers' must not be null");
 
-		if (buffers instanceof Mono) {
-			return (Mono<DataBuffer>) buffers;
+		if (buffers instanceof Mono mono) {
+			return mono;
 		}
 
 		return Flux.from(buffers)

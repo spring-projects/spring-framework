@@ -44,6 +44,8 @@ import org.springframework.context.testfixture.cache.beans.CacheableService;
 import org.springframework.context.testfixture.cache.beans.DefaultCacheableService;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Integration tests for {@code @EnableCaching} and its related
@@ -76,7 +78,7 @@ class EnableCachingTests extends AbstractCacheAnnotationTests {
 	void singleCacheManagerBean() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(SingleCacheManagerConfig.class);
-		ctx.refresh();
+		assertThatCode(ctx::refresh).doesNotThrowAnyException();
 		ctx.close();
 	}
 
@@ -85,20 +87,17 @@ class EnableCachingTests extends AbstractCacheAnnotationTests {
 		@SuppressWarnings("resource")
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(MultiCacheManagerConfig.class);
-		try {
-			ctx.refresh();
-		}
-		catch (IllegalStateException ex) {
-			assertThat(ex.getMessage().contains("no unique bean of type CacheManager")).isTrue();
-			assertThat(ex).hasCauseInstanceOf(NoUniqueBeanDefinitionException.class);
-		}
+		assertThatThrownBy(ctx::refresh)
+				.isInstanceOf(IllegalStateException.class)
+				.hasMessageContaining("no unique bean of type CacheManager")
+				.hasCauseInstanceOf(NoUniqueBeanDefinitionException.class);
 	}
 
 	@Test
 	void multipleCacheManagerBeans_implementsCachingConfigurer() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(MultiCacheManagerConfigurer.class);
-		ctx.refresh();  // does not throw an exception
+		assertThatCode(ctx::refresh).doesNotThrowAnyException();
 		ctx.close();
 	}
 
@@ -107,12 +106,8 @@ class EnableCachingTests extends AbstractCacheAnnotationTests {
 		@SuppressWarnings("resource")
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(MultiCacheManagerConfigurer.class, EnableCachingConfig.class);
-		try {
-			ctx.refresh();
-		}
-		catch (IllegalStateException ex) {
-			assertThat(ex.getMessage().contains("implementations of CachingConfigurer")).isTrue();
-		}
+		assertThatThrownBy(ctx::refresh)
+				.hasMessageContaining("implementations of CachingConfigurer");
 	}
 
 	@Test
@@ -120,22 +115,18 @@ class EnableCachingTests extends AbstractCacheAnnotationTests {
 		@SuppressWarnings("resource")
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(EmptyConfig.class);
-		try {
-			ctx.refresh();
-		}
-		catch (IllegalStateException ex) {
-			assertThat(ex.getMessage().contains("no bean of type CacheManager")).isTrue();
-			assertThat(ex).hasCauseInstanceOf(NoSuchBeanDefinitionException.class);
-		}
+		assertThatThrownBy(ctx::refresh)
+				.isInstanceOf(IllegalStateException.class)
+				.hasMessageContaining("no bean of type CacheManager")
+				.hasCauseInstanceOf(NoSuchBeanDefinitionException.class);
 	}
 
 	@Test
 	void emptyConfigSupport() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(EmptyConfigSupportConfig.class);
 		CacheInterceptor ci = context.getBean(CacheInterceptor.class);
-		assertThat(ci.getCacheResolver()).isNotNull();
-		assertThat(ci.getCacheResolver().getClass()).isEqualTo(SimpleCacheResolver.class);
-		assertThat(((SimpleCacheResolver) ci.getCacheResolver()).getCacheManager()).isSameAs(context.getBean(CacheManager.class));
+		assertThat(ci.getCacheResolver()).isInstanceOfSatisfying(SimpleCacheResolver.class, cacheResolver ->
+				assertThat(cacheResolver.getCacheManager()).isSameAs(context.getBean(CacheManager.class)));
 		context.close();
 	}
 

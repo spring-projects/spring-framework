@@ -74,6 +74,12 @@ public class ProblemDetail {
 		this.instance = other.instance;
 	}
 
+	/**
+	 * For deserialization.
+	 */
+	protected ProblemDetail() {
+	}
+
 
 	/**
 	 * Variant of {@link #setType(URI)} for chained initialization.

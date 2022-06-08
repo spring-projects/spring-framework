@@ -17,7 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.BeanMetadataElement;
@@ -31,6 +31,8 @@ import org.springframework.lang.Nullable;
  * @author Rod Johnson
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 27.05.2003
  * @param <E> the element type
  */
@@ -55,16 +57,17 @@ public class ManagedList<E> extends ArrayList<E> implements Mergeable, BeanMetad
 
 
 	/**
-	 * Return a new instance containing an arbitrary number of elements.
+	 * Create a new instance containing an arbitrary number of elements.
 	 * @param elements the elements to be contained in the list
 	 * @param <E> the {@code List}'s element type
-	 * @return a {@code List} containing the specified elements
+	 * @return a {@code ManagedList} containing the specified elements
 	 * @since 5.3.16
 	 */
-	@SuppressWarnings("unchecked")
+	@SafeVarargs
+	@SuppressWarnings("varargs")
 	public static <E> ManagedList<E> of(E... elements) {
 		ManagedList<E> list = new ManagedList<>();
-		list.addAll(Arrays.asList(elements));
+		Collections.addAll(list, elements);
 		return list;
 	}
 

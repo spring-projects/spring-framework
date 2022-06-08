@@ -50,9 +50,9 @@ import org.springframework.util.function.SupplierUtils;
  * by default. This factory loads a "sql-error-codes.xml" file from the class path,
  * defining error code mappings for database names from database meta-data.
  * <li>Fallback to a fallback translator. {@link SQLStateSQLExceptionTranslator} is the
- * default fallback translator, analyzing the exception's SQL state only. On Java 6
- * which introduces its own {@code SQLException} subclass hierarchy, we will
- * use {@link SQLExceptionSubclassTranslator} by default, which in turns falls back
+ * default fallback translator, analyzing the exception's SQL state only. Since Java 6
+ * which introduces its own {@code SQLException} subclass hierarchy, we use
+ * {@link SQLExceptionSubclassTranslator} by default, which in turns falls back
  * to Spring's own SQL state translation when not encountering specific subclasses.
  * </ul>
  *

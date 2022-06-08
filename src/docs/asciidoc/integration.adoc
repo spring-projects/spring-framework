@@ -12,19 +12,34 @@ a number of technologies.
 
 
 [[rest-client-access]]
-== REST Endpoints
+== REST Clients
 
-The Spring Framework provides two choices for making calls to REST endpoints:
+The Spring Framework provides the following choices for making calls to REST endpoints:
 
-* <<rest-resttemplate>>: The original Spring REST client with a synchronous, template
-method API.
-* <<web-reactive.adoc#webflux-client, WebClient>>: a non-blocking, reactive alternative
-that supports both synchronous and asynchronous as well as streaming scenarios.
+* <<rest-webclient>> - non-blocking, reactive client w fluent API.
+* <<rest-resttemplate>> - synchronous client with template method API.
+* <<rest-http-interface>> - annotated interface with generated, dynamic proxy implementation.
 
-NOTE: As of 5.0 the `RestTemplate` is in maintenance mode, with only minor requests for
-changes and bugs to be accepted going forward. Please, consider using the
-<<web-reactive.adoc#webflux-client, WebClient>> which offers a more modern API and
-supports sync, async, and streaming scenarios.
+
+[[rest-webclient]]
+=== `WebClient`
+
+`WebClient` is a non-blocking, reactive client to perform HTTP requests. It was
+introduced in 5.0 and offers an alternative to the `RestTemplate`, with support for
+synchronous, asynchronous, and streaming scenarios.
+
+`WebClient` supports the following:
+
+* Non-blocking I/O.
+* Reactive Streams back pressure.
+* High concurrency with fewer hardware resources.
+* Functional-style, fluent API that takes advantage of Java 8 lambdas.
+* Synchronous and asynchronous interactions.
+* Streaming up to or streaming down from a server.
+
+See <<web-reactive.adoc#webflux-client, WebClient>> for more details.
+
+
 
 
 [[rest-resttemplate]]
@@ -33,6 +48,10 @@ supports sync, async, and streaming scenarios.
 The `RestTemplate` provides a higher level API over HTTP client libraries. It makes it
 easy to invoke REST endpoints in a single line. It exposes the following groups of
 overloaded methods:
+
+NOTE: `RestTemplate` is in maintenance mode, with only requests for minor
+changes and bugs to be accepted. Please, consider using the
+<<web-reactive.adoc#webflux-client, WebClient>> instead.
 
 [[rest-overview-of-resttemplate-methods-tbl]]
 .RestTemplate methods
@@ -218,7 +237,7 @@ on the server side (for example, in Spring MVC REST controllers).
 
 Concrete implementations for the main media (MIME) types are provided in the framework
 and are, by default, registered with the `RestTemplate` on the client side and with
-`RequestMethodHandlerAdapter` on the server side (see
+`RequestMappingHandlerAdapter` on the server side (see
 <<web.adoc#mvc-config-message-converters, Configuring Message Converters>>).
 
 The implementations of `HttpMessageConverter` are described in the following sections.
@@ -344,1094 +363,149 @@ to `multipart/form-data` by the `FormHttpMessageConverter`. If the `MultiValueMa
 If necessary the `Content-Type` may also be set explicitly.
 
 
+[[rest-http-interface]]
+=== HTTP Interface
 
-[[remoting]]
-== Remoting and Web Services
+The Spring Framework lets you define an HTTP service as a Java interface with annotated
+methods for HTTP exchanges. You can then generate a proxy that implements this interface
+and performs the exchanges. This helps to simplify HTTP remote access which often
+involves a facade that wraps the details of using the underlying HTTP client.
 
-Spring provides support for remoting with various technologies.
-The remoting support eases the development of remote-enabled services, implemented
-via Java interfaces and objects as input and output. Currently, Spring supports the
-following remoting technologies:
-
-* <<remoting-web-services>>: Spring provides remoting support for web services through JAX-WS.
-* <<remoting-amqp>>: Remoting via AMQP as the underlying protocol is supported by the
-  separate Spring AMQP project.
-
-WARNING: As of Spring Framework 5.3, support for several remoting technologies is now deprecated
-for security reasons and broader industry support. Supporting infrastructure will be removed
-from Spring Framework for its next major release.
-
-The following remoting technologies are now deprecated and will not be replaced:
-
-* <<remoting-rmi,Remote Method Invocation (RMI)>>: Through the use of  `RmiProxyFactoryBean` and
-  `RmiServiceExporter`, Spring supports both traditional RMI (with `java.rmi.Remote`
-  interfaces and `java.rmi.RemoteException`) and transparent remoting through RMI
-  invokers (with any Java interface).
-* <<remoting-httpinvoker>>: Spring provides a special remoting strategy that allows
-  for Java serialization though HTTP, supporting any Java interface (as the RMI
-  invoker does). The corresponding support classes are `HttpInvokerProxyFactoryBean`
-  and `HttpInvokerServiceExporter`.
-* <<remoting-caucho-protocols-hessian>>: By using Spring's `HessianProxyFactoryBean` and the
-  `HessianServiceExporter`, you can transparently expose your services through the
-  lightweight binary HTTP-based protocol provided by Caucho.
-* <<remoting-jms>>: Remoting via JMS as the underlying protocol is supported through the
-  `JmsInvokerServiceExporter` and `JmsInvokerProxyFactoryBean` classes in the
-   `spring-jms` module.
-
-While discussing the remoting capabilities of Spring, we use the following domain
-model and corresponding services:
+To start, declare an interface with annotated, HTTP exchange methods:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	public class Account implements Serializable {
+	interface RepositoryService {
 
-		private String name;
+		@GetExchange("/repos/{owner}/{repo}")
+		Repository getRepository(@PathVariable String owner, @PathVariable String repo);
 
-		public String getName(){
-			return name;
-		}
+		// more HTTP exchange methods...
 
-		public void setName(String name) {
-			this.name = name;
-		}
 	}
 ----
+
+Now you create a proxy for the interface that performs the declared exchanges through
+the `WebClient`:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	public interface AccountService {
+	WebClient client = WebClient.builder()
+			.baseUrl("https://api.github.com/")
+			.build();
 
-		public void insertAccount(Account account);
+	HttpServiceProxyFactory proxyFactory = 
+			HttpServiceProxyFactory.builder(new WebClientAdapter(client)).build();
 
-		public List<Account> getAccounts(String name);
-	}
+	RepositoryService service = proxyFactory.createClient(RepositoryService.class);
 ----
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	// the implementation doing nothing at the moment
-	public class AccountServiceImpl implements AccountService {
-
-		public void insertAccount(Account acc) {
-			// do something...
-		}
-
-		public List<Account> getAccounts(String name) {
-			// do something...
-		}
-	}
-----
-
-This section starts by exposing the service to a remote client by using RMI and talk a bit
-about the drawbacks of using RMI. It then continues with an example that uses Hessian as
-the protocol.
-
-
-
-
-[[remoting-amqp]]
-=== AMQP
-Remoting via AMQP as the underlying protocol is supported in the Spring AMQP project.
-For further details please visit the {doc-spring-amqp}/html/#remoting[Spring Remoting]
-section of the Spring AMQP reference.
-
-[[remoting-autodection-remote-interfaces]]
-[NOTE]
-====
-Auto-detection is not implemented for remote interfaces.
-
-The main reason why auto-detection of implemented interfaces does not occur for remote
-interfaces is to avoid opening too many doors to remote callers. The target object might
-implement internal callback interfaces, such as `InitializingBean` or `DisposableBean`
-which one would not want to expose to callers.
-
-Offering a proxy with all interfaces implemented by the target usually does not matter
-in the local case. However, when you export a remote service, you should expose a specific
-service interface, with specific operations intended for remote usage. Besides internal
-callback interfaces, the target might implement multiple business interfaces, with only
-one of them intended for remote exposure. For these reasons, we require such a
-service interface to be specified.
-
-This is a trade-off between configuration convenience and the risk of accidental
-exposure of internal methods. Always specifying a service interface is not too much
-effort and puts you on the safe side regarding controlled exposure of specific methods.
-====
-
-
-
-[[remoting-considerations]]
-=== Considerations when Choosing a Technology
-
-Each and every technology presented here has its drawbacks. When choosing a technology,
-you should carefully consider your needs, the services you expose, and the objects you
-send over the wire.
-
-When using RMI, you cannot access the objects through the HTTP protocol,
-unless you tunnel the RMI traffic. RMI is a fairly heavy-weight protocol, in that it
-supports full-object serialization, which is important when you use a complex data model
-that needs serialization over the wire. However, RMI-JRMP is tied to Java clients. It is
-a Java-to-Java remoting solution.
-
-Spring's HTTP invoker is a good choice if you need HTTP-based remoting but also rely on
-Java serialization. It shares the basic infrastructure with RMI invokers but uses
-HTTP as transport. Note that HTTP invokers are not limited only to Java-to-Java remoting
-but also to Spring on both the client and the server side. (The latter also applies to
-Spring's RMI invoker for non-RMI interfaces.)
-
-Hessian might provide significant value when operating in a heterogeneous environment,
-because they explicitly allow for non-Java clients. However, non-Java support is still
-limited. Known issues include the serialization of Hibernate objects in combination with
-lazily-initialized collections. If you have such a data model, consider using RMI or
-HTTP invokers instead of Hessian.
-
-JMS can be useful for providing clusters of services and letting the JMS broker take
-care of load balancing, discovery, and auto-failover. By default, Java serialization is
-used for JMS remoting, but the JMS provider could use a different mechanism for
-the wire formatting, such as XStream to let servers be implemented in other
-technologies.
-
-Last but not least, EJB has an advantage over RMI, in that it supports standard
-role-based authentication and authorization and remote transaction propagation. It is
-possible to get RMI invokers or HTTP invokers to support security context propagation as
-well, although this is not provided by core Spring. Spring offers only appropriate hooks
-for plugging in third-party or custom solutions.
-
-
-
-[[remoting-web-services]]
-=== Java Web Services
-
-Spring provides full support for the standard Java web services APIs:
-
-* Exposing web services using JAX-WS
-* Accessing web services using JAX-WS
-
-In addition to stock support for JAX-WS in Spring Core, the Spring portfolio also
-features https://projects.spring.io/spring-ws[Spring Web Services], which is a solution for
-contract-first, document-driven web services -- highly recommended for building modern,
-future-proof web services.
-
-
-[[remoting-web-services-jaxws-export-servlet]]
-==== Exposing Servlet-based Web Services by Using JAX-WS
-
-Spring provides a convenient base class for JAX-WS servlet endpoint implementations:
-`SpringBeanAutowiringSupport`. To expose our `AccountService`, we extend Spring's
-`SpringBeanAutowiringSupport` class and implement our business logic here, usually
-delegating the call to the business layer. We use Spring's `@Autowired`
-annotation to express such dependencies on Spring-managed beans. The following example
-shows our class that extends `SpringBeanAutowiringSupport`:
-
-[source,java,indent=0]
-----
-	/**
-	 * JAX-WS compliant AccountService implementation that simply delegates
-	 * to the AccountService implementation in the root web application context.
-	 *
-	 * This wrapper class is necessary because JAX-WS requires working with dedicated
-	 * endpoint classes. If an existing service needs to be exported, a wrapper that
-	 * extends SpringBeanAutowiringSupport for simple Spring bean autowiring (through
-	 * the @Autowired annotation) is the simplest JAX-WS compliant way.
-	 *
-	 * This is the class registered with the server-side JAX-WS implementation.
-	 * In the case of a Jakarta EE server, this would simply be defined as a servlet
-	 * in web.xml, with the server detecting that this is a JAX-WS endpoint and reacting
-	 * accordingly. The servlet name usually needs to match the specified WS service name.
-	 *
-	 * The web service engine manages the lifecycle of instances of this class.
-	 * Spring bean references will just be wired in here.
-	 */
-	import org.springframework.web.context.support.SpringBeanAutowiringSupport;
-
-	@WebService(serviceName="AccountService")
-	public class AccountServiceEndpoint extends SpringBeanAutowiringSupport {
-
-		@Autowired
-		private AccountService biz;
-
-		@WebMethod
-		public void insertAccount(Account acc) {
-			biz.insertAccount(acc);
-		}
-
-		@WebMethod
-		public Account[] getAccounts(String name) {
-			return biz.getAccounts(name);
-		}
-	}
-----
-
-Our `AccountServiceEndpoint` needs to run in the same web application as the Spring
-context to allow for access to Spring's facilities. This is the case by default in Java
-EE environments, using the standard contract for JAX-WS servlet endpoint deployment.
-See the various Jakarta EE web service tutorials for details.
-
-
-[[remoting-web-services-jaxws-export-standalone]]
-==== Exporting Standalone Web Services by Using JAX-WS
-
-The built-in JAX-WS provider that comes with Oracle's JDK supports exposure of web
-services by using the built-in HTTP server that is also included in the JDK. Spring's
-`SimpleJaxWsServiceExporter` detects all `@WebService`-annotated beans in the Spring
-application context and exports them through the default JAX-WS server (the JDK HTTP
-server).
-
-In this scenario, the endpoint instances are defined and managed as Spring beans
-themselves. They are registered with the JAX-WS engine, but their lifecycle is up to
-the Spring application context. This means that you can apply Spring functionality
-(such as explicit dependency injection) to the endpoint instances. Annotation-driven
-injection through `@Autowired` works as well. The following example shows how to
-define these beans:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean class="org.springframework.remoting.jaxws.SimpleJaxWsServiceExporter">
-		<property name="baseAddress" value="http://localhost:8080/"/>
-	</bean>
-
-	<bean id="accountServiceEndpoint" class="example.AccountServiceEndpoint">
-		...
-	</bean>
-
-	...
-----
-
-The `AccountServiceEndpoint` can but does not have to derive from Spring's `SpringBeanAutowiringSupport`,
-since the endpoint in this example is a fully Spring-managed bean. This means that
-the endpoint implementation can be as follows (without any superclass declared --
-and Spring's `@Autowired` configuration annotation is still honored):
+An HTTP service interface can declare common attributes at the type level:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	@WebService(serviceName="AccountService")
-	public class AccountServiceEndpoint {
+	@HttpExchange(url = "/repos/{owner}/{repo}", accept = "application/vnd.github.v3+json")
+	interface RepositoryService {
 
-		@Autowired
-		private AccountService biz;
+		@GetExchange
+		Repository getRepository(@PathVariable String owner, @PathVariable String repo);
 
-		@WebMethod
-		public void insertAccount(Account acc) {
-			biz.insertAccount(acc);
-		}
+		@PatchExchange(contentType = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+		void updateRepository(@PathVariable String owner, @PathVariable String repo,
+				@RequestParam String name, @RequestParam String description, @RequestParam String homepage);
 
-		@WebMethod
-		public List<Account> getAccounts(String name) {
-			return biz.getAccounts(name);
-		}
 	}
 ----
 
 
-[[remoting-web-services-jaxws-export-ri]]
-==== Exporting Web Services by Using JAX-WS RI's Spring Support
+[[rest-http-interface-method-parameters]]
+==== Method Parameters
 
-Oracle's JAX-WS RI, developed as part of the GlassFish project, ships Spring support
-as part of its JAX-WS Commons project. This allows for defining JAX-WS endpoints as
-Spring-managed beans, similar to the standalone mode discussed in the
-<<remoting-web-services-jaxws-export-standalone, previous section>> --
-but this time in a Servlet environment.
+Annotated, HTTP exchange methods support flexible method signatures with the following
+method parameters:
 
-NOTE: This is not portable in a Jakarta EE environment. It is mainly intended for non-EE
-environments, such as Tomcat, that embed the JAX-WS RI as part of the web application.
+[cols="1,2", options="header"]
+|===
+| Controller method argument | Description
 
-The differences from the standard style of exporting servlet-based endpoints are that
-the lifecycle of the endpoint instances themselves are managed by Spring and that there
-is only one JAX-WS servlet defined in `web.xml`. With the standard Jakarta EE style (as
-shown earlier), you have one servlet definition per service endpoint, with each endpoint
-typically delegating to Spring beans (through the use of `@Autowired`, as shown earlier).
+| `URI`
+| Dynamically set the URL for the request, overriding the annotation's `url` attribute.
 
-See https://jax-ws-commons.java.net/spring/[https://jax-ws-commons.java.net/spring/]
-for details on setup and usage style.
+| `HttpMethod`
+| Dynamically set the HTTP method for the request, overriding the annotation's `method` attribute
 
+| `@RequestHeader`
+| Add a request header or mutliple headers. The argument may be a `Map<String, ?>` or
+  `MultiValueMap<String, ?>` with multiple headers, a `Collection<?>` of values, or an
+  individual value. Type conversion is supported for non-String values.
 
-[[remoting-web-services-jaxws-access]]
-==== Accessing Web Services by Using JAX-WS
+| `@PathVariable`
+| Add a variable for expand a placeholder in the request URL. The argument may be a
+  `Map<String, ?>` with multiple variables, or an individual value. Type conversion
+  is supported for non-String values.
 
-Spring provides two factory beans to create JAX-WS web service proxies, namely
-`LocalJaxWsServiceFactoryBean` and `JaxWsPortProxyFactoryBean`. The former can
-return only a JAX-WS service class for us to work with. The latter is the full-fledged
-version that can return a proxy that implements our business service interface.
-In the following example, we use `JaxWsPortProxyFactoryBean` to create a proxy for the
-`AccountService` endpoint (again):
+| `@RequestBody`
+| Provide the body of the request either as an Object to be serialized, or a
+  Reactive Streams `Publisher` such as `Mono`, `Flux`, or any other async type supported
+  through the configured `ReactiveAdapterRegistry`.
 
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean id="accountWebService" class="org.springframework.remoting.jaxws.JaxWsPortProxyFactoryBean">
-		<property name="serviceInterface" value="example.AccountService"/> <1>
-		<property name="wsdlDocumentUrl" value="http://localhost:8888/AccountServiceEndpoint?WSDL"/>
-		<property name="namespaceUri" value="https://example/"/>
-		<property name="serviceName" value="AccountService"/>
-		<property name="portName" value="AccountServiceEndpointPort"/>
-	</bean>
-----
-<1> Where `serviceInterface` is our business interface that the clients use.
+| `@RequestParam`
+| Add a request parameter or mutliple parameters. The argument may be a `Map<String, ?>`
+  or `MultiValueMap<String, ?>` with multiple parameters, a `Collection<?>` of values, or
+  an individual value. Type conversion is supported for non-String values.
+  
+  When `"content-type"` is set to `"application/x-www-form-urlencoded"`, request
+  parameters are encoded in the request body. Otherwise, they are added as URL query
+  parameters.
 
+| `@CookieValue`
+| Add a cookie or mutliple cookies. The argument may be a `Map<String, ?>` or
+  `MultiValueMap<String, ?>` with multiple cookies, a `Collection<?>` of values, or an
+  individual value. Type conversion is supported for non-String values.
 
-`wsdlDocumentUrl` is the URL for the WSDL file. Spring needs this at startup time to
-create the JAX-WS Service. `namespaceUri` corresponds to the `targetNamespace` in the
-.wsdl file. `serviceName` corresponds to the service name in the .wsdl file. `portName`
-corresponds to the port name in the .wsdl file.
+|===
 
-Accessing the web service is easy, as we have a bean factory for it that exposes it as
-an interface called `AccountService`. The following example shows how we can wire this
-up in Spring:
 
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean id="client" class="example.AccountClientImpl">
-		...
-		<property name="service" ref="accountWebService"/>
-	</bean>
-----
+[[rest-http-interface-return-values]]
+==== Return Values
 
-From the client code, we can access the web service as if it were a normal class,
-as the following example shows:
+Annotated, HTTP exchange methods support the following return values:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	public class AccountClientImpl {
+[cols="1,2", options="header"]
+|===
+| Controller method return value | Description
 
-		private AccountService service;
+| `void`, `Mono<Void>`
+| Perform the given request, and release the response content, if any.
 
-		public void setService(AccountService service) {
-			this.service = service;
-		}
+| `HttpHeaders`, `Mono<HttpHeaders>`
+| Perform the given request, release the response content, if any, and return the
+  response headers.
 
-		public void foo() {
-			service.insertAccount(...);
-		}
-	}
-----
+| `<T>`, `Mono<T>`
+| Perform the given request and decode the response content to the declared return type.
 
-NOTE: The above is slightly simplified in that JAX-WS requires endpoint interfaces
-and implementation classes to be annotated with `@WebService`, `@SOAPBinding`, etc.
-annotations. This means that you cannot (easily) use plain Java interfaces and
-implementation classes as JAX-WS endpoint artifacts; you need to annotate them
-accordingly first. Check the JAX-WS documentation for details on those requirements.
+| `<T>`, `Flux<T>`
+| Perform the given request and decode the response content to a stream of the declared
+  element type.
 
+| `ResponseEntity<Void>`, `Mono<ResponseEntity<Void>>`
+| Perform the given request, and release the response content, if any, and return a
+  `ResponseEntity` with the status and headers.
 
+| `ResponseEntity<T>`, `Mono<ResponseEntity<T>>`
+| Perform the given request, decode the response content to the declared return type, and
+  return a `ResponseEntity` with the status, headers, and the decoded body.
 
+| `Mono<ResponseEntity<Flux<T>>`
+| Perform the given request, decode the response content to a stream of the declared
+  element type, and return a `ResponseEntity` with the status, headers, and the decoded
+  response body stream.
 
-[[remoting-rmi]]
-=== RMI (Deprecated)
+|===
 
-WARNING: As of Spring Framework 5.3, RMI support is deprecated and will not be replaced.
-
-By using Spring's support for RMI, you can transparently expose your services through the
-RMI infrastructure. After having this set up, you basically have a configuration similar
-to remote EJBs, except for the fact that there is no standard support for security
-context propagation or remote transaction propagation. Spring does provide hooks for
-such additional invocation context when you use the RMI invoker, so you can, for example,
-plug in security frameworks or custom security credentials.
-
-
-[[remoting-rmi-server]]
-==== Exporting the Service by Using `RmiServiceExporter`
-
-Using the `RmiServiceExporter`, we can expose the interface of our AccountService object
-as RMI object. The interface can be accessed by using `RmiProxyFactoryBean`, or via
-plain RMI in case of a traditional RMI service. The `RmiServiceExporter` explicitly
-supports the exposing of any non-RMI services via RMI invokers.
-
-We first have to set up our service in the Spring container.
-The following example shows how to do so:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean id="accountService" class="example.AccountServiceImpl">
-		<!-- any additional properties, maybe a DAO? -->
-	</bean>
-----
-
-Next, we have to expose our service by using `RmiServiceExporter`.
-The following example shows how to do so:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean class="org.springframework.remoting.rmi.RmiServiceExporter">
-		<!-- does not necessarily have to be the same name as the bean to be exported -->
-		<property name="serviceName" value="AccountService"/>
-		<property name="service" ref="accountService"/>
-		<property name="serviceInterface" value="example.AccountService"/>
-		<!-- defaults to 1099 -->
-		<property name="registryPort" value="1199"/>
-	</bean>
-----
-
-In the preceding example, we override the port for the RMI registry. Often, your application
-server also maintains an RMI registry, and it is wise to not interfere with that one.
-Furthermore, the service name is used to bind the service. So, in the preceding example, the
-service is bound at `'rmi://HOST:1199/AccountService'`. We use this URL later on to link in
-the service at the client side.
-
-NOTE: The `servicePort` property has been omitted (it defaults to 0). This means that an
-anonymous port is used to communicate with the service.
-
-
-[[remoting-rmi-client]]
-==== Linking in the Service at the Client
-
-Our client is a simple object that uses the `AccountService` to manage accounts,
-as the following example shows:
-
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	public class SimpleObject {
-
-		private AccountService accountService;
-
-		public void setAccountService(AccountService accountService) {
-			this.accountService = accountService;
-		}
-
-		// additional methods using the accountService
-	}
-----
-
-To link in the service on the client, we create a separate Spring container,
-to contain the following simple object and the service linking configuration bits:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean class="example.SimpleObject">
-		<property name="accountService" ref="accountService"/>
-	</bean>
-
-	<bean id="accountService" class="org.springframework.remoting.rmi.RmiProxyFactoryBean">
-		<property name="serviceUrl" value="rmi://HOST:1199/AccountService"/>
-		<property name="serviceInterface" value="example.AccountService"/>
-	</bean>
-----
-
-That is all we need to do to support the remote account service on the client. Spring
-transparently creates an invoker and remotely enables the account service through the
-`RmiServiceExporter`. At the client, we link it in by using the `RmiProxyFactoryBean`.
-
-
-
-[[remoting-caucho-protocols]]
-=== Using Hessian to Remotely Call Services through HTTP (Deprecated)
-
-WARNING: As of Spring Framework 5.3, Hessian support is deprecated and will not be replaced.
-
-Hessian offers a binary HTTP-based remoting protocol. It is developed by Caucho,
-and you can find more information about Hessian itself at https://www.caucho.com/[].
-
-
-[[remoting-caucho-protocols-hessian]]
-==== Hessian
-
-Hessian communicates through HTTP and does so by using a custom servlet. By using Spring's
-`DispatcherServlet` principles (see <<webmvc.adoc#mvc-servlet>>), we can wire up such a
-servlet to expose your services. First, we have to create a new servlet in our application,
-as shown in the following excerpt from `web.xml`:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<servlet>
-		<servlet-name>remoting</servlet-name>
-		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>remoting</servlet-name>
-		<url-pattern>/remoting/*</url-pattern>
-	</servlet-mapping>
-----
-
-If you are familiar with Spring's `DispatcherServlet` principles, you probably
-know that now you have to create a Spring container configuration resource named
-`remoting-servlet.xml` (after the name of your servlet) in the `WEB-INF` directory.
-The application context is used in the next section.
-
-Alternatively, consider the use of Spring's simpler `HttpRequestHandlerServlet`. Doing so
-lets you embed the remote exporter definitions in your root application context (by
-default, in `WEB-INF/applicationContext.xml`), with individual servlet definitions
-pointing to specific exporter beans. In this case, each servlet name needs to match the bean name of
-its target exporter.
-
-
-[[remoting-caucho-protocols-hessian-server]]
-==== Exposing Your Beans by Using `HessianServiceExporter`
-
-In the newly created application context called `remoting-servlet.xml`, we create a
-`HessianServiceExporter` to export our services, as the following example shows:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean id="accountService" class="example.AccountServiceImpl">
-		<!-- any additional properties, maybe a DAO? -->
-	</bean>
-
-	<bean name="/AccountService" class="org.springframework.remoting.caucho.HessianServiceExporter">
-		<property name="service" ref="accountService"/>
-		<property name="serviceInterface" value="example.AccountService"/>
-	</bean>
-----
-
-Now we are ready to link in the service at the client. No explicit handler mapping is
-specified (to map request URLs onto services), so we use `BeanNameUrlHandlerMapping`
-used. Hence, the service is exported at the URL indicated through its bean name
-within the containing `DispatcherServlet` instance's mapping (as defined earlier):
-`https://HOST:8080/remoting/AccountService`.
-
-Alternatively, you can create a `HessianServiceExporter` in your root application context (for example,
-in `WEB-INF/applicationContext.xml`), as the following example shows:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean name="accountExporter" class="org.springframework.remoting.caucho.HessianServiceExporter">
-		<property name="service" ref="accountService"/>
-		<property name="serviceInterface" value="example.AccountService"/>
-	</bean>
-----
-
-In the latter case, you should define a corresponding servlet for this exporter in `web.xml`,
-with the same end result: The exporter gets mapped to the request path at
-`/remoting/AccountService`. Note that the servlet name needs to match the bean name of
-the target exporter. The following example shows how to do so:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<servlet>
-		<servlet-name>accountExporter</servlet-name>
-		<servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>accountExporter</servlet-name>
-		<url-pattern>/remoting/AccountService</url-pattern>
-	</servlet-mapping>
-----
-
-
-[[remoting-caucho-protocols-hessian-client]]
-==== Linking in the Service on the Client
-
-By using the `HessianProxyFactoryBean`, we can link in the service at the client. The same
-principles apply as with the RMI example. We create a separate bean factory or
-application context and mention the following beans where the `SimpleObject` is by using
-the `AccountService` to manage accounts, as the following example shows:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean class="example.SimpleObject">
-		<property name="accountService" ref="accountService"/>
-	</bean>
-
-	<bean id="accountService" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
-		<property name="serviceUrl" value="https://remotehost:8080/remoting/AccountService"/>
-		<property name="serviceInterface" value="example.AccountService"/>
-	</bean>
-----
-
-
-[[remoting-caucho-protocols-security]]
-==== Applying HTTP Basic Authentication to a Service Exposed through Hessian
-
-One of the advantages of Hessian is that we can easily apply HTTP basic authentication,
-because both protocols are HTTP-based. Your normal HTTP server security mechanism can
-be applied through using the `web.xml` security features, for example. Usually,
-you need not use per-user security credentials here. Rather, you can use shared credentials that you define
-at the `HessianProxyFactoryBean` level (similar to a JDBC `DataSource`), as the following example shows:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping">
-		<property name="interceptors" ref="authorizationInterceptor"/>
-	</bean>
-
-	<bean id="authorizationInterceptor"
-			class="org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor">
-		<property name="authorizedRoles" value="administrator,operator"/>
-	</bean>
-----
-
-In the preceding example, we explicitly mention the `BeanNameUrlHandlerMapping` and set
-an interceptor, to let only administrators and operators call the beans mentioned in
-this application context.
-
-NOTE: The preceding example does not show a flexible kind of security infrastructure. For
-more options as far as security is concerned, have a look at the Spring Security project
-at https://spring.io/projects/spring-security/.
-
-
-
-[[remoting-httpinvoker]]
-=== Spring HTTP Invoker (Deprecated)
-
-WARNING: As of Spring Framework 5.3, HTTP Invoker support is deprecated and will not be replaced.
-
-As opposed to Hessian, Spring HTTP invokers are both lightweight protocols that use their own slim
-serialization mechanisms and use the standard Java serialization
-mechanism to expose services through HTTP. This has a huge advantage if your arguments
-and return types are complex types that cannot be serialized by using the serialization
-mechanisms Hessian uses (see the next section for more considerations when
-you choose a remoting technology).
-
-Under the hood, Spring uses either the standard facilities provided by the JDK or
-Apache `HttpComponents` to perform HTTP calls. If you need more
-advanced and easier-to-use functionality, use the latter. See
-https://hc.apache.org/httpcomponents-client-ga/[hc.apache.org/httpcomponents-client-ga/]
-for more information.
-
-[CAUTION]
-====
-Be aware of vulnerabilities due to unsafe Java deserialization:
-Manipulated input streams can lead to unwanted code execution on the server
-during the deserialization step. As a consequence, do not expose HTTP invoker
-endpoints to untrusted clients. Rather, expose them only between your own services.
-In general, we strongly recommend using any other message format (such as JSON) instead.
-
-If you are concerned about security vulnerabilities due to Java serialization,
-consider the general-purpose serialization filter mechanism at the core JVM level,
-originally developed for JDK 9 but backported to JDK 8, 7 and 6 in the meantime. See
-https://blogs.oracle.com/java-platform-group/entry/incoming_filter_serialization_data_a
-and https://openjdk.java.net/jeps/290.
-====
-
-
-[[remoting-httpinvoker-server]]
-==== Exposing the Service Object
-
-Setting up the HTTP invoker infrastructure for a service object closely resembles the
-way you would do the same by using Hessian. As Hessian support provides
-`HessianServiceExporter`, Spring's HttpInvoker support provides
-`org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter`.
-
-To expose the `AccountService` (mentioned earlier) within a Spring Web MVC
-`DispatcherServlet`, the following configuration needs to be in place in the
-dispatcher's application context, as the following example shows:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean name="/AccountService" class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
-		<property name="service" ref="accountService"/>
-		<property name="serviceInterface" value="example.AccountService"/>
-	</bean>
-----
-
-Such an exporter definition is exposed through the `DispatcherServlet` instance's standard
-mapping facilities, as explained in <<remoting-caucho-protocols, the section on Hessian>>.
-
-Alternatively, you can create an `HttpInvokerServiceExporter` in your root application context
-(for example, in `'WEB-INF/applicationContext.xml'`), as the following example shows:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean name="accountExporter" class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
-		<property name="service" ref="accountService"/>
-		<property name="serviceInterface" value="example.AccountService"/>
-	</bean>
-----
-
-In addition, you can define a corresponding servlet for this exporter in `web.xml`, with the
-servlet name matching the bean name of the target exporter, as the following example shows:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<servlet>
-		<servlet-name>accountExporter</servlet-name>
-		<servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>accountExporter</servlet-name>
-		<url-pattern>/remoting/AccountService</url-pattern>
-	</servlet-mapping>
-----
-
-
-[[remoting-httpinvoker-client]]
-==== Linking in the Service at the Client
-
-Again, linking in the service from the client much resembles the way you would do it
-when you use Hessian. By using a proxy, Spring can translate your calls to
-HTTP POST requests to the URL that points to the exported service. The following example
-shows how to configure this arrangement:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean id="httpInvokerProxy" class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
-		<property name="serviceUrl" value="https://remotehost:8080/remoting/AccountService"/>
-		<property name="serviceInterface" value="example.AccountService"/>
-	</bean>
-----
-
-As mentioned earlier, you can choose what HTTP client you want to use. By default, the
-`HttpInvokerProxy` uses the JDK's HTTP functionality, but you can also use the Apache
-`HttpComponents` client by setting the `httpInvokerRequestExecutor` property.
-The following example shows how to do so:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<property name="httpInvokerRequestExecutor">
-		<bean class="org.springframework.remoting.httpinvoker.HttpComponentsHttpInvokerRequestExecutor"/>
-	</property>
-----
-
-
-
-[[remoting-jms]]
-=== JMS (Deprecated)
-
-WARNING: As of Spring Framework 5.3, JMS remoting support is deprecated and will not be replaced.
-
-You can also expose services transparently by using JMS as the underlying communication
-protocol. The JMS remoting support in the Spring Framework is pretty basic. It sends
-and receives on the `same thread` and in the same non-transactional `Session`.
-As a result, throughput is implementation-dependent. Note that these single-threaded
-and non-transactional constraints apply only to Spring's JMS remoting support.
-See <<jms>> for information on Spring's rich support for JMS-based messaging.
-
-The following interface is used on both the server and the client sides:
-
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	package com.foo;
-
-	public interface CheckingAccountService {
-
-		public void cancelAccount(Long accountId);
-	}
-----
-
-The following simple implementation of the preceding interface is used on the server-side:
-
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	package com.foo;
-
-	public class SimpleCheckingAccountService implements CheckingAccountService {
-
-		public void cancelAccount(Long accountId) {
-			System.out.println("Cancelling account [" + accountId + "]");
-		}
-	}
-----
-
-The following configuration file contains the JMS-infrastructure beans that are shared
-on both the client and the server:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<?xml version="1.0" encoding="UTF-8"?>
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			https://www.springframework.org/schema/beans/spring-beans.xsd">
-
-		<bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
-			<property name="brokerURL" value="tcp://ep-t43:61616"/>
-		</bean>
-
-		<bean id="queue" class="org.apache.activemq.command.ActiveMQQueue">
-			<constructor-arg value="mmm"/>
-		</bean>
-
-	</beans>
-----
-
-
-[[remoting-jms-server]]
-==== Server-side Configuration
-
-On the server, you need to expose the service object that uses the
-`JmsInvokerServiceExporter`, as the following example shows:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<?xml version="1.0" encoding="UTF-8"?>
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			https://www.springframework.org/schema/beans/spring-beans.xsd">
-
-		<bean id="checkingAccountService"
-				class="org.springframework.jms.remoting.JmsInvokerServiceExporter">
-			<property name="serviceInterface" value="com.foo.CheckingAccountService"/>
-			<property name="service">
-				<bean class="com.foo.SimpleCheckingAccountService"/>
-			</property>
-		</bean>
-
-		<bean class="org.springframework.jms.listener.SimpleMessageListenerContainer">
-			<property name="connectionFactory" ref="connectionFactory"/>
-			<property name="destination" ref="queue"/>
-			<property name="concurrentConsumers" value="3"/>
-			<property name="messageListener" ref="checkingAccountService"/>
-		</bean>
-
-	</beans>
-----
-
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	package com.foo;
-
-	import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-	public class Server {
-
-		public static void main(String[] args) throws Exception {
-			new ClassPathXmlApplicationContext("com/foo/server.xml", "com/foo/jms.xml");
-		}
-	}
-----
-
-
-[[remoting-jms-client]]
-==== Client-side Configuration
-
-The client merely needs to create a client-side proxy that implements the agreed-upon
-interface (`CheckingAccountService`).
-
-The following example defines beans that you can inject into other client-side objects
-(and the proxy takes care of forwarding the call to the server-side object via JMS):
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<?xml version="1.0" encoding="UTF-8"?>
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			https://www.springframework.org/schema/beans/spring-beans.xsd">
-
-		<bean id="checkingAccountService"
-				class="org.springframework.jms.remoting.JmsInvokerProxyFactoryBean">
-			<property name="serviceInterface" value="com.foo.CheckingAccountService"/>
-			<property name="connectionFactory" ref="connectionFactory"/>
-			<property name="queue" ref="queue"/>
-		</bean>
-
-	</beans>
-----
-
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	package com.foo;
-
-	import org.springframework.context.ApplicationContext;
-	import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-	public class Client {
-
-		public static void main(String[] args) throws Exception {
-			ApplicationContext ctx = new ClassPathXmlApplicationContext("com/foo/client.xml", "com/foo/jms.xml");
-			CheckingAccountService service = (CheckingAccountService) ctx.getBean("checkingAccountService");
-			service.cancelAccount(new Long(10));
-		}
-	}
-----
-
-
-
-
-[[ejb]]
-== Enterprise JavaBeans (EJB) Integration
-
-As a lightweight container, Spring is often considered an EJB replacement. We do believe
-that for many, if not most, applications and use cases, Spring, as a container, combined
-with its rich supporting functionality in the area of transactions, ORM and JDBC access,
-is a better choice than implementing equivalent functionality through an EJB container
-and EJBs.
-
-However, it is important to note that using Spring does not prevent you from using EJBs.
-In fact, Spring makes it much easier to access EJBs and implement EJBs and functionality
-within them. Additionally, using Spring to access services provided by EJBs allows the
-implementation of those services to later transparently be switched between local EJB,
-remote EJB, or POJO (plain old Java object) variants, without the client code having to
-be changed.
-
-In this chapter, we look at how Spring can help you access and implement EJBs. Spring
-provides particular value when accessing stateless session beans (SLSBs), so we begin
-by discussing this topic.
-
-
-
-[[ejb-access]]
-=== Accessing EJBs
-
-This section covers how to access EJBs.
-
-
-[[ejb-access-concepts]]
-==== Concepts
-
-To invoke a method on a local or remote stateless session bean, client code must
-normally perform a JNDI lookup to obtain the (local or remote) EJB Home object and then use
-a `create` method call on that object to obtain the actual (local or remote) EJB object.
-One or more methods are then invoked on the EJB.
-
-To avoid repeated low-level code, many EJB applications use the Service Locator and
-Business Delegate patterns. These are better than spraying JNDI lookups throughout
-client code, but their usual implementations have significant disadvantages:
-
-* Typically, code that uses EJBs depends on Service Locator or Business Delegate singletons,
-  making it hard to test.
-* In the case of the Service Locator pattern used without a Business Delegate,
-  application code still ends up having to invoke the `create()` method on an EJB home
-  and deal with the resulting exceptions. Thus, it remains tied to the EJB API and the
-  complexity of the EJB programming model.
-* Implementing the Business Delegate pattern typically results in significant code
-  duplication, where we have to write numerous methods that call the same method
-  on the EJB.
-
-The Spring approach is to allow the creation and use of proxy objects (normally
-configured inside a Spring container), which act as codeless business delegates. You need
-not write another Service Locator, another JNDI lookup, or duplicate methods in
-a hand-coded Business Delegate unless you actually add real value in such code.
-
-
-[[ejb-access-local]]
-==== Accessing Local SLSBs
-
-Assume that we have a web controller that needs to use a local EJB. We follow best
-practice and use the EJB Business Methods Interface pattern, so that the EJB's local
-interface extends a non-EJB-specific business methods interface. We call this
-business methods interface `MyComponent`. The following example shows such an interface:
-
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	public interface MyComponent {
-		...
-	}
-----
-
-One of the main reasons to use the Business Methods Interface pattern is to ensure that
-synchronization between method signatures in local interface and bean implementation
-class is automatic. Another reason is that it later makes it much easier for us to
-switch to a POJO (plain old Java object) implementation of the service if it makes sense
-to do so. We also need to implement the local home interface and provide an
-implementation class that implements `SessionBean` and the `MyComponent` business
-methods interface. Now, the only Java coding we need to do to hook up our web tier
-controller to the EJB implementation is to expose a setter method of type `MyComponent`
-on the controller. This saves the reference as an instance variable in the
-controller. The following example shows how to do so:
-
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	private MyComponent myComponent;
-
-	public void setMyComponent(MyComponent myComponent) {
-		this.myComponent = myComponent;
-	}
-----
-
-We can subsequently use this instance variable in any business method in the controller.
-Now, assuming we obtain our controller object out of a Spring container, we can
-(in the same context) configure a `LocalStatelessSessionProxyFactoryBean` instance,
-which is the EJB proxy object. We configure the proxy and set the
-`myComponent` property of the controller with the following configuration entry:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean id="myComponent"
-			class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
-		<property name="jndiName" value="ejb/myBean"/>
-		<property name="businessInterface" value="com.mycom.MyComponent"/>
-	</bean>
-
-	<bean id="myController" class="com.mycom.myController">
-		<property name="myComponent" ref="myComponent"/>
-	</bean>
-----
-
-A lot of work happens behind the scenes, courtesy of the Spring AOP framework,
-although you are not forced to work with AOP concepts to enjoy the results. The
-`myComponent` bean definition creates a proxy for the EJB, which implements the business
-method interface. The EJB local home is cached on startup, so there is only a single JNDI
-lookup. Each time the EJB is invoked, the proxy invokes the `classname` method on the
-local EJB and invokes the	corresponding business method on the EJB.
-
-The `myController` bean definition sets the `myComponent` property of the controller
-class to the EJB proxy.
-
-Alternatively (and preferably in case of many such proxy definitions), consider using
-the `<jee:local-slsb>` configuration element in Spring's "`jee`" namespace.
-The following example shows how to do so:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<jee:local-slsb id="myComponent" jndi-name="ejb/myBean"
-			business-interface="com.mycom.MyComponent"/>
-
-	<bean id="myController" class="com.mycom.myController">
-		<property name="myComponent" ref="myComponent"/>
-	</bean>
-----
-
-This EJB access mechanism delivers huge simplification of application code. The web tier
-code (or other EJB client code) has no dependence on the use of EJB. To
-replace this EJB reference with a POJO or a mock object or other test stub, we could
-change the `myComponent` bean definition without changing a line of Java code.
-Additionally, we have not had to write a single line of JNDI lookup or other EJB plumbing
-code as part of our application.
-
-Benchmarks and experience in real applications indicate that the performance overhead of
-this approach (which involves reflective invocation of the target EJB) is minimal and
-is undetectable in typical use. Remember that we do not want to make
-fine-grained calls to EJBs anyway, as there is a cost associated with the EJB
-infrastructure in the application server.
-
-There is one caveat with regards to the JNDI lookup. In a bean container, this class is
-normally best used as a singleton (there is no reason to make it a prototype).
-However, if that bean container pre-instantiates singletons (as do the various XML
-`ApplicationContext` variants), you can have a problem if the bean container is loaded
-before the EJB container loads the target EJB. That is because the JNDI lookup is
-performed in the `init()` method of this class and then cached, but the EJB has not
-been bound at the target location yet. The solution is to not pre-instantiate this
-factory object but to let it be created on first use. In the XML containers, you can control this
-by using the `lazy-init` attribute.
-
-Although not of interest to the majority of Spring users, those doing
-programmatic AOP work with EJBs may want to look at `LocalSlsbInvokerInterceptor`.
-
-
-[[ejb-access-remote]]
-==== Accessing Remote SLSBs
-
-Accessing remote EJBs is essentially identical to accessing local EJBs, except that the
-`SimpleRemoteStatelessSessionProxyFactoryBean` or `<jee:remote-slsb>` configuration
-element is used. Of course, with or without Spring, remote invocation semantics apply: A
-call to a method on an object in another VM in another computer does sometimes have to
-be treated differently in terms of usage scenarios and failure handling.
-
-Spring's EJB client support adds one more advantage over the non-Spring approach.
-Normally, it is problematic for EJB client code to be easily switched back and forth
-between calling EJBs locally or remotely. This is because the remote interface methods
-must declare that they throw `RemoteException`, and client code must deal with this,
-while the local interface methods need not. Client code written for local EJBs that needs
-to be moved to remote EJBs typically has to be modified to add handling for the remote
-exceptions, and client code written for remote EJBs that needs to be moved to local
-EJBs can either stay the same but do a lot of unnecessary handling of remote
-exceptions or be modified to remove that code. With the Spring remote EJB
-proxy, you can instead not declare any thrown `RemoteException` in your Business Method
-Interface and implementing EJB code, have a remote interface that is identical (except
-that it does throw `RemoteException`), and rely on the proxy to dynamically treat the two
-interfaces as if they were the same. That is, client code does not have to deal with the
-checked `RemoteException` class. Any actual `RemoteException` that is thrown during the
-EJB invocation is re-thrown as the non-checked `RemoteAccessException` class, which
-is a subclass of `RuntimeException`. You can then switch the target service at will
-between a local EJB or remote EJB (or even plain Java object) implementation, without
-the client code knowing or caring. Of course, this is optional: Nothing
-stops you from declaring `RemoteException` in your business interface.
-
-
-[[ejb-access-ejb2-ejb3]]
-==== Accessing EJB 2.x SLSBs Versus EJB 3 SLSBs
-
-Accessing EJB 2.x Session Beans and EJB 3 Session Beans through Spring is largely
-transparent. Spring's EJB accessors, including the `<jee:local-slsb>` and
-`<jee:remote-slsb>` facilities, transparently adapt to the actual component at runtime.
-They handle a home interface if found (EJB 2.x style) or perform straight component
-invocations if no home interface is available (EJB 3 style).
-
-Note: For EJB 3 Session Beans, you can effectively use a `JndiObjectFactoryBean` /
-`<jee:jndi-lookup>` as well, since fully usable component references are exposed for
-plain JNDI lookups there. Defining explicit `<jee:local-slsb>` or `<jee:remote-slsb>`
-lookups provides consistent and more explicit EJB access configuration.
+TIP: You can also use any other async or reactive types registered in the
+`ReactiveAdapterRegistry`.
 
 
 
@@ -3867,17 +2941,7 @@ parameters that you can pass to the `ConnectorServerFactoryBean` when creating a
 ----
 
 Note that, when you use a RMI-based connector, you need the lookup service (`tnameserv` or
-`rmiregistry`) to be started in order for the name registration to complete. If you
-use Spring to export remote services for you through RMI, Spring has already
-constructed an RMI registry. If not, you can easily start a registry by using the following
-snippet of configuration:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean id="registry" class="org.springframework.remoting.rmi.RmiRegistryFactoryBean">
-		<property name="port" value="1099"/>
-	</bean>
-----
+`rmiregistry`) to be started in order for the name registration to complete.
 
 
 [[jmx-jsr160-client]]

@@ -15,7 +15,6 @@ dependencies {
 	optional("jakarta.el:jakarta.el-api")
 	optional("jakarta.faces:jakarta.faces-api")
 	optional("jakarta.json.bind:jakarta.json.bind-api")
-	optional("jakarta.mail:jakarta.mail-api")
 	optional("jakarta.validation:jakarta.validation-api")
 	optional("jakarta.xml.bind:jakarta.xml.bind-api")
 	optional("io.reactivex.rxjava3:rxjava")

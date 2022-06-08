@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,16 +31,16 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * {@code MergedContextConfiguration} encapsulates the <em>merged</em>
- * context configuration declared on a test class and all of its superclasses
- * via {@link ContextConfiguration @ContextConfiguration},
+ * {@code MergedContextConfiguration} encapsulates the <em>merged</em> context
+ * configuration declared on a test class and all of its superclasses and
+ * enclosing classes via {@link ContextConfiguration @ContextConfiguration},
  * {@link ActiveProfiles @ActiveProfiles}, and
  * {@link TestPropertySource @TestPropertySource}.
  *
  * <p>Merged context resource locations, annotated classes, active profiles,
  * property resource locations, and in-lined properties represent all declared
- * values in the test class hierarchy taking into consideration the semantics
- * of the {@link ContextConfiguration#inheritLocations},
+ * values in the test class hierarchy and enclosing class hierarchy taking into
+ * consideration the semantics of the {@link ContextConfiguration#inheritLocations},
  * {@link ActiveProfiles#inheritProfiles},
  * {@link TestPropertySource#inheritLocations}, and
  * {@link TestPropertySource#inheritProperties} flags.

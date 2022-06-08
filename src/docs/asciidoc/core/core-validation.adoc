@@ -792,8 +792,8 @@ See also the `org.springframework.beans.support.ResourceEditorRegistrar` for an 
 `PropertyEditorRegistrar` implementation. Notice how in its implementation of the
 `registerCustomEditors(..)` method, it creates new instances of each property editor.
 
-The next example shows how to configure a `CustomEditorConfigurer` and inject an instance of our
-`CustomPropertyEditorRegistrar` into it:
+The next example shows how to configure a `CustomEditorConfigurer` and inject an instance
+of our `CustomPropertyEditorRegistrar` into it:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -809,50 +809,51 @@ The next example shows how to configure a `CustomEditorConfigurer` and inject an
 		class="com.foo.editors.spring.CustomPropertyEditorRegistrar"/>
 ----
 
-Finally (and in a bit of a departure from the focus of this chapter for those of you
-using <<web.adoc#mvc, Spring's MVC web framework>>), using `PropertyEditorRegistrars` in
-conjunction with data-binding `Controllers` (such as `SimpleFormController`) can be very
-convenient. The following example uses a `PropertyEditorRegistrar` in the
-implementation of an `initBinder(..)` method:
+Finally (and in a bit of a departure from the focus of this chapter) for those of you
+using <<web.adoc#mvc, Spring's MVC web framework>>, using a `PropertyEditorRegistrar` in
+conjunction with data-binding web controllers can be very convenient. The following
+example uses a `PropertyEditorRegistrar` in the implementation of an `@InitBinder` method:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	public final class RegisterUserController extends SimpleFormController {
+	@Controller
+	public class RegisterUserController {
 
 		private final PropertyEditorRegistrar customPropertyEditorRegistrar;
 
-		public RegisterUserController(PropertyEditorRegistrar propertyEditorRegistrar) {
+		RegisterUserController(PropertyEditorRegistrar propertyEditorRegistrar) {
 			this.customPropertyEditorRegistrar = propertyEditorRegistrar;
 		}
 
-		protected void initBinder(HttpServletRequest request,
-				ServletRequestDataBinder binder) throws Exception {
+		@InitBinder
+		void initBinder(WebDataBinder binder) {
 			this.customPropertyEditorRegistrar.registerCustomEditors(binder);
 		}
 
-		// other methods to do with registering a User
+		// other methods related to registering a User
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
+	@Controller
 	class RegisterUserController(
-		private val customPropertyEditorRegistrar: PropertyEditorRegistrar) : SimpleFormController() {
+		private val customPropertyEditorRegistrar: PropertyEditorRegistrar) {
 
-		protected fun initBinder(request: HttpServletRequest,
-								binder: ServletRequestDataBinder) {
+		@InitBinder
+		fun initBinder(binder: WebDataBinder) {
 			this.customPropertyEditorRegistrar.registerCustomEditors(binder)
 		}
 
-		// other methods to do with registering a User
+		// other methods related to registering a User
 	}
 ----
 
 This style of `PropertyEditor` registration can lead to concise code (the implementation
-of `initBinder(..)` is only one line long) and lets common `PropertyEditor`
-registration code be encapsulated in a class and then shared amongst as many
-`Controllers` as needed.
+of the `@InitBinder` method is only one line long) and lets common `PropertyEditor`
+registration code be encapsulated in a class and then shared amongst as many controllers
+as needed.
 
 
 

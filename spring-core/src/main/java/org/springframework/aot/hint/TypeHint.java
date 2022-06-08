@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
  * @author Stephane Nicoll
  * @since 6.0
  */
-public final class TypeHint {
+public final class TypeHint implements ConditionalHint {
 
 	private final TypeReference type;
 
@@ -81,12 +81,8 @@ public final class TypeHint {
 		return this.type;
 	}
 
-	/**
-	 * Return the type that should be reachable for this hint to apply, or
-	 * {@code null} if this hint should always been applied.
-	 * @return the reachable type, if any
-	 */
 	@Nullable
+	@Override
 	public TypeReference getReachableType() {
 		return this.reachableType;
 	}

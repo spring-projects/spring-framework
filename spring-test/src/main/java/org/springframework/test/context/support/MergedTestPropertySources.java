@@ -24,9 +24,9 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.Assert;
 
 /**
- * {@code MergedTestPropertySources} encapsulates the <em>merged</em>
- * property sources declared on a test class and all of its superclasses
- * via {@link TestPropertySource @TestPropertySource}.
+ * {@code MergedTestPropertySources} encapsulates the <em>merged</em> property
+ * sources declared on a test class and all of its superclasses and enclosing
+ * classes via {@link TestPropertySource @TestPropertySource}.
  *
  * @author Sam Brannen
  * @since 4.1

@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.net.URI;
 import java.util.List;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,6 +26,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
@@ -178,6 +181,14 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 		mavContainer.setRequestHandled(true);
 		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
 		ServletServerHttpResponse outputMessage = createOutputMessage(webRequest);
+
+		if (returnValue instanceof ProblemDetail detail) {
+			outputMessage.setStatusCode(HttpStatusCode.valueOf(detail.getStatus()));
+			if (detail.getInstance() == null) {
+				URI path = URI.create(inputMessage.getServletRequest().getRequestURI());
+				detail.setInstance(path);
+			}
+		}
 
 		// Try even with null return value. ResponseBodyAdvice could get involved.
 		writeWithMessageConverters(returnValue, returnType, inputMessage, outputMessage);

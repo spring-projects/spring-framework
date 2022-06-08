@@ -356,16 +356,16 @@ import org.springframework.stereotype.Component;
  * {@code @Component} classes.
  *
  * <pre class="code">
- * &#064;RunWith(SpringRunner.class)
+ * &#064;ExtendWith(SpringExtension.class)
  * &#064;ContextConfiguration(classes = {AppConfig.class, DatabaseConfig.class})
- * public class MyTests {
+ * class MyTests {
  *
  *     &#064;Autowired MyBean myBean;
  *
  *     &#064;Autowired DataSource dataSource;
  *
  *     &#064;Test
- *     public void test() {
+ *     void test() {
  *         // assertions against myBean ...
  *     }
  * }</pre>
