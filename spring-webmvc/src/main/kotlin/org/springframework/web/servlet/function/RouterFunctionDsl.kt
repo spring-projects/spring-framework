@@ -21,7 +21,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import java.net.URI
-import java.util.*
+import java.util.Optional
 import java.util.function.Supplier
 
 /**
@@ -703,7 +703,7 @@ class RouterFunctionDsl internal constructor (private val init: (RouterFunctionD
 	 * Add an attribute with the given name and value to the last route built with this builder.
 	 * @param name the attribute name
 	 * @param value the attribute value
-	 * @since 5.3
+	 * @since 6.0
 	 */
 	fun withAttribute(name: String, value: Any) {
 		builder.withAttribute(name, value)
@@ -713,11 +713,11 @@ class RouterFunctionDsl internal constructor (private val init: (RouterFunctionD
 	 * Manipulate the attributes of the last route built with the given consumer.
 	 *
 	 * The map provided to the consumer is "live", so that the consumer can be used
-	 * to [overwrite][Map.put] existing attributes,
-	 * [remove][Map.remove] attributes, or use any of the other
-	 * [Map] methods.
+	 * to [overwrite][MutableMap.put] existing attributes,
+	 * [remove][MutableMap.remove] attributes, or use any of the other
+	 * [MutableMap] methods.
 	 * @param attributesConsumer a function that consumes the attributes map
-	 * @since 5.3
+	 * @since 6.0
 	 */
 	fun withAttributes(attributesConsumer: (MutableMap<String, Any>) -> Unit) {
 		builder.withAttributes(attributesConsumer)
