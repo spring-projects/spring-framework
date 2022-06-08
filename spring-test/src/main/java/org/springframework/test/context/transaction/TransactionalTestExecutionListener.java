@@ -73,10 +73,10 @@ import org.springframework.util.StringUtils;
  * to be run within a transaction that will, by default, be automatically
  * <em>rolled back</em> after completion of the test. If a test class is
  * annotated with {@code @Transactional}, each test method within that class
- * hierarchy will be run within a transaction. Test methods that are
- * <em>not</em> annotated with {@code @Transactional} (at the class or method
- * level) will not be run within a transaction. Furthermore, tests that
- * <em>are</em> annotated with {@code @Transactional} but have the
+ * hierarchy or nested class hierarchy will be run within a transaction. Test
+ * methods that are <em>not</em> annotated with {@code @Transactional} (at the
+ * class or method level) will not be run within a transaction. Furthermore,
+ * tests that <em>are</em> annotated with {@code @Transactional} but have the
  * {@link Transactional#propagation propagation} type set to
  * {@link org.springframework.transaction.annotation.Propagation#NOT_SUPPORTED NOT_SUPPORTED}
  * or {@link org.springframework.transaction.annotation.Propagation#NEVER NEVER}
