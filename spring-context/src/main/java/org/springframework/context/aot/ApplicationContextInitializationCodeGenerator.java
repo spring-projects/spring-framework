@@ -50,6 +50,7 @@ class ApplicationContextInitializationCodeGenerator
 	private static final String APPLICATION_CONTEXT_VARIABLE = "applicationContext";
 
 
+	@Nullable
 	private final Class<?> target;
 
 	private final String name;
@@ -59,13 +60,14 @@ class ApplicationContextInitializationCodeGenerator
 	private final List<MethodReference> initializers = new ArrayList<>();
 
 
-	ApplicationContextInitializationCodeGenerator(Class<?> target, @Nullable String name) {
-		this.target=target;
+	ApplicationContextInitializationCodeGenerator(@Nullable Class<?> target, @Nullable String name) {
+		this.target = target;
 		this.name = (!StringUtils.hasText(name)) ? "" : name;
 	}
 
 
 	@Override
+	@Nullable
 	public Class<?> getTarget() {
 		return this.target;
 	}
