@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -215,7 +215,7 @@ public abstract class MockMvcRequestBuilders {
 	}
 
 	/**
-	 * Create a {@link MockMultipartHttpServletRequestBuilder} for a multipart request.
+	 * Variant of {@link #multipart(String, Object...)} with a {@link URI}.
 	 * @param uri the URL
 	 * @since 5.0
 	 */
@@ -223,6 +223,16 @@ public abstract class MockMvcRequestBuilders {
 		return new MockMultipartHttpServletRequestBuilder(uri);
 	}
 
+	/**
+	 * Variant of {@link #multipart(String, Object...)} with a {@link URI} and
+	 * an {@link HttpMethod}.
+	 * @param httpMethod the HTTP method to use
+	 * @param uri the URL
+	 * @since 5.3.21
+	 */
+	public static MockMultipartHttpServletRequestBuilder multipart(HttpMethod httpMethod, URI uri) {
+		return new MockMultipartHttpServletRequestBuilder(httpMethod, uri);
+	}
 
 	/**
 	 * Create a {@link RequestBuilder} for an async dispatch from the
