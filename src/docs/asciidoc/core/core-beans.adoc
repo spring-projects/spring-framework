@@ -1427,6 +1427,7 @@ The following example shows the corresponding `ExampleBean` class:
 			// a static factory method; the arguments to this method can be
 			// considered the dependencies of the bean that is returned,
 			// regardless of how those arguments are actually used.
+			@JvmStatic
 			fun createInstance(anotherBean: AnotherBean, yetAnotherBean: YetAnotherBean, i: Int): ExampleBean {
 				val eb = ExampleBean (...)
 				// some other operations...
@@ -4687,8 +4688,9 @@ example:
 ----
 	class SimpleMovieLister {
 
-		@Required
 		lateinit var movieFinder: MovieFinder
+			@Required
+			set
 
 		// ...
 	}
