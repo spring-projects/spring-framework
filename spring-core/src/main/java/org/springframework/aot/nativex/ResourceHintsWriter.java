@@ -82,7 +82,12 @@ class ResourceHintsWriter {
 	}
 
 	private String patternToRegexp(String pattern) {
-		return Arrays.stream(pattern.split("\\*")).map(Pattern::quote).collect(Collectors.joining(".*"));
+		String prefix = (pattern.startsWith("*") ? ".*" : "");
+		String suffix = (pattern.endsWith("*") ? ".*" : "");
+		return Arrays.stream(pattern.split("\\*"))
+				.filter(s -> !s.isEmpty())
+				.map(Pattern::quote)
+				.collect(Collectors.joining(".*", prefix, suffix));
 	}
 
 	private void addIfNotEmpty(Map<String, Object> attributes, String name, @Nullable Object value) {

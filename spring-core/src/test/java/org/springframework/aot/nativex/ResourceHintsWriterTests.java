@@ -57,7 +57,21 @@ public class ResourceHintsWriterTests {
 	}
 
 	@Test
-	void registerPattern() throws JSONException {
+	void registerWildcardAtTheBeginningPattern() throws JSONException {
+		ResourceHints hints = new ResourceHints();
+		hints.registerPattern("*.properties");
+		assertEquals("""
+				{
+					"resources": {
+						"includes": [
+							{ "pattern": ".*\\\\Q.properties\\\\E"}
+						]
+					}
+				}""", hints);
+	}
+
+	@Test
+	void registerWildcardInTheMiddlePattern() throws JSONException {
 		ResourceHints hints = new ResourceHints();
 		hints.registerPattern("com/example/*.properties");
 		assertEquals("""
@@ -65,6 +79,20 @@ public class ResourceHintsWriterTests {
 					"resources": {
 						"includes": [
 							{ "pattern": "\\\\Qcom/example/\\\\E.*\\\\Q.properties\\\\E"}
+						]
+					}
+				}""", hints);
+	}
+
+	@Test
+	void registerWildcardAtTheEndPattern() throws JSONException {
+		ResourceHints hints = new ResourceHints();
+		hints.registerPattern("static/*");
+		assertEquals("""
+				{
+					"resources": {
+						"includes": [
+							{ "pattern": "\\\\Qstatic/\\\\E.*"}
 						]
 					}
 				}""", hints);
