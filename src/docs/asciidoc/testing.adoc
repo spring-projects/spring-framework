@@ -1482,7 +1482,6 @@ and can be used anywhere in the Spring Framework.
 * `@Named` (jakarta.inject) if JSR-330 is present
 * `@PersistenceContext` (jakarta.persistence) if JPA is present
 * `@PersistenceUnit` (jakarta.persistence) if JPA is present
-* `@Required`
 * `@Transactional` (org.springframework.transaction.annotation)
   _with <<testcontext-tx-attribute-support, limited attribute support>>_
 

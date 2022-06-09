@@ -1168,7 +1168,7 @@ load an entire Spring IoC container instance.
 ****
 Since you can mix constructor-based and setter-based DI, it is a good rule of thumb to
 use constructors for mandatory dependencies and setter methods or configuration methods
-for optional dependencies. Note that use of the <<beans-required-annotation, @Required>>
+for optional dependencies. Note that use of the <<beans-autowired-annotation, @Autowired>>
 annotation on a setter method can be used to make the property be a required dependency;
 however, constructor injection with programmatic validation of arguments is preferable.
 
@@ -4600,22 +4600,21 @@ source code and that, in terms of tooling, all configuration styles are supporte
 https://spring.io/tools[Spring Tools for Eclipse].
 ****
 
-An alternative to XML setup is provided by annotation-based configuration, which relies on
-the bytecode metadata for wiring up components instead of angle-bracket declarations.
+An alternative to XML setup is provided by annotation-based configuration, which relies
+on the bytecode metadata for wiring up components instead of angle-bracket declarations.
 Instead of using XML to describe a bean wiring, the developer moves the configuration
 into the component class itself by using annotations on the relevant class, method, or
 field declaration. As mentioned in <<beans-factory-extension-bpp-examples-aabpp>>, using
 a `BeanPostProcessor` in conjunction with annotations is a common means of extending the
-Spring IoC container. For example, Spring 2.0 introduced the possibility of enforcing
-required properties with the <<beans-required-annotation,`@Required`>> annotation. Spring
-2.5 made it possible to follow that same general approach to drive Spring's dependency
-injection. Essentially, the `@Autowired` annotation provides the same capabilities as
-described in <<beans-factory-autowire>> but with more fine-grained control and wider
-applicability. Spring 2.5 also added support for JSR-250 annotations, such as
-`@PostConstruct` and `@PreDestroy`. Spring 3.0 added support for JSR-330 (Dependency
-Injection for Java) annotations contained in the `jakarta.inject` package such as
-`@Inject` and `@Named`. Details about those annotations can be found in the
-<<beans-standard-annotations,relevant section>>.
+Spring IoC container. For example, Spring 2.5 introduced an annotation-based approach to
+drive Spring's dependency injection. Essentially, the <<beans-autowired-annotation,
+`@Autowired`>> annotation provides the same capabilities as described in
+<<beans-factory-autowire>> but with more fine-grained control and wider applicability.
+Spring 2.5 also added support for JSR-250 annotations, such as `@PostConstruct` and
+`@PreDestroy`. Spring 3.0 added support for JSR-330 (Dependency Injection for Java)
+annotations contained in the `jakarta.inject` package such as `@Inject` and `@Named`.
+Details about those annotations can be found in the <<beans-standard-annotations,
+relevant section>>.
 
 [NOTE]
 ====
@@ -4658,64 +4657,6 @@ application context in which it is defined. This means that, if you put
 `<context:annotation-config/>` in a `WebApplicationContext` for a `DispatcherServlet`,
 it only checks for `@Autowired` beans in your controllers, and not your services. See
 <<web.adoc#mvc-servlet, The DispatcherServlet>> for more information.
-====
-
-
-
-[[beans-required-annotation]]
-=== @Required
-
-The `@Required` annotation applies to bean property setter methods, as in the following
-example:
-
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
-----
-	public class SimpleMovieLister {
-
-		private MovieFinder movieFinder;
-
-		@Required
-		public void setMovieFinder(MovieFinder movieFinder) {
-			this.movieFinder = movieFinder;
-		}
-
-		// ...
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	class SimpleMovieLister {
-
-		lateinit var movieFinder: MovieFinder
-			@Required
-			set
-
-		// ...
-	}
-----
-
-This annotation indicates that the affected bean property must be populated at
-configuration time, through an explicit property value in a bean definition or through
-autowiring. The container throws an exception if the affected bean property has not been
-populated. This allows for eager and explicit failure, avoiding `NullPointerException`
-instances or the like later on. We still recommend that you put assertions into the
-bean class itself (for example, into an init method). Doing so enforces those required
-references and values even when you use the class outside of a container.
-
-[TIP]
-====
-The {api-spring-framework}/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html[`RequiredAnnotationBeanPostProcessor`]
-must be registered as a bean to enable support for the `@Required` annotation.
-====
-
-[NOTE]
-====
-The `@Required` annotation and `RequiredAnnotationBeanPostProcessor` are formally
-deprecated as of Spring Framework 5.1, in favor of using constructor injection for
-required settings (or a custom implementation of `InitializingBean.afterPropertiesSet()`
-or a custom `@PostConstruct` method along with bean property setter methods).
 ====
 
 
@@ -5026,9 +4967,18 @@ non-required (i.e., by setting the `required` attribute in `@Autowired` to `fals
 	}
 ----
 
+[NOTE]
+====
 A non-required method will not be called at all if its dependency (or one of its
 dependencies, in case of multiple arguments) is not available. A non-required field will
 not get populated at all in such cases, leaving its default value in place.
+
+In other words, setting the `required` attribute to `false` indicates that the
+corresponding property is _optional_ for autowiring purposes, and the property will be
+ignored if it cannot be autowired. This allows properties to be assigned default values
+that can be optionally overridden via dependency injection.
+====
+
 
 [[beans-autowired-annotation-constructor-resolution]]
 
@@ -5057,13 +5007,6 @@ declares multiple constructors but none of them is annotated with `@Autowired`, 
 primary/default constructor (if present) will be used. If a class only declares a single
 constructor to begin with, it will always be used, even if not annotated. Note that an
 annotated constructor does not have to be public.
-
-The `required` attribute of `@Autowired` is recommended over the deprecated `@Required`
-annotation on setter methods. Setting the `required` attribute to `false` indicates that
-the property is not required for autowiring purposes, and the property is ignored if it
-cannot be autowired. `@Required`, on the other hand, is stronger in that it enforces the
-property to be set by any means supported by the container, and if no value is defined,
-a corresponding exception is raised.
 ====
 
 Alternatively, you can express the non-required nature of a particular dependency
@@ -7535,10 +7478,6 @@ features are not available, as the following table shows:
   through `jakarta.inject.Named`.
 
 | @Value
-| -
-| no equivalent
-
-| @Required
 | -
 | no equivalent
 
