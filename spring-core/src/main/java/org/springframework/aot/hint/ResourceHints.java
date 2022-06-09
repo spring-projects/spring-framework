@@ -83,7 +83,7 @@ public class ResourceHints {
 	/**
 	 * Register that the resources matching the specified pattern should be
 	 * made available at runtime.
-	 * @param include a pattern of the resources to include
+	 * @param include a pattern of the resources to include (see {@link ResourcePatternHint} documentation)
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public ResourceHints registerPattern(String include) {

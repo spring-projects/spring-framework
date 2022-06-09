@@ -72,7 +72,7 @@ public final class ResourcePatternHints {
 		/**
 		 * Includes the resources matching the specified pattern.
 		 * @param reachableType the type that should be reachable for this hint to apply
-		 * @param includes the include patterns
+		 * @param includes the include patterns (see {@link ResourcePatternHint} documentation)
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder includes(TypeReference reachableType, String... includes) {
@@ -84,7 +84,7 @@ public final class ResourcePatternHints {
 
 		/**
 		 * Includes the resources matching the specified pattern.
-		 * @param includes the include patterns
+		 * @param includes the include patterns (see {@link ResourcePatternHint} documentation)
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder includes(String... includes) {
@@ -94,7 +94,7 @@ public final class ResourcePatternHints {
 		/**
 		 * Exclude resources matching the specified pattern.
 		 * @param reachableType the type that should be reachable for this hint to apply
-		 * @param excludes the excludes pattern
+		 * @param excludes the excludes pattern (see {@link ResourcePatternHint} documentation)
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder excludes(TypeReference reachableType, String... excludes) {
@@ -106,7 +106,7 @@ public final class ResourcePatternHints {
 
 		/**
 		 * Exclude resources matching the specified pattern.
-		 * @param excludes the excludes pattern
+		 * @param excludes the excludes pattern (see {@link ResourcePatternHint} documentation)
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder excludes(String... excludes) {
