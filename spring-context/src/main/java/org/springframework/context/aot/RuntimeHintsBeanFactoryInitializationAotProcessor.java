@@ -16,8 +16,10 @@
 
 package org.springframework.context.aot;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,29 +57,37 @@ class RuntimeHintsBeanFactoryInitializationAotProcessor
 	public BeanFactoryInitializationAotContribution processAheadOfTime(
 			ConfigurableListableBeanFactory beanFactory) {
 		AotFactoriesLoader loader = new AotFactoriesLoader(beanFactory);
-		List<RuntimeHintsRegistrar> registrars = new ArrayList<>(
-				loader.load(RuntimeHintsRegistrar.class));
+		Map<Class<? extends RuntimeHintsRegistrar>, RuntimeHintsRegistrar> registrars = loader
+				.load(RuntimeHintsRegistrar.class).stream()
+				.collect(LinkedHashMap::new, (map, item) -> map.put(item.getClass(), item), Map::putAll);
+		extractFromBeanFactory(beanFactory).forEach(registrarClass ->
+				registrars.computeIfAbsent(registrarClass, BeanUtils::instantiateClass));
+		return new RuntimeHintsRegistrarContribution(registrars.values(),
+				beanFactory.getBeanClassLoader());
+	}
+
+	private Set<Class<? extends RuntimeHintsRegistrar>> extractFromBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+		Set<Class<? extends RuntimeHintsRegistrar>> registrarClasses = new LinkedHashSet<>();
 		for (String beanName : beanFactory
 				.getBeanNamesForAnnotation(ImportRuntimeHints.class)) {
 			ImportRuntimeHints annotation = beanFactory.findAnnotationOnBean(beanName,
 					ImportRuntimeHints.class);
 			if (annotation != null) {
-				registrars.addAll(extracted(beanName, annotation));
+				registrarClasses.addAll(extractFromBeanDefinition(beanName, annotation));
 			}
 		}
-		return new RuntimeHintsRegistrarContribution(registrars,
-				beanFactory.getBeanClassLoader());
+		return registrarClasses;
 	}
 
-	private List<RuntimeHintsRegistrar> extracted(String beanName,
+	private Set<Class<? extends RuntimeHintsRegistrar>> extractFromBeanDefinition(String beanName,
 			ImportRuntimeHints annotation) {
-		Class<? extends RuntimeHintsRegistrar>[] registrarClasses = annotation.value();
-		List<RuntimeHintsRegistrar> registrars = new ArrayList<>(registrarClasses.length);
-		for (Class<? extends RuntimeHintsRegistrar> registrarClass : registrarClasses) {
+
+		Set<Class<? extends RuntimeHintsRegistrar>> registrars = new LinkedHashSet<>();
+		for (Class<? extends RuntimeHintsRegistrar> registrarClass : annotation.value()) {
 			logger.trace(
 					LogMessage.format("Loaded [%s] registrar from annotated bean [%s]",
 							registrarClass.getCanonicalName(), beanName));
-			registrars.add(BeanUtils.instantiateClass(registrarClass));
+			registrars.add(registrarClass);
 		}
 		return registrars;
 	}
@@ -87,13 +97,13 @@ class RuntimeHintsBeanFactoryInitializationAotProcessor
 			implements BeanFactoryInitializationAotContribution {
 
 
-		private final List<RuntimeHintsRegistrar> registrars;
+		private final Iterable<RuntimeHintsRegistrar> registrars;
 
 		@Nullable
 		private final ClassLoader beanClassLoader;
 
 
-		RuntimeHintsRegistrarContribution(List<RuntimeHintsRegistrar> registrars,
+		RuntimeHintsRegistrarContribution(Iterable<RuntimeHintsRegistrar> registrars,
 				@Nullable ClassLoader beanClassLoader) {
 			this.registrars = registrars;
 			this.beanClassLoader = beanClassLoader;
