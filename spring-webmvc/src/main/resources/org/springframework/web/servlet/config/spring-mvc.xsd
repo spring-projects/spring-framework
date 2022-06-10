@@ -36,7 +36,14 @@
 								<xsd:documentation><![CDATA[
 	Whether to use suffix pattern match (".*") when matching patterns to requests. If enabled
 	a method mapped to "/users" also matches to "/users.*".
-	The default value is true.
+
+	In 5.2.4, suffix pattern matching was deprecated in order to discourage use of path
+	extensions for request mapping and for content negotiation (see deprecation notes on
+	org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping and on
+	org.springframework.web.accept.ContentNegotiationManagerFactoryBean and
+	also see https://github.com/spring-projects/spring-framework/issues/24179.
+
+	The default value is true but in 5.3 it changes to false.
 								]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>
@@ -56,6 +63,13 @@
 	explicitly registered when you configure content negotiation.
 	This is generally recommended to reduce ambiguity and to
 	avoid issues such as when a "." appears in the path for other reasons.
+
+	In 5.2.4, suffix pattern matching was deprecated in order to discourage use of path
+	extensions for request mapping and for content negotiation (see deprecation notes on
+	org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping and on
+	org.springframework.web.accept.ContentNegotiationManagerFactoryBean and
+	also see https://github.com/spring-projects/spring-framework/issues/24179.
+
 	The default value is false.
 								]]></xsd:documentation>
 							</xsd:annotation>
@@ -236,8 +250,8 @@
 	By default, a SimpleAsyncTaskExecutor is used which does not re-use threads and is not recommended for production.
 
 	As of 5.0 this executor is also used when a controller returns a reactive type that does streaming
-	(e.g. "text/event-stream" or "application/stream+json") for the blocking writes to the
-	"javax.servlet.ServletOutputStream".
+	(e.g. "text/event-stream" or "application/x-ndjson") for the blocking writes to the
+	"jakarta.servlet.ServletOutputStream".
 
 								]]></xsd:documentation>
 								<xsd:appinfo>
@@ -253,7 +267,7 @@
 	Specify the amount of time, in milliseconds, before asynchronous request handling times out.
 	In Servlet 3, the timeout begins after the main request processing thread has exited and ends when the request
 	is dispatched again for further processing of the concurrently produced result. If this value is not set,
-	the default timeout of the underlying implementation is used, e.g. 10 seconds on Tomcat with Servlet 3.
+	the default timeout of the underlying implementation is used.
 								]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>
@@ -1027,15 +1041,6 @@
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:element>
-					<xsd:element name="tiles" type="urlViewResolverType">
-						<xsd:annotation>
-							<xsd:documentation><![CDATA[
-	Register a TilesViewResolver based on Tiles 3.x.
-	To configure Tiles you must also add a top-level <mvc:tiles-configurer> element
-	or declare a TilesConfigurer bean.
-							]]></xsd:documentation>
-						</xsd:annotation>
-					</xsd:element>
 					<xsd:element name="freemarker" type="urlViewResolverType">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
@@ -1098,62 +1103,6 @@
 	By default this property is not set, which means the resolver is ordered at
 	Ordered.LOWEST_PRECEDENCE unless content negotiation is enabled in which case
 	the order (if not set explicitly) is changed to Ordered.HIGHEST_PRECEDENCE.
-					]]></xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-		</xsd:complexType>
-	</xsd:element>
-
-	<xsd:element name="tiles-configurer">
-		<xsd:annotation>
-			<xsd:documentation><![CDATA[
-	Configure Tiles 3.x by registering a TilesConfigurer bean.
-	This is a shortcut alternative to declaring a TilesConfigurer bean directly.
-			]]></xsd:documentation>
-		</xsd:annotation>
-		<xsd:complexType>
-			<xsd:sequence>
-				<xsd:element name="definitions" minOccurs="0" maxOccurs="unbounded">
-					<xsd:complexType>
-						<xsd:attribute name="location" type="xsd:string" use="required">
-							<xsd:annotation>
-								<xsd:documentation><![CDATA[
-	The location of a file containing Tiles definitions (or a Spring resource pattern).
-	If no Tiles definitions are registered, then "/WEB-INF/tiles.xml" is expected to exists.
-								]]></xsd:documentation>
-							</xsd:annotation>
-						</xsd:attribute>
-					</xsd:complexType>
-				</xsd:element>
-			</xsd:sequence>
-			<xsd:attribute name="check-refresh" type="xsd:boolean">
-				<xsd:annotation>
-					<xsd:documentation><![CDATA[
-	Whether to check Tiles definition files for a refresh at runtime.
-	Default is "false".
-					]]></xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="validate-definitions" type="xsd:boolean">
-				<xsd:annotation>
-					<xsd:documentation><![CDATA[
-	Whether to validate the Tiles XML definitions. Default is "true".
-					]]></xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="definitions-factory" type="xsd:string">
-				<xsd:annotation>
-					<xsd:documentation><![CDATA[
-	The Tiles DefinitionsFactory class to use. Default is Tiles' default.
-					]]></xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="preparer-factory" type="xsd:string">
-				<xsd:annotation>
-					<xsd:documentation><![CDATA[
-	The Tiles PreparerFactory class to use. Default is Tiles' default.
-	Consider "org.springframework.web.servlet.view.tiles3.SimpleSpringPreparerFactory" or
-	"org.springframework.web.servlet.view.tiles3.SpringBeanPreparerFactory" (see javadoc).
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -1332,11 +1281,34 @@
 	Comma-separated list of origins to allow, e.g. "https://domain1.com, https://domain2.com".
 	The special value "*" allows all domains (default).
 
+	For matching pre-flight and actual requests the "Access-Control-Allow-Origin"
+	response header is set either to the matched domain value or to "*".
+	Keep in mind however that the CORS spec does not allow "*" when allow-credentials
+	is set to true and that is rejected as of 5.3. See allowed-origin-patterns for
+	further options.
+
+	By default all origins are allowed unless allowed-origin-patterns is also set
+	in which case allowed-origin-patterns is used instead.
+
 	Note that CORS checks use values from "Forwarded" (RFC 7239), "X-Forwarded-Host",
 	"X-Forwarded-Port", and "X-Forwarded-Proto" headers, if present, in order to reflect
 	the client-originated address. Consider using the ForwardedHeaderFilter in order to
 	choose from a central place whether to extract and use such headers, or whether to
 	discard them. See the Spring Framework reference for more on this filter.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="allowed-origin-patterns" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	Alternative to allowed-origins that supports origins declared via patterns.
+	In contrast to allowed-origins which does support the special value "*", this
+	property allows more flexible patterns, e.g. "*.domain1.com". Furthermore it
+	always sets the "Access-Control-Allow-Origin" response header to the matched
+	origin and never to "*" nor to any other pattern and therefore can be used in
+	combination with allowCredentials set to true.
+
+	By default this is not set.
 								]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>
@@ -1363,6 +1335,7 @@
 	Comma-separated list of response headers other than simple headers (i.e.
 	Cache-Control, Content-Language, Content-Type, Expires, Last-Modified, Pragma) that an
 	actual response might have and can be exposed.
+	The special value "*" allows all headers to be exposed for non-credentialed requests.
 	Empty by default.
 								]]></xsd:documentation>
 							</xsd:annotation>

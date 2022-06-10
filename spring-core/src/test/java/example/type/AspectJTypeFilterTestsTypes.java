@@ -16,7 +16,7 @@
 
 package example.type;
 
-import org.springframework.stereotype.Component;
+import org.springframework.core.testfixture.stereotype.Component;
 
 /**
  * We must use a standalone set of types to ensure that no one else is loading

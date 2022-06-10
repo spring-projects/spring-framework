@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,11 @@ import org.springframework.cache.Cache;
 /**
  * Simple cache manager working against a given collection of caches.
  * Useful for testing or simple caching declarations.
+ * <p>
+ * When using this implementation directly, i.e. not via a regular
+ * bean registration, {@link #initializeCaches()} should be invoked
+ * to initialize its internal state once the
+ * {@linkplain #setCaches(Collection) caches have been provided}.
  *
  * @author Costin Leau
  * @since 3.1
@@ -35,6 +40,7 @@ public class SimpleCacheManager extends AbstractCacheManager {
 
 	/**
 	 * Specify the collection of Cache instances to use for this CacheManager.
+	 * @see #initializeCaches()
 	 */
 	public void setCaches(Collection<? extends Cache> caches) {
 		this.caches = caches;

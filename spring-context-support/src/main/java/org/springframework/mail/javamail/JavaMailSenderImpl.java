@@ -24,14 +24,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.activation.FileTypeMap;
-import javax.mail.Address;
-import javax.mail.AuthenticationFailedException;
-import javax.mail.MessagingException;
-import javax.mail.NoSuchProviderException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.MimeMessage;
+import jakarta.activation.FileTypeMap;
+import jakarta.mail.Address;
+import jakarta.mail.AuthenticationFailedException;
+import jakarta.mail.MessagingException;
+import jakarta.mail.NoSuchProviderException;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.MimeMessage;
 
 import org.springframework.lang.Nullable;
 import org.springframework.mail.MailAuthenticationException;
@@ -49,7 +49,7 @@ import org.springframework.util.Assert;
  * plain {@link org.springframework.mail.MailSender} implementation.
  *
  * <p>Allows for defining all settings locally as bean properties.
- * Alternatively, a pre-configured JavaMail {@link javax.mail.Session} can be
+ * Alternatively, a pre-configured JavaMail {@link jakarta.mail.Session} can be
  * specified, possibly pulled from an application server's JNDI environment.
  *
  * <p>Non-default properties in this object will always override the settings
@@ -59,8 +59,8 @@ import org.springframework.util.Assert;
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  * @since 10.09.2003
- * @see javax.mail.internet.MimeMessage
- * @see javax.mail.Session
+ * @see jakarta.mail.internet.MimeMessage
+ * @see jakarta.mail.Session
  * @see #setSession
  * @see #setJavaMailProperties
  * @see #setHost
@@ -523,7 +523,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * Obtain a Transport object from the given JavaMail Session,
 	 * using the configured protocol.
 	 * <p>Can be overridden in subclasses, e.g. to return a mock Transport object.
-	 * @see javax.mail.Session#getTransport(String)
+	 * @see jakarta.mail.Session#getTransport(String)
 	 * @see #getSession()
 	 * @see #getProtocol()
 	 */

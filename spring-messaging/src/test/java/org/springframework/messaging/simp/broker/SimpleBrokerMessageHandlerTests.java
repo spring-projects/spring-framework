@@ -29,13 +29,13 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.core.testfixture.security.TestPrincipal;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.TaskScheduler;
 
@@ -180,8 +180,8 @@ public class SimpleBrokerMessageHandlerTests {
 				this.messageHandler::start);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void startAndStopWithHeartbeatValue() {
 		ScheduledFuture future = mock(ScheduledFuture.class);
 		given(this.taskScheduler.scheduleWithFixedDelay(any(Runnable.class), eq(15000L))).willReturn(future);
@@ -199,7 +199,6 @@ public class SimpleBrokerMessageHandlerTests {
 		verifyNoMoreInteractions(future);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void startWithOneZeroHeartbeatValue() {
 		this.messageHandler.setTaskScheduler(this.taskScheduler);

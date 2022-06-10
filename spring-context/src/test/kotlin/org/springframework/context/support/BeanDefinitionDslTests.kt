@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.beans.factory.getBean
 import org.springframework.context.support.BeanDefinitionDsl.*
 import org.springframework.core.env.SimpleCommandLinePropertySource
 import org.springframework.core.env.get
-import org.springframework.mock.env.MockPropertySource
+import org.springframework.core.testfixture.env.MockPropertySource
 import java.util.stream.Collectors
 
 @Suppress("UNUSED_EXPRESSION")
@@ -156,6 +156,7 @@ class BeanDefinitionDslTests {
 		val beans = beans {
 			bean<Bar>()
 			bean(::baz)
+			bean(::foo)
 		}
 		val context = GenericApplicationContext().apply {
 			beans.initialize(this)
@@ -205,3 +206,4 @@ class FooFoo(val name: String)
 class BarBar(val foos: Collection<Foo>)
 
 fun baz(bar: Bar) = Baz(bar)
+fun foo() = Foo()

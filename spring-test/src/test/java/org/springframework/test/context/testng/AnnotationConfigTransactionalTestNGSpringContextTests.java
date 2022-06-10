@@ -25,6 +25,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.testfixture.beans.Employee;
+import org.springframework.beans.testfixture.beans.Pet;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -32,8 +34,6 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
-import org.springframework.tests.sample.beans.Employee;
-import org.springframework.tests.sample.beans.Pet;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -112,7 +112,7 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	void autowiringFromConfigClass() {
+	public void autowiringFromConfigClass() {
 		assertThat(employee).as("The employee should have been autowired.").isNotNull();
 		assertThat(employee.getName()).isEqualTo("John Smith");
 
@@ -136,7 +136,7 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests
 	}
 
 	@Test
-	void modifyTestDataWithinTransaction() {
+	public void modifyTestDataWithinTransaction() {
 		assertThatTransaction().isActive();
 		assertAddPerson(JANE);
 		assertAddPerson(SUE);

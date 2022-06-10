@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.function.Consumer;
 
 import reactor.core.publisher.Flux;
@@ -31,7 +30,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
@@ -40,17 +38,16 @@ import org.springframework.util.StringUtils;
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Brian Clozel
  * @since 5.0
  */
 class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 	private URI uri;
 
-	private HttpHeaders httpHeaders;
+	private final HttpHeaders headers;
 
-	private String httpMethodValue;
-
-	private final MultiValueMap<String, HttpCookie> cookies;
+	private HttpMethod httpMethod;
 
 	@Nullable
 	private String uriPath;
@@ -61,7 +58,10 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 	@Nullable
 	private SslInfo sslInfo;
 
-	private Flux<DataBuffer> body;
+	@Nullable
+	private InetSocketAddress remoteAddress;
+
+	private final Flux<DataBuffer> body;
 
 	private final ServerHttpRequest originalRequest;
 
@@ -70,25 +70,19 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		Assert.notNull(original, "ServerHttpRequest is required");
 
 		this.uri = original.getURI();
-		this.httpMethodValue = original.getMethodValue();
+		this.headers = HttpHeaders.writableHttpHeaders(original.getHeaders());
+		this.httpMethod = original.getMethod();
+		this.contextPath = original.getPath().contextPath().value();
+		this.remoteAddress = original.getRemoteAddress();
 		this.body = original.getBody();
-
-		this.httpHeaders = HttpHeaders.writableHttpHeaders(original.getHeaders());
-
-		this.cookies = new LinkedMultiValueMap<>(original.getCookies().size());
-		copyMultiValueMap(original.getCookies(), this.cookies);
-
 		this.originalRequest = original;
-	}
-
-	private static <K, V> void copyMultiValueMap(MultiValueMap<K,V> source, MultiValueMap<K,V> target) {
-		source.forEach((key, value) -> target.put(key, new LinkedList<>(value)));
 	}
 
 
 	@Override
 	public ServerHttpRequest.Builder method(HttpMethod httpMethod) {
-		this.httpMethodValue = httpMethod.name();
+		Assert.notNull(httpMethod, "HttpMethod must not be null");
+		this.httpMethod = httpMethod;
 		return this;
 	}
 
@@ -113,14 +107,14 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 	@Override
 	public ServerHttpRequest.Builder header(String headerName, String... headerValues) {
-		this.httpHeaders.put(headerName, Arrays.asList(headerValues));
+		this.headers.put(headerName, Arrays.asList(headerValues));
 		return this;
 	}
 
 	@Override
 	public ServerHttpRequest.Builder headers(Consumer<HttpHeaders> headersConsumer) {
 		Assert.notNull(headersConsumer, "'headersConsumer' must not be null");
-		headersConsumer.accept(this.httpHeaders);
+		headersConsumer.accept(this.headers);
 		return this;
 	}
 
@@ -131,9 +125,15 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 	}
 
 	@Override
+	public ServerHttpRequest.Builder remoteAddress(InetSocketAddress remoteAddress) {
+		this.remoteAddress = remoteAddress;
+		return this;
+	}
+
+	@Override
 	public ServerHttpRequest build() {
-		return new MutatedServerHttpRequest(getUriToUse(), this.contextPath, this.httpHeaders,
-				this.httpMethodValue, this.cookies, this.sslInfo, this.body, this.originalRequest);
+		return new MutatedServerHttpRequest(getUriToUse(), this.contextPath,
+				this.httpMethod, this.sslInfo, this.remoteAddress, this.headers, this.body, this.originalRequest);
 	}
 
 	private URI getUriToUse() {
@@ -177,15 +177,13 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 	private static class MutatedServerHttpRequest extends AbstractServerHttpRequest {
 
-		private final String methodValue;
-
-		private final MultiValueMap<String, HttpCookie> cookies;
-
-		@Nullable
-		private final InetSocketAddress remoteAddress;
+		private final HttpMethod method;
 
 		@Nullable
 		private final SslInfo sslInfo;
+
+		@Nullable
+		private final InetSocketAddress remoteAddress;
 
 		private final Flux<DataBuffer> body;
 
@@ -193,36 +191,47 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 
 		public MutatedServerHttpRequest(URI uri, @Nullable String contextPath,
-				HttpHeaders headers, String methodValue, MultiValueMap<String, HttpCookie> cookies,
-				@Nullable SslInfo sslInfo, Flux<DataBuffer> body, ServerHttpRequest originalRequest) {
+				HttpMethod method, @Nullable SslInfo sslInfo, @Nullable InetSocketAddress remoteAddress,
+				HttpHeaders headers, Flux<DataBuffer> body, ServerHttpRequest originalRequest) {
 
 			super(uri, contextPath, headers);
-			this.methodValue = methodValue;
-			this.cookies = cookies;
-			this.remoteAddress = originalRequest.getRemoteAddress();
-			this.sslInfo = sslInfo != null ? sslInfo : originalRequest.getSslInfo();
+			this.method = method;
+			this.remoteAddress = (remoteAddress != null ? remoteAddress : originalRequest.getRemoteAddress());
+			this.sslInfo = (sslInfo != null ? sslInfo : originalRequest.getSslInfo());
 			this.body = body;
 			this.originalRequest = originalRequest;
 		}
 
 		@Override
+		public HttpMethod getMethod() {
+			return this.method;
+		}
+
+		@Override
+		@Deprecated
 		public String getMethodValue() {
-			return this.methodValue;
+			return this.method.name();
 		}
 
 		@Override
 		protected MultiValueMap<String, HttpCookie> initCookies() {
-			return this.cookies;
+			return this.originalRequest.getCookies();
 		}
 
-		@Nullable
 		@Override
+		@Nullable
+		public InetSocketAddress getLocalAddress() {
+			return this.originalRequest.getLocalAddress();
+		}
+
+		@Override
+		@Nullable
 		public InetSocketAddress getRemoteAddress() {
 			return this.remoteAddress;
 		}
 
-		@Nullable
 		@Override
+		@Nullable
 		protected SslInfo initSslInfo() {
 			return this.sslInfo;
 		}
@@ -235,7 +244,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		@SuppressWarnings("unchecked")
 		@Override
 		public <T> T getNativeRequest() {
-			return (T) this.originalRequest;
+			return ServerHttpRequestDecorator.getNativeRequest(this.originalRequest);
 		}
 
 		@Override

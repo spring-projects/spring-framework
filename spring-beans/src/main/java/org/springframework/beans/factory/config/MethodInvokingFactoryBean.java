@@ -56,24 +56,24 @@ import org.springframework.lang.Nullable;
  * which uses this class to call a static factory method:
  *
  * <pre class="code">
- * &lt;bean id="myObject" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
- *   &lt;property name="staticMethod" value="com.whatever.MyClassFactory.getInstance"/>
- * &lt;/bean></pre>
+ * &lt;bean id="myObject" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean"&gt;
+ *   &lt;property name="staticMethod" value="com.whatever.MyClassFactory.getInstance"/&gt;
+ * &lt;/bean&gt;</pre>
  *
  * <p>An example of calling a static method then an instance method to get at a
  * Java system property. Somewhat verbose, but it works.
  *
  * <pre class="code">
- * &lt;bean id="sysProps" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
- *   &lt;property name="targetClass" value="java.lang.System"/>
- *   &lt;property name="targetMethod" value="getProperties"/>
- * &lt;/bean>
+ * &lt;bean id="sysProps" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean"&gt;
+ *   &lt;property name="targetClass" value="java.lang.System"/&gt;
+ *   &lt;property name="targetMethod" value="getProperties"/&gt;
+ * &lt;/bean&gt;
  *
- * &lt;bean id="javaVersion" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
- *   &lt;property name="targetObject" ref="sysProps"/>
- *   &lt;property name="targetMethod" value="getProperty"/>
- *   &lt;property name="arguments" value="java.version"/>
- * &lt;/bean></pre>
+ * &lt;bean id="javaVersion" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean"&gt;
+ *   &lt;property name="targetObject" ref="sysProps"/&gt;
+ *   &lt;property name="targetMethod" value="getProperty"/&gt;
+ *   &lt;property name="arguments" value="java.version"/&gt;
+ * &lt;/bean&gt;</pre>
  *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller

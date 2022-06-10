@@ -117,9 +117,7 @@ public class EncodedUriTests {
 
 		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-			if (bean instanceof RequestMappingHandlerMapping) {
-				RequestMappingHandlerMapping requestMappingHandlerMapping = (RequestMappingHandlerMapping) bean;
-
+			if (bean instanceof RequestMappingHandlerMapping requestMappingHandlerMapping) {
 				// URL decode after request mapping, not before.
 				requestMappingHandlerMapping.setUrlDecode(false);
 			}

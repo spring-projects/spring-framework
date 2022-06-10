@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ import java.lang.annotation.Target;
  *
  * <p>When declared as a class-level annotation, {@code @Commit} defines
  * the default commit semantics for all test methods within the test class
- * hierarchy. When declared as a method-level annotation, {@code @Commit}
- * defines commit semantics for the specific test method, potentially
+ * hierarchy or nested class hierarchy. When declared as a method-level annotation,
+ * {@code @Commit} defines commit semantics for the specific test method, potentially
  * overriding class-level default commit or rollback semantics.
  *
  * <p><strong>Warning</strong>: {@code @Commit} can be used as direct
@@ -43,6 +43,11 @@ import java.lang.annotation.Target;
  * <strong>not</strong> be declared alongside {@code @Rollback}. Declaring
  * {@code @Commit} and {@code @Rollback} on the same test method or on the
  * same test class is unsupported and may lead to unpredictable results.
+ *
+ * <p>As of Spring Framework 5.3, this annotation will be inherited from an
+ * enclosing test class by default. See
+ * {@link org.springframework.test.context.NestedTestConfiguration @NestedTestConfiguration}
+ * for details.
  *
  * @author Sam Brannen
  * @since 4.2

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,14 @@
 
 package org.springframework.test.web.servlet.result;
 
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.hamcrest.Matcher;
 import org.w3c.dom.Node;
 
@@ -43,6 +44,7 @@ import static org.springframework.test.util.AssertionErrors.assertTrue;
  * {@link MockMvcResultMatchers#content}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 3.2
  */
 public class ContentResultMatchers {
@@ -105,6 +107,16 @@ public class ContentResultMatchers {
 			assertTrue("Content type [" + actual + "] is not compatible with [" + contentType + "]",
 					actualContentType.isCompatibleWith(contentType));
 		};
+	}
+
+	/**
+	 * Assert the character encoding in the ServletResponse.
+	 * @since 5.3.10
+	 * @see StandardCharsets
+	 * @see #encoding(String)
+	 */
+	public ResultMatcher encoding(Charset characterEncoding) {
+		return encoding(characterEncoding.name());
 	}
 
 	/**

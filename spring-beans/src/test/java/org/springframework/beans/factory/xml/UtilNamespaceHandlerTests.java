@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,10 @@ import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.testfixture.beans.CollectingReaderEventListener;
+import org.springframework.beans.testfixture.beans.CustomEnum;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.tests.beans.CollectingReaderEventListener;
-import org.springframework.tests.sample.beans.CustomEnum;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -342,7 +342,7 @@ public class UtilNamespaceHandlerTests {
 	public void testLoadProperties() {
 		Properties props = (Properties) this.beanFactory.getBean("myProperties");
 		assertThat(props.get("foo")).as("Incorrect property value").isEqualTo("bar");
-		assertThat(props.get("foo2")).as("Incorrect property value").isEqualTo(null);
+		assertThat(props.get("foo2")).as("Incorrect property value").isNull();
 		Properties props2 = (Properties) this.beanFactory.getBean("myProperties");
 		assertThat(props == props2).isTrue();
 	}
@@ -351,17 +351,17 @@ public class UtilNamespaceHandlerTests {
 	public void testScopedProperties() {
 		Properties props = (Properties) this.beanFactory.getBean("myScopedProperties");
 		assertThat(props.get("foo")).as("Incorrect property value").isEqualTo("bar");
-		assertThat(props.get("foo2")).as("Incorrect property value").isEqualTo(null);
+		assertThat(props.get("foo2")).as("Incorrect property value").isNull();
 		Properties props2 = (Properties) this.beanFactory.getBean("myScopedProperties");
 		assertThat(props.get("foo")).as("Incorrect property value").isEqualTo("bar");
-		assertThat(props.get("foo2")).as("Incorrect property value").isEqualTo(null);
+		assertThat(props.get("foo2")).as("Incorrect property value").isNull();
 		assertThat(props != props2).isTrue();
 	}
 
 	@Test
 	public void testLocalProperties() {
 		Properties props = (Properties) this.beanFactory.getBean("myLocalProperties");
-		assertThat(props.get("foo")).as("Incorrect property value").isEqualTo(null);
+		assertThat(props.get("foo")).as("Incorrect property value").isNull();
 		assertThat(props.get("foo2")).as("Incorrect property value").isEqualTo("bar2");
 	}
 

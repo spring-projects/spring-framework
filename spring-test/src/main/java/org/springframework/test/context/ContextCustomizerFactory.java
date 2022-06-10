@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public interface ContextCustomizerFactory {
 	 * @param testClass the test class
 	 * @param configAttributes the list of context configuration attributes for
 	 * the test class, ordered <em>bottom-up</em> (i.e., as if we were traversing
-	 * up the class hierarchy); never {@code null} or empty
+	 * up the class hierarchy or enclosing class hierarchy); never {@code null} or empty
 	 * @return a {@link ContextCustomizer} or {@code null} if no customizer should
 	 * be used
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,15 +45,16 @@ import org.springframework.util.Assert;
  * in {@link FileSystemResource#FileSystemResource(Path) FileSystemResource},
  * applying Spring's standard String-based path transformations but
  * performing all operations via the {@link java.nio.file.Files} API.
+ * This {@code PathResource} is effectively a pure {@code java.nio.path.Path}
+ * based alternative with different {@code createRelative} behavior.
  *
  * @author Philippe Marschall
  * @author Juergen Hoeller
  * @since 4.0
  * @see java.nio.file.Path
  * @see java.nio.file.Files
- * @deprecated as of 5.1.1, in favor of {@link FileSystemResource#FileSystemResource(Path)}
+ * @see FileSystemResource
  */
-@Deprecated
 public class PathResource extends AbstractResource implements WritableResource {
 
 	private final Path path;
@@ -63,7 +64,7 @@ public class PathResource extends AbstractResource implements WritableResource {
 	 * Create a new PathResource from a Path handle.
 	 * <p>Note: Unlike {@link FileSystemResource}, when building relative resources
 	 * via {@link #createRelative}, the relative path will be built <i>underneath</i>
-	 * the given root: e.g. Paths.get("C:/dir1/"), relative path "dir2" -> "C:/dir1/dir2"!
+	 * the given root: e.g. Paths.get("C:/dir1/"), relative path "dir2" &rarr; "C:/dir1/dir2"!
 	 * @param path a Path handle
 	 */
 	public PathResource(Path path) {
@@ -75,7 +76,7 @@ public class PathResource extends AbstractResource implements WritableResource {
 	 * Create a new PathResource from a Path handle.
 	 * <p>Note: Unlike {@link FileSystemResource}, when building relative resources
 	 * via {@link #createRelative}, the relative path will be built <i>underneath</i>
-	 * the given root: e.g. Paths.get("C:/dir1/"), relative path "dir2" -> "C:/dir1/dir2"!
+	 * the given root: e.g. Paths.get("C:/dir1/"), relative path "dir2" &rarr; "C:/dir1/dir2"!
 	 * @param path a path
 	 * @see java.nio.file.Paths#get(String, String...)
 	 */
@@ -88,7 +89,7 @@ public class PathResource extends AbstractResource implements WritableResource {
 	 * Create a new PathResource from a Path handle.
 	 * <p>Note: Unlike {@link FileSystemResource}, when building relative resources
 	 * via {@link #createRelative}, the relative path will be built <i>underneath</i>
-	 * the given root: e.g. Paths.get("C:/dir1/"), relative path "dir2" -> "C:/dir1/dir2"!
+	 * the given root: e.g. Paths.get("C:/dir1/"), relative path "dir2" &rarr; "C:/dir1/dir2"!
 	 * @param uri a path URI
 	 * @see java.nio.file.Paths#get(URI)
 	 */
@@ -253,7 +254,7 @@ public class PathResource extends AbstractResource implements WritableResource {
 	 * @see java.nio.file.Path#resolve(String)
 	 */
 	@Override
-	public Resource createRelative(String relativePath) throws IOException {
+	public Resource createRelative(String relativePath) {
 		return new PathResource(this.path.resolve(relativePath));
 	}
 

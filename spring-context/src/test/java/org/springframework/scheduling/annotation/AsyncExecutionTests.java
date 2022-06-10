@@ -27,7 +27,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 
@@ -36,6 +35,7 @@ import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreato
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
@@ -383,7 +383,7 @@ public class AsyncExecutionTests {
 		listenerConstructed = 0;
 		GenericApplicationContext context = new GenericApplicationContext();
 		RootBeanDefinition listenerDef = new RootBeanDefinition(AsyncClassListener.class);
-		listenerDef.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		listenerDef.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		context.registerBeanDefinition("asyncTest", listenerDef);
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
@@ -612,16 +612,13 @@ public class AsyncExecutionTests {
 
 		public DynamicAsyncInterfaceBean() {
 			ProxyFactory pf = new ProxyFactory(new HashMap<>());
-			DefaultIntroductionAdvisor advisor = new DefaultIntroductionAdvisor(new MethodInterceptor() {
-				@Override
-				public Object invoke(MethodInvocation invocation) throws Throwable {
-					boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-					assertThat(condition).isTrue();
-					if (Future.class.equals(invocation.getMethod().getReturnType())) {
-						return new AsyncResult<>(invocation.getArguments()[0].toString());
-					}
-					return null;
+			DefaultIntroductionAdvisor advisor = new DefaultIntroductionAdvisor((MethodInterceptor) invocation -> {
+				boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+				assertThat(condition).isTrue();
+				if (Future.class.equals(invocation.getMethod().getReturnType())) {
+					return new AsyncResult<>(invocation.getArguments()[0].toString());
 				}
+				return null;
 			});
 			advisor.addInterface(AsyncInterface.class);
 			pf.addAdvisor(advisor);
@@ -685,16 +682,13 @@ public class AsyncExecutionTests {
 
 		public DynamicAsyncMethodsInterfaceBean() {
 			ProxyFactory pf = new ProxyFactory(new HashMap<>());
-			DefaultIntroductionAdvisor advisor = new DefaultIntroductionAdvisor(new MethodInterceptor() {
-				@Override
-				public Object invoke(MethodInvocation invocation) throws Throwable {
-					boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-					assertThat(condition).isTrue();
-					if (Future.class.equals(invocation.getMethod().getReturnType())) {
-						return new AsyncResult<>(invocation.getArguments()[0].toString());
-					}
-					return null;
+			DefaultIntroductionAdvisor advisor = new DefaultIntroductionAdvisor((MethodInterceptor) invocation -> {
+				boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+				assertThat(condition).isTrue();
+				if (Future.class.equals(invocation.getMethod().getReturnType())) {
+					return new AsyncResult<>(invocation.getArguments()[0].toString());
 				}
+				return null;
 			});
 			advisor.addInterface(AsyncMethodsInterface.class);
 			pf.addAdvisor(advisor);

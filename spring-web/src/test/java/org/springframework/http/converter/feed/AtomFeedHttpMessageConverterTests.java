@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,10 @@ import org.xmlunit.diff.DefaultNodeMatcher;
 import org.xmlunit.diff.ElementSelectors;
 import org.xmlunit.diff.NodeMatcher;
 
+import org.springframework.core.testfixture.xml.XmlContent;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
-import org.springframework.tests.XmlContent;
 
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -71,8 +71,8 @@ public class AtomFeedHttpMessageConverterTests {
 
 	@Test
 	public void read() throws IOException {
-		InputStream is = getClass().getResourceAsStream("atom.xml");
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(is);
+		InputStream inputStream = getClass().getResourceAsStream("atom.xml");
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(inputStream);
 		inputMessage.getHeaders().setContentType(ATOM_XML_UTF8);
 		Feed result = converter.read(Feed.class, inputMessage);
 		assertThat(result.getTitle()).isEqualTo("title");

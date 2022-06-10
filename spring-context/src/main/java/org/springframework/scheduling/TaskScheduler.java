@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -38,7 +39,7 @@ import org.springframework.lang.Nullable;
  * and adding extended trigger capabilities.
  *
  * <p>This interface is roughly equivalent to a JSR-236
- * {@code ManagedScheduledExecutorService} as supported in Java EE 7
+ * {@code ManagedScheduledExecutorService} as supported in Jakarta EE
  * environments but aligned with Spring's {@code TaskExecutor} model.
  *
  * @author Juergen Hoeller
@@ -48,6 +49,15 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
  */
 public interface TaskScheduler {
+
+	/**
+	 * Return the clock to use for scheduling purposes.
+	 * @since 5.3
+	 * @see Clock#systemDefaultZone()
+	 */
+	default Clock getClock() {
+		return Clock.systemDefaultZone();
+	}
 
 	/**
 	 * Schedule the given {@link Runnable}, invoking it whenever the trigger

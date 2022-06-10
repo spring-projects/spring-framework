@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,30 +38,33 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class EnableAspectJAutoProxyTests {
+class EnableAspectJAutoProxyTests {
 
 	@Test
-	public void withJdkProxy() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithJdkProxy.class);
+	void withJdkProxy() {
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithJdkProxy.class);
 
 		aspectIsApplied(ctx);
 		assertThat(AopUtils.isJdkDynamicProxy(ctx.getBean(FooService.class))).isTrue();
+		ctx.close();
 	}
 
 	@Test
-	public void withCglibProxy() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithCglibProxy.class);
+	void withCglibProxy() {
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithCglibProxy.class);
 
 		aspectIsApplied(ctx);
 		assertThat(AopUtils.isCglibProxy(ctx.getBean(FooService.class))).isTrue();
+		ctx.close();
 	}
 
 	@Test
-	public void withExposedProxy() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithExposedProxy.class);
+	void withExposedProxy() {
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithExposedProxy.class);
 
 		aspectIsApplied(ctx);
 		assertThat(AopUtils.isJdkDynamicProxy(ctx.getBean(FooService.class))).isTrue();
+		ctx.close();
 	}
 
 	private void aspectIsApplied(ApplicationContext ctx) {
@@ -82,7 +85,7 @@ public class EnableAspectJAutoProxyTests {
 	}
 
 	@Test
-	public void withAnnotationOnArgumentAndJdkProxy() {
+	void withAnnotationOnArgumentAndJdkProxy() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(
 				ConfigWithJdkProxy.class, SampleService.class, LoggingAspect.class);
 
@@ -91,10 +94,11 @@ public class EnableAspectJAutoProxyTests {
 		sampleService.execute(new SampleInputBean());
 		sampleService.execute((SampleDto) null);
 		sampleService.execute((SampleInputBean) null);
+		ctx.close();
 	}
 
 	@Test
-	public void withAnnotationOnArgumentAndCglibProxy() {
+	void withAnnotationOnArgumentAndCglibProxy() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(
 				ConfigWithCglibProxy.class, SampleService.class, LoggingAspect.class);
 
@@ -103,6 +107,7 @@ public class EnableAspectJAutoProxyTests {
 		sampleService.execute(new SampleInputBean());
 		sampleService.execute((SampleDto) null);
 		sampleService.execute((SampleInputBean) null);
+		ctx.close();
 	}
 
 
@@ -123,7 +128,7 @@ public class EnableAspectJAutoProxyTests {
 	static class ConfigWithExposedProxy {
 
 		@Bean
-		public FooService fooServiceImpl(final ApplicationContext context) {
+		FooService fooServiceImpl(final ApplicationContext context) {
 			return new FooServiceImpl() {
 				@Override
 				public String foo(int id) {
@@ -140,20 +145,20 @@ public class EnableAspectJAutoProxyTests {
 
 
 	@Retention(RetentionPolicy.RUNTIME)
-	public @interface Loggable {
+	@interface Loggable {
 	}
 
 
 	@Loggable
-	public static class SampleDto {
+	static class SampleDto {
 	}
 
 
-	public static class SampleInputBean {
+	static class SampleInputBean {
 	}
 
 
-	public static class SampleService {
+	static class SampleService {
 
 		// Not matched method on {@link LoggingAspect}.
 		public void execute(SampleInputBean inputBean) {

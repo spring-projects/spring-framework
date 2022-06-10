@@ -36,6 +36,7 @@ import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.LinkedMultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for {@link org.springframework.messaging.simp.SimpMessagingTemplate}.
@@ -84,6 +85,12 @@ public class SimpMessagingTemplateTests {
 
 		assertThat(headerAccessor).isNotNull();
 		assertThat(headerAccessor.getDestination()).isEqualTo("/user/https:%2F%2Fjoe.openid.example.org%2F/queue/foo");
+	}
+
+	@Test // gh-23836
+	public void convertAndSendToUserWithInvalidSequence() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.messagingTemplate.convertAndSendToUser("joe%2F", "/queue/foo", "data"));
 	}
 
 	@Test

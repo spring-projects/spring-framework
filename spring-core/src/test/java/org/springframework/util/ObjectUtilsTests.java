@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.util;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,6 +36,7 @@ import static org.springframework.util.ObjectUtils.isEmpty;
  * @author Juergen Hoeller
  * @author Rick Evans
  * @author Sam Brannen
+ * @author Hyunjin Choi
  */
 class ObjectUtilsTests {
 
@@ -108,7 +108,7 @@ class ObjectUtilsTests {
 		Set<String> set = new HashSet<>();
 		set.add("foo");
 		assertThat(isEmpty(set)).isFalse();
-		assertThat(isEmpty(Arrays.asList("foo"))).isFalse();
+		assertThat(isEmpty(Collections.singletonList("foo"))).isFalse();
 	}
 
 	@Test
@@ -158,7 +158,7 @@ class ObjectUtilsTests {
 	void toObjectArrayWithEmptyPrimitiveArray() {
 		Object[] objects = ObjectUtils.toObjectArray(new byte[] {});
 		assertThat(objects).isNotNull();
-		assertThat(objects.length).isEqualTo(0);
+		assertThat(objects).hasSize(0);
 	}
 
 	@Test
@@ -178,8 +178,17 @@ class ObjectUtilsTests {
 		String[] array = new String[] {"foo", "bar"};
 		String newElement = "baz";
 		Object[] newArray = ObjectUtils.addObjectToArray(array, newElement);
-		assertThat(newArray.length).isEqualTo(3);
+		assertThat(newArray).hasSize(3);
 		assertThat(newArray[2]).isEqualTo(newElement);
+	}
+
+	@Test
+	void addObjectToArraysAtPosition() {
+		String[] array = new String[] {"foo", "bar", "baz"};
+		assertThat(ObjectUtils.addObjectToArray(array, "bat", 3)).containsExactly("foo", "bar", "baz", "bat");
+		assertThat(ObjectUtils.addObjectToArray(array, "bat", 2)).containsExactly("foo", "bar", "bat", "baz");
+		assertThat(ObjectUtils.addObjectToArray(array, "bat", 1)).containsExactly("foo", "bat", "bar", "baz");
+		assertThat(ObjectUtils.addObjectToArray(array, "bat", 0)).containsExactly("bat", "foo", "bar", "baz");
 	}
 
 	@Test
@@ -187,7 +196,7 @@ class ObjectUtilsTests {
 		String[] array = new String[0];
 		String newElement = "foo";
 		String[] newArray = ObjectUtils.addObjectToArray(array, newElement);
-		assertThat(newArray.length).isEqualTo(1);
+		assertThat(newArray).hasSize(1);
 		assertThat(newArray[0]).isEqualTo(newElement);
 	}
 
@@ -197,7 +206,7 @@ class ObjectUtilsTests {
 		String[] array = new String[] {existingElement};
 		String newElement = "bar";
 		String[] newArray = ObjectUtils.addObjectToArray(array, newElement);
-		assertThat(newArray.length).isEqualTo(2);
+		assertThat(newArray).hasSize(2);
 		assertThat(newArray[0]).isEqualTo(existingElement);
 		assertThat(newArray[1]).isEqualTo(newElement);
 	}
@@ -207,8 +216,8 @@ class ObjectUtilsTests {
 		String[] array = new String[] {null};
 		String newElement = "bar";
 		String[] newArray = ObjectUtils.addObjectToArray(array, newElement);
-		assertThat(newArray.length).isEqualTo(2);
-		assertThat(newArray[0]).isEqualTo(null);
+		assertThat(newArray).hasSize(2);
+		assertThat(newArray[0]).isNull();
 		assertThat(newArray[1]).isEqualTo(newElement);
 	}
 
@@ -216,59 +225,21 @@ class ObjectUtilsTests {
 	void addObjectToNullArray() throws Exception {
 		String newElement = "foo";
 		String[] newArray = ObjectUtils.addObjectToArray(null, newElement);
-		assertThat(newArray.length).isEqualTo(1);
+		assertThat(newArray).hasSize(1);
 		assertThat(newArray[0]).isEqualTo(newElement);
 	}
 
 	@Test
 	void addNullObjectToNullArray() throws Exception {
 		Object[] newArray = ObjectUtils.addObjectToArray(null, null);
-		assertThat(newArray.length).isEqualTo(1);
-		assertThat(newArray[0]).isEqualTo(null);
+		assertThat(newArray).hasSize(1);
+		assertThat(newArray[0]).isNull();
 	}
 
 	@Test
 	void nullSafeEqualsWithArrays() throws Exception {
 		assertThat(ObjectUtils.nullSafeEquals(new String[] {"a", "b", "c"}, new String[] {"a", "b", "c"})).isTrue();
 		assertThat(ObjectUtils.nullSafeEquals(new int[] {1, 2, 3}, new int[] {1, 2, 3})).isTrue();
-	}
-
-	@Test
-	@Deprecated
-	void hashCodeWithBooleanFalse() {
-		int expected = Boolean.FALSE.hashCode();
-		assertThat(ObjectUtils.hashCode(false)).isEqualTo(expected);
-	}
-
-	@Test
-	@Deprecated
-	void hashCodeWithBooleanTrue() {
-		int expected = Boolean.TRUE.hashCode();
-		assertThat(ObjectUtils.hashCode(true)).isEqualTo(expected);
-	}
-
-	@Test
-	@Deprecated
-	void hashCodeWithDouble() {
-		double dbl = 9830.43;
-		int expected = (new Double(dbl)).hashCode();
-		assertThat(ObjectUtils.hashCode(dbl)).isEqualTo(expected);
-	}
-
-	@Test
-	@Deprecated
-	void hashCodeWithFloat() {
-		float flt = 34.8f;
-		int expected = (new Float(flt)).hashCode();
-		assertThat(ObjectUtils.hashCode(flt)).isEqualTo(expected);
-	}
-
-	@Test
-	@Deprecated
-	void hashCodeWithLong() {
-		long lng = 883L;
-		int expected = (new Long(lng)).hashCode();
-		assertThat(ObjectUtils.hashCode(lng)).isEqualTo(expected);
 	}
 
 	@Test
@@ -281,7 +252,7 @@ class ObjectUtilsTests {
 
 	@Test
 	void identityToStringWithNullObject() {
-		assertThat(ObjectUtils.identityToString(null)).isEqualTo("");
+		assertThat(ObjectUtils.identityToString(null)).isEmpty();
 	}
 
 	@Test
@@ -794,6 +765,20 @@ class ObjectUtilsTests {
 
 		assertThat(ObjectUtils.containsConstant(Tropes.values(), "FOO", true)).isTrue();
 		assertThat(ObjectUtils.containsConstant(Tropes.values(), "foo", true)).isFalse();
+	}
+
+	@Test
+	void containsElement() {
+		Object[] array = {"foo", "bar", 42, new String[] {"baz", "quux"}};
+
+		assertThat(ObjectUtils.containsElement(null, "foo")).isFalse();
+		assertThat(ObjectUtils.containsElement(array, null)).isFalse();
+		assertThat(ObjectUtils.containsElement(array, "bogus")).isFalse();
+
+		assertThat(ObjectUtils.containsElement(array, "foo")).isTrue();
+		assertThat(ObjectUtils.containsElement(array, "bar")).isTrue();
+		assertThat(ObjectUtils.containsElement(array, 42)).isTrue();
+		assertThat(ObjectUtils.containsElement(array, new String[] {"baz", "quux"})).isTrue();
 	}
 
 	@Test

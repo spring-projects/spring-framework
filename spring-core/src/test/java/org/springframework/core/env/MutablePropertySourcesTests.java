@@ -20,7 +20,7 @@ import java.util.Iterator;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.env.MockPropertySource;
+import org.springframework.core.testfixture.env.MockPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

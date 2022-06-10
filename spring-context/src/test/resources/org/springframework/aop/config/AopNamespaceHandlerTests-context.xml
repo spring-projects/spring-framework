@@ -19,11 +19,11 @@
 
 	</aop:config>
 
-	<bean id="getNameCounter" class="org.springframework.tests.aop.advice.CountingBeforeAdvice"/>
+	<bean id="getNameCounter" class="org.springframework.aop.testfixture.advice.CountingBeforeAdvice"/>
 
-	<bean id="getAgeCounter" class="org.springframework.tests.aop.advice.CountingBeforeAdvice"/>
+	<bean id="getAgeCounter" class="org.springframework.aop.testfixture.advice.CountingBeforeAdvice"/>
 
-	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean"/>
+	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 	<bean id="countingAdvice" class="org.springframework.aop.config.CountingAspectJAdvice"/>
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,11 +48,9 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public class MockClientHttpRequest extends AbstractClientHttpRequest {
 
-	private HttpMethod httpMethod;
+	private final HttpMethod httpMethod;
 
-	private URI url;
-
-	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
+	private final URI url;
 
 	private Flux<DataBuffer> body = Flux.error(
 			new IllegalStateException("The body is not set. " +
@@ -81,7 +79,6 @@ public class MockClientHttpRequest extends AbstractClientHttpRequest {
 	 * <p>The default write handler consumes and caches the request body so it
 	 * may be accessed subsequently, e.g. in test assertions. Use this property
 	 * when the request body is an infinite stream.
-	 *
 	 * @param writeHandler the write handler to use returning {@code Mono<Void>}
 	 * when the body has been "written" (i.e. consumed).
 	 */
@@ -103,7 +100,13 @@ public class MockClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	public DataBufferFactory bufferFactory() {
-		return this.bufferFactory;
+		return DefaultDataBufferFactory.sharedInstance;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T getNativeRequest() {
+		return (T) this;
 	}
 
 	@Override
@@ -149,20 +152,13 @@ public class MockClientHttpRequest extends AbstractClientHttpRequest {
 		Charset charset = Optional.ofNullable(getHeaders().getContentType()).map(MimeType::getCharset)
 				.orElse(StandardCharsets.UTF_8);
 
-		return getBody()
-				.reduce(bufferFactory().allocateBuffer(), (previous, current) -> {
-					previous.write(current);
-					DataBufferUtils.release(current);
-					return previous;
+		return DataBufferUtils.join(getBody())
+				.map(buffer -> {
+					String s = buffer.toString(charset);
+					DataBufferUtils.release(buffer);
+					return s;
 				})
-				.map(buffer -> bufferToString(buffer, charset));
-	}
-
-	private static String bufferToString(DataBuffer buffer, Charset charset) {
-		Assert.notNull(charset, "'charset' must not be null");
-		byte[] bytes = new byte[buffer.readableByteCount()];
-		buffer.read(bytes);
-		return new String(bytes, charset);
+				.defaultIfEmpty("");
 	}
 
 }

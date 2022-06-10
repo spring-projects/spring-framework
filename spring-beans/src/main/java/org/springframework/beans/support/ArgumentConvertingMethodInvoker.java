@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,8 +146,9 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 			for (Method candidate : candidates) {
 				if (candidate.getName().equals(targetMethod)) {
 					// Check if the inspected method has the correct number of parameters.
-					Class<?>[] paramTypes = candidate.getParameterTypes();
-					if (paramTypes.length == argCount) {
+					int parameterCount = candidate.getParameterCount();
+					if (parameterCount == argCount) {
+						Class<?>[] paramTypes = candidate.getParameterTypes();
 						Object[] convertedArguments = new Object[argCount];
 						boolean match = true;
 						for (int j = 0; j < argCount && match; j++) {

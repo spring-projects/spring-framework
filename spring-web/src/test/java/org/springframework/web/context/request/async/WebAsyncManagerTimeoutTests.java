@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,15 @@ package org.springframework.web.context.request.async;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-import javax.servlet.AsyncEvent;
-
+import jakarta.servlet.AsyncEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.mock.web.test.MockAsyncContext;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.testfixture.servlet.MockAsyncContext;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -97,12 +96,7 @@ public class WebAsyncManagerTimeoutTests {
 
 		StubCallable callable = new StubCallable();
 		WebAsyncTask<Object> webAsyncTask = new WebAsyncTask<>(callable);
-		webAsyncTask.onTimeout(new Callable<Object>() {
-			@Override
-			public Object call() throws Exception {
-				return 7;
-			}
-		});
+		webAsyncTask.onTimeout(() -> 7);
 
 		this.asyncManager.startCallableProcessing(webAsyncTask);
 
@@ -215,12 +209,7 @@ public class WebAsyncManagerTimeoutTests {
 	public void startDeferredResultProcessingTimeoutAndResumeThroughCallback() throws Exception {
 
 		final DeferredResult<Integer> deferredResult = new DeferredResult<>();
-		deferredResult.onTimeout(new Runnable() {
-			@Override
-			public void run() {
-				deferredResult.setResult(23);
-			}
-		});
+		deferredResult.onTimeout(() -> deferredResult.setResult(23));
 
 		this.asyncManager.startDeferredResultProcessing(deferredResult);
 

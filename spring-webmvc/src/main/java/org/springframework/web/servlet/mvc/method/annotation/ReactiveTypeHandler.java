@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -73,8 +74,12 @@ class ReactiveTypeHandler {
 
 	private static final long STREAMING_TIMEOUT_VALUE = -1;
 
+	@SuppressWarnings("deprecation")
+	private static final List<MediaType> JSON_STREAMING_MEDIA_TYPES =
+			Arrays.asList(MediaType.APPLICATION_NDJSON, MediaType.APPLICATION_STREAM_JSON);
 
-	private static Log logger = LogFactory.getLog(ReactiveTypeHandler.class);
+	private static final Log logger = LogFactory.getLog(ReactiveTypeHandler.class);
+
 
 	private final ReactiveAdapterRegistry adapterRegistry;
 
@@ -144,11 +149,15 @@ class ReactiveTypeHandler {
 				new TextEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
 				return emitter;
 			}
-			if (mediaTypes.stream().anyMatch(MediaType.APPLICATION_STREAM_JSON::includes)) {
-				logExecutorWarning(returnType);
-				ResponseBodyEmitter emitter = getEmitter(MediaType.APPLICATION_STREAM_JSON);
-				new JsonEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
-				return emitter;
+			for (MediaType type : mediaTypes) {
+				for (MediaType streamingType : JSON_STREAMING_MEDIA_TYPES) {
+					if (streamingType.includes(type)) {
+						logExecutorWarning(returnType);
+						ResponseBodyEmitter emitter = getEmitter(streamingType);
+						new JsonEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
+						return emitter;
+					}
+				}
 			}
 		}
 
@@ -193,7 +202,7 @@ class ReactiveTypeHandler {
 							"-------------------------------\n" +
 							"Controller:\t" + returnType.getContainingClass().getName() + "\n" +
 							"Method:\t\t" + returnType.getMethod().getName() + "\n" +
-							"Returning:\t" + ResolvableType.forMethodParameter(returnType).toString() + "\n" +
+							"Returning:\t" + ResolvableType.forMethodParameter(returnType) + "\n" +
 							"!!!");
 					this.taskExecutorWarning = false;
 				}

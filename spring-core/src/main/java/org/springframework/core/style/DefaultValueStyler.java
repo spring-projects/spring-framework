@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,21 +58,20 @@ public class DefaultValueStyler implements ValueStyler {
 		else if (value instanceof String) {
 			return "\'" + value + "\'";
 		}
-		else if (value instanceof Class) {
-			return ClassUtils.getShortName((Class<?>) value);
+		else if (value instanceof Class<?> clazz) {
+			return ClassUtils.getShortName(clazz);
 		}
-		else if (value instanceof Method) {
-			Method method = (Method) value;
+		else if (value instanceof Method method) {
 			return method.getName() + "@" + ClassUtils.getShortName(method.getDeclaringClass());
 		}
-		else if (value instanceof Map) {
-			return style((Map<?, ?>) value);
+		else if (value instanceof Map<?, ?> map) {
+			return style(map);
 		}
-		else if (value instanceof Map.Entry) {
-			return style((Map.Entry<? ,?>) value);
+		else if (value instanceof Map.Entry<?, ?> entry) {
+			return style(entry);
 		}
-		else if (value instanceof Collection) {
-			return style((Collection<?>) value);
+		else if (value instanceof Collection<?> collection) {
+			return style(collection);
 		}
 		else if (value.getClass().isArray()) {
 			return styleArray(ObjectUtils.toObjectArray(value));

@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
 /**
  * @author Juergen Hoeller

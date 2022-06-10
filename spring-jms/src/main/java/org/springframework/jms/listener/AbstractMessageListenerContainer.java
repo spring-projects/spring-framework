@@ -16,16 +16,16 @@
 
 package org.springframework.jms.listener;
 
-import javax.jms.Connection;
-import javax.jms.Destination;
-import javax.jms.ExceptionListener;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageListener;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.Topic;
+import jakarta.jms.Connection;
+import jakarta.jms.Destination;
+import jakarta.jms.ExceptionListener;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.MessageConsumer;
+import jakarta.jms.MessageListener;
+import jakarta.jms.Queue;
+import jakarta.jms.Session;
+import jakarta.jms.Topic;
 
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.QosSettings;
@@ -35,12 +35,12 @@ import org.springframework.util.ErrorHandler;
 
 /**
  * Abstract base class for Spring message listener container implementations.
- * Can either host a standard JMS {@link javax.jms.MessageListener} or Spring's
+ * Can either host a standard JMS {@link jakarta.jms.MessageListener} or Spring's
  * {@link SessionAwareMessageListener} for actual message processing.
  *
  * <p>Usually holds a single JMS {@link Connection} that all listeners are supposed
  * to be registered on, which is the standard JMS way of managing listener sessions.
- * Can alternatively also be used with a fresh Connection per listener, for Java EE
+ * Can alternatively also be used with a fresh Connection per listener, for Jakarta EE
  * style XA-aware JMS messaging. The actual registration process is up to concrete
  * subclasses.
  *
@@ -99,7 +99,7 @@ import org.springframework.util.ErrorHandler;
  * supported by {@link DefaultMessageListenerContainer}, through specifying
  * an external "transactionManager" (typically a
  * {@link org.springframework.transaction.jta.JtaTransactionManager}, with
- * a corresponding XA-aware JMS {@link javax.jms.ConnectionFactory} passed in
+ * a corresponding XA-aware JMS {@link jakarta.jms.ConnectionFactory} passed in
  * as "connectionFactory").
  * </ul>
  * Note that XA transaction coordination adds significant runtime overhead,
@@ -116,7 +116,7 @@ import org.springframework.util.ErrorHandler;
  * <li>Alternatively, specify a
  * {@link org.springframework.transaction.jta.JtaTransactionManager} as
  * "transactionManager" for a fully XA-aware JMS provider - typically when
- * running on a Java EE server, but also for other environments with a JTA
+ * running on a Jakarta EE server, but also for other environments with a JTA
  * transaction manager present. This will give full "exactly-once" guarantees
  * without custom duplicate message checks, at the price of additional
  * runtime processing overhead.
@@ -132,7 +132,7 @@ import org.springframework.util.ErrorHandler;
  * @author Stephane Nicoll
  * @since 2.0
  * @see #setMessageListener
- * @see javax.jms.MessageListener
+ * @see jakarta.jms.MessageListener
  * @see SessionAwareMessageListener
  * @see #handleListenerException
  * @see DefaultMessageListenerContainer
@@ -222,7 +222,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * container picking up the new destination immediately (works e.g. with
 	 * DefaultMessageListenerContainer, as long as the cache level is less than
 	 * CACHE_CONSUMER). However, this is considered advanced usage; use it with care!
-	 * @see #setDestination(javax.jms.Destination)
+	 * @see #setDestination(jakarta.jms.Destination)
 	 */
 	public void setDestinationName(@Nullable String destinationName) {
 		this.destination = destinationName;
@@ -280,7 +280,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * CACHE_CONSUMER). However, this is considered advanced usage; use it with care!
 	 * @throws IllegalArgumentException if the supplied listener is not a
 	 * {@link MessageListener} or a {@link SessionAwareMessageListener}
-	 * @see javax.jms.MessageListener
+	 * @see jakarta.jms.MessageListener
 	 * @see SessionAwareMessageListener
 	 */
 	public void setMessageListener(@Nullable Object messageListener) {
@@ -307,7 +307,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * @param messageListener the message listener object to check
 	 * @throws IllegalArgumentException if the supplied listener is not a
 	 * {@link MessageListener} or a {@link SessionAwareMessageListener}
-	 * @see javax.jms.MessageListener
+	 * @see jakarta.jms.MessageListener
 	 * @see SessionAwareMessageListener
 	 */
 	protected void checkMessageListener(@Nullable Object messageListener) {
@@ -449,7 +449,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * Set whether to inhibit the delivery of messages published by its own connection.
 	 * Default is "false".
 	 * @since 4.1
-	 * @see javax.jms.Session#createConsumer(javax.jms.Destination, String, boolean)
+	 * @see jakarta.jms.Session#createConsumer(jakarta.jms.Destination, String, boolean)
 	 */
 	public void setPubSubNoLocal(boolean pubSubNoLocal) {
 		this.pubSubNoLocal = pubSubNoLocal;
@@ -478,8 +478,8 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	}
 
 	/**
-	 * Return whether the Publish/Subscribe domain ({@link javax.jms.Topic Topics}) is used
-	 * for replies. Otherwise, the Point-to-Point domain ({@link javax.jms.Queue Queues})
+	 * Return whether the Publish/Subscribe domain ({@link jakarta.jms.Topic Topics}) is used
+	 * for replies. Otherwise, the Point-to-Point domain ({@link jakarta.jms.Queue Queues})
 	 * is used.
 	 * @since 4.2
 	 */
@@ -755,7 +755,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * @param listener the JMS MessageListener to invoke
 	 * @param message the received JMS Message
 	 * @throws JMSException if thrown by JMS API methods
-	 * @see javax.jms.MessageListener#onMessage
+	 * @see jakarta.jms.MessageListener#onMessage
 	 */
 	protected void doInvokeListener(MessageListener listener, Message message) throws JMSException {
 		listener.onMessage(message);
@@ -765,7 +765,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * Perform a commit or message acknowledgement, as appropriate.
 	 * @param session the JMS Session to commit
 	 * @param message the Message to acknowledge
-	 * @throws javax.jms.JMSException in case of commit failure
+	 * @throws jakarta.jms.JMSException in case of commit failure
 	 */
 	protected void commitIfNecessary(Session session, @Nullable Message message) throws JMSException {
 		// Commit session or acknowledge message.
@@ -784,7 +784,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	/**
 	 * Perform a rollback, if appropriate.
 	 * @param session the JMS Session to rollback
-	 * @throws javax.jms.JMSException in case of a rollback error
+	 * @throws jakarta.jms.JMSException in case of a rollback error
 	 */
 	protected void rollbackIfNecessary(Session session) throws JMSException {
 		if (session.getTransacted()) {
@@ -802,7 +802,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * Perform a rollback, handling rollback exceptions properly.
 	 * @param session the JMS Session to rollback
 	 * @param ex the thrown application exception or error
-	 * @throws javax.jms.JMSException in case of a rollback error
+	 * @throws jakarta.jms.JMSException in case of a rollback error
 	 */
 	protected void rollbackOnExceptionIfNecessary(Session session, Throwable ex) throws JMSException {
 		try {
@@ -850,7 +850,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * @param session the JMS Session to create a MessageConsumer for
 	 * @param destination the JMS Destination to create a MessageConsumer for
 	 * @return the new JMS MessageConsumer
-	 * @throws javax.jms.JMSException if thrown by JMS API methods
+	 * @throws jakarta.jms.JMSException if thrown by JMS API methods
 	 */
 	protected MessageConsumer createConsumer(Session session, Destination destination) throws JMSException {
 		if (isPubSubDomain() && destination instanceof Topic) {

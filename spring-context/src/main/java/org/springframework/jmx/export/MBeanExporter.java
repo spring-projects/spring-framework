@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,7 +165,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	private boolean exposeManagedResourceClassLoader = true;
 
 	/** A set of bean names that should be excluded from autodetection. */
-	private Set<String> excludedBeans = new HashSet<>();
+	private final Set<String> excludedBeans = new HashSet<>();
 
 	/** The MBeanExporterListeners registered with this exporter. */
 	@Nullable
@@ -762,7 +762,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * <p>The default implementation delegates to {@link JmxUtils#isMBean},
 	 * which checks for {@link javax.management.DynamicMBean} classes as well
 	 * as classes with corresponding "*MBean" interface (Standard MBeans)
-	 * or corresponding "*MXBean" interface (Java 6 MXBeans).
+	 * or corresponding "*MXBean" interface (Java MXBeans).
 	 * @param beanClass the bean class to analyze
 	 * @return whether the class qualifies as an MBean
 	 * @see org.springframework.jmx.support.JmxUtils#isMBean(Class)

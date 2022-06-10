@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.jetty.websocket.api.Frame;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
@@ -27,8 +28,7 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketFrame;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import org.eclipse.jetty.websocket.api.extensions.Frame;
-import org.eclipse.jetty.websocket.common.OpCode;
+import org.eclipse.jetty.websocket.core.OpCode;
 
 import org.springframework.util.Assert;
 import org.springframework.web.socket.BinaryMessage;
@@ -71,7 +71,7 @@ public class JettyWebSocketHandlerAdapter {
 			this.wsSession.initializeNativeSession(session);
 			this.webSocketHandler.afterConnectionEstablished(this.wsSession);
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
 		}
 	}
@@ -82,7 +82,7 @@ public class JettyWebSocketHandlerAdapter {
 		try {
 			this.webSocketHandler.handleMessage(this.wsSession, message);
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
 		}
 	}
@@ -93,7 +93,7 @@ public class JettyWebSocketHandlerAdapter {
 		try {
 			this.webSocketHandler.handleMessage(this.wsSession, message);
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
 		}
 	}
@@ -106,7 +106,7 @@ public class JettyWebSocketHandlerAdapter {
 			try {
 				this.webSocketHandler.handleMessage(this.wsSession, message);
 			}
-			catch (Throwable ex) {
+			catch (Exception ex) {
 				ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
 			}
 		}
@@ -118,7 +118,7 @@ public class JettyWebSocketHandlerAdapter {
 		try {
 			this.webSocketHandler.afterConnectionClosed(this.wsSession, closeStatus);
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			if (logger.isWarnEnabled()) {
 				logger.warn("Unhandled exception after connection closed for " + this, ex);
 			}
@@ -130,7 +130,7 @@ public class JettyWebSocketHandlerAdapter {
 		try {
 			this.webSocketHandler.handleTransportError(this.wsSession, cause);
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
 		}
 	}

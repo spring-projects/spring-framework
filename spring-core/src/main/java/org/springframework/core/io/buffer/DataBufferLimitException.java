@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.io.buffer;
 
 /**
@@ -21,7 +22,7 @@ package org.springframework.core.io.buffer;
  * This can be raised when data buffers are cached and aggregated, e.g.
  * {@link DataBufferUtils#join}. Or it could also be raised when data buffers
  * have been released but a parsed representation is being aggregated, e.g. async
- * parsing with Jackson.
+ * parsing with Jackson, SSE parsing and aggregating lines per event.
  *
  * @author Rossen Stoyanchev
  * @since 5.1.11

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,12 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.LifecycleBean;
+import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.beans.testfixture.beans.factory.DummyFactory;
+import org.springframework.beans.testfixture.factory.xml.AbstractListableBeanFactoryTests;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.LifecycleBean;
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.tests.sample.beans.factory.DummyFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -180,7 +181,7 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 		assertThat(beanNames.contains("aliasWithoutId3")).isFalse();
 
 		TestBean tb4 = (TestBean) getBeanFactory().getBean(TestBean.class.getName() + "#0");
-		assertThat(tb4.getName()).isEqualTo(null);
+		assertThat(tb4.getName()).isNull();
 
 		Map drs = getListableBeanFactory().getBeansOfType(DummyReferencer.class, false, false);
 		assertThat(drs.size()).isEqualTo(5);

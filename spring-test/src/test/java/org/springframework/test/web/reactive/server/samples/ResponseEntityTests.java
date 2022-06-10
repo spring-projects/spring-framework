@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ResponseEntityTests {
+class ResponseEntityTests {
 
 	private final WebTestClient client = WebTestClient.bindToController(new PersonController())
 			.configureClient()
@@ -58,7 +58,7 @@ public class ResponseEntityTests {
 
 
 	@Test
-	public void entity() {
+	void entity() {
 		this.client.get().uri("/John")
 				.exchange()
 				.expectStatus().isOk()
@@ -67,7 +67,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void entityMatcher() {
+	void entityMatcher() {
 		this.client.get().uri("/John")
 				.exchange()
 				.expectStatus().isOk()
@@ -76,7 +76,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void entityWithConsumer() {
+	void entityWithConsumer() {
 		this.client.get().uri("/John")
 				.exchange()
 				.expectStatus().isOk()
@@ -86,8 +86,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void entityList() {
-
+	void entityList() {
 		List<Person> expected = Arrays.asList(
 				new Person("Jane"), new Person("Jason"), new Person("John"));
 
@@ -99,8 +98,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void entityListWithConsumer() {
-
+	void entityListWithConsumer() {
 		this.client.get()
 				.exchange()
 				.expectStatus().isOk()
@@ -111,8 +109,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void entityMap() {
-
+	void entityMap() {
 		Map<String, Person> map = new LinkedHashMap<>();
 		map.put("Jane", new Person("Jane"));
 		map.put("Jason", new Person("Jason"));
@@ -125,8 +122,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void entityStream() {
-
+	void entityStream() {
 		FluxExchangeResult<Person> result = this.client.get()
 				.accept(TEXT_EVENT_STREAM)
 				.exchange()
@@ -143,7 +139,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void postEntity() {
+	void postEntity() {
 		this.client.post()
 				.bodyValue(new Person("John"))
 				.exchange()

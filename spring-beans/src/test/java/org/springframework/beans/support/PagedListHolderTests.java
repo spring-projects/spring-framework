@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -195,14 +195,22 @@ public class PagedListHolderTests {
 
 		@Override
 		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (!(o instanceof MockFilter)) return false;
+			if (this == o) {
+				return true;
+			}
+			if (!(o instanceof MockFilter mockFilter)) {
+				return false;
+			}
 
-			final MockFilter mockFilter = (MockFilter) o;
-
-			if (!age.equals(mockFilter.age)) return false;
-			if (!extendedInfo.equals(mockFilter.extendedInfo)) return false;
-			if (!name.equals(mockFilter.name)) return false;
+			if (!age.equals(mockFilter.age)) {
+				return false;
+			}
+			if (!extendedInfo.equals(mockFilter.extendedInfo)) {
+				return false;
+			}
+			if (!name.equals(mockFilter.name)) {
+				return false;
+			}
 
 			return true;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,14 +34,15 @@ import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.evt.EventAllocatorImpl;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
 import org.reactivestreams.Publisher;
-import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractDecoder;
+import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
@@ -54,7 +55,7 @@ import org.springframework.util.xml.StaxUtils;
  * <p>Given the following XML:
  *
  * <pre class="code">
- * &lt;root>
+ * &lt;root&gt;
  *     &lt;child&gt;foo&lt;/child&gt;
  *     &lt;child&gt;bar&lt;/child&gt;
  * &lt;/root&gt;
@@ -94,7 +95,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
 
 	public XmlEventDecoder() {
-		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML);
+		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML, new MediaType("application", "*+xml"));
 	}
 
 
@@ -121,7 +122,6 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
 
 	@Override
-	@SuppressWarnings({"rawtypes", "unchecked", "cast"})  // XMLEventReader is Iterator<Object> on JDK 9
 	public Flux<XMLEvent> decode(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
@@ -136,13 +136,13 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 					.flatMapIterable(buffer -> {
 						try {
 							InputStream is = buffer.asInputStream();
-							Iterator eventReader = inputFactory.createXMLEventReader(is);
+							Iterator<Object> eventReader = inputFactory.createXMLEventReader(is);
 							List<XMLEvent> result = new ArrayList<>();
 							eventReader.forEachRemaining(event -> result.add((XMLEvent) event));
 							return result;
 						}
 						catch (XMLStreamException ex) {
-							throw Exceptions.propagate(ex);
+							throw new DecodingException(ex.getMessage(), ex);
 						}
 						finally {
 							DataBufferUtils.release(buffer);
@@ -203,7 +203,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 				return events;
 			}
 			catch (XMLStreamException ex) {
-				throw Exceptions.propagate(ex);
+				throw new DecodingException(ex.getMessage(), ex);
 			}
 			finally {
 				DataBufferUtils.release(dataBuffer);

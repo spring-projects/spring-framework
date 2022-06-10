@@ -21,7 +21,7 @@ import javax.naming.NamingException;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.mock.jndi.SimpleNamingContext;
+import org.springframework.context.testfixture.jndi.SimpleNamingContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

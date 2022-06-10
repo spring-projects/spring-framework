@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,11 @@ import java.util.List;
  */
 public class ParsedSql {
 
-	private String originalSql;
+	private final String originalSql;
 
-	private List<String> parameterNames = new ArrayList<>();
+	private final List<String> parameterNames = new ArrayList<>();
 
-	private List<int[]> parameterIndexes = new ArrayList<>();
+	private final List<int[]> parameterIndexes = new ArrayList<>();
 
 	private int namedParameterCount;
 

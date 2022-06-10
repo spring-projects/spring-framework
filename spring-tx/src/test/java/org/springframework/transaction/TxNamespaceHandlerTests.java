@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
+import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -69,6 +69,7 @@ public class TxNamespaceHandlerTests {
 		assertThat(ptm.begun).as("Should not have any started transactions").isEqualTo(0);
 		testBean.getName();
 		assertThat(ptm.lastDefinition.isReadOnly()).isTrue();
+		assertThat(ptm.lastDefinition.getTimeout()).isEqualTo(5);
 		assertThat(ptm.begun).as("Should have 1 started transaction").isEqualTo(1);
 		assertThat(ptm.commits).as("Should have 1 committed transaction").isEqualTo(1);
 

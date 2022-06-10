@@ -36,16 +36,18 @@ import org.springframework.stereotype.Component;
  * as Spring beans or auto-detected via classpath scanning. All such beans are
  * sorted based on {@link org.springframework.core.Ordered Ordered} semantics or
  * {@link org.springframework.core.annotation.Order @Order} /
- * {@link javax.annotation.Priority @Priority} declarations, with {@code Ordered}
+ * {@link jakarta.annotation.Priority @Priority} declarations, with {@code Ordered}
  * semantics taking precedence over {@code @Order} / {@code @Priority} declarations.
  * {@code @ControllerAdvice} beans are then applied in that order at runtime.
  * Note, however, that {@code @ControllerAdvice} beans that implement
  * {@link org.springframework.core.PriorityOrdered PriorityOrdered} are <em>not</em>
  * given priority over {@code @ControllerAdvice} beans that implement {@code Ordered}.
- * For handling exceptions, an {@code @ExceptionHandler} will be picked on the
- * first advice with a matching exception handler method. For model attributes
- * and {@code InitBinder} initialization, {@code @ModelAttribute} and
- * {@code @InitBinder} methods will also follow {@code @ControllerAdvice} order.
+ * In addition, {@code Ordered} is not honored for scoped {@code @ControllerAdvice}
+ * beans &mdash; for example if such a bean has been configured as a request-scoped
+ * or session-scoped bean.  For handling exceptions, an {@code @ExceptionHandler}
+ * will be picked on the first advice with a matching exception handler method. For
+ * model attributes and data binding initialization, {@code @ModelAttribute} and
+ * {@code @InitBinder} methods will follow {@code @ControllerAdvice} order.
  *
  * <p>Note: For {@code @ExceptionHandler} methods, a root exception match will be
  * preferred to just matching a cause of the current exception, among the handler

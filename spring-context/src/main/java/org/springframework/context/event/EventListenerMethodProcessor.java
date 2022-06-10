@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.MethodIntrospector;
+import org.springframework.core.SpringProperties;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -56,12 +57,21 @@ import org.springframework.util.CollectionUtils;
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 4.2
  * @see EventListenerFactory
  * @see DefaultEventListenerFactory
  */
 public class EventListenerMethodProcessor
 		implements SmartInitializingSingleton, ApplicationContextAware, BeanFactoryPostProcessor {
+
+	/**
+	 * Boolean flag controlled by a {@code spring.spel.ignore} system property that instructs Spring to
+	 * ignore SpEL, i.e. to not initialize the SpEL infrastructure.
+	 * <p>The default is "false".
+	 */
+	private static final boolean shouldIgnoreSpel = SpringProperties.getFlag("spring.spel.ignore");
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -74,10 +84,20 @@ public class EventListenerMethodProcessor
 	@Nullable
 	private List<EventListenerFactory> eventListenerFactories;
 
-	private final EventExpressionEvaluator evaluator = new EventExpressionEvaluator();
+	@Nullable
+	private final EventExpressionEvaluator evaluator;
 
 	private final Set<Class<?>> nonAnnotatedClasses = Collections.newSetFromMap(new ConcurrentHashMap<>(64));
 
+
+	public EventListenerMethodProcessor() {
+		if (shouldIgnoreSpel) {
+			this.evaluator = null;
+		}
+		else {
+			this.evaluator = new EventExpressionEvaluator();
+		}
+	}
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {

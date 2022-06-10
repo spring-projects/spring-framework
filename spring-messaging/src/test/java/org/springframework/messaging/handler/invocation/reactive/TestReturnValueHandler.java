@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.handler.invocation.reactive;
 
 import org.reactivestreams.Publisher;
@@ -44,7 +45,7 @@ public class TestReturnValueHandler implements HandlerMethodReturnValueHandler {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Mono<Void> handleReturnValue(@Nullable Object value, MethodParameter returnType, Message<?> message) {
 		return value instanceof Publisher ?
 				new ChannelSendOperator((Publisher) value, this::saveValue) :

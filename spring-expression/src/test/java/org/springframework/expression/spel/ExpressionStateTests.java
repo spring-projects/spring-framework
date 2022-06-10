@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class ExpressionStateTests extends AbstractExpressionTests {
 
 		state.setLocalVariable("foo", null);
 		value = state.lookupLocalVariable("foo");
-		assertThat(value).isEqualTo(null);
+		assertThat(value).isNull();
 	}
 
 	@Test
@@ -101,7 +101,7 @@ public class ExpressionStateTests extends AbstractExpressionTests {
 	@Test
 	public void testLocalVariableNestedScopes() {
 		ExpressionState state = getState();
-		assertThat(state.lookupLocalVariable("foo")).isEqualTo(null);
+		assertThat(state.lookupLocalVariable("foo")).isNull();
 
 		state.setLocalVariable("foo",12);
 		assertThat(state.lookupLocalVariable("foo")).isEqualTo(12);
@@ -134,7 +134,7 @@ public class ExpressionStateTests extends AbstractExpressionTests {
 
 
 		((StandardEvaluationContext) state.getEvaluationContext()).setRootObject(null);
-		assertThat(state.getRootContextObject().getValue()).isEqualTo(null);
+		assertThat(state.getRootContextObject().getValue()).isNull();
 	}
 
 	@Test

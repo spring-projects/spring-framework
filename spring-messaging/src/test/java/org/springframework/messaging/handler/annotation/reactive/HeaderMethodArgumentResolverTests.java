@@ -51,6 +51,7 @@ public class HeaderMethodArgumentResolverTests {
 
 
 	@BeforeEach
+	@SuppressWarnings("resource")
 	public void setup() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.refresh();

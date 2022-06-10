@@ -29,11 +29,10 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyEditorRegistrar;
-import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,12 +49,7 @@ public class CustomEditorConfigurerTests {
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
 		final DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMAN);
 		cec.setPropertyEditorRegistrars(new PropertyEditorRegistrar[] {
-				new PropertyEditorRegistrar() {
-					@Override
-					public void registerCustomEditors(PropertyEditorRegistry registry) {
-						registry.registerCustomEditor(Date.class, new CustomDateEditor(df, true));
-					}
-				}});
+				registry -> registry.registerCustomEditor(Date.class, new CustomDateEditor(df, true))});
 		cec.postProcessBeanFactory(bf);
 
 		MutablePropertyValues pvs = new MutablePropertyValues();

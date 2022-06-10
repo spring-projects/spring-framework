@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,16 @@
 package org.springframework.aop.framework.adapter;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.lang.reflect.Method;
 import java.rmi.ConnectException;
 import java.rmi.RemoteException;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aop.ThrowsAdvice;
-import org.springframework.tests.aop.advice.MethodCounter;
+import org.springframework.aop.testfixture.advice.MyThrowsHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.BDDMockito.given;
@@ -66,9 +64,7 @@ public class ThrowsAdviceInterceptorTests {
 		Exception ex = new Exception();
 		MethodInvocation mi = mock(MethodInvocation.class);
 		given(mi.proceed()).willThrow(ex);
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-				ti.invoke(mi))
-			.isSameAs(ex);
+		assertThatException().isThrownBy(() -> ti.invoke(mi)).isSameAs(ex);
 		assertThat(th.getCalls()).isEqualTo(0);
 	}
 
@@ -126,25 +122,6 @@ public class ThrowsAdviceInterceptorTests {
 			.isSameAs(t);
 		assertThat(th.getCalls()).isEqualTo(1);
 		assertThat(th.getCalls("remoteException")).isEqualTo(1);
-	}
-
-
-	@SuppressWarnings("serial")
-	static class MyThrowsHandler extends MethodCounter implements ThrowsAdvice {
-
-		// Full method signature
-		public void afterThrowing(Method m, Object[] args, Object target, IOException ex) {
-			count("ioException");
-		}
-
-		public void afterThrowing(RemoteException ex) throws Throwable {
-			count("remoteException");
-		}
-
-		/** Not valid, wrong number of arguments */
-		public void afterThrowing(Method m, Exception ex) throws Throwable {
-			throw new UnsupportedOperationException("Shouldn't be called");
-		}
 	}
 
 }

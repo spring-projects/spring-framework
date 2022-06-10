@@ -101,8 +101,8 @@ public interface SmartContextLoader extends ContextLoader {
 	 * {@code SmartContextLoader}. Beans will therefore automatically be
 	 * candidates for annotation-based dependency injection using
 	 * {@link org.springframework.beans.factory.annotation.Autowired @Autowired},
-	 * {@link javax.annotation.Resource @Resource}, and
-	 * {@link javax.inject.Inject @Inject}. In addition, concrete implementations
+	 * {@link jakarta.annotation.Resource @Resource}, and
+	 * {@link jakarta.inject.Inject @Inject}. In addition, concrete implementations
 	 * should set the active bean definition profiles in the context's
 	 * {@link org.springframework.core.env.Environment Environment}.
 	 * <p>Any {@code ApplicationContext} loaded by a

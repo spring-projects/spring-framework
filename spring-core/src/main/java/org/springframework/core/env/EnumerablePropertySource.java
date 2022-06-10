@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,10 +44,20 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class EnumerablePropertySource<T> extends PropertySource<T> {
 
+	/**
+	 * Create a new {@code EnumerablePropertySource} with the given name and source object.
+	 * @param name the associated name
+	 * @param source the source object
+	 */
 	public EnumerablePropertySource(String name, T source) {
 		super(name, source);
 	}
 
+	/**
+	 * Create a new {@code EnumerablePropertySource} with the given name and with a new
+	 * {@code Object} instance as the underlying source.
+	 * @param name the associated name
+	 */
 	protected EnumerablePropertySource(String name) {
 		super(name);
 	}

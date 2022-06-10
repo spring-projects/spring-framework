@@ -1,5 +1,5 @@
 /**
- * Support package for the Java 6 ServiceLoader facility.
+ * Support package for the Java {@link java.util.ServiceLoader} facility.
  */
 @NonNullApi
 @NonNullFields

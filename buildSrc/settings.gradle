@@ -1,1 +1,0 @@
-apply from: "../gradle/build-cache-settings.gradle"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,7 @@ public class HtmlCharacterEntityReferencesTests {
 		while (entityIterator.hasNext()) {
 			int character = entityIterator.getReferredCharacter();
 			String entityName = entityIterator.nextEntry();
-			referencedCharactersMap.put(new Integer(character), entityName);
+			referencedCharactersMap.put(character, entityName);
 		}
 		return referencedCharactersMap;
 	}
@@ -174,7 +174,7 @@ public class HtmlCharacterEntityReferencesTests {
 		private int nextReferredCharacterId() throws IOException {
 			String reference = nextWordToken();
 			if (reference != null && reference.startsWith("&#") && reference.endsWith(";")) {
-				return Integer.parseInt(reference.substring(2, reference.length() - 1));
+				return Integer.parseInt(reference, 2, reference.length() - 1, 10);
 			}
 			return -1;
 		}

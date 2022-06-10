@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.transaction;
 import org.springframework.lang.Nullable;
 
 /**
- * This is the central interface in Spring's transaction infrastructure.
- * Applications can use this directly, but it is not primarily meant as API:
+ * This is the central interface in Spring's imperative transaction infrastructure.
+ * Applications can use this directly, but it is not primarily meant as an API:
  * Typically, applications will work with either TransactionTemplate or
  * declarative transaction demarcation through AOP.
  *
@@ -41,6 +41,7 @@ import org.springframework.lang.Nullable;
  * @since 16.05.2003
  * @see org.springframework.transaction.support.TransactionTemplate
  * @see org.springframework.transaction.interceptor.TransactionInterceptor
+ * @see org.springframework.transaction.ReactiveTransactionManager
  */
 public interface PlatformTransactionManager extends TransactionManager {
 

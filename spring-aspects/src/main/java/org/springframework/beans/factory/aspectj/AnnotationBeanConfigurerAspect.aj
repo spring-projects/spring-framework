@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,22 +47,26 @@ import org.springframework.beans.factory.wiring.BeanConfigurerSupport;
 public aspect AnnotationBeanConfigurerAspect extends AbstractInterfaceDrivenDependencyInjectionAspect
 		implements BeanFactoryAware, InitializingBean, DisposableBean {
 
-	private BeanConfigurerSupport beanConfigurerSupport = new BeanConfigurerSupport();
+	private final BeanConfigurerSupport beanConfigurerSupport = new BeanConfigurerSupport();
 
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanConfigurerSupport.setBeanWiringInfoResolver(new AnnotationBeanWiringInfoResolver());
 		this.beanConfigurerSupport.setBeanFactory(beanFactory);
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		this.beanConfigurerSupport.afterPropertiesSet();
 	}
 
+	@Override
 	public void configureBean(Object bean) {
 		this.beanConfigurerSupport.configureBean(bean);
 	}
 
+	@Override
 	public void destroy() {
 		this.beanConfigurerSupport.destroy();
 	}

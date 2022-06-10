@@ -18,7 +18,7 @@ package org.springframework.web.util;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

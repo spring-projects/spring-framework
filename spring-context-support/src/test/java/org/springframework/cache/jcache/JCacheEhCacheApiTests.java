@@ -25,7 +25,7 @@ import javax.cache.spi.CachingProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
-import org.springframework.cache.AbstractValueAdaptingCacheTests;
+import org.springframework.context.testfixture.cache.AbstractValueAdaptingCacheTests;
 
 /**
  * @author Stephane Nicoll
@@ -54,7 +54,7 @@ public class JCacheEhCacheApiTests extends AbstractValueAdaptingCacheTests<JCach
 	}
 
 	protected CachingProvider getCachingProvider() {
-		return Caching.getCachingProvider("org.ehcache.jcache.JCacheCachingProvider");
+		return Caching.getCachingProvider("org.ehcache.jsr107.EhcacheCachingProvider");
 	}
 
 	@AfterEach

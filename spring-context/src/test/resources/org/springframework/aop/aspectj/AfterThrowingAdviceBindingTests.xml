@@ -37,6 +37,6 @@
 
 	<bean id="testAspect" class="org.springframework.aop.aspectj.AfterThrowingAdviceBindingTestAspect"/>
 
-	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean"/>
+	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 </beans>

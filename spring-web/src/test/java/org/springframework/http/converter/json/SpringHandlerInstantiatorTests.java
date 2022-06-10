@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,6 @@ import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.jsontype.impl.StdTypeResolverBuilder;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -202,11 +201,6 @@ public class SpringHandlerInstantiatorTests {
 			return JsonTypeInfo.Id.CUSTOM;
 		}
 
-		// Only needed when compiling against Jackson 2.7; gone in 2.8
-		public JavaType typeFromId(String s) {
-			return TypeFactory.defaultInstance().constructFromCanonical(s);
-		}
-
 		@Override
 		public String idFromValue(Object value) {
 			isAutowiredFiledInitialized = (this.capitalizer != null);
@@ -227,7 +221,6 @@ public class SpringHandlerInstantiatorTests {
 			return null;
 		}
 
-		// New in Jackson 2.7
 		@Override
 		public String getDescForKnownTypeIds() {
 			return null;

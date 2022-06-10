@@ -18,11 +18,10 @@ package org.springframework.web.servlet.tags.form;
 
 import java.util.stream.IntStream;
 
-import javax.servlet.jsp.PageContext;
-
+import jakarta.servlet.jsp.PageContext;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockPageContext;
+import org.springframework.web.testfixture.servlet.MockPageContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -206,7 +206,7 @@ public abstract class MockMvcResultMatchers {
 	 * @see #jsonPath(String, Object...)
 	 * @see #jsonPath(String, Matcher, Class)
 	 */
-	public static <T> ResultMatcher jsonPath(String expression, Matcher<T> matcher) {
+	public static <T> ResultMatcher jsonPath(String expression, Matcher<? super T> matcher) {
 		return new JsonPathResultMatchers(expression).value(matcher);
 	}
 
@@ -224,7 +224,7 @@ public abstract class MockMvcResultMatchers {
 	 * @see #jsonPath(String, Object...)
 	 * @see #jsonPath(String, Matcher)
 	 */
-	public static <T> ResultMatcher jsonPath(String expression, Matcher<T> matcher, Class<T> targetType) {
+	public static <T> ResultMatcher jsonPath(String expression, Matcher<? super T> matcher, Class<T> targetType) {
 		return new JsonPathResultMatchers(expression).value(matcher, targetType);
 	}
 
@@ -246,7 +246,7 @@ public abstract class MockMvcResultMatchers {
 	 * <p>The XPath expression can be a parameterized string using formatting
 	 * specifiers as defined in {@link String#format(String, Object...)}.
 	 * @param expression the XPath expression, optionally parameterized with arguments
-	 * @param namespaces namespaces referenced in the XPath expression
+	 * @param namespaces the namespaces referenced in the XPath expression
 	 * @param args arguments to parameterize the XPath expression with
 	 */
 	public static XpathResultMatchers xpath(String expression, Map<String, String> namespaces, Object... args)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ public abstract class AnnotatedElementUtils {
 	 * @param element the annotated element
 	 * @param annotationType the annotation type on which to find meta-annotations
 	 * @return the names of all meta-annotations present on the annotation,
-	 * or {@code null} if not found
+	 * or an empty set if not found
 	 * @since 4.2
 	 * @see #getMetaAnnotationTypes(AnnotatedElement, String)
 	 * @see #hasMetaAnnotationTypes
@@ -794,7 +794,7 @@ public abstract class AnnotatedElementUtils {
 
 
 	/**
-	 * Adapted {@link AnnotatedElement} that hold specific annotations.
+	 * Adapted {@link AnnotatedElement} that holds specific annotations.
 	 */
 	private static class AnnotatedElementForAnnotations implements AnnotatedElement {
 

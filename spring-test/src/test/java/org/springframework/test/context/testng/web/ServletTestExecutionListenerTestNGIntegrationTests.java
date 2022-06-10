@@ -57,7 +57,7 @@ public class ServletTestExecutionListenerTestNGIntegrationTests extends Abstract
 	 * @see #ensureMocksAreReinjectedBetweenTests_2
 	 */
 	@Test
-	void ensureMocksAreReinjectedBetweenTests_1() {
+	public void ensureMocksAreReinjectedBetweenTests_1() {
 		assertInjectedServletRequestEqualsRequestInRequestContextHolder();
 	}
 
@@ -67,7 +67,7 @@ public class ServletTestExecutionListenerTestNGIntegrationTests extends Abstract
 	 * @see #ensureMocksAreReinjectedBetweenTests_1
 	 */
 	@Test
-	void ensureMocksAreReinjectedBetweenTests_2() {
+	public void ensureMocksAreReinjectedBetweenTests_2() {
 		assertInjectedServletRequestEqualsRequestInRequestContextHolder();
 	}
 

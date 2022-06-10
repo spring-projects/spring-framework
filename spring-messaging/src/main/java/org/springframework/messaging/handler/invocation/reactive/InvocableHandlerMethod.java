@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.messaging.handler.invocation.MethodArgumentResolutionException;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Extension of {@link HandlerMethod} that invokes the underlying method with
@@ -55,7 +54,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	private static final Object NO_ARG_VALUE = new Object();
 
 
-	private HandlerMethodArgumentResolverComposite resolvers = new HandlerMethodArgumentResolverComposite();
+	private final HandlerMethodArgumentResolverComposite resolvers = new HandlerMethodArgumentResolverComposite();
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
@@ -127,10 +126,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	public Mono<Object> invoke(Message<?> message, Object... providedArgs) {
 		return getMethodArgumentValues(message, providedArgs).flatMap(args -> {
 			Object value;
+			boolean isSuspendingFunction = false;
 			try {
 				Method method = getBridgedMethod();
-				ReflectionUtils.makeAccessible(method);
-				if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(method.getDeclaringClass())) {
+				if (KotlinDetector.isSuspendingFunction(method)) {
+					isSuspendingFunction = true;
 					value = CoroutinesUtils.invokeSuspendingFunction(method, getBean(), args);
 				}
 				else {
@@ -151,7 +151,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			}
 
 			MethodParameter returnType = getReturnType();
-			ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(returnType.getParameterType());
+			Class<?> reactiveType = (isSuspendingFunction ? value.getClass() : returnType.getParameterType());
+			ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(reactiveType);
 			return (isAsyncVoidReturnType(returnType, adapter) ?
 					Mono.from(adapter.toPublisher(value)) : Mono.justOrEmpty(value));
 		});
@@ -204,15 +205,16 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			if (reactiveAdapter.isNoValue()) {
 				return true;
 			}
-			Type parameterType = returnType.getGenericParameterType();
-			if (parameterType instanceof ParameterizedType) {
-				ParameterizedType type = (ParameterizedType) parameterType;
-				if (type.getActualTypeArguments().length == 1) {
-					return Void.class.equals(type.getActualTypeArguments()[0]);
-				}
+		}
+		Type parameterType = returnType.getGenericParameterType();
+		if (parameterType instanceof ParameterizedType type) {
+			if (type.getActualTypeArguments().length == 1) {
+				return Void.class.equals(type.getActualTypeArguments()[0]);
 			}
 		}
-		return false;
+		Method method = returnType.getMethod();
+		return method != null && KotlinDetector.isSuspendingFunction(method) &&
+				Void.TYPE.equals(returnType.getParameterType());
 	}
 
 }

@@ -15,6 +15,6 @@
 		destroy-method="customDestroy"
 	/>
 
-	<bean id="prototype" class="org.springframework.tests.sample.beans.TestBean" scope="prototype"/>
+	<bean id="prototype" class="org.springframework.beans.testfixture.beans.TestBean" scope="prototype"/>
 
 </beans>

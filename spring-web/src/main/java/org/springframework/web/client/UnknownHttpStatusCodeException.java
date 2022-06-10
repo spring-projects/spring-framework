@@ -19,7 +19,6 @@ package org.springframework.web.client;
 import java.nio.charset.Charset;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 
 /**
@@ -34,8 +33,8 @@ public class UnknownHttpStatusCodeException extends RestClientResponseException 
 
 
 	/**
-	 * Construct a new instance of {@code HttpStatusCodeException} based on an
-	 * {@link HttpStatus}, status text, and response body content.
+	 * Construct a new instance of {@code HttpStatusCodeException} based on a
+	 * status code, status text, and response body content.
 	 * @param rawStatusCode the raw status code value
 	 * @param statusText the status text
 	 * @param responseHeaders the response headers (may be {@code null})
@@ -50,8 +49,8 @@ public class UnknownHttpStatusCodeException extends RestClientResponseException 
 	}
 
 	/**
-	 * Construct a new instance of {@code HttpStatusCodeException} based on an
-	 * {@link HttpStatus}, status text, and response body content.
+	 * Construct a new instance of {@code HttpStatusCodeException} based on a
+	 * status code, status text, and response body content.
 	 * @param rawStatusCode the raw status code value
 	 * @param statusText the status text
 	 * @param responseHeaders the response headers (may be {@code null})

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,15 @@
 package org.springframework.web.socket.sockjs.transport.session;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,7 +58,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	/**
 	 * Log category to use on network IO exceptions after a client has gone away.
-	 * <p>Servlet containers dn't expose a a client disconnected callback, see
+	 * <p>Servlet containers don't expose a client disconnected callback; see
 	 * <a href="https://github.com/eclipse-ee4j/servlet-api/issues/44">eclipse-ee4j/servlet-api#44</a>.
 	 * Therefore network IO failures may occur simply because a client has gone away,
 	 * and that can fill the logs with unnecessary stack traces.
@@ -80,7 +80,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	 * @see #indicatesDisconnectedClient(Throwable)
 	 */
 	private static final Set<String> DISCONNECTED_CLIENT_EXCEPTIONS =
-			new HashSet<>(Arrays.asList("ClientAbortException", "EOFException", "EofException"));
+			Set.of("ClientAbortException", "EOFException", "EofException");
 
 
 	/**
@@ -121,7 +121,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	 * @param id the session ID
 	 * @param config the SockJS service configuration options
 	 * @param handler the recipient of SockJS messages
-	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket
+	 * @param attributes the attributes from the HTTP handshake to associate with the WebSocket
 	 * session; the provided attributes are copied, the original map is not used.
 	 */
 	public AbstractSockJsSession(String id, SockJsServiceConfig config, WebSocketHandler handler,
@@ -324,7 +324,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 		try {
 			writeFrameInternal(frame);
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			logWriteFrameFailure(ex);
 			try {
 				// Force disconnect (so we won't try to send close frame)
@@ -377,21 +377,43 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	}
 
 	public void delegateMessages(String... messages) throws SockJsMessageDeliveryException {
-		List<String> undelivered = new ArrayList<>(Arrays.asList(messages));
-		for (String message : messages) {
+		for (int i = 0; i < messages.length; i++) {
 			try {
 				if (isClosed()) {
-					throw new SockJsMessageDeliveryException(this.id, undelivered, "Session closed");
+					logUndeliveredMessages(i, messages);
+					return;
 				}
-				else {
-					this.handler.handleMessage(this, new TextMessage(message));
-					undelivered.remove(0);
-				}
+				this.handler.handleMessage(this, new TextMessage(messages[i]));
 			}
-			catch (Throwable ex) {
-				throw new SockJsMessageDeliveryException(this.id, undelivered, ex);
+			catch (Exception ex) {
+				if (isClosed()) {
+					if (logger.isTraceEnabled()) {
+						logger.trace("Failed to handle message '" + messages[i] + "'", ex);
+					}
+					logUndeliveredMessages(i, messages);
+					return;
+				}
+				throw new SockJsMessageDeliveryException(this.id, getUndelivered(messages, i), ex);
 			}
 		}
+	}
+
+	private void logUndeliveredMessages(int index, String[] messages) {
+		List<String> undelivered = getUndelivered(messages, index);
+		if (logger.isTraceEnabled() && !undelivered.isEmpty()) {
+			logger.trace("Dropped inbound message(s) due to closed session: " + undelivered);
+		}
+	}
+
+	private static List<String> getUndelivered(String[] messages, int i) {
+		return switch (messages.length - i) {
+			case 0 -> Collections.emptyList();
+			case 1 -> (messages[i].trim().isEmpty() ?
+					Collections.<String>emptyList() : Collections.singletonList(messages[i]));
+			default -> Arrays.stream(Arrays.copyOfRange(messages, i, messages.length))
+					.filter(message -> !message.trim().isEmpty())
+					.collect(Collectors.toList());
+		};
 	}
 
 	/**

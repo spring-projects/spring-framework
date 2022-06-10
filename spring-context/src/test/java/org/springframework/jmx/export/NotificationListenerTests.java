@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import javax.management.Attribute;
 import javax.management.AttributeChangeNotification;
 import javax.management.MalformedObjectNameException;
 import javax.management.Notification;
-import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
 import javax.management.ObjectName;
 
@@ -117,7 +116,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(server);
 		exporter.setBeans(beans);
-		exporter.setNotificationListeners(new NotificationListenerBean[] { listenerBean });
+		exporter.setNotificationListeners(listenerBean);
 		start(exporter);
 
 		// update the attribute
@@ -145,7 +144,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(server);
 		exporter.setBeans(beans);
-		exporter.setNotificationListeners(new NotificationListenerBean[] { listenerBean });
+		exporter.setNotificationListeners(listenerBean);
 		start(exporter);
 
 		// update the attribute
@@ -168,23 +167,19 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 
 		NotificationListenerBean listenerBean = new NotificationListenerBean();
 		listenerBean.setNotificationListener(listener);
-		listenerBean.setNotificationFilter(new NotificationFilter() {
-			@Override
-			public boolean isNotificationEnabled(Notification notification) {
-				if (notification instanceof AttributeChangeNotification) {
-					AttributeChangeNotification changeNotification = (AttributeChangeNotification) notification;
-					return "Name".equals(changeNotification.getAttributeName());
-				}
-				else {
-					return false;
-				}
+		listenerBean.setNotificationFilter(notification -> {
+			if (notification instanceof AttributeChangeNotification changeNotification) {
+				return "Name".equals(changeNotification.getAttributeName());
+			}
+			else {
+				return false;
 			}
 		});
 
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(server);
 		exporter.setBeans(beans);
-		exporter.setNotificationListeners(new NotificationListenerBean[] { listenerBean });
+		exporter.setNotificationListeners(listenerBean);
 		start(exporter);
 
 		// update the attributes
@@ -192,7 +187,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		String ageAttribute = "Age";
 
 		server.setAttribute(objectName, new Attribute(nameAttribute, "Rob Harrop"));
-		server.setAttribute(objectName, new Attribute(ageAttribute, new Integer(90)));
+		server.setAttribute(objectName, new Attribute(ageAttribute, 90));
 
 		assertThat(listener.getCount(nameAttribute)).as("Listener not notified for Name").isEqualTo(1);
 		assertThat(listener.getCount(ageAttribute)).as("Listener incorrectly notified for Age").isEqualTo(0);
@@ -231,7 +226,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		start(exporter);
 		assertIsRegistered("Should have registered MBean", objectName);
 
-		server.setAttribute(objectName, new Attribute("Age", new Integer(77)));
+		server.setAttribute(objectName, new Attribute("Age", 77));
 		assertThat(listener.getCount("Age")).as("Listener not notified").isEqualTo(1);
 	}
 
@@ -262,7 +257,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		start(exporter);
 		assertIsRegistered("Should have registered MBean", objectName);
 
-		server.setAttribute(objectName, new Attribute("Age", new Integer(77)));
+		server.setAttribute(objectName, new Attribute("Age", 77));
 		assertThat(listener.getCount("Age")).as("Listener not notified").isEqualTo(1);
 	}
 
@@ -294,7 +289,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		start(exporter);
 		assertIsRegistered("Should have registered MBean", objectName);
 
-		server.setAttribute(objectName, new Attribute("Age", new Integer(77)));
+		server.setAttribute(objectName, new Attribute("Age", 77));
 		assertThat(listener.getCount("Age")).as("Listener should have been notified exactly once").isEqualTo(1);
 	}
 
@@ -326,7 +321,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		start(exporter);
 		assertIsRegistered("Should have registered MBean", objectName);
 
-		server.setAttribute(objectName, new Attribute("Age", new Integer(77)));
+		server.setAttribute(objectName, new Attribute("Age", 77));
 		assertThat(listener.getCount("Age")).as("Listener should have been notified exactly once").isEqualTo(1);
 	}
 
@@ -367,10 +362,10 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		assertIsRegistered("Should have registered MBean", objectName1);
 		assertIsRegistered("Should have registered MBean", objectName2);
 
-		server.setAttribute(ObjectNameManager.getInstance(objectName1), new Attribute("Age", new Integer(77)));
+		server.setAttribute(ObjectNameManager.getInstance(objectName1), new Attribute("Age", 77));
 		assertThat(listener.getCount("Age")).as("Listener not notified for testBean1").isEqualTo(1);
 
-		server.setAttribute(ObjectNameManager.getInstance(objectName2), new Attribute("Age", new Integer(33)));
+		server.setAttribute(ObjectNameManager.getInstance(objectName2), new Attribute("Age", 33));
 		assertThat(listener.getCount("Age")).as("Listener not notified for testBean2").isEqualTo(2);
 	}
 
@@ -454,18 +449,17 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 
 		@Override
 		public void handleNotification(Notification notification, Object handback) {
-			if (notification instanceof AttributeChangeNotification) {
-				AttributeChangeNotification attNotification = (AttributeChangeNotification) notification;
+			if (notification instanceof AttributeChangeNotification attNotification) {
 				String attributeName = attNotification.getAttributeName();
 
 				Integer currentCount = (Integer) this.attributeCounts.get(attributeName);
 
 				if (currentCount != null) {
 					int count = currentCount.intValue() + 1;
-					this.attributeCounts.put(attributeName, new Integer(count));
+					this.attributeCounts.put(attributeName, count);
 				}
 				else {
-					this.attributeCounts.put(attributeName, new Integer(1));
+					this.attributeCounts.put(attributeName, 1);
 				}
 
 				this.attributeHandbacks.put(attributeName, handback);

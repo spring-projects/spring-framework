@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.server.reactive;
 
 import java.nio.charset.StandardCharsets;
@@ -21,11 +22,13 @@ import io.netty.buffer.PooledByteBufAllocator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.LeakAwareDataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.core.testfixture.io.buffer.LeakAwareDataBufferFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -49,10 +52,17 @@ public class HttpHeadResponseDecoratorTests {
 
 
 	@Test
-	public void write() {
+	public void writeWithFlux() {
 		Flux<DataBuffer> body = Flux.just(toDataBuffer("data1"), toDataBuffer("data2"));
 		this.response.writeWith(body).block();
-		assertThat(this.response.getHeaders().getContentLength()).isEqualTo(10);
+		assertThat(this.response.getHeaders().getContentLength()).isEqualTo(-1);
+	}
+
+	@Test
+	public void writeWithMono() {
+		Mono<DataBuffer> body = Mono.just(toDataBuffer("data1,data2"));
+		this.response.writeWith(body).block();
+		assertThat(this.response.getHeaders().getContentLength()).isEqualTo(11);
 	}
 
 	@Test // gh-23484
@@ -63,6 +73,13 @@ public class HttpHeadResponseDecoratorTests {
 		assertThat(this.response.getHeaders().getContentLength()).isEqualTo(length);
 	}
 
+	@Test // gh-25908
+	public void writeWithGivenTransferEncoding() {
+		Flux<DataBuffer> body = Flux.just(toDataBuffer("data1"), toDataBuffer("data2"));
+		this.response.getHeaders().add(HttpHeaders.TRANSFER_ENCODING, "chunked");
+		this.response.writeWith(body).block();
+		assertThat(this.response.getHeaders().getContentLength()).isEqualTo(-1);
+	}
 
 	private DataBuffer toDataBuffer(String s) {
 		DataBuffer buffer = this.bufferFactory.allocateBuffer();

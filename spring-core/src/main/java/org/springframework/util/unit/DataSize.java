@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.util.unit;
 
+import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,12 +49,8 @@ import org.springframework.util.StringUtils;
  * @since 5.1
  * @see DataUnit
  */
-public final class DataSize implements Comparable<DataSize> {
-
-	/**
-	 * The pattern for parsing.
-	 */
-	private static final Pattern PATTERN = Pattern.compile("^([+\\-]?\\d+)([a-zA-Z]{0,2})$");
+@SuppressWarnings("serial")
+public final class DataSize implements Comparable<DataSize>, Serializable {
 
 	/**
 	 * Bytes per Kilobyte.
@@ -177,20 +174,15 @@ public final class DataSize implements Comparable<DataSize> {
 	public static DataSize parse(CharSequence text, @Nullable DataUnit defaultUnit) {
 		Assert.notNull(text, "Text must not be null");
 		try {
-			Matcher matcher = PATTERN.matcher(text);
+			Matcher matcher = DataSizeUtils.PATTERN.matcher(text);
 			Assert.state(matcher.matches(), "Does not match data size pattern");
-			DataUnit unit = determineDataUnit(matcher.group(2), defaultUnit);
+			DataUnit unit = DataSizeUtils.determineDataUnit(matcher.group(2), defaultUnit);
 			long amount = Long.parseLong(matcher.group(1));
 			return DataSize.of(amount, unit);
 		}
 		catch (Exception ex) {
 			throw new IllegalArgumentException("'" + text + "' is not a valid data size", ex);
 		}
-	}
-
-	private static DataUnit determineDataUnit(String suffix, @Nullable DataUnit defaultUnit) {
-		DataUnit defaultUnitToUse = (defaultUnit != null ? defaultUnit : DataUnit.BYTES);
-		return (StringUtils.hasLength(suffix) ? DataUnit.fromSuffix(suffix) : defaultUnitToUse);
 	}
 
 	/**
@@ -267,6 +259,25 @@ public final class DataSize implements Comparable<DataSize> {
 	@Override
 	public int hashCode() {
 		return Long.hashCode(this.bytes);
+	}
+
+
+	/**
+	 * Static nested class to support lazy loading of the {@link #PATTERN}.
+	 * @since 5.3.21
+	 */
+	private static class DataSizeUtils {
+
+		/**
+		 * The pattern for parsing.
+		 */
+		private static final Pattern PATTERN = Pattern.compile("^([+\\-]?\\d+)([a-zA-Z]{0,2})$");
+
+		private static DataUnit determineDataUnit(String suffix, @Nullable DataUnit defaultUnit) {
+			DataUnit defaultUnitToUse = (defaultUnit != null ? defaultUnit : DataUnit.BYTES);
+			return (StringUtils.hasLength(suffix) ? DataUnit.fromSuffix(suffix) : defaultUnitToUse);
+		}
+
 	}
 
 }

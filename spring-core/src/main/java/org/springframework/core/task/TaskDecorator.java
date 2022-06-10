@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,17 +27,24 @@ package org.springframework.core.task;
  * <p>The primary use case is to set some execution context around the task's
  * invocation, or to provide some monitoring/statistics for task execution.
  *
+ * <p><b>NOTE:</b> Exception handling in {@code TaskDecorator} implementations
+ * may be limited. Specifically in case of a {@code Future}-based operation,
+ * the exposed {@code Runnable} will be a wrapper which does not propagate
+ * any exceptions from its {@code run} method.
+ *
  * @author Juergen Hoeller
  * @since 4.3
  * @see TaskExecutor#execute(Runnable)
  * @see SimpleAsyncTaskExecutor#setTaskDecorator
+ * @see org.springframework.core.task.support.TaskExecutorAdapter#setTaskDecorator
  */
 @FunctionalInterface
 public interface TaskDecorator {
 
 	/**
 	 * Decorate the given {@code Runnable}, returning a potentially wrapped
-	 * {@code Runnable} for actual execution.
+	 * {@code Runnable} for actual execution, internally delegating to the
+	 * original {@link Runnable#run()} implementation.
 	 * @param runnable the original {@code Runnable}
 	 * @return the decorated {@code Runnable}
 	 */

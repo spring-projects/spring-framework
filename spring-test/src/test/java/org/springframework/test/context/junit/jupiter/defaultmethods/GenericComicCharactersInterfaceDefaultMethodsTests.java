@@ -45,7 +45,7 @@ interface GenericComicCharactersInterfaceDefaultMethodsTests<C extends Character
 
 	@Test
 	default void autowiredParameterWithParameterizedList(@Autowired List<C> characters) {
-		assertThat(characters).as("Number of characters in context").size().isEqualTo(getExpectedNumCharacters());
+		assertThat(characters).as("Number of characters in context").hasSize(getExpectedNumCharacters());
 	}
 
 	@Test

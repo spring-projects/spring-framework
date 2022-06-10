@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,8 @@ public final class AopContext {
 		Object proxy = currentProxy.get();
 		if (proxy == null) {
 			throw new IllegalStateException(
-					"Cannot find current proxy: Set 'exposeProxy' property on Advised to 'true' to make it available.");
+					"Cannot find current proxy: Set 'exposeProxy' property on Advised to 'true' to make it available, and " +
+							"ensure that AopContext.currentProxy() is invoked in the same thread as the AOP invocation context.");
 		}
 		return proxy;
 	}

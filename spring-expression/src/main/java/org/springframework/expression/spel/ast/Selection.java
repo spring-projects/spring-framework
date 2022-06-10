@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -209,12 +209,12 @@ public class Selection extends SpelNodeImpl {
 	}
 
 	private String prefix() {
-		switch (this.variant) {
-			case ALL:   return "?[";
-			case FIRST: return "^[";
-			case LAST:  return "$[";
-		}
-		return "";
+		return switch (this.variant) {
+			case ALL -> "?[";
+			case FIRST -> "^[";
+			case LAST -> "$[";
+			default -> "";
+		};
 	}
 
 }

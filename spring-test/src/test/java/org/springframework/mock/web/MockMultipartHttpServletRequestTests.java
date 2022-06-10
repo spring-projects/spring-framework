@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,17 @@ package org.springframework.mock.web;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -61,6 +63,24 @@ class MockMultipartHttpServletRequestTests {
 		doTestMultipartHttpServletRequest(request);
 	}
 
+	@Test
+	void mockMultiPartHttpServletRequestWithMixedData() {
+		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+		request.addFile(new MockMultipartFile("file", "myOrigFilename", MediaType.TEXT_PLAIN_VALUE, "myContent2".getBytes()));
+
+		MockPart metadataPart = new MockPart("metadata", "{\"foo\": \"bar\"}".getBytes());
+		metadataPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+		request.addPart(metadataPart);
+
+		HttpHeaders fileHttpHeaders = request.getMultipartHeaders("file");
+		assertThat(fileHttpHeaders).isNotNull();
+		assertThat(fileHttpHeaders.getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
+
+		HttpHeaders dataHttpHeaders = request.getMultipartHeaders("metadata");
+		assertThat(dataHttpHeaders).isNotNull();
+		assertThat(dataHttpHeaders.getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+	}
+
 	private void doTestMultipartHttpServletRequest(MultipartHttpServletRequest request) throws IOException {
 		Set<String> fileNames = new HashSet<>();
 		Iterator<String> fileIter = request.getFileNames();
@@ -73,7 +93,7 @@ class MockMultipartHttpServletRequestTests {
 		MultipartFile file1 = request.getFile("file1");
 		MultipartFile file2 = request.getFile("file2");
 		Map<String, MultipartFile> fileMap = request.getFileMap();
-		List<String> fileMapKeys = new LinkedList<>(fileMap.keySet());
+		List<String> fileMapKeys = new ArrayList<>(fileMap.keySet());
 		assertThat(fileMapKeys.size()).isEqualTo(2);
 		assertThat(fileMap.get("file1")).isEqualTo(file1);
 		assertThat(fileMap.get("file2")).isEqualTo(file2);

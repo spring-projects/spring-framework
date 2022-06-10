@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -350,12 +350,14 @@ public abstract class AbstractReactiveTransactionAspectTests {
 	}
 
 	private void checkReactiveTransaction(boolean expected) {
-		Mono.subscriberContext().handle((context, sink) -> {
-			if (context.hasKey(TransactionContext.class) != expected) {
-				fail("Should have thrown NoTransactionException");
-			}
-			sink.complete();
-		}).block();
+		Mono.deferContextual(Mono::just)
+				.handle((context, sink) -> {
+					if (context.hasKey(TransactionContext.class) != expected) {
+						fail("Should have thrown NoTransactionException");
+					}
+					sink.complete();
+				})
+				.block();
 	}
 
 
@@ -371,7 +373,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 	 * have been created, as there's no distinction between target and proxy.
 	 * In the case of Spring's own AOP framework, a proxy must be created
 	 * using a suitably configured transaction interceptor
-	 * @param target target if there's a distinct target. If not (AspectJ),
+	 * @param target the target if there's a distinct target. If not (AspectJ),
 	 * return target.
 	 * @return transactional advised object
 	 */

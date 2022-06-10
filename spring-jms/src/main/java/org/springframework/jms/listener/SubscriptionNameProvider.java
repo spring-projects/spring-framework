@@ -21,7 +21,7 @@ package org.springframework.jms.listener;
  * name for a durable subscription that they might be registered with. Otherwise
  * the listener class name will be used as a default subscription name.
  *
- * <p>Applies to {@link javax.jms.MessageListener} objects as well as to
+ * <p>Applies to {@link jakarta.jms.MessageListener} objects as well as to
  * {@link SessionAwareMessageListener} objects and plain listener methods
  * (as supported by {@link org.springframework.jms.listener.adapter.MessageListenerAdapter}.
  *

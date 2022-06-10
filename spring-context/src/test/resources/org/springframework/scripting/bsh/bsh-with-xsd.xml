@@ -35,7 +35,7 @@
 			autowire="byName" init-method="init" destroy-method="destroy">
 	</lang:bsh>
 
-	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean"/>
+	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 	<lang:bsh id="calculator" script-interfaces="org.springframework.scripting.Calculator">
 		<lang:inline-script>

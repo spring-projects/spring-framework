@@ -259,6 +259,9 @@ public class Enhancer extends AbstractClassGenerator {
 	public void setSuperclass(Class superclass) {
 		if (superclass != null && superclass.isInterface()) {
 			setInterfaces(new Class[]{superclass});
+			// SPRING PATCH BEGIN
+			setContextClass(superclass);
+			// SPRING PATCH END
 		}
 		else if (superclass != null && superclass.equals(Object.class)) {
 			// affects choice of ClassLoader

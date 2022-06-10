@@ -25,7 +25,7 @@ import org.eclipse.jetty.websocket.api.UpgradeResponse;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import org.springframework.web.socket.handler.TestPrincipal;
+import org.springframework.core.testfixture.security.TestPrincipal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;

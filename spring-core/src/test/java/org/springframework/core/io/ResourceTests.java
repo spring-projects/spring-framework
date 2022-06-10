@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.core.io;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -131,6 +132,14 @@ class ResourceTests {
 	}
 
 	@Test
+	void fileSystemResourceWithFile() throws IOException {
+		File file = new File(getClass().getResource("Resource.class").getFile());
+		Resource resource = new FileSystemResource(file);
+		doTestResource(resource);
+		assertThat(resource).isEqualTo(new FileSystemResource(file));
+	}
+
+	@Test
 	void fileSystemResourceWithFilePath() throws Exception {
 		Path filePath = Paths.get(getClass().getResource("Resource.class").toURI());
 		Resource resource = new FileSystemResource(filePath);
@@ -197,6 +206,21 @@ class ResourceTests {
 				relative4::contentLength);
 		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(
 				relative4::lastModified);
+	}
+
+	@Test
+	void urlResourceFactoryMethods() throws IOException {
+		Resource resource1 = new UrlResource("file:core/io/Resource.class");
+		Resource resource2 = UrlResource.from("file:core/io/Resource.class");
+		Resource resource3 = UrlResource.from(resource1.getURI());
+
+		assertThat(resource2.getURL()).isEqualTo(resource1.getURL());
+		assertThat(resource3.getURL()).isEqualTo(resource1.getURL());
+
+		assertThat(UrlResource.from("file:core/../core/io/./Resource.class")).isEqualTo(resource1);
+		assertThat(UrlResource.from("file:/dir/test.txt?argh").getFilename()).isEqualTo("test.txt");
+		assertThat(UrlResource.from("file:\\dir\\test.txt?argh").getFilename()).isEqualTo("test.txt");
+		assertThat(UrlResource.from("file:\\dir/test.txt?argh").getFilename()).isEqualTo("test.txt");
 	}
 
 	@Test
@@ -289,18 +313,11 @@ class ResourceTests {
 	@Test
 	void readableChannel() throws IOException {
 		Resource resource = new FileSystemResource(getClass().getResource("Resource.class").getFile());
-		ReadableByteChannel channel = null;
-		try {
-			channel = resource.readableChannel();
+		try (ReadableByteChannel channel = resource.readableChannel()) {
 			ByteBuffer buffer = ByteBuffer.allocate((int) resource.contentLength());
 			channel.read(buffer);
 			buffer.rewind();
 			assertThat(buffer.limit() > 0).isTrue();
-		}
-		finally {
-			if (channel != null) {
-				channel.close();
-			}
 		}
 	}
 

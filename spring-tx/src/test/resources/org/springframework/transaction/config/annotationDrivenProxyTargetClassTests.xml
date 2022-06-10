@@ -12,11 +12,11 @@
 
 	<bean id="txCheckingInterceptor" class="org.springframework.transaction.config.AnnotationDrivenTests$TransactionCheckingInterceptor"/>
 
-	<bean id="transactionManager1" class="org.springframework.tests.transaction.CallCountingTransactionManager">
+	<bean id="transactionManager1" class="org.springframework.transaction.testfixture.CallCountingTransactionManager">
 		<qualifier value="synch"/>
 	</bean>
 
-	<bean id="transactionManager2" class="org.springframework.tests.transaction.CallCountingTransactionManager">
+	<bean id="transactionManager2" class="org.springframework.transaction.testfixture.CallCountingTransactionManager">
 		<property name="transactionSynchronizationName" value="SYNCHRONIZATION_NEVER"/>
 		<qualifier value="noSynch"/>
 	</bean>

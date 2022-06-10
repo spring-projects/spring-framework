@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,6 +84,11 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 				public String getFilename() {
 					return inputMessage.getHeaders().getContentDisposition().getFilename();
 				}
+				@Override
+				public long contentLength() throws IOException {
+					long length = inputMessage.getHeaders().getContentLength();
+					return (length != -1 ? length : super.contentLength());
+				}
 			};
 		}
 		else if (Resource.class == clazz || ByteArrayResource.class.isAssignableFrom(clazz)) {
@@ -117,6 +122,14 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 		return (contentLength < 0 ? null : contentLength);
 	}
 
+	/**
+	 * Adds the default headers for the given resource to the given message.
+	 * @since 6.0
+	 */
+	public void addDefaultHeaders(HttpOutputMessage message, Resource resource, @Nullable MediaType contentType) throws IOException {
+		addDefaultHeaders(message.getHeaders(), resource, contentType);
+	}
+
 	@Override
 	protected void writeInternal(Resource resource, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
@@ -126,6 +139,8 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 
 	protected void writeContent(Resource resource, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
+		// We cannot use try-with-resources here for the InputStream, since we have
+		// custom handling of the close() method in a finally-block.
 		try {
 			InputStream in = resource.getInputStream();
 			try {

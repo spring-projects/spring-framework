@@ -247,7 +247,7 @@
 			<value>03000,42000,42601,42602,42622,42804,42P01</value>
 		</property>
 		<property name="duplicateKeyCodes">
-			<value>23505</value>
+			<value>21000,23505</value>
 		</property>
 		<property name="dataIntegrityViolationCodes">
 			<value>23000,23502,23503,23514</value>

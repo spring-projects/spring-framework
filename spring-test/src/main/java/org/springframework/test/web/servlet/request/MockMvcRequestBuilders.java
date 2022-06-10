@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.test.web.servlet.request;
 
 import java.net.URI;
 
-import javax.servlet.DispatcherType;
+import jakarta.servlet.DispatcherType;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -215,7 +215,7 @@ public abstract class MockMvcRequestBuilders {
 	}
 
 	/**
-	 * Create a {@link MockMultipartHttpServletRequestBuilder} for a multipart request.
+	 * Variant of {@link #multipart(String, Object...)} with a {@link URI}.
 	 * @param uri the URL
 	 * @since 5.0
 	 */
@@ -224,27 +224,15 @@ public abstract class MockMvcRequestBuilders {
 	}
 
 	/**
-	 * Create a {@link MockMultipartHttpServletRequestBuilder} for a multipart request.
-	 * @param urlTemplate a URL template; the resulting URL will be encoded
-	 * @param uriVars zero or more URI variables
-	 * @deprecated in favor of {@link #multipart(String, Object...)}
-	 */
-	@Deprecated
-	public static MockMultipartHttpServletRequestBuilder fileUpload(String urlTemplate, Object... uriVars) {
-		return new MockMultipartHttpServletRequestBuilder(urlTemplate, uriVars);
-	}
-
-	/**
-	 * Create a {@link MockMultipartHttpServletRequestBuilder} for a multipart request.
+	 * Variant of {@link #multipart(String, Object...)} with a {@link URI} and
+	 * an {@link HttpMethod}.
+	 * @param httpMethod the HTTP method to use
 	 * @param uri the URL
-	 * @since 4.0.3
-	 * @deprecated in favor of {@link #multipart(URI)}
+	 * @since 5.3.21
 	 */
-	@Deprecated
-	public static MockMultipartHttpServletRequestBuilder fileUpload(URI uri) {
-		return new MockMultipartHttpServletRequestBuilder(uri);
+	public static MockMultipartHttpServletRequestBuilder multipart(HttpMethod httpMethod, URI uri) {
+		return new MockMultipartHttpServletRequestBuilder(httpMethod, uri);
 	}
-
 
 	/**
 	 * Create a {@link RequestBuilder} for an async dispatch from the

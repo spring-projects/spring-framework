@@ -1,12 +1,14 @@
 package org.springframework.test.web.servlet
 
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+
 /**
  * Provide a [ResultActions] Kotlin DSL in order to be able to write idiomatic Kotlin code.
  *
  * @author Sebastien Deleuze
  * @since 5.2
  */
-class ResultActionsDsl(private val actions: ResultActions) {
+class ResultActionsDsl internal constructor (private val actions: ResultActions, private val mockMvc: MockMvc) {
 
 	/**
 	 * Provide access to [MockMvcResultMatchersDsl] Kotlin DSL.
@@ -24,6 +26,19 @@ class ResultActionsDsl(private val actions: ResultActions) {
 	fun andDo(dsl: MockMvcResultHandlersDsl.() -> Unit): ResultActionsDsl {
 		MockMvcResultHandlersDsl(actions).dsl()
 		return this
+	}
+
+	/**
+	 * Enable asynchronous dispatching.
+	 * @see MockMvcRequestBuilders.asyncDispatch
+	 * @since 5.2.2
+	 */
+	fun asyncDispatch(): ResultActionsDsl {
+		return andExpect {
+			request { asyncStarted() }
+		}.andReturn().let {
+			ResultActionsDsl(mockMvc.perform(MockMvcRequestBuilders.asyncDispatch(it)), mockMvc)
+		}
 	}
 
 	/**

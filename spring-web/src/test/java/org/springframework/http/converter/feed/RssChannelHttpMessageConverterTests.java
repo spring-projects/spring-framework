@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,12 @@ import java.util.List;
 
 import com.rometools.rome.feed.rss.Channel;
 import com.rometools.rome.feed.rss.Item;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.testfixture.xml.XmlContent;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
-import org.springframework.tests.XmlContent;
 
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,17 +40,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class RssChannelHttpMessageConverterTests {
 
-	private static final MediaType RSS_XML_UTF8 =
-			new MediaType(MediaType.APPLICATION_RSS_XML, StandardCharsets.UTF_8);
+	private static final MediaType RSS_XML_UTF8 = new MediaType(MediaType.APPLICATION_RSS_XML, StandardCharsets.UTF_8);
 
-
-	private RssChannelHttpMessageConverter converter;
-
-
-	@BeforeEach
-	public void setUp() {
-		converter = new RssChannelHttpMessageConverter();
-	}
+	private final RssChannelHttpMessageConverter converter = new RssChannelHttpMessageConverter();
 
 
 	@Test
@@ -65,8 +56,8 @@ public class RssChannelHttpMessageConverterTests {
 
 	@Test
 	public void read() throws IOException {
-		InputStream is = getClass().getResourceAsStream("rss.xml");
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(is);
+		InputStream inputStream = getClass().getResourceAsStream("rss.xml");
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(inputStream);
 		inputMessage.getHeaders().setContentType(RSS_XML_UTF8);
 		Channel result = converter.read(Channel.class, inputMessage);
 		assertThat(result.getTitle()).isEqualTo("title");
@@ -141,7 +132,7 @@ public class RssChannelHttpMessageConverterTests {
 	public void writeOtherContentTypeParameters() throws IOException {
 		Channel channel = new Channel("rss_2.0");
 		channel.setTitle("title");
-		channel.setLink("http://example.com");
+		channel.setLink("https://example.com");
 		channel.setDescription("description");
 
 		MockHttpOutputMessage message = new MockHttpOutputMessage();

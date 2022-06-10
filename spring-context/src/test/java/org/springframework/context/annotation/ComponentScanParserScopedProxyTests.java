@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.context.SimpleMapScope;
-import org.springframework.util.SerializationTestUtils;
+import org.springframework.context.testfixture.SimpleMapScope;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -72,7 +72,7 @@ public class ComponentScanParserScopedProxyTests {
 		assertThat(AopUtils.isJdkDynamicProxy(bean)).isTrue();
 		// test serializability
 		assertThat(bean.foo(1)).isEqualTo("bar");
-		FooService deserialized = (FooService) SerializationTestUtils.serializeAndDeserialize(bean);
+		FooService deserialized = SerializationTestUtils.serializeAndDeserialize(bean);
 		assertThat(deserialized).isNotNull();
 		assertThat(deserialized.foo(1)).isEqualTo("bar");
 		context.close();
@@ -89,7 +89,7 @@ public class ComponentScanParserScopedProxyTests {
 		assertThat(AopUtils.isCglibProxy(bean)).isTrue();
 		// test serializability
 		assertThat(bean.foo(1)).isEqualTo("bar");
-		ScopedProxyTestBean deserialized = (ScopedProxyTestBean) SerializationTestUtils.serializeAndDeserialize(bean);
+		ScopedProxyTestBean deserialized = SerializationTestUtils.serializeAndDeserialize(bean);
 		assertThat(deserialized).isNotNull();
 		assertThat(deserialized.foo(1)).isEqualTo("bar");
 		context.close();

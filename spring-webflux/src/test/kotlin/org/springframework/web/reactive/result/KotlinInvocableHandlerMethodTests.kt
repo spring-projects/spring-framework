@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import org.springframework.http.server.reactive.ServerHttpResponse
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get
-import org.springframework.mock.web.test.server.MockServerWebExchange
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get
+import org.springframework.web.testfixture.server.MockServerWebExchange
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.reactive.BindingContext
 import org.springframework.web.reactive.HandlerResult
@@ -97,6 +97,14 @@ class KotlinInvocableHandlerMethodTests {
 		assertThat(this.exchange.response.headers.getFirst("foo")).isEqualTo("bar")
 	}
 
+	@Test
+	fun privateController() {
+		this.resolvers.add(stubResolver("foo"))
+		val method = PrivateCoroutinesController::singleArg.javaMethod!!
+		val result = invoke(PrivateCoroutinesController(), method,"foo")
+		assertHandlerResultValue(result, "success:foo")
+	}
+
 	private fun invoke(handler: Any, method: Method, vararg providedArgs: Any?): Mono<HandlerResult> {
 		val invocable = InvocableHandlerMethod(handler, method)
 		invocable.setArgumentResolvers(this.resolvers)
@@ -146,7 +154,13 @@ class KotlinInvocableHandlerMethodTests {
 			delay(10)
 			response.headers.add("foo", "bar")
 		}
+	}
 
+	private class PrivateCoroutinesController {
 
+		suspend fun singleArg(q: String?): String {
+			delay(10)
+			return "success:$q"
+		}
 	}
 }

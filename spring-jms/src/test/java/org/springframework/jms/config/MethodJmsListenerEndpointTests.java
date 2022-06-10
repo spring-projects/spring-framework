@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.jms.Destination;
-import javax.jms.InvalidDestinationException;
-import javax.jms.JMSException;
-import javax.jms.ObjectMessage;
-import javax.jms.QueueSender;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-
+import jakarta.jms.Destination;
+import jakarta.jms.InvalidDestinationException;
+import jakarta.jms.JMSException;
+import jakarta.jms.ObjectMessage;
+import jakarta.jms.QueueSender;
+import jakarta.jms.Session;
+import jakarta.jms.TextMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -65,6 +64,7 @@ import org.springframework.validation.annotation.Validated;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.InstanceOfAssertFactories.BOOLEAN;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -127,7 +127,7 @@ class MethodJmsListenerEndpointTests {
 
 	@Test
 	void resolveMessageAndSession() throws JMSException {
-		MessagingMessageListenerAdapter listener = createDefaultInstance(javax.jms.Message.class, Session.class);
+		MessagingMessageListenerAdapter listener = createDefaultInstance(jakarta.jms.Message.class, Session.class);
 
 		Session session = mock(Session.class);
 		listener.onMessage(createSimpleJmsTextMessage("test"), session);
@@ -521,7 +521,7 @@ class MethodJmsListenerEndpointTests {
 
 		private final Map<String, Boolean> invocations = new HashMap<>();
 
-		public void resolveMessageAndSession(javax.jms.Message message, Session session) {
+		public void resolveMessageAndSession(jakarta.jms.Message message, Session session) {
 			this.invocations.put("resolveMessageAndSession", true);
 			assertThat(message).as("Message not injected").isNotNull();
 			assertThat(session).as("Session not injected").isNotNull();
@@ -570,7 +570,7 @@ class MethodJmsListenerEndpointTests {
 			this.invocations.put("resolveJmsMessageHeaderAccessor", true);
 			assertThat(headers).as("MessageHeaders not injected").isNotNull();
 			assertThat(headers.getPriority()).as("Missing JMS message priority header").isEqualTo(Integer.valueOf(9));
-			assertThat(headers.getHeader("customBoolean")).as("Missing custom header").isEqualTo(true);
+			assertThat(headers.getHeader("customBoolean")).as("Missing custom header").asInstanceOf(BOOLEAN).isTrue();
 		}
 
 		public void resolveObjectPayload(MyBean bean) {

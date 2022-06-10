@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 /**
  * Marks a constructor, field, setter method, or config method as to be autowired by
  * Spring's dependency injection facilities. This is an alternative to the JSR-330
- * {@link javax.inject.Inject} annotation, adding required-vs-optional semantics.
+ * {@link jakarta.inject.Inject} annotation, adding required-vs-optional semantics.
  *
  * <h3>Autowired Constructors</h3>
  * <p>Only one constructor of any given bean class may declare this annotation with the
@@ -36,9 +36,11 @@ import java.lang.annotation.Target;
  * annotation, they will be considered as candidates for autowiring. The constructor
  * with the greatest number of dependencies that can be satisfied by matching beans
  * in the Spring container will be chosen. If none of the candidates can be satisfied,
- * then a primary/default constructor (if present) will be used. If a class only
- * declares a single constructor to begin with, it will always be used, even if not
- * annotated. An annotated constructor does not have to be public.
+ * then a primary/default constructor (if present) will be used. Similarly, if a
+ * class declares multiple constructors but none of them is annotated with
+ * {@code @Autowired}, then a primary/default constructor (if present) will be used.
+ * If a class only declares a single constructor to begin with, it will always be used,
+ * even if not annotated. An annotated constructor does not have to be public.
  *
  * <h3>Autowired Fields</h3>
  * <p>Fields are injected right after construction of a bean, before any config methods

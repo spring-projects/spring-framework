@@ -82,7 +82,7 @@ public class CharacterEditor extends PropertyEditorSupport {
 			setAsUnicode(text);
 		}
 		else if (text.length() == 1) {
-			setValue(Character.valueOf(text.charAt(0)));
+			setValue(text.charAt(0));
 		}
 		else {
 			throw new IllegalArgumentException("String [" + text + "] with length " +
@@ -103,7 +103,7 @@ public class CharacterEditor extends PropertyEditorSupport {
 
 	private void setAsUnicode(String text) {
 		int code = Integer.parseInt(text.substring(UNICODE_PREFIX.length()), 16);
-		setValue(Character.valueOf((char) code));
+		setValue((char) code);
 	}
 
 }

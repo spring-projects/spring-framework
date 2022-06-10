@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -78,7 +77,7 @@ public class StompDecoderTests {
 	}
 
 	@Test
-	public void decodeFrame() throws UnsupportedEncodingException {
+	public void decodeFrame() {
 		Message<byte[]> frame = decode("SEND\ndestination:test\n\nThe body of the message\0");
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(frame);
 
@@ -160,10 +159,38 @@ public class StompDecoderTests {
 		assertThat(headers.getFirstNativeHeader("a:\r\n\\b")).isEqualTo("alpha:bravo\r\n\\");
 	}
 
+	@Test // gh-27722
+	public void decodeFrameWithHeaderWithBackslashValue() {
+		String accept = "accept-version:1.1\n";
+		String keyAndValueWithBackslash = "key:\\value\n";
+
+		Message<byte[]> frame = decode("CONNECT\n" + accept + keyAndValueWithBackslash + "\n\0");
+		StompHeaderAccessor headers = StompHeaderAccessor.wrap(frame);
+
+		assertThat(headers.getCommand()).isEqualTo(StompCommand.CONNECT);
+
+		assertThat(headers.toNativeHeaderMap().size()).isEqualTo(2);
+		assertThat(headers.getFirstNativeHeader("accept-version")).isEqualTo("1.1");
+		assertThat(headers.getFirstNativeHeader("key")).isEqualTo("\\value");
+
+		assertThat(frame.getPayload().length).isEqualTo(0);
+	}
+
 	@Test
 	public void decodeFrameBodyNotAllowed() {
 		assertThatExceptionOfType(StompConversionException.class).isThrownBy(() ->
 				decode("CONNECT\naccept-version:1.2\n\nThe body of the message\0"));
+	}
+
+	@Test // gh-23713
+	public void decodeFramesWithExtraNewLines() {
+		String frame1 = "SEND\ndestination:test\n\nbody\0\n\n\n";
+		ByteBuffer buffer = ByteBuffer.wrap((frame1).getBytes());
+
+		final List<Message<byte[]>> messages = decoder.decode(buffer);
+
+		assertThat(messages.size()).isEqualTo(1);
+		assertThat(StompHeaderAccessor.wrap(messages.get(0)).getCommand()).isEqualTo(StompCommand.SEND);
 	}
 
 	@Test
@@ -179,9 +206,7 @@ public class StompDecoderTests {
 		assertThat(StompHeaderAccessor.wrap(messages.get(1)).getCommand()).isEqualTo(StompCommand.DISCONNECT);
 	}
 
-	// SPR-13111
-
-	@Test
+	@Test // SPR-13111
 	public void decodeFrameWithHeaderWithEmptyValue() {
 		String accept = "accept-version:1.1\n";
 		String valuelessKey = "key:\n";

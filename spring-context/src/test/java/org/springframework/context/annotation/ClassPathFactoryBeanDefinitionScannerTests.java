@@ -23,12 +23,12 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation4.DependencyBean;
 import org.springframework.context.annotation4.FactoryMethodComponent;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.tests.context.SimpleMapScope;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.context.testfixture.SimpleMapScope;
 import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;

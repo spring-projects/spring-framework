@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.jdbc.support;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +35,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Slawomir Dymitrow
  * @since 1.1
  */
 public class GeneratedKeyHolder implements KeyHolder {
@@ -46,7 +47,7 @@ public class GeneratedKeyHolder implements KeyHolder {
 	 * Create a new GeneratedKeyHolder with a default list.
 	 */
 	public GeneratedKeyHolder() {
-		this.keyList = new LinkedList<>();
+		this.keyList = new ArrayList<>(1);
 	}
 
 	/**
@@ -61,24 +62,30 @@ public class GeneratedKeyHolder implements KeyHolder {
 	@Override
 	@Nullable
 	public Number getKey() throws InvalidDataAccessApiUsageException, DataRetrievalFailureException {
+		return getKeyAs(Number.class);
+	}
+
+	@Override
+	@Nullable
+	public <T> T getKeyAs(Class<T> keyType) throws InvalidDataAccessApiUsageException, DataRetrievalFailureException {
 		if (this.keyList.isEmpty()) {
 			return null;
 		}
 		if (this.keyList.size() > 1 || this.keyList.get(0).size() > 1) {
 			throw new InvalidDataAccessApiUsageException(
-					"The getKey method should only be used when a single key is returned.  " +
+					"The getKey method should only be used when a single key is returned. " +
 					"The current key entry contains multiple keys: " + this.keyList);
 		}
 		Iterator<Object> keyIter = this.keyList.get(0).values().iterator();
 		if (keyIter.hasNext()) {
 			Object key = keyIter.next();
-			if (!(key instanceof Number)) {
+			if (key == null || !(keyType.isAssignableFrom(key.getClass()))) {
 				throw new DataRetrievalFailureException(
-						"The generated key is not of a supported numeric type. " +
+						"The generated key type is not supported. " +
 						"Unable to cast [" + (key != null ? key.getClass().getName() : null) +
-						"] to [" + Number.class.getName() + "]");
+						"] to [" + keyType.getName() + "].");
 			}
-			return (Number) key;
+			return keyType.cast(key);
 		}
 		else {
 			throw new DataRetrievalFailureException("Unable to retrieve the generated key. " +
@@ -94,7 +101,7 @@ public class GeneratedKeyHolder implements KeyHolder {
 		}
 		if (this.keyList.size() > 1) {
 			throw new InvalidDataAccessApiUsageException(
-					"The getKeys method should only be used when keys for a single row are returned.  " +
+					"The getKeys method should only be used when keys for a single row are returned. " +
 					"The current key list contains keys for multiple rows: " + this.keyList);
 		}
 		return this.keyList.get(0);

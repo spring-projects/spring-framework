@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,6 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.lang.Nullable;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -57,6 +55,8 @@ import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -207,6 +207,19 @@ public class RequestMappingHandlerAdapterTests {
 	}
 
 	@Test
+	public void prototypeControllerAdvice() throws Exception {
+		this.webAppContext.registerPrototype("maa", ModelAttributeAdvice.class);
+		this.webAppContext.refresh();
+
+		HandlerMethod handlerMethod = handlerMethod(new SimpleController(), "handle");
+		this.handlerAdapter.afterPropertiesSet();
+		Map<String, Object> model1 = this.handlerAdapter.handle(this.request, this.response, handlerMethod).getModel();
+		Map<String, Object> model2 = this.handlerAdapter.handle(this.request, this.response, handlerMethod).getModel();
+
+		assertThat(model1.get("instance")).isNotSameAs(model2.get("instance"));
+	}
+
+	@Test
 	public void modelAttributeAdviceInParentContext() throws Exception {
 		StaticWebApplicationContext parent = new StaticWebApplicationContext();
 		parent.registerSingleton("maa", ModelAttributeAdvice.class);
@@ -234,7 +247,7 @@ public class RequestMappingHandlerAdapterTests {
 
 		assertThat(mav.getModel().get("attr1")).isEqualTo("lAttr1");
 		assertThat(mav.getModel().get("attr2")).isEqualTo("gAttr2");
-		assertThat(mav.getModel().get("attr3")).isEqualTo(null);
+		assertThat(mav.getModel().get("attr3")).isNull();
 	}
 
 	// SPR-10859
@@ -322,6 +335,7 @@ public class RequestMappingHandlerAdapterTests {
 		public void addAttributes(Model model) {
 			model.addAttribute("attr1", "gAttr1");
 			model.addAttribute("attr2", "gAttr2");
+			model.addAttribute("instance", this);
 		}
 	}
 

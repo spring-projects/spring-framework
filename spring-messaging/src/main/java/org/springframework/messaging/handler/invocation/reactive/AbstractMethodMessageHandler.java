@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -50,10 +51,10 @@ import org.springframework.messaging.handler.invocation.AbstractExceptionHandler
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.RouteMatcher;
+import org.springframework.util.StringUtils;
 
 /**
  * Abstract base class for reactive HandlerMethod-based message handling.
@@ -104,9 +105,9 @@ public abstract class AbstractMethodMessageHandler<T>
 	@Nullable
 	private String beanName;
 
-	private final Map<T, HandlerMethod> handlerMethods = new LinkedHashMap<>(64);
+	private final Map<T, HandlerMethod> handlerMethods = new ConcurrentHashMap<>(64);
 
-	private final MultiValueMap<String, T> destinationLookup = new LinkedMultiValueMap<>(64);
+	private final Map<String, List<T>> destinationLookup = new ConcurrentHashMap<>(48);
 
 
 	/**
@@ -157,7 +158,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	/**
-	 * Configure custom return value handlers for handler metohds.
+	 * Configure custom return value handlers for handler methods.
 	 */
 	public void setReturnValueHandlerConfigurer(ReturnValueHandlerConfigurer configurer) {
 		Assert.notNull(configurer, "ReturnValueHandlerConfigurer is required");
@@ -229,7 +230,16 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * (e.g. for non-pattern destinations).
 	 */
 	public MultiValueMap<String, T> getDestinationLookup() {
-		return CollectionUtils.unmodifiableMultiValueMap(this.destinationLookup);
+		return CollectionUtils.unmodifiableMultiValueMap(CollectionUtils.toMultiValueMap(this.destinationLookup));
+	}
+
+	/**
+	 * Return the argument resolvers initialized during {@link #afterPropertiesSet()}.
+	 * Primarily for internal use in sub-classes.
+	 * @since 5.2.2
+	 */
+	protected HandlerMethodArgumentResolverComposite getArgumentResolvers() {
+		return this.invocableHelper.getArgumentResolvers();
 	}
 
 
@@ -332,9 +342,12 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	private String formatMappings(Class<?> userType, Map<Method, T> methods) {
-		String formattedType = Arrays.stream(ClassUtils.getPackageName(userType).split("\\."))
-				.map(p -> p.substring(0, 1))
-				.collect(Collectors.joining(".", "", "." + userType.getSimpleName()));
+		String packageName = ClassUtils.getPackageName(userType);
+		String formattedType = (StringUtils.hasText(packageName) ?
+				Arrays.stream(packageName.split("\\."))
+						.map(packageSegment -> packageSegment.substring(0, 1))
+						.collect(Collectors.joining(".", "", "." + userType.getSimpleName())) :
+				userType.getSimpleName());
 		Function<Method, String> methodFormatter = method -> Arrays.stream(method.getParameterTypes())
 				.map(Class::getSimpleName)
 				.collect(Collectors.joining(",", "(", ")"));
@@ -357,16 +370,15 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	/**
 	 * Register a handler method and its unique mapping.
-	 * <p><strong>Note:</strong> This method is protected and can be invoked by
-	 * subclasses. Keep in mind however that the registration is not protected
-	 * for concurrent use, and is expected to be done on startup.
+	 * <p><strong>Note:</strong> As of 5.3 this method is public (rather than
+	 * protected) and can be used both at startup and at runtime.
 	 * @param handler the bean name of the handler or the handler instance
 	 * @param method the method to register
 	 * @param mapping the mapping conditions associated with the handler method
 	 * @throws IllegalStateException if another method was already registered
 	 * under the same mapping
 	 */
-	protected final void registerHandlerMethod(Object handler, Method method, T mapping) {
+	public final void registerHandlerMethod(Object handler, Method method, T mapping) {
 		Assert.notNull(mapping, "Mapping must not be null");
 		HandlerMethod newHandlerMethod = createHandlerMethod(handler, method);
 		HandlerMethod oldHandlerMethod = this.handlerMethods.get(mapping);
@@ -377,10 +389,12 @@ public abstract class AbstractMethodMessageHandler<T>
 					oldHandlerMethod.getBean() + "' bean method\n" + oldHandlerMethod + " mapped.");
 		}
 
+		mapping = extendMapping(mapping, newHandlerMethod);
 		this.handlerMethods.put(mapping, newHandlerMethod);
 
 		for (String pattern : getDirectLookupMappings(mapping)) {
-			this.destinationLookup.add(pattern, mapping);
+			List<T> values = this.destinationLookup.computeIfAbsent(pattern, p -> new CopyOnWriteArrayList<>());
+			values.add(mapping);
 		}
 	}
 
@@ -403,6 +417,21 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	/**
+	 * This method is invoked just before mappings are added. It allows
+	 * sub-classes to update the mapping with the {@link HandlerMethod} in mind.
+	 * This can be useful when the method signature is used to refine the
+	 * mapping, e.g. based on the cardinality of input and output.
+	 * <p>By default this method returns the mapping that is passed in.
+	 * @param mapping the mapping to be added
+	 * @param handlerMethod the target handler for the mapping
+	 * @return a new mapping or the same
+	 * @since 5.2.2
+	 */
+	protected T extendMapping(T mapping, HandlerMethod handlerMethod) {
+		return mapping;
+	}
+
+	/**
 	 * Return String-based destinations for the given mapping, if any, that can
 	 * be used to find matches with a direct lookup (i.e. non-patterns).
 	 * <p><strong>Note:</strong> This is completely optional. The mapping
@@ -414,7 +443,13 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	@Override
 	public Mono<Void> handleMessage(Message<?> message) throws MessagingException {
-		Match<T> match = getHandlerMethod(message);
+		Match<T> match = null;
+		try {
+			match = getHandlerMethod(message);
+		}
+		catch (Exception ex) {
+			return Mono.error(ex);
+		}
 		if (match == null) {
 			// handleNoMatch would have been invoked already
 			return Mono.empty();
@@ -477,7 +512,7 @@ public abstract class AbstractMethodMessageHandler<T>
 		for (T mapping : mappingsToCheck) {
 			T match = getMatchingMapping(mapping, message);
 			if (match != null) {
-				matches.add(new Match<T>(match, this.handlerMethods.get(mapping)));
+				matches.add(new Match<>(match, this.handlerMethods.get(mapping)));
 			}
 		}
 	}
@@ -533,14 +568,6 @@ public abstract class AbstractMethodMessageHandler<T>
 		Match(T mapping, HandlerMethod handlerMethod) {
 			this.mapping = mapping;
 			this.handlerMethod = handlerMethod;
-		}
-
-		public T getMapping() {
-			return this.mapping;
-		}
-
-		public HandlerMethod getHandlerMethod() {
-			return this.handlerMethod;
 		}
 
 		@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.transaction.CallCountingTransactionManager;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.util.SerializationTestUtils;
+import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -87,7 +87,7 @@ public class AnnotationDrivenTests {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("annotationDrivenProxyTargetClassTests.xml", getClass());
 		TransactionalService service = context.getBean("service", TransactionalService.class);
 		service.setSomething("someName");
-		service = (TransactionalService) SerializationTestUtils.serializeAndDeserialize(service);
+		service = SerializationTestUtils.serializeAndDeserialize(service);
 		service.setSomething("someName");
 	}
 
@@ -96,7 +96,7 @@ public class AnnotationDrivenTests {
 	public void serializableWithoutPreviousUsage() throws Exception {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("annotationDrivenProxyTargetClassTests.xml", getClass());
 		TransactionalService service = context.getBean("service", TransactionalService.class);
-		service = (TransactionalService) SerializationTestUtils.serializeAndDeserialize(service);
+		service = SerializationTestUtils.serializeAndDeserialize(service);
 		service.setSomething("someName");
 	}
 

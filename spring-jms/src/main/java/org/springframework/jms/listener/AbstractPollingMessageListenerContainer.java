@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package org.springframework.jms.listener;
 
-import javax.jms.Connection;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.Session;
+import jakarta.jms.Connection;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.MessageConsumer;
+import jakarta.jms.Session;
 
 import org.springframework.jms.connection.ConnectionFactoryUtils;
 import org.springframework.jms.connection.JmsResourceHolder;
@@ -29,6 +29,7 @@ import org.springframework.jms.connection.SingleConnectionFactory;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.ResourceTransactionManager;
@@ -38,7 +39,7 @@ import org.springframework.util.Assert;
 
 /**
  * Base class for listener container implementations which are based on polling.
- * Provides support for listener handling based on {@link javax.jms.MessageConsumer},
+ * Provides support for listener handling based on {@link jakarta.jms.MessageConsumer},
  * optionally participating in externally managed transactions.
  *
  * <p>This listener container variant is built for repeated polling attempts,
@@ -48,7 +49,7 @@ import org.springframework.util.Assert;
  * configured through the {@link #setReceiveTimeout "receiveTimeout"} property.
  *
  * <p>The underlying mechanism is based on standard JMS MessageConsumer handling,
- * which is perfectly compatible with both native JMS and JMS in a Java EE environment.
+ * which is perfectly compatible with both native JMS and JMS in a Jakarta EE environment.
  * Neither the JMS {@code MessageConsumer.setMessageListener} facility  nor the JMS
  * ServerSessionPool facility is required. A further advantage of this approach is
  * full control over the listening process, allowing for custom scaling and throttling
@@ -59,7 +60,7 @@ import org.springframework.util.Assert;
  * {@link org.springframework.transaction.PlatformTransactionManager} into the
  * {@link #setTransactionManager "transactionManager"} property. This will usually
  * be a {@link org.springframework.transaction.jta.JtaTransactionManager} in a
- * Java EE environment, in combination with a JTA-aware JMS ConnectionFactory
+ * Jakarta EE environment, in combination with a JTA-aware JMS ConnectionFactory
  * obtained from JNDI (check your application server's documentation).
  *
  * <p>This base class does not assume any specific mechanism for asynchronous
@@ -90,7 +91,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	@Nullable
 	private PlatformTransactionManager transactionManager;
 
-	private DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
+	private final DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
 
 	private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
 
@@ -165,9 +166,9 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * discouraged since such a listener container cannot cleanly shut down.
 	 * A negative value such as -1 indicates a no-wait receive operation.
 	 * @see #receiveFromConsumer(MessageConsumer, long)
-	 * @see javax.jms.MessageConsumer#receive(long)
-	 * @see javax.jms.MessageConsumer#receiveNoWait()
-	 * @see javax.jms.MessageConsumer#receive()
+	 * @see jakarta.jms.MessageConsumer#receive(long)
+	 * @see jakarta.jms.MessageConsumer#receiveNoWait()
+	 * @see jakarta.jms.MessageConsumer#receive()
 	 * @see #setTransactionTimeout
 	 */
 	public void setReceiveTimeout(long receiveTimeout) {
@@ -211,7 +212,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * registering a MessageListener for the specified listener.
 	 * @param session the JMS Session to work on
 	 * @return the MessageConsumer
-	 * @throws javax.jms.JMSException if thrown by JMS methods
+	 * @throws jakarta.jms.JMSException if thrown by JMS methods
 	 * @see #receiveAndExecute
 	 */
 	protected MessageConsumer createListenerConsumer(Session session) throws JMSException {
@@ -248,7 +249,19 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 				rollbackOnException(this.transactionManager, status, ex);
 				throw ex;
 			}
-			this.transactionManager.commit(status);
+			try {
+				this.transactionManager.commit(status);
+			}
+			catch (TransactionException ex) {
+				// Propagate transaction system exceptions as infrastructure problems.
+				throw ex;
+			}
+			catch (RuntimeException ex) {
+				// Typically a late persistence exception from a listener-used resource
+				// -> handle it as listener exception, not as an infrastructure problem.
+				// E.g. a database locking failure should not lead to listener shutdown.
+				handleListenerException(ex);
+			}
 			return messageReceived;
 		}
 
@@ -266,7 +279,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * @param status the TransactionStatus (may be {@code null})
 	 * @return whether a message has been received
 	 * @throws JMSException if thrown by JMS methods
-	 * @see #doExecuteListener(javax.jms.Session, javax.jms.Message)
+	 * @see #doExecuteListener(jakarta.jms.Session, jakarta.jms.Message)
 	 */
 	protected boolean doReceiveAndExecute(Object invoker, @Nullable Session session,
 			@Nullable MessageConsumer consumer, @Nullable TransactionStatus status) throws JMSException {

@@ -12,7 +12,7 @@ APIs as follows:
 * <<databuffers-buffer>> represents a byte buffer, which may be
 <<databuffers-buffer-pooled, pooled>>.
 * <<databuffers-utils>> offers utility methods for data buffers.
-* <<Codecs>> decode or encode streams data buffer streams into higher level objects.
+* <<Codecs>> decode or encode data buffer streams into higher level objects.
 
 
 
@@ -127,9 +127,9 @@ others that prefetch and cache data items internally, or is using operators such
 `filter`, `skip`, and others that leave out items, then
 `doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release)` must be added to the
 composition chain to ensure such buffers are released prior to being discarded, possibly
-also as a result an error or cancellation signal.
+also as a result of an error or cancellation signal.
 . If a `Decoder` holds on to one or more data buffers in any other way, it must
-ensure they are released when fully read, or in case an error or cancellation signals that
+ensure they are released when fully read, or in case of an error or cancellation signals that
 take place before the cached data buffers have been read and released.
 
 Note that `DataBufferUtils#join` offers a safe and efficient way to aggregate a data

@@ -4,7 +4,7 @@
 <beans>
 
 	<!-- Simple target -->
-	<bean id="target" class="org.springframework.tests.sample.beans.DerivedTestBean">
+	<bean id="target" class="org.springframework.beans.testfixture.beans.DerivedTestBean">
 		<property name="name"><value>custom</value></property>
 		<property name="age"><value>666</value></property>
 	</bean>

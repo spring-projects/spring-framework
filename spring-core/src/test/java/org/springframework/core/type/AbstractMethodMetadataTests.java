@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.core.type;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import example.type.AnnotatedComponent;
+import example.type.EnclosingAnnotation;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.MergedAnnotation;
@@ -31,8 +33,57 @@ import static org.assertj.core.api.Assertions.entry;
  * Base class for {@link MethodMetadata} tests.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  */
 public abstract class AbstractMethodMetadataTests {
+
+	@Test
+	public void verifyEquals() throws Exception {
+		MethodMetadata withMethod1 = getTagged(WithMethod.class);
+		MethodMetadata withMethod2 = getTagged(WithMethod.class);
+		MethodMetadata withMethodWithTwoArguments1 = getTagged(WithMethodWithTwoArguments.class);
+		MethodMetadata withMethodWithTwoArguments2 = getTagged(WithMethodWithTwoArguments.class);
+
+		assertThat(withMethod1.equals(null)).isFalse();
+
+		assertThat(withMethod1.equals(withMethod1)).isTrue();
+		assertThat(withMethod2.equals(withMethod2)).isTrue();
+		assertThat(withMethod1.equals(withMethod2)).isTrue();
+		assertThat(withMethod2.equals(withMethod1)).isTrue();
+
+		assertThat(withMethodWithTwoArguments1.equals(withMethodWithTwoArguments1)).isTrue();
+		assertThat(withMethodWithTwoArguments2.equals(withMethodWithTwoArguments2)).isTrue();
+		assertThat(withMethodWithTwoArguments1.equals(withMethodWithTwoArguments2)).isTrue();
+		assertThat(withMethodWithTwoArguments2.equals(withMethodWithTwoArguments1)).isTrue();
+
+		assertThat(withMethod1.equals(withMethodWithTwoArguments1)).isFalse();
+		assertThat(withMethodWithTwoArguments1.equals(withMethod1)).isFalse();
+	}
+
+	@Test
+	public void verifyHashCode() throws Exception {
+		MethodMetadata withMethod1 = getTagged(WithMethod.class);
+		MethodMetadata withMethod2 = getTagged(WithMethod.class);
+		MethodMetadata withMethodWithTwoArguments1 = getTagged(WithMethodWithTwoArguments.class);
+		MethodMetadata withMethodWithTwoArguments2 = getTagged(WithMethodWithTwoArguments.class);
+
+		assertThat(withMethod1).hasSameHashCodeAs(withMethod2);
+		assertThat(withMethodWithTwoArguments1).hasSameHashCodeAs(withMethodWithTwoArguments2);
+
+		assertThat(withMethod1).doesNotHaveSameHashCodeAs(withMethodWithTwoArguments1);
+	}
+
+	@Test
+	public void verifyToString() throws Exception {
+		assertThat(getTagged(WithMethod.class).toString())
+			.endsWith(WithMethod.class.getName() + ".test()");
+
+		assertThat(getTagged(WithMethodWithOneArgument.class).toString())
+			.endsWith(WithMethodWithOneArgument.class.getName() + ".test(java.lang.String)");
+
+		assertThat(getTagged(WithMethodWithTwoArguments.class).toString())
+			.endsWith(WithMethodWithTwoArguments.class.getName() + ".test(java.lang.String,java.lang.Integer)");
+	}
 
 	@Test
 	public void getMethodNameReturnsMethodName() {
@@ -138,6 +189,12 @@ public abstract class AbstractMethodMetadataTests {
 		assertThat(attributes.get("size")).containsExactlyInAnyOrder(1, 2);
 	}
 
+	@Test // gh-24375
+	public void metadataLoadsForNestedAnnotations() {
+		AnnotationMetadata annotationMetadata = get(AnnotatedComponent.class);
+		assertThat(annotationMetadata.getAnnotationTypes()).containsExactly(EnclosingAnnotation.class.getName());
+	}
+
 	protected MethodMetadata getTagged(Class<?> source) {
 		return get(source, Tag.class.getName());
 	}
@@ -157,6 +214,24 @@ public abstract class AbstractMethodMetadataTests {
 
 		@Tag
 		public String test() {
+			return "";
+		}
+
+	}
+
+	public static class WithMethodWithOneArgument {
+
+		@Tag
+		public String test(String text) {
+			return "";
+		}
+
+	}
+
+	public static class WithMethodWithTwoArguments {
+
+		@Tag
+		public String test(String text, Integer num) {
 			return "";
 		}
 

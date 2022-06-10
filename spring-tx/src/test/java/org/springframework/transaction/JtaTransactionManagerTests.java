@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,23 @@
 
 package org.springframework.transaction;
 
-import javax.transaction.HeuristicMixedException;
-import javax.transaction.HeuristicRollbackException;
-import javax.transaction.NotSupportedException;
-import javax.transaction.RollbackException;
-import javax.transaction.Status;
-import javax.transaction.SystemException;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
-import javax.transaction.UserTransaction;
-
+import jakarta.transaction.HeuristicMixedException;
+import jakarta.transaction.HeuristicRollbackException;
+import jakarta.transaction.NotSupportedException;
+import jakarta.transaction.RollbackException;
+import jakarta.transaction.Status;
+import jakarta.transaction.SystemException;
+import jakarta.transaction.Transaction;
+import jakarta.transaction.TransactionManager;
+import jakarta.transaction.UserTransaction;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.tests.transaction.MockJtaTransaction;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -888,7 +885,7 @@ public class JtaTransactionManagerTests {
 				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					// something transactional
-					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 						@Override
 						public void afterCompletion(int status) {
 							assertThat(status == TransactionSynchronization.STATUS_ROLLED_BACK).as("Correct completion status").isTrue();
@@ -932,7 +929,7 @@ public class JtaTransactionManagerTests {
 				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					// something transactional
-					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 						@Override
 						public void afterCompletion(int status) {
 							assertThat(status == TransactionSynchronization.STATUS_ROLLED_BACK).as("Correct completion status").isTrue();
@@ -977,7 +974,7 @@ public class JtaTransactionManagerTests {
 				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					// something transactional
-					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 						@Override
 						public void afterCompletion(int status) {
 							assertThat(status == TransactionSynchronization.STATUS_UNKNOWN).as("Correct completion status").isTrue();
@@ -1004,7 +1001,7 @@ public class JtaTransactionManagerTests {
 				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					// something transactional
-					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 						@Override
 						public void afterCompletion(int status) {
 							assertThat(status == TransactionSynchronization.STATUS_UNKNOWN).as("Correct completion status").isTrue();
@@ -1031,7 +1028,7 @@ public class JtaTransactionManagerTests {
 				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					// something transactional
-					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 						@Override
 						public void afterCompletion(int status) {
 							assertThat(status == TransactionSynchronization.STATUS_UNKNOWN).as("Correct completion status").isTrue();
@@ -1056,7 +1053,7 @@ public class JtaTransactionManagerTests {
 			tt.execute(new TransactionCallbackWithoutResult() {
 				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
-					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 						@Override
 						public void afterCompletion(int status) {
 							assertThat(status == TransactionSynchronization.STATUS_UNKNOWN).as("Correct completion status").isTrue();
@@ -1101,7 +1098,7 @@ public class JtaTransactionManagerTests {
 				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					status.setRollbackOnly();
-					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 						@Override
 						public void afterCompletion(int status) {
 							assertThat(status == TransactionSynchronization.STATUS_UNKNOWN).as("Correct completion status").isTrue();

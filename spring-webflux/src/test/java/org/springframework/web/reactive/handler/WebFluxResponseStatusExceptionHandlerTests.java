@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
-import org.springframework.web.server.handler.ResponseStatusExceptionHandlerTests;
+import org.springframework.web.testfixture.server.handler.AbstractResponseStatusExceptionHandlerTests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  */
-public class WebFluxResponseStatusExceptionHandlerTests extends ResponseStatusExceptionHandlerTests {
+public class WebFluxResponseStatusExceptionHandlerTests extends AbstractResponseStatusExceptionHandlerTests {
 
 	@Override
 	protected ResponseStatusExceptionHandler createResponseStatusExceptionHandler() {

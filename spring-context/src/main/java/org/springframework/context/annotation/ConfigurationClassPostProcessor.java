@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.context.annotation;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -25,20 +25,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.lang.model.element.Modifier;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.framework.autoproxy.AutoProxyUtils;
+import org.springframework.aot.generate.GeneratedMethod;
+import org.springframework.aot.generate.GenerationContext;
+import org.springframework.aot.generate.MethodReference;
+import org.springframework.aot.hint.ResourceHints;
+import org.springframework.aot.hint.TypeReference;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
+import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
+import org.springframework.beans.factory.aot.BeanFactoryInitializationAotProcessor;
+import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
+import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
 import org.springframework.beans.factory.parsing.FailFastProblemReporter;
 import org.springframework.beans.factory.parsing.PassThroughSourceExtractor;
@@ -48,19 +58,27 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.ApplicationStartupAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ConfigurationClassEnhancer.EnhancedConfiguration;
+import org.springframework.core.NativeDetector;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.metrics.ApplicationStartup;
+import org.springframework.core.metrics.StartupStep;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.javapoet.CodeBlock;
+import org.springframework.javapoet.MethodSpec;
+import org.springframework.javapoet.ParameterizedTypeName;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -71,20 +89,22 @@ import org.springframework.util.ClassUtils;
  *
  * <p>Registered by default when using {@code <context:annotation-config/>} or
  * {@code <context:component-scan/>}. Otherwise, may be declared manually as
- * with any other BeanFactoryPostProcessor.
+ * with any other {@link BeanFactoryPostProcessor}.
  *
  * <p>This post processor is priority-ordered as it is important that any
- * {@link Bean} methods declared in {@code @Configuration} classes have
+ * {@link Bean @Bean} methods declared in {@code @Configuration} classes have
  * their corresponding bean definitions registered before any other
- * {@link BeanFactoryPostProcessor} executes.
+ * {@code BeanFactoryPostProcessor} executes.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 3.0
  */
 public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor,
-		PriorityOrdered, ResourceLoaderAware, BeanClassLoaderAware, EnvironmentAware {
+		BeanFactoryInitializationAotProcessor, PriorityOrdered, ResourceLoaderAware, ApplicationStartupAware,
+		BeanClassLoaderAware, EnvironmentAware {
 
 	/**
 	 * A {@code BeanNameGenerator} using fully qualified class names as default bean names.
@@ -95,14 +115,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * @since 5.2
 	 * @see #setBeanNameGenerator
 	 */
-	public static final AnnotationBeanNameGenerator IMPORT_BEAN_NAME_GENERATOR = new AnnotationBeanNameGenerator() {
-		@Override
-		protected String buildDefaultBeanName(BeanDefinition definition) {
-			String beanClassName = definition.getBeanClassName();
-			Assert.state(beanClassName != null, "No bean class name set");
-			return beanClassName;
-		}
-	};
+	public static final AnnotationBeanNameGenerator IMPORT_BEAN_NAME_GENERATOR =
+			FullyQualifiedAnnotationBeanNameGenerator.INSTANCE;
 
 	private static final String IMPORT_REGISTRY_BEAN_NAME =
 			ConfigurationClassPostProcessor.class.getName() + ".importRegistry";
@@ -140,6 +154,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	/* Using fully qualified class names as default bean names by default. */
 	private BeanNameGenerator importBeanNameGenerator = IMPORT_BEAN_NAME_GENERATOR;
+
+	private ApplicationStartup applicationStartup = ApplicationStartup.DEFAULT;
 
 
 	@Override
@@ -222,6 +238,10 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 	}
 
+	@Override
+	public void setApplicationStartup(ApplicationStartup applicationStartup) {
+		this.applicationStartup = applicationStartup;
+	}
 
 	/**
 	 * Derive further bean definitions from the configuration classes in the registry.
@@ -262,6 +282,14 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 		enhanceConfigurationClasses(beanFactory);
 		beanFactory.addBeanPostProcessor(new ImportAwareBeanPostProcessor(beanFactory));
+	}
+
+	@Override
+	public BeanFactoryInitializationAotContribution processAheadOfTime(
+			ConfigurableListableBeanFactory beanFactory) {
+
+		return (beanFactory.containsBean(IMPORT_REGISTRY_BEAN_NAME)
+				? new AotContribution(beanFactory) : null);
 	}
 
 	/**
@@ -322,6 +350,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		Set<BeanDefinitionHolder> candidates = new LinkedHashSet<>(configCandidates);
 		Set<ConfigurationClass> alreadyParsed = new HashSet<>(configCandidates.size());
 		do {
+			StartupStep processConfig = this.applicationStartup.start("spring.context.config-classes.parse");
 			parser.parse(candidates);
 			parser.validate();
 
@@ -336,11 +365,12 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			}
 			this.reader.loadBeanDefinitions(configClasses);
 			alreadyParsed.addAll(configClasses);
+			processConfig.tag("classCount", () -> String.valueOf(configClasses.size())).end();
 
 			candidates.clear();
 			if (registry.getBeanDefinitionCount() > candidateNames.length) {
 				String[] newCandidateNames = registry.getBeanDefinitionNames();
-				Set<String> oldCandidateNames = new HashSet<>(Arrays.asList(candidateNames));
+				Set<String> oldCandidateNames = Set.of(candidateNames);
 				Set<String> alreadyParsedClasses = new HashSet<>();
 				for (ConfigurationClass configurationClass : alreadyParsed) {
 					alreadyParsedClasses.add(configurationClass.getMetadata().getClassName());
@@ -364,10 +394,10 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			sbr.registerSingleton(IMPORT_REGISTRY_BEAN_NAME, parser.getImportRegistry());
 		}
 
-		if (this.metadataReaderFactory instanceof CachingMetadataReaderFactory) {
+		if (this.metadataReaderFactory instanceof CachingMetadataReaderFactory cachingMetadataReaderFactory) {
 			// Clear cache in externally provided MetadataReaderFactory; this is a no-op
 			// for a shared cache since it'll be cleared by the ApplicationContext.
-			((CachingMetadataReaderFactory) this.metadataReaderFactory).clearCache();
+			cachingMetadataReaderFactory.clearCache();
 		}
 	}
 
@@ -378,19 +408,26 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * @see ConfigurationClassEnhancer
 	 */
 	public void enhanceConfigurationClasses(ConfigurableListableBeanFactory beanFactory) {
+		StartupStep enhanceConfigClasses = this.applicationStartup.start("spring.context.config-classes.enhance");
 		Map<String, AbstractBeanDefinition> configBeanDefs = new LinkedHashMap<>();
 		for (String beanName : beanFactory.getBeanDefinitionNames()) {
 			BeanDefinition beanDef = beanFactory.getBeanDefinition(beanName);
 			Object configClassAttr = beanDef.getAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE);
+			AnnotationMetadata annotationMetadata = null;
 			MethodMetadata methodMetadata = null;
-			if (beanDef instanceof AnnotatedBeanDefinition) {
-				methodMetadata = ((AnnotatedBeanDefinition) beanDef).getFactoryMethodMetadata();
+			if (beanDef instanceof AnnotatedBeanDefinition annotatedBeanDefinition) {
+				annotationMetadata = annotatedBeanDefinition.getMetadata();
+				methodMetadata = annotatedBeanDefinition.getFactoryMethodMetadata();
 			}
-			if ((configClassAttr != null || methodMetadata != null) && beanDef instanceof AbstractBeanDefinition) {
+			if ((configClassAttr != null || methodMetadata != null) &&
+					(beanDef instanceof AbstractBeanDefinition abd) && !abd.hasBeanClass()) {
 				// Configuration class (full or lite) or a configuration-derived @Bean method
-				// -> resolve bean class at this point...
-				AbstractBeanDefinition abd = (AbstractBeanDefinition) beanDef;
-				if (!abd.hasBeanClass()) {
+				// -> eagerly resolve bean class at this point, unless it's a 'lite' configuration
+				// or component class without @Bean methods.
+				boolean liteConfigurationCandidateWithoutBeanMethods =
+						(ConfigurationClassUtils.CONFIGURATION_CLASS_LITE.equals(configClassAttr) &&
+							annotationMetadata != null && !ConfigurationClassUtils.hasBeanMethods(annotationMetadata));
+				if (!liteConfigurationCandidateWithoutBeanMethods) {
 					try {
 						abd.resolveBeanClass(this.beanClassLoader);
 					}
@@ -401,7 +438,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				}
 			}
 			if (ConfigurationClassUtils.CONFIGURATION_CLASS_FULL.equals(configClassAttr)) {
-				if (!(beanDef instanceof AbstractBeanDefinition)) {
+				if (!(beanDef instanceof AbstractBeanDefinition abd)) {
 					throw new BeanDefinitionStoreException("Cannot enhance @Configuration bean definition '" +
 							beanName + "' since it is not stored in an AbstractBeanDefinition subclass");
 				}
@@ -411,11 +448,12 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 							"is a non-static @Bean method with a BeanDefinitionRegistryPostProcessor " +
 							"return type: Consider declaring such methods as 'static'.");
 				}
-				configBeanDefs.put(beanName, (AbstractBeanDefinition) beanDef);
+				configBeanDefs.put(beanName, abd);
 			}
 		}
-		if (configBeanDefs.isEmpty()) {
+		if (configBeanDefs.isEmpty() || NativeDetector.inNativeImage()) {
 			// nothing to enhance -> return immediately
+			enhanceConfigClasses.end();
 			return;
 		}
 
@@ -435,10 +473,11 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				beanDef.setBeanClass(enhancedClass);
 			}
 		}
+		enhanceConfigClasses.tag("classCount", () -> String.valueOf(configBeanDefs.keySet().size())).end();
 	}
 
 
-	private static class ImportAwareBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter {
+	private static class ImportAwareBeanPostProcessor implements InstantiationAwareBeanPostProcessor {
 
 		private final BeanFactory beanFactory;
 
@@ -450,23 +489,102 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		public PropertyValues postProcessProperties(@Nullable PropertyValues pvs, Object bean, String beanName) {
 			// Inject the BeanFactory before AutowiredAnnotationBeanPostProcessor's
 			// postProcessProperties method attempts to autowire other configuration beans.
-			if (bean instanceof EnhancedConfiguration) {
-				((EnhancedConfiguration) bean).setBeanFactory(this.beanFactory);
+			if (bean instanceof EnhancedConfiguration enhancedConfiguration) {
+				enhancedConfiguration.setBeanFactory(this.beanFactory);
 			}
 			return pvs;
 		}
 
 		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) {
-			if (bean instanceof ImportAware) {
+			if (bean instanceof ImportAware importAware) {
 				ImportRegistry ir = this.beanFactory.getBean(IMPORT_REGISTRY_BEAN_NAME, ImportRegistry.class);
 				AnnotationMetadata importingClass = ir.getImportingClassFor(ClassUtils.getUserClass(bean).getName());
 				if (importingClass != null) {
-					((ImportAware) bean).setImportMetadata(importingClass);
+					importAware.setImportMetadata(importingClass);
 				}
 			}
 			return bean;
 		}
+	}
+
+
+	private static class AotContribution implements BeanFactoryInitializationAotContribution {
+
+		private static final String BEAN_FACTORY_VARIABLE = BeanFactoryInitializationCode.BEAN_FACTORY_VARIABLE;
+
+		private static final ParameterizedTypeName STRING_STRING_MAP = ParameterizedTypeName
+				.get(Map.class, String.class, String.class);
+
+		private static final String MAPPINGS_VARIABLE = "mappings";
+
+
+		private final ConfigurableListableBeanFactory beanFactory;
+
+
+		public AotContribution(ConfigurableListableBeanFactory beanFactory) {
+			this.beanFactory = beanFactory;
+		}
+
+
+		@Override
+		public void applyTo(GenerationContext generationContext,
+				BeanFactoryInitializationCode beanFactoryInitializationCode) {
+
+			Map<String, String> mappings = buildImportAwareMappings();
+			if (!mappings.isEmpty()) {
+				GeneratedMethod generatedMethod = beanFactoryInitializationCode
+						.getMethodGenerator()
+						.generateMethod("addImportAwareBeanPostProcessors")
+						.using(builder -> generateAddPostProcessorMethod(builder,
+								mappings));
+				beanFactoryInitializationCode
+						.addInitializer(MethodReference.of(generatedMethod.getName()));
+				ResourceHints hints = generationContext.getRuntimeHints().resources();
+				mappings.forEach(
+						(target, from) -> hints.registerType(TypeReference.of(from)));
+			}
+		}
+
+		private void generateAddPostProcessorMethod(MethodSpec.Builder builder,
+				Map<String, String> mappings) {
+
+			builder.addJavadoc(
+					"Add ImportAwareBeanPostProcessor to support ImportAware beans");
+			builder.addModifiers(Modifier.PRIVATE);
+			builder.addParameter(DefaultListableBeanFactory.class, BEAN_FACTORY_VARIABLE);
+			builder.addCode(generateAddPostProcessorCode(mappings));
+		}
+
+		private CodeBlock generateAddPostProcessorCode(Map<String, String> mappings) {
+			CodeBlock.Builder builder = CodeBlock.builder();
+			builder.addStatement("$T $L = new $T<>()", STRING_STRING_MAP,
+					MAPPINGS_VARIABLE, HashMap.class);
+			mappings.forEach((type, from) -> builder.addStatement("$L.put($S, $S)",
+					MAPPINGS_VARIABLE, type, from));
+			builder.addStatement("$L.addBeanPostProcessor(new $T($L))",
+					BEAN_FACTORY_VARIABLE, ImportAwareAotBeanPostProcessor.class,
+					MAPPINGS_VARIABLE);
+			return builder.build();
+		}
+
+		private Map<String, String> buildImportAwareMappings() {
+			ImportRegistry importRegistry = this.beanFactory
+					.getBean(IMPORT_REGISTRY_BEAN_NAME, ImportRegistry.class);
+			Map<String, String> mappings = new LinkedHashMap<>();
+			for (String name : this.beanFactory.getBeanDefinitionNames()) {
+				Class<?> beanType = this.beanFactory.getType(name);
+				if (beanType != null && ImportAware.class.isAssignableFrom(beanType)) {
+					String target = ClassUtils.getUserClass(beanType).getName();
+					AnnotationMetadata from = importRegistry.getImportingClassFor(target);
+					if (from != null) {
+						mappings.put(target, from.getClassName());
+					}
+				}
+			}
+			return mappings;
+		}
+
 	}
 
 }

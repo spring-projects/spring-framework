@@ -120,8 +120,7 @@ public class DefaultMessageHandlerMethodFactory
 	 * the ones configured by default. This is an advanced option. For most use cases
 	 * it should be sufficient to use {@link #setCustomArgumentResolvers(java.util.List)}.
 	 */
-	@SuppressWarnings("ConstantConditions")
-	public void setArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+	public void setArgumentResolvers(@Nullable List<HandlerMethodArgumentResolver> argumentResolvers) {
 		if (argumentResolvers == null) {
 			this.argumentResolvers.clear();
 			return;

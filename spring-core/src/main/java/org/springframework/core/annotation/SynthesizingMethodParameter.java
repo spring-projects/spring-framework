@@ -120,11 +120,11 @@ public class SynthesizingMethodParameter extends MethodParameter {
 	 * @since 5.0
 	 */
 	public static SynthesizingMethodParameter forExecutable(Executable executable, int parameterIndex) {
-		if (executable instanceof Method) {
-			return new SynthesizingMethodParameter((Method) executable, parameterIndex);
+		if (executable instanceof Method method) {
+			return new SynthesizingMethodParameter(method, parameterIndex);
 		}
-		else if (executable instanceof Constructor) {
-			return new SynthesizingMethodParameter((Constructor<?>) executable, parameterIndex);
+		else if (executable instanceof Constructor<?> constructor) {
+			return new SynthesizingMethodParameter(constructor, parameterIndex);
 		}
 		else {
 			throw new IllegalArgumentException("Not a Method/Constructor: " + executable);

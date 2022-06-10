@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,10 @@ public final class CallMetaDataProviderFactory {
 	public static final List<String> supportedDatabaseProductsForProcedures = Arrays.asList(
 			"Apache Derby",
 			"DB2",
-			"MySQL",
+			"Informix Dynamic Server",
+			"MariaDB",
 			"Microsoft SQL Server",
+			"MySQL",
 			"Oracle",
 			"PostgreSQL",
 			"Sybase"
@@ -51,8 +53,9 @@ public final class CallMetaDataProviderFactory {
 
 	/** List of supported database products for function calls. */
 	public static final List<String> supportedDatabaseProductsForFunctions = Arrays.asList(
-			"MySQL",
+			"MariaDB",
 			"Microsoft SQL Server",
+			"MySQL",
 			"Oracle",
 			"PostgreSQL"
 		);
@@ -72,7 +75,7 @@ public final class CallMetaDataProviderFactory {
 	 */
 	public static CallMetaDataProvider createMetaDataProvider(DataSource dataSource, final CallMetaDataContext context) {
 		try {
-			return (CallMetaDataProvider) JdbcUtils.extractDatabaseMetaData(dataSource, databaseMetaData -> {
+			return JdbcUtils.extractDatabaseMetaData(dataSource, databaseMetaData -> {
 				String databaseProductName = JdbcUtils.commonDatabaseName(databaseMetaData.getDatabaseProductName());
 				boolean accessProcedureColumnMetaData = context.isAccessCallParameterMetaData();
 				if (context.isFunction()) {

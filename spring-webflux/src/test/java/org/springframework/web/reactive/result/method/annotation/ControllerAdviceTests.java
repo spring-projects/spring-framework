@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ClassUtils;
@@ -44,6 +42,8 @@ import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -82,9 +82,10 @@ public class ControllerAdviceTests {
 
 	@Test
 	public void resolveExceptionWithAssertionErrorAsRootCause() throws Exception {
-		AssertionError cause = new AssertionError("argh");
-		FatalBeanException exception = new FatalBeanException("wrapped", cause);
-		testException(exception, cause.toString());
+		AssertionError rootCause = new AssertionError("argh");
+		FatalBeanException cause = new FatalBeanException("wrapped", rootCause);
+		Exception exception = new Exception(cause);
+		testException(exception, rootCause.toString());
 	}
 
 	private void testException(Throwable exception, String expected) throws Exception {

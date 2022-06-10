@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
  * Represent a list in an expression, e.g. '{1,2,3}'
  *
  * @author Andy Clement
+ * @author Sam Brannen
  * @since 3.0.4
  */
 public class InlineList extends SpelNodeImpl {
@@ -59,8 +60,7 @@ public class InlineList extends SpelNodeImpl {
 		for (int c = 0, max = getChildCount(); c < max; c++) {
 			SpelNode child = getChild(c);
 			if (!(child instanceof Literal)) {
-				if (child instanceof InlineList) {
-					InlineList inlineList = (InlineList) child;
+				if (child instanceof InlineList inlineList) {
 					if (!inlineList.isConstant()) {
 						isConstant = false;
 					}
@@ -75,11 +75,11 @@ public class InlineList extends SpelNodeImpl {
 			int childcount = getChildCount();
 			for (int c = 0; c < childcount; c++) {
 				SpelNode child = getChild(c);
-				if ((child instanceof Literal)) {
-					constantList.add(((Literal) child).getLiteralValue().getValue());
+				if (child instanceof Literal literal) {
+					constantList.add(literal.getLiteralValue().getValue());
 				}
-				else if (child instanceof InlineList) {
-					constantList.add(((InlineList) child).getConstantValue());
+				else if (child instanceof InlineList inlineList) {
+					constantList.add(inlineList.getConstantValue());
 				}
 			}
 			this.constant = new TypedValue(Collections.unmodifiableList(constantList));
@@ -164,8 +164,8 @@ public class InlineList extends SpelNodeImpl {
 			// The children might be further lists if they are not constants. In this
 			// situation do not call back into generateCode() because it will register another clinit adder.
 			// Instead, directly build the list here:
-			if (this.children[c] instanceof InlineList) {
-				((InlineList)this.children[c]).generateClinitCode(clazzname, constantFieldName, mv, codeflow, true);
+			if (this.children[c] instanceof InlineList inlineList) {
+				inlineList.generateClinitCode(clazzname, constantFieldName, mv, codeflow, true);
 			}
 			else {
 				this.children[c].generateCode(mv, codeflow);

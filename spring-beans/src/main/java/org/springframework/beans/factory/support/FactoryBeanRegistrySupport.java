@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import java.security.AccessControlContext;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -54,15 +49,9 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * or {@code null} if the type cannot be determined yet
 	 */
 	@Nullable
-	protected Class<?> getTypeForFactoryBean(final FactoryBean<?> factoryBean) {
+	protected Class<?> getTypeForFactoryBean(FactoryBean<?> factoryBean) {
 		try {
-			if (System.getSecurityManager() != null) {
-				return AccessController.doPrivileged((PrivilegedAction<Class<?>>)
-						factoryBean::getObjectType, getAccessControlContext());
-			}
-			else {
-				return factoryBean.getObjectType();
-			}
+			return factoryBean.getObjectType();
 		}
 		catch (Throwable ex) {
 			// Thrown from the FactoryBean's getObjectType implementation.
@@ -153,23 +142,10 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @throws BeanCreationException if FactoryBean object creation failed
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
-	private Object doGetObjectFromFactoryBean(final FactoryBean<?> factory, final String beanName)
-			throws BeanCreationException {
-
+	private Object doGetObjectFromFactoryBean(FactoryBean<?> factory, String beanName) throws BeanCreationException {
 		Object object;
 		try {
-			if (System.getSecurityManager() != null) {
-				AccessControlContext acc = getAccessControlContext();
-				try {
-					object = AccessController.doPrivileged((PrivilegedExceptionAction<Object>) factory::getObject, acc);
-				}
-				catch (PrivilegedActionException pae) {
-					throw pae.getException();
-				}
-			}
-			else {
-				object = factory.getObject();
-			}
+			object = factory.getObject();
 		}
 		catch (FactoryBeanNotInitializedException ex) {
 			throw new BeanCurrentlyInCreationException(beanName, ex.toString());
@@ -239,16 +215,6 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 			super.clearSingletonCache();
 			this.factoryBeanObjectCache.clear();
 		}
-	}
-
-	/**
-	 * Return the security context for this bean factory. If a security manager
-	 * is set, interaction with the user code will be executed using the privileged
-	 * of the security context returned by this method.
-	 * @see AccessController#getContext()
-	 */
-	protected AccessControlContext getAccessControlContext() {
-		return AccessController.getContext();
 	}
 
 }

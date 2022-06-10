@@ -23,7 +23,7 @@ import org.springframework.core.convert.converter.Converter;
 /**
  * @author Juergen Hoeller
  */
-public class FooServiceDependentConverter implements Converter<String, org.springframework.tests.sample.beans.TestBean> {
+public class FooServiceDependentConverter implements Converter<String, org.springframework.beans.testfixture.beans.TestBean> {
 
 	@SuppressWarnings("unused")
 	private FooService fooService;
@@ -33,8 +33,8 @@ public class FooServiceDependentConverter implements Converter<String, org.sprin
 	}
 
 	@Override
-	public org.springframework.tests.sample.beans.TestBean convert(String source) {
-		return new org.springframework.tests.sample.beans.TestBean(source);
+	public org.springframework.beans.testfixture.beans.TestBean convert(String source) {
+		return new org.springframework.beans.testfixture.beans.TestBean(source);
 	}
 
 }

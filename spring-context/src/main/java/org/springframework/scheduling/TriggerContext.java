@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling;
 
+import java.time.Clock;
 import java.util.Date;
 
 import org.springframework.lang.Nullable;
@@ -28,6 +29,16 @@ import org.springframework.lang.Nullable;
  * @since 3.0
  */
 public interface TriggerContext {
+
+	/**
+	 * Return the clock to use for trigger calculation.
+	 * @since 5.3
+	 * @see TaskScheduler#getClock()
+	 * @see Clock#systemDefaultZone()
+	 */
+	default Clock getClock() {
+		return Clock.systemDefaultZone();
+	}
 
 	/**
 	 * Return the last <i>scheduled</i> execution time of the task,

@@ -22,8 +22,8 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.BeanCreationException
 import org.springframework.beans.factory.support.DefaultListableBeanFactory
 import org.springframework.beans.factory.support.RootBeanDefinition
-import org.springframework.tests.sample.beans.Colour
-import org.springframework.tests.sample.beans.TestBean
+import org.springframework.beans.testfixture.beans.Colour
+import org.springframework.beans.testfixture.beans.TestBean
 
 /**
  * Tests for Kotlin support with [Autowired].

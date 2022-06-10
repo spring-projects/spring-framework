@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,6 +137,9 @@ public abstract class BodyExtractors {
 
 	/**
 	 * Extractor to read multipart data into a {@code MultiValueMap<String, Part>}.
+	 * <p><strong>Note:</strong> that resources used for part handling,
+	 * like storage for the uploaded files, is not deleted automatically, but
+	 * should be done via {@link Part#delete()}.
 	 * @return {@code BodyExtractor} for multipart data
 	 */
 	// Parameterized for server-side use
@@ -151,6 +154,9 @@ public abstract class BodyExtractors {
 
 	/**
 	 * Extractor to read multipart data into {@code Flux<Part>}.
+	 * <p><strong>Note:</strong> that resources used for part handling,
+	 * like storage for the uploaded files, is not deleted automatically, but
+	 * should be done via {@link Part#delete()}.
 	 * @return {@code BodyExtractor} for multipart request parts
 	 */
 	// Parameterized for server-side use
@@ -196,7 +202,7 @@ public abstract class BodyExtractors {
 				.map(readerFunction)
 				.orElseGet(() -> {
 					List<MediaType> mediaTypes = context.messageReaders().stream()
-							.flatMap(reader -> reader.getReadableMediaTypes().stream())
+							.flatMap(reader -> reader.getReadableMediaTypes(elementType).stream())
 							.collect(Collectors.toList());
 					return errorFunction.apply(
 							new UnsupportedMediaTypeException(contentType, mediaTypes, elementType));
@@ -264,18 +270,11 @@ public abstract class BodyExtractors {
 				() -> consumeAndCancel(message).then(Mono.empty()) : Mono::empty;
 	}
 
-	private static Mono<Void> consumeAndCancel(ReactiveHttpInputMessage message) {
-		return message.getBody()
-				.map(buffer -> {
-					DataBufferUtils.release(buffer);
-					throw new ReadCancellationException();
-				})
-				.onErrorResume(ReadCancellationException.class, ex -> Mono.empty())
-				.then();
-	}
-
-	@SuppressWarnings("serial")
-	private static class ReadCancellationException extends RuntimeException {
+	private static Flux<DataBuffer> consumeAndCancel(ReactiveHttpInputMessage message) {
+		return message.getBody().takeWhile(buffer -> {
+			DataBufferUtils.release(buffer);
+			return false;
+		});
 	}
 
 }

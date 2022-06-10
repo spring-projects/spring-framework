@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -121,7 +121,7 @@ public class ContextPathCompositeHandlerTests {
 	@Test // SPR-17144
 	public void notFoundWithCommitAction() {
 
-		AtomicBoolean commitInvoked = new AtomicBoolean(false);
+		AtomicBoolean commitInvoked = new AtomicBoolean();
 
 		ServerHttpRequest request = MockServerHttpRequest.get("/unknown/path").build();
 		ServerHttpResponse response = new MockServerHttpResponse();

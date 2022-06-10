@@ -24,6 +24,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.ParallelComputer;
 
+import org.springframework.core.testfixture.TestGroup;
 import org.springframework.test.context.junit4.InheritedConfigSpringJUnit4ClassRunnerAppCtxTests;
 import org.springframework.test.context.junit4.MethodLevelTransactionalSpringRunnerTests;
 import org.springframework.test.context.junit4.SpringJUnit47ClassRunnerRuleTests;
@@ -34,7 +35,6 @@ import org.springframework.test.context.junit4.rules.BaseAppCtxRuleTests;
 import org.springframework.test.context.junit4.rules.BasicAnnotationConfigWacSpringRuleTests;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
-import org.springframework.tests.TestGroup;
 import org.springframework.util.ReflectionUtils;
 
 import static org.junit.Assume.assumeTrue;

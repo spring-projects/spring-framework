@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,13 @@ import org.springframework.lang.Nullable;
  */
 public class SimpleAutowireCandidateResolver implements AutowireCandidateResolver {
 
+	/**
+	 * Shared instance of {@code SimpleAutowireCandidateResolver}.
+	 * @since 5.2.7
+	 */
+	public static final SimpleAutowireCandidateResolver INSTANCE = new SimpleAutowireCandidateResolver();
+
+
 	@Override
 	public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
 		return bdHolder.getBeanDefinition().isAutowireCandidate();
@@ -38,6 +45,11 @@ public class SimpleAutowireCandidateResolver implements AutowireCandidateResolve
 	@Override
 	public boolean isRequired(DependencyDescriptor descriptor) {
 		return descriptor.isRequired();
+	}
+
+	@Override
+	public boolean hasQualifier(DependencyDescriptor descriptor) {
+		return false;
 	}
 
 	@Override
@@ -50,6 +62,15 @@ public class SimpleAutowireCandidateResolver implements AutowireCandidateResolve
 	@Nullable
 	public Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, @Nullable String beanName) {
 		return null;
+	}
+
+	/**
+	 * This implementation returns {@code this} as-is.
+	 * @see #INSTANCE
+	 */
+	@Override
+	public AutowireCandidateResolver cloneIfNecessary() {
+		return this;
 	}
 
 }

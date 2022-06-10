@@ -19,8 +19,8 @@ package org.springframework.web.servlet.tags.form;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.DynamicAttributes;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.DynamicAttributes;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;

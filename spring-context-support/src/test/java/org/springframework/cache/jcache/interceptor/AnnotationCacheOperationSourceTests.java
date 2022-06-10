@@ -32,9 +32,9 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.jcache.AbstractJCacheTests;
-import org.springframework.cache.jcache.support.TestableCacheKeyGenerator;
-import org.springframework.cache.jcache.support.TestableCacheResolver;
-import org.springframework.cache.jcache.support.TestableCacheResolverFactory;
+import org.springframework.contextsupport.testfixture.cache.TestableCacheKeyGenerator;
+import org.springframework.contextsupport.testfixture.cache.TestableCacheResolver;
+import org.springframework.contextsupport.testfixture.cache.TestableCacheResolverFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 

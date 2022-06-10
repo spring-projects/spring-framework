@@ -236,7 +236,7 @@ class InternalPathPatternParser {
 
 	/**
 	 * After processing a separator, a quick peek whether it is followed by
-	 * (and only before the end of the pattern or the next separator).
+	 * a double wildcard (and only as the last path element).
 	 */
 	private boolean peekDoubleWildcard() {
 		if ((this.pos + 2) >= this.pathPatternLength) {
@@ -244,6 +244,11 @@ class InternalPathPatternParser {
 		}
 		if (this.pathPatternData[this.pos + 1] != '*' || this.pathPatternData[this.pos + 2] != '*') {
 			return false;
+		}
+		char separator = this.parser.getPathOptions().separator();
+		if ((this.pos + 3) < this.pathPatternLength && this.pathPatternData[this.pos + 3] == separator) {
+			throw new PatternParseException(this.pos, this.pathPatternData,
+					PatternMessage.NO_MORE_DATA_EXPECTED_AFTER_CAPTURE_THE_REST);
 		}
 		return (this.pos + 3 == this.pathPatternLength);
 	}

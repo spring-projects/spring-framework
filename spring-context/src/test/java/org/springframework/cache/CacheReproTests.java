@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,11 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.cache.annotation.CachingConfigurerSupport;
+import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
@@ -39,7 +40,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -53,10 +53,10 @@ import static org.mockito.Mockito.verify;
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  */
-public class CacheReproTests {
+class CacheReproTests {
 
 	@Test
-	public void spr11124MultipleAnnotations() throws Exception {
+	void spr11124MultipleAnnotations() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr11124Config.class);
 		Spr11124Service bean = context.getBean(Spr11124Service.class);
 		bean.single(2);
@@ -67,7 +67,7 @@ public class CacheReproTests {
 	}
 
 	@Test
-	public void spr11249PrimitiveVarargs() throws Exception {
+	void spr11249PrimitiveVarargs() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr11249Config.class);
 		Spr11249Service bean = context.getBean(Spr11249Service.class);
 		Object result = bean.doSomething("op", 2, 3);
@@ -76,7 +76,7 @@ public class CacheReproTests {
 	}
 
 	@Test
-	public void spr11592GetSimple() {
+	void spr11592GetSimple() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr11592Config.class);
 		Spr11592Service bean = context.getBean(Spr11592Service.class);
 		Cache cache = context.getBean("cache", Cache.class);
@@ -93,7 +93,7 @@ public class CacheReproTests {
 	}
 
 	@Test
-	public void spr11592GetNeverCache() {
+	void spr11592GetNeverCache() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr11592Config.class);
 		Spr11592Service bean = context.getBean(Spr11592Service.class);
 		Cache cache = context.getBean("cache", Cache.class);
@@ -110,7 +110,7 @@ public class CacheReproTests {
 	}
 
 	@Test
-	public void spr13081ConfigNoCacheNameIsRequired() {
+	void spr13081ConfigNoCacheNameIsRequired() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr13081Config.class);
 		MyCacheResolver cacheResolver = context.getBean(MyCacheResolver.class);
 		Spr13081Service bean = context.getBean(Spr13081Service.class);
@@ -118,20 +118,21 @@ public class CacheReproTests {
 		assertThat(cacheResolver.getCache("foo").get("foo")).isNull();
 		Object result = bean.getSimple("foo");  // cache name = id
 		assertThat(cacheResolver.getCache("foo").get("foo").get()).isEqualTo(result);
+		context.close();
 	}
 
 	@Test
-	public void spr13081ConfigFailIfCacheResolverReturnsNullCacheName() {
+	void spr13081ConfigFailIfCacheResolverReturnsNullCacheName() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr13081Config.class);
 		Spr13081Service bean = context.getBean(Spr13081Service.class);
 
-		assertThatIllegalStateException().isThrownBy(() ->
-				bean.getSimple(null))
+		assertThatIllegalStateException().isThrownBy(() -> bean.getSimple(null))
 			.withMessageContaining(MyCacheResolver.class.getName());
+		context.close();
 	}
 
 	@Test
-	public void spr14230AdaptsToOptional() {
+	void spr14230AdaptsToOptional() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr14230Config.class);
 		Spr14230Service bean = context.getBean(Spr14230Service.class);
 		Cache cache = context.getBean(CacheManager.class).getCache("itemCache");
@@ -145,10 +146,11 @@ public class CacheReproTests {
 		TestBean tb2 = bean.findById("tb1").get();
 		assertThat(tb2).isNotSameAs(tb);
 		assertThat(cache.get("tb1").get()).isSameAs(tb2);
+		context.close();
 	}
 
 	@Test
-	public void spr14853AdaptsToOptionalWithSync() {
+	void spr14853AdaptsToOptionalWithSync() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr14853Config.class);
 		Spr14853Service bean = context.getBean(Spr14853Service.class);
 		Cache cache = context.getBean(CacheManager.class).getCache("itemCache");
@@ -162,10 +164,11 @@ public class CacheReproTests {
 		TestBean tb2 = bean.findById("tb1").get();
 		assertThat(tb2).isNotSameAs(tb);
 		assertThat(cache.get("tb1").get()).isSameAs(tb2);
+		context.close();
 	}
 
 	@Test
-	public void spr15271FindsOnInterfaceWithInterfaceProxy() {
+	void spr15271FindsOnInterfaceWithInterfaceProxy() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr15271ConfigA.class);
 		Spr15271Interface bean = context.getBean(Spr15271Interface.class);
 		Cache cache = context.getBean(CacheManager.class).getCache("itemCache");
@@ -174,10 +177,11 @@ public class CacheReproTests {
 		bean.insertItem(tb);
 		assertThat(bean.findById("tb1").get()).isSameAs(tb);
 		assertThat(cache.get("tb1").get()).isSameAs(tb);
+		context.close();
 	}
 
 	@Test
-	public void spr15271FindsOnInterfaceWithCglibProxy() {
+	void spr15271FindsOnInterfaceWithCglibProxy() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr15271ConfigB.class);
 		Spr15271Interface bean = context.getBean(Spr15271Interface.class);
 		Cache cache = context.getBean(CacheManager.class).getCache("itemCache");
@@ -186,6 +190,7 @@ public class CacheReproTests {
 		bean.insertItem(tb);
 		assertThat(bean.findById("tb1").get()).isSameAs(tb);
 		assertThat(cache.get("tb1").get()).isSameAs(tb);
+		context.close();
 	}
 
 
@@ -306,7 +311,7 @@ public class CacheReproTests {
 
 	@Configuration
 	@EnableCaching
-	public static class Spr13081Config extends CachingConfigurerSupport {
+	public static class Spr13081Config implements CachingConfigurer {
 
 		@Bean
 		@Override
@@ -393,7 +398,6 @@ public class CacheReproTests {
 		public TestBean insertItem(TestBean item) {
 			return item;
 		}
-
 	}
 
 

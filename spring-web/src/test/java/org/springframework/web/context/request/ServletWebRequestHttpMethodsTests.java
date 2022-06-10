@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import java.util.Date;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -323,7 +323,7 @@ class ServletWebRequestHttpMethodsTests {
 
 		assertThat(request.checkNotModified(oneMinuteAgo)).isFalse();
 		assertThat(servletResponse.getStatus()).isEqualTo(200);
-		assertThat(servletResponse.getHeader("Last-Modified")).isEqualTo(null);
+		assertThat(servletResponse.getHeader("Last-Modified")).isNull();
 	}
 
 	@ParameterizedHttpMethodTest
@@ -337,7 +337,7 @@ class ServletWebRequestHttpMethodsTests {
 
 		assertThat(request.checkNotModified(currentEpoch)).isTrue();
 		assertThat(servletResponse.getStatus()).isEqualTo(412);
-		assertThat(servletResponse.getHeader("Last-Modified")).isEqualTo(null);
+		assertThat(servletResponse.getHeader("Last-Modified")).isNull();
 	}
 
 	private void setUpRequest(String method) {

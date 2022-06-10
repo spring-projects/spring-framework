@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class WebFilterTests {
 	public void testWebFilter() throws Exception {
 
 		WebFilter filter = (exchange, chain) -> {
-			DataBuffer buffer = new DefaultDataBufferFactory().allocateBuffer();
+			DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.allocateBuffer();
 			buffer.write("It works!".getBytes(StandardCharsets.UTF_8));
 			return exchange.getResponse().writeWith(Mono.just(buffer));
 		};

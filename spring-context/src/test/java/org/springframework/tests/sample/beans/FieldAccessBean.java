@@ -16,6 +16,8 @@
 
 package org.springframework.tests.sample.beans;
 
+import org.springframework.beans.testfixture.beans.TestBean;
+
 /**
  * @author Juergen Hoeller
  * @since 07.03.2006

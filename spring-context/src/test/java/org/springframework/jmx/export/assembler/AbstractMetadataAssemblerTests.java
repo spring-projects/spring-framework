@@ -29,12 +29,12 @@ import javax.management.modelmbean.ModelMBeanOperationInfo;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.testfixture.interceptor.NopInterceptor;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
 import org.springframework.jmx.support.ObjectNameManager;
-import org.springframework.tests.aop.interceptor.NopInterceptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

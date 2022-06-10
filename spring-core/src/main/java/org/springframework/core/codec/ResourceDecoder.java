@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,6 +82,10 @@ public class ResourceDecoder extends AbstractDataBufferDecoder<Resource> {
 				@Override
 				public String getFilename() {
 					return filename;
+				}
+				@Override
+				public long contentLength() {
+					return bytes.length;
 				}
 			};
 		}

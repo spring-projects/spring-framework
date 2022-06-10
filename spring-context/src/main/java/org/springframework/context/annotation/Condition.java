@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
  *
  * <p>Conditions must follow the same restrictions as {@link BeanFactoryPostProcessor}
  * and take care to never interact with bean instances. For more fine-grained control
- * of conditions that interact with {@code @Configuration} beans consider the
- * {@link ConfigurationCondition} interface.
+ * of conditions that interact with {@code @Configuration} beans consider implementing
+ * the {@link ConfigurationCondition} interface.
  *
  * @author Phillip Webb
  * @since 4.0
@@ -44,7 +44,7 @@ public interface Condition {
 	/**
 	 * Determine if the condition matches.
 	 * @param context the condition context
-	 * @param metadata metadata of the {@link org.springframework.core.type.AnnotationMetadata class}
+	 * @param metadata the metadata of the {@link org.springframework.core.type.AnnotationMetadata class}
 	 * or {@link org.springframework.core.type.MethodMetadata method} being checked
 	 * @return {@code true} if the condition matches and the component can be registered,
 	 * or {@code false} to veto the annotated component's registration

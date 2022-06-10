@@ -54,7 +54,7 @@ The following example shows how to do so:
 	}
 ----
 
-Then you can map it to a URL and add a `WebSocketHandlerAdapter`, as the following example shows:
+Then you can map it to a URL:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -69,11 +69,6 @@ Then you can map it to a URL and add a `WebSocketHandlerAdapter`, as the followi
 			int order = -1; // before annotated controllers
 
 			return new SimpleUrlHandlerMapping(map, order);
-		}
-
-		@Bean
-		public WebSocketHandlerAdapter handlerAdapter() {
-			return new WebSocketHandlerAdapter();
 		}
 	}
 ----
@@ -90,6 +85,34 @@ Then you can map it to a URL and add a `WebSocketHandlerAdapter`, as the followi
 
 			return SimpleUrlHandlerMapping(map, order)
 		}
+	}
+----
+
+If using the <<web-reactive.adoc#webflux-config, WebFlux Config>> there is nothing
+further to do, or otherwise if not using the WebFlux config you'll need to declare a
+`WebSocketHandlerAdapter` as shown below:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Configuration
+	class WebConfig {
+
+		// ...
+
+		@Bean
+		public WebSocketHandlerAdapter handlerAdapter() {
+			return new WebSocketHandlerAdapter();
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	class WebConfig {
+
+		// ...
 
 		@Bean
 		fun handlerAdapter() =  WebSocketHandlerAdapter()
@@ -128,7 +151,7 @@ requirements, the unified flow completes when:
 * At a chosen point, through the `close` method of `WebSocketSession`.
 
 When inbound and outbound message streams are composed together, there is no need to
-check if the connection is open, since Reactive Streams signals terminate activity.
+check if the connection is open, since Reactive Streams signals end activity.
 The inbound stream receives a completion or error signal, and the outbound stream
 receives a cancellation signal.
 
@@ -333,9 +356,11 @@ into the attributes of the `WebSocketSession`.
 === Server Configation
 [.small]#<<web.adoc#websocket-server-runtime-configuration, Same as in the Servlet stack>>#
 
-The `RequestUpgradeStrategy` for each server exposes WebSocket-related configuration
-options available for the underlying WebSocket engine. The following example sets
-WebSocket options when running on Tomcat:
+The `RequestUpgradeStrategy` for each server exposes configuration specific to the
+underlying WebSocket server engine. When using the WebFlux Java config you can customize
+such properties as shown in the corresponding section of the
+<<web-reactive.adoc#webflux-config-websocket-service, WebFlux Config>>, or otherwise if
+not using the WebFlux config, use the below:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -369,7 +394,7 @@ WebSocket options when running on Tomcat:
 		@Bean
 		fun webSocketService(): WebSocketService {
 			val strategy = TomcatRequestUpgradeStrategy().apply {
-				setMaxSessionIdleTimeout(0L)	
+				setMaxSessionIdleTimeout(0L)
 			}
 			return HandshakeWebSocketService(strategy)
 		}
@@ -387,7 +412,7 @@ only Tomcat and Jetty expose such options.
 
 The easiest way to configure CORS and restrict access to a WebSocket endpoint is to
 have your `WebSocketHandler` implement `CorsConfigurationSource` and return a
-`CorsConfiguraiton` with allowed origins, headers, and other details. If you cannot do
+`CorsConfiguration` with allowed origins, headers, and other details. If you cannot do
 that, you can also set the `corsConfigurations` property on the `SimpleUrlHandler` to
 specify CORS settings by URL pattern. If both are specified, they are combined by using the
 `combine` method on `CorsConfiguration`.

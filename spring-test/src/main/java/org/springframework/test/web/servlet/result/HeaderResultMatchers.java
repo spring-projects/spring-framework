@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ public class HeaderResultMatchers {
 	 * Iterable {@link Matcher}.
 	 * @since 4.3
 	 */
-	public ResultMatcher stringValues(String name, Matcher<Iterable<String>> matcher) {
+	public ResultMatcher stringValues(String name, Matcher<? super Iterable<String>> matcher) {
 		return result -> {
 			List<String> values = result.getResponse().getHeaders(name);
 			assertThat("Response header '" + name + "'", values, matcher);

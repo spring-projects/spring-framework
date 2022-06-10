@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,12 @@ import java.io.Closeable;
 import java.io.IOException;
 
 import org.springframework.http.HttpInputMessage;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 
 /**
  * Represents a client-side HTTP response.
- * Obtained via an calling of the {@link ClientHttpRequest#execute()}.
+ *
+ * <p>Obtained via an invocation of {@link ClientHttpRequest#execute()}.
  *
  * <p>A {@code ClientHttpResponse} must be {@linkplain #close() closed},
  * typically in a {@code finally} block.
@@ -35,28 +36,25 @@ import org.springframework.http.HttpStatus;
 public interface ClientHttpResponse extends HttpInputMessage, Closeable {
 
 	/**
-	 * Return the HTTP status code as an {@link HttpStatus} enum value.
-	 * @return the HTTP status as an HttpStatus enum value (never {@code null})
+	 * Get the HTTP status code as an {@link HttpStatusCode}.
+	 * @return the HTTP status as {@code HttpStatusCode} value (never {@code null})
 	 * @throws IOException in case of I/O errors
-	 * @throws IllegalArgumentException in case of an unknown HTTP status code
-	 * @since #getRawStatusCode()
-	 * @see HttpStatus#valueOf(int)
 	 */
-	HttpStatus getStatusCode() throws IOException;
+	HttpStatusCode getStatusCode() throws IOException;
 
 	/**
-	 * Return the HTTP status code (potentially non-standard and not
-	 * resolvable through the {@link HttpStatus} enum) as an integer.
+	 * Get the HTTP status code as an integer.
 	 * @return the HTTP status as an integer value
 	 * @throws IOException in case of I/O errors
 	 * @since 3.1.1
 	 * @see #getStatusCode()
-	 * @see HttpStatus#resolve(int)
+	 * @deprecated as of 6.0, in favor of {@link #getStatusCode()}
 	 */
+	@Deprecated
 	int getRawStatusCode() throws IOException;
 
 	/**
-	 * Return the HTTP status text of the response.
+	 * Get the HTTP status text of the response.
 	 * @return the HTTP status text
 	 * @throws IOException in case of I/O errors
 	 */

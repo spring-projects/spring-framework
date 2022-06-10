@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import org.springframework.util.Assert;
  * Base class for STOMP client implementations.
  *
  * <p>Subclasses can connect over WebSocket or TCP using any library. When creating
- * a new connection, a subclass can create an instance of @link DefaultStompSession}
- * which extends {@link org.springframework.messaging.tcp.TcpConnectionHandler}
+ * a new connection, a subclass can create an instance of {@link DefaultStompSession}
+ * which implements {@link org.springframework.messaging.tcp.TcpConnectionHandler}
  * whose lifecycle methods the subclass must then invoke.
  *
  * <p>In effect, {@code TcpConnectionHandler} and {@code TcpConnection} are the
@@ -98,6 +98,14 @@ public abstract class StompClientSupport {
 	 * <p>By default this is set to "10000,10000" but subclasses may override
 	 * that default and for example set it to "0,0" if they require a
 	 * TaskScheduler to be configured first.
+	 * <p><strong>Note:</strong> that a heartbeat is sent only in case of
+	 * inactivity, i.e. when no other messages are sent. This can present a
+	 * challenge when using an external broker since messages with a non-broker
+	 * destination represent activity but aren't actually forwarded to the broker.
+	 * In that case you can configure a `TaskScheduler` through the
+	 * {@link org.springframework.messaging.simp.config.StompBrokerRelayRegistration}
+	 * which ensures a heartbeat is forwarded to the broker also when only
+	 * messages with a non-broker destination are sent.
 	 * @param heartbeat the value for the CONNECT "heart-beat" header
 	 * @see <a href="https://stomp.github.io/stomp-specification-1.2.html#Heart-beating">
 	 * https://stomp.github.io/stomp-specification-1.2.html#Heart-beating</a>

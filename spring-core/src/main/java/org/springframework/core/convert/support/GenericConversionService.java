@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,15 @@ package org.springframework.core.convert.support;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.springframework.core.DecoratingProxy;
 import org.springframework.core.ResolvableType;
@@ -84,8 +85,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 	@Override
 	public void addConverter(Converter<?, ?> converter) {
 		ResolvableType[] typeInfo = getRequiredTypeInfo(converter.getClass(), Converter.class);
-		if (typeInfo == null && converter instanceof DecoratingProxy) {
-			typeInfo = getRequiredTypeInfo(((DecoratingProxy) converter).getDecoratedClass(), Converter.class);
+		if (typeInfo == null && converter instanceof DecoratingProxy decoratingProxy) {
+			typeInfo = getRequiredTypeInfo(decoratingProxy.getDecoratedClass(), Converter.class);
 		}
 		if (typeInfo == null) {
 			throw new IllegalArgumentException("Unable to determine source type <S> and target type <T> for your " +
@@ -109,8 +110,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 	@Override
 	public void addConverterFactory(ConverterFactory<?, ?> factory) {
 		ResolvableType[] typeInfo = getRequiredTypeInfo(factory.getClass(), ConverterFactory.class);
-		if (typeInfo == null && factory instanceof DecoratingProxy) {
-			typeInfo = getRequiredTypeInfo(((DecoratingProxy) factory).getDecoratedClass(), ConverterFactory.class);
+		if (typeInfo == null && factory instanceof DecoratingProxy decoratingProxy) {
+			typeInfo = getRequiredTypeInfo(decoratingProxy.getDecoratedClass(), ConverterFactory.class);
 		}
 		if (typeInfo == null) {
 			throw new IllegalArgumentException("Unable to determine source type <S> and target type <T> for your " +
@@ -372,8 +373,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 					!this.targetType.hasUnresolvableGenerics()) {
 				return false;
 			}
-			return !(this.converter instanceof ConditionalConverter) ||
-					((ConditionalConverter) this.converter).matches(sourceType, targetType);
+			return !(this.converter instanceof ConditionalConverter conditionalConverter) ||
+					conditionalConverter.matches(sourceType, targetType);
 		}
 
 		@Override
@@ -415,13 +416,13 @@ public class GenericConversionService implements ConfigurableConversionService {
 		@Override
 		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			boolean matches = true;
-			if (this.converterFactory instanceof ConditionalConverter) {
-				matches = ((ConditionalConverter) this.converterFactory).matches(sourceType, targetType);
+			if (this.converterFactory instanceof ConditionalConverter conditionalConverter) {
+				matches = conditionalConverter.matches(sourceType, targetType);
 			}
 			if (matches) {
 				Converter<?, ?> converter = this.converterFactory.getConverter(targetType.getType());
-				if (converter instanceof ConditionalConverter) {
-					matches = ((ConditionalConverter) converter).matches(sourceType, targetType);
+				if (converter instanceof ConditionalConverter conditionalConverter) {
+					matches = conditionalConverter.matches(sourceType, targetType);
 				}
 			}
 			return matches;
@@ -462,10 +463,9 @@ public class GenericConversionService implements ConfigurableConversionService {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof ConverterCacheKey)) {
+			if (!(other instanceof ConverterCacheKey otherKey)) {
 				return false;
 			}
-			ConverterCacheKey otherKey = (ConverterCacheKey) other;
 			return (this.sourceType.equals(otherKey.sourceType)) &&
 					this.targetType.equals(otherKey.targetType);
 		}
@@ -499,9 +499,9 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 */
 	private static class Converters {
 
-		private final Set<GenericConverter> globalConverters = new LinkedHashSet<>();
+		private final Set<GenericConverter> globalConverters = new CopyOnWriteArraySet<>();
 
-		private final Map<ConvertiblePair, ConvertersForPair> converters = new LinkedHashMap<>(36);
+		private final Map<ConvertiblePair, ConvertersForPair> converters = new ConcurrentHashMap<>(256);
 
 		public void add(GenericConverter converter) {
 			Set<ConvertiblePair> convertibleTypes = converter.getConvertibleTypes();
@@ -512,19 +512,13 @@ public class GenericConversionService implements ConfigurableConversionService {
 			}
 			else {
 				for (ConvertiblePair convertiblePair : convertibleTypes) {
-					ConvertersForPair convertersForPair = getMatchableConverters(convertiblePair);
-					convertersForPair.add(converter);
+					getMatchableConverters(convertiblePair).add(converter);
 				}
 			}
 		}
 
 		private ConvertersForPair getMatchableConverters(ConvertiblePair convertiblePair) {
-			ConvertersForPair convertersForPair = this.converters.get(convertiblePair);
-			if (convertersForPair == null) {
-				convertersForPair = new ConvertersForPair();
-				this.converters.put(convertiblePair, convertersForPair);
-			}
-			return convertersForPair;
+			return this.converters.computeIfAbsent(convertiblePair, k -> new ConvertersForPair());
 		}
 
 		public void remove(Class<?> sourceType, Class<?> targetType) {
@@ -656,7 +650,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 */
 	private static class ConvertersForPair {
 
-		private final LinkedList<GenericConverter> converters = new LinkedList<>();
+		private final Deque<GenericConverter> converters = new ConcurrentLinkedDeque<>();
 
 		public void add(GenericConverter converter) {
 			this.converters.addFirst(converter);
@@ -665,8 +659,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 		@Nullable
 		public GenericConverter getConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			for (GenericConverter converter : this.converters) {
-				if (!(converter instanceof ConditionalGenericConverter) ||
-						((ConditionalGenericConverter) converter).matches(sourceType, targetType)) {
+				if (!(converter instanceof ConditionalGenericConverter genericConverter) ||
+						genericConverter.matches(sourceType, targetType)) {
 					return converter;
 				}
 			}
@@ -692,6 +686,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 
 		@Override
+		@Nullable
 		public Set<ConvertiblePair> getConvertibleTypes() {
 			return null;
 		}

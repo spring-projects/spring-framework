@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.core.serializer.support;
-
-import java.io.ByteArrayOutputStream;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.serializer.DefaultSerializer;
@@ -58,10 +56,8 @@ public class SerializingConverter implements Converter<Object, byte[]> {
 	 */
 	@Override
 	public byte[] convert(Object source) {
-		ByteArrayOutputStream byteStream = new ByteArrayOutputStream(1024);
 		try  {
-			this.serializer.serialize(source, byteStream);
-			return byteStream.toByteArray();
+			return this.serializer.serializeToByteArray(source);
 		}
 		catch (Throwable ex) {
 			throw new SerializationFailedException("Failed to serialize object using " +

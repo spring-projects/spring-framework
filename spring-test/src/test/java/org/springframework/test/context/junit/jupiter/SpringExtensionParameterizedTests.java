@@ -50,7 +50,7 @@ class SpringExtensionParameterizedTests {
 	@ParameterizedTest
 	@ValueSource(strings = { "Dilbert", "Wally" })
 	void people(String name, @Autowired List<Person> people) {
-		assertThat(people.stream().map(Person::getName).filter(name::equals)).size().isEqualTo(1);
+		assertThat(people.stream().map(Person::getName).filter(name::equals)).hasSize(1);
 	}
 
 	@ParameterizedTest

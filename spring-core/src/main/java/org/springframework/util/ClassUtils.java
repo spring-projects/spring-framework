@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,14 +65,17 @@ public abstract class ClassUtils {
 	/** Prefix for internal non-primitive array class names: {@code "[L"}. */
 	private static final String NON_PRIMITIVE_ARRAY_PREFIX = "[L";
 
+	/** A reusable empty class array constant. */
+	private static final Class<?>[] EMPTY_CLASS_ARRAY = {};
+
 	/** The package separator character: {@code '.'}. */
 	private static final char PACKAGE_SEPARATOR = '.';
 
 	/** The path separator character: {@code '/'}. */
 	private static final char PATH_SEPARATOR = '/';
 
-	/** The inner class separator character: {@code '$'}. */
-	private static final char INNER_CLASS_SEPARATOR = '$';
+	/** The nested class separator character: {@code '$'}. */
+	private static final char NESTED_CLASS_SEPARATOR = '$';
 
 	/** The CGLIB class separator: {@code "$$"}. */
 	public static final String CGLIB_CLASS_SEPARATOR = "$$";
@@ -85,13 +88,13 @@ public abstract class ClassUtils {
 	 * Map with primitive wrapper type as key and corresponding primitive
 	 * type as value, for example: Integer.class -> int.class.
 	 */
-	private static final Map<Class<?>, Class<?>> primitiveWrapperTypeMap = new IdentityHashMap<>(8);
+	private static final Map<Class<?>, Class<?>> primitiveWrapperTypeMap = new IdentityHashMap<>(9);
 
 	/**
 	 * Map with primitive type as key and corresponding wrapper
 	 * type as value, for example: int.class -> Integer.class.
 	 */
-	private static final Map<Class<?>, Class<?>> primitiveTypeToWrapperMap = new IdentityHashMap<>(8);
+	private static final Map<Class<?>, Class<?>> primitiveTypeToWrapperMap = new IdentityHashMap<>(9);
 
 	/**
 	 * Map with primitive type name as key and corresponding primitive
@@ -110,6 +113,11 @@ public abstract class ClassUtils {
 	 * when searching for 'primary' user-level interfaces.
 	 */
 	private static final Set<Class<?>> javaLanguageInterfaces;
+
+	/**
+	 * Cache for equivalent methods on an interface implemented by the declaring class.
+	 */
+	private static final Map<Method, Method> interfaceMethodCache = new ConcurrentReferenceHashMap<>(256);
 
 
 	static {
@@ -133,7 +141,6 @@ public abstract class ClassUtils {
 		primitiveTypes.addAll(primitiveWrapperTypeMap.values());
 		Collections.addAll(primitiveTypes, boolean[].class, byte[].class, char[].class,
 				double[].class, float[].class, int[].class, long[].class, short[].class);
-		primitiveTypes.add(void.class);
 		for (Class<?> primitiveType : primitiveTypes) {
 			primitiveTypeNameMap.put(primitiveType.getName(), primitiveType);
 		}
@@ -150,7 +157,7 @@ public abstract class ClassUtils {
 		Class<?>[] javaLanguageInterfaceArray = {Serializable.class, Externalizable.class,
 				Closeable.class, AutoCloseable.class, Cloneable.class, Comparable.class};
 		registerCommonClasses(javaLanguageInterfaceArray);
-		javaLanguageInterfaces = new HashSet<>(Arrays.asList(javaLanguageInterfaceArray));
+		javaLanguageInterfaces = Set.of(javaLanguageInterfaceArray);
 	}
 
 
@@ -225,7 +232,7 @@ public abstract class ClassUtils {
 	/**
 	 * Replacement for {@code Class.forName()} that also returns Class instances
 	 * for primitives (e.g. "int") and array class names (e.g. "String[]").
-	 * Furthermore, it is also capable of resolving inner class names in Java source
+	 * Furthermore, it is also capable of resolving nested class names in Java source
 	 * style (e.g. "java.lang.Thread.State" instead of "java.lang.Thread$State").
 	 * @param name the name of the Class
 	 * @param classLoader the class loader to use
@@ -279,10 +286,10 @@ public abstract class ClassUtils {
 		catch (ClassNotFoundException ex) {
 			int lastDotIndex = name.lastIndexOf(PACKAGE_SEPARATOR);
 			if (lastDotIndex != -1) {
-				String innerClassName =
-						name.substring(0, lastDotIndex) + INNER_CLASS_SEPARATOR + name.substring(lastDotIndex + 1);
+				String nestedClassName =
+						name.substring(0, lastDotIndex) + NESTED_CLASS_SEPARATOR + name.substring(lastDotIndex + 1);
 				try {
-					return Class.forName(innerClassName, false, clToUse);
+					return Class.forName(nestedClassName, false, clToUse);
 				}
 				catch (ClassNotFoundException ex2) {
 					// Swallow - let original exception get through
@@ -455,7 +462,7 @@ public abstract class ClassUtils {
 		Class<?> result = null;
 		// Most class names will be quite long, considering that they
 		// SHOULD sit in a package, so a length check is worthwhile.
-		if (name != null && name.length() <= 8) {
+		if (name != null && name.length() <= 7) {
 			// Could be a primitive - likely.
 			result = primitiveTypeNameMap.get(name);
 		}
@@ -528,7 +535,7 @@ public abstract class ClassUtils {
 	 * @param lhsType the target type
 	 * @param rhsType the value type that should be assigned to the target type
 	 * @return if the target type is assignable from the value type
-	 * @see TypeUtils#isAssignable
+	 * @see TypeUtils#isAssignable(java.lang.reflect.Type, java.lang.reflect.Type)
 	 */
 	public static boolean isAssignable(Class<?> lhsType, Class<?> rhsType) {
 		Assert.notNull(lhsType, "Left-hand side type must not be null");
@@ -538,17 +545,12 @@ public abstract class ClassUtils {
 		}
 		if (lhsType.isPrimitive()) {
 			Class<?> resolvedPrimitive = primitiveWrapperTypeMap.get(rhsType);
-			if (lhsType == resolvedPrimitive) {
-				return true;
-			}
+			return (lhsType == resolvedPrimitive);
 		}
 		else {
 			Class<?> resolvedWrapper = primitiveTypeToWrapperMap.get(rhsType);
-			if (resolvedWrapper != null && lhsType.isAssignableFrom(resolvedWrapper)) {
-				return true;
-			}
+			return (resolvedWrapper != null && lhsType.isAssignableFrom(resolvedWrapper));
 		}
-		return false;
 	}
 
 	/**
@@ -676,8 +678,8 @@ public abstract class ClassUtils {
 	 * @since 3.1
 	 * @see StringUtils#toStringArray
 	 */
-	public static Class<?>[] toClassArray(Collection<Class<?>> collection) {
-		return collection.toArray(new Class<?>[0]);
+	public static Class<?>[] toClassArray(@Nullable Collection<Class<?>> collection) {
+		return (!CollectionUtils.isEmpty(collection) ? collection.toArray(EMPTY_CLASS_ARRAY) : EMPTY_CLASS_ARRAY);
 	}
 
 	/**
@@ -776,7 +778,7 @@ public abstract class ClassUtils {
 	 * conflicting method signatures (or a similar constraint is violated)
 	 * @see java.lang.reflect.Proxy#getProxyClass
 	 */
-	@SuppressWarnings("deprecation")  // on JDK 9
+	@SuppressWarnings("deprecation")
 	public static Class<?> createCompositeInterface(Class<?>[] interfaces, @Nullable ClassLoader classLoader) {
 		Assert.notEmpty(interfaces, "Interface array must not be empty");
 		return Proxy.getProxyClass(classLoader, interfaces);
@@ -830,14 +832,40 @@ public abstract class ClassUtils {
 	}
 
 	/**
+	 * Determine if the supplied class is a static class.
+	 * @return {@code true} if the supplied class is a static class
+	 * @since 6.0
+	 * @see Modifier#isStatic(int)
+	 * @see #isInnerClass(Class)
+	 */
+	public static boolean isStaticClass(Class<?> clazz) {
+		return Modifier.isStatic(clazz.getModifiers());
+	}
+
+	/**
 	 * Determine if the supplied class is an <em>inner class</em>,
 	 * i.e. a non-static member of an enclosing class.
 	 * @return {@code true} if the supplied class is an inner class
 	 * @since 5.0.5
 	 * @see Class#isMemberClass()
+	 * @see #isStaticClass(Class)
 	 */
 	public static boolean isInnerClass(Class<?> clazz) {
-		return (clazz.isMemberClass() && !Modifier.isStatic(clazz.getModifiers()));
+		return (clazz.isMemberClass() && !isStaticClass(clazz));
+	}
+
+	/**
+	 * Determine if the supplied {@link Class} is a JVM-generated implementation
+	 * class for a lambda expression or method reference.
+	 * <p>This method makes a best-effort attempt at determining this, based on
+	 * checks that work on modern, mainstream JVMs.
+	 * @param clazz the class to check
+	 * @return {@code true} if the class is a lambda implementation class
+	 * @since 5.3.19
+	 */
+	public static boolean isLambdaClass(Class<?> clazz) {
+		return (clazz.isSynthetic() && (clazz.getSuperclass() == Object.class) &&
+				(clazz.getInterfaces().length > 0) && clazz.getName().contains("$$Lambda"));
 	}
 
 	/**
@@ -951,7 +979,7 @@ public abstract class ClassUtils {
 			nameEndIndex = className.length();
 		}
 		String shortName = className.substring(lastDotIndex + 1, nameEndIndex);
-		shortName = shortName.replace(INNER_CLASS_SEPARATOR, PACKAGE_SEPARATOR);
+		shortName = shortName.replace(NESTED_CLASS_SEPARATOR, PACKAGE_SEPARATOR);
 		return shortName;
 	}
 
@@ -966,7 +994,7 @@ public abstract class ClassUtils {
 
 	/**
 	 * Return the short string name of a Java class in uncapitalized JavaBeans
-	 * property format. Strips the outer class name in case of an inner class.
+	 * property format. Strips the outer class name in case of a nested class.
 	 * @param clazz the class
 	 * @return the short name rendered in a standard JavaBeans property format
 	 * @see java.beans.Introspector#decapitalize(String)
@@ -1057,7 +1085,7 @@ public abstract class ClassUtils {
 	 * @param clazz the clazz to analyze
 	 * @param paramTypes the parameter types of the method
 	 * @return whether the class has a corresponding constructor
-	 * @see Class#getMethod
+	 * @see Class#getConstructor
 	 */
 	public static boolean hasConstructor(Class<?> clazz, Class<?>... paramTypes) {
 		return (getConstructorIfAvailable(clazz, paramTypes) != null);
@@ -1081,6 +1109,24 @@ public abstract class ClassUtils {
 		catch (NoSuchMethodException ex) {
 			return null;
 		}
+	}
+
+	/**
+	 * Determine whether the given class has a public method with the given signature.
+	 * @param clazz the clazz to analyze
+	 * @param method the method to look for
+	 * @return whether the class has a corresponding method
+	 * @since 5.2.3
+	 */
+	public static boolean hasMethod(Class<?> clazz, Method method) {
+		Assert.notNull(clazz, "Class must not be null");
+		Assert.notNull(method, "Method must not be null");
+		if (clazz == method.getDeclaringClass()) {
+			return true;
+		}
+		String methodName = method.getName();
+		Class<?>[] paramTypes = method.getParameterTypes();
+		return getMethodOrNull(clazz, methodName, paramTypes) != null;
 	}
 
 	/**
@@ -1153,12 +1199,7 @@ public abstract class ClassUtils {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
 		if (paramTypes != null) {
-			try {
-				return clazz.getMethod(methodName, paramTypes);
-			}
-			catch (NoSuchMethodException ex) {
-				return null;
-			}
+			return getMethodOrNull(clazz, methodName, paramTypes);
 		}
 		else {
 			Set<Method> candidates = findMethodCandidatesByName(clazz, methodName);
@@ -1229,7 +1270,7 @@ public abstract class ClassUtils {
 	 * target class may be {@code DefaultFoo}. In this case, the method may be
 	 * {@code DefaultFoo.bar()}. This enables attributes on that method to be found.
 	 * <p><b>NOTE:</b> In contrast to {@link org.springframework.aop.support.AopUtils#getMostSpecificMethod},
-	 * this method does <i>not</i> resolve Java 5 bridge methods automatically.
+	 * this method does <i>not</i> resolve bridge methods automatically.
 	 * Call {@link org.springframework.core.BridgeMethodResolver#findBridgedMethod}
 	 * if bridge method resolution is desirable (e.g. for obtaining metadata from
 	 * the original method definition).
@@ -1241,7 +1282,7 @@ public abstract class ClassUtils {
 	 * (may be {@code null} or may not even implement the method)
 	 * @return the specific target method, or the original method if the
 	 * {@code targetClass} does not implement it
-	 * @see #getInterfaceMethodIfPossible
+	 * @see #getInterfaceMethodIfPossible(Method, Class)
 	 */
 	public static Method getMostSpecificMethod(Method method, @Nullable Class<?> targetClass) {
 		if (targetClass != null && targetClass != method.getDeclaringClass() && isOverridable(method, targetClass)) {
@@ -1274,23 +1315,52 @@ public abstract class ClassUtils {
 	 * @param method the method to be invoked, potentially from an implementation class
 	 * @return the corresponding interface method, or the original method if none found
 	 * @since 5.1
+	 * @deprecated in favor of {@link #getInterfaceMethodIfPossible(Method, Class)}
+	 */
+	@Deprecated
+	public static Method getInterfaceMethodIfPossible(Method method) {
+		return getInterfaceMethodIfPossible(method, null);
+	}
+
+	/**
+	 * Determine a corresponding interface method for the given method handle, if possible.
+	 * <p>This is particularly useful for arriving at a public exported type on Jigsaw
+	 * which can be reflectively invoked without an illegal access warning.
+	 * @param method the method to be invoked, potentially from an implementation class
+	 * @param targetClass the target class to check for declared interfaces
+	 * @return the corresponding interface method, or the original method if none found
+	 * @since 5.3.16
 	 * @see #getMostSpecificMethod
 	 */
-	public static Method getInterfaceMethodIfPossible(Method method) {
-		if (Modifier.isPublic(method.getModifiers()) && !method.getDeclaringClass().isInterface()) {
-			Class<?> current = method.getDeclaringClass();
-			while (current != null && current != Object.class) {
-				Class<?>[] ifcs = current.getInterfaces();
-				for (Class<?> ifc : ifcs) {
-					try {
-						return ifc.getMethod(method.getName(), method.getParameterTypes());
-					}
-					catch (NoSuchMethodException ex) {
-						// ignore
-					}
+	public static Method getInterfaceMethodIfPossible(Method method, @Nullable Class<?> targetClass) {
+		if (!Modifier.isPublic(method.getModifiers()) || method.getDeclaringClass().isInterface()) {
+			return method;
+		}
+		// Try cached version of method in its declaring class
+		Method result = interfaceMethodCache.computeIfAbsent(method,
+				key -> findInterfaceMethodIfPossible(key, key.getDeclaringClass(), Object.class));
+		if (result == method && targetClass != null) {
+			// No interface method found yet -> try given target class (possibly a subclass of the
+			// declaring class, late-binding a base class method to a subclass-declared interface:
+			// see e.g. HashMap.HashIterator.hasNext)
+			result = findInterfaceMethodIfPossible(method, targetClass, method.getDeclaringClass());
+		}
+		return result;
+	}
+
+	private static Method findInterfaceMethodIfPossible(Method method, Class<?> startClass, Class<?> endClass) {
+		Class<?> current = startClass;
+		while (current != null && current != endClass) {
+			Class<?>[] ifcs = current.getInterfaces();
+			for (Class<?> ifc : ifcs) {
+				try {
+					return ifc.getMethod(method.getName(), method.getParameterTypes());
 				}
-				current = current.getSuperclass();
+				catch (NoSuchMethodException ex) {
+					// ignore
+				}
 			}
+			current = current.getSuperclass();
 		}
 		return method;
 	}
@@ -1304,7 +1374,7 @@ public abstract class ClassUtils {
 	 * Note that, despite being synthetic, bridge methods ({@link Method#isBridge()}) are considered
 	 * as user-level methods since they are eventually pointing to a user-declared generic method.
 	 * @param method the method to check
-	 * @return {@code true} if the method can be considered as user-declared; [@code false} otherwise
+	 * @return {@code true} if the method can be considered as user-declared; {@code false} otherwise
 	 */
 	public static boolean isUserLevelMethod(Method method) {
 		Assert.notNull(method, "Method must not be null");
@@ -1352,6 +1422,17 @@ public abstract class ClassUtils {
 		}
 	}
 
+
+	@Nullable
+	private static Method getMethodOrNull(Class<?> clazz, String methodName, Class<?>[] paramTypes) {
+		try {
+			return clazz.getMethod(methodName, paramTypes);
+		}
+		catch (NoSuchMethodException ex) {
+			return null;
+		}
+	}
+
 	private static Set<Method> findMethodCandidatesByName(Class<?> clazz, String methodName) {
 		Set<Method> candidates = new HashSet<>(1);
 		Method[] methods = clazz.getMethods();
@@ -1362,4 +1443,5 @@ public abstract class ClassUtils {
 		}
 		return candidates;
 	}
+
 }

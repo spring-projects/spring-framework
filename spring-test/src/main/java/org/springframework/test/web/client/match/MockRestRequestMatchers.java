@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public abstract class MockRestRequestMatchers {
 	 * @param matcher the String matcher for the expected URI
 	 * @return the request matcher
 	 */
-	public static RequestMatcher requestTo(Matcher<String> matcher) {
+	public static RequestMatcher requestTo(Matcher<? super String> matcher) {
 		Assert.notNull(matcher, "'matcher' must not be null");
 		return request -> assertThat("Request URI", request.getURI().toString(), matcher);
 	}
@@ -227,7 +227,7 @@ public abstract class MockRestRequestMatchers {
 	 * @param expression the JSON path expression
 	 * @param matcher a matcher for the value expected at the JSON path
 	 */
-	public static <T> RequestMatcher jsonPath(String expression, Matcher<T> matcher) {
+	public static <T> RequestMatcher jsonPath(String expression, Matcher<? super T> matcher) {
 		return new JsonPathRequestMatchers(expression).value(matcher);
 	}
 
@@ -249,7 +249,7 @@ public abstract class MockRestRequestMatchers {
 	 * using formatting specifiers as defined in
 	 * {@link String#format(String, Object...)}.
 	 * @param expression the XPath optionally parameterized with arguments
-	 * @param namespaces namespaces referenced in the XPath expression
+	 * @param namespaces the namespaces referenced in the XPath expression
 	 * @param args arguments to parameterize the XPath expression with
 	 */
 	public static XpathRequestMatchers xpath(String expression, Map<String, String> namespaces, Object... args)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,13 @@ import javax.sql.DataSource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InOrder;
 
+import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.UncategorizedSQLException;
-import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -44,13 +46,13 @@ import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
@@ -58,11 +60,12 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.springframework.tests.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
 
 /**
  * @author Juergen Hoeller
  * @since 04.07.2003
+ * @see org.springframework.jdbc.support.JdbcTransactionManagerTests
  */
 public class DataSourceTransactionManagerTests  {
 
@@ -235,7 +238,7 @@ public class DataSourceTransactionManagerTests  {
 		assertThat(condition2).as("Synchronization not active").isTrue();
 
 		final RuntimeException ex = new RuntimeException("Application exception");
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+		assertThatRuntimeException().isThrownBy(() ->
 				tt.execute(new TransactionCallbackWithoutResult() {
 					@Override
 					protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
@@ -284,8 +287,7 @@ public class DataSourceTransactionManagerTests  {
 		boolean condition1 = !TransactionSynchronizationManager.isSynchronizationActive();
 		assertThat(condition1).as("Synchronization not active").isTrue();
 
-		ConnectionHolder conHolder = new ConnectionHolder(con);
-		conHolder.setTransactionActive(true);
+		ConnectionHolder conHolder = new ConnectionHolder(con, true);
 		TransactionSynchronizationManager.bindResource(ds, conHolder);
 		final RuntimeException ex = new RuntimeException("Application exception");
 		try {
@@ -488,9 +490,7 @@ public class DataSourceTransactionManagerTests  {
 							protected void doInTransactionWithoutResult(TransactionStatus status) {
 							}
 						});
-						TransactionSynchronizationManager.registerSynchronization(
-								new TransactionSynchronizationAdapter() {
-								});
+						TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {});
 					}
 				};
 
@@ -966,18 +966,10 @@ public class DataSourceTransactionManagerTests  {
 		ordered.verify(con).close();
 	}
 
-	@Test
-	public void testTransactionWithLongTimeout() throws Exception {
-		doTestTransactionWithTimeout(10);
-	}
-
-	@Test
-	public void testTransactionWithShortTimeout() throws Exception {
-		doTestTransactionWithTimeout(1);
-	}
-
-	@EnabledForTestGroups(PERFORMANCE)
-	private void doTestTransactionWithTimeout(int timeout) throws Exception {
+	@ParameterizedTest(name = "transaction with {0} second timeout")
+	@ValueSource(ints = {1, 10})
+	@EnabledForTestGroups(LONG_RUNNING)
+	public void transactionWithTimeout(int timeout) throws Exception {
 		PreparedStatement ps = mock(PreparedStatement.class);
 		given(con.getAutoCommit()).willReturn(true);
 		given(con.prepareStatement("some SQL statement")).willReturn(ps);

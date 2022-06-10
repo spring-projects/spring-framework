@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,10 @@ import org.springframework.core.annotation.AliasFor;
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em>.
  *
+ * <p>As of Spring Framework 5.3, this annotation will be inherited from an
+ * enclosing test class by default. See
+ * {@link NestedTestConfiguration @NestedTestConfiguration} for details.
+ *
  * @author Sam Brannen
  * @since 2.5
  * @see TestExecutionListener
@@ -63,6 +67,7 @@ public @interface TestExecutionListeners {
 	 * {@link #value}, but it may be used instead of {@link #value}.
 	 * @see org.springframework.test.context.web.ServletTestExecutionListener
 	 * @see org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener
+	 * @see org.springframework.test.context.event.ApplicationEventsTestExecutionListener
 	 * @see org.springframework.test.context.support.DependencyInjectionTestExecutionListener
 	 * @see org.springframework.test.context.support.DirtiesContextTestExecutionListener
 	 * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
@@ -74,15 +79,16 @@ public @interface TestExecutionListeners {
 
 	/**
 	 * Whether or not {@link #listeners TestExecutionListeners} from superclasses
-	 * should be <em>inherited</em>.
-	 * <p>The default value is {@code true}, which means that an annotated
-	 * class will <em>inherit</em> the listeners defined by an annotated
-	 * superclass. Specifically, the listeners for an annotated class will be
-	 * appended to the list of listeners defined by an annotated superclass.
-	 * Thus, subclasses have the option of <em>extending</em> the list of
-	 * listeners. In the following example, {@code AbstractBaseTest} will
-	 * be configured with {@code DependencyInjectionTestExecutionListener}
-	 * and {@code DirtiesContextTestExecutionListener}; whereas,
+	 * and enclosing classes should be <em>inherited</em>.
+	 * <p>The default value is {@code true}, which means that an annotated class
+	 * will <em>inherit</em> the listeners defined by an annotated superclass or
+	 * enclosing class. Specifically, the listeners for an annotated class will be
+	 * appended to the list of listeners defined by an annotated superclass or
+	 * enclosing class. Thus, subclasses and nested classes have the option of
+	 * <em>extending</em> the list of listeners. In the following example,
+	 * {@code AbstractBaseTest} will be configured with
+	 * {@code DependencyInjectionTestExecutionListener} and
+	 * {@code DirtiesContextTestExecutionListener}; whereas,
 	 * {@code TransactionalTest} will be configured with
 	 * {@code DependencyInjectionTestExecutionListener},
 	 * {@code DirtiesContextTestExecutionListener}, <strong>and</strong>
@@ -102,18 +108,19 @@ public @interface TestExecutionListeners {
 	 * }</pre>
 	 * <p>If {@code inheritListeners} is set to {@code false}, the listeners for
 	 * the annotated class will <em>shadow</em> and effectively replace any
-	 * listeners defined by a superclass.
+	 * listeners defined by a superclass or enclosing class.
 	 */
 	boolean inheritListeners() default true;
 
 	/**
 	 * The <em>merge mode</em> to use when {@code @TestExecutionListeners} is
-	 * declared on a class that does <strong>not</strong> inherit listeners
-	 * from a superclass.
+	 * declared on a class that does <strong>not</strong> inherit listeners from
+	 * a superclass or enclosing class.
 	 * <p>Can be set to {@link MergeMode#MERGE_WITH_DEFAULTS MERGE_WITH_DEFAULTS}
 	 * to have locally declared listeners <em>merged</em> with the default
 	 * listeners.
-	 * <p>The mode is ignored if listeners are inherited from a superclass.
+	 * <p>The mode is ignored if listeners are inherited from a superclass or
+	 * enclosing class.
 	 * <p>Defaults to {@link MergeMode#REPLACE_DEFAULTS REPLACE_DEFAULTS}
 	 * for backwards compatibility.
 	 * @see MergeMode
@@ -126,7 +133,8 @@ public @interface TestExecutionListeners {
 	 * Enumeration of <em>modes</em> that dictate whether or not explicitly
 	 * declared listeners are merged with the default listeners when
 	 * {@code @TestExecutionListeners} is declared on a class that does
-	 * <strong>not</strong> inherit listeners from a superclass.
+	 * <strong>not</strong> inherit listeners from a superclass or enclosing
+	 * class.
 	 * @since 4.1
 	 */
 	enum MergeMode {
