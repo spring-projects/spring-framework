@@ -22,6 +22,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A collection of {@link ResourcePatternHint} describing whether
  * resources should be made available at runtime through a matching
@@ -43,6 +45,11 @@ public final class ResourcePatternHints {
 		this.excludes = new ArrayList<>(builder.excludes);
 	}
 
+	private ResourcePatternHints(List<ResourcePatternHint> includes, List<ResourcePatternHint> excludes) {
+		this.includes = includes;
+		this.excludes = excludes;
+	}
+
 	/**
 	 * Return the include patterns to use to identify the resources to match.
 	 * @return the include patterns
@@ -57,6 +64,16 @@ public final class ResourcePatternHints {
 	 */
 	public List<ResourcePatternHint> getExcludes() {
 		return this.excludes;
+	}
+
+	ResourcePatternHints merge(ResourcePatternHints resourcePatternHints) {
+		List<ResourcePatternHint> includes = new ArrayList<>();
+		includes.addAll(this.includes);
+		includes.addAll(resourcePatternHints.includes);
+		List<ResourcePatternHint> excludes = new ArrayList<>();
+		excludes.addAll(this.excludes);
+		excludes.addAll(resourcePatternHints.excludes);
+		return new ResourcePatternHints(includes, excludes);
 	}
 
 
@@ -75,7 +92,7 @@ public final class ResourcePatternHints {
 		 * @param includes the include patterns (see {@link ResourcePatternHint} documentation)
 		 * @return {@code this}, to facilitate method chaining
 		 */
-		public Builder includes(TypeReference reachableType, String... includes) {
+		public Builder includes(@Nullable TypeReference reachableType, String... includes) {
 			List<ResourcePatternHint> newIncludes = Arrays.stream(includes)
 					.map(include -> new ResourcePatternHint(include, reachableType)).toList();
 			this.includes.addAll(newIncludes);

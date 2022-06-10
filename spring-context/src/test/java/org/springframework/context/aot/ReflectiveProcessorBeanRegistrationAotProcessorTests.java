@@ -29,6 +29,7 @@ import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.RuntimeHintsPredicates;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
@@ -96,8 +97,7 @@ class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 	void shouldRegisterAnnotation() {
 		process(SampleMethodMetaAnnotatedBean.class);
 		RuntimeHints runtimeHints = this.generationContext.getRuntimeHints();
-		assertThat(runtimeHints.reflection().getTypeHint(SampleInvoker.class)).satisfies(typeHint ->
-				assertThat(typeHint.getMemberCategories()).containsOnly(MemberCategory.INVOKE_DECLARED_METHODS));
+		assertThat(RuntimeHintsPredicates.reflection().onType(SampleInvoker.class).withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(runtimeHints);
 		assertThat(runtimeHints.proxies().jdkProxies()).isEmpty();
 	}
 
@@ -105,11 +105,8 @@ class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 	void shouldRegisterAnnotationAndProxyWithAliasFor() {
 		process(SampleMethodMetaAnnotatedBeanWithAlias.class);
 		RuntimeHints runtimeHints = this.generationContext.getRuntimeHints();
-		assertThat(runtimeHints.reflection().getTypeHint(RetryInvoker.class)).satisfies(typeHint ->
-				assertThat(typeHint.getMemberCategories()).containsOnly(MemberCategory.INVOKE_DECLARED_METHODS));
-		assertThat(runtimeHints.proxies().jdkProxies()).anySatisfy(jdkProxyHint ->
-				assertThat(jdkProxyHint.getProxiedInterfaces()).containsExactly(
-						TypeReference.of(RetryInvoker.class), TypeReference.of(SynthesizedAnnotation.class)));
+		assertThat(RuntimeHintsPredicates.reflection().onType(RetryInvoker.class).withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(runtimeHints);
+		assertThat(RuntimeHintsPredicates.proxies().forInterfaces(RetryInvoker.class, SynthesizedAnnotation.class)).accepts(runtimeHints);
 	}
 
 	@Nullable
@@ -196,7 +193,7 @@ class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 
 	}
 
-	@Target({ ElementType.METHOD, ElementType.ANNOTATION_TYPE })
+	@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
 	@Reflective
@@ -206,7 +203,7 @@ class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 
 	}
 
-	@Target({ ElementType.METHOD })
+	@Target({ElementType.METHOD})
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
 	@SampleInvoker

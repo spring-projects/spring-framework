@@ -25,8 +25,8 @@ import javax.lang.model.element.Modifier;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.RuntimeHintsPredicates;
 import org.springframework.aot.test.generator.compile.Compiled;
 import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.beans.testfixture.beans.TestBean;
@@ -87,11 +87,8 @@ class InjectionCodeGeneratorTests {
 		TestBean bean = new TestBean();
 		Field field = ReflectionUtils.findField(bean.getClass(), "age");
 		this.generator.generateInjectionCode(field, INSTANCE_VARIABLE, CodeBlock.of("$L", 123));
-		assertThat(this.hints.reflection().getTypeHint(TestBean.class))
-				.satisfies(hint -> assertThat(hint.fields()).anySatisfy(fieldHint -> {
-					assertThat(fieldHint.getName()).isEqualTo("age");
-					assertThat(fieldHint.isAllowWrite()).isTrue();
-				}));
+		assertThat(RuntimeHintsPredicates.reflection().onField(TestBean.class, "age").allowWrite())
+				.accepts(this.hints);
 	}
 
 	@Test
@@ -127,11 +124,8 @@ class InjectionCodeGeneratorTests {
 		TestBeanWithPrivateMethod bean = new TestBeanWithPrivateMethod();
 		Method method = ReflectionUtils.findMethod(bean.getClass(), "setAge", int.class);
 		this.generator.generateInjectionCode(method, INSTANCE_VARIABLE, CodeBlock.of("$L", 123));
-		assertThat(this.hints.reflection().getTypeHint(TestBeanWithPrivateMethod.class))
-				.satisfies(hint -> assertThat(hint.methods()).anySatisfy(methodHint -> {
-					assertThat(methodHint.getName()).isEqualTo("setAge");
-					assertThat(methodHint.getModes()).contains(ExecutableMode.INVOKE);
-				}));
+		assertThat(RuntimeHintsPredicates.reflection()
+				.onMethod(TestBeanWithPrivateMethod.class, "setAge").invoke()).accepts(this.hints);
 	}
 
 	@SuppressWarnings("unchecked")

@@ -21,8 +21,8 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.RuntimeHintsPredicates;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
-import org.springframework.aot.hint.TypeReference;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.support.SpringFactoriesLoader;
@@ -49,16 +49,14 @@ class CoreAnnotationsRuntimeHintsRegistrarTests {
 
 	@Test
 	void aliasForHasHints() {
-		assertThat(this.hints.reflection().getTypeHint(TypeReference.of(AliasFor.class)))
-				.satisfies(hint -> assertThat(hint.getMemberCategories())
-						.containsExactly(MemberCategory.INVOKE_DECLARED_METHODS));
+		assertThat(RuntimeHintsPredicates.reflection().onType(AliasFor.class)
+				.withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(this.hints);
 	}
 
 	@Test
 	void orderAnnotationHasHints() {
-		assertThat(this.hints.reflection().getTypeHint(TypeReference.of(Order.class)))
-				.satisfies(hint -> assertThat(hint.getMemberCategories())
-						.containsExactly(MemberCategory.INVOKE_DECLARED_METHODS));
+		assertThat(RuntimeHintsPredicates.reflection().onType(Order.class)
+				.withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(this.hints);
 	}
 
 }

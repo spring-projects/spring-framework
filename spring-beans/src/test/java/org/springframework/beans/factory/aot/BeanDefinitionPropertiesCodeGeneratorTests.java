@@ -28,8 +28,8 @@ import javax.lang.model.element.Modifier;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.GeneratedMethods;
-import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.RuntimeHintsPredicates;
 import org.springframework.aot.test.generator.compile.Compiled;
 import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -277,15 +277,8 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 	}
 
 	private void assertHasMethodInvokeHints(Class<?> beanType, String... methodNames) {
-		assertThat(this.hints.reflection().getTypeHint(beanType)).satisfies(typeHint -> {
-			for (String methodName : methodNames) {
-				assertThat(typeHint.methods()).anySatisfy(methodHint -> {
-					assertThat(methodHint.getName()).isEqualTo(methodName);
-					assertThat(methodHint.getModes())
-							.containsExactly(ExecutableMode.INVOKE);
-				});
-			}
-		});
+		assertThat(methodNames).allMatch(methodName ->
+				RuntimeHintsPredicates.reflection().onMethod(beanType, methodName).invoke().test(this.hints));
 	}
 
 	@Test

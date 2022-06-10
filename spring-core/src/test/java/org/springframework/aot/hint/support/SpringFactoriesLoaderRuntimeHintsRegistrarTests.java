@@ -20,11 +20,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.hint.MemberCategory;
-import org.springframework.aot.hint.ResourcePatternHint;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.RuntimeHintsPredicates;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
-import org.springframework.aot.hint.TypeHint;
-import org.springframework.aot.hint.TypeReference;
 import org.springframework.core.io.support.DummyFactory;
 import org.springframework.core.io.support.MyDummyFactory1;
 import org.springframework.core.io.support.SpringFactoriesLoader;
@@ -51,28 +49,19 @@ class SpringFactoriesLoaderRuntimeHintsRegistrarTests {
 
 	@Test
 	void resourceLocationHasHints() {
-		assertThat(this.hints.resources().resourcePatterns())
-				.anySatisfy(hint -> assertThat(hint.getIncludes()).map(ResourcePatternHint::getPattern)
-						.contains(SpringFactoriesLoader.FACTORIES_RESOURCE_LOCATION));
+		assertThat(RuntimeHintsPredicates.resource().forResource(SpringFactoriesLoader.FACTORIES_RESOURCE_LOCATION)).accepts(this.hints);
 	}
 
 	@Test
 	void factoryTypeHasHint() {
-		TypeReference type = TypeReference.of(DummyFactory.class);
-		assertThat(this.hints.reflection().getTypeHint(type))
-				.satisfies(this::expectedHints);
+		assertThat(RuntimeHintsPredicates.reflection().onType(DummyFactory.class)
+				.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.hints);
 	}
 
 	@Test
 	void factoryImplementationHasHint() {
-		TypeReference type = TypeReference.of(MyDummyFactory1.class);
-		assertThat(this.hints.reflection().getTypeHint(type))
-				.satisfies(this::expectedHints);
-	}
-
-	private void expectedHints(TypeHint hint) {
-		assertThat(hint.getMemberCategories())
-				.containsExactly(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+		assertThat(RuntimeHintsPredicates.reflection().onType(MyDummyFactory1.class)
+				.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.hints);
 	}
 
 }
