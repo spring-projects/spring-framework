@@ -29,7 +29,6 @@ import org.springframework.aot.hint.FieldHint;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.TypeHint;
-import org.springframework.aot.hint.TypeReference;
 import org.springframework.lang.Nullable;
 
 /**
@@ -96,7 +95,7 @@ class ReflectionHintsWriter {
 	private Map<String, Object> toAttributes(ExecutableHint hint) {
 		Map<String, Object> attributes = new LinkedHashMap<>();
 		attributes.put("name", hint.getName());
-		attributes.put("parameterTypes", hint.getParameterTypes().stream().map(TypeReference::getCanonicalName).toList());
+		attributes.put("parameterTypes", hint.getParameterTypes());
 		return attributes;
 	}
 
@@ -105,14 +104,21 @@ class ReflectionHintsWriter {
 					switch (category) {
 						case PUBLIC_FIELDS -> attributes.put("allPublicFields", true);
 						case DECLARED_FIELDS -> attributes.put("allDeclaredFields", true);
-						case INTROSPECT_PUBLIC_CONSTRUCTORS -> attributes.put("queryAllPublicConstructors", true);
-						case INTROSPECT_DECLARED_CONSTRUCTORS -> attributes.put("queryAllDeclaredConstructors", true);
-						case INVOKE_PUBLIC_CONSTRUCTORS -> attributes.put("allPublicConstructors", true);
-						case INVOKE_DECLARED_CONSTRUCTORS -> attributes.put("allDeclaredConstructors", true);
-						case INTROSPECT_PUBLIC_METHODS -> attributes.put("queryAllPublicMethods", true);
-						case INTROSPECT_DECLARED_METHODS -> attributes.put("queryAllDeclaredMethods", true);
+						case INTROSPECT_PUBLIC_CONSTRUCTORS ->
+								attributes.put("queryAllPublicConstructors", true);
+						case INTROSPECT_DECLARED_CONSTRUCTORS ->
+								attributes.put("queryAllDeclaredConstructors", true);
+						case INVOKE_PUBLIC_CONSTRUCTORS ->
+								attributes.put("allPublicConstructors", true);
+						case INVOKE_DECLARED_CONSTRUCTORS ->
+								attributes.put("allDeclaredConstructors", true);
+						case INTROSPECT_PUBLIC_METHODS ->
+								attributes.put("queryAllPublicMethods", true);
+						case INTROSPECT_DECLARED_METHODS ->
+								attributes.put("queryAllDeclaredMethods", true);
 						case INVOKE_PUBLIC_METHODS -> attributes.put("allPublicMethods", true);
-						case INVOKE_DECLARED_METHODS -> attributes.put("allDeclaredMethods", true);
+						case INVOKE_DECLARED_METHODS ->
+								attributes.put("allDeclaredMethods", true);
 						case PUBLIC_CLASSES -> attributes.put("allPublicClasses", true);
 						case DECLARED_CLASSES -> attributes.put("allDeclaredClasses", true);
 					}

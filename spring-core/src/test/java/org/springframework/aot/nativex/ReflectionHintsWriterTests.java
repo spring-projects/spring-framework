@@ -159,6 +159,27 @@ public class ReflectionHintsWriterTests {
 	}
 
 	@Test
+	void methodWithInnerClassParameter() throws JSONException {
+		ReflectionHints hints = new ReflectionHints();
+		hints.registerType(Integer.class, builder -> builder.withMethod("test", List.of(TypeReference.of(Inner.class)),
+				b -> b.withMode(ExecutableMode.INVOKE)));
+
+		assertEquals("""
+				[
+					{
+						"name": "java.lang.Integer",
+						"methods": [
+							{
+								"name": "test",
+								"parameterTypes": ["org.springframework.aot.nativex.ReflectionHintsWriterTests$Inner"]
+							}
+						]
+					}
+				]
+				""", hints);
+	}
+
+	@Test
 	void methodAndQueriedMethods() throws JSONException {
 		ReflectionHints hints = new ReflectionHints();
 		hints.registerType(Integer.class, builder -> builder.withMethod("parseInt", List.of(TypeReference.of(String.class)),
@@ -192,6 +213,11 @@ public class ReflectionHintsWriterTests {
 		BasicJsonWriter writer = new BasicJsonWriter(out, "\t");
 		ReflectionHintsWriter.INSTANCE.write(writer, hints);
 		JSONAssert.assertEquals(expectedString, out.toString(), JSONCompareMode.NON_EXTENSIBLE);
+	}
+
+
+	static class Inner {
+
 	}
 
 }

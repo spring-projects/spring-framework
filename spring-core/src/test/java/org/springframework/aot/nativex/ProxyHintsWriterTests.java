@@ -64,6 +64,16 @@ public class ProxyHintsWriterTests {
 	}
 
 	@Test
+	void shouldWriteInnerClass() throws JSONException {
+		ProxyHints hints = new ProxyHints();
+		hints.registerJdkProxy(Inner.class);
+		assertEquals("""
+				[
+					{ "interfaces": [ "org.springframework.aot.nativex.ProxyHintsWriterTests$Inner" ] }
+				]""", hints);
+	}
+
+	@Test
 	void shouldWriteCondition() throws JSONException {
 		ProxyHints hints = new ProxyHints();
 		hints.registerJdkProxy(builder -> builder.proxiedInterfaces(Function.class)
@@ -79,6 +89,10 @@ public class ProxyHintsWriterTests {
 		BasicJsonWriter writer = new BasicJsonWriter(out, "\t");
 		ProxyHintsWriter.INSTANCE.write(writer, hints);
 		JSONAssert.assertEquals(expectedString, out.toString(), JSONCompareMode.NON_EXTENSIBLE);
+	}
+
+	interface Inner {
+
 	}
 
 }

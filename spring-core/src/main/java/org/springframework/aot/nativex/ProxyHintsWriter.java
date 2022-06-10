@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.springframework.aot.hint.JdkProxyHint;
 import org.springframework.aot.hint.ProxyHints;
-import org.springframework.aot.hint.TypeReference;
 
 /**
  * Write {@link JdkProxyHint}s contained in a {@link ProxyHints} to the JSON
@@ -46,8 +45,7 @@ class ProxyHintsWriter {
 	private Map<String, Object> toAttributes(JdkProxyHint hint) {
 		Map<String, Object> attributes = new LinkedHashMap<>();
 		handleCondition(attributes, hint);
-		attributes.put("interfaces", hint.getProxiedInterfaces().stream()
-				.map(TypeReference::getCanonicalName).toList());
+		attributes.put("interfaces", hint.getProxiedInterfaces());
 		return attributes;
 	}
 
