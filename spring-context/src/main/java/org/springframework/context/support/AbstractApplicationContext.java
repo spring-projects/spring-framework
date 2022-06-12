@@ -572,15 +572,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 //				注册拦截bean创建的bean后置处理器
 				registerBeanPostProcessors(beanFactory);
 				beanPostProcess.end();
-
+// 初始化上下文的消息源
 				// Initialize message source for this context.
 				initMessageSource();
-
+//为此上下文初始化multicaster
 				// Initialize event multicaster for this context.
 				initApplicationEventMulticaster();
 
-				// Initialize other special beans in specific context subclasses.
 //				初始化特定上下文中的其他特殊bean的子类
+				// Initialize other special beans in specific context subclasses.
 				onRefresh();
 
 				// Check for listener beans and register them.
