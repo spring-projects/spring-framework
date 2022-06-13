@@ -16,6 +16,8 @@
 
 package org.springframework.aot.hint.support;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Qualifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -56,6 +58,18 @@ class CoreAnnotationsRuntimeHintsRegistrarTests {
 	@Test
 	void orderAnnotationHasHints() {
 		assertThat(RuntimeHintsPredicates.reflection().onType(Order.class)
+				.withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(this.hints);
+	}
+
+	@Test
+	void jakartaInjectAnnotationHasHints() {
+		assertThat(RuntimeHintsPredicates.reflection().onType(Inject.class)
+				.withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(this.hints);
+	}
+
+	@Test
+	void jakartaQualifierAnnotationHasHints() {
+		assertThat(RuntimeHintsPredicates.reflection().onType(Qualifier.class)
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(this.hints);
 	}
 

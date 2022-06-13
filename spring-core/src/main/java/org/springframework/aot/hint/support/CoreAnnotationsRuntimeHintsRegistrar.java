@@ -23,6 +23,7 @@ import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.Order;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 
 /**
  * {@link RuntimeHintsRegistrar} for core annotations.
@@ -36,6 +37,10 @@ class CoreAnnotationsRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
 	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 		Stream.of(AliasFor.class, Order.class).forEach(annotationType ->
 				RuntimeHintsUtils.registerAnnotation(hints, annotationType));
+		if (ClassUtils.isPresent("jakarta.inject.Inject", classLoader)) {
+			Stream.of("jakarta.inject.Inject", "jakarta.inject.Qualifier").forEach(annotationType ->
+					RuntimeHintsUtils.registerAnnotation(hints, ClassUtils.resolveClassName(annotationType, classLoader)));
+		}
 	}
 
 }
