@@ -16,26 +16,59 @@
 
 package org.springframework.web.bind.annotation;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 
+import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.annotation.ReflectiveProcessor;
-import org.springframework.aot.hint.annotation.SimpleReflectiveProcessor;
+import org.springframework.aot.hint.support.BindingReflectionHintsRegistrar;
+import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 
 /**
  * {@link ReflectiveProcessor} implementation for {@link RequestMapping}
  * annotated types. On top of registering reflection hints for invoking
- * the annotated method, this implementation handles return types that
- * are serialized as well as TBD.
+ * the annotated method, this implementation handles return types annotated
+ * with {@link ResponseBody} and parameters annotated with {@link RequestBody}
+ * which are serialized as well.
+ *
  *
  * @author Stephane Nicoll
+ * @author Sebastien Deleuze
  * @since 6.0
  */
-class RequestMappingReflectiveProcessor extends SimpleReflectiveProcessor {
+class RequestMappingReflectiveProcessor implements ReflectiveProcessor {
+
+	private BindingReflectionHintsRegistrar bindingRegistrar = new BindingReflectionHintsRegistrar();
 
 	@Override
+	public void registerReflectionHints(ReflectionHints hints, AnnotatedElement element) {
+		if (element instanceof Class<?> type) {
+			registerTypeHint(hints, type);
+		}
+		else if (element instanceof Method method) {
+			registerMethodHint(hints, method);
+		}
+	}
+
+	protected void registerTypeHint(ReflectionHints hints, Class<?> type) {
+		hints.registerType(type, hint -> {});
+	}
+
 	protected void registerMethodHint(ReflectionHints hints, Method method) {
-		super.registerMethodHint(hints, method);
-		// TODO
+		hints.registerMethod(method, hint -> hint.setModes(ExecutableMode.INVOKE));
+		for (Parameter parameter : method.getParameters()) {
+			MethodParameter methodParameter = MethodParameter.forParameter(parameter);
+			if (methodParameter.hasParameterAnnotation(RequestBody.class)) {
+				this.bindingRegistrar.registerReflectionHints(hints, methodParameter.getGenericParameterType());
+			}
+		}
+		MethodParameter returnType = MethodParameter.forExecutable(method, -1);
+		if (AnnotatedElementUtils.hasAnnotation(returnType.getContainingClass(), ResponseBody.class) ||
+				returnType.hasMethodAnnotation(ResponseBody.class)) {
+			this.bindingRegistrar.registerReflectionHints(hints, returnType.getGenericParameterType());
+		}
 	}
 }
