@@ -48,6 +48,7 @@ import static org.mockito.Mockito.mock;
  * Tests for {@link ReflectiveProcessorBeanRegistrationAotProcessor}.
  *
  * @author Stephane Nicoll
+ * @author Sebastien Deleuze
  */
 class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 
@@ -107,6 +108,28 @@ class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 		RuntimeHints runtimeHints = this.generationContext.getRuntimeHints();
 		assertThat(RuntimeHintsPredicates.reflection().onType(RetryInvoker.class).withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(runtimeHints);
 		assertThat(RuntimeHintsPredicates.proxies().forInterfaces(RetryInvoker.class, SynthesizedAnnotation.class)).accepts(runtimeHints);
+	}
+
+	@Test
+	void shouldProcessAnnotationOnInterface() {
+		process(SampleMethodAnnotatedBeanWithInterface.class);
+		assertThat(this.generationContext.getRuntimeHints().reflection().getTypeHint(SampleInterface.class))
+				.satisfies(typeHint -> assertThat(typeHint.methods()).singleElement()
+						.satisfies(methodHint -> assertThat(methodHint.getName()).isEqualTo("managed")));
+		assertThat(this.generationContext.getRuntimeHints().reflection().getTypeHint(SampleMethodAnnotatedBeanWithInterface.class))
+				.satisfies(typeHint -> assertThat(typeHint.methods()).singleElement()
+						.satisfies(methodHint -> assertThat(methodHint.getName()).isEqualTo("managed")));
+	}
+
+	@Test
+	void shouldProcessAnnotationOnInheritedClass() {
+		process(SampleMethodAnnotatedBeanWithInheritance.class);
+		assertThat(this.generationContext.getRuntimeHints().reflection().getTypeHint(SampleInheritedClass.class))
+				.satisfies(typeHint -> assertThat(typeHint.methods()).singleElement()
+						.satisfies(methodHint -> assertThat(methodHint.getName()).isEqualTo("managed")));
+		assertThat(this.generationContext.getRuntimeHints().reflection().getTypeHint(SampleMethodAnnotatedBeanWithInheritance.class))
+				.satisfies(typeHint -> assertThat(typeHint.methods()).singleElement()
+						.satisfies(methodHint -> assertThat(methodHint.getName()).isEqualTo("managed")));
 	}
 
 	@Nullable
@@ -193,6 +216,28 @@ class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 
 	}
 
+	static class SampleMethodAnnotatedBeanWithInterface implements SampleInterface {
+
+		@Override
+		public void managed() {
+		}
+
+		public void notManaged() {
+		}
+
+	}
+
+	static class SampleMethodAnnotatedBeanWithInheritance extends SampleInheritedClass {
+
+		@Override
+		public void managed() {
+		}
+
+		public void notManaged() {
+		}
+
+	}
+
 	@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
@@ -212,6 +257,19 @@ class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 		@AliasFor(attribute = "retries", annotation = SampleInvoker.class)
 		int value() default 1;
 
+	}
+
+	interface SampleInterface {
+
+		@Reflective
+		void managed();
+	}
+
+	static class SampleInheritedClass {
+
+		@Reflective
+		void managed() {
+		}
 	}
 
 }

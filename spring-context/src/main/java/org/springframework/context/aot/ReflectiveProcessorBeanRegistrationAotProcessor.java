@@ -40,6 +40,7 @@ import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -48,6 +49,7 @@ import org.springframework.util.ReflectionUtils;
  * underlying {@link ReflectiveProcessor} implementations.
  *
  * @author Stephane Nicoll
+ * @author Sebastien Deleuze
  */
 class ReflectiveProcessorBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
 
@@ -58,23 +60,30 @@ class ReflectiveProcessorBeanRegistrationAotProcessor implements BeanRegistratio
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		Class<?> beanClass = registeredBean.getBeanClass();
 		Set<Entry> entries = new LinkedHashSet<>();
-		if (isReflective(beanClass)) {
-			entries.add(createEntry(beanClass));
+		processType(entries, beanClass);
+		for (Class<?> implementedInterface : ClassUtils.getAllInterfacesForClass(beanClass)) {
+			processType(entries, implementedInterface);
 		}
-		doWithReflectiveConstructors(beanClass, constructor ->
-				entries.add(createEntry(constructor)));
-		ReflectionUtils.doWithFields(beanClass, field ->
-				entries.add(createEntry(field)), this::isReflective);
-		ReflectionUtils.doWithMethods(beanClass, method ->
-				entries.add(createEntry(method)), this::isReflective);
 		if (!entries.isEmpty()) {
 			return new ReflectiveProcessorBeanRegistrationAotContribution(entries);
 		}
 		return null;
 	}
 
-	private void doWithReflectiveConstructors(Class<?> beanClass, Consumer<Constructor<?>> consumer) {
-		for (Constructor<?> constructor : beanClass.getDeclaredConstructors()) {
+	private void processType(Set<Entry> entries, Class<?> typeToProcess) {
+		if (isReflective(typeToProcess)) {
+			entries.add(createEntry(typeToProcess));
+		}
+		doWithReflectiveConstructors(typeToProcess, constructor ->
+				entries.add(createEntry(constructor)));
+		ReflectionUtils.doWithFields(typeToProcess, field ->
+				entries.add(createEntry(field)), this::isReflective);
+		ReflectionUtils.doWithMethods(typeToProcess, method ->
+				entries.add(createEntry(method)), this::isReflective);
+	}
+
+	private void doWithReflectiveConstructors(Class<?> typeToProcess, Consumer<Constructor<?>> consumer) {
+		for (Constructor<?> constructor : typeToProcess.getDeclaredConstructors()) {
 			if (isReflective(constructor)) {
 				consumer.accept(constructor);
 			}
@@ -82,13 +91,13 @@ class ReflectiveProcessorBeanRegistrationAotProcessor implements BeanRegistratio
 	}
 
 	private boolean isReflective(AnnotatedElement element) {
-		return MergedAnnotations.from(element).isPresent(Reflective.class);
+		return MergedAnnotations.from(element, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY).isPresent(Reflective.class);
 	}
 
 	@SuppressWarnings("unchecked")
 	private Entry createEntry(AnnotatedElement element) {
 		Class<? extends ReflectiveProcessor>[] processorClasses = (Class<? extends ReflectiveProcessor>[])
-				MergedAnnotations.from(element).get(Reflective.class).getClassArray("value");
+				MergedAnnotations.from(element, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY).get(Reflective.class).getClassArray("value");
 		List<ReflectiveProcessor> processors = Arrays.stream(processorClasses).distinct()
 				.map(processorClass -> this.processors.computeIfAbsent(processorClass, BeanUtils::instantiateClass))
 				.toList();
@@ -125,7 +134,6 @@ class ReflectiveProcessorBeanRegistrationAotProcessor implements BeanRegistratio
 		@Override
 		public void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {
 			RuntimeHints runtimeHints = generationContext.getRuntimeHints();
-			RuntimeHintsUtils.registerAnnotation(runtimeHints, Reflective.class);
 			this.entries.forEach(entry -> {
 				AnnotatedElement element = entry.element();
 				entry.processor().registerReflectionHints(runtimeHints.reflection(), element);
