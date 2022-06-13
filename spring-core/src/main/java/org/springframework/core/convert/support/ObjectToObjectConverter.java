@@ -59,9 +59,9 @@ import org.springframework.util.ReflectionUtils;
  * </ol>
  *
  * <p><strong>Warning</strong>: this converter does <em>not</em> support the
- * {@link Object#toString()} method for converting from a {@code sourceType}
- * to {@code java.lang.String}. For {@code toString()} support, use
- * {@link FallbackObjectToStringConverter} instead.
+ * {@link Object#toString()} or {@link String#valueOf(Object)} methods for converting
+ * from a {@code sourceType} to {@code java.lang.String}. For {@code toString()}
+ * support, use {@link FallbackObjectToStringConverter} instead.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
