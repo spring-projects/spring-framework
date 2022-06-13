@@ -99,6 +99,21 @@ class ReflectionHintsPredicatesTests {
 		}
 
 		@Test
+		void typeWithMemberCategoriesMatchesCategories() {
+			runtimeHints.reflection().registerType(SampleClass.class, builder ->
+					builder.withMembers(MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS, MemberCategory.INTROSPECT_PUBLIC_METHODS));
+			assertPredicateMatches(reflection.onType(SampleClass.class)
+					.withMemberCategories(MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS, MemberCategory.INTROSPECT_PUBLIC_METHODS));
+		}
+
+		@Test
+		void typeWithMemberCategoriesDoesNotMatchMissingCategory() {
+			runtimeHints.reflection().registerType(SampleClass.class, builder -> builder.withMembers(MemberCategory.INTROSPECT_PUBLIC_METHODS));
+			assertPredicateDoesNotMatch(reflection.onType(SampleClass.class)
+					.withMemberCategories(MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS, MemberCategory.INTROSPECT_PUBLIC_METHODS));
+		}
+
+		@Test
 		void typeWithAnyMemberCategoryFailsWithNullCategories() {
 			runtimeHints.reflection().registerType(SampleClass.class, builder -> builder.withMembers(MemberCategory.INTROSPECT_PUBLIC_METHODS));
 			assertThatIllegalArgumentException().isThrownBy(() -> reflection.onType(SampleClass.class).withAnyMemberCategory(new MemberCategory[0]));

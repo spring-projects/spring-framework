@@ -181,6 +181,16 @@ public class ReflectionHintsPredicates {
 		}
 
 		/**
+		 * Refine the current predicate to only match if the given {@link MemberCategory categories} are present.
+		 * @param memberCategories the member categories
+		 * @return the refined {@link RuntimeHints} predicate
+		 */
+		public Predicate<RuntimeHints> withMemberCategories(MemberCategory... memberCategories) {
+			Assert.notEmpty(memberCategories, "'memberCategories' should not be empty");
+			return this.and(hints -> getTypeHint(hints).getMemberCategories().containsAll(Arrays.asList(memberCategories)));
+		}
+
+		/**
 		 * Refine the current predicate to match if any of the given {@link MemberCategory categories} is present.
 		 * @param memberCategories the member categories
 		 * @return the refined {@link RuntimeHints} predicate
