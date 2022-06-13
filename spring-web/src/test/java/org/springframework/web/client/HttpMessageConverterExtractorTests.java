@@ -18,9 +18,11 @@ package org.springframework.web.client;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 import org.junit.jupiter.api.Test;
 
@@ -109,6 +111,22 @@ class HttpMessageConverterExtractorTests {
 		given(response.getStatusCode()).willReturn(HttpStatus.OK);
 		given(response.getHeaders()).willReturn(responseHeaders);
 		given(response.getBody()).willReturn(new ByteArrayInputStream("".getBytes()));
+
+		Object result = extractor.extractData(response);
+		assertThat(result).isNull();
+	}
+
+	@Test
+	void emptyLazyGzipMessageBody() throws IOException {
+		given(response.getStatusCode()).willReturn(HttpStatus.BAD_REQUEST);
+		given(response.getHeaders()).willReturn(responseHeaders);
+		given(response.getBody()).willReturn(new InputStream() {
+			@Override
+			public int read() throws IOException {
+				// Simulates lazy gzip stream reading
+				return new GZIPInputStream(new ByteArrayInputStream("".getBytes())).read();
+			}
+		});
 
 		Object result = extractor.extractData(response);
 		assertThat(result).isNull();

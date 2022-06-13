@@ -16,6 +16,8 @@
 
 package org.springframework.web.client;
 
+import java.io.ByteArrayInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
@@ -96,14 +98,20 @@ class IntrospectingClientHttpResponse extends ClientHttpResponseDecorator {
 			}
 		}
 		else {
-			this.pushbackInputStream = new PushbackInputStream(body);
-			int b = this.pushbackInputStream.read();
-			if (b == -1) {
-				return true;
+			try {
+				this.pushbackInputStream = new PushbackInputStream(body);
+				int b = this.pushbackInputStream.read();
+				if (b == -1) {
+					return true;
+				}
+				else {
+					this.pushbackInputStream.unread(b);
+					return false;
+				}
 			}
-			else {
-				this.pushbackInputStream.unread(b);
-				return false;
+			catch (EOFException ex) {
+				this.pushbackInputStream = new PushbackInputStream(new ByteArrayInputStream(new byte[0]));
+				return true;
 			}
 		}
 	}
