@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,15 +41,21 @@ import org.springframework.util.ReflectionUtils;
  * <h3>Conversion Algorithm</h3>
  * <ol>
  * <li>Invoke a non-static {@code to[targetType.simpleName]()} method on the
- * source object that has a return type equal to {@code targetType}, if such
+ * source object that has a return type assignable to {@code targetType}, if such
  * a method exists. For example, {@code org.example.Bar Foo#toBar()} is a
  * method that follows this convention.
  * <li>Otherwise invoke a <em>static</em> {@code valueOf(sourceType)} or Java
  * 8 style <em>static</em> {@code of(sourceType)} or {@code from(sourceType)}
- * method on the {@code targetType}, if such a method exists.
+ * method on the {@code targetType} that has a return type <em>related</em> to
+ * {@code targetType}, if such a method exists. For example, a static
+ * {@code Foo.of(sourceType)} method that returns a {@code Foo},
+ * {@code SuperFooType}, or {@code SubFooType} is a method that follows this
+ * convention. {@link java.time.ZoneId#of(String)} is a concrete example of
+ * such a static factory method which returns a subtype of {@code ZoneId}.
  * <li>Otherwise invoke a constructor on the {@code targetType} that accepts
  * a single {@code sourceType} argument, if such a constructor exists.
- * <li>Otherwise throw a {@link ConversionFailedException}.
+ * <li>Otherwise throw a {@link ConversionFailedException} or
+ * {@link IllegalStateException}.
  * </ol>
  *
  * <p><strong>Warning</strong>: this converter does <em>not</em> support the
@@ -193,7 +199,18 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 				method = ClassUtils.getStaticMethod(targetClass, "from", sourceClass);
 			}
 		}
-		return method;
+
+		return (method != null && areRelatedTypes(targetClass, method.getReturnType()) ? method : null);
+	}
+
+	/**
+	 * Determine if the two types reside in the same type hierarchy (i.e., type 1
+	 * is assignable to type 2 or vice versa).
+	 * @since 5.3.21
+	 * @see ClassUtils#isAssignable(Class, Class)
+	 */
+	private static boolean areRelatedTypes(Class<?> type1, Class<?> type2) {
+		return (ClassUtils.isAssignable(type1, type2) || ClassUtils.isAssignable(type2, type1));
 	}
 
 	@Nullable

@@ -824,6 +824,9 @@ class DefaultConversionServiceTests {
 		assertThat(ISBN.toStringCount).as("toString() invocations").isEqualTo(1);
 	}
 
+	/**
+	 * @see org.springframework.core.convert.support.ObjectToObjectConverterTests
+	 */
 	@Test
 	void convertObjectToObjectUsingValueOfMethod() {
 		ISBN.reset();
