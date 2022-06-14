@@ -154,35 +154,20 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	 * current application context.
 	 */
 	private void initRouterFunctions() {
-		List<RouterFunction<?>> routerFunctions = routerFunctions();
+		List<RouterFunction<?>> routerFunctions = new ArrayList<>();
+		detectRouterFunctions(obtainApplicationContext(), routerFunctions);
 		this.routerFunction = routerFunctions.stream().reduce(RouterFunction::andOther).orElse(null);
 		logRouterFunctions(routerFunctions);
 	}
 
-	private List<RouterFunction<?>> routerFunctions() {
-		List<RouterFunction<?>> routerFunctions = new ArrayList<>();
-		if (this.detectHandlerFunctionsInAncestorContexts) {
-			detectRouterFunctionsInAncestorContexts(obtainApplicationContext(), routerFunctions);
+	private void detectRouterFunctions(ApplicationContext context, List<RouterFunction<?>> routerFunctions) {
+		if (this.detectHandlerFunctionsInAncestorContexts && context.getParent() != null) {
+			detectRouterFunctions(context.getParent(), routerFunctions);
 		}
-		obtainApplicationContext()
-				.getBeanProvider(RouterFunction.class)
+		context.getBeanProvider(RouterFunction.class)
 				.orderedStream()
 				.map(router -> (RouterFunction<?>) router)
 				.collect(Collectors.toCollection(() -> routerFunctions));
-		return routerFunctions;
-	}
-
-	private void detectRouterFunctionsInAncestorContexts(
-			ApplicationContext applicationContext, List<RouterFunction<?>> routerFunctions) {
-
-		ApplicationContext parentContext = applicationContext.getParent();
-		if (parentContext != null) {
-			detectRouterFunctionsInAncestorContexts(parentContext, routerFunctions);
-			parentContext.getBeanProvider(RouterFunction.class)
-					.orderedStream()
-					.map(router -> (RouterFunction<?>) router)
-					.collect(Collectors.toCollection(() -> routerFunctions));
-		}
 	}
 
 	private void logRouterFunctions(List<RouterFunction<?>> routerFunctions) {
