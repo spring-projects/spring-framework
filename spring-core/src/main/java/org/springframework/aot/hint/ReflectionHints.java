@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 
 import org.springframework.aot.hint.TypeHint.Builder;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 
 /**
  * Gather the need for reflection at runtime.
@@ -93,6 +94,22 @@ public class ReflectionHints {
 	 */
 	public ReflectionHints registerType(Class<?> type, Consumer<TypeHint.Builder> typeHint) {
 		return registerType(TypeReference.of(type), typeHint);
+	}
+
+	/**
+	 * Register or customize reflection hints for the specified type if it
+	 * is available using the specified {@link ClassLoader}.
+	 * @param classLoader the classloader to use to check if the type is present
+	 * @param typeName the type to customize
+	 * @param typeHint a builder to further customize hints for that type
+	 * @return {@code this}, to facilitate method chaining
+	 */
+	public ReflectionHints registerTypeIfPresent(@Nullable ClassLoader classLoader,
+			String typeName, Consumer<TypeHint.Builder> typeHint) {
+		if (ClassUtils.isPresent(typeName, classLoader)) {
+			registerType(TypeReference.of(typeName), typeHint);
+		}
+		return this;
 	}
 
 	/**

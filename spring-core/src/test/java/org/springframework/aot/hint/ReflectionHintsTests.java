@@ -27,6 +27,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Tests for {@link ReflectionHints}.
@@ -43,6 +45,23 @@ class ReflectionHintsTests {
 				hint -> hint.withMembers(MemberCategory.DECLARED_FIELDS));
 		assertThat(this.reflectionHints.typeHints()).singleElement().satisfies(
 				typeWithMemberCategories(String.class, MemberCategory.DECLARED_FIELDS));
+	}
+
+	@Test
+	void registerTypeIfPresentRegisterExistingClass() {
+		this.reflectionHints.registerTypeIfPresent(null, String.class.getName(),
+				hint -> hint.withMembers(MemberCategory.DECLARED_FIELDS));
+		assertThat(this.reflectionHints.typeHints()).singleElement().satisfies(
+				typeWithMemberCategories(String.class, MemberCategory.DECLARED_FIELDS));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void registerTypeIfPresentIgnoreMissingClass() {
+		Consumer<TypeHint.Builder> hintBuilder = mock(Consumer.class);
+		this.reflectionHints.registerTypeIfPresent(null, "com.example.DoesNotExist", hintBuilder);
+		assertThat(this.reflectionHints.typeHints()).isEmpty();
+		verifyNoInteractions(hintBuilder);
 	}
 
 	@Test

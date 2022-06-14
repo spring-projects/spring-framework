@@ -26,6 +26,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aot.hint.ResourceHintsTests.Nested.Inner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Tests for {@link ResourceHints}.
@@ -89,6 +91,23 @@ class ResourceHintsTests {
 		assertThat(this.resourceHints.resourcePatterns()).singleElement().satisfies(patternOf(
 				List.of("com/example/*.properties"),
 				List.of("com/example/to-ignore.properties")));
+	}
+
+	@Test
+	void registerIfPresentRegisterExistingLocation() {
+		this.resourceHints.registerPatternIfPresent(null, "META-INF/",
+				resourceHint -> resourceHint.includes("com/example/*.properties"));
+		assertThat(this.resourceHints.resourcePatterns()).singleElement().satisfies(
+				patternOf("com/example/*.properties"));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void registerIfPresentIgnoreMissingLocation() {
+		Consumer<ResourcePatternHints.Builder> hintBuilder = mock(Consumer.class);
+		this.resourceHints.registerPatternIfPresent(null, "location/does-not-exist/", hintBuilder);
+		assertThat(this.resourceHints.resourcePatterns()).isEmpty();
+		verifyNoInteractions(hintBuilder);
 	}
 
 	@Test
