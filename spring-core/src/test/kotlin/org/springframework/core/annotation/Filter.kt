@@ -24,7 +24,11 @@ package org.springframework.core.annotation
 @Retention(AnnotationRetention.RUNTIME)
 public annotation class Filter(
 
+	@get:AliasFor("name")
 	val value: String = "",
+
+	@get:AliasFor("value")
+	val name: String = "",
 
 	val and: Filters = Filters()
 

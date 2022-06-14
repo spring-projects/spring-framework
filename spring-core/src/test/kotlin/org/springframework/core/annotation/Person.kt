@@ -24,6 +24,10 @@ package org.springframework.core.annotation
 @Retention(AnnotationRetention.RUNTIME)
 public annotation class Person(
 
+	@get:AliasFor("name")
+	val value: String = "",
+
+	@get:AliasFor("value")
 	val name: String = "",
 
 	vararg val friends: Person = []
