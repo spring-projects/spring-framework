@@ -42,7 +42,7 @@ class ResourceHintsPredicatesTests {
 
 	@Test
 	void resourcePatternMatchesResourceName() {
-		this.runtimeHints.resources().registerPattern("/test/spring.*");
+		this.runtimeHints.resources().registerPattern("/test/*");
 		assertPredicateMatches(resources.forResource("/test/spring.properties"));
 	}
 

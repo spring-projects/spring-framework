@@ -30,7 +30,7 @@ import org.springframework.util.ConcurrentLruCache;
  */
 public class ResourceHintsPredicates {
 
-	private static final ConcurrentLruCache<String, Pattern> CACHED_RESOURCE_PATTERNS = new ConcurrentLruCache<>(32, Pattern::compile);
+	private static final ConcurrentLruCache<ResourcePatternHint, Pattern> CACHED_RESOURCE_PATTERNS = new ConcurrentLruCache<>(32, ResourcePatternHint::toRegex);
 
 	ResourceHintsPredicates() {
 	}
@@ -80,12 +80,12 @@ public class ResourceHintsPredicates {
 		return hints -> hints.resources().resourcePatterns().reduce(ResourcePatternHints::merge)
 				.map(hint -> {
 					boolean isExcluded = hint.getExcludes().stream()
-							.anyMatch(excluded -> CACHED_RESOURCE_PATTERNS.get(excluded.getPattern()).matcher(resourceName).matches());
+							.anyMatch(excluded -> CACHED_RESOURCE_PATTERNS.get(excluded).matcher(resourceName).matches());
 					if (isExcluded) {
 						return false;
 					}
 					return hint.getIncludes().stream()
-							.anyMatch(included -> CACHED_RESOURCE_PATTERNS.get(included.getPattern()).matcher(resourceName).matches());
+							.anyMatch(included -> CACHED_RESOURCE_PATTERNS.get(included).matcher(resourceName).matches());
 				}).orElse(false);
 	}
 
