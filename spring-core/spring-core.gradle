@@ -60,7 +60,6 @@ dependencies {
 	optional("io.smallrye.reactive:mutiny")
 	optional("io.netty:netty-buffer")
 	testImplementation("jakarta.annotation:jakarta.annotation-api")
-	testImplementation("jakarta.inject:jakarta.inject-api")
 	testImplementation("jakarta.xml.bind:jakarta.xml.bind-api")
 	testImplementation("com.google.code.findbugs:jsr305")
 	testImplementation("com.fasterxml.woodstox:woodstox-core")

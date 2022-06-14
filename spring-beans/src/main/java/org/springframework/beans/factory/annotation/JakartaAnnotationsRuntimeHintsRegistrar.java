@@ -14,28 +14,29 @@
  * limitations under the License.
  */
 
-package org.springframework.aot.hint.support;
+package org.springframework.beans.factory.annotation;
 
 import java.util.stream.Stream;
 
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
-import org.springframework.core.annotation.AliasFor;
-import org.springframework.core.annotation.Order;
-import org.springframework.lang.Nullable;
+import org.springframework.aot.hint.support.RuntimeHintsUtils;
+import org.springframework.util.ClassUtils;
 
 /**
- * {@link RuntimeHintsRegistrar} for core annotations.
+ * {@link RuntimeHintsRegistrar} for Jakarta annotations.
+ * <p>Hints are only registered if Jakarta inject is on the classpath.
  *
- * @author Phillip Webb
- * @since 6.0
+ * @author Brian Clozel
  */
-class CoreAnnotationsRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
+class JakartaAnnotationsRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
 
 	@Override
-	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
-		Stream.of(AliasFor.class, Order.class).forEach(annotationType ->
-				RuntimeHintsUtils.registerAnnotation(hints, annotationType));
+	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+		if (ClassUtils.isPresent("jakarta.inject.Inject", classLoader)) {
+			Stream.of("jakarta.inject.Inject", "jakarta.inject.Qualifier").forEach(annotationType ->
+					RuntimeHintsUtils.registerAnnotation(hints, ClassUtils.resolveClassName(annotationType, classLoader)));
+		}
 	}
 
 }

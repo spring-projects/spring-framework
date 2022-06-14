@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.aot.hint.support;
+package org.springframework.beans.factory.annotation;
 
+
+import jakarta.inject.Inject;
+import jakarta.inject.Qualifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,38 +26,36 @@ import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsPredicates;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
-import org.springframework.core.annotation.AliasFor;
-import org.springframework.core.annotation.Order;
+import org.springframework.beans.factory.aot.AotFactoriesLoader;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link CoreAnnotationsRuntimeHintsRegistrar}.
- *
- * @author Phillip Webb
+ * Tests for {@link JakartaAnnotationsRuntimeHintsRegistrar}.
+ * @author Brian Clozel
  */
-class CoreAnnotationsRuntimeHintsRegistrarTests {
+class JakartaAnnotationsRuntimeHintsRegistrarTests {
 
-	private RuntimeHints hints = new RuntimeHints();
+	private final RuntimeHints hints = new RuntimeHints();
 
 	@BeforeEach
 	void setup() {
-		SpringFactoriesLoader.forResourceLocation("META-INF/spring/aot.factories")
+		SpringFactoriesLoader.forResourceLocation(AotFactoriesLoader.FACTORIES_RESOURCE_LOCATION)
 				.load(RuntimeHintsRegistrar.class).forEach(registrar -> registrar
 						.registerHints(this.hints, ClassUtils.getDefaultClassLoader()));
 	}
 
 	@Test
-	void aliasForHasHints() {
-		assertThat(RuntimeHintsPredicates.reflection().onType(AliasFor.class)
+	void jakartaInjectAnnotationHasHints() {
+		assertThat(RuntimeHintsPredicates.reflection().onType(Inject.class)
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(this.hints);
 	}
 
 	@Test
-	void orderAnnotationHasHints() {
-		assertThat(RuntimeHintsPredicates.reflection().onType(Order.class)
+	void jakartaQualifierAnnotationHasHints() {
+		assertThat(RuntimeHintsPredicates.reflection().onType(Qualifier.class)
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(this.hints);
 	}
 
