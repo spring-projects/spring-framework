@@ -34,14 +34,16 @@ import org.springframework.aot.hint.ExecutableHint;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
+import org.springframework.aot.hint.TypeHint.Builder;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 
 /**
- * Register the necessary reflection hints so that the specified type can be bound/serialized at runtime.
- * Fields, constructors and property methods are registered, except for a set of types like those in
- * {@code java.} package where just the type is registered. Types are discovered transitively and
- * generic types are registered as well.
+ * Register the necessary reflection hints so that the specified type can be
+ * bound at runtime. Fields, constructors and property methods are registered,
+ * except for a set of types like those in the {@code java.} package where just
+ * the type is registered. Types are discovered transitively and generic types
+ * are registered as well.
  *
  * @author Sebastien Deleuze
  * @since 6.0
@@ -53,38 +55,22 @@ public class BindingReflectionHintsRegistrar {
 	private static final Consumer<ExecutableHint.Builder> INVOKE = builder -> builder
 			.withMode(ExecutableMode.INVOKE);
 
+	/**
+	 * Register the necessary reflection hints to bind the specified types.
+	 * @param hints the hints instance to use
+	 * @param types the types to bind
+	 */
 	public void registerReflectionHints(ReflectionHints hints, Type... types) {
 		for (Type type : types) {
 			Set<Class<?>> referencedTypes = new LinkedHashSet<>();
 			collectReferencedTypes(new HashSet<>(), referencedTypes, type);
-			referencedTypes.forEach(referencedType -> hints.registerType(referencedType, builder -> {
-				if (shouldRegisterMembers(referencedType)) {
-					builder.withMembers(MemberCategory.DECLARED_FIELDS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
-					try {
-						BeanInfo beanInfo = Introspector.getBeanInfo(referencedType);
-						PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
-						for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-							Method writeMethod = propertyDescriptor.getWriteMethod();
-							if (writeMethod != null && writeMethod.getDeclaringClass() != Object.class) {
-								hints.registerMethod(writeMethod, INVOKE);
-								MethodParameter methodParameter = MethodParameter.forExecutable(writeMethod, 0);
-								registerReflectionHints(hints, methodParameter.getGenericParameterType());
-							}
-							Method readMethod = propertyDescriptor.getReadMethod();
-							if (readMethod != null && readMethod.getDeclaringClass() != Object.class) {
-								hints.registerMethod(readMethod, INVOKE);
-								MethodParameter methodParameter = MethodParameter.forExecutable(readMethod, -1);
-								registerReflectionHints(hints, methodParameter.getGenericParameterType());
-							}
-						}
+			for (Class<?> referencedType : referencedTypes) {
+				hints.registerType(referencedType, builder -> {
+					if (shouldRegisterMembers(referencedType)) {
+						registerMembers(hints, referencedType, builder);
 					}
-					catch (IntrospectionException ex) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Ignoring referenced type [" + referencedType.getName() + "]: " + ex.getMessage());
-						}
-					}
-				}
-			}));
+				});
+			}
 		}
 	}
 
@@ -97,13 +83,41 @@ public class BindingReflectionHintsRegistrar {
 		return !type.getCanonicalName().startsWith("java.");
 	}
 
+	private void registerMembers(ReflectionHints hints, Class<?> type, Builder builder) {
+		builder.withMembers(MemberCategory.DECLARED_FIELDS,
+				MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+		try {
+			BeanInfo beanInfo = Introspector.getBeanInfo(type);
+			PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+			for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+				Method writeMethod = propertyDescriptor.getWriteMethod();
+				if (writeMethod != null && writeMethod.getDeclaringClass() != Object.class) {
+					hints.registerMethod(writeMethod, INVOKE);
+					MethodParameter methodParameter = MethodParameter.forExecutable(writeMethod, 0);
+					registerReflectionHints(hints, methodParameter.getGenericParameterType());
+				}
+				Method readMethod = propertyDescriptor.getReadMethod();
+				if (readMethod != null && readMethod.getDeclaringClass() != Object.class) {
+					hints.registerMethod(readMethod, INVOKE);
+					MethodParameter methodParameter = MethodParameter.forExecutable(readMethod, -1);
+					registerReflectionHints(hints, methodParameter.getGenericParameterType());
+				}
+			}
+		}
+		catch (IntrospectionException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Ignoring referenced type [" + type.getName() + "]: " + ex.getMessage());
+			}
+		}
+	}
+
 	private void collectReferencedTypes(Set<Type> seen, Set<Class<?>> types, Type type) {
 		if (seen.contains(type)) {
 			return;
 		}
 		seen.add(type);
 		ResolvableType resolvableType = ResolvableType.forType(type);
-		Class<?> clazz  = resolvableType.resolve();
+		Class<?> clazz = resolvableType.resolve();
 		if (clazz != null) {
 			types.add(clazz);
 			for (ResolvableType genericResolvableType : resolvableType.getGenerics()) {

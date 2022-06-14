@@ -34,14 +34,13 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
  * with {@link ResponseBody} and parameters annotated with {@link RequestBody}
  * which are serialized as well.
  *
- *
  * @author Stephane Nicoll
  * @author Sebastien Deleuze
  * @since 6.0
  */
 class RequestMappingReflectiveProcessor implements ReflectiveProcessor {
 
-	private BindingReflectionHintsRegistrar bindingRegistrar = new BindingReflectionHintsRegistrar();
+	private final BindingReflectionHintsRegistrar bindingRegistrar = new BindingReflectionHintsRegistrar();
 
 	@Override
 	public void registerReflectionHints(ReflectionHints hints, AnnotatedElement element) {

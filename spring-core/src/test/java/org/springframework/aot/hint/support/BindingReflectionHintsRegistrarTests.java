@@ -35,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class BindingReflectionHintsRegistrarTests {
 
 	private final BindingReflectionHintsRegistrar bindingRegistrar = new BindingReflectionHintsRegistrar();
+
 	private final RuntimeHints hints = new RuntimeHints();
 
 	@Test
