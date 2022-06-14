@@ -1859,6 +1859,22 @@ class DefaultListableBeanFactoryTests {
 		assertBeanNamesForType(FactoryBean.class, false, false, "&factoryBean");
 	}
 
+	@Test  // gh-28616
+	void getBeanNamesForTypeWithPrototypeScopedFactoryBean() {
+		FactoryBeanThatShouldntBeCalled.instantiated = false;
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(FactoryBeanThatShouldntBeCalled.class);
+		beanDefinition.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		lbf.registerBeanDefinition("factoryBean", beanDefinition);
+		assertThat(FactoryBeanThatShouldntBeCalled.instantiated).isFalse();
+		assertThat(lbf.containsSingleton("factoryBean")).isFalse();
+
+		// We should not find any beans of the following types if the FactoryBean itself is prototype-scoped.
+		assertBeanNamesForType(Runnable.class, false, false);
+		assertBeanNamesForType(Callable.class, false, false);
+		assertBeanNamesForType(RepositoryFactoryInformation.class, false, false);
+		assertBeanNamesForType(FactoryBean.class, false, false);
+	}
+
 	/**
 	 * Verifies that a dependency on a {@link FactoryBean} can <strong>not</strong>
 	 * be autowired <em>by name</em>, as &amp; is an illegal character in
