@@ -98,16 +98,16 @@ class RouterFunctionMappingTests {
 		HandlerFunction<ServerResponse> function3 = request -> ServerResponse.ok().build();
 
 		AnnotationConfigApplicationContext context1 = new AnnotationConfigApplicationContext();
-		context1.registerBean(RouterFunction.class, () -> RouterFunctions.route().GET("/fn1", function1).build());
+		context1.registerBean("fn1", RouterFunction.class, () -> RouterFunctions.route().GET("/fn1", function1).build());
 		context1.refresh();
 
 		AnnotationConfigApplicationContext context2 = new AnnotationConfigApplicationContext();
-		context2.registerBean(RouterFunction.class, () -> RouterFunctions.route().GET("/fn2", function2).build());
+		context2.registerBean("fn2", RouterFunction.class, () -> RouterFunctions.route().GET("/fn2", function2).build());
 		context2.setParent(context1);
 		context2.refresh();
 
 		AnnotationConfigApplicationContext context3 = new AnnotationConfigApplicationContext();
-		context3.registerBean(RouterFunction.class, () -> RouterFunctions.route().GET("/fn3", function3).build());
+		context3.registerBean("fn3", RouterFunction.class, () -> RouterFunctions.route().GET("/fn3", function3).build());
 		context3.setParent(context2);
 		context3.refresh();
 

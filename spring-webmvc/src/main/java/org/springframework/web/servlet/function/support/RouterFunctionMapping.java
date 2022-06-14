@@ -154,20 +154,19 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	 * current application context.
 	 */
 	private void initRouterFunctions() {
-		List<RouterFunction<?>> routerFunctions = new ArrayList<>();
-		detectRouterFunctions(obtainApplicationContext(), routerFunctions);
-		this.routerFunction = routerFunctions.stream().reduce(RouterFunction::andOther).orElse(null);
-		logRouterFunctions(routerFunctions);
-	}
-
-	private void detectRouterFunctions(ApplicationContext context, List<RouterFunction<?>> routerFunctions) {
-		if (this.detectHandlerFunctionsInAncestorContexts && context.getParent() != null) {
-			detectRouterFunctions(context.getParent(), routerFunctions);
-		}
-		context.getBeanProvider(RouterFunction.class)
+		List<RouterFunction<?>> routerFunctions = obtainApplicationContext()
+				.getBeanProvider(RouterFunction.class)
 				.orderedStream()
 				.map(router -> (RouterFunction<?>) router)
-				.collect(Collectors.toCollection(() -> routerFunctions));
+				.collect(Collectors.toList());
+
+		ApplicationContext parentContext = obtainApplicationContext().getParent();
+		if (parentContext != null && !this.detectHandlerFunctionsInAncestorContexts) {
+			parentContext.getBeanProvider(RouterFunction.class).stream().forEach(routerFunctions::remove);
+		}
+
+		this.routerFunction = routerFunctions.stream().reduce(RouterFunction::andOther).orElse(null);
+		logRouterFunctions(routerFunctions);
 	}
 
 	private void logRouterFunctions(List<RouterFunction<?>> routerFunctions) {
