@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.concurrent.Callable;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -44,7 +45,6 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandlerCom
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.View;
-import org.springframework.web.util.NestedServletException;
 
 /**
  * Extends {@link InvocableHandlerMethod} with the ability to handle return
@@ -220,7 +220,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 					throw (Exception) result;
 				}
 				else if (result instanceof Throwable) {
-					throw new NestedServletException("Async processing failed", (Throwable) result);
+					throw new ServletException("Async processing failed: " + result, (Throwable) result);
 				}
 				return result;
 			}, CALLABLE_METHOD);

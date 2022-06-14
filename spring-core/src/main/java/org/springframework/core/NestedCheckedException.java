@@ -33,19 +33,12 @@ import org.springframework.lang.Nullable;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #getMessage
- * @see #printStackTrace
  * @see NestedRuntimeException
  */
 public abstract class NestedCheckedException extends Exception {
 
 	/** Use serialVersionUID from Spring 1.2 for interoperability. */
 	private static final long serialVersionUID = 7100714597678207546L;
-
-	static {
-		// Eagerly load the NestedExceptionUtils class to avoid classloader deadlock
-		// issues on OSGi when calling getMessage(). Reported by Don Brown; SPR-5607.
-		NestedExceptionUtils.class.getName();
-	}
 
 
 	/**
@@ -64,17 +57,6 @@ public abstract class NestedCheckedException extends Exception {
 	 */
 	public NestedCheckedException(@Nullable String msg, @Nullable Throwable cause) {
 		super(msg, cause);
-	}
-
-
-	/**
-	 * Return the detail message, including the message from the nested exception
-	 * if there is one.
-	 */
-	@Override
-	@Nullable
-	public String getMessage() {
-		return NestedExceptionUtils.buildMessage(super.getMessage(), getCause());
 	}
 
 

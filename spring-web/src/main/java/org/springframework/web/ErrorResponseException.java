@@ -18,13 +18,11 @@ package org.springframework.web;
 
 import java.net.URI;
 
-import org.springframework.core.NestedExceptionUtils;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.lang.Nullable;
-
 
 /**
  * {@link RuntimeException} that implements {@link ErrorResponse} to expose
@@ -137,8 +135,7 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 
 	@Override
 	public String getMessage() {
-		String message = this.status + (!this.headers.isEmpty() ? ", headers=" + this.headers : "") + ", " + this.body;
-		return NestedExceptionUtils.buildMessage(message, getCause());
+		return this.status + (!this.headers.isEmpty() ? ", headers=" + this.headers : "") + ", " + this.body;
 	}
 
 }

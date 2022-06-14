@@ -944,8 +944,8 @@ class XmlBeanFactoryTests {
 			xbf.getBean("rod2Accessor");
 		}
 		catch (BeanCreationException ex) {
-			assertThat(ex.toString().contains("touchy")).isTrue();
 			ex.printStackTrace();
+			assertThat(ex.toString().contains("touchy")).isTrue();
 			assertThat((Object) ex.getRelatedCauses()).isNull();
 		}
 	}
@@ -1370,7 +1370,7 @@ class XmlBeanFactoryTests {
 		reader.loadBeanDefinitions(INVALID_NO_SUCH_METHOD_CONTEXT);
 		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
 				xbf.getBean("constructorOverrides"))
-			.withMessageContaining("bogusMethod");
+			.satisfies(ex -> ex.getCause().getMessage().contains("bogusMethod"));
 	}
 
 	@Test
