@@ -574,7 +574,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 							if (!matchFound) {
 								// In case of FactoryBean, try to match FactoryBean instance itself next.
 								beanName = FACTORY_BEAN_PREFIX + beanName;
-								matchFound = isTypeMatch(beanName, type, allowFactoryBeanInit);
+								if (includeNonSingletons || isSingleton(beanName, mbd, dbd)) {
+									matchFound = isTypeMatch(beanName, type, allowFactoryBeanInit);
+								}
 							}
 						}
 						if (matchFound) {
