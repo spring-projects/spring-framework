@@ -672,16 +672,25 @@ takes a reference to a standard `ConnectionFactory` that would typically come fr
 ===== Using `CachingConnectionFactory`
 
 The `CachingConnectionFactory` extends the functionality of `SingleConnectionFactory`
-and adds the caching of `Session`, `MessageProducer`, and `MessageConsumer` instances. The initial
-cache size is set to `1`. You can use the `sessionCacheSize` property to increase the number of
-cached sessions. Note that the number of actual cached sessions is more than that
-number, as sessions are cached based on their acknowledgment mode, so there can be up to
-four cached session instances (one for each
-acknowledgment mode) when `sessionCacheSize` is set to one. `MessageProducer` and `MessageConsumer` instances are cached within their
-owning session and also take into account the unique properties of the producers and
-consumers when caching. MessageProducers are cached based on their destination.
-MessageConsumers are cached based on a key composed of the destination, selector,
+and adds the caching of `Session`, `MessageProducer`, and `MessageConsumer` instances.
+The initial cache size is set to `1`. You can use the `sessionCacheSize` property to
+increase the number of cached sessions. Note that the number of actual cached sessions
+is more than that number, as sessions are cached based on their acknowledgment mode,
+so there can be up to four cached session instances (one for each acknowledgment mode)
+when `sessionCacheSize` is set to one. `MessageProducer` and `MessageConsumer` instances
+are cached within their owning session and also take into account the unique properties
+of the producers and consumers when caching. MessageProducers are cached based on their
+destination. MessageConsumers are cached based on a key composed of the destination, selector,
 noLocal delivery flag, and the durable subscription name (if creating durable consumers).
+
+[NOTE]
+====
+MessageProducers and MessageConsumers for temporary queues and topics
+(TemporaryQueue/TemporaryTopic) will never be cached. Unfortunately, WebLogic JMS happens
+to implement the temporary queue/topic interfaces on its regular destination implementation,
+mis-indicating that none of its destinations can be cached. Please use a different connection
+pool/cache on WebLogic, or customize `CachingConnectionFactory` for WebLogic purposes.
+====
 
 
 [[jms-destinations]]
