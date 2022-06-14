@@ -76,8 +76,7 @@ jar {
 	dependsOn cglibRepackJar
 	from(zipTree(cglibRepackJar.archivePath)) {
 		include "org/springframework/cglib/**"
-		exclude "org/springframework/cglib/beans/BeanMap.class"
-		exclude "org/springframework/cglib/beans/BeanMap\$*.class"
+		exclude "org/springframework/cglib/beans/**"
 		exclude "org/springframework/cglib/core/AbstractClassGenerator*.class"
 		exclude "org/springframework/cglib/core/AsmApi*.class"
 		exclude "org/springframework/cglib/core/KeyFactory.class"
