@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,18 @@ public class UrlResource extends AbstractFileResolvingResource {
 
 
 	/**
+	 * Create a new {@code UrlResource} based on the given URL object.
+	 * @param url a URL
+	 * @see #UrlResource(URI)
+	 * @see #UrlResource(String)
+	 */
+	public UrlResource(URL url) {
+		Assert.notNull(url, "URL must not be null");
+		this.uri = null;
+		this.url = url;
+	}
+
+	/**
 	 * Create a new {@code UrlResource} based on the given URI object.
 	 * @param uri a URI
 	 * @throws MalformedURLException if the given URL path is not valid
@@ -70,16 +82,6 @@ public class UrlResource extends AbstractFileResolvingResource {
 		Assert.notNull(uri, "URI must not be null");
 		this.uri = uri;
 		this.url = uri.toURL();
-	}
-
-	/**
-	 * Create a new {@code UrlResource} based on the given URL object.
-	 * @param url a URL
-	 */
-	public UrlResource(URL url) {
-		Assert.notNull(url, "URL must not be null");
-		this.uri = null;
-		this.url = url;
 	}
 
 	/**

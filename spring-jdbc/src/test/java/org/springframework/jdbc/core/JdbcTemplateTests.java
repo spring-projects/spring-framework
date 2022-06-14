@@ -955,7 +955,7 @@ public class JdbcTemplateTests {
 	}
 
 	@Test
-	public void testSQLErrorCodeTranslationWithSpecifiedDbName() throws Exception {
+	public void testSQLErrorCodeTranslationWithSpecifiedDatabaseName() throws Exception {
 		final SQLException sqlException = new SQLException("I have a known problem", "99999", 1054);
 		final String sql = "SELECT ID FROM CUSTOMER";
 
@@ -983,7 +983,7 @@ public class JdbcTemplateTests {
 	 * to get the metadata
 	 */
 	@Test
-	public void testUseCustomSQLErrorCodeTranslator() throws Exception {
+	public void testUseCustomExceptionTranslator() throws Exception {
 		// Bad SQL state
 		final SQLException sqlException = new SQLException("I have a known problem", "07000", 1054);
 		final String sql = "SELECT ID FROM CUSTOMER";
