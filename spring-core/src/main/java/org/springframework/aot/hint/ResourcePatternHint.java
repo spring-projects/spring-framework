@@ -16,7 +16,10 @@
 
 package org.springframework.aot.hint;
 
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
 
@@ -58,10 +61,24 @@ public final class ResourcePatternHint implements ConditionalHint {
 
 	/**
 	 * Return the pattern to use for identifying the resources to match.
-	 * @return the patterns
+	 * @return the pattern
 	 */
 	public String getPattern() {
 		return this.pattern;
+	}
+
+	/**
+	 * Return the regex {@link Pattern} to use for identifying the resources to match.
+	 * @return the regex pattern
+	 */
+	public Pattern toRegex() {
+		String prefix = (this.pattern.startsWith("*") ? ".*" : "");
+		String suffix = (this.pattern.endsWith("*") ? ".*" : "");
+		String regex = Arrays.stream(this.pattern.split("\\*"))
+				.filter(s -> !s.isEmpty())
+				.map(Pattern::quote)
+				.collect(Collectors.joining(".*", prefix, suffix));
+		return Pattern.compile(regex);
 	}
 
 	@Nullable
