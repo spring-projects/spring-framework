@@ -205,7 +205,8 @@ public abstract class MockMvcRequestBuilders {
 	}
 
 	/**
-	 * Create a {@link MockMultipartHttpServletRequestBuilder} for a multipart request.
+	 * Create a {@link MockMultipartHttpServletRequestBuilder} for a multipart request,
+	 * using POST as the HTTP method.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param uriVars zero or more URI variables
 	 * @since 5.0
@@ -215,7 +216,8 @@ public abstract class MockMvcRequestBuilders {
 	}
 
 	/**
-	 * Create a {@link MockMultipartHttpServletRequestBuilder} for a multipart request.
+	 * Variant of {@link #multipart(String, Object...)} that also accepts an
+	 * {@link HttpMethod}.
 	 * @param httpMethod the HTTP method to use
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param uriVars zero or more URI variables

@@ -67,6 +67,11 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 		this(HttpMethod.POST, urlTemplate, uriVariables);
 	}
 
+	/**
+	 * Variant of {@link #MockMultipartHttpServletRequestBuilder(String, Object...)}
+	 * that also accepts an {@link HttpMethod}.
+	 * @since 5.3.22
+	 */
 	MockMultipartHttpServletRequestBuilder(HttpMethod httpMethod, String urlTemplate, Object... uriVariables) {
 		super(httpMethod, urlTemplate, uriVariables);
 		super.contentType(MediaType.MULTIPART_FORM_DATA);

@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.mock.web.MockPart;
 import org.springframework.stereotype.Controller;
@@ -45,6 +46,7 @@ import org.springframework.util.StreamUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -61,20 +63,30 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Jaebin Joo
+ * @author Sam Brannen
  */
 public class MultipartControllerTests {
 
 	@ParameterizedTest
-	@ValueSource(strings = {"/multipartfile", "/part"})
-	public void multipartRequestWithSingleFileOrPart(String url) throws Exception {
+	@ValueSource(strings = {"/multipartfile", "/multipartfile-via-put", "/part"})
+	void multipartRequestWithSingleFileOrPart(String url) throws Exception {
 		byte[] fileContent = "bar".getBytes(StandardCharsets.UTF_8);
 
 		byte[] json = "{\"name\":\"yeeeah\"}".getBytes(StandardCharsets.UTF_8);
 		MockMultipartFile jsonPart = new MockMultipartFile("json", "json", "application/json", json);
 
-		MockMultipartHttpServletRequestBuilder requestBuilder = (url.endsWith("file") ?
-				multipart(url).file(new MockMultipartFile("file", "orig", null, fileContent)) :
-				multipart(url).part(new MockPart("part", "orig", fileContent)));
+		MockMultipartHttpServletRequestBuilder requestBuilder;
+		switch (url) {
+			case "/multipartfile":
+				requestBuilder = multipart(url).file(new MockMultipartFile("file", "orig", null, fileContent));
+				break;
+			case "/multipartfile-via-put":
+				requestBuilder = multipart(HttpMethod.PUT, url).file(new MockMultipartFile("file", "orig", null, fileContent));
+				break;
+			default:
+				requestBuilder = multipart(url).part(new MockPart("part", "orig", fileContent));
+				break;
+		}
 
 		standaloneSetup(new MultipartController()).build()
 				.perform(requestBuilder.file(jsonPart))
@@ -275,6 +287,13 @@ public class MultipartControllerTests {
 		}
 
 		@RequestMapping(value = "/multipartfilearray", method = RequestMethod.POST)
+		@PutMapping("/multipartfile-via-put")
+		public String processMultipartFileViaHttpPut(@RequestParam(required = false) MultipartFile file,
+				@RequestPart(required = false) Map<String, String> json, Model model) throws IOException {
+
+			return processMultipartFile(file, json, model);
+		}
+
 		public String processMultipartFileArray(@RequestParam(required = false) MultipartFile[] file,
 				@RequestPart(required = false) Map<String, String> json, Model model) throws IOException {
 
