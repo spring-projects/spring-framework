@@ -35,8 +35,10 @@ import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.TypeHint.Builder;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.util.ClassUtils;
 
 /**
  * Register the necessary reflection hints so that the specified type can be
@@ -54,6 +56,8 @@ public class BindingReflectionHintsRegistrar {
 
 	private static final Consumer<ExecutableHint.Builder> INVOKE = builder -> builder
 			.withMode(ExecutableMode.INVOKE);
+
+	private static final String KOTLIN_COMPANION_SUFFIX = "$Companion";
 
 	/**
 	 * Register the necessary reflection hints to bind the specified types.
@@ -101,6 +105,14 @@ public class BindingReflectionHintsRegistrar {
 					hints.registerMethod(readMethod, INVOKE);
 					MethodParameter methodParameter = MethodParameter.forExecutable(readMethod, -1);
 					registerReflectionHints(hints, methodParameter.getGenericParameterType());
+				}
+			}
+			String companionClassName = type.getCanonicalName() + KOTLIN_COMPANION_SUFFIX;
+			if (KotlinDetector.isKotlinType(type) && ClassUtils.isPresent(companionClassName, null)) {
+				Class<?> companionClass = ClassUtils.resolveClassName(companionClassName, null);
+				Method serializerMethod = ClassUtils.getMethodIfAvailable(companionClass, "serializer");
+				if (serializerMethod != null) {
+					hints.registerMethod(serializerMethod);
 				}
 			}
 		}
