@@ -215,6 +215,17 @@ public abstract class MockMvcRequestBuilders {
 	}
 
 	/**
+	 * Create a {@link MockMultipartHttpServletRequestBuilder} for a multipart request.
+	 * @param httpMethod the HTTP method to use
+	 * @param urlTemplate a URL template; the resulting URL will be encoded
+	 * @param uriVars zero or more URI variables
+	 * @since 5.3.22
+	 */
+	public static MockMultipartHttpServletRequestBuilder multipart(HttpMethod httpMethod, String urlTemplate, Object... uriVars) {
+		return new MockMultipartHttpServletRequestBuilder(httpMethod, urlTemplate, uriVars);
+	}
+
+	/**
 	 * Variant of {@link #multipart(String, Object...)} with a {@link URI}.
 	 * @param uri the URL
 	 * @since 5.0
