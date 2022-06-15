@@ -6558,7 +6558,7 @@ and using "`stub`" repositories instead:
 .Kotlin
 ----
 	@Configuration
-	@ComponentScan(basePackages = "org.example",
+	@ComponentScan(basePackages = ["org.example"],
 			includeFilters = [Filter(type = FilterType.REGEX, pattern = [".*Stub.*Repository"])],
 			excludeFilters = [Filter(Repository::class)])
 	class AppConfig {
