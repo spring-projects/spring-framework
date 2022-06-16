@@ -36,7 +36,7 @@ context`"). This section details how you can configure a Spring container (a
 
 Moving on to specifics, all you need to do is declare a
 {api-spring-framework}/web/context/ContextLoaderListener.html[`ContextLoaderListener`]
-in the standard Java EE servlet `web.xml` file of your web application and add a
+in the standard Jakarta EE servlet `web.xml` file of your web application and add a
 `contextConfigLocation`<context-param/> section (in the same file) that defines which
 set of Spring XML configuration files to load.
 
@@ -102,7 +102,7 @@ on its specific integration strategies.
 == JSF
 
 JavaServer Faces (JSF) is the JCP's standard component-based, event-driven web
-user interface framework. It is an official part of the Java EE umbrella but also
+user interface framework. It is an official part of the Jakarta EE umbrella but also
 individually usable, e.g. through embedding Mojarra or MyFaces within Tomcat.
 
 Please note that recent versions of JSF became closely tied to CDI infrastructure

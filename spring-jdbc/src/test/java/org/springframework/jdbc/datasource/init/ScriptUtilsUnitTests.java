@@ -200,37 +200,43 @@ public class ScriptUtilsUnitTests {
 	}
 
 	@ParameterizedTest
-	@CsvSource(delimiter = '#', value = {
-		// semicolon
-		"'select 1\n select '';'''                                                          # ;      # false",
-		"'select 1\n select \";\"'                                                          # ;      # false",
-		"'select 1; select 2'                                                               # ;      # true",
-		// newline
-		"'select 1; select ''\n'''                                                          # '\n'   # false",
-		"'select 1; select \"\n\"'                                                          # '\n'   # false",
-		"'select 1\n select 2'                                                              # '\n'   # true",
-		// double newline
-		"'select 1\n select 2'                                                              # '\n\n' # false",
-		"'select 1\n\n select 2'                                                            # '\n\n' # true",
-		// semicolon with MySQL style escapes '\\'
-		"'insert into users(first, last)\nvalues(''a\\\\'', ''b;'')'                        # ;      # false",
-		"'insert into users(first, last)\nvalues(''Charles'', ''d\\''Artagnan''); select 1' # ;      # true",
-		// semicolon inside comments
-		"'-- a;b;c\ninsert into colors(color_num) values(42);'                              # ;      # true",
-		"'/* a;b;c */\ninsert into colors(color_num) values(42);'                           # ;      # true",
-		"'-- a;b;c\ninsert into colors(color_num) values(42)'                               # ;      # false",
-		"'/* a;b;c */\ninsert into colors(color_num) values(42)'                            # ;      # false",
-		// single quotes inside comments
-		"'-- What\\''s your favorite color?\ninsert into colors(color_num) values(42);'     # ;      # true",
-		"'-- What''s your favorite color?\ninsert into colors(color_num) values(42);'       # ;      # true",
-		"'/* What\\''s your favorite color? */\ninsert into colors(color_num) values(42);'  # ;      # true",
-		"'/* What''s your favorite color? */\ninsert into colors(color_num) values(42);'    # ;      # true",
-		// double quotes inside comments
-		"'-- double \" quotes\ninsert into colors(color_num) values(42);'                   # ;      # true",
-		"'-- double \\\" quotes\ninsert into colors(color_num) values(42);'                 # ;      # true",
-		"'/* double \" quotes */\ninsert into colors(color_num) values(42);'                # ;      # true",
-		"'/* double \\\" quotes */\ninsert into colors(color_num) values(42);'              # ;      # true"
-	})
+	@CsvSource(delimiter = '|', quoteCharacter = '~', textBlock = """
+		# semicolon
+		~select 1\n select ';'~                                                            | ;      | false
+		~select 1\n select ";"~                                                            | ;      | false
+		~select 1; select 2~                                                               | ;      | true
+
+		# newline
+		~select 1; select '\n'~                                                            | ~\n~   | false
+		~select 1; select "\n"~                                                            | ~\n~   | false
+		~select 1\n select 2~                                                              | ~\n~   | true
+
+		# double newline
+		~select 1\n select 2~                                                              | ~\n\n~ | false
+		~select 1\n\n select 2~                                                            | ~\n\n~ | true
+
+		# semicolon with MySQL style escapes '\\'
+		~insert into users(first, last)\n values('a\\\\', 'b;')~                           | ;      | false
+		~insert into users(first, last)\n values('Charles', 'd\\'Artagnan'); select 1~     | ;      | true
+
+		# semicolon inside comments
+		~-- a;b;c\n insert into colors(color_num) values(42);~                             | ;      | true
+		~/* a;b;c */\n insert into colors(color_num) values(42);~                          | ;      | true
+		~-- a;b;c\n insert into colors(color_num) values(42)~                              | ;      | false
+		~/* a;b;c */\n insert into colors(color_num) values(42)~                           | ;      | false
+
+		# single quotes inside comments
+		~-- What\\'s your favorite color?\n insert into colors(color_num) values(42);~     | ;      | true
+		~-- What's your favorite color?\n insert into colors(color_num) values(42);~       | ;      | true
+		~/* What\\'s your favorite color? */\n insert into colors(color_num) values(42);~  | ;      | true
+		~/* What's your favorite color? */\n insert into colors(color_num) values(42);~    | ;      | true
+
+		# double quotes inside comments
+		~-- double " quotes\n insert into colors(color_num) values(42);~                   | ;      | true
+		~-- double \\" quotes\n insert into colors(color_num) values(42);~                 | ;      | true
+		~/* double " quotes */\n insert into colors(color_num) values(42);~                | ;      | true
+		~/* double \\" quotes */\n insert into colors(color_num) values(42);~              | ;      | true
+		""")
 	@SuppressWarnings("deprecation")
 	public void containsStatementSeparator(String script, String delimiter, boolean expected) {
 		// Indirectly tests ScriptUtils.containsStatementSeparator(EncodedResource, String, String, String[], String, String).

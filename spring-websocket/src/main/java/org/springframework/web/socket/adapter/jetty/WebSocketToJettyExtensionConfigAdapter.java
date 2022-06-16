@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 package org.springframework.web.socket.adapter.jetty;
 
-import org.eclipse.jetty.websocket.api.extensions.ExtensionConfig;
+import org.eclipse.jetty.websocket.api.ExtensionConfig;
+import org.eclipse.jetty.websocket.common.JettyExtensionConfig;
 
 import org.springframework.web.socket.WebSocketExtension;
 
@@ -27,7 +28,7 @@ import org.springframework.web.socket.WebSocketExtension;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class WebSocketToJettyExtensionConfigAdapter extends ExtensionConfig {
+public class WebSocketToJettyExtensionConfigAdapter extends JettyExtensionConfig {
 
 	public WebSocketToJettyExtensionConfigAdapter(WebSocketExtension extension) {
 		super(extension.getName());

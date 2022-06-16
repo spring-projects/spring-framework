@@ -21,7 +21,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;

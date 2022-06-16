@@ -20,12 +20,11 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-import javax.websocket.CloseReason;
-import javax.websocket.CloseReason.CloseCodes;
-import javax.websocket.SendHandler;
-import javax.websocket.SendResult;
-import javax.websocket.Session;
-
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.CloseReason.CloseCodes;
+import jakarta.websocket.SendHandler;
+import jakarta.websocket.SendResult;
+import jakarta.websocket.Session;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
@@ -38,7 +37,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 
 /**
  * Spring {@link WebSocketSession} adapter for a standard Java (JSR 356)
- * {@link javax.websocket.Session}.
+ * {@link jakarta.websocket.Session}.
  *
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev

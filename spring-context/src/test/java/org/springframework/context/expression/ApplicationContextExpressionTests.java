@@ -23,8 +23,6 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URL;
-import java.security.AccessControlException;
-import java.security.Permission;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -235,43 +233,6 @@ class ApplicationContextExpressionTests {
 			System.getProperties().remove("name");
 			System.getProperties().remove("country");
 		}
-	}
-
-	@Test
-	void systemPropertiesSecurityManager() {
-		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext();
-
-		GenericBeanDefinition bd = new GenericBeanDefinition();
-		bd.setBeanClass(TestBean.class);
-		bd.getPropertyValues().add("country", "#{systemProperties.country}");
-		ac.registerBeanDefinition("tb", bd);
-
-		SecurityManager oldSecurityManager = System.getSecurityManager();
-		try {
-			System.setProperty("country", "NL");
-
-			SecurityManager securityManager = new SecurityManager() {
-				@Override
-				public void checkPropertiesAccess() {
-					throw new AccessControlException("Not Allowed");
-				}
-				@Override
-				public void checkPermission(Permission perm) {
-					// allow everything else
-				}
-			};
-			System.setSecurityManager(securityManager);
-			ac.refresh();
-
-			TestBean tb = ac.getBean("tb", TestBean.class);
-			assertThat(tb.getCountry()).isEqualTo("NL");
-
-		}
-		finally {
-			System.setSecurityManager(oldSecurityManager);
-			System.getProperties().remove("country");
-		}
-		ac.close();
 	}
 
 	@Test

@@ -22,9 +22,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.jsp.tagext.BodyTag;
-import javax.servlet.jsp.tagext.Tag;
-
+import jakarta.servlet.jsp.tagext.BodyTag;
+import jakarta.servlet.jsp.tagext.Tag;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
@@ -557,8 +556,7 @@ class OptionTagTests extends AbstractHtmlElementTagTests {
 
 		@Override
 		public boolean equals(Object obj) {
-			if (obj instanceof RulesVariant) {
-				RulesVariant other = (RulesVariant) obj;
+			if (obj instanceof RulesVariant other) {
 				return this.toId().equals(other.toId());
 			}
 			return false;

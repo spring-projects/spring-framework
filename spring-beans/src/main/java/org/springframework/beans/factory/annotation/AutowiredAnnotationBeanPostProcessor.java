@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,12 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -37,6 +39,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aot.generator.CodeContribution;
+import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
@@ -48,9 +52,13 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
+import org.springframework.beans.factory.annotation.InjectionMetadata.InjectedElement;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
+import org.springframework.beans.factory.generator.AotContributingBeanPostProcessor;
+import org.springframework.beans.factory.generator.BeanInstantiationContribution;
+import org.springframework.beans.factory.generator.InjectionGenerator;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -65,6 +73,7 @@ import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -75,8 +84,10 @@ import org.springframework.util.StringUtils;
  * by default, Spring's {@link Autowired @Autowired} and {@link Value @Value}
  * annotations.
  *
- * <p>Also supports JSR-330's {@link javax.inject.Inject @Inject} annotation,
+ * <p>Also supports the common {@link jakarta.inject.Inject @Inject} annotation,
  * if available, as a direct alternative to Spring's own {@code @Autowired}.
+ * Additionally, it retains support for the {@code javax.inject.Inject} variant
+ * dating back to the original JSR-330 specification (as known from Java EE 6-8).
  *
  * <h3>Autowired Constructors</h3>
  * <p>Only one constructor of any given bean class may declare this annotation with
@@ -129,7 +140,7 @@ import org.springframework.util.StringUtils;
  * @see Value
  */
 public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationAwareBeanPostProcessor,
-		MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware {
+		MergedBeanDefinitionPostProcessor, AotContributingBeanPostProcessor, PriorityOrdered, BeanFactoryAware {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -154,20 +165,30 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	/**
 	 * Create a new {@code AutowiredAnnotationBeanPostProcessor} for Spring's
 	 * standard {@link Autowired @Autowired} and {@link Value @Value} annotations.
-	 * <p>Also supports JSR-330's {@link javax.inject.Inject @Inject} annotation,
-	 * if available.
+	 * <p>Also supports the common {@link jakarta.inject.Inject @Inject} annotation,
+	 * if available, as well as the original {@code javax.inject.Inject} variant.
 	 */
 	@SuppressWarnings("unchecked")
 	public AutowiredAnnotationBeanPostProcessor() {
 		this.autowiredAnnotationTypes.add(Autowired.class);
 		this.autowiredAnnotationTypes.add(Value.class);
+
+		try {
+			this.autowiredAnnotationTypes.add((Class<? extends Annotation>)
+					ClassUtils.forName("jakarta.inject.Inject", AutowiredAnnotationBeanPostProcessor.class.getClassLoader()));
+			logger.trace("'jakarta.inject.Inject' annotation found and supported for autowiring");
+		}
+		catch (ClassNotFoundException ex) {
+			// jakarta.inject API not available - simply skip.
+		}
+
 		try {
 			this.autowiredAnnotationTypes.add((Class<? extends Annotation>)
 					ClassUtils.forName("javax.inject.Inject", AutowiredAnnotationBeanPostProcessor.class.getClassLoader()));
-			logger.trace("JSR-330 'javax.inject.Inject' annotation found and supported for autowiring");
+			logger.trace("'javax.inject.Inject' annotation found and supported for autowiring");
 		}
 		catch (ClassNotFoundException ex) {
-			// JSR-330 API not available - simply skip.
+			// javax.inject API not available - simply skip.
 		}
 	}
 
@@ -177,7 +198,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	 * setter methods, and arbitrary config methods.
 	 * <p>The default autowired annotation types are the Spring-provided
 	 * {@link Autowired @Autowired} and {@link Value @Value} annotations as well
-	 * as JSR-330's {@link javax.inject.Inject @Inject} annotation, if available.
+	 * as the common {@code @Inject} annotation, if available.
 	 * <p>This setter property exists so that developers can provide their own
 	 * (non-Spring-specific) annotation type to indicate that a member is supposed
 	 * to be autowired.
@@ -193,7 +214,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	 * setter methods, and arbitrary config methods.
 	 * <p>The default autowired annotation types are the Spring-provided
 	 * {@link Autowired @Autowired} and {@link Value @Value} annotations as well
-	 * as JSR-330's {@link javax.inject.Inject @Inject} annotation, if available.
+	 * as the common {@code @Inject} annotation, if available.
 	 * <p>This setter property exists so that developers can provide their own
 	 * (non-Spring-specific) annotation types to indicate that a member is supposed
 	 * to be autowired.
@@ -243,8 +264,22 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+		findInjectionMetadata(beanName, beanType, beanDefinition);
+	}
+
+	@Override
+	public BeanInstantiationContribution contribute(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+		InjectionMetadata metadata = findInjectionMetadata(beanName, beanType, beanDefinition);
+		Collection<InjectedElement> injectedElements = metadata.getInjectedElements();
+		return (!ObjectUtils.isEmpty(injectedElements)
+				? new AutowiredAnnotationBeanInstantiationContribution(injectedElements)
+				: null);
+	}
+
+	private InjectionMetadata findInjectionMetadata(String beanName, Class<?> beanType, RootBeanDefinition beanDefinition) {
 		InjectionMetadata metadata = findAutowiringMetadata(beanName, beanType, null);
 		metadata.checkConfigMembers(beanDefinition);
+		return metadata;
 	}
 
 	@Override
@@ -407,14 +442,6 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		return pvs;
 	}
 
-	@Deprecated
-	@Override
-	public PropertyValues postProcessPropertyValues(
-			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
-
-		return postProcessProperties(pvs, bean, beanName);
-	}
-
 	/**
 	 * 'Native' processing method for direct calls with an arbitrary target instance,
 	 * resolving all of its fields and methods which are annotated with one of the
@@ -537,10 +564,9 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	 * @param ann the Autowired annotation
 	 * @return whether the annotation indicates that a dependency is required
 	 */
-	@SuppressWarnings("deprecation")
 	protected boolean determineRequiredStatus(MergedAnnotation<?> ann) {
 		return determineRequiredStatus(ann.<AnnotationAttributes> asMap(
-			mergedAnnotation -> new AnnotationAttributes(mergedAnnotation.getType())));
+				mergedAnnotation -> new AnnotationAttributes(mergedAnnotation.getType())));
 	}
 
 	/**
@@ -594,8 +620,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	 */
 	@Nullable
 	private Object resolvedCachedArgument(@Nullable String beanName, @Nullable Object cachedArgument) {
-		if (cachedArgument instanceof DependencyDescriptor) {
-			DependencyDescriptor descriptor = (DependencyDescriptor) cachedArgument;
+		if (cachedArgument instanceof DependencyDescriptor descriptor) {
 			Assert.state(this.beanFactory != null, "No BeanFactory available");
 			return this.beanFactory.resolveDependency(descriptor, beanName, null, null);
 		}
@@ -796,6 +821,52 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		}
 	}
 
+	private static final class AutowiredAnnotationBeanInstantiationContribution implements BeanInstantiationContribution {
+
+		private final Collection<InjectedElement> injectedElements;
+
+		private final InjectionGenerator generator;
+
+		AutowiredAnnotationBeanInstantiationContribution(Collection<InjectedElement> injectedElements) {
+			this.injectedElements = injectedElements;
+			this.generator = new InjectionGenerator();
+		}
+
+		@Override
+		public void applyTo(CodeContribution contribution) {
+			this.injectedElements.forEach(element -> {
+				boolean isRequired = isRequired(element);
+				Member member = element.getMember();
+				analyzeMember(contribution, member);
+				contribution.statements().addStatement(this.generator.generateInjection(member, isRequired));
+			});
+		}
+
+		private boolean isRequired(InjectedElement element) {
+			if (element instanceof AutowiredMethodElement injectedMethod) {
+				return injectedMethod.required;
+			}
+			else if (element instanceof AutowiredFieldElement injectedField) {
+				return injectedField.required;
+			}
+			return true;
+		}
+
+		private void analyzeMember(CodeContribution contribution, Member member) {
+			if (member instanceof Method method) {
+				contribution.runtimeHints().reflection().registerMethod(method,
+						hint -> hint.setModes(ExecutableMode.INTROSPECT));
+				contribution.protectedAccess().analyze(member,
+						this.generator.getProtectedAccessInjectionOptions(member));
+			}
+			else if (member instanceof Field field) {
+				contribution.runtimeHints().reflection().registerField(field);
+				contribution.protectedAccess().analyze(member,
+						this.generator.getProtectedAccessInjectionOptions(member));
+			}
+		}
+
+	}
 
 	/**
 	 * DependencyDescriptor variant with a pre-resolved target bean name.

@@ -61,6 +61,7 @@ import org.springframework.http.codec.json.Jackson2SmileEncoder;
 import org.springframework.http.codec.json.KotlinSerializationJsonDecoder;
 import org.springframework.http.codec.json.KotlinSerializationJsonEncoder;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
+import org.springframework.http.codec.multipart.PartEventHttpMessageWriter;
 import org.springframework.http.codec.protobuf.ProtobufDecoder;
 import org.springframework.http.codec.protobuf.ProtobufHttpMessageWriter;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
@@ -106,7 +107,7 @@ public class ClientCodecConfigurerTests {
 	@Test
 	public void defaultWriters() {
 		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
-		assertThat(writers.size()).isEqualTo(13);
+		assertThat(writers.size()).isEqualTo(14);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(ByteArrayEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(ByteBufferEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(DataBufferEncoder.class);
@@ -115,6 +116,7 @@ public class ClientCodecConfigurerTests {
 		assertStringEncoder(getNextEncoder(writers), true);
 		assertThat(writers.get(index.getAndIncrement()).getClass()).isEqualTo(ProtobufHttpMessageWriter.class);
 		assertThat(writers.get(this.index.getAndIncrement()).getClass()).isEqualTo(MultipartHttpMessageWriter.class);
+		assertThat(writers.get(this.index.getAndIncrement()).getClass()).isEqualTo(PartEventHttpMessageWriter.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(KotlinSerializationJsonEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(Jackson2JsonEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(Jackson2SmileEncoder.class);

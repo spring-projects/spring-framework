@@ -20,7 +20,7 @@ import java.time.DateTimeException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-import javax.servlet.http.Cookie;
+import jakarta.servlet.http.Cookie;
 
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;

@@ -49,18 +49,17 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.Part;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.xml.bind.annotation.XmlRootElement;
-
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
@@ -2215,6 +2214,19 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		assertThat(response.getContentAsString()).isEqualTo("2010-01-01");
 	}
 
+	@PathPatternsParameterizedTest
+	void dataRecordBinding(boolean usePathPatterns) throws Exception {
+		initDispatcherServlet(DataRecordController.class, usePathPatterns);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
+		request.addParameter("param1", "value1");
+		request.addParameter("param2", "true");
+		request.addParameter("param3", "3");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertThat(response.getContentAsString()).isEqualTo("value1-true-3");
+	}
+
 	@Test
 	void routerFunction() throws ServletException, IOException {
 		GenericWebApplicationContext wac = new GenericWebApplicationContext();
@@ -2411,7 +2423,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	@Controller
 	@RequestMapping("/myPage")
 	@SessionAttributes(names = { "object1", "object2" })
-	public static class MySessionAttributesController {
+	static class MySessionAttributesController {
 
 		@RequestMapping(method = RequestMethod.GET)
 		public String get(Model model) {
@@ -2431,7 +2443,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	@RequestMapping("/myPage")
 	@SessionAttributes({"object1", "object2"})
 	@Controller
-	public interface MySessionAttributesControllerIfc {
+	interface MySessionAttributesControllerIfc {
 
 		@RequestMapping(method = RequestMethod.GET)
 		String get(Model model);
@@ -2440,7 +2452,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		String post(@ModelAttribute("object1") Object object1);
 	}
 
-	public static class MySessionAttributesControllerImpl implements MySessionAttributesControllerIfc {
+	static class MySessionAttributesControllerImpl implements MySessionAttributesControllerIfc {
 
 		@Override
 		public String get(Model model) {
@@ -2458,7 +2470,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 	@RequestMapping("/myPage")
 	@SessionAttributes({"object1", "object2"})
-	public interface MyParameterizedControllerIfc<T> {
+	interface MyParameterizedControllerIfc<T> {
 
 		@ModelAttribute("testBeanList")
 		List<TestBean> getTestBeans();
@@ -2467,14 +2479,14 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		String get(Model model);
 	}
 
-	public interface MyEditableParameterizedControllerIfc<T> extends MyParameterizedControllerIfc<T> {
+	interface MyEditableParameterizedControllerIfc<T> extends MyParameterizedControllerIfc<T> {
 
 		@RequestMapping(method = RequestMethod.POST)
 		String post(@ModelAttribute("object1") T object);
 	}
 
 	@Controller
-	public static class MyParameterizedControllerImpl implements MyEditableParameterizedControllerIfc<TestBean> {
+	static class MyParameterizedControllerImpl implements MyEditableParameterizedControllerIfc<TestBean> {
 
 		@Override
 		public List<TestBean> getTestBeans() {
@@ -2499,7 +2511,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class MyParameterizedControllerImplWithOverriddenMappings
+	static class MyParameterizedControllerImplWithOverriddenMappings
 			implements MyEditableParameterizedControllerIfc<TestBean> {
 
 		@Override
@@ -2528,7 +2540,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class MyFormController {
+	static class MyFormController {
 
 		@ModelAttribute("testBeanList")
 		public List<TestBean> getTestBeans() {
@@ -2550,7 +2562,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 	}
 
-	public static class ValidTestBean extends TestBean {
+	static class ValidTestBean extends TestBean {
 
 		@NotNull
 		private String validCountry;
@@ -2565,7 +2577,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class MyModelFormController {
+	static class MyModelFormController {
 
 		@ModelAttribute
 		public List<TestBean> getTestBeans() {
@@ -2586,7 +2598,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class LateBindingFormController {
+	static class LateBindingFormController {
 
 		@ModelAttribute("testBeanList")
 		public List<TestBean> getTestBeans(@ModelAttribute(name="myCommand", binding=false) TestBean tb) {
@@ -2929,7 +2941,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 	}
 
-	public static class ModelExposingViewResolver implements ViewResolver {
+	static class ModelExposingViewResolver implements ViewResolver {
 
 		@Override
 		public View resolveViewName(String viewName, Locale locale) {
@@ -2940,7 +2952,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 	}
 
-	public static class ParentController {
+	static class ParentController {
 
 		@RequestMapping(method = RequestMethod.GET)
 		public void doGet(HttpServletRequest req, HttpServletResponse resp) {
@@ -2949,7 +2961,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 	@Controller
 	@RequestMapping("/child/test")
-	public static class ChildController extends ParentController {
+	static class ChildController extends ParentController {
 
 		@RequestMapping(method = RequestMethod.GET)
 		public void doGet(HttpServletRequest req, HttpServletResponse resp, @RequestParam("childId") String id) {
@@ -2983,7 +2995,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@MyControllerAnnotation
-	public static class CustomAnnotationController {
+	static class CustomAnnotationController {
 
 		@RequestMapping("/myPath.do")
 		public void myHandle() {
@@ -2991,7 +3003,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class RequiredParamController {
+	static class RequiredParamController {
 
 		@RequestMapping("/myPath.do")
 		public void myHandle(@RequestParam(value = "id", required = true) int id,
@@ -3000,7 +3012,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class OptionalParamController {
+	static class OptionalParamController {
 
 		@RequestMapping("/myPath.do")
 		public void myHandle(@RequestParam(required = false) String id,
@@ -3012,7 +3024,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class DefaultValueParamController {
+	static class DefaultValueParamController {
 
 		@RequestMapping("/myPath.do")
 		public void myHandle(@RequestParam(value = "id", defaultValue = "foo") String id,
@@ -3024,7 +3036,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class DefaultExpressionValueParamController {
+	static class DefaultExpressionValueParamController {
 
 		@RequestMapping("/myPath.do")
 		public void myHandle(@RequestParam(value = "id", defaultValue = "${myKey}") String id,
@@ -3036,7 +3048,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class NestedSetController {
+	static class NestedSetController {
 
 		@RequestMapping("/myPath.do")
 		public void myHandle(GenericBean<?> gb, HttpServletResponse response) throws Exception {
@@ -3045,7 +3057,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 	}
 
-	public static class TestBeanConverter implements Converter<String, ITestBean> {
+	static class TestBeanConverter implements Converter<String, ITestBean> {
 
 		@Override
 		public ITestBean convert(String source) {
@@ -3054,14 +3066,14 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class PathVariableWithCustomConverterController {
+	static class PathVariableWithCustomConverterController {
 
 		@RequestMapping("/myPath/{id}")
 		public void myHandle(@PathVariable("id") ITestBean bean) throws Exception {
 		}
 	}
 
-	public static class AnnotatedExceptionRaisingConverter implements Converter<String, ITestBean> {
+	static class AnnotatedExceptionRaisingConverter implements Converter<String, ITestBean> {
 
 		@Override
 		public ITestBean convert(String source) {
@@ -3075,7 +3087,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class MethodNotAllowedController {
+	static class MethodNotAllowedController {
 
 		@RequestMapping(value = "/myPath.do", method = RequestMethod.DELETE)
 		public void delete() {
@@ -3107,7 +3119,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class PathOrderingController {
+	static class PathOrderingController {
 
 		@RequestMapping(value = {"/dir/myPath1.do", "/*/*.do"})
 		public void method1(Writer writer) throws IOException {
@@ -3121,7 +3133,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class RequestResponseBodyController {
+	static class RequestResponseBodyController {
 
 		@RequestMapping(value = "/something", method = RequestMethod.PUT)
 		@ResponseBody
@@ -3137,7 +3149,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class RequestResponseBodyProducesController {
+	static class RequestResponseBodyProducesController {
 
 		@RequestMapping(value = "/something", method = RequestMethod.PUT, produces = "text/plain")
 		@ResponseBody
@@ -3147,7 +3159,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class ResponseBodyVoidController {
+	static class ResponseBodyVoidController {
 
 		@RequestMapping("/something")
 		@ResponseBody
@@ -3156,7 +3168,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class RequestBodyArgMismatchController {
+	static class RequestBodyArgMismatchController {
 
 		@RequestMapping(value = "/something", method = RequestMethod.PUT)
 		public void handle(@RequestBody A a) throws IOException {
@@ -3164,14 +3176,14 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@XmlRootElement
-	public static class A {
+	static class A {
 	}
 
 	@XmlRootElement
-	public static class B {
+	static class B {
 	}
 
-	public static class NotReadableMessageConverter implements HttpMessageConverter<Object> {
+	static class NotReadableMessageConverter implements HttpMessageConverter<Object> {
 
 		@Override
 		public boolean canRead(Class<?> clazz, @Nullable MediaType mediaType) {
@@ -3199,7 +3211,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 	}
 
-	public static class SimpleMessageConverter implements HttpMessageConverter<Object> {
+	static class SimpleMessageConverter implements HttpMessageConverter<Object> {
 
 		private final List<MediaType> supportedMediaTypes;
 
@@ -3237,7 +3249,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class ContentTypeHeadersController {
+	static class ContentTypeHeadersController {
 
 		@RequestMapping(value = "/something", headers = "content-type=application/pdf")
 		public void handlePdf(Writer writer) throws IOException {
@@ -3251,7 +3263,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class ConsumesController {
+	static class ConsumesController {
 
 		@RequestMapping(value = "/something", consumes = "application/pdf")
 		public void handlePdf(Writer writer) throws IOException {
@@ -3265,7 +3277,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class NegatedContentTypeHeadersController {
+	static class NegatedContentTypeHeadersController {
 
 		@RequestMapping(value = "/something", headers = "content-type=application/pdf")
 		public void handlePdf(Writer writer) throws IOException {
@@ -3280,7 +3292,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class AcceptHeadersController {
+	static class AcceptHeadersController {
 
 		@RequestMapping(value = "/something", headers = "accept=text/html")
 		public void handleHtml(Writer writer) throws IOException {
@@ -3294,7 +3306,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class ProducesController {
+	static class ProducesController {
 
 		@GetMapping(path = "/something", produces = "text/html")
 		public void handleHtml(Writer writer) throws IOException {
@@ -3318,7 +3330,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class ResponseStatusController {
+	static class ResponseStatusController {
 
 		@RequestMapping("/something")
 		@ResponseStatus(code = HttpStatus.CREATED, reason = "It's alive!")
@@ -3328,7 +3340,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class ModelAndViewResolverController {
+	static class ModelAndViewResolverController {
 
 		@RequestMapping("/")
 		public MySpecialArg handle() {
@@ -3336,7 +3348,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 	}
 
-	public static class MyModelAndViewResolver implements ModelAndViewResolver {
+	static class MyModelAndViewResolver implements ModelAndViewResolver {
 
 		@Override
 		public ModelAndView resolveModelAndView(Method handlerMethod, Class<?> handlerType, Object returnValue,
@@ -3390,7 +3402,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 	@Controller
 	@RequestMapping("/test*")
-	public static class BindingCookieValueController {
+	static class BindingCookieValueController {
 
 		@InitBinder
 		public void initBinder(WebDataBinder binder) {
@@ -3407,16 +3419,16 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 	}
 
-	public interface TestController<T> {
+	interface TestController<T> {
 
 		ModelAndView method(T object);
 	}
 
-	public static class MyEntity {
+	static class MyEntity {
 	}
 
 	@Controller
-	public static class TestControllerImpl implements TestController<MyEntity> {
+	static class TestControllerImpl implements TestController<MyEntity> {
 
 		@Override
 		@RequestMapping("/method")
@@ -3427,7 +3439,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 	@RestController
 	@RequestMapping(path = ApiConstants.ARTICLES_PATH)
-	public static class ArticleController implements ApiConstants, ResourceEndpoint<Article, ArticlePredicate> {
+	static class ArticleController implements ApiConstants, ResourceEndpoint<Article, ArticlePredicate> {
 
 		@Override
 		@GetMapping(params = "page")
@@ -3449,14 +3461,14 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		String ARTICLES_PATH = API_V1 + "/articles";
 	}
 
-	public interface ResourceEndpoint<E extends Entity, P extends EntityPredicate<?>> {
+	interface ResourceEndpoint<E extends Entity, P extends EntityPredicate<?>> {
 
 		Collection<E> find(String pageable, P predicate) throws IOException;
 
 		List<E> find(boolean sort, P predicate) throws IOException;
 	}
 
-	public static abstract class Entity {
+	static abstract class Entity {
 
 		public UUID id;
 
@@ -3465,7 +3477,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		public Instant createdDate;
 	}
 
-	public static class Article extends Entity {
+	static class Article extends Entity {
 
 		public String slug;
 
@@ -3474,7 +3486,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		public String content;
 	}
 
-	public static abstract class EntityPredicate<E extends Entity> {
+	static abstract class EntityPredicate<E extends Entity> {
 
 		public String createdBy;
 
@@ -3489,7 +3501,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 	}
 
-	public static class ArticlePredicate extends EntityPredicate<Article> {
+	static class ArticlePredicate extends EntityPredicate<Article> {
 
 		public String query;
 
@@ -3500,7 +3512,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class RequestParamMapController {
+	static class RequestParamMapController {
 
 		@RequestMapping("/map")
 		public void map(@RequestParam Map<String, String> params, Writer writer) throws IOException {
@@ -3535,7 +3547,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class RequestHeaderMapController {
+	static class RequestHeaderMapController {
 
 		@RequestMapping("/map")
 		public void map(@RequestHeader Map<String, String> headers, Writer writer) throws IOException {
@@ -3577,14 +3589,14 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public interface IMyController {
+	interface IMyController {
 
 		@RequestMapping("/handle")
 		void handle(Writer writer, @RequestParam(value="p", required=false) String param) throws IOException;
 	}
 
 	@Controller
-	public static class IMyControllerImpl implements IMyController {
+	static class IMyControllerImpl implements IMyController {
 
 		@Override
 		public void handle(Writer writer, @RequestParam(value="p", required=false) String param) throws IOException {
@@ -3592,14 +3604,14 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 	}
 
-	public static abstract class MyAbstractController {
+	static abstract class MyAbstractController {
 
 		@RequestMapping("/handle")
 		public abstract void handle(Writer writer) throws IOException;
 	}
 
 	@Controller
-	public static class MyAbstractControllerImpl extends MyAbstractController {
+	static class MyAbstractControllerImpl extends MyAbstractController {
 
 		@Override
 		public void handle(Writer writer) throws IOException {
@@ -3608,7 +3620,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class TrailingSlashController  {
+	static class TrailingSlashController  {
 
 		@RequestMapping(value = "/", method = RequestMethod.GET)
 		public void root(Writer writer) throws IOException {
@@ -3622,7 +3634,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class ResponseEntityController {
+	static class ResponseEntityController {
 
 		@PostMapping("/foo")
 		public ResponseEntity<String> foo(HttpEntity<byte[]> requestEntity) throws Exception {
@@ -3679,7 +3691,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class CustomMapEditorController {
+	static class CustomMapEditorController {
 
 		@InitBinder
 		public void initBinder(WebDataBinder binder) {
@@ -3694,7 +3706,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 	}
 
-	public static class CustomMapEditor extends PropertyEditorSupport {
+	static class CustomMapEditor extends PropertyEditorSupport {
 
 		@Override
 		public void setAsText(String text) throws IllegalArgumentException {
@@ -3708,7 +3720,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class MultipartController {
+	static class MultipartController {
 
 		@InitBinder
 		public void initBinder(WebDataBinder binder) {
@@ -3729,7 +3741,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class CsvController {
+	static class CsvController {
 
 		@RequestMapping("/singleInteger")
 		public void processCsv(@RequestParam("content") Integer content, HttpServletResponse response) throws IOException {
@@ -3853,7 +3865,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@RestController
-	public static class TextRestController {
+	static class TextRestController {
 
 		@RequestMapping(path = "/a1", method = RequestMethod.GET)
 		public String a1(@RequestBody String body) {
@@ -3877,7 +3889,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class ModelAndViewController {
+	static class ModelAndViewController {
 
 		@RequestMapping("/path")
 		public ModelAndView methodWithHttpStatus(MyEntity object) {
@@ -3904,7 +3916,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 	}
 
-	public static class DataClass {
+	static class DataClass {
 
 		@NotNull
 		private final String param1;
@@ -3939,7 +3951,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@RestController
-	public static class DataClassController {
+	static class DataClassController {
 
 		@RequestMapping("/bind")
 		public String handle(DataClass data) {
@@ -3948,7 +3960,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@RestController
-	public static class PathVariableDataClassController {
+	static class PathVariableDataClassController {
 
 		@RequestMapping("/bind/{param2}")
 		public String handle(DataClass data) {
@@ -3957,7 +3969,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@RestController
-	public static class ValidatedDataClassController {
+	static class ValidatedDataClassController {
 
 		@InitBinder
 		public void initBinder(WebDataBinder binder) {
@@ -3978,7 +3990,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 	}
 
-	public static class BindStatusView extends AbstractView {
+	static class BindStatusView extends AbstractView {
 
 		private final String content;
 
@@ -3998,7 +4010,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 	}
 
-	public static class MultipartFileDataClass {
+	static class MultipartFileDataClass {
 
 		@NotNull
 		public final MultipartFile param1;
@@ -4021,7 +4033,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@RestController
-	public static class MultipartFileDataClassController {
+	static class MultipartFileDataClassController {
 
 		@RequestMapping("/bind")
 		public String handle(MultipartFileDataClass data) throws IOException {
@@ -4030,7 +4042,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 	}
 
-	public static class ServletPartDataClass {
+	static class ServletPartDataClass {
 
 		@NotNull
 		public final Part param1;
@@ -4053,7 +4065,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@RestController
-	public static class ServletPartDataClassController {
+	static class ServletPartDataClassController {
 
 		@RequestMapping("/bind")
 		public String handle(ServletPartDataClass data) throws IOException {
@@ -4063,7 +4075,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@RestController
-	public static class NullableDataClassController {
+	static class NullableDataClassController {
 
 		@RequestMapping("/bind")
 		public String handle(@Nullable DataClass data, BindingResult result) {
@@ -4078,7 +4090,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@RestController
-	public static class OptionalDataClassController {
+	static class OptionalDataClassController {
 
 		@RequestMapping("/bind")
 		public String handle(Optional<DataClass> optionalData, BindingResult result) {
@@ -4092,7 +4104,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 	}
 
-	public static class DateClass {
+	static class DateClass {
 
 		@DateTimeFormat(pattern = "yyyy-MM-dd")
 		public LocalDate date;
@@ -4103,7 +4115,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@RestController
-	public static class DateClassController {
+	static class DateClassController {
 
 		@InitBinder
 		public void initBinder(WebDataBinder binder) {
@@ -4122,6 +4134,18 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			assertThat(data.date.getMonthValue()).isEqualTo(1);
 			assertThat(data.date.getDayOfMonth()).isEqualTo(1);
 			return result.getFieldValue("date").toString();
+		}
+	}
+
+	static record DataRecord(String param1, boolean param2, int param3) {
+	}
+
+	@RestController
+	static class DataRecordController {
+
+		@RequestMapping("/bind")
+		public String handle(DataRecord data) {
+			return data.param1 + "-" + data.param2 + "-" + data.param3;
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -192,10 +192,9 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof PropertyValue)) {
+		if (!(other instanceof PropertyValue otherPv)) {
 			return false;
 		}
-		PropertyValue otherPv = (PropertyValue) other;
 		return (this.name.equals(otherPv.name) &&
 				ObjectUtils.nullSafeEquals(this.value, otherPv.value) &&
 				ObjectUtils.nullSafeEquals(getSource(), otherPv.getSource()));

@@ -561,14 +561,14 @@ final class AnnotationTypeMapping {
 		if (ObjectUtils.nullSafeEquals(value, extractedValue)) {
 			return true;
 		}
-		if (value instanceof Class && extractedValue instanceof String) {
-			return areEquivalent((Class<?>) value, (String) extractedValue);
+		if (value instanceof Class<?> clazz && extractedValue instanceof String string) {
+			return areEquivalent(clazz, string);
 		}
-		if (value instanceof Class[] && extractedValue instanceof String[]) {
-			return areEquivalent((Class[]) value, (String[]) extractedValue);
+		if (value instanceof Class<?>[] classes && extractedValue instanceof String[] strings) {
+			return areEquivalent(classes, strings);
 		}
-		if (value instanceof Annotation) {
-			return areEquivalent((Annotation) value, extractedValue, valueExtractor);
+		if (value instanceof Annotation annotation) {
+			return areEquivalent(annotation, extractedValue, valueExtractor);
 		}
 		return false;
 	}
@@ -597,8 +597,8 @@ final class AnnotationTypeMapping {
 			Method attribute = attributes.get(i);
 			Object value1 = ReflectionUtils.invokeMethod(attribute, annotation);
 			Object value2;
-			if (extractedValue instanceof TypeMappedAnnotation) {
-				value2 = ((TypeMappedAnnotation<?>) extractedValue).getValue(attribute.getName()).orElse(null);
+			if (extractedValue instanceof TypeMappedAnnotation<?> typeMappedAnnotation) {
+				value2 = typeMappedAnnotation.getValue(attribute.getName()).orElse(null);
 			}
 			else {
 				value2 = valueExtractor.extract(attribute, extractedValue);

@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.Part;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Part;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -52,8 +52,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 /**
  * Resolves method arguments annotated with @{@link RequestParam}, arguments of
  * type {@link MultipartFile} in conjunction with Spring's {@link MultipartResolver}
- * abstraction, and arguments of type {@code javax.servlet.http.Part} in conjunction
- * with Servlet 3.0 multipart requests. This resolver can also be created in default
+ * abstraction, and arguments of type {@code jakarta.servlet.http.Part} in conjunction
+ * with Servlet multipart requests. This resolver can also be created in default
  * resolution mode in which simple types (int, long, etc.) not annotated with
  * {@link RequestParam @RequestParam} are also treated as request parameters with
  * the parameter name derived from the argument name.

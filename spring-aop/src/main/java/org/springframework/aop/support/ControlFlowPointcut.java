@@ -128,10 +128,9 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof ControlFlowPointcut)) {
+		if (!(other instanceof ControlFlowPointcut that)) {
 			return false;
 		}
-		ControlFlowPointcut that = (ControlFlowPointcut) other;
 		return (this.clazz.equals(that.clazz)) && ObjectUtils.nullSafeEquals(this.methodName, that.methodName);
 	}
 

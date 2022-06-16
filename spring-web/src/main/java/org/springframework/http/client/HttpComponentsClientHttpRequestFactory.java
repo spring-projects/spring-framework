@@ -273,26 +273,31 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * @return the Commons HttpMethodBase object
 	 */
 	protected HttpUriRequest createHttpUriRequest(HttpMethod httpMethod, URI uri) {
-		switch (httpMethod) {
-			case GET:
-				return new HttpGet(uri);
-			case HEAD:
-				return new HttpHead(uri);
-			case POST:
-				return new HttpPost(uri);
-			case PUT:
-				return new HttpPut(uri);
-			case PATCH:
-				return new HttpPatch(uri);
-			case DELETE:
-				return new HttpDelete(uri);
-			case OPTIONS:
-				return new HttpOptions(uri);
-			case TRACE:
-				return new HttpTrace(uri);
-			default:
-				throw new IllegalArgumentException("Invalid HTTP method: " + httpMethod);
+		if (HttpMethod.GET.equals(httpMethod)) {
+			return new HttpGet(uri);
 		}
+		else if (HttpMethod.HEAD.equals(httpMethod)) {
+			return new HttpHead(uri);
+		}
+		else if (HttpMethod.POST.equals(httpMethod)) {
+			return new HttpPost(uri);
+		}
+		else if (HttpMethod.PUT.equals(httpMethod)) {
+			return new HttpPut(uri);
+		}
+		else if (HttpMethod.PATCH.equals(httpMethod)) {
+			return new HttpPatch(uri);
+		}
+		else if (HttpMethod.DELETE.equals(httpMethod)) {
+			return new HttpDelete(uri);
+		}
+		else if (HttpMethod.OPTIONS.equals(httpMethod)) {
+			return new HttpOptions(uri);
+		}
+		else if (HttpMethod.TRACE.equals(httpMethod)) {
+			return new HttpTrace(uri);
+		}
+		throw new IllegalArgumentException("Invalid HTTP method: " + httpMethod);
 	}
 
 	/**

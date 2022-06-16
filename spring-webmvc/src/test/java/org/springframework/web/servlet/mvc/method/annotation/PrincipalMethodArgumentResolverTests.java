@@ -23,8 +23,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.security.Principal;
 
-import javax.servlet.ServletRequest;
-
+import jakarta.servlet.ServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

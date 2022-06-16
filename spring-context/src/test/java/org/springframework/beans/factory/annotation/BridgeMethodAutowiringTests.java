@@ -16,9 +16,8 @@
 
 package org.springframework.beans.factory.annotation;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;

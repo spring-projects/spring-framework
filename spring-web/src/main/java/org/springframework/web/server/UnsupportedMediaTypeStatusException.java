@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ public class UnsupportedMediaTypeStatusException extends ResponseStatusException
 		this.supportedMediaTypes = Collections.emptyList();
 		this.bodyType = null;
 		this.method = null;
+		getBody().setDetail("Could not parse Content-Type.");
 	}
 
 	/**
@@ -91,16 +92,16 @@ public class UnsupportedMediaTypeStatusException extends ResponseStatusException
 	public UnsupportedMediaTypeStatusException(@Nullable MediaType contentType, List<MediaType> supportedTypes,
 			@Nullable ResolvableType bodyType, @Nullable HttpMethod method) {
 
-		super(HttpStatus.UNSUPPORTED_MEDIA_TYPE, initReason(contentType, bodyType));
+		super(HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+				"Content type '" + (contentType != null ? contentType : "") + "' not supported" +
+						(bodyType != null ? " for bodyType=" + bodyType : ""));
+
 		this.contentType = contentType;
 		this.supportedMediaTypes = Collections.unmodifiableList(supportedTypes);
 		this.bodyType = bodyType;
 		this.method = method;
-	}
 
-	private static String initReason(@Nullable MediaType contentType, @Nullable ResolvableType bodyType) {
-		return "Content type '" + (contentType != null ? contentType : "") + "' not supported" +
-				(bodyType != null ? " for bodyType=" + bodyType.toString() : "");
+		setDetail(contentType != null ? "Content-Type '" + contentType + "' is not supported." : null);
 	}
 
 
@@ -133,14 +134,31 @@ public class UnsupportedMediaTypeStatusException extends ResponseStatusException
 		return this.bodyType;
 	}
 
+	/**
+	 * Return HttpHeaders with an "Accept" header that documents the supported
+	 * media types, if available, or an empty instance otherwise.
+	 */
 	@Override
-	public HttpHeaders getResponseHeaders() {
-		if (HttpMethod.PATCH != this.method || CollectionUtils.isEmpty(this.supportedMediaTypes) ) {
+	public HttpHeaders getHeaders() {
+		if (CollectionUtils.isEmpty(this.supportedMediaTypes) ) {
 			return HttpHeaders.EMPTY;
 		}
 		HttpHeaders headers = new HttpHeaders();
-		headers.setAcceptPatch(this.supportedMediaTypes);
+		headers.setAccept(this.supportedMediaTypes);
+		if (this.method == HttpMethod.PATCH) {
+			headers.setAcceptPatch(this.supportedMediaTypes);
+		}
 		return headers;
+	}
+
+	/**
+	 * Delegates to {@link #getHeaders()}.
+	 * @deprecated as of 6.0 in favor of {@link #getHeaders()}
+	 */
+	@Deprecated
+	@Override
+	public HttpHeaders getResponseHeaders() {
+		return getHeaders();
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,12 +48,9 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 
 	private static final boolean jsr354Present;
 
-	private static final boolean jodaTimePresent;
-
 	static {
 		ClassLoader classLoader = DefaultFormattingConversionService.class.getClassLoader();
 		jsr354Present = ClassUtils.isPresent("javax.money.MonetaryAmount", classLoader);
-		jodaTimePresent = ClassUtils.isPresent("org.joda.time.YearMonth", classLoader);
 	}
 
 	/**
@@ -104,7 +101,6 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 	 * depending on the presence of the corresponding API on the classpath.
 	 * @param formatterRegistry the service to register default formatters with
 	 */
-	@SuppressWarnings("deprecation")
 	public static void addDefaultFormatters(FormatterRegistry formatterRegistry) {
 		// Default handling of number values
 		formatterRegistry.addFormatterForFieldAnnotation(new NumberFormatAnnotationFormatterFactory());
@@ -121,14 +117,8 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 		// just handling JSR-310 specific date and time types
 		new DateTimeFormatterRegistrar().registerFormatters(formatterRegistry);
 
-		if (jodaTimePresent) {
-			// handles Joda-specific types as well as Date, Calendar, Long
-			new org.springframework.format.datetime.joda.JodaTimeFormatterRegistrar().registerFormatters(formatterRegistry);
-		}
-		else {
-			// regular DateFormat-based Date, Calendar, Long converters
-			new DateFormatterRegistrar().registerFormatters(formatterRegistry);
-		}
+		// regular DateFormat-based Date, Calendar, Long converters
+		new DateFormatterRegistrar().registerFormatters(formatterRegistry);
 	}
 
 }

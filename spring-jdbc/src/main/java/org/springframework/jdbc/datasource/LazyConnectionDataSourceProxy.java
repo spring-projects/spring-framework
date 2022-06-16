@@ -57,7 +57,7 @@ import org.springframework.lang.Nullable;
  * without paying a performance penalty if no actual data access happens.
  *
  * <p>This DataSource proxy gives you behavior analogous to JTA and a
- * transactional JNDI DataSource (as provided by the Java EE server), even
+ * transactional JNDI DataSource (as provided by the Jakarta EE server), even
  * with a local transaction strategy like DataSourceTransactionManager or
  * HibernateTransactionManager. It does not add value with Spring's
  * JtaTransactionManager as transaction strategy.

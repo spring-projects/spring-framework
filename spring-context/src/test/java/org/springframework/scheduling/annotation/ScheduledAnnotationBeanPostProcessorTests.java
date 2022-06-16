@@ -90,11 +90,11 @@ class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 	@ParameterizedTest
-	@CsvSource({
-		"FixedDelay, 5000",
-		"FixedDelayInSeconds, 5000",
-		"FixedDelayInMinutes, 180000"
-	})
+	@CsvSource(textBlock = """
+		FixedDelay, 5_000
+		FixedDelayInSeconds, 5_000
+		FixedDelayInMinutes, 180_000
+	""")
 	void fixedDelayTask(@NameToClass Class<?> beanClass, long expectedInterval) {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(beanClass);
@@ -123,11 +123,11 @@ class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 	@ParameterizedTest
-	@CsvSource({
-		"FixedRate, 3000",
-		"FixedRateInSeconds, 5000",
-		"FixedRateInMinutes, 180000"
-	})
+	@CsvSource(textBlock = """
+		FixedRate, 3_000
+		FixedRateInSeconds, 5_000
+		FixedRateInMinutes, 180_000
+	""")
 	void fixedRateTask(@NameToClass Class<?> beanClass, long expectedInterval) {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(beanClass);
@@ -158,11 +158,11 @@ class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 	@ParameterizedTest
-	@CsvSource({
-		"FixedRateWithInitialDelay, 1000, 3000",
-		"FixedRateWithInitialDelayInSeconds, 5000, 3000",
-		"FixedRateWithInitialDelayInMinutes, 60000, 180000"
-	})
+	@CsvSource(textBlock = """
+		FixedRateWithInitialDelay, 1_000, 3_000
+		FixedRateWithInitialDelayInSeconds, 5_000, 3_000
+		FixedRateWithInitialDelayInMinutes, 60_000, 180_000
+	""")
 	void fixedRateTaskWithInitialDelay(@NameToClass Class<?> beanClass, long expectedInitialDelay, long expectedInterval) {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(beanClass);
@@ -252,15 +252,15 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("fixedRate");
 		assertThat(task1.getInitialDelay()).isEqualTo(0);
-		assertThat(task1.getInterval()).isEqualTo(4000L);
+		assertThat(task1.getInterval()).isEqualTo(4_000L);
 		IntervalTask task2 = fixedRateTasks.get(1);
 		ScheduledMethodRunnable runnable2 = (ScheduledMethodRunnable) task2.getRunnable();
 		targetObject = runnable2.getTarget();
 		targetMethod = runnable2.getMethod();
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("fixedRate");
-		assertThat(task2.getInitialDelay()).isEqualTo(2000L);
-		assertThat(task2.getInterval()).isEqualTo(4000L);
+		assertThat(task2.getInitialDelay()).isEqualTo(2_000L);
+		assertThat(task2.getInterval()).isEqualTo(4_000L);
 	}
 
 	@Test
@@ -407,7 +407,7 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		Method targetMethod = runnable.getMethod();
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("checkForUpdates");
-		assertThat(task.getInterval()).isEqualTo(5000L);
+		assertThat(task.getInterval()).isEqualTo(5_000L);
 	}
 
 	@Test
@@ -434,8 +434,8 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		Method targetMethod = runnable.getMethod();
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("checkForUpdates");
-		assertThat(task.getInterval()).isEqualTo(5000L);
-		assertThat(task.getInitialDelay()).isEqualTo(1000L);
+		assertThat(task.getInterval()).isEqualTo(5_000L);
+		assertThat(task.getInitialDelay()).isEqualTo(1_000L);
 	}
 
 	@Test
@@ -517,12 +517,12 @@ class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 	@ParameterizedTest
-	@CsvSource({
-		"PropertyPlaceholderWithFixedDelay, 5000, 1000, 5000, 1000",
-		"PropertyPlaceholderWithFixedDelay, PT5S, PT1S, 5000, 1000",
-		"PropertyPlaceholderWithFixedDelayInSeconds, 5000, 1000, 5000000, 1000000",
-		"PropertyPlaceholderWithFixedDelayInSeconds, PT5S, PT1S, 5000, 1000"
-	})
+	@CsvSource(textBlock = """
+		PropertyPlaceholderWithFixedDelay, 5000, 1000, 5_000, 1_000
+		PropertyPlaceholderWithFixedDelay, PT5S, PT1S, 5_000, 1_000
+		PropertyPlaceholderWithFixedDelayInSeconds, 5000, 1000, 5_000_000, 1_000_000
+		PropertyPlaceholderWithFixedDelayInSeconds, PT5S, PT1S, 5_000, 1_000
+	""")
 	void propertyPlaceholderWithFixedDelay(@NameToClass Class<?> beanClass, String fixedDelay, String initialDelay,
 			long expectedInterval, long expectedInitialDelay) {
 
@@ -561,12 +561,12 @@ class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 	@ParameterizedTest
-	@CsvSource({
-		"PropertyPlaceholderWithFixedRate, 3000, 1000, 3000, 1000",
-		"PropertyPlaceholderWithFixedRate, PT3S, PT1S, 3000, 1000",
-		"PropertyPlaceholderWithFixedRateInSeconds, 3000, 1000, 3000000, 1000000",
-		"PropertyPlaceholderWithFixedRateInSeconds, PT3S, PT1S, 3000, 1000"
-	})
+	@CsvSource(textBlock = """
+		PropertyPlaceholderWithFixedRate, 3000, 1000, 3_000, 1_000
+		PropertyPlaceholderWithFixedRate, PT3S, PT1S, 3_000, 1_000
+		PropertyPlaceholderWithFixedRateInSeconds, 3000, 1000, 3_000_000, 1_000_000
+		PropertyPlaceholderWithFixedRateInSeconds, PT3S, PT1S, 3_000, 1_000
+	""")
 	void propertyPlaceholderWithFixedRate(@NameToClass Class<?> beanClass, String fixedRate, String initialDelay,
 			long expectedInterval, long expectedInitialDelay) {
 
@@ -728,7 +728,7 @@ class ScheduledAnnotationBeanPostProcessorTests {
 
 	static class FixedDelay {
 
-		@Scheduled(fixedDelay = 5000)
+		@Scheduled(fixedDelay = 5_000)
 		void fixedDelay() {
 		}
 	}
@@ -750,7 +750,7 @@ class ScheduledAnnotationBeanPostProcessorTests {
 
 	static class FixedRate {
 
-		@Scheduled(fixedRate = 3000)
+		@Scheduled(fixedRate = 3_000)
 		void fixedRate() {
 		}
 	}
@@ -772,7 +772,7 @@ class ScheduledAnnotationBeanPostProcessorTests {
 
 	static class FixedRateWithInitialDelay {
 
-		@Scheduled(fixedRate = 3000, initialDelay = 1000)
+		@Scheduled(fixedRate = 3_000, initialDelay = 1_000)
 		void fixedRate() {
 		}
 	}
@@ -794,7 +794,7 @@ class ScheduledAnnotationBeanPostProcessorTests {
 
 	static class SeveralFixedRatesWithSchedulesContainerAnnotationTestBean {
 
-		@Schedules({@Scheduled(fixedRate = 4000), @Scheduled(fixedRate = 4000, initialDelay = 2000)})
+		@Schedules({@Scheduled(fixedRate = 4_000), @Scheduled(fixedRate = 4_000, initialDelay = 2_000)})
 		void fixedRate() {
 		}
 	}
@@ -802,8 +802,8 @@ class ScheduledAnnotationBeanPostProcessorTests {
 
 	static class SeveralFixedRatesWithRepeatedScheduledAnnotationTestBean {
 
-		@Scheduled(fixedRate = 4000)
-		@Scheduled(fixedRate = 4000, initialDelay = 2000)
+		@Scheduled(fixedRate = 4_000)
+		@Scheduled(fixedRate = 4_000, initialDelay = 2_000)
 		void fixedRate() {
 		}
 
@@ -819,8 +819,8 @@ class ScheduledAnnotationBeanPostProcessorTests {
 
 	static class FixedRatesBaseBean {
 
-		@Scheduled(fixedRate = 4000)
-		@Scheduled(fixedRate = 4000, initialDelay = 2000)
+		@Scheduled(fixedRate = 4_000)
+		@Scheduled(fixedRate = 4_000, initialDelay = 2_000)
 		void fixedRate() {
 		}
 	}
@@ -832,8 +832,8 @@ class ScheduledAnnotationBeanPostProcessorTests {
 
 	interface FixedRatesDefaultMethod {
 
-		@Scheduled(fixedRate = 4000)
-		@Scheduled(fixedRate = 4000, initialDelay = 2000)
+		@Scheduled(fixedRate = 4_000)
+		@Scheduled(fixedRate = 4_000, initialDelay = 2_000)
 		default void fixedRate() {
 		}
 	}
@@ -916,13 +916,13 @@ class ScheduledAnnotationBeanPostProcessorTests {
 
 	static class NonEmptyParamListTestBean {
 
-		@Scheduled(fixedRate = 3000)
+		@Scheduled(fixedRate = 3_000)
 		void invalid(String oops) {
 		}
 	}
 
 
-	@Scheduled(fixedRate = 5000)
+	@Scheduled(fixedRate = 5_000)
 	@Target(ElementType.METHOD)
 	@Retention(RetentionPolicy.RUNTIME)
 	private @interface EveryFiveSeconds {
@@ -934,7 +934,7 @@ class ScheduledAnnotationBeanPostProcessorTests {
 	private @interface Hourly {
 	}
 
-	@Scheduled(initialDelay = 1000)
+	@Scheduled(initialDelay = 1_000)
 	@Retention(RetentionPolicy.RUNTIME)
 	private @interface WaitASec {
 
@@ -956,7 +956,7 @@ class ScheduledAnnotationBeanPostProcessorTests {
 
 	static class ComposedAnnotationFixedRateTestBean {
 
-		@WaitASec(fixedRate = 5000)
+		@WaitASec(fixedRate = 5_000)
 		void checkForUpdates() {
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -566,8 +566,7 @@ public class MBeanClientInterceptor
 				Method fromMethod = targetClass.getMethod("from", CompositeData.class);
 				return ReflectionUtils.invokeMethod(fromMethod, null, result);
 			}
-			else if (result instanceof CompositeData[]) {
-				CompositeData[] array = (CompositeData[]) result;
+			else if (result instanceof CompositeData[] array) {
 				if (targetClass.isArray()) {
 					return convertDataArrayToTargetArray(array, targetClass);
 				}
@@ -583,8 +582,7 @@ public class MBeanClientInterceptor
 				Method fromMethod = targetClass.getMethod("from", TabularData.class);
 				return ReflectionUtils.invokeMethod(fromMethod, null, result);
 			}
-			else if (result instanceof TabularData[]) {
-				TabularData[] array = (TabularData[]) result;
+			else if (result instanceof TabularData[] array) {
 				if (targetClass.isArray()) {
 					return convertDataArrayToTargetArray(array, targetClass);
 				}
@@ -621,8 +619,8 @@ public class MBeanClientInterceptor
 
 		Method fromMethod = elementType.getMethod("from", array.getClass().getComponentType());
 		Collection<Object> resultColl = CollectionFactory.createCollection(collectionType, Array.getLength(array));
-		for (int i = 0; i < array.length; i++) {
-			resultColl.add(ReflectionUtils.invokeMethod(fromMethod, null, array[i]));
+		for (Object element : array) {
+			resultColl.add(ReflectionUtils.invokeMethod(fromMethod, null, element));
 		}
 		return resultColl;
 	}
@@ -660,10 +658,9 @@ public class MBeanClientInterceptor
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof MethodCacheKey)) {
+			if (!(other instanceof MethodCacheKey otherKey)) {
 				return false;
 			}
-			MethodCacheKey otherKey = (MethodCacheKey) other;
 			return (this.name.equals(otherKey.name) && Arrays.equals(this.parameterTypes, otherKey.parameterTypes));
 		}
 

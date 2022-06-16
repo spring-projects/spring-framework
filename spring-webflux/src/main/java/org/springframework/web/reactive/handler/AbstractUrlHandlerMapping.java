@@ -153,8 +153,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		Object handler = this.handlerMap.get(pattern);
 
 		// Bean name or resolved handler?
-		if (handler instanceof String) {
-			String handlerName = (String) handler;
+		if (handler instanceof String handlerName) {
 			handler = obtainApplicationContext().getBean(handlerName);
 		}
 
@@ -223,8 +222,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		}
 
 		// Eagerly resolve handler if referencing singleton via name.
-		if (!this.lazyInitHandlers && handler instanceof String) {
-			String handlerName = (String) handler;
+		if (!this.lazyInitHandlers && handler instanceof String handlerName) {
 			if (obtainApplicationContext().isSingleton(handlerName)) {
 				resolvedHandler = obtainApplicationContext().getBean(handlerName);
 			}

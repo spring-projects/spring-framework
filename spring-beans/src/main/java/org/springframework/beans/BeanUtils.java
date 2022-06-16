@@ -29,7 +29,6 @@ import java.time.temporal.Temporal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -79,20 +78,15 @@ public abstract class BeanUtils {
 	private static final Set<Class<?>> unknownEditorTypes =
 			Collections.newSetFromMap(new ConcurrentReferenceHashMap<>(64));
 
-	private static final Map<Class<?>, Object> DEFAULT_TYPE_VALUES;
-
-	static {
-		Map<Class<?>, Object> values = new HashMap<>();
-		values.put(boolean.class, false);
-		values.put(byte.class, (byte) 0);
-		values.put(short.class, (short) 0);
-		values.put(int.class, 0);
-		values.put(long.class, 0L);
-		values.put(float.class, 0F);
-		values.put(double.class, 0D);
-		values.put(char.class, '\0');
-		DEFAULT_TYPE_VALUES = Collections.unmodifiableMap(values);
-	}
+	private static final Map<Class<?>, Object> DEFAULT_TYPE_VALUES = Map.of(
+			boolean.class, false,
+			byte.class, (byte) 0,
+			short.class, (short) 0,
+			int.class, 0,
+			long.class, 0L,
+			float.class, 0F,
+			double.class, 0D,
+			char.class, '\0');
 
 
 	/**
@@ -142,19 +136,20 @@ public abstract class BeanUtils {
 		if (clazz.isInterface()) {
 			throw new BeanInstantiationException(clazz, "Specified class is an interface");
 		}
+		Constructor<T> ctor;
 		try {
-			return instantiateClass(clazz.getDeclaredConstructor());
+			ctor = clazz.getDeclaredConstructor();
 		}
 		catch (NoSuchMethodException ex) {
-			Constructor<T> ctor = findPrimaryConstructor(clazz);
-			if (ctor != null) {
-				return instantiateClass(ctor);
+			ctor = findPrimaryConstructor(clazz);
+			if (ctor == null) {
+				throw new BeanInstantiationException(clazz, "No default constructor found", ex);
 			}
-			throw new BeanInstantiationException(clazz, "No default constructor found", ex);
 		}
 		catch (LinkageError err) {
 			throw new BeanInstantiationException(clazz, "Unresolvable class definition", err);
 		}
+		return instantiateClass(ctor);
 	}
 
 	/**

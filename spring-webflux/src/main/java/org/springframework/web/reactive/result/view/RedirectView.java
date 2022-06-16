@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -56,7 +57,7 @@ public class RedirectView extends AbstractUrlBasedView {
 	private static final Pattern URI_TEMPLATE_VARIABLE_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
 
 
-	private HttpStatus statusCode = HttpStatus.SEE_OTHER;
+	private HttpStatusCode statusCode = HttpStatus.SEE_OTHER;
 
 	private boolean contextRelative = true;
 
@@ -85,7 +86,7 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * redirect status code such as {@link HttpStatus#TEMPORARY_REDIRECT} or
 	 * {@link HttpStatus#PERMANENT_REDIRECT}.
 	 */
-	public RedirectView(String redirectUrl, HttpStatus statusCode) {
+	public RedirectView(String redirectUrl, HttpStatusCode statusCode) {
 		super(redirectUrl);
 		setStatusCode(statusCode);
 	}
@@ -96,7 +97,7 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * {@link HttpStatus#TEMPORARY_REDIRECT} or
 	 * {@link HttpStatus#PERMANENT_REDIRECT}.
 	 */
-	public void setStatusCode(HttpStatus statusCode) {
+	public void setStatusCode(HttpStatusCode statusCode) {
 		Assert.isTrue(statusCode.is3xxRedirection(), "Not a redirect status code");
 		this.statusCode = statusCode;
 	}
@@ -104,7 +105,7 @@ public class RedirectView extends AbstractUrlBasedView {
 	/**
 	 * Get the redirect status code to use.
 	 */
-	public HttpStatus getStatusCode() {
+	public HttpStatusCode getStatusCode() {
 		return this.statusCode;
 	}
 
@@ -296,7 +297,7 @@ public class RedirectView extends AbstractUrlBasedView {
 
 	/**
 	 * Whether the given targetUrl has a host that is a "foreign" system in which
-	 * case {@link javax.servlet.http.HttpServletResponse#encodeRedirectURL} will not be applied.
+	 * case {@link jakarta.servlet.http.HttpServletResponse#encodeRedirectURL} will not be applied.
 	 * This method returns {@code true} if the {@link #setHosts(String[])}
 	 * property is configured and the target URL has a host that does not match.
 	 * @param targetUrl the target redirect URL

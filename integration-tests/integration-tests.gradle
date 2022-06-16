@@ -15,12 +15,12 @@ dependencies {
 	testImplementation(project(":spring-test"))
 	testImplementation(project(":spring-tx"))
 	testImplementation(project(":spring-web"))
-	testImplementation("javax.inject:javax.inject")
-	testImplementation("javax.resource:javax.resource-api")
-	testImplementation("javax.servlet:javax.servlet-api")
+	testImplementation("jakarta.inject:jakarta.inject-api")
+	testImplementation("jakarta.resource:jakarta.resource-api")
+	testImplementation("jakarta.servlet:jakarta.servlet-api")
 	testImplementation("org.aspectj:aspectjweaver")
 	testImplementation("org.hsqldb:hsqldb")
-	testImplementation("org.hibernate:hibernate-core")
+	testImplementation("org.hibernate:hibernate-core-jakarta")
 }
 
 normalization {

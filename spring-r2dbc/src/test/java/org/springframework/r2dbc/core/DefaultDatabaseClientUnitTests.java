@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Arrays;
 
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
+import io.r2dbc.spi.Parameters;
 import io.r2dbc.spi.Result;
 import io.r2dbc.spi.Statement;
 import io.r2dbc.spi.test.MockColumnMetadata;
@@ -28,10 +29,8 @@ import io.r2dbc.spi.test.MockRow;
 import io.r2dbc.spi.test.MockRowMetadata;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.reactivestreams.Publisher;
@@ -65,12 +64,11 @@ import static org.mockito.BDDMockito.when;
  * @author Ferdinand Jacobs
  * @author Jens Schauder
  */
-@ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class DefaultDatabaseClientUnitTests {
 
 	@Mock
-	Connection connection;
+	private Connection connection;
 
 	private DatabaseClient.Builder databaseClientBuilder;
 
@@ -137,15 +135,16 @@ class DefaultDatabaseClientUnitTests {
 		databaseClient.sql("SELECT * FROM table WHERE key = $1").bindNull(0,
 				String.class).then().as(StepVerifier::create).verifyComplete();
 
-		verify(statement).bindNull(0, String.class);
+		verify(statement).bind(0, Parameters.in(String.class));
 
 		databaseClient.sql("SELECT * FROM table WHERE key = $1").bindNull("$1",
 				String.class).then().as(StepVerifier::create).verifyComplete();
 
-		verify(statement).bindNull("$1", String.class);
+		verify(statement).bind("$1", Parameters.in(String.class));
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void executeShouldBindSettableValues() {
 		Statement statement = mockStatementFor("SELECT * FROM table WHERE key = $1");
 
@@ -155,13 +154,13 @@ class DefaultDatabaseClientUnitTests {
 				Parameter.empty(String.class)).then().as(
 						StepVerifier::create).verifyComplete();
 
-		verify(statement).bindNull(0, String.class);
+		verify(statement).bind(0, Parameters.in(String.class));
 
 		databaseClient.sql("SELECT * FROM table WHERE key = $1").bind("$1",
 				Parameter.empty(String.class)).then().as(
 						StepVerifier::create).verifyComplete();
 
-		verify(statement).bindNull("$1", String.class);
+		verify(statement).bind("$1", Parameters.in(String.class));
 	}
 
 	@Test
@@ -173,7 +172,7 @@ class DefaultDatabaseClientUnitTests {
 		databaseClient.sql("SELECT * FROM table WHERE key = :key").bindNull("key",
 				String.class).then().as(StepVerifier::create).verifyComplete();
 
-		verify(statement).bindNull(0, String.class);
+		verify(statement).bind(0, Parameters.in(String.class));
 	}
 
 	@Test
@@ -196,6 +195,7 @@ class DefaultDatabaseClientUnitTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void executeShouldBindValues() {
 		Statement statement = mockStatementFor("SELECT * FROM table WHERE key = $1");
 
@@ -204,12 +204,12 @@ class DefaultDatabaseClientUnitTests {
 		databaseClient.sql("SELECT * FROM table WHERE key = $1").bind(0,
 				Parameter.from("foo")).then().as(StepVerifier::create).verifyComplete();
 
-		verify(statement).bind(0, "foo");
+		verify(statement).bind(0, Parameters.in("foo"));
 
 		databaseClient.sql("SELECT * FROM table WHERE key = $1").bind("$1",
 				"foo").then().as(StepVerifier::create).verifyComplete();
 
-		verify(statement).bind("$1", "foo");
+		verify(statement).bind("$1", Parameters.in("foo"));
 	}
 
 	@Test
@@ -221,7 +221,7 @@ class DefaultDatabaseClientUnitTests {
 		databaseClient.sql("SELECT * FROM table WHERE key = :key").bind("key",
 				"foo").then().as(StepVerifier::create).verifyComplete();
 
-		verify(statement).bind(0, "foo");
+		verify(statement).bind(0, Parameters.in("foo"));
 	}
 
 	@Test
@@ -247,11 +247,12 @@ class DefaultDatabaseClientUnitTests {
 	@Test
 	void selectShouldEmitFirstValue() {
 		MockRowMetadata metadata = MockRowMetadata.builder().columnMetadata(
-				MockColumnMetadata.builder().name("name").build()).build();
+				MockColumnMetadata.builder().name("name").javaType(String.class).build()).build();
 
-		MockResult.Builder resultBuilder = MockResult.builder().rowMetadata(metadata);
-		MockResult result = resultBuilder.row(MockRow.builder().identified(0, Object.class, "Walter").build())
-				.row(MockRow.builder().identified(0, Object.class, "White").build()).build();
+		MockResult result = MockResult.builder().row(
+					MockRow.builder().identified(0, Object.class, "Walter").metadata(metadata).build(),
+					MockRow.builder().identified(0, Object.class, "White").metadata(metadata).build()
+				).build();
 
 		mockStatementFor("SELECT * FROM person", result);
 
@@ -267,11 +268,12 @@ class DefaultDatabaseClientUnitTests {
 	@Test
 	void selectShouldEmitAllValues() {
 		MockRowMetadata metadata = MockRowMetadata.builder().columnMetadata(
-				MockColumnMetadata.builder().name("name").build()).build();
+				MockColumnMetadata.builder().name("name").javaType(String.class).build()).build();
 
-		MockResult.Builder resultBuilder = MockResult.builder().rowMetadata(metadata);
-		MockResult result = resultBuilder.row(MockRow.builder().identified(0, Object.class, "Walter").build())
-				.row(MockRow.builder().identified(0, Object.class, "White").build()).build();
+		MockResult result = MockResult.builder().row(
+					MockRow.builder().identified(0, Object.class, "Walter").metadata(metadata).build(),
+					MockRow.builder().identified(0, Object.class, "White").metadata(metadata).build()
+				).build();
 
 		mockStatementFor("SELECT * FROM person", result);
 
@@ -287,13 +289,13 @@ class DefaultDatabaseClientUnitTests {
 
 	@Test
 	void selectOneShouldFailWithException() {
-
 		MockRowMetadata metadata = MockRowMetadata.builder().columnMetadata(
-				MockColumnMetadata.builder().name("name").build()).build();
+				MockColumnMetadata.builder().name("name").javaType(String.class).build()).build();
 
-		MockResult.Builder resultBuilder = MockResult.builder().rowMetadata(metadata);
-		MockResult result = resultBuilder.row(MockRow.builder().identified(0, Object.class, "Walter").build())
-				.row(MockRow.builder().identified(0, Object.class, "White").build()).build();
+		MockResult result = MockResult.builder().row(
+					MockRow.builder().identified(0, Object.class, "Walter").metadata(metadata).build(),
+					MockRow.builder().identified(0, Object.class, "White").metadata(metadata).build()
+				).build();
 
 		mockStatementFor("SELECT * FROM person", result);
 
@@ -307,7 +309,6 @@ class DefaultDatabaseClientUnitTests {
 
 	@Test
 	void shouldApplyExecuteFunction() {
-
 		Statement statement = mockStatement();
 		MockResult result = mockSingleColumnResult(
 				MockRow.builder().identified(0, Object.class, "Walter"));
@@ -323,7 +324,6 @@ class DefaultDatabaseClientUnitTests {
 
 	@Test
 	void shouldApplyPreparedOperation() {
-
 		MockResult result = mockSingleColumnResult(
 				MockRow.builder().identified(0, Object.class, "Walter"));
 		Statement statement = mockStatementFor("SELECT * FROM person", result);
@@ -354,10 +354,7 @@ class DefaultDatabaseClientUnitTests {
 
 	@Test
 	void shouldApplyStatementFilterFunctions() {
-
-		MockRowMetadata metadata = MockRowMetadata.builder().columnMetadata(
-				MockColumnMetadata.builder().name("name").build()).build();
-		MockResult result = MockResult.builder().rowMetadata(metadata).build();
+		MockResult result = MockResult.builder().build();
 
 		Statement statement = mockStatement(result);
 
@@ -378,7 +375,6 @@ class DefaultDatabaseClientUnitTests {
 
 	@Test
 	void shouldApplySimpleStatementFilterFunctions() {
-
 		MockResult result = mockSingleColumnEmptyResult();
 
 		Statement statement = mockStatement(result);
@@ -410,7 +406,6 @@ class DefaultDatabaseClientUnitTests {
 	}
 
 	private Statement mockStatementFor(@Nullable String sql, @Nullable Result result) {
-
 		Statement statement = mock(Statement.class);
 		when(connection.createStatement(sql == null ? anyString() : eq(sql))).thenReturn(
 				statement);
@@ -432,13 +427,11 @@ class DefaultDatabaseClientUnitTests {
 	 * row is provided.
 	 */
 	private MockResult mockSingleColumnResult(@Nullable MockRow.Builder row) {
-
-		MockRowMetadata metadata = MockRowMetadata.builder().columnMetadata(
-				MockColumnMetadata.builder().name("name").build()).build();
-
-		MockResult.Builder resultBuilder = MockResult.builder().rowMetadata(metadata);
+		MockResult.Builder resultBuilder = MockResult.builder();
 		if (row != null) {
-			resultBuilder = resultBuilder.row(row.build());
+			MockRowMetadata metadata = MockRowMetadata.builder().columnMetadata(
+					MockColumnMetadata.builder().name("name").javaType(String.class).build()).build();
+			resultBuilder = resultBuilder.row(row.metadata(metadata).build());
 		}
 		return resultBuilder.build();
 	}

@@ -22,8 +22,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -302,14 +300,7 @@ class ConstructorResolver {
 
 		try {
 			InstantiationStrategy strategy = this.beanFactory.getInstantiationStrategy();
-			if (System.getSecurityManager() != null) {
-				return AccessController.doPrivileged((PrivilegedAction<Object>) () ->
-						strategy.instantiate(mbd, beanName, this.beanFactory, constructorToUse, argsToUse),
-						this.beanFactory.getAccessControlContext());
-			}
-			else {
-				return strategy.instantiate(mbd, beanName, this.beanFactory, constructorToUse, argsToUse);
-			}
+			return strategy.instantiate(mbd, beanName, this.beanFactory, constructorToUse, argsToUse);
 		}
 		catch (Throwable ex) {
 			throw new BeanCreationException(mbd.getResourceDescription(), beanName,
@@ -365,15 +356,8 @@ class ConstructorResolver {
 	 * Called as the starting point for factory method determination.
 	 */
 	private Method[] getCandidateMethods(Class<?> factoryClass, RootBeanDefinition mbd) {
-		if (System.getSecurityManager() != null) {
-			return AccessController.doPrivileged((PrivilegedAction<Method[]>) () ->
-					(mbd.isNonPublicAccessAllowed() ?
-						ReflectionUtils.getAllDeclaredMethods(factoryClass) : factoryClass.getMethods()));
-		}
-		else {
-			return (mbd.isNonPublicAccessAllowed() ?
-					ReflectionUtils.getAllDeclaredMethods(factoryClass) : factoryClass.getMethods());
-		}
+		return (mbd.isNonPublicAccessAllowed() ?
+				ReflectionUtils.getAllDeclaredMethods(factoryClass) : factoryClass.getMethods());
 	}
 
 	/**
@@ -643,16 +627,8 @@ class ConstructorResolver {
 			@Nullable Object factoryBean, Method factoryMethod, Object[] args) {
 
 		try {
-			if (System.getSecurityManager() != null) {
-				return AccessController.doPrivileged((PrivilegedAction<Object>) () ->
-						this.beanFactory.getInstantiationStrategy().instantiate(
-								mbd, beanName, this.beanFactory, factoryBean, factoryMethod, args),
-						this.beanFactory.getAccessControlContext());
-			}
-			else {
-				return this.beanFactory.getInstantiationStrategy().instantiate(
-						mbd, beanName, this.beanFactory, factoryBean, factoryMethod, args);
-			}
+			return this.beanFactory.getInstantiationStrategy().instantiate(
+					mbd, beanName, this.beanFactory, factoryBean, factoryMethod, args);
 		}
 		catch (Throwable ex) {
 			throw new BeanCreationException(mbd.getResourceDescription(), beanName,

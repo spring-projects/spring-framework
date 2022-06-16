@@ -16,8 +16,7 @@
 
 package org.springframework.test.web.servlet.samples.context;
 
-import javax.servlet.ServletContext;
-
+import jakarta.servlet.ServletContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,9 +41,7 @@ import org.springframework.web.servlet.config.annotation.DefaultServletHandlerCo
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
-import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -52,7 +49,6 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -130,13 +126,6 @@ public class JavaConfigTests {
 			.satisfies(error -> assertThat(error.getSuppressed()).hasSize(2));
 	}
 
-	@Test
-	public void tilesDefinitions() throws Exception {
-		this.mockMvc.perform(get("/"))
-			.andExpect(status().isOk())
-			.andExpect(forwardedUrl("/WEB-INF/layouts/standardLayout.jsp"));
-	}
-
 	/**
 	 * Verify that the breaking change introduced in <a
 	 * href="https://jira.spring.io/browse/SPR-12553">SPR-12553</a> has been reverted.
@@ -201,18 +190,6 @@ public class JavaConfigTests {
 		@Override
 		public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
 			configurer.enable();
-		}
-
-		@Override
-		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.tiles();
-		}
-
-		@Bean
-		public TilesConfigurer tilesConfigurer() {
-			TilesConfigurer configurer = new TilesConfigurer();
-			configurer.setDefinitions("/WEB-INF/**/tiles.xml");
-			return configurer;
 		}
 	}
 

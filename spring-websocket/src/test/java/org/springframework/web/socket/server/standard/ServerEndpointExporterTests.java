@@ -16,13 +16,12 @@
 
 package org.springframework.web.socket.server.standard;
 
-import javax.servlet.ServletContext;
-import javax.websocket.Endpoint;
-import javax.websocket.EndpointConfig;
-import javax.websocket.Session;
-import javax.websocket.server.ServerContainer;
-import javax.websocket.server.ServerEndpoint;
-
+import jakarta.servlet.ServletContext;
+import jakarta.websocket.Endpoint;
+import jakarta.websocket.EndpointConfig;
+import jakarta.websocket.Session;
+import jakarta.websocket.server.ServerContainer;
+import jakarta.websocket.server.ServerEndpoint;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -56,7 +55,7 @@ public class ServerEndpointExporterTests {
 		this.serverContainer = mock(ServerContainer.class);
 
 		this.servletContext = new MockServletContext();
-		this.servletContext.setAttribute("javax.websocket.server.ServerContainer", this.serverContainer);
+		this.servletContext.setAttribute("jakarta.websocket.server.ServerContainer", this.serverContainer);
 
 		this.webAppContext = new AnnotationConfigWebApplicationContext();
 		this.webAppContext.register(Config.class);
@@ -129,7 +128,7 @@ public class ServerEndpointExporterTests {
 	public void addServerEndpointConfigBeanWithExplicitServerContainer() throws Exception {
 		ServerEndpointRegistration endpointRegistration = new ServerEndpointRegistration("/dummy", new DummyEndpoint());
 		this.webAppContext.getBeanFactory().registerSingleton("dummyEndpoint", endpointRegistration);
-		this.servletContext.removeAttribute("javax.websocket.server.ServerContainer");
+		this.servletContext.removeAttribute("jakarta.websocket.server.ServerContainer");
 
 		this.exporter.setServerContainer(this.serverContainer);
 		this.exporter.setApplicationContext(this.webAppContext);

@@ -22,10 +22,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 
-import javax.ejb.TransactionAttributeType;
-
 import groovy.lang.GroovyObject;
 import groovy.lang.MetaClass;
+import jakarta.ejb.TransactionAttributeType;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.Advised;
@@ -745,7 +744,7 @@ public class AnnotationTransactionAttributeSourceTests {
 		private int age;
 
 		@Override
-		@javax.ejb.TransactionAttribute(TransactionAttributeType.SUPPORTS)
+		@jakarta.ejb.TransactionAttribute(TransactionAttributeType.SUPPORTS)
 		public String getName() {
 			return name;
 		}
@@ -756,7 +755,7 @@ public class AnnotationTransactionAttributeSourceTests {
 		}
 
 		@Override
-		@javax.ejb.TransactionAttribute
+		@jakarta.ejb.TransactionAttribute
 		public int getAge() {
 			return age;
 		}
@@ -768,7 +767,7 @@ public class AnnotationTransactionAttributeSourceTests {
 	}
 
 
-	@javax.ejb.TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	@jakarta.ejb.TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	static class Ejb3AnnotatedBean2 implements ITestBean1 {
 
 		private String name;
@@ -786,7 +785,7 @@ public class AnnotationTransactionAttributeSourceTests {
 		}
 
 		@Override
-		@javax.ejb.TransactionAttribute
+		@jakarta.ejb.TransactionAttribute
 		public int getAge() {
 			return age;
 		}
@@ -798,10 +797,10 @@ public class AnnotationTransactionAttributeSourceTests {
 	}
 
 
-	@javax.ejb.TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	@jakarta.ejb.TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	interface ITestEjb {
 
-		@javax.ejb.TransactionAttribute
+		@jakarta.ejb.TransactionAttribute
 		int getAge();
 
 		void setAge(int age);
@@ -847,7 +846,7 @@ public class AnnotationTransactionAttributeSourceTests {
 		private int age;
 
 		@Override
-		@javax.transaction.Transactional(javax.transaction.Transactional.TxType.SUPPORTS)
+		@jakarta.transaction.Transactional(jakarta.transaction.Transactional.TxType.SUPPORTS)
 		public String getName() {
 			return name;
 		}
@@ -858,7 +857,7 @@ public class AnnotationTransactionAttributeSourceTests {
 		}
 
 		@Override
-		@javax.transaction.Transactional
+		@jakarta.transaction.Transactional
 		public int getAge() {
 			return age;
 		}
@@ -870,7 +869,7 @@ public class AnnotationTransactionAttributeSourceTests {
 	}
 
 
-	@javax.transaction.Transactional(javax.transaction.Transactional.TxType.SUPPORTS)
+	@jakarta.transaction.Transactional(jakarta.transaction.Transactional.TxType.SUPPORTS)
 	static class JtaAnnotatedBean2 implements ITestBean1 {
 
 		private String name;
@@ -888,7 +887,7 @@ public class AnnotationTransactionAttributeSourceTests {
 		}
 
 		@Override
-		@javax.transaction.Transactional
+		@jakarta.transaction.Transactional
 		public int getAge() {
 			return age;
 		}
@@ -900,10 +899,10 @@ public class AnnotationTransactionAttributeSourceTests {
 	}
 
 
-	@javax.transaction.Transactional(javax.transaction.Transactional.TxType.SUPPORTS)
+	@jakarta.transaction.Transactional(jakarta.transaction.Transactional.TxType.SUPPORTS)
 	interface ITestJta {
 
-		@javax.transaction.Transactional
+		@jakarta.transaction.Transactional
 		int getAge();
 
 		void setAge(int age);

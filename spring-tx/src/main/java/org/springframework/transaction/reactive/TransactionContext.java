@@ -19,11 +19,8 @@ package org.springframework.transaction.reactive;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.StringUtils;
-import org.springframework.util.function.SingletonSupplier;
 
 /**
  * Mutable transaction context that encapsulates transactional synchronizations and
@@ -40,8 +37,6 @@ import org.springframework.util.function.SingletonSupplier;
 public class TransactionContext {
 
 	private final @Nullable TransactionContext parent;
-
-	private final SingletonSupplier<UUID> contextId = SingletonSupplier.of(UUID::randomUUID);
 
 	private final Map<Object, Object> resources = new LinkedHashMap<>();
 
@@ -69,20 +64,6 @@ public class TransactionContext {
 	@Nullable
 	public TransactionContext getParent() {
 		return this.parent;
-	}
-
-	@Deprecated
-	public String getName() {
-		String name = getCurrentTransactionName();
-		if (StringUtils.hasText(name)) {
-			return getContextId() + ": " + name;
-		}
-		return getContextId().toString();
-	}
-
-	@Deprecated
-	public UUID getContextId() {
-		return this.contextId.obtain();
 	}
 
 	public Map<Object, Object> getResources() {

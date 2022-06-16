@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -218,14 +218,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	static {
 		ClassLoader classLoader = WebMvcConfigurationSupport.class.getClassLoader();
 		romePresent = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", classLoader);
-		jaxb2Present = ClassUtils.isPresent("javax.xml.bind.Binder", classLoader);
+		jaxb2Present = ClassUtils.isPresent("jakarta.xml.bind.Binder", classLoader);
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
 		jackson2XmlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
 		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
 		jackson2CborPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", classLoader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
-		jsonbPresent = ClassUtils.isPresent("javax.json.bind.Jsonb", classLoader);
+		jsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
 		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
 	}
 
@@ -279,7 +279,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Set the {@link javax.servlet.ServletContext}, e.g. for resource handling,
+	 * Set the {@link jakarta.servlet.ServletContext}, e.g. for resource handling,
 	 * looking up file extensions, etc.
 	 */
 	@Override
@@ -288,7 +288,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Return the associated {@link javax.servlet.ServletContext}.
+	 * Return the associated {@link jakarta.servlet.ServletContext}.
 	 * @since 4.2
 	 */
 	@Nullable
@@ -774,7 +774,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	public Validator mvcValidator() {
 		Validator validator = getValidator();
 		if (validator == null) {
-			if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
+			if (ClassUtils.isPresent("jakarta.validation.Validator", getClass().getClassLoader())) {
 				Class<?> clazz;
 				try {
 					String className = "org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean";

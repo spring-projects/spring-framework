@@ -19,8 +19,8 @@ package org.springframework.web.servlet.mvc.method;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
@@ -470,10 +470,9 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof RequestMappingInfo)) {
+		if (!(other instanceof RequestMappingInfo otherInfo)) {
 			return false;
 		}
-		RequestMappingInfo otherInfo = (RequestMappingInfo) other;
 		return (getActivePatternsCondition().equals(otherInfo.getActivePatternsCondition()) &&
 				this.methodsCondition.equals(otherInfo.methodsCondition) &&
 				this.paramsCondition.equals(otherInfo.paramsCondition) &&

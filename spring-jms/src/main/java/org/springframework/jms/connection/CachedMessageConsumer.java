@@ -16,14 +16,14 @@
 
 package org.springframework.jms.connection;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageListener;
-import javax.jms.Queue;
-import javax.jms.QueueReceiver;
-import javax.jms.Topic;
-import javax.jms.TopicSubscriber;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.MessageConsumer;
+import jakarta.jms.MessageListener;
+import jakarta.jms.Queue;
+import jakarta.jms.QueueReceiver;
+import jakarta.jms.Topic;
+import jakarta.jms.TopicSubscriber;
 
 import org.springframework.lang.Nullable;
 

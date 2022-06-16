@@ -58,7 +58,9 @@ class OperatorTests extends AbstractExpressionTests {
 		evaluate("'abc' == new java.lang.StringBuilder('abc')", true, Boolean.class);
 		evaluate("'abc' == 'def'", false, Boolean.class);
 		evaluate("'abc' == null", false, Boolean.class);
-		evaluate("new org.springframework.expression.spel.OperatorTests$SubComparable() == new org.springframework.expression.spel.OperatorTests$OtherSubComparable()", true, Boolean.class);
+		evaluate("new org.springframework.expression.spel.OperatorTests$SubComparable(0) == new org.springframework.expression.spel.OperatorTests$OtherSubComparable(0)", true, Boolean.class);
+		evaluate("new org.springframework.expression.spel.OperatorTests$SubComparable(1) < new org.springframework.expression.spel.OperatorTests$OtherSubComparable(2)", true, Boolean.class);
+		evaluate("new org.springframework.expression.spel.OperatorTests$SubComparable(2) > new org.springframework.expression.spel.OperatorTests$OtherSubComparable(1)", true, Boolean.class);
 
 		evaluate("3 eq 5", false, Boolean.class);
 		evaluate("5 eQ 3", false, Boolean.class);
@@ -621,18 +623,40 @@ class OperatorTests extends AbstractExpressionTests {
 
 	public static class BaseComparable implements Comparable<BaseComparable> {
 
+		private int id;
+
+		public BaseComparable() {
+			this.id = 0;
+		}
+
+		public BaseComparable(int id) {
+			this.id = id;
+		}
+
 		@Override
 		public int compareTo(BaseComparable other) {
-			return 0;
+			return this.id - other.id;
 		}
 	}
 
 
 	public static class SubComparable extends BaseComparable {
+		public SubComparable() {
+		}
+
+		public SubComparable(int id) {
+			super(id);
+		}
 	}
 
 
 	public static class OtherSubComparable extends BaseComparable {
+		public OtherSubComparable() {
+		}
+
+		public OtherSubComparable(int id) {
+			super(id);
+		}
 	}
 
 }

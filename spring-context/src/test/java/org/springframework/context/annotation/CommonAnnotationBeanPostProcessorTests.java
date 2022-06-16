@@ -18,11 +18,10 @@ package org.springframework.context.annotation;
 
 import java.util.Properties;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJB;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;

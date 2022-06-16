@@ -24,9 +24,9 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
@@ -474,22 +474,6 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		}
 	}
 
-
-	/**
-	 * Check and prepare the given request and response according to the settings
-	 * of this generator.
-	 * @see #checkRequest(HttpServletRequest)
-	 * @see #prepareResponse(HttpServletResponse)
-	 * @deprecated as of 4.2, since the {@code lastModified} flag is effectively ignored,
-	 * with a must-revalidate header only generated if explicitly configured
-	 */
-	@Deprecated
-	protected final void checkAndPrepare(
-			HttpServletRequest request, HttpServletResponse response, boolean lastModified) throws ServletException {
-
-		checkRequest(request);
-		prepareResponse(response);
-	}
 
 	/**
 	 * Check and prepare the given request and response according to the settings

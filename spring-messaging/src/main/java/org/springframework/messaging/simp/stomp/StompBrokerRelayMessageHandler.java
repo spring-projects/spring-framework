@@ -657,6 +657,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 
 
+		@Override
 		public String getSessionId() {
 			return this.sessionId;
 		}
@@ -984,6 +985,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			sendSystemSubscriptions();
 		}
 
+		@Override
 		protected void initHeartbeats(StompHeaderAccessor connectedHeaders) {
 			TcpConnection<byte[]> con = getTcpConnection();
 			Assert.state(con != null, "No TcpConnection available");

@@ -265,7 +265,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 
 		PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
 
-		PropertySource<?> ps = new PropertySource<Object>("simplePropertySource", new Object()) {
+		PropertySource<?> ps = new PropertySource<>("simplePropertySource", new Object()) {
 			@Override
 			public Object getProperty(String key) {
 				return "bar";
@@ -445,7 +445,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class IgnoreUnresolvablePlaceholdersFalseConfig {
 
 		@Value("${my.key}")
@@ -457,7 +457,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class IgnoreUnresolvablePlaceholdersTrueConfig {
 
 		@Value("${my.key}")

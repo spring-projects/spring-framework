@@ -88,14 +88,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 				afterExpectationsDeclared();
 			}
 			try {
-				// Try this first for backwards compatibility
-				ClientHttpResponse response = validateRequestInternal(request);
-				if (response != null) {
-					return response;
-				}
-				else {
-					expectation = matchRequest(request);
-				}
+				expectation = matchRequest(request);
 			}
 			catch (Throwable ex) {
 				this.requestFailures.put(request, ex);
@@ -113,19 +106,6 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 	 * the expectations declaration phase is over.
 	 */
 	protected void afterExpectationsDeclared() {
-	}
-
-	/**
-	 * Subclasses must implement the actual validation of the request
-	 * matching to declared expectations.
-	 * @deprecated as of 5.0.3, subclasses should implement {@link #matchRequest(ClientHttpRequest)}
-	 * instead and return only the matched expectation, leaving the call to create the response
-	 * as a separate step (to be invoked by this class).
-	 */
-	@Deprecated
-	@Nullable
-	protected ClientHttpResponse validateRequestInternal(ClientHttpRequest request) throws IOException {
-		return null;
 	}
 
 	/**
@@ -270,15 +250,6 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 			else {
 				this.expectations.remove(expectation);
 			}
-		}
-
-		/**
-		 * Add expectations to this group.
-		 * @deprecated as of 5.0.3, if favor of {@link #addAllExpectations}
-		 */
-		@Deprecated
-		public void updateAll(Collection<RequestExpectation> expectations) {
-			expectations.forEach(this::updateInternal);
 		}
 
 		/**

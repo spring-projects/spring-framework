@@ -21,9 +21,9 @@ import java.io.Writer;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.json.bind.JsonbConfig;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
+import jakarta.json.bind.JsonbConfig;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -39,8 +39,8 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 5.0
- * @see javax.json.bind.Jsonb
- * @see javax.json.bind.JsonbBuilder
+ * @see jakarta.json.bind.Jsonb
+ * @see jakarta.json.bind.JsonbBuilder
  * @see #setJsonb
  */
 public class JsonbHttpMessageConverter extends AbstractJsonHttpMessageConverter {

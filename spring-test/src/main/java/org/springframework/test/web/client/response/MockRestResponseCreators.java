@@ -21,6 +21,7 @@ import java.net.URI;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.test.web.client.ResponseCreator;
@@ -113,12 +114,12 @@ public abstract class MockRestResponseCreators {
 	 * {@code ResponseCreator} with a specific HTTP status.
 	 * @param status the response status
 	 */
-	public static DefaultResponseCreator withStatus(HttpStatus status) {
+	public static DefaultResponseCreator withStatus(HttpStatusCode status) {
 		return new DefaultResponseCreator(status);
 	}
 
 	/**
-	 * Variant of {@link #withStatus(HttpStatus)} for a custom HTTP status code.
+	 * Variant of {@link #withStatus(HttpStatusCode)} with an integer.
 	 * @param status the response status
 	 * @since 5.3.17
 	 */

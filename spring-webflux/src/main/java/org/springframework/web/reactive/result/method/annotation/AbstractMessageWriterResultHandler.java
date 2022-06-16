@@ -30,7 +30,7 @@ import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.converter.HttpMessageNotWritableException;
@@ -152,7 +152,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 			bestMediaType = selectMediaType(exchange, () -> getMediaTypesFor(elementType));
 		}
 		catch (NotAcceptableStatusException ex) {
-			HttpStatus statusCode = exchange.getResponse().getStatusCode();
+			HttpStatusCode statusCode = exchange.getResponse().getStatusCode();
 			if (statusCode != null && statusCode.isError()) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Ignoring error response content (if any). " + ex.getReason());

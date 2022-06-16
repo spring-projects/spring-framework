@@ -19,8 +19,7 @@ package org.springframework.web.servlet.handler;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.Arguments;
 

@@ -49,6 +49,7 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	public WebExchangeBindException(MethodParameter parameter, BindingResult bindingResult) {
 		super("Validation failure", parameter);
 		this.bindingResult = bindingResult;
+		getBody().setDetail("Invalid request content.");
 	}
 
 

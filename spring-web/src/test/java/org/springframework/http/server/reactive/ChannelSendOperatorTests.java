@@ -140,7 +140,7 @@ public class ChannelSendOperatorTests {
 					return Mono.never();
 				});
 
-		BaseSubscriber<Void> subscriber = new BaseSubscriber<Void>() {};
+		BaseSubscriber<Void> subscriber = new BaseSubscriber<>() {};
 		operator.subscribe(subscriber);
 		subscriber.cancel();
 

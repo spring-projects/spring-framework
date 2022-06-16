@@ -48,6 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link WebHttpHandlerBuilder}.
+ *
  * @author Rossen Stoyanchev
  */
 public class WebHttpHandlerBuilderTests {
@@ -73,7 +74,7 @@ public class WebHttpHandlerBuilderTests {
 	@Test
 	void forwardedHeaderTransformer() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.register(ForwardedHeaderFilterConfig.class);
+		context.register(ForwardedHeaderTransformerConfig.class);
 		context.refresh();
 
 		WebHttpHandlerBuilder builder = WebHttpHandlerBuilder.applicationContext(context);
@@ -199,7 +200,6 @@ public class WebHttpHandlerBuilderTests {
 
 
 	@Configuration
-	@SuppressWarnings("unused")
 	static class OrderedWebFilterBeanConfig {
 
 		private static final String ATTRIBUTE = "attr";
@@ -234,7 +234,6 @@ public class WebHttpHandlerBuilderTests {
 
 
 	@Configuration
-	@SuppressWarnings("unused")
 	static class OrderedExceptionHandlerBeanConfig {
 
 		@Bean
@@ -256,13 +255,11 @@ public class WebHttpHandlerBuilderTests {
 	}
 
 	@Configuration
-	@SuppressWarnings("unused")
-	static class ForwardedHeaderFilterConfig {
+	static class ForwardedHeaderTransformerConfig {
 
 		@Bean
-		@SuppressWarnings("deprecation")
-		public WebFilter forwardedHeaderFilter() {
-			return new org.springframework.web.filter.reactive.ForwardedHeaderFilter();
+		public ForwardedHeaderTransformer forwardedHeaderTransformer() {
+			return new ForwardedHeaderTransformer();
 		}
 
 		@Bean
@@ -272,7 +269,6 @@ public class WebHttpHandlerBuilderTests {
 	}
 
 	@Configuration
-	@SuppressWarnings("unused")
 	static class NoFilterConfig {
 
 		@Bean

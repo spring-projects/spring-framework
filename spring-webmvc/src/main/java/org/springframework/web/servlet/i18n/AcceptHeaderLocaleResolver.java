@@ -21,8 +21,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
@@ -39,7 +39,7 @@ import org.springframework.web.servlet.LocaleResolver;
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @since 27.02.2003
- * @see javax.servlet.http.HttpServletRequest#getLocale()
+ * @see jakarta.servlet.http.HttpServletRequest#getLocale()
  */
 public class AcceptHeaderLocaleResolver implements LocaleResolver {
 

@@ -319,4 +319,12 @@ public class NamedParameterUtilsTests {
 		assertThat(psql2.getParameterNames().get(0)).isEqualTo("xxx");
 	}
 
+	@Test  // gh-27716
+	public void parseSqlStatementWithSquareBracket() {
+		String sql = "SELECT ARRAY[:ext]";
+		ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);
+		assertThat(psql.getNamedParameterCount()).isEqualTo(1);
+		assertThat(psql.getParameterNames()).containsExactly("ext");
+	}
+
 }

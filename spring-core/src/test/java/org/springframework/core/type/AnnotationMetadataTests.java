@@ -397,6 +397,7 @@ class AnnotationMetadataTests {
 	}
 
 	private void doTestMethodAnnotationInfo(AnnotationMetadata classMetadata) {
+		assertThat(classMetadata.getDeclaredMethods()).hasSize(3);
 		Set<MethodMetadata> methods = classMetadata.getAnnotatedMethods(TestAutowired.class.getName());
 		assertThat(methods).hasSize(1);
 		for (MethodMetadata methodMetadata : methods) {
@@ -502,6 +503,9 @@ class AnnotationMetadataTests {
 	@EnumSubclasses({SubclassEnum.FOO, SubclassEnum.BAR})
 	@NamedComposedAnnotation
 	private static class AnnotatedComponent implements Serializable {
+
+		public AnnotatedComponent() {
+		}
 
 		@TestAutowired
 		public void doWork(@TestQualifier("myColor") java.awt.Color color) {

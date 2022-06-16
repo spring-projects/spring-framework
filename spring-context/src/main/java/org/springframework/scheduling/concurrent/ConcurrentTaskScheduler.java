@@ -25,8 +25,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import javax.enterprise.concurrent.LastExecution;
-import javax.enterprise.concurrent.ManagedScheduledExecutorService;
+import jakarta.enterprise.concurrent.LastExecution;
+import jakarta.enterprise.concurrent.ManagedScheduledExecutorService;
 
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.lang.Nullable;
@@ -44,11 +44,11 @@ import org.springframework.util.ErrorHandler;
  * Extends {@link ConcurrentTaskExecutor} in order to implement the
  * {@link org.springframework.scheduling.SchedulingTaskExecutor} interface as well.
  *
- * <p>Autodetects a JSR-236 {@link javax.enterprise.concurrent.ManagedScheduledExecutorService}
+ * <p>Autodetects a JSR-236 {@link jakarta.enterprise.concurrent.ManagedScheduledExecutorService}
  * in order to use it for trigger-based scheduling if possible, instead of Spring's
  * local trigger management which ends up delegating to regular delay-based scheduling
  * against the {@code java.util.concurrent.ScheduledExecutorService} API. For JSR-236 style
- * lookup in a Java EE 7 environment, consider using {@link DefaultManagedTaskScheduler}.
+ * lookup in a Jakarta EE environment, consider using {@link DefaultManagedTaskScheduler}.
  *
  * <p>Note that there is a pre-built {@link ThreadPoolTaskScheduler} that allows for
  * defining a {@link java.util.concurrent.ScheduledThreadPoolExecutor} in bean style,
@@ -73,7 +73,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	static {
 		try {
 			managedScheduledExecutorServiceClass = ClassUtils.forName(
-					"javax.enterprise.concurrent.ManagedScheduledExecutorService",
+					"jakarta.enterprise.concurrent.ManagedScheduledExecutorService",
 					ConcurrentTaskScheduler.class.getClassLoader());
 		}
 		catch (ClassNotFoundException ex) {
@@ -106,7 +106,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	/**
 	 * Create a new ConcurrentTaskScheduler, using the given
 	 * {@link java.util.concurrent.ScheduledExecutorService} as shared delegate.
-	 * <p>Autodetects a JSR-236 {@link javax.enterprise.concurrent.ManagedScheduledExecutorService}
+	 * <p>Autodetects a JSR-236 {@link jakarta.enterprise.concurrent.ManagedScheduledExecutorService}
 	 * in order to use it for trigger-based scheduling if possible,
 	 * instead of Spring's local trigger management.
 	 * @param scheduledExecutor the {@link java.util.concurrent.ScheduledExecutorService}
@@ -121,7 +121,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	/**
 	 * Create a new ConcurrentTaskScheduler, using the given {@link java.util.concurrent.Executor}
 	 * and {@link java.util.concurrent.ScheduledExecutorService} as delegates.
-	 * <p>Autodetects a JSR-236 {@link javax.enterprise.concurrent.ManagedScheduledExecutorService}
+	 * <p>Autodetects a JSR-236 {@link jakarta.enterprise.concurrent.ManagedScheduledExecutorService}
 	 * in order to use it for trigger-based scheduling if possible,
 	 * instead of Spring's local trigger management.
 	 * @param concurrentExecutor the {@link java.util.concurrent.Executor} to delegate to
@@ -150,7 +150,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 
 	/**
 	 * Specify the {@link java.util.concurrent.ScheduledExecutorService} to delegate to.
-	 * <p>Autodetects a JSR-236 {@link javax.enterprise.concurrent.ManagedScheduledExecutorService}
+	 * <p>Autodetects a JSR-236 {@link jakarta.enterprise.concurrent.ManagedScheduledExecutorService}
 	 * in order to use it for trigger-based scheduling if possible,
 	 * instead of Spring's local trigger management.
 	 * <p>Note: This will only apply to {@link TaskScheduler} invocations.
@@ -275,7 +275,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 
 		public ScheduledFuture<?> schedule(Runnable task, final Trigger trigger) {
 			ManagedScheduledExecutorService executor = (ManagedScheduledExecutorService) scheduledExecutor;
-			return executor.schedule(task, new javax.enterprise.concurrent.Trigger() {
+			return executor.schedule(task, new jakarta.enterprise.concurrent.Trigger() {
 				@Override
 				@Nullable
 				public Date getNextRunTime(@Nullable LastExecution le, Date taskScheduledTime) {

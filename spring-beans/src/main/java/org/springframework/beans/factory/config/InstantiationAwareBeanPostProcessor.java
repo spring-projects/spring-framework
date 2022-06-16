@@ -16,8 +16,6 @@
 
 package org.springframework.beans.factory.config;
 
-import java.beans.PropertyDescriptor;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.lang.Nullable;
@@ -94,53 +92,19 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 
 	/**
 	 * Post-process the given property values before the factory applies them
-	 * to the given bean, without any need for property descriptors.
-	 * <p>Implementations should return {@code null} (the default) if they provide a custom
-	 * {@link #postProcessPropertyValues} implementation, and {@code pvs} otherwise.
-	 * In a future version of this interface (with {@link #postProcessPropertyValues} removed),
-	 * the default implementation will return the given {@code pvs} as-is directly.
-	 * @param pvs the property values that the factory is about to apply (never {@code null})
-	 * @param bean the bean instance created, but whose properties have not yet been set
-	 * @param beanName the name of the bean
-	 * @return the actual property values to apply to the given bean (can be the passed-in
-	 * PropertyValues instance), or {@code null} which proceeds with the existing properties
-	 * but specifically continues with a call to {@link #postProcessPropertyValues}
-	 * (requiring initialized {@code PropertyDescriptor}s for the current bean class)
-	 * @throws org.springframework.beans.BeansException in case of errors
-	 * @since 5.1
-	 * @see #postProcessPropertyValues
-	 */
-	@Nullable
-	default PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName)
-			throws BeansException {
-
-		return null;
-	}
-
-	/**
-	 * Post-process the given property values before the factory applies them
-	 * to the given bean. Allows for checking whether all dependencies have been
-	 * satisfied, for example based on a "Required" annotation on bean property setters.
-	 * <p>Also allows for replacing the property values to apply, typically through
-	 * creating a new MutablePropertyValues instance based on the original PropertyValues,
-	 * adding or removing specific values.
+	 * to the given bean.
 	 * <p>The default implementation returns the given {@code pvs} as-is.
 	 * @param pvs the property values that the factory is about to apply (never {@code null})
-	 * @param pds the relevant property descriptors for the target bean (with ignored
-	 * dependency types - which the factory handles specifically - already filtered out)
 	 * @param bean the bean instance created, but whose properties have not yet been set
 	 * @param beanName the name of the bean
 	 * @return the actual property values to apply to the given bean (can be the passed-in
 	 * PropertyValues instance), or {@code null} to skip property population
 	 * @throws org.springframework.beans.BeansException in case of errors
-	 * @see #postProcessProperties
-	 * @see org.springframework.beans.MutablePropertyValues
-	 * @deprecated as of 5.1, in favor of {@link #postProcessProperties(PropertyValues, Object, String)}
+	 * @since 5.1
 	 */
-	@Deprecated
 	@Nullable
-	default PropertyValues postProcessPropertyValues(
-			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
+	default PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName)
+			throws BeansException {
 
 		return pvs;
 	}

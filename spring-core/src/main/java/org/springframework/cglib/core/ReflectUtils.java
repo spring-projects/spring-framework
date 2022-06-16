@@ -26,9 +26,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.security.PrivilegedExceptionAction;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,11 +53,6 @@ public class ReflectUtils {
 
 	private static final ClassLoader defaultLoader = ReflectUtils.class.getClassLoader();
 
-	// SPRING PATCH BEGIN
-	private static final Method privateLookupInMethod;
-
-	private static final Method lookupDefineClassMethod;
-
 	private static final Method classLoaderDefineClassMethod;
 
 	private static final Throwable THROWABLE;
@@ -69,65 +61,32 @@ public class ReflectUtils {
 
 	private static final List<Method> OBJECT_METHODS = new ArrayList<Method>();
 
+	// SPRING PATCH BEGIN
 	static {
-		Method privateLookupIn;
-		Method lookupDefineClass;
+		// Resolve protected ClassLoader.defineClass method for fallback use
+		// (even if JDK 9+ Lookup.defineClass is preferably used below)
 		Method classLoaderDefineClass;
 		Throwable throwable = null;
 		try {
-			privateLookupIn = (Method) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws Exception {
-					try {
-						return MethodHandles.class.getMethod("privateLookupIn", Class.class, MethodHandles.Lookup.class);
-					}
-					catch (NoSuchMethodException ex) {
-						return null;
-					}
-				}
-			});
-			lookupDefineClass = (Method) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws Exception {
-					try {
-						return MethodHandles.Lookup.class.getMethod("defineClass", byte[].class);
-					}
-					catch (NoSuchMethodException ex) {
-						return null;
-					}
-				}
-			});
-			classLoaderDefineClass = (Method) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws Exception {
-					return ClassLoader.class.getDeclaredMethod("defineClass",
+			classLoaderDefineClass = ClassLoader.class.getDeclaredMethod("defineClass",
 							String.class, byte[].class, Integer.TYPE, Integer.TYPE, ProtectionDomain.class);
-				}
-			});
 		}
 		catch (Throwable t) {
-			privateLookupIn = null;
-			lookupDefineClass = null;
 			classLoaderDefineClass = null;
 			throwable = t;
 		}
 
-		privateLookupInMethod = privateLookupIn;
-		lookupDefineClassMethod = lookupDefineClass;
 		classLoaderDefineClassMethod = classLoaderDefineClass;
 		THROWABLE = throwable;
 		PROTECTION_DOMAIN = getProtectionDomain(ReflectUtils.class);
 
-		AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
-				Method[] methods = Object.class.getDeclaredMethods();
-				for (Method method : methods) {
-					if ("finalize".equals(method.getName())
-							|| (method.getModifiers() & (Modifier.FINAL | Modifier.STATIC)) > 0) {
-						continue;
-					}
-					OBJECT_METHODS.add(method);
-				}
-				return null;
+		for (Method method : Object.class.getDeclaredMethods()) {
+			if ("finalize".equals(method.getName())
+					|| (method.getModifiers() & (Modifier.FINAL | Modifier.STATIC)) > 0) {
+				continue;
 			}
-		});
+			OBJECT_METHODS.add(method);
+		}
 	}
 	// SPRING PATCH END
 
@@ -157,11 +116,7 @@ public class ReflectUtils {
 		if (source == null) {
 			return null;
 		}
-		return (ProtectionDomain) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
-				return source.getProtectionDomain();
-			}
-		});
+		return source.getProtectionDomain();
 	}
 
 	public static Type[] getExceptionTypes(Member member) {
@@ -304,7 +259,7 @@ public class ReflectUtils {
 		return newInstance(getConstructor(type, parameterTypes), args);
 	}
 
-	@SuppressWarnings("deprecation")  // on JDK 9
+	@SuppressWarnings("deprecation")
 	public static Object newInstance(final Constructor cstruct, final Object[] args) {
 		boolean flag = cstruct.isAccessible();
 		try {
@@ -333,15 +288,7 @@ public class ReflectUtils {
 	public static Constructor getConstructor(Class type, Class[] parameterTypes) {
 		try {
 			Constructor constructor = type.getDeclaredConstructor(parameterTypes);
-			if (System.getSecurityManager() != null) {
-				AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
-					constructor.setAccessible(true);
-					return null;
-				});
-			}
-			else {
-				constructor.setAccessible(true);
-			}
+			constructor.setAccessible(true);
 			return constructor;
 		}
 		catch (NoSuchMethodException e) {
@@ -491,7 +438,7 @@ public class ReflectUtils {
 		return defineClass(className, b, loader, protectionDomain, null);
 	}
 
-	@SuppressWarnings("deprecation")  // on JDK 9
+	@SuppressWarnings("deprecation")
 	public static Class defineClass(String className, byte[] b, ClassLoader loader,
 			ProtectionDomain protectionDomain, Class<?> contextClass) throws Exception {
 
@@ -499,22 +446,16 @@ public class ReflectUtils {
 		Throwable t = THROWABLE;
 
 		// Preferred option: JDK 9+ Lookup.defineClass API if ClassLoader matches
-		if (contextClass != null && contextClass.getClassLoader() == loader &&
-				privateLookupInMethod != null && lookupDefineClassMethod != null) {
+		if (contextClass != null && contextClass.getClassLoader() == loader) {
 			try {
-				MethodHandles.Lookup lookup = (MethodHandles.Lookup)
-						privateLookupInMethod.invoke(null, contextClass, MethodHandles.lookup());
-				c = (Class) lookupDefineClassMethod.invoke(lookup, b);
+				MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(contextClass, MethodHandles.lookup());
+				c = lookup.defineClass(b);
 			}
-			catch (InvocationTargetException ex) {
-				Throwable target = ex.getTargetException();
-				if (target.getClass() != LinkageError.class && target.getClass() != IllegalArgumentException.class) {
-					throw new CodeGenerationException(target);
-				}
+			catch (LinkageError | IllegalArgumentException ex) {
 				// in case of plain LinkageError (class already defined)
 				// or IllegalArgumentException (class in different package):
 				// fall through to traditional ClassLoader.defineClass below
-				t = target;
+				t = ex;
 			}
 			catch (Throwable ex) {
 				throw new CodeGenerationException(ex);
@@ -569,15 +510,10 @@ public class ReflectUtils {
 		}
 
 		// Fallback option: JDK 9+ Lookup.defineClass API even if ClassLoader does not match
-		if (c == null && contextClass != null && contextClass.getClassLoader() != loader &&
-				privateLookupInMethod != null && lookupDefineClassMethod != null) {
+		if (c == null && contextClass != null && contextClass.getClassLoader() != loader) {
 			try {
-				MethodHandles.Lookup lookup = (MethodHandles.Lookup)
-						privateLookupInMethod.invoke(null, contextClass, MethodHandles.lookup());
-				c = (Class) lookupDefineClassMethod.invoke(lookup, b);
-			}
-			catch (InvocationTargetException ex) {
-				throw new CodeGenerationException(ex.getTargetException());
+				MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(contextClass, MethodHandles.lookup());
+				c = lookup.defineClass(b);
 			}
 			catch (Throwable ex) {
 				throw new CodeGenerationException(ex);

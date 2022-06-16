@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -352,8 +352,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				logger.trace(String.format("Processing locations and classes for context configuration attributes %s",
 						configAttributes));
 			}
-			if (contextLoader instanceof SmartContextLoader) {
-				SmartContextLoader smartContextLoader = (SmartContextLoader) contextLoader;
+			if (contextLoader instanceof SmartContextLoader smartContextLoader) {
 				smartContextLoader.processContextConfiguration(configAttributes);
 				locations.addAll(0, Arrays.asList(configAttributes.getLocations()));
 				classes.addAll(0, Arrays.asList(configAttributes.getClasses()));

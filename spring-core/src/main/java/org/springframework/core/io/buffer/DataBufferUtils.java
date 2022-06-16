@@ -513,8 +513,7 @@ public abstract class DataBufferUtils {
 	 * @return {@code true} if the buffer was released; {@code false} otherwise.
 	 */
 	public static boolean release(@Nullable DataBuffer dataBuffer) {
-		if (dataBuffer instanceof PooledDataBuffer) {
-			PooledDataBuffer pooledDataBuffer = (PooledDataBuffer) dataBuffer;
+		if (dataBuffer instanceof PooledDataBuffer pooledDataBuffer) {
 			if (pooledDataBuffer.isAllocated()) {
 				try {
 					return pooledDataBuffer.release();
@@ -608,15 +607,14 @@ public abstract class DataBufferUtils {
 	}
 
 	private static NestedMatcher createMatcher(byte[] delimiter) {
-		Assert.isTrue(delimiter.length > 0, "Delimiter must not be empty");
-		switch (delimiter.length) {
-			case 1:
-				return (delimiter[0] == 10 ? SingleByteMatcher.NEWLINE_MATCHER : new SingleByteMatcher(delimiter));
-			case 2:
-				return new TwoByteMatcher(delimiter);
-			default:
-				return new KnuthMorrisPrattMatcher(delimiter);
-		}
+		// extract length due to Eclipse IDE compiler error in switch expression
+		int length = delimiter.length;
+		Assert.isTrue(length > 0, "Delimiter must not be empty");
+		return switch (length) {
+			case 1 -> (delimiter[0] == 10 ? SingleByteMatcher.NEWLINE_MATCHER : new SingleByteMatcher(delimiter));
+			case 2 -> new TwoByteMatcher(delimiter);
+			default -> new KnuthMorrisPrattMatcher(delimiter);
+		};
 	}
 
 

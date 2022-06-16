@@ -19,15 +19,15 @@ package org.springframework.web.socket.client.standard;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.websocket.ClientEndpointConfig;
-import javax.websocket.ClientEndpointConfig.Configurator;
-import javax.websocket.ContainerProvider;
-import javax.websocket.Decoder;
-import javax.websocket.Encoder;
-import javax.websocket.Endpoint;
-import javax.websocket.Extension;
-import javax.websocket.Session;
-import javax.websocket.WebSocketContainer;
+import jakarta.websocket.ClientEndpointConfig;
+import jakarta.websocket.ClientEndpointConfig.Configurator;
+import jakarta.websocket.ContainerProvider;
+import jakarta.websocket.Decoder;
+import jakarta.websocket.Encoder;
+import jakarta.websocket.Endpoint;
+import jakarta.websocket.Extension;
+import jakarta.websocket.Session;
+import jakarta.websocket.WebSocketContainer;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;

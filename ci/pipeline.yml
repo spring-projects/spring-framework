@@ -77,13 +77,6 @@ resources:
   icon: github
   source:
     <<: *git-repo-resource-source
-- name: every-morning
-  type: time
-  icon: alarm
-  source:
-    start: 8:00 AM
-    stop: 9:00 AM
-    location: Europe/Vienna
 - name: ci-images-git-repo
   type: git
   icon: github
@@ -97,6 +90,13 @@ resources:
   source:
     <<: *docker-resource-source
     repository: ((docker-hub-organization))/spring-framework-ci
+- name: every-morning
+  type: time
+  icon: alarm
+  source:
+    start: 8:00 AM
+    stop: 9:00 AM
+    location: Europe/Vienna
 - name: artifactory-repo
   type: artifactory-resource
   icon: package-variant
@@ -121,22 +121,14 @@ resources:
     access_token: ((github-ci-status-token))
     branch: ((branch))
     context: build
-- name: repo-status-jdk11-build
+- name: repo-status-jdk18-build
   type: github-status-resource
   icon: eye-check-outline
   source:
     repository: ((github-repo-name))
     access_token: ((github-ci-status-token))
     branch: ((branch))
-    context: jdk11-build
-- name: repo-status-jdk17-build
-  type: github-status-resource
-  icon: eye-check-outline
-  source:
-    repository: ((github-repo-name))
-    access_token: ((github-ci-status-token))
-    branch: ((branch))
-    context: jdk17-build
+    context: jdk18-build
 - name: slack-alert
   type: slack-notification
   icon: slack
@@ -226,35 +218,7 @@ jobs:
           "zip.type": "schema"
     get_params:
       threads: 8
-- name: jdk11-build
-  serial: true
-  public: true
-  plan:
-  - get: ci-image
-  - get: git-repo
-  - get: every-morning
-    trigger: true
-  - put: repo-status-jdk11-build
-    params: { state: "pending", commit: "git-repo" }
-  - do:
-    - task: check-project
-      image: ci-image
-      file: git-repo/ci/tasks/check-project.yml
-      privileged: true
-      timeout: ((task-timeout))
-      params:
-        TEST_TOOLCHAIN: 11
-        <<: *build-project-task-params
-    on_failure:
-      do:
-      - put: repo-status-jdk11-build
-        params: { state: "failure", commit: "git-repo" }
-      - put: slack-alert
-        params:
-          <<: *slack-fail-params
-  - put: repo-status-jdk11-build
-    params: { state: "success", commit: "git-repo" }
-- name: jdk17-build
+- name: jdk18-build
   serial: true
   public: true
   plan:
@@ -262,25 +226,25 @@ jobs:
     - get: git-repo
     - get: every-morning
       trigger: true
-    - put: repo-status-jdk17-build
+    - put: repo-status-jdk18-build
       params: { state: "pending", commit: "git-repo" }
     - do:
-      - task: check-project
-        image: ci-image
-        file: git-repo/ci/tasks/check-project.yml
-        privileged: true
-        timeout: ((task-timeout))
-        params:
-          TEST_TOOLCHAIN: 15
-          <<: *build-project-task-params
+        - task: check-project
+          image: ci-image
+          file: git-repo/ci/tasks/check-project.yml
+          privileged: true
+          timeout: ((task-timeout))
+          params:
+            TEST_TOOLCHAIN: 18
+            <<: *build-project-task-params
       on_failure:
         do:
-          - put: repo-status-jdk17-build
+          - put: repo-status-jdk18-build
             params: { state: "failure", commit: "git-repo" }
           - put: slack-alert
             params:
               <<: *slack-fail-params
-    - put: repo-status-jdk17-build
+    - put: repo-status-jdk18-build
       params: { state: "success", commit: "git-repo" }
 - name: build-pull-requests
   serial: true
@@ -463,7 +427,7 @@ jobs:
 
 groups:
 - name: "builds"
-  jobs: ["build", "jdk11-build", "jdk17-build"]
+  jobs: ["build", "jdk18-build"]
 - name: "releases"
   jobs: ["stage-milestone", "stage-rc", "stage-release", "promote-milestone", "promote-rc", "promote-release", "create-github-release"]
 - name: "ci-images"

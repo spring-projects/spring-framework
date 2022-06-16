@@ -17,9 +17,9 @@
 package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,10 +27,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -310,7 +309,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * response.
 	 * <p>Use of this method is typically not necessary since mappings are
 	 * otherwise determined via
-	 * {@link javax.servlet.ServletContext#getMimeType(String)} or via
+	 * {@link jakarta.servlet.ServletContext#getMimeType(String)} or via
 	 * {@link MediaTypeFactory#getMediaType(Resource)}.
 	 * @param mediaTypes media type mappings
 	 * @since 5.2.4
@@ -508,8 +507,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			return;
 		}
 		for (int i = getResourceResolvers().size() - 1; i >= 0; i--) {
-			if (getResourceResolvers().get(i) instanceof PathResourceResolver) {
-				PathResourceResolver pathResolver = (PathResourceResolver) getResourceResolvers().get(i);
+			if (getResourceResolvers().get(i) instanceof PathResourceResolver pathResolver) {
 				if (ObjectUtils.isEmpty(pathResolver.getAllowedLocations())) {
 					pathResolver.setAllowedLocations(getLocations().toArray(new Resource[0]));
 				}
@@ -563,7 +561,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		}
 
 		if (HttpMethod.OPTIONS.matches(request.getMethod())) {
-			response.setHeader("Allow", getAllowHeader());
+			response.setHeader(HttpHeaders.ALLOW, getAllowHeader());
 			return;
 		}
 
@@ -587,7 +585,14 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		ServletServerHttpResponse outputMessage = new ServletServerHttpResponse(response);
 		if (request.getHeader(HttpHeaders.RANGE) == null) {
 			Assert.state(this.resourceHttpMessageConverter != null, "Not initialized");
-			this.resourceHttpMessageConverter.write(resource, mediaType, outputMessage);
+
+			if (HttpMethod.HEAD.matches(request.getMethod())) {
+				this.resourceHttpMessageConverter.addDefaultHeaders(outputMessage, resource, mediaType);
+				outputMessage.flush();
+			}
+			else {
+				this.resourceHttpMessageConverter.write(resource, mediaType, outputMessage);
+			}
 		}
 		else {
 			Assert.state(this.resourceRegionHttpMessageConverter != null, "Not initialized");
@@ -697,7 +702,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		if (path.contains("%")) {
 			try {
 				// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars
-				String decodedPath = URLDecoder.decode(path, "UTF-8");
+				String decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8);
 				if (isInvalidPath(decodedPath)) {
 					return true;
 				}
@@ -708,9 +713,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			}
 			catch (IllegalArgumentException ex) {
 				// May not be possible to decode...
-			}
-			catch (UnsupportedEncodingException ex) {
-				// Should never happen...
 			}
 		}
 		return false;
@@ -766,7 +768,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * the following lookups based on the resource filename and its path
 	 * extension:
 	 * <ol>
-	 * <li>{@link javax.servlet.ServletContext#getMimeType(String)}
+	 * <li>{@link jakarta.servlet.ServletContext#getMimeType(String)}
 	 * <li>{@link #getMediaTypes()}
 	 * <li>{@link MediaTypeFactory#getMediaType(String)}
 	 * </ol>
@@ -816,8 +818,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			response.setContentType(mediaType.toString());
 		}
 
-		if (resource instanceof HttpResource) {
-			HttpHeaders resourceHeaders = ((HttpResource) resource).getResponseHeaders();
+		if (resource instanceof HttpResource httpResource) {
+			HttpHeaders resourceHeaders = httpResource.getResponseHeaders();
 			resourceHeaders.forEach((headerName, headerValues) -> {
 				boolean first = true;
 				for (String headerValue : headerValues) {

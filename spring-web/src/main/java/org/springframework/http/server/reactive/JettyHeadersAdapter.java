@@ -39,14 +39,15 @@ import org.springframework.util.MultiValueMap;
  * <p>There is a duplicate of this class in the client package!
  *
  * @author Brian Clozel
+ * @author Juergen Hoeller
  * @since 5.1.1
  */
 class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
-	private final HttpFields headers;
+	private final HttpFields.Mutable headers;
 
 
-	JettyHeadersAdapter(HttpFields headers) {
+	JettyHeadersAdapter(HttpFields.Mutable headers) {
 		this.headers = headers;
 	}
 
@@ -105,7 +106,7 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public boolean containsKey(Object key) {
-		return (key instanceof String && this.headers.containsKey((String) key));
+		return (key instanceof String && this.headers.contains((String) key));
 	}
 
 	@Override
@@ -165,7 +166,7 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public Set<Entry<String, List<String>>> entrySet() {
-		return new AbstractSet<Entry<String, List<String>>>() {
+		return new AbstractSet<>() {
 			@Override
 			public Iterator<Entry<String, List<String>>> iterator() {
 				return new EntryIterator();
@@ -269,7 +270,7 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 			if (this.currentName == null) {
 				throw new IllegalStateException("No current Header in iterator");
 			}
-			if (!headers.containsKey(this.currentName)) {
+			if (!headers.contains(this.currentName)) {
 				throw new IllegalStateException("Header not present: " + this.currentName);
 			}
 			headers.remove(this.currentName);

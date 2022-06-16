@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,32 +46,12 @@ public interface RequestUpgradeStrategy {
 	 * @param exchange the current exchange
 	 * @param webSocketHandler handler for the WebSocket session
 	 * @param subProtocol the selected sub-protocol got the handler
-	 * @return completion {@code Mono<Void>} to indicate the outcome of the
-	 * WebSocket session handling.
-	 * @deprecated as of 5.1 in favor of
-	 * {@link #upgrade(ServerWebExchange, WebSocketHandler, String, Supplier)}
-	 */
-	@Deprecated
-	default Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler webSocketHandler,
-			@Nullable String subProtocol) {
-
-		return Mono.error(new UnsupportedOperationException());
-	}
-
-	/**
-	 * Upgrade to a WebSocket session and handle it with the given handler.
-	 * @param exchange the current exchange
-	 * @param webSocketHandler handler for the WebSocket session
-	 * @param subProtocol the selected sub-protocol got the handler
 	 * @param handshakeInfoFactory factory to create HandshakeInfo for the WebSocket session
 	 * @return completion {@code Mono<Void>} to indicate the outcome of the
 	 * WebSocket session handling.
 	 * @since 5.1
 	 */
-	default Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler webSocketHandler,
-			@Nullable String subProtocol, Supplier<HandshakeInfo> handshakeInfoFactory) {
-
-		return upgrade(exchange, webSocketHandler, subProtocol);
-	}
+	Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler webSocketHandler,
+			@Nullable String subProtocol, Supplier<HandshakeInfo> handshakeInfoFactory);
 
 }

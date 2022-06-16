@@ -58,7 +58,7 @@ import org.springframework.http.codec.json.KotlinSerializationJsonEncoder;
 import org.springframework.http.codec.multipart.DefaultPartHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
-import org.springframework.http.codec.multipart.SynchronossPartHttpMessageReader;
+import org.springframework.http.codec.multipart.PartEventHttpMessageReader;
 import org.springframework.http.codec.protobuf.ProtobufDecoder;
 import org.springframework.http.codec.protobuf.ProtobufEncoder;
 import org.springframework.http.codec.protobuf.ProtobufHttpMessageWriter;
@@ -103,7 +103,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 						ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
 		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
-		jaxb2Present = ClassUtils.isPresent("javax.xml.bind.Binder", classLoader);
+		jaxb2Present = ClassUtils.isPresent("jakarta.xml.bind.Binder", classLoader);
 		protobufPresent = ClassUtils.isPresent("com.google.protobuf.Message", classLoader);
 		synchronossMultipartPresent = ClassUtils.isPresent("org.synchronoss.cloud.nio.multipart.NioMultipartParser", classLoader);
 		nettyByteBufPresent = ClassUtils.isPresent("io.netty.buffer.ByteBuf", classLoader);
@@ -417,10 +417,8 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			if (codec instanceof DefaultPartHttpMessageReader) {
 				((DefaultPartHttpMessageReader) codec).setMaxInMemorySize(size);
 			}
-			if (synchronossMultipartPresent) {
-				if (codec instanceof SynchronossPartHttpMessageReader) {
-					((SynchronossPartHttpMessageReader) codec).setMaxInMemorySize(size);
-				}
+			if (codec instanceof PartEventHttpMessageReader) {
+				((PartEventHttpMessageReader) codec).setMaxInMemorySize(size);
 			}
 		}
 
@@ -435,10 +433,8 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			if (codec instanceof DefaultPartHttpMessageReader) {
 				((DefaultPartHttpMessageReader) codec).setEnableLoggingRequestDetails(enable);
 			}
-			if (synchronossMultipartPresent) {
-				if (codec instanceof SynchronossPartHttpMessageReader) {
-					((SynchronossPartHttpMessageReader) codec).setEnableLoggingRequestDetails(enable);
-				}
+			if (codec instanceof PartEventHttpMessageReader) {
+				((PartEventHttpMessageReader) codec).setEnableLoggingRequestDetails(enable);
 			}
 			if (codec instanceof FormHttpMessageWriter) {
 				((FormHttpMessageWriter) codec).setEnableLoggingRequestDetails(enable);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,17 @@ package org.springframework.http.server;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.AsyncEvent;
-import javax.servlet.AsyncListener;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.AsyncEvent;
+import jakarta.servlet.AsyncListener;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * A {@link ServerHttpAsyncRequestControl} to use on Servlet containers (Servlet 3.0+).
+ * A {@link ServerHttpAsyncRequestControl} to use on Servlet containers.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -46,7 +46,7 @@ public class ServletServerHttpAsyncRequestControl implements ServerHttpAsyncRequ
 	@Nullable
 	private AsyncContext asyncContext;
 
-	private AtomicBoolean asyncCompleted = new AtomicBoolean();
+	private final AtomicBoolean asyncCompleted = new AtomicBoolean();
 
 
 	/**
@@ -62,7 +62,7 @@ public class ServletServerHttpAsyncRequestControl implements ServerHttpAsyncRequ
 				"Async support must be enabled on a servlet and for all filters involved " +
 				"in async request processing. This is done in Java code using the Servlet API " +
 				"or by adding \"<async-supported>true</async-supported>\" to servlet and " +
-				"filter declarations in web.xml. Also you must use a Servlet 3.0+ container");
+				"filter declarations in web.xml.");
 
 		this.request = request;
 		this.response = response;

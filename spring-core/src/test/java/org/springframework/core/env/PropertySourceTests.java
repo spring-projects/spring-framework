@@ -37,10 +37,10 @@ class PropertySourceTests {
 	@Test
 	@SuppressWarnings("serial")
 	void equals() {
-		Map<String, Object> map1 = new HashMap<String, Object>() {{
+		Map<String, Object> map1 = new HashMap<>() {{
 			put("a", "b");
 		}};
-		Map<String, Object> map2 = new HashMap<String, Object>() {{
+		Map<String, Object> map2 = new HashMap<>() {{
 			put("c", "d");
 		}};
 		Properties props1 = new Properties() {{
@@ -69,10 +69,10 @@ class PropertySourceTests {
 	@Test
 	@SuppressWarnings("serial")
 	void collectionsOperations() {
-		Map<String, Object> map1 = new HashMap<String, Object>() {{
+		Map<String, Object> map1 = new HashMap<>() {{
 			put("a", "b");
 		}};
-		Map<String, Object> map2 = new HashMap<String, Object>() {{
+		Map<String, Object> map2 = new HashMap<>() {{
 			put("c", "d");
 		}};
 

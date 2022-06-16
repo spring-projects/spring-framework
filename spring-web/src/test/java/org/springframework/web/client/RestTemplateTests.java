@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -580,7 +579,7 @@ class RestTemplateTests {
 		mockSentRequest(OPTIONS, "https://example.com");
 		mockResponseStatus(HttpStatus.OK);
 		HttpHeaders responseHeaders = new HttpHeaders();
-		EnumSet<HttpMethod> expected = EnumSet.of(GET, POST);
+		Set<HttpMethod> expected = Set.of(GET, POST);
 		responseHeaders.setAllow(expected);
 		given(response.getHeaders()).willReturn(responseHeaders);
 
@@ -647,7 +646,7 @@ class RestTemplateTests {
 	void exchangeParameterizedType() throws Exception {
 		GenericHttpMessageConverter converter = mock(GenericHttpMessageConverter.class);
 		template.setMessageConverters(Collections.<HttpMessageConverter<?>>singletonList(converter));
-		ParameterizedTypeReference<List<Integer>> intList = new ParameterizedTypeReference<List<Integer>>() {};
+		ParameterizedTypeReference<List<Integer>> intList = new ParameterizedTypeReference<>() {};
 		given(converter.canRead(intList.getType(), null, null)).willReturn(true);
 		given(converter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 		given(converter.canWrite(String.class, String.class, null)).willReturn(true);
@@ -757,6 +756,7 @@ class RestTemplateTests {
 		given(request.getHeaders()).willReturn(requestHeaders);
 	}
 
+	@SuppressWarnings("deprecation")
 	private void mockResponseStatus(HttpStatus responseStatus) throws Exception {
 		given(request.execute()).willReturn(response);
 		given(errorHandler.hasError(response)).willReturn(responseStatus.isError());

@@ -167,14 +167,12 @@ public class ResourceHandlerRegistryTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	public void resourceChainWithVersionResolver() {
 		VersionResourceResolver versionResolver = new VersionResourceResolver()
 				.addFixedVersionStrategy("fixed", "/**/*.js")
 				.addContentVersionStrategy("/**");
 
-		this.registration.resourceChain(true).addResolver(versionResolver)
-				.addTransformer(new org.springframework.web.servlet.resource.AppCacheManifestTransformer());
+		this.registration.resourceChain(true).addResolver(versionResolver);
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
@@ -185,22 +183,18 @@ public class ResourceHandlerRegistryTests {
 		assertThat(resolvers.get(3)).isInstanceOf(PathResourceResolver.class);
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
-		assertThat(transformers).hasSize(3);
+		assertThat(transformers).hasSize(2);
 		assertThat(transformers.get(0)).isInstanceOf(CachingResourceTransformer.class);
 		assertThat(transformers.get(1)).isInstanceOf(CssLinkResourceTransformer.class);
-		assertThat(transformers.get(2)).isInstanceOf(org.springframework.web.servlet.resource.AppCacheManifestTransformer.class);
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	public void resourceChainWithOverrides() {
 		CachingResourceResolver cachingResolver = Mockito.mock(CachingResourceResolver.class);
 		VersionResourceResolver versionResolver = Mockito.mock(VersionResourceResolver.class);
 		WebJarsResourceResolver webjarsResolver = Mockito.mock(WebJarsResourceResolver.class);
 		PathResourceResolver pathResourceResolver = new PathResourceResolver();
 		CachingResourceTransformer cachingTransformer = Mockito.mock(CachingResourceTransformer.class);
-		org.springframework.web.servlet.resource.AppCacheManifestTransformer appCacheTransformer =
-				Mockito.mock(org.springframework.web.servlet.resource.AppCacheManifestTransformer.class);
 		CssLinkResourceTransformer cssLinkTransformer = new CssLinkResourceTransformer();
 
 		this.registration.setCachePeriod(3600)
@@ -210,7 +204,6 @@ public class ResourceHandlerRegistryTests {
 					.addResolver(webjarsResolver)
 					.addResolver(pathResourceResolver)
 					.addTransformer(cachingTransformer)
-					.addTransformer(appCacheTransformer)
 					.addTransformer(cssLinkTransformer);
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
@@ -222,10 +215,9 @@ public class ResourceHandlerRegistryTests {
 		assertThat(resolvers.get(3)).isSameAs(pathResourceResolver);
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
-		assertThat(transformers).hasSize(3);
+		assertThat(transformers).hasSize(2);
 		assertThat(transformers.get(0)).isSameAs(cachingTransformer);
-		assertThat(transformers.get(1)).isSameAs(appCacheTransformer);
-		assertThat(transformers.get(2)).isSameAs(cssLinkTransformer);
+		assertThat(transformers.get(1)).isSameAs(cssLinkTransformer);
 	}
 
 	@Test

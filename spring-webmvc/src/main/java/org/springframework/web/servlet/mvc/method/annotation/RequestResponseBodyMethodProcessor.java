@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;

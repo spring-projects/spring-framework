@@ -16,11 +16,10 @@
 
 package org.springframework.jms.config;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.MessageListener;
-import javax.jms.Session;
-import javax.transaction.TransactionManager;
-
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.MessageListener;
+import jakarta.jms.Session;
+import jakarta.transaction.TransactionManager;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;

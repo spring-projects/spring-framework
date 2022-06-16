@@ -69,7 +69,7 @@ class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunctionInt
 	void flux(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		ParameterizedTypeReference<List<Person>> reference = new ParameterizedTypeReference<List<Person>>() {};
+		ParameterizedTypeReference<List<Person>> reference = new ParameterizedTypeReference<>() {};
 		ResponseEntity<List<Person>> result =
 				restTemplate.exchange("http://localhost:" + super.port + "/flux", HttpMethod.GET, null, reference);
 

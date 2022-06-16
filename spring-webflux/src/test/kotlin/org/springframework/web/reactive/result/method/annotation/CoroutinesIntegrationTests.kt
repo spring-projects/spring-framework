@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.result.method.annotation
 
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -136,6 +137,7 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 	@ComponentScan(resourcePattern = "**/CoroutinesIntegrationTests*")
 	open class WebConfig
 
+	@OptIn(DelicateCoroutinesApi::class)
 	@RestController
 	class CoroutinesController {
 

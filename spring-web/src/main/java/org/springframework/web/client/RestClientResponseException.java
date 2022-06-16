@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 
 /**
@@ -36,7 +37,7 @@ public class RestClientResponseException extends RestClientException {
 	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 
-	private final int rawStatusCode;
+	private final HttpStatusCode statusCode;
 
 	private final String statusText;
 
@@ -59,9 +60,22 @@ public class RestClientResponseException extends RestClientException {
 	 */
 	public RestClientResponseException(String message, int statusCode, String statusText,
 			@Nullable HttpHeaders responseHeaders, @Nullable byte[] responseBody, @Nullable Charset responseCharset) {
+		this(message, HttpStatusCode.valueOf(statusCode), statusText, responseHeaders, responseBody, responseCharset);
+	}
 
+	/**
+	 * Construct a new instance of with the given response data.
+	 * @param statusCode the raw status code value
+	 * @param statusText the status text
+	 * @param responseHeaders the response headers (may be {@code null})
+	 * @param responseBody the response body content (may be {@code null})
+	 * @param responseCharset the response body charset (may be {@code null})
+	 * @since 6.0
+	 */
+	public RestClientResponseException(String message, HttpStatusCode statusCode, String statusText,
+			@Nullable HttpHeaders responseHeaders, @Nullable byte[] responseBody, @Nullable Charset responseCharset) {
 		super(message);
-		this.rawStatusCode = statusCode;
+		this.statusCode = statusCode;
 		this.statusText = statusText;
 		this.responseHeaders = responseHeaders;
 		this.responseBody = (responseBody != null ? responseBody : new byte[0]);
@@ -70,10 +84,20 @@ public class RestClientResponseException extends RestClientException {
 
 
 	/**
-	 * Return the raw HTTP status code value.
+	 * Return the HTTP status code.
+	 * @since 6.0
 	 */
+	public HttpStatusCode getStatusCode() {
+		return this.statusCode;
+	}
+
+	/**
+	 * Return the raw HTTP status code value.
+	 * @deprecated as of 6.0, in favor of {@link #getStatusCode()}
+	 */
+	@Deprecated
 	public int getRawStatusCode() {
-		return this.rawStatusCode;
+		return this.statusCode.value();
 	}
 
 	/**

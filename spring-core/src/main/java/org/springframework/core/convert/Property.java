@@ -263,10 +263,9 @@ public final class Property {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof Property)) {
+		if (!(other instanceof Property otherProperty)) {
 			return false;
 		}
-		Property otherProperty = (Property) other;
 		return (ObjectUtils.nullSafeEquals(this.objectType, otherProperty.objectType) &&
 				ObjectUtils.nullSafeEquals(this.name, otherProperty.name) &&
 				ObjectUtils.nullSafeEquals(this.readMethod, otherProperty.readMethod) &&

@@ -1152,8 +1152,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @see DefaultTransactionStatus#isLocalRollbackOnly()
 	 * @see org.springframework.transaction.TransactionStatus#setRollbackOnly()
 	 * @see org.springframework.transaction.UnexpectedRollbackException
-	 * @see javax.transaction.UserTransaction#commit()
-	 * @see javax.transaction.RollbackException
+	 * @see jakarta.transaction.UserTransaction#commit()
+	 * @see jakarta.transaction.RollbackException
 	 */
 	protected boolean shouldCommitOnGlobalRollbackOnly() {
 		return false;

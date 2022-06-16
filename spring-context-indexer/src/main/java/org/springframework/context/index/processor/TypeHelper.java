@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,8 +60,7 @@ class TypeHelper {
 		if (type == null) {
 			return null;
 		}
-		if (type instanceof DeclaredType) {
-			DeclaredType declaredType = (DeclaredType) type;
+		if (type instanceof DeclaredType declaredType) {
 			Element enclosingElement = declaredType.asElement().getEnclosingElement();
 			if (enclosingElement instanceof TypeElement) {
 				return getQualifiedName(enclosingElement) + "$" + declaredType.asElement().getSimpleName().toString();

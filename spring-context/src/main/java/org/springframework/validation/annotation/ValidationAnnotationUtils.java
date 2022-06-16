@@ -34,7 +34,7 @@ public abstract class ValidationAnnotationUtils {
 
 	/**
 	 * Determine any validation hints by the given annotation.
-	 * <p>This implementation checks for {@code @javax.validation.Valid},
+	 * <p>This implementation checks for {@code @jakarta.validation.Valid},
 	 * Spring's {@link org.springframework.validation.annotation.Validated},
 	 * and custom annotations whose name starts with "Valid".
 	 * @param ann the annotation (potentially a validation annotation)
@@ -45,7 +45,7 @@ public abstract class ValidationAnnotationUtils {
 	public static Object[] determineValidationHints(Annotation ann) {
 		Class<? extends Annotation> annotationType = ann.annotationType();
 		String annotationName = annotationType.getName();
-		if ("javax.validation.Valid".equals(annotationName)) {
+		if ("jakarta.validation.Valid".equals(annotationName)) {
 			return EMPTY_OBJECT_ARRAY;
 		}
 		Validated validatedAnn = AnnotationUtils.getAnnotation(ann, Validated.class);

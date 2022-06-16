@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,7 @@ import org.springframework.web.servlet.config.annotation.DefaultServletHandlerCo
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
-import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 
 import static org.mockito.BDDMockito.given;
 
@@ -84,14 +82,6 @@ class JavaConfigTests {
 				.expectBody().json("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}");
 	}
 
-	@Test
-	void tilesDefinitions() {
-		testClient.get().uri("/")
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader().valueEquals("Forwarded-Url", "/WEB-INF/layouts/standardLayout.jsp");
-	}
-
 
 	@Configuration
 	static class RootConfig {
@@ -127,18 +117,6 @@ class JavaConfigTests {
 		@Override
 		public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
 			configurer.enable();
-		}
-
-		@Override
-		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.tiles();
-		}
-
-		@Bean
-		TilesConfigurer tilesConfigurer() {
-			TilesConfigurer configurer = new TilesConfigurer();
-			configurer.setDefinitions("/WEB-INF/**/tiles.xml");
-			return configurer;
 		}
 	}
 

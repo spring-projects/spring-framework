@@ -26,8 +26,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Properties;
 
-import javax.inject.Inject;
-
+import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -347,7 +346,7 @@ class PropertySourceAnnotationTests {
 		@Bean
 		FactoryBean<TestBean> testBean() {
 			final String name = env.getProperty("testbean.name");
-			return new FactoryBean<TestBean>() {
+			return new FactoryBean<>() {
 				@Override
 				public TestBean getObject() {
 					return new TestBean(name);
@@ -437,7 +436,7 @@ class PropertySourceAnnotationTests {
 		@Override
 		public org.springframework.core.env.PropertySource<?> createPropertySource(String name, EncodedResource resource) throws IOException {
 			Properties props = PropertiesLoaderUtils.loadProperties(resource);
-			return new org.springframework.core.env.PropertySource<Properties>("my" + name, props) {
+			return new org.springframework.core.env.PropertySource<>("my" + name, props) {
 				@Override
 				public Object getProperty(String name) {
 					String value = props.getProperty(name);

@@ -64,7 +64,7 @@ public class JCacheEhCacheAnnotationTests extends AbstractCacheAnnotationTests {
 	}
 
 	protected CachingProvider getCachingProvider() {
-		return Caching.getCachingProvider("org.ehcache.jcache.JCacheCachingProvider");
+		return Caching.getCachingProvider("org.ehcache.jsr107.EhcacheCachingProvider");
 	}
 
 	@AfterEach

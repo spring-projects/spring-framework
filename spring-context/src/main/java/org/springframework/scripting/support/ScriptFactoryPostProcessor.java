@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -510,7 +510,7 @@ public class ScriptFactoryPostProcessor implements SmartInstantiationAwareBeanPo
 			Signature signature = new Signature(setterName, Type.VOID_TYPE, new Type[] {Type.getType(propertyType)});
 			maker.add(signature, new Type[0]);
 		}
-		if (bd.getInitMethodName() != null) {
+		if (StringUtils.hasText(bd.getInitMethodName())) {
 			Signature signature = new Signature(bd.getInitMethodName(), Type.VOID_TYPE, new Type[0]);
 			maker.add(signature, new Type[0]);
 		}

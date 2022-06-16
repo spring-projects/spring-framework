@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
@@ -48,6 +49,8 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Unit tests for {@link DefaultHandlerExceptionResolver}.
+ *
  * @author Arjen Poutsma
  */
 public class DefaultHandlerExceptionResolverTests {
@@ -89,8 +92,10 @@ public class DefaultHandlerExceptionResolverTests {
 
 	@Test
 	public void patchHttpMediaTypeNotSupported() {
-		HttpMediaTypeNotSupportedException ex = new HttpMediaTypeNotSupportedException(new MediaType("text", "plain"),
-				Collections.singletonList(new MediaType("application", "pdf")));
+		HttpMediaTypeNotSupportedException ex = new HttpMediaTypeNotSupportedException(
+				new MediaType("text", "plain"),
+				Collections.singletonList(new MediaType("application", "pdf")),
+				HttpMethod.PATCH);
 		MockHttpServletRequest request = new MockHttpServletRequest("PATCH", "/");
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
@@ -108,8 +113,7 @@ public class DefaultHandlerExceptionResolverTests {
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
 		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();
 		assertThat(response.getStatus()).as("Invalid status code").isEqualTo(500);
-		assertThat(response.getErrorMessage())
-				.isEqualTo("Required URI template variable 'foo' for method parameter type String is not present");
+		assertThat(response.getErrorMessage()).isEqualTo("Required path variable 'foo' is not present.");
 	}
 
 	@Test
@@ -119,8 +123,7 @@ public class DefaultHandlerExceptionResolverTests {
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
 		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();
 		assertThat(response.getStatus()).as("Invalid status code").isEqualTo(400);
-		assertThat(response.getErrorMessage()).isEqualTo(
-				"Required request parameter 'foo' for method parameter type bar is not present");
+		assertThat(response.getErrorMessage()).isEqualTo("Required parameter 'foo' is not present.");
 	}
 
 	@Test
@@ -180,7 +183,7 @@ public class DefaultHandlerExceptionResolverTests {
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
 		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();
 		assertThat(response.getStatus()).as("Invalid status code").isEqualTo(400);
-		assertThat(response.getErrorMessage().contains("request part")).isTrue();
+		assertThat(response.getErrorMessage().contains("part")).isTrue();
 		assertThat(response.getErrorMessage().contains("name")).isTrue();
 		assertThat(response.getErrorMessage().contains("not present")).isTrue();
 	}
@@ -216,7 +219,7 @@ public class DefaultHandlerExceptionResolverTests {
 		assertThat(response.getStatus()).as("Invalid status code").isEqualTo(500);
 
 		// SPR-9653
-		assertThat(request.getAttribute("javax.servlet.error.exception")).isSameAs(ex);
+		assertThat(request.getAttribute("jakarta.servlet.error.exception")).isSameAs(ex);
 	}
 
 	@Test  // SPR-14669

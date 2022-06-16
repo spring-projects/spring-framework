@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -366,10 +365,10 @@ public class PropertyResourceConfigurerTests {
 		pvs.add("someSet", someSet);
 
 		Map<Object, Object> someMap = ManagedMap.ofEntries(
-				new SimpleEntry<>(new TypedStringValue("key${age}"), new TypedStringValue("${age}")),
-				new SimpleEntry<>(new TypedStringValue("key${age}ref"), new RuntimeBeanReference("${ref}")),
-				new SimpleEntry<>("key1", new RuntimeBeanReference("${ref}")),
-				new SimpleEntry<>("key2", "${age}name"));
+				Map.entry(new TypedStringValue("key${age}"), new TypedStringValue("${age}")),
+				Map.entry(new TypedStringValue("key${age}ref"), new RuntimeBeanReference("${ref}")),
+				Map.entry("key1", new RuntimeBeanReference("${ref}")),
+				Map.entry("key2", "${age}name"));
 		MutablePropertyValues innerPvs = new MutablePropertyValues();
 		innerPvs.add("country", "${os.name}");
 		RootBeanDefinition innerBd = new RootBeanDefinition(TestBean.class);

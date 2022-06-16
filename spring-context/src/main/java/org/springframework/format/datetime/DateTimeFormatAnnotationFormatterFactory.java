@@ -18,9 +18,7 @@ package org.springframework.format.datetime;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -38,21 +36,11 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @author Sam Brannen
  * @since 3.2
- * @see org.springframework.format.datetime.joda.JodaDateTimeFormatAnnotationFormatterFactory
  */
 public class DateTimeFormatAnnotationFormatterFactory  extends EmbeddedValueResolutionSupport
 		implements AnnotationFormatterFactory<DateTimeFormat> {
 
-	private static final Set<Class<?>> FIELD_TYPES;
-
-	static {
-		Set<Class<?>> fieldTypes = new HashSet<>(4);
-		fieldTypes.add(Date.class);
-		fieldTypes.add(Calendar.class);
-		fieldTypes.add(Long.class);
-		FIELD_TYPES = Collections.unmodifiableSet(fieldTypes);
-	}
-
+	private static final Set<Class<?>> FIELD_TYPES = Set.of(Date.class, Calendar.class, Long.class);
 
 	@Override
 	public Set<Class<?>> getFieldTypes() {

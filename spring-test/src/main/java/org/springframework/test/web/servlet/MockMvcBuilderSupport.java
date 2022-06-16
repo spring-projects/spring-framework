@@ -19,8 +19,8 @@ package org.springframework.test.web.servlet;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import javax.servlet.Filter;
-import javax.servlet.ServletException;
+import jakarta.servlet.Filter;
+import jakarta.servlet.ServletException;
 
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.lang.Nullable;

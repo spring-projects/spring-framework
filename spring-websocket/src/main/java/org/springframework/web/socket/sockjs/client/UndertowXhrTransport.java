@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import org.xnio.channels.StreamSinkChannel;
 import org.xnio.channels.StreamSourceChannel;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -148,7 +148,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 			logger.trace("Starting XHR receive request for " + url);
 		}
 
-		ClientCallback<ClientConnection> clientCallback = new ClientCallback<ClientConnection>() {
+		ClientCallback<ClientConnection> clientCallback = new ClientCallback<>() {
 			@Override
 			public void completed(ClientConnection connection) {
 				ClientRequest request = new ClientRequest().setMethod(Methods.POST).setPath(url.getPath());
@@ -182,7 +182,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 			final URI url, final HttpHeaders headers, final XhrClientSockJsSession sockJsSession,
 			final SettableListenableFuture<WebSocketSession> connectFuture) {
 
-		return new ClientCallback<ClientExchange>() {
+		return new ClientCallback<>() {
 			@Override
 			public void completed(final ClientExchange exchange) {
 				exchange.setResponseListener(new ClientCallback<ClientExchange>() {
@@ -190,7 +190,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 					public void completed(ClientExchange result) {
 						ClientResponse response = result.getResponse();
 						if (response.getResponseCode() != 200) {
-							HttpStatus status = HttpStatus.valueOf(response.getResponseCode());
+							HttpStatusCode status = HttpStatusCode.valueOf(response.getResponseCode());
 							IoUtils.safeClose(result.getConnection());
 							onFailure(new HttpServerErrorException(status, "Unexpected XHR receive status"));
 						}
@@ -286,7 +286,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 
 				latch.await();
 				ClientResponse response = responses.iterator().next();
-				HttpStatus status = HttpStatus.valueOf(response.getResponseCode());
+				HttpStatusCode status = HttpStatusCode.valueOf(response.getResponseCode());
 				HttpHeaders responseHeaders = toHttpHeaders(response.getResponseHeaders());
 				String responseBody = response.getAttachment(RESPONSE_BODY);
 				return (responseBody != null ?
@@ -309,7 +309,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 	private ClientCallback<ClientExchange> createRequestCallback(final @Nullable String body,
 			final List<ClientResponse> responses, final CountDownLatch latch) {
 
-		return new ClientCallback<ClientExchange>() {
+		return new ClientCallback<>() {
 			@Override
 			public void completed(ClientExchange result) {
 				result.setResponseListener(new ClientCallback<ClientExchange>() {

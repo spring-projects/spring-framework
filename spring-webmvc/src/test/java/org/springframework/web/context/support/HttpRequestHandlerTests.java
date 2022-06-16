@@ -18,9 +18,8 @@ package org.springframework.web.context.support;
 
 import java.io.IOException;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.HttpRequestHandler;

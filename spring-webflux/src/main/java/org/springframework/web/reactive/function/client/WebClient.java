@@ -35,7 +35,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -527,7 +527,7 @@ public interface WebClient {
 		 *             return response.bodyToMono(Person.class);
 		 *         }
 		 *         else {
-		 *             return response.createException().flatMap(Mono::error);
+		 *             return response.createError();
 		 *         }
 		 *     });
 		 * </pre>
@@ -556,7 +556,7 @@ public interface WebClient {
 		 *             return response.bodyToFlux(Person.class);
 		 *         }
 		 *         else {
-		 *             return response.createException().flatMapMany(Mono::error);
+		 *             return response.createError().flux();
 		 *         }
 		 *     });
 		 * </pre>
@@ -767,7 +767,7 @@ public interface WebClient {
 		 * @return this builder
 		 * @see ClientResponse#createException()
 		 */
-		ResponseSpec onStatus(Predicate<HttpStatus> statusPredicate,
+		ResponseSpec onStatus(Predicate<HttpStatusCode> statusPredicate,
 				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction);
 
 		/**

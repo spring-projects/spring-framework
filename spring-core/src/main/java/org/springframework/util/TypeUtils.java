@@ -31,6 +31,7 @@ import org.springframework.lang.Nullable;
  * @author Ramnivas Laddad
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 2.0.7
  */
 public abstract class TypeUtils {
@@ -51,62 +52,56 @@ public abstract class TypeUtils {
 			return true;
 		}
 
-		if (lhsType instanceof Class) {
-			Class<?> lhsClass = (Class<?>) lhsType;
-
+		if (lhsType instanceof Class<?> lhsClass) {
 			// just comparing two classes
-			if (rhsType instanceof Class) {
-				return ClassUtils.isAssignable(lhsClass, (Class<?>) rhsType);
+			if (rhsType instanceof Class<?> rhsClass) {
+				return ClassUtils.isAssignable(lhsClass, rhsClass);
 			}
 
-			if (rhsType instanceof ParameterizedType) {
-				Type rhsRaw = ((ParameterizedType) rhsType).getRawType();
+			if (rhsType instanceof ParameterizedType rhsParameterizedType) {
+				Type rhsRaw = rhsParameterizedType.getRawType();
 
 				// a parameterized type is always assignable to its raw class type
-				if (rhsRaw instanceof Class) {
-					return ClassUtils.isAssignable(lhsClass, (Class<?>) rhsRaw);
+				if (rhsRaw instanceof Class<?> rhRawClass) {
+					return ClassUtils.isAssignable(lhsClass, rhRawClass);
 				}
 			}
-			else if (lhsClass.isArray() && rhsType instanceof GenericArrayType) {
-				Type rhsComponent = ((GenericArrayType) rhsType).getGenericComponentType();
+			else if (lhsClass.isArray() && rhsType instanceof GenericArrayType rhsGenericArrayType) {
+				Type rhsComponent = rhsGenericArrayType.getGenericComponentType();
 
 				return isAssignable(lhsClass.getComponentType(), rhsComponent);
 			}
 		}
 
 		// parameterized types are only assignable to other parameterized types and class types
-		if (lhsType instanceof ParameterizedType) {
-			if (rhsType instanceof Class) {
-				Type lhsRaw = ((ParameterizedType) lhsType).getRawType();
+		if (lhsType instanceof ParameterizedType lhsParameterizedType) {
+			if (rhsType instanceof Class<?> rhsClass) {
+				Type lhsRaw = lhsParameterizedType.getRawType();
 
-				if (lhsRaw instanceof Class) {
-					return ClassUtils.isAssignable((Class<?>) lhsRaw, (Class<?>) rhsType);
+				if (lhsRaw instanceof Class<?> lhsClass) {
+					return ClassUtils.isAssignable(lhsClass, rhsClass);
 				}
 			}
-			else if (rhsType instanceof ParameterizedType) {
-				return isAssignable((ParameterizedType) lhsType, (ParameterizedType) rhsType);
+			else if (rhsType instanceof ParameterizedType rhsParameterizedType) {
+				return isAssignable(lhsParameterizedType, rhsParameterizedType);
 			}
 		}
 
-		if (lhsType instanceof GenericArrayType) {
-			Type lhsComponent = ((GenericArrayType) lhsType).getGenericComponentType();
+		if (lhsType instanceof GenericArrayType lhsGenericArrayType) {
+			Type lhsComponent = lhsGenericArrayType.getGenericComponentType();
 
-			if (rhsType instanceof Class) {
-				Class<?> rhsClass = (Class<?>) rhsType;
-
-				if (rhsClass.isArray()) {
-					return isAssignable(lhsComponent, rhsClass.getComponentType());
-				}
+			if (rhsType instanceof Class<?> rhsClass && rhsClass.isArray()) {
+				return isAssignable(lhsComponent, rhsClass.getComponentType());
 			}
-			else if (rhsType instanceof GenericArrayType) {
-				Type rhsComponent = ((GenericArrayType) rhsType).getGenericComponentType();
+			else if (rhsType instanceof GenericArrayType rhsGenericArrayType) {
+				Type rhsComponent = rhsGenericArrayType.getGenericComponentType();
 
 				return isAssignable(lhsComponent, rhsComponent);
 			}
 		}
 
-		if (lhsType instanceof WildcardType) {
-			return isAssignable((WildcardType) lhsType, rhsType);
+		if (lhsType instanceof WildcardType lhsWildcardType) {
+			return isAssignable(lhsWildcardType, rhsType);
 		}
 
 		return false;
@@ -129,7 +124,7 @@ public abstract class TypeUtils {
 			Type rhsArg = rhsTypeArguments[i];
 
 			if (!lhsArg.equals(rhsArg) &&
-					!(lhsArg instanceof WildcardType && isAssignable((WildcardType) lhsArg, rhsArg))) {
+					!(lhsArg instanceof WildcardType wildcardType && isAssignable(wildcardType, rhsArg))) {
 				return false;
 			}
 		}
@@ -152,11 +147,10 @@ public abstract class TypeUtils {
 			lLowerBounds = new Type[] { null };
 		}
 
-		if (rhsType instanceof WildcardType) {
+		if (rhsType instanceof WildcardType rhsWcType) {
 			// both the upper and lower bounds of the right-hand side must be
 			// completely enclosed in the upper and lower bounds of the left-
 			// hand side.
-			WildcardType rhsWcType = (WildcardType) rhsType;
 			Type[] rUpperBounds = rhsWcType.getUpperBounds();
 
 			if (rUpperBounds.length == 0) {

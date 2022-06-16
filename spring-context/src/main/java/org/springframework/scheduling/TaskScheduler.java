@@ -39,7 +39,7 @@ import org.springframework.lang.Nullable;
  * and adding extended trigger capabilities.
  *
  * <p>This interface is roughly equivalent to a JSR-236
- * {@code ManagedScheduledExecutorService} as supported in Java EE 7
+ * {@code ManagedScheduledExecutorService} as supported in Jakarta EE
  * environments but aligned with Spring's {@code TaskExecutor} model.
  *
  * @author Juergen Hoeller

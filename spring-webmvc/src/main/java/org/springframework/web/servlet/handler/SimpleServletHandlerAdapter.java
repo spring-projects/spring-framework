@@ -16,9 +16,9 @@
 
 package org.springframework.web.servlet.handler;
 
-import javax.servlet.Servlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.HandlerAdapter;
@@ -47,8 +47,8 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * @author Juergen Hoeller
  * @since 1.1.5
- * @see javax.servlet.Servlet
- * @see javax.servlet.http.HttpServlet
+ * @see jakarta.servlet.Servlet
+ * @see jakarta.servlet.http.HttpServlet
  * @see SimpleServletPostProcessor
  * @see org.springframework.web.servlet.mvc.ServletWrappingController
  */

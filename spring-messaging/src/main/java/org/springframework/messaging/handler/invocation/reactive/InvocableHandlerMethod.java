@@ -54,7 +54,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	private static final Object NO_ARG_VALUE = new Object();
 
 
-	private HandlerMethodArgumentResolverComposite resolvers = new HandlerMethodArgumentResolverComposite();
+	private final HandlerMethodArgumentResolverComposite resolvers = new HandlerMethodArgumentResolverComposite();
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
@@ -206,8 +206,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				return true;
 			}
 			Type parameterType = returnType.getGenericParameterType();
-			if (parameterType instanceof ParameterizedType) {
-				ParameterizedType type = (ParameterizedType) parameterType;
+			if (parameterType instanceof ParameterizedType type) {
 				if (type.getActualTypeArguments().length == 1) {
 					return Void.class.equals(type.getActualTypeArguments()[0]);
 				}

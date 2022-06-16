@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,10 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.lang.Nullable;
@@ -50,6 +52,12 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		private final URI empty = URI.create("");
 
 		@Override
+		public HttpMethod getMethod() {
+			return HttpMethod.valueOf("UNKNOWN");
+		}
+
+		@Override
+		@Deprecated
 		public String getMethodValue() {
 			return "UNKNOWN";
 		}
@@ -66,9 +74,9 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 	};
 
 
-	private ExchangeStrategies strategies;
+	private final ExchangeStrategies strategies;
 
-	private int statusCode = 200;
+	private HttpStatusCode statusCode = HttpStatus.OK;
 
 	@Nullable
 	private HttpHeaders headers;
@@ -95,7 +103,7 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 	DefaultClientResponseBuilder(ClientResponse other, boolean mutate) {
 		Assert.notNull(other, "ClientResponse must not be null");
 		this.strategies = other.strategies();
-		this.statusCode = other.rawStatusCode();
+		this.statusCode = other.statusCode();
 		if (mutate) {
 			this.body = other.bodyToFlux(DataBuffer.class);
 		}
@@ -104,21 +112,21 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 			this.headers.addAll(other.headers().asHttpHeaders());
 		}
 		this.originalResponse = other;
-		this.request = (other instanceof DefaultClientResponse ?
-				((DefaultClientResponse) other).request() : EMPTY_REQUEST);
+		this.request = (other instanceof DefaultClientResponse defaultClientResponse ?
+				defaultClientResponse.request() : EMPTY_REQUEST);
 	}
 
 
 	@Override
-	public DefaultClientResponseBuilder statusCode(HttpStatus statusCode) {
-		return rawStatusCode(statusCode.value());
+	public DefaultClientResponseBuilder statusCode(HttpStatusCode statusCode) {
+		Assert.notNull(statusCode, "StatusCode must not be null");
+		this.statusCode = statusCode;
+		return this;
 	}
 
 	@Override
 	public DefaultClientResponseBuilder rawStatusCode(int statusCode) {
-		Assert.isTrue(statusCode >= 100 && statusCode < 600, "StatusCode must be between 1xx and 5xx");
-		this.statusCode = statusCode;
-		return this;
+		return statusCode(HttpStatusCode.valueOf(statusCode));
 	}
 
 	@Override
@@ -210,14 +218,14 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 		return new DefaultClientResponse(httpResponse, this.strategies,
 				this.originalResponse != null ? this.originalResponse.logPrefix() : "",
-				this.request.getMethodValue() + " " + this.request.getURI(),
+				this.request.getMethod() + " " + this.request.getURI(),
 				() -> this.request);
 	}
 
 
 	private static class BuiltClientHttpResponse implements ClientHttpResponse {
 
-		private final int statusCode;
+		private final HttpStatusCode statusCode;
 
 		@Nullable
 		private final HttpHeaders headers;
@@ -231,7 +239,7 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		private final ClientResponse originalResponse;
 
 
-		BuiltClientHttpResponse(int statusCode, @Nullable HttpHeaders headers,
+		BuiltClientHttpResponse(HttpStatusCode statusCode, @Nullable HttpHeaders headers,
 				@Nullable MultiValueMap<String, ResponseCookie> cookies, Flux<DataBuffer> body,
 				@Nullable ClientResponse originalResponse) {
 
@@ -249,13 +257,14 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		}
 
 		@Override
-		public HttpStatus getStatusCode() {
-			return HttpStatus.valueOf(this.statusCode);
+		public HttpStatusCode getStatusCode() {
+			return this.statusCode;
 		}
 
 		@Override
+		@Deprecated
 		public int getRawStatusCode() {
-			return this.statusCode;
+			return this.statusCode.value();
 		}
 
 		@Override

@@ -340,7 +340,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test //gh-27156
-	void resolveExceptionWithReasonResovledByMessageSource() throws Exception {
+	void resolveExceptionWithReasonResolvedByMessageSource() throws Exception {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyConfig.class);
 		StaticApplicationContext context = new StaticApplicationContext(ctx);
 		Locale locale = Locale.ENGLISH;

@@ -19,7 +19,6 @@ package org.springframework.http.codec.json;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -75,11 +74,10 @@ public abstract class Jackson2CodecSupport {
 	private static final String JSON_VIEW_HINT_ERROR =
 			"@JsonView only supported for write hints with exactly 1 class argument: ";
 
-	private static final List<MimeType> DEFAULT_MIME_TYPES = Collections.unmodifiableList(
-			Arrays.asList(
-					MediaType.APPLICATION_JSON,
-					new MediaType("application", "*+json"),
-					MediaType.APPLICATION_NDJSON));
+	private static final List<MimeType> DEFAULT_MIME_TYPES = List.of(
+			MediaType.APPLICATION_JSON,
+			new MediaType("application", "*+json"),
+			MediaType.APPLICATION_NDJSON);
 
 
 	protected final Log logger = HttpLogging.forLogName(getClass());
@@ -99,7 +97,7 @@ public abstract class Jackson2CodecSupport {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 		this.defaultObjectMapper = objectMapper;
 		this.mimeTypes = !ObjectUtils.isEmpty(mimeTypes) ?
-				Collections.unmodifiableList(Arrays.asList(mimeTypes)) : DEFAULT_MIME_TYPES;
+				List.of(mimeTypes) : DEFAULT_MIME_TYPES;
 	}
 
 

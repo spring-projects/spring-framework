@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -266,8 +266,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 */
 	@Override
 	protected boolean isHandler(Class<?> beanType) {
-		return (AnnotatedElementUtils.hasAnnotation(beanType, Controller.class) ||
-				AnnotatedElementUtils.hasAnnotation(beanType, RequestMapping.class));
+		return AnnotatedElementUtils.hasAnnotation(beanType, Controller.class);
 	}
 
 	/**

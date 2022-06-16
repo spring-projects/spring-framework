@@ -256,7 +256,7 @@ public abstract class UriComponents implements Serializable {
 			source = sanitizeSource(source);
 		}
 		Matcher matcher = NAMES_PATTERN.matcher(source);
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		while (matcher.find()) {
 			String match = matcher.group(1);
 			String varName = getVariableName(match);

@@ -73,6 +73,7 @@ class MockServerHttpRequestTests {
 			.withMessageContaining("HTTP method is required.");
 	}
 
+	@SuppressWarnings("deprecation")
 	static Stream<Named<ThrowingCallable>> httpMethodNotNullOrEmpty() {
 		String uriTemplate = "/foo bar?a=b";
 		return Stream.of(

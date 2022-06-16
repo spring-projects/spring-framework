@@ -20,6 +20,7 @@ import java.nio.charset.Charset;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 
 /**
@@ -51,6 +52,19 @@ public class UnknownHttpStatusCodeException extends WebClientResponseException {
 	 */
 	public UnknownHttpStatusCodeException(
 			int statusCode, HttpHeaders headers, byte[] responseBody, @Nullable Charset responseCharset,
+			@Nullable HttpRequest request) {
+
+		super("Unknown status code [" + statusCode + "]", statusCode, "",
+				headers, responseBody, responseCharset, request);
+	}
+
+	/**
+	 * Create a new instance of the {@code UnknownHttpStatusCodeException} with the given
+	 * parameters.
+	 * @since 6.0
+	 */
+	public UnknownHttpStatusCodeException(
+			HttpStatusCode statusCode, HttpHeaders headers, byte[] responseBody, @Nullable Charset responseCharset,
 			@Nullable HttpRequest request) {
 
 		super("Unknown status code [" + statusCode + "]", statusCode, "",

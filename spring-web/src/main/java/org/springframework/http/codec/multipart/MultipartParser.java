@@ -167,11 +167,11 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 		this.sink.next(new HeadersToken(headers));
 	}
 
-	void emitBody(DataBuffer buffer) {
+	void emitBody(DataBuffer buffer, boolean last) {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Emitting body: " + buffer);
 		}
-		this.sink.next(new BodyToken(buffer));
+		this.sink.next(new BodyToken(buffer, last));
 	}
 
 	void emitError(Throwable t) {
@@ -202,6 +202,9 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 		public abstract HttpHeaders headers();
 
 		public abstract DataBuffer buffer();
+
+		public abstract boolean isLast();
+
 	}
 
 
@@ -225,6 +228,11 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 		public DataBuffer buffer() {
 			throw new IllegalStateException();
 		}
+
+		@Override
+		public boolean isLast() {
+			return false;
+		}
 	}
 
 
@@ -235,8 +243,12 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 
 		private final DataBuffer buffer;
 
-		public BodyToken(DataBuffer buffer) {
+		private final boolean last;
+
+
+		public BodyToken(DataBuffer buffer, boolean last) {
 			this.buffer = buffer;
+			this.last = last;
 		}
 
 		@Override
@@ -247,6 +259,11 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 		@Override
 		public DataBuffer buffer() {
 			return this.buffer;
+		}
+
+		@Override
+		public boolean isLast() {
+			return this.last;
 		}
 	}
 
@@ -572,11 +589,15 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 				len += previous.readableByteCount();
 			}
 
-			emit.forEach(MultipartParser.this::emitBody);
+			emit.forEach(buffer -> MultipartParser.this.emitBody(buffer, false));
 		}
 
 		private void flush() {
-			this.queue.forEach(MultipartParser.this::emitBody);
+			for (Iterator<DataBuffer> iterator = this.queue.iterator(); iterator.hasNext(); ) {
+				DataBuffer buffer = iterator.next();
+				boolean last = !iterator.hasNext();
+				MultipartParser.this.emitBody(buffer, last);
+			}
 			this.queue.clear();
 		}
 

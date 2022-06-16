@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Arjen Poutsma
  * @author Brian Clozel
  */
-public class RouterFunctionMappingTests {
+class RouterFunctionMappingTests {
 
 	private final ServerCodecConfigurer codecConfigurer = ServerCodecConfigurer.create();
 

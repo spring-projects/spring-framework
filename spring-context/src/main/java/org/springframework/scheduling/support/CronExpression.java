@@ -280,8 +280,7 @@ public final class CronExpression {
 		if (this == o) {
 			return true;
 		}
-		if (o instanceof CronExpression) {
-			CronExpression other = (CronExpression) o;
+		if (o instanceof CronExpression other) {
 			return Arrays.equals(this.fields, other.fields);
 		}
 		else {

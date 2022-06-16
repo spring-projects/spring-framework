@@ -335,10 +335,9 @@ public class ContextConfigurationAttributes {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof ContextConfigurationAttributes)) {
+		if (!(other instanceof ContextConfigurationAttributes otherAttr)) {
 			return false;
 		}
-		ContextConfigurationAttributes otherAttr = (ContextConfigurationAttributes) other;
 		return (ObjectUtils.nullSafeEquals(this.declaringClass, otherAttr.declaringClass) &&
 				Arrays.equals(this.classes, otherAttr.classes)) &&
 				Arrays.equals(this.locations, otherAttr.locations) &&

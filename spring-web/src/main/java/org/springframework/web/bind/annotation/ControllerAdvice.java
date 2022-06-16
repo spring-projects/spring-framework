@@ -36,7 +36,7 @@ import org.springframework.stereotype.Component;
  * as Spring beans or auto-detected via classpath scanning. All such beans are
  * sorted based on {@link org.springframework.core.Ordered Ordered} semantics or
  * {@link org.springframework.core.annotation.Order @Order} /
- * {@link javax.annotation.Priority @Priority} declarations, with {@code Ordered}
+ * {@link jakarta.annotation.Priority @Priority} declarations, with {@code Ordered}
  * semantics taking precedence over {@code @Order} / {@code @Priority} declarations.
  * {@code @ControllerAdvice} beans are then applied in that order at runtime.
  * Note, however, that {@code @ControllerAdvice} beans that implement

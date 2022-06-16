@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.jms.listener.endpoint;
 
-import javax.jms.Session;
+import jakarta.jms.Session;
 
 import org.springframework.core.Constants;
 import org.springframework.jms.support.QosSettings;
@@ -36,11 +36,11 @@ import org.springframework.lang.Nullable;
  * @since 2.5
  * @see JmsActivationSpecFactory
  * @see JmsMessageEndpointManager#setActivationSpecConfig
- * @see javax.resource.spi.ResourceAdapter#endpointActivation
+ * @see jakarta.resource.spi.ResourceAdapter#endpointActivation
  */
 public class JmsActivationSpecConfig {
 
-	/** Constants instance for {@code javax.jms.Session}. */
+	/** Constants instance for {@code jakarta.jms.Session}. */
 	private static final Constants sessionConstants = new Constants(Session.class);
 
 
@@ -184,10 +184,10 @@ public class JmsActivationSpecConfig {
 	 * supports "SESSION_TRANSACTED" in the form of RA-managed transactions
 	 * (automatically translated by Spring's {@link DefaultJmsActivationSpecFactory}.
 	 * @param constantName the name of the {@link Session} acknowledge mode constant
-	 * @see javax.jms.Session#AUTO_ACKNOWLEDGE
-	 * @see javax.jms.Session#CLIENT_ACKNOWLEDGE
-	 * @see javax.jms.Session#DUPS_OK_ACKNOWLEDGE
-	 * @see javax.jms.Session#SESSION_TRANSACTED
+	 * @see jakarta.jms.Session#AUTO_ACKNOWLEDGE
+	 * @see jakarta.jms.Session#CLIENT_ACKNOWLEDGE
+	 * @see jakarta.jms.Session#DUPS_OK_ACKNOWLEDGE
+	 * @see jakarta.jms.Session#SESSION_TRANSACTED
 	 * @see StandardJmsActivationSpecFactory
 	 * @see DefaultJmsActivationSpecFactory
 	 */
@@ -197,10 +197,10 @@ public class JmsActivationSpecConfig {
 
 	/**
 	 * Set the JMS acknowledgement mode to use.
-	 * @see javax.jms.Session#AUTO_ACKNOWLEDGE
-	 * @see javax.jms.Session#CLIENT_ACKNOWLEDGE
-	 * @see javax.jms.Session#DUPS_OK_ACKNOWLEDGE
-	 * @see javax.jms.Session#SESSION_TRANSACTED
+	 * @see jakarta.jms.Session#AUTO_ACKNOWLEDGE
+	 * @see jakarta.jms.Session#CLIENT_ACKNOWLEDGE
+	 * @see jakarta.jms.Session#DUPS_OK_ACKNOWLEDGE
+	 * @see jakarta.jms.Session#SESSION_TRANSACTED
 	 */
 	public void setAcknowledgeMode(int acknowledgeMode) {
 		this.acknowledgeMode = acknowledgeMode;
@@ -226,7 +226,7 @@ public class JmsActivationSpecConfig {
 		try {
 			int separatorIndex = concurrency.indexOf('-');
 			if (separatorIndex != -1) {
-				setMaxConcurrency(Integer.parseInt(concurrency.substring(separatorIndex + 1)));
+				setMaxConcurrency(Integer.parseInt(concurrency, separatorIndex + 1, concurrency.length(), 10));
 			}
 			else {
 				setMaxConcurrency(Integer.parseInt(concurrency));

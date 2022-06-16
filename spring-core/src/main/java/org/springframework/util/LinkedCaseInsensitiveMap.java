@@ -110,7 +110,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 	 * @see #convertKey(String)
 	 */
 	public LinkedCaseInsensitiveMap(int expectedSize, @Nullable Locale locale) {
-		this.targetMap = new LinkedHashMap<String, V>(
+		this.targetMap = new LinkedHashMap<>(
 				(int) (expectedSize / CollectionUtils.DEFAULT_LOAD_FACTOR), CollectionUtils.DEFAULT_LOAD_FACTOR) {
 			@Override
 			public boolean containsKey(Object key) {

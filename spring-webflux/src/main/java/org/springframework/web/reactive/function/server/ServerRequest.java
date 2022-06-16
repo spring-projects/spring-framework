@@ -70,15 +70,14 @@ public interface ServerRequest {
 	 * @return the HTTP method as an HttpMethod enum value, or {@code null}
 	 * if not resolvable (e.g. in case of a non-standard HTTP method)
 	 */
-	@Nullable
-	default HttpMethod method() {
-		return HttpMethod.resolve(methodName());
-	}
+	HttpMethod method();
 
 	/**
 	 * Get the name of the HTTP method.
 	 * @return the HTTP method as a String
+	 * @deprecated in favor of {@link #method()}
 	 */
+	@Deprecated
 	String methodName();
 
 	/**

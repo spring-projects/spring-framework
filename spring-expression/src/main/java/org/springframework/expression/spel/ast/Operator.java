@@ -24,7 +24,6 @@ import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -36,6 +35,7 @@ import org.springframework.util.ObjectUtils;
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Giovanni Dall'Oglio Risso
+ * @author Sam Brannen
  * @since 3.0
  */
 public abstract class Operator extends SpelNodeImpl {
@@ -261,10 +261,7 @@ public abstract class Operator extends SpelNodeImpl {
 	 * @param right the right-hand operand value
 	 */
 	public static boolean equalityCheck(EvaluationContext context, @Nullable Object left, @Nullable Object right) {
-		if (left instanceof Number && right instanceof Number) {
-			Number leftNumber = (Number) left;
-			Number rightNumber = (Number) right;
-
+		if (left instanceof Number leftNumber && right instanceof Number rightNumber) {
 			if (leftNumber instanceof BigDecimal || rightNumber instanceof BigDecimal) {
 				BigDecimal leftBigDecimal = NumberUtils.convertNumberToTargetClass(leftNumber, BigDecimal.class);
 				BigDecimal rightBigDecimal = NumberUtils.convertNumberToTargetClass(rightNumber, BigDecimal.class);
@@ -311,11 +308,8 @@ public abstract class Operator extends SpelNodeImpl {
 			return true;
 		}
 
-		if (left instanceof Comparable && right instanceof Comparable) {
-			Class<?> ancestor = ClassUtils.determineCommonAncestor(left.getClass(), right.getClass());
-			if (ancestor != null && Comparable.class.isAssignableFrom(ancestor)) {
-				return (context.getTypeComparator().compare(left, right) == 0);
-			}
+		if (context.getTypeComparator().canCompare(left, right)) {
+			return context.getTypeComparator().compare(left, right) == 0;
 		}
 
 		return false;

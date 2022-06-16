@@ -87,11 +87,11 @@ public class ExceptionCollector {
 
 		if (this.exceptions.size() == 1) {
 			Throwable exception = this.exceptions.get(0);
-			if (exception instanceof Error) {
-				throw (Error) exception;
+			if (exception instanceof Error error) {
+				throw error;
 			}
-			if (exception instanceof Exception) {
-				throw (Exception) exception;
+			if (exception instanceof Exception ex) {
+				throw ex;
 			}
 			AssertionError assertionError = new AssertionError(exception.getMessage());
 			assertionError.initCause(exception);

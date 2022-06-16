@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
@@ -34,7 +35,7 @@ import org.springframework.util.StringUtils;
  * @author Brian Clozel
  * @since 3.0
  */
-final class SimpleClientHttpResponse extends AbstractClientHttpResponse {
+final class SimpleClientHttpResponse implements ClientHttpResponse {
 
 	private final HttpURLConnection connection;
 
@@ -51,6 +52,12 @@ final class SimpleClientHttpResponse extends AbstractClientHttpResponse {
 
 
 	@Override
+	public HttpStatusCode getStatusCode() throws IOException {
+		return HttpStatusCode.valueOf(this.connection.getResponseCode());
+	}
+
+	@Override
+	@Deprecated
 	public int getRawStatusCode() throws IOException {
 		return this.connection.getResponseCode();
 	}

@@ -19,9 +19,8 @@ package org.springframework.web.multipart.support;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;

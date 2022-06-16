@@ -79,4 +79,28 @@ public class DataClassRowMapperTests extends AbstractRowMapperTests {
 		mock.verifyClosed();
 	}
 
+	@Test
+	public void testStaticQueryWithDataRecord() throws Exception {
+		Mock mock = new Mock();
+		List<RecordPerson> result = mock.getJdbcTemplate().query(
+				"select name, age, birth_date, balance from people",
+				new DataClassRowMapper<>(RecordPerson.class));
+		assertThat(result.size()).isEqualTo(1);
+		verifyPerson(result.get(0));
+
+		mock.verifyClosed();
+	}
+
+	protected void verifyPerson(RecordPerson person) {
+		assertThat(person.name()).isEqualTo("Bubba");
+		assertThat(person.age()).isEqualTo(22L);
+		assertThat(person.birth_date()).usingComparator(Date::compareTo).isEqualTo(new java.util.Date(1221222L));
+		assertThat(person.balance()).isEqualTo(new BigDecimal("1234.56"));
+		verifyPersonViaBeanWrapper(person);
+	}
+
+
+	static record RecordPerson(String name, long age, Date birth_date, BigDecimal balance) {
+	}
+
 }

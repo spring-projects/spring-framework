@@ -16,8 +16,8 @@
 
 package org.springframework.web.context.support;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
 
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;

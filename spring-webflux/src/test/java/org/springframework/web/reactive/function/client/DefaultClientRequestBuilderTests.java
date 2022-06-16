@@ -202,7 +202,7 @@ public class DefaultClientRequestBuilderTests {
 	public void bodyParameterizedTypeReference() {
 		String body = "foo";
 		Publisher<String> publisher = Mono.just(body);
-		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<String>() {};
+		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<>() {};
 		ClientRequest result = ClientRequest.create(POST, DEFAULT_URL).body(publisher, typeReference).build();
 
 		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();

@@ -29,14 +29,14 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
 import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
 
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.transaction.TransactionManager;
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
 import org.hibernate.SessionFactory;
@@ -78,12 +78,12 @@ import org.springframework.util.ClassUtils;
  * Typically combined with {@link HibernateTransactionManager} for declarative
  * transactions against the {@code SessionFactory} and its JDBC {@code DataSource}.
  *
- * <p>Compatible with Hibernate 5.2/5.3/5.4, as of Spring 5.3.
+ * <p>Compatible with Hibernate 5.5/5.6, as of Spring 6.0.
  * This Hibernate-specific factory builder can also be a convenient way to set up
  * a JPA {@code EntityManagerFactory} since the Hibernate {@code SessionFactory}
  * natively exposes the JPA {@code EntityManagerFactory} interface as well now.
  *
- * <p>This builder supports Hibernate 5.3/5.4 {@code BeanContainer} integration,
+ * <p>This builder supports Hibernate {@code BeanContainer} integration,
  * {@link MetadataSources} from custom {@link BootstrapServiceRegistryBuilder}
  * setup, as well as other advanced Hibernate configuration options beyond the
  * standard JPA bootstrap contract.
@@ -222,8 +222,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	/**
 	 * Set a Hibernate {@link org.hibernate.resource.beans.container.spi.BeanContainer}
 	 * for the given Spring {@link ConfigurableListableBeanFactory}.
-	 * <p>Note: Bean container integration requires Hibernate 5.3 or higher.
-	 * It enables autowiring of Hibernate attribute converters and entity listeners.
+	 * <p>This enables autowiring of Hibernate attribute converters and entity listeners.
 	 * @since 5.1
 	 * @see SpringBeanContainer
 	 * @see AvailableSettings#BEAN_CONTAINER
@@ -270,8 +269,8 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	/**
 	 * Specify custom type filters for Spring-based scanning for entity classes.
 	 * <p>Default is to search all specified packages for classes annotated with
-	 * {@code @javax.persistence.Entity}, {@code @javax.persistence.Embeddable}
-	 * or {@code @javax.persistence.MappedSuperclass}.
+	 * {@code @jakarta.persistence.Entity}, {@code @jakarta.persistence.Embeddable}
+	 * or {@code @jakarta.persistence.MappedSuperclass}.
 	 * @see #scanPackages
 	 */
 	public LocalSessionFactoryBuilder setEntityTypeFilters(TypeFilter... entityTypeFilters) {

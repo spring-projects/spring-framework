@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -28,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -239,12 +238,12 @@ public class PathResourceResolver extends AbstractResourceResolver {
 			resourcePath = resource.getURL().toExternalForm();
 			locationPath = StringUtils.cleanPath(location.getURL().toString());
 		}
-		else if (resource instanceof ClassPathResource) {
-			resourcePath = ((ClassPathResource) resource).getPath();
+		else if (resource instanceof ClassPathResource classPathResource) {
+			resourcePath = classPathResource.getPath();
 			locationPath = StringUtils.cleanPath(((ClassPathResource) location).getPath());
 		}
-		else if (resource instanceof ServletContextResource) {
-			resourcePath = ((ServletContextResource) resource).getPath();
+		else if (resource instanceof ServletContextResource servletContextResource) {
+			resourcePath = servletContextResource.getPath();
 			locationPath = StringUtils.cleanPath(((ServletContextResource) location).getPath());
 		}
 		else {
@@ -297,7 +296,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 		if (resourcePath.contains("%")) {
 			// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars...
 			try {
-				String decodedPath = URLDecoder.decode(resourcePath, "UTF-8");
+				String decodedPath = URLDecoder.decode(resourcePath, StandardCharsets.UTF_8);
 				if (decodedPath.contains("../") || decodedPath.contains("..\\")) {
 					logger.warn(LogFormatUtils.formatValue(
 							"Resolved resource path contains encoded \"../\" or \"..\\\": " + resourcePath, -1, true));
@@ -306,9 +305,6 @@ public class PathResourceResolver extends AbstractResourceResolver {
 			}
 			catch (IllegalArgumentException ex) {
 				// May not be possible to decode...
-			}
-			catch (UnsupportedEncodingException ex) {
-				// Should never happen...
 			}
 		}
 		return false;

@@ -196,7 +196,7 @@ public class FormattingConversionServiceFactoryBeanTests {
 		public Parser<?> getParser(SpecialInt annotation, Class<?> fieldType) {
 			assertThat(annotation.value()).isEqualTo("aliased");
 			assertThat(annotation.alias()).isEqualTo("aliased");
-			return (text, locale) -> Integer.parseInt(text.substring(1));
+			return (text, locale) -> Integer.parseInt(text, 1, text.length(), 10);
 		}
 	}
 

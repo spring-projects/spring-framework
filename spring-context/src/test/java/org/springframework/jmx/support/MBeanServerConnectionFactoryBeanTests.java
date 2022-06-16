@@ -24,6 +24,7 @@ import javax.management.remote.JMXServiceURL;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.core.testfixture.net.TestSocketUtils;
 import org.springframework.jmx.AbstractMBeanServerTests;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTests {
 
 	@SuppressWarnings("deprecation")
-	private final String serviceUrl = "service:jmx:jmxmp://localhost:" + org.springframework.util.SocketUtils.findAvailableTcpPort();
+	private final String serviceUrl = "service:jmx:jmxmp://localhost:" + TestSocketUtils.findAvailableTcpPort();
 
 
 	@Test

@@ -70,8 +70,6 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 
 	private static final boolean jettyPresent;
 
-	private static final boolean jetty10Present;
-
 	private static final boolean undertowPresent;
 
 	private static final boolean reactorNettyPresent;
@@ -79,8 +77,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 	static {
 		ClassLoader loader = HandshakeWebSocketService.class.getClassLoader();
 		tomcatPresent = ClassUtils.isPresent("org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", loader);
-		jettyPresent = ClassUtils.isPresent("org.eclipse.jetty.websocket.server.WebSocketServerFactory", loader);
-		jetty10Present = ClassUtils.isPresent("org.eclipse.jetty.websocket.server.JettyWebSocketServerContainer", loader);
+		jettyPresent = ClassUtils.isPresent("org.eclipse.jetty.websocket.server.JettyWebSocketServerContainer", loader);
 		undertowPresent = ClassUtils.isPresent("io.undertow.websockets.WebSocketProtocolHandshakeHandler", loader);
 		reactorNettyPresent = ClassUtils.isPresent("reactor.netty.http.server.HttpServerResponse", loader);
 	}
@@ -121,9 +118,6 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		}
 		else if (jettyPresent) {
 			className = "JettyRequestUpgradeStrategy";
-		}
-		else if (jetty10Present) {
-			className = "Jetty10RequestUpgradeStrategy";
 		}
 		else if (undertowPresent) {
 			className = "UndertowRequestUpgradeStrategy";
@@ -220,7 +214,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 
 		if (HttpMethod.GET != method) {
 			return Mono.error(new MethodNotAllowedException(
-					request.getMethodValue(), Collections.singleton(HttpMethod.GET)));
+					request.getMethod(), Collections.singleton(HttpMethod.GET)));
 		}
 
 		if (!"WebSocket".equalsIgnoreCase(headers.getUpgrade())) {

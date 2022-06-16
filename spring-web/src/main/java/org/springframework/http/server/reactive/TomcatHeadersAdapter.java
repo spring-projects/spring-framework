@@ -38,6 +38,7 @@ import org.springframework.util.MultiValueMap;
  * {@code MultiValueMap} implementation for wrapping Tomcat HTTP headers.
  *
  * @author Brian Clozel
+ * @author Sam Brannen
  * @since 5.1.1
  */
 class TomcatHeadersAdapter implements MultiValueMap<String, String> {
@@ -105,19 +106,19 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public boolean containsKey(Object key) {
-		if (key instanceof String) {
-			return (this.headers.findHeader((String) key, 0) != -1);
+		if (key instanceof String headerName) {
+			return (this.headers.findHeader(headerName, 0) != -1);
 		}
 		return false;
 	}
 
 	@Override
 	public boolean containsValue(Object value) {
-		if (value instanceof String) {
-			MessageBytes needle = MessageBytes.newInstance();
-			needle.setString((String) value);
+		if (value instanceof String text) {
+			MessageBytes messageBytes = MessageBytes.newInstance();
+			messageBytes.setString(text);
 			for (int i = 0; i < this.headers.size(); i++) {
-				if (this.headers.getValue(i).equals(needle)) {
+				if (this.headers.getValue(i).equals(messageBytes)) {
 					return true;
 				}
 			}
@@ -146,9 +147,9 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 	@Override
 	@Nullable
 	public List<String> remove(Object key) {
-		if (key instanceof String) {
+		if (key instanceof String headerName) {
 			List<String> previousValues = get(key);
-			this.headers.removeHeader((String) key);
+			this.headers.removeHeader(headerName);
 			return previousValues;
 		}
 		return null;
@@ -176,7 +177,7 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public Set<Entry<String, List<String>>> entrySet() {
-		return new AbstractSet<Entry<String, List<String>>>() {
+		return new AbstractSet<>() {
 			@Override
 			public Iterator<Entry<String, List<String>>> iterator() {
 				return new EntryIterator();
@@ -198,7 +199,7 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 
 	private class EntryIterator implements Iterator<Entry<String, List<String>>> {
 
-		private Enumeration<String> names = headers.names();
+		private final Enumeration<String> names = headers.names();
 
 		@Override
 		public boolean hasNext() {

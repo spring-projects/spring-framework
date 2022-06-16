@@ -16,8 +16,7 @@
 
 package org.springframework.web.util;
 
-import javax.servlet.http.MappingMatch;
-
+import jakarta.servlet.http.MappingMatch;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.server.RequestPath;

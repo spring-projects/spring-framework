@@ -21,9 +21,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 

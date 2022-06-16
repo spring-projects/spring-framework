@@ -24,9 +24,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import javax.servlet.FilterChain;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
@@ -197,7 +196,6 @@ public class ServletInvocableHandlerMethodTests {
 		context.refresh();
 
 		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
-		System.out.println(beanFactory.getType(beanName));
 
 		LocaleContextHolder.setLocale(locale);
 		try {

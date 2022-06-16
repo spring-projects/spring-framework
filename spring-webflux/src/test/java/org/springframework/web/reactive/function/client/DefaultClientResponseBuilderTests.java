@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,20 +28,20 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.web.testfixture.http.client.reactive.MockClientHttpRequest;
 import org.springframework.web.testfixture.http.client.reactive.MockClientHttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Arjen Poutsma
  */
-public class DefaultClientResponseBuilderTests {
+class DefaultClientResponseBuilderTests {
 
 	@Test
-	public void normal() {
+	void normal() {
 		Flux<DataBuffer> body = Flux.just("baz")
 				.map(s -> s.getBytes(StandardCharsets.UTF_8))
 				.map(DefaultDataBufferFactory.sharedInstance::wrap);
@@ -64,7 +64,7 @@ public class DefaultClientResponseBuilderTests {
 	}
 
 	@Test
-	public void mutate() {
+	void mutate() {
 		Flux<DataBuffer> otherBody = Flux.just("foo", "bar")
 				.map(s -> s.getBytes(StandardCharsets.UTF_8))
 				.map(DefaultDataBufferFactory.sharedInstance::wrap);
@@ -101,11 +101,13 @@ public class DefaultClientResponseBuilderTests {
 	}
 
 	@Test
-	public void mutateWithCustomStatus() {
+	@SuppressWarnings("deprecation")
+	void mutateWithCustomStatus() {
 		ClientResponse other = ClientResponse.create(499, ExchangeStrategies.withDefaults()).build();
 		ClientResponse result = other.mutate().build();
 
 		assertThat(result.rawStatusCode()).isEqualTo(499);
-		assertThatIllegalArgumentException().isThrownBy(result::statusCode);
+		assertThat(result.statusCode()).isEqualTo(HttpStatusCode.valueOf(499));
 	}
+
 }

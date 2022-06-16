@@ -16,8 +16,7 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import javax.servlet.ServletException;
-
+import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.AfterEach;
 
 import org.springframework.beans.factory.config.BeanDefinition;

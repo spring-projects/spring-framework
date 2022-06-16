@@ -29,11 +29,11 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.Consumer;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.Part;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -66,15 +66,14 @@ public interface ServerRequest {
 	 * @return the HTTP method as an HttpMethod enum value, or {@code null}
 	 * if not resolvable (e.g. in case of a non-standard HTTP method)
 	 */
-	@Nullable
-	default HttpMethod method() {
-		return HttpMethod.resolve(methodName());
-	}
+	HttpMethod method();
 
 	/**
 	 * Get the name of the HTTP method.
 	 * @return the HTTP method as a String
+	 * @deprecated in favor of {@link #method()}
 	 */
+	@Deprecated
 	String methodName();
 
 	/**

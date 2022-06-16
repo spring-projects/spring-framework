@@ -33,6 +33,7 @@ import org.springframework.context.Lifecycle;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpResponse;
@@ -316,9 +317,9 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 			transportHandler.handleRequest(request, response, handler, session);
 
-			if (isNewSession && (response instanceof ServletServerHttpResponse)) {
-				int status = ((ServletServerHttpResponse) response).getServletResponse().getStatus();
-				if (HttpStatus.valueOf(status).is4xxClientError()) {
+			if (isNewSession && response instanceof ServletServerHttpResponse servletResponse) {
+				int status = servletResponse.getServletResponse().getStatus();
+				if (HttpStatusCode.valueOf(status).is4xxClientError()) {
 					this.sessions.remove(sessionId);
 				}
 			}

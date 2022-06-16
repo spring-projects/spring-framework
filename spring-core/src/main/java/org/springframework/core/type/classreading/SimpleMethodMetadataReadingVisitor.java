@@ -33,6 +33,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Phillip Webb
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 5.2
  */
 final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
@@ -78,13 +79,11 @@ final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
 
 	@Override
 	public void visitEnd() {
-		if (!this.annotations.isEmpty()) {
-			String returnTypeName = Type.getReturnType(this.descriptor).getClassName();
-			MergedAnnotations annotations = MergedAnnotations.of(this.annotations);
-			SimpleMethodMetadata metadata = new SimpleMethodMetadata(this.methodName, this.access,
-					this.declaringClassName, returnTypeName, getSource(), annotations);
-			this.consumer.accept(metadata);
-		}
+		String returnTypeName = Type.getReturnType(this.descriptor).getClassName();
+		MergedAnnotations annotations = MergedAnnotations.of(this.annotations);
+		SimpleMethodMetadata metadata = new SimpleMethodMetadata(this.methodName, this.access,
+				this.declaringClassName, returnTypeName, getSource(), annotations);
+		this.consumer.accept(metadata);
 	}
 
 	private Object getSource() {

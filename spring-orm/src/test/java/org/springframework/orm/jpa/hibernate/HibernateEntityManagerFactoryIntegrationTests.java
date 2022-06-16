@@ -16,8 +16,7 @@
 
 package org.springframework.orm.jpa.hibernate;
 
-import javax.persistence.EntityManager;
-
+import jakarta.persistence.EntityManager;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;

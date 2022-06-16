@@ -18,9 +18,8 @@ package org.springframework.test.web.servlet.samples.standalone.resulthandlers;
 
 import java.io.StringWriter;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;

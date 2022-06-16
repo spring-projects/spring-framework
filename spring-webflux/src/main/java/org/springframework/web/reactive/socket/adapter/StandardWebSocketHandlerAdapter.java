@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
 
-import javax.websocket.CloseReason;
-import javax.websocket.Endpoint;
-import javax.websocket.EndpointConfig;
-import javax.websocket.PongMessage;
-import javax.websocket.Session;
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.Endpoint;
+import jakarta.websocket.EndpointConfig;
+import jakarta.websocket.PongMessage;
+import jakarta.websocket.Session;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.lang.Nullable;
@@ -41,13 +41,14 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  *
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0
  */
 public class StandardWebSocketHandlerAdapter extends Endpoint {
 
 	private final WebSocketHandler delegateHandler;
 
-	private Function<Session, StandardWebSocketSession> sessionFactory;
+	private final Function<Session, StandardWebSocketSession> sessionFactory;
 
 	@Nullable
 	private StandardWebSocketSession delegateSession;
@@ -89,16 +90,16 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 	private <T> WebSocketMessage toMessage(T message) {
 		WebSocketSession session = this.delegateSession;
 		Assert.state(session != null, "Cannot create message without a session");
-		if (message instanceof String) {
-			byte[] bytes = ((String) message).getBytes(StandardCharsets.UTF_8);
+		if (message instanceof String text) {
+			byte[] bytes = text.getBytes(StandardCharsets.UTF_8);
 			return new WebSocketMessage(Type.TEXT, session.bufferFactory().wrap(bytes));
 		}
-		else if (message instanceof ByteBuffer) {
-			DataBuffer buffer = session.bufferFactory().wrap((ByteBuffer) message);
+		else if (message instanceof ByteBuffer byteBuffer) {
+			DataBuffer buffer = session.bufferFactory().wrap(byteBuffer);
 			return new WebSocketMessage(Type.BINARY, buffer);
 		}
-		else if (message instanceof PongMessage) {
-			DataBuffer buffer = session.bufferFactory().wrap(((PongMessage) message).getApplicationData());
+		else if (message instanceof PongMessage pongMessage) {
+			DataBuffer buffer = session.bufferFactory().wrap(pongMessage.getApplicationData());
 			return new WebSocketMessage(Type.PONG, buffer);
 		}
 		else {

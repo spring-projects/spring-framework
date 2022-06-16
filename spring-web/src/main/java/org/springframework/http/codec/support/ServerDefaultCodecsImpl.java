@@ -25,6 +25,7 @@ import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
 import org.springframework.http.codec.multipart.DefaultPartHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
+import org.springframework.http.codec.multipart.PartEventHttpMessageReader;
 import org.springframework.http.codec.multipart.PartHttpMessageWriter;
 import org.springframework.lang.Nullable;
 
@@ -69,11 +70,13 @@ class ServerDefaultCodecsImpl extends BaseDefaultCodecs implements ServerCodecCo
 	protected void extendTypedReaders(List<HttpMessageReader<?>> typedReaders) {
 		if (this.multipartReader != null) {
 			addCodec(typedReaders, this.multipartReader);
-			return;
 		}
-		DefaultPartHttpMessageReader partReader = new DefaultPartHttpMessageReader();
-		addCodec(typedReaders, partReader);
-		addCodec(typedReaders, new MultipartHttpMessageReader(partReader));
+		else {
+			DefaultPartHttpMessageReader partReader = new DefaultPartHttpMessageReader();
+			addCodec(typedReaders, partReader);
+			addCodec(typedReaders, new MultipartHttpMessageReader(partReader));
+		}
+		addCodec(typedReaders, new PartEventHttpMessageReader());
 	}
 
 	@Override

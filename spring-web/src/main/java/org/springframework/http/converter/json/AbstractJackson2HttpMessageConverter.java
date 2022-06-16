@@ -75,6 +75,7 @@ import org.springframework.util.TypeUtils;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  * @since 4.1
  * @see MappingJackson2HttpMessageConverter
  */
@@ -91,14 +92,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	}
 
 
-	/**
-	 * The default charset used by the converter.
-	 */
-	@Nullable
-	@Deprecated
-	public static final Charset DEFAULT_CHARSET = null;
-
-
 	protected ObjectMapper defaultObjectMapper;
 
 	@Nullable
@@ -108,7 +101,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	private Boolean prettyPrint;
 
 	@Nullable
-	private PrettyPrinter ssePrettyPrinter;
+	private final PrettyPrinter ssePrettyPrinter;
 
 
 	protected AbstractJackson2HttpMessageConverter(ObjectMapper objectMapper) {
@@ -363,8 +356,8 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 				"UTF-32".equals(charset.name());
 		try {
 			InputStream inputStream = StreamUtils.nonClosing(inputMessage.getBody());
-			if (inputMessage instanceof MappingJacksonInputMessage) {
-				Class<?> deserializationView = ((MappingJacksonInputMessage) inputMessage).getDeserializationView();
+			if (inputMessage instanceof MappingJacksonInputMessage mappingJacksonInputMessage) {
+				Class<?> deserializationView = mappingJacksonInputMessage.getDeserializationView();
 				if (deserializationView != null) {
 					ObjectReader objectReader = objectMapper.readerWithView(deserializationView).forType(javaType);
 					if (isUnicode) {
@@ -416,8 +409,8 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		MediaType contentType = outputMessage.getHeaders().getContentType();
 		JsonEncoding encoding = getJsonEncoding(contentType);
 
-		Class<?> clazz = (object instanceof MappingJacksonValue ?
-				((MappingJacksonValue) object).getValue().getClass() : object.getClass());
+		Class<?> clazz = (object instanceof MappingJacksonValue mappingJacksonValue ?
+				mappingJacksonValue.getValue().getClass() : object.getClass());
 		ObjectMapper objectMapper = selectObjectMapper(clazz, contentType);
 		Assert.state(objectMapper != null, "No ObjectMapper for " + clazz.getName());
 
@@ -430,11 +423,10 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			FilterProvider filters = null;
 			JavaType javaType = null;
 
-			if (object instanceof MappingJacksonValue) {
-				MappingJacksonValue container = (MappingJacksonValue) object;
-				value = container.getValue();
-				serializationView = container.getSerializationView();
-				filters = container.getFilters();
+			if (object instanceof MappingJacksonValue mappingJacksonValue) {
+				value = mappingJacksonValue.getValue();
+				serializationView = mappingJacksonValue.getSerializationView();
+				filters = mappingJacksonValue.getFilters();
 			}
 			if (type != null && TypeUtils.isAssignable(type, value.getClass())) {
 				javaType = getJavaType(type, null);
@@ -512,16 +504,16 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	@Override
 	@Nullable
 	protected MediaType getDefaultContentType(Object object) throws IOException {
-		if (object instanceof MappingJacksonValue) {
-			object = ((MappingJacksonValue) object).getValue();
+		if (object instanceof MappingJacksonValue mappingJacksonValue) {
+			object = mappingJacksonValue.getValue();
 		}
 		return super.getDefaultContentType(object);
 	}
 
 	@Override
 	protected Long getContentLength(Object object, @Nullable MediaType contentType) throws IOException {
-		if (object instanceof MappingJacksonValue) {
-			object = ((MappingJacksonValue) object).getValue();
+		if (object instanceof MappingJacksonValue mappingJacksonValue) {
+			object = mappingJacksonValue.getValue();
 		}
 		return super.getContentLength(object, contentType);
 	}

@@ -60,6 +60,7 @@ import org.springframework.http.codec.json.KotlinSerializationJsonDecoder;
 import org.springframework.http.codec.json.KotlinSerializationJsonEncoder;
 import org.springframework.http.codec.multipart.DefaultPartHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
+import org.springframework.http.codec.multipart.PartEventHttpMessageReader;
 import org.springframework.http.codec.multipart.PartHttpMessageWriter;
 import org.springframework.http.codec.protobuf.ProtobufDecoder;
 import org.springframework.http.codec.protobuf.ProtobufHttpMessageWriter;
@@ -85,7 +86,7 @@ public class ServerCodecConfigurerTests {
 	@Test
 	public void defaultReaders() {
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
-		assertThat(readers.size()).isEqualTo(15);
+		assertThat(readers.size()).isEqualTo(16);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(ByteArrayDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(ByteBufferDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(DataBufferDecoder.class);
@@ -96,6 +97,7 @@ public class ServerCodecConfigurerTests {
 		assertThat(readers.get(this.index.getAndIncrement()).getClass()).isEqualTo(FormHttpMessageReader.class);
 		assertThat(readers.get(this.index.getAndIncrement()).getClass()).isEqualTo(DefaultPartHttpMessageReader.class);
 		assertThat(readers.get(this.index.getAndIncrement()).getClass()).isEqualTo(MultipartHttpMessageReader.class);
+		assertThat(readers.get(this.index.getAndIncrement()).getClass()).isEqualTo(PartEventHttpMessageReader.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(KotlinSerializationJsonDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(Jackson2JsonDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(Jackson2SmileDecoder.class);
@@ -159,6 +161,7 @@ public class ServerCodecConfigurerTests {
 		MultipartHttpMessageReader multipartReader = (MultipartHttpMessageReader) nextReader(readers);
 		DefaultPartHttpMessageReader reader = (DefaultPartHttpMessageReader) multipartReader.getPartReader();
 		assertThat((reader).getMaxInMemorySize()).isEqualTo(size);
+		assertThat(((PartEventHttpMessageReader) nextReader(readers)).getMaxInMemorySize()).isEqualTo(size);
 
 		assertThat(((KotlinSerializationJsonDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((Jackson2JsonDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);

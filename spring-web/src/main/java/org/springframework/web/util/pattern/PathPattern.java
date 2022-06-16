@@ -430,10 +430,9 @@ public class PathPattern implements Comparable<PathPattern> {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (!(other instanceof PathPattern)) {
+		if (!(other instanceof PathPattern otherPattern)) {
 			return false;
 		}
-		PathPattern otherPattern = (PathPattern) other;
 		return (this.patternString.equals(otherPattern.getPatternString()) &&
 				getSeparator() == otherPattern.getSeparator() &&
 				this.caseSensitive == otherPattern.caseSensitive);
@@ -726,10 +725,7 @@ public class PathPattern implements Comparable<PathPattern> {
 		 */
 		String pathElementValue(int pathIndex) {
 			Element element = (pathIndex < this.pathLength) ? this.pathElements.get(pathIndex) : null;
-			if (element instanceof PathContainer.PathSegment) {
-				return ((PathContainer.PathSegment)element).valueToMatch();
-			}
-			return "";
+			return (element instanceof PathContainer.PathSegment pathSegment ? pathSegment.valueToMatch() : "");
 		}
 	}
 

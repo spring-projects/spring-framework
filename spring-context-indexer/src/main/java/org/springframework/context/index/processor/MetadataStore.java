@@ -62,11 +62,8 @@ class MetadataStore {
 
 
 	private CandidateComponentsMetadata readMetadata(InputStream in) throws IOException {
-		try {
+		try (in) {
 			return PropertiesMarshaller.read(in);
-		}
-		finally {
-			in.close();
 		}
 	}
 

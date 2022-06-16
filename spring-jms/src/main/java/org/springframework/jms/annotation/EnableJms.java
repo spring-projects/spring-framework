@@ -74,8 +74,8 @@ import org.springframework.context.annotation.Import;
  * is set a {@code JmsListenerContainerFactory} bean with name {@code jmsListenerContainerFactory} is
  * assumed to be present.
  *
- * <p>the following configuration would ensure that every time a {@link javax.jms.Message}
- * is received on the {@link javax.jms.Destination} named "myQueue", {@code MyService.process()}
+ * <p>the following configuration would ensure that every time a {@link jakarta.jms.Message}
+ * is received on the {@link jakarta.jms.Destination} named "myQueue", {@code MyService.process()}
  * is called with the content of the message:
  *
  * <pre class="code">

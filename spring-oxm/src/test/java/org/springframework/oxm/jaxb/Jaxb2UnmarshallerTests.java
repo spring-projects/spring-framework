@@ -20,14 +20,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 
-import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
-import javax.xml.bind.JAXBElement;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
+import jakarta.activation.DataHandler;
+import jakarta.activation.FileDataSource;
+import jakarta.xml.bind.JAXBElement;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;

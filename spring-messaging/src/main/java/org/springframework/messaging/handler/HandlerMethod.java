@@ -308,10 +308,9 @@ public class HandlerMethod {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof HandlerMethod)) {
+		if (!(other instanceof HandlerMethod otherMethod)) {
 			return false;
 		}
-		HandlerMethod otherMethod = (HandlerMethod) other;
 		return (this.bean.equals(otherMethod.bean) && this.method.equals(otherMethod.method));
 	}
 

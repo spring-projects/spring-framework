@@ -20,12 +20,9 @@ import java.io.Closeable;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
-import java.security.AccessControlContext;
-import java.security.AccessController;
-import java.security.Principal;
-import java.security.PrivilegedAction;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -40,9 +37,7 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import javax.annotation.Priority;
-import javax.security.auth.Subject;
-
+import jakarta.annotation.Priority;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;
@@ -87,7 +82,6 @@ import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
-import org.springframework.core.testfixture.security.TestPrincipal;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
@@ -861,8 +855,11 @@ class DefaultListableBeanFactoryTests {
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
 		lbf.registerAlias("otherTest", "test2");
 		lbf.registerAlias("test", "test2");
+		lbf.registerAlias("test", "testX");
+		lbf.registerBeanDefinition("testX", new RootBeanDefinition(TestBean.class));
 		assertThat(lbf.getBean("test")).isInstanceOf(NestedTestBean.class);
 		assertThat(lbf.getBean("test2")).isInstanceOf(NestedTestBean.class);
+		assertThat(lbf.getBean("testX")).isInstanceOf(TestBean.class);
 	}
 
 	@Test
@@ -871,10 +868,18 @@ class DefaultListableBeanFactoryTests {
 		BeanDefinition oldDef = new RootBeanDefinition(TestBean.class);
 		BeanDefinition newDef = new RootBeanDefinition(NestedTestBean.class);
 		lbf.registerBeanDefinition("test", oldDef);
+		lbf.registerAlias("test", "testX");
 		assertThatExceptionOfType(BeanDefinitionOverrideException.class).isThrownBy(() ->
 				lbf.registerBeanDefinition("test", newDef))
 				.satisfies(ex -> {
 					assertThat(ex.getBeanName()).isEqualTo("test");
+					assertThat(ex.getBeanDefinition()).isEqualTo(newDef);
+					assertThat(ex.getExistingDefinition()).isEqualTo(oldDef);
+				});
+		assertThatExceptionOfType(BeanDefinitionOverrideException.class).isThrownBy(() ->
+						lbf.registerBeanDefinition("testX", newDef))
+				.satisfies(ex -> {
+					assertThat(ex.getBeanName()).isEqualTo("testX");
 					assertThat(ex.getBeanDefinition()).isEqualTo(newDef);
 					assertThat(ex.getExistingDefinition()).isEqualTo(oldDef);
 				});
@@ -2330,6 +2335,19 @@ class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	void multipleInitAndDestroyMethods() {
+		RootBeanDefinition bd = new RootBeanDefinition(BeanWithInitAndDestroyMethods.class);
+		bd.setInitMethodNames("init1", "init2");
+		bd.setDestroyMethodNames("destroy2", "destroy1");
+		lbf.registerBeanDefinition("test", bd);
+		BeanWithInitAndDestroyMethods bean = lbf.getBean("test", BeanWithInitAndDestroyMethods.class);
+		assertThat(bean.initMethods).containsExactly("init", "init1", "init2");
+		assertThat(bean.destroyMethods).isEmpty();
+		lbf.destroySingletons();
+		assertThat(bean.destroyMethods).containsExactly("destroy", "destroy2", "destroy1");
+	}
+
+	@Test
 	void beanPostProcessorWithWrappedObjectAndDisposableBean() {
 		RootBeanDefinition bd = new RootBeanDefinition(BeanWithDisposableBean.class);
 		lbf.registerBeanDefinition("test", bd);
@@ -2590,22 +2608,6 @@ class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	void initSecurityAwarePrototypeBean() {
-		RootBeanDefinition bd = new RootBeanDefinition(TestSecuredBean.class);
-		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
-		bd.setInitMethodName("init");
-		lbf.registerBeanDefinition("test", bd);
-		final Subject subject = new Subject();
-		subject.getPrincipals().add(new TestPrincipal("user1"));
-
-		TestSecuredBean bean = (TestSecuredBean) Subject.doAsPrivileged(subject,
-				(PrivilegedAction) () -> lbf.getBean("test"), null);
-		assertThat(bean).isNotNull();
-		assertThat(bean.getUserName()).isEqualTo("user1");
-	}
-
-	@Test
 	void containsBeanReturnsTrueEvenForAbstractBeanDefinition() {
 		lbf.registerBeanDefinition("abs", BeanDefinitionBuilder
 				.rootBeanDefinition(TestBean.class).setAbstract(true).getBeanDefinition());
@@ -2770,9 +2772,42 @@ class DefaultListableBeanFactoryTests {
 	}
 
 
+	static class BeanWithInitAndDestroyMethods implements InitializingBean, DisposableBean {
+
+		final List<String> initMethods = new ArrayList<>();
+		final List<String> destroyMethods = new ArrayList<>();
+
+		@Override
+		public void afterPropertiesSet() {
+			initMethods.add("init");
+		}
+
+		void init1() {
+			initMethods.add("init1");
+		}
+
+		void init2() {
+			initMethods.add("init2");
+		}
+
+		@Override
+		public void destroy() {
+			destroyMethods.add("destroy");
+		}
+
+		void destroy1() {
+			destroyMethods.add("destroy1");
+		}
+
+		void destroy2() {
+			destroyMethods.add("destroy2");
+		}
+	}
+
+
 	public static class BeanWithDisposableBean implements DisposableBean {
 
-		private static boolean closed;
+		static boolean closed;
 
 		@Override
 		public void destroy() {
@@ -2783,7 +2818,7 @@ class DefaultListableBeanFactoryTests {
 
 	public static class BeanWithCloseable implements Closeable {
 
-		private static boolean closed;
+		static boolean closed;
 
 		@Override
 		public void close() {
@@ -2800,7 +2835,7 @@ class DefaultListableBeanFactoryTests {
 
 	public static class BeanWithDestroyMethod extends BaseClassWithDestroyMethod {
 
-		private static int closeCount = 0;
+		static int closeCount = 0;
 
 		@SuppressWarnings("unused")
 		private BeanWithDestroyMethod inner;
@@ -3050,37 +3085,6 @@ class DefaultListableBeanFactoryTests {
 
 
 	@SuppressWarnings("unused")
-	private static class TestSecuredBean {
-
-		private String userName;
-
-		void init() {
-			AccessControlContext acc = AccessController.getContext();
-			Subject subject = Subject.getSubject(acc);
-			if (subject == null) {
-				return;
-			}
-			setNameFromPrincipal(subject.getPrincipals());
-		}
-
-		private void setNameFromPrincipal(Set<Principal> principals) {
-			if (principals == null) {
-				return;
-			}
-			for (Iterator<Principal> it = principals.iterator(); it.hasNext();) {
-				Principal p = it.next();
-				this.userName = p.getName();
-				return;
-			}
-		}
-
-		public String getUserName() {
-			return this.userName;
-		}
-	}
-
-
-	@SuppressWarnings("unused")
 	private static class KnowsIfInstantiated {
 
 		private static boolean instantiated;
@@ -3096,7 +3100,6 @@ class DefaultListableBeanFactoryTests {
 		public KnowsIfInstantiated() {
 			instantiated = true;
 		}
-
 	}
 
 

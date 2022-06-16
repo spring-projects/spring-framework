@@ -37,7 +37,7 @@ import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
@@ -214,7 +214,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 					}
 					else if (Rendering.class.isAssignableFrom(clazz)) {
 						Rendering render = (Rendering) returnValue;
-						HttpStatus status = render.status();
+						HttpStatusCode status = render.status();
 						if (status != null) {
 							exchange.getResponse().setStatusCode(status);
 						}
@@ -325,7 +325,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 			bestMediaType = selectMediaType(exchange, () -> mediaTypes);
 		}
 		catch (NotAcceptableStatusException ex) {
-			HttpStatus statusCode = exchange.getResponse().getStatusCode();
+			HttpStatusCode statusCode = exchange.getResponse().getStatusCode();
 			if (statusCode != null && statusCode.isError()) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Ignoring error response content (if any). " + ex.getReason());

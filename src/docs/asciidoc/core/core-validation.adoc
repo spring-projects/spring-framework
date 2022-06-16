@@ -1738,8 +1738,8 @@ bean, keep reading.
 
 Spring provides full support for the Bean Validation API including the bootstrapping of a
 Bean Validation provider as a Spring bean. This lets you inject a
-`javax.validation.ValidatorFactory` or `javax.validation.Validator` wherever validation is
-needed in your application.
+`jakarta.validation.ValidatorFactory` or `jakarta.validation.Validator` wherever validation
+is needed in your application.
 
 You can use the `LocalValidatorFactoryBean` to configure a default Validator as a Spring
 bean, as the following example shows:
@@ -1773,18 +1773,18 @@ Validator, is expected to be present in the classpath and is automatically detec
 [[validation-beanvalidation-spring-inject]]
 ==== Injecting a Validator
 
-`LocalValidatorFactoryBean` implements both `javax.validation.ValidatorFactory` and
-`javax.validation.Validator`, as well as Spring's `org.springframework.validation.Validator`.
+`LocalValidatorFactoryBean` implements both `jakarta.validation.ValidatorFactory` and
+`jakarta.validation.Validator`, as well as Spring's `org.springframework.validation.Validator`.
 You can inject a reference to either of these interfaces into beans that need to invoke
 validation logic.
 
-You can inject a reference to `javax.validation.Validator` if you prefer to work with the Bean
+You can inject a reference to `jakarta.validation.Validator` if you prefer to work with the Bean
 Validation API directly, as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	import javax.validation.Validator;
+	import jakarta.validation.Validator;
 
 	@Service
 	public class MyService {
@@ -1796,7 +1796,7 @@ Validation API directly, as the following example shows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	import javax.validation.Validator;
+	import jakarta.validation.Validator;
 
 	@Service
 	class MyService(@Autowired private val validator: Validator)
@@ -1833,7 +1833,7 @@ requires the Spring Validation API, as the following example shows:
 Each bean validation constraint consists of two parts:
 
 * A `@Constraint` annotation that declares the constraint and its configurable properties.
-* An implementation of the `javax.validation.ConstraintValidator` interface that implements
+* An implementation of the `jakarta.validation.ConstraintValidator` interface that implements
 the constraint's behavior.
 
 To associate a declaration with an implementation, each `@Constraint` annotation
@@ -1869,7 +1869,7 @@ The following example shows a custom `@Constraint` declaration followed by an as
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	import javax.validation.ConstraintValidator;
+	import jakarta.validation.ConstraintValidator;
 
 	public class MyConstraintValidator implements ConstraintValidator {
 
@@ -1882,7 +1882,7 @@ The following example shows a custom `@Constraint` declaration followed by an as
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	import javax.validation.ConstraintValidator
+	import jakarta.validation.ConstraintValidator
 
 	class MyConstraintValidator(private val aDependency: Foo) : ConstraintValidator {
 

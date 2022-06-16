@@ -26,7 +26,6 @@ import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.codec.LoggingCodecSupport;
@@ -125,12 +124,8 @@ public abstract class ExchangeFunctions {
 		}
 
 		private void logResponse(ClientHttpResponse response, String logPrefix) {
-			LogFormatUtils.traceDebug(logger, traceOn -> {
-				int code = response.getRawStatusCode();
-				HttpStatus status = HttpStatus.resolve(code);
-				return logPrefix + "Response " + (status != null ? status : code) +
-						(traceOn ? ", headers=" + formatHeaders(response.getHeaders()) : "");
-			});
+			LogFormatUtils.traceDebug(logger, traceOn -> logPrefix + "Response " + response.getStatusCode() +
+					(traceOn ? ", headers=" + formatHeaders(response.getHeaders()) : ""));
 		}
 
 		private String formatHeaders(HttpHeaders headers) {
@@ -150,6 +145,7 @@ public abstract class ExchangeFunctions {
 				}
 
 				@Override
+				@Deprecated
 				public String getMethodValue() {
 					return request.method().name();
 				}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.function.Consumer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.HttpComponentsClientHttpConnector;
+import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.ClientCodecConfigurer;
@@ -294,7 +295,9 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		else if (httpComponentsClientPresent) {
 			return new HttpComponentsClientHttpConnector();
 		}
-		throw new IllegalStateException("No suitable default ClientHttpConnector found");
+		else {
+			return new JdkClientHttpConnector();
+		}
 	}
 
 	private ExchangeStrategies initExchangeStrategies() {

@@ -3,7 +3,7 @@
 This document will guide you through the process of importing the Spring Framework
 projects into Eclipse or the Spring Tool Suite (_STS_). It is recommended that you
 have a recent version of Eclipse. As a bare minimum you will need Eclipse with full Java
-8 support, Eclipse Buildship, and the Groovy plugin.
+17 support and Eclipse Buildship.
 
 The following instructions have been tested against [STS](https://spring.io/tools) 4.12.0
 ([download](https://github.com/spring-projects/sts4/wiki/Previous-Versions#spring-tools-4120-changelog))
@@ -12,13 +12,14 @@ The instructions should work with the latest Eclipse distribution as long as you
 [Buildship](https://marketplace.eclipse.org/content/buildship-gradle-integration). Note
 that STS 4 comes with Buildship preinstalled.
 
+If you are using Eclipse 4.21, you will need to install
+[Java 17 Support for Eclipse 2021-09 (4.21)](https://marketplace.eclipse.org/content/java-17-support-eclipse-2021-09-421)
+from the Eclipse Marketplace.
+
 ## Steps
 
 _When instructed to execute `./gradlew` from the command line, be sure to execute it within your locally cloned `spring-framework` working directory._
 
-1. Install the [Groovy Development Tools](https://marketplace.eclipse.org/content/groovy-development-tools).
-1. Switch to Groovy 3.0 in Eclipse (Preferences &#8594; Groovy &#8594; Compiler &#8594; Switch to 3.0...).
-   - If you encounter build errors stating something similar to _"Groovy: compiler mismatch: project level is 2.5, workspace level is 3.0"_, change the Groovy compiler version to 3.0 for each affected project.
 1. Ensure that the _Forbidden reference (access rule)_ in Eclipse is set to `Info`
 (Preferences &#8594; Java &#8594; Compiler &#8594; Errors/Warnings &#8594; Deprecated and restricted API &#8594; Forbidden reference (access rule)).
 1. Optionally install the [Kotlin Plugin for Eclipse](https://marketplace.eclipse.org/content/kotlin-plugin-eclipse) if you need to execute Kotlin-based tests or develop Kotlin extensions.

@@ -176,7 +176,7 @@ public @interface RequestMapping {
 	 * If specified at both levels, the method level consumes condition overrides
 	 * the type level condition.
 	 * @see org.springframework.http.MediaType
-	 * @see javax.servlet.http.HttpServletRequest#getContentType()
+	 * @see jakarta.servlet.http.HttpServletRequest#getContentType()
 	 */
 	String[] consumes() default {};
 

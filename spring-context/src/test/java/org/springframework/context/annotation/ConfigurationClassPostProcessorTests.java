@@ -23,8 +23,7 @@ import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
+import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -1371,7 +1370,7 @@ class ConfigurationClassPostProcessorTests {
 
 		@Bean
 		public Repository<String> stringRepo() {
-			return new Repository<String>() {
+			return new Repository<>() {
 				@Override
 				public String toString() {
 					return "Repository<String>";
@@ -1381,7 +1380,7 @@ class ConfigurationClassPostProcessorTests {
 
 		@Bean
 		public Repository<Integer> integerRepo() {
-			return new Repository<Integer>() {
+			return new Repository<>() {
 				@Override
 				public String toString() {
 					return "Repository<Integer>";
@@ -1391,7 +1390,7 @@ class ConfigurationClassPostProcessorTests {
 
 		@Bean
 		public Repository<?> genericRepo() {
-			return new Repository<Object>() {
+			return new Repository<>() {
 				@Override
 				public String toString() {
 					return "Repository<Object>";
@@ -1436,7 +1435,7 @@ class ConfigurationClassPostProcessorTests {
 		@Bean
 		@Scope("prototype")
 		public Repository<String> stringRepo() {
-			return new Repository<String>() {
+			return new Repository<>() {
 				@Override
 				public String toString() {
 					return "Repository<String>";
@@ -1447,7 +1446,7 @@ class ConfigurationClassPostProcessorTests {
 		@Bean
 		@Scope("prototype")
 		public Repository<Integer> integerRepo() {
-			return new Repository<Integer>() {
+			return new Repository<>() {
 				@Override
 				public String toString() {
 					return "Repository<Integer>";
@@ -1459,7 +1458,7 @@ class ConfigurationClassPostProcessorTests {
 		@Scope("prototype")
 		@SuppressWarnings("rawtypes")
 		public Repository genericRepo() {
-			return new Repository<Object>() {
+			return new Repository<>() {
 				@Override
 				public String toString() {
 					return "Repository<Object>";
@@ -1481,7 +1480,7 @@ class ConfigurationClassPostProcessorTests {
 		@Bean
 		@Scope(scopeName = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
 		public Repository<String> stringRepo() {
-			return new Repository<String>() {
+			return new Repository<>() {
 				@Override
 				public String toString() {
 					return "Repository<String>";
@@ -1492,7 +1491,7 @@ class ConfigurationClassPostProcessorTests {
 		@Bean
 		@PrototypeScoped
 		public Repository<Integer> integerRepo() {
-			return new Repository<Integer>() {
+			return new Repository<>() {
 				@Override
 				public String toString() {
 					return "Repository<Integer>";

@@ -7,7 +7,7 @@ dependencies {
 	api(project(":spring-core"))
 	api(project(":spring-tx"))
 	optional(project(":spring-context"))  // for JndiDataSourceLookup
-	optional("javax.transaction:javax.transaction-api")
+	optional("jakarta.transaction:jakarta.transaction-api")
 	optional("org.hsqldb:hsqldb")
 	optional("com.h2database:h2")
 	optional("org.apache.derby:derby")

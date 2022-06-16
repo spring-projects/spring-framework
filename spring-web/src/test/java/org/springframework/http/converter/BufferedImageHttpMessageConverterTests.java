@@ -19,7 +19,6 @@ package org.springframework.http.converter;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
@@ -34,9 +33,6 @@ import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.util.FileCopyUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests for BufferedImageHttpMessageConverter.
@@ -69,13 +65,11 @@ public class BufferedImageHttpMessageConverterTests {
 	public void read() throws IOException {
 		Resource logo = new ClassPathResource("logo.jpg", BufferedImageHttpMessageConverterTests.class);
 		byte[] body = FileCopyUtils.copyToByteArray(logo.getInputStream());
-		InputStream inputStream = spy(new ByteArrayInputStream(body));
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(inputStream);
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
 		inputMessage.getHeaders().setContentType(new MediaType("image", "jpeg"));
 		BufferedImage result = converter.read(BufferedImage.class, inputMessage);
 		assertThat(result.getHeight()).as("Invalid height").isEqualTo(500);
 		assertThat(result.getWidth()).as("Invalid width").isEqualTo(750);
-		verify(inputStream, never()).close();
 	}
 
 	@Test
@@ -90,7 +84,6 @@ public class BufferedImageHttpMessageConverterTests {
 		BufferedImage result = ImageIO.read(new ByteArrayInputStream(outputMessage.getBodyAsBytes()));
 		assertThat(result.getHeight()).as("Invalid height").isEqualTo(500);
 		assertThat(result.getWidth()).as("Invalid width").isEqualTo(750);
-		verify(outputMessage.getBody(), never()).close();
 	}
 
 	@Test

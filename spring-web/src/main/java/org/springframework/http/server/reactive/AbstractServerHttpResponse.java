@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -62,7 +62,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	private final DataBufferFactory dataBufferFactory;
 
 	@Nullable
-	private Integer statusCode;
+	private HttpStatusCode statusCode;
 
 	private final HttpHeaders headers;
 
@@ -95,62 +95,32 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public boolean setStatusCode(@Nullable HttpStatus status) {
+	public boolean setStatusCode(@Nullable HttpStatusCode status) {
 		if (this.state.get() == State.COMMITTED) {
 			return false;
 		}
 		else {
-			this.statusCode = (status != null ? status.value() : null);
+			this.statusCode = status;
 			return true;
 		}
 	}
 
 	@Override
 	@Nullable
-	public HttpStatus getStatusCode() {
-		return (this.statusCode != null ? HttpStatus.resolve(this.statusCode) : null);
+	public HttpStatusCode getStatusCode() {
+		return this.statusCode;
 	}
 
 	@Override
 	public boolean setRawStatusCode(@Nullable Integer statusCode) {
-		if (this.state.get() == State.COMMITTED) {
-			return false;
-		}
-		else {
-			this.statusCode = statusCode;
-			return true;
-		}
+		return setStatusCode(statusCode != null ? HttpStatusCode.valueOf(statusCode) : null);
 	}
 
 	@Override
 	@Nullable
+	@Deprecated
 	public Integer getRawStatusCode() {
-		return this.statusCode;
-	}
-
-	/**
-	 * Set the HTTP status code of the response.
-	 * @param statusCode the HTTP status as an integer value
-	 * @since 5.0.1
-	 * @deprecated as of 5.2.4 in favor of {@link ServerHttpResponse#setRawStatusCode(Integer)}.
-	 */
-	@Deprecated
-	public void setStatusCodeValue(@Nullable Integer statusCode) {
-		if (this.state.get() != State.COMMITTED) {
-			this.statusCode = statusCode;
-		}
-	}
-
-	/**
-	 * Return the HTTP status code of the response.
-	 * @return the HTTP status as an integer value
-	 * @since 5.0.1
-	 * @deprecated as of 5.2.4 in favor of {@link ServerHttpResponse#getRawStatusCode()}.
-	 */
-	@Nullable
-	@Deprecated
-	public Integer getStatusCodeValue() {
-		return this.statusCode;
+		return this.statusCode != null ? this.statusCode.value() : null;
 	}
 
 	@Override

@@ -23,7 +23,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -65,15 +64,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	private static final Set<Class<?>> ANY_TYPES = Collections.emptySet();
 
-	private static final Set<Class<?>> BOOLEAN_TYPES;
-
-	static {
-		Set<Class<?>> booleanTypes = new HashSet<>(4);
-		booleanTypes.add(Boolean.class);
-		booleanTypes.add(Boolean.TYPE);
-		BOOLEAN_TYPES = Collections.unmodifiableSet(booleanTypes);
-	}
-
+	private static final Set<Class<?>> BOOLEAN_TYPES = Set.of(Boolean.class, Boolean.TYPE);
 
 	private final boolean allowWrite;
 
@@ -123,7 +114,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			return false;
 		}
 
-		Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
+		Class<?> type = (target instanceof Class<?> clazz ? clazz : target.getClass());
 		if (type.isArray() && name.equals("length")) {
 			return true;
 		}
@@ -160,7 +151,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	@Override
 	public TypedValue read(EvaluationContext context, @Nullable Object target, String name) throws AccessException {
 		Assert.state(target != null, "Target must not be null");
-		Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
+		Class<?> type = (target instanceof Class<?> clazz ? clazz : target.getClass());
 
 		if (type.isArray() && name.equals("length")) {
 			if (target instanceof Class) {
@@ -231,7 +222,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			return false;
 		}
 
-		Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
+		Class<?> type = (target instanceof Class<?> clazz ? clazz : target.getClass());
 		PropertyCacheKey cacheKey = new PropertyCacheKey(type, name, target instanceof Class);
 		if (this.writerCache.containsKey(cacheKey)) {
 			return true;
@@ -269,7 +260,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		}
 
 		Assert.state(target != null, "Target must not be null");
-		Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
+		Class<?> type = (target instanceof Class<?> clazz ? clazz : target.getClass());
 
 		Object possiblyConvertedNewValue = newValue;
 		TypeDescriptor typeDescriptor = getTypeDescriptor(context, target, name);
@@ -332,21 +323,10 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		throw new AccessException("Neither setter method nor field found for property '" + name + "'");
 	}
 
-	/**
-	 * Get the last read invoker pair.
-	 * @deprecated as of 4.3.15 since it is not used within the framework anymore
-	 */
-	@Deprecated
-	@Nullable
-	public Member getLastReadInvokerPair() {
-		InvokerPair lastReadInvoker = this.lastReadInvokerPair;
-		return (lastReadInvoker != null ? lastReadInvoker.member : null);
-	}
-
 
 	@Nullable
 	private TypeDescriptor getTypeDescriptor(EvaluationContext context, Object target, String name) {
-		Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
+		Class<?> type = (target instanceof Class<?> clazz ? clazz : target.getClass());
 
 		if (type.isArray() && name.equals("length")) {
 			return TypeDescriptor.valueOf(Integer.TYPE);
@@ -533,7 +513,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		if (target == null) {
 			return this;
 		}
-		Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
+		Class<?> type = (target instanceof Class<?> clazz ? clazz : target.getClass());
 		if (type.isArray()) {
 			return this;
 		}
@@ -613,10 +593,9 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof PropertyCacheKey)) {
+			if (!(other instanceof PropertyCacheKey otherKey)) {
 				return false;
 			}
-			PropertyCacheKey otherKey = (PropertyCacheKey) other;
 			return (this.clazz == otherKey.clazz && this.property.equals(otherKey.property) &&
 					this.targetIsClass == otherKey.targetIsClass);
 		}
@@ -676,13 +655,12 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			if (target == null) {
 				return false;
 			}
-			Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
+			Class<?> type = (target instanceof Class<?> clazz ? clazz : target.getClass());
 			if (type.isArray()) {
 				return false;
 			}
 
-			if (this.member instanceof Method) {
-				Method method = (Method) this.member;
+			if (this.member instanceof Method method) {
 				String getterName = "get" + StringUtils.capitalize(name);
 				if (getterName.equals(method.getName())) {
 					return true;
@@ -697,8 +675,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 		@Override
 		public TypedValue read(EvaluationContext context, @Nullable Object target, String name) throws AccessException {
-			if (this.member instanceof Method) {
-				Method method = (Method) this.member;
+			if (this.member instanceof Method method) {
 				try {
 					ReflectionUtils.makeAccessible(method);
 					Object value = method.invoke(target);
@@ -739,8 +716,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 		@Override
 		public Class<?> getPropertyType() {
-			if (this.member instanceof Method) {
-				return ((Method) this.member).getReturnType();
+			if (this.member instanceof Method method) {
+				return method.getReturnType();
 			}
 			else {
 				return ((Field) this.member).getType();
@@ -769,8 +746,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				}
 			}
 
-			if (this.member instanceof Method) {
-				Method method = (Method) this.member;
+			if (this.member instanceof Method method) {
 				boolean isInterface = method.getDeclaringClass().isInterface();
 				int opcode = (isStatic ? INVOKESTATIC : isInterface ? INVOKEINTERFACE : INVOKEVIRTUAL);
 				mv.visitMethodInsn(opcode, classDesc, method.getName(),

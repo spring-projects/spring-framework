@@ -18,8 +18,8 @@ package org.springframework.web.servlet.tags;
 
 import java.io.IOException;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.PageContext;
 
 import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.context.expression.EnvironmentAccessor;
@@ -102,7 +102,7 @@ import org.springframework.web.util.TagUtils;
 public class EvalTag extends HtmlEscapingAwareTag {
 
 	/**
-	 * {@link javax.servlet.jsp.PageContext} attribute for the
+	 * {@link jakarta.servlet.jsp.PageContext} attribute for the
 	 * page-level {@link EvaluationContext} instance.
 	 */
 	private static final String EVALUATION_CONTEXT_PAGE_ATTRIBUTE =
@@ -212,7 +212,7 @@ public class EvalTag extends HtmlEscapingAwareTag {
 		private final PageContext pageContext;
 
 		@Nullable
-		private final javax.servlet.jsp.el.VariableResolver variableResolver;
+		private final jakarta.servlet.jsp.el.VariableResolver variableResolver;
 
 		public JspPropertyAccessor(PageContext pageContext) {
 			this.pageContext = pageContext;

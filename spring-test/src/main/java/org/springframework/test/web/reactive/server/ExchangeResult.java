@@ -31,6 +31,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.client.reactive.ClientHttpRequest;
@@ -170,17 +171,18 @@ public class ExchangeResult {
 
 
 	/**
-	 * Return the HTTP status code as an {@link HttpStatus} enum value.
+	 * Return the HTTP status code as an {@link HttpStatusCode} value.
 	 */
-	public HttpStatus getStatus() {
+	public HttpStatusCode getStatus() {
 		return this.response.getStatusCode();
 	}
 
 	/**
-	 * Return the HTTP status code (potentially non-standard and not resolvable
-	 * through the {@link HttpStatus} enum) as an integer.
+	 * Return the HTTP status code as an integer.
 	 * @since 5.1.10
+	 * @deprecated as of 6.0, in favor of {@link #getStatus()}
 	 */
+	@Deprecated
 	public int getRawStatusCode() {
 		return this.response.getRawStatusCode();
 	}
@@ -248,11 +250,20 @@ public class ExchangeResult {
 				"\n" +
 				formatBody(getRequestHeaders().getContentType(), this.requestBody) + "\n" +
 				"\n" +
-				"< " + getStatus() + " " + getStatus().getReasonPhrase() + "\n" +
+				"< " + getStatus() + " " + getReasonPhrase(getStatus()) + "\n" +
 				"< " + formatHeaders(getResponseHeaders(), "\n< ") + "\n" +
 				"\n" +
 				formatBody(getResponseHeaders().getContentType(), this.responseBody) +"\n" +
 				formatMockServerResult();
+	}
+
+	private static String getReasonPhrase(HttpStatusCode statusCode) {
+		if (statusCode instanceof HttpStatus status) {
+			return status.getReasonPhrase();
+		}
+		else {
+			return "";
+		}
 	}
 
 	private String formatHeaders(HttpHeaders headers, String delimiter) {

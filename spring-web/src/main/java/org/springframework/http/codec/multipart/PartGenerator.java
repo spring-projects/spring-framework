@@ -50,7 +50,6 @@ import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.util.FastByteArrayOutputStream;
 
 /**
@@ -144,7 +143,7 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 	}
 
 	private void newPart(State currentState, HttpHeaders headers) {
-		if (isFormField(headers)) {
+		if (MultipartUtils.isFormField(headers)) {
 			changeStateInternal(new FormFieldState(headers));
 			requestToken();
 		}
@@ -245,12 +244,6 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 		}
 	}
 
-	private static boolean isFormField(HttpHeaders headers) {
-		MediaType contentType = headers.getContentType();
-		return (contentType == null || MediaType.TEXT_PLAIN.equalsTypeAndSubtype(contentType))
-				&& headers.getContentDisposition().getFilename() == null;
-	}
-
 	/**
 	 * Represents the internal state of the {@link PartGenerator} for
 	 * creating a single {@link Part}.
@@ -259,7 +252,7 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 	 * {@link #newPart(State, HttpHeaders)}.
 	 * The following rules determine which state the creator will have:
 	 * <ol>
-	 * <li>If the part is a {@linkplain #isFormField(HttpHeaders) form field},
+	 * <li>If the part is a {@linkplain MultipartUtils#isFormField(HttpHeaders) form field},
 	 * the creator will be in the {@link FormFieldState}.</li>
 	 * <li>If {@linkplain #streaming} is enabled, the creator will be in the
 	 * {@link StreamingState}.</li>
@@ -328,7 +321,7 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 
 
 	/**
-	 * The creator state when a {@linkplain #isFormField(HttpHeaders) form field} is received.
+	 * The creator state when a {@linkplain MultipartUtils#isFormField(HttpHeaders) form field} is received.
 	 * Stores all body buffers in memory (up until {@link #maxInMemorySize}).
 	 */
 	private final class FormFieldState implements State {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
 import org.springframework.context.annotation.DeferredImportSelector.Group;
-import org.springframework.core.NestedIOException;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAttributes;
@@ -690,7 +689,7 @@ class ConfigurationClassParser {
 				return new SourceClass(ClassUtils.forName(className, this.resourceLoader.getClassLoader()));
 			}
 			catch (ClassNotFoundException ex) {
-				throw new NestedIOException("Failed to load class [" + className + "]", ex);
+				throw new IOException("Failed to load class [" + className + "]", ex);
 			}
 		}
 		return new SourceClass(this.metadataReaderFactory.getMetadataReader(className));
@@ -967,8 +966,7 @@ class ConfigurationClassParser {
 
 		public Collection<SourceClass> getMemberClasses() throws IOException {
 			Object sourceToProcess = this.source;
-			if (sourceToProcess instanceof Class) {
-				Class<?> sourceClass = (Class<?>) sourceToProcess;
+			if (sourceToProcess instanceof Class<?> sourceClass) {
 				try {
 					Class<?>[] declaredClasses = sourceClass.getDeclaredClasses();
 					List<SourceClass> members = new ArrayList<>(declaredClasses.length);
@@ -1013,8 +1011,7 @@ class ConfigurationClassParser {
 
 		public Set<SourceClass> getInterfaces() throws IOException {
 			Set<SourceClass> result = new LinkedHashSet<>();
-			if (this.source instanceof Class) {
-				Class<?> sourceClass = (Class<?>) this.source;
+			if (this.source instanceof Class<?> sourceClass) {
 				for (Class<?> ifcClass : sourceClass.getInterfaces()) {
 					result.add(asSourceClass(ifcClass, DEFAULT_EXCLUSION_FILTER));
 				}
@@ -1029,8 +1026,7 @@ class ConfigurationClassParser {
 
 		public Set<SourceClass> getAnnotations() {
 			Set<SourceClass> result = new LinkedHashSet<>();
-			if (this.source instanceof Class) {
-				Class<?> sourceClass = (Class<?>) this.source;
+			if (this.source instanceof Class<?> sourceClass) {
 				for (Annotation ann : sourceClass.getDeclaredAnnotations()) {
 					Class<?> annType = ann.annotationType();
 					if (!annType.getName().startsWith("java")) {
@@ -1082,7 +1078,7 @@ class ConfigurationClassParser {
 				catch (ClassNotFoundException ex) {
 					// Ignore -> fall back to ASM next, except for core java types.
 					if (className.startsWith("java")) {
-						throw new NestedIOException("Failed to load class [" + className + "]", ex);
+						throw new IOException("Failed to load class [" + className + "]", ex);
 					}
 					return new SourceClass(metadataReaderFactory.getMetadataReader(className));
 				}

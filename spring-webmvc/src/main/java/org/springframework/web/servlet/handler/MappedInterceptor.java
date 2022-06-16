@@ -18,8 +18,8 @@ package org.springframework.web.servlet.handler;
 
 import java.util.Arrays;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.server.PathContainer;
 import org.springframework.lang.Nullable;

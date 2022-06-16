@@ -16,8 +16,7 @@
 
 package org.springframework.test.context.junit4.orm;
 
-import javax.persistence.PersistenceException;
-
+import jakarta.persistence.PersistenceException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.exception.ConstraintViolationException;

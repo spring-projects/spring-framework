@@ -369,18 +369,6 @@ public class TableMetaDataContext {
 	 * Does this database support a simple query to retrieve generated keys
 	 * when the JDBC 3.0 feature is not supported:
 	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
-	 * @deprecated as of 4.3.15, in favor of {@link #getSimpleQueryForGetGeneratedKey}
-	 */
-	@Deprecated
-	@Nullable
-	public String getSimulationQueryForGetGeneratedKey(String tableName, String keyColumnName) {
-		return getSimpleQueryForGetGeneratedKey(tableName, keyColumnName);
-	}
-
-	/**
-	 * Does this database support a simple query to retrieve generated keys
-	 * when the JDBC 3.0 feature is not supported:
-	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
 	 */
 	@Nullable
 	public String getSimpleQueryForGetGeneratedKey(String tableName, String keyColumnName) {

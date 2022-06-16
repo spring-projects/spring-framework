@@ -20,7 +20,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
@@ -56,11 +56,12 @@ public class ClientHttpResponseDecorator implements ClientHttpResponse {
 	}
 
 	@Override
-	public HttpStatus getStatusCode() {
+	public HttpStatusCode getStatusCode() {
 		return this.delegate.getStatusCode();
 	}
 
 	@Override
+	@Deprecated
 	public int getRawStatusCode() {
 		return this.delegate.getRawStatusCode();
 	}

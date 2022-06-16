@@ -20,10 +20,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
-import javax.jms.Connection;
-import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.Session;
+import jakarta.jms.Connection;
+import jakarta.jms.JMSException;
+import jakarta.jms.MessageConsumer;
+import jakarta.jms.Session;
 
 import org.springframework.core.Constants;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -45,7 +45,7 @@ import org.springframework.util.backoff.FixedBackOff;
  * Message listener container variant that uses plain JMS client APIs, specifically
  * a loop of {@code MessageConsumer.receive()} calls that also allow for
  * transactional reception of messages (registering them with XA transactions).
- * Designed to work in a native JMS environment as well as in a Java EE environment,
+ * Designed to work in a native JMS environment as well as in a Jakarta EE environment,
  * with only minimal differences in configuration.
  *
  * <p>This is a simple but nevertheless powerful form of message listener container.
@@ -62,22 +62,21 @@ import org.springframework.util.backoff.FixedBackOff;
  * abstraction. By default, the specified number of invoker tasks will be created
  * on startup, according to the {@link #setConcurrentConsumers "concurrentConsumers"}
  * setting. Specify an alternative {@code TaskExecutor} to integrate with an existing
- * thread pool facility (such as a Java EE server's), for example using a
- * {@link org.springframework.scheduling.commonj.WorkManagerTaskExecutor CommonJ WorkManager}.
- * With a native JMS setup, each of those listener threads is going to use a
- * cached JMS {@code Session} and {@code MessageConsumer} (only refreshed in case
- * of failure), using the JMS provider's resources as efficiently as possible.
+ * thread pool facility (such as a Jakarta EE server's). With a native JMS setup,
+ * each of those listener threads is going to use a cached JMS {@code Session} and
+ * {@code MessageConsumer} (only refreshed in case of failure), using the JMS provider's
+ * resources as efficiently as possible.
  *
  * <p>Message reception and listener execution can automatically be wrapped
  * in transactions by passing a Spring
  * {@link org.springframework.transaction.PlatformTransactionManager} into the
  * {@link #setTransactionManager "transactionManager"} property. This will usually
  * be a {@link org.springframework.transaction.jta.JtaTransactionManager} in a
- * Java EE environment, in combination with a JTA-aware JMS {@code ConnectionFactory}
- * obtained from JNDI (check your Java EE server's documentation). Note that this
+ * Jakarta EE environment, in combination with a JTA-aware JMS {@code ConnectionFactory}
+ * obtained from JNDI (check your Jakarta EE server's documentation). Note that this
  * listener container will automatically reobtain all JMS handles for each transaction
  * in case an external transaction manager is specified, for compatibility with
- * all Java EE servers (in particular JBoss). This non-caching behavior can be
+ * all Jakarta EE servers (in particular JBoss). This non-caching behavior can be
  * overridden through the {@link #setCacheLevel "cacheLevel"} /
  * {@link #setCacheLevelName "cacheLevelName"} property, enforcing caching of
  * the {@code Connection} (or also {@code Session} and {@code MessageConsumer})
@@ -119,7 +118,7 @@ import org.springframework.util.backoff.FixedBackOff;
  * @since 2.0
  * @see #setTransactionManager
  * @see #setCacheLevel
- * @see javax.jms.MessageConsumer#receive(long)
+ * @see jakarta.jms.MessageConsumer#receive(long)
  * @see SimpleMessageListenerContainer
  * @see org.springframework.jms.listener.endpoint.JmsMessageEndpointManager
  */
@@ -219,12 +218,11 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * of concurrent consumers.
 	 * <p>Specify an alternative {@code TaskExecutor} for integration with an existing
 	 * thread pool. Note that this really only adds value if the threads are
-	 * managed in a specific fashion, for example within a Java EE environment.
+	 * managed in a specific fashion, for example within a Jakarta EE environment.
 	 * A plain thread pool does not add much value, as this listener container
 	 * will occupy a number of threads for its entire lifetime.
 	 * @see #setConcurrentConsumers
 	 * @see org.springframework.core.task.SimpleAsyncTaskExecutor
-	 * @see org.springframework.scheduling.commonj.WorkManagerTaskExecutor
 	 */
 	public void setTaskExecutor(Executor taskExecutor) {
 		this.taskExecutor = taskExecutor;
@@ -273,7 +271,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * <p>Default is {@link #CACHE_NONE} if an external transaction manager has been specified
 	 * (to reobtain all resources freshly within the scope of the external transaction),
 	 * and {@link #CACHE_CONSUMER} otherwise (operating with local JMS resources).
-	 * <p>Some Java EE servers only register their JMS resources with an ongoing XA
+	 * <p>Some Jakarta EE servers only register their JMS resources with an ongoing XA
 	 * transaction in case of a freshly obtained JMS {@code Connection} and {@code Session},
 	 * which is why this listener container by default does not cache any of those.
 	 * However, depending on the rules of your server with respect to the caching
@@ -311,8 +309,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		try {
 			int separatorIndex = concurrency.indexOf('-');
 			if (separatorIndex != -1) {
-				setConcurrentConsumers(Integer.parseInt(concurrency.substring(0, separatorIndex)));
-				setMaxConcurrentConsumers(Integer.parseInt(concurrency.substring(separatorIndex + 1)));
+				setConcurrentConsumers(Integer.parseInt(concurrency, 0, separatorIndex, 10));
+				setMaxConcurrentConsumers(Integer.parseInt(concurrency, separatorIndex + 1, concurrency.length(), 10));
 			}
 			else {
 				setConcurrentConsumers(1);

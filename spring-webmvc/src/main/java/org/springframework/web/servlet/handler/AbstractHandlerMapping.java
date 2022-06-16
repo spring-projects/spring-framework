@@ -22,10 +22,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 
 import org.springframework.beans.BeansException;
@@ -69,6 +68,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  *
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 07.04.2003
  * @see #getHandlerInternal
  * @see #setDefaultHandler
@@ -180,8 +180,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	@SuppressWarnings("deprecation")
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
 		this.urlPathHelper.setAlwaysUseFullPath(alwaysUseFullPath);
-		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource) {
-			((UrlBasedCorsConfigurationSource) this.corsConfigurationSource).setAlwaysUseFullPath(alwaysUseFullPath);
+		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource urlConfigSource) {
+			urlConfigSource.setAlwaysUseFullPath(alwaysUseFullPath);
 		}
 	}
 
@@ -194,8 +194,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	@SuppressWarnings("deprecation")
 	public void setUrlDecode(boolean urlDecode) {
 		this.urlPathHelper.setUrlDecode(urlDecode);
-		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource) {
-			((UrlBasedCorsConfigurationSource) this.corsConfigurationSource).setUrlDecode(urlDecode);
+		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource urlConfigSource) {
+			urlConfigSource.setUrlDecode(urlDecode);
 		}
 	}
 
@@ -208,8 +208,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	@SuppressWarnings("deprecation")
 	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
 		this.urlPathHelper.setRemoveSemicolonContent(removeSemicolonContent);
-		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource) {
-			((UrlBasedCorsConfigurationSource) this.corsConfigurationSource).setRemoveSemicolonContent(removeSemicolonContent);
+		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource urlConfigSource) {
+			urlConfigSource.setRemoveSemicolonContent(removeSemicolonContent);
 		}
 	}
 
@@ -221,8 +221,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
 		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");
 		this.urlPathHelper = urlPathHelper;
-		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource) {
-			((UrlBasedCorsConfigurationSource) this.corsConfigurationSource).setUrlPathHelper(urlPathHelper);
+		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource urlConfigSource) {
+			urlConfigSource.setUrlPathHelper(urlPathHelper);
 		}
 	}
 
@@ -243,8 +243,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		Assert.notNull(pathMatcher, "PathMatcher must not be null");
 		this.pathMatcher = pathMatcher;
-		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource) {
-			((UrlBasedCorsConfigurationSource) this.corsConfigurationSource).setPathMatcher(pathMatcher);
+		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource urlConfigSource) {
+			urlConfigSource.setPathMatcher(pathMatcher);
 		}
 	}
 
@@ -312,8 +312,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	public void setCorsConfigurationSource(CorsConfigurationSource source) {
 		Assert.notNull(source, "CorsConfigurationSource must not be null");
 		this.corsConfigurationSource = source;
-		if (source instanceof UrlBasedCorsConfigurationSource) {
-			((UrlBasedCorsConfigurationSource) source).setAllowInitLookupPath(false);
+		if (source instanceof UrlBasedCorsConfigurationSource urlConfigSource) {
+			urlConfigSource.setAllowInitLookupPath(false);
 		}
 	}
 
@@ -438,11 +438,11 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see WebRequestHandlerInterceptorAdapter
 	 */
 	protected HandlerInterceptor adaptInterceptor(Object interceptor) {
-		if (interceptor instanceof HandlerInterceptor) {
-			return (HandlerInterceptor) interceptor;
+		if (interceptor instanceof HandlerInterceptor handlerInterceptor) {
+			return handlerInterceptor;
 		}
-		else if (interceptor instanceof WebRequestInterceptor) {
-			return new WebRequestHandlerInterceptorAdapter((WebRequestInterceptor) interceptor);
+		else if (interceptor instanceof WebRequestInterceptor webRequestInterceptor) {
+			return new WebRequestHandlerInterceptorAdapter(webRequestInterceptor);
 		}
 		else {
 			throw new IllegalArgumentException("Interceptor type not supported: " + interceptor.getClass().getName());
@@ -468,8 +468,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	protected final MappedInterceptor[] getMappedInterceptors() {
 		List<MappedInterceptor> mappedInterceptors = new ArrayList<>(this.adaptedInterceptors.size());
 		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
-			if (interceptor instanceof MappedInterceptor) {
-				mappedInterceptors.add((MappedInterceptor) interceptor);
+			if (interceptor instanceof MappedInterceptor mappedInterceptor) {
+				mappedInterceptors.add(mappedInterceptor);
 			}
 		}
 		return (!mappedInterceptors.isEmpty() ? mappedInterceptors.toArray(new MappedInterceptor[0]) : null);
@@ -503,8 +503,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			return null;
 		}
 		// Bean name or resolved handler?
-		if (handler instanceof String) {
-			String handlerName = (String) handler;
+		if (handler instanceof String handlerName) {
 			handler = obtainApplicationContext().getBean(handlerName);
 		}
 
@@ -601,12 +600,11 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see #getAdaptedInterceptors()
 	 */
 	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
-		HandlerExecutionChain chain = (handler instanceof HandlerExecutionChain ?
-				(HandlerExecutionChain) handler : new HandlerExecutionChain(handler));
+		HandlerExecutionChain chain = (handler instanceof HandlerExecutionChain handlerExecutionChain ?
+				handlerExecutionChain : new HandlerExecutionChain(handler));
 
 		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
-			if (interceptor instanceof MappedInterceptor) {
-				MappedInterceptor mappedInterceptor = (MappedInterceptor) interceptor;
+			if (interceptor instanceof MappedInterceptor mappedInterceptor) {
 				if (mappedInterceptor.matches(request)) {
 					chain.addInterceptor(mappedInterceptor.getInterceptor());
 				}
@@ -623,8 +621,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @since 5.2
 	 */
 	protected boolean hasCorsConfigurationSource(Object handler) {
-		if (handler instanceof HandlerExecutionChain) {
-			handler = ((HandlerExecutionChain) handler).getHandler();
+		if (handler instanceof HandlerExecutionChain handlerExecutionChain) {
+			handler = handlerExecutionChain.getHandler();
 		}
 		return (handler instanceof CorsConfigurationSource || this.corsConfigurationSource != null);
 	}
@@ -639,11 +637,11 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	@Nullable
 	protected CorsConfiguration getCorsConfiguration(Object handler, HttpServletRequest request) {
 		Object resolvedHandler = handler;
-		if (handler instanceof HandlerExecutionChain) {
-			resolvedHandler = ((HandlerExecutionChain) handler).getHandler();
+		if (handler instanceof HandlerExecutionChain handlerExecutionChain) {
+			resolvedHandler = handlerExecutionChain.getHandler();
 		}
-		if (resolvedHandler instanceof CorsConfigurationSource) {
-			return ((CorsConfigurationSource) resolvedHandler).getCorsConfiguration(request);
+		if (resolvedHandler instanceof CorsConfigurationSource configSource) {
+			return configSource.getCorsConfiguration(request);
 		}
 		return null;
 	}

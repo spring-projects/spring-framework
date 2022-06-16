@@ -18,8 +18,7 @@ package org.springframework.web.filter;
 
 import java.nio.charset.StandardCharsets;
 
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;

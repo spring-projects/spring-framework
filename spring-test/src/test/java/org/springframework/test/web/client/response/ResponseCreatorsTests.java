@@ -22,6 +22,7 @@ import java.net.URI;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.test.web.client.ResponseCreator;
@@ -133,7 +134,7 @@ class ResponseCreatorsTests {
 		DefaultResponseCreator responseCreator = MockRestResponseCreators.withRawStatus(454);
 		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
 
-		assertThat(response.getRawStatusCode()).isEqualTo(454);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(454));
 		assertThat(response.getStatusText()).isEmpty();
 	}
 

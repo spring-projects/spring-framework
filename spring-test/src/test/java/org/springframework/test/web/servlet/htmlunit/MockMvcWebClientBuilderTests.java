@@ -19,14 +19,13 @@ package org.springframework.test.web.servlet.htmlunit;
 import java.io.IOException;
 import java.net.URL;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.util.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Configuration;
@@ -157,13 +156,13 @@ class MockMvcWebClientBuilderTests {
 
 		@PostMapping(path = "/", produces = "text/plain")
 		String setCookie(@RequestParam String cookie, HttpServletResponse response) {
-			response.addCookie(new javax.servlet.http.Cookie(COOKIE_NAME, cookie));
+			response.addCookie(new jakarta.servlet.http.Cookie(COOKIE_NAME, cookie));
 			return "Set";
 		}
 
 		@DeleteMapping(path = "/", produces = "text/plain")
 		String deleteCookie(HttpServletResponse response) {
-			javax.servlet.http.Cookie cookie = new javax.servlet.http.Cookie(COOKIE_NAME, "");
+			jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie(COOKIE_NAME, "");
 			cookie.setMaxAge(0);
 			response.addCookie(cookie);
 			return "Delete";

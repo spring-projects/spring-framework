@@ -30,12 +30,11 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
-
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -51,6 +50,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
@@ -81,7 +81,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 
 	private final Type entityType;
 
-	private int status = HttpStatus.OK.value();
+	private HttpStatusCode status = HttpStatus.OK;
 
 	private final HttpHeaders headers = new HttpHeaders();
 
@@ -94,16 +94,15 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 	}
 
 	@Override
-	public EntityResponse.Builder<T> status(HttpStatus status) {
-		Assert.notNull(status, "HttpStatus must not be null");
-		this.status = status.value();
+	public EntityResponse.Builder<T> status(HttpStatusCode status) {
+		Assert.notNull(status, "HttpStatusCode must not be null");
+		this.status = status;
 		return this;
 	}
 
 	@Override
 	public EntityResponse.Builder<T> status(int status) {
-		this.status = status;
-		return this;
+		return status(HttpStatusCode.valueOf(status));
 	}
 
 	@Override
@@ -203,8 +202,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
 	public EntityResponse<T> build() {
-		if (this.entity instanceof CompletionStage) {
-			CompletionStage completionStage = (CompletionStage) this.entity;
+		if (this.entity instanceof CompletionStage completionStage) {
 			return new CompletionStageEntityResponse(this.status, this.headers, this.cookies,
 					completionStage, this.entityType);
 		}
@@ -243,7 +241,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 
 		private final Type entityType;
 
-		public DefaultEntityResponse(int statusCode, HttpHeaders headers,
+		public DefaultEntityResponse(HttpStatusCode statusCode, HttpHeaders headers,
 				MultiValueMap<String, Cookie> cookies, T entity, Type entityType) {
 
 			super(statusCode, headers, cookies);
@@ -265,7 +263,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 			return null;
 		}
 
-		@SuppressWarnings({ "unchecked", "resource" })
+		@SuppressWarnings({ "unchecked", "resource", "rawtypes" })
 		protected void writeEntityWithMessageConverters(Object entity, HttpServletRequest request,
 				HttpServletResponse response, ServerResponse.Context context)
 				throws ServletException, IOException {
@@ -295,16 +293,14 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 			}
 
 			for (HttpMessageConverter<?> messageConverter : context.messageConverters()) {
-				if (messageConverter instanceof GenericHttpMessageConverter<?>) {
-					GenericHttpMessageConverter<Object> genericMessageConverter =
-							(GenericHttpMessageConverter<Object>) messageConverter;
+				if (messageConverter instanceof GenericHttpMessageConverter genericMessageConverter) {
 					if (genericMessageConverter.canWrite(entityType, entityClass, contentType)) {
 						genericMessageConverter.write(entity, entityType, contentType, serverResponse);
 						return;
 					}
 				}
 				if (messageConverter.canWrite(entityClass, contentType)) {
-					((HttpMessageConverter<Object>)messageConverter).write(entity, contentType, serverResponse);
+					((HttpMessageConverter<Object>) messageConverter).write(entity, contentType, serverResponse);
 					return;
 				}
 			}
@@ -351,7 +347,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 	 */
 	private static class CompletionStageEntityResponse<T> extends DefaultEntityResponse<CompletionStage<T>> {
 
-		public CompletionStageEntityResponse(int statusCode, HttpHeaders headers,
+		public CompletionStageEntityResponse(HttpStatusCode statusCode, HttpHeaders headers,
 				MultiValueMap<String, Cookie> cookies, CompletionStage<T> entity, Type entityType) {
 
 			super(statusCode, headers, cookies, entity, entityType);
@@ -405,7 +401,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 	 */
 	private static class PublisherEntityResponse<T> extends DefaultEntityResponse<Publisher<T>> {
 
-		public PublisherEntityResponse(int statusCode, HttpHeaders headers,
+		public PublisherEntityResponse(HttpStatusCode statusCode, HttpHeaders headers,
 				MultiValueMap<String, Cookie> cookies, Publisher<T> entity, Type entityType) {
 
 			super(statusCode, headers, cookies, entity, entityType);

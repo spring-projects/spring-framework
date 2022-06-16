@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Andy Clement
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 3.0
  */
 // TODO support multidimensional arrays
@@ -121,8 +122,7 @@ public class Indexer extends SpelNodeImpl {
 		Object index;
 
 		// This first part of the if clause prevents a 'double dereference' of the property (SPR-5847)
-		if (target instanceof Map && (this.children[0] instanceof PropertyOrFieldReference)) {
-			PropertyOrFieldReference reference = (PropertyOrFieldReference) this.children[0];
+		if (target instanceof Map && (this.children[0] instanceof PropertyOrFieldReference reference)) {
 			index = reference.getName();
 			indexValue = new TypedValue(index);
 		}
@@ -148,13 +148,13 @@ public class Indexer extends SpelNodeImpl {
 		Assert.state(targetDescriptor != null, "No type descriptor");
 
 		// Indexing into a Map
-		if (target instanceof Map) {
+		if (target instanceof Map<?, ?> map) {
 			Object key = index;
 			if (targetDescriptor.getMapKeyTypeDescriptor() != null) {
 				key = state.convertValue(key, targetDescriptor.getMapKeyTypeDescriptor());
 			}
 			this.indexedType = IndexedType.MAP;
-			return new MapIndexingValueRef(state.getTypeConverter(), (Map<?, ?>) target, key, targetDescriptor);
+			return new MapIndexingValueRef(state.getTypeConverter(), map, key, targetDescriptor);
 		}
 
 		// If the object is something that looks indexable by an integer,
@@ -275,8 +275,7 @@ public class Indexer extends SpelNodeImpl {
 			mv.visitTypeInsn(CHECKCAST, "java/util/Map");
 			// Special case when the key is an unquoted string literal that will be parsed as
 			// a property/field reference
-			if ((this.children[0] instanceof PropertyOrFieldReference)) {
-				PropertyOrFieldReference reference = (PropertyOrFieldReference) this.children[0];
+			if ((this.children[0] instanceof PropertyOrFieldReference reference)) {
 				String mapKeyName = reference.getName();
 				mv.visitLdcInsn(mapKeyName);
 			}
@@ -306,9 +305,9 @@ public class Indexer extends SpelNodeImpl {
 				}
 			}
 
-			if (member instanceof Method) {
+			if (member instanceof Method method) {
 				mv.visitMethodInsn((isStatic? INVOKESTATIC : INVOKEVIRTUAL), classDesc, member.getName(),
-						CodeFlow.createSignatureDescriptor((Method) member), false);
+						CodeFlow.createSignatureDescriptor(method), false);
 			}
 			else {
 				mv.visitFieldInsn((isStatic ? GETSTATIC : GETFIELD), classDesc, member.getName(),
@@ -572,19 +571,17 @@ public class Indexer extends SpelNodeImpl {
 						targetObjectRuntimeClass, this.evaluationContext.getPropertyAccessors());
 				for (PropertyAccessor accessor : accessorsToTry) {
 					if (accessor.canRead(this.evaluationContext, this.targetObject, this.name)) {
-						if (accessor instanceof ReflectivePropertyAccessor) {
-							accessor = ((ReflectivePropertyAccessor) accessor).createOptimalAccessor(
+						if (accessor instanceof ReflectivePropertyAccessor reflectivePropertyAccessor) {
+							accessor = reflectivePropertyAccessor.createOptimalAccessor(
 									this.evaluationContext, this.targetObject, this.name);
 						}
 						Indexer.this.cachedReadAccessor = accessor;
 						Indexer.this.cachedReadName = this.name;
 						Indexer.this.cachedReadTargetType = targetObjectRuntimeClass;
-						if (accessor instanceof ReflectivePropertyAccessor.OptimalPropertyAccessor) {
-							ReflectivePropertyAccessor.OptimalPropertyAccessor optimalAccessor =
-									(ReflectivePropertyAccessor.OptimalPropertyAccessor) accessor;
+						if (accessor instanceof ReflectivePropertyAccessor.OptimalPropertyAccessor optimalAccessor) {
 							Member member = optimalAccessor.member;
-							Indexer.this.exitTypeDescriptor = CodeFlow.toDescriptor(member instanceof Method ?
-									((Method) member).getReturnType() : ((Field) member).getType());
+							Indexer.this.exitTypeDescriptor = CodeFlow.toDescriptor(member instanceof Method method ?
+									method.getReturnType() : ((Field) member).getType());
 						}
 						return accessor.read(this.evaluationContext, this.targetObject, this.name);
 					}
@@ -665,8 +662,8 @@ public class Indexer extends SpelNodeImpl {
 		@Override
 		public TypedValue getValue() {
 			growCollectionIfNecessary();
-			if (this.collection instanceof List) {
-				Object o = ((List) this.collection).get(this.index);
+			if (this.collection instanceof List list) {
+				Object o = list.get(this.index);
 				exitTypeDescriptor = CodeFlow.toDescriptor(Object.class);
 				return new TypedValue(o, this.collectionEntryDescriptor.elementTypeDescriptor(o));
 			}
@@ -683,8 +680,7 @@ public class Indexer extends SpelNodeImpl {
 		@Override
 		public void setValue(@Nullable Object newValue) {
 			growCollectionIfNecessary();
-			if (this.collection instanceof List) {
-				List list = (List) this.collection;
+			if (this.collection instanceof List list) {
 				if (this.collectionEntryDescriptor.getElementTypeDescriptor() != null) {
 					newValue = this.typeConverter.convertValue(newValue, TypeDescriptor.forObject(newValue),
 							this.collectionEntryDescriptor.getElementTypeDescriptor());

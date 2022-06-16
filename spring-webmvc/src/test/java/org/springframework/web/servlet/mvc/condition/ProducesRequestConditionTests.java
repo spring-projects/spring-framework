@@ -20,8 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
@@ -222,10 +221,10 @@ public class ProducesRequestConditionTests {
 		HttpServletRequest request = createRequest("text/plain");
 
 		int result = condition1.compareTo(condition2, request);
-		assertThat(result < 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isGreaterThan(0);
 
 		result = condition2.compareTo(condition1, request);
-		assertThat(result > 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isLessThan(0);
 	}
 
 	@Test

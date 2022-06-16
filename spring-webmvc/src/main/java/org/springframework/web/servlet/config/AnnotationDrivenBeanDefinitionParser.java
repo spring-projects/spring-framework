@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,9 +178,9 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 	static {
 		ClassLoader classLoader = AnnotationDrivenBeanDefinitionParser.class.getClassLoader();
-		javaxValidationPresent = ClassUtils.isPresent("javax.validation.Validator", classLoader);
+		javaxValidationPresent = ClassUtils.isPresent("jakarta.validation.Validator", classLoader);
 		romePresent = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", classLoader);
-		jaxb2Present = ClassUtils.isPresent("javax.xml.bind.Binder", classLoader);
+		jaxb2Present = ClassUtils.isPresent("jakarta.xml.bind.Binder", classLoader);
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 						ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
 		jackson2XmlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
@@ -514,8 +514,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	private ManagedList<Object> wrapLegacyResolvers(List<Object> list, ParserContext context) {
 		ManagedList<Object> result = new ManagedList<>();
 		for (Object object : list) {
-			if (object instanceof BeanDefinitionHolder) {
-				BeanDefinitionHolder beanDef = (BeanDefinitionHolder) object;
+			if (object instanceof BeanDefinitionHolder beanDef) {
 				String className = beanDef.getBeanDefinition().getBeanClassName();
 				Assert.notNull(className, "No resolver class");
 				Class<?> clazz = ClassUtils.resolveClassName(className, context.getReaderContext().getBeanClassLoader());

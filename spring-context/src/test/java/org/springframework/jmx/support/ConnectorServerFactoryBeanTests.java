@@ -30,6 +30,7 @@ import javax.management.remote.JMXServiceURL;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.testfixture.net.TestSocketUtils;
 import org.springframework.jmx.AbstractMBeanServerTests;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,7 +48,7 @@ class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 	private static final String OBJECT_NAME = "spring:type=connector,name=test";
 
 	@SuppressWarnings("deprecation")
-	private final String serviceUrl = "service:jmx:jmxmp://localhost:" + org.springframework.util.SocketUtils.findAvailableTcpPort();
+	private final String serviceUrl = "service:jmx:jmxmp://localhost:" + TestSocketUtils.findAvailableTcpPort();
 
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,6 @@ import org.springframework.web.servlet.view.groovy.GroovyMarkupViewResolver;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 import org.springframework.web.servlet.view.script.ScriptTemplateConfigurer;
 import org.springframework.web.servlet.view.script.ScriptTemplateViewResolver;
-import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
-import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
 import org.springframework.web.servlet.view.xml.MarshallingView;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,7 +55,6 @@ public class ViewResolverRegistryTests {
 	public void setup() {
 		StaticWebApplicationContext context = new StaticWebApplicationContext();
 		context.registerSingleton("freeMarkerConfigurer", FreeMarkerConfigurer.class);
-		context.registerSingleton("tilesConfigurer", TilesConfigurer.class);
 		context.registerSingleton("groovyMarkupConfigurer", GroovyMarkupConfigurer.class);
 		context.registerSingleton("scriptTemplateConfigurer", ScriptTemplateConfigurer.class);
 
@@ -129,12 +126,6 @@ public class ViewResolverRegistryTests {
 		assertThat(this.registry.getViewResolvers().size()).isEqualTo(2);
 		assertThat(this.registry.getViewResolvers().get(0).getClass()).isEqualTo(InternalResourceViewResolver.class);
 		assertThat(this.registry.getViewResolvers().get(1).getClass()).isEqualTo(InternalResourceViewResolver.class);
-	}
-
-	@Test
-	public void tiles() {
-		this.registry.tiles();
-		checkAndGetResolver(TilesViewResolver.class);
 	}
 
 	@Test

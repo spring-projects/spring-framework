@@ -27,8 +27,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 
 /**
- * Abstract base class for listener-based server responses, e.g. Servlet 3.1
- * and Undertow.
+ * Abstract base class for listener-based server responses.
  *
  * @author Arjen Poutsma
  * @since 5.0

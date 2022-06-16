@@ -18,8 +18,7 @@ package org.springframework.web.cors;
 
 import java.util.Arrays;
 
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

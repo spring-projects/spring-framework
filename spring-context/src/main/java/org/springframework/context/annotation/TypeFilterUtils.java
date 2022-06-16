@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,37 +78,31 @@ public abstract class TypeFilterUtils {
 
 		for (Class<?> filterClass : filterAttributes.getClassArray("classes")) {
 			switch (filterType) {
-				case ANNOTATION:
+				case ANNOTATION -> {
 					Assert.isAssignable(Annotation.class, filterClass,
 							"@ComponentScan ANNOTATION type filter requires an annotation type");
 					@SuppressWarnings("unchecked")
 					Class<Annotation> annotationType = (Class<Annotation>) filterClass;
 					typeFilters.add(new AnnotationTypeFilter(annotationType));
-					break;
-				case ASSIGNABLE_TYPE:
-					typeFilters.add(new AssignableTypeFilter(filterClass));
-					break;
-				case CUSTOM:
+				}
+				case ASSIGNABLE_TYPE -> typeFilters.add(new AssignableTypeFilter(filterClass));
+				case CUSTOM -> {
 					Assert.isAssignable(TypeFilter.class, filterClass,
 							"@ComponentScan CUSTOM type filter requires a TypeFilter implementation");
 					TypeFilter filter = ParserStrategyUtils.instantiateClass(filterClass, TypeFilter.class,
 							environment, resourceLoader, registry);
 					typeFilters.add(filter);
-					break;
-				default:
+				}
+				default ->
 					throw new IllegalArgumentException("Filter type not supported with Class value: " + filterType);
 			}
 		}
 
 		for (String expression : filterAttributes.getStringArray("pattern")) {
 			switch (filterType) {
-				case ASPECTJ:
-					typeFilters.add(new AspectJTypeFilter(expression, resourceLoader.getClassLoader()));
-					break;
-				case REGEX:
-					typeFilters.add(new RegexPatternTypeFilter(Pattern.compile(expression)));
-					break;
-				default:
+				case ASPECTJ -> typeFilters.add(new AspectJTypeFilter(expression, resourceLoader.getClassLoader()));
+				case REGEX -> typeFilters.add(new RegexPatternTypeFilter(Pattern.compile(expression)));
+				default ->
 					throw new IllegalArgumentException("Filter type not supported with String pattern: " + filterType);
 			}
 		}

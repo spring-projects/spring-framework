@@ -97,10 +97,9 @@ public class ReplaceOverride extends MethodOverride {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (!(other instanceof ReplaceOverride) || !super.equals(other)) {
+		if (!(other instanceof ReplaceOverride that) || !super.equals(other)) {
 			return false;
 		}
-		ReplaceOverride that = (ReplaceOverride) other;
 		return (ObjectUtils.nullSafeEquals(this.methodReplacerBeanName, that.methodReplacerBeanName) &&
 				ObjectUtils.nullSafeEquals(this.typeIdentifiers, that.typeIdentifiers));
 	}

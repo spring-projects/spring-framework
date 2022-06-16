@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,16 +42,12 @@ final class EmbeddedDatabaseConfigurerFactory {
 	public static EmbeddedDatabaseConfigurer getConfigurer(EmbeddedDatabaseType type) throws IllegalStateException {
 		Assert.notNull(type, "EmbeddedDatabaseType is required");
 		try {
-			switch (type) {
-				case HSQL:
-					return HsqlEmbeddedDatabaseConfigurer.getInstance();
-				case H2:
-					return H2EmbeddedDatabaseConfigurer.getInstance();
-				case DERBY:
-					return DerbyEmbeddedDatabaseConfigurer.getInstance();
-				default:
-					throw new UnsupportedOperationException("Embedded database type [" + type + "] is not supported");
-			}
+			return switch (type) {
+				case HSQL -> HsqlEmbeddedDatabaseConfigurer.getInstance();
+				case H2 -> H2EmbeddedDatabaseConfigurer.getInstance();
+				case DERBY -> DerbyEmbeddedDatabaseConfigurer.getInstance();
+				default -> throw new UnsupportedOperationException("Embedded database type [" + type + "] is not supported");
+			};
 		}
 		catch (ClassNotFoundException | NoClassDefFoundError ex) {
 			throw new IllegalStateException("Driver for test database type [" + type + "] is not available", ex);
