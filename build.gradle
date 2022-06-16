@@ -197,7 +197,7 @@ configure(allprojects) { project ->
 			}
 			dependency "org.skyscreamer:jsonassert:1.5.0"
 			dependency "com.jayway.jsonpath:json-path:2.6.0"
-			dependency "org.bouncycastle:bcpkix-jdk15on:1.66"
+			dependency "org.bouncycastle:bcpkix-jdk18on:1.71"
 
 			dependency "javax.cache:cache-api:1.1.1"
 			dependency "javax.money:money-api:1.1"
