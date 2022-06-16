@@ -72,6 +72,7 @@ eclipse.classpath.file.whenMerged {
 // Include project specific settings
 task eclipseSettings(type: Copy) {
 	from rootProject.files(
+		'src/eclipse/org.eclipse.core.resources.prefs',
 		'src/eclipse/org.eclipse.jdt.core.prefs',
 		'src/eclipse/org.eclipse.jdt.ui.prefs')
 	into project.file('.settings/')
@@ -79,6 +80,7 @@ task eclipseSettings(type: Copy) {
 }
 
 task cleanEclipseSettings(type: Delete) {
+	delete project.file('.settings/org.eclipse.core.resources.prefs')
 	delete project.file('.settings/org.eclipse.jdt.core.prefs')
 	delete project.file('.settings/org.eclipse.jdt.ui.prefs')
 }
