@@ -62,7 +62,7 @@ import static org.mockito.Mockito.verify;
  */
 public class MappingJackson2HttpMessageConverterTests {
 
-	protected static final String NEWLINE_SYSTEM_PROPERTY = System.getProperty("line.separator");
+	protected static final String NEWLINE_SYSTEM_PROPERTY = System.lineSeparator();
 
 	private final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
 
