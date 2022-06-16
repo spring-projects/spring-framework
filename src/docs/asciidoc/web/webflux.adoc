@@ -1,6 +1,6 @@
 [[webflux]]
 = Spring WebFlux
-:doc-spring-security: {doc-root}/spring-security/site/docs/current/reference
+:doc-spring-security: {doc-root}/spring-security/reference
 
 The original web framework included in the Spring Framework, Spring Web MVC, was
 purpose-built for the Servlet API and Servlet containers. The reactive-stack web framework,
@@ -676,8 +676,7 @@ Spring WebFlux provides fine-grained support for CORS configuration through anno
 controllers. However, when you use it with Spring Security, we advise relying on the built-in
 `CorsFilter`, which must be ordered ahead of Spring Security's chain of filters.
 
-See the section on <<webflux-cors>> and the <<webflux-cors.adoc#webflux-cors-webfilter>> for more details.
-
+See the section on <<webflux-cors>> and the <<webflux-cors-webfilter>> for more details.
 
 
 [[webflux-exception-handler]]
@@ -3320,6 +3319,11 @@ controller-specific `Formatter` instances, as the following example shows:
 ----
 <1> Adding a custom formatter (a `DateFormatter`, in this case).
 
+[[webflux-ann-initbinder-model-design]]
+==== Model Design
+[.small]#<<web.adoc#mvc-ann-initbinder-model-design, Web MVC>>#
+
+include::web-data-binding-model-design.adoc[]
 
 
 [[webflux-ann-controller-exceptions]]
@@ -3486,14 +3490,14 @@ include::webflux-cors.adoc[leveloffset=+1]
 == Web Security
 [.small]#<<web.adoc#mvc-web-security, Web MVC>>#
 
-The https://projects.spring.io/spring-security/[Spring Security] project provides support
+The https://spring.io/projects/spring-security[Spring Security] project provides support
 for protecting web applications from malicious exploits. See the Spring Security
 reference documentation, including:
 
-* {doc-spring-security}/html5/#jc-webflux[WebFlux Security]
-* {doc-spring-security}/html5/#test-webflux[WebFlux Testing Support]
-* {doc-spring-security}/html5/#csrf[CSRF Protection]
-* {doc-spring-security}/html5/#headers[Security Response Headers]
+* {doc-spring-security}/reactive/configuration/webflux.html[WebFlux Security]
+* {doc-spring-security}/reactive/test/index.html[WebFlux Testing Support]
+* {doc-spring-security}/features/exploits/csrf.html#csrf-protection[CSRF protection]
+* {doc-spring-security}/features/exploits/headers.html[Security Response Headers]
 
 include::webflux-view.adoc[leveloffset=+1]
 

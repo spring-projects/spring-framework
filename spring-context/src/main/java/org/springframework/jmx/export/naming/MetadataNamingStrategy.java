@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.util.StringUtils;
  * <p>Uses the {@link JmxAttributeSource} strategy interface, so that
  * metadata can be read using any supported implementation. Out of the box,
  * {@link org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource}
- * introspects a well-defined set of Java 5 annotations that come with Spring.
+ * introspects a well-defined set of annotations that come with Spring.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller

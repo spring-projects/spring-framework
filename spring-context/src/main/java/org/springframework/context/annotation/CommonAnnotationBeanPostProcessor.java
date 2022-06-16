@@ -105,7 +105,7 @@ import org.springframework.util.StringValueResolver;
  *
  * <p>The common annotations supported by this post-processor are available in
  * Java 6 (JDK 1.6) as well as in Java EE 5/6 (which provides a standalone jar for
- * its common annotations as well, allowing for use in any Java 5 based application).
+ * its common annotations as well, allowing for use in any based application).
  *
  * <p>For default usage, resolving resource names as Spring bean names,
  * simply define the following in your application context:

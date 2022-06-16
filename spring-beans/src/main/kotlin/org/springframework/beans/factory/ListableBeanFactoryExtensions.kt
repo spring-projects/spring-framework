@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ inline fun <reified T : Any> ListableBeanFactory.getBeansOfType(includeNonSingle
 
 /**
  * Extension for [ListableBeanFactory.getBeanNamesForAnnotation] providing a
- * `getBeansOfType<Foo>()` variant.
+ * `getBeanNamesForAnnotation<Foo>()` variant.
  *
  * @author Sebastien Deleuze
  * @since 5.0
@@ -64,6 +64,6 @@ inline fun <reified T : Annotation> ListableBeanFactory.getBeansWithAnnotation()
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified T : Annotation> ListableBeanFactory.findAnnotationOnBean(beanName:String): Annotation? =
+inline fun <reified T : Annotation> ListableBeanFactory.findAnnotationOnBean(beanName:String): T? =
 		findAnnotationOnBean(beanName, T::class.java)
 

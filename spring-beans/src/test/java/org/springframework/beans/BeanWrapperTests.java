@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.core.OverridingClassLoader;
+import org.springframework.core.io.DefaultResourceLoader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -105,7 +107,7 @@ class BeanWrapperTests extends AbstractPropertyAccessorTests {
 			.satisfies(ex -> assertThat(ex.getPossibleMatches()).containsExactly("age"));
 	}
 
-	@Test // Can't be shared; there is no such thing as a read-only field
+	@Test  // Can't be shared; there is no such thing as a read-only field
 	void setReadOnlyMapProperty() {
 		TypedReadOnlyMap map = new TypedReadOnlyMap(Collections.singletonMap("key", new TestBean()));
 		TypedReadOnlyMapClient target = new TypedReadOnlyMapClient();
@@ -157,12 +159,34 @@ class BeanWrapperTests extends AbstractPropertyAccessorTests {
 		BeanWrapper accessor = createAccessor(target);
 		accessor.setPropertyValue("name", "a");
 		accessor.setPropertyValue("spouse.name", "b");
+
 		assertThat(target.getName()).isEqualTo("a");
 		assertThat(target.getSpouse().getName()).isEqualTo("b");
 		assertThat(accessor.getPropertyValue("name")).isEqualTo("a");
 		assertThat(accessor.getPropertyValue("spouse.name")).isEqualTo("b");
 		assertThat(accessor.getPropertyDescriptor("name").getPropertyType()).isEqualTo(String.class);
 		assertThat(accessor.getPropertyDescriptor("spouse.name").getPropertyType()).isEqualTo(String.class);
+
+		assertThat(accessor.isReadableProperty("class.package")).isFalse();
+		assertThat(accessor.isReadableProperty("class.module")).isFalse();
+		assertThat(accessor.isReadableProperty("class.classLoader")).isFalse();
+		assertThat(accessor.isReadableProperty("class.name")).isTrue();
+		assertThat(accessor.isReadableProperty("class.simpleName")).isTrue();
+		assertThat(accessor.getPropertyValue("class.name")).isEqualTo(TestBean.class.getName());
+		assertThat(accessor.getPropertyValue("class.simpleName")).isEqualTo(TestBean.class.getSimpleName());
+		assertThat(accessor.getPropertyDescriptor("class.name").getPropertyType()).isEqualTo(String.class);
+		assertThat(accessor.getPropertyDescriptor("class.simpleName").getPropertyType()).isEqualTo(String.class);
+
+		accessor = createAccessor(new DefaultResourceLoader());
+
+		assertThat(accessor.isReadableProperty("class.package")).isFalse();
+		assertThat(accessor.isReadableProperty("class.module")).isFalse();
+		assertThat(accessor.isReadableProperty("class.classLoader")).isFalse();
+		assertThat(accessor.isReadableProperty("classLoader")).isTrue();
+		assertThat(accessor.isWritableProperty("classLoader")).isTrue();
+		OverridingClassLoader ocl = new OverridingClassLoader(getClass().getClassLoader());
+		accessor.setPropertyValue("classLoader", ocl);
+		assertThat(accessor.getPropertyValue("classLoader")).isSameAs(ocl);
 	}
 
 	@Test

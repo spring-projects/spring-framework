@@ -1960,6 +1960,19 @@ example, you can create a custom `@EnabledOnMac` annotation as follows:
 	annotation class EnabledOnMac {}
 ----
 
+[NOTE]
+====
+`@EnabledOnMac` is meant only as an example of what is possible. If you have that exact
+use case, please use the built-in `@EnabledOnOs(MAC)` support in JUnit Jupiter.
+====
+
+[WARNING]
+====
+Since JUnit 5.7, JUnit Jupiter also has a condition annotation named `@EnabledIf`. Thus,
+if you wish to use Spring's `@EnabledIf` support make sure you import the annotation type
+from the correct package.
+====
+
 [[integration-testing-annotations-junit-jupiter-disabledif]]
 ===== `@DisabledIf`
 
@@ -2007,6 +2020,19 @@ example, you can create a custom `@DisabledOnMac` annotation as follows:
 	)
 	annotation class DisabledOnMac {}
 ----
+
+[NOTE]
+====
+`@DisabledOnMac` is meant only as an example of what is possible. If you have that exact
+use case, please use the built-in `@DisabledOnOs(MAC)` support in JUnit Jupiter.
+====
+
+[WARNING]
+====
+Since JUnit 5.7, JUnit Jupiter also has a condition annotation named `@DisabledIf`. Thus,
+if you wish to use Spring's `@DisabledIf` support make sure you import the annotation type
+from the correct package.
+====
 
 [[integration-testing-annotations-meta]]
 ==== Meta-Annotation Support for Testing
@@ -2672,14 +2698,38 @@ test's `ApplicationContext` can listen to the following events published by the
 * `AfterTestMethodEvent`
 * `AfterTestClassEvent`
 
-NOTE: These events are only published if the `ApplicationContext` has already been loaded.
-
 These events may be consumed for various reasons, such as resetting mock beans or tracing
 test execution. One advantage of consuming test execution events rather than implementing
 a custom `TestExecutionListener` is that test execution events may be consumed by any
 Spring bean registered in the test `ApplicationContext`, and such beans may benefit
 directly from dependency injection and other features of the `ApplicationContext`. In
 contrast, a `TestExecutionListener` is not a bean in the `ApplicationContext`.
+
+[NOTE]
+====
+The `EventPublishingTestExecutionListener` is registered by default; however, it only
+publishes events if the `ApplicationContext` has _already been loaded_. This prevents the
+`ApplicationContext` from being loaded unnecessarily or too early.
+
+Consequently, a `BeforeTestClassEvent` will not be published until after the
+`ApplicationContext` has been loaded by another `TestExecutionListener`. For example, with
+the default set of `TestExecutionListener` implementations registered, a
+`BeforeTestClassEvent` will not be published for the first test class that uses a
+particular test `ApplicationContext`, but a `BeforeTestClassEvent` _will_ be published for
+any subsequent test class in the same test suite that uses the same test
+`ApplicationContext` since the context will already have been loaded when subsequent test
+classes run (as long as the context has not been removed from the `ContextCache` via
+`@DirtiesContext` or the max-size eviction policy).
+
+If you wish to ensure that a `BeforeTestClassEvent` is always published for every test
+class, you need to register a `TestExecutionListener` that loads the `ApplicationContext`
+in the `beforeTestClass` callback, and that `TestExecutionListener` must be registered
+_before_ the `EventPublishingTestExecutionListener`.
+
+Similarly, if `@DirtiesContext` is used to remove the `ApplicationContext` from the
+context cache after the last test method in a given test class, the `AfterTestClassEvent`
+will not be published for that test class.
+====
 
 In order to listen to test execution events, a Spring bean may choose to implement the
 `org.springframework.context.ApplicationListener` interface. Alternatively, listener
@@ -5624,7 +5674,6 @@ following example shows the relevant annotations:
 
 [[testcontext-tx-false-positives]]
 .Avoid false positives when testing ORM code
-
 [NOTE]
 =====
 When you test application code that manipulates the state of a Hibernate session or JPA
@@ -5744,6 +5793,86 @@ The following example shows matching methods for JPA:
 
 	// ...
 ----
+=====
+
+[[testcontext-tx-orm-lifecycle-callbacks]]
+.Testing ORM entity lifecycle callbacks
+[NOTE]
+=====
+Similar to the note about avoiding <<testcontext-tx-false-positives, false positives>>
+when testing ORM code, if your application makes use of entity lifecycle callbacks (also
+known as entity listeners), make sure to flush the underlying unit of work within test
+methods that run that code. Failing to _flush_ or _clear_ the underlying unit of work can
+result in certain lifecycle callbacks not being invoked.
+
+For example, when using JPA, `@PostPersist`, `@PreUpdate`, and `@PostUpdate` callbacks
+will not be called unless `entityManager.flush()` is invoked after an entity has been
+saved or updated. Similarly, if an entity is already attached to the current unit of work
+(associated with the current persistence context), an attempt to reload the entity will
+not result in a `@PostLoad` callback unless `entityManager.clear()` is invoked before the
+attempt to reload the entity.
+
+The following example shows how to flush the `EntityManager` to ensure that
+`@PostPersist` callbacks are invoked when an entity is persisted. An entity listener with
+a `@PostPersist` callback method has been registered for the `Person` entity used in the
+example.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	// ...
+
+	@Autowired
+	JpaPersonRepository repo;
+
+	@PersistenceContext
+	EntityManager entityManager;
+
+	@Transactional
+	@Test
+	void savePerson() {
+		// EntityManager#persist(...) results in @PrePersist but not @PostPersist
+		repo.save(new Person("Jane"));
+
+		// Manual flush is required for @PostPersist callback to be invoked
+		entityManager.flush();
+
+		// Test code that relies on the @PostPersist callback
+		// having been invoked...
+	}
+
+	// ...
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// ...
+
+	@Autowired
+	lateinit var repo: JpaPersonRepository
+
+	@PersistenceContext
+	lateinit var entityManager: EntityManager
+
+	@Transactional
+	@Test
+	fun savePerson() {
+		// EntityManager#persist(...) results in @PrePersist but not @PostPersist
+		repo.save(Person("Jane"))
+
+		// Manual flush is required for @PostPersist callback to be invoked
+		entityManager.flush()
+
+		// Test code that relies on the @PostPersist callback
+		// having been invoked...
+	}
+
+	// ...
+----
+
+See
+https://github.com/spring-projects/spring-framework/blob/5.3.x/spring-test/src/test/java/org/springframework/test/context/junit/jupiter/orm/JpaEntityListenerTests.java[JpaEntityListenerTests]
+in the Spring Framework test suite for working examples using all JPA lifecycle callbacks.
 =====
 
 

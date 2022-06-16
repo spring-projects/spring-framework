@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import org.springframework.util.Assert;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @see GenericBeanDefinition
  * @see ChildBeanDefinition
  */
@@ -436,7 +437,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
-	 * Check whether the given method or field is an externally managed configuration member.
+	 * Determine if the given method or field is an externally managed configuration member.
 	 */
 	public boolean isExternallyManagedConfigMember(Member configMember) {
 		synchronized (this.postProcessingLock) {
@@ -446,7 +447,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
-	 * Return all externally managed configuration methods and fields (as an immutable Set).
+	 * Get all externally managed configuration methods and fields (as an immutable Set).
 	 * @since 5.3.11
 	 */
 	public Set<Member> getExternallyManagedConfigMembers() {
@@ -458,7 +459,15 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
-	 * Register an externally managed configuration initialization method.
+	 * Register an externally managed configuration initialization method &mdash;
+	 * for example, a method annotated with JSR-250's
+	 * {@link javax.annotation.PostConstruct} annotation.
+	 * <p>The supplied {@code initMethod} may be the
+	 * {@linkplain Method#getName() simple method name} for non-private methods or the
+	 * {@linkplain org.springframework.util.ClassUtils#getQualifiedMethodName(Method)
+	 * qualified method name} for {@code private} methods. A qualified name is
+	 * necessary for {@code private} methods in order to disambiguate between
+	 * multiple private methods with the same name within a class hierarchy.
 	 */
 	public void registerExternallyManagedInitMethod(String initMethod) {
 		synchronized (this.postProcessingLock) {
@@ -470,7 +479,10 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
-	 * Check whether the given method name indicates an externally managed initialization method.
+	 * Determine if the given method name indicates an externally managed
+	 * initialization method.
+	 * <p>See {@link #registerExternallyManagedInitMethod} for details
+	 * regarding the format for the supplied {@code initMethod}.
 	 */
 	public boolean isExternallyManagedInitMethod(String initMethod) {
 		synchronized (this.postProcessingLock) {
@@ -480,7 +492,39 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
+	 * Determine if the given method name indicates an externally managed
+	 * initialization method, regardless of method visibility.
+	 * <p>In contrast to {@link #isExternallyManagedInitMethod(String)}, this
+	 * method also returns {@code true} if there is a {@code private} externally
+	 * managed initialization method that has been
+	 * {@linkplain #registerExternallyManagedInitMethod(String) registered}
+	 * using a qualified method name instead of a simple method name.
+	 * @since 5.3.17
+	 */
+	boolean hasAnyExternallyManagedInitMethod(String initMethod) {
+		synchronized (this.postProcessingLock) {
+			if (isExternallyManagedInitMethod(initMethod)) {
+				return true;
+			}
+			if (this.externallyManagedInitMethods != null) {
+				for (String candidate : this.externallyManagedInitMethods) {
+					int indexOfDot = candidate.lastIndexOf('.');
+					if (indexOfDot >= 0) {
+						String methodName = candidate.substring(indexOfDot + 1);
+						if (methodName.equals(initMethod)) {
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		}
+	}
+
+	/**
 	 * Return all externally managed initialization methods (as an immutable Set).
+	 * <p>See {@link #registerExternallyManagedInitMethod} for details
+	 * regarding the format for the initialization methods in the returned set.
 	 * @since 5.3.11
 	 */
 	public Set<String> getExternallyManagedInitMethods() {
@@ -492,7 +536,15 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
-	 * Register an externally managed configuration destruction method.
+	 * Register an externally managed configuration destruction method &mdash;
+	 * for example, a method annotated with JSR-250's
+	 * {@link javax.annotation.PreDestroy} annotation.
+	 * <p>The supplied {@code destroyMethod} may be the
+	 * {@linkplain Method#getName() simple method name} for non-private methods or the
+	 * {@linkplain org.springframework.util.ClassUtils#getQualifiedMethodName(Method)
+	 * qualified method name} for {@code private} methods. A qualified name is
+	 * necessary for {@code private} methods in order to disambiguate between
+	 * multiple private methods with the same name within a class hierarchy.
 	 */
 	public void registerExternallyManagedDestroyMethod(String destroyMethod) {
 		synchronized (this.postProcessingLock) {
@@ -504,7 +556,10 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
-	 * Check whether the given method name indicates an externally managed destruction method.
+	 * Determine if the given method name indicates an externally managed
+	 * destruction method.
+	 * <p>See {@link #registerExternallyManagedDestroyMethod} for details
+	 * regarding the format for the supplied {@code destroyMethod}.
 	 */
 	public boolean isExternallyManagedDestroyMethod(String destroyMethod) {
 		synchronized (this.postProcessingLock) {
@@ -514,7 +569,39 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
-	 * Return all externally managed destruction methods (as an immutable Set).
+	 * Determine if the given method name indicates an externally managed
+	 * destruction method, regardless of method visibility.
+	 * <p>In contrast to {@link #isExternallyManagedDestroyMethod(String)}, this
+	 * method also returns {@code true} if there is a {@code private} externally
+	 * managed destruction method that has been
+	 * {@linkplain #registerExternallyManagedDestroyMethod(String) registered}
+	 * using a qualified method name instead of a simple method name.
+	 * @since 5.3.17
+	 */
+	boolean hasAnyExternallyManagedDestroyMethod(String destroyMethod) {
+		synchronized (this.postProcessingLock) {
+			if (isExternallyManagedDestroyMethod(destroyMethod)) {
+				return true;
+			}
+			if (this.externallyManagedDestroyMethods != null) {
+				for (String candidate : this.externallyManagedDestroyMethods) {
+					int indexOfDot = candidate.lastIndexOf('.');
+					if (indexOfDot >= 0) {
+						String methodName = candidate.substring(indexOfDot + 1);
+						if (methodName.equals(destroyMethod)) {
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		}
+	}
+
+	/**
+	 * Get all externally managed destruction methods (as an immutable Set).
+	 * <p>See {@link #registerExternallyManagedDestroyMethod} for details
+	 * regarding the format for the destruction methods in the returned set.
 	 * @since 5.3.11
 	 */
 	public Set<String> getExternallyManagedDestroyMethods() {

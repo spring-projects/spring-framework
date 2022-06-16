@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Method-level annotation that indicates to expose a given method as a
- * JMX operation, corresponding to the {@code ManagedOperation} attribute.
- * Only valid when used on a method that is not a JavaBean getter or setter.
+ * Method-level annotation that indicates to expose a given method as a JMX operation,
+ * corresponding to the {@link org.springframework.jmx.export.metadata.ManagedOperation}
+ * attribute.
+ *
+ * <p>Only valid when used on a method that is not a JavaBean getter or setter.
  *
  * @author Rob Harrop
  * @since 1.2

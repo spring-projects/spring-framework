@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -196,22 +196,26 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	public DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory,
 			ResolvableType valueType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		ObjectMapper mapper = selectObjectMapper(valueType, mimeType);
-		if (mapper == null) {
-			throw new IllegalStateException("No ObjectMapper for " + valueType);
-		}
 		Class<?> jsonView = null;
 		FilterProvider filters = null;
 		if (value instanceof MappingJacksonValue) {
 			MappingJacksonValue container = (MappingJacksonValue) value;
 			value = container.getValue();
+			valueType = ResolvableType.forInstance(value);
 			jsonView = container.getSerializationView();
 			filters = container.getFilters();
 		}
+
+		ObjectMapper mapper = selectObjectMapper(valueType, mimeType);
+		if (mapper == null) {
+			throw new IllegalStateException("No ObjectMapper for " + valueType);
+		}
+
 		ObjectWriter writer = createObjectWriter(mapper, valueType, mimeType, jsonView, hints);
 		if (filters != null) {
 			writer = writer.with(filters);
 		}
+
 		ByteArrayBuilder byteBuilder = new ByteArrayBuilder(writer.getFactory()._getBufferRecycler());
 		try {
 			JsonEncoding encoding = getJsonEncoding(mimeType);

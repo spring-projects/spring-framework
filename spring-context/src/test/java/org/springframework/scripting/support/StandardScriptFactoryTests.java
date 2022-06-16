@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.junit.jupiter.api.condition.DisabledForJreRange;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.scripting.Messenger;
 
@@ -37,35 +37,38 @@ import static org.junit.jupiter.api.condition.JRE.JAVA_15;
  * @since 4.2
  */
 @DisabledForJreRange(min = JAVA_15) // Nashorn JavaScript engine removed in Java 15
-public class StandardScriptFactoryTests {
+class StandardScriptFactoryTests {
 
 	@Test
-	public void testJsr223FromTagWithInterface() throws Exception {
-		ApplicationContext ctx = new ClassPathXmlApplicationContext("jsr223-with-xsd.xml", getClass());
+	void jsr223FromTagWithInterface() throws Exception {
+		ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("jsr223-with-xsd.xml", getClass());
 		assertThat(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messengerWithInterface")).isTrue();
 		Messenger messenger = (Messenger) ctx.getBean("messengerWithInterface");
 		assertThat(AopUtils.isAopProxy(messenger)).isFalse();
 		assertThat(messenger.getMessage()).isEqualTo("Hello World!");
+		ctx.close();
 	}
 
 	@Test
-	public void testRefreshableJsr223FromTagWithInterface() throws Exception {
-		ApplicationContext ctx = new ClassPathXmlApplicationContext("jsr223-with-xsd.xml", getClass());
+	void refreshableJsr223FromTagWithInterface() throws Exception {
+		ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("jsr223-with-xsd.xml", getClass());
 		assertThat(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("refreshableMessengerWithInterface")).isTrue();
 		Messenger messenger = (Messenger) ctx.getBean("refreshableMessengerWithInterface");
 		assertThat(AopUtils.isAopProxy(messenger)).isTrue();
 		boolean condition = messenger instanceof Refreshable;
 		assertThat(condition).isTrue();
 		assertThat(messenger.getMessage()).isEqualTo("Hello World!");
+		ctx.close();
 	}
 
 	@Test
-	public void testInlineJsr223FromTagWithInterface() throws Exception {
-		ApplicationContext ctx = new ClassPathXmlApplicationContext("jsr223-with-xsd.xml", getClass());
+	void inlineJsr223FromTagWithInterface() throws Exception {
+		ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("jsr223-with-xsd.xml", getClass());
 		assertThat(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("inlineMessengerWithInterface")).isTrue();
 		Messenger messenger = (Messenger) ctx.getBean("inlineMessengerWithInterface");
 		assertThat(AopUtils.isAopProxy(messenger)).isFalse();
 		assertThat(messenger.getMessage()).isEqualTo("Hello World!");
+		ctx.close();
 	}
 
 }

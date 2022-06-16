@@ -961,7 +961,7 @@ this application context.
 
 NOTE: The preceding example does not show a flexible kind of security infrastructure. For
 more options as far as security is concerned, have a look at the Spring Security project
-at https://projects.spring.io/spring-security/.
+at https://spring.io/projects/spring-security/.
 
 
 

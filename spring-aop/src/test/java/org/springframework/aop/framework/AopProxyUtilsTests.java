@@ -19,7 +19,6 @@ package org.springframework.aop.framework;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
@@ -132,63 +131,6 @@ public class AopProxyUtilsTests {
 				(proxy1, method, args) -> null);
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				AopProxyUtils.proxiedUserInterfaces(proxy));
-	}
-
-	@Test
-	void isLambda() {
-		assertIsLambda(AopProxyUtilsTests.staticLambdaExpression);
-		assertIsLambda(AopProxyUtilsTests::staticStringFactory);
-
-		assertIsLambda(this.instanceLambdaExpression);
-		assertIsLambda(this::instanceStringFactory);
-	}
-
-	@Test
-	void isNotLambda() {
-		assertIsNotLambda(new EnigmaSupplier());
-
-		assertIsNotLambda(new Supplier<String>() {
-			@Override
-			public String get() {
-				return "anonymous inner class";
-			}
-		});
-
-		assertIsNotLambda(new Fake$$LambdaSupplier());
-	}
-
-	private static void assertIsLambda(Supplier<String> supplier) {
-		assertThat(AopProxyUtils.isLambda(supplier.getClass())).isTrue();
-	}
-
-	private static void assertIsNotLambda(Supplier<String> supplier) {
-		assertThat(AopProxyUtils.isLambda(supplier.getClass())).isFalse();
-	}
-
-	private static final Supplier<String> staticLambdaExpression = () -> "static lambda expression";
-
-	private final Supplier<String> instanceLambdaExpression = () -> "instance lambda expressions";
-
-	private static String staticStringFactory() {
-		return "static string factory";
-	}
-
-	private String instanceStringFactory() {
-		return "instance string factory";
-	}
-
-	private static class EnigmaSupplier implements Supplier<String> {
-		@Override
-		public String get() {
-			return "enigma";
-		}
-	}
-
-	private static class Fake$$LambdaSupplier implements Supplier<String> {
-		@Override
-		public String get() {
-			return "fake lambda";
-		}
 	}
 
 }

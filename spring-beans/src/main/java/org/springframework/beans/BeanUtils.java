@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -691,7 +691,25 @@ public abstract class BeanUtils {
 	 * from each other, as long as the properties match. Any bean properties that the
 	 * source bean exposes but the target bean does not will silently be ignored.
 	 * <p>This is just a convenience method. For more complex transfer needs,
-	 * consider using a full BeanWrapper.
+	 * consider using a full {@link BeanWrapper}.
+	 * <p>As of Spring Framework 5.3, this method honors generic type information
+	 * when matching properties in the source and target objects.
+	 * <p>The following table provides a non-exhaustive set of examples of source
+	 * and target property types that can be copied as well as source and target
+	 * property types that cannot be copied.
+	 * <table border="1">
+	 * <tr><th>source property type</th><th>target property type</th><th>copy supported</th></tr>
+	 * <tr><td>{@code Integer}</td><td>{@code Integer}</td><td>yes</td></tr>
+	 * <tr><td>{@code Integer}</td><td>{@code Number}</td><td>yes</td></tr>
+	 * <tr><td>{@code List<Integer>}</td><td>{@code List<Integer>}</td><td>yes</td></tr>
+	 * <tr><td>{@code List<?>}</td><td>{@code List<?>}</td><td>yes</td></tr>
+	 * <tr><td>{@code List<Integer>}</td><td>{@code List<?>}</td><td>yes</td></tr>
+	 * <tr><td>{@code List<Integer>}</td><td>{@code List<? extends Number>}</td><td>yes</td></tr>
+	 * <tr><td>{@code String}</td><td>{@code Integer}</td><td>no</td></tr>
+	 * <tr><td>{@code Number}</td><td>{@code Integer}</td><td>no</td></tr>
+	 * <tr><td>{@code List<Integer>}</td><td>{@code List<Long>}</td><td>no</td></tr>
+	 * <tr><td>{@code List<Integer>}</td><td>{@code List<Number>}</td><td>no</td></tr>
+	 * </table>
 	 * @param source the source bean
 	 * @param target the target bean
 	 * @throws BeansException if the copying failed
@@ -708,7 +726,10 @@ public abstract class BeanUtils {
 	 * from each other, as long as the properties match. Any bean properties that the
 	 * source bean exposes but the target bean does not will silently be ignored.
 	 * <p>This is just a convenience method. For more complex transfer needs,
-	 * consider using a full BeanWrapper.
+	 * consider using a full {@link BeanWrapper}.
+	 * <p>As of Spring Framework 5.3, this method honors generic type information
+	 * when matching properties in the source and target objects. See the
+	 * documentation for {@link #copyProperties(Object, Object)} for details.
 	 * @param source the source bean
 	 * @param target the target bean
 	 * @param editable the class (or interface) to restrict property setting to
@@ -726,7 +747,10 @@ public abstract class BeanUtils {
 	 * from each other, as long as the properties match. Any bean properties that the
 	 * source bean exposes but the target bean does not will silently be ignored.
 	 * <p>This is just a convenience method. For more complex transfer needs,
-	 * consider using a full BeanWrapper.
+	 * consider using a full {@link BeanWrapper}.
+	 * <p>As of Spring Framework 5.3, this method honors generic type information
+	 * when matching properties in the source and target objects. See the
+	 * documentation for {@link #copyProperties(Object, Object)} for details.
 	 * @param source the source bean
 	 * @param target the target bean
 	 * @param ignoreProperties array of property names to ignore
@@ -743,7 +767,8 @@ public abstract class BeanUtils {
 	 * from each other, as long as the properties match. Any bean properties that the
 	 * source bean exposes but the target bean does not will silently be ignored.
 	 * <p>As of Spring Framework 5.3, this method honors generic type information
-	 * when matching properties in the source and target objects.
+	 * when matching properties in the source and target objects. See the
+	 * documentation for {@link #copyProperties(Object, Object)} for details.
 	 * @param source the source bean
 	 * @param target the target bean
 	 * @param editable the class (or interface) to restrict property setting to

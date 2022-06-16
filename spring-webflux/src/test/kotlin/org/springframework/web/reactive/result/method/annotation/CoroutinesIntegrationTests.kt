@@ -36,6 +36,8 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.reactive.config.EnableWebFlux
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer
+import reactor.core.publisher.Flux
+import java.time.Duration
 
 class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 
@@ -110,6 +112,25 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 		}
 	}
 
+	@ParameterizedHttpServerTest
+	fun `Suspending handler method returning ResponseEntity of Flux `(httpServer: HttpServer) {
+		startServer(httpServer)
+
+		val entity = performGet<String>("/entity-flux", HttpHeaders.EMPTY, String::class.java)
+		assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
+		assertThat(entity.body).isEqualTo("01234")
+	}
+
+	@ParameterizedHttpServerTest
+	fun `Suspending handler method returning ResponseEntity of Flow`(httpServer: HttpServer) {
+		startServer(httpServer)
+
+		val entity = performGet<String>("/entity-flow", HttpHeaders.EMPTY, String::class.java)
+		assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
+		assertThat(entity.body).isEqualTo("foobar")
+	}
+
+
 	@Configuration
 	@EnableWebFlux
 	@ComponentScan(resourcePattern = "**/CoroutinesIntegrationTests*")
@@ -165,6 +186,25 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 		suspend fun flowError() = flow<String> {
 			delay(1)
 			throw IllegalStateException()
+		}
+
+		@GetMapping("/entity-flux")
+		suspend fun entityFlux() : ResponseEntity<Flux<String>> {
+			val strings = Flux.interval(Duration.ofMillis(100)).take(5)
+					.map { l -> l.toString() }
+			delay(1)
+			return ResponseEntity.ok().body(strings)
+		}
+
+		@GetMapping("/entity-flow")
+		suspend fun entityFlow() : ResponseEntity<Flow<String>> {
+			val strings =  flow {
+							emit("foo")
+							delay(1)
+							emit("bar")
+							delay(1)
+						}
+			return ResponseEntity.ok().body(strings)
 		}
 
 	}

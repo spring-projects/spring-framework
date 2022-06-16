@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.Order;
@@ -389,6 +389,7 @@ class ConfigurationClassPostProcessorTests {
 				.withMessageContaining("alias 'taskExecutor'")
 				.withMessageContaining("name 'applicationTaskExecutor'")
 				.withMessageContaining("bean definition 'taskExecutor'");
+		context.close();
 	}
 
 	@Test
@@ -998,118 +999,129 @@ class ConfigurationClassPostProcessorTests {
 
 	@Test
 	void testPrototypeArgumentThroughBeanMethodCall() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(BeanArgumentConfigWithPrototype.class);
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(BeanArgumentConfigWithPrototype.class);
 		ctx.getBean(FooFactory.class).createFoo(new BarArgument());
+		ctx.close();
 	}
 
 	@Test
 	void testSingletonArgumentThroughBeanMethodCall() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(BeanArgumentConfigWithSingleton.class);
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(BeanArgumentConfigWithSingleton.class);
 		ctx.getBean(FooFactory.class).createFoo(new BarArgument());
+		ctx.close();
 	}
 
 	@Test
 	void testNullArgumentThroughBeanMethodCall() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(BeanArgumentConfigWithNull.class);
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(BeanArgumentConfigWithNull.class);
 		ctx.getBean("aFoo");
+		ctx.close();
 	}
 
 	@Test
 	void testInjectionPointMatchForNarrowTargetReturnType() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(FooBarConfiguration.class);
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(FooBarConfiguration.class);
 		assertThat(ctx.getBean(FooImpl.class).bar).isSameAs(ctx.getBean(BarImpl.class));
+		ctx.close();
 	}
 
 	@Test
 	void testVarargOnBeanMethod() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(VarargConfiguration.class, TestBean.class);
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(VarargConfiguration.class, TestBean.class);
 		VarargConfiguration bean = ctx.getBean(VarargConfiguration.class);
 		assertThat(bean.testBeans).isNotNull();
 		assertThat(bean.testBeans.length).isEqualTo(1);
 		assertThat(bean.testBeans[0]).isSameAs(ctx.getBean(TestBean.class));
+		ctx.close();
 	}
 
 	@Test
 	void testEmptyVarargOnBeanMethod() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(VarargConfiguration.class);
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(VarargConfiguration.class);
 		VarargConfiguration bean = ctx.getBean(VarargConfiguration.class);
 		assertThat(bean.testBeans).isNotNull();
 		assertThat(bean.testBeans.length).isEqualTo(0);
+		ctx.close();
 	}
 
 	@Test
 	void testCollectionArgumentOnBeanMethod() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(CollectionArgumentConfiguration.class, TestBean.class);
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(CollectionArgumentConfiguration.class, TestBean.class);
 		CollectionArgumentConfiguration bean = ctx.getBean(CollectionArgumentConfiguration.class);
 		assertThat(bean.testBeans).isNotNull();
 		assertThat(bean.testBeans.size()).isEqualTo(1);
 		assertThat(bean.testBeans.get(0)).isSameAs(ctx.getBean(TestBean.class));
+		ctx.close();
 	}
 
 	@Test
 	void testEmptyCollectionArgumentOnBeanMethod() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(CollectionArgumentConfiguration.class);
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(CollectionArgumentConfiguration.class);
 		CollectionArgumentConfiguration bean = ctx.getBean(CollectionArgumentConfiguration.class);
 		assertThat(bean.testBeans).isNotNull();
 		assertThat(bean.testBeans.isEmpty()).isTrue();
+		ctx.close();
 	}
 
 	@Test
 	void testMapArgumentOnBeanMethod() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(MapArgumentConfiguration.class, DummyRunnable.class);
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(MapArgumentConfiguration.class, DummyRunnable.class);
 		MapArgumentConfiguration bean = ctx.getBean(MapArgumentConfiguration.class);
 		assertThat(bean.testBeans).isNotNull();
 		assertThat(bean.testBeans.size()).isEqualTo(1);
 		assertThat(bean.testBeans.values().iterator().next()).isSameAs(ctx.getBean(Runnable.class));
+		ctx.close();
 	}
 
 	@Test
 	void testEmptyMapArgumentOnBeanMethod() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(MapArgumentConfiguration.class);
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(MapArgumentConfiguration.class);
 		MapArgumentConfiguration bean = ctx.getBean(MapArgumentConfiguration.class);
 		assertThat(bean.testBeans).isNotNull();
 		assertThat(bean.testBeans.isEmpty()).isTrue();
+		ctx.close();
 	}
 
 	@Test
 	void testCollectionInjectionFromSameConfigurationClass() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(CollectionInjectionConfiguration.class);
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(CollectionInjectionConfiguration.class);
 		CollectionInjectionConfiguration bean = ctx.getBean(CollectionInjectionConfiguration.class);
 		assertThat(bean.testBeans).isNotNull();
 		assertThat(bean.testBeans.size()).isEqualTo(1);
 		assertThat(bean.testBeans.get(0)).isSameAs(ctx.getBean(TestBean.class));
+		ctx.close();
 	}
 
 	@Test
 	void testMapInjectionFromSameConfigurationClass() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(MapInjectionConfiguration.class);
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(MapInjectionConfiguration.class);
 		MapInjectionConfiguration bean = ctx.getBean(MapInjectionConfiguration.class);
 		assertThat(bean.testBeans).isNotNull();
 		assertThat(bean.testBeans.size()).isEqualTo(1);
 		assertThat(bean.testBeans.get("testBean")).isSameAs(ctx.getBean(Runnable.class));
+		ctx.close();
 	}
 
 	@Test
 	void testBeanLookupFromSameConfigurationClass() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(BeanLookupConfiguration.class);
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(BeanLookupConfiguration.class);
 		BeanLookupConfiguration bean = ctx.getBean(BeanLookupConfiguration.class);
 		assertThat(bean.getTestBean()).isNotNull();
 		assertThat(bean.getTestBean()).isSameAs(ctx.getBean(TestBean.class));
+		ctx.close();
 	}
 
 	@Test
 	void testNameClashBetweenConfigurationClassAndBean() {
-		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() -> {
-				ApplicationContext ctx = new AnnotationConfigApplicationContext(MyTestBean.class);
-				ctx.getBean("myTestBean", TestBean.class);
-		});
+		assertThatExceptionOfType(BeanDefinitionStoreException.class)
+			.isThrownBy(() -> new AnnotationConfigApplicationContext(MyTestBean.class).getBean("myTestBean", TestBean.class));
 	}
 
 	@Test
 	void testBeanDefinitionRegistryPostProcessorConfig() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(BeanDefinitionRegistryPostProcessorConfig.class);
-		boolean condition = ctx.getBean("myTestBean") instanceof TestBean;
-		assertThat(condition).isTrue();
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(BeanDefinitionRegistryPostProcessorConfig.class);
+		assertThat(ctx.getBean("myTestBean")).isInstanceOf(TestBean.class);
+		ctx.close();
 	}
 
 

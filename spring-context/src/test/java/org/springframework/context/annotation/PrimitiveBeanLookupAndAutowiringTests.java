@@ -21,7 +21,7 @@ import javax.annotation.Resource;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,65 +41,64 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @since 3.1
  */
-public class PrimitiveBeanLookupAndAutowiringTests {
+class PrimitiveBeanLookupAndAutowiringTests {
 
 	@Test
-	public void primitiveLookupByName() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(Config.class);
-		boolean b = ctx.getBean("b", boolean.class);
-		assertThat(b).isTrue();
-		int i = ctx.getBean("i", int.class);
-		assertThat(i).isEqualTo(42);
+	void primitiveLookupByName() {
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(Config.class);
+		assertThat(ctx.getBean("b", boolean.class)).isTrue();
+		assertThat(ctx.getBean("i", int.class)).isEqualTo(42);
+		ctx.close();
 	}
 
 	@Test
-	public void primitiveLookupByType() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(Config.class);
-		boolean b = ctx.getBean(boolean.class);
-		assertThat(b).isTrue();
-		int i = ctx.getBean(int.class);
-		assertThat(i).isEqualTo(42);
+	void primitiveLookupByType() {
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(Config.class);
+		assertThat(ctx.getBean(boolean.class)).isTrue();
+		assertThat(ctx.getBean(int.class)).isEqualTo(42);
+		ctx.close();
 	}
 
 	@Test
-	public void primitiveAutowiredInjection() {
-		ApplicationContext ctx =
+	void primitiveAutowiredInjection() {
+		ConfigurableApplicationContext ctx =
 				new AnnotationConfigApplicationContext(Config.class, AutowiredComponent.class);
 		assertThat(ctx.getBean(AutowiredComponent.class).b).isTrue();
 		assertThat(ctx.getBean(AutowiredComponent.class).i).isEqualTo(42);
+		ctx.close();
 	}
 
 	@Test
-	public void primitiveResourceInjection() {
-		ApplicationContext ctx =
+	void primitiveResourceInjection() {
+		ConfigurableApplicationContext ctx =
 				new AnnotationConfigApplicationContext(Config.class, ResourceComponent.class);
 		assertThat(ctx.getBean(ResourceComponent.class).b).isTrue();
 		assertThat(ctx.getBean(ResourceComponent.class).i).isEqualTo(42);
+		ctx.close();
 	}
 
 
 	@Configuration
 	static class Config {
 		@Bean
-		public boolean b() {
+		boolean b() {
 			return true;
 		}
 
 		@Bean
-		public int i() {
+		int i() {
 			return 42;
 		}
 	}
-
 
 	static class AutowiredComponent {
 		@Autowired boolean b;
 		@Autowired int i;
 	}
 
-
 	static class ResourceComponent {
 		@Resource boolean b;
 		@Autowired int i;
 	}
+
 }

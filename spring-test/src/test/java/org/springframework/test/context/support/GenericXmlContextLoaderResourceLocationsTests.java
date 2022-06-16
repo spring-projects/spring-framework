@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextLoader;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
@@ -53,13 +53,11 @@ class GenericXmlContextLoaderResourceLocationsTests {
 
 	@ParameterizedTest(name = "[{index}] {0}")
 	@MethodSource("contextConfigurationLocationsData")
-	void assertContextConfigurationLocations(String testClassName, String[] expectedLocations) throws Exception {
-		Class<?> testClass = ClassUtils.forName(getClass().getName() + "$" + testClassName, getClass().getClassLoader());
-
-		final ContextConfiguration contextConfig = testClass.getAnnotation(ContextConfiguration.class);
-		final ContextLoader contextLoader = new GenericXmlContextLoader();
-		final String[] configuredLocations = (String[]) AnnotationUtils.getValue(contextConfig);
-		final String[] processedLocations = contextLoader.processLocations(testClass, configuredLocations);
+	void assertContextConfigurationLocations(Class<?> testClass, String[] expectedLocations) throws Exception {
+		ContextConfiguration contextConfig = testClass.getAnnotation(ContextConfiguration.class);
+		ContextLoader contextLoader = new GenericXmlContextLoader();
+		String[] configuredLocations = (String[]) AnnotationUtils.getValue(contextConfig);
+		String[] processedLocations = contextLoader.processLocations(testClass, configuredLocations);
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("----------------------------------------------------------------------");
@@ -73,27 +71,30 @@ class GenericXmlContextLoaderResourceLocationsTests {
 
 	static Stream<Arguments> contextConfigurationLocationsData() {
 		return Stream.of(
-			arguments(ClasspathNonExistentDefaultLocationsTestCase.class.getSimpleName(), array()),
+			args(ClasspathNonExistentDefaultLocationsTestCase.class, array()),
 
-			arguments(ClasspathExistentDefaultLocationsTestCase.class.getSimpleName(), array(
+			args(ClasspathExistentDefaultLocationsTestCase.class, array(
 				"classpath:org/springframework/test/context/support/GenericXmlContextLoaderResourceLocationsTests$ClasspathExistentDefaultLocationsTestCase-context.xml")),
 
-			arguments(ImplicitClasspathLocationsTestCase.class.getSimpleName(),
+			args(ImplicitClasspathLocationsTestCase.class,
 				array("classpath:/org/springframework/test/context/support/context1.xml",
 					"classpath:/org/springframework/test/context/support/context2.xml")),
 
-			arguments(ExplicitClasspathLocationsTestCase.class.getSimpleName(), array("classpath:context.xml")),
+			args(ExplicitClasspathLocationsTestCase.class, array("classpath:context.xml")),
 
-			arguments(ExplicitFileLocationsTestCase.class.getSimpleName(),
-				array("file:/testing/directory/context.xml")),
+			args(ExplicitFileLocationsTestCase.class, array("file:/testing/directory/context.xml")),
 
-			arguments(ExplicitUrlLocationsTestCase.class.getSimpleName(), array("https://example.com/context.xml")),
+			args(ExplicitUrlLocationsTestCase.class, array("https://example.com/context.xml")),
 
-			arguments(ExplicitMixedPathTypesLocationsTestCase.class.getSimpleName(),
+			args(ExplicitMixedPathTypesLocationsTestCase.class,
 				array("classpath:/org/springframework/test/context/support/context1.xml", "classpath:context2.xml",
 					"classpath:/context3.xml", "file:/testing/directory/context.xml",
 					"https://example.com/context.xml"))
 		);
+	}
+
+	private static Arguments args(Class<?> testClass, String[] expectedLocations) {
+		return arguments(named(testClass.getSimpleName(), testClass), expectedLocations);
 	}
 
 	private static String[] array(String... elements) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonView;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -58,6 +59,7 @@ import org.springframework.util.MultiValueMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.junit.jupiter.api.Named.named;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.MediaType.MULTIPART_MIXED;
 
@@ -88,12 +90,12 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	}
 
 	@SuppressWarnings("deprecation")
-	static Stream<ClientHttpRequestFactory> clientHttpRequestFactories() {
+	static Stream<Named<ClientHttpRequestFactory>> clientHttpRequestFactories() {
 		return Stream.of(
-			new SimpleClientHttpRequestFactory(),
-			new HttpComponentsClientHttpRequestFactory(),
-			new org.springframework.http.client.Netty4ClientHttpRequestFactory(),
-			new OkHttp3ClientHttpRequestFactory()
+			named("JDK", new SimpleClientHttpRequestFactory()),
+			named("HttpComponents", new HttpComponentsClientHttpRequestFactory()),
+			named("Netty", new org.springframework.http.client.Netty4ClientHttpRequestFactory()),
+			named("OkHttp", new OkHttp3ClientHttpRequestFactory())
 		);
 	}
 

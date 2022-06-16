@@ -134,6 +134,11 @@
 			<property name="regexp" value="true" />
 			<property name="illegalClasses" value="^org\.hamcrest\..+" />
 		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.imports.IllegalImportCheck">
+			<property name="id" value="bannedJetbrainsAnnotationsImports"/>
+			<property name="regexp" value="true" />
+			<property name="illegalClasses" value="^org\.jetbrains\.annotations\..+" />
+		</module>
 
 		<!-- Javadoc Comments -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocTypeCheck">

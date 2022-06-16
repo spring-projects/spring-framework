@@ -37,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Sam Brannen
  * @since 16.05.2003
  */
+@SuppressWarnings("deprecation")
 public class CauchoRemotingTests {
 
 	@Test

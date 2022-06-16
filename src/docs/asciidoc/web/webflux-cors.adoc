@@ -1,5 +1,6 @@
 [[webflux-cors]]
 = CORS
+:doc-spring-security: {doc-root}/spring-security/reference
 [.small]#<<web.adoc#mvc-cors, Web MVC>>#
 
 Spring WebFlux lets you handle CORS (Cross-Origin Resource Sharing). This section
@@ -309,9 +310,8 @@ You can apply CORS support through the built-in
 good fit with <<webflux-fn, functional endpoints>>.
 
 NOTE: If you try to use the `CorsFilter` with Spring Security, keep in mind that Spring
-Security has
-https://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#cors[built-in support]
-for CORS.
+Security has {doc-spring-security}/servlet/integrations/cors.html[built-in support] for
+CORS.
 
 To configure the filter, you can declare a `CorsWebFilter` bean and pass a
 `CorsConfigurationSource` to its constructor, as the following example shows:
