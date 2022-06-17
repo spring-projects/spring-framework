@@ -29,6 +29,7 @@ import org.springframework.util.Assert;
  *
  * @author Adam Ostrožlík
  * @author Stephane Nicoll
+ * @author Vedran Pavic
  * @since 5.3.16
  */
 public class LoggingCacheErrorHandler implements CacheErrorHandler {
@@ -50,10 +51,18 @@ public class LoggingCacheErrorHandler implements CacheErrorHandler {
 	}
 
 	/**
+	 * Create an instance.
+	 * @param logStacktrace whether to log stacktrace
+	 */
+	public LoggingCacheErrorHandler(boolean logStacktrace) {
+		this(LogFactory.getLog(LoggingCacheErrorHandler.class), logStacktrace);
+	}
+
+	/**
 	 * Create an instance that does not log stack traces.
 	 */
 	public LoggingCacheErrorHandler() {
-		this(LogFactory.getLog(LoggingCacheErrorHandler.class), false);
+		this(false);
 	}
 
 
