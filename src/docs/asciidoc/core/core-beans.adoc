@@ -4689,9 +4689,8 @@ example:
 ----
 	class SimpleMovieLister {
 
+		@set:Autowired
 		lateinit var movieFinder: MovieFinder
-			@Required
-			set
 
 		// ...
 	}
