@@ -16,6 +16,8 @@
 
 package org.springframework.cache.interceptor;
 
+import java.util.function.Supplier;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -69,46 +71,46 @@ public class LoggingCacheErrorHandler implements CacheErrorHandler {
 	@Override
 	public void handleCacheGetError(RuntimeException exception, Cache cache, Object key) {
 		logCacheError(logger,
-				createMessage(cache, "failed to get entry with key '" + key + "'"),
+				() -> String.format("Cache '%s' %s", cache.getName(), "failed to get entry with key '" + key + "'"),
 				exception);
 	}
 
 	@Override
 	public void handleCachePutError(RuntimeException exception, Cache cache, Object key, @Nullable Object value) {
 		logCacheError(logger,
-				createMessage(cache, "failed to put entry with key '" + key + "'"),
+				() -> String.format("Cache '%s' %s", cache.getName(), "failed to put entry with key '" + key + "'"),
 				exception);
 	}
 
 	@Override
 	public void handleCacheEvictError(RuntimeException exception, Cache cache, Object key) {
 		logCacheError(logger,
-				createMessage(cache, "failed to evict entry with key '" + key + "'"),
+				() -> String.format("Cache '%s' %s", cache.getName(), "failed to evict entry with key '" + key + "'"),
 				exception);
 	}
 
 	@Override
 	public void handleCacheClearError(RuntimeException exception, Cache cache) {
-		logCacheError(logger, createMessage(cache, "failed to clear entries"), exception);
+		logCacheError(logger,
+				() -> String.format("Cache '%s' %s", cache.getName(), "failed to clear entries"),
+				exception);
 	}
 
 	/**
 	 * Log the specified message.
 	 * @param logger the logger
-	 * @param message the message
+	 * @param messageSupplier the message supplier
 	 * @param ex the exception
 	 */
-	protected void logCacheError(Log logger, String message, RuntimeException ex) {
-		if (this.logStacktrace) {
-			logger.warn(message, ex);
+	protected void logCacheError(Log logger, Supplier<String> messageSupplier, RuntimeException ex) {
+		if (logger.isWarnEnabled()) {
+			if (this.logStacktrace) {
+				logger.warn(messageSupplier.get(), ex);
+			}
+			else {
+				logger.warn(messageSupplier.get());
+			}
 		}
-		else {
-			logger.warn(message);
-		}
-	}
-
-	private String createMessage(Cache cache, String reason) {
-		return String.format("Cache '%s' %s", cache.getName(), reason);
 	}
 
 }
