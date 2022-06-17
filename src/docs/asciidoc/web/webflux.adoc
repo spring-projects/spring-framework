@@ -2998,7 +2998,7 @@ configure or customize message writing.
 	public ResponseEntity<String> handle() {
 		String body = ... ;
 		String etag = ... ;
-		return ResponseEntity.ok().eTag(etag).build(body);
+		return ResponseEntity.ok().eTag(etag).body(body);
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
