@@ -244,6 +244,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * @param beanPostProcessor the post-processor to register
 	 */
 	void addBeanPostProcessor(BeanPostProcessor beanPostProcessor);
+	void addBeanLifecycleNotice(BeanLifecycleNotice beanLifecycleNotice);
 
 	/**
 	 * Return the current number of registered BeanPostProcessors, if any.

@@ -63,6 +63,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
+import org.springframework.beans.factory.config.BeanLifecycleNotice;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
@@ -158,6 +159,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	/** BeanPostProcessors to apply. */
 	private final List<BeanPostProcessor> beanPostProcessors = new BeanPostProcessorCacheAwareList();
+
+	/**
+	 * BeanLifecycleNotice to apply.
+	 */
+	private final List<BeanLifecycleNotice> beanLifecycleNotices = new CopyOnWriteArrayList<>();
 
 	/** Cache of pre-filtered post-processors. */
 	@Nullable
@@ -950,6 +956,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		this.beanPostProcessors.add(beanPostProcessor);
 	}
 
+	@Override
+	public void addBeanLifecycleNotice(BeanLifecycleNotice beanLifecycleNotice) {
+		Assert.notNull(beanLifecycleNotice, "BeanLifecycleNotice must not be null");
+		this.beanLifecycleNotices.remove(beanLifecycleNotice);
+		this.beanLifecycleNotices.add(beanLifecycleNotice);
+	}
+
 	/**
 	 * Add new BeanPostProcessors that will get applied to beans created
 	 * by this factory. To be invoked during factory configuration.
@@ -972,6 +985,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 */
 	public List<BeanPostProcessor> getBeanPostProcessors() {
 		return this.beanPostProcessors;
+	}
+
+	public List<BeanLifecycleNotice> getBeanLifecycleNotices() {
+		return beanLifecycleNotices;
 	}
 
 	/**
@@ -1222,7 +1239,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 */
 	protected void destroyBean(String beanName, Object bean, RootBeanDefinition mbd) {
 		new DisposableBeanAdapter(
-				bean, beanName, mbd, getBeanPostProcessorCache().destructionAware, getAccessControlContext()).destroy();
+				bean, beanName, mbd, getBeanPostProcessorCache().destructionAware, getAccessControlContext(),getBeanLifecycleNotices()).destroy();
 	}
 
 	@Override
@@ -1932,7 +1949,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				// work for the given bean: DestructionAwareBeanPostProcessors,
 				// DisposableBean interface, custom destroy method.
 				registerDisposableBean(beanName, new DisposableBeanAdapter(
-						bean, beanName, mbd, getBeanPostProcessorCache().destructionAware, acc));
+						bean, beanName, mbd, getBeanPostProcessorCache().destructionAware, acc,getBeanLifecycleNotices()));
 			}
 			else {
 				// A bean with a custom scope...
@@ -1941,7 +1958,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					throw new IllegalStateException("No Scope registered for scope name '" + mbd.getScope() + "'");
 				}
 				scope.registerDestructionCallback(beanName, new DisposableBeanAdapter(
-						bean, beanName, mbd, getBeanPostProcessorCache().destructionAware, acc));
+						bean, beanName, mbd, getBeanPostProcessorCache().destructionAware, acc,getBeanLifecycleNotices()));
 			}
 		}
 	}

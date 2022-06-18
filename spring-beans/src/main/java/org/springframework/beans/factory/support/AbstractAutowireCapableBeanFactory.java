@@ -63,6 +63,7 @@ import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.AutowiredPropertyMarker;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanLifecycleNotice;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
@@ -124,22 +125,6 @@ import org.springframework.util.StringUtils;
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory
 		implements AutowireCapableBeanFactory {
 
-	/** Strategy for creating bean instances. */
-	private InstantiationStrategy instantiationStrategy;
-
-	/** Resolver strategy for method parameter names. */
-	@Nullable
-	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
-
-	/** Whether to automatically try to resolve circular references between beans. */
-	private boolean allowCircularReferences = true;
-
-	/**
-	 * Whether to resort to injecting a raw bean instance in case of circular reference,
-	 * even if the injected bean eventually got wrapped.
-	 */
-	private boolean allowRawInjectionDespiteWrapping = false;
-
 	/**
 	 * Dependency types to ignore on dependency check and autowire, as Set of
 	 * Class objects: for example, String. Default is none.
@@ -168,6 +153,22 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	private final ConcurrentMap<Class<?>, PropertyDescriptor[]> filteredPropertyDescriptorsCache =
 			new ConcurrentHashMap<>();
 
+	/** Strategy for creating bean instances. */
+	private InstantiationStrategy instantiationStrategy;
+
+	/** Resolver strategy for method parameter names. */
+	@Nullable
+	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+
+	/** Whether to automatically try to resolve circular references between beans. */
+	private boolean allowCircularReferences = true;
+
+	/**
+	 * Whether to resort to injecting a raw bean instance in case of circular reference,
+	 * even if the injected bean eventually got wrapped.
+	 */
+	private boolean allowRawInjectionDespiteWrapping = false;
+
 
 	/**
 	 * Create a new AbstractAutowireCapableBeanFactory.
@@ -194,6 +195,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		setParentBeanFactory(parentBeanFactory);
 	}
 
+	/**
+	 * Return the instantiation strategy to use for creating bean instances.
+	 */
+	protected InstantiationStrategy getInstantiationStrategy() {
+		return this.instantiationStrategy;
+	}
 
 	/**
 	 * Set the instantiation strategy to use for creating bean instances.
@@ -205,10 +212,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
-	 * Return the instantiation strategy to use for creating bean instances.
+	 * Return the ParameterNameDiscoverer to use for resolving method parameter
+	 * names if needed.
 	 */
-	protected InstantiationStrategy getInstantiationStrategy() {
-		return this.instantiationStrategy;
+	@Nullable
+	protected ParameterNameDiscoverer getParameterNameDiscoverer() {
+		return this.parameterNameDiscoverer;
 	}
 
 	/**
@@ -221,12 +230,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
-	 * Return the ParameterNameDiscoverer to use for resolving method parameter
-	 * names if needed.
+	 * Return whether to allow circular references between beans.
+	 * @since 5.3.10
+	 * @see #setAllowCircularReferences
 	 */
-	@Nullable
-	protected ParameterNameDiscoverer getParameterNameDiscoverer() {
-		return this.parameterNameDiscoverer;
+	public boolean isAllowCircularReferences() {
+		return this.allowCircularReferences;
 	}
 
 	/**
@@ -247,12 +256,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
-	 * Return whether to allow circular references between beans.
+	 * Return whether to allow the raw injection of a bean instance.
 	 * @since 5.3.10
-	 * @see #setAllowCircularReferences
+	 * @see #setAllowRawInjectionDespiteWrapping
 	 */
-	public boolean isAllowCircularReferences() {
-		return this.allowCircularReferences;
+	public boolean isAllowRawInjectionDespiteWrapping() {
+		return this.allowRawInjectionDespiteWrapping;
 	}
 
 	/**
@@ -271,15 +280,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	public void setAllowRawInjectionDespiteWrapping(boolean allowRawInjectionDespiteWrapping) {
 		this.allowRawInjectionDespiteWrapping = allowRawInjectionDespiteWrapping;
-	}
-
-	/**
-	 * Return whether to allow the raw injection of a bean instance.
-	 * @since 5.3.10
-	 * @see #setAllowRawInjectionDespiteWrapping
-	 */
-	public boolean isAllowRawInjectionDespiteWrapping() {
-		return this.allowRawInjectionDespiteWrapping;
 	}
 
 	/**
@@ -437,11 +437,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		Object result = existingBean;
 		for (BeanPostProcessor processor : getBeanPostProcessors()) {
-			Object current = processor.postProcessBeforeInitialization(result, beanName);
-			if (current == null) {
-				return result;
+			if (processor.support(result, beanName)) {
+				Object current = processor.postProcessBeforeInitialization(result, beanName);
+				if (current == null) {
+					return result;
+				}
+				result = current;
 			}
-			result = current;
 		}
 		return result;
 	}
@@ -452,11 +454,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		Object result = existingBean;
 		for (BeanPostProcessor processor : getBeanPostProcessors()) {
-			Object current = processor.postProcessAfterInitialization(result, beanName);
-			if (current == null) {
-				return result;
+			if (processor.support(result, beanName)) {
+				Object current = processor.postProcessAfterInitialization(result, beanName);
+				if (current == null) {
+					return result;
+				}
+				result = current;
 			}
-			result = current;
+
+		}
+		for (BeanLifecycleNotice beanLifecycleNotice : getBeanLifecycleNotices()) {
+			beanLifecycleNotice.notice(BeanLifecycleNotice.BeanLifecycleEnum.created,new BeanLifecycleNotice.BeanLifecycleEvent(beanName,existingBean));
 		}
 		return result;
 	}
@@ -464,7 +472,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	@Override
 	public void destroyBean(Object existingBean) {
 		new DisposableBeanAdapter(
-				existingBean, getBeanPostProcessorCache().destructionAware, getAccessControlContext()).destroy();
+				existingBean, getBeanPostProcessorCache().destructionAware, getAccessControlContext(),getBeanLifecycleNotices()).destroy();
 	}
 
 
@@ -646,11 +654,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					if (!actualDependentBeans.isEmpty()) {
 						throw new BeanCurrentlyInCreationException(beanName,
 								"Bean with name '" + beanName + "' has been injected into other beans [" +
-								StringUtils.collectionToCommaDelimitedString(actualDependentBeans) +
-								"] in its raw version as part of a circular reference, but has eventually been " +
-								"wrapped. This means that said other beans do not use the final version of the " +
-								"bean. This is often the result of over-eager type matching - consider using " +
-								"'getBeanNamesForType' with the 'allowEagerInit' flag turned off, for example.");
+										StringUtils.collectionToCommaDelimitedString(actualDependentBeans) +
+										"] in its raw version as part of a circular reference, but has eventually been " +
+										"wrapped. This means that said other beans do not use the final version of the " +
+										"bean. This is often the result of over-eager type matching - consider using " +
+										"'getBeanNamesForType' with the 'allowEagerInit' flag turned off, for example.");
 					}
 				}
 			}
@@ -1811,6 +1819,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return wrappedBean;
 	}
 
+	/**
+	 * todo: 生命周期通知
+	 * @param beanName
+	 * @param bean
+	 */
 	private void invokeAwareMethods(String beanName, Object bean) {
 		if (bean instanceof Aware) {
 			if (bean instanceof BeanNameAware) {

@@ -46,6 +46,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
+import org.springframework.beans.factory.config.BeanLifecycleNotice;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -83,49 +84,86 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class XmlBeanFactoryTests {
 
 	private static final Class<?> CLASS = XmlBeanFactoryTests.class;
+
 	private static final String CLASSNAME = CLASS.getSimpleName();
 
 	private static final ClassPathResource AUTOWIRE_CONTEXT = classPathResource("-autowire.xml");
+
 	private static final ClassPathResource CHILD_CONTEXT = classPathResource("-child.xml");
+
 	private static final ClassPathResource CLASS_NOT_FOUND_CONTEXT = classPathResource("-classNotFound.xml");
+
 	private static final ClassPathResource COMPLEX_FACTORY_CIRCLE_CONTEXT = classPathResource("-complexFactoryCircle.xml");
+
 	private static final ClassPathResource CONSTRUCTOR_ARG_CONTEXT = classPathResource("-constructorArg.xml");
+
 	private static final ClassPathResource CONSTRUCTOR_OVERRIDES_CONTEXT = classPathResource("-constructorOverrides.xml");
+
 	private static final ClassPathResource DELEGATION_OVERRIDES_CONTEXT = classPathResource("-delegationOverrides.xml");
+
 	private static final ClassPathResource DEP_CARG_AUTOWIRE_CONTEXT = classPathResource("-depCargAutowire.xml");
+
 	private static final ClassPathResource DEP_CARG_INNER_CONTEXT = classPathResource("-depCargInner.xml");
+
 	private static final ClassPathResource DEP_CARG_CONTEXT = classPathResource("-depCarg.xml");
+
 	private static final ClassPathResource DEP_DEPENDSON_INNER_CONTEXT = classPathResource("-depDependsOnInner.xml");
+
 	private static final ClassPathResource DEP_DEPENDSON_CONTEXT = classPathResource("-depDependsOn.xml");
+
 	private static final ClassPathResource DEP_PROP = classPathResource("-depProp.xml");
+
 	private static final ClassPathResource DEP_PROP_ABN_CONTEXT = classPathResource("-depPropAutowireByName.xml");
+
 	private static final ClassPathResource DEP_PROP_ABT_CONTEXT = classPathResource("-depPropAutowireByType.xml");
+
 	private static final ClassPathResource DEP_PROP_MIDDLE_CONTEXT = classPathResource("-depPropInTheMiddle.xml");
+
 	private static final ClassPathResource DEP_PROP_INNER_CONTEXT = classPathResource("-depPropInner.xml");
+
 	private static final ClassPathResource DEP_MATERIALIZE_CONTEXT = classPathResource("-depMaterializeThis.xml");
+
 	private static final ClassPathResource FACTORY_CIRCLE_CONTEXT = classPathResource("-factoryCircle.xml");
+
 	private static final ClassPathResource INITIALIZERS_CONTEXT = classPathResource("-initializers.xml");
+
 	private static final ClassPathResource INVALID_CONTEXT = classPathResource("-invalid.xml");
+
 	private static final ClassPathResource INVALID_NO_SUCH_METHOD_CONTEXT = classPathResource("-invalidOverridesNoSuchMethod.xml");
+
 	private static final ClassPathResource COLLECTIONS_XSD_CONTEXT = classPathResource("-localCollectionsUsingXsd.xml");
+
 	private static final ClassPathResource MISSING_CONTEXT = classPathResource("-missing.xml");
+
 	private static final ClassPathResource OVERRIDES_CONTEXT = classPathResource("-overrides.xml");
+
 	private static final ClassPathResource PARENT_CONTEXT = classPathResource("-parent.xml");
+
 	private static final ClassPathResource NO_SUCH_FACTORY_METHOD_CONTEXT = classPathResource("-noSuchFactoryMethod.xml");
+
 	private static final ClassPathResource RECURSIVE_IMPORT_CONTEXT = classPathResource("-recursiveImport.xml");
+
 	private static final ClassPathResource RESOURCE_CONTEXT = classPathResource("-resource.xml");
+
 	private static final ClassPathResource TEST_WITH_DUP_NAMES_CONTEXT = classPathResource("-testWithDuplicateNames.xml");
+
 	private static final ClassPathResource TEST_WITH_DUP_NAME_IN_ALIAS_CONTEXT = classPathResource("-testWithDuplicateNameInAlias.xml");
+
 	private static final ClassPathResource REFTYPES_CONTEXT = classPathResource("-reftypes.xml");
+
 	private static final ClassPathResource DEFAULT_LAZY_CONTEXT = classPathResource("-defaultLazyInit.xml");
+
 	private static final ClassPathResource DEFAULT_AUTOWIRE_CONTEXT = classPathResource("-defaultAutowire.xml");
+
+	private static final ClassPathResource BEAN_LIFECYCLE_NOTICE_CONTEXT = classPathResource("-beanLifecycleNotice.xml");
 
 	private static ClassPathResource classPathResource(String suffix) {
 		return new ClassPathResource(CLASSNAME + suffix, CLASS);
 	}
 
 
-	@Test  // SPR-2368
+	@Test
+		// SPR-2368
 	void collectionsReferredToAsRefLocals() {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(COLLECTIONS_XSD_CONTEXT);
@@ -417,8 +455,7 @@ class XmlBeanFactoryTests {
 		assertThat(tbs.containsKey("inheritedTestBeanSingleton")).isTrue();
 
 		// abstract bean should throw exception on creation attempt
-		assertThatExceptionOfType(BeanIsAbstractException.class).isThrownBy(() ->
-				parent.getBean("inheritedTestBeanWithoutClass"));
+		assertThatExceptionOfType(BeanIsAbstractException.class).isThrownBy(() -> parent.getBean("inheritedTestBeanWithoutClass"));
 
 		// non-abstract bean should work, even if it serves as parent
 		assertThat(parent.getBean("inheritedTestBeanPrototype") instanceof TestBean).isTrue();
@@ -468,10 +505,7 @@ class XmlBeanFactoryTests {
 		new XmlBeanDefinitionReader(parent).loadBeanDefinitions(PARENT_CONTEXT);
 		DefaultListableBeanFactory child = new DefaultListableBeanFactory(parent);
 		new XmlBeanDefinitionReader(child).loadBeanDefinitions(CHILD_CONTEXT);
-		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
-				child.getBean("bogusParent", TestBean.class))
-			.withMessageContaining("bogusParent")
-			.withCauseInstanceOf(NoSuchBeanDefinitionException.class);
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() -> child.getBean("bogusParent", TestBean.class)).withMessageContaining("bogusParent").withCauseInstanceOf(NoSuchBeanDefinitionException.class);
 	}
 
 	/**
@@ -539,12 +573,8 @@ class XmlBeanFactoryTests {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
 		reader.loadBeanDefinitions(REFTYPES_CONTEXT);
-		assertThatExceptionOfType(BeanCreationException.class)
-				.isThrownBy(() -> xbf.getBean("jenny_constructor"))
-				.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
-		assertThatExceptionOfType(BeanCreationException.class)
-				.isThrownBy(() -> xbf.getBean("david_constructor"))
-				.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() -> xbf.getBean("jenny_constructor")).matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() -> xbf.getBean("david_constructor")).matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
 	}
 
 	@Test
@@ -553,12 +583,8 @@ class XmlBeanFactoryTests {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
 		reader.loadBeanDefinitions(REFTYPES_CONTEXT);
-		assertThatExceptionOfType(BeanCreationException.class)
-				.isThrownBy(() -> xbf.getBean("jenny_prototype"))
-				.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
-		assertThatExceptionOfType(BeanCreationException.class)
-				.isThrownBy(() -> xbf.getBean("david_prototype"))
-				.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() -> xbf.getBean("jenny_prototype")).matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() -> xbf.getBean("david_prototype")).matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
 	}
 
 	@Test
@@ -567,10 +593,8 @@ class XmlBeanFactoryTests {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
 		reader.loadBeanDefinitions(REFTYPES_CONTEXT);
-		assertThatExceptionOfType(BeanCreationException.class)
-				.isThrownBy(() -> xbf.getBean("jenny_depends_on"));
-		assertThatExceptionOfType(BeanCreationException.class)
-				.isThrownBy(() -> xbf.getBean("david_depends_on"));
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() -> xbf.getBean("jenny_depends_on"));
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() -> xbf.getBean("david_depends_on"));
 	}
 
 	@Test
@@ -603,9 +627,7 @@ class XmlBeanFactoryTests {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
 		reader.loadBeanDefinitions(REFTYPES_CONTEXT);
-		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
-				xbf.getBean("jenny"))
-			.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() -> xbf.getBean("jenny")).matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
 	}
 
 	@Test
@@ -615,9 +637,7 @@ class XmlBeanFactoryTests {
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
 		reader.loadBeanDefinitions(REFTYPES_CONTEXT);
 		xbf.addBeanPostProcessor(new WrappingPostProcessor());
-		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
-				xbf.getBean("jenny"))
-			.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() -> xbf.getBean("jenny")).matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
 	}
 
 	@Test
@@ -673,8 +693,7 @@ class XmlBeanFactoryTests {
 	void noSuchFactoryBeanMethod() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(NO_SUCH_FACTORY_METHOD_CONTEXT);
-		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
-				xbf.getBean("defaultTestBean"));
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() -> xbf.getBean("defaultTestBean"));
 	}
 
 	@Test
@@ -693,24 +712,17 @@ class XmlBeanFactoryTests {
 	void initMethodThrowsException() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(INITIALIZERS_CONTEXT);
-		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
-				xbf.getBean("init-method2"))
-			.withCauseInstanceOf(IOException.class)
-			.satisfies(ex -> {
-				assertThat(ex.getResourceDescription()).contains("initializers.xml");
-				assertThat(ex.getBeanName()).isEqualTo("init-method2");
-			});
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() -> xbf.getBean("init-method2")).withCauseInstanceOf(IOException.class).satisfies(ex -> {
+			assertThat(ex.getResourceDescription()).contains("initializers.xml");
+			assertThat(ex.getBeanName()).isEqualTo("init-method2");
+		});
 	}
 
 	@Test
 	void noSuchInitMethod() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(INITIALIZERS_CONTEXT);
-		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(() ->
-				xbf.getBean("init-method3"))
-			.withMessageContaining("initializers.xml")
-			.withMessageContaining("init-method3")
-			.withMessageContaining("init");
+		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(() -> xbf.getBean("init-method3")).withMessageContaining("initializers.xml").withMessageContaining("init-method3").withMessageContaining("init");
 	}
 
 	/**
@@ -774,15 +786,13 @@ class XmlBeanFactoryTests {
 	@Test
 	void noSuchXmlFile() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
-		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
-				new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(MISSING_CONTEXT));
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() -> new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(MISSING_CONTEXT));
 	}
 
 	@Test
 	void invalidXmlFile() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
-		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
-				new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(INVALID_CONTEXT));
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() -> new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(INVALID_CONTEXT));
 	}
 
 	@Test
@@ -839,8 +849,7 @@ class XmlBeanFactoryTests {
 		assertThat(rod3a.getSpouse2()).isEqualTo(kerry);
 		assertThat(rod3a.getOther()).isEqualTo(other);
 
-		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(() ->
-				xbf.getBean("rod4", ConstructorDependenciesBean.class));
+		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(() -> xbf.getBean("rod4", ConstructorDependenciesBean.class));
 
 		DependenciesBean rod5 = (DependenciesBean) xbf.getBean("rod5");
 		// Should not have been autowired
@@ -1027,16 +1036,14 @@ class XmlBeanFactoryTests {
 	void throwsExceptionOnTooManyArguments() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
-		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
-				xbf.getBean("rod7", ConstructorDependenciesBean.class));
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() -> xbf.getBean("rod7", ConstructorDependenciesBean.class));
 	}
 
 	@Test
 	void throwsExceptionOnAmbiguousResolution() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
-		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(() ->
-				xbf.getBean("rod8", ConstructorDependenciesBean.class));
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(() -> xbf.getBean("rod8", ConstructorDependenciesBean.class));
 	}
 
 	@Test
@@ -1122,10 +1129,7 @@ class XmlBeanFactoryTests {
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(CLASS_NOT_FOUND_CONTEXT);
 		// cool, no errors, so the rubbish class name in the bean def was not resolved
 		// let's resolve the bean definition; must blow up
-		assertThatExceptionOfType(CannotLoadBeanClassException.class).isThrownBy(() ->
-				factory.getBean("classNotFound"))
-			.withCauseInstanceOf(ClassNotFoundException.class)
-			.satisfies(ex -> assertThat(ex.getResourceDescription()).contains("classNotFound.xml"));
+		assertThatExceptionOfType(CannotLoadBeanClassException.class).isThrownBy(() -> factory.getBean("classNotFound")).withCauseInstanceOf(ClassNotFoundException.class).satisfies(ex -> assertThat(ex.getResourceDescription()).contains("classNotFound.xml"));
 	}
 
 	@Test
@@ -1196,8 +1200,7 @@ class XmlBeanFactoryTests {
 	@Test
 	void recursiveImport() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
-		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
-				new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(RECURSIVE_IMPORT_CONTEXT));
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() -> new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(RECURSIVE_IMPORT_CONTEXT));
 	}
 
 	/**
@@ -1260,8 +1263,7 @@ class XmlBeanFactoryTests {
 		assertThat(tb.getName()).isEqualTo("Jenny");
 	}
 
-	private void lookupOverrideMethodsWithSetterInjection(BeanFactory xbf,
-			String beanName, boolean singleton) {
+	private void lookupOverrideMethodsWithSetterInjection(BeanFactory xbf, String beanName, boolean singleton) {
 		OverrideOneMethod oom = (OverrideOneMethod) xbf.getBean(beanName);
 
 		if (singleton) {
@@ -1368,9 +1370,7 @@ class XmlBeanFactoryTests {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(INVALID_NO_SUCH_METHOD_CONTEXT);
-		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
-				xbf.getBean("constructorOverrides"))
-			.withMessageContaining("bogusMethod");
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() -> xbf.getBean("constructorOverrides")).withMessageContaining("bogusMethod");
 	}
 
 	@Test
@@ -1472,9 +1472,7 @@ class XmlBeanFactoryTests {
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) xbf.getBeanDefinition("lenientDependencyTestBean");
 		bd.setLenientConstructorResolution(false);
-		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
-				xbf.getBean("lenientDependencyTestBean"))
-			.satisfies(ex -> assertThat(ex.getMostSpecificCause().getMessage()).contains("Ambiguous"));
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() -> xbf.getBean("lenientDependencyTestBean")).satisfies(ex -> assertThat(ex.getMostSpecificCause().getMessage()).contains("Ambiguous"));
 	}
 
 	@Test
@@ -1483,9 +1481,7 @@ class XmlBeanFactoryTests {
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) xbf.getBeanDefinition("lenientDependencyTestBeanFactoryMethod");
 		bd.setLenientConstructorResolution(false);
-		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
-				xbf.getBean("lenientDependencyTestBeanFactoryMethod"))
-			.satisfies(ex -> assertThat(ex.getMostSpecificCause().getMessage()).contains("Ambiguous"));
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() -> xbf.getBean("lenientDependencyTestBeanFactoryMethod")).satisfies(ex -> assertThat(ex.getMostSpecificCause().getMessage()).contains("Ambiguous"));
 	}
 
 	@Test
@@ -1561,17 +1557,13 @@ class XmlBeanFactoryTests {
 	@Test
 	void withDuplicateName() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
-		assertThatExceptionOfType(BeansException.class).isThrownBy(() ->
-				new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(TEST_WITH_DUP_NAMES_CONTEXT))
-			.withMessageContaining("Bean name 'foo'");
+		assertThatExceptionOfType(BeansException.class).isThrownBy(() -> new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(TEST_WITH_DUP_NAMES_CONTEXT)).withMessageContaining("Bean name 'foo'");
 	}
 
 	@Test
 	void withDuplicateNameInAlias() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
-		assertThatExceptionOfType(BeansException.class).isThrownBy(() ->
-				new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(TEST_WITH_DUP_NAME_IN_ALIAS_CONTEXT))
-			.withMessageContaining("Bean name 'foo'");
+		assertThatExceptionOfType(BeansException.class).isThrownBy(() -> new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(TEST_WITH_DUP_NAME_IN_ALIAS_CONTEXT)).withMessageContaining("Bean name 'foo'");
 	}
 
 	@Test
@@ -1593,6 +1585,157 @@ class XmlBeanFactoryTests {
 		assertThat(oom.replaceMe(1)).as("should not replace").isEqualTo("replaceMe:1");
 		assertThat(oom.replaceMe("abc")).as("should replace").isEqualTo("cba");
 	}
+
+
+	@Test
+	void beanPostProcessorSupport() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
+		reader.loadBeanDefinitions(new EncodedResource(BEAN_LIFECYCLE_NOTICE_CONTEXT, "ISO-8859-1"));
+
+		xbf.addBeanPostProcessor(new CustomerBeanPostProcess());
+		xbf.addBeanLifecycleNotice(new CustomerBeanLifecycleNotice());
+
+		BeanLifecycleNoticeObj1 beanLifecycleNoticeObj1 = xbf.getBean("beanLifecycleNoticeObj1", BeanLifecycleNoticeObj1.class);
+
+		assertThat(beanLifecycleNoticeObj1.handlerBefore).isTrue();
+		assertThat(beanLifecycleNoticeObj1.handlerAfter).isTrue();
+		assertThat(beanLifecycleNoticeObj1.created).isTrue();
+
+
+		BeanLifecycleNoticeObj2 beanLifecycleNoticeObj2 = xbf.getBean("beanLifecycleNoticeObj2", BeanLifecycleNoticeObj2.class);
+		assertThat(beanLifecycleNoticeObj2.handlerBefore).isFalse();
+		assertThat(beanLifecycleNoticeObj2.handlerAfter).isFalse();
+
+
+		xbf.destroyBean(beanLifecycleNoticeObj1);
+
+
+		System.out.println();
+
+	}
+
+	public static class CustomerBeanLifecycleNotice implements BeanLifecycleNotice {
+		@Override
+		public void notice(BeanLifecycleEnum lifecycleEnum, BeanLifecycleEvent event) {
+			switch (lifecycleEnum) {
+				case created:
+					handlerCreated(event);
+					break;
+
+				case destroyed:
+					handlerDestroyed(event);
+					break;
+
+			}
+		}
+
+		public void handlerCreated(BeanLifecycleEvent event) {
+			Object bean = event.getBean();
+
+			if (bean instanceof BeanLifecycleNoticeObj1) {
+				((BeanLifecycleNoticeObj1) bean).setCreated(true);
+			}
+		}
+
+		public void handlerDestroyed(BeanLifecycleEvent event) {
+			Object bean = event.getBean();
+			if (bean instanceof BeanLifecycleNoticeObj1) {
+				assertThat(((BeanLifecycleNoticeObj1) bean).isDestroyed()).isFalse();
+			}
+		}
+	}
+
+
+	static class BeanLifecycleNoticeObj1 {
+		private boolean handlerBefore;
+
+		private boolean handlerAfter;
+
+		private boolean created;
+
+		private boolean destroyed;
+
+		public boolean isDestroyed() {
+			return destroyed;
+		}
+
+		public void setDestroyed(boolean destroyed) {
+			this.destroyed = destroyed;
+		}
+
+		public boolean isCreated() {
+			return created;
+		}
+
+		public void setCreated(boolean created) {
+			this.created = created;
+		}
+
+		public boolean isHandlerBefore() {
+			return handlerBefore;
+		}
+
+		public void setHandlerBefore(boolean handlerBefore) {
+			this.handlerBefore = handlerBefore;
+		}
+
+		public boolean isHandlerAfter() {
+			return handlerAfter;
+		}
+
+		public void setHandlerAfter(boolean handlerAfter) {
+			this.handlerAfter = handlerAfter;
+		}
+	}
+
+	static class BeanLifecycleNoticeObj2 {
+		private boolean handlerBefore;
+
+		private boolean handlerAfter;
+
+		public boolean isHandlerBefore() {
+			return handlerBefore;
+		}
+
+		public void setHandlerBefore(boolean handlerBefore) {
+			this.handlerBefore = handlerBefore;
+		}
+
+		public boolean isHandlerAfter() {
+			return handlerAfter;
+		}
+
+		public void setHandlerAfter(boolean handlerAfter) {
+			this.handlerAfter = handlerAfter;
+		}
+	}
+
+
+	static class CustomerBeanPostProcess implements BeanPostProcessor {
+		@Override
+		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+			if (bean instanceof BeanLifecycleNoticeObj1) {
+				((BeanLifecycleNoticeObj1) bean).setHandlerBefore(true);
+			}
+			return BeanPostProcessor.super.postProcessBeforeInitialization(bean, beanName);
+		}
+
+		@Override
+		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+			if (bean instanceof BeanLifecycleNoticeObj1) {
+				((BeanLifecycleNoticeObj1) bean).setHandlerAfter(true);
+			}
+			return BeanPostProcessor.super.postProcessAfterInitialization(bean, beanName);
+		}
+
+		@Override
+		public boolean support(Object bean, String beanName) {
+			return bean instanceof BeanLifecycleNoticeObj1;
+		}
+	}
+
 
 	static class DoSomethingReplacer implements MethodReplacer {
 
@@ -1770,9 +1913,9 @@ class XmlBeanFactoryTests {
 
 		public static int destroyCount = 0;
 
-		private DependingBean dependingBean;
-
 		public boolean destroyed = false;
+
+		private DependingBean dependingBean;
 
 		public void setDependingBean(DependingBean dependingBean) {
 			this.dependingBean = dependingBean;
@@ -1791,8 +1934,9 @@ class XmlBeanFactoryTests {
 
 	static class DoubleBooleanConstructorBean {
 
-		private Boolean boolean1;
-		private Boolean boolean2;
+		private final Boolean boolean1;
+
+		private final Boolean boolean2;
 
 		public DoubleBooleanConstructorBean(Boolean b1, Boolean b2) {
 			this.boolean1 = b1;

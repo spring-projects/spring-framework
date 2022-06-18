@@ -101,4 +101,15 @@ public interface BeanPostProcessor {
 		return bean;
 	}
 
+	/**
+	 *  Used to determine whether the current beanPostProcess can process
+	 * @param bean the new bean instance
+	 * @param beanName the name of the bean
+	 * @return true or false
+	 */
+	@Nullable
+	default boolean support(Object bean, String beanName) {
+		return true;
+	}
+
 }

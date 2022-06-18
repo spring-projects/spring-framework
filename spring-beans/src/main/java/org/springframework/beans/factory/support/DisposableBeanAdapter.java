@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.config.BeanLifecycleNotice;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -103,7 +104,9 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * (potentially DestructionAwareBeanPostProcessor), if any
 	 */
 	public DisposableBeanAdapter(Object bean, String beanName, RootBeanDefinition beanDefinition,
-			List<DestructionAwareBeanPostProcessor> postProcessors, @Nullable AccessControlContext acc) {
+			List<DestructionAwareBeanPostProcessor> postProcessors, @Nullable AccessControlContext acc,
+			@Nullable List<BeanLifecycleNotice> beanLifecycleNotices
+	) {
 
 		Assert.notNull(bean, "Disposable bean must not be null");
 		this.bean = bean;
@@ -147,6 +150,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
 		this.beanPostProcessors = filterPostProcessors(postProcessors, bean);
 		this.acc = acc;
+		this.beanLifecycleNotices = beanLifecycleNotices;
 	}
 
 	/**
@@ -156,7 +160,9 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * (potentially DestructionAwareBeanPostProcessor), if any
 	 */
 	public DisposableBeanAdapter(
-			Object bean, List<DestructionAwareBeanPostProcessor> postProcessors, AccessControlContext acc) {
+			Object bean, List<DestructionAwareBeanPostProcessor> postProcessors, AccessControlContext acc,
+			List<BeanLifecycleNotice> beanLifecycleNotices
+	) {
 
 		Assert.notNull(bean, "Disposable bean must not be null");
 		this.bean = bean;
@@ -165,14 +171,19 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		this.invokeDisposableBean = (this.bean instanceof DisposableBean);
 		this.beanPostProcessors = filterPostProcessors(postProcessors, bean);
 		this.acc = acc;
+		this.beanLifecycleNotices = beanLifecycleNotices;
 	}
+
+	private  List<BeanLifecycleNotice> beanLifecycleNotices;
 
 	/**
 	 * Create a new DisposableBeanAdapter for the given bean.
 	 */
 	private DisposableBeanAdapter(Object bean, String beanName, boolean nonPublicAccessAllowed,
 			boolean invokeDisposableBean, boolean invokeAutoCloseable, @Nullable String destroyMethodName,
-			@Nullable List<DestructionAwareBeanPostProcessor> postProcessors) {
+			@Nullable List<DestructionAwareBeanPostProcessor> postProcessors,
+			@Nullable List<BeanLifecycleNotice> beanLifecycleNotices
+	) {
 
 		this.bean = bean;
 		this.beanName = beanName;
@@ -182,6 +193,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		this.destroyMethodName = destroyMethodName;
 		this.beanPostProcessors = postProcessors;
 		this.acc = null;
+		this.beanLifecycleNotices = beanLifecycleNotices;
 	}
 
 
@@ -258,6 +270,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 				invokeCustomDestroyMethod(ClassUtils.getInterfaceMethodIfPossible(destroyMethod, this.bean.getClass()));
 			}
 		}
+
 	}
 
 
@@ -352,7 +365,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		}
 		return new DisposableBeanAdapter(
 				this.bean, this.beanName, this.nonPublicAccessAllowed, this.invokeDisposableBean,
-				this.invokeAutoCloseable, this.destroyMethodName, serializablePostProcessors);
+				this.invokeAutoCloseable, this.destroyMethodName, serializablePostProcessors,this.beanLifecycleNotices);
 	}
 
 
