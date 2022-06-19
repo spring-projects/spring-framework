@@ -84,9 +84,11 @@ class RuntimeHintsBeanFactoryInitializationAotProcessor
 
 		Set<Class<? extends RuntimeHintsRegistrar>> registrars = new LinkedHashSet<>();
 		for (Class<? extends RuntimeHintsRegistrar> registrarClass : annotation.value()) {
-			logger.trace(
-					LogMessage.format("Loaded [%s] registrar from annotated bean [%s]",
-							registrarClass.getCanonicalName(), beanName));
+			if (logger.isTraceEnabled()) {
+				logger.trace(
+						LogMessage.format("Loaded [%s] registrar from annotated bean [%s]",
+								registrarClass.getCanonicalName(), beanName));
+			}
 			registrars.add(registrarClass);
 		}
 		return registrars;
@@ -115,9 +117,11 @@ class RuntimeHintsBeanFactoryInitializationAotProcessor
 				BeanFactoryInitializationCode beanFactoryInitializationCode) {
 			RuntimeHints hints = generationContext.getRuntimeHints();
 			this.registrars.forEach(registrar -> {
-				logger.trace(LogMessage.format(
-						"Processing RuntimeHints contribution from [%s]",
-						registrar.getClass().getCanonicalName()));
+				if (logger.isTraceEnabled()) {
+					logger.trace(LogMessage.format(
+							"Processing RuntimeHints contribution from [%s]",
+							registrar.getClass().getCanonicalName()));
+				}
 				registrar.registerHints(hints, this.beanClassLoader);
 			});
 		}
