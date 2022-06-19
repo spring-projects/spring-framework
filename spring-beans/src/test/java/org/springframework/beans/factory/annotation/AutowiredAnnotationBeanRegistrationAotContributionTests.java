@@ -31,6 +31,8 @@ import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.generate.MethodGenerator;
 import org.springframework.aot.generate.MethodReference;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.RuntimeHintsPredicates;
 import org.springframework.aot.test.generator.compile.CompileWithTargetClassAccess;
 import org.springframework.aot.test.generator.compile.Compiled;
 import org.springframework.aot.test.generator.compile.TestCompiler;
@@ -51,7 +53,7 @@ import org.springframework.javapoet.TypeSpec;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link AutowiredAnnotationBeanRegistrationAotContribution}.
+ * Tests for {@link AutowiredAnnotationBeanPostProcessor} for AOT contributions.
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
@@ -63,6 +65,8 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 
 	private GenerationContext generationContext;
 
+	private RuntimeHints runtimeHints;
+
 	private MockBeanRegistrationCode beanRegistrationCode;
 
 	private DefaultListableBeanFactory beanFactory;
@@ -71,6 +75,7 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 	void setup() {
 		this.generatedFiles = new InMemoryGeneratedFiles();
 		this.generationContext = new DefaultGenerationContext(this.generatedFiles);
+		this.runtimeHints = this.generationContext.getRuntimeHints();
 		this.beanRegistrationCode = new MockBeanRegistrationCode();
 		this.beanFactory = new DefaultListableBeanFactory();
 	}
@@ -81,6 +86,9 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 		this.beanFactory.registerSingleton("environment", environment);
 		RegisteredBean registeredBean = getAndApplyContribution(
 				PrivateFieldInjectionSample.class);
+		assertThat(RuntimeHintsPredicates.reflection()
+				.onField(PrivateFieldInjectionSample.class, "environment").allowWrite())
+				.accepts(this.runtimeHints);
 		testCompiledResult(registeredBean, (postProcessor, compiled) -> {
 			PrivateFieldInjectionSample instance = new PrivateFieldInjectionSample();
 			postProcessor.apply(registeredBean, instance);
@@ -97,6 +105,9 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 		this.beanFactory.registerSingleton("environment", environment);
 		RegisteredBean registeredBean = getAndApplyContribution(
 				PackagePrivateFieldInjectionSample.class);
+		assertThat(RuntimeHintsPredicates.reflection()
+				.onField(PackagePrivateFieldInjectionSample.class, "environment").allowWrite())
+				.accepts(this.runtimeHints);
 		testCompiledResult(registeredBean, (postProcessor, compiled) -> {
 			PackagePrivateFieldInjectionSample instance = new PackagePrivateFieldInjectionSample();
 			postProcessor.apply(registeredBean, instance);
@@ -112,6 +123,9 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 		this.beanFactory.registerSingleton("environment", environment);
 		RegisteredBean registeredBean = getAndApplyContribution(
 				PrivateMethodInjectionSample.class);
+		assertThat(RuntimeHintsPredicates.reflection()
+				.onMethod(PrivateMethodInjectionSample.class, "setTestBean").invoke())
+				.accepts(this.runtimeHints);
 		testCompiledResult(registeredBean, (postProcessor, compiled) -> {
 			PrivateMethodInjectionSample instance = new PrivateMethodInjectionSample();
 			postProcessor.apply(registeredBean, instance);
@@ -128,6 +142,9 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 		this.beanFactory.registerSingleton("environment", environment);
 		RegisteredBean registeredBean = getAndApplyContribution(
 				PackagePrivateMethodInjectionSample.class);
+		assertThat(RuntimeHintsPredicates.reflection()
+				.onMethod(PackagePrivateMethodInjectionSample.class, "setTestBean").introspect())
+				.accepts(this.runtimeHints);
 		testCompiledResult(registeredBean, (postProcessor, compiled) -> {
 			PackagePrivateMethodInjectionSample instance = new PackagePrivateMethodInjectionSample();
 			postProcessor.apply(registeredBean, instance);
@@ -141,6 +158,7 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 		RegisteredBean registeredBean = registerBean(beanClass);
 		BeanRegistrationAotContribution contribution = new AutowiredAnnotationBeanPostProcessor()
 				.processAheadOfTime(registeredBean);
+		assertThat(contribution).isNotNull();
 		contribution.applyTo(this.generationContext, this.beanRegistrationCode);
 		return registeredBean;
 	}

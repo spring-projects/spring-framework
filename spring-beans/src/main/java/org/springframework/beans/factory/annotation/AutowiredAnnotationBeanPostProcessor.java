@@ -964,13 +964,13 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		private CodeBlock generateMethodStatementForField(Field field, boolean required,
 				RuntimeHints hints) {
 
+			hints.reflection().registerField(field, ALLOW_WRITE);
 			CodeBlock resolver = CodeBlock.of("$T.$L($S)",
 					AutowiredFieldValueResolver.class,
 					(!required) ? "forField" : "forRequiredField", field.getName());
 			AccessVisibility visibility = AccessVisibility.forMember(field);
 			if (visibility == AccessVisibility.PRIVATE
 					|| visibility == AccessVisibility.PROTECTED) {
-				hints.reflection().registerField(field, ALLOW_WRITE);
 				return CodeBlock.of("$L.resolveAndSet($L, $L)", resolver,
 						REGISTERED_BEAN_PARAMETER, INSTANCE_PARAMETER);
 			}
