@@ -34,6 +34,7 @@ import org.springframework.util.ReflectionUtils;
 /**
  * Generator of {@link ReflectionHints} predicates, testing whether the given hints
  * match the expected behavior for reflection.
+ *
  * @author Brian Clozel
  * @since 6.0
  */
@@ -265,6 +266,7 @@ public class ReflectionHintsPredicates {
 			super(constructor);
 		}
 
+		@Override
 		MemberCategory[] getPublicMemberCategories() {
 			if (this.executableMode == ExecutableMode.INTROSPECT) {
 				return new MemberCategory[] {MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS,
@@ -273,6 +275,7 @@ public class ReflectionHintsPredicates {
 			return new MemberCategory[] {MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS};
 		}
 
+		@Override
 		MemberCategory[] getDeclaredMemberCategories() {
 			if (this.executableMode == ExecutableMode.INTROSPECT) {
 				return new MemberCategory[] {MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
@@ -299,6 +302,7 @@ public class ReflectionHintsPredicates {
 			super(method);
 		}
 
+		@Override
 		MemberCategory[] getPublicMemberCategories() {
 			if (this.executableMode == ExecutableMode.INTROSPECT) {
 				return new MemberCategory[] {MemberCategory.INTROSPECT_PUBLIC_METHODS,
@@ -307,6 +311,7 @@ public class ReflectionHintsPredicates {
 			return new MemberCategory[] {MemberCategory.INVOKE_PUBLIC_METHODS};
 		}
 
+		@Override
 		MemberCategory[] getDeclaredMemberCategories() {
 
 			if (this.executableMode == ExecutableMode.INTROSPECT) {

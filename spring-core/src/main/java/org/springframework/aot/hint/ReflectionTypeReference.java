@@ -22,6 +22,7 @@ import org.springframework.lang.Nullable;
  * A {@link TypeReference} based on a {@link Class}.
  *
  * @author Stephane Nicoll
+ * @since 6.0
  */
 final class ReflectionTypeReference extends AbstractTypeReference {
 

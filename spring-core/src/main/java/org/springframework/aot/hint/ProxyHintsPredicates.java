@@ -24,6 +24,7 @@ import org.springframework.util.Assert;
 /**
  * Generator of {@link ProxyHints} predicates, testing whether the given hints
  * match the expected behavior for proxies.
+ *
  * @author Brian Clozel
  * @since 6.0
  */

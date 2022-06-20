@@ -18,7 +18,8 @@ package org.springframework.aot.hint;
 
 /**
  * Static generator of predicates that test whether the given {@link RuntimeHints}
- * instance matches the expected behavior for reflection, resource or proxy generation.
+ * instance matches the expected behavior for reflection, resource, or proxy generation.
+ *
  * <p>This utility class can be used by {@link RuntimeHintsRegistrar} to conditionally
  * register hints depending on what's present already. This can also be used as a
  * testing utility for checking proper registration of hints:
@@ -26,6 +27,7 @@ package org.springframework.aot.hint;
  * Predicate&lt;RuntimeHints&gt; predicate = RuntimeHintsPredicates.reflection().onMethod(MyClass.class, "someMethod").invoke();
  * assertThat(predicate).accepts(runtimeHints);
  * </pre>
+ *
  * @author Brian Clozel
  * @since 6.0
  */
@@ -39,7 +41,6 @@ public abstract class RuntimeHintsPredicates {
 
 
 	private RuntimeHintsPredicates() {
-
 	}
 
 	/**

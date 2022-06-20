@@ -25,6 +25,7 @@ import org.springframework.util.ConcurrentLruCache;
 /**
  * Generator of {@link ResourceHints} predicates, testing whether the given hints
  * match the expected behavior for resources.
+ *
  * @author Brian Clozel
  * @since 6.0
  */

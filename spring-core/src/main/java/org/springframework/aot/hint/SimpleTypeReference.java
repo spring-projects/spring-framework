@@ -27,6 +27,7 @@ import org.springframework.util.Assert;
  * A {@link TypeReference} based on fully qualified name.
  *
  * @author Stephane Nicoll
+ * @since 6.0
  */
 final class SimpleTypeReference extends AbstractTypeReference {
 
