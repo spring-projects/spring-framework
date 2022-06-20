@@ -83,7 +83,7 @@ import static org.springframework.web.testfixture.method.ResolvableMethod.on;
  */
 public class ResponseEntityResultHandlerTests {
 
-	private static final String NEWLINE_SYSTEM_PROPERTY = System.getProperty("line.separator");
+	private static final String NEWLINE_SYSTEM_PROPERTY = System.lineSeparator();
 
 
 	private ResponseEntityResultHandler resultHandler;

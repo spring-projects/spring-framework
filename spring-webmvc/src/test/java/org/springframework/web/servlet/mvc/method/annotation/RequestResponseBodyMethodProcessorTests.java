@@ -89,7 +89,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 @SuppressWarnings("unused")
 public class RequestResponseBodyMethodProcessorTests {
 
-	protected static final String NEWLINE_SYSTEM_PROPERTY = System.getProperty("line.separator");
+	protected static final String NEWLINE_SYSTEM_PROPERTY = System.lineSeparator();
 
 
 	private ModelAndViewContainer container;
