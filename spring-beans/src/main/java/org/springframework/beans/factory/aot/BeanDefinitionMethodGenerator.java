@@ -111,7 +111,7 @@ class BeanDefinitionMethodGenerator {
 				beanRegistrationsCode.getClassName(), methodGenerator, codeFragments,
 				Modifier.PRIVATE);
 		return MethodReference.ofStatic(beanRegistrationsCode.getClassName(),
-				generatedMethod.getName().toString());
+				generatedMethod.getName());
 	}
 
 	private BeanRegistrationCodeFragments getCodeFragments(GenerationContext generationContext,
