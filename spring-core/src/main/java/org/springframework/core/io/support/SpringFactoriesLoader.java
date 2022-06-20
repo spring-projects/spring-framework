@@ -296,7 +296,7 @@ public class SpringFactoriesLoader {
 	 * @see #forDefaultResourceLocation()
 	 */
 	public static SpringFactoriesLoader forDefaultResourceLocation(@Nullable ClassLoader classLoader) {
-		return forResourceLocation(classLoader, FACTORIES_RESOURCE_LOCATION);
+		return forResourceLocation(FACTORIES_RESOURCE_LOCATION, classLoader);
 	}
 
 	/**
@@ -306,24 +306,24 @@ public class SpringFactoriesLoader {
 	 * @param resourceLocation the resource location to look for factories
 	 * @return a {@link SpringFactoriesLoader} instance
 	 * @since 6.0
-	 * @see #forResourceLocation(ClassLoader, String)
+	 * @see #forResourceLocation(String, ClassLoader)
 	 */
 	public static SpringFactoriesLoader forResourceLocation(String resourceLocation) {
-		return forResourceLocation(null, resourceLocation);
+		return forResourceLocation(resourceLocation, null);
 	}
 
 	/**
 	 * Create a {@link SpringFactoriesLoader} instance that will load and
 	 * instantiate the factory implementations from the given location, using
 	 * the given class loader.
+	 * @param resourceLocation the resource location to look for factories
 	 * @param classLoader the ClassLoader to use for loading resources; can be
 	 * {@code null} to use the default
-	 * @param resourceLocation the resource location to look for factories
 	 * @return a {@link SpringFactoriesLoader} instance
 	 * @since 6.0
 	 * @see #forResourceLocation(String)
 	 */
-	public static SpringFactoriesLoader forResourceLocation(@Nullable ClassLoader classLoader, String resourceLocation) {
+	public static SpringFactoriesLoader forResourceLocation(String resourceLocation, @Nullable ClassLoader classLoader) {
 		Assert.hasText(resourceLocation, "'resourceLocation' must not be empty");
 		ClassLoader resourceClassLoader = (classLoader != null ? classLoader :
 				SpringFactoriesLoader.class.getClassLoader());

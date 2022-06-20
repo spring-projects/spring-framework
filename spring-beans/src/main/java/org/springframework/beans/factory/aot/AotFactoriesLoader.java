@@ -62,8 +62,8 @@ public class AotFactoriesLoader {
 		ClassLoader classLoader = (beanFactory instanceof ConfigurableBeanFactory configurableBeanFactory)
 				? configurableBeanFactory.getBeanClassLoader() : null;
 		this.beanFactory = beanFactory;
-		this.factoriesLoader = SpringFactoriesLoader.forResourceLocation(classLoader,
-				FACTORIES_RESOURCE_LOCATION);
+		this.factoriesLoader = SpringFactoriesLoader.forResourceLocation(FACTORIES_RESOURCE_LOCATION,
+				classLoader);
 	}
 
 	/**
