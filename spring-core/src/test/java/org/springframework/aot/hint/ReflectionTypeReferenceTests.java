@@ -44,10 +44,14 @@ class ReflectionTypeReferenceTests {
 				Arguments.of(ReflectionTypeReference.of(int[].class), "int[]"),
 				Arguments.of(ReflectionTypeReference.of(Integer[].class), "java.lang.Integer[]"),
 				Arguments.of(ReflectionTypeReference.of(Object[].class), "java.lang.Object[]"),
-				Arguments.of(ReflectionTypeReference.of(StaticInner.class), "org.springframework.aot.hint.ReflectionTypeReferenceTests$StaticInner"),
-				Arguments.of(ReflectionTypeReference.of(StaticInner[].class), "org.springframework.aot.hint.ReflectionTypeReferenceTests$StaticInner[]"),
-				Arguments.of(ReflectionTypeReference.of(Inner.class), "org.springframework.aot.hint.ReflectionTypeReferenceTests$Inner"),
-				Arguments.of(ReflectionTypeReference.of(Inner[].class), "org.springframework.aot.hint.ReflectionTypeReferenceTests$Inner[]")
+				Arguments.of(ReflectionTypeReference.of(StaticInner.class),
+						"org.springframework.aot.hint.ReflectionTypeReferenceTests$StaticInner"),
+				Arguments.of(ReflectionTypeReference.of(StaticInner[].class),
+						"org.springframework.aot.hint.ReflectionTypeReferenceTests$StaticInner[]"),
+				Arguments.of(ReflectionTypeReference.of(Inner.class),
+						"org.springframework.aot.hint.ReflectionTypeReferenceTests$Inner"),
+				Arguments.of(ReflectionTypeReference.of(Inner[].class),
+						"org.springframework.aot.hint.ReflectionTypeReferenceTests$Inner[]")
 		);
 	}
 

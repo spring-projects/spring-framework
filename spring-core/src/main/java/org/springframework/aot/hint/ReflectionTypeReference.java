@@ -28,21 +28,16 @@ final class ReflectionTypeReference extends AbstractTypeReference {
 	private final Class<?> type;
 
 	private ReflectionTypeReference(Class<?> type) {
-		super(type.getPackageName(), type.getSimpleName(), safeCreate(getEnclosingClass(type)));
+		super(type.getPackageName(), type.getSimpleName(), getEnclosingClass(type));
 		this.type = type;
 	}
 
 	@Nullable
-	private static Class<?> getEnclosingClass(Class<?> type) {
-		if (type.isArray()) {
-			return type.getComponentType().getEnclosingClass();
-		}
-		return type.getEnclosingClass();
-	}
-
-	@Nullable
-	private static ReflectionTypeReference safeCreate(@Nullable Class<?> type) {
-		return (type != null ? new ReflectionTypeReference(type) : null);
+	private static TypeReference getEnclosingClass(Class<?> type) {
+		Class<?> candidate = (type.isArray()
+				? type.getComponentType().getEnclosingClass()
+				: type.getEnclosingClass());
+		return (candidate != null ? new ReflectionTypeReference(candidate) : null);
 	}
 
 	static ReflectionTypeReference of(Class<?> type) {
