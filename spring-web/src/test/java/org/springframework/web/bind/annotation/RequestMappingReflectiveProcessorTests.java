@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.TypeReference;
+import org.springframework.http.HttpEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -112,6 +113,58 @@ public class RequestMappingReflectiveProcessorTests {
 				assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleControllerWithClassMapping.class)));
 	}
 
+	@Test
+	void registerReflectiveHintsForMethodReturningHttpEntity() throws NoSuchMethodException {
+		Method method = SampleController.class.getDeclaredMethod("getHttpEntity");
+		processor.registerReflectionHints(hints, method);
+		assertThat(hints.typeHints()).satisfiesExactlyInAnyOrder(
+				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleController.class)),
+				typeHint -> {
+					assertThat(typeHint.getType()).isEqualTo(TypeReference.of(Response.class));
+					assertThat(typeHint.getMemberCategories()).containsExactlyInAnyOrder(
+							MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+							MemberCategory.DECLARED_FIELDS);
+					assertThat(typeHint.methods()).satisfiesExactlyInAnyOrder(
+							hint -> assertThat(hint.getName()).isEqualTo("getMessage"),
+							hint -> assertThat(hint.getName()).isEqualTo("setMessage"));
+				},
+				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(String.class)));
+	}
+
+	@Test
+	void registerReflectiveHintsForMethodReturningRawHttpEntity() throws NoSuchMethodException {
+		Method method = SampleController.class.getDeclaredMethod("getRawHttpEntity");
+		processor.registerReflectionHints(hints, method);
+		assertThat(hints.typeHints()).singleElement().satisfies(
+				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleController.class)));
+	}
+
+	@Test
+	void registerReflectiveHintsForMethodWithHttpEntityParameter() throws NoSuchMethodException {
+		Method method = SampleController.class.getDeclaredMethod("postHttpEntity", HttpEntity.class);
+		processor.registerReflectionHints(hints, method);
+		assertThat(hints.typeHints()).satisfiesExactlyInAnyOrder(
+				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleController.class)),
+				typeHint -> {
+					assertThat(typeHint.getType()).isEqualTo(TypeReference.of(Request.class));
+					assertThat(typeHint.getMemberCategories()).containsExactlyInAnyOrder(
+							MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+							MemberCategory.DECLARED_FIELDS);
+					assertThat(typeHint.methods()).satisfiesExactlyInAnyOrder(
+							hint -> assertThat(hint.getName()).isEqualTo("getMessage"),
+							hint -> assertThat(hint.getName()).isEqualTo("setMessage"));
+				},
+				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(String.class)));
+	}
+
+	@Test
+	void registerReflectiveHintsForMethodWithRawHttpEntityParameter() throws NoSuchMethodException {
+		Method method = SampleController.class.getDeclaredMethod("postRawHttpEntity", HttpEntity.class);
+		processor.registerReflectionHints(hints, method);
+		assertThat(hints.typeHints()).singleElement().satisfies(
+				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleController.class)));
+	}
+
 	static class SampleController {
 
 		@GetMapping
@@ -129,6 +182,25 @@ public class RequestMappingReflectiveProcessorTests {
 		String message() {
 			return "";
 		}
+
+		@GetMapping
+		HttpEntity<Response> getHttpEntity() {
+			return new HttpEntity(new Response("response"));
+		}
+
+		@GetMapping
+		HttpEntity getRawHttpEntity() {
+			return new HttpEntity(new Response("response"));
+		}
+
+		@PostMapping
+		void postHttpEntity(HttpEntity<Request>  entity) {
+		}
+
+		@PostMapping
+		void postRawHttpEntity(HttpEntity  entity) {
+		}
+
 	}
 
 	@RestController

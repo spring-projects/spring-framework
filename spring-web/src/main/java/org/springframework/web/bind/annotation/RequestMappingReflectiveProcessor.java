@@ -19,6 +19,7 @@ package org.springframework.web.bind.annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.ReflectionHints;
@@ -26,13 +27,18 @@ import org.springframework.aot.hint.annotation.ReflectiveProcessor;
 import org.springframework.aot.hint.support.BindingReflectionHintsRegistrar;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.http.HttpEntity;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link ReflectiveProcessor} implementation for {@link RequestMapping}
  * annotated types. On top of registering reflection hints for invoking
- * the annotated method, this implementation handles return types annotated
- * with {@link ResponseBody} and parameters annotated with {@link RequestBody}
- * which are serialized as well.
+ * the annotated method, this implementation handles:
+ * <ul>
+ *     <li>Return types annotated with {@link ResponseBody}.</li>
+ *     <li>Parameters annotated with {@link RequestBody}.</li>
+ *     <li>{@link HttpEntity} return type and parameters.</li>
+ * </ul>
  *
  * @author Stephane Nicoll
  * @author Sebastien Deleuze
@@ -45,29 +51,51 @@ class RequestMappingReflectiveProcessor implements ReflectiveProcessor {
 	@Override
 	public void registerReflectionHints(ReflectionHints hints, AnnotatedElement element) {
 		if (element instanceof Class<?> type) {
-			registerTypeHint(hints, type);
+			registerTypeHints(hints, type);
 		}
 		else if (element instanceof Method method) {
-			registerMethodHint(hints, method);
+			registerMethodHints(hints, method);
 		}
 	}
 
-	protected void registerTypeHint(ReflectionHints hints, Class<?> type) {
+	protected void registerTypeHints(ReflectionHints hints, Class<?> type) {
 		hints.registerType(type, hint -> {});
 	}
 
-	protected void registerMethodHint(ReflectionHints hints, Method method) {
+	protected void registerMethodHints(ReflectionHints hints, Method method) {
+		hints.registerMethod(method, hint -> hint.setModes(ExecutableMode.INVOKE));
+		registerParameterHints(hints, method);
+		registerReturnValueHints(hints, method);
+	}
+
+	protected void registerParameterHints(ReflectionHints hints, Method method) {
 		hints.registerMethod(method, hint -> hint.setModes(ExecutableMode.INVOKE));
 		for (Parameter parameter : method.getParameters()) {
 			MethodParameter methodParameter = MethodParameter.forParameter(parameter);
 			if (methodParameter.hasParameterAnnotation(RequestBody.class)) {
 				this.bindingRegistrar.registerReflectionHints(hints, methodParameter.getGenericParameterType());
 			}
+			else if (HttpEntity.class.isAssignableFrom(methodParameter.getParameterType())) {
+				this.bindingRegistrar.registerReflectionHints(hints, getHttpEntityType(methodParameter));
+			}
 		}
+	}
+
+	protected void registerReturnValueHints(ReflectionHints hints, Method method) {
 		MethodParameter returnType = MethodParameter.forExecutable(method, -1);
 		if (AnnotatedElementUtils.hasAnnotation(returnType.getContainingClass(), ResponseBody.class) ||
 				returnType.hasMethodAnnotation(ResponseBody.class)) {
 			this.bindingRegistrar.registerReflectionHints(hints, returnType.getGenericParameterType());
 		}
+		else if (HttpEntity.class.isAssignableFrom(returnType.getParameterType())) {
+			this.bindingRegistrar.registerReflectionHints(hints, getHttpEntityType(returnType));
+		}
 	}
+
+	@Nullable
+	protected Type getHttpEntityType(MethodParameter parameter) {
+		MethodParameter nestedParameter = parameter.nested();
+		return (nestedParameter.getNestedParameterType() == nestedParameter.getParameterType() ? null : nestedParameter.getNestedParameterType());
+	}
+
 }

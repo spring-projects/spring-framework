@@ -38,6 +38,7 @@ import org.springframework.aot.hint.TypeHint.Builder;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -123,8 +124,8 @@ public class BindingReflectionHintsRegistrar {
 		}
 	}
 
-	private void collectReferencedTypes(Set<Type> seen, Set<Class<?>> types, Type type) {
-		if (seen.contains(type)) {
+	private void collectReferencedTypes(Set<Type> seen, Set<Class<?>> types, @Nullable Type type) {
+		if (type == null || seen.contains(type)) {
 			return;
 		}
 		seen.add(type);
