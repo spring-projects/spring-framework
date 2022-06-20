@@ -16,8 +16,6 @@
 
 package org.springframework.beans.factory.annotation;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
@@ -29,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.InMemoryGeneratedFiles;
-import org.springframework.aot.generate.MethodGenerator;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsPredicates;
@@ -37,13 +34,12 @@ import org.springframework.aot.test.generator.compile.CompileWithTargetClassAcce
 import org.springframework.aot.test.generator.compile.Compiled;
 import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
-import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.factory.aot.MockBeanRegistrationCode;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
-import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.JavaFile;
 import org.springframework.javapoet.MethodSpec;
@@ -180,7 +176,7 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 	}
 
 	private JavaFile createJavaFile(Class<?> target) {
-		MethodReference methodReference = this.beanRegistrationCode.instancePostProcessors
+		MethodReference methodReference = this.beanRegistrationCode.getInstancePostProcessors()
 				.get(0);
 		TypeSpec.Builder builder = TypeSpec.classBuilder("TestPostProcessor");
 		builder.addModifiers(Modifier.PUBLIC);
@@ -193,28 +189,6 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 						CodeBlock.of("registeredBean"), CodeBlock.of("instance")))
 				.build());
 		return JavaFile.builder("__", builder.build()).build();
-	}
-
-
-	private static class MockBeanRegistrationCode implements BeanRegistrationCode {
-
-		private final List<MethodReference> instancePostProcessors = new ArrayList<>();
-
-		@Override
-		public ClassName getClassName() {
-			return null;
-		}
-
-		@Override
-		public MethodGenerator getMethodGenerator() {
-			return null;
-		}
-
-		@Override
-		public void addInstancePostProcessor(MethodReference methodReference) {
-			this.instancePostProcessors.add(methodReference);
-		}
-
 	}
 
 }

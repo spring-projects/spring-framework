@@ -14,29 +14,38 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.scope;
+package org.springframework.beans.testfixture.beans.factory.aot;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.springframework.aot.generate.GeneratedMethods;
-import org.springframework.aot.generate.MethodGenerator;
-import org.springframework.beans.factory.aot.BeanRegistrationsCode;
+import org.springframework.aot.generate.MethodReference;
+import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.javapoet.ClassName;
 
 /**
- * Mock {@link BeanRegistrationsCode} implementation.
+ * Mock {@link BeanRegistrationCode} implementation.
  *
+ * @author Stephane Nicoll
  * @author Phillip Webb
  */
-class MockBeanRegistrationsCode implements BeanRegistrationsCode {
+public class MockBeanRegistrationCode implements BeanRegistrationCode {
 
 	private final ClassName className;
 
 	private final GeneratedMethods generatedMethods = new GeneratedMethods();
 
+	private final List<MethodReference> instancePostProcessors = new ArrayList<>();
 
-	MockBeanRegistrationsCode(ClassName className) {
+	public MockBeanRegistrationCode(ClassName className) {
 		this.className = className;
 	}
 
+	public MockBeanRegistrationCode() {
+		this(ClassName.get("com.example", "Test"));
+	}
 
 	@Override
 	public ClassName getClassName() {
@@ -44,12 +53,17 @@ class MockBeanRegistrationsCode implements BeanRegistrationsCode {
 	}
 
 	@Override
-	public MethodGenerator getMethodGenerator() {
+	public GeneratedMethods getMethodGenerator() {
 		return this.generatedMethods;
 	}
 
-	GeneratedMethods getGeneratedMethods() {
-		return this.generatedMethods;
+	@Override
+	public void addInstancePostProcessor(MethodReference methodReference) {
+		this.instancePostProcessors.add(methodReference);
+	}
+
+	public List<MethodReference> getInstancePostProcessors() {
+		return Collections.unmodifiableList(this.instancePostProcessors);
 	}
 
 }

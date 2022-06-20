@@ -16,8 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -27,17 +25,15 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.DefaultGenerationContext;
-import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.InMemoryGeneratedFiles;
-import org.springframework.aot.generate.MethodGenerator;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.hint.ResourcePatternHint;
 import org.springframework.aot.test.generator.compile.Compiled;
 import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
-import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.factory.aot.MockBeanFactoryInitializationCode;
 import org.springframework.beans.testfixture.beans.factory.generator.SimpleConfiguration;
 import org.springframework.context.testfixture.context.generator.annotation.ImportAwareConfiguration;
 import org.springframework.context.testfixture.context.generator.annotation.ImportConfiguration;
@@ -121,7 +117,7 @@ class ConfigurationClassPostProcessorAotContributionTests {
 	}
 
 	private JavaFile createJavaFile() {
-		MethodReference methodReference = this.beanFactoryInitializationCode.initializers
+		MethodReference methodReference = this.beanFactoryInitializationCode.getInitializers()
 				.get(0);
 		TypeSpec.Builder builder = TypeSpec.classBuilder("TestConsumer");
 		builder.addModifiers(Modifier.PUBLIC);
@@ -132,7 +128,7 @@ class ConfigurationClassPostProcessorAotContributionTests {
 				.addStatement(
 						methodReference.toInvokeCodeBlock(CodeBlock.of("beanFactory")))
 				.build());
-		this.beanFactoryInitializationCode.generatedMethods
+		this.beanFactoryInitializationCode.getMethodGenerator()
 				.doWithMethodSpecs(builder::addMethod);
 		return JavaFile.builder("__", builder.build()).build();
 	}
@@ -142,24 +138,6 @@ class ConfigurationClassPostProcessorAotContributionTests {
 		assertThat(postProcessor).extracting("importsMapping")
 				.asInstanceOf(InstanceOfAssertFactories.MAP)
 				.containsExactly(entry(key.getName(), value.getName()));
-	}
-
-	class MockBeanFactoryInitializationCode implements BeanFactoryInitializationCode {
-
-		private final GeneratedMethods generatedMethods = new GeneratedMethods();
-
-		private final List<MethodReference> initializers = new ArrayList<>();
-
-		@Override
-		public MethodGenerator getMethodGenerator() {
-			return this.generatedMethods;
-		}
-
-		@Override
-		public void addInitializer(MethodReference methodReference) {
-			this.initializers.add(methodReference);
-		}
-
 	}
 
 }

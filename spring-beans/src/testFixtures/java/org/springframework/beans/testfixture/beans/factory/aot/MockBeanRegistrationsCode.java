@@ -14,28 +14,31 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.aot;
+package org.springframework.beans.testfixture.beans.factory.aot;
 
 import org.springframework.aot.generate.GeneratedMethods;
-import org.springframework.aot.generate.MethodGenerator;
+import org.springframework.beans.factory.aot.BeanRegistrationsCode;
 import org.springframework.javapoet.ClassName;
 
 /**
  * Mock {@link BeanRegistrationsCode} implementation.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
-class MockBeanRegistrationsCode implements BeanRegistrationsCode {
+public class MockBeanRegistrationsCode implements BeanRegistrationsCode {
 
 	private final ClassName className;
 
 	private final GeneratedMethods generatedMethods = new GeneratedMethods();
 
-
-	MockBeanRegistrationsCode(ClassName className) {
+	public MockBeanRegistrationsCode(ClassName className) {
 		this.className = className;
 	}
 
+	public MockBeanRegistrationsCode() {
+		this(ClassName.get("com.example", "Test"));
+	}
 
 	@Override
 	public ClassName getClassName() {
@@ -43,11 +46,7 @@ class MockBeanRegistrationsCode implements BeanRegistrationsCode {
 	}
 
 	@Override
-	public MethodGenerator getMethodGenerator() {
-		return this.generatedMethods;
-	}
-
-	GeneratedMethods getGeneratedMethods() {
+	public GeneratedMethods getMethodGenerator() {
 		return this.generatedMethods;
 	}
 

@@ -17,8 +17,6 @@
 package org.springframework.aop.scope;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 import java.util.function.BiConsumer;
 
@@ -27,16 +25,13 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aot.generate.DefaultGenerationContext;
-import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.InMemoryGeneratedFiles;
-import org.springframework.aot.generate.MethodGenerator;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.test.generator.compile.Compiled;
 import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.aot.AotFactoriesLoader;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
-import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.TestBeanRegistrationsAotProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -44,6 +39,7 @@ import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.factory.aot.MockBeanFactoryInitializationCode;
 import org.springframework.beans.testfixture.beans.factory.generator.factory.NumberHolder;
 import org.springframework.core.ResolvableType;
 import org.springframework.util.ReflectionUtils;
@@ -156,29 +152,6 @@ class ScopedProxyBeanRegistrationAotProcessorTests {
 			ReflectionUtils.invokeMethod(method, instance, freshBeanFactory);
 			result.accept(freshBeanFactory, compiled);
 		});
-	}
-
-
-	static class MockBeanFactoryInitializationCode implements BeanFactoryInitializationCode {
-
-		private final GeneratedMethods generatedMethods = new GeneratedMethods();
-
-		private final List<MethodReference> initializers = new ArrayList<>();
-
-		@Override
-		public MethodGenerator getMethodGenerator() {
-			return this.generatedMethods;
-		}
-
-		@Override
-		public void addInitializer(MethodReference methodReference) {
-			this.initializers.add(methodReference);
-		}
-
-		List<MethodReference> getInitializers() {
-			return this.initializers;
-		}
-
 	}
 
 }

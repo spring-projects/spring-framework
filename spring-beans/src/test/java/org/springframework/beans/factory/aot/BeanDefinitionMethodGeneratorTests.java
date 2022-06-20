@@ -47,6 +47,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.AnnotatedBean;
 import org.springframework.beans.testfixture.beans.GenericBean;
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.beans.testfixture.beans.factory.aot.MockBeanRegistrationsCode;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.mock.MockSpringFactoriesLoader;
 import org.springframework.javapoet.ClassName;
@@ -385,7 +386,7 @@ class BeanDefinitionMethodGeneratorTests {
 		builder.addMethod(MethodSpec.methodBuilder("get").addModifiers(Modifier.PUBLIC)
 				.returns(BeanDefinition.class)
 				.addCode("return $L;", method.toInvokeCodeBlock()).build());
-		this.beanRegistrationsCode.getGeneratedMethods()
+		this.beanRegistrationsCode.getMethodGenerator()
 				.doWithMethodSpecs(builder::addMethod);
 		return JavaFile.builder("__", builder.build()).build();
 	}
