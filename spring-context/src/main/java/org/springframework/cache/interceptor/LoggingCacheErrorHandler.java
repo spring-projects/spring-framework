@@ -16,6 +16,8 @@
 
 package org.springframework.cache.interceptor;
 
+import java.util.function.Supplier;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -78,47 +80,71 @@ public class LoggingCacheErrorHandler implements CacheErrorHandler {
 
 	@Override
 	public void handleCacheGetError(RuntimeException exception, Cache cache, Object key) {
-		logCacheError(logger,
-				createMessage(cache, "failed to get entry with key '" + key + "'"),
+		logCacheError(
+				() -> String.format("Cache '%s' failed to get entry with key '%s'", cache.getName(), key),
 				exception);
 	}
 
 	@Override
 	public void handleCachePutError(RuntimeException exception, Cache cache, Object key, @Nullable Object value) {
-		logCacheError(logger,
-				createMessage(cache, "failed to put entry with key '" + key + "'"),
+		logCacheError(
+				() -> String.format("Cache '%s' failed to put entry with key '%s'", cache.getName(), key),
 				exception);
 	}
 
 	@Override
 	public void handleCacheEvictError(RuntimeException exception, Cache cache, Object key) {
-		logCacheError(logger,
-				createMessage(cache, "failed to evict entry with key '" + key + "'"),
+		logCacheError(
+				() -> String.format("Cache '%s' failed to evict entry with key '%s'", cache.getName(), key),
 				exception);
 	}
 
 	@Override
 	public void handleCacheClearError(RuntimeException exception, Cache cache) {
-		logCacheError(logger, createMessage(cache, "failed to clear entries"), exception);
+		logCacheError(
+				() -> String.format("Cache '%s' failed to clear entries", cache.getName()),
+				exception);
+	}
+
+
+	/**
+	 * Get the logger for this {@code LoggingCacheErrorHandler}.
+	 * @return the logger
+	 * @since 5.3.22
+	 */
+	protected final Log getLogger() {
+		return logger;
 	}
 
 	/**
-	 * Log the specified message.
-	 * @param logger the logger
-	 * @param message the message
-	 * @param ex the exception
+	 * Get the {@code logStackTraces} flag for this {@code LoggingCacheErrorHandler}.
+	 * @return {@code true} if this {@code LoggingCacheErrorHandler} logs stack traces
+	 * @since 5.3.22
 	 */
-	protected void logCacheError(Log logger, String message, RuntimeException ex) {
-		if (this.logStackTraces) {
-			logger.warn(message, ex);
-		}
-		else {
-			logger.warn(message);
-		}
+	protected final boolean isLogStackTraces() {
+		return this.logStackTraces;
 	}
 
-	private String createMessage(Cache cache, String reason) {
-		return String.format("Cache '%s' %s", cache.getName(), reason);
+	/**
+	 * Log the cache error message in the given supplier.
+	 * <p>If {@link #isLogStackTraces()} is {@code true}, the given
+	 * {@code exception} will be logged as well.
+	 * <p>The default implementation logs the message as a warning.
+	 * @param messageSupplier the message supplier
+	 * @param exception the exception thrown by the cache provider
+	 * @since 5.3.22
+	 * @see #isLogStackTraces()
+	 * @see #getLogger()
+	 */
+	protected void logCacheError(Supplier<String> messageSupplier, RuntimeException exception) {
+		if (getLogger().isWarnEnabled()) {
+			if (isLogStackTraces()) {
+				getLogger().warn(messageSupplier.get(), exception);
+			}
+			else {
+				getLogger().warn(messageSupplier.get());
+			}
+		}
 	}
 
 }
