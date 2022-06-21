@@ -69,7 +69,7 @@ public final class TypeHint implements ConditionalHint {
 	 * @return a builder
 	 */
 	public static Builder of(TypeReference type) {
-		Assert.notNull(type, "Type must not be null");
+		Assert.notNull(type, "'type' must not be null");
 		return new Builder(type);
 	}
 

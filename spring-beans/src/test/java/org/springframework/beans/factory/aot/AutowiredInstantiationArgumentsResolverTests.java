@@ -76,7 +76,7 @@ class AutowiredInstantiationArgumentsResolverTests {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> AutowiredInstantiationArgumentsResolver
 						.forConstructor((Class<?>[]) null))
-				.withMessage("ParameterTypes must not be null");
+				.withMessage("'parameterTypes' must not be null");
 	}
 
 	@Test
@@ -84,7 +84,7 @@ class AutowiredInstantiationArgumentsResolverTests {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> AutowiredInstantiationArgumentsResolver
 						.forConstructor(String.class, null))
-				.withMessage("ParameterTypes must not contain null elements");
+				.withMessage("'parameterTypes' must not contain null elements");
 	}
 
 	@Test
@@ -104,7 +104,7 @@ class AutowiredInstantiationArgumentsResolverTests {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> AutowiredInstantiationArgumentsResolver
 						.forFactoryMethod(null, "test"))
-				.withMessage("DeclaringClass must not be null");
+				.withMessage("'declaringClass' must not be null");
 	}
 
 	@Test
@@ -112,7 +112,7 @@ class AutowiredInstantiationArgumentsResolverTests {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> AutowiredInstantiationArgumentsResolver
 						.forFactoryMethod(SingleArgFactory.class, ""))
-				.withMessage("MethodName must not be empty");
+				.withMessage("'methodName' must not be empty");
 	}
 
 	@Test
@@ -121,7 +121,7 @@ class AutowiredInstantiationArgumentsResolverTests {
 				.isThrownBy(
 						() -> AutowiredInstantiationArgumentsResolver.forFactoryMethod(
 								SingleArgFactory.class, "single", (Class<?>[]) null))
-				.withMessage("ParameterTypes must not be null");
+				.withMessage("'parameterTypes' must not be null");
 	}
 
 	@Test
@@ -130,7 +130,7 @@ class AutowiredInstantiationArgumentsResolverTests {
 				.isThrownBy(
 						() -> AutowiredInstantiationArgumentsResolver.forFactoryMethod(
 								SingleArgFactory.class, "single", String.class, null))
-				.withMessage("ParameterTypes must not contain null elements");
+				.withMessage("'parameterTypes' must not contain null elements");
 	}
 
 	@Test
@@ -153,7 +153,7 @@ class AutowiredInstantiationArgumentsResolverTests {
 		RegisteredBean registerBean = source.registerBean(this.beanFactory);
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> resolver.resolve(registerBean, null))
-				.withMessage("Action must not be null");
+				.withMessage("'action' must not be null");
 	}
 
 	@Test
@@ -174,7 +174,7 @@ class AutowiredInstantiationArgumentsResolverTests {
 		AutowiredInstantiationArgumentsResolver resolver = AutowiredInstantiationArgumentsResolver
 				.forConstructor(String.class);
 		assertThatIllegalArgumentException().isThrownBy(() -> resolver.resolve(null))
-				.withMessage("RegisteredBean must not be null");
+				.withMessage("'registeredBean' must not be null");
 	}
 
 	@ParameterizedResolverTest(Sources.SINGLE_ARG)

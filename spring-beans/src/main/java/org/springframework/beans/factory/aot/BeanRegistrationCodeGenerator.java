@@ -75,7 +75,7 @@ class BeanRegistrationCodeGenerator implements BeanRegistrationCode {
 
 	@Override
 	public void addInstancePostProcessor(MethodReference methodReference) {
-		Assert.notNull(methodReference, "MethodReference must not be null");
+		Assert.notNull(methodReference, "'methodReference' must not be null");
 		this.instancePostProcessors.add(methodReference);
 	}
 

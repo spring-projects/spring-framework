@@ -53,7 +53,7 @@ public abstract class BeanRegistrationCodeFragments {
 
 
 	protected BeanRegistrationCodeFragments(BeanRegistrationCodeFragments codeFragments) {
-		Assert.notNull(codeFragments, "CodeFragments must not be null");
+		Assert.notNull(codeFragments, "'codeFragments' must not be null");
 		this.codeFragments = codeFragments;
 	}
 

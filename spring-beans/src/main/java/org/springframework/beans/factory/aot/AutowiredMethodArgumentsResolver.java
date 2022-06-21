@@ -69,7 +69,7 @@ public final class AutowiredMethodArgumentsResolver extends AutowiredElementReso
 	private AutowiredMethodArgumentsResolver(String methodName, Class<?>[] parameterTypes,
 			boolean required, @Nullable String[] shortcuts) {
 
-		Assert.hasText(methodName, "MethodName must not be empty");
+		Assert.hasText(methodName, "'methodName' must not be empty");
 		this.methodName = methodName;
 		this.parameterTypes = parameterTypes;
 		this.required = required;
@@ -126,8 +126,8 @@ public final class AutowiredMethodArgumentsResolver extends AutowiredElementReso
 	public void resolve(RegisteredBean registeredBean,
 			ThrowingConsumer<AutowiredArguments> action) {
 
-		Assert.notNull(registeredBean, "RegisteredBean must not be null");
-		Assert.notNull(action, "Action must not be null");
+		Assert.notNull(registeredBean, "'registeredBean' must not be null");
+		Assert.notNull(action, "'action' must not be null");
 		AutowiredArguments resolved = resolve(registeredBean);
 		if (resolved != null) {
 			action.accept(resolved);
@@ -141,7 +141,7 @@ public final class AutowiredMethodArgumentsResolver extends AutowiredElementReso
 	 */
 	@Nullable
 	public AutowiredArguments resolve(RegisteredBean registeredBean) {
-		Assert.notNull(registeredBean, "RegisteredBean must not be null");
+		Assert.notNull(registeredBean, "'registeredBean' must not be null");
 		return resolveArguments(registeredBean, getMethod(registeredBean));
 	}
 
@@ -152,8 +152,8 @@ public final class AutowiredMethodArgumentsResolver extends AutowiredElementReso
 	 * @param instance the bean instance
 	 */
 	public void resolveAndInvoke(RegisteredBean registeredBean, Object instance) {
-		Assert.notNull(registeredBean, "RegisteredBean must not be null");
-		Assert.notNull(instance, "Instance must not be null");
+		Assert.notNull(registeredBean, "'registeredBean' must not be null");
+		Assert.notNull(instance, "'instance' must not be null");
 		Method method = getMethod(registeredBean);
 		AutowiredArguments resolved = resolveArguments(registeredBean, method);
 		if (resolved != null) {

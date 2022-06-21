@@ -42,7 +42,7 @@ final class SimpleTypeReference extends AbstractTypeReference {
 	}
 
 	static SimpleTypeReference of(String className) {
-		Assert.notNull(className, "ClassName must not be null");
+		Assert.notNull(className, "'className' must not be null");
 		if (!isValidClassName(className)) {
 			throw new IllegalStateException("Invalid class name '" + className + "'");
 		}

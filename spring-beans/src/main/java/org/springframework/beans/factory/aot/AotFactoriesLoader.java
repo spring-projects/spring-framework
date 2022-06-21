@@ -58,7 +58,7 @@ public class AotFactoriesLoader {
 	 * @param beanFactory the bean factory to use
 	 */
 	public AotFactoriesLoader(ListableBeanFactory beanFactory) {
-		Assert.notNull(beanFactory, "BeanFactory must not be null");
+		Assert.notNull(beanFactory, "'beanFactory' must not be null");
 		ClassLoader classLoader = (beanFactory instanceof ConfigurableBeanFactory configurableBeanFactory)
 				? configurableBeanFactory.getBeanClassLoader() : null;
 		this.beanFactory = beanFactory;
@@ -76,8 +76,8 @@ public class AotFactoriesLoader {
 	public AotFactoriesLoader(ListableBeanFactory beanFactory,
 			SpringFactoriesLoader factoriesLoader) {
 
-		Assert.notNull(beanFactory, "BeanFactory must not be null");
-		Assert.notNull(factoriesLoader, "FactoriesLoader must not be null");
+		Assert.notNull(beanFactory, "'beanFactory' must not be null");
+		Assert.notNull(factoriesLoader, "'factoriesLoader' must not be null");
 		this.beanFactory = beanFactory;
 		this.factoriesLoader = factoriesLoader;
 	}

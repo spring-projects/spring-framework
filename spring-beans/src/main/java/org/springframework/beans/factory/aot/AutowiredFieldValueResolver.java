@@ -64,7 +64,7 @@ public final class AutowiredFieldValueResolver extends AutowiredElementResolver 
 	private AutowiredFieldValueResolver(String fieldName, boolean required,
 			@Nullable String shortcut) {
 
-		Assert.hasText(fieldName, "FieldName must not be empty");
+		Assert.hasText(fieldName, "'fieldName' must not be empty");
 		this.fieldName = fieldName;
 		this.required = required;
 		this.shortcut = shortcut;
@@ -110,8 +110,8 @@ public final class AutowiredFieldValueResolver extends AutowiredElementResolver 
 	 * @param action the action to execute with the resolved field value
 	 */
 	public <T> void resolve(RegisteredBean registeredBean, ThrowingConsumer<T> action) {
-		Assert.notNull(registeredBean, "RegisteredBean must not be null");
-		Assert.notNull(action, "Action must not be null");
+		Assert.notNull(registeredBean, "'registeredBean' must not be null");
+		Assert.notNull(action, "'action' must not be null");
 		T resolved = resolve(registeredBean);
 		if (resolved != null) {
 			action.accept(resolved);
@@ -150,7 +150,7 @@ public final class AutowiredFieldValueResolver extends AutowiredElementResolver 
 	 */
 	@Nullable
 	public Object resolveObject(RegisteredBean registeredBean) {
-		Assert.notNull(registeredBean, "RegisteredBean must not be null");
+		Assert.notNull(registeredBean, "'registeredBean' must not be null");
 		return resolveValue(registeredBean, getField(registeredBean));
 	}
 
@@ -161,8 +161,8 @@ public final class AutowiredFieldValueResolver extends AutowiredElementResolver 
 	 * @param instance the bean instance
 	 */
 	public void resolveAndSet(RegisteredBean registeredBean, Object instance) {
-		Assert.notNull(registeredBean, "RegisteredBean must not be null");
-		Assert.notNull(instance, "Instance must not be null");
+		Assert.notNull(registeredBean, "'registeredBean' must not be null");
+		Assert.notNull(instance, "'instance' must not be null");
 		Field field = getField(registeredBean);
 		Object resolved = resolveValue(registeredBean, field);
 		if (resolved != null) {

@@ -94,9 +94,9 @@ public final class AutowiredInstantiationArgumentsResolver extends AutowiredElem
 	public static AutowiredInstantiationArgumentsResolver forConstructor(
 			Class<?>... parameterTypes) {
 
-		Assert.notNull(parameterTypes, "ParameterTypes must not be null");
+		Assert.notNull(parameterTypes, "'parameterTypes' must not be null");
 		Assert.noNullElements(parameterTypes,
-				"ParameterTypes must not contain null elements");
+				"'parameterTypes' must not contain null elements");
 		return new AutowiredInstantiationArgumentsResolver(
 				new ConstructorLookup(parameterTypes), null);
 	}
@@ -112,11 +112,11 @@ public final class AutowiredInstantiationArgumentsResolver extends AutowiredElem
 	public static AutowiredInstantiationArgumentsResolver forFactoryMethod(
 			Class<?> declaringClass, String methodName, Class<?>... parameterTypes) {
 
-		Assert.notNull(declaringClass, "DeclaringClass must not be null");
-		Assert.hasText(methodName, "MethodName must not be empty");
-		Assert.notNull(parameterTypes, "ParameterTypes must not be null");
+		Assert.notNull(declaringClass, "'declaringClass' must not be null");
+		Assert.hasText(methodName, "'methodName' must not be empty");
+		Assert.notNull(parameterTypes, "'parameterTypes' must not be null");
 		Assert.noNullElements(parameterTypes,
-				"ParameterTypes must not contain null elements");
+				"'parameterTypes' must not contain null elements");
 		return new AutowiredInstantiationArgumentsResolver(
 				new FactoryMethodLookup(declaringClass, methodName, parameterTypes),
 				null);
@@ -149,8 +149,8 @@ public final class AutowiredInstantiationArgumentsResolver extends AutowiredElem
 	public <T> T resolve(RegisteredBean registeredBean,
 			ThrowingFunction<AutowiredArguments, T> generator) {
 
-		Assert.notNull(registeredBean, "RegisteredBean must not be null");
-		Assert.notNull(generator, "Action must not be null");
+		Assert.notNull(registeredBean, "'registeredBean' must not be null");
+		Assert.notNull(generator, "'action' must not be null");
 		AutowiredArguments resolved = resolveArguments(registeredBean,
 				this.lookup.get(registeredBean));
 		return generator.apply(resolved);
@@ -162,7 +162,7 @@ public final class AutowiredInstantiationArgumentsResolver extends AutowiredElem
 	 * @return the resolved constructor or factory method arguments
 	 */
 	public AutowiredArguments resolve(RegisteredBean registeredBean) {
-		Assert.notNull(registeredBean, "RegisteredBean must not be null");
+		Assert.notNull(registeredBean, "'registeredBean' must not be null");
 		return resolveArguments(registeredBean, this.lookup.get(registeredBean));
 	}
 
@@ -188,8 +188,8 @@ public final class AutowiredInstantiationArgumentsResolver extends AutowiredElem
 	public <T> T resolveAndInstantiate(RegisteredBean registeredBean,
 			Class<T> requiredType) {
 
-		Assert.notNull(registeredBean, "RegisteredBean must not be null");
-		Assert.notNull(registeredBean, "RequiredType must not be null");
+		Assert.notNull(registeredBean, "'registeredBean' must not be null");
+		Assert.notNull(registeredBean, "'requiredType' must not be null");
 		Executable executable = this.lookup.get(registeredBean);
 		AutowiredArguments arguments = resolveArguments(registeredBean, executable);
 		Object instance = instantiate(registeredBean.getBeanFactory(), executable,
