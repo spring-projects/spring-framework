@@ -24,45 +24,55 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * A {@link CacheErrorHandler} implementation that logs error message. Can be
- * used when underlying cache errors should be ignored.
+ * A {@link CacheErrorHandler} implementation that logs error messages.
+ *
+ * <p>Can be used when underlying cache errors should be ignored.
  *
  * @author Adam Ostrožlík
  * @author Stephane Nicoll
  * @author Vedran Pavic
+ * @author Sam Brannen
  * @since 5.3.16
  */
 public class LoggingCacheErrorHandler implements CacheErrorHandler {
 
 	private final Log logger;
 
-	private final boolean logStacktrace;
+	private final boolean logStackTraces;
 
 
 	/**
-	 * Create an instance with the {@link Log logger} to use.
-	 * @param logger the logger to use
-	 * @param logStacktrace whether to log stack trace
-	 */
-	public LoggingCacheErrorHandler(Log logger, boolean logStacktrace) {
-		Assert.notNull(logger, "Logger must not be null");
-		this.logger = logger;
-		this.logStacktrace = logStacktrace;
-	}
-
-	/**
-	 * Create an instance.
-	 * @param logStacktrace whether to log stacktrace
-	 */
-	public LoggingCacheErrorHandler(boolean logStacktrace) {
-		this(LogFactory.getLog(LoggingCacheErrorHandler.class), logStacktrace);
-	}
-
-	/**
-	 * Create an instance that does not log stack traces.
+	 * Create a {@code LoggingCacheErrorHandler} that uses the default logging
+	 * category and does not log stack traces.
+	 * <p>The default logging category is
+	 * "{@code org.springframework.cache.interceptor.LoggingCacheErrorHandler}".
 	 */
 	public LoggingCacheErrorHandler() {
 		this(false);
+	}
+
+	/**
+	 * Create a {@code LoggingCacheErrorHandler} that uses the default logging
+	 * category and the supplied {@code logStackTraces} flag.
+	 * <p>The default logging category is
+	 * "{@code org.springframework.cache.interceptor.LoggingCacheErrorHandler}".
+	 * @param logStackTraces whether to log stack traces
+	 * @since 5.3.22
+	 */
+	public LoggingCacheErrorHandler(boolean logStackTraces) {
+		this(LogFactory.getLog(LoggingCacheErrorHandler.class), logStackTraces);
+	}
+
+	/**
+	 * Create a {@code LoggingCacheErrorHandler} that uses the supplied
+	 * {@link Log logger} and {@code logStackTraces} flag.
+	 * @param logger the logger to use
+	 * @param logStackTraces whether to log stack traces
+	 */
+	public LoggingCacheErrorHandler(Log logger, boolean logStackTraces) {
+		Assert.notNull(logger, "'logger' must not be null");
+		this.logger = logger;
+		this.logStackTraces = logStackTraces;
 	}
 
 
@@ -99,7 +109,7 @@ public class LoggingCacheErrorHandler implements CacheErrorHandler {
 	 * @param ex the exception
 	 */
 	protected void logCacheError(Log logger, String message, RuntimeException ex) {
-		if (this.logStacktrace) {
+		if (this.logStackTraces) {
 			logger.warn(message, ex);
 		}
 		else {
