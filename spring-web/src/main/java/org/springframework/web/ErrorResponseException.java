@@ -32,7 +32,7 @@ import org.springframework.lang.Nullable;
  * <p>The exception can be used as is, or it can be extended as a more specific
  * exception that populates the {@link ProblemDetail#setType(URI) type} or
  * {@link ProblemDetail#setDetail(String) detail} fields, or potentially adds
- * other non-standard fields.
+ * other non-standard properties.
  *
  * @author Rossen Stoyanchev
  * @since 6.0

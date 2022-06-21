@@ -264,10 +264,11 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 	/**
 	 * Create a builder for a {@code ResponseEntity} with the given
-	 * {@link ProblemDetail} as the body, also matching to its
-	 * {@link ProblemDetail#getStatus() status}. An {@code @ExceptionHandler}
-	 * method can use to add response headers, or otherwise it can return
-	 * {@code ProblemDetail}.
+	 * {@link ProblemDetail} as the body, and its
+	 * {@link ProblemDetail#getStatus() status} as the status.
+	 * <p>Note that {@code ProblemDetail} is supported as a return value from
+	 * controller methods and from {@code @ExceptionHandler} methods. The method
+	 * here is convenient to also add response headers.
 	 * @param body the details for an HTTP error response
 	 * @return the created builder
 	 * @since 6.0

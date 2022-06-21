@@ -23,8 +23,11 @@ import org.springframework.util.Assert;
 
 /**
  * Representation of an RFC 7807 problem detail, including all RFC-defined
- * fields. For an extended response with more fields, create a subclass that
- * exposes the additional fields.
+ * properties.
+ *
+ * <p>For an extended response, create a subclass with additional properties.
+ * A subclass can use the {@link ProblemDetail#ProblemDetail(ProblemDetail)}
+ * copy constructor to extend an existing {@code ProblemDetail} instance.
  *
  * @author Rossen Stoyanchev
  * @since 6.0
@@ -63,8 +66,8 @@ public class ProblemDetail {
 	}
 
 	/**
-	 * Copy constructor that could be used from a subclass to re-create a
-	 * {@code ProblemDetail} in order to extend it with more fields.
+	 * Copy constructor that a subclass can use to re-create and extend a
+	 * {@code ProblemDetail} with additional properties.
 	 */
 	protected ProblemDetail(ProblemDetail other) {
 		this.type = other.type;
@@ -75,7 +78,7 @@ public class ProblemDetail {
 	}
 
 	/**
-	 * For deserialization.
+	 * No-arg constructor, for deserialization.
 	 */
 	protected ProblemDetail() {
 	}
