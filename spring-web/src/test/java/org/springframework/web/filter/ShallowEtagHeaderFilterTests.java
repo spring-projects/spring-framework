@@ -30,6 +30,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Tests for {@link ShallowEtagHeaderFilter}.
  * @author Arjen Poutsma
  * @author Brian Clozel
  * @author Juergen Hoeller

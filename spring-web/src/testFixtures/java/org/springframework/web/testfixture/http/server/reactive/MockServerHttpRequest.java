@@ -361,6 +361,12 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		B ifUnmodifiedSince(long ifUnmodifiedSince);
 
 		/**
+		 * Set the values of the {@code If-Match} header.
+		 * @param ifMatches the new value of the header
+		 */
+		B ifMatch(String... ifMatches);
+
+		/**
 		 * Set the values of the {@code If-None-Match} header.
 		 * @param ifNoneMatches the new value of the header
 		 */
@@ -553,6 +559,12 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		@Override
 		public BodyBuilder ifUnmodifiedSince(long ifUnmodifiedSince) {
 			this.headers.setIfUnmodifiedSince(ifUnmodifiedSince);
+			return this;
+		}
+
+		@Override
+		public BodyBuilder ifMatch(String... ifMatches) {
+			this.headers.setIfMatch(Arrays.asList(ifMatches));
 			return this;
 		}
 
