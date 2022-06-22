@@ -48,4 +48,7 @@ public class CannotGetJdbcConnectionException extends DataAccessResourceFailureE
 		super(msg, ex);
 	}
 
+	public CannotGetJdbcConnectionException(String msg, IllegalStateException ex) {
+		super(msg, ex);
+	}
 }
