@@ -240,6 +240,8 @@ configure(allprojects) { project ->
 			dependency "org.glassfish:jakarta.el:4.0.2"
 			dependency "org.glassfish.tyrus:tyrus-container-servlet:2.0.1"
 			dependency "org.eclipse.persistence:org.eclipse.persistence.jpa:3.0.2"
+
+			dependency "org.graalvm.nativeimage:svm:22.1.0.1"
 		}
 		generatedPomCustomization {
 			enabled = false

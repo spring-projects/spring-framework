@@ -17,6 +17,7 @@ configurations {
 	cglib
 	javapoet
 	objenesis
+	graalvm
 }
 
 task cglibRepackJar(type: ShadowJar) {
@@ -45,6 +46,7 @@ dependencies {
 	cglib("cglib:cglib:${cglibVersion}@jar")
 	javapoet("com.squareup:javapoet:${javapoetVersion}@jar")
 	objenesis("org.objenesis:objenesis:${objenesisVersion}@jar")
+	graalvm(project(path: ":spring-core-graalvm", configuration: 'classesOnlyElements'))
 	api(files(cglibRepackJar))
 	api(files(javapoetRepackJar))
 	api(files(objenesisRepackJar))
@@ -107,6 +109,8 @@ jar {
 	from(zipTree(objenesisRepackJar.archivePath)) {
 		include "org/springframework/objenesis/**"
 	}
+
+	from configurations.graalvm
 }
 
 test {
