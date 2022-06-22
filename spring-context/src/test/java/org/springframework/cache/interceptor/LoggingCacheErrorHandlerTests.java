@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.cache.Cache;
 import org.springframework.cache.support.NoOpCache;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -82,6 +83,12 @@ class LoggingCacheErrorHandlerTests {
 		RuntimeException exception = new RuntimeException();
 		this.handler.handleCacheGetError(exception, CACHE, KEY);
 		verify(this.logger).warn("Cache 'NOOP' failed to get entry with key 'enigma'", exception);
+	}
+
+	@Test
+	void constructorWithLoggerName() {
+		assertThatCode(() -> new LoggingCacheErrorHandler("org.apache.commons.logging.Log", true))
+				.doesNotThrowAnyException();
 	}
 
 }
