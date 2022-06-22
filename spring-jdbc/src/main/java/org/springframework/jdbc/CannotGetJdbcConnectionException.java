@@ -48,4 +48,13 @@ public class CannotGetJdbcConnectionException extends DataAccessResourceFailureE
 		super(msg, ex);
 	}
 
+	/**
+	 * Constructor for CannotGetJdbcConnectionException.
+	 * @param msg the detail message
+	 * @param ex the root cause IllegalStateException
+	 */
+	public CannotGetJdbcConnectionException(String msg, @Nullable IllegalStateException ex) {
+		super(msg, ex);
+	}
+
 }
