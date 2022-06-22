@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -39,11 +40,10 @@ import jakarta.persistence.PersistenceProperty;
 import jakarta.persistence.PersistenceUnit;
 import jakarta.persistence.SynchronizationType;
 
+import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.generate.GeneratedMethod;
-import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodGenerator;
-import org.springframework.aot.generate.MethodNameGenerator;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.beans.BeanUtils;
@@ -70,11 +70,9 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
-import org.springframework.javapoet.JavaFile;
 import org.springframework.javapoet.MethodSpec;
-import org.springframework.javapoet.TypeSpec;
+import org.springframework.javapoet.MethodSpec.Builder;
 import org.springframework.jndi.JndiLocatorDelegate;
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.lang.Nullable;
@@ -789,34 +787,27 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 		@Override
 		public void applyTo(GenerationContext generationContext,
 				BeanRegistrationCode beanRegistrationCode) {
-			ClassName className = generationContext.getClassNameGenerator()
-					.generateClassName(this.target, "PersistenceInjection");
-			TypeSpec.Builder classBuilder = TypeSpec.classBuilder(className);
-			classBuilder.addJavadoc("Persistence injection for {@link $T}.", this.target);
-			classBuilder.addModifiers(javax.lang.model.element.Modifier.PUBLIC);
-			GeneratedMethods methods = new GeneratedMethods(
-					new MethodNameGenerator(APPLY_METHOD));
-			classBuilder.addMethod(generateMethod(generationContext.getRuntimeHints(),
-					className, methods));
-			methods.doWithMethodSpecs(classBuilder::addMethod);
-			JavaFile javaFile = JavaFile
-					.builder(className.packageName(), classBuilder.build()).build();
-			generationContext.getGeneratedFiles().addSourceFile(javaFile);
+			GeneratedClass generatedClass = generationContext.getGeneratedClasses()
+					.forFeatureComponent("PersistenceInjection", this.target).generate(type -> {
+						type.addJavadoc("Persistence injection for {@link $T}.", this.target);
+						type.addModifiers(javax.lang.model.element.Modifier.PUBLIC);
+					});
+			generatedClass.getMethodGenerator().generateMethod(APPLY_METHOD)
+					.using(generateMethod(generationContext.getRuntimeHints(), generatedClass.getMethodGenerator()));
 			beanRegistrationCode.addInstancePostProcessor(
-					MethodReference.ofStatic(className, APPLY_METHOD));
+					MethodReference.ofStatic(generatedClass.getName(), APPLY_METHOD));
 		}
 
-		private MethodSpec generateMethod(RuntimeHints hints, ClassName className,
-				MethodGenerator methodGenerator) {
-			MethodSpec.Builder builder = MethodSpec.methodBuilder(APPLY_METHOD);
-			builder.addJavadoc("Apply the persistence injection.");
-			builder.addModifiers(javax.lang.model.element.Modifier.PUBLIC,
-					javax.lang.model.element.Modifier.STATIC);
-			builder.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER);
-			builder.addParameter(this.target, INSTANCE_PARAMETER);
-			builder.returns(this.target);
-			builder.addCode(generateMethodCode(hints, methodGenerator));
-			return builder.build();
+		private Consumer<Builder> generateMethod(RuntimeHints hints, MethodGenerator methodGenerator) {
+			return method -> {
+				method.addJavadoc("Apply the persistence injection.");
+				method.addModifiers(javax.lang.model.element.Modifier.PUBLIC,
+						javax.lang.model.element.Modifier.STATIC);
+				method.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER);
+				method.addParameter(this.target, INSTANCE_PARAMETER);
+				method.returns(this.target);
+				method.addCode(generateMethodCode(hints, methodGenerator));
+			};
 		}
 
 		private CodeBlock generateMethodCode(RuntimeHints hints,

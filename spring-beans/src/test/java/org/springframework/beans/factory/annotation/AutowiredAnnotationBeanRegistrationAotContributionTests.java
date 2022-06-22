@@ -25,7 +25,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.DefaultGenerationContext;
-import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.hint.RuntimeHints;
@@ -40,6 +39,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.factory.aot.MockBeanRegistrationCode;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.testfixture.aot.generate.TestGenerationContext;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.JavaFile;
 import org.springframework.javapoet.MethodSpec;
@@ -59,7 +59,7 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 
 	private InMemoryGeneratedFiles generatedFiles;
 
-	private GenerationContext generationContext;
+	private DefaultGenerationContext generationContext;
 
 	private RuntimeHints runtimeHints;
 
@@ -70,7 +70,7 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 	@BeforeEach
 	void setup() {
 		this.generatedFiles = new InMemoryGeneratedFiles();
-		this.generationContext = new DefaultGenerationContext(this.generatedFiles);
+		this.generationContext = new TestGenerationContext(this.generatedFiles);
 		this.runtimeHints = this.generationContext.getRuntimeHints();
 		this.beanRegistrationCode = new MockBeanRegistrationCode();
 		this.beanFactory = new DefaultListableBeanFactory();
@@ -169,6 +169,7 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 	@SuppressWarnings("unchecked")
 	private void testCompiledResult(RegisteredBean registeredBean,
 			BiConsumer<BiFunction<RegisteredBean, Object, Object>, Compiled> result) {
+		this.generationContext.writeGeneratedContent();
 		JavaFile javaFile = createJavaFile(registeredBean.getBeanClass());
 		TestCompiler.forSystem().withFiles(this.generatedFiles).compile(javaFile::writeTo,
 				compiled -> result.accept(compiled.getInstance(BiFunction.class),

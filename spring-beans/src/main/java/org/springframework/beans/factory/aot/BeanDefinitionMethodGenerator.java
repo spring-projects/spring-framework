@@ -21,10 +21,8 @@ import java.util.List;
 
 import javax.lang.model.element.Modifier;
 
-import org.springframework.aot.generate.ClassGenerator.JavaFileGenerator;
 import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.generate.GeneratedMethod;
-import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodGenerator;
 import org.springframework.aot.generate.MethodNameGenerator;
@@ -32,8 +30,6 @@ import org.springframework.aot.generate.MethodReference;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.javapoet.ClassName;
-import org.springframework.javapoet.JavaFile;
-import org.springframework.javapoet.TypeSpec;
 import org.springframework.lang.Nullable;
 
 /**
@@ -44,6 +40,8 @@ import org.springframework.lang.Nullable;
  * @see BeanDefinitionMethodGeneratorFactory
  */
 class BeanDefinitionMethodGenerator {
+
+	private static final String FEATURE_NAME = "BeanDefinitions";
 
 	private final BeanDefinitionMethodGeneratorFactory methodGeneratorFactory;
 
@@ -81,22 +79,23 @@ class BeanDefinitionMethodGenerator {
 	 * Generate the method that returns the {@link BeanDefinition} to be
 	 * registered.
 	 * @param generationContext the generation context
-	 * @param featureNamePrefix the prefix to use for the feature name
 	 * @param beanRegistrationsCode the bean registrations code
 	 * @return a reference to the generated method.
 	 */
 	MethodReference generateBeanDefinitionMethod(GenerationContext generationContext,
-			String featureNamePrefix, BeanRegistrationsCode beanRegistrationsCode) {
+			BeanRegistrationsCode beanRegistrationsCode) {
 
 		BeanRegistrationCodeFragments codeFragments = getCodeFragments(generationContext,
-				beanRegistrationsCode, featureNamePrefix);
+				beanRegistrationsCode);
 		Class<?> target = codeFragments.getTarget(this.registeredBean,
 				this.constructorOrFactoryMethod);
 		if (!target.getName().startsWith("java.")) {
-			String featureName = featureNamePrefix + "BeanDefinitions";
-			GeneratedClass generatedClass = generationContext.getClassGenerator()
-					.getOrGenerateClass(new BeanDefinitionsJavaFileGenerator(target),
-							target, featureName);
+			GeneratedClass generatedClass = generationContext.getGeneratedClasses()
+					.forFeatureComponent(FEATURE_NAME, target)
+					.getOrGenerate(FEATURE_NAME, type -> {
+						type.addJavadoc("Bean definitions for {@link $T}", target);
+						type.addModifiers(Modifier.PUBLIC);
+					});
 			MethodGenerator methodGenerator = generatedClass.getMethodGenerator()
 					.withName(getName());
 			GeneratedMethod generatedMethod = generateBeanDefinitionMethod(
@@ -115,11 +114,10 @@ class BeanDefinitionMethodGenerator {
 	}
 
 	private BeanRegistrationCodeFragments getCodeFragments(GenerationContext generationContext,
-			BeanRegistrationsCode beanRegistrationsCode, String featureNamePrefix) {
+			BeanRegistrationsCode beanRegistrationsCode) {
 
 		BeanRegistrationCodeFragments codeFragments = new DefaultBeanRegistrationCodeFragments(
-				beanRegistrationsCode, this.registeredBean, this.methodGeneratorFactory,
-				featureNamePrefix);
+				beanRegistrationsCode, this.registeredBean, this.methodGeneratorFactory);
 		for (BeanRegistrationAotContribution aotContribution : this.aotContributions) {
 			codeFragments = aotContribution.customizeBeanRegistrationCodeFragments(generationContext, codeFragments);
 		}
@@ -170,43 +168,6 @@ class BeanDefinitionMethodGenerator {
 		int lastDollar = beanName.lastIndexOf('$');
 		beanName = (lastDollar != -1) ? beanName.substring(lastDollar + 1) : beanName;
 		return beanName;
-	}
-
-
-	/**
-	 * {@link BeanDefinitionsJavaFileGenerator} to create the
-	 * {@code BeanDefinitions} file.
-	 */
-	private static class BeanDefinitionsJavaFileGenerator implements JavaFileGenerator {
-
-		private final Class<?> target;
-
-
-		BeanDefinitionsJavaFileGenerator(Class<?> target) {
-			this.target = target;
-		}
-
-
-		@Override
-		public JavaFile generateJavaFile(ClassName className, GeneratedMethods methods) {
-			TypeSpec.Builder classBuilder = TypeSpec.classBuilder(className);
-			classBuilder.addJavadoc("Bean definitions for {@link $T}", this.target);
-			classBuilder.addModifiers(Modifier.PUBLIC);
-			methods.doWithMethodSpecs(classBuilder::addMethod);
-			return JavaFile.builder(className.packageName(), classBuilder.build())
-					.build();
-		}
-
-		@Override
-		public int hashCode() {
-			return getClass().hashCode();
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			return getClass() == obj.getClass();
-		}
-
 	}
 
 }

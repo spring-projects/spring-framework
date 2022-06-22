@@ -17,12 +17,15 @@
 package org.springframework.aot.generate;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.util.Assert;
 
 /**
- * Default implementation of {@link GenerationContext}.
+ * Default {@link GenerationContext} implementation.
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
@@ -30,7 +33,7 @@ import org.springframework.util.Assert;
  */
 public class DefaultGenerationContext implements GenerationContext {
 
-	private final ClassNameGenerator classNameGenerator;
+	private final Map<String, AtomicInteger> sequenceGenerator;
 
 	private final GeneratedClasses generatedClasses;
 
@@ -41,39 +44,45 @@ public class DefaultGenerationContext implements GenerationContext {
 
 	/**
 	 * Create a new {@link DefaultGenerationContext} instance backed by the
-	 * specified {@code generatedFiles}.
+	 * specified {@link ClassNameGenerator} and {@link GeneratedFiles}.
+	 * @param classNameGenerator the naming convention to use for generated
+	 * class names
 	 * @param generatedFiles the generated files
 	 */
-	public DefaultGenerationContext(GeneratedFiles generatedFiles) {
-		this(new ClassNameGenerator(), generatedFiles, new RuntimeHints());
+	public DefaultGenerationContext(ClassNameGenerator classNameGenerator, GeneratedFiles generatedFiles) {
+		this(new GeneratedClasses(classNameGenerator), generatedFiles, new RuntimeHints());
 	}
 
 	/**
 	 * Create a new {@link DefaultGenerationContext} instance backed by the
 	 * specified items.
-	 * @param classNameGenerator the class name generator
+	 * @param generatedClasses the generated classes
 	 * @param generatedFiles the generated files
 	 * @param runtimeHints the runtime hints
 	 */
-	public DefaultGenerationContext(ClassNameGenerator classNameGenerator,
+	public DefaultGenerationContext(GeneratedClasses generatedClasses,
 			GeneratedFiles generatedFiles, RuntimeHints runtimeHints) {
-		Assert.notNull(classNameGenerator, "'classNameGenerator' must not be null");
+		Assert.notNull(generatedClasses, "'generatedClasses' must not be null");
 		Assert.notNull(generatedFiles, "'generatedFiles' must not be null");
 		Assert.notNull(runtimeHints, "'runtimeHints' must not be null");
-		this.classNameGenerator = classNameGenerator;
-		this.generatedClasses = new GeneratedClasses(classNameGenerator);
+		this.sequenceGenerator = new ConcurrentHashMap<>();
+		this.generatedClasses = generatedClasses;
 		this.generatedFiles = generatedFiles;
 		this.runtimeHints = runtimeHints;
 	}
 
-
-	@Override
-	public ClassNameGenerator getClassNameGenerator() {
-		return this.classNameGenerator;
+	private DefaultGenerationContext(DefaultGenerationContext existing, String name) {
+		int sequence = existing.sequenceGenerator
+				.computeIfAbsent(name, key -> new AtomicInteger()).getAndIncrement();
+		String nameToUse = (sequence > 0 ? name + sequence : name);
+		this.sequenceGenerator = existing.sequenceGenerator;
+		this.generatedClasses = existing.generatedClasses.withName(nameToUse);
+		this.generatedFiles = existing.generatedFiles;
+		this.runtimeHints = existing.runtimeHints;
 	}
 
 	@Override
-	public GeneratedClasses getClassGenerator() {
+	public GeneratedClasses getGeneratedClasses() {
 		return this.generatedClasses;
 	}
 
@@ -85,6 +94,11 @@ public class DefaultGenerationContext implements GenerationContext {
 	@Override
 	public RuntimeHints getRuntimeHints() {
 		return this.runtimeHints;
+	}
+
+	@Override
+	public GenerationContext withName(String name) {
+		return new DefaultGenerationContext(this, name);
 	}
 
 	/**

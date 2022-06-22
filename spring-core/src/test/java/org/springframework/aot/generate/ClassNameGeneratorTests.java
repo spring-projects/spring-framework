@@ -32,12 +32,26 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  */
 class ClassNameGeneratorTests {
 
-	private final ClassNameGenerator generator = new ClassNameGenerator();
+	private final ClassNameGenerator generator = new ClassNameGenerator(Object.class);
 
 	@Test
-	void generateClassNameWhenTargetClassIsNullUsesAotPackage() {
-		ClassName generated = this.generator.generateClassName((Class<?>) null, "test");
-		assertThat(generated).hasToString("__.Test");
+	void generateClassNameWhenTargetClassIsNullUsesMainTarget() {
+		ClassName generated = this.generator.generateClassName(null, "test");
+		assertThat(generated).hasToString("java.lang.Object__Test");
+	}
+
+	@Test
+	void generateClassNameUseFeatureNamePrefix() {
+		ClassName generated = new ClassNameGenerator(Object.class, "One")
+				.generateClassName(InputStream.class, "test");
+		assertThat(generated).hasToString("java.io.InputStream__OneTest");
+	}
+
+	@Test
+	void generateClassNameWithNoTextFeatureNamePrefix() {
+		ClassName generated = new ClassNameGenerator(Object.class, "  ")
+				.generateClassName(InputStream.class, "test");
+		assertThat(generated).hasToString("java.io.InputStream__Test");
 	}
 
 	@Test
@@ -59,8 +73,7 @@ class ClassNameGeneratorTests {
 
 	@Test
 	void generateClassNameWithClassWhenLowercaseFeatureNameGeneratesName() {
-		ClassName generated = this.generator.generateClassName(InputStream.class,
-				"bytes");
+		ClassName generated = this.generator.generateClassName(InputStream.class, "bytes");
 		assertThat(generated).hasToString("java.io.InputStream__Bytes");
 	}
 
@@ -68,7 +81,7 @@ class ClassNameGeneratorTests {
 	void generateClassNameWithClassWhenInnerClassGeneratesName() {
 		ClassName generated = this.generator.generateClassName(TestBean.class, "EventListener");
 		assertThat(generated)
-			.hasToString("org.springframework.aot.generate.ClassNameGeneratorTests_TestBean__EventListener");
+				.hasToString("org.springframework.aot.generate.ClassNameGeneratorTests_TestBean__EventListener");
 	}
 
 	@Test
@@ -79,6 +92,15 @@ class ClassNameGeneratorTests {
 		assertThat(generated1).hasToString("java.io.InputStream__Bytes");
 		assertThat(generated2).hasToString("java.io.InputStream__Bytes1");
 		assertThat(generated3).hasToString("java.io.InputStream__Bytes2");
+	}
+
+	@Test
+	void getClassNameWhenMultipleCallsReturnsSameName() {
+		String name1 = this.generator.getClassName(InputStream.class, "bytes");
+		String name2 = this.generator.getClassName(InputStream.class, "bytes");
+		String name3 = this.generator.getClassName(InputStream.class, "bytes");
+		assertThat(name1).hasToString("java.io.InputStream__Bytes")
+				.isEqualTo(name2).isEqualTo(name3);
 	}
 
 	static class TestBean {

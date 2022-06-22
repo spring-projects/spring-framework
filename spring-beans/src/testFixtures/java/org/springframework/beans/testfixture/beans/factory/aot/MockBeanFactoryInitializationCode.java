@@ -35,21 +35,6 @@ public class MockBeanFactoryInitializationCode implements BeanFactoryInitializat
 
 	private final List<MethodReference> initializers = new ArrayList<>();
 
-	private final String name;
-
-	public MockBeanFactoryInitializationCode() {
-		this("");
-	}
-
-	public MockBeanFactoryInitializationCode(String name) {
-		this.name = name;
-	}
-
-	@Override
-	public String getName() {
-		return this.name;
-	}
-
 	@Override
 	public GeneratedMethods getMethodGenerator() {
 		return this.generatedMethods;

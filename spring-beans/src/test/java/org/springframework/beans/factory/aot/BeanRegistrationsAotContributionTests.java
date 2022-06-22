@@ -29,6 +29,7 @@ import javax.lang.model.element.Modifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.generate.ClassNameGenerator;
 import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.InMemoryGeneratedFiles;
@@ -42,6 +43,8 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.beans.testfixture.beans.factory.aot.MockBeanFactoryInitializationCode;
 import org.springframework.core.mock.MockSpringFactoriesLoader;
+import org.springframework.core.testfixture.aot.generate.TestGenerationContext;
+import org.springframework.core.testfixture.aot.generate.TestTarget;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.JavaFile;
 import org.springframework.javapoet.MethodSpec;
@@ -72,7 +75,7 @@ class BeanRegistrationsAotContributionTests {
 	@BeforeEach
 	void setup() {
 		this.generatedFiles = new InMemoryGeneratedFiles();
-		this.generationContext = new DefaultGenerationContext(this.generatedFiles);
+		this.generationContext = new TestGenerationContext(this.generatedFiles);
 		this.beanFactory = new DefaultListableBeanFactory();
 		this.springFactoriesLoader = new MockSpringFactoriesLoader();
 		this.methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
@@ -100,7 +103,9 @@ class BeanRegistrationsAotContributionTests {
 
 	@Test
 	void applyToWhenHasNameGeneratesPrefixedFeatureName() {
-		this.beanFactoryInitializationCode = new MockBeanFactoryInitializationCode("Management");
+		this.generationContext = new DefaultGenerationContext(
+				new ClassNameGenerator(TestTarget.class, "Management"), this.generatedFiles);
+		this.beanFactoryInitializationCode = new MockBeanFactoryInitializationCode();
 		Map<String, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
 		RegisteredBean registeredBean = registerBean(
 				new RootBeanDefinition(TestBean.class));
@@ -129,11 +134,11 @@ class BeanRegistrationsAotContributionTests {
 
 			@Override
 			MethodReference generateBeanDefinitionMethod(
-					GenerationContext generationContext, String featureNamePrefix,
+					GenerationContext generationContext,
 					BeanRegistrationsCode beanRegistrationsCode) {
 				beanRegistrationsCodes.add(beanRegistrationsCode);
 				return super.generateBeanDefinitionMethod(generationContext,
-						featureNamePrefix, beanRegistrationsCode);
+						beanRegistrationsCode);
 			}
 
 		};

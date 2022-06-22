@@ -24,15 +24,17 @@ import org.springframework.aot.hint.SerializationHints;
 
 /**
  * Central interface used for code generation.
- * <p>
- * A generation context provides:
+ *
+ * <p>A generation context provides:
  * <ul>
- * <li>Support for {@link #getClassNameGenerator() class name generation}.</li>
- * <li>Central management of all {@link #getGeneratedFiles() generated
- * files}.</li>
- * <li>Support for the recording of {@link #getRuntimeHints() runtime
- * hints}.</li>
+ * <li>Management of all {@link #getGeneratedClasses()} generated classes},
+ * including naming convention support.</li>
+ * <li>Central management of all {@link #getGeneratedFiles() generated files}.</li>
+ * <li>Support for the recording of {@link #getRuntimeHints() runtime hints}.</li>
  * </ul>
+ *
+ * <p>If a dedicated round of code generation is required while processing, it
+ * is possible to create a specialized context using {@link #withName(String)}.
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
@@ -41,21 +43,12 @@ import org.springframework.aot.hint.SerializationHints;
 public interface GenerationContext {
 
 	/**
-	 * Return the {@link ClassNameGenerator} being used by the context. Allows
-	 * new class names to be generated before they are added to the
-	 * {@link #getGeneratedFiles() generated files}.
-	 * @return the class name generator
-	 * @see #getGeneratedFiles()
-	 */
-	ClassNameGenerator getClassNameGenerator();
-
-	/**
 	 * Return the {@link GeneratedClasses} being used by the context. Allows a
 	 * single generated class to be shared across multiple AOT processors. All
 	 * generated classes are written at the end of AOT processing.
 	 * @return the generated classes
 	 */
-	ClassGenerator getClassGenerator();
+	GeneratedClasses getGeneratedClasses();
 
 	/**
 	 * Return the {@link GeneratedFiles} being used by the context. Used to
@@ -72,5 +65,15 @@ public interface GenerationContext {
 	 * @return the runtime hints
 	 */
 	RuntimeHints getRuntimeHints();
+
+	/**
+	 * Return a new {@link GenerationContext} instance using the specified
+	 * name to qualify generated assets for a dedicated round of code
+	 * generation. If this name is already in use, a unique sequence is added
+	 * to ensure the name is unique.
+	 * @param name the name to use
+	 * @return a specialized {@link GenerationContext} for the specified name
+	 */
+	GenerationContext withName(String name);
 
 }

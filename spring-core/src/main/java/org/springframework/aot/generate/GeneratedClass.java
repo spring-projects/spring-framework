@@ -16,22 +16,24 @@
 
 package org.springframework.aot.generate;
 
-import org.springframework.aot.generate.ClassGenerator.JavaFileGenerator;
+import java.util.function.Consumer;
+
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.JavaFile;
-import org.springframework.util.Assert;
+import org.springframework.javapoet.TypeSpec;
+import org.springframework.javapoet.TypeSpec.Builder;
 
 /**
- * A generated class.
+ * A generated class is a container for generated methods.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 6.0
  * @see GeneratedClasses
- * @see ClassGenerator
  */
 public final class GeneratedClass {
 
-	private final JavaFileGenerator JavaFileGenerator;
+	private final Consumer<Builder> typeSpecCustomizer;
 
 	private final ClassName name;
 
@@ -44,12 +46,10 @@ public final class GeneratedClass {
 	 * {@link GeneratedClasses}.
 	 * @param name the generated name
 	 */
-	GeneratedClass(JavaFileGenerator javaFileGenerator, ClassName name) {
-		MethodNameGenerator methodNameGenerator = new MethodNameGenerator(
-				javaFileGenerator.getReservedMethodNames());
-		this.JavaFileGenerator = javaFileGenerator;
+	GeneratedClass(Consumer<Builder> typeSpecCustomizer, ClassName name) {
+		this.typeSpecCustomizer = typeSpecCustomizer;
 		this.name = name;
-		this.methods = new GeneratedMethods(methodNameGenerator);
+		this.methods = new GeneratedMethods(new MethodNameGenerator());
 	}
 
 
@@ -70,15 +70,11 @@ public final class GeneratedClass {
 	}
 
 	JavaFile generateJavaFile() {
-		JavaFile javaFile = this.JavaFileGenerator.generateJavaFile(this.name,
-				this.methods);
-		Assert.state(this.name.packageName().equals(javaFile.packageName),
-				() -> "Generated JavaFile should be in package '"
-						+ this.name.packageName() + "'");
-		Assert.state(this.name.simpleName().equals(javaFile.typeSpec.name),
-				() -> "Generated JavaFile should be named '" + this.name.simpleName()
-						+ "'");
-		return javaFile;
+		TypeSpec.Builder typeSpecBuilder = TypeSpec.classBuilder(this.name);
+		this.typeSpecCustomizer.accept(typeSpecBuilder);
+		this.methods.doWithMethodSpecs(typeSpecBuilder::addMethod);
+		return JavaFile.builder(this.name.packageName(), typeSpecBuilder.build())
+				.build();
 	}
 
 }

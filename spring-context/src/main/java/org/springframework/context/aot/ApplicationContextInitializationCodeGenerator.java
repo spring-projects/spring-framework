@@ -18,6 +18,7 @@ package org.springframework.context.aot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import javax.lang.model.element.Modifier;
 
@@ -29,14 +30,10 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.annotation.ContextAnnotationAutowireCandidateResolver;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
-import org.springframework.javapoet.JavaFile;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
 import org.springframework.javapoet.TypeSpec;
-import org.springframework.lang.Nullable;
-import org.springframework.util.StringUtils;
 
 /**
  * Internal code generator to create the application context initializer.
@@ -50,32 +47,10 @@ class ApplicationContextInitializationCodeGenerator
 	private static final String APPLICATION_CONTEXT_VARIABLE = "applicationContext";
 
 
-	@Nullable
-	private final Class<?> target;
-
-	private final String name;
-
 	private final GeneratedMethods generatedMethods = new GeneratedMethods();
 
 	private final List<MethodReference> initializers = new ArrayList<>();
 
-
-	ApplicationContextInitializationCodeGenerator(@Nullable Class<?> target, @Nullable String name) {
-		this.target = target;
-		this.name = (!StringUtils.hasText(name)) ? "" : name;
-	}
-
-
-	@Override
-	@Nullable
-	public Class<?> getTarget() {
-		return this.target;
-	}
-
-	@Override
-	public String getName() {
-		return this.name;
-	}
 
 	@Override
 	public MethodGenerator getMethodGenerator() {
@@ -87,17 +62,17 @@ class ApplicationContextInitializationCodeGenerator
 		this.initializers.add(methodReference);
 	}
 
-	JavaFile generateJavaFile(ClassName className) {
-		TypeSpec.Builder builder = TypeSpec.classBuilder(className);
-		builder.addJavadoc(
-				"{@link $T} to restore an application context based on previous AOT processing.",
-				ApplicationContextInitializer.class);
-		builder.addModifiers(Modifier.PUBLIC);
-		builder.addSuperinterface(ParameterizedTypeName.get(
-				ApplicationContextInitializer.class, GenericApplicationContext.class));
-		builder.addMethod(generateInitializeMethod());
-		this.generatedMethods.doWithMethodSpecs(builder::addMethod);
-		return JavaFile.builder(className.packageName(), builder.build()).build();
+	Consumer<TypeSpec.Builder> generateJavaFile() {
+		return builder -> {
+			builder.addJavadoc(
+					"{@link $T} to restore an application context based on previous AOT processing.",
+					ApplicationContextInitializer.class);
+			builder.addModifiers(Modifier.PUBLIC);
+			builder.addSuperinterface(ParameterizedTypeName.get(
+					ApplicationContextInitializer.class, GenericApplicationContext.class));
+			builder.addMethod(generateInitializeMethod());
+			this.generatedMethods.doWithMethodSpecs(builder::addMethod);
+		};
 	}
 
 	private MethodSpec generateInitializeMethod() {

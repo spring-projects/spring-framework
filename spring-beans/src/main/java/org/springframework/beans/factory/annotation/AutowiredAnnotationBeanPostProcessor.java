@@ -41,6 +41,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aot.generate.AccessVisibility;
+import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.hint.ExecutableHint;
@@ -79,11 +80,8 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
-import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
-import org.springframework.javapoet.JavaFile;
 import org.springframework.javapoet.MethodSpec;
-import org.springframework.javapoet.TypeSpec;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -910,30 +908,28 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		@Override
 		public void applyTo(GenerationContext generationContext,
 				BeanRegistrationCode beanRegistrationCode) {
-
-			ClassName className = generationContext.getClassNameGenerator()
-					.generateClassName(this.target, "Autowiring");
-			TypeSpec.Builder classBuilder = TypeSpec.classBuilder(className);
-			classBuilder.addJavadoc("Autowiring for {@link $T}.", this.target);
-			classBuilder.addModifiers(javax.lang.model.element.Modifier.PUBLIC);
-			classBuilder.addMethod(generateMethod(generationContext.getRuntimeHints()));
-			JavaFile javaFile = JavaFile
-					.builder(className.packageName(), classBuilder.build()).build();
-			generationContext.getGeneratedFiles().addSourceFile(javaFile);
+			GeneratedClass generatedClass = generationContext.getGeneratedClasses()
+					.forFeatureComponent("Autowiring", this.target)
+					.generate(type -> {
+						type.addJavadoc("Autowiring for {@link $T}.", this.target);
+						type.addModifiers(javax.lang.model.element.Modifier.PUBLIC);
+					});
+			generatedClass.getMethodGenerator().generateMethod(APPLY_METHOD)
+					.using(generateMethod(generationContext.getRuntimeHints()));
 			beanRegistrationCode.addInstancePostProcessor(
-					MethodReference.ofStatic(className, APPLY_METHOD));
+					MethodReference.ofStatic(generatedClass.getName(), APPLY_METHOD));
 		}
 
-		private MethodSpec generateMethod(RuntimeHints hints) {
-			MethodSpec.Builder builder = MethodSpec.methodBuilder(APPLY_METHOD);
-			builder.addJavadoc("Apply the autowiring.");
-			builder.addModifiers(javax.lang.model.element.Modifier.PUBLIC,
-					javax.lang.model.element.Modifier.STATIC);
-			builder.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER);
-			builder.addParameter(this.target, INSTANCE_PARAMETER);
-			builder.returns(this.target);
-			builder.addCode(generateMethodCode(hints));
-			return builder.build();
+		private Consumer<MethodSpec.Builder> generateMethod(RuntimeHints hints) {
+			return method -> {
+				method.addJavadoc("Apply the autowiring.");
+				method.addModifiers(javax.lang.model.element.Modifier.PUBLIC,
+						javax.lang.model.element.Modifier.STATIC);
+				method.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER);
+				method.addParameter(this.target, INSTANCE_PARAMETER);
+				method.returns(this.target);
+				method.addCode(generateMethodCode(hints));
+			};
 		}
 
 		private CodeBlock generateMethodCode(RuntimeHints hints) {
