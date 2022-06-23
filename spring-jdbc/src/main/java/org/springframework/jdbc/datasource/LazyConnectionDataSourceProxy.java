@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -91,6 +92,9 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	@Nullable
 	private Integer defaultTransactionIsolation;
 
+	@Nullable
+	private DatabaseMetaData defaultDatabaseMetaData;
+
 
 	/**
 	 * Create a new LazyConnectionDataSourceProxy.
@@ -159,7 +163,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 
 		// Determine default auto-commit and transaction isolation
 		// via a Connection from the target DataSource, if possible.
-		if (this.defaultAutoCommit == null || this.defaultTransactionIsolation == null) {
+		if (this.defaultAutoCommit == null || this.defaultTransactionIsolation == null || this.defaultDatabaseMetaData == null) {
 			try {
 				try (Connection con = obtainTargetDataSource().getConnection()) {
 					checkDefaultConnectionProperties(con);
@@ -188,6 +192,9 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 		if (this.defaultTransactionIsolation == null) {
 			this.defaultTransactionIsolation = con.getTransactionIsolation();
 		}
+		if (this.defaultDatabaseMetaData == null) {
+			this.defaultDatabaseMetaData = con.getMetaData();
+		}
 	}
 
 	/**
@@ -206,6 +213,13 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 		return this.defaultTransactionIsolation;
 	}
 
+	/**
+	 * Expose the default database metadata value.
+	 */
+	@Nullable
+	protected DatabaseMetaData defaultDatabaseMetadata() {
+		return this.defaultDatabaseMetaData;
+	}
 
 	/**
 	 * Return a Connection handle that lazily fetches an actual JDBC Connection
@@ -260,6 +274,9 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 		@Nullable
 		private Integer transactionIsolation;
 
+		@Nullable
+		private DatabaseMetaData databaseMetaData;
+
 		private boolean readOnly = false;
 
 		private int holdability = ResultSet.CLOSE_CURSORS_AT_COMMIT;
@@ -272,6 +289,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 		public LazyConnectionInvocationHandler() {
 			this.autoCommit = defaultAutoCommit();
 			this.transactionIsolation = defaultTransactionIsolation();
+			this.databaseMetaData = defaultDatabaseMetadata();
 		}
 
 		public LazyConnectionInvocationHandler(String username, String password) {
@@ -348,6 +366,13 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 					case "setHoldability":
 						this.holdability = (Integer) args[0];
 						return null;
+					case "getMetadata":
+						if (this.databaseMetaData != null) {
+							return this.databaseMetaData;
+						}
+						// Else fetch actual Connection and check there,
+						// because we didn't have a default specified.
+						break;
 					case "commit":
 					case "rollback":
 						// Ignore: no statements created yet.
