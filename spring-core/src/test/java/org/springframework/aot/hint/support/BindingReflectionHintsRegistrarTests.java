@@ -16,6 +16,7 @@
 
 package org.springframework.aot.hint.support;
 
+import java.lang.reflect.Type;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,7 @@ import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
+import org.springframework.core.ResolvableType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -139,6 +141,49 @@ public class BindingReflectionHintsRegistrarTests {
 				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(List.class)));
 	}
 
+	@Test
+	void registerTypeForSerializationWithResolvableType() {
+		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleClassWithResolvableType.class);
+		assertThat(this.hints.reflection().typeHints()).satisfiesExactlyInAnyOrder(
+				typeHint -> {
+					assertThat(typeHint.getType()).isEqualTo(TypeReference.of(ResolvableType[].class));
+					assertThat(typeHint.getMemberCategories()).isEmpty();
+					assertThat(typeHint.constructors()).isEmpty();
+					assertThat(typeHint.fields()).isEmpty();
+					assertThat(typeHint.methods()).isEmpty();
+				},
+				typeHint -> {
+					assertThat(typeHint.getType()).isEqualTo(TypeReference.of(Type.class));
+					assertThat(typeHint.getMemberCategories()).isEmpty();
+					assertThat(typeHint.constructors()).isEmpty();
+					assertThat(typeHint.fields()).isEmpty();
+					assertThat(typeHint.methods()).isEmpty();
+				},
+				typeHint -> {
+					assertThat(typeHint.getType()).isEqualTo(TypeReference.of(Class.class));
+					assertThat(typeHint.getMemberCategories()).isEmpty();
+					assertThat(typeHint.constructors()).isEmpty();
+					assertThat(typeHint.fields()).isEmpty();
+					assertThat(typeHint.methods()).isEmpty();
+				},
+				typeHint -> {
+					assertThat(typeHint.getType()).isEqualTo(TypeReference.of(ResolvableType.class));
+					assertThat(typeHint.getMemberCategories()).containsExactlyInAnyOrder(
+							MemberCategory.DECLARED_FIELDS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+					assertThat(typeHint.constructors()).isEmpty();
+					assertThat(typeHint.fields()).isEmpty();
+					assertThat(typeHint.methods()).hasSizeGreaterThan(1);
+				},
+				typeHint -> {
+					assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleClassWithResolvableType.class));
+					assertThat(typeHint.methods()).singleElement().satisfies(
+							methodHint -> {
+								assertThat(methodHint.getName()).isEqualTo("getResolvableType");
+								assertThat(methodHint.getModes()).containsOnly(ExecutableMode.INVOKE);
+							});
+				});
+	}
+
 
 	static class SampleEmptyClass {
 	}
@@ -188,6 +233,13 @@ public class BindingReflectionHintsRegistrarTests {
 		}
 
 		public List<SampleClassWithCycles> getSampleClassWithCyclesList() {
+			return null;
+		}
+	}
+
+	static class SampleClassWithResolvableType {
+
+		public ResolvableType getResolvableType() {
 			return null;
 		}
 	}

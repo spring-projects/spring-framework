@@ -76,11 +76,14 @@ public class BindingReflectionHintsRegistrar {
 	 * @return {@code true} if the members of the type should be registered transitively
 	 */
 	protected boolean shouldRegisterMembers(Class<?> type) {
-		return !type.getCanonicalName().startsWith("java.");
+		return !type.getCanonicalName().startsWith("java.") && !type.isArray();
 	}
 
 	private void registerReflectionHints(ReflectionHints hints, Set<Type> seen, Type type) {
 		if (type instanceof Class<?> clazz) {
+			if (clazz.isPrimitive() || clazz == Object.class) {
+				return;
+			}
 			hints.registerType(clazz, builder -> {
 				if (seen.contains(type)) {
 					return;
