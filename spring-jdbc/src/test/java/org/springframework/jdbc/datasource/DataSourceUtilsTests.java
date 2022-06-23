@@ -29,18 +29,17 @@ import static org.mockito.BDDMockito.when;
 import static org.mockito.Mockito.mock;
 
 /**
+ * Tests for {@link DataSourceUtils}.
+ *
  * @author Kevin Schoenfeld
- * @see org.springframework.jdbc.datasource.DataSourceUtilsTests
- * @since 21.06.2022
+ * @author Stephane Nicoll
  */
-
 class DataSourceUtilsTests {
 
 	@Test
 	void testConnectionNotAcquiredExceptionIsPropagated() throws SQLException {
-		final DataSource dataSource = mock(DataSource.class);
+		DataSource dataSource = mock(DataSource.class);
 		when(dataSource.getConnection()).thenReturn(null);
-
 		assertThatThrownBy(() -> DataSourceUtils.getConnection(dataSource))
 				.isInstanceOf(CannotGetJdbcConnectionException.class)
 				.hasMessageStartingWith("Failed to obtain JDBC Connection")
@@ -49,12 +48,14 @@ class DataSourceUtilsTests {
 
 	@Test
 	void testConnectionSQLExceptionIsPropagated() throws SQLException {
-		final DataSource dataSource = mock(DataSource.class);
+		DataSource dataSource = mock(DataSource.class);
 		when(dataSource.getConnection()).thenThrow(new SQLException("my dummy exception"));
-
 		assertThatThrownBy(() -> DataSourceUtils.getConnection(dataSource))
 				.isInstanceOf(CannotGetJdbcConnectionException.class)
 				.hasMessageStartingWith("Failed to obtain JDBC Connection")
-				.hasCauseInstanceOf(SQLException.class);
+				.cause().isInstanceOf(SQLException.class)
+				.hasMessage("my dummy exception");
 	}
+
 }
+
