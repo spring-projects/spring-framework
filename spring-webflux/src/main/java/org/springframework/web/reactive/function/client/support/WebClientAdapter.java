@@ -29,20 +29,28 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.service.invoker.HttpClientAdapter;
 import org.springframework.web.service.invoker.HttpRequestValues;
+import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 
 /**
- * {@link HttpClientAdapter} implementation for {@link WebClient}.
+ * {@link HttpClientAdapter} that enables an {@link HttpServiceProxyFactory} to
+ * use {@link WebClient} for request execution.
+ *
+ * <p>Use static factory methods in this class to create an
+ * {@code HttpServiceProxyFactory} configured with a given {@code WebClient}.
  *
  * @author Rossen Stoyanchev
  * @since 6.0
  */
-public class WebClientAdapter implements HttpClientAdapter {
+public final class WebClientAdapter implements HttpClientAdapter {
 
 	private final WebClient webClient;
 
 
-	public WebClientAdapter(WebClient webClient) {
+	/**
+	 * Package private constructor. See static factory methods.
+	 */
+	private WebClientAdapter(WebClient webClient) {
 		this.webClient = webClient;
 	}
 
@@ -114,6 +122,40 @@ public class WebClientAdapter implements HttpClientAdapter {
 		}
 
 		return bodySpec;
+	}
+
+
+	/**
+	 * Static method to create a {@link HttpServiceProxyFactory} configured to
+	 * use the given {@link WebClient} instance. Effectively a shortcut for:
+	 * <pre>
+	 * WebClientAdapter adapter = WebClientAdapter.forClient(webClient);
+	 * HttpServiceProxyFactory proxyFactory = new HttpServiceProxyFactory(adapter);
+	 * </pre>
+	 * @param webClient the client to use
+	 * @return the created {@code HttpServiceProxyFactory} instance
+	 */
+	public static HttpServiceProxyFactory createHttpServiceProxyFactory(WebClient webClient) {
+		return new HttpServiceProxyFactory(new WebClientAdapter(webClient));
+	}
+
+	/**
+	 * Variant of {@link #createHttpServiceProxyFactory(WebClient)} that accepts
+	 * a {@link WebClient.Builder} and uses it to create the client.
+	 * @param webClientBuilder a builder to create the client to use with
+	 * @return the created {@code HttpServiceProxyFactory} instance
+	 */
+	public static HttpServiceProxyFactory createHttpServiceProxyFactory(WebClient.Builder webClientBuilder) {
+		return createHttpServiceProxyFactory(webClientBuilder.build());
+	}
+
+	/**
+	 * Create a {@link WebClientAdapter} for the given {@code WebClient} instance.
+	 * @param webClient the client to use
+	 * @return the created adapter instance
+	 */
+	public static WebClientAdapter forClient(WebClient webClient) {
+		return new WebClientAdapter(webClient);
 	}
 
 }

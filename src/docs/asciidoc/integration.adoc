@@ -390,14 +390,10 @@ the `WebClient`:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	WebClient client = WebClient.builder()
-			.baseUrl("https://api.github.com/")
-			.build();
+	WebClient client = WebClient.builder().baseUrl("https://api.github.com/").build();
+	HttpServiceProxyFactory factory = WebClientAdapter.createHttpServiceProxyFactory(client)).build();
 
-	HttpServiceProxyFactory proxyFactory = 
-			HttpServiceProxyFactory.builder(new WebClientAdapter(client)).build();
-
-	RepositoryService service = proxyFactory.createClient(RepositoryService.class);
+	RepositoryService service = factory.createClient(RepositoryService.class);
 ----
 
 An HTTP service interface can declare common attributes at the type level:
