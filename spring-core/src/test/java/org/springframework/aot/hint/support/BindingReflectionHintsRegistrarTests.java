@@ -131,6 +131,15 @@ public class BindingReflectionHintsRegistrarTests {
 				});
 	}
 
+	@Test
+	void registerTypeForSerializationWithCycles() {
+		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleClassWithCycles.class);
+		assertThat(this.hints.reflection().typeHints()).satisfiesExactlyInAnyOrder(
+				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleClassWithCycles.class)),
+				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(List.class)));
+	}
+
+
 	static class SampleEmptyClass {
 	}
 
@@ -169,6 +178,17 @@ public class BindingReflectionHintsRegistrarTests {
 		}
 
 		public void setNames(List<String> names) {
+		}
+	}
+
+	static class SampleClassWithCycles {
+
+		public SampleClassWithCycles getSampleClassWithCycles() {
+			return null;
+		}
+
+		public List<SampleClassWithCycles> getSampleClassWithCyclesList() {
+			return null;
 		}
 	}
 
