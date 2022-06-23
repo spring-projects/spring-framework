@@ -74,9 +74,9 @@ public class DefaultGenerationContext implements GenerationContext {
 	private DefaultGenerationContext(DefaultGenerationContext existing, String name) {
 		int sequence = existing.sequenceGenerator
 				.computeIfAbsent(name, key -> new AtomicInteger()).getAndIncrement();
-		String nameToUse = (sequence > 0 ? name + sequence : name);
+		String featureName = (sequence > 0 ? name + sequence : name);
 		this.sequenceGenerator = existing.sequenceGenerator;
-		this.generatedClasses = existing.generatedClasses.withName(nameToUse);
+		this.generatedClasses = existing.generatedClasses.withFeatureNamePrefix(featureName);
 		this.generatedFiles = existing.generatedFiles;
 		this.runtimeHints = existing.runtimeHints;
 	}

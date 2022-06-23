@@ -39,10 +39,8 @@ import org.springframework.context.testfixture.context.generator.annotation.Impo
 import org.springframework.context.testfixture.context.generator.annotation.ImportConfiguration;
 import org.springframework.core.testfixture.aot.generate.TestGenerationContext;
 import org.springframework.javapoet.CodeBlock;
-import org.springframework.javapoet.JavaFile;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
-import org.springframework.javapoet.TypeSpec;
 import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,21 +54,26 @@ import static org.assertj.core.api.Assertions.entry;
  */
 class ConfigurationClassPostProcessorAotContributionTests {
 
-	private DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+	private final InMemoryGeneratedFiles generatedFiles;
 
-	private InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
+	private final DefaultGenerationContext generationContext;
 
-	private DefaultGenerationContext generationContext = new TestGenerationContext(
-			this.generatedFiles);
+	private final MockBeanFactoryInitializationCode beanFactoryInitializationCode;
 
-	private MockBeanFactoryInitializationCode beanFactoryInitializationCode = new MockBeanFactoryInitializationCode();
+
+	ConfigurationClassPostProcessorAotContributionTests() {
+		this.generatedFiles = new InMemoryGeneratedFiles();
+		this.generationContext = new TestGenerationContext(this.generatedFiles);
+		this.beanFactoryInitializationCode = new MockBeanFactoryInitializationCode(this.generationContext);
+	}
+
 
 	@Test
 	void applyToWhenHasImportAwareConfigurationRegistersBeanPostProcessorWithMapEntry() {
 		BeanFactoryInitializationAotContribution contribution = getContribution(
 				ImportConfiguration.class);
 		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
-		testCompiledResult((initializer, compiled) -> {
+		compile((initializer, compiled) -> {
 			DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory();
 			initializer.accept(freshBeanFactory);
 			ImportAwareAotBeanPostProcessor postProcessor = (ImportAwareAotBeanPostProcessor) freshBeanFactory
@@ -89,8 +92,8 @@ class ConfigurationClassPostProcessorAotContributionTests {
 				.singleElement()
 				.satisfies(resourceHint -> assertThat(resourceHint.getIncludes())
 						.map(ResourcePatternHint::getPattern)
-						.containsOnly(
-								"org/springframework/context/testfixture/context/generator/annotation/ImportConfiguration.class"));
+						.containsOnly("org/springframework/context/testfixture/context/generator/annotation/"
+								+ "ImportConfiguration.class"));
 	}
 
 	@Test
@@ -100,38 +103,28 @@ class ConfigurationClassPostProcessorAotContributionTests {
 
 	@Nullable
 	private BeanFactoryInitializationAotContribution getContribution(Class<?> type) {
-		this.beanFactory.registerBeanDefinition("configuration",
-				new RootBeanDefinition(type));
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.registerBeanDefinition("configuration", new RootBeanDefinition(type));
 		ConfigurationClassPostProcessor postProcessor = new ConfigurationClassPostProcessor();
-		postProcessor.postProcessBeanFactory(this.beanFactory);
-		return postProcessor.processAheadOfTime(this.beanFactory);
+		postProcessor.postProcessBeanFactory(beanFactory);
+		return postProcessor.processAheadOfTime(beanFactory);
 	}
 
 	@SuppressWarnings("unchecked")
-	private void testCompiledResult(
-			BiConsumer<Consumer<DefaultListableBeanFactory>, Compiled> result) {
-		JavaFile javaFile = createJavaFile();
+	private void compile(BiConsumer<Consumer<DefaultListableBeanFactory>, Compiled> result) {
+		MethodReference methodReference = this.beanFactoryInitializationCode
+				.getInitializers().get(0);
+		this.beanFactoryInitializationCode.getTypeBuilder().set(type -> {
+			type.addModifiers(Modifier.PUBLIC);
+			type.addSuperinterface(ParameterizedTypeName.get(Consumer.class, DefaultListableBeanFactory.class));
+			type.addMethod(MethodSpec.methodBuilder("accept").addModifiers(Modifier.PUBLIC)
+					.addParameter(DefaultListableBeanFactory.class, "beanFactory")
+					.addStatement(methodReference.toInvokeCodeBlock(CodeBlock.of("beanFactory")))
+					.build());
+		});
 		this.generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(this.generatedFiles).compile(javaFile::writeTo,
-				compiled -> result.accept(compiled.getInstance(Consumer.class),
-						compiled));
-	}
-
-	private JavaFile createJavaFile() {
-		MethodReference methodReference = this.beanFactoryInitializationCode.getInitializers()
-				.get(0);
-		TypeSpec.Builder builder = TypeSpec.classBuilder("TestConsumer");
-		builder.addModifiers(Modifier.PUBLIC);
-		builder.addSuperinterface(ParameterizedTypeName.get(Consumer.class,
-				DefaultListableBeanFactory.class));
-		builder.addMethod(MethodSpec.methodBuilder("accept").addModifiers(Modifier.PUBLIC)
-				.addParameter(DefaultListableBeanFactory.class, "beanFactory")
-				.addStatement(
-						methodReference.toInvokeCodeBlock(CodeBlock.of("beanFactory")))
-				.build());
-		this.beanFactoryInitializationCode.getMethodGenerator()
-				.doWithMethodSpecs(builder::addMethod);
-		return JavaFile.builder("__", builder.build()).build();
+		TestCompiler.forSystem().withFiles(this.generatedFiles).compile(compiled ->
+				result.accept(compiled.getInstance(Consumer.class), compiled));
 	}
 
 	private void assertPostProcessorEntry(ImportAwareAotBeanPostProcessor postProcessor,

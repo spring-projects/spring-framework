@@ -30,8 +30,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.springframework.aot.generate.GeneratedMethod;
-import org.springframework.aot.generate.MethodGenerator;
-import org.springframework.aot.generate.MethodNameGenerator;
+import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -57,7 +56,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 
 	static final CodeBlock NULL_VALUE_CODE_BLOCK = CodeBlock.of("null");
 
-	private final MethodGenerator methodGenerator;
+	private final GeneratedMethods generatedMethods;
 
 	private final List<Delegate> delegates = List.of(
 			new PrimitiveDelegate(),
@@ -76,8 +75,8 @@ class BeanDefinitionPropertyValueCodeGenerator {
 		);
 
 
-	BeanDefinitionPropertyValueCodeGenerator(MethodGenerator methodGenerator) {
-		this.methodGenerator = methodGenerator;
+	BeanDefinitionPropertyValueCodeGenerator(GeneratedMethods generatedMethods) {
+		this.generatedMethods = generatedMethods;
 	}
 
 
@@ -485,24 +484,22 @@ class BeanDefinitionPropertyValueCodeGenerator {
 
 		private <K, V> CodeBlock generateLinkedHashMapCode(Map<K, V> map,
 				ResolvableType keyType, ResolvableType valueType) {
-			GeneratedMethod method = BeanDefinitionPropertyValueCodeGenerator.this.methodGenerator
-					.generateMethod(MethodNameGenerator.join("get", "map"))
-					.using(builder -> {
-						builder.addAnnotation(AnnotationSpec
+			GeneratedMethod generatedMethod = generatedMethods.add("getMap", method -> {
+						method.addAnnotation(AnnotationSpec
 								.builder(SuppressWarnings.class)
 								.addMember("value", "{\"rawtypes\", \"unchecked\"}")
 								.build());
-						builder.returns(Map.class);
-						builder.addStatement("$T map = new $T($L)", Map.class,
+						method.returns(Map.class);
+						method.addStatement("$T map = new $T($L)", Map.class,
 								LinkedHashMap.class, map.size());
-						map.forEach((key, value) -> builder.addStatement("map.put($L, $L)",
+						map.forEach((key, value) -> method.addStatement("map.put($L, $L)",
 								BeanDefinitionPropertyValueCodeGenerator.this
 										.generateCode(key, keyType),
 								BeanDefinitionPropertyValueCodeGenerator.this
 										.generateCode(value, valueType)));
-						builder.addStatement("return map");
+						method.addStatement("return map");
 					});
-			return CodeBlock.of("$L()", method.getName());
+			return CodeBlock.of("$L()", generatedMethod.getName());
 		}
 
 	}

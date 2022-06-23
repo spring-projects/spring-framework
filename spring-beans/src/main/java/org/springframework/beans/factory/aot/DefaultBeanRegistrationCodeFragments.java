@@ -105,7 +105,7 @@ class DefaultBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments
 
 		return new BeanDefinitionPropertiesCodeGenerator(
 				generationContext.getRuntimeHints(), attributeFilter,
-				beanRegistrationCode.getMethodGenerator(),
+				beanRegistrationCode.getMethods(),
 				(name, value) -> generateValueCode(generationContext, name, value))
 						.generateCode(beanDefinition);
 	}
@@ -170,7 +170,7 @@ class DefaultBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments
 
 		return new InstanceSupplierCodeGenerator(generationContext,
 				beanRegistrationCode.getClassName(),
-				beanRegistrationCode.getMethodGenerator(), allowDirectSupplierShortcut)
+				beanRegistrationCode.getMethods(), allowDirectSupplierShortcut)
 						.generateCode(this.registeredBean, constructorOrFactoryMethod);
 	}
 

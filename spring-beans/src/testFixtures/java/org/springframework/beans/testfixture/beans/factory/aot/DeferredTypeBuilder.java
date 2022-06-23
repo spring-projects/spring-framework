@@ -14,30 +14,32 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.aot;
+package org.springframework.beans.testfixture.beans.factory.aot;
 
-import org.springframework.aot.generate.GeneratedMethods;
-import org.springframework.javapoet.ClassName;
+import java.util.function.Consumer;
+
+import org.springframework.javapoet.TypeSpec;
+import org.springframework.util.Assert;
 
 /**
- * Interface that can be used to configure the code that will be generated to
- * register beans.
+ * {@link TypeSpec.Builder} {@link Consumer} that can be used to defer the to
+ * another consumer that is set at a later point.
  *
  * @author Phillip Webb
  * @since 6.0
  */
-public interface BeanRegistrationsCode {
+public class DeferredTypeBuilder implements Consumer<TypeSpec.Builder> {
 
-	/**
-	 * Return the name of the class being used for registrations.
-	 * @return the generated class name.
-	 */
-	ClassName getClassName();
+	private Consumer<TypeSpec.Builder> type;
 
-	/**
-	 * Return a {@link GeneratedMethods} being used by the registrations code.
-	 * @return the method generator
-	 */
-	GeneratedMethods getMethods();
+	@Override
+	public void accept(TypeSpec.Builder type) {
+		Assert.notNull(this.type, "No type builder set");
+		this.type.accept(type);
+	}
+
+	public void set(Consumer<TypeSpec.Builder> type) {
+		this.type = type;
+	}
 
 }

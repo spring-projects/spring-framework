@@ -26,8 +26,8 @@ import java.util.function.Consumer;
 
 import org.springframework.aot.generate.AccessVisibility;
 import org.springframework.aot.generate.GeneratedMethod;
+import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.generate.MethodGenerator;
 import org.springframework.aot.hint.ExecutableHint;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.beans.factory.support.InstanceSupplier;
@@ -36,6 +36,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
+import org.springframework.javapoet.MethodSpec.Builder;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.function.ThrowingSupplier;
 
@@ -60,7 +61,7 @@ class InstanceSupplierCodeGenerator {
 
 	private static final CodeBlock NO_ARGS = CodeBlock.of("");
 
-	private static final Consumer<ExecutableHint.Builder> INTROSPECT = builder -> builder
+	private static final Consumer<ExecutableHint.Builder> INTROSPECT = hint -> hint
 			.withMode(ExecutableMode.INTROSPECT);
 
 
@@ -68,18 +69,18 @@ class InstanceSupplierCodeGenerator {
 
 	private final ClassName className;
 
-	private final MethodGenerator methodGenerator;
+	private final GeneratedMethods generatedMethods;
 
 	private final boolean allowDirectSupplierShortcut;
 
 
 	InstanceSupplierCodeGenerator(GenerationContext generationContext,
-			ClassName className, MethodGenerator methodGenerator,
+			ClassName className, GeneratedMethods generatedMethods,
 			boolean allowDirectSupplierShortcut) {
 
 		this.generationContext = generationContext;
 		this.className = className;
-		this.methodGenerator = methodGenerator;
+		this.generatedMethods = generatedMethods;
 		this.allowDirectSupplierShortcut = allowDirectSupplierShortcut;
 	}
 
@@ -131,11 +132,11 @@ class InstanceSupplierCodeGenerator {
 			return CodeBlock.of("$T.of($T::new)", ThrowingSupplier.class,
 					declaringClass);
 		}
-		GeneratedMethod getInstanceMethod = generateGetInstanceMethod()
-				.using(builder -> buildGetInstanceMethodForConstructor(builder, name,
-						constructor, declaringClass, dependsOnBean, PRIVATE_STATIC));
+		GeneratedMethod generatedMethod = generateGetInstanceMethod(method ->
+				buildGetInstanceMethodForConstructor(method, name, constructor, declaringClass,
+						dependsOnBean, PRIVATE_STATIC));
 		return CodeBlock.of("$T.of($T::$L)", InstanceSupplier.class, this.className,
-				getInstanceMethod.getName());
+				generatedMethod.getName());
 	}
 
 	private CodeBlock generateCodeForInaccessibleConstructor(String name,
@@ -143,33 +144,33 @@ class InstanceSupplierCodeGenerator {
 
 		this.generationContext.getRuntimeHints().reflection()
 				.registerConstructor(constructor);
-		GeneratedMethod getInstanceMethod = generateGetInstanceMethod().using(builder -> {
-			builder.addJavadoc("Instantiate the bean instance for '$L'.", name);
-			builder.addModifiers(PRIVATE_STATIC);
-			builder.returns(declaringClass);
-			builder.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER_NAME);
+		GeneratedMethod generatedMethod = generateGetInstanceMethod(method -> {
+			method.addJavadoc("Instantiate the bean instance for '$L'.", name);
+			method.addModifiers(PRIVATE_STATIC);
+			method.returns(declaringClass);
+			method.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER_NAME);
 			int parameterOffset = (!dependsOnBean) ? 0 : 1;
-			builder.addStatement(
+			method.addStatement(
 					generateResolverForConstructor(constructor, parameterOffset));
-			builder.addStatement("return resolver.resolveAndInstantiate($L)",
+			method.addStatement("return resolver.resolveAndInstantiate($L)",
 					REGISTERED_BEAN_PARAMETER_NAME);
 		});
 		return CodeBlock.of("$T.of($T::$L)", InstanceSupplier.class, this.className,
-				getInstanceMethod.getName());
+				generatedMethod.getName());
 	}
 
-	private void buildGetInstanceMethodForConstructor(MethodSpec.Builder builder,
+	private void buildGetInstanceMethodForConstructor(MethodSpec.Builder method,
 			String name, Constructor<?> constructor, Class<?> declaringClass,
 			boolean dependsOnBean, javax.lang.model.element.Modifier... modifiers) {
 
-		builder.addJavadoc("Create the bean instance for '$L'.", name);
-		builder.addModifiers(modifiers);
-		builder.returns(declaringClass);
-		builder.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER_NAME);
+		method.addJavadoc("Create the bean instance for '$L'.", name);
+		method.addModifiers(modifiers);
+		method.returns(declaringClass);
+		method.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER_NAME);
 		if (constructor.getParameterCount() == 0) {
 			CodeBlock instantiationCode = generateNewInstanceCodeForConstructor(
 					dependsOnBean, declaringClass, NO_ARGS);
-			builder.addCode(generateReturnStatement(instantiationCode));
+			method.addCode(generateReturnStatement(instantiationCode));
 		}
 		else {
 			int parameterOffset = (!dependsOnBean) ? 0 : 1;
@@ -183,7 +184,7 @@ class InstanceSupplierCodeGenerator {
 					declaringClass, arguments);
 			code.addStatement("return resolver.resolve($L, (args) -> $L)",
 					REGISTERED_BEAN_PARAMETER_NAME, newInstance);
-			builder.addCode(code.build());
+			method.addCode(code.build());
 		}
 	}
 
@@ -241,11 +242,11 @@ class InstanceSupplierCodeGenerator {
 			return CodeBlock.of("$T.of($T::$L)", ThrowingSupplier.class, declaringClass,
 					factoryMethod.getName());
 		}
-		GeneratedMethod getInstanceMethod = generateGetInstanceMethod()
-				.using(builder -> buildGetInstanceMethodForFactoryMethod(builder, name,
-						factoryMethod, declaringClass, dependsOnBean, PRIVATE_STATIC));
+		GeneratedMethod generatedMethod = generateGetInstanceMethod(method ->
+				buildGetInstanceMethodForFactoryMethod(method, name, factoryMethod, declaringClass,
+						dependsOnBean, PRIVATE_STATIC));
 		return CodeBlock.of("$T.of($T::$L)", InstanceSupplier.class, this.className,
-				getInstanceMethod.getName());
+				generatedMethod.getName());
 	}
 
 	private CodeBlock generateCodeForInaccessibleFactoryMethod(String name,
@@ -253,36 +254,36 @@ class InstanceSupplierCodeGenerator {
 
 		this.generationContext.getRuntimeHints().reflection()
 				.registerMethod(factoryMethod);
-		GeneratedMethod getInstanceMethod = generateGetInstanceMethod().using(builder -> {
-			builder.addJavadoc("Instantiate the bean instance for '$L'.", name);
-			builder.addModifiers(PRIVATE_STATIC);
-			builder.returns(factoryMethod.getReturnType());
-			builder.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER_NAME);
-			builder.addStatement(generateResolverForFactoryMethod(factoryMethod,
+		GeneratedMethod generatedMethod = generateGetInstanceMethod(method -> {
+			method.addJavadoc("Instantiate the bean instance for '$L'.", name);
+			method.addModifiers(PRIVATE_STATIC);
+			method.returns(factoryMethod.getReturnType());
+			method.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER_NAME);
+			method.addStatement(generateResolverForFactoryMethod(factoryMethod,
 					declaringClass, factoryMethod.getName()));
-			builder.addStatement("return resolver.resolveAndInstantiate($L)",
+			method.addStatement("return resolver.resolveAndInstantiate($L)",
 					REGISTERED_BEAN_PARAMETER_NAME);
 		});
 		return CodeBlock.of("$T.of($T::$L)", InstanceSupplier.class, this.className,
-				getInstanceMethod.getName());
+				generatedMethod.getName());
 	}
 
-	private void buildGetInstanceMethodForFactoryMethod(MethodSpec.Builder builder,
+	private void buildGetInstanceMethodForFactoryMethod(MethodSpec.Builder method,
 			String name, Method factoryMethod, Class<?> declaringClass,
 			boolean dependsOnBean, javax.lang.model.element.Modifier... modifiers) {
 
 		String factoryMethodName = factoryMethod.getName();
-		builder.addJavadoc("Get the bean instance for '$L'.", name);
-		builder.addModifiers(modifiers);
-		builder.returns(factoryMethod.getReturnType());
+		method.addJavadoc("Get the bean instance for '$L'.", name);
+		method.addModifiers(modifiers);
+		method.returns(factoryMethod.getReturnType());
 		if (isThrowingCheckedException(factoryMethod)) {
-			builder.addException(Exception.class);
+			method.addException(Exception.class);
 		}
-		builder.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER_NAME);
+		method.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER_NAME);
 		if (factoryMethod.getParameterCount() == 0) {
 			CodeBlock instantiationCode = generateNewInstanceCodeForMethod(dependsOnBean,
 					declaringClass, factoryMethodName, NO_ARGS);
-			builder.addCode(generateReturnStatement(instantiationCode));
+			method.addCode(generateReturnStatement(instantiationCode));
 		}
 		else {
 			CodeBlock.Builder code = CodeBlock.builder();
@@ -294,7 +295,7 @@ class InstanceSupplierCodeGenerator {
 					declaringClass, factoryMethodName, arguments);
 			code.addStatement("return resolver.resolve($L, (args) -> $L)",
 					REGISTERED_BEAN_PARAMETER_NAME, newInstance);
-			builder.addCode(code.build());
+			method.addCode(code.build());
 		}
 	}
 
@@ -349,8 +350,8 @@ class InstanceSupplierCodeGenerator {
 		return builder.build();
 	}
 
-	private GeneratedMethod generateGetInstanceMethod() {
-		return this.methodGenerator.generateMethod("get", "instance");
+	private GeneratedMethod generateGetInstanceMethod(Consumer<Builder> method) {
+		return this.generatedMethods.add("getInstance", method);
 	}
 
 	private boolean isThrowingCheckedException(Executable executable) {

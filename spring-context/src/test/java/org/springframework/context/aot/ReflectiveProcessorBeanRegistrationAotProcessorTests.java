@@ -25,6 +25,7 @@ import java.lang.annotation.Target;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.GenerationContext;
+import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
@@ -53,7 +54,7 @@ class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 
 	private final ReflectiveProcessorBeanRegistrationAotProcessor processor = new ReflectiveProcessorBeanRegistrationAotProcessor();
 
-	private final GenerationContext generationContext = new TestGenerationContext();
+	private final GenerationContext generationContext = new TestGenerationContext(new InMemoryGeneratedFiles());
 
 	@Test
 	void shouldIgnoreNonAnnotatedType() {

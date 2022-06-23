@@ -22,8 +22,8 @@ import javax.lang.model.element.Modifier;
 
 import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.generate.GeneratedMethod;
+import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.generate.MethodGenerator;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.javapoet.ClassName;
@@ -60,27 +60,24 @@ class BeanRegistrationsAotContribution
 			BeanFactoryInitializationCode beanFactoryInitializationCode) {
 
 		GeneratedClass generatedClass = generationContext.getGeneratedClasses()
-				.forFeature("BeanFactoryRegistrations").generate(type -> {
+				.addForFeature("BeanFactoryRegistrations", type -> {
 					type.addJavadoc("Register bean definitions for the bean factory.");
 					type.addModifiers(Modifier.PUBLIC);
 				});
-		BeanRegistrationsCodeGenerator codeGenerator = new BeanRegistrationsCodeGenerator(
-				generatedClass);
-		GeneratedMethod registerMethod = codeGenerator.getMethodGenerator()
-				.generateMethod("registerBeanDefinitions")
-				.using(builder -> generateRegisterMethod(builder, generationContext,
-						codeGenerator));
-		beanFactoryInitializationCode
-				.addInitializer(MethodReference.of(generatedClass.getName(), registerMethod.getName()));
+		BeanRegistrationsCodeGenerator codeGenerator = new BeanRegistrationsCodeGenerator(generatedClass);
+		GeneratedMethod generatedMethod = codeGenerator.getMethods().add("registerBeanDefinitions", method ->
+				generateRegisterMethod(method, generationContext, codeGenerator));
+		beanFactoryInitializationCode.addInitializer(
+				MethodReference.of(generatedClass.getName(), generatedMethod.getName()));
 	}
 
-	private void generateRegisterMethod(MethodSpec.Builder builder,
+	private void generateRegisterMethod(MethodSpec.Builder method,
 			GenerationContext generationContext,
 			BeanRegistrationsCode beanRegistrationsCode) {
 
-		builder.addJavadoc("Register the bean definitions.");
-		builder.addModifiers(Modifier.PUBLIC);
-		builder.addParameter(DefaultListableBeanFactory.class,
+		method.addJavadoc("Register the bean definitions.");
+		method.addModifiers(Modifier.PUBLIC);
+		method.addParameter(DefaultListableBeanFactory.class,
 				BEAN_FACTORY_PARAMETER_NAME);
 		CodeBlock.Builder code = CodeBlock.builder();
 		this.registrations.forEach((beanName, beanDefinitionMethodGenerator) -> {
@@ -91,7 +88,7 @@ class BeanRegistrationsAotContribution
 					BEAN_FACTORY_PARAMETER_NAME, beanName,
 					beanDefinitionMethod.toInvokeCodeBlock());
 		});
-		builder.addCode(code.build());
+		method.addCode(code.build());
 	}
 
 
@@ -113,8 +110,8 @@ class BeanRegistrationsAotContribution
 		}
 
 		@Override
-		public MethodGenerator getMethodGenerator() {
-			return this.generatedClass.getMethodGenerator();
+		public GeneratedMethods getMethods() {
+			return this.generatedClass.getMethods();
 		}
 
 	}

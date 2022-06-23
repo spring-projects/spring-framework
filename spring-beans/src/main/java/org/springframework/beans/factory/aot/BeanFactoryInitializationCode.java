@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory.aot;
 
-import org.springframework.aot.generate.MethodGenerator;
+import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.MethodReference;
 
 /**
@@ -35,11 +35,10 @@ public interface BeanFactoryInitializationCode {
 	String BEAN_FACTORY_VARIABLE = "beanFactory";
 
 	/**
-	 * Return a {@link MethodGenerator} that can be used to add more methods to
-	 * the Initializing code.
+	 * Return the {@link GeneratedMethods} being used by the Initializing code.
 	 * @return the method generator
 	 */
-	MethodGenerator getMethodGenerator();
+	GeneratedMethods getMethods();
 
 	/**
 	 * Add an initializer method call.

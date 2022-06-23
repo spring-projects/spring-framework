@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aot.generate.GeneratedFiles.Kind;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.core.testfixture.aot.generate.TestTarget;
-import org.springframework.javapoet.TypeSpec.Builder;
+import org.springframework.javapoet.TypeSpec;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  */
 class DefaultGenerationContextTests {
 
-	private static final Consumer<Builder> typeSpecCustomizer = type -> {};
+	private static final Consumer<TypeSpec.Builder> typeSpecCustomizer = type -> {};
 
 	private final GeneratedClasses generatedClasses = new GeneratedClasses(
 			new ClassNameGenerator(TestTarget.class));
@@ -113,34 +113,34 @@ class DefaultGenerationContextTests {
 				new ClassNameGenerator(TestTarget.class), this.generatedFiles);
 		GenerationContext anotherContext = context.withName("Another");
 		GeneratedClass generatedClass = anotherContext.getGeneratedClasses()
-				.forFeature("Test").generate(typeSpecCustomizer);
+				.addForFeature("Test", typeSpecCustomizer);
 		assertThat(generatedClass.getName().simpleName()).endsWith("__AnotherTest");
 	}
 
 	@Test
-	void withNameKeepTrackOfAllGeneratedFiles() {
+	void withNameKeepsTrackOfAllGeneratedFiles() {
 		DefaultGenerationContext context = new DefaultGenerationContext(
 				new ClassNameGenerator(TestTarget.class), this.generatedFiles);
-		context.getGeneratedClasses().forFeature("Test").generate(typeSpecCustomizer);
+		context.getGeneratedClasses().addForFeature("Test", typeSpecCustomizer);
 		GenerationContext anotherContext = context.withName("Another");
 		assertThat(anotherContext.getGeneratedClasses()).isNotSameAs(context.getGeneratedClasses());
 		assertThat(anotherContext.getGeneratedFiles()).isSameAs(context.getGeneratedFiles());
 		assertThat(anotherContext.getRuntimeHints()).isSameAs(context.getRuntimeHints());
-		anotherContext.getGeneratedClasses().forFeature("Test").generate(typeSpecCustomizer);
+		anotherContext.getGeneratedClasses().addForFeature("Test", typeSpecCustomizer);
 		context.writeGeneratedContent();
 		assertThat(this.generatedFiles.getGeneratedFiles(Kind.SOURCE)).hasSize(2);
 	}
 
 	@Test
-	void withNameGenerateUniqueName() {
+	void withNameGeneratesUniqueName() {
 		DefaultGenerationContext context = new DefaultGenerationContext(
 				new ClassNameGenerator(Object.class), this.generatedFiles);
 		context.withName("Test").getGeneratedClasses()
-				.forFeature("Feature").generate(typeSpecCustomizer);
+				.addForFeature("Feature", typeSpecCustomizer);
 		context.withName("Test").getGeneratedClasses()
-				.forFeature("Feature").generate(typeSpecCustomizer);
+				.addForFeature("Feature", typeSpecCustomizer);
 		context.withName("Test").getGeneratedClasses()
-				.forFeature("Feature").generate(typeSpecCustomizer);
+				.addForFeature("Feature", typeSpecCustomizer);
 		context.writeGeneratedContent();
 		assertThat(this.generatedFiles.getGeneratedFiles(Kind.SOURCE)).containsOnlyKeys(
 				"java/lang/Object__TestFeature.java",

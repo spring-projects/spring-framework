@@ -534,10 +534,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			Map<String, String> mappings = buildImportAwareMappings();
 			if (!mappings.isEmpty()) {
 				GeneratedMethod generatedMethod = beanFactoryInitializationCode
-						.getMethodGenerator()
-						.generateMethod("addImportAwareBeanPostProcessors")
-						.using(builder -> generateAddPostProcessorMethod(builder,
-								mappings));
+						.getMethods()
+						.add("addImportAwareBeanPostProcessors", method ->
+								generateAddPostProcessorMethod(method, mappings));
 				beanFactoryInitializationCode
 						.addInitializer(MethodReference.of(generatedMethod.getName()));
 				ResourceHints hints = generationContext.getRuntimeHints().resources();
@@ -546,14 +545,14 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			}
 		}
 
-		private void generateAddPostProcessorMethod(MethodSpec.Builder builder,
+		private void generateAddPostProcessorMethod(MethodSpec.Builder method,
 				Map<String, String> mappings) {
 
-			builder.addJavadoc(
+			method.addJavadoc(
 					"Add ImportAwareBeanPostProcessor to support ImportAware beans");
-			builder.addModifiers(Modifier.PRIVATE);
-			builder.addParameter(DefaultListableBeanFactory.class, BEAN_FACTORY_VARIABLE);
-			builder.addCode(generateAddPostProcessorCode(mappings));
+			method.addModifiers(Modifier.PRIVATE);
+			method.addParameter(DefaultListableBeanFactory.class, BEAN_FACTORY_VARIABLE);
+			method.addCode(generateAddPostProcessorCode(mappings));
 		}
 
 		private CodeBlock generateAddPostProcessorCode(Map<String, String> mappings) {

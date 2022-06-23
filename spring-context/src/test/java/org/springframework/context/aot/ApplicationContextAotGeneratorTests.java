@@ -188,14 +188,11 @@ class ApplicationContextAotGeneratorTests {
 			BiConsumer<ApplicationContextInitializer<GenericApplicationContext>, Compiled> result) {
 		ApplicationContextAotGenerator generator = new ApplicationContextAotGenerator();
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
-		DefaultGenerationContext generationContext = new TestGenerationContext(
-				generatedFiles);
+		DefaultGenerationContext generationContext = new TestGenerationContext(generatedFiles);
 		generator.generateApplicationContext(applicationContext, generationContext);
 		generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(generatedFiles)
-				.compile(compiled -> result.accept(
-						compiled.getInstance(ApplicationContextInitializer.class),
-						compiled));
+		TestCompiler.forSystem().withFiles(generatedFiles).compile(compiled ->
+				result.accept(compiled.getInstance(ApplicationContextInitializer.class), compiled));
 	}
 
 	private GenericApplicationContext toFreshApplicationContext(

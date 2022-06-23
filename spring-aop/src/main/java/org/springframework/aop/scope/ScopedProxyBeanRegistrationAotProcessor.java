@@ -152,30 +152,30 @@ class ScopedProxyBeanRegistrationAotProcessor
 				Executable constructorOrFactoryMethod,
 				boolean allowDirectSupplierShortcut) {
 
-			GeneratedMethod method = beanRegistrationCode.getMethodGenerator()
-					.generateMethod("get", "scopedProxyInstance").using(builder -> {
+			GeneratedMethod generatedMethod = beanRegistrationCode.getMethods()
+					.add("getScopedProxyInstance", method -> {
 						Class<?> beanClass = this.targetBeanDefinition.getResolvableType()
 								.toClass();
-						builder.addJavadoc(
+						method.addJavadoc(
 								"Create the scoped proxy bean instance for '$L'.",
 								this.registeredBean.getBeanName());
-						builder.addModifiers(Modifier.PRIVATE, Modifier.STATIC);
-						builder.returns(beanClass);
-						builder.addParameter(RegisteredBean.class,
+						method.addModifiers(Modifier.PRIVATE, Modifier.STATIC);
+						method.returns(beanClass);
+						method.addParameter(RegisteredBean.class,
 								REGISTERED_BEAN_PARAMETER_NAME);
-						builder.addStatement("$T factory = new $T()",
+						method.addStatement("$T factory = new $T()",
 								ScopedProxyFactoryBean.class,
 								ScopedProxyFactoryBean.class);
-						builder.addStatement("factory.setTargetBeanName($S)",
+						method.addStatement("factory.setTargetBeanName($S)",
 								this.targetBeanName);
-						builder.addStatement(
+						method.addStatement(
 								"factory.setBeanFactory($L.getBeanFactory())",
 								REGISTERED_BEAN_PARAMETER_NAME);
-						builder.addStatement("return ($T) factory.getObject()",
+						method.addStatement("return ($T) factory.getObject()",
 								beanClass);
 					});
 			return CodeBlock.of("$T.of($T::$L)", InstanceSupplier.class,
-					beanRegistrationCode.getClassName(), method.getName());
+					beanRegistrationCode.getClassName(), generatedMethod.getName());
 		}
 
 	}

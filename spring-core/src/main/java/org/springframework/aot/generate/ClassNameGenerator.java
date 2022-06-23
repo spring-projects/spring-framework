@@ -47,6 +47,7 @@ public final class ClassNameGenerator {
 
 	private final Map<String, AtomicInteger> sequenceGenerator;
 
+
 	/**
 	 * Create a new instance using the specified {@code defaultTarget} and no
 	 * feature name prefix.
@@ -68,11 +69,15 @@ public final class ClassNameGenerator {
 
 	private ClassNameGenerator(Class<?> defaultTarget, String featureNamePrefix,
 			Map<String, AtomicInteger> sequenceGenerator) {
+		Assert.notNull(defaultTarget, "'defaultTarget' must not be null");
 		this.defaultTarget = defaultTarget;
 		this.featureNamePrefix = (!StringUtils.hasText(featureNamePrefix) ? "" : featureNamePrefix);
 		this.sequenceGenerator = sequenceGenerator;
 	}
 
+	String getFeatureNamePrefix() {
+		return this.featureNamePrefix;
+	}
 
 	/**
 	 * Generate a unique {@link ClassName} based on the specified
@@ -85,46 +90,22 @@ public final class ClassNameGenerator {
 	 * if any.
 	 * <p>Generated class names are unique. If such a feature was already
 	 * requested for this target, a counter is used to ensure uniqueness.
-	 * @param target the class the newly generated class relates to, or
-	 * {@code null} to use the main target
 	 * @param featureName the name of the feature that the generated class
 	 * supports
+	 * @param target the class the newly generated class relates to, or
+	 * {@code null} to use the main target
 	 * @return a unique generated class name
 	 */
-	public ClassName generateClassName(@Nullable Class<?> target, String featureName) {
-		return generateSequencedClassName(getClassName(target, featureName));
+	public ClassName generateClassName(String featureName, @Nullable Class<?> target) {
+		return generateSequencedClassName(getRootName(featureName, target));
 	}
 
-	/**
-	 * Return a class name based on the specified {@code target} and
-	 * {@code featureName}. This uses the same algorithm as
-	 * {@link #generateClassName(Class, String)} but does not register
-	 * the class name, nor add a unique suffix to it if necessary.
-	 * @param target the class the newly generated class relates to, or
-	 * {@code null} to use the main target
-	 * @param featureName the name of the feature that the generated class
-	 * supports
-	 * @return the class name
-	 */
-	String getClassName(@Nullable Class<?> target, String featureName) {
+	private String getRootName(String featureName, @Nullable Class<?> target) {
 		Assert.hasLength(featureName, "'featureName' must not be empty");
 		featureName = clean(featureName);
 		Class<?> targetToUse = (target != null ? target : this.defaultTarget);
 		String featureNameToUse = this.featureNamePrefix + featureName;
-		return targetToUse.getName().replace("$", "_")
-				+ SEPARATOR + StringUtils.capitalize(featureNameToUse);
-	}
-
-	/**
-	 * Return a new {@link ClassNameGenerator} instance for the specified
-	 * feature name prefix, keeping track of all the class names generated
-	 * by this instance.
-	 * @param featureNamePrefix the feature name prefix to use
-	 * @return a new instance for the specified feature name prefix
-	 */
-	ClassNameGenerator usingFeatureNamePrefix(String featureNamePrefix) {
-		return new ClassNameGenerator(this.defaultTarget, featureNamePrefix,
-				this.sequenceGenerator);
+		return targetToUse.getName().replace("$", "_") + SEPARATOR + StringUtils.capitalize(featureNameToUse);
 	}
 
 	private String clean(String name) {
@@ -142,15 +123,26 @@ public final class ClassNameGenerator {
 	}
 
 	private ClassName generateSequencedClassName(String name) {
-		name = addSequence(name);
+		int sequence = this.sequenceGenerator.computeIfAbsent(name, key ->
+				new AtomicInteger()).getAndIncrement();
+		if (sequence > 0) {
+			name = name + sequence;
+		}
 		return ClassName.get(ClassUtils.getPackageName(name),
 				ClassUtils.getShortName(name));
 	}
 
-	private String addSequence(String name) {
-		int sequence = this.sequenceGenerator
-				.computeIfAbsent(name, key -> new AtomicInteger()).getAndIncrement();
-		return (sequence > 0) ? name + sequence : name;
+
+	/**
+	 * Return a new {@link ClassNameGenerator} instance for the specified
+	 * feature name prefix, keeping track of all the class names generated
+	 * by this instance.
+	 * @param featureNamePrefix the feature name prefix to use
+	 * @return a new instance for the specified feature name prefix
+	 */
+	ClassNameGenerator withFeatureNamePrefix(String featureNamePrefix) {
+		return new ClassNameGenerator(this.defaultTarget, featureNamePrefix,
+				this.sequenceGenerator);
 	}
 
 }

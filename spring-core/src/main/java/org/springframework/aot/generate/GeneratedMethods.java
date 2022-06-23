@@ -17,12 +17,13 @@
 package org.springframework.aot.generate;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.springframework.javapoet.MethodSpec;
+import org.springframework.javapoet.MethodSpec.Builder;
 import org.springframework.util.Assert;
 
 /**
@@ -32,49 +33,63 @@ import org.springframework.util.Assert;
  * @since 6.0
  * @see GeneratedMethod
  */
-public class GeneratedMethods implements Iterable<GeneratedMethod>, MethodGenerator {
+public class GeneratedMethods {
 
-	private final MethodNameGenerator methodNameGenerator;
+	private final Function<MethodName, String> methodNameGenerator;
 
-	private final List<GeneratedMethod> generatedMethods = new ArrayList<>();
+	private final MethodName prefix;
 
-
-	/**
-	 * Create a new {@link GeneratedMethods} instance backed by a new
-	 * {@link MethodNameGenerator}.
-	 */
-	public GeneratedMethods() {
-		this(new MethodNameGenerator());
-	}
+	private final List<GeneratedMethod> generatedMethods;
 
 	/**
 	 * Create a new {@link GeneratedMethods} instance backed by the given
 	 * {@link MethodNameGenerator}.
 	 * @param methodNameGenerator the method name generator
 	 */
-	public GeneratedMethods(MethodNameGenerator methodNameGenerator) {
+	GeneratedMethods(Function<MethodName, String> methodNameGenerator) {
 		Assert.notNull(methodNameGenerator, "'methodNameGenerator' must not be null");
 		this.methodNameGenerator = methodNameGenerator;
+		this.prefix = MethodName.NONE;
+		this.generatedMethods = new ArrayList<>();
 	}
 
+	private GeneratedMethods(Function<MethodName, String> methodNameGenerator,
+			MethodName prefix, List<GeneratedMethod> generatedMethods) {
 
-	@Override
-	public GeneratedMethod generateMethod(Object... methodNameParts) {
-		return add(methodNameParts);
+		this.methodNameGenerator = methodNameGenerator;
+		this.prefix = prefix;
+		this.generatedMethods = generatedMethods;
 	}
 
 	/**
-	 * Add a new {@link GeneratedMethod}. The returned instance must define the
-	 * method spec by calling {@code using(builder -> ...)}.
-	 * @param methodNameParts the method name parts that should be used to
-	 * generate a unique method name
+	 * Add a new {@link GeneratedMethod}.
+	 * @param suggestedName the suggested name for the method
+	 * @param method a {@link Consumer} used to build method
 	 * @return the newly added {@link GeneratedMethod}
 	 */
-	public GeneratedMethod add(Object... methodNameParts) {
-		GeneratedMethod method = new GeneratedMethod(
-				this.methodNameGenerator.generateMethodName(methodNameParts));
-		this.generatedMethods.add(method);
-		return method;
+	public GeneratedMethod add(String suggestedName, Consumer<Builder> method) {
+		Assert.notNull(suggestedName, "'suggestedName' must not be null");
+		return add(MethodName.of(suggestedName), method);
+	}
+
+	/**
+	 * Add a new {@link GeneratedMethod}.
+	 * @param suggestedName the suggested name for the method
+	 * @param method a {@link Consumer} used to build the method
+	 * @return the newly added {@link GeneratedMethod}
+	 */
+	public GeneratedMethod add(MethodName suggestedName, Consumer<Builder> method) {
+		Assert.notNull(suggestedName, "'suggestedName' must not be null");
+		Assert.notNull(method, "'method' must not be null");
+		String generatedName = this.methodNameGenerator.apply(this.prefix.and(suggestedName));
+		GeneratedMethod generatedMethod = new GeneratedMethod(generatedName, method);
+		this.generatedMethods.add(generatedMethod);
+		return generatedMethod;
+	}
+
+	public GeneratedMethods withPrefix(String prefix) {
+		Assert.notNull(prefix, "'prefix' must not be null");
+		return new GeneratedMethods(this.methodNameGenerator, this.prefix.and(prefix), this.generatedMethods);
 	}
 
 	/**
@@ -82,20 +97,11 @@ public class GeneratedMethods implements Iterable<GeneratedMethod>, MethodGenera
 	 * that have been added to this collection.
 	 * @param action the action to perform
 	 */
-	public void doWithMethodSpecs(Consumer<MethodSpec> action) {
-		stream().map(GeneratedMethod::getSpec).forEach(action);
+	void doWithMethodSpecs(Consumer<MethodSpec> action) {
+		stream().map(GeneratedMethod::getMethodSpec).forEach(action);
 	}
 
-	@Override
-	public Iterator<GeneratedMethod> iterator() {
-		return this.generatedMethods.iterator();
-	}
-
-	/**
-	 * Return a {@link Stream} of all the methods in this collection.
-	 * @return a stream of {@link GeneratedMethod} instances
-	 */
-	public Stream<GeneratedMethod> stream() {
+	Stream<GeneratedMethod> stream() {
 		return this.generatedMethods.stream();
 	}
 

@@ -16,7 +16,6 @@
 
 package org.springframework.context.aot;
 
-import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -47,15 +46,11 @@ public class ApplicationContextAotGenerator {
 	public ClassName generateApplicationContext(GenericApplicationContext applicationContext,
 			GenerationContext generationContext) {
 		applicationContext.refreshForAotProcessing();
-		DefaultListableBeanFactory beanFactory = applicationContext
-				.getDefaultListableBeanFactory();
-		ApplicationContextInitializationCodeGenerator codeGenerator = new ApplicationContextInitializationCodeGenerator();
-		new BeanFactoryInitializationAotContributions(beanFactory).applyTo(generationContext,
-				codeGenerator);
-		GeneratedClass applicationContextInitializer = generationContext.getGeneratedClasses()
-				.forFeature("ApplicationContextInitializer")
-				.generate(codeGenerator.generateJavaFile());
-		return applicationContextInitializer.getName();
+		DefaultListableBeanFactory beanFactory = applicationContext.getDefaultListableBeanFactory();
+		ApplicationContextInitializationCodeGenerator codeGenerator =
+				new ApplicationContextInitializationCodeGenerator(generationContext);
+		new BeanFactoryInitializationAotContributions(beanFactory).applyTo(generationContext, codeGenerator);
+		return codeGenerator.getGeneratedClass().getName();
 	}
 
 }
