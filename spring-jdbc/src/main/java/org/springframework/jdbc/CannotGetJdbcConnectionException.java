@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,4 +48,12 @@ public class CannotGetJdbcConnectionException extends DataAccessResourceFailureE
 		super(msg, ex);
 	}
 
+	/**
+	 * Constructor for CannotGetJdbcConnectionException.
+	 * @param msg the detail message
+	 * @param ex the root cause IllegalStateException
+	 */
+	public CannotGetJdbcConnectionException(String msg, IllegalStateException ex) {
+		super(msg, ex);
+	}
 }
