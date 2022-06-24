@@ -17,6 +17,8 @@
 package org.springframework.http;
 
 import java.net.URI;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -54,6 +56,9 @@ public class ProblemDetail {
 	@Nullable
 	private URI instance;
 
+	@Nullable
+	private Map<String, Object> properties;
+
 
 	/**
 	 * Protected constructor for subclasses.
@@ -75,6 +80,7 @@ public class ProblemDetail {
 		this.status = other.status;
 		this.detail = other.detail;
 		this.instance = other.instance;
+		this.properties = (other.properties != null ? new LinkedHashMap<>(other.properties) : null);
 	}
 
 	/**
@@ -201,6 +207,18 @@ public class ProblemDetail {
 		this.instance = instance;
 	}
 
+	/**
+	 * Set a "dynamic" property to be added to a generic {@link #getProperties()
+	 * properties map}.
+	 * @param name the property name
+	 * @param value the property value
+	 */
+	public void setProperty(String name, Object value) {
+		this.properties = (this.properties != null ? this.properties : new LinkedHashMap<>());
+		this.properties.put(name, value);
+	}
+
+
 
 	// Getters
 
@@ -249,6 +267,14 @@ public class ProblemDetail {
 		return this.instance;
 	}
 
+	/**
+	 * Return a generic map of properties that are not known ahead of time.
+	 */
+	@Nullable
+	public Map<String, Object> getProperties() {
+		return this.properties;
+	}
+
 
 	@Override
 	public String toString() {
@@ -264,7 +290,8 @@ public class ProblemDetail {
 				", title='" + getTitle() + "'" +
 				", status=" + getStatus() +
 				", detail='" + getDetail() + "'" +
-				", instance='" + getInstance() + "'";
+				", instance='" + getInstance() + "'" +
+				", properties='" + getProperties() + "'";
 	}
 
 
