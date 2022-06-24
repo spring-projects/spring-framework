@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -421,6 +421,40 @@ public class DefaultWebClientTests {
 				.bodyToMono(Void.class);
 
 		StepVerifier.create(result).expectErrorMessage("1").verify();
+	}
+
+	@Test
+	public void onStatusHandlerRegisteredGlobally() {
+
+		ClientResponse response = ClientResponse.create(HttpStatus.BAD_REQUEST).build();
+		given(exchangeFunction.exchange(any())).willReturn(Mono.just(response));
+
+		Mono<Void> result = this.builder
+				.defaultStatusHandler(HttpStatusCode::is4xxClientError, resp -> Mono.error(new IllegalStateException("1")))
+				.defaultStatusHandler(HttpStatusCode::is4xxClientError, resp -> Mono.error(new IllegalStateException("2")))
+				.build().get()
+				.uri("/path")
+				.retrieve()
+				.bodyToMono(Void.class);
+
+		StepVerifier.create(result).expectErrorMessage("1").verify();
+	}
+
+	@Test
+	public void onStatusHandlerRegisteredGloballyHaveLowerPrecedence() {
+
+		ClientResponse response = ClientResponse.create(HttpStatus.BAD_REQUEST).build();
+		given(exchangeFunction.exchange(any())).willReturn(Mono.just(response));
+
+		Mono<Void> result = this.builder
+				.defaultStatusHandler(HttpStatusCode::is4xxClientError, resp -> Mono.error(new IllegalStateException("1")))
+				.build().get()
+				.uri("/path")
+				.retrieve()
+				.onStatus(HttpStatusCode::is4xxClientError, resp -> Mono.error(new IllegalStateException("2")))
+				.bodyToMono(Void.class);
+
+		StepVerifier.create(result).expectErrorMessage("2").verify();
 	}
 
 	@Test // gh-23880
