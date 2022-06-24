@@ -25,7 +25,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.service.invoker.HttpClientAdapter;
 import org.springframework.web.service.invoker.HttpRequestValues;
@@ -57,41 +56,41 @@ public final class WebClientAdapter implements HttpClientAdapter {
 
 	@Override
 	public Mono<Void> requestToVoid(HttpRequestValues requestValues) {
-		return toBodySpec(requestValues).exchangeToMono(ClientResponse::releaseBody);
+		return newRequest(requestValues).retrieve().toBodilessEntity().then();
 	}
 
 	@Override
 	public Mono<HttpHeaders> requestToHeaders(HttpRequestValues requestValues) {
-		return toBodySpec(requestValues).retrieve().toBodilessEntity().map(ResponseEntity::getHeaders);
+		return newRequest(requestValues).retrieve().toBodilessEntity().map(ResponseEntity::getHeaders);
 	}
 
 	@Override
 	public <T> Mono<T> requestToBody(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
-		return toBodySpec(requestValues).retrieve().bodyToMono(bodyType);
+		return newRequest(requestValues).retrieve().bodyToMono(bodyType);
 	}
 
 	@Override
 	public <T> Flux<T> requestToBodyFlux(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
-		return toBodySpec(requestValues).retrieve().bodyToFlux(bodyType);
+		return newRequest(requestValues).retrieve().bodyToFlux(bodyType);
 	}
 
 	@Override
 	public Mono<ResponseEntity<Void>> requestToBodilessEntity(HttpRequestValues requestValues) {
-		return toBodySpec(requestValues).retrieve().toBodilessEntity();
+		return newRequest(requestValues).retrieve().toBodilessEntity();
 	}
 
 	@Override
 	public <T> Mono<ResponseEntity<T>> requestToEntity(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
-		return toBodySpec(requestValues).retrieve().toEntity(bodyType);
+		return newRequest(requestValues).retrieve().toEntity(bodyType);
 	}
 
 	@Override
 	public <T> Mono<ResponseEntity<Flux<T>>> requestToEntityFlux(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
-		return toBodySpec(requestValues).retrieve().toEntityFlux(bodyType);
+		return newRequest(requestValues).retrieve().toEntityFlux(bodyType);
 	}
 
 	@SuppressWarnings("ReactiveStreamsUnusedPublisher")
-	private WebClient.RequestBodySpec toBodySpec(HttpRequestValues requestValues) {
+	private WebClient.RequestBodySpec newRequest(HttpRequestValues requestValues) {
 
 		HttpMethod httpMethod = requestValues.getHttpMethod();
 		Assert.notNull(httpMethod, "HttpMethod is required");

@@ -371,7 +371,7 @@ methods for HTTP exchanges. You can then generate a proxy that implements this i
 and performs the exchanges. This helps to simplify HTTP remote access which often
 involves a facade that wraps the details of using the underlying HTTP client.
 
-To start, declare an interface with annotated, HTTP exchange methods:
+One, declare an interface with `@HttpExchange` methods:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -385,8 +385,7 @@ To start, declare an interface with annotated, HTTP exchange methods:
 	}
 ----
 
-Now you create a proxy for the interface that performs the declared exchanges through
-the `WebClient`:
+Two, create a proxy that will perform the declared HTTP exchanges:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -396,7 +395,7 @@ the `WebClient`:
 	RepositoryService service = factory.createClient(RepositoryService.class);
 ----
 
-An HTTP service interface can declare common attributes at the type level:
+`@HttpExchange` is supported at the type level where it applies to all methods:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -502,6 +501,27 @@ Annotated, HTTP exchange methods support the following return values:
 
 TIP: You can also use any other async or reactive types registered in the
 `ReactiveAdapterRegistry`.
+
+
+[[rest-http-interface-exceptions]]
+==== Exception Handling
+
+By default, `WebClient` raises `WebClientResponseException` for 4xx and 5xx HTTP status
+codes. To customize this, you can register a response status handler that applies to all
+responses performed through the client:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	WebClient webClient = WebClient.builder()
+			.defaultStatusHandler(HttpStatusCode::isError, resp -> ...)
+			.build();
+
+	HttpServiceProxyFactory proxyFactory =
+			WebClientAdapter.createHttpServiceProxyFactory(webClient);
+----
+
+For more details and options, such as suppressing error status codes, see the Javadoc of
+`defaultStatusHandler` in `WebClient.Builder`.
 
 
 
