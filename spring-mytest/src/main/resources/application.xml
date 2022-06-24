@@ -2,8 +2,60 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-	<bean id="person" class="study.entity.Person">
+	<bean id="person" class="com.study.entity.Person">
 		<property name="id" value="1"/>
 		<property name="name" value="Java"/>
 	</bean>
+
+	<!-- 给web使用的spring文件 -->
+	<bean id="propertyConfigurer"
+		  class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>dbconfig.properties</value>
+			</list>
+		</property>
+	</bean>
+<!--	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"-->
+<!--		  destroy-method="close">-->
+<!--		<property name="url" value="${url}" />-->
+<!--		<property name="username" value="${username}" />-->
+<!--		<property name="password" value="${password}" />-->
+<!--		<property name="driverClassName" value="${driverClassName}" />-->
+<!--		<property name="filters" value="${filters}" />-->
+
+<!--		<property name="maxActive" value="${maxActive}" />-->
+<!--		<property name="initialSize" value="${initialSize}" />-->
+<!--		<property name="maxWait" value="${maxWait}" />-->
+<!--		<property name="minIdle" value="${minIdle}" />-->
+
+<!--		<property name="timeBetweenEvictionRunsMillis" value="${timeBetweenEvictionRunsMillis}" />-->
+<!--		<property name="minEvictableIdleTimeMillis" value="${minEvictableIdleTimeMillis}" />-->
+
+<!--		<property name="validationQuery" value="${validationQuery}" />-->
+
+<!--		<property name="maxOpenPreparedStatements"-->
+<!--				  value="${maxOpenPreparedStatements}" />-->
+<!--		<property name="removeAbandonedTimeout" value="${removeAbandonedTimeout}" /> &lt;!&ndash; 1800秒，也就是30分钟 &ndash;&gt;-->
+<!--	</bean>-->
+
+
+
+<!--	&lt;!&ndash; jdbcTemplate &ndash;&gt;-->
+<!--	<bean id="jdbc" class="org.springframework.jdbc.core.JdbcTemplate">-->
+<!--		<property name="dataSource">-->
+<!--			<ref bean="dataSource" />-->
+<!--		</property>-->
+<!--	</bean>-->
+
+
+
+	<!--	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">-->
+<!--		<property name="driverClassName" value="${jdbc.driverClassName}"/>-->
+<!--		<property name="url" value="${jdbc.url}"/>-->
+<!--		<property name="username" value="${jdbc.username}"/>-->
+<!--		<property name="password" value="${jdbc.password}"/>-->
+<!--	</bean>-->
+
+<!--	<context:property-placeholder location="jdbc.properties"/>-->
 </beans>

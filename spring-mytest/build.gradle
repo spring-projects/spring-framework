@@ -12,7 +12,37 @@ repositories {
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
+//    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    // https://mvnrepository.com/artifact/org.springframework.data/spring-data-jpa
+//    implementation group: 'org.springframework.data', name: 'spring-data-jpa', version: '2.6.5'
     compile(project(":spring-context"))
+    compile(project(":spring-jdbc"))
+    // https://mvnrepository.com/artifact/com.alibaba/druid
+//    implementation group: 'com.alibaba', name: 'druid', version: '1.2.11'
+    // https://mvnrepository.com/artifact/mysql/mysql-connector-java
+    implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.28'
+
+
+//    compile(project(":spring-jdbc"))
+//    compile(project(":spring-orm"))
+//    compile(project(":spring-beans"))
+//    compile(project(":spring-core"))
+//    compile(project(":spring-jdbc"))
+//    compile(project(":spring-tx"))
+//    optional(project(":spring-aop"))
+//    optional(project(":spring-context"))
+//    optional(project(":spring-web"))
+//    optional("org.eclipse.persistence:org.eclipse.persistence.jpa")
+//    optional("org.hibernate:hibernate-core")
+//    optional("javax.servlet:javax.servlet-api:3.1.0")
+//    testCompile(testFixtures(project(":spring-beans")))
+//    testCompile(testFixtures(project(":spring-context")))
+//    testCompile(testFixtures(project(":spring-core")))
+//    testCompile(testFixtures(project(":spring-web")))
+//    testCompile("org.aspectj:aspectjweaver")
+//    testCompile("org.hsqldb:hsqldb")
+//    testRuntime("javax.xml.bind:jaxb-api")
+//    compile('mysql:mysql-connector-java:8.0.28')
 }
 
 test {
