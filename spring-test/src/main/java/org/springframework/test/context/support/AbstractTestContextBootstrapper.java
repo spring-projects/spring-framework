@@ -24,6 +24,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,6 +33,7 @@ import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.support.SpringFactoriesLoader;
+import org.springframework.core.io.support.SpringFactoriesLoader.FailureHandler;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.BootstrapContext;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
@@ -112,7 +114,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	public final List<TestExecutionListener> getTestExecutionListeners() {
 		Class<?> clazz = getBootstrapContext().getTestClass();
 		Class<TestExecutionListeners> annotationType = TestExecutionListeners.class;
-		List<Class<? extends TestExecutionListener>> classesList = new ArrayList<>();
+		List<TestExecutionListener> listeners = new ArrayList<>(8);
 		boolean usingDefaults = false;
 
 		AnnotationDescriptor<TestExecutionListeners> descriptor =
@@ -125,7 +127,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 						clazz.getName()));
 			}
 			usingDefaults = true;
-			classesList.addAll(getDefaultTestExecutionListenerClasses());
+			listeners.addAll(getDefaultTestExecutionListeners());
 		}
 		else {
 			// Traverse the class hierarchy...
@@ -149,24 +151,27 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 								"@TestExecutionListeners for class [%s].", descriptor.getRootDeclaringClass().getName()));
 					}
 					usingDefaults = true;
-					classesList.addAll(getDefaultTestExecutionListenerClasses());
+					listeners.addAll(getDefaultTestExecutionListeners());
 				}
 
-				classesList.addAll(0, Arrays.asList(testExecutionListeners.listeners()));
+				listeners.addAll(0, instantiateListeners(testExecutionListeners.listeners()));
 
 				descriptor = (inheritListeners ? parentDescriptor : null);
 			}
 		}
 
-		Collection<Class<? extends TestExecutionListener>> classesToUse = classesList;
-		// Remove possible duplicates if we loaded default listeners.
 		if (usingDefaults) {
-			classesToUse = new LinkedHashSet<>(classesList);
-		}
+			// Remove possible duplicates if we loaded default listeners.
+			List<TestExecutionListener> uniqueListeners = new ArrayList<>(listeners.size());
+			listeners.forEach(listener -> {
+				Class<? extends TestExecutionListener> listenerClass = listener.getClass();
+				if (uniqueListeners.stream().map(Object::getClass).noneMatch(listenerClass::equals)) {
+					uniqueListeners.add(listener);
+				}
+			});
+			listeners = uniqueListeners;
 
-		List<TestExecutionListener> listeners = instantiateListeners(classesToUse);
-		// Sort by Ordered/@Order if we loaded default listeners.
-		if (usingDefaults) {
+			// Sort by Ordered/@Order if we loaded default listeners.
 			AnnotationAwareOrderComparator.sort(listeners);
 		}
 
@@ -176,8 +181,61 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		return listeners;
 	}
 
-	private List<TestExecutionListener> instantiateListeners(Collection<Class<? extends TestExecutionListener>> classes) {
-		List<TestExecutionListener> listeners = new ArrayList<>(classes.size());
+	/**
+	 * Get the default {@link TestExecutionListener TestExecutionListeners} for
+	 * this bootstrapper.
+	 * <p>This method is invoked by {@link #getTestExecutionListeners()}.
+	 * <p>The default implementation looks up and instantiates all
+	 * {@code org.springframework.test.context.TestExecutionListener} entries
+	 * configured in all {@code META-INF/spring.factories} files on the classpath.
+	 * <p>If a particular listener cannot be loaded due to a {@link LinkageError}
+	 * or {@link ClassNotFoundException}, a {@code DEBUG} message will be logged,
+	 * but the associated exception will not be rethrown. A {@link RuntimeException}
+	 * or any other {@link Error} will be rethrown. Any other exception will be
+	 * thrown wrapped in an {@link IllegalStateException}.
+	 * @return an <em>unmodifiable</em> list of default {@code TestExecutionListener}
+	 * instances
+	 * @since 6.0
+	 * @see SpringFactoriesLoader#forDefaultResourceLocation()
+	 * @see SpringFactoriesLoader#load(Class, FailureHandler)
+	 */
+	protected List<TestExecutionListener> getDefaultTestExecutionListeners() {
+		FailureHandler failureHandler = (factoryType, factoryImplementationName, ex) -> {
+			if (ex instanceof LinkageError || ex instanceof ClassNotFoundException) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Could not load default TestExecutionListener [" + factoryImplementationName +
+							"]. Specify custom listener classes or make the default listener classes available.", ex);
+				}
+			}
+			else {
+				if (ex instanceof RuntimeException runtimeException) {
+					throw runtimeException;
+				}
+				if (ex instanceof Error error) {
+					throw error;
+				}
+				throw new IllegalStateException("Failed to load default TestExecutionListener [" +
+						factoryImplementationName + "].", ex);
+			}
+		};
+
+		List<TestExecutionListener> listeners = SpringFactoriesLoader.forDefaultResourceLocation()
+				.load(TestExecutionListener.class, failureHandler);
+
+		if (logger.isInfoEnabled()) {
+			List<String> classNames = listeners.stream()
+					.map(listener -> listener.getClass().getName())
+					.collect(Collectors.toList());
+			logger.info(String.format("Loaded default TestExecutionListener implementations from location [%s]: %s",
+					SpringFactoriesLoader.FACTORIES_RESOURCE_LOCATION, classNames));
+		}
+
+		return Collections.unmodifiableList(listeners);
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<TestExecutionListener> instantiateListeners(Class<? extends TestExecutionListener>... classes) {
+		List<TestExecutionListener> listeners = new ArrayList<>(classes.length);
 		for (Class<? extends TestExecutionListener> listenerClass : classes) {
 			try {
 				listeners.add(BeanUtils.instantiateClass(listenerClass));
@@ -199,53 +257,6 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			}
 		}
 		return listeners;
-	}
-
-	/**
-	 * Get the default {@link TestExecutionListener} classes for this bootstrapper.
-	 * <p>This method is invoked by {@link #getTestExecutionListeners()} and
-	 * delegates to {@link #getDefaultTestExecutionListenerClassNames()} to
-	 * retrieve the class names.
-	 * <p>If a particular class cannot be loaded, a {@code DEBUG} message will
-	 * be logged, but the associated exception will not be rethrown.
-	 */
-	@SuppressWarnings("unchecked")
-	protected Set<Class<? extends TestExecutionListener>> getDefaultTestExecutionListenerClasses() {
-		Set<Class<? extends TestExecutionListener>> defaultListenerClasses = new LinkedHashSet<>();
-		ClassLoader cl = getClass().getClassLoader();
-		for (String className : getDefaultTestExecutionListenerClassNames()) {
-			try {
-				defaultListenerClasses.add((Class<? extends TestExecutionListener>) ClassUtils.forName(className, cl));
-			}
-			catch (Throwable ex) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Could not load default TestExecutionListener class [" + className +
-							"]. Specify custom listener classes or make the default listener classes available.", ex);
-				}
-			}
-		}
-		return defaultListenerClasses;
-	}
-
-	/**
-	 * Get the names of the default {@link TestExecutionListener} classes for
-	 * this bootstrapper.
-	 * <p>The default implementation looks up all
-	 * {@code org.springframework.test.context.TestExecutionListener} entries
-	 * configured in all {@code META-INF/spring.factories} files on the classpath.
-	 * <p>This method is invoked by {@link #getDefaultTestExecutionListenerClasses()}.
-	 * @return an <em>unmodifiable</em> list of names of default {@code TestExecutionListener}
-	 * classes
-	 * @see SpringFactoriesLoader#loadFactoryNames
-	 */
-	protected List<String> getDefaultTestExecutionListenerClassNames() {
-		List<String> classNames =
-				SpringFactoriesLoader.loadFactoryNames(TestExecutionListener.class, getClass().getClassLoader());
-		if (logger.isInfoEnabled()) {
-			logger.info(String.format("Loaded default TestExecutionListener class names from location [%s]: %s",
-					SpringFactoriesLoader.FACTORIES_RESOURCE_LOCATION, classNames));
-		}
-		return Collections.unmodifiableList(classNames);
 	}
 
 	/**
