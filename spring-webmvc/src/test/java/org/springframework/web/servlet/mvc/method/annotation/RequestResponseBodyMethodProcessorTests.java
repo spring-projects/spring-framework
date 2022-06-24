@@ -434,7 +434,8 @@ public class RequestResponseBodyMethodProcessorTests {
 						"\"title\":\"Bad Request\"," +
 						"\"status\":400," +
 						"\"detail\":null," +
-						"\"instance\":\"/path\"}");
+						"\"instance\":\"/path\"," +
+						"\"properties\":null}");
 	}
 
 	@Test // SPR-13135

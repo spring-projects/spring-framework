@@ -91,74 +91,9 @@ public class ProblemDetail {
 
 
 	/**
-	 * Variant of {@link #setType(URI)} for chained initialization.
-	 * @param type the problem type
-	 * @return the same instance
-	 */
-	public ProblemDetail withType(URI type) {
-		setType(type);
-		return this;
-	}
-
-	/**
-	 * Variant of {@link #setTitle(String)} for chained initialization.
-	 * @param title the problem title
-	 * @return the same instance
-	 */
-	public ProblemDetail withTitle(@Nullable String title) {
-		setTitle(title);
-		return this;
-	}
-
-	/**
-	 * Variant of {@link #setStatus(int)} for chained initialization.
-	 * @param statusCode the response status for the problem
-	 * @return the same instance
-	 */
-	public ProblemDetail withStatus(HttpStatusCode statusCode) {
-		Assert.notNull(statusCode, "HttpStatus is required");
-		setStatus(statusCode.value());
-		return this;
-	}
-
-	/**
-	 * Variant of {@link #setStatus(int)} for chained initialization.
-	 * @param status the response status value for the problem
-	 * @return the same instance
-	 */
-	public ProblemDetail withStatus(int status) {
-		setStatus(status);
-		return this;
-	}
-
-	/**
-	 * Variant of {@link #setDetail(String)} for chained initialization.
-	 * @param detail the problem detail
-	 * @return the same instance
-	 */
-	public ProblemDetail withDetail(@Nullable String detail) {
-		setDetail(detail);
-		return this;
-	}
-
-	/**
-	 * Variant of {@link #setInstance(URI)} for chained initialization.
-	 * @param instance the problem instance URI
-	 * @return the same instance
-	 */
-	public ProblemDetail withInstance(@Nullable URI instance) {
-		setInstance(instance);
-		return this;
-	}
-
-
-	// Setters for deserialization
-
-	/**
 	 * Setter for the {@link #getType() problem type}.
 	 * <p>By default, this is {@link #BLANK_TYPE}.
 	 * @param type the problem type
-	 * @see #withType(URI)
 	 */
 	public void setType(URI type) {
 		Assert.notNull(type, "'type' is required");
@@ -170,7 +105,6 @@ public class ProblemDetail {
 	 * <p>By default, if not explicitly set and the status is well-known, this
 	 * is sourced from the {@link HttpStatus#getReasonPhrase()}.
 	 * @param title the problem title
-	 * @see #withTitle(String)
 	 */
 	public void setTitle(@Nullable String title) {
 		this.title = title;
@@ -178,9 +112,15 @@ public class ProblemDetail {
 
 	/**
 	 * Setter for the {@link #getStatus() problem status}.
+	 * @param httpStatus the problem status
+	 */
+	public void setStatus(HttpStatus httpStatus) {
+		this.status = httpStatus.value();
+	}
+
+	/**
+	 * Setter for the {@link #getStatus() problem status}.
 	 * @param status the problem status
-	 * @see #withStatus(HttpStatusCode)
-	 * @see #withStatus(int)
 	 */
 	public void setStatus(int status) {
 		this.status = status;
@@ -190,7 +130,6 @@ public class ProblemDetail {
 	 * Setter for the {@link #getDetail() problem detail}.
 	 * <p>By default, this is not set.
 	 * @param detail the problem detail
-	 * @see #withDetail(String)
 	 */
 	public void setDetail(@Nullable String detail) {
 		this.detail = detail;
@@ -201,7 +140,6 @@ public class ProblemDetail {
 	 * <p>By default, when {@code ProblemDetail} is returned from an
 	 * {@code @ExceptionHandler} method, this is initialized to the request path.
 	 * @param instance the problem instance
-	 * @see #withInstance(URI)
 	 */
 	public void setInstance(@Nullable URI instance) {
 		this.instance = instance;
@@ -218,9 +156,6 @@ public class ProblemDetail {
 		this.properties.put(name, value);
 	}
 
-
-
-	// Getters
 
 	/**
 	 * Return the configured {@link #setType(URI) problem type}.
@@ -310,6 +245,16 @@ public class ProblemDetail {
 	 */
 	public static ProblemDetail forStatus(int status) {
 		return new ProblemDetail(status);
+	}
+
+	/**
+	 * Create a {@code ProblemDetail} instance with the given status and detail.
+	 */
+	public static ProblemDetail forStatusAndDetail(HttpStatusCode status, String detail) {
+		Assert.notNull(status, "HttpStatusCode is required");
+		ProblemDetail problemDetail = forStatus(status.value());
+		problemDetail.setDetail(detail);
+		return problemDetail;
 	}
 
 }
