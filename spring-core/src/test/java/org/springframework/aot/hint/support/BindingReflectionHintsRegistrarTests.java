@@ -18,6 +18,7 @@ package org.springframework.aot.hint.support;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -184,6 +185,17 @@ public class BindingReflectionHintsRegistrarTests {
 				});
 	}
 
+	@Test
+	void registerTypeForSerializationWithMultipleLevelsAndCollection() {
+		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleClassA.class);
+		assertThat(this.hints.reflection().typeHints()).satisfiesExactlyInAnyOrder(
+				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleClassA.class)),
+				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleClassB.class)),
+				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleClassC.class)),
+				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(String.class)),
+				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(Set.class)));
+	}
+
 
 	static class SampleEmptyClass {
 	}
@@ -241,6 +253,24 @@ public class BindingReflectionHintsRegistrarTests {
 
 		public ResolvableType getResolvableType() {
 			return null;
+		}
+	}
+
+	static class SampleClassA {
+		public Set<SampleClassB> getB() {
+			return null;
+		}
+	}
+
+	static class SampleClassB {
+		public SampleClassC getC() {
+			return null;
+		}
+	}
+
+	class SampleClassC {
+		public String getString() {
+			return "";
 		}
 	}
 

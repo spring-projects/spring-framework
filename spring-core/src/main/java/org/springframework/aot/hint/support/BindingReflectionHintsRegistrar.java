@@ -142,7 +142,6 @@ public class BindingReflectionHintsRegistrar {
 		if (type == null || seen.contains(type)) {
 			return;
 		}
-		seen.add(type);
 		ResolvableType resolvableType = ResolvableType.forType(type);
 		Class<?> clazz = resolvableType.resolve();
 		if (clazz != null) {
