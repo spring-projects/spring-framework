@@ -328,7 +328,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected A createSynthesized() {
+	protected A createSynthesizedAnnotation() {
 		if (getType().isInstance(this.rootAttributes) && !isSynthesizable()) {
 			return (A) this.rootAttributes;
 		}
