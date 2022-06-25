@@ -1539,6 +1539,17 @@ class MergedAnnotationsTests {
 		assertThat(generatedValue).isSameAs(synthesizedGeneratedValue);
 	}
 
+	@Test
+	void synthesizeShouldNotSynthesizeNonsynthesizableAnnotationsWhenUsingMergedAnnotationsFromApi() {
+		MergedAnnotations mergedAnnotations = MergedAnnotations.from(SecurityConfig.class);
+
+		EnableWebSecurity enableWebSecurity = mergedAnnotations.get(EnableWebSecurity.class).synthesize();
+		assertThat(enableWebSecurity).isNotInstanceOf(SynthesizedAnnotation.class);
+
+		EnableGlobalAuthentication enableGlobalAuthentication = mergedAnnotations.get(EnableGlobalAuthentication.class).synthesize();
+		assertThat(enableGlobalAuthentication).isNotInstanceOf(SynthesizedAnnotation.class);
+	}
+
 	/**
 	 * If an attempt is made to synthesize an annotation from an annotation instance
 	 * that has already been synthesized, the original synthesized annotation should
@@ -3214,6 +3225,25 @@ class MergedAnnotationsTests {
 	@GeneratedValue(strategy = "AUTO")
 	private Long getId() {
 		return 42L;
+	}
+
+	/**
+	 * Mimics org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication
+	 */
+	@Retention(RUNTIME)
+	@interface EnableGlobalAuthentication {
+	}
+
+	/**
+	 * Mimics org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+	 */
+	@Retention(RUNTIME)
+	@EnableGlobalAuthentication
+	@interface EnableWebSecurity {
+	}
+
+	@EnableWebSecurity
+	static class SecurityConfig {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
