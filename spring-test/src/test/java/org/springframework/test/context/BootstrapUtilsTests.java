@@ -73,8 +73,8 @@ class BootstrapUtilsTests {
 		assertThatIllegalStateException()
 			.isThrownBy(() -> resolveTestContextBootstrapper(bootstrapContext))
 			.withMessageContaining("Configuration error: found multiple declarations of @BootstrapWith")
-			.withMessageContaining(FooBootstrapper.class.getCanonicalName())
-			.withMessageContaining(BarBootstrapper.class.getCanonicalName());
+			.withMessageContaining(FooBootstrapper.class.getSimpleName())
+			.withMessageContaining(BarBootstrapper.class.getSimpleName());
 	}
 
 	@Test
