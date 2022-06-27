@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.messaging.simp.stomp;
+
+import java.util.function.Consumer;
 
 import org.springframework.lang.Nullable;
 
@@ -142,6 +144,13 @@ public interface StompSession {
 		 * @throws java.lang.IllegalArgumentException if the receiptId is {@code null}
 		 */
 		void addReceiptTask(Runnable runnable);
+
+		/**
+		 * Consumer to invoke when a receipt is received. Accepts the headers of the received RECEIPT frame.
+		 * @throws java.lang.IllegalArgumentException if the receiptId is {@code null}
+		 * @since TBD
+		 */
+		void addReceiptTask(Consumer<StompHeaders> task);
 
 		/**
 		 * Task to invoke when a receipt is not received in the configured time.
