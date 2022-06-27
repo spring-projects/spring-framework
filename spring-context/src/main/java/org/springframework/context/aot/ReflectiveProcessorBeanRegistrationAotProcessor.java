@@ -45,7 +45,7 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * AOT {@code BeanRegistrationAotProcessor} that detects the presence of
- * {@link Reflective @Reflective} on annotated elements and invoke the
+ * {@link Reflective @Reflective} on annotated elements and invokes the
  * underlying {@link ReflectiveProcessor} implementations.
  *
  * @author Stephane Nicoll

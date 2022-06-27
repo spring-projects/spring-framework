@@ -29,7 +29,6 @@ import org.springframework.aot.hint.TypeHint;
 import org.springframework.aot.hint.TypeHint.Builder;
 import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.core.annotation.AliasFor;
-import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.SynthesizedAnnotation;
 
 /**
@@ -49,10 +48,11 @@ public abstract class RuntimeHintsUtils {
 
 	/**
 	 * Register the necessary hints so that the specified annotation is visible
-	 * at runtime. If an annotation attributes aliases an attribute of another
-	 * annotation, it is registered as well and a JDK proxy hints is defined
+	 * at runtime.
+	 * <p>If an annotation attribute aliases an attribute of another annotation,
+	 * the other annotation is registered as well and a JDK proxy hint is defined
 	 * so that the synthesized annotation can be resolved.
-	 * @param hints the {@link RuntimeHints} instance ot use
+	 * @param hints the {@link RuntimeHints} instance to use
 	 * @param annotationType the annotation type
 	 * @see SynthesizedAnnotation
 	 */
@@ -61,7 +61,7 @@ public abstract class RuntimeHintsUtils {
 		Set<Class<?>> allAnnotations = new LinkedHashSet<>();
 		collectAliasedAnnotations(new HashSet<>(), allAnnotations, annotationType);
 		allAnnotations.forEach(annotation -> hints.reflection().registerType(annotation, ANNOTATION_HINT));
-		if (allAnnotations.size() > 0) {
+		if (!allAnnotations.isEmpty()) {
 			hints.proxies().registerJdkProxy(annotationType, SynthesizedAnnotation.class);
 		}
 	}
@@ -72,9 +72,9 @@ public abstract class RuntimeHintsUtils {
 		}
 		seen.add(annotationType);
 		for (Method method : annotationType.getDeclaredMethods()) {
-			MergedAnnotations methodAnnotations = MergedAnnotations.from(method);
-			if (methodAnnotations.isPresent(AliasFor.class)) {
-				Class<?> annotationAttribute = methodAnnotations.get(AliasFor.class).getClass("annotation");
+			AliasFor aliasFor = method.getAnnotation(AliasFor.class);
+			if (aliasFor != null) {
+				Class<?> annotationAttribute = aliasFor.annotation();
 				Class<?> targetAnnotation = (annotationAttribute != Annotation.class
 						? annotationAttribute : annotationType);
 				if (!types.contains(targetAnnotation)) {

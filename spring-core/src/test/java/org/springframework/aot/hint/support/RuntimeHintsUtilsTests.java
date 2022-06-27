@@ -104,17 +104,14 @@ class RuntimeHintsUtilsTests {
 
 	@SampleInvoker
 	static class SampleInvokerClass {
-
 	}
 
 	@RetryInvoker
 	static class RetryInvokerClass {
-
 	}
 
 	@RetryWithEnabledFlagInvoker
 	static class RetryWithEnabledFlagInvokerClass {
-
 	}
 
 	@Target({ ElementType.TYPE, ElementType.ANNOTATION_TYPE })
