@@ -1347,7 +1347,7 @@ receipt if the server supports it (simple broker does not). For example, with th
 	headers.setDestination("/topic/...");
 	headers.setReceipt("r1");
 	FrameHandler handler = ...;
-	stompSession.subscribe(headers, handler).addReceiptTask(() -> {
+	stompSession.subscribe(headers, handler).addReceiptTask(receiptHeaders -> {
 		// Subscription ready...
 	});
 ----
