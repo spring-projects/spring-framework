@@ -413,6 +413,8 @@ configure(rootProject) {
 
 	nohttp {
 		source.exclude "**/test-output/**"
+		source.exclude "spring-core/graalvm/build/**" // only available on `main`
+		source.exclude "spring-core-test/build/**" // only available on `main`
 		allowlistFile = project.file("src/nohttp/allowlist.lines")
 		def rootPath = file(rootDir).toPath()
 		def projectDirs = allprojects.collect { it.projectDir } + "${rootDir}/buildSrc"
