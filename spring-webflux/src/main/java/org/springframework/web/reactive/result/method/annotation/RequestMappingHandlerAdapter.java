@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
@@ -148,8 +149,8 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 	 */
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
-		if (applicationContext instanceof ConfigurableApplicationContext) {
-			this.applicationContext = (ConfigurableApplicationContext) applicationContext;
+		if (applicationContext instanceof ConfigurableApplicationContext cac) {
+			this.applicationContext = cac;
 		}
 	}
 
@@ -213,21 +214,30 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 
 		InvocableHandlerMethod invocable = this.methodResolver.getExceptionHandlerMethod(exception, handlerMethod);
 		if (invocable != null) {
+			ArrayList<Throwable> exceptions = new ArrayList<>();
 			try {
 				if (logger.isDebugEnabled()) {
 					logger.debug(exchange.getLogPrefix() + "Using @ExceptionHandler " + invocable);
 				}
 				bindingContext.getModel().asMap().clear();
-				Throwable cause = exception.getCause();
-				if (cause != null) {
-					return invocable.invoke(exchange, bindingContext, exception, cause, handlerMethod);
+
+				// Expose causes as provided arguments as well
+				Throwable exToExpose = exception;
+				while (exToExpose != null) {
+					exceptions.add(exToExpose);
+					Throwable cause = exToExpose.getCause();
+					exToExpose = (cause != exToExpose ? cause : null);
 				}
-				else {
-					return invocable.invoke(exchange, bindingContext, exception, handlerMethod);
-				}
+				Object[] arguments = new Object[exceptions.size() + 1];
+				exceptions.toArray(arguments);  // efficient arraycopy call in ArrayList
+				arguments[arguments.length - 1] = handlerMethod;
+
+				return invocable.invoke(exchange, bindingContext, arguments);
 			}
 			catch (Throwable invocationEx) {
-				if (logger.isWarnEnabled()) {
+				// Any other than the original exception (or a cause) is unintended here,
+				// probably an accident (e.g. failed assertion or the like).
+				if (!exceptions.contains(invocationEx) && logger.isWarnEnabled()) {
 					logger.warn(exchange.getLogPrefix() + "Failure in @ExceptionHandler " + invocable, invocationEx);
 				}
 			}

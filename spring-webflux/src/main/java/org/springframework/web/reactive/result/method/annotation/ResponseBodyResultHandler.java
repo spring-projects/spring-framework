@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.net.URI;
 import java.util.List;
 
 import reactor.core.publisher.Mono;
@@ -23,6 +24,8 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.reactive.HandlerResult;
@@ -83,6 +86,13 @@ public class ResponseBodyResultHandler extends AbstractMessageWriterResultHandle
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 		Object body = result.getReturnValue();
 		MethodParameter bodyTypeParameter = result.getReturnTypeSource();
+		if (body instanceof ProblemDetail detail) {
+			exchange.getResponse().setStatusCode(HttpStatusCode.valueOf(detail.getStatus()));
+			if (detail.getInstance() == null) {
+				URI path = URI.create(exchange.getRequest().getPath().value());
+				detail.setInstance(path);
+			}
+		}
 		return writeBody(body, bodyTypeParameter, exchange);
 	}
 

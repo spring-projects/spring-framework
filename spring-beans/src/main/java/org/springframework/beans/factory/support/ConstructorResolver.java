@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,8 +303,7 @@ class ConstructorResolver {
 			return strategy.instantiate(mbd, beanName, this.beanFactory, constructorToUse, argsToUse);
 		}
 		catch (Throwable ex) {
-			throw new BeanCreationException(mbd.getResourceDescription(), beanName,
-					"Bean instantiation via constructor failed", ex);
+			throw new BeanCreationException(mbd.getResourceDescription(), beanName, ex.getMessage(), ex);
 		}
 	}
 
@@ -631,8 +630,7 @@ class ConstructorResolver {
 					mbd, beanName, this.beanFactory, factoryBean, factoryMethod, args);
 		}
 		catch (Throwable ex) {
-			throw new BeanCreationException(mbd.getResourceDescription(), beanName,
-					"Bean instantiation via factory method failed", ex);
+			throw new BeanCreationException(mbd.getResourceDescription(), beanName, ex.getMessage(), ex);
 		}
 	}
 
@@ -961,7 +959,7 @@ class ConstructorResolver {
 
 
 	/**
-	 * Delegate for checking Java 6's {@link ConstructorProperties} annotation.
+	 * Delegate for checking Java's {@link ConstructorProperties} annotation.
 	 */
 	private static class ConstructorPropertiesChecker {
 

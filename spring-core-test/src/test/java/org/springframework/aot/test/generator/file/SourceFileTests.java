@@ -18,7 +18,6 @@ package org.springframework.aot.test.generator.file;
 
 import java.io.IOException;
 
-import com.thoughtworks.qdox.model.JavaSource;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -88,12 +87,6 @@ class SourceFileTests {
 	void getContentReturnsContent() {
 		SourceFile sourceFile = SourceFile.of(HELLO_WORLD);
 		assertThat(sourceFile.getContent()).isEqualTo(HELLO_WORLD);
-	}
-
-	@Test
-	void getJavaSourceReturnsJavaSource() {
-		SourceFile sourceFile = SourceFile.of(HELLO_WORLD);
-		assertThat(sourceFile.getJavaSource()).isInstanceOf(JavaSource.class);
 	}
 
 	@Test

@@ -2,9 +2,9 @@ plugins {
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE' apply false
 	id 'io.spring.nohttp' version '0.0.10'
 	id "io.freefair.aspectj" version '6.4.0' apply false
-	id 'org.jetbrains.dokka' version '1.6.10' apply false
-	id 'org.jetbrains.kotlin.jvm' version '1.6.20' apply false
-	id "org.jetbrains.kotlin.plugin.serialization" version '1.6.20' apply false
+	id 'org.jetbrains.dokka' version '1.7.0' apply false
+	id 'org.jetbrains.kotlin.jvm' version '1.7.0' apply false
+	id "org.jetbrains.kotlin.plugin.serialization" version '1.7.0' apply false
 	id 'org.asciidoctor.jvm.convert' version '3.3.2'
 	id 'org.asciidoctor.jvm.pdf' version '3.3.2'
 	id "org.unbroken-dome.xjc" version '2.0.0' apply false
@@ -27,15 +27,15 @@ configure(allprojects) { project ->
 
 	dependencyManagement {
 		imports {
-			mavenBom "com.fasterxml.jackson:jackson-bom:2.13.1"
-			mavenBom "io.netty:netty-bom:4.1.75.Final"
-			mavenBom "io.projectreactor:reactor-bom:2020.0.18"
+			mavenBom "com.fasterxml.jackson:jackson-bom:2.13.3"
+			mavenBom "io.netty:netty-bom:4.1.77.Final"
+			mavenBom "io.projectreactor:reactor-bom:2022.0.0-M2"
 			mavenBom "io.r2dbc:r2dbc-bom:Borca-SR1"
 			mavenBom "io.rsocket:rsocket-bom:1.1.2"
 			mavenBom "org.eclipse.jetty:jetty-bom:11.0.9"
-			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.6.20"
-			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.0"
-			mavenBom "org.jetbrains.kotlinx:kotlinx-serialization-bom:1.3.2"
+			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.7.0"
+			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.2"
+			mavenBom "org.jetbrains.kotlinx:kotlinx-serialization-bom:1.3.3"
 			mavenBom "org.junit:junit-bom:5.8.2"
 		}
 		dependencies {
@@ -56,14 +56,14 @@ configure(allprojects) { project ->
 				entry 'aspectjtools'
 				entry 'aspectjweaver'
 			}
-			dependencySet(group: 'org.apache.groovy', version: '4.0.1') {
+			dependencySet(group: 'org.apache.groovy', version: '4.0.2') {
 				entry 'groovy'
 				entry 'groovy-jsr223'
 				entry 'groovy-templates'  // requires findbugs for warning-free compilation
 				entry 'groovy-xml'
 			}
 
-			dependency "io.reactivex.rxjava3:rxjava:3.1.3"
+			dependency "io.reactivex.rxjava3:rxjava:3.1.4"
 			dependency "io.smallrye.reactive:mutiny:1.4.0"
 			dependency "io.projectreactor.tools:blockhound:1.0.6.RELEASE"
 
@@ -86,9 +86,9 @@ configure(allprojects) { project ->
 			dependency "org.ogce:xpp3:1.1.6"
 			dependency "org.yaml:snakeyaml:1.30"
 
-			dependency "com.h2database:h2:2.1.210"
-			dependency "com.github.ben-manes.caffeine:caffeine:3.0.6"
-			dependency "com.github.librepdf:openpdf:1.3.27"
+			dependency "com.h2database:h2:2.1.212"
+			dependency "com.github.ben-manes.caffeine:caffeine:3.1.1"
+			dependency "com.github.librepdf:openpdf:1.3.28"
 			dependency "com.rometools:rome:1.18.0"
 			dependency "commons-io:commons-io:2.11.0"
 			dependency "io.vavr:vavr:0.10.4"
@@ -105,26 +105,26 @@ configure(allprojects) { project ->
 				entry 'derby'
 				entry 'derbyclient'
 			}
-			dependency "org.apache.poi:poi-ooxml:5.2.0"
+			dependency "org.apache.poi:poi-ooxml:5.2.2"
 			dependency "org.apache-extras.beanshell:bsh:2.0b6"
 			dependency "org.freemarker:freemarker:2.3.31"
 			dependency "org.hsqldb:hsqldb:2.5.2"
 			dependency "org.quartz-scheduler:quartz:2.3.2"
 			dependency "org.ehcache:jcache:1.0.1"
 			dependency "org.ehcache:ehcache:3.4.0"
-			dependency "org.hibernate:hibernate-core-jakarta:5.6.7.Final"
+			dependency "org.hibernate:hibernate-core-jakarta:5.6.8.Final"
 			dependency "org.hibernate:hibernate-validator:7.0.4.Final"
 			dependency "org.webjars:webjars-locator-core:0.48"
 			dependency "org.webjars:underscorejs:1.8.3"
 
-			dependencySet(group: 'org.apache.tomcat', version: '10.0.20') {
+			dependencySet(group: 'org.apache.tomcat', version: '10.0.22') {
 				entry 'tomcat-util'
 				entry('tomcat-websocket') {
 					exclude group: "org.apache.tomcat", name: "tomcat-servlet-api"
 					exclude group: "org.apache.tomcat", name: "tomcat-websocket-api"
 				}
 			}
-			dependencySet(group: 'org.apache.tomcat.embed', version: '10.0.20') {
+			dependencySet(group: 'org.apache.tomcat.embed', version: '10.0.22') {
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
@@ -168,16 +168,16 @@ configure(allprojects) { project ->
 			}
 			dependency "org.testng:testng:7.4.0"
 			dependency "org.junit.support:testng-engine:1.0.1"
-			dependency "org.hamcrest:hamcrest:2.1"
+			dependency "org.hamcrest:hamcrest:2.2"
 			dependency "org.awaitility:awaitility:3.1.6"
-			dependency "org.assertj:assertj-core:3.22.0"
+			dependency "org.assertj:assertj-core:3.23.1"
 			dependencySet(group: 'org.xmlunit', version: '2.9.0') {
 				entry 'xmlunit-assertj'
 				entry('xmlunit-matchers') {
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
 			}
-			dependencySet(group: 'org.mockito', version: '4.4.0') {
+			dependencySet(group: 'org.mockito', version: '4.6.1') {
 				entry('mockito-core') {
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
@@ -185,10 +185,10 @@ configure(allprojects) { project ->
 			}
 			dependency "io.mockk:mockk:1.12.1"
 
-			dependency("net.sourceforge.htmlunit:htmlunit:2.60.0") {
+			dependency("net.sourceforge.htmlunit:htmlunit:2.62.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
-			dependency("org.seleniumhq.selenium:htmlunit-driver:2.60.0") {
+			dependency("org.seleniumhq.selenium:htmlunit-driver:2.62.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.seleniumhq.selenium:selenium-java:3.141.59") {
@@ -197,7 +197,7 @@ configure(allprojects) { project ->
 			}
 			dependency "org.skyscreamer:jsonassert:1.5.0"
 			dependency "com.jayway.jsonpath:json-path:2.6.0"
-			dependency "org.bouncycastle:bcpkix-jdk15on:1.66"
+			dependency "org.bouncycastle:bcpkix-jdk18on:1.71"
 
 			dependency "javax.cache:cache-api:1.1.1"
 			dependency "javax.money:money-api:1.1"
@@ -240,6 +240,8 @@ configure(allprojects) { project ->
 			dependency "org.glassfish:jakarta.el:4.0.2"
 			dependency "org.glassfish.tyrus:tyrus-container-servlet:2.0.1"
 			dependency "org.eclipse.persistence:org.eclipse.persistence.jpa:3.0.2"
+
+			dependency "org.graalvm.nativeimage:svm:22.1.0.1"
 		}
 		generatedPomCustomization {
 			enabled = false
@@ -250,6 +252,7 @@ configure(allprojects) { project ->
 		repositories {
 			mavenCentral()
 			maven { url "https://repo.spring.io/libs-spring-framework-build" }
+			maven { url "https://repo.spring.io/milestone"}
 		}
 	}
 	configurations.all {
@@ -276,8 +279,8 @@ configure([rootProject] + javaProjects) { project ->
 
 		compileKotlin {
 			kotlinOptions {
-				languageVersion = "1.6"
-				apiVersion = "1.6"
+				languageVersion = "1.7"
+				apiVersion = "1.7"
 				freeCompilerArgs = ["-Xjsr305=strict", "-Xsuppress-version-warnings", "-opt-in=kotlin.RequiresOptIn"]
 				allWarningsAsErrors = true
 			}
@@ -298,7 +301,7 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "10.1"
+		toolVersion = "10.3"
 		configDirectory.set(rootProject.file("src/checkstyle"))
 	}
 

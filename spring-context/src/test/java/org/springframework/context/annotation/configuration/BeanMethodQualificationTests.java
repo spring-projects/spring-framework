@@ -141,16 +141,17 @@ class BeanMethodQualificationTests {
 		assertThat(ctx.getBeanNamesForAnnotation(Configuration.class)).isEqualTo(new String[] {"beanMethodQualificationTests.StandardConfig"});
 		assertThat(ctx.getBeanNamesForAnnotation(Scope.class)).isEqualTo(new String[] {});
 		assertThat(ctx.getBeanNamesForAnnotation(Lazy.class)).isEqualTo(new String[] {"testBean1"});
-		assertThat(ctx.getBeanNamesForAnnotation(Boring.class)).isEqualTo(new String[] {"testBean2"});
+		assertThat(ctx.getBeanNamesForAnnotation(Boring.class)).isEqualTo(new String[] {"beanMethodQualificationTests.StandardConfig", "testBean2"});
 		ctx.close();
 	}
 
 
 	@Configuration
+	@Boring
 	static class StandardConfig {
 
 		@Bean @Qualifier("interesting") @Lazy
-		public TestBean testBean1() {
+		public static TestBean testBean1() {
 			return new TestBean("interesting");
 		}
 
@@ -163,10 +164,11 @@ class BeanMethodQualificationTests {
 	}
 
 	@Configuration
+	@Boring
 	static class ScopedConfig {
 
 		@Bean @Qualifier("interesting") @Scope("prototype")
-		public TestBean testBean1() {
+		public static TestBean testBean1() {
 			return new TestBean("interesting");
 		}
 
@@ -179,10 +181,11 @@ class BeanMethodQualificationTests {
 	}
 
 	@Configuration
+	@Boring
 	static class ScopedProxyConfig {
 
 		@Bean @Qualifier("interesting") @Scope(value="prototype", proxyMode=ScopedProxyMode.TARGET_CLASS)
-		public TestBean testBean1() {
+		public static TestBean testBean1() {
 			return new TestBean("interesting");
 		}
 

@@ -83,7 +83,7 @@ import static org.springframework.web.testfixture.method.ResolvableMethod.on;
  */
 public class ResponseEntityResultHandlerTests {
 
-	private static final String NEWLINE_SYSTEM_PROPERTY = System.getProperty("line.separator");
+	private static final String NEWLINE_SYSTEM_PROPERTY = System.lineSeparator();
 
 
 	private ResponseEntityResultHandler resultHandler;
@@ -260,7 +260,8 @@ public class ResponseEntityResultHandlerTests {
 						"\"title\":\"Bad Request\"," +
 						"\"status\":400," +
 						"\"detail\":null," +
-						"\"instance\":\"/path\"}");
+						"\"instance\":\"/path\"," +
+						"\"properties\":null}");
 	}
 
 	@Test
@@ -280,7 +281,8 @@ public class ResponseEntityResultHandlerTests {
 						"\"title\":\"Bad Request\"," +
 						"\"status\":400," +
 						"\"detail\":null," +
-						"\"instance\":\"/path\"}");
+						"\"instance\":\"/path\"," +
+						"\"properties\":null}");
 	}
 
 	@Test

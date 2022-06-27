@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,7 +139,7 @@ class RequestMappingExceptionHandlingIntegrationTests extends AbstractRequestMap
 
 		@GetMapping("/thrown-exception-with-cause-to-handle")
 		public Publisher<String> handleAndThrowExceptionWithCauseToHandle() {
-			throw new RuntimeException("State", new IOException("IO"));
+			throw new RuntimeException("State1", new RuntimeException("State2", new IOException("IO")));
 		}
 
 		@GetMapping(path = "/mono-error")

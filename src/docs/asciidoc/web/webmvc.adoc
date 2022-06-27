@@ -1718,9 +1718,9 @@ extracts the name, version, and file extension:
 ----
 
 URI path patterns can also have embedded `${...}` placeholders that are resolved on startup
-by using `PropertyPlaceHolderConfigurer` against local, system, environment, and other property
-sources. You can use this, for example, to parameterize a base URL based on some external
-configuration.
+by using `PropertySourcesPlaceholderConfigurer` against local, system, environment, and
+other property sources. You can use this, for example, to parameterize a base URL based on
+some external configuration.
 
 
 
@@ -3392,7 +3392,7 @@ See <<mvc-ann-jackson>> for details.
 	public ResponseEntity<String> handle() {
 		String body = ... ;
 		String etag = ... ;
-		return ResponseEntity.ok().eTag(etag).build(body);
+		return ResponseEntity.ok().eTag(etag).body(body);
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

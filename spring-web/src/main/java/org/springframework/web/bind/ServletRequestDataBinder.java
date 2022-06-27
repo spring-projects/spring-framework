@@ -104,11 +104,13 @@ public class ServletRequestDataBinder extends WebDataBinder {
 	 * HTTP parameters: i.e. "uploadedFile" to an "uploadedFile" bean property,
 	 * invoking a "setUploadedFile" setter method.
 	 * <p>The type of the target property for a multipart file can be MultipartFile,
-	 * byte[], or String. The latter two receive the contents of the uploaded file;
-	 * all metadata like original file name, content type, etc are lost in those cases.
+	 * byte[], or String. Servlet Part binding is also supported when the
+	 * request has not been parsed to MultipartRequest via MultipartResolver.
 	 * @param request the request with parameters to bind (can be multipart)
 	 * @see org.springframework.web.multipart.MultipartHttpServletRequest
+	 * @see org.springframework.web.multipart.MultipartRequest
 	 * @see org.springframework.web.multipart.MultipartFile
+	 * @see jakarta.servlet.http.Part
 	 * @see #bind(org.springframework.beans.PropertyValues)
 	 */
 	public void bind(ServletRequest request) {

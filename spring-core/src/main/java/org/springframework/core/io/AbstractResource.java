@@ -50,7 +50,7 @@ public abstract class AbstractResource implements Resource {
 	/**
 	 * This implementation checks whether a File can be opened,
 	 * falling back to whether an InputStream can be opened.
-	 * This will cover both directories and content resources.
+	 * <p>This will cover both directories and content resources.
 	 */
 	@Override
 	public boolean exists() {

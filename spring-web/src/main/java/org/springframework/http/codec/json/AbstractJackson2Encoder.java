@@ -35,9 +35,12 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
+import org.apache.commons.logging.Log;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
@@ -71,6 +74,8 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 
 	private static final byte[] NEWLINE_SEPARATOR = {'\n'};
 
+	private static final byte[] EMPTY_BYTES = new byte[0];
+
 	private static final Map<String, JsonEncoding> ENCODINGS;
 
 	static {
@@ -83,6 +88,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 
 
 	private final List<MediaType> streamingMediaTypes = new ArrayList<>(1);
+
 
 	/**
 	 * Constructor with a Jackson {@link ObjectMapper} to use.
@@ -148,73 +154,69 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 		if (inputStream instanceof Mono) {
 			return Mono.from(inputStream)
 					.flatMap(value -> createEncodingToolsForStream(value, elementType, mimeType, hints)
-							.map(tools -> encodeValue(value, tools.mapper(), tools.writer(),
+							.map(tools -> encodeValue(value, tools.getT1(), tools.getT2(),
 									bufferFactory, mimeType, hints)))
 					.flux();
 		}
-		else {
-			byte[] separator = getStreamingMediaTypeSeparator(mimeType);
-			if (separator != null) { // streaming
-				ObjectMapper mapper = selectObjectMapper(elementType, mimeType);
-				if (mapper == null) {
-					return Flux.error(new IllegalStateException("No ObjectMapper for " + elementType));
-				}
 
-				ObjectWriter objectWriter = createObjectWriter(mapper, elementType, mimeType, null, hints);
-				return customizeWriterFromStream(objectWriter, mimeType, elementType, hints)
-						.flatMapMany(writer -> {
-							try {
-								ByteArrayBuilder byteBuilder = new ByteArrayBuilder(
-										writer.getFactory()._getBufferRecycler());
-								JsonEncoding encoding = getJsonEncoding(mimeType);
-								JsonGenerator generator = mapper.getFactory().createGenerator(byteBuilder, encoding);
-								SequenceWriter sequenceWriter = writer.writeValues(generator);
-								return Flux.from(inputStream)
-										.map(value -> encodeStreamingValue(value, bufferFactory, hints,
-												sequenceWriter, byteBuilder, separator))
-										.doAfterTerminate(() -> {
-											try {
-												byteBuilder.release();
-												generator.close();
-											}
-											catch (IOException ex) {
-												logger.error("Could not close Encoder resources", ex);
-											}
-										});
-							}
-							catch (IOException ex) {
-								return Flux.error(ex);
-							}
-						});
-			}
-			else { // non-streaming
-				ResolvableType listType = ResolvableType.forClassWithGenerics(List.class, elementType);
-				return Flux.from(inputStream)
-						.collectList()
-						.flatMap(list -> Mono.zip(
-								Mono.just(list),
-								createEncodingToolsForStream(list, listType, mimeType, hints))
-						)
-						.map(tpl -> encodeValue(tpl.getT1(), tpl.getT2().mapper(), tpl.getT2().writer(),
-								bufferFactory, mimeType, hints))
-						.flux();
-			}
-
+		ObjectMapper mapper = selectObjectMapper(elementType, mimeType);
+		if (mapper == null) {
+			return Flux.error(new IllegalStateException("No ObjectMapper for " + elementType));
 		}
+
+		ObjectWriter objectWriter = createObjectWriter(mapper, elementType, mimeType, null, hints);
+		return customizeWriterFromStream(objectWriter, mimeType, elementType, hints)
+				.flatMapMany(writer -> {
+					try {
+						ByteArrayBuilder byteBuilder = new ByteArrayBuilder(writer.getFactory()._getBufferRecycler());
+						JsonEncoding encoding = getJsonEncoding(mimeType);
+						JsonGenerator generator = mapper.getFactory().createGenerator(byteBuilder, encoding);
+						SequenceWriter sequenceWriter = writer.writeValues(generator);
+
+						byte[] separator = getStreamingMediaTypeSeparator(mimeType);
+						Flux<DataBuffer> dataBufferFlux;
+
+						if (separator != null) {
+							dataBufferFlux = Flux.from(inputStream).map(value -> encodeStreamingValue(
+									value, bufferFactory, hints, sequenceWriter, byteBuilder, EMPTY_BYTES, separator));
+						}
+						else {
+							JsonArrayJoinHelper helper = new JsonArrayJoinHelper();
+							return Flux.concat(
+									helper.getPrefix(bufferFactory, hints, logger),
+									Flux.from(inputStream).map(value -> encodeStreamingValue(
+											value, bufferFactory, hints, sequenceWriter, byteBuilder, helper.getDelimiter(), EMPTY_BYTES)),
+									helper.getSuffix(bufferFactory, hints, logger));
+						}
+
+						return dataBufferFlux
+								.doAfterTerminate(() -> {
+									try {
+										byteBuilder.release();
+										generator.close();
+									}
+									catch (IOException ex) {
+										logger.error("Could not close Encoder resources", ex);
+									}
+								});
+					}
+					catch (IOException ex) {
+						return Flux.error(ex);
+					}
+				});
 	}
 
 	@Override
 	public DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory,
 			ResolvableType valueType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
-		ObjectEncodingTools encodingTools = createEncodingTools(value, valueType, mimeType, hints);
-		ObjectWriter writer = encodingTools.writer();
+		Tuple2<ObjectMapper, ObjectWriter> encodingTools = createEncodingTools(value, valueType, mimeType, hints);
+		ObjectWriter writer = encodingTools.getT2();
 		writer = customizeWriter(writer, mimeType, valueType, hints);
-		return encodeValue(value, encodingTools.mapper(), writer, bufferFactory, mimeType, hints);
+		return encodeValue(value, encodingTools.getT1(), writer, bufferFactory, mimeType, hints);
 	}
 
 	private DataBuffer encodeValue(Object value, ObjectMapper mapper, ObjectWriter writer,
 			DataBufferFactory bufferFactory, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
-
 		FilterProvider filters = null;
 		if (value instanceof MappingJacksonValue mappingJacksonValue) {
 			value = mappingJacksonValue.getValue();
@@ -257,8 +259,10 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 		}
 	}
 
-	private DataBuffer encodeStreamingValue(Object value, DataBufferFactory bufferFactory, @Nullable Map<String, Object> hints,
-			SequenceWriter sequenceWriter, ByteArrayBuilder byteArrayBuilder, byte[] separator) {
+	private DataBuffer encodeStreamingValue(
+			Object value, DataBufferFactory bufferFactory, @Nullable Map<String, Object> hints,
+			SequenceWriter sequenceWriter, ByteArrayBuilder byteArrayBuilder,
+			byte[] prefix, byte[] suffix) {
 
 		logValue(hints, value);
 
@@ -290,9 +294,14 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 			offset = 0;
 			length = bytes.length;
 		}
-		DataBuffer buffer = bufferFactory.allocateBuffer(length + separator.length);
+		DataBuffer buffer = bufferFactory.allocateBuffer(length + prefix.length + suffix.length);
+		if (prefix.length != 0) {
+			buffer.write(prefix);
+		}
 		buffer.write(bytes, offset, length);
-		buffer.write(separator);
+		if (suffix.length != 0) {
+			buffer.write(suffix);
+		}
 		Hints.touchDataBuffer(buffer, hints, logger);
 
 		return buffer;
@@ -307,20 +316,20 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 		}
 	}
 
-	private Mono<ObjectEncodingTools> createEncodingToolsForStream(Object value, ResolvableType valueType,
+	private Mono<Tuple2<ObjectMapper, ObjectWriter>> createEncodingToolsForStream(Object value, ResolvableType valueType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 		try {
-			ObjectEncodingTools encodingTools = createEncodingTools(value, valueType, mimeType, hints);
-			ObjectWriter objectWriter = encodingTools.writer();
+			Tuple2<ObjectMapper, ObjectWriter> encodingTools = createEncodingTools(value, valueType, mimeType, hints);
+			ObjectWriter objectWriter = encodingTools.getT2();
 			return customizeWriterFromStream(objectWriter, mimeType, valueType, hints)
-					.map(customizedWriter -> new ObjectEncodingTools(encodingTools.mapper(), customizedWriter));
+					.map(customizedWriter -> Tuples.of(encodingTools.getT1(), customizedWriter));
 		}
 		catch (IllegalStateException ex) {
 			return Mono.error(ex);
 		}
 	}
 
-	private ObjectEncodingTools createEncodingTools(Object value, ResolvableType valueType,
+	private Tuple2<ObjectMapper, ObjectWriter> createEncodingTools(Object value, ResolvableType valueType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 		Class<?> jsonView = null;
 		if (value instanceof MappingJacksonValue mappingJacksonValue) {
@@ -333,7 +342,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 			throw new IllegalStateException("No ObjectMapper for " + valueType);
 		}
 		ObjectWriter writer = createObjectWriter(mapper, valueType, mimeType, jsonView, hints);
-		return new ObjectEncodingTools(mapper, writer);
+		return Tuples.of(mapper, writer);
 	}
 
 	private ObjectWriter createObjectWriter(
@@ -360,7 +369,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	 * @return the customized {@link ObjectWriter}
 	 */
 	protected Mono<ObjectWriter> customizeWriterFromStream(@NonNull ObjectWriter writer, @Nullable MimeType mimeType,
-			ResolvableType elementType, @Nullable Map<String, Object> hints) {
+				ResolvableType elementType, @Nullable Map<String, Object> hints) {
 		return Mono.just(customizeWriter(writer, mimeType, elementType, hints));
 	}
 
@@ -373,7 +382,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	 * @return the customized {@link ObjectWriter}
 	 */
 	protected ObjectWriter customizeWriter(ObjectWriter writer, @Nullable MimeType mimeType,
-			ResolvableType elementType, @Nullable Map<String, Object> hints) {
+				ResolvableType elementType, @Nullable Map<String, Object> hints) {
 		return writer;
 	}
 
@@ -444,5 +453,42 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 		return parameter.getMethodAnnotation(annotType);
 	}
 
-	private record ObjectEncodingTools(ObjectMapper mapper, ObjectWriter writer) {}
+
+	private static class JsonArrayJoinHelper {
+
+		private static final byte[] COMMA_SEPARATOR = {','};
+
+		private static final byte[] OPEN_BRACKET = {'['};
+
+		private static final byte[] CLOSE_BRACKET = {']'};
+
+
+		private boolean afterFirstItem = false;
+
+		public byte[] getDelimiter() {
+			if (this.afterFirstItem) {
+				return COMMA_SEPARATOR;
+			}
+			this.afterFirstItem = true;
+			return EMPTY_BYTES;
+		}
+
+		public Mono<DataBuffer> getPrefix(DataBufferFactory factory, @Nullable Map<String, Object> hints, Log logger) {
+			return wrapBytes(OPEN_BRACKET, factory, hints, logger);
+		}
+
+		public Mono<DataBuffer> getSuffix(DataBufferFactory factory, @Nullable Map<String, Object> hints, Log logger) {
+			return wrapBytes(CLOSE_BRACKET, factory, hints, logger);
+		}
+
+		private Mono<DataBuffer> wrapBytes(
+				byte[] bytes, DataBufferFactory bufferFactory, @Nullable Map<String, Object> hints, Log logger) {
+
+			return Mono.fromCallable(() -> {
+				DataBuffer buffer = bufferFactory.wrap(bytes);
+				Hints.touchDataBuffer(buffer, hints, logger);
+				return buffer;
+			});
+		}
+	}
 }

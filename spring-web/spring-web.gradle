@@ -15,7 +15,6 @@ dependencies {
 	optional("jakarta.el:jakarta.el-api")
 	optional("jakarta.faces:jakarta.faces-api")
 	optional("jakarta.json.bind:jakarta.json.bind-api")
-	optional("jakarta.mail:jakarta.mail-api")
 	optional("jakarta.validation:jakarta.validation-api")
 	optional("jakarta.xml.bind:jakarta.xml.bind-api")
 	optional("io.reactivex.rxjava3:rxjava")
@@ -78,7 +77,7 @@ dependencies {
 	testFixturesApi("org.junit.jupiter:junit-jupiter-params")
 	testFixturesImplementation("io.projectreactor:reactor-test")
 	testFixturesImplementation("org.assertj:assertj-core")
-	testFixturesImplementation("org.bouncycastle:bcpkix-jdk15on") {
+	testFixturesImplementation("org.bouncycastle:bcpkix-jdk18on") {
 		because("needed by Netty's SelfSignedCertificate on JDK 15+")
 	}
 	testFixturesImplementation("org.eclipse.jetty.websocket:websocket-jetty-server")

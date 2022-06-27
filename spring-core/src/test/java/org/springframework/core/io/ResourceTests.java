@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -206,6 +206,21 @@ class ResourceTests {
 				relative4::contentLength);
 		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(
 				relative4::lastModified);
+	}
+
+	@Test
+	void urlResourceFactoryMethods() throws IOException {
+		Resource resource1 = new UrlResource("file:core/io/Resource.class");
+		Resource resource2 = UrlResource.from("file:core/io/Resource.class");
+		Resource resource3 = UrlResource.from(resource1.getURI());
+
+		assertThat(resource2.getURL()).isEqualTo(resource1.getURL());
+		assertThat(resource3.getURL()).isEqualTo(resource1.getURL());
+
+		assertThat(UrlResource.from("file:core/../core/io/./Resource.class")).isEqualTo(resource1);
+		assertThat(UrlResource.from("file:/dir/test.txt?argh").getFilename()).isEqualTo("test.txt");
+		assertThat(UrlResource.from("file:\\dir\\test.txt?argh").getFilename()).isEqualTo("test.txt");
+		assertThat(UrlResource.from("file:\\dir/test.txt?argh").getFilename()).isEqualTo("test.txt");
 	}
 
 	@Test

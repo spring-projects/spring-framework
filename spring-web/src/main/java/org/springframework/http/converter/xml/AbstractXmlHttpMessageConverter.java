@@ -75,7 +75,7 @@ public abstract class AbstractXmlHttpMessageConverter<T> extends AbstractHttpMes
 			throw ex;
 		}
 		catch (Exception ex) {
-			throw new HttpMessageNotReadableException("Could not unmarshal to [" + clazz + "]: " + ex.getMessage(),
+			throw new HttpMessageNotReadableException("Could not unmarshal to [" + clazz + "]: " + ex,
 					ex, inputMessage);
 		}
 	}

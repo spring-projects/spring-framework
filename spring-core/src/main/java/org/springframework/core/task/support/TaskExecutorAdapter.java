@@ -106,8 +106,9 @@ public class TaskExecutorAdapter implements AsyncListenableTaskExecutor {
 	@Override
 	public Future<?> submit(Runnable task) {
 		try {
-			if (this.taskDecorator == null && this.concurrentExecutor instanceof ExecutorService) {
-				return ((ExecutorService) this.concurrentExecutor).submit(task);
+			if (this.taskDecorator == null &&
+					this.concurrentExecutor instanceof ExecutorService executorService) {
+				return executorService.submit(task);
 			}
 			else {
 				FutureTask<Object> future = new FutureTask<>(task, null);
@@ -124,8 +125,9 @@ public class TaskExecutorAdapter implements AsyncListenableTaskExecutor {
 	@Override
 	public <T> Future<T> submit(Callable<T> task) {
 		try {
-			if (this.taskDecorator == null && this.concurrentExecutor instanceof ExecutorService) {
-				return ((ExecutorService) this.concurrentExecutor).submit(task);
+			if (this.taskDecorator == null &&
+					this.concurrentExecutor instanceof ExecutorService executorService) {
+				return executorService.submit(task);
 			}
 			else {
 				FutureTask<T> future = new FutureTask<>(task);

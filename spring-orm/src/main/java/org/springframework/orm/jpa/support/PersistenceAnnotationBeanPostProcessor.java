@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -37,6 +40,12 @@ import jakarta.persistence.PersistenceProperty;
 import jakarta.persistence.PersistenceUnit;
 import jakarta.persistence.SynchronizationType;
 
+import org.springframework.aot.generate.GeneratedClass;
+import org.springframework.aot.generate.GeneratedMethod;
+import org.springframework.aot.generate.GenerationContext;
+import org.springframework.aot.generate.MethodGenerator;
+import org.springframework.aot.generate.MethodReference;
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanCreationException;
@@ -45,17 +54,25 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.InjectionMetadata;
+import org.springframework.beans.factory.annotation.InjectionMetadata.InjectedElement;
+import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
+import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
+import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.NamedBeanHolder;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
+import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.javapoet.CodeBlock;
+import org.springframework.javapoet.MethodSpec;
+import org.springframework.javapoet.MethodSpec.Builder;
 import org.springframework.jndi.JndiLocatorDelegate;
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.lang.Nullable;
@@ -66,6 +83,7 @@ import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -164,14 +182,16 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
+ * @author Phillip Webb
  * @since 2.0
  * @see jakarta.persistence.PersistenceUnit
  * @see jakarta.persistence.PersistenceContext
  */
 @SuppressWarnings("serial")
-public class PersistenceAnnotationBeanPostProcessor
-		implements InstantiationAwareBeanPostProcessor, DestructionAwareBeanPostProcessor,
-		MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware, Serializable {
+public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwareBeanPostProcessor,
+		DestructionAwareBeanPostProcessor, MergedBeanDefinitionPostProcessor, BeanRegistrationAotProcessor,
+		PriorityOrdered, BeanFactoryAware, Serializable {
 
 	@Nullable
 	private Object jndiEnvironment;
@@ -332,8 +352,26 @@ public class PersistenceAnnotationBeanPostProcessor
 
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+		findInjectionMetadata(beanDefinition, beanType, beanName);
+	}
+
+	@Override
+	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+		Class<?> beanClass = registeredBean.getBeanClass();
+		String beanName = registeredBean.getBeanName();
+		RootBeanDefinition beanDefinition = registeredBean.getMergedBeanDefinition();
+		InjectionMetadata metadata = findInjectionMetadata(beanDefinition, beanClass, beanName);
+		Collection<InjectedElement> injectedElements = metadata.getInjectedElements();
+		if (!CollectionUtils.isEmpty(injectedElements)) {
+			return new AotContribution(beanClass, injectedElements);
+		}
+		return null;
+	}
+
+	private InjectionMetadata findInjectionMetadata(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		InjectionMetadata metadata = findPersistenceMetadata(beanName, beanType, null);
 		metadata.checkConfigMembers(beanDefinition);
+		return metadata;
 	}
 
 	@Override
@@ -723,6 +761,121 @@ public class PersistenceAnnotationBeanPostProcessor
 			}
 			return em;
 		}
+	}
+
+
+	private static class AotContribution implements BeanRegistrationAotContribution {
+
+		private static final String APPLY_METHOD = "apply";
+
+		private static final String REGISTERED_BEAN_PARAMETER = "registeredBean";
+
+		private static final String INSTANCE_PARAMETER = "instance";
+
+
+		private final Class<?> target;
+
+		private final Collection<InjectedElement> injectedElements;
+
+
+		AotContribution(Class<?> target, Collection<InjectedElement> injectedElements) {
+			this.target = target;
+			this.injectedElements = injectedElements;
+		}
+
+
+		@Override
+		public void applyTo(GenerationContext generationContext,
+				BeanRegistrationCode beanRegistrationCode) {
+			GeneratedClass generatedClass = generationContext.getGeneratedClasses()
+					.forFeatureComponent("PersistenceInjection", this.target).generate(type -> {
+						type.addJavadoc("Persistence injection for {@link $T}.", this.target);
+						type.addModifiers(javax.lang.model.element.Modifier.PUBLIC);
+					});
+			generatedClass.getMethodGenerator().generateMethod(APPLY_METHOD)
+					.using(generateMethod(generationContext.getRuntimeHints(), generatedClass.getMethodGenerator()));
+			beanRegistrationCode.addInstancePostProcessor(
+					MethodReference.ofStatic(generatedClass.getName(), APPLY_METHOD));
+		}
+
+		private Consumer<Builder> generateMethod(RuntimeHints hints, MethodGenerator methodGenerator) {
+			return method -> {
+				method.addJavadoc("Apply the persistence injection.");
+				method.addModifiers(javax.lang.model.element.Modifier.PUBLIC,
+						javax.lang.model.element.Modifier.STATIC);
+				method.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER);
+				method.addParameter(this.target, INSTANCE_PARAMETER);
+				method.returns(this.target);
+				method.addCode(generateMethodCode(hints, methodGenerator));
+			};
+		}
+
+		private CodeBlock generateMethodCode(RuntimeHints hints,
+				MethodGenerator methodGenerator) {
+			CodeBlock.Builder builder = CodeBlock.builder();
+			InjectionCodeGenerator injectionCodeGenerator = new InjectionCodeGenerator(
+					hints);
+			for (InjectedElement injectedElement : this.injectedElements) {
+				CodeBlock resourceToInject = getResourceToInject(methodGenerator,
+						(PersistenceElement) injectedElement);
+				builder.add(injectionCodeGenerator.generateInjectionCode(
+						injectedElement.getMember(), INSTANCE_PARAMETER,
+						resourceToInject));
+			}
+			builder.addStatement("return $L", INSTANCE_PARAMETER);
+			return builder.build();
+		}
+
+		private CodeBlock getResourceToInject(MethodGenerator methodGenerator,
+				PersistenceElement injectedElement) {
+			String unitName = injectedElement.unitName;
+			boolean requireEntityManager = (injectedElement.type != null);
+			if (!requireEntityManager) {
+				return CodeBlock.of(
+						"$T.findEntityManagerFactory(($T) $L.getBeanFactory(), $S)",
+						EntityManagerFactoryUtils.class, ListableBeanFactory.class,
+						REGISTERED_BEAN_PARAMETER, unitName);
+			}
+			GeneratedMethod getEntityManagerMethod = methodGenerator
+					.generateMethod("get", unitName, "EntityManager")
+					.using(builder -> buildGetEntityManagerMethod(builder,
+							injectedElement));
+			return CodeBlock.of("$L($L)", getEntityManagerMethod.getName(),
+					REGISTERED_BEAN_PARAMETER);
+		}
+
+		private void buildGetEntityManagerMethod(MethodSpec.Builder builder,
+				PersistenceElement injectedElement) {
+			String unitName = injectedElement.unitName;
+			Properties properties = injectedElement.properties;
+			builder.addJavadoc("Get the '$L' {@link $T}",
+					(StringUtils.hasLength(unitName)) ? unitName : "default",
+					EntityManager.class);
+			builder.addModifiers(javax.lang.model.element.Modifier.PUBLIC,
+					javax.lang.model.element.Modifier.STATIC);
+			builder.returns(EntityManager.class);
+			builder.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER);
+			builder.addStatement(
+					"$T entityManagerFactory = $T.findEntityManagerFactory(($T) $L.getBeanFactory(), $S)",
+					EntityManagerFactory.class, EntityManagerFactoryUtils.class,
+					ListableBeanFactory.class, REGISTERED_BEAN_PARAMETER, unitName);
+			boolean hasProperties = !CollectionUtils.isEmpty(properties);
+			if (hasProperties) {
+				builder.addStatement("$T properties = new Properties()",
+						Properties.class);
+				for (String propertyName : new TreeSet<>(
+						properties.stringPropertyNames())) {
+					builder.addStatement("properties.put($S, $S)", propertyName,
+							properties.getProperty(propertyName));
+				}
+			}
+			builder.addStatement(
+					"return $T.createSharedEntityManager(entityManagerFactory, $L, $L)",
+					SharedEntityManagerCreator.class,
+					(hasProperties) ? "properties" : null,
+					injectedElement.synchronizedWithTransaction);
+		}
+
 	}
 
 }

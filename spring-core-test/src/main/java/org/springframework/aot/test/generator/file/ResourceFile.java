@@ -16,7 +16,14 @@
 
 package org.springframework.aot.test.generator.file;
 
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+
 import org.assertj.core.api.AssertProvider;
+
+import org.springframework.core.io.InputStreamSource;
+import org.springframework.lang.Nullable;
+import org.springframework.util.FileCopyUtils;
 
 /**
  * {@link DynamicFile} that holds resource file content and provides
@@ -44,6 +51,20 @@ public final class ResourceFile extends DynamicFile
 	 */
 	public static ResourceFile of(String path, CharSequence charSequence) {
 		return new ResourceFile(path, charSequence.toString());
+	}
+
+	/**
+	 * Factory method to create a new {@link ResourceFile} from the given
+	 * {@link InputStreamSource}.
+	 * @param path the relative path of the file or {@code null} to have the
+	 * path deduced
+	 * @param inputStreamSource the source for the file
+	 * @return a {@link SourceFile} instance
+	 */
+	public static ResourceFile of(@Nullable String path,
+			InputStreamSource inputStreamSource) {
+		return of(path, appendable -> appendable.append(FileCopyUtils.copyToString(
+				new InputStreamReader(inputStreamSource.getInputStream(), StandardCharsets.UTF_8))));
 	}
 
 	/**

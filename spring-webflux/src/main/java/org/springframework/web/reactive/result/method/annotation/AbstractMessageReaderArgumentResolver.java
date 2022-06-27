@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -225,8 +225,14 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	}
 
 	private ServerWebInputException handleMissingBody(MethodParameter parameter) {
-		String paramInfo = parameter.getExecutable().toGenericString();
-		return new ServerWebInputException("Request body is missing: " + paramInfo, parameter);
+
+		DecodingException cause = new DecodingException(
+				"No request body for: " + parameter.getExecutable().toGenericString());
+
+		ServerWebInputException ex = new ServerWebInputException("No request body", parameter, cause);
+		ex.setDetail("Invalid request content");
+
+		return ex;
 	}
 
 	/**

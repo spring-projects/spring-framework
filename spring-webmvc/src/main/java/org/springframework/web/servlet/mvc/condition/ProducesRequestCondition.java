@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -372,17 +371,6 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 				}
 			}
 			return false;
-		}
-
-		private boolean matchParameters(MediaType acceptedMediaType) {
-			for (String name : getMediaType().getParameters().keySet()) {
-				String s1 = getMediaType().getParameter(name);
-				String s2 = acceptedMediaType.getParameter(name);
-				if (StringUtils.hasText(s1) && StringUtils.hasText(s2) && !s1.equalsIgnoreCase(s2)) {
-					return false;
-				}
-			}
-			return true;
 		}
 	}
 

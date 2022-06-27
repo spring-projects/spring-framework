@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,8 +49,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * {@link SingleConnectionFactory} subclass that adds {@link jakarta.jms.Session}
- * caching as well {@link jakarta.jms.MessageProducer} caching. This ConnectionFactory
+ * {@link SingleConnectionFactory} subclass that adds {@link Session} caching as well as
+ * {@link MessageProducer} and {@link MessageConsumer} caching. This ConnectionFactory
  * also switches the {@link #setReconnectOnException "reconnectOnException" property}
  * to "true" by default, allowing for automatic recovery of the underlying Connection.
  *
@@ -82,8 +82,19 @@ import org.springframework.util.ObjectUtils;
  * Re-registering a durable consumer for the same subscription on the same
  * Session handle is not supported; close and reobtain a cached Session first.
  *
+ * <p>Last but not least, MessageProducers and MessageConsumers for temporary
+ * queues and topics (TemporaryQueue/TemporaryTopic) will never be cached.
+ * Unfortunately, WebLogic JMS happens to implement the temporary queue/topic
+ * interfaces on its regular destination implementation, mis-indicating that
+ * none of its destinations can be cached. Please use a different connection
+ * pool/cache on WebLogic, or customize this class for WebLogic purposes.
+ *
  * @author Juergen Hoeller
  * @since 2.5.3
+ * @see Connection
+ * @see Session
+ * @see MessageProducer
+ * @see MessageConsumer
  */
 public class CachingConnectionFactory extends SingleConnectionFactory {
 

@@ -1,2 +1,0 @@
-org.springframework.beans.factory.generator.AotContributingBeanFactoryPostProcessor= \
-org.springframework.context.generator.RuntimeHintsPostProcessor

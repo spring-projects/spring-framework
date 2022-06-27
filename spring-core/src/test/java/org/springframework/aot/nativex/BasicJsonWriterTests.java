@@ -45,7 +45,7 @@ class BasicJsonWriterTests {
 		Map<String, Object> attributes = orderedMap("test", "value");
 		attributes.put("another", true);
 		this.json.writeObject(attributes);
-		assertThat(out.toString()).isEqualTo("""
+		assertThat(out.toString()).isEqualToNormalizingNewlines("""
 				{
 					"test": "value",
 					"another": true
@@ -54,11 +54,11 @@ class BasicJsonWriterTests {
 	}
 
 	@Test
-	void writeObjectWitNestedObject() {
+	void writeObjectWithNestedObject() {
 		Map<String, Object> attributes = orderedMap("test", "value");
 		attributes.put("nested", orderedMap("enabled", false));
 		this.json.writeObject(attributes);
-		assertThat(out.toString()).isEqualTo("""
+		assertThat(out.toString()).isEqualToNormalizingNewlines("""
 				{
 					"test": "value",
 					"nested": {
@@ -69,11 +69,11 @@ class BasicJsonWriterTests {
 	}
 
 	@Test
-	void writeObjectWitNestedArrayOfString() {
+	void writeObjectWithNestedArrayOfString() {
 		Map<String, Object> attributes = orderedMap("test", "value");
 		attributes.put("nested", List.of("test", "value", "another"));
 		this.json.writeObject(attributes);
-		assertThat(out.toString()).isEqualTo("""
+		assertThat(out.toString()).isEqualToNormalizingNewlines("""
 				{
 					"test": "value",
 					"nested": [
@@ -86,13 +86,13 @@ class BasicJsonWriterTests {
 	}
 
 	@Test
-	void writeObjectWitNestedArrayOfObject() {
+	void writeObjectWithNestedArrayOfObject() {
 		Map<String, Object> attributes = orderedMap("test", "value");
 		LinkedHashMap<String, Object> secondNested = orderedMap("name", "second");
 		secondNested.put("enabled", false);
 		attributes.put("nested", List.of(orderedMap("name", "first"), secondNested, orderedMap("name", "third")));
 		this.json.writeObject(attributes);
-		assertThat(out.toString()).isEqualTo("""
+		assertThat(out.toString()).isEqualToNormalizingNewlines("""
 				{
 					"test": "value",
 					"nested": [
@@ -116,7 +116,7 @@ class BasicJsonWriterTests {
 		Map<String, Object> attributes = orderedMap("test", "value");
 		attributes.put("nested", Collections.emptyList());
 		this.json.writeObject(attributes);
-		assertThat(out.toString()).isEqualTo("""
+		assertThat(out.toString()).isEqualToNormalizingNewlines("""
 				{
 					"test": "value",
 					"nested": [ ]
@@ -129,7 +129,7 @@ class BasicJsonWriterTests {
 		Map<String, Object> attributes = orderedMap("test", "value");
 		attributes.put("nested", Collections.emptyMap());
 		this.json.writeObject(attributes);
-		assertThat(out.toString()).isEqualTo("""
+		assertThat(out.toString()).isEqualToNormalizingNewlines("""
 				{
 					"test": "value",
 					"nested": { }

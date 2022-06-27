@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import org.springframework.core.SpringProperties;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.lang.Nullable;
@@ -52,14 +51,6 @@ import org.springframework.lang.Nullable;
  */
 @SuppressWarnings("serial")
 public class JdbcTransactionManager extends DataSourceTransactionManager {
-
-	/**
-	 * Boolean flag controlled by a {@code spring.xml.ignore} system property that instructs Spring to
-	 * ignore XML, i.e. to not initialize the XML-related infrastructure.
-	 * <p>The default is "false".
-	 */
-	private static final boolean shouldIgnoreXml = SpringProperties.getFlag("spring.xml.ignore");
-
 
 	@Nullable
 	private volatile SQLExceptionTranslator exceptionTranslator;
@@ -97,8 +88,11 @@ public class JdbcTransactionManager extends DataSourceTransactionManager {
 	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
 	 */
 	public void setDatabaseProductName(String dbName) {
-		if (!shouldIgnoreXml) {
+		if (SQLErrorCodeSQLExceptionTranslator.hasUserProvidedErrorCodesFile()) {
 			this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dbName);
+		}
+		else {
+			this.exceptionTranslator = new SQLExceptionSubclassTranslator();
 		}
 	}
 
@@ -128,11 +122,11 @@ public class JdbcTransactionManager extends DataSourceTransactionManager {
 		synchronized (this) {
 			exceptionTranslator = this.exceptionTranslator;
 			if (exceptionTranslator == null) {
-				if (shouldIgnoreXml) {
-					exceptionTranslator = new SQLExceptionSubclassTranslator();
+				if (SQLErrorCodeSQLExceptionTranslator.hasUserProvidedErrorCodesFile()) {
+					exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(obtainDataSource());
 				}
 				else {
-					exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(obtainDataSource());
+					exceptionTranslator = new SQLExceptionSubclassTranslator();
 				}
 				this.exceptionTranslator = exceptionTranslator;
 			}

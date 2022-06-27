@@ -139,7 +139,6 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @see #setPropertyValues
 	 */
 	public RootBeanDefinition() {
-		super();
 	}
 
 	/**
@@ -148,8 +147,17 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @see #setBeanClass
 	 */
 	public RootBeanDefinition(@Nullable Class<?> beanClass) {
-		super();
 		setBeanClass(beanClass);
+	}
+
+	/**
+	 * Create a new RootBeanDefinition for a singleton.
+	 * @param beanType the type of bean to instantiate
+	 * @since 6.0
+	 * @see #setTargetType(ResolvableType)
+	 */
+	public RootBeanDefinition(@Nullable ResolvableType beanType) {
+		setTargetType(beanType);
 	}
 
 	/**
@@ -162,7 +170,6 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @see #setInstanceSupplier
 	 */
 	public <T> RootBeanDefinition(@Nullable Class<T> beanClass, @Nullable Supplier<T> instanceSupplier) {
-		super();
 		setBeanClass(beanClass);
 		setInstanceSupplier(instanceSupplier);
 	}
@@ -178,7 +185,6 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @see #setInstanceSupplier
 	 */
 	public <T> RootBeanDefinition(@Nullable Class<T> beanClass, String scope, @Nullable Supplier<T> instanceSupplier) {
-		super();
 		setBeanClass(beanClass);
 		setScope(scope);
 		setInstanceSupplier(instanceSupplier);
@@ -193,7 +199,6 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * (not applicable to autowiring a constructor, thus ignored there)
 	 */
 	public RootBeanDefinition(@Nullable Class<?> beanClass, int autowireMode, boolean dependencyCheck) {
-		super();
 		setBeanClass(beanClass);
 		setAutowireMode(autowireMode);
 		if (dependencyCheck && getResolvedAutowireMode() != AUTOWIRE_CONSTRUCTOR) {

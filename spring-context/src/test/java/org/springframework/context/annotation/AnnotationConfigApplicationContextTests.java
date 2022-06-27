@@ -148,25 +148,51 @@ class AnnotationConfigApplicationContextTests {
 	void nullReturningBeanPostProcessor() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(AutowiredConfig.class);
+		// 1st BPP always gets invoked
+		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
+			@Override
+			public Object postProcessBeforeInitialization(Object bean, String beanName) {
+				if (bean instanceof TestBean testBean) {
+					testBean.name = testBean.name + "-before";
+				}
+				return bean;
+			}
+			@Override
+			public Object postProcessAfterInitialization(Object bean, String beanName) {
+				if (bean instanceof TestBean testBean) {
+					testBean.name = testBean.name + "-after";
+				}
+				return bean;
+			}
+		});
+		// 2nd BPP always returns null for a TestBean
 		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
 			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
 				return (bean instanceof TestBean ? null : bean);
 			}
+			@Override
+			public Object postProcessAfterInitialization(Object bean, String beanName) {
+				return (bean instanceof TestBean ? null : bean);
+			}
 		});
+		// 3rd BPP never gets invoked with a TestBean
 		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
 			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
-				bean.getClass().getName();
+				assertThat(bean).isNotInstanceOf(TestBean.class);
 				return bean;
 			}
 			@Override
 			public Object postProcessAfterInitialization(Object bean, String beanName) {
-				bean.getClass().getName();
+				assertThat(bean).isNotInstanceOf(TestBean.class);
 				return bean;
 			}
 		});
 		context.refresh();
+		TestBean testBean = context.getBean(TestBean.class);
+		assertThat(testBean).isNotNull();
+		assertThat(testBean.name).isEqualTo("foo-before-after");
 	}
 
 	@Test

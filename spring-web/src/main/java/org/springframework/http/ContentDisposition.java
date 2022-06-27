@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StreamUtils;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 
@@ -50,6 +51,9 @@ public final class ContentDisposition {
 
 	private final static Pattern BASE64_ENCODED_PATTERN =
 			Pattern.compile("=\\?([0-9a-zA-Z-_]+)\\?B\\?([+/0-9a-zA-Z]+=*)\\?=");
+
+	private final static Pattern QUOTED_PRINTABLE_ENCODED_PATTERN =
+			Pattern.compile("=\\?([0-9a-zA-Z-_]+)\\?Q\\?([!->@-~]+)\\?="); // Printable ASCII other than "?" or SPACE
 
 	private static final String INVALID_HEADER_FIELD_PARAMETER_FORMAT =
 			"Invalid header field parameter format (as defined in RFC 5987)";
@@ -371,12 +375,33 @@ public final class ContentDisposition {
 					if (value.startsWith("=?") ) {
 						Matcher matcher = BASE64_ENCODED_PATTERN.matcher(value);
 						if (matcher.find()) {
-							String match1 = matcher.group(1);
-							String match2 = matcher.group(2);
-							filename = new String(Base64.getDecoder().decode(match2), Charset.forName(match1));
+							Base64.Decoder decoder = Base64.getDecoder();
+							StringBuilder builder = new StringBuilder();
+							do {
+								charset = Charset.forName(matcher.group(1));
+								byte[] decoded = decoder.decode(matcher.group(2));
+								builder.append(new String(decoded, charset));
+							}
+							while (matcher.find());
+
+							filename = builder.toString();
 						}
 						else {
-							filename = value;
+							matcher = QUOTED_PRINTABLE_ENCODED_PATTERN.matcher(value);
+							if (matcher.find()) {
+								StringBuilder builder = new StringBuilder();
+								do {
+									charset = Charset.forName(matcher.group(1));
+									String decoded = decodeQuotedPrintableFilename(matcher.group(2), charset);
+									builder.append(decoded);
+								}
+								while (matcher.find());
+
+								filename = builder.toString();
+							}
+							else {
+								filename = value;
+							}
 						}
 					}
 					else {
@@ -496,6 +521,43 @@ public final class ContentDisposition {
 		return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
 				c == '!' || c == '#' || c == '$' || c == '&' || c == '+' || c == '-' ||
 				c == '.' || c == '^' || c == '_' || c == '`' || c == '|' || c == '~';
+	}
+
+	/**
+	 * Decode the given header field param as described in RFC 2047.
+	 * @param filename the filename
+	 * @param charset the charset for the filename
+	 * @return the encoded header field param
+	 * @see <a href="https://tools.ietf.org/html/rfc2047">RFC 2047</a>
+	 */
+	private static String decodeQuotedPrintableFilename(String filename, Charset charset) {
+		Assert.notNull(filename, "'input' String` should not be null");
+		Assert.notNull(charset, "'charset' should not be null");
+
+		byte[] value = filename.getBytes(US_ASCII);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		int index = 0;
+		while (index < value.length) {
+			byte b = value[index];
+			if (b == '_') {
+				baos.write(' ');
+				index++;
+			}
+			else if (b == '=' && index < value.length - 2) {
+				int i1 = Character.digit((char) value[index + 1], 16);
+				int i2 = Character.digit((char) value[index + 2], 16);
+				if (i1 == -1 || i2 == -1) {
+					throw new IllegalArgumentException("Not a valid hex sequence: " + filename.substring(index));
+				}
+				baos.write((i1 << 4) | i2);
+				index += 3;
+			}
+			else {
+				baos.write(b);
+				index++;
+			}
+		}
+		return StreamUtils.copyToString(baos, charset);
 	}
 
 	private static String escapeQuotationsInFilename(String filename) {

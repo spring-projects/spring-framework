@@ -1,3 +1,7 @@
+ext {
+	documentedProjects = moduleProjects.findAll { it.name != 'spring-core-graalvm' }
+}
+
 configurations {
 	asciidoctorExt
 }
@@ -24,7 +28,7 @@ task api(type: Javadoc) {
 	title = "${rootProject.description} ${version} API"
 
 	dependsOn {
-		moduleProjects.collect {
+		documentedProjects.collect {
 			it.tasks.getByName("jar")
 		}
 	}
@@ -33,7 +37,7 @@ task api(type: Javadoc) {
 				// ensure the javadoc process can resolve types compiled from .aj sources
 				project(":spring-aspects").sourceSets.main.output
 		)
-		classpath += files(moduleProjects.collect { it.sourceSets.main.compileClasspath })
+		classpath += files(documentedProjects.collect { it.sourceSets.main.compileClasspath })
 	}
 
 	options {
@@ -48,7 +52,7 @@ task api(type: Javadoc) {
 		addBooleanOption('Xdoclint:syntax', true) // only check syntax with doclint
 		addBooleanOption('Werror', true) // fail build on Javadoc warnings
 	}
-	source moduleProjects.collect { project ->
+	source documentedProjects.collect { project ->
 		project.sourceSets.main.allJava
 	}
 	maxMemory = "1024m"
@@ -180,7 +184,7 @@ task schemaZip(type: Zip) {
 	description = "Builds -${archiveClassifier} archive containing all " +
 			"XSDs for deployment at https://springframework.org/schema."
 	duplicatesStrategy DuplicatesStrategy.EXCLUDE
-	moduleProjects.each { module ->
+	documentedProjects.each { module ->
 		def Properties schemas = new Properties();
 
 		module.sourceSets.main.resources.find {
@@ -230,7 +234,7 @@ task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
 		into "${baseDir}/schema"
 	}
 
-	moduleProjects.each { module ->
+	documentedProjects.each { module ->
 		into ("${baseDir}/libs") {
 			from module.jar
 			if (module.tasks.findByPath("sourcesJar")) {
@@ -243,4 +247,4 @@ task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
 	}
 }
 
-distZip.mustRunAfter moduleProjects.check
+distZip.mustRunAfter documentedProjects.check

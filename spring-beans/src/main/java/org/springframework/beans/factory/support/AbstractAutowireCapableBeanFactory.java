@@ -79,6 +79,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodCallback;
 import org.springframework.util.StringUtils;
+import org.springframework.util.function.ThrowingSupplier;
 
 /**
  * Abstract bean factory superclass that implements default bean creation,
@@ -607,8 +608,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				throw (BeanCreationException) ex;
 			}
 			else {
-				throw new BeanCreationException(
-						mbd.getResourceDescription(), beanName, "Initialization of bean failed", ex);
+				throw new BeanCreationException(mbd.getResourceDescription(), beanName, ex.getMessage(), ex);
 			}
 		}
 
@@ -1199,19 +1199,40 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	/**
 	 * Obtain a bean instance from the given supplier.
-	 * @param instanceSupplier the configured supplier
+	 * @param supplier the configured supplier
 	 * @param beanName the corresponding bean name
 	 * @return a BeanWrapper for the new instance
 	 * @since 5.0
 	 * @see #getObjectForBeanInstance
 	 */
-	protected BeanWrapper obtainFromSupplier(Supplier<?> instanceSupplier, String beanName) {
-		Object instance;
+	protected BeanWrapper obtainFromSupplier(Supplier<?> supplier, String beanName) {
+		Object instance = obtainInstanceFromSupplier(supplier, beanName);
+		if (instance == null) {
+			instance = new NullBean();
+		}
+		BeanWrapper bw = new BeanWrapperImpl(instance);
+		initBeanWrapper(bw);
+		return bw;
+	}
 
+	private Object obtainInstanceFromSupplier(Supplier<?> supplier, String beanName) {
 		String outerBean = this.currentlyCreatedBean.get();
 		this.currentlyCreatedBean.set(beanName);
 		try {
-			instance = instanceSupplier.get();
+			if (supplier instanceof InstanceSupplier<?> instanceSupplier) {
+				return instanceSupplier.get(RegisteredBean.of(this, beanName));
+			}
+			if (supplier instanceof ThrowingSupplier<?> throwableSupplier) {
+				return throwableSupplier.getWithException();
+			}
+			return supplier.get();
+		}
+		catch (Throwable ex) {
+			if (ex instanceof BeansException beansException) {
+				throw beansException;
+			}
+			throw new BeanCreationException(beanName,
+					"Instantiation of supplied bean failed", ex);
 		}
 		finally {
 			if (outerBean != null) {
@@ -1221,13 +1242,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				this.currentlyCreatedBean.remove();
 			}
 		}
-
-		if (instance == null) {
-			instance = new NullBean();
-		}
-		BeanWrapper bw = new BeanWrapperImpl(instance);
-		initBeanWrapper(bw);
-		return bw;
 	}
 
 	/**
@@ -1287,8 +1301,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return bw;
 		}
 		catch (Throwable ex) {
-			throw new BeanCreationException(
-					mbd.getResourceDescription(), beanName, "Instantiation of bean failed", ex);
+			throw new BeanCreationException(mbd.getResourceDescription(), beanName, ex.getMessage(), ex);
 		}
 	}
 
@@ -1684,8 +1697,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			bw.setPropertyValues(new MutablePropertyValues(deepCopy));
 		}
 		catch (BeansException ex) {
-			throw new BeanCreationException(
-					mbd.getResourceDescription(), beanName, "Error setting property values", ex);
+			throw new BeanCreationException(mbd.getResourceDescription(), beanName, ex.getMessage(), ex);
 		}
 	}
 
@@ -1737,8 +1749,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		catch (Throwable ex) {
 			throw new BeanCreationException(
-					(mbd != null ? mbd.getResourceDescription() : null),
-					beanName, "Invocation of init method failed", ex);
+					(mbd != null ? mbd.getResourceDescription() : null), beanName, ex.getMessage(), ex);
 		}
 		if (mbd == null || !mbd.isSynthetic()) {
 			wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);

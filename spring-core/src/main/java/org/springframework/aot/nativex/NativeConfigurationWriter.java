@@ -18,11 +18,11 @@ package org.springframework.aot.nativex;
 
 import java.util.function.Consumer;
 
-import org.springframework.aot.hint.JavaSerializationHints;
 import org.springframework.aot.hint.ProxyHints;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.ResourceHints;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.SerializationHints;
 
 /**
  * Write {@link RuntimeHints} as GraalVM native configuration.
@@ -30,7 +30,7 @@ import org.springframework.aot.hint.RuntimeHints;
  * @author Sebastien Deleuze
  * @author Stephane Nicoll
  * @since 6.0
- * @see <a href="https://www.graalvm.org/22.0/reference-manual/native-image/BuildConfiguration/">Native Image Build Configuration</a>
+ * @see <a href="https://www.graalvm.org/22.1/reference-manual/native-image/BuildConfiguration/">Native Image Build Configuration</a>
  */
 public abstract class NativeConfigurationWriter {
 
@@ -39,8 +39,8 @@ public abstract class NativeConfigurationWriter {
 	 * @param hints the hints to handle
 	 */
 	public void write(RuntimeHints hints) {
-		if (hints.javaSerialization().types().findAny().isPresent()) {
-			writeJavaSerializationHints(hints.javaSerialization());
+		if (hints.serialization().javaSerialization().findAny().isPresent()) {
+			writeJavaSerializationHints(hints.serialization());
 		}
 		if (hints.proxies().jdkProxies().findAny().isPresent()) {
 			writeProxyHints(hints.proxies());
@@ -62,9 +62,9 @@ public abstract class NativeConfigurationWriter {
 	 */
 	protected abstract void writeTo(String fileName, Consumer<BasicJsonWriter> writer);
 
-	private void writeJavaSerializationHints(JavaSerializationHints hints) {
+	private void writeJavaSerializationHints(SerializationHints hints) {
 		writeTo("serialization-config.json", writer ->
-				JavaSerializationHintsWriter.INSTANCE.write(writer, hints));
+				SerializationHintsWriter.INSTANCE.write(writer, hints));
 	}
 
 	private void writeProxyHints(ProxyHints hints) {

@@ -16,6 +16,8 @@
 
 package org.springframework.beans.testfixture.beans.factory.generator;
 
+import java.io.IOException;
+
 public class SimpleConfiguration {
 
 	public SimpleConfiguration() {
@@ -25,7 +27,20 @@ public class SimpleConfiguration {
 		return "Hello";
 	}
 
-	public Integer integerBean() {
+	@SuppressWarnings("unused")
+	private static String privateStaticStringBean() {
+		return "Hello";
+	}
+
+	static String packageStaticStringBean() {
+		return "Hello";
+	}
+
+	public static Integer integerBean() {
+		return 42;
+	}
+
+	public Integer throwingIntegerBean() throws IOException {
 		return 42;
 	}
 

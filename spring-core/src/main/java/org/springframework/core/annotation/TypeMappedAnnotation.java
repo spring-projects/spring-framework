@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -321,19 +321,37 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected A createSynthesized() {
-		if (getType().isInstance(this.rootAttributes) && !isSynthesizable()) {
+	protected A createSynthesizedAnnotation() {
+		// Check root annotation
+		if (isTargetAnnotation(this.rootAttributes) && isNotSynthesizable((Annotation) this.rootAttributes)) {
 			return (A) this.rootAttributes;
+		}
+		// Check meta-annotation
+		else if (isTargetAnnotation(this.mapping.getAnnotation()) && isNotSynthesizable(this.mapping.getAnnotation())) {
+			return (A) this.mapping.getAnnotation();
 		}
 		return SynthesizedMergedAnnotationInvocationHandler.createProxy(this, getType());
 	}
 
-	private boolean isSynthesizable() {
-		// Already synthesized?
-		if (this.rootAttributes instanceof SynthesizedAnnotation) {
-			return false;
-		}
-		return this.mapping.isSynthesizable();
+	/**
+	 * Determine if the supplied object is an annotation of the required
+	 * {@linkplain #getType() type}.
+	 * @param obj the object to check
+	 * @since 5.3.22
+	 */
+	private boolean isTargetAnnotation(@Nullable Object obj) {
+		return getType().isInstance(obj);
+	}
+
+	/**
+	 * Determine if the supplied annotation has already been synthesized or if the
+	 * mapped annotation is not {@linkplain AnnotationTypeMapping#isSynthesizable()
+	 * synthesizable} in general.
+	 * @param annotation the annotation to check
+	 * @since 5.3.22
+	 */
+	private boolean isNotSynthesizable(Annotation annotation) {
+		return (annotation instanceof SynthesizedAnnotation || !this.mapping.isSynthesizable());
 	}
 
 	@Override

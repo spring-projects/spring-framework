@@ -25,7 +25,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.testfixture.codec.AbstractEncoderTests;
 import org.springframework.util.MimeType;
 
@@ -71,10 +70,10 @@ public class CustomizedJackson2JsonEncoderTests extends AbstractEncoderTests<Jac
 		);
 
 		testEncode(input, MyCustomizedEncoderBean.class, step -> step
-				.consumeNextWith(expectString("[" +
-						"{\"property\":\"Value1\"}," +
-						"{\"property\":\"Value2\"}]")
-						.andThen(DataBufferUtils::release))
+				.consumeNextWith(expectString("["))
+				.consumeNextWith(expectString("{\"property\":\"Value1\"}"))
+				.consumeNextWith(expectString(",{\"property\":\"Value2\"}"))
+				.consumeNextWith(expectString("]"))
 				.verifyComplete());
 	}
 

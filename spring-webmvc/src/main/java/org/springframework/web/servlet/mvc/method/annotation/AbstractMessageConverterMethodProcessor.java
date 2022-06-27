@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -45,6 +46,7 @@ import org.springframework.http.HttpRange;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotWritableException;
@@ -77,22 +79,25 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		implements HandlerMethodReturnValueHandler {
 
 	/* Extensions associated with the built-in message converters */
-	private static final Set<String> SAFE_EXTENSIONS = new HashSet<>(Arrays.asList(
+	private static final Set<String> SAFE_EXTENSIONS = Set.of(
 			"txt", "text", "yml", "properties", "csv",
 			"json", "xml", "atom", "rss",
-			"png", "jpe", "jpeg", "jpg", "gif", "wbmp", "bmp"));
+			"png", "jpe", "jpeg", "jpg", "gif", "wbmp", "bmp");
 
-	private static final Set<String> SAFE_MEDIA_BASE_TYPES = new HashSet<>(
-			Arrays.asList("audio", "image", "video"));
+	private static final Set<String> SAFE_MEDIA_BASE_TYPES =
+			Set.of("audio", "image", "video");
 
 	private static final List<MediaType> ALL_APPLICATION_MEDIA_TYPES =
-			Arrays.asList(MediaType.ALL, new MediaType("application"));
+			List.of(MediaType.ALL, new MediaType("application"));
 
 	private static final Type RESOURCE_REGION_LIST_TYPE =
-			new ParameterizedTypeReference<List<ResourceRegion>>() { }.getType();
+			new ParameterizedTypeReference<List<ResourceRegion>>() {}.getType();
 
 
 	private final ContentNegotiationManager contentNegotiationManager;
+
+	private final List<MediaType> problemMediaTypes =
+			Arrays.asList(MediaType.APPLICATION_PROBLEM_JSON, MediaType.APPLICATION_PROBLEM_XML);
 
 	private final Set<String> safeExtensions = new HashSet<>();
 
@@ -228,21 +233,22 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 				}
 				throw ex;
 			}
-			List<MediaType> producibleTypes = getProducibleMediaTypes(request, valueType, targetType);
 
+			List<MediaType> producibleTypes = getProducibleMediaTypes(request, valueType, targetType);
 			if (body != null && producibleTypes.isEmpty()) {
 				throw new HttpMessageNotWritableException(
 						"No converter found for return value of type: " + valueType);
 			}
-			List<MediaType> mediaTypesToUse = new ArrayList<>();
-			for (MediaType requestedType : acceptableTypes) {
-				for (MediaType producibleType : producibleTypes) {
-					if (requestedType.isCompatibleWith(producibleType)) {
-						mediaTypesToUse.add(getMostSpecificMediaType(requestedType, producibleType));
-					}
-				}
+
+			List<MediaType> compatibleMediaTypes = new ArrayList<>();
+			determineCompatibleMediaTypes(acceptableTypes, producibleTypes, compatibleMediaTypes);
+
+			// For ProblemDetail, fall back on RFC 7807 format
+			if (compatibleMediaTypes.isEmpty() && ProblemDetail.class.isAssignableFrom(valueType)) {
+				determineCompatibleMediaTypes(this.problemMediaTypes, producibleTypes, compatibleMediaTypes);
 			}
-			if (mediaTypesToUse.isEmpty()) {
+
+			if (compatibleMediaTypes.isEmpty()) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("No match for " + acceptableTypes + ", supported: " + producibleTypes);
 				}
@@ -252,9 +258,9 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 				return;
 			}
 
-			MimeTypeUtils.sortBySpecificity(mediaTypesToUse);
+			MimeTypeUtils.sortBySpecificity(compatibleMediaTypes);
 
-			for (MediaType mediaType : mediaTypesToUse) {
+			for (MediaType mediaType : compatibleMediaTypes) {
 				if (mediaType.isConcrete()) {
 					selectedMediaType = mediaType;
 					break;
@@ -375,7 +381,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		if (!CollectionUtils.isEmpty(mediaTypes)) {
 			return new ArrayList<>(mediaTypes);
 		}
-		List<MediaType> result = new ArrayList<>();
+		Set<MediaType> result = new LinkedHashSet<>();
 		for (HttpMessageConverter<?> converter : this.messageConverters) {
 			if (converter instanceof GenericHttpMessageConverter && targetType != null) {
 				if (((GenericHttpMessageConverter<?>) converter).canWrite(targetType, valueClass, null)) {
@@ -386,13 +392,25 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 				result.addAll(converter.getSupportedMediaTypes(valueClass));
 			}
 		}
-		return (result.isEmpty() ? Collections.singletonList(MediaType.ALL) : result);
+		return (result.isEmpty() ? Collections.singletonList(MediaType.ALL) : new ArrayList<>(result));
 	}
 
 	private List<MediaType> getAcceptableMediaTypes(HttpServletRequest request)
 			throws HttpMediaTypeNotAcceptableException {
 
 		return this.contentNegotiationManager.resolveMediaTypes(new ServletWebRequest(request));
+	}
+
+	private void determineCompatibleMediaTypes(
+			List<MediaType> acceptableTypes, List<MediaType> producibleTypes, List<MediaType> mediaTypesToUse) {
+
+		for (MediaType requestedType : acceptableTypes) {
+			for (MediaType producibleType : producibleTypes) {
+				if (requestedType.isCompatibleWith(producibleType)) {
+					mediaTypesToUse.add(getMostSpecificMediaType(requestedType, producibleType));
+				}
+			}
+		}
 	}
 
 	/**

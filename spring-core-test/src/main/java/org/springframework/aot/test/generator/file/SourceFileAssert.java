@@ -16,21 +16,6 @@
 
 package org.springframework.aot.test.generator.file;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import com.thoughtworks.qdox.model.JavaClass;
-import com.thoughtworks.qdox.model.JavaMethod;
-import com.thoughtworks.qdox.model.JavaParameter;
-import com.thoughtworks.qdox.model.JavaType;
-import org.assertj.core.error.BasicErrorMessageFactory;
-import org.assertj.core.internal.Failures;
-
-import org.springframework.lang.Nullable;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 /**
  * Assertion methods for {@code SourceFile} instances.
  *
@@ -42,89 +27,6 @@ public class SourceFileAssert extends DynamicFileAssert<SourceFileAssert, Source
 
 	SourceFileAssert(SourceFile actual) {
 		super(actual, SourceFileAssert.class);
-	}
-
-
-	public SourceFileAssert implementsInterface(@Nullable Class<?> type) {
-		return implementsInterface((type != null ? type.getName() : null));
-	}
-
-	public SourceFileAssert implementsInterface(@Nullable String name) {
-		JavaClass javaClass = getJavaClass();
-		assertThat(javaClass.getImplements()).as("implements").map(
-				JavaType::getFullyQualifiedName).contains(name);
-		return this;
-	}
-
-	public MethodAssert hasMethodNamed(String name) {
-		JavaClass javaClass = getJavaClass();
-		JavaMethod method = null;
-		for (JavaMethod candidate : javaClass.getMethods()) {
-			if (candidate.getName().equals(name)) {
-				if (method != null) {
-					throw Failures.instance().failure(this.info,
-							new BasicErrorMessageFactory(String.format(
-									"%nExpecting actual:%n  %s%nto contain unique method:%n  %s%n",
-									this.actual.getContent(), name)));
-				}
-				method = candidate;
-			}
-		}
-		if (method == null) {
-			throw Failures.instance().failure(this.info,
-					new BasicErrorMessageFactory(String.format(
-							"%nExpecting actual:%n  %s%nto contain method:%n  %s%n",
-							this.actual.getContent(), name)));
-		}
-		return new MethodAssert(method);
-	}
-
-	public MethodAssert hasMethod(String name, Class<?>... parameters) {
-		JavaClass javaClass = getJavaClass();
-		JavaMethod method = null;
-		for (JavaMethod candidate : javaClass.getMethods()) {
-			if (candidate.getName().equals(name)
-					&& hasParameters(candidate, parameters)) {
-				if (method != null) {
-					throw Failures.instance().failure(this.info,
-							new BasicErrorMessageFactory(String.format(
-									"%nExpecting actual:%n  %s%nto contain unique method:%n  %s%n",
-									this.actual.getContent(), name)));
-				}
-				method = candidate;
-			}
-		}
-		if (method == null) {
-			String methodDescription = getMethodDescription(name, parameters);
-			throw Failures.instance().failure(this.info,
-					new BasicErrorMessageFactory(String.format(
-							"%nExpecting actual:%n  %s%nto contain method:%n  %s%n",
-							this.actual.getContent(), methodDescription)));
-		}
-		return new MethodAssert(method);
-	}
-
-	private boolean hasParameters(JavaMethod method, Class<?>[] requiredParameters) {
-		List<JavaParameter> parameters = method.getParameters();
-		if (parameters.size() != requiredParameters.length) {
-			return false;
-		}
-		for (int i = 0; i < requiredParameters.length; i++) {
-			if (!requiredParameters[i].getName().equals(
-					parameters.get(i).getFullyQualifiedName())) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private String getMethodDescription(String name, Class<?>... parameters) {
-		return name + "(" + Arrays.stream(parameters).map(Class::getName).collect(
-				Collectors.joining(", ")) + ")";
-	}
-
-	private JavaClass getJavaClass() {
-		return this.actual.getJavaSource().getClasses().get(0);
 	}
 
 }

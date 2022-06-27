@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,8 +137,9 @@ class ExtendedBeanInfo implements BeanInfo {
 			}
 		}
 		// Sort non-void returning write methods to guard against the ill effects of
-		// non-deterministic sorting of methods returned from Class#getDeclaredMethods
-		// under JDK 7. See https://bugs.java.com/view_bug.do?bug_id=7023180
+		// non-deterministic sorting of methods returned from Class#getMethods.
+		// For historical reasons, the natural sort order is reversed.
+		// See https://github.com/spring-projects/spring-framework/issues/14744.
 		matches.sort(Comparator.comparing(Method::toString).reversed());
 		return matches;
 	}

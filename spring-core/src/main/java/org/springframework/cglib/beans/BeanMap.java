@@ -97,7 +97,9 @@ abstract public class BeanMap implements Map {
             this.bean = bean;
             if (bean != null) {
 				beanClass = bean.getClass();
+				// SPRING PATCH BEGIN
 				setContextClass(beanClass);
+				// SPRING PATCH END
 			}
         }
 

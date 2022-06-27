@@ -205,14 +205,16 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			if (reactiveAdapter.isNoValue()) {
 				return true;
 			}
-			Type parameterType = returnType.getGenericParameterType();
-			if (parameterType instanceof ParameterizedType type) {
-				if (type.getActualTypeArguments().length == 1) {
-					return Void.class.equals(type.getActualTypeArguments()[0]);
-				}
+		}
+		Type parameterType = returnType.getGenericParameterType();
+		if (parameterType instanceof ParameterizedType type) {
+			if (type.getActualTypeArguments().length == 1) {
+				return Void.class.equals(type.getActualTypeArguments()[0]);
 			}
 		}
-		return false;
+		Method method = returnType.getMethod();
+		return method != null && KotlinDetector.isSuspendingFunction(method) &&
+				Void.TYPE.equals(returnType.getParameterType());
 	}
 
 }

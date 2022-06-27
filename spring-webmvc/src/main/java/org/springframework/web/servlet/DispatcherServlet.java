@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,6 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.util.NestedServletException;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.WebUtils;
 
@@ -1077,7 +1076,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			catch (Throwable err) {
 				// As of 4.3, we're processing Errors thrown from handler methods as well,
 				// making them available for @ExceptionHandler methods and other scenarios.
-				dispatchException = new NestedServletException("Handler dispatch failed", err);
+				dispatchException = new ServletException("Handler dispatch failed: " + err, err);
 			}
 			processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
 		}
@@ -1086,7 +1085,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		catch (Throwable err) {
 			triggerAfterCompletion(processedRequest, response, mappedHandler,
-					new NestedServletException("Handler processing failed", err));
+					new ServletException("Handler processing failed: " + err, err));
 		}
 		finally {
 			if (asyncManager.isConcurrentHandlingStarted()) {
