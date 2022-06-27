@@ -98,7 +98,8 @@ public class BindingReflectionHintsRegistrar {
 						PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
 						for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
 							Method writeMethod = propertyDescriptor.getWriteMethod();
-							if (writeMethod != null && writeMethod.getDeclaringClass() != Object.class) {
+							if (writeMethod != null && writeMethod.getDeclaringClass() != Object.class
+									&& writeMethod.getDeclaringClass() != Enum.class) {
 								hints.registerMethod(writeMethod, INVOKE);
 								MethodParameter methodParameter = MethodParameter.forExecutable(writeMethod, 0);
 								Type methodParameterType = methodParameter.getGenericParameterType();
@@ -107,7 +108,8 @@ public class BindingReflectionHintsRegistrar {
 								}
 							}
 							Method readMethod = propertyDescriptor.getReadMethod();
-							if (readMethod != null && readMethod.getDeclaringClass() != Object.class) {
+							if (readMethod != null && readMethod.getDeclaringClass() != Object.class
+									&& readMethod.getDeclaringClass() != Enum.class) {
 								hints.registerMethod(readMethod, INVOKE);
 								MethodParameter methodParameter = MethodParameter.forExecutable(readMethod, -1);
 								Type methodParameterType = methodParameter.getGenericParameterType();
@@ -144,7 +146,7 @@ public class BindingReflectionHintsRegistrar {
 		}
 		ResolvableType resolvableType = ResolvableType.forType(type);
 		Class<?> clazz = resolvableType.resolve();
-		if (clazz != null) {
+		if (clazz != null && !types.contains(clazz)) {
 			types.add(clazz);
 			for (ResolvableType genericResolvableType : resolvableType.getGenerics()) {
 				collectReferencedTypes(seen, types, genericResolvableType.getType());

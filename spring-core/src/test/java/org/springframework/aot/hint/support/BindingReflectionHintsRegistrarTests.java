@@ -196,6 +196,13 @@ public class BindingReflectionHintsRegistrarTests {
 				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(Set.class)));
 	}
 
+	@Test
+	void registerTypeForSerializationWithEnum() {
+		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleEnum.class);
+		assertThat(this.hints.reflection().typeHints()).singleElement()
+				.satisfies(typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleEnum.class)));
+	}
+
 
 	static class SampleEmptyClass {
 	}
@@ -272,6 +279,10 @@ public class BindingReflectionHintsRegistrarTests {
 		public String getString() {
 			return "";
 		}
+	}
+
+	enum SampleEnum {
+		value1, value2
 	}
 
 }
