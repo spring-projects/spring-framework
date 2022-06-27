@@ -21,6 +21,7 @@ classes/
 /build
 buildSrc/build
 /spring-*/build
+/spring-core/graalvm/build
 /spring-core/kotlin-coroutines/build
 /framework-bom/build
 /integration-tests/build
