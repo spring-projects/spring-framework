@@ -24,15 +24,28 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.FileSystemResourceLoader;
+import org.springframework.core.io.FileUrlResource;
+import org.springframework.core.io.ProtocolResolver;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.metrics.jfr.FlightRecorderApplicationStartup;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.InstanceOfAssertFactories.type;
 
 /**
+ * Tests for {@link GenericApplicationContext}.
+ *
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  */
 class GenericApplicationContextTests {
 
@@ -209,6 +222,39 @@ class GenericApplicationContextTests {
 		assertThat(context.getBeanFactory().getApplicationStartup()).isEqualTo(applicationStartup);
 	}
 
+	@Test
+	void getResourceWithDefaultResourceLoader() {
+		assertGetResourceSemantics(null, ClassPathResource.class);
+	}
+
+	@Test
+	void getResourceWithCustomResourceLoader() {
+		assertGetResourceSemantics(new FileSystemResourceLoader(), FileSystemResource.class);
+	}
+
+	private void assertGetResourceSemantics(ResourceLoader resourceLoader, Class<? extends Resource> defaultResouceType) {
+		if (resourceLoader != null) {
+			context.setResourceLoader(resourceLoader);
+		}
+
+		String pingLocation = "ping:foo";
+		String fileLocation = "file:foo";
+
+		Resource resource = context.getResource(pingLocation);
+		assertThat(resource).isInstanceOf(defaultResouceType);
+		resource = context.getResource(fileLocation);
+		assertThat(resource).isInstanceOf(FileUrlResource.class);
+
+		context.addProtocolResolver(new PingPongProtocolResolver());
+
+		resource = context.getResource(pingLocation);
+		assertThat(resource).asInstanceOf(type(ByteArrayResource.class))
+			.extracting(bar -> new String(bar.getByteArray(), UTF_8))
+			.isEqualTo("pong:foo");
+		resource = context.getResource(fileLocation);
+		assertThat(resource).isInstanceOf(FileUrlResource.class);
+	}
+
 
 	static class BeanA {
 
@@ -235,5 +281,16 @@ class GenericApplicationContextTests {
 	}
 
 	static class BeanC {}
+
+	static class PingPongProtocolResolver implements ProtocolResolver {
+
+		@Override
+		public Resource resolve(String location, ResourceLoader resourceLoader) {
+			if (location.startsWith("ping:")) {
+				return new ByteArrayResource(("pong:" + location.substring(5)).getBytes(UTF_8));
+			}
+			return null;
+		}
+	}
 
 }
