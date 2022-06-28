@@ -323,11 +323,11 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	@SuppressWarnings("unchecked")
 	protected A createSynthesizedAnnotation() {
 		// Check root annotation
-		if (isTargetAnnotation(this.rootAttributes) && isNotSynthesizable((Annotation) this.rootAttributes)) {
+		if (isTargetAnnotation(this.rootAttributes) && !isSynthesizable((Annotation) this.rootAttributes)) {
 			return (A) this.rootAttributes;
 		}
 		// Check meta-annotation
-		else if (isTargetAnnotation(this.mapping.getAnnotation()) && isNotSynthesizable(this.mapping.getAnnotation())) {
+		else if (isTargetAnnotation(this.mapping.getAnnotation()) && !isSynthesizable(this.mapping.getAnnotation())) {
 			return (A) this.mapping.getAnnotation();
 		}
 		return SynthesizedMergedAnnotationInvocationHandler.createProxy(this, getType());
@@ -344,14 +344,25 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	}
 
 	/**
-	 * Determine if the supplied annotation has already been synthesized or if the
-	 * mapped annotation is not {@linkplain AnnotationTypeMapping#isSynthesizable()
-	 * synthesizable} in general.
+	 * Determine if the supplied annotation has not already been synthesized
+	 * <strong>and</strong> whether the mapped annotation is a composed annotation
+	 * that needs to have its attributes merged or the mapped annotation is
+	 * {@linkplain AnnotationTypeMapping#isSynthesizable() synthesizable} in general.
 	 * @param annotation the annotation to check
 	 * @since 5.3.22
 	 */
-	private boolean isNotSynthesizable(Annotation annotation) {
-		return (annotation instanceof SynthesizedAnnotation || !this.mapping.isSynthesizable());
+	private boolean isSynthesizable(Annotation annotation) {
+		// Already synthesized?
+		if (annotation instanceof SynthesizedAnnotation) {
+			return false;
+		}
+		// Is this a mapped annotation for a composed annotation, and are there
+		// annotation attributes (mirrors) that need to be merged?
+		if (getDistance() > 0 && this.resolvedMirrors.length > 0) {
+			return true;
+		}
+		// Is the mapped annotation itself synthesizable?
+		return this.mapping.isSynthesizable();
 	}
 
 	@Override

@@ -24,6 +24,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1539,7 +1540,28 @@ class MergedAnnotationsTests {
 		assertThat(generatedValue).isSameAs(synthesizedGeneratedValue);
 	}
 
-	@Test
+	@Test  // gh-28716
+	void synthesizeWhenUsingMergedAnnotationsFromApi() {
+		Field directlyAnnotatedField = ReflectionUtils.findField(DomainType.class, "directlyAnnotated");
+		MergedAnnotations mergedAnnotations = MergedAnnotations.from(directlyAnnotatedField);
+		RootAnnotation rootAnnotation = mergedAnnotations.get(RootAnnotation.class).synthesize();
+		assertThat(rootAnnotation.flag()).isFalse();
+		assertThat(rootAnnotation).isNotInstanceOf(SynthesizedAnnotation.class);
+
+		Field metaAnnotatedField = ReflectionUtils.findField(DomainType.class, "metaAnnotated");
+		mergedAnnotations = MergedAnnotations.from(metaAnnotatedField);
+		rootAnnotation = mergedAnnotations.get(RootAnnotation.class).synthesize();
+		assertThat(rootAnnotation.flag()).isTrue();
+		assertThat(rootAnnotation).isInstanceOf(SynthesizedAnnotation.class);
+
+		Field metaMetaAnnotatedField = ReflectionUtils.findField(DomainType.class, "metaMetaAnnotated");
+		mergedAnnotations = MergedAnnotations.from(metaMetaAnnotatedField);
+		rootAnnotation = mergedAnnotations.get(RootAnnotation.class).synthesize();
+		assertThat(rootAnnotation.flag()).isTrue();
+		assertThat(rootAnnotation).isInstanceOf(SynthesizedAnnotation.class);
+	}
+
+	@Test  // gh-28704
 	void synthesizeShouldNotSynthesizeNonsynthesizableAnnotationsWhenUsingMergedAnnotationsFromApi() {
 		MergedAnnotations mergedAnnotations = MergedAnnotations.from(SecurityConfig.class);
 
@@ -3244,6 +3266,40 @@ class MergedAnnotationsTests {
 
 	@EnableWebSecurity
 	static class SecurityConfig {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.FIELD, ElementType.ANNOTATION_TYPE })
+	@interface RootAnnotation {
+		String value() default "";
+		boolean flag() default false;
+	}
+
+	@RootAnnotation
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.FIELD, ElementType.ANNOTATION_TYPE })
+	@interface ComposedRootAnnotation {
+
+		@AliasFor(annotation = RootAnnotation.class, attribute = "flag")
+		boolean enabled() default true;
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.FIELD)
+	@ComposedRootAnnotation
+	@interface DoublyComposedRootAnnotation {
+	}
+
+	class DomainType {
+
+		@RootAnnotation
+		Object directlyAnnotated;
+
+		@ComposedRootAnnotation
+		Object metaAnnotated;
+
+		@DoublyComposedRootAnnotation
+		Object metaMetaAnnotated;
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
