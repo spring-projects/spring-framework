@@ -16,21 +16,13 @@
 
 package org.springframework.messaging.simp.config;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.junit.jupiter.api.Test;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.Ordered;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -76,6 +68,12 @@ import org.springframework.util.PathMatcher;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -595,20 +593,20 @@ public class MessageBrokerConfigurationTests {
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel clientInboundChannel(TaskExecutor clientInboundChannelExecutor) {
+		public AbstractSubscribableChannel clientInboundChannel() {
 			return new TestChannel();
 		}
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel clientOutboundChannel(TaskExecutor clientOutboundChannelExecutor) {
+		public AbstractSubscribableChannel clientOutboundChannel() {
 			return new TestChannel();
 		}
 
 		@Override
 		@Bean
 		public AbstractSubscribableChannel brokerChannel(AbstractSubscribableChannel clientInboundChannel,
-				AbstractSubscribableChannel clientOutboundChannel, TaskExecutor brokerChannelExecutor) {
+				AbstractSubscribableChannel clientOutboundChannel) {
 			return new TestChannel();
 		}
 	}
@@ -682,21 +680,21 @@ public class MessageBrokerConfigurationTests {
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel clientInboundChannel(TaskExecutor clientInboundChannelExecutor) {
+		public AbstractSubscribableChannel clientInboundChannel() {
 			// synchronous
 			return new ExecutorSubscribableChannel(null);
 		}
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel clientOutboundChannel(TaskExecutor clientOutboundChannelExecutor) {
+		public AbstractSubscribableChannel clientOutboundChannel() {
 			return new TestChannel();
 		}
 
 		@Override
 		@Bean
 		public AbstractSubscribableChannel brokerChannel(AbstractSubscribableChannel clientInboundChannel,
-				AbstractSubscribableChannel clientOutboundChannel, TaskExecutor brokerChannelExecutor) {
+				AbstractSubscribableChannel clientOutboundChannel) {
 			// synchronous
 			return new ExecutorSubscribableChannel(null);
 		}

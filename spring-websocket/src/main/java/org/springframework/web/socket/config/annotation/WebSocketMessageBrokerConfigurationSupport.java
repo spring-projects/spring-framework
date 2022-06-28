@@ -19,7 +19,6 @@ package org.springframework.web.socket.config.annotation;
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
@@ -129,17 +128,16 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	@Bean
 	public WebSocketMessageBrokerStats webSocketMessageBrokerStats(
 			@Nullable AbstractBrokerMessageHandler stompBrokerRelayMessageHandler,
-			WebSocketHandler subProtocolWebSocketHandler, TaskExecutor clientInboundChannelExecutor,
-			TaskExecutor clientOutboundChannelExecutor, TaskScheduler messageBrokerTaskScheduler) {
+			WebSocketHandler subProtocolWebSocketHandler) {
 
 		WebSocketMessageBrokerStats stats = new WebSocketMessageBrokerStats();
 		stats.setSubProtocolWebSocketHandler((SubProtocolWebSocketHandler) subProtocolWebSocketHandler);
 		if (stompBrokerRelayMessageHandler instanceof StompBrokerRelayMessageHandler) {
 			stats.setStompBrokerRelay((StompBrokerRelayMessageHandler) stompBrokerRelayMessageHandler);
 		}
-		stats.setInboundChannelExecutor(clientInboundChannelExecutor);
-		stats.setOutboundChannelExecutor(clientOutboundChannelExecutor);
-		stats.setSockJsTaskScheduler(messageBrokerTaskScheduler);
+		stats.setInboundChannelExecutor(clientInboundChannelExecutor());
+		stats.setOutboundChannelExecutor(clientOutboundChannelExecutor());
+		stats.setSockJsTaskScheduler(messageBrokerTaskScheduler());
 		return stats;
 	}
 
