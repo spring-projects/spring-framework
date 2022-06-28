@@ -6,11 +6,6 @@
 		</Console>
 	</Appenders>
 	<Loggers>
-		<Logger name="org.springframework.web" level="trace" />
-		<Logger name="org.springframework.beans" level="trace" />
-		<Logger name="org.springframework.binding" level="trace" />
-		<Logger name="org.springframework.http" level="trace" />
-		<Logger name="org.springframework.remoting" level="trace" />
 		<Root level="trace">
 			<AppenderRef ref="Console" />
 		</Root>

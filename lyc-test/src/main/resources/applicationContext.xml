@@ -1,0 +1,11 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- 导入约束之后，即可在此处装配bean了 -->
+	<bean id="person" class="org.springframework.Person" >
+		<property name="name" value="houww"></property>
+		<property name="age" value="13"></property>
+	</bean>
+</beans>

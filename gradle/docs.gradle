@@ -62,15 +62,15 @@ task api(type: Javadoc) {
 /**
  * Produce KDoc for all Spring Framework modules in "build/docs/kdoc"
  */
-pluginManager.withPlugin("kotlin") {
-	tasks.dokkaHtmlMultiModule.configure {
-		dependsOn {
-			tasks.getByName("api")
-		}
-		moduleName.set("spring-framework")
-		outputDirectory.set(project.file("$buildDir/docs/kdoc"))
-	}
-}
+//pluginManager.withPlugin("kotlin") {
+//	tasks.dokkaHtmlMultiModule.configure {
+//		dependsOn {
+//			tasks.getByName("api")
+//		}
+//		moduleName.set("spring-framework")
+//		outputDirectory.set(project.file("$buildDir/docs/kdoc"))
+//	}
+//}
 
 task downloadResources(type: Download) {
 	def version = "0.2.5"

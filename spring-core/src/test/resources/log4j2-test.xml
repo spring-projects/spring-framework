@@ -9,8 +9,8 @@
 		</File>
 	</Appenders>
 	<Loggers>
-		<Logger name="org.springframework.core" level="info" />
-		<Logger name="org.springframework.util" level="warn" />
+		<Logger name="org.springframework.core" level="debug" />
+		<Logger name="org.springframework.util" level="debug" />
 		<Root level="error">
 			<AppenderRef ref="Console" />
 			<AppenderRef ref="File" />
