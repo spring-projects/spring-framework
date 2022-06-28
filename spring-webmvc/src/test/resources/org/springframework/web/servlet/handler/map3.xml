@@ -11,6 +11,7 @@
 	</bean>
 
 	<bean id="urlMapping2" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="patternParser"><null/></property>
 		<property name="urlDecode"><value>true</value></property>
 		<property name="mappings"><ref bean="mappings"/></property>
 	</bean>

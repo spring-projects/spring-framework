@@ -580,8 +580,8 @@ initialization parameters (`init-param` elements) to the Servlet declaration in 
 The Servlet API exposes the full request path as `requestURI` and further sub-divides it
 into `contextPath`, `servletPath`, and `pathInfo` whose values vary depending on how a
 Servlet is mapped. From these inputs, Spring MVC needs to determine the lookup path to
-use for handler mapping, which is the path within the mapping of the `DispatcherServlet`
-itself, excluding the `contextPath` and any `servletMapping` prefix, if present.
+use for mapping handlers, which should exclude the `contextPath` and any `servletMapping`
+prefix, if applicable.
 
 The `servletPath` and `pathInfo` are decoded and that makes them impossible to compare
 directly to the full `requestURI` in order to derive the lookupPath and that makes it
@@ -611,15 +611,17 @@ encoded path which may not always work well. Furthermore, sometimes the
 `DispatcherServlet` needs to share the URL space with another Servlet and may need to
 be mapped by prefix.
 
-The above issues can be addressed more comprehensively by switching from `PathMatcher` to
-the parsed `PathPattern` available in 5.3 or higher, see
-<<mvc-ann-requestmapping-pattern-comparison>>. Unlike `AntPathMatcher` which needs
-either the lookup path decoded or the controller mapping encoded, a parsed `PathPattern`
-matches to a parsed representation of the path called `RequestPath`, one path segment
-at a time. This allows decoding and sanitizing path segment values individually without
-the risk of altering the structure of the path. Parsed `PathPattern` also supports
-the use of `servletPath` prefix mapping as long as the prefix is kept simple and does
-not have any characters that need to be encoded.
+The above issues are addressed when using `PathPatternParser` and parsed patterns, as
+an alternative to String path matching with `AntPathMatcher`. The `PathPatternParser` has
+been available for use in Spring MVC from version 5.3, and is enabled by default from
+version 6.0. Unlike `AntPathMatcher` which needs either the lookup path decoded or the
+controller mapping encoded, a parsed `PathPattern` matches to a parsed representation
+of the path called `RequestPath`, one path segment at a time. This allows decoding and
+sanitizing path segment values individually without the risk of altering the structure
+of the path. Parsed `PathPattern` also supports the use of `servletPath` prefix mapping
+as long as a Servlet path mapping is used and the prefix is kept simple, i.e. it has no
+encoded characters. For pattern syntax details and comparison, see
+<<mvc-ann-requestmapping-pattern-comparison>>.
 
 
 
@@ -1617,11 +1619,11 @@ filesystem, and other locations. It is less efficient and the String path input 
 challenge for dealing effectively with encoding and other issues with URLs.
 
 `PathPattern` is the recommended solution for web applications and it is the only choice in
-Spring WebFlux. Prior to version 5.3, `AntPathMatcher` was the only choice in Spring MVC
-and continues to be the default. However `PathPattern` can be enabled in the
-<<mvc-config-path-matching, MVC config>>.
+Spring WebFlux. It was enabled for use in Spring MVC from version 5.3 and is enabled by
+default from version 6.0. See <<mvc-config-path-matching, MVC config>> for
+customizations of path matching options.
 
-`PathPattern` supports the same pattern syntax as `AntPathMatcher`. In addition it also
+`PathPattern` supports the same pattern syntax as `AntPathMatcher`. In addition, it also
 supports the capturing pattern, e.g. `+{*spring}+`, for matching 0 or more path segments
 at the end of a path. `PathPattern` also restricts the use of `+**+` for matching multiple
 path segments such that it's only allowed at the end of a pattern. This eliminates many
@@ -5997,9 +5999,7 @@ The following example shows how to customize path matching in Java configuration
 
 		@Override
 		public void configurePathMatch(PathMatchConfigurer configurer) {
-			configurer
-				.setPatternParser(new PathPatternParser())
-				.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController.class));
+			configurer.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController.class));
 		}
 
 		private PathPatternParser patternParser() {
@@ -6015,9 +6015,7 @@ The following example shows how to customize path matching in Java configuration
 	class WebConfig : WebMvcConfigurer {
 
 		override fun configurePathMatch(configurer: PathMatchConfigurer) {
-			configurer
-				.setPatternParser(patternParser)
-				.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController::class.java))
+			configurer.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController::class.java))
 		}
 
 		fun patternParser(): PathPatternParser {
@@ -6026,7 +6024,7 @@ The following example shows how to customize path matching in Java configuration
 	}
 ----
 
-The following example shows how to achieve the same configuration in XML:
+The following example shows how to customize path matching in XML configuration:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----

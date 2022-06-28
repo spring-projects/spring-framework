@@ -75,7 +75,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 
 
 	@Override
-	public void setPatternParser(PathPatternParser patternParser) {
+	public void setPatternParser(@Nullable PathPatternParser patternParser) {
 		Assert.state(this.handlerMap.isEmpty(),
 				"PathPatternParser must be set before the initialization of " +
 						"the handler map via ApplicationContextAware#setApplicationContext.");

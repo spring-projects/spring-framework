@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,6 +126,8 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	@Nullable
 	private FlashMapManager flashMapManager;
+
+	private boolean preferPathMatcher = false;
 
 	@Nullable
 	private PathPatternParser patternParser;
@@ -317,8 +319,10 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	 * @param parser the parser to use
 	 * @since 5.3
 	 */
-	public void setPatternParser(PathPatternParser parser) {
+	public StandaloneMockMvcBuilder setPatternParser(@Nullable PathPatternParser parser) {
 		this.patternParser = parser;
+		this.preferPathMatcher = (this.patternParser == null);
+		return this;
 	}
 
 	/**
@@ -332,6 +336,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	@Deprecated
 	public StandaloneMockMvcBuilder setUseSuffixPatternMatch(boolean useSuffixPatternMatch) {
 		this.useSuffixPatternMatch = useSuffixPatternMatch;
+		this.preferPathMatcher |= useSuffixPatternMatch;
 		return this;
 	}
 
@@ -468,14 +473,15 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 			RequestMappingHandlerMapping handlerMapping = handlerMappingFactory.get();
 			handlerMapping.setEmbeddedValueResolver(new StaticStringValueResolver(placeholderValues));
-			if (patternParser != null) {
-				handlerMapping.setPatternParser(patternParser);
-			}
-			else {
+			if (patternParser == null && preferPathMatcher) {
+				handlerMapping.setPatternParser(null);
 				handlerMapping.setUseSuffixPatternMatch(useSuffixPatternMatch);
 				if (removeSemicolonContent != null) {
 					handlerMapping.setRemoveSemicolonContent(removeSemicolonContent);
 				}
+			}
+			else if (patternParser != null) {
+				handlerMapping.setPatternParser(patternParser);
 			}
 			handlerMapping.setUseTrailingSlashMatch(useTrailingSlashPatternMatch);
 			handlerMapping.setOrder(0);

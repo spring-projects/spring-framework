@@ -76,6 +76,8 @@ import org.springframework.web.util.pattern.PathPatternParser;
 public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMapping
 		implements MatchableHandlerMapping, EmbeddedValueResolverAware {
 
+	private boolean defaultPatternParser = true;
+
 	private boolean useSuffixPatternMatch = false;
 
 	private boolean useRegisteredSuffixPatternMatch = false;
@@ -91,6 +93,14 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	private RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
 
+
+	@Override
+	public void setPatternParser(@Nullable PathPatternParser patternParser) {
+		if (patternParser != null) {
+			this.defaultPatternParser = false;
+		}
+		super.setPatternParser(patternParser);
+	}
 
 	/**
 	 * Whether to use suffix pattern match (".*") when matching patterns to
@@ -190,6 +200,12 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		this.config = new RequestMappingInfo.BuilderConfiguration();
 		this.config.setTrailingSlashMatch(useTrailingSlashMatch());
 		this.config.setContentNegotiationManager(getContentNegotiationManager());
+
+		if (getPatternParser() != null && this.defaultPatternParser &&
+				(this.useSuffixPatternMatch || this.useRegisteredSuffixPatternMatch)) {
+
+			setPatternParser(null);
+		}
 
 		if (getPatternParser() != null) {
 			this.config.setPatternParser(getPatternParser());
