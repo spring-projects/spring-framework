@@ -343,8 +343,10 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	/**
 	 * Whether to match to URLs irrespective of the presence of a trailing slash.
 	 * If enabled a method mapped to "/users" also matches to "/users/".
-	 * <p>The default value is {@code true}.
+	 * @deprecated as of 6.0, see
+	 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
 	 */
+	@Deprecated
 	public StandaloneMockMvcBuilder setUseTrailingSlashPatternMatch(boolean useTrailingSlashPatternMatch) {
 		this.useTrailingSlashPatternMatch = useTrailingSlashPatternMatch;
 		return this;

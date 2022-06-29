@@ -6030,7 +6030,6 @@ The following example shows how to customize path matching in XML configuration:
 ----
 	<mvc:annotation-driven>
 		<mvc:path-matching
-			trailing-slash="false"
 			path-helper="pathHelper"
 			path-matcher="pathMatcher"/>
 	</mvc:annotation-driven>

@@ -140,8 +140,12 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	/**
 	 * Whether to match to URLs irrespective of the presence of a trailing slash.
 	 * If enabled a method mapped to "/users" also matches to "/users/".
-	 * <p>The default value is {@code true}.
+	 * <p>The default was changed in 6.0 from {@code true} to {@code false} in
+	 * order to support the deprecation of the property.
+	 * @deprecated as of 6.0, see
+	 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
 	 */
+	@Deprecated
 	public void setUseTrailingSlashMatch(boolean useTrailingSlashMatch) {
 		this.useTrailingSlashMatch = useTrailingSlashMatch;
 		if (getPatternParser() != null) {

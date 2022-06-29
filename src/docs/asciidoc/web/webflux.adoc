@@ -4310,9 +4310,7 @@ The following example shows how to use `PathMatchConfigurer`:
 		public void configurePathMatch(PathMatchConfigurer configurer) {
 			configurer
 				.setUseCaseSensitiveMatch(true)
-				.setUseTrailingSlashMatch(false)
-				.addPathPrefix("/api",
-						HandlerTypePredicate.forAnnotation(RestController.class));
+				.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController.class));
 		}
 	}
 ----
@@ -4327,9 +4325,7 @@ The following example shows how to use `PathMatchConfigurer`:
 		fun configurePathMatch(configurer: PathMatchConfigurer) {
 			configurer
 				.setUseCaseSensitiveMatch(true)
-				.setUseTrailingSlashMatch(false)
-				.addPathPrefix("/api",
-						HandlerTypePredicate.forAnnotation(RestController::class.java))
+				.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController::class.java))
 		}
 	}
 ----

@@ -3849,7 +3849,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	@Controller
 	static class HttpHeadersResponseController {
 
-		@RequestMapping(value = "", method = RequestMethod.POST)
+		@RequestMapping(value = "/", method = RequestMethod.POST)
 		@ResponseStatus(HttpStatus.CREATED)
 		public HttpHeaders create() throws URISyntaxException {
 			HttpHeaders headers = new HttpHeaders();

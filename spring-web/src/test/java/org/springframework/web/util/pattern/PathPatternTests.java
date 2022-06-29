@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,6 +99,7 @@ public class PathPatternTests {
 		assertThat(pp.matches(toPathContainer(path))).isFalse();
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void optionalTrailingSeparators() {
 		PathPattern pp;
@@ -438,6 +439,7 @@ public class PathPatternTests {
 		checkCapture("///{foo}///bar", "///one///bar", "foo", "one");
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void wildcards() {
 		checkMatches("/*/bar", "/foo/bar");
@@ -725,6 +727,7 @@ public class PathPatternTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void extractUriTemplateVariables_spr15264() {
 		PathPattern pp;
 		pp = new PathPatternParser().parse("/{foo}");
@@ -1145,6 +1148,7 @@ public class PathPatternTests {
 		return parse(pattern).matchAndExtract(PathPatternTests.toPathContainer(path));
 	}
 
+	@SuppressWarnings("deprecation")
 	private PathPattern parse(String path) {
 		PathPatternParser pp = new PathPatternParser();
 		pp.setMatchOptionalTrailingSeparator(true);
@@ -1158,6 +1162,7 @@ public class PathPatternTests {
 		return PathContainer.parsePath(path);
 	}
 
+	@SuppressWarnings("deprecation")
 	private void checkMatches(String uriTemplate, String path) {
 		PathPatternParser parser = new PathPatternParser();
 		parser.setMatchOptionalTrailingSeparator(true);

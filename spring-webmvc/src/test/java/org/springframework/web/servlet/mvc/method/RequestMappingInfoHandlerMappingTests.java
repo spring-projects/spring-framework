@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-202 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,11 +138,6 @@ class RequestMappingInfoHandlerMappingTests {
 		HandlerMethod handlerMethod = getHandler(mapping, request);
 
 		assertThat(handlerMethod.getMethod()).isEqualTo(this.emptyMethod.getMethod());
-
-		request = new MockHttpServletRequest("GET", "/");
-		handlerMethod = getHandler(mapping, request);
-
-		assertThat(handlerMethod.getMethod()).isEqualTo(this.emptyMethod.getMethod());
 	}
 
 	@PathPatternsParameterizedTest
@@ -174,7 +169,6 @@ class RequestMappingInfoHandlerMappingTests {
 	@PathPatternsParameterizedTest // SPR-8462
 	void getHandlerMediaTypeNotSupported(TestRequestMappingInfoHandlerMapping mapping) {
 		testHttpMediaTypeNotSupportedException(mapping, "/person/1");
-		testHttpMediaTypeNotSupportedException(mapping, "/person/1/");
 		testHttpMediaTypeNotSupportedException(mapping, "/person/1.json");
 	}
 
@@ -199,7 +193,6 @@ class RequestMappingInfoHandlerMappingTests {
 	@PathPatternsParameterizedTest // SPR-8462
 	void getHandlerMediaTypeNotAccepted(TestRequestMappingInfoHandlerMapping mapping) {
 		testHttpMediaTypeNotAcceptableException(mapping, "/persons");
-		testHttpMediaTypeNotAcceptableException(mapping, "/persons/");
 		if (mapping.getPatternParser() == null) {
 			testHttpMediaTypeNotAcceptableException(mapping, "/persons.json");
 		}
