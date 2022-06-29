@@ -58,7 +58,6 @@ import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
-import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
@@ -68,6 +67,7 @@ import org.springframework.web.servlet.support.SessionFlashMapManager;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
 import org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
+import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
@@ -353,7 +353,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	/**
 	 * Set if ";" (semicolon) content should be stripped from the request URI. The value,
 	 * if provided, is in turn set on
-	 * {@link AbstractHandlerMapping#setRemoveSemicolonContent(boolean)}.
+	 * {@link org.springframework.web.util.UrlPathHelper#setRemoveSemicolonContent(boolean)}.
 	 */
 	public StandaloneMockMvcBuilder setRemoveSemicolonContent(boolean removeSemicolonContent) {
 		this.removeSemicolonContent = removeSemicolonContent;
@@ -477,7 +477,9 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 				handlerMapping.setPatternParser(null);
 				handlerMapping.setUseSuffixPatternMatch(useSuffixPatternMatch);
 				if (removeSemicolonContent != null) {
-					handlerMapping.setRemoveSemicolonContent(removeSemicolonContent);
+					UrlPathHelper pathHelper = new UrlPathHelper();
+					pathHelper.setRemoveSemicolonContent(removeSemicolonContent);
+					handlerMapping.setUrlPathHelper(pathHelper);
 				}
 			}
 			else if (patternParser != null) {

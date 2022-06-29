@@ -27,6 +27,7 @@ import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockServletContext;
+import org.springframework.web.util.UrlPathHelper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -118,9 +119,13 @@ public class BeanNameUrlHandlerMappingTests {
 
 	@Test
 	public void requestsWithFullPaths() throws Exception {
+
+		UrlPathHelper pathHelper = new UrlPathHelper();
+		pathHelper.setAlwaysUseFullPath(true);
+
 		BeanNameUrlHandlerMapping hm = new BeanNameUrlHandlerMapping();
 		hm.setPatternParser(null);  // the test targets AntPathPatcher-specific feature
-		hm.setAlwaysUseFullPath(true);
+		hm.setUrlPathHelper(pathHelper);
 		hm.setApplicationContext(wac);
 		Object bean = wac.getBean("godCtrl");
 

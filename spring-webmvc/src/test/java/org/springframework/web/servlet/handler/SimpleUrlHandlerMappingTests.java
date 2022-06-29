@@ -31,6 +31,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockServletContext;
+import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,8 +71,10 @@ public class SimpleUrlHandlerMappingTests {
 	@Test
 	public void testNewlineInRequest() throws Exception {
 		Object controller = new Object();
+		UrlPathHelper urlPathHelper = new UrlPathHelper();
+		urlPathHelper.setUrlDecode(false);
 		SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping(Collections.singletonMap("/*/baz", controller));
-		mapping.setUrlDecode(false);
+		mapping.setUrlPathHelper(urlPathHelper);
 		mapping.setApplicationContext(new StaticApplicationContext());
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo%0a%0dbar/baz");

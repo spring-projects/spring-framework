@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-202 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,6 @@ import org.springframework.web.servlet.handler.PathPatternsParameterizedTest;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UrlPathHelper;
-import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -75,10 +74,12 @@ class RequestMappingInfoHandlerMappingTests {
 		TestController controller = new TestController();
 
 		TestRequestMappingInfoHandlerMapping mapping1 = new TestRequestMappingInfoHandlerMapping();
-		mapping1.setPatternParser(new PathPatternParser());
+
+		UrlPathHelper pathHelper = new UrlPathHelper();
+		pathHelper.setRemoveSemicolonContent(false);
 
 		TestRequestMappingInfoHandlerMapping mapping2 = new TestRequestMappingInfoHandlerMapping();
-		mapping2.setRemoveSemicolonContent(false);
+		mapping2.setUrlPathHelper(pathHelper);
 
 		return Stream.of(mapping1, mapping2).peek(mapping -> {
 			mapping.setApplicationContext(new StaticWebApplicationContext());
