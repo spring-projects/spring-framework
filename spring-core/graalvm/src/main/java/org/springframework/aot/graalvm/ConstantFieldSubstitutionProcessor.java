@@ -45,6 +45,7 @@ class ConstantFieldSubstitutionProcessor extends SubstitutionProcessor {
 	private static Pattern[] patterns = {
 			Pattern.compile(Pattern.quote("org.springframework.core.NativeDetector#imageCode")),
 			Pattern.compile(Pattern.quote("org.springframework.") + ".*#.*Present"),
+			Pattern.compile(Pattern.quote("org.springframework.") + ".*#.*_PRESENT")
 	};
 
 	private final ThrowawayClassLoader throwawayClassLoader;
