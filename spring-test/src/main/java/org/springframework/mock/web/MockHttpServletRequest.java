@@ -104,9 +104,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private static final ServletInputStream EMPTY_SERVLET_INPUT_STREAM =
 			new DelegatingServletInputStream(StreamUtils.emptyInput());
 
-	private static final BufferedReader EMPTY_BUFFERED_READER =
-			new BufferedReader(new StringReader(""));
-
 	/**
 	 * Date formats as specified in the HTTP RFC.
 	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
@@ -739,7 +736,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			this.reader = new BufferedReader(sourceReader);
 		}
 		else {
-			this.reader = EMPTY_BUFFERED_READER;
+			this.reader = new BufferedReader(new StringReader(""));
 		}
 		return this.reader;
 	}
