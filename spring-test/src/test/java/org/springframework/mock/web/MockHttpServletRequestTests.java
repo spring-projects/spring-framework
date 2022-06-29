@@ -632,6 +632,15 @@ class MockHttpServletRequestTests {
 				request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE));
 	}
 
+	@Test
+	void getReaderTwiceOnDifferentInstances() throws IOException {
+		MockHttpServletRequest firstRequest = new MockHttpServletRequest();
+		assertThat(firstRequest.getReader().read()).isEqualTo(-1);
+		firstRequest.getReader().close();
+		MockHttpServletRequest secondRequest = new MockHttpServletRequest();
+		assertThat(secondRequest.getReader().read()).isEqualTo(-1);
+	}
+
 	private void assertEqualEnumerations(Enumeration<?> enum1, Enumeration<?> enum2) {
 		int count = 0;
 		while (enum1.hasMoreElements()) {
