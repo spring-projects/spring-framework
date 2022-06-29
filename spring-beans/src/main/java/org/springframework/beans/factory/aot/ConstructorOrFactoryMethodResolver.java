@@ -30,9 +30,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -40,6 +38,7 @@ import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -62,57 +61,52 @@ import org.springframework.util.ReflectionUtils;
  */
 class ConstructorOrFactoryMethodResolver {
 
-	private static final Log logger = LogFactory
-			.getLog(ConstructorOrFactoryMethodResolver.class);
-
-
 	private final ConfigurableBeanFactory beanFactory;
 
+	@Nullable
 	private final ClassLoader classLoader;
 
 
 	ConstructorOrFactoryMethodResolver(ConfigurableBeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
-		this.classLoader = (beanFactory.getBeanClassLoader() != null)
-				? beanFactory.getBeanClassLoader() : ClassUtils.getDefaultClassLoader();
+		this.classLoader = (beanFactory.getBeanClassLoader() != null ?
+				beanFactory.getBeanClassLoader() : ClassUtils.getDefaultClassLoader());
 	}
 
 
+	@Nullable
 	Executable resolve(BeanDefinition beanDefinition) {
 		Supplier<ResolvableType> beanType = () -> getBeanType(beanDefinition);
-		List<ResolvableType> valueTypes = beanDefinition.hasConstructorArgumentValues()
-				? determineParameterValueTypes(
-						beanDefinition.getConstructorArgumentValues())
-				: Collections.emptyList();
+		List<ResolvableType> valueTypes = (beanDefinition.hasConstructorArgumentValues() ?
+				determineParameterValueTypes(beanDefinition.getConstructorArgumentValues()) :
+				Collections.emptyList());
 		Method resolvedFactoryMethod = resolveFactoryMethod(beanDefinition, valueTypes);
 		if (resolvedFactoryMethod != null) {
 			return resolvedFactoryMethod;
 		}
+
 		Class<?> factoryBeanClass = getFactoryBeanClass(beanDefinition);
-		if (factoryBeanClass != null && !factoryBeanClass
-				.equals(beanDefinition.getResolvableType().toClass())) {
+		if (factoryBeanClass != null && !factoryBeanClass.equals(beanDefinition.getResolvableType().toClass())) {
 			ResolvableType resolvableType = beanDefinition.getResolvableType();
 			boolean isCompatible = ResolvableType.forClass(factoryBeanClass)
 					.as(FactoryBean.class).getGeneric(0).isAssignableFrom(resolvableType);
-			Assert.state(isCompatible,
-					() -> String.format(
-							"Incompatible target type '%s' for factory bean '%s'",
-							resolvableType.toClass().getName(),
-							factoryBeanClass.getName()));
-			return resolveConstructor(() -> ResolvableType.forClass(factoryBeanClass),
-					valueTypes);
+			Assert.state(isCompatible, () -> String.format(
+					"Incompatible target type '%s' for factory bean '%s'",
+					resolvableType.toClass().getName(), factoryBeanClass.getName()));
+			return resolveConstructor(() -> ResolvableType.forClass(factoryBeanClass), valueTypes);
 		}
+
 		Executable resolvedConstructor = resolveConstructor(beanType, valueTypes);
 		if (resolvedConstructor != null) {
 			return resolvedConstructor;
 		}
-		Executable resolvedConstructorOrFactoryMethod = getField(beanDefinition,
-				"resolvedConstructorOrFactoryMethod", Executable.class);
-		if (resolvedConstructorOrFactoryMethod != null) {
-			logger.error(
-					"resolvedConstructorOrFactoryMethod required for " + beanDefinition);
-			return resolvedConstructorOrFactoryMethod;
+
+		Field field = ReflectionUtils.findField(RootBeanDefinition.class, "resolvedConstructorOrFactoryMethod");
+		if (field != null) {
+			ReflectionUtils.makeAccessible(field);
+			return (Executable) ReflectionUtils.getField(field, beanDefinition);
 		}
+
 		return null;
 	}
 
@@ -132,15 +126,19 @@ class ConstructorOrFactoryMethodResolver {
 			return ResolvableType.forClass(loadClass(valueHolder.getType()));
 		}
 		Object value = valueHolder.getValue();
-		if (value instanceof BeanReference) {
-			return ResolvableType.forClass(this.beanFactory
-					.getType(((BeanReference) value).getBeanName(), false));
+		if (value instanceof BeanReference br) {
+			if (value instanceof RuntimeBeanReference rbr) {
+				if (rbr.getBeanType() != null) {
+					return ResolvableType.forClass(rbr.getBeanType());
+				}
+			}
+			return ResolvableType.forClass(this.beanFactory.getType(br.getBeanName(), false));
 		}
-		if (value instanceof BeanDefinition) {
-			return extractTypeFromBeanDefinition(getBeanType((BeanDefinition) value));
+		if (value instanceof BeanDefinition bd) {
+			return extractTypeFromBeanDefinition(getBeanType(bd));
 		}
-		if (value instanceof Class<?>) {
-			return ResolvableType.forClassWithGenerics(Class.class, (Class<?>) value);
+		if (value instanceof Class<?> clazz) {
+			return ResolvableType.forClassWithGenerics(Class.class, clazz);
 		}
 		return ResolvableType.forInstance(value);
 	}
@@ -153,9 +151,7 @@ class ConstructorOrFactoryMethodResolver {
 	}
 
 	@Nullable
-	private Method resolveFactoryMethod(BeanDefinition beanDefinition,
-			List<ResolvableType> valueTypes) {
-
+	private Method resolveFactoryMethod(BeanDefinition beanDefinition, List<ResolvableType> valueTypes) {
 		if (beanDefinition instanceof RootBeanDefinition rbd) {
 			Method resolvedFactoryMethod = rbd.getResolvedFactoryMethod();
 			if (resolvedFactoryMethod != null) {
@@ -165,15 +161,13 @@ class ConstructorOrFactoryMethodResolver {
 		String factoryMethodName = beanDefinition.getFactoryMethodName();
 		if (factoryMethodName != null) {
 			String factoryBeanName = beanDefinition.getFactoryBeanName();
-			Class<?> beanClass = getBeanClass((factoryBeanName != null)
-					? this.beanFactory.getMergedBeanDefinition(factoryBeanName)
-					: beanDefinition);
+			Class<?> beanClass = getBeanClass(factoryBeanName != null ?
+					this.beanFactory.getMergedBeanDefinition(factoryBeanName) : beanDefinition);
 			List<Method> methods = new ArrayList<>();
 			Assert.state(beanClass != null,
 					() -> "Failed to determine bean class of " + beanDefinition);
 			ReflectionUtils.doWithMethods(beanClass, methods::add,
-					method -> isFactoryMethodCandidate(beanClass, method,
-							factoryMethodName));
+					method -> isFactoryMethodCandidate(beanClass, method, factoryMethodName));
 			if (methods.size() >= 1) {
 				Function<Method, List<ResolvableType>> parameterTypesFactory = method -> {
 					List<ResolvableType> types = new ArrayList<>();
@@ -182,16 +176,13 @@ class ConstructorOrFactoryMethodResolver {
 					}
 					return types;
 				};
-				return (Method) resolveFactoryMethod(methods, parameterTypesFactory,
-						valueTypes);
+				return (Method) resolveFactoryMethod(methods, parameterTypesFactory, valueTypes);
 			}
 		}
 		return null;
 	}
 
-	private boolean isFactoryMethodCandidate(Class<?> beanClass, Method method,
-			String factoryMethodName) {
-
+	private boolean isFactoryMethodCandidate(Class<?> beanClass, Method method, String factoryMethodName) {
 		if (method.getName().equals(factoryMethodName)) {
 			if (Modifier.isStatic(method.getModifiers())) {
 				return method.getDeclaringClass().equals(beanClass);
@@ -202,9 +193,7 @@ class ConstructorOrFactoryMethodResolver {
 	}
 
 	@Nullable
-	private Executable resolveConstructor(Supplier<ResolvableType> beanType,
-			List<ResolvableType> valueTypes) {
-
+	private Executable resolveConstructor(Supplier<ResolvableType> beanType, List<ResolvableType> valueTypes) {
 		Class<?> type = ClassUtils.getUserClass(beanType.get().toClass());
 		Constructor<?>[] constructors = type.getDeclaredConstructors();
 		if (constructors.length == 1) {
@@ -240,47 +229,41 @@ class ConstructorOrFactoryMethodResolver {
 		List<? extends Executable> typeConversionFallbackMatches = Arrays
 				.stream(constructors)
 				.filter(executable -> match(parameterTypesFactory.apply(executable),
-						valueTypes,
-						ConstructorOrFactoryMethodResolver.FallbackMode.TYPE_CONVERSION))
+						valueTypes, FallbackMode.TYPE_CONVERSION))
 				.toList();
 		return (typeConversionFallbackMatches.size() == 1)
 				? typeConversionFallbackMatches.get(0) : null;
 	}
 
+	@Nullable
 	private Executable resolveFactoryMethod(List<Method> executables,
 			Function<Method, List<ResolvableType>> parameterTypesFactory,
 			List<ResolvableType> valueTypes) {
 
 		List<? extends Executable> matches = executables.stream()
-				.filter(executable -> match(parameterTypesFactory.apply(executable),
-						valueTypes, ConstructorOrFactoryMethodResolver.FallbackMode.NONE))
+				.filter(executable -> match(parameterTypesFactory.apply(executable), valueTypes, FallbackMode.NONE))
 				.toList();
 		if (matches.size() == 1) {
 			return matches.get(0);
 		}
 		List<? extends Executable> assignableElementFallbackMatches = executables.stream()
 				.filter(executable -> match(parameterTypesFactory.apply(executable),
-						valueTypes,
-						ConstructorOrFactoryMethodResolver.FallbackMode.ASSIGNABLE_ELEMENT))
+						valueTypes, FallbackMode.ASSIGNABLE_ELEMENT))
 				.toList();
 		if (assignableElementFallbackMatches.size() == 1) {
 			return assignableElementFallbackMatches.get(0);
 		}
 		List<? extends Executable> typeConversionFallbackMatches = executables.stream()
 				.filter(executable -> match(parameterTypesFactory.apply(executable),
-						valueTypes,
-						ConstructorOrFactoryMethodResolver.FallbackMode.TYPE_CONVERSION))
+						valueTypes, FallbackMode.TYPE_CONVERSION))
 				.toList();
 		Assert.state(typeConversionFallbackMatches.size() <= 1,
-				() -> "Multiple matches with parameters '" + valueTypes + "': "
-						+ typeConversionFallbackMatches);
-		return (typeConversionFallbackMatches.size() == 1)
-				? typeConversionFallbackMatches.get(0) : null;
+				() -> "Multiple matches with parameters '" + valueTypes + "': " + typeConversionFallbackMatches);
+		return (typeConversionFallbackMatches.size() == 1 ? typeConversionFallbackMatches.get(0) : null);
 	}
 
-	private boolean match(List<ResolvableType> parameterTypes,
-			List<ResolvableType> valueTypes,
-			ConstructorOrFactoryMethodResolver.FallbackMode fallbackMode) {
+	private boolean match(
+			List<ResolvableType> parameterTypes, List<ResolvableType> valueTypes, FallbackMode fallbackMode) {
 
 		if (parameterTypes.size() != valueTypes.size()) {
 			return false;
@@ -293,17 +276,14 @@ class ConstructorOrFactoryMethodResolver {
 		return true;
 	}
 
-	private boolean isMatch(ResolvableType parameterType, ResolvableType valueType,
-			ConstructorOrFactoryMethodResolver.FallbackMode fallbackMode) {
-
+	private boolean isMatch(ResolvableType parameterType, ResolvableType valueType, FallbackMode fallbackMode) {
 		if (isAssignable(valueType).test(parameterType)) {
 			return true;
 		}
 		return switch (fallbackMode) {
-		case ASSIGNABLE_ELEMENT -> isAssignable(valueType)
-				.test(extractElementType(parameterType));
-		case TYPE_CONVERSION -> typeConversionFallback(valueType).test(parameterType);
-		default -> false;
+			case ASSIGNABLE_ELEMENT -> isAssignable(valueType).test(extractElementType(parameterType));
+			case TYPE_CONVERSION -> typeConversionFallback(valueType).test(parameterType);
+			default -> false;
 		};
 	}
 
@@ -323,12 +303,10 @@ class ConstructorOrFactoryMethodResolver {
 
 	private Predicate<ResolvableType> typeConversionFallback(ResolvableType valueType) {
 		return parameterType -> {
-			if (valueOrCollection(valueType, this::isStringForClassFallback)
-					.test(parameterType)) {
+			if (valueOrCollection(valueType, this::isStringForClassFallback).test(parameterType)) {
 				return true;
 			}
-			return valueOrCollection(valueType, this::isSimpleConvertibleType)
-					.test(parameterType);
+			return valueOrCollection(valueType, this::isSimpleValueType).test(parameterType);
 		};
 	}
 
@@ -339,12 +317,10 @@ class ConstructorOrFactoryMethodResolver {
 			if (predicateProvider.apply(valueType).test(parameterType)) {
 				return true;
 			}
-			if (predicateProvider.apply(extractElementType(valueType))
-					.test(extractElementType(parameterType))) {
+			if (predicateProvider.apply(extractElementType(valueType)).test(extractElementType(parameterType))) {
 				return true;
 			}
-			return (predicateProvider.apply(valueType)
-					.test(extractElementType(parameterType)));
+			return (predicateProvider.apply(valueType).test(extractElementType(parameterType)));
 		};
 	}
 
@@ -358,13 +334,13 @@ class ConstructorOrFactoryMethodResolver {
 	 * parameter
 	 */
 	private Predicate<ResolvableType> isStringForClassFallback(ResolvableType valueType) {
-		return parameterType -> (valueType.isAssignableFrom(String.class)
-				&& parameterType.isAssignableFrom(Class.class));
+		return parameterType -> (valueType.isAssignableFrom(String.class) &&
+				parameterType.isAssignableFrom(Class.class));
 	}
 
-	private Predicate<ResolvableType> isSimpleConvertibleType(ResolvableType valueType) {
-		return parameterType -> isSimpleConvertibleType(parameterType.toClass())
-				&& isSimpleConvertibleType(valueType.toClass());
+	private Predicate<ResolvableType> isSimpleValueType(ResolvableType valueType) {
+		return parameterType -> (BeanUtils.isSimpleValueType(parameterType.toClass()) &&
+				BeanUtils.isSimpleValueType(valueType.toClass()));
 	}
 
 	@Nullable
@@ -372,7 +348,7 @@ class ConstructorOrFactoryMethodResolver {
 		if (beanDefinition instanceof RootBeanDefinition rbd) {
 			if (rbd.hasBeanClass()) {
 				Class<?> beanClass = rbd.getBeanClass();
-				return FactoryBean.class.isAssignableFrom(beanClass) ? beanClass : null;
+				return (FactoryBean.class.isAssignableFrom(beanClass) ? beanClass : null);
 			}
 		}
 		return null;
@@ -380,12 +356,10 @@ class ConstructorOrFactoryMethodResolver {
 
 	@Nullable
 	private Class<?> getBeanClass(BeanDefinition beanDefinition) {
-		if (beanDefinition instanceof AbstractBeanDefinition abd) {
-			return abd.hasBeanClass() ? abd.getBeanClass()
-					: loadClass(abd.getBeanClassName());
+		if (beanDefinition instanceof AbstractBeanDefinition abd && abd.hasBeanClass()) {
+			return abd.getBeanClass();
 		}
-		return (beanDefinition.getBeanClassName() != null)
-				? loadClass(beanDefinition.getBeanClassName()) : null;
+		return (beanDefinition.getBeanClassName() != null ? loadClass(beanDefinition.getBeanClassName()) : null);
 	}
 
 	private ResolvableType getBeanType(BeanDefinition beanDefinition) {
@@ -416,21 +390,6 @@ class ConstructorOrFactoryMethodResolver {
 	}
 
 	@Nullable
-	private <T> T getField(BeanDefinition beanDefinition, String fieldName,
-			Class<T> targetType) {
-
-		Field field = ReflectionUtils.findField(RootBeanDefinition.class, fieldName);
-		ReflectionUtils.makeAccessible(field);
-		return targetType.cast(ReflectionUtils.getField(field, beanDefinition));
-	}
-
-	private static boolean isSimpleConvertibleType(Class<?> type) {
-		return (type.isPrimitive() && type != void.class) || type == Double.class
-				|| type == Float.class || type == Long.class || type == Integer.class
-				|| type == Short.class || type == Character.class || type == Byte.class
-				|| type == Boolean.class || type == String.class;
-	}
-
 	static Executable resolve(RegisteredBean registeredBean) {
 		return new ConstructorOrFactoryMethodResolver(registeredBean.getBeanFactory())
 				.resolve(registeredBean.getMergedBeanDefinition());
@@ -444,7 +403,6 @@ class ConstructorOrFactoryMethodResolver {
 		ASSIGNABLE_ELEMENT,
 
 		TYPE_CONVERSION
-
 	}
 
 }

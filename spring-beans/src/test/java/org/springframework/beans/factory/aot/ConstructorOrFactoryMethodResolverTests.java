@@ -141,8 +141,7 @@ class ConstructorOrFactoryMethodResolverTests {
 	}
 
 	@Test
-	void beanDefinitionWithMultiArgConstructorAndMatchingValue()
-			throws NoSuchMethodException {
+	void beanDefinitionWithMultiArgConstructorAndMatchingValue() throws NoSuchMethodException {
 		BeanDefinition beanDefinition = BeanDefinitionBuilder
 				.rootBeanDefinition(MultiConstructorSample.class)
 				.addConstructorArgValue(42).getBeanDefinition();
@@ -152,8 +151,7 @@ class ConstructorOrFactoryMethodResolverTests {
 	}
 
 	@Test
-	void beanDefinitionWithMultiArgConstructorAndMatchingArrayValue()
-			throws NoSuchMethodException {
+	void beanDefinitionWithMultiArgConstructorAndMatchingArrayValue() throws NoSuchMethodException {
 		BeanDefinition beanDefinition = BeanDefinitionBuilder
 				.rootBeanDefinition(MultiConstructorArraySample.class)
 				.addConstructorArgValue(42).getBeanDefinition();
@@ -163,8 +161,7 @@ class ConstructorOrFactoryMethodResolverTests {
 	}
 
 	@Test
-	void beanDefinitionWithMultiArgConstructorAndMatchingListValue()
-			throws NoSuchMethodException {
+	void beanDefinitionWithMultiArgConstructorAndMatchingListValue() throws NoSuchMethodException {
 		BeanDefinition beanDefinition = BeanDefinitionBuilder
 				.rootBeanDefinition(MultiConstructorListSample.class)
 				.addConstructorArgValue(42).getBeanDefinition();
@@ -174,8 +171,7 @@ class ConstructorOrFactoryMethodResolverTests {
 	}
 
 	@Test
-	void beanDefinitionWithMultiArgConstructorAndMatchingValueAsInnerBean()
-			throws NoSuchMethodException {
+	void beanDefinitionWithMultiArgConstructorAndMatchingValueAsInnerBean() throws NoSuchMethodException {
 		BeanDefinition beanDefinition = BeanDefinitionBuilder
 				.rootBeanDefinition(MultiConstructorSample.class)
 				.addConstructorArgValue(
@@ -188,8 +184,7 @@ class ConstructorOrFactoryMethodResolverTests {
 	}
 
 	@Test
-	void beanDefinitionWithMultiArgConstructorAndMatchingValueAsInnerBeanFactory()
-			throws NoSuchMethodException {
+	void beanDefinitionWithMultiArgConstructorAndMatchingValueAsInnerBeanFactory() throws NoSuchMethodException {
 		BeanDefinition beanDefinition = BeanDefinitionBuilder
 				.rootBeanDefinition(MultiConstructorSample.class)
 				.addConstructorArgValue(BeanDefinitionBuilder
@@ -258,8 +253,7 @@ class ConstructorOrFactoryMethodResolverTests {
 	}
 
 	@Test
-	void beanDefinitionWithClassArrayConstructorArgAndStringArrayValueType()
-			throws NoSuchMethodException {
+	void beanDefinitionWithClassArrayConstructorArgAndStringArrayValueType() throws NoSuchMethodException {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		BeanDefinition beanDefinition = BeanDefinitionBuilder
 				.rootBeanDefinition(ConstructorClassArraySample.class.getName())
@@ -282,8 +276,7 @@ class ConstructorOrFactoryMethodResolverTests {
 	}
 
 	@Test
-	void beanDefinitionWithClassArrayConstructorArgAndAnotherMatchingConstructor()
-			throws NoSuchMethodException {
+	void beanDefinitionWithClassArrayConstructorArgAndAnotherMatchingConstructor() throws NoSuchMethodException {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		BeanDefinition beanDefinition = BeanDefinitionBuilder
 				.rootBeanDefinition(MultiConstructorClassArraySample.class.getName())
@@ -323,8 +316,7 @@ class ConstructorOrFactoryMethodResolverTests {
 	}
 
 	@Test
-	void beanDefinitionWithMultiArgConstructorAndPrimitiveConversion()
-			throws NoSuchMethodException {
+	void beanDefinitionWithMultiArgConstructorAndPrimitiveConversion() throws NoSuchMethodException {
 		BeanDefinition beanDefinition = BeanDefinitionBuilder
 				.rootBeanDefinition(ConstructorPrimitiveFallback.class)
 				.addConstructorArgValue("true").getBeanDefinition();
@@ -345,11 +337,12 @@ class ConstructorOrFactoryMethodResolverTests {
 				Class.class));
 	}
 
-	private Executable resolve(DefaultListableBeanFactory beanFactory,
-			BeanDefinition beanDefinition) {
-		return new ConstructorOrFactoryMethodResolver(beanFactory)
-				.resolve(beanDefinition);
+
+	@Nullable
+	private Executable resolve(DefaultListableBeanFactory beanFactory, BeanDefinition beanDefinition) {
+		return new ConstructorOrFactoryMethodResolver(beanFactory).resolve(beanDefinition);
 	}
+
 
 	static class IntegerFactoryBean implements FactoryBean<Integer> {
 
@@ -372,7 +365,6 @@ class ConstructorOrFactoryMethodResolverTests {
 
 		MultiConstructorSample(Integer value) {
 		}
-
 	}
 
 	@SuppressWarnings("unused")
@@ -393,7 +385,6 @@ class ConstructorOrFactoryMethodResolverTests {
 
 		public MultiConstructorListSample(List<Integer> values) {
 		}
-
 	}
 
 	interface DummyInterface {
@@ -441,7 +432,6 @@ class ConstructorOrFactoryMethodResolverTests {
 		static String of(Class<?>[] classArrayArg) {
 			return "test";
 		}
-
 	}
 
 	@SuppressWarnings("unused")
@@ -454,7 +444,6 @@ class ConstructorOrFactoryMethodResolverTests {
 		static String of(String[] classArrayArg) {
 			return "test";
 		}
-
 	}
 
 	@SuppressWarnings("unnused")
@@ -465,7 +454,6 @@ class ConstructorOrFactoryMethodResolverTests {
 
 		public ConstructorPrimitiveFallback(Executor executor) {
 		}
-
 	}
 
 	static class SampleBeanWithConstructors {
@@ -478,7 +466,6 @@ class ConstructorOrFactoryMethodResolverTests {
 
 		public SampleBeanWithConstructors(Number number, String name) {
 		}
-
 	}
 
 	interface FactoryWithOverloadedClassMethodsOnInterface {
@@ -493,7 +480,6 @@ class ConstructorOrFactoryMethodResolverTests {
 				SearchStrategy searchStrategy) {
 			return null;
 		}
-
 	}
 
 }
