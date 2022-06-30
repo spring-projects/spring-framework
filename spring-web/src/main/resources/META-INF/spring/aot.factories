@@ -1,3 +1,4 @@
 org.springframework.aot.hint.RuntimeHintsRegistrar= \
 org.springframework.http.MediaTypeResourceHintsRegistrar,\
-org.springframework.http.codec.CodecConfigurerHintsRegistrar
+org.springframework.http.codec.CodecConfigurerHintsRegistrar,\
+org.springframework.http.converter.json.JacksonBuilderRuntimeHintsRegistrar
