@@ -116,7 +116,9 @@ public class BindingReflectionHintsRegistrar {
 						}
 					}
 				}
-				registerKotlinSerializationHints(hints, clazz);
+				if (KotlinDetector.isKotlinType(clazz)) {
+					registerKotlinSerializationHints(hints, clazz);
+				}
 			});
 		}
 		Set<Class<?>> referencedTypes = new LinkedHashSet<>();
@@ -147,7 +149,7 @@ public class BindingReflectionHintsRegistrar {
 
 	private void registerKotlinSerializationHints(ReflectionHints hints, Class<?> clazz) {
 		String companionClassName = clazz.getCanonicalName() + KOTLIN_COMPANION_SUFFIX;
-		if (KotlinDetector.isKotlinType(clazz) && ClassUtils.isPresent(companionClassName, null)) {
+		if (ClassUtils.isPresent(companionClassName, null)) {
 			Class<?> companionClass = ClassUtils.resolveClassName(companionClassName, null);
 			Method serializerMethod = ClassUtils.getMethodIfAvailable(companionClass, "serializer");
 			if (serializerMethod != null) {
