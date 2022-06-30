@@ -16,6 +16,7 @@
 
 package org.springframework.web.socket.config.annotation;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -129,8 +130,10 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	@Bean
 	public WebSocketMessageBrokerStats webSocketMessageBrokerStats(
 			@Nullable AbstractBrokerMessageHandler stompBrokerRelayMessageHandler,
-			WebSocketHandler subProtocolWebSocketHandler, TaskExecutor clientInboundChannelExecutor,
-			TaskExecutor clientOutboundChannelExecutor, TaskScheduler messageBrokerTaskScheduler) {
+			WebSocketHandler subProtocolWebSocketHandler,
+			@Qualifier("clientInboundChannelExecutor") TaskExecutor clientInboundChannelExecutor,
+			@Qualifier("clientOutboundChannelExecutor") TaskExecutor clientOutboundChannelExecutor,
+			@Qualifier("messageBrokerTaskScheduler") TaskScheduler messageBrokerTaskScheduler) {
 
 		WebSocketMessageBrokerStats stats = new WebSocketMessageBrokerStats();
 		stats.setSubProtocolWebSocketHandler((SubProtocolWebSocketHandler) subProtocolWebSocketHandler);
