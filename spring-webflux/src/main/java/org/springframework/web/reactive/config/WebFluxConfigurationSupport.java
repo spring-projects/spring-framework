@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.converter.Converter;
@@ -45,6 +46,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.WebAnnotationsRuntimeHintsRegistrar;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.reactive.DispatcherHandler;
@@ -83,6 +85,7 @@ import org.springframework.web.server.i18n.LocaleContextResolver;
  * @author Brian Clozel
  * @since 5.0
  */
+@ImportRuntimeHints(WebAnnotationsRuntimeHintsRegistrar.class)
 public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 	@Nullable
