@@ -40,6 +40,7 @@
 
 	<!-- spring-core-test -->
 	<suppress files="CompileWithTargetClassAccess" checks="IllegalImport" id="bannedJUnitJupiterImports" />
+	<suppress files="org[\\/]springframework[\\/]aot[\\/]test[\\/]agent[\\/].+" checks="IllegalImport" id="bannedJUnitJupiterImports" />
 
 	<!-- spring-expression -->
 	<suppress files="ExpressionException" checks="MutableException"/>
