@@ -137,6 +137,11 @@ class ReflectionHintsPredicatesTests {
 	class ReflectionOnConstructor {
 
 		@Test
+		void constructorIntrospectionDoesNotMatchMissingHint() {
+			assertPredicateDoesNotMatch(reflection.onConstructor(publicConstructor).introspect());
+		}
+
+		@Test
 		void constructorIntrospectionMatchesConstructorHint() {
 			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withConstructor(Collections.emptyList(), constructorHint -> {
 			}));

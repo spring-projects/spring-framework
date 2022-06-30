@@ -286,7 +286,8 @@ public class ReflectionHintsPredicates {
 
 		@Override
 		Predicate<RuntimeHints> exactMatch() {
-			return hints -> hints.reflection().getTypeHint(this.executable.getDeclaringClass()).constructors().anyMatch(executableHint -> {
+			return hints -> (hints.reflection().getTypeHint(this.executable.getDeclaringClass()) != null) &&
+					hints.reflection().getTypeHint(this.executable.getDeclaringClass()).constructors().anyMatch(executableHint -> {
 				List<TypeReference> parameters = Arrays.stream(this.executable.getParameterTypes()).map(TypeReference::of).toList();
 				ExecutableHint syntheticHint = ExecutableHint.ofConstructor(parameters)
 						.setModes(this.executableMode).build();
