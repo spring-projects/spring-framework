@@ -203,6 +203,26 @@ public class BindingReflectionHintsRegistrarTests {
 				.satisfies(typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleEnum.class)));
 	}
 
+	@Test
+	void registerTypeForSerializationWithRecord() {
+		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleRecord.class);
+		assertThat(this.hints.reflection().typeHints()).satisfiesExactlyInAnyOrder(
+				typeHint -> {
+					assertThat(typeHint.getType()).isEqualTo(TypeReference.of(String.class));
+					assertThat(typeHint.getMemberCategories()).isEmpty();
+					assertThat(typeHint.constructors()).isEmpty();
+					assertThat(typeHint.fields()).isEmpty();
+					assertThat(typeHint.methods()).isEmpty();
+				},
+				typeHint -> {
+					assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleRecord.class));
+					assertThat(typeHint.methods()).singleElement().satisfies(methodHint -> {
+						assertThat(methodHint.getName()).isEqualTo("name");
+						assertThat(methodHint.getModes()).containsOnly(ExecutableMode.INVOKE);
+					});
+				});
+	}
+
 
 	static class SampleEmptyClass {
 	}
@@ -284,5 +304,7 @@ public class BindingReflectionHintsRegistrarTests {
 	enum SampleEnum {
 		value1, value2
 	}
+
+	record SampleRecord(String name) {}
 
 }

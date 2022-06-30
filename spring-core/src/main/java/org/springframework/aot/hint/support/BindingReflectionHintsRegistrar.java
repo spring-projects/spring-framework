@@ -21,6 +21,7 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.lang.reflect.RecordComponent;
 import java.lang.reflect.Type;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -90,20 +91,28 @@ public class BindingReflectionHintsRegistrar {
 				}
 				seen.add(type);
 				if (shouldRegisterMembers(clazz)) {
-					builder.withMembers(
-							MemberCategory.DECLARED_FIELDS,
-							MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
-					try {
-						BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
-						PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
-						for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-							registerPropertyHints(hints, seen, propertyDescriptor.getWriteMethod(), 0);
-							registerPropertyHints(hints, seen, propertyDescriptor.getReadMethod(), -1);
+					if (clazz.isRecord()) {
+						builder.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+						for (RecordComponent recordComponent : clazz.getRecordComponents()) {
+							registerRecordHints(hints, seen, recordComponent.getAccessor());
 						}
 					}
-					catch (IntrospectionException ex) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Ignoring referenced type [" + clazz.getName() + "]: " + ex.getMessage());
+					else {
+						builder.withMembers(
+								MemberCategory.DECLARED_FIELDS,
+								MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+						try {
+							BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
+							PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+							for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+								registerPropertyHints(hints, seen, propertyDescriptor.getWriteMethod(), 0);
+								registerPropertyHints(hints, seen, propertyDescriptor.getReadMethod(), -1);
+							}
+						}
+						catch (IntrospectionException ex) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Ignoring referenced type [" + clazz.getName() + "]: " + ex.getMessage());
+							}
 						}
 					}
 				}
@@ -113,6 +122,15 @@ public class BindingReflectionHintsRegistrar {
 		Set<Class<?>> referencedTypes = new LinkedHashSet<>();
 		collectReferencedTypes(seen, referencedTypes, type);
 		referencedTypes.forEach(referencedType -> registerReflectionHints(hints, seen, referencedType));
+	}
+
+	private void registerRecordHints(ReflectionHints hints, Set<Type> seen, Method method) {
+		hints.registerMethod(method, INVOKE);
+		MethodParameter methodParameter = MethodParameter.forExecutable(method, -1);
+		Type methodParameterType = methodParameter.getGenericParameterType();
+		if (!seen.contains(methodParameterType)) {
+			registerReflectionHints(hints, seen, methodParameterType);
+		}
 	}
 
 	private void registerPropertyHints(ReflectionHints hints, Set<Type> seen, @Nullable Method method, int parameterIndex) {
