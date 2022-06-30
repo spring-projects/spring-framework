@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.aot.hint.support
+package org.springframework.context.aot
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.ThrowingConsumer

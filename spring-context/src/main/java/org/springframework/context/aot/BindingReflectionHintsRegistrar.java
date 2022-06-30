@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.aot.hint.support;
+package org.springframework.context.aot;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;

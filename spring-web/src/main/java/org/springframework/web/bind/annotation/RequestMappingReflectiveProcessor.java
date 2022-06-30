@@ -24,7 +24,7 @@ import java.lang.reflect.Type;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.annotation.ReflectiveProcessor;
-import org.springframework.aot.hint.support.BindingReflectionHintsRegistrar;
+import org.springframework.context.aot.BindingReflectionHintsRegistrar;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpEntity;

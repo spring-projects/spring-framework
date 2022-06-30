@@ -3,7 +3,6 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 description = "Spring Core"
 
 apply plugin: "kotlin"
-apply plugin: "kotlinx-serialization"
 
 // spring-core includes asm, javapoet and repackages cglib, inlining all into the
 // spring-core jar. cglib itself depends on asm and is therefore further transformed by
@@ -71,7 +70,6 @@ dependencies {
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("io.projectreactor.tools:blockhound")
 	testImplementation("org.skyscreamer:jsonassert")
-	testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
 	testFixturesImplementation("com.google.code.findbugs:jsr305")
 	testFixturesImplementation("org.junit.platform:junit-platform-launcher")
 	testFixturesImplementation("org.junit.jupiter:junit-jupiter-api")
