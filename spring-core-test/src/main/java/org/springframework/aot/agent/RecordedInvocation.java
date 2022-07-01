@@ -170,6 +170,12 @@ public final class RecordedInvocation {
 		return this.instrumentedMethod.matcher(this).test(hints);
 	}
 
+	@Override
+	public String toString() {
+		return String.format("<%s> invocation of <%s> on type <%s> with arguments %s",
+				getHintType().hintClassName(), getMethodReference(), getInstanceTypeReference(), getArguments());
+	}
+
 	/**
 	 * Builder for {@link RecordedInvocation}.
 	 */
