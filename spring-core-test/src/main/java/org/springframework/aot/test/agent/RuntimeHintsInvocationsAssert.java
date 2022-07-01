@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.ListAssert;
 import org.assertj.core.error.BasicErrorMessageFactory;
 import org.assertj.core.error.ErrorMessageFactory;
 
@@ -68,7 +69,7 @@ public class RuntimeHintsInvocationsAssert extends AbstractAssert<RuntimeHintsIn
 	 * Example: <pre class="code">
 	 * RuntimeHints hints = new RuntimeHints();
 	 * hints.reflection().registerType(MyType.class);
-	 * assertThat(invocations).allMatch(hints); </pre>
+	 * assertThat(invocations).match(hints); </pre>
 	 * @param runtimeHints the runtime hints configuration to test against
 	 * @throws AssertionError if any of the recorded invocations has no match in the provided hints
 	 */
@@ -80,6 +81,13 @@ public class RuntimeHintsInvocationsAssert extends AbstractAssert<RuntimeHintsIn
 		if (!noMatchInvocations.isEmpty()) {
 			throwAssertionError(errorMessageForInvocation(noMatchInvocations.get(0)));
 		}
+	}
+
+	public ListAssert<RecordedInvocation> notMatching(RuntimeHints runtimeHints) {
+		Assert.notNull(runtimeHints, "RuntimeHints should not be null");
+		configureRuntimeHints(runtimeHints);
+		return ListAssert.assertThatStream(this.actual.recordedInvocations()
+				.filter(invocation -> !invocation.matches(runtimeHints)));
 	}
 
 

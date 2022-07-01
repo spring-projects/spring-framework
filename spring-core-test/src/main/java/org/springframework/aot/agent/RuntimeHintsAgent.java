@@ -33,7 +33,7 @@ import org.springframework.util.StringUtils;
  * option, as a comma-separated list of packages to instrument prefixed with {@code "+"}
  * and packages to ignore prefixed with {@code "-"}:
  * <pre class="code">
- *   -javaagent:/path/to/spring-runtimehints-agent.jar=+org.springframework,-io.spring,+org.example")
+ *   -javaagent:/path/to/spring-core-test.jar=+org.springframework,-io.spring,+org.example")
  * </pre>
  *
  * @author Brian Clozel
