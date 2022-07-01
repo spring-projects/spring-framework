@@ -31,7 +31,7 @@ import org.springframework.lang.Nullable;
 public class CannotGetJdbcConnectionException extends DataAccessResourceFailureException {
 
 	/**
-	 * Constructor for CannotGetJdbcConnectionException.
+	 * Constructor for {@code CannotGetJdbcConnectionException}.
 	 * @param msg the detail message
 	 * @since 5.0
 	 */
@@ -40,7 +40,7 @@ public class CannotGetJdbcConnectionException extends DataAccessResourceFailureE
 	}
 
 	/**
-	 * Constructor for CannotGetJdbcConnectionException.
+	 * Constructor for {@code CannotGetJdbcConnectionException}.
 	 * @param msg the detail message
 	 * @param ex the root cause SQLException
 	 */
@@ -49,11 +49,13 @@ public class CannotGetJdbcConnectionException extends DataAccessResourceFailureE
 	}
 
 	/**
-	 * Constructor for CannotGetJdbcConnectionException.
+	 * Constructor for {@code CannotGetJdbcConnectionException}.
 	 * @param msg the detail message
 	 * @param ex the root cause IllegalStateException
+	 * @since 5.3.22
 	 */
 	public CannotGetJdbcConnectionException(String msg, IllegalStateException ex) {
 		super(msg, ex);
 	}
+
 }
