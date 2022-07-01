@@ -975,7 +975,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	private void logRequest(HttpServletRequest request) {
 		LogFormatUtils.traceDebug(logger, traceOn -> {
 			String params;
-			if (StringUtils.startsWithIgnoreCase(request.getContentType(), "multipart/")) {
+			String contentType = request.getContentType();
+			if (StringUtils.startsWithIgnoreCase(contentType, "multipart/")) {
 				params = "multipart";
 			}
 			else if (isEnableLoggingRequestDetails()) {
@@ -984,7 +985,9 @@ public class DispatcherServlet extends FrameworkServlet {
 						.collect(Collectors.joining(", "));
 			}
 			else {
-				params = (request.getParameterMap().isEmpty() ? "" : "masked");
+				// Avoid request body parsing for form data
+				params = (StringUtils.startsWithIgnoreCase(contentType, "application/x-www-form-urlencoded") ||
+						!request.getParameterMap().isEmpty() ? "masked" : "");
 			}
 
 			String queryString = request.getQueryString();
