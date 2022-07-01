@@ -28,6 +28,7 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
@@ -57,6 +58,7 @@ import org.springframework.validation.annotation.Validated;
  * @see jakarta.validation.executable.ExecutableValidator
  */
 @SuppressWarnings("serial")
+@ImportRuntimeHints(MethodValidationRuntimeHintsRegistrar.class)
 public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvisingPostProcessor
 		implements InitializingBean {
 
