@@ -66,8 +66,7 @@ public abstract class AopUtils {
 	 * @see #isCglibProxy
 	 */
 	public static boolean isAopProxy(@Nullable Object object) {
-		return (object instanceof SpringProxy && (Proxy.isProxyClass(object.getClass()) ||
-				object.getClass().getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR)));
+		return isJdkDynamicProxy(object) || isCglibProxy(object);
 	}
 
 	/**
