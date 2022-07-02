@@ -232,7 +232,7 @@ class GenericApplicationContextTests {
 		assertGetResourceSemantics(new FileSystemResourceLoader(), FileSystemResource.class);
 	}
 
-	private void assertGetResourceSemantics(ResourceLoader resourceLoader, Class<? extends Resource> defaultResouceType) {
+	private void assertGetResourceSemantics(ResourceLoader resourceLoader, Class<? extends Resource> defaultResourceType) {
 		if (resourceLoader != null) {
 			context.setResourceLoader(resourceLoader);
 		}
@@ -241,7 +241,7 @@ class GenericApplicationContextTests {
 		String fileLocation = "file:foo";
 
 		Resource resource = context.getResource(pingLocation);
-		assertThat(resource).isInstanceOf(defaultResouceType);
+		assertThat(resource).isInstanceOf(defaultResourceType);
 		resource = context.getResource(fileLocation);
 		assertThat(resource).isInstanceOf(FileUrlResource.class);
 
