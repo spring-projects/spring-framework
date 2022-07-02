@@ -36,10 +36,12 @@ public class CodecConfigurerHintsRegistrar implements RuntimeHintsRegistrar {
 	@Override
 	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 		hints.resources().registerPattern("org/springframework/http/codec/CodecConfigurer.properties");
-		hints.reflection().registerType(DefaultClientCodecConfigurer.class, builder ->
-				builder.onReachableType(TypeReference.of(CodecConfigurerFactory.class))
-						.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
-		hints.reflection().registerType(DefaultServerCodecConfigurer.class, builder ->
+		registerType(hints, DefaultClientCodecConfigurer.class);
+		registerType(hints, DefaultServerCodecConfigurer.class);
+	}
+
+	private void registerType(RuntimeHints hints, Class<?> type) {
+		hints.reflection().registerType(type, builder ->
 				builder.onReachableType(TypeReference.of(CodecConfigurerFactory.class))
 						.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
 	}

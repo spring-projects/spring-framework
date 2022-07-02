@@ -33,11 +33,13 @@ public class JacksonBuilderRuntimeHintsRegistrar implements RuntimeHintsRegistra
 	@Override
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
 		ReflectionHints reflectionHints = hints.reflection();
-		reflectionHints.registerType(TypeReference.of("com.fasterxml.jackson.datatype.jdk8.Jdk8Module"),
-				builder -> builder.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
-		reflectionHints.registerType(TypeReference.of("com.fasterxml.jackson.datatype.jsr310.JavaTimeModule"),
-				builder -> builder.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
-		reflectionHints.registerType(TypeReference.of("com.fasterxml.jackson.module.kotlin.KotlinModule"),
+		registerType(reflectionHints, "com.fasterxml.jackson.datatype.jdk8.Jdk8Module");
+		registerType(reflectionHints, "com.fasterxml.jackson.datatype.jsr310.JavaTimeModule");
+		registerType(reflectionHints, "com.fasterxml.jackson.module.kotlin.KotlinModule");
+	}
+
+	private void registerType(ReflectionHints reflectionHints, String className) {
+		reflectionHints.registerType(TypeReference.of(className),
 				builder -> builder.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
 	}
 }

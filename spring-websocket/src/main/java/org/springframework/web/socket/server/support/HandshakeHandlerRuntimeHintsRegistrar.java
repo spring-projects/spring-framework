@@ -64,28 +64,27 @@ public class HandshakeHandlerRuntimeHintsRegistrar implements RuntimeHintsRegist
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
 		ReflectionHints reflectionHints = hints.reflection();
 		if (tomcatWsPresent) {
-			reflectionHints.registerType(TypeReference.of("org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy"),
-					builder -> builder.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
+			registerType(reflectionHints, "org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy");
 		}
 		else if (jettyWsPresent) {
-			reflectionHints.registerType(TypeReference.of("org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy"),
-					builder -> builder.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
+			registerType(reflectionHints, "org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy");
 		}
 		else if (undertowWsPresent) {
-			reflectionHints.registerType(TypeReference.of("org.springframework.web.socket.server.standard.UndertowRequestUpgradeStrategy"),
-					builder -> builder.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
+			registerType(reflectionHints, "org.springframework.web.socket.server.standard.UndertowRequestUpgradeStrategy");
 		}
 		else if (glassfishWsPresent) {
-			reflectionHints.registerType(TypeReference.of("org.springframework.web.socket.server.standard.GlassFishRequestUpgradeStrategy"),
-					builder -> builder.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
+			registerType(reflectionHints, "org.springframework.web.socket.server.standard.GlassFishRequestUpgradeStrategy");
 		}
 		else if (weblogicWsPresent) {
-			reflectionHints.registerType(TypeReference.of("org.springframework.web.socket.server.standard.WebLogicRequestUpgradeStrategy"),
-					builder -> builder.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
+			registerType(reflectionHints, "org.springframework.web.socket.server.standard.WebLogicRequestUpgradeStrategy");
 		}
 		else if (websphereWsPresent) {
-			reflectionHints.registerType(TypeReference.of("org.springframework.web.socket.server.standard.WebSphereRequestUpgradeStrategy"),
-					builder -> builder.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
+			registerType(reflectionHints, "org.springframework.web.socket.server.standard.WebSphereRequestUpgradeStrategy");
 		}
+	}
+
+	private void registerType(ReflectionHints reflectionHints, String className) {
+		reflectionHints.registerType(TypeReference.of(className),
+				builder -> builder.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
 	}
 }
