@@ -253,6 +253,7 @@ class GenericApplicationContextTests {
 		String pingLocation = "ping:foo";
 		String fileLocation = "file:foo";
 
+
 		Resource resource = context.getResource(commonLocation);
 		assertThat(resource).isInstanceOf(defaultResourceType);
 		resource = context.getResource(fileLocation);
