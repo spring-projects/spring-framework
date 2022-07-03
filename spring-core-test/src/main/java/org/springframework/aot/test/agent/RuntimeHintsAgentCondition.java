@@ -22,25 +22,26 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 import org.springframework.aot.agent.RuntimeHintsAgent;
 
-import static org.junit.platform.commons.util.AnnotationUtils.findAnnotation;
+import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
 
 /**
  * {@link ExecutionCondition} for {@link EnabledIfRuntimeHintsAgent @EnabledIfRuntimeHintsAgent}.
  *
  * @author Brian Clozel
+ * @since 6.0
  */
-public class RuntimeHintsAgentCondition implements ExecutionCondition {
-
+class RuntimeHintsAgentCondition implements ExecutionCondition {
 
 	@Override
 	public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
 		return findAnnotation(context.getElement(), EnabledIfRuntimeHintsAgent.class)
 				.map(annotation -> checkRuntimeHintsAgentPresence())
-				.orElse(ConditionEvaluationResult.enabled("@RuntimeHintsTest is not present"));
+				.orElse(ConditionEvaluationResult.enabled("@EnabledIfRuntimeHintsAgent is not present"));
 	}
 
 	static ConditionEvaluationResult checkRuntimeHintsAgentPresence() {
 		return RuntimeHintsAgent.isLoaded() ? ConditionEvaluationResult.enabled("RuntimeHintsAgent is loaded")
 				: ConditionEvaluationResult.disabled("RuntimeHintsAgent is not loaded on the current JVM");
 	}
+
 }
