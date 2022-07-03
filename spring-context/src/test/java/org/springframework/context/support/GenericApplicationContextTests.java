@@ -249,12 +249,11 @@ class GenericApplicationContextTests {
 		if (resourceLoader != null) {
 			context.setResourceLoader(resourceLoader);
 		}
-		String commonLocation = "foo";
+		String relativePathLocation = "foo";
 		String pingLocation = "ping:foo";
 		String fileLocation = "file:foo";
 
-
-		Resource resource = context.getResource(commonLocation);
+		Resource resource = context.getResource(relativePathLocation);
 		assertThat(resource).isInstanceOf(defaultResourceType);
 		resource = context.getResource(fileLocation);
 		assertThat(resource).isInstanceOf(FileUrlResource.class);
@@ -263,10 +262,10 @@ class GenericApplicationContextTests {
 
 		resource = context.getResource(pingLocation);
 		assertThat(resource).asInstanceOf(type(ByteArrayResource.class))
-				.extracting(bar -> new String(bar.getByteArray(), UTF_8))
-				.isEqualTo("pong:foo");
+			.extracting(bar -> new String(bar.getByteArray(), UTF_8))
+			.isEqualTo("pong:foo");
 
-		resource = context.getResource(commonLocation);
+		resource = context.getResource(relativePathLocation);
 		assertThat(resource).isInstanceOf(defaultResourceType);
 		resource = context.getResource(fileLocation);
 		assertThat(resource).isInstanceOf(FileUrlResource.class);
