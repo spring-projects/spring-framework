@@ -22,8 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.condition.EnabledIf;
 
 import org.springframework.aot.agent.RuntimeHintsAgent;
 
@@ -51,13 +50,13 @@ import org.springframework.aot.agent.RuntimeHintsAgent;
  * </pre>
  *
  * @author Brian Clozel
+ * @author Sam Brannen
  * @since 6.0
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@ExtendWith(RuntimeHintsAgentCondition.class)
-@Tag("RuntimeHintsTests")
+@EnabledIf(value = "org.springframework.aot.agent.RuntimeHintsAgent#isLoaded",
+		disabledReason = "RuntimeHintsAgent is not loaded on the current JVM")
 public @interface EnabledIfRuntimeHintsAgent {
-
 }
