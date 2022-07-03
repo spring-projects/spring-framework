@@ -15,11 +15,7 @@
  */
 package org.springframework.cglib.beans;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.security.ProtectionDomain;
-import java.util.*;
 import org.springframework.cglib.core.*;
 import org.springframework.asm.ClassVisitor;
 

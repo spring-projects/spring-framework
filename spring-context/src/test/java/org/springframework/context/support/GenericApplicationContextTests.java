@@ -262,9 +262,13 @@ class GenericApplicationContextTests {
 		resource = context.getResource(fileLocation);
 		assertThat(resource).isInstanceOf(FileUrlResource.class);
 
-		if (OS.WINDOWS.isCurrentOs()) {
-			// On Windows we expect an error similar to the following.
-			// java.nio.file.InvalidPathException: Illegal char <:> at index 4: ping:foo
+		// If we are using a FileSystemResourceLoader on Windows, we expect an error
+		// similar to the following since "ping:foo" is not a valid file name in the
+		// Windows file system and since the PingPongProtocolResolver has not yet been
+		// registered.
+		//
+		// java.nio.file.InvalidPathException: Illegal char <:> at index 4: ping:foo
+		if (resourceLoader instanceof FileSystemResourceLoader && OS.WINDOWS.isCurrentOs()) {
 			assertThatExceptionOfType(InvalidPathException.class)
 				.isThrownBy(() -> context.getResource(pingLocation))
 				.withMessageContaining(pingLocation);

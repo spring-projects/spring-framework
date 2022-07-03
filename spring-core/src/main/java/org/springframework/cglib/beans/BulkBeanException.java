@@ -15,8 +15,6 @@
  */
 package org.springframework.cglib.beans;
 
-import org.springframework.cglib.core.CodeGenerationException;
-
 @SuppressWarnings({"rawtypes", "unchecked", "serial"})
 public class BulkBeanException extends RuntimeException
 {

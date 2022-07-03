@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.asm.Attribute;
 import org.springframework.asm.Type;
 
 /**
@@ -561,10 +560,6 @@ public class ReflectUtils {
 
 			public Type[] getExceptionTypes() {
 				return ReflectUtils.getExceptionTypes(member);
-			}
-
-			public Attribute getAttribute() {
-				return null;
 			}
 		};
 	}
