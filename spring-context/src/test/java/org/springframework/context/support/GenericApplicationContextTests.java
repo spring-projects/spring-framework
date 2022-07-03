@@ -16,8 +16,11 @@
 
 package org.springframework.context.support;
 
+import java.nio.file.InvalidPathException;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.OS;
 
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -238,25 +241,36 @@ class GenericApplicationContextTests {
 		}
 
 		String relativePathLocation = "foo";
-		String pingLocation = "ping:foo";
 		String fileLocation = "file:foo";
+		String pingLocation = "ping:foo";
 
 		Resource resource = context.getResource(relativePathLocation);
 		assertThat(resource).isInstanceOf(defaultResourceType);
 		resource = context.getResource(fileLocation);
 		assertThat(resource).isInstanceOf(FileUrlResource.class);
 
-		context.addProtocolResolver(new PingPongProtocolResolver());
+		if (OS.WINDOWS.isCurrentOs()) {
+			// On Windows we expect an error similar to the following.
+			// java.nio.file.InvalidPathException: Illegal char <:> at index 4: ping:foo
+			assertThatExceptionOfType(InvalidPathException.class)
+				.isThrownBy(() -> context.getResource(pingLocation))
+				.withMessageContaining(pingLocation);
+		}
+		else {
+			resource = context.getResource(pingLocation);
+			assertThat(resource).isInstanceOf(defaultResourceType);
+		}
 
-		resource = context.getResource(pingLocation);
-		assertThat(resource).asInstanceOf(type(ByteArrayResource.class))
-			.extracting(bar -> new String(bar.getByteArray(), UTF_8))
-			.isEqualTo("pong:foo");
+		context.addProtocolResolver(new PingPongProtocolResolver());
 
 		resource = context.getResource(relativePathLocation);
 		assertThat(resource).isInstanceOf(defaultResourceType);
 		resource = context.getResource(fileLocation);
 		assertThat(resource).isInstanceOf(FileUrlResource.class);
+		resource = context.getResource(pingLocation);
+		assertThat(resource).asInstanceOf(type(ByteArrayResource.class))
+			.extracting(bar -> new String(bar.getByteArray(), UTF_8))
+			.isEqualTo("pong:foo");
 	}
 
 
