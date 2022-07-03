@@ -128,6 +128,7 @@ public class PathPatternParser {
 	 */
 	public final static PathPatternParser defaultInstance = new PathPatternParser() {
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public void setMatchOptionalTrailingSeparator(boolean matchOptionalTrailingSeparator) {
 			raiseError();

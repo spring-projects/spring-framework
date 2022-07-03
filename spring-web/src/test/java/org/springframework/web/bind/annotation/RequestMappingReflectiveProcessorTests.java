@@ -185,10 +185,11 @@ public class RequestMappingReflectiveProcessorTests {
 
 		@GetMapping
 		HttpEntity<Response> getHttpEntity() {
-			return new HttpEntity(new Response("response"));
+			return new HttpEntity<>(new Response("response"));
 		}
 
 		@GetMapping
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		HttpEntity getRawHttpEntity() {
 			return new HttpEntity(new Response("response"));
 		}
@@ -198,6 +199,7 @@ public class RequestMappingReflectiveProcessorTests {
 		}
 
 		@PostMapping
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		void postRawHttpEntity(HttpEntity  entity) {
 		}
 

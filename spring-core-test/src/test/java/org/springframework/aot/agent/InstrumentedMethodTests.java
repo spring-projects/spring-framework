@@ -312,7 +312,6 @@ class InstrumentedMethodTests {
 
 		@Test
 		void classGetDeclaredMethodsShouldMatchIntrospectPublicMethodsHint() {
-			RecordedInvocation invocation = RecordedInvocation.of(InstrumentedMethod.CLASS_GETDECLAREDMETHODS).onInstance(String.class).build();
 			hints.reflection().registerType(String.class, typeHint -> typeHint.withMembers(MemberCategory.INTROSPECT_PUBLIC_METHODS));
 			assertThatInvocationDoesNotMatch(InstrumentedMethod.CLASS_GETDECLAREDMETHODS, this.stringGetScaleMethod);
 		}
@@ -634,12 +633,6 @@ class InstrumentedMethodTests {
 		assertThat(method.matcher(invocation)).rejects(this.hints);
 	}
 
-	private static class PrivateConstructor {
-
-		private PrivateConstructor() {
-
-		}
-	}
 
 	static class PublicField {
 
