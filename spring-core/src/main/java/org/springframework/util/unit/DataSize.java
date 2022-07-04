@@ -174,7 +174,7 @@ public final class DataSize implements Comparable<DataSize>, Serializable {
 	public static DataSize parse(CharSequence text, @Nullable DataUnit defaultUnit) {
 		Assert.notNull(text, "Text must not be null");
 		try {
-			Matcher matcher = DataSizeUtils.PATTERN.matcher(text);
+			Matcher matcher = DataSizeUtils.PATTERN.matcher(StringUtils.trimAllWhitespace(text));
 			Assert.state(matcher.matches(), "Does not match data size pattern");
 			DataUnit unit = DataSizeUtils.determineDataUnit(matcher.group(2), defaultUnit);
 			long amount = Long.parseLong(matcher.group(1));

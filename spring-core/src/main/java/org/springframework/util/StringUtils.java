@@ -232,26 +232,43 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Trim <i>all</i> whitespace from the given {@code String}:
+	 * Trim <em>all</em> whitespace from the given {@code CharSequence}:
 	 * leading, trailing, and in between characters.
-	 * @param str the {@code String} to check
-	 * @return the trimmed {@code String}
+	 * @param text the {@code CharSequence} to check
+	 * @return the trimmed {@code CharSequence}
+	 * @since 5.3.22
+	 * @see #trimAllWhitespace(String)
 	 * @see java.lang.Character#isWhitespace
 	 */
-	public static String trimAllWhitespace(String str) {
-		if (!hasLength(str)) {
-			return str;
+	public static CharSequence trimAllWhitespace(CharSequence text) {
+		if (!hasLength(text)) {
+			return text;
 		}
 
-		int len = str.length();
-		StringBuilder sb = new StringBuilder(str.length());
+		int len = text.length();
+		StringBuilder sb = new StringBuilder(text.length());
 		for (int i = 0; i < len; i++) {
-			char c = str.charAt(i);
+			char c = text.charAt(i);
 			if (!Character.isWhitespace(c)) {
 				sb.append(c);
 			}
 		}
 		return sb.toString();
+	}
+
+	/**
+	 * Trim <em>all</em> whitespace from the given {@code String}:
+	 * leading, trailing, and in between characters.
+	 * @param str the {@code String} to check
+	 * @return the trimmed {@code String}
+	 * @see #trimAllWhitespace(CharSequence)
+	 * @see java.lang.Character#isWhitespace
+	 */
+	public static String trimAllWhitespace(String str) {
+		if (str == null) {
+			return null;
+		}
+		return trimAllWhitespace((CharSequence) str).toString();
 	}
 
 	/**
