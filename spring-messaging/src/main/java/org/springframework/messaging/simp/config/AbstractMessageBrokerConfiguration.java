@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,8 +151,9 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	@Bean
 	public AbstractSubscribableChannel clientInboundChannel(
-			@Qualifier("clientInboundChannelExecutor") TaskExecutor clientInboundChannelExecutor) {
-		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientInboundChannelExecutor);
+			@Qualifier("clientInboundChannelExecutor") TaskExecutor executor) {
+
+		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(executor);
 		channel.setLogger(SimpLogging.forLog(channel.getLogger()));
 		ChannelRegistration reg = getClientInboundChannelRegistration();
 		if (reg.hasInterceptors()) {
@@ -188,8 +189,9 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	@Bean
 	public AbstractSubscribableChannel clientOutboundChannel(
-			@Qualifier("clientOutboundChannelExecutor") TaskExecutor clientOutboundChannelExecutor) {
-		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientOutboundChannelExecutor);
+			@Qualifier("clientOutboundChannelExecutor") TaskExecutor executor) {
+
+		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(executor);
 		channel.setLogger(SimpLogging.forLog(channel.getLogger()));
 		ChannelRegistration reg = getClientOutboundChannelRegistration();
 		if (reg.hasInterceptors()) {
@@ -226,12 +228,12 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	@Bean
 	public AbstractSubscribableChannel brokerChannel(
 			AbstractSubscribableChannel clientInboundChannel, AbstractSubscribableChannel clientOutboundChannel,
-			@Qualifier("brokerChannelExecutor") TaskExecutor brokerChannelExecutor) {
+			@Qualifier("brokerChannelExecutor") TaskExecutor executor) {
 
 		MessageBrokerRegistry registry = getBrokerRegistry(clientInboundChannel, clientOutboundChannel);
 		ChannelRegistration registration = registry.getBrokerChannelRegistration();
 		ExecutorSubscribableChannel channel = (registration.hasTaskExecutor() ?
-				new ExecutorSubscribableChannel(brokerChannelExecutor) : new ExecutorSubscribableChannel());
+				new ExecutorSubscribableChannel(executor) : new ExecutorSubscribableChannel());
 		registration.interceptors(new ImmutableMessageChannelInterceptor());
 		channel.setLogger(SimpLogging.forLog(channel.getLogger()));
 		channel.setInterceptors(registration.getInterceptors());
@@ -370,10 +372,10 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	@Bean
 	@Nullable
-	public AbstractBrokerMessageHandler stompBrokerRelayMessageHandler(AbstractSubscribableChannel clientInboundChannel,
-			AbstractSubscribableChannel clientOutboundChannel, AbstractSubscribableChannel brokerChannel,
-			UserDestinationMessageHandler userDestinationMessageHandler, @Nullable MessageHandler userRegistryMessageHandler,
-			UserDestinationResolver userDestinationResolver) {
+	public AbstractBrokerMessageHandler stompBrokerRelayMessageHandler(
+			AbstractSubscribableChannel clientInboundChannel, AbstractSubscribableChannel clientOutboundChannel,
+			AbstractSubscribableChannel brokerChannel, UserDestinationMessageHandler userDestinationMessageHandler,
+			@Nullable MessageHandler userRegistryMessageHandler, UserDestinationResolver userDestinationResolver) {
 
 		MessageBrokerRegistry registry = getBrokerRegistry(clientInboundChannel, clientOutboundChannel);
 		StompBrokerRelayMessageHandler handler = registry.getStompBrokerRelay(brokerChannel);
@@ -415,7 +417,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	public MessageHandler userRegistryMessageHandler(
 			AbstractSubscribableChannel clientInboundChannel, AbstractSubscribableChannel clientOutboundChannel,
 			SimpUserRegistry userRegistry, SimpMessagingTemplate brokerMessagingTemplate,
-			@Qualifier("messageBrokerTaskScheduler") TaskScheduler messageBrokerTaskScheduler) {
+			@Qualifier("messageBrokerTaskScheduler") TaskScheduler scheduler) {
 
 		MessageBrokerRegistry brokerRegistry = getBrokerRegistry(clientInboundChannel, clientOutboundChannel);
 		if (brokerRegistry.getUserRegistryBroadcast() == null) {
@@ -424,7 +426,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		Assert.isInstanceOf(MultiServerUserRegistry.class, userRegistry, "MultiServerUserRegistry required");
 		return new UserRegistryMessageHandler((MultiServerUserRegistry) userRegistry,
 				brokerMessagingTemplate, brokerRegistry.getUserRegistryBroadcast(),
-				messageBrokerTaskScheduler);
+				scheduler);
 	}
 
 	// Expose alias for 4.1 compatibility

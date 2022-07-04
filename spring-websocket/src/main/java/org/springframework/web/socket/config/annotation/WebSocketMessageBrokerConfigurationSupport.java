@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,18 +131,18 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	public WebSocketMessageBrokerStats webSocketMessageBrokerStats(
 			@Nullable AbstractBrokerMessageHandler stompBrokerRelayMessageHandler,
 			WebSocketHandler subProtocolWebSocketHandler,
-			@Qualifier("clientInboundChannelExecutor") TaskExecutor clientInboundChannelExecutor,
-			@Qualifier("clientOutboundChannelExecutor") TaskExecutor clientOutboundChannelExecutor,
-			@Qualifier("messageBrokerTaskScheduler") TaskScheduler messageBrokerTaskScheduler) {
+			@Qualifier("clientInboundChannelExecutor") TaskExecutor inboundExecutor,
+			@Qualifier("clientOutboundChannelExecutor") TaskExecutor outboundExecutor,
+			@Qualifier("messageBrokerTaskScheduler") TaskScheduler scheduler) {
 
 		WebSocketMessageBrokerStats stats = new WebSocketMessageBrokerStats();
 		stats.setSubProtocolWebSocketHandler((SubProtocolWebSocketHandler) subProtocolWebSocketHandler);
 		if (stompBrokerRelayMessageHandler instanceof StompBrokerRelayMessageHandler) {
 			stats.setStompBrokerRelay((StompBrokerRelayMessageHandler) stompBrokerRelayMessageHandler);
 		}
-		stats.setInboundChannelExecutor(clientInboundChannelExecutor);
-		stats.setOutboundChannelExecutor(clientOutboundChannelExecutor);
-		stats.setSockJsTaskScheduler(messageBrokerTaskScheduler);
+		stats.setInboundChannelExecutor(inboundExecutor);
+		stats.setOutboundChannelExecutor(outboundExecutor);
+		stats.setSockJsTaskScheduler(scheduler);
 		return stats;
 	}
 
