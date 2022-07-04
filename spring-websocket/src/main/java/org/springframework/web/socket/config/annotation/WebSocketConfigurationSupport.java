@@ -84,12 +84,14 @@ public class WebSocketConfigurationSupport {
 	@Bean
 	@Nullable
 	public TaskScheduler defaultSockJsTaskScheduler() {
-		if (initHandlerRegistry().requiresTaskScheduler()) {
-			ThreadPoolTaskScheduler threadPoolScheduler = new ThreadPoolTaskScheduler();
-			threadPoolScheduler.setThreadNamePrefix("SockJS-");
-			threadPoolScheduler.setPoolSize(Runtime.getRuntime().availableProcessors());
-			threadPoolScheduler.setRemoveOnCancelPolicy(true);
-			this.scheduler = threadPoolScheduler;
+		if (this.scheduler == null) {
+			if (initHandlerRegistry().requiresTaskScheduler()) {
+				ThreadPoolTaskScheduler threadPoolScheduler = new ThreadPoolTaskScheduler();
+				threadPoolScheduler.setThreadNamePrefix("SockJS-");
+				threadPoolScheduler.setPoolSize(Runtime.getRuntime().availableProcessors());
+				threadPoolScheduler.setRemoveOnCancelPolicy(true);
+				this.scheduler = threadPoolScheduler;
+			}
 		}
 		return this.scheduler;
 	}
