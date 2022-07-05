@@ -36,7 +36,8 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Utility methods for AOP proxy factories.
- * Mainly for internal use within the AOP framework.
+ *
+ * <p>Mainly for internal use within the AOP framework.
  *
  * <p>See {@link org.springframework.aop.support.AopUtils} for a collection of
  * generic AOP utility methods which do not depend on AOP framework internals.
@@ -59,10 +60,10 @@ public abstract class AopProxyUtils {
 	 */
 	@Nullable
 	public static Object getSingletonTarget(Object candidate) {
-		if (candidate instanceof Advised) {
-			TargetSource targetSource = ((Advised) candidate).getTargetSource();
-			if (targetSource instanceof SingletonTargetSource) {
-				return ((SingletonTargetSource) targetSource).getTarget();
+		if (candidate instanceof Advised advised) {
+			TargetSource targetSource = advised.getTargetSource();
+			if (targetSource instanceof SingletonTargetSource singleTargetSource) {
+				return singleTargetSource.getTarget();
 			}
 		}
 		return null;
@@ -82,8 +83,8 @@ public abstract class AopProxyUtils {
 		Assert.notNull(candidate, "Candidate object must not be null");
 		Object current = candidate;
 		Class<?> result = null;
-		while (current instanceof TargetClassAware) {
-			result = ((TargetClassAware) current).getTargetClass();
+		while (current instanceof TargetClassAware targetClassAware) {
+			result = targetClassAware.getTargetClass();
 			current = getSingletonTarget(current);
 		}
 		if (result == null) {
