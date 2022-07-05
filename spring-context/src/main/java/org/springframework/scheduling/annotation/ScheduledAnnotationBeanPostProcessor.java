@@ -405,16 +405,16 @@ public class ScheduledAnnotationBeanPostProcessor
 			Set<ScheduledTask> tasks = new LinkedHashSet<>(4);
 
 			// Determine initial delay
-			long initialDelay = convertToMillis(scheduled.initialDelay(), scheduled.timeUnit());
+			Duration initialDelay = toDuration(scheduled.initialDelay(), scheduled.timeUnit());
 			String initialDelayString = scheduled.initialDelayString();
 			if (StringUtils.hasText(initialDelayString)) {
-				Assert.isTrue(initialDelay < 0, "Specify 'initialDelay' or 'initialDelayString', not both");
+				Assert.isTrue(initialDelay.isNegative(), "Specify 'initialDelay' or 'initialDelayString', not both");
 				if (this.embeddedValueResolver != null) {
 					initialDelayString = this.embeddedValueResolver.resolveStringValue(initialDelayString);
 				}
 				if (StringUtils.hasLength(initialDelayString)) {
 					try {
-						initialDelay = convertToMillis(initialDelayString, scheduled.timeUnit());
+						initialDelay = toDuration(initialDelayString, scheduled.timeUnit());
 					}
 					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
@@ -432,7 +432,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					zone = this.embeddedValueResolver.resolveStringValue(zone);
 				}
 				if (StringUtils.hasLength(cron)) {
-					Assert.isTrue(initialDelay == -1, "'initialDelay' not supported for cron triggers");
+					Assert.isTrue(initialDelay.isNegative(), "'initialDelay' not supported for cron triggers");
 					processedSchedule = true;
 					if (!Scheduled.CRON_DISABLED.equals(cron)) {
 						TimeZone timeZone;
@@ -448,13 +448,13 @@ public class ScheduledAnnotationBeanPostProcessor
 			}
 
 			// At this point we don't need to differentiate between initial delay set or not anymore
-			if (initialDelay < 0) {
-				initialDelay = 0;
+			if (initialDelay.isNegative()) {
+				initialDelay = Duration.ZERO;
 			}
 
 			// Check fixed delay
-			long fixedDelay = convertToMillis(scheduled.fixedDelay(), scheduled.timeUnit());
-			if (fixedDelay >= 0) {
+			Duration fixedDelay = toDuration(scheduled.fixedDelay(), scheduled.timeUnit());
+			if (!fixedDelay.isNegative()) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
 				tasks.add(this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, initialDelay)));
@@ -469,7 +469,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					Assert.isTrue(!processedSchedule, errorMessage);
 					processedSchedule = true;
 					try {
-						fixedDelay = convertToMillis(fixedDelayString, scheduled.timeUnit());
+						fixedDelay = toDuration(fixedDelayString, scheduled.timeUnit());
 					}
 					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
@@ -480,8 +480,8 @@ public class ScheduledAnnotationBeanPostProcessor
 			}
 
 			// Check fixed rate
-			long fixedRate = convertToMillis(scheduled.fixedRate(), scheduled.timeUnit());
-			if (fixedRate >= 0) {
+			Duration fixedRate = toDuration(scheduled.fixedRate(), scheduled.timeUnit());
+			if (!fixedRate.isNegative()) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
 				tasks.add(this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, initialDelay)));
@@ -495,7 +495,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					Assert.isTrue(!processedSchedule, errorMessage);
 					processedSchedule = true;
 					try {
-						fixedRate = convertToMillis(fixedRateString, scheduled.timeUnit());
+						fixedRate = toDuration(fixedRateString, scheduled.timeUnit());
 					}
 					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
@@ -535,15 +535,15 @@ public class ScheduledAnnotationBeanPostProcessor
 		return new ScheduledMethodRunnable(target, invocableMethod);
 	}
 
-	private static long convertToMillis(long value, TimeUnit timeUnit) {
-		return TimeUnit.MILLISECONDS.convert(value, timeUnit);
+	private static Duration toDuration(long value, TimeUnit timeUnit) {
+		return Duration.of(value, timeUnit.toChronoUnit());
 	}
 
-	private static long convertToMillis(String value, TimeUnit timeUnit) {
+	private static Duration toDuration(String value, TimeUnit timeUnit) {
 		if (isDurationString(value)) {
-			return Duration.parse(value).toMillis();
+			return Duration.parse(value);
 		}
-		return convertToMillis(Long.parseLong(value), timeUnit);
+		return toDuration(Long.parseLong(value), timeUnit);
 	}
 
 	private static boolean isDurationString(String value) {

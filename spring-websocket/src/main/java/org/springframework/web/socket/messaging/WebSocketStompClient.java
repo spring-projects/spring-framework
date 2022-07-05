@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.socket.messaging;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -403,6 +404,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		public void onReadInactivity(final Runnable runnable, final long duration) {
 			Assert.state(getTaskScheduler() != null, "No TaskScheduler configured");
 			this.lastReadTime = System.currentTimeMillis();
+			Duration delay = Duration.ofMillis(duration / 2);
 			this.inactivityTasks.add(getTaskScheduler().scheduleWithFixedDelay(() -> {
 				if (System.currentTimeMillis() - this.lastReadTime > duration) {
 					try {
@@ -414,13 +416,14 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 						}
 					}
 				}
-			}, duration / 2));
+			}, delay));
 		}
 
 		@Override
 		public void onWriteInactivity(final Runnable runnable, final long duration) {
 			Assert.state(getTaskScheduler() != null, "No TaskScheduler configured");
 			this.lastWriteTime = System.currentTimeMillis();
+			Duration delay = Duration.ofMillis(duration / 2);
 			this.inactivityTasks.add(getTaskScheduler().scheduleWithFixedDelay(() -> {
 				if (System.currentTimeMillis() - this.lastWriteTime > duration) {
 					try {
@@ -432,7 +435,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 						}
 					}
 				}
-			}, duration / 2));
+			}, delay));
 		}
 
 		@Override

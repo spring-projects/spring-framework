@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.lang.reflect.Type;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -566,7 +566,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		private void initReceiptHandling() {
 			Assert.notNull(getTaskScheduler(), "To track receipts, a TaskScheduler must be configured");
 			DefaultStompSession.this.receiptHandlers.put(this.receiptId, this);
-			Date startTime = new Date(System.currentTimeMillis() + getReceiptTimeLimit());
+			Instant startTime = Instant.now().plusMillis(getReceiptTimeLimit());
 			this.future = getTaskScheduler().schedule(this::handleReceiptNotReceived, startTime);
 		}
 

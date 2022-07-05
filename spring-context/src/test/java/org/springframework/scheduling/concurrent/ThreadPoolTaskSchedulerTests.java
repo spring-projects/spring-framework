@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.concurrent;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -182,11 +183,11 @@ public class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutor
 		}
 
 		@Override
-		public Date nextExecutionTime(TriggerContext triggerContext) {
+		public Instant nextExecution(TriggerContext triggerContext) {
 			if (this.actualRunCount.incrementAndGet() > this.maxRunCount) {
 				return null;
 			}
-			return new Date();
+			return Instant.now();
 		}
 	}
 

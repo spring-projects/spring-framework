@@ -3836,27 +3836,17 @@ The following listing shows the `TaskScheduler` interface definition:
 
 		ScheduledFuture schedule(Runnable task, Instant startTime);
 
-		ScheduledFuture schedule(Runnable task, Date startTime);
-
 		ScheduledFuture scheduleAtFixedRate(Runnable task, Instant startTime, Duration period);
-
-		ScheduledFuture scheduleAtFixedRate(Runnable task, Date startTime, long period);
 
 		ScheduledFuture scheduleAtFixedRate(Runnable task, Duration period);
 
-		ScheduledFuture scheduleAtFixedRate(Runnable task, long period);
-
 		ScheduledFuture scheduleWithFixedDelay(Runnable task, Instant startTime, Duration delay);
-
-		ScheduledFuture scheduleWithFixedDelay(Runnable task, Date startTime, long delay);
 
 		ScheduledFuture scheduleWithFixedDelay(Runnable task, Duration delay);
 
-		ScheduledFuture scheduleWithFixedDelay(Runnable task, long delay);
-	}
 ----
 
-The simplest method is the one named `schedule` that takes only a `Runnable` and a `Date`.
+The simplest method is the one named `schedule` that takes only a `Runnable` and an `Instant`.
 That causes the task to run once after the specified time. All of the other methods
 are capable of scheduling tasks to run repeatedly. The fixed-rate and fixed-delay
 methods are for simple, periodic execution, but the method that accepts a `Trigger` is

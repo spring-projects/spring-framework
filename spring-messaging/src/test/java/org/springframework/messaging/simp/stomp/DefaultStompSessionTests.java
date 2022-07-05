@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicReference;
@@ -628,7 +628,7 @@ public class DefaultStompSessionTests {
 		AtomicReference<Boolean> notReceived = new AtomicReference<>();
 
 		ScheduledFuture future = mock(ScheduledFuture.class);
-		given(taskScheduler.schedule(any(Runnable.class), any(Date.class))).willReturn(future);
+		given(taskScheduler.schedule(any(Runnable.class), any(Instant.class))).willReturn(future);
 
 		StompHeaders headers = new StompHeaders();
 		headers.setDestination("/topic/foo");
@@ -637,7 +637,7 @@ public class DefaultStompSessionTests {
 		receiptable.addReceiptLostTask(() -> notReceived.set(true));
 
 		ArgumentCaptor<Runnable> taskCaptor = ArgumentCaptor.forClass(Runnable.class);
-		verify(taskScheduler).schedule(taskCaptor.capture(), (Date) notNull());
+		verify(taskScheduler).schedule(taskCaptor.capture(), (Instant) notNull());
 		Runnable scheduledTask = taskCaptor.getValue();
 		assertThat(scheduledTask).isNotNull();
 

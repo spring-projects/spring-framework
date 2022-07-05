@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.security.Principal;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -457,7 +458,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		this.tcpClient.connect(handler, new FixedIntervalReconnectStrategy(5000));
 
 		if (this.taskScheduler != null) {
-			this.taskScheduler.scheduleWithFixedDelay(new ClientSendMessageCountTask(), 5000);
+			this.taskScheduler.scheduleWithFixedDelay(new ClientSendMessageCountTask(), Duration.ofMillis(5000));
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.socket.messaging;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.concurrent.ScheduledFuture;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -295,7 +296,7 @@ public class WebSocketStompClientTests {
 		TcpConnection<byte[]> tcpConnection = getTcpConnection();
 
 		ScheduledFuture future = mock(ScheduledFuture.class);
-		given(this.taskScheduler.scheduleWithFixedDelay(any(), eq(1L))).willReturn(future);
+		given(this.taskScheduler.scheduleWithFixedDelay(any(), eq(Duration.ofMillis(1)))).willReturn(future);
 
 		tcpConnection.onReadInactivity(mock(Runnable.class), 2L);
 		tcpConnection.onWriteInactivity(mock(Runnable.class), 2L);
@@ -332,7 +333,7 @@ public class WebSocketStompClientTests {
 			throws InterruptedException {
 
 		ArgumentCaptor<Runnable> inactivityTaskCaptor = ArgumentCaptor.forClass(Runnable.class);
-		verify(this.taskScheduler).scheduleWithFixedDelay(inactivityTaskCaptor.capture(), eq(delay/2));
+		verify(this.taskScheduler).scheduleWithFixedDelay(inactivityTaskCaptor.capture(), eq(Duration.ofMillis(delay/2)));
 		verifyNoMoreInteractions(this.taskScheduler);
 
 		if (sleepTime > 0) {
