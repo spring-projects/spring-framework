@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,16 @@ import org.springframework.util.StringUtils;
  * Convert a String to a {@link TimeZone}.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 4.2
  */
 class StringToTimeZoneConverter implements Converter<String, TimeZone> {
 
 	@Override
 	public TimeZone convert(String source) {
+		if (StringUtils.hasText(source)) {
+			source = source.trim();
+		}
 		return StringUtils.parseTimeZoneString(source);
 	}
 
