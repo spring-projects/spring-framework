@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.i18n;
 
+import java.time.Duration;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.function.Function;
@@ -23,16 +24,17 @@ import java.util.function.Function;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.i18n.LocaleContext;
-import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.LocaleResolver;
-import org.springframework.web.util.CookieGenerator;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -57,7 +59,7 @@ import org.springframework.web.util.WebUtils;
  * @see #setDefaultLocale
  * @see #setDefaultTimeZone
  */
-public class CookieLocaleResolver extends CookieGenerator implements LocaleContextResolver {
+public class CookieLocaleResolver extends AbstractLocaleContextResolver {
 
 	/**
 	 * The name of the request attribute that holds the {@code Locale}.
@@ -86,16 +88,39 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	 */
 	public static final String DEFAULT_COOKIE_NAME = CookieLocaleResolver.class.getName() + ".LOCALE";
 
+	/**
+	 * The default cookie max age (persists until browser shutdown) if none is
+	 * explicitly set.
+	 */
+	public static final Duration DEFAULT_COOKIE_MAX_AGE = Duration.ofSeconds(-1);
+
+	/**
+	 * The default cookie path used if none is explicitly set.
+	 */
+	public static final String DEFAULT_COOKIE_PATH = "/";
+
+	private static final Log logger = LogFactory.getLog(CookieLocaleResolver.class);
+
+
+	private String cookieName;
+
+	private Duration cookieMaxAge = DEFAULT_COOKIE_MAX_AGE;
+
+	@Nullable
+	private String cookiePath = DEFAULT_COOKIE_PATH;
+
+	@Nullable
+	private String cookieDomain;
+
+	private boolean cookieSecure;
+
+	private boolean cookieHttpOnly;
+
+	private String cookieSameSite = "Lax";
 
 	private boolean languageTagCompliant = true;
 
 	private boolean rejectInvalidCookies = true;
-
-	@Nullable
-	private Locale defaultLocale;
-
-	@Nullable
-	private TimeZone defaultTimeZone;
 
 	private Function<HttpServletRequest, Locale> defaultLocaleFunction = request -> {
 		Locale defaultLocale = getDefaultLocale();
@@ -104,14 +129,98 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 
 	private Function<HttpServletRequest, TimeZone> defaultTimeZoneFunction = request -> getDefaultTimeZone();
 
+
+	/**
+	 * Create a new instance of {@link CookieLocaleResolver} using the supplied
+	 * cookie name.
+	 * @param cookieName the cookie name
+	 * @since 6.0
+	 */
+	public CookieLocaleResolver(String cookieName) {
+		Assert.notNull(cookieName, "cookieName must not be null");
+		this.cookieName = cookieName;
+	}
+
 	/**
 	 * Create a new instance of {@link CookieLocaleResolver} using the
 	 * {@linkplain #DEFAULT_COOKIE_NAME default cookie name}.
 	 */
 	public CookieLocaleResolver() {
-		setCookieName(DEFAULT_COOKIE_NAME);
+		this(DEFAULT_COOKIE_NAME);
 	}
 
+
+	/**
+	 * Set the name of cookie created by this resolver.
+	 * @param cookieName the cookie name
+	 * @deprecated since 6.0, in favor of {@link #CookieLocaleResolver(String)}
+	 */
+	@Deprecated
+	public void setCookieName(String cookieName) {
+		Assert.notNull(cookieName, "cookieName must not be null");
+		this.cookieName = cookieName;
+	}
+
+	/**
+	 * Set the cookie "Max-Age" attribute.
+	 * @since 6.0
+	 * @see org.springframework.http.ResponseCookie.ResponseCookieBuilder#maxAge(Duration)
+	 */
+	public void setCookieMaxAge(Duration cookieMaxAge) {
+		Assert.notNull(cookieMaxAge, "cookieMaxAge must not be null");
+		this.cookieMaxAge = cookieMaxAge;
+	}
+
+	/**
+	 * Variant of {@link #setCookieMaxAge(Duration)} accepting a value in
+	 * seconds.
+	 */
+	@Deprecated
+	public void setCookieMaxAge(@Nullable Integer cookieMaxAge) {
+		setCookieMaxAge(Duration.ofSeconds((cookieMaxAge != null) ? cookieMaxAge : -1));
+	}
+
+	/**
+	 * Set the cookie "Path" attribute.
+	 * @see org.springframework.http.ResponseCookie.ResponseCookieBuilder#path(String)
+	 */
+	public void setCookiePath(@Nullable String cookiePath) {
+		this.cookiePath = cookiePath;
+	}
+
+	/**
+	 * Set the cookie "Domain" attribute.
+	 * @see org.springframework.http.ResponseCookie.ResponseCookieBuilder#domain(String)
+	 */
+	public void setCookieDomain(@Nullable String cookieDomain) {
+		this.cookieDomain = cookieDomain;
+	}
+
+	/**
+	 * Add the "Secure" attribute to the cookie.
+	 * @see org.springframework.http.ResponseCookie.ResponseCookieBuilder#secure(boolean)
+	 */
+	public void setCookieSecure(boolean cookieSecure) {
+		this.cookieSecure = cookieSecure;
+	}
+
+	/**
+	 * Add the "HttpOnly" attribute to the cookie.
+	 * @see org.springframework.http.ResponseCookie.ResponseCookieBuilder#httpOnly(boolean)
+	 */
+	public void setCookieHttpOnly(boolean cookieHttpOnly) {
+		this.cookieHttpOnly = cookieHttpOnly;
+	}
+
+	/**
+	 * Add the "SameSite" attribute to the cookie.
+	 * @since 6.0
+	 * @see org.springframework.http.ResponseCookie.ResponseCookieBuilder#sameSite(String)
+	 */
+	public void setCookieSameSite(String cookieSameSite) {
+		Assert.notNull(cookieSameSite, "cookieSameSite must not be null");
+		this.cookieSameSite = cookieSameSite;
+	}
 
 	/**
 	 * Specify whether this resolver's cookies should be compliant with BCP 47
@@ -159,40 +268,6 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	 */
 	public boolean isRejectInvalidCookies() {
 		return this.rejectInvalidCookies;
-	}
-
-	/**
-	 * Set a fixed locale that this resolver will return if no cookie is found.
-	 */
-	public void setDefaultLocale(@Nullable Locale defaultLocale) {
-		this.defaultLocale = defaultLocale;
-	}
-
-	/**
-	 * Return the fixed locale that this resolver will return if no cookie is found,
-	 * if any.
-	 */
-	@Nullable
-	protected Locale getDefaultLocale() {
-		return this.defaultLocale;
-	}
-
-	/**
-	 * Set a fixed time zone that this resolver will return if no cookie is found.
-	 * @since 4.0
-	 */
-	public void setDefaultTimeZone(@Nullable TimeZone defaultTimeZone) {
-		this.defaultTimeZone = defaultTimeZone;
-	}
-
-	/**
-	 * Return the fixed time zone that this resolver will return if no cookie is found,
-	 * if any.
-	 * @since 4.0
-	 */
-	@Nullable
-	protected TimeZone getDefaultTimeZone() {
-		return this.defaultTimeZone;
 	}
 
 	/**
@@ -256,46 +331,43 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 			TimeZone timeZone = null;
 
 			// Retrieve and parse cookie value.
-			String cookieName = getCookieName();
-			if (cookieName != null) {
-				Cookie cookie = WebUtils.getCookie(request, cookieName);
-				if (cookie != null) {
-					String value = cookie.getValue();
-					String localePart = value;
-					String timeZonePart = null;
-					int separatorIndex = localePart.indexOf('/');
-					if (separatorIndex == -1) {
-						// Leniently accept older cookies separated by a space...
-						separatorIndex = localePart.indexOf(' ');
+			Cookie cookie = WebUtils.getCookie(request, this.cookieName);
+			if (cookie != null) {
+				String value = cookie.getValue();
+				String localePart = value;
+				String timeZonePart = null;
+				int separatorIndex = localePart.indexOf('/');
+				if (separatorIndex == -1) {
+					// Leniently accept older cookies separated by a space...
+					separatorIndex = localePart.indexOf(' ');
+				}
+				if (separatorIndex >= 0) {
+					localePart = value.substring(0, separatorIndex);
+					timeZonePart = value.substring(separatorIndex + 1);
+				}
+				try {
+					locale = (!"-".equals(localePart) ? parseLocaleValue(localePart) : null);
+					if (timeZonePart != null) {
+						timeZone = StringUtils.parseTimeZoneString(timeZonePart);
 					}
-					if (separatorIndex >= 0) {
-						localePart = value.substring(0, separatorIndex);
-						timeZonePart = value.substring(separatorIndex + 1);
+				}
+				catch (IllegalArgumentException ex) {
+					if (isRejectInvalidCookies() &&
+							request.getAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE) == null) {
+						throw new IllegalStateException("Encountered invalid locale cookie '" +
+								this.cookieName + "': [" + value + "] due to: " + ex.getMessage());
 					}
-					try {
-						locale = (!"-".equals(localePart) ? parseLocaleValue(localePart) : null);
-						if (timeZonePart != null) {
-							timeZone = StringUtils.parseTimeZoneString(timeZonePart);
+					else {
+						// Lenient handling (e.g. error dispatch): ignore locale/timezone parse exceptions
+						if (logger.isDebugEnabled()) {
+							logger.debug("Ignoring invalid locale cookie '" + this.cookieName +
+									"': [" + value + "] due to: " + ex.getMessage());
 						}
 					}
-					catch (IllegalArgumentException ex) {
-						if (isRejectInvalidCookies() &&
-								request.getAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE) == null) {
-							throw new IllegalStateException("Encountered invalid locale cookie '" +
-									cookieName + "': [" + value + "] due to: " + ex.getMessage());
-						}
-						else {
-							// Lenient handling (e.g. error dispatch): ignore locale/timezone parse exceptions
-							if (logger.isDebugEnabled()) {
-								logger.debug("Ignoring invalid locale cookie '" + cookieName +
-										"': [" + value + "] due to: " + ex.getMessage());
-							}
-						}
-					}
-					if (logger.isTraceEnabled()) {
-						logger.trace("Parsed cookie value [" + cookie.getValue() + "] into locale '" + locale +
-								"'" + (timeZone != null ? " and time zone '" + timeZone.getID() + "'" : ""));
-					}
+				}
+				if (logger.isTraceEnabled()) {
+					logger.trace("Parsed cookie value [" + cookie.getValue() + "] into locale '" + locale +
+							"'" + (timeZone != null ? " and time zone '" + timeZone.getID() + "'" : ""));
 				}
 			}
 
@@ -307,11 +379,6 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	}
 
 	@Override
-	public void setLocale(HttpServletRequest request, @Nullable HttpServletResponse response, @Nullable Locale locale) {
-		setLocaleContext(request, response, (locale != null ? new SimpleLocaleContext(locale) : null));
-	}
-
-	@Override
 	public void setLocaleContext(HttpServletRequest request, @Nullable HttpServletResponse response,
 			@Nullable LocaleContext localeContext) {
 
@@ -319,17 +386,35 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 
 		Locale locale = null;
 		TimeZone timeZone = null;
+		ResponseCookie cookie;
 		if (localeContext != null) {
 			locale = localeContext.getLocale();
 			if (localeContext instanceof TimeZoneAwareLocaleContext timeZoneAwareLocaleContext) {
 				timeZone = timeZoneAwareLocaleContext.getTimeZone();
 			}
-			addCookie(response,
-					(locale != null ? toLocaleValue(locale) : "-") + (timeZone != null ? '/' + timeZone.getID() : ""));
+			cookie = ResponseCookie.from(this.cookieName,
+							(locale != null ? toLocaleValue(locale) : "-") +
+									(timeZone != null ? '/' + timeZone.getID() : ""))
+					.maxAge(this.cookieMaxAge)
+					.path(this.cookiePath)
+					.domain(this.cookieDomain)
+					.secure(this.cookieSecure)
+					.httpOnly(this.cookieHttpOnly)
+					.sameSite(this.cookieSameSite)
+					.build();
 		}
 		else {
-			removeCookie(response);
+			// a cookie with empty value and max age 0
+			cookie = ResponseCookie.from(this.cookieName, "")
+					.maxAge(Duration.ZERO)
+					.path(this.cookiePath)
+					.domain(this.cookieDomain)
+					.secure(this.cookieSecure)
+					.httpOnly(this.cookieHttpOnly)
+					.sameSite(this.cookieSameSite)
+					.build();
 		}
+		response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 		request.setAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME,
 				(locale != null ? locale : this.defaultLocaleFunction.apply(request)));
 		request.setAttribute(TIME_ZONE_REQUEST_ATTRIBUTE_NAME,

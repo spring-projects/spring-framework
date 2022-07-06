@@ -99,6 +99,8 @@ class LocaleResolverTests {
 
 			if (localeContextResolver instanceof AbstractLocaleContextResolver) {
 				((AbstractLocaleContextResolver) localeContextResolver).setDefaultTimeZone(TimeZone.getTimeZone("GMT+1"));
+				request.removeAttribute(CookieLocaleResolver.LOCALE_REQUEST_ATTRIBUTE_NAME);
+				localeContextResolver.resolveLocaleContext(request);
 				assertThat(TimeZone.getTimeZone("GMT+1")).isEqualTo(((TimeZoneAwareLocaleContext) localeContext).getTimeZone());
 			}
 
@@ -134,6 +136,8 @@ class LocaleResolverTests {
 
 				if (localeContextResolver instanceof AbstractLocaleContextResolver) {
 					((AbstractLocaleContextResolver) localeContextResolver).setDefaultLocale(Locale.GERMANY);
+					request.removeAttribute(CookieLocaleResolver.LOCALE_REQUEST_ATTRIBUTE_NAME);
+					localeContextResolver.resolveLocaleContext(request);
 					assertThat(localeContext.getLocale()).isEqualTo(Locale.GERMANY);
 				}
 			}
