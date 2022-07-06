@@ -104,12 +104,23 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 
 	private Function<HttpServletRequest, TimeZone> defaultTimeZoneFunction = request -> getDefaultTimeZone();
 
+
+	/**
+	 * Create a new instance of {@link CookieLocaleResolver} using the supplied
+	 * cookie name.
+	 * @param cookieName the cookie name
+	 * @since 6.0
+	 */
+	public CookieLocaleResolver(String cookieName) {
+		setCookieName(cookieName);
+	}
+
 	/**
 	 * Create a new instance of {@link CookieLocaleResolver} using the
 	 * {@linkplain #DEFAULT_COOKIE_NAME default cookie name}.
 	 */
 	public CookieLocaleResolver() {
-		setCookieName(DEFAULT_COOKIE_NAME);
+		this(DEFAULT_COOKIE_NAME);
 	}
 
 
