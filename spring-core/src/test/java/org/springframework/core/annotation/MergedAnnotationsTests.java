@@ -38,6 +38,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.Ordered;
@@ -74,6 +75,70 @@ import static org.assertj.core.api.Assertions.entry;
  * @see MergedAnnotationClassLoaderTests
  */
 class MergedAnnotationsTests {
+
+	@Nested
+	class ConventionBasedAnnotationAttributeOverrideTests {
+
+		@Test
+		void getWithInheritedAnnotationsAttributesWithConventionBasedComposedAnnotation() {
+			MergedAnnotation<?> annotation =
+					MergedAnnotations.from(ConventionBasedComposedContextConfigurationClass.class,
+						SearchStrategy.INHERITED_ANNOTATIONS).get(ContextConfiguration.class);
+			assertThat(annotation.isPresent()).isTrue();
+			assertThat(annotation.getStringArray("locations")).containsExactly("explicitDeclaration");
+			assertThat(annotation.getStringArray("value")).containsExactly("explicitDeclaration");
+		}
+
+		@Test
+		void getWithInheritedAnnotationsFromHalfConventionBasedAndHalfAliasedComposedAnnotation1() {
+			// SPR-13554: convention mapping mixed with AliasFor annotations
+			// xmlConfigFiles can be used because it has an AliasFor annotation
+			MergedAnnotation<?> annotation =
+					MergedAnnotations.from(HalfConventionBasedAndHalfAliasedComposedContextConfigurationClass1.class,
+						SearchStrategy.INHERITED_ANNOTATIONS).get(ContextConfiguration.class);
+			assertThat(annotation.getStringArray("locations")).containsExactly("explicitDeclaration");
+			assertThat(annotation.getStringArray("value")).containsExactly("explicitDeclaration");
+		}
+
+		@Test
+		void withInheritedAnnotationsFromHalfConventionBasedAndHalfAliasedComposedAnnotation2() {
+			// SPR-13554: convention mapping mixed with AliasFor annotations
+			// locations doesn't apply because it has no AliasFor annotation
+			MergedAnnotation<?> annotation =
+					MergedAnnotations.from(HalfConventionBasedAndHalfAliasedComposedContextConfigurationClass2.class,
+						SearchStrategy.INHERITED_ANNOTATIONS).get(ContextConfiguration.class);
+			assertThat(annotation.getStringArray("locations")).isEmpty();
+			assertThat(annotation.getStringArray("value")).isEmpty();
+		}
+
+		@Test
+		void getWithInheritedAnnotationsFromInvalidConventionBasedComposedAnnotation() {
+			assertThatExceptionOfType(AnnotationConfigurationException.class)
+				.isThrownBy(() -> MergedAnnotations.from(InvalidConventionBasedComposedContextConfigurationClass.class,
+							SearchStrategy.INHERITED_ANNOTATIONS).get(ContextConfiguration.class));
+		}
+
+		@Test
+		void getWithTypeHierarchyWithSingleElementOverridingAnArrayViaConvention() {
+			testGetWithTypeHierarchy(ConventionBasedSinglePackageComponentScanClass.class, "com.example.app.test");
+		}
+
+		@Test
+		void getWithTypeHierarchyWithLocalAliasesThatConflictWithAttributesInMetaAnnotationByConvention() {
+			MergedAnnotation<?> annotation =
+					MergedAnnotations.from(SpringApplicationConfigurationClass.class, SearchStrategy.TYPE_HIERARCHY)
+						.get(ContextConfiguration.class);
+			assertThat(annotation.getStringArray("locations")).isEmpty();
+			assertThat(annotation.getStringArray("value")).isEmpty();
+			assertThat(annotation.getClassArray("classes")).containsExactly(Number.class);
+		}
+
+		@Test
+		void getWithTypeHierarchyOnMethodWithSingleElementOverridingAnArrayViaConvention() throws Exception {
+			testGetWithTypeHierarchyWebMapping(WebController.class.getMethod("postMappedWithPathAttribute"));
+		}
+
+	}
 
 	@Test
 	void fromPreconditions() {
@@ -347,41 +412,7 @@ class MergedAnnotationsTests {
 		assertThat(annotation.isPresent()).isTrue();
 	}
 
-	@Test
-	void getWithInheritedAnnotationsAttributesWithConventionBasedComposedAnnotation() {
-		MergedAnnotation<?> annotation = MergedAnnotations.from(
-				ConventionBasedComposedContextConfigurationClass.class,
-				SearchStrategy.INHERITED_ANNOTATIONS).get(ContextConfiguration.class);
-		assertThat(annotation.isPresent()).isTrue();
-		assertThat(annotation.getStringArray("locations")).containsExactly(
-				"explicitDeclaration");
-		assertThat(annotation.getStringArray("value")).containsExactly(
-				"explicitDeclaration");
-	}
 
-	@Test
-	void getWithInheritedAnnotationsFromHalfConventionBasedAndHalfAliasedComposedAnnotation1() {
-		// SPR-13554: convention mapping mixed with AliasFor annotations
-		// xmlConfigFiles can be used because it has an AliasFor annotation
-		MergedAnnotation<?> annotation = MergedAnnotations.from(
-				HalfConventionBasedAndHalfAliasedComposedContextConfigurationClass1.class,
-				SearchStrategy.INHERITED_ANNOTATIONS).get(ContextConfiguration.class);
-		assertThat(annotation.getStringArray("locations")).containsExactly(
-				"explicitDeclaration");
-		assertThat(annotation.getStringArray("value")).containsExactly(
-				"explicitDeclaration");
-	}
-
-	@Test
-	void withInheritedAnnotationsFromHalfConventionBasedAndHalfAliasedComposedAnnotation2() {
-		// SPR-13554: convention mapping mixed with AliasFor annotations
-		// locations doesn't apply because it has no AliasFor annotation
-		MergedAnnotation<?> annotation = MergedAnnotations.from(
-				HalfConventionBasedAndHalfAliasedComposedContextConfigurationClass2.class,
-				SearchStrategy.INHERITED_ANNOTATIONS).get(ContextConfiguration.class);
-		assertThat(annotation.getStringArray("locations")).isEmpty();
-		assertThat(annotation.getStringArray("value")).isEmpty();
-	}
 
 	@Test
 	void withInheritedAnnotationsFromAliasedComposedAnnotation() {
@@ -457,13 +488,6 @@ class MergedAnnotationsTests {
 		assertThat(annotation.getStringArray("locations")).isEqualTo(expected);
 		assertThat(annotation.getStringArray("value")).isEqualTo(expected);
 		assertThat(annotation.getClassArray("classes")).isEmpty();
-	}
-
-	@Test
-	void getWithInheritedAnnotationsFromInvalidConventionBasedComposedAnnotation() {
-		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
-				MergedAnnotations.from(InvalidConventionBasedComposedContextConfigurationClass.class,
-						SearchStrategy.INHERITED_ANNOTATIONS).get(ContextConfiguration.class));
 	}
 
 	@Test
@@ -629,11 +653,6 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void getWithTypeHierarchyWithSingleElementOverridingAnArrayViaConvention() {
-		testGetWithTypeHierarchy(ConventionBasedSinglePackageComponentScanClass.class, "com.example.app.test");
-	}
-
-	@Test
 	void getWithTypeHierarchyWithSingleElementOverridingAnArrayViaAliasFor() {
 		testGetWithTypeHierarchy(AliasForBasedSinglePackageComponentScanClass.class, "com.example.app.test");
 	}
@@ -659,22 +678,6 @@ class MergedAnnotationsTests {
 				"test.properties");
 		assertThat(testPropSource.getStringArray("value")).containsExactly(
 				"test.properties");
-	}
-
-	@Test
-	void getWithTypeHierarchyWithLocalAliasesThatConflictWithAttributesInMetaAnnotationByConvention() {
-		MergedAnnotation<?> annotation = MergedAnnotations.from(
-				SpringApplicationConfigurationClass.class, SearchStrategy.TYPE_HIERARCHY).get(
-						ContextConfiguration.class);
-		assertThat(annotation.getStringArray("locations")).isEmpty();
-		assertThat(annotation.getStringArray("value")).isEmpty();
-		assertThat(annotation.getClassArray("classes")).containsExactly(Number.class);
-	}
-
-	@Test
-	void getWithTypeHierarchyOnMethodWithSingleElementOverridingAnArrayViaConvention() throws Exception {
-		testGetWithTypeHierarchyWebMapping(
-				WebController.class.getMethod("postMappedWithPathAttribute"));
 	}
 
 	@Test
