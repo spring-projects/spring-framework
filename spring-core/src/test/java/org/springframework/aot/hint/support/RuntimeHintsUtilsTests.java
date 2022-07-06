@@ -16,11 +16,8 @@
 
 package org.springframework.aot.hint.support;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
@@ -102,21 +99,7 @@ class RuntimeHintsUtilsTests {
 	}
 
 
-	@SampleInvoker
-	static class SampleInvokerClass {
-	}
-
-	@RetryInvoker
-	static class RetryInvokerClass {
-	}
-
-	@RetryWithEnabledFlagInvoker
-	static class RetryWithEnabledFlagInvokerClass {
-	}
-
-	@Target({ ElementType.TYPE, ElementType.ANNOTATION_TYPE })
 	@Retention(RetentionPolicy.RUNTIME)
-	@Documented
 	@interface LocalMapping {
 
 		@AliasFor("retries")
@@ -128,18 +111,14 @@ class RuntimeHintsUtilsTests {
 	}
 
 
-	@Target({ ElementType.TYPE, ElementType.ANNOTATION_TYPE })
 	@Retention(RetentionPolicy.RUNTIME)
-	@Documented
 	@interface SampleInvoker {
 
 		int retries() default 0;
 
 	}
 
-	@Target({ ElementType.TYPE })
 	@Retention(RetentionPolicy.RUNTIME)
-	@Documented
 	@SampleInvoker
 	@interface RetryInvoker {
 
@@ -148,9 +127,7 @@ class RuntimeHintsUtilsTests {
 
 	}
 
-	@Target({ ElementType.TYPE })
 	@Retention(RetentionPolicy.RUNTIME)
-	@Documented
 	@RetryInvoker
 	@interface RetryWithEnabledFlagInvoker {
 
