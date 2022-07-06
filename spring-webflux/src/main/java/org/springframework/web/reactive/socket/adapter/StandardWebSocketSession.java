@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,20 +46,13 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 public class StandardWebSocketSession extends AbstractListenerWebSocketSession<Session> {
 
 	public StandardWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory) {
-		this(session, info, factory, (Sinks.Empty<Void>) null);
+		this(session, info, factory, null);
 	}
 
 	public StandardWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory,
 			@Nullable Sinks.Empty<Void> completionSink) {
 
 		super(session, session.getId(), info, factory, completionSink);
-	}
-
-	@Deprecated
-	public StandardWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory,
-			@Nullable reactor.core.publisher.MonoProcessor<Void> completionMono) {
-
-		super(session, session.getId(), info, factory, completionMono);
 	}
 
 
