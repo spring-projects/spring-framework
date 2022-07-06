@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.BootstrapTestUtils;
 import org.springframework.test.context.ContextConfiguration;
@@ -466,6 +467,7 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 	@Target(ElementType.TYPE)
 	public static @interface SpringAppConfig {
 
+		@AliasFor(annotation = ContextConfiguration.class)
 		Class<?>[] classes() default {};
 	}
 
