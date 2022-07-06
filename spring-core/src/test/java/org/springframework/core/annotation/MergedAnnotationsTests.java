@@ -232,7 +232,7 @@ class MergedAnnotationsTests {
 		}
 
 		@Test
-		void withInheritedAnnotationsFromHalfConventionBasedAndHalfAliasedComposedAnnotation2() {
+		void getWithInheritedAnnotationsFromHalfConventionBasedAndHalfAliasedComposedAnnotation2() {
 			// SPR-13554: convention mapping mixed with AliasFor annotations
 			// locations doesn't apply because it has no AliasFor annotation
 			MergedAnnotation<?> annotation =
