@@ -621,6 +621,11 @@ class CrossOriginTests {
 			}
 			return super.initLookupPath(request);
 		}
+
+		@Override
+		public String toString() {
+			return "PatternParser = " + (getPatternParser() != null ? getPatternParser().getClass().getSimpleName() : null) ;
+		}
 	}
 
 }
