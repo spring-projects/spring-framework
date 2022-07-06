@@ -271,10 +271,10 @@ final class AnnotationTypeMapping {
 		int[] mappings = this.conventionMappings;
 		for (int i = 0; i < mappings.length; i++) {
 			String name = this.attributes.get(i).getName();
-			MirrorSet mirrors = getMirrorSets().getAssigned(i);
 			int mapped = rootAttributes.indexOf(name);
 			if (!MergedAnnotation.VALUE.equals(name) && mapped != -1) {
 				mappings[i] = mapped;
+				MirrorSet mirrors = getMirrorSets().getAssigned(i);
 				if (mirrors != null) {
 					for (int j = 0; j < mirrors.size(); j++) {
 						mappings[mirrors.getAttributeIndex(j)] = mapped;
@@ -509,7 +509,6 @@ final class AnnotationTypeMapping {
 	 * @return {@code true} if the value is equivalent to the default value
 	 */
 	boolean isEquivalentToDefaultValue(int attributeIndex, Object value, ValueExtractor valueExtractor) {
-
 		Method attribute = this.attributes.get(attributeIndex);
 		return isEquivalentToDefaultValue(attribute, value, valueExtractor);
 	}
