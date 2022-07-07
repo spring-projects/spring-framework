@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -272,7 +272,7 @@ final class AnnotationTypeMapping {
 		for (int i = 0; i < mappings.length; i++) {
 			String name = this.attributes.get(i).getName();
 			int mapped = rootAttributes.indexOf(name);
-			if (!MergedAnnotation.VALUE.equals(name) && mapped != -1) {
+			if (!MergedAnnotation.VALUE.equals(name) && mapped != -1 && !isExplicitAttributeOverride(name)) {
 				mappings[i] = mapped;
 				MirrorSet mirrors = getMirrorSets().getAssigned(i);
 				if (mirrors != null) {
@@ -282,6 +282,27 @@ final class AnnotationTypeMapping {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Determine if the given annotation attribute in the {@linkplain #getRoot()
+	 * root annotation} is an explicit annotation attribute override for an
+	 * attribute in a meta-annotation, explicit in the sense that the override
+	 * is declared via {@link AliasFor @AliasFor}.
+	 * <p>If the named attribute does not exist in the root annotation, this
+	 * method returns {@code false}.
+	 * @param name the name of the annotation attribute to check
+	 * @since 6.0
+	 */
+	private boolean isExplicitAttributeOverride(String name) {
+		Method attribute = this.root.getAttributes().get(name);
+		if (attribute != null) {
+			AliasFor aliasFor = AnnotationsScanner.getDeclaredAnnotation(attribute, AliasFor.class);
+			return ((aliasFor != null) &&
+					(aliasFor.annotation() != Annotation.class) &&
+					(aliasFor.annotation() != this.root.annotationType));
+		}
+		return false;
 	}
 
 	private void addConventionAnnotationValues() {
