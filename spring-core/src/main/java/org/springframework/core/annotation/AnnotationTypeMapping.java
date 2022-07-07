@@ -28,6 +28,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.MirrorSet;
 import org.springframework.lang.Nullable;
@@ -45,6 +49,17 @@ import org.springframework.util.StringUtils;
  * @see AnnotationTypeMappings
  */
 final class AnnotationTypeMapping {
+
+	private static final Log logger = LogFactory.getLog(AnnotationTypeMapping.class);
+
+	/**
+	 * Set of fully qualified class names concatenated with attribute names for
+	 * annotations which we have already checked for use of convention-based
+	 * annotation attribute overrides.
+	 * @since 6.0
+	 * @see #addConventionMappings()
+	 */
+	private static final Set<String> conventionBasedOverrideCheckCache = ConcurrentHashMap.newKeySet();
 
 	private static final MirrorSet[] EMPTY_MIRROR_SETS = new MirrorSet[0];
 
@@ -273,6 +288,21 @@ final class AnnotationTypeMapping {
 			String name = this.attributes.get(i).getName();
 			int mapped = rootAttributes.indexOf(name);
 			if (!MergedAnnotation.VALUE.equals(name) && mapped != -1 && !isExplicitAttributeOverride(name)) {
+				String rootAnnotationTypeName = this.root.annotationType.getName();
+				// We want to avoid duplicate log warnings as much as possible, without
+				// fully synchronizing on the cache.
+				String cacheKey = rootAnnotationTypeName + "." + name;
+				if (!conventionBasedOverrideCheckCache.contains(cacheKey)) {
+					conventionBasedOverrideCheckCache.add(cacheKey);
+					if (logger.isWarnEnabled()) {
+						logger.warn("""
+								Support for convention-based annotation attribute overrides is \
+								deprecated and will be removed in Spring Framework 6.1. Please \
+								annotate the '%s' attribute in @%s with an appropriate @AliasFor \
+								declaration."""
+									.formatted(name, rootAnnotationTypeName));
+					}
+				}
 				mappings[i] = mapped;
 				MirrorSet mirrors = getMirrorSets().getAssigned(i);
 				if (mirrors != null) {
