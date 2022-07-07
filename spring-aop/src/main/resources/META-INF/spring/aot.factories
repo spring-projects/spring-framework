@@ -1,4 +1,2 @@
 org.springframework.beans.factory.aot.BeanRegistrationAotProcessor=\
 org.springframework.aop.scope.ScopedProxyBeanRegistrationAotProcessor
-org.springframework.aot.hint.RuntimeHintsRegistrar=\
-org.springframework.aop.SpringProxyRuntimeHintsRegistrar
