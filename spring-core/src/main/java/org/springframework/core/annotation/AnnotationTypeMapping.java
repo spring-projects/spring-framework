@@ -289,19 +289,15 @@ final class AnnotationTypeMapping {
 			int mapped = rootAttributes.indexOf(name);
 			if (!MergedAnnotation.VALUE.equals(name) && mapped != -1 && !isExplicitAttributeOverride(name)) {
 				String rootAnnotationTypeName = this.root.annotationType.getName();
-				// We want to avoid duplicate log warnings as much as possible, without
-				// fully synchronizing on the cache.
 				String cacheKey = rootAnnotationTypeName + "." + name;
-				if (!conventionBasedOverrideCheckCache.contains(cacheKey)) {
-					conventionBasedOverrideCheckCache.add(cacheKey);
-					if (logger.isWarnEnabled()) {
-						logger.warn("""
-								Support for convention-based annotation attribute overrides is \
-								deprecated and will be removed in Spring Framework 6.1. Please \
-								annotate the '%s' attribute in @%s with an appropriate @AliasFor \
-								declaration."""
-									.formatted(name, rootAnnotationTypeName));
-					}
+				// We want to avoid duplicate log warnings as much as possible, without full synchronization.
+				if (conventionBasedOverrideCheckCache.add(cacheKey) && logger.isWarnEnabled()) {
+					logger.warn("""
+							Support for convention-based annotation attribute overrides is \
+							deprecated and will be removed in Spring Framework 6.1. Please \
+							annotate the '%s' attribute in @%s with an appropriate @AliasFor \
+							declaration."""
+								.formatted(name, rootAnnotationTypeName));
 				}
 				mappings[i] = mapped;
 				MirrorSet mirrors = getMirrorSets().getAssigned(i);
