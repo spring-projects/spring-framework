@@ -56,7 +56,7 @@ import org.springframework.util.StringUtils;
  */
 public class ServletServerHttpRequest implements ServerHttpRequest {
 
-	protected static final String FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
+	protected static final String FORM_CONTENT_TYPE = MediaType.APPLICATION_FORM_URLENCODED_VALUE;
 
 	protected static final Charset FORM_CHARSET = StandardCharsets.UTF_8;
 

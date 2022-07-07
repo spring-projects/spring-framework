@@ -50,6 +50,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
@@ -989,7 +990,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 			else {
 				// Avoid request body parsing for form data
-				params = (StringUtils.startsWithIgnoreCase(contentType, "application/x-www-form-urlencoded") ||
+				params = (StringUtils.startsWithIgnoreCase(contentType, MediaType.APPLICATION_FORM_URLENCODED_VALUE) ||
 						!request.getParameterMap().isEmpty() ? "masked" : "");
 			}
 
