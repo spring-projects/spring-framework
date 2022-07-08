@@ -170,7 +170,6 @@ public class TransactionBeanRegistrationAotProcessorTests {
 
 	static class TransactionalOnInterfaceMethodBean implements TransactionalOnMethodInterface {
 
-		@Transactional
 		public void transactional() {
 		}
 	}
