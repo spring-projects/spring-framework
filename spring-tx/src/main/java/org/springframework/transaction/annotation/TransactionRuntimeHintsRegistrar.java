@@ -30,6 +30,7 @@ import static java.util.Arrays.asList;
  *
  * @author Sebastien Deleuze
  * @since 6.0
+ * @see TransactionBeanRegistrationAotProcessor
  */
 public class TransactionRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
 
