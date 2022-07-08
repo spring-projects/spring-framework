@@ -87,7 +87,7 @@ final class AnnotationTypeMappings {
 				continue;
 			}
 			Annotation[] repeatedAnnotations = this.repeatableContainers.findRepeatedAnnotations(metaAnnotation);
-			if (repeatedAnnotations != null) {
+			if (repeatedAnnotations != null && repeatedAnnotations.length > 0) {
 				for (Annotation repeatedAnnotation : repeatedAnnotations) {
 					if (!isMappable(source, repeatedAnnotation)) {
 						continue;
