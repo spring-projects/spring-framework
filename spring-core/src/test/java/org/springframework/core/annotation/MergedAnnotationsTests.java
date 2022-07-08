@@ -2425,6 +2425,8 @@ class MergedAnnotationsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ConventionBasedComposedContextConfiguration {
 
+		// Do NOT use @AliasFor here until Spring 6.1
+		// @AliasFor(annotation = ContextConfiguration.class)
 		String[] locations() default {};
 	}
 
@@ -2432,6 +2434,8 @@ class MergedAnnotationsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface InvalidConventionBasedComposedContextConfiguration {
 
+		// Do NOT use @AliasFor here until Spring 6.1
+		// @AliasFor(annotation = ContextConfiguration.class)
 		String[] locations();
 	}
 
@@ -2443,6 +2447,8 @@ class MergedAnnotationsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface HalfConventionBasedAndHalfAliasedComposedContextConfiguration {
 
+		// Do NOT use @AliasFor here until Spring 6.1
+		// @AliasFor(annotation = ContextConfiguration.class)
 		String[] locations() default {};
 
 		@AliasFor(annotation = ContextConfiguration.class, attribute = "locations")
@@ -2564,9 +2570,13 @@ class MergedAnnotationsTests {
 		@AliasFor(annotation = ContextConfiguration.class, attribute = "locations")
 		String[] locations() default {};
 
+		// Do NOT use @AliasFor(annotation = ...) here until Spring 6.1
+		// @AliasFor(annotation = ContextConfiguration.class, attribute = "classes")
 		@AliasFor("value")
 		Class<?>[] classes() default {};
 
+		// Do NOT use @AliasFor(annotation = ...) here until Spring 6.1
+		// @AliasFor(annotation = ContextConfiguration.class, attribute = "classes")
 		@AliasFor("classes")
 		Class<?>[] value() default {};
 	}
@@ -2603,6 +2613,8 @@ class MergedAnnotationsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ConventionBasedSinglePackageComponentScan {
 
+		// Do NOT use @AliasFor here until Spring 6.1
+		// @AliasFor(annotation = ComponentScan.class)
 		String basePackages();
 	}
 
@@ -3193,6 +3205,8 @@ class MergedAnnotationsTests {
 	@RequestMapping(method = RequestMethod.POST, name = "")
 	@interface PostMapping {
 
+		// Do NOT use @AliasFor here until Spring 6.1
+		// @AliasFor(annotation = RequestMapping.class)
 		String path() default "";
 	}
 

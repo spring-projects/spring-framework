@@ -549,6 +549,8 @@ class AnnotationMetadataTests {
 	@Target(ElementType.TYPE)
 	public @interface ComposedConfigurationWithAttributeOverrides {
 
+		// Do NOT use @AliasFor here until Spring 6.1
+		// @AliasFor(annotation = TestComponentScan.class)
 		String[] basePackages() default {};
 	}
 

@@ -196,6 +196,8 @@ class TypeMappedAnnotationTests {
 
 		String value() default "";
 
+		// Do NOT use @AliasFor here until Spring 6.1
+		// @AliasFor(annotation = ConventionAliasMetaAnnotationTarget.class)
 		String convention() default "";
 	}
 

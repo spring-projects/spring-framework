@@ -33,6 +33,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Component;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -259,6 +260,7 @@ class BeanMethodQualificationTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface InterestingBeanWithName {
 
+		@AliasFor(annotation = Bean.class)
 		String name();
 	}
 
@@ -271,6 +273,7 @@ class BeanMethodQualificationTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface InterestingNeedWithRequiredOverride {
 
+		@AliasFor(annotation = Autowired.class)
 		boolean required();
 	}
 

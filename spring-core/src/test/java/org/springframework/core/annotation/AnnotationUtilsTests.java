@@ -1367,6 +1367,8 @@ class AnnotationUtilsTests {
 	@WebMapping(method = RequestMethod.POST, name = "")
 	@interface Post {
 
+		// Do NOT use @AliasFor here until Spring 6.1
+		// @AliasFor(annotation = WebMapping.class)
 		String path() default "";
 	}
 
