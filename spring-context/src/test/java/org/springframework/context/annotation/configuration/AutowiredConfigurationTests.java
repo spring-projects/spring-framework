@@ -43,6 +43,7 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.testfixture.stereotype.Component;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -231,6 +232,15 @@ class AutowiredConfigurationTests {
 		assertThat(testBean.getName()).isEqualTo("localhost");
 		assertThat(testBean.getAge()).isEqualTo(contentLength());
 		context.close();
+	}
+
+	@Test
+	void testValueInjectionWithRecord() {
+		System.setProperty("recordBeanName", "recordBean");
+		GenericApplicationContext context = new AnnotationConfigApplicationContext(RecordBean.class);
+		context.refresh();
+		RecordBean recordBean = context.getBean(RecordBean.class);
+		assertThat(recordBean.name()).isEqualTo("recordBean");
 	}
 
 	private int contentLength() throws IOException {
@@ -506,4 +516,8 @@ class AutowiredConfigurationTests {
 		}
 	}
 
+
+	@Component
+	static record RecordBean(@Value("recordBeanName") String name) {
+	}
 }
