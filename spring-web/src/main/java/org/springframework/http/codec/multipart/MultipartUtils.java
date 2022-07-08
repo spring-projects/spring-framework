@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.nio.channels.Channel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
@@ -105,6 +107,14 @@ abstract class MultipartUtils {
 			if (channel.isOpen()) {
 				channel.close();
 			}
+		}
+		catch (IOException ignore) {
+		}
+	}
+
+	public static void deleteFile(Path file) {
+		try {
+			Files.delete(file);
 		}
 		catch (IOException ignore) {
 		}
