@@ -465,7 +465,7 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 	@ContextConfiguration
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface SpringAppConfig {
+	public @interface SpringAppConfig {
 
 		@AliasFor(annotation = ContextConfiguration.class)
 		Class<?>[] classes() default {};

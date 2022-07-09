@@ -408,7 +408,7 @@ class AnnotationMetadataTests {
 
 	// -------------------------------------------------------------------------
 
-	public static enum SomeEnum {
+	public enum SomeEnum {
 		LABEL1, LABEL2, DEFAULT
 	}
 

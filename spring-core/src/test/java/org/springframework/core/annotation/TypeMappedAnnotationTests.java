@@ -132,8 +132,7 @@ class TypeMappedAnnotationTests {
 
 	private AnnotationTypeMapping getMapping(Annotation annotation,
 			Class<? extends Annotation> mappedAnnotationType) {
-		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
-				annotation.annotationType());
+		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(annotation.annotationType());
 		for (int i = 0; i < mappings.size(); i++) {
 			AnnotationTypeMapping candidate = mappings.get(i);
 			if (candidate.getAnnotationType().equals(mappedAnnotationType)) {
@@ -233,7 +232,9 @@ class TypeMappedAnnotationTests {
 		ExampleEnum[] enumValue();
 	}
 
-	enum ExampleEnum {ONE,TWO,THREE}
+	enum ExampleEnum {
+		ONE, TWO, THREE
+	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface NestedContainer {

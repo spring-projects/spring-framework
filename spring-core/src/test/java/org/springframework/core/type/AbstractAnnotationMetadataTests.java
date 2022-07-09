@@ -307,10 +307,10 @@ public abstract class AbstractAnnotationMetadataTests {
 	public static class TestClass {
 	}
 
-	public static interface TestInterface {
+	public interface TestInterface {
 	}
 
-	public static interface TestSubInterface extends TestInterface {
+	public interface TestSubInterface extends TestInterface {
 	}
 
 	public @interface TestAnnotation {

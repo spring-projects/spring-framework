@@ -748,7 +748,7 @@ class GenericConversionServiceTests {
 		}
 	}
 
-	private static interface MyEnumBaseInterface {
+	private interface MyEnumBaseInterface {
 		String getBaseCode();
 	}
 
