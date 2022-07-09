@@ -296,8 +296,8 @@ final class AnnotationTypeMapping {
 							Support for convention-based annotation attribute overrides is \
 							deprecated and will be removed in Spring Framework 6.1. Please \
 							annotate the '%s' attribute in @%s with an appropriate @AliasFor \
-							declaration."""
-								.formatted(name, rootAnnotationTypeName));
+							declaration -- for example, @AliasFor(annotation = %s.class)."""
+								.formatted(name, rootAnnotationTypeName, this.annotationType.getName()));
 				}
 				mappings[i] = mapped;
 				MirrorSet mirrors = getMirrorSets().getAssigned(i);
