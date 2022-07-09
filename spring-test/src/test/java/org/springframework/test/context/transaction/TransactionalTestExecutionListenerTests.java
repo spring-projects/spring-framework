@@ -285,7 +285,7 @@ class TransactionalTestExecutionListenerTests {
 
 	@Transactional
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface MetaTxWithOverride {
+	private @interface MetaTxWithOverride {
 
 		@AliasFor(annotation = Transactional.class, attribute = "value")
 		String transactionManager() default "";

@@ -1770,7 +1770,7 @@ public abstract class AbstractAopProxyTests {
 	}
 
 
-	public static interface IOverloads {
+	public interface IOverloads {
 
 		void overload();
 

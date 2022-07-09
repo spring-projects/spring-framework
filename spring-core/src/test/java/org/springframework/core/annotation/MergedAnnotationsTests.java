@@ -2175,7 +2175,7 @@ class MergedAnnotationsTests {
 		}
 	}
 
-	static interface NonAnnotatedInterface {
+	interface NonAnnotatedInterface {
 	}
 
 	@TransactionalComponent
@@ -2539,7 +2539,7 @@ class MergedAnnotationsTests {
 	}
 
 	@Transactional
-	static interface InterfaceWithInheritedAnnotation {
+	interface InterfaceWithInheritedAnnotation {
 
 		@Order
 		void handleFromInterface();

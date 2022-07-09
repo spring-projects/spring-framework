@@ -382,7 +382,7 @@ class ContextLoaderTests {
 	}
 
 
-	private static interface UnknownApplicationContext extends ConfigurableApplicationContext {
+	private interface UnknownApplicationContext extends ConfigurableApplicationContext {
 
 		void unheardOf();
 	}

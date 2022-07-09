@@ -97,7 +97,7 @@ class AnnotationBackCompatibiltyTests {
 
 	}
 
-	static enum TestEnum {
+	enum TestEnum {
 
 		ONE,
 

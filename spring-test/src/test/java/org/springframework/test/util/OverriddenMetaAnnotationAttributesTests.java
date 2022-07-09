@@ -125,7 +125,7 @@ class OverriddenMetaAnnotationAttributesTests {
 
 	@ContextConfiguration("foo.xml")
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface MetaValueConfig {
+	@interface MetaValueConfig {
 
 		String[] value() default {};
 	}
@@ -140,7 +140,7 @@ class OverriddenMetaAnnotationAttributesTests {
 
 	@ContextConfiguration(locations = "foo.xml", inheritLocations = false)
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface MetaLocationsConfig {
+	@interface MetaLocationsConfig {
 
 		String[] locations() default {};
 

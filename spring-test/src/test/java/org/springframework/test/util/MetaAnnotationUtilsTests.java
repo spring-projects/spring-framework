@@ -480,7 +480,7 @@ class MetaAnnotationUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
 	@Documented
-	static @interface Meta1 {
+	@interface Meta1 {
 	}
 
 	@Component(value = "meta2")
@@ -488,7 +488,7 @@ class MetaAnnotationUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
 	@Documented
-	static @interface Meta2 {
+	@interface Meta2 {
 	}
 
 	@Meta2
@@ -530,7 +530,7 @@ class MetaAnnotationUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
 	@Documented
-	static @interface MetaConfig {
+	@interface MetaConfig {
 
 		static class DevConfig {
 		}
@@ -555,7 +555,7 @@ class MetaAnnotationUtilsTests {
 	}
 
 	@Meta1
-	static interface InterfaceWithMetaAnnotation {
+	interface InterfaceWithMetaAnnotation {
 	}
 
 	static class ClassWithMetaAnnotatedInterface implements InterfaceWithMetaAnnotation {
@@ -592,26 +592,26 @@ class MetaAnnotationUtilsTests {
 	// -------------------------------------------------------------------------
 
 	@Transactional
-	static interface InheritedAnnotationInterface {
+	interface InheritedAnnotationInterface {
 	}
 
-	static interface SubInheritedAnnotationInterface extends InheritedAnnotationInterface {
+	interface SubInheritedAnnotationInterface extends InheritedAnnotationInterface {
 	}
 
-	static interface SubSubInheritedAnnotationInterface extends SubInheritedAnnotationInterface {
+	interface SubSubInheritedAnnotationInterface extends SubInheritedAnnotationInterface {
 	}
 
 	@Order
-	static interface NonInheritedAnnotationInterface {
+	interface NonInheritedAnnotationInterface {
 	}
 
-	static interface SubNonInheritedAnnotationInterface extends NonInheritedAnnotationInterface {
+	interface SubNonInheritedAnnotationInterface extends NonInheritedAnnotationInterface {
 	}
 
 	static class NonAnnotatedClass {
 	}
 
-	static interface NonAnnotatedInterface {
+	interface NonAnnotatedInterface {
 	}
 
 	@Transactional

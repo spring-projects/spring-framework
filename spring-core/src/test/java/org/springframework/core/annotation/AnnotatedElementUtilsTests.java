@@ -1345,7 +1345,7 @@ class AnnotatedElementUtilsTests {
 	}
 
 	@Transactional
-	static interface InterfaceWithInheritedAnnotation {
+	interface InterfaceWithInheritedAnnotation {
 
 		@Order
 		void handleFromInterface();

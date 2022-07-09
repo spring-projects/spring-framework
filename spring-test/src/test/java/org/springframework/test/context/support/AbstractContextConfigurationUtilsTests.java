@@ -149,14 +149,14 @@ abstract class AbstractContextConfigurationUtilsTests {
 	@ActiveProfiles(profiles = "foo")
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface MetaLocationsFooConfig {
+	public @interface MetaLocationsFooConfig {
 	}
 
 	@ContextConfiguration
 	@ActiveProfiles
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface MetaLocationsFooConfigWithOverrides {
+	public @interface MetaLocationsFooConfigWithOverrides {
 
 		String[] locations() default "/foo.xml";
 
@@ -167,7 +167,7 @@ abstract class AbstractContextConfigurationUtilsTests {
 	@ActiveProfiles(profiles = "bar")
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface MetaLocationsBarConfig {
+	public @interface MetaLocationsBarConfig {
 	}
 
 	@MetaLocationsFooConfig
