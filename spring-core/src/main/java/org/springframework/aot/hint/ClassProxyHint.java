@@ -48,11 +48,11 @@ public final class ClassProxyHint implements ConditionalHint {
 
 	/**
 	 * Initialize a builder with the target class to use.
-	 * @param targetClass the target class of the proxy
+	 * @param typeReference the type reference for the target class of the proxy
 	 * @return a builder for the hint
 	 */
-	public static Builder of(TypeReference targetClass) {
-		return new Builder(targetClass);
+	public static Builder of(TypeReference typeReference) {
+		return new Builder(typeReference);
 	}
 
 	/**

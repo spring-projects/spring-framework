@@ -25,8 +25,7 @@ import java.util.Objects;
 import org.springframework.lang.Nullable;
 
 /**
- * A hint that describes the need of a JDK {@link Proxy}, that is an
- * interfaces-based proxy.
+ * A hint that describes the need for a JDK interface-based {@link Proxy}.
  *
  * @author Stephane Nicoll
  * @author Brian Clozel
@@ -145,7 +144,7 @@ public final class JdkProxyHint implements ConditionalHint {
 
 		/**
 		 * Create a {@link JdkProxyHint} based on the state of this builder.
-		 * @return a jdk proxy hint
+		 * @return a JDK proxy hint
 		 */
 		JdkProxyHint build() {
 			return new JdkProxyHint(this);
