@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aop.SpringProxy;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.core.DecoratingProxy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -106,6 +107,58 @@ class AopProxyUtilsTests {
 		Object proxy = Proxy.newProxyInstance(getClass().getClassLoader(), new Class[0],
 				(proxy1, method, args) -> null);
 		assertThatIllegalArgumentException().isThrownBy(() -> AopProxyUtils.proxiedUserInterfaces(proxy));
+	}
+
+	@Test
+	void completeJdkProxyInterfacesFromClassThatIsNotAnInterface() {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> AopProxyUtils.completeJdkProxyInterfaces(TestBean.class))
+			.withMessage(TestBean.class.getName() + " must be an interface");
+	}
+
+	@Test
+	void completeJdkProxyInterfacesFromSingleClass() {
+		Class<?>[] jdkProxyInterfaces = AopProxyUtils.completeJdkProxyInterfaces(ITestBean.class);
+		assertThat(jdkProxyInterfaces).containsExactly(
+				ITestBean.class, SpringProxy.class, Advised.class, DecoratingProxy.class);
+	}
+
+	@Test
+	void completeJdkProxyInterfacesFromMultipleClasses() {
+		Class<?>[] jdkProxyInterfaces = AopProxyUtils.completeJdkProxyInterfaces(ITestBean.class, Comparable.class);
+		assertThat(jdkProxyInterfaces).containsExactly(
+				ITestBean.class, Comparable.class, SpringProxy.class, Advised.class, DecoratingProxy.class);
+	}
+
+	@Test
+	void completeJdkProxyInterfacesIgnoresSealedInterfaces() {
+		Class<?>[] jdkProxyInterfaces = AopProxyUtils.completeJdkProxyInterfaces(SealedInterface.class, Comparable.class);
+		assertThat(jdkProxyInterfaces).containsExactly(
+				Comparable.class, SpringProxy.class, Advised.class, DecoratingProxy.class);
+	}
+
+	@Test
+	void completeJdkProxyInterfacesFromSingleClassName() {
+		String[] jdkProxyInterfaces = AopProxyUtils.completeJdkProxyInterfaces(ITestBean.class.getName());
+		assertThat(jdkProxyInterfaces).containsExactly(
+				ITestBean.class.getName(), SpringProxy.class.getName(), Advised.class.getName(),
+				DecoratingProxy.class.getName());
+	}
+
+	@Test
+	void completeJdkProxyInterfacesFromMultipleClassNames() {
+		String[] jdkProxyInterfaces =
+				AopProxyUtils.completeJdkProxyInterfaces(ITestBean.class.getName(), Comparable.class.getName());
+		assertThat(jdkProxyInterfaces).containsExactly(
+				ITestBean.class.getName(), Comparable.class.getName(), SpringProxy.class.getName(),
+				Advised.class.getName(), DecoratingProxy.class.getName());
+	}
+
+
+	sealed interface SealedInterface {
+	}
+
+	static final class SealedType implements SealedInterface {
 	}
 
 }

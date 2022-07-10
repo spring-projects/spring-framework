@@ -18,11 +18,9 @@ package org.springframework.validation.beanvalidation;
 
 import jakarta.validation.Validator;
 
-import org.springframework.aop.SpringProxy;
-import org.springframework.aop.framework.Advised;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
-import org.springframework.core.DecoratingProxy;
 import org.springframework.lang.Nullable;
 
 /**
@@ -36,6 +34,7 @@ public class MethodValidationRuntimeHintsRegistrar implements RuntimeHintsRegist
 
 	@Override
 	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
-		hints.proxies().registerJdkProxy(Validator.class, SpringProxy.class, Advised.class, DecoratingProxy.class);
+		hints.proxies().registerJdkProxy(AopProxyUtils.completeJdkProxyInterfaces(Validator.class));
 	}
+
 }

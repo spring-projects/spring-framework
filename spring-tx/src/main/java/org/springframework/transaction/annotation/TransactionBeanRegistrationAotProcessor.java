@@ -20,8 +20,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.springframework.aop.SpringProxy;
-import org.springframework.aop.framework.Advised;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
@@ -29,7 +28,6 @@ import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.RegisteredBean;
-import org.springframework.core.DecoratingProxy;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -81,19 +79,15 @@ public class TransactionBeanRegistrationAotProcessor implements BeanRegistration
 		@Override
 		public void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {
 			RuntimeHints runtimeHints = generationContext.getRuntimeHints();
-			LinkedHashSet<Class<?>> interfaces = new LinkedHashSet<>();
 			Class<?>[] proxyInterfaces = ClassUtils.getAllInterfacesForClass(this.beanClass);
 			if (proxyInterfaces.length == 0) {
 				return;
 			}
 			for (Class<?> proxyInterface : proxyInterfaces) {
-				interfaces.add(proxyInterface);
 				runtimeHints.reflection().registerType(proxyInterface, builder -> builder.withMembers(MemberCategory.INVOKE_DECLARED_METHODS));
 			}
-			interfaces.add(SpringProxy.class);
-			interfaces.add(Advised.class);
-			interfaces.add(DecoratingProxy.class);
-			runtimeHints.proxies().registerJdkProxy(interfaces.toArray(Class[]::new));
+			runtimeHints.proxies().registerJdkProxy(AopProxyUtils.completeJdkProxyInterfaces(proxyInterfaces));
 		}
 	}
+
 }

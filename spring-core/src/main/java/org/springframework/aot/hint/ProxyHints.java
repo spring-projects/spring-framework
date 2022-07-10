@@ -80,6 +80,9 @@ public class ProxyHints {
 	/**
 	 * Register that a JDK proxy implementing the specified interfaces is
 	 * required.
+	 * <p>When registering a JDK proxy for Spring AOP, consider using
+	 * {@link org.springframework.aop.framework.AopProxyUtils#completeJdkProxyInterfaces(Class...)
+	 * AopProxyUtils.completeJdkProxyInterfaces()} for convenience.
 	 * @param proxiedInterfaces the interfaces the proxy should implement
 	 * @return {@code this}, to facilitate method chaining
 	 */
@@ -91,6 +94,9 @@ public class ProxyHints {
 	/**
 	 * Register that a JDK proxy implementing the specified interfaces is
 	 * required.
+	 * <p>When registering a JDK proxy for Spring AOP, consider using
+	 * {@link org.springframework.aop.framework.AopProxyUtils#completeJdkProxyInterfaces(String...)
+	 * AopProxyUtils.completeJdkProxyInterfaces()} for convenience.
 	 * @param proxiedInterfaces the fully qualified class names of interfaces the
 	 * proxy should implement
 	 * @return {@code this}, to facilitate method chaining
