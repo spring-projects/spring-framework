@@ -27,6 +27,7 @@ import org.springframework.aot.hint.ClassProxyHint.Builder;
  * Gather the need for using proxies at runtime.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.0
  */
 public class ProxyHints {
@@ -83,6 +84,18 @@ public class ProxyHints {
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public ProxyHints registerJdkProxy(Class<?>... proxiedInterfaces) {
+		return registerJdkProxy(jdkProxyHint ->
+				jdkProxyHint.proxiedInterfaces(proxiedInterfaces));
+	}
+
+	/**
+	 * Register that a JDK proxy implementing the specified interfaces is
+	 * required.
+	 * @param proxiedInterfaces the fully qualified class names of interfaces the
+	 * proxy should implement
+	 * @return {@code this}, to facilitate method chaining
+	 */
+	public ProxyHints registerJdkProxy(String... proxiedInterfaces) {
 		return registerJdkProxy(jdkProxyHint ->
 				jdkProxyHint.proxiedInterfaces(proxiedInterfaces));
 	}

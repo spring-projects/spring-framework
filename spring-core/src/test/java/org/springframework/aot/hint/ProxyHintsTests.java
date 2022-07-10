@@ -32,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * Tests for {@link ProxyHints}.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 class ProxyHintsTests {
 
@@ -52,10 +53,17 @@ class ProxyHintsTests {
 
 	@Test
 	void registerJdkProxyWithInterfaceClassNames() {
+		this.proxyHints.registerJdkProxy(Function.class.getName(), "com.example.Advised");
+		assertThat(this.proxyHints.jdkProxies()).singleElement()
+				.satisfies(proxiedInterfaces(Function.class.getName(), "com.example.Advised"));
+	}
+
+	@Test
+	void registerJdkProxyWithTypeReferences() {
 		this.proxyHints.registerJdkProxy(TypeReference.of(Function.class),
 				TypeReference.of("com.example.Advised"));
-		assertThat(this.proxyHints.jdkProxies()).singleElement().satisfies(proxiedInterfaces(
-				Function.class.getName(), "com.example.Advised"));
+		assertThat(this.proxyHints.jdkProxies()).singleElement()
+				.satisfies(proxiedInterfaces(Function.class.getName(), "com.example.Advised"));
 	}
 
 	@Test
