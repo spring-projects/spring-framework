@@ -48,7 +48,7 @@ import static org.mockito.Mockito.mock;
 
 /**
  * Base class for {@code @RequestAttribute} and {@code @SessionAttribute} method
- * method argument resolution tests.
+ * argument resolution tests.
  *
  * @author Rossen Stoyanchev
  * @since 4.3

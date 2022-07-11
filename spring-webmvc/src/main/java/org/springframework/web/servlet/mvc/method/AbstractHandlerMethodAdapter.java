@@ -62,7 +62,7 @@ public abstract class AbstractHandlerMethodAdapter extends WebContentGenerator i
 	/**
 	 * This implementation expects the handler to be an {@link HandlerMethod}.
 	 * @param handler the handler instance to check
-	 * @return whether or not this adapter can adapt the given handler
+	 * @return whether this adapter can adapt the given handler
 	 */
 	@Override
 	public final boolean supports(Object handler) {
@@ -70,9 +70,9 @@ public abstract class AbstractHandlerMethodAdapter extends WebContentGenerator i
 	}
 
 	/**
-	 * Given a handler method, return whether or not this adapter can support it.
+	 * Given a handler method, return whether this adapter can support it.
 	 * @param handlerMethod the handler method to check
-	 * @return whether or not this adapter can adapt the given method
+	 * @return whether this adapter can adapt the given method
 	 */
 	protected abstract boolean supportsInternal(HandlerMethod handlerMethod);
 

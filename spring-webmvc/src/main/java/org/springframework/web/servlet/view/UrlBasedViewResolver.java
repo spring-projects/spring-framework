@@ -331,10 +331,10 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	}
 
 	/**
-	 * Allow Map access to the static attributes for views returned by
+	 * Allow {@code Map} access to the static attributes for views returned by
 	 * this resolver, with the option to add or override specific entries.
 	 * <p>Useful for specifying entries directly, for example via
-	 * "attributesMap[myKey]". This is particularly useful for
+	 * {@code attributesMap[myKey]}. This is particularly useful for
 	 * adding or overriding entries in child view definitions.
 	 */
 	public Map<String, Object> getAttributesMap() {
@@ -492,7 +492,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	}
 
 	/**
-	 * Indicates whether or not this {@link org.springframework.web.servlet.ViewResolver} can
+	 * Indicates whether this {@link org.springframework.web.servlet.ViewResolver} can
 	 * handle the supplied view name. If not, {@link #createView(String, java.util.Locale)} will
 	 * return {@code null}. The default implementation checks against the configured
 	 * {@link #setViewNames view names}.

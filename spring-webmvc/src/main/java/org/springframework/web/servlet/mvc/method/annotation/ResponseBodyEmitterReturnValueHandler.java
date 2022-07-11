@@ -48,7 +48,7 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Handler for return values of type {@link ResponseBodyEmitter} and sub-classes
+ * Handler for return values of type {@link ResponseBodyEmitter} and subclasses
  * such as {@link SseEmitter} including the same types wrapped with
  * {@link ResponseEntity}.
  *

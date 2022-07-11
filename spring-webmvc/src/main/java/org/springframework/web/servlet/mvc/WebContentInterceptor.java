@@ -56,7 +56,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * {@link PathPattern}s. The syntax is largely the same with the latter being
  * more tailored for web usage and more efficient. The choice depends on the
  * presence of a {@link UrlPathHelper#resolveAndCacheLookupPath resolved}
- * {@code String} lookupPath or a {@link ServletRequestPathUtils#parseAndCache}
+ * {@code String} lookupPath or a {@link ServletRequestPathUtils#parseAndCache
  * parsed} {@code RequestPath} which in turn depends on the
  * {@link HandlerMapping} that matched the current request.
  *
@@ -182,7 +182,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	/**
 	 * Map specific URL paths to a specific {@link org.springframework.http.CacheControl}.
 	 * <p>Overrides the default cache seconds setting of this interceptor.
-	 * Can specify a empty {@link org.springframework.http.CacheControl} instance
+	 * Can specify an empty {@link org.springframework.http.CacheControl} instance
 	 * to exclude a URL path from default caching.
 	 * <p>For pattern syntax see {@link AntPathMatcher} and {@link PathPattern}
 	 * as well as the class-level Javadoc for details for when each is used.
