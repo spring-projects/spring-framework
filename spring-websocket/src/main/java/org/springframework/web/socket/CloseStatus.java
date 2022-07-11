@@ -139,7 +139,7 @@ public final class CloseStatus implements Serializable {
 	public static final CloseStatus TLS_HANDSHAKE_FAILURE = new CloseStatus(1015);
 
 	/**
-	 * A status code for use within the framework the indicate a session has
+	 * A status code for use within the framework that indicates a session has
 	 * become unreliable (e.g. timed out while sending a message) and extra
 	 * care should be exercised, e.g. avoid sending any further data to the
 	 * client that may be done during normal shutdown.

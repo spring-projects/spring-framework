@@ -35,7 +35,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
- * Test fixture for {@link AbstractHttpReceivingTransportHandler} and sub-classes
+ * Test fixture for {@link AbstractHttpReceivingTransportHandler} and subclasses
  * {@link XhrReceivingTransportHandler}.
  *
  * @author Rossen Stoyanchev

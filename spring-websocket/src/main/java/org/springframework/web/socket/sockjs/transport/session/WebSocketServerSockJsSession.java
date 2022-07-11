@@ -159,7 +159,7 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 				delegateConnectionEstablished();
 				this.webSocketSession.sendMessage(new TextMessage(SockJsFrame.openFrame().getContent()));
 
-				// Flush any messages cached in the mean time
+				// Flush any messages cached in the meantime
 				while (!this.initSessionCache.isEmpty()) {
 					writeFrame(SockJsFrame.messageFrame(getMessageCodec(), this.initSessionCache.poll()));
 				}

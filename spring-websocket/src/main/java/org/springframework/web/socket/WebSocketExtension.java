@@ -83,7 +83,7 @@ public class WebSocketExtension {
 
 
 	/**
-	 * Return the name of the extension (never {@code null) or empty}.
+	 * Return the name of the extension (never {@code null} or empty).
 	 */
 	public String getName() {
 		return this.name;

@@ -60,7 +60,7 @@ public interface SockJsServiceConfig {
 	 * property since even streaming transports recycle HTTP requests periodically.
 	 * <p>The amount of time between HTTP requests should be relatively brief and will not
 	 * exceed the allows disconnect delay (see
-	 * {@link org.springframework.web.socket.sockjs.support.AbstractSockJsService#setDisconnectDelay(long)},
+	 * {@link org.springframework.web.socket.sockjs.support.AbstractSockJsService#setDisconnectDelay(long)}),
 	 * 5 seconds by default.
 	 * <p>The default size is 100.
 	 */

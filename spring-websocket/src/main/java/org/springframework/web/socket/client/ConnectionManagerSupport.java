@@ -81,7 +81,7 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 	/**
 	 * Specify the phase in which a connection should be established to the remote
 	 * endpoint and subsequently closed. The startup order proceeds from lowest to
-	 * highest, and the shutdown order is the reverse of that. By default this value is
+	 * highest, and the shutdown order is the reverse of that. By default, this value is
 	 * Integer.MAX_VALUE meaning that this endpoint connection factory connects as late as
 	 * possible and is closed as soon as possible.
 	 */

@@ -95,7 +95,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	 * @param localAddress the address on which the request was received
 	 * @param remoteAddress the address of the remote client
 	 * @param user the user associated with the session; if {@code null} we'll
-	 * fallback on the user available in the underlying WebSocket session
+	 * fall back on the user available in the underlying WebSocket session
 	 */
 	public StandardWebSocketSession(@Nullable HttpHeaders headers, @Nullable Map<String, Object> attributes,
 			@Nullable InetSocketAddress localAddress, @Nullable InetSocketAddress remoteAddress,

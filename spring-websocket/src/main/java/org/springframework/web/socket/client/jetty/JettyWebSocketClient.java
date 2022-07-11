@@ -173,7 +173,7 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 
 	/**
 	 * Return the user to make available through {@link WebSocketSession#getPrincipal()}.
-	 * By default this method returns {@code null}
+	 * By default, this method returns {@code null}
 	 */
 	@Nullable
 	protected Principal getUser() {

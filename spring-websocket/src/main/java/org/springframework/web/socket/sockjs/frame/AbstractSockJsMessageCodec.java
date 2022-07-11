@@ -19,7 +19,7 @@ package org.springframework.web.socket.sockjs.frame;
 import org.springframework.util.Assert;
 
 /**
- * An base class for SockJS message codec that provides an implementation of
+ * A base class for SockJS message codec that provides an implementation of
  * {@link #encode(String[])}.
  *
  * @author Rossen Stoyanchev

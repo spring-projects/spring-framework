@@ -30,7 +30,7 @@ import org.springframework.messaging.simp.annotation.support.SimpAnnotationMetho
 import org.springframework.web.method.ControllerAdviceBean;
 
 /**
- * A sub-class of {@link SimpAnnotationMethodMessageHandler} to provide support
+ * A subclass of {@link SimpAnnotationMethodMessageHandler} to provide support
  * for {@link org.springframework.web.bind.annotation.ControllerAdvice
  * ControllerAdvice} with global {@code @MessageExceptionHandler} methods.
  *

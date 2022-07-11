@@ -36,7 +36,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
- * Test fixture for {@link AbstractHttpSendingTransportHandler} and sub-classes.
+ * Test fixture for {@link AbstractHttpSendingTransportHandler} and subclasses.
  *
  * @author Rossen Stoyanchev
  */

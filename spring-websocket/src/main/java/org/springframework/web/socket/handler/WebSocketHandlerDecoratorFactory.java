@@ -34,7 +34,7 @@ public interface WebSocketHandlerDecoratorFactory {
 	/**
 	 * Decorate the given WebSocketHandler.
 	 * @param handler the handler to be decorated.
-	 * @return the same handler or the handler wrapped with a sub-class of
+	 * @return the same handler or the handler wrapped with a subclass of
 	 * {@code WebSocketHandlerDecorator}.
 	 */
 	WebSocketHandler decorate(WebSocketHandler handler);

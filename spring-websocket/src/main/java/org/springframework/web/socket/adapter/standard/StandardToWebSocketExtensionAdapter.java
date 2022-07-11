@@ -26,7 +26,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.web.socket.WebSocketExtension;
 
 /**
- * A sub-class of {@link org.springframework.web.socket.WebSocketExtension} that
+ * A subclass of {@link org.springframework.web.socket.WebSocketExtension} that
  * can be constructed from an {@link jakarta.websocket.Extension}.
  *
  * @author Rossen Stoyanchev

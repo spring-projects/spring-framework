@@ -52,7 +52,7 @@ public interface WebSocketMessageBrokerConfigurer {
 
 	/**
 	 * Configure the {@link org.springframework.messaging.MessageChannel} used for
-	 * incoming messages from WebSocket clients. By default the channel is backed
+	 * incoming messages from WebSocket clients. By default, the channel is backed
 	 * by a thread pool of size 1. It is recommended to customize thread pool
 	 * settings for production use.
 	 */
@@ -61,7 +61,7 @@ public interface WebSocketMessageBrokerConfigurer {
 
 	/**
 	 * Configure the {@link org.springframework.messaging.MessageChannel} used for
-	 * outbound messages to WebSocket clients. By default the channel is backed
+	 * outbound messages to WebSocket clients. By default, the channel is backed
 	 * by a thread pool of size 1. It is recommended to customize thread pool
 	 * settings for production use.
 	 */
