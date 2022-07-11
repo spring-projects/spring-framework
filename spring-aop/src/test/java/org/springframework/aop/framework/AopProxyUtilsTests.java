@@ -110,10 +110,24 @@ class AopProxyUtilsTests {
 	}
 
 	@Test
+	void completeJdkProxyInterfacesFromNullInterface() {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> AopProxyUtils.completeJdkProxyInterfaces(ITestBean.class, null, Comparable.class))
+			.withMessage("'userInterfaces' must not contain null values");
+	}
+
+	@Test
 	void completeJdkProxyInterfacesFromClassThatIsNotAnInterface() {
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> AopProxyUtils.completeJdkProxyInterfaces(TestBean.class))
-			.withMessage(TestBean.class.getName() + " must be an interface");
+			.withMessage(TestBean.class.getName() + " must be a non-sealed interface");
+	}
+
+	@Test
+	void completeJdkProxyInterfacesFromSealedInterface() {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> AopProxyUtils.completeJdkProxyInterfaces(SealedInterface.class))
+			.withMessage(SealedInterface.class.getName() + " must be a non-sealed interface");
 	}
 
 	@Test
@@ -128,13 +142,6 @@ class AopProxyUtilsTests {
 		Class<?>[] jdkProxyInterfaces = AopProxyUtils.completeJdkProxyInterfaces(ITestBean.class, Comparable.class);
 		assertThat(jdkProxyInterfaces).containsExactly(
 				ITestBean.class, Comparable.class, SpringProxy.class, Advised.class, DecoratingProxy.class);
-	}
-
-	@Test
-	void completeJdkProxyInterfacesIgnoresSealedInterfaces() {
-		Class<?>[] jdkProxyInterfaces = AopProxyUtils.completeJdkProxyInterfaces(SealedInterface.class, Comparable.class);
-		assertThat(jdkProxyInterfaces).containsExactly(
-				Comparable.class, SpringProxy.class, Advised.class, DecoratingProxy.class);
 	}
 
 	@Test
@@ -158,7 +165,7 @@ class AopProxyUtilsTests {
 	sealed interface SealedInterface {
 	}
 
-	static final class SealedType implements SealedInterface {
+	static final class SealedClass implements SealedInterface {
 	}
 
 }
