@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
@@ -32,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * Tests for {@link ProxyHints}.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 class ProxyHintsTests {
 
@@ -51,16 +51,15 @@ class ProxyHintsTests {
 	}
 
 	@Test
-	void registerJdkProxyWithInterfaceClassNames() {
-		this.proxyHints.registerJdkProxy(TypeReference.of(Function.class),
-				TypeReference.of("com.example.Advised"));
-		assertThat(this.proxyHints.jdkProxies()).singleElement().satisfies(proxiedInterfaces(
-				Function.class.getName(), "com.example.Advised"));
+	void registerJdkProxyWithTypeReferences() {
+		this.proxyHints.registerJdkProxy(TypeReference.of(Function.class), TypeReference.of("com.example.Advised"));
+		assertThat(this.proxyHints.jdkProxies()).singleElement()
+				.satisfies(proxiedInterfaces(Function.class.getName(), "com.example.Advised"));
 	}
 
 	@Test
 	void registerJdkProxyWithConsumer() {
-		this.proxyHints.registerJdkProxy(springProxy(TypeReference.of("com.example.Test")));
+		this.proxyHints.registerJdkProxy(springProxy("com.example.Test"));
 		assertThat(this.proxyHints.jdkProxies()).singleElement().satisfies(proxiedInterfaces(
 				"com.example.Test",
 				"org.springframework.aop.SpringProxy",
@@ -97,28 +96,36 @@ class ProxyHintsTests {
 
 	@Test
 	void registerClassProxyWithTargetInterface() {
-		assertThatIllegalArgumentException().isThrownBy(() -> this.proxyHints.registerClassProxy(Serializable.class, classProxyHint -> {
-		})).withMessageContaining(Serializable.class.getName());
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> this.proxyHints.registerClassProxy(Serializable.class, classProxyHint -> {}))
+			.withMessageContaining(Serializable.class.getName());
 	}
 
-	private static Consumer<JdkProxyHint.Builder> springProxy(TypeReference proxiedInterface) {
-		return builder -> builder
-				.proxiedInterfaces(proxiedInterface)
-				.proxiedInterfaces(Stream.of("org.springframework.aop.SpringProxy",
-								"org.springframework.aop.framework.Advised", "org.springframework.core.DecoratingProxy")
-						.map(TypeReference::of).toArray(TypeReference[]::new));
+
+	private static Consumer<JdkProxyHint.Builder> springProxy(String proxiedInterface) {
+		return builder -> builder.proxiedInterfaces(toTypeReferences(
+				proxiedInterface,
+				"org.springframework.aop.SpringProxy",
+				"org.springframework.aop.framework.Advised",
+				"org.springframework.core.DecoratingProxy"));
 	}
 
-	private Consumer<JdkProxyHint> proxiedInterfaces(String... proxiedInterfaces) {
+	private static Consumer<JdkProxyHint> proxiedInterfaces(String... proxiedInterfaces) {
 		return jdkProxyHint -> assertThat(jdkProxyHint.getProxiedInterfaces())
-				.containsExactly(Arrays.stream(proxiedInterfaces)
-						.map(TypeReference::of).toArray(TypeReference[]::new));
+				.containsExactly(toTypeReferences(proxiedInterfaces));
 	}
 
-	private Consumer<JdkProxyHint> proxiedInterfaces(Class<?>... proxiedInterfaces) {
+	private static Consumer<JdkProxyHint> proxiedInterfaces(Class<?>... proxiedInterfaces) {
 		return jdkProxyHint -> assertThat(jdkProxyHint.getProxiedInterfaces())
-				.containsExactly(Arrays.stream(proxiedInterfaces)
-						.map(TypeReference::of).toArray(TypeReference[]::new));
+				.containsExactly(toTypeReferences(proxiedInterfaces));
+	}
+
+	private static TypeReference[] toTypeReferences(String... proxiedInterfaces) {
+		return Arrays.stream(proxiedInterfaces).map(TypeReference::of).toArray(TypeReference[]::new);
+	}
+
+	private static TypeReference[] toTypeReferences(Class<?>... proxiedInterfaces) {
+		return Arrays.stream(proxiedInterfaces).map(TypeReference::of).toArray(TypeReference[]::new);
 	}
 
 }
