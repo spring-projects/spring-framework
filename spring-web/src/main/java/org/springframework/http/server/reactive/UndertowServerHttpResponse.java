@@ -199,7 +199,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 				return false;
 			}
 
-			// Track write listener calls from here on..
+			// Track write listener calls from here on.
 			this.writePossible = false;
 
 			// In case of IOException, onError handling should call discardData(DataBuffer)..
@@ -213,7 +213,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 				return false;
 			}
 
-			// We wrote all, so can still write more..
+			// We wrote all, so can still write more.
 			this.writePossible = true;
 
 			DataBufferUtils.release(dataBuffer);
@@ -288,7 +288,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 		protected boolean isWritePossible() {
 			StreamSinkChannel channel = UndertowServerHttpResponse.this.responseChannel;
 			if (channel != null) {
-				// We can always call flush, just ensure writes are on..
+				// We can always call flush, just ensure writes are on.
 				channel.resumeWrites();
 				return true;
 			}

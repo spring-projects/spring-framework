@@ -492,7 +492,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 	/**
 	 * The state of the parser dealing with multipart bodies. Relays
 	 * data buffers as {@link BodyToken} until the boundary is found (or
-	 * rather: {@code CR LF - - boundary}.
+	 * rather: {@code CR LF - - boundary}).
 	 */
 	private final class BodyState implements State {
 

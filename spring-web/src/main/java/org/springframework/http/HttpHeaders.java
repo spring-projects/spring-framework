@@ -1605,7 +1605,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Retrieve a combined result from the field values of multi-valued headers.
+	 * Retrieve a combined result from the field values of multivalued headers.
 	 * @param headerName the header name
 	 * @return the combined result
 	 * @since 4.3
