@@ -69,7 +69,7 @@ public abstract class ServletContextPropertyUtils {
 	 * @param servletContext the servletContext to use for lookups.
 	 * @param ignoreUnresolvablePlaceholders flag to determine is unresolved placeholders are ignored
 	 * @return the resolved String
-	 * @throws IllegalArgumentException if there is an unresolvable placeholder and the flag is false
+	 * @throws IllegalArgumentException if there is an unresolvable placeholder and the flag is {@code false}
 	 * @see SystemPropertyUtils#PLACEHOLDER_PREFIX
 	 * @see SystemPropertyUtils#PLACEHOLDER_SUFFIX
 	 * @see SystemPropertyUtils#resolvePlaceholders(String, boolean)

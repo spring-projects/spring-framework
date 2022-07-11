@@ -27,7 +27,7 @@ import org.springframework.util.MultiValueMap;
 
 /**
  * Wraps another {@link ClientHttpResponse} and delegates all methods to it.
- * Sub-classes can override specific methods selectively.
+ * Subclasses can override specific methods selectively.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
