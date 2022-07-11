@@ -20,8 +20,8 @@ import org.springframework.core.NativeDetector;
 import org.springframework.core.SpringProperties;
 
 /**
- * Determine if AOT-processed optimizations must be used rather than the
- * regular runtime. Strictly for internal use within the framework.
+ * Utility for determining if AOT-processed optimizations must be used rather
+ * than the regular runtime. Strictly for internal use within the framework.
  *
  * @author Stephane Nicoll
  * @since 6.0
@@ -31,15 +31,15 @@ public abstract class AotDetector {
 	/**
 	 * System property that indicates the application should run with AOT
 	 * generated artifacts. If such optimizations are not available, it is
-	 * recommended to throw an exception rather than falling back to the
-	 * regular runtime behavior.
+	 * recommended to throw an exception rather than fall back to the regular
+	 * runtime behavior.
 	 */
 	public static final String AOT_ENABLED = "spring.aot.enabled";
 
 	/**
-	 * Return whether AOT optimizations must be considered at runtime. This
+	 * Determine whether AOT optimizations must be considered at runtime. This
 	 * is mandatory in a native image but can be triggered on the JVM using
-	 * the {@value AOT_ENABLED} spring property.
+	 * the {@value #AOT_ENABLED} Spring property.
 	 * @return whether AOT optimizations must be considered
 	 */
 	public static boolean useGeneratedArtifacts() {
