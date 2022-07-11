@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class ServerEndpointExporter extends WebApplicationObjectSupport
 	/**
 	 * Explicitly list annotated endpoint types that should be registered on startup. This
 	 * can be done if you wish to turn off a Servlet container's scan for endpoints, which
-	 * goes through all 3rd party jars in the, and rely on Spring configuration instead.
+	 * goes through all 3rd party jars in the classpath, and rely on Spring configuration instead.
 	 * @param annotatedEndpointClasses {@link ServerEndpoint}-annotated types
 	 */
 	public void setAnnotatedEndpointClasses(Class<?>... annotatedEndpointClasses) {

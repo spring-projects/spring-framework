@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * A SockJS implementation of
  * {@link org.springframework.web.socket.client.WebSocketClient WebSocketClient}
  * with fallback alternatives that simulate a WebSocket interaction through plain
- * HTTP streaming and long polling techniques..
+ * HTTP streaming and long polling techniques.
  *
  * <p>Implements {@link Lifecycle} in order to propagate lifecycle events to
  * the transports it is configured with.
@@ -337,7 +337,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 	}
 
 	/**
-	 * By default the result of a SockJS "Info" request, including whether the
+	 * By default, the result of a SockJS "Info" request, including whether the
 	 * server has WebSocket disabled and how long the request took (used for
 	 * calculating transport timeout time) is cached. This method can be used to
 	 * clear that cache hence causing it to re-populate.
