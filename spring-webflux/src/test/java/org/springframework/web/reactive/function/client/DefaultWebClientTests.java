@@ -290,7 +290,7 @@ public class DefaultWebClientTests {
 				.defaultCookie("baz", "qux")
 				.build();
 
-		// Now, verify what each client has..
+		// Now, verify what each client has.
 
 		WebClient.Builder builder1 = client1.mutate();
 		builder1.filters(filters -> assertThat(filters.size()).isEqualTo(1));
