@@ -37,6 +37,8 @@ public abstract class RuntimeHintsPredicates {
 
 	private static final ResourceHintsPredicates resource = new ResourceHintsPredicates();
 
+	private static final SerializationHintsPredicates serialization = new SerializationHintsPredicates();
+
 	private static final ProxyHintsPredicates proxies = new ProxyHintsPredicates();
 
 
@@ -57,6 +59,14 @@ public abstract class RuntimeHintsPredicates {
 	 */
 	public static ResourceHintsPredicates resource() {
 		return resource;
+	}
+
+	/**
+	 * Return a predicate generator for {@link SerializationHints serialization hints}.
+	 * @return the predicate generator
+	 */
+	public static SerializationHintsPredicates serialization() {
+		return serialization;
 	}
 
 	/**
