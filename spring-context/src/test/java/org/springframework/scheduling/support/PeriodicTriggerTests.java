@@ -44,6 +44,7 @@ public class PeriodicTriggerTests {
 
 	@Test
 	public void fixedDelayWithInitialDelayFirstExecution() {
+	@SuppressWarnings("deprecation")
 		Instant now = Instant.now();
 		long period = 5000;
 		long initialDelay = 30000;
@@ -83,6 +84,7 @@ public class PeriodicTriggerTests {
 
 	@Test
 	public void fixedDelayWithInitialDelaySubsequentExecution() {
+	@SuppressWarnings("deprecation")
 		Instant now = Instant.now();
 		long period = 5000;
 		long initialDelay = 30000;
@@ -121,6 +123,7 @@ public class PeriodicTriggerTests {
 
 	@Test
 	public void fixedRateWithInitialDelayFirstExecution() {
+	@SuppressWarnings("deprecation")
 		Instant now = Instant.now();
 		long period = 5000;
 		long initialDelay = 30000;
@@ -155,6 +158,7 @@ public class PeriodicTriggerTests {
 
 	@Test
 	public void fixedRateWithInitialDelaySubsequentExecution() {
+	@SuppressWarnings("deprecation")
 		Instant now = Instant.now();
 		long period = 5000;
 		long initialDelay = 30000;
@@ -177,6 +181,7 @@ public class PeriodicTriggerTests {
 
 	@Test
 	public void equalsVerification() {
+	@SuppressWarnings("deprecation")
 		PeriodicTrigger trigger1 = new PeriodicTrigger(Duration.ofMillis(3000));
 		PeriodicTrigger trigger2 = new PeriodicTrigger(Duration.ofMillis(3000));
 		assertThat(trigger1.equals(new String("not a trigger"))).isFalse();

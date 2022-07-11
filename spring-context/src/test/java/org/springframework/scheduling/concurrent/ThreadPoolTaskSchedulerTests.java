@@ -88,6 +88,7 @@ public class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutor
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void scheduleOneTimeTask() throws Exception {
 		TestTask task = new TestTask(this.testName, 1);
 		Future<?> future = scheduler.schedule(task, new Date());
@@ -98,6 +99,7 @@ public class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutor
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void scheduleOneTimeFailingTaskWithoutErrorHandler() throws Exception {
 		TestTask task = new TestTask(this.testName, 0);
 		Future<?> future = scheduler.schedule(task, new Date());
@@ -106,6 +108,7 @@ public class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutor
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void scheduleOneTimeFailingTaskWithErrorHandler() throws Exception {
 		TestTask task = new TestTask(this.testName, 0);
 		TestErrorHandler errorHandler = new TestErrorHandler(1);
