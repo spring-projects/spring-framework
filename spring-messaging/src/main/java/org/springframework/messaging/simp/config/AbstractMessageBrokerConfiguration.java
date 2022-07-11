@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.lang.Nullable;
@@ -41,10 +42,12 @@ import org.springframework.messaging.converter.KotlinSerializationJsonMessageCon
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
+import org.springframework.messaging.handler.annotation.MessagingAnnotationsRuntimeHintsRegistrar;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.annotation.SimpAnnotationsRuntimeHintsRegistrar;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
 import org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler;
 import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
@@ -95,6 +98,7 @@ import org.springframework.validation.Validator;
  * @author Sebastien Deleuze
  * @since 4.0
  */
+@ImportRuntimeHints({ MessagingAnnotationsRuntimeHintsRegistrar.class, SimpAnnotationsRuntimeHintsRegistrar.class })
 public abstract class AbstractMessageBrokerConfiguration implements ApplicationContextAware {
 
 	private static final String MVC_VALIDATOR_NAME = "mvcValidator";
