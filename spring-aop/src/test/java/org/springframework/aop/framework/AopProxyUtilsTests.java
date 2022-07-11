@@ -144,23 +144,6 @@ class AopProxyUtilsTests {
 				ITestBean.class, Comparable.class, SpringProxy.class, Advised.class, DecoratingProxy.class);
 	}
 
-	@Test
-	void completeJdkProxyInterfacesFromSingleClassName() {
-		String[] jdkProxyInterfaces = AopProxyUtils.completeJdkProxyInterfaces(ITestBean.class.getName());
-		assertThat(jdkProxyInterfaces).containsExactly(
-				ITestBean.class.getName(), SpringProxy.class.getName(), Advised.class.getName(),
-				DecoratingProxy.class.getName());
-	}
-
-	@Test
-	void completeJdkProxyInterfacesFromMultipleClassNames() {
-		String[] jdkProxyInterfaces =
-				AopProxyUtils.completeJdkProxyInterfaces(ITestBean.class.getName(), Comparable.class.getName());
-		assertThat(jdkProxyInterfaces).containsExactly(
-				ITestBean.class.getName(), Comparable.class.getName(), SpringProxy.class.getName(),
-				Advised.class.getName(), DecoratingProxy.class.getName());
-	}
-
 
 	sealed interface SealedInterface {
 	}
