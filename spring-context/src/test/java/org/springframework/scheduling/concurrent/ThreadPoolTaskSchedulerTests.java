@@ -24,6 +24,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
@@ -40,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Sam Brannen
  * @since 3.0
  */
-public class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutorTests {
+class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutorTests {
 
 	private final ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
 
@@ -120,21 +121,14 @@ public class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutor
 		assertThat(errorHandler.lastError).isNotNull();
 	}
 
-	@Test
-	void scheduleTriggerTask() throws Exception {
+	@RepeatedTest(20)
+	void scheduleMultipleTriggerTasks() throws Exception {
 		TestTask task = new TestTask(this.testName, 3);
 		Future<?> future = scheduler.schedule(task, new TestTrigger(3));
 		Object result = future.get(1000, TimeUnit.MILLISECONDS);
 		assertThat(result).isNull();
 		await(task);
 		assertThreadNamePrefix(task);
-	}
-
-	@Test
-	void scheduleMultipleTriggerTasks() throws Exception {
-		for (int i = 0; i < 100; i++) {
-			scheduleTriggerTask();
-		}
 	}
 
 
