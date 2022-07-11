@@ -160,7 +160,7 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 	}
 
 	@Override
-	protected boolean isConnected() {
+	public boolean isConnected() {
 		return (this.webSocketSession != null && this.webSocketSession.isOpen());
 	}
 
