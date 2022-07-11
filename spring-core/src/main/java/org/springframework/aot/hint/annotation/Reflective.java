@@ -33,6 +33,7 @@ import org.springframework.core.annotation.AliasFor;
  * annotated element so that it can be discovered and invoked if necessary.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.0
  * @see SimpleReflectiveProcessor
  */
@@ -45,6 +46,7 @@ public @interface Reflective {
 	/**
 	 * Alias for {@link #processors()}.
 	 */
+	@AliasFor("processors")
 	Class<? extends ReflectiveProcessor>[] value() default SimpleReflectiveProcessor.class;
 
 	/**
