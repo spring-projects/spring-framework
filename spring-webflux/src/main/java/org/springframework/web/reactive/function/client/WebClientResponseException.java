@@ -414,7 +414,7 @@ public class WebClientResponseException extends WebClientException {
 	}
 
 	/**
-	 * {@link WebClientResponseException} for status HTTP HTTP 502 Bad Gateway.
+	 * {@link WebClientResponseException} for HTTP status 502 Bad Gateway.
 	 * @since 5.1
 	 */
 	@SuppressWarnings("serial")

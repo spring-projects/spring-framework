@@ -116,7 +116,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	 * in Java config).
 	 * <p>If not done already, variants of the given {@code pathPatterns}, prefixed with
 	 * the {@code version} will be also configured. For example, adding a {@code "/js/**"} path pattern
-	 * will also cofigure automatically a {@code "/v1.0.0/js/**"} with {@code "v1.0.0"} the
+	 * will also configure automatically a {@code "/v1.0.0/js/**"} with {@code "v1.0.0"} the
 	 * {@code version} String given as an argument.
 	 * @param version a version string
 	 * @param pathPatterns one or more resource URL path patterns,

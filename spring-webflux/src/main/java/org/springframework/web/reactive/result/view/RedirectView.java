@@ -300,7 +300,7 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * This method returns {@code true} if the {@link #setHosts(String[])}
 	 * property is configured and the target URL has a host that does not match.
 	 * @param targetUrl the target redirect URL
-	 * @return {@code true} the target URL has a remote host, {@code false} if it
+	 * @return {@code true} the target URL has a remote host, {@code false} if
 	 * the URL does not have a host or the "host" property is not configured
 	 */
 	protected boolean isRemoteHost(String targetUrl) {

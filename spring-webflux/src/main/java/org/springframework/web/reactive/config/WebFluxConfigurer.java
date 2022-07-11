@@ -54,7 +54,7 @@ public interface WebFluxConfigurer {
 	}
 
 	/**
-	 * Configure "global" cross origin request processing. The configured CORS
+	 * Configure "global" cross-origin request processing. The configured CORS
 	 * mappings apply to annotated controllers, functional endpoints, and static
 	 * resources.
 	 * <p>Annotated controllers can further declare more fine-grained config via
