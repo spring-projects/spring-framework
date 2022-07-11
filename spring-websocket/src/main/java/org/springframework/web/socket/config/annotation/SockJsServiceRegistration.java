@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,7 +120,7 @@ public class SockJsServiceRegistration {
 	 * Streaming transports save responses on the client side and don't free
 	 * memory used by delivered messages. Such transports need to recycle the
 	 * connection once in a while. This property sets a minimum number of bytes
-	 * that can be send over a single HTTP streaming request before it will be
+	 * that can be sent over a single HTTP streaming request before it will be
 	 * closed. After that client will open a new request. Setting this value to
 	 * one effectively disables streaming and will make streaming transports to
 	 * behave like polling transports.

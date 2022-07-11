@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	 * Log category to use on network IO exceptions after a client has gone away.
 	 * <p>Servlet containers don't expose a client disconnected callback; see
 	 * <a href="https://github.com/eclipse-ee4j/servlet-api/issues/44">eclipse-ee4j/servlet-api#44</a>.
-	 * Therefore network IO failures may occur simply because a client has gone away,
+	 * Therefore, network IO failures may occur simply because a client has gone away,
 	 * and that can fill the logs with unnecessary stack traces.
 	 * <p>We make a best effort to identify such network failures, on a per-server
 	 * basis, and log them under a separate log category. A simple one-line message
