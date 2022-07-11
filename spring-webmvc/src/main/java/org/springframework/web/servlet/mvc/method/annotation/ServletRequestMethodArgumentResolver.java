@@ -42,7 +42,7 @@ import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
- * Resolves servlet backed request-related method arguments. Supports values of the
+ * Resolves servlet backed request-related method arguments. It supports values of the
  * following types:
  * <ul>
  * <li>{@link WebRequest}

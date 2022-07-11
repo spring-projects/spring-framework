@@ -40,7 +40,7 @@ import org.springframework.lang.Nullable;
  * <p>Note: {@code HandlerAdapter} implementors may implement the {@link
  * org.springframework.core.Ordered} interface to be able to specify a sorting
  * order (and thus a priority) for getting applied by the {@code DispatcherServlet}.
- * Non-Ordered instances get treated as lowest priority.
+ * Non-Ordered instances get treated as the lowest priority.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -50,7 +50,7 @@ import org.springframework.lang.Nullable;
 public interface HandlerAdapter {
 
 	/**
-	 * Given a handler instance, return whether or not this {@code HandlerAdapter}
+	 * Given a handler instance, return whether this {@code HandlerAdapter}
 	 * can support it. Typical HandlerAdapters will base the decision on the handler
 	 * type. HandlerAdapters will usually only support one handler type each.
 	 * <p>A typical implementation:
@@ -58,7 +58,7 @@ public interface HandlerAdapter {
 	 * return (handler instanceof MyHandler);
 	 * }
 	 * @param handler the handler object to check
-	 * @return whether or not this object can use the given handler
+	 * @return whether this object can use the given handler
 	 */
 	boolean supports(Object handler);
 

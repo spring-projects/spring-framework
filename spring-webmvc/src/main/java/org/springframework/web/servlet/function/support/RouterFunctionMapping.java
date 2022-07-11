@@ -150,7 +150,7 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	}
 
 	/**
-	 * Detect a all {@linkplain RouterFunction router functions} in the
+	 * Detect an all {@linkplain RouterFunction router functions} in the
 	 * current application context.
 	 */
 	private void initRouterFunctions() {

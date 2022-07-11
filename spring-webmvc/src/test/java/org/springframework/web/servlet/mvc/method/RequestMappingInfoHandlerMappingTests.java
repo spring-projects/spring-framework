@@ -314,7 +314,7 @@ class RequestMappingInfoHandlerMappingTests {
 		assertThat(matrixVariables.getFirst("year")).isEqualTo("2012");
 		assertThat(uriVariables.get("cars")).isEqualTo("cars");
 
-		// URI var with regex for path variable, and URI var for matrix params..
+		// URI var with regex for path variable, and URI var for matrix params.
 		request = new MockHttpServletRequest("GET", "/cars;colors=red,blue,green;year=2012");
 		handleMatch(mapping, request, "/{cars:[^;]+}{params}", request.getRequestURI());
 
@@ -329,7 +329,7 @@ class RequestMappingInfoHandlerMappingTests {
 			assertThat(uriVariables.get("params")).isEqualTo(";colors=red,blue,green;year=2012");
 		}
 
-		// URI var with regex for path variable, and (empty) URI var for matrix params..
+		// URI var with regex for path variable, and (empty) URI var for matrix params.
 		request = new MockHttpServletRequest("GET", "/cars");
 		handleMatch(mapping, request, "/{cars:[^;]+}{params}", request.getRequestURI());
 

@@ -46,8 +46,8 @@ import org.springframework.web.servlet.view.script.ScriptTemplateViewResolver;
  * with its order property set to 0 so that other external resolvers may be ordered
  * before or after it.
  *
- * <p>When content negotiation is enabled the order property is set to highest priority
- * instead with the ContentNegotiatingViewResolver encapsulating all other registered
+ * <p>When content negotiation is enabled the order property is set to the highest priority
+ * instead with the ContentNegotiatingViewResolver encapsulating all others registered
  * view resolver instances. That way the resolvers registered through the MVC namespace
  * form a self-encapsulated resolver chain.
  *

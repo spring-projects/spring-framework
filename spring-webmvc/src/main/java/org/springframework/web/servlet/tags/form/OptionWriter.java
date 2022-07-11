@@ -31,7 +31,7 @@ import org.springframework.web.servlet.support.BindStatus;
 
 /**
  * Provides supporting functionality to render a list of '{@code option}'
- * tags based on some source object. This object can be either an array, a
+ * tags based on some source objects. This object can be either an array, a
  * {@link Collection}, or a {@link Map}.
  * <h3>Using an array or a {@link Collection}:</h3>
  * <p>
