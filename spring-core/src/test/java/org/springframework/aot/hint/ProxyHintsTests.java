@@ -39,15 +39,23 @@ class ProxyHintsTests {
 
 
 	@Test
-	void registerJdkProxyWithInterfaceClass() {
-		this.proxyHints.registerJdkProxy(Function.class);
-		assertThat(this.proxyHints.jdkProxies()).singleElement().satisfies(proxiedInterfaces(Function.class));
+	void registerJdkProxyWithSealedInterface() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> this.proxyHints.registerJdkProxy(SealedInterface.class))
+				.withMessageContaining(SealedInterface.class.getName());
 	}
 
 	@Test
 	void registerJdkProxyWithConcreteClass() {
-		assertThatIllegalArgumentException().isThrownBy(() -> this.proxyHints.registerJdkProxy(String.class))
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> this.proxyHints.registerJdkProxy(String.class))
 				.withMessageContaining(String.class.getName());
+	}
+
+	@Test
+	void registerJdkProxyWithInterface() {
+		this.proxyHints.registerJdkProxy(Function.class);
+		assertThat(this.proxyHints.jdkProxies()).singleElement().satisfies(proxiedInterfaces(Function.class));
 	}
 
 	@Test
@@ -126,6 +134,13 @@ class ProxyHintsTests {
 
 	private static TypeReference[] toTypeReferences(Class<?>... proxiedInterfaces) {
 		return Arrays.stream(proxiedInterfaces).map(TypeReference::of).toArray(TypeReference[]::new);
+	}
+
+
+	sealed interface SealedInterface {
+	}
+
+	static final class SealedClass implements SealedInterface {
 	}
 
 }

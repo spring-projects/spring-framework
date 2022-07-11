@@ -151,10 +151,12 @@ public final class JdkProxyHint implements ConditionalHint {
 		}
 
 		private static List<TypeReference> toTypeReferences(Class<?>... proxiedInterfaces) {
-			List<String> concreteTypes = Arrays.stream(proxiedInterfaces)
-					.filter(candidate -> !candidate.isInterface()).map(Class::getName).toList();
-			if (!concreteTypes.isEmpty()) {
-				throw new IllegalArgumentException("Not an interface: " + concreteTypes);
+			List<String> invalidTypes = Arrays.stream(proxiedInterfaces)
+					.filter(candidate -> !candidate.isInterface() || candidate.isSealed())
+					.map(Class::getName)
+					.toList();
+			if (!invalidTypes.isEmpty()) {
+				throw new IllegalArgumentException("The following must be non-sealed interfaces: " + invalidTypes);
 			}
 			return Arrays.stream(proxiedInterfaces).map(TypeReference::of).toList();
 		}
