@@ -284,13 +284,13 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	}
 
 	/**
-	 * Determine whether or not <em>default</em> resource locations should be
+	 * Determine whether <em>default</em> resource locations should be
 	 * generated if the {@code locations} provided to
 	 * {@link #processLocations(Class, String...)} are {@code null} or empty.
 	 * <p>As of Spring 3.1, the semantics of this method have been overloaded
 	 * to include detection of either default resource locations or default
 	 * configuration classes. Consequently, this method can also be used to
-	 * determine whether or not <em>default</em> configuration classes should be
+	 * determine whether <em>default</em> configuration classes should be
 	 * detected if the {@code classes} present in the
 	 * {@link ContextConfigurationAttributes configuration attributes} supplied
 	 * to {@link #processContextConfiguration(ContextConfigurationAttributes)}

@@ -132,9 +132,9 @@ class TestPropertySourceAttributes {
 	}
 
 	/**
-	 * Add all of the supplied elements to the provided list, honoring the
+	 * Add all the supplied elements to the provided list, honoring the
 	 * {@code prepend} flag.
-	 * <p>If the {@code prepend} flag is {@code false}, the elements will appended
+	 * <p>If the {@code prepend} flag is {@code false}, the elements will be appended
 	 * to the list.
 	 * @param prepend whether the elements should be prepended to the list
 	 * @param list the list to which to add the elements

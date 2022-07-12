@@ -231,7 +231,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	/**
-	 * Create a builder with a raw HTTP method value value that is outside the
+	 * Create a builder with a raw HTTP method value that is outside the
 	 * range of {@link HttpMethod} enum values.
 	 * @param httpMethod the HTTP methodValue value
 	 * @param uri the URI template for target the URL
@@ -253,7 +253,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 	/**
 	 * Request builder exposing properties not related to the body.
-	 * @param <B> the builder sub-class
+	 * @param <B> the builder subclass
 	 */
 	public interface BaseBuilder<B extends BaseBuilder<B>> {
 

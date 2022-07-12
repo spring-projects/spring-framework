@@ -453,7 +453,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	}
 
 	/**
-	 * This method could be used from a sub-class to register additional Spring
+	 * This method could be used from a subclass to register additional Spring
 	 * MVC infrastructure such as additional {@code HandlerMapping},
 	 * {@code HandlerAdapter}, and others.
 	 * @param servletContext the ServletContext

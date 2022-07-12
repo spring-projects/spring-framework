@@ -57,7 +57,7 @@ public interface ResultActions {
 	 * <p>If a single {@link Error} or {@link Exception} is thrown, it will
 	 * be rethrown.
 	 * <p>If multiple exceptions are thrown, this method will throw an
-	 * {@link AssertionError} whose error message is a summary of all of the
+	 * {@link AssertionError} whose error message is a summary of all the
 	 * exceptions. In addition, each exception will be added as a
 	 * {@linkplain Throwable#addSuppressed(Throwable) suppressed exception} to
 	 * the {@code AssertionError}.

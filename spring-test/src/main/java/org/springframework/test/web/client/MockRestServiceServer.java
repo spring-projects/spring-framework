@@ -120,7 +120,7 @@ public final class MockRestServiceServer {
 	 * Variant of {@link #verify()} that waits for up to the specified time for
 	 * all expectations to be fulfilled. This can be useful for tests that
 	 * involve asynchronous requests.
-	 * @param timeout how long to wait for all expecations to be met
+	 * @param timeout how long to wait for all expectations to be met
 	 * @throws AssertionError if not all expectations are met by the specified
 	 * timeout, or if any expectation fails at any time before that.
 	 * @since 5.3.4

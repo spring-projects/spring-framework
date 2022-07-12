@@ -150,7 +150,7 @@ public @interface TestPropertySource {
 	String[] locations() default {};
 
 	/**
-	 * Whether or not test property source {@link #locations} from superclasses
+	 * Whether test property source {@link #locations} from superclasses
 	 * and enclosing classes should be <em>inherited</em>.
 	 * <p>The default value is {@code true}, which means that a test class will
 	 * <em>inherit</em> property source locations defined by a superclass or
@@ -230,7 +230,7 @@ public @interface TestPropertySource {
 	String[] properties() default {};
 
 	/**
-	 * Whether or not inlined test {@link #properties} from superclasses and
+	 * Whether inlined test {@link #properties} from superclasses and
 	 * enclosing classes should be <em>inherited</em>.
 	 * <p>The default value is {@code true}, which means that a test class will
 	 * <em>inherit</em> inlined properties defined by a superclass or enclosing

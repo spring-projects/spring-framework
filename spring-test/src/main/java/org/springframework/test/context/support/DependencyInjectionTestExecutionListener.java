@@ -35,7 +35,7 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 
 	/**
 	 * Attribute name for a {@link TestContext} attribute which indicates
-	 * whether or not the dependencies of a test instance should be
+	 * whether the dependencies of a test instance should be
 	 * <em>reinjected</em> in
 	 * {@link #beforeTestMethod(TestContext) beforeTestMethod()}. Note that
 	 * dependencies will be injected in
