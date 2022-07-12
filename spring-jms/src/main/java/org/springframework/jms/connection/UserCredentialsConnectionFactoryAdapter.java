@@ -123,7 +123,7 @@ public class UserCredentialsConnectionFactoryAdapter
 
 
 	/**
-	 * Set user credententials for this proxy and the current thread.
+	 * Set user credentials for this proxy and the current thread.
 	 * The given username and password will be applied to all subsequent
 	 * {@code createConnection()} calls on this ConnectionFactory proxy.
 	 * <p>This will override any statically specified user credentials,

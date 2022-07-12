@@ -465,7 +465,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 
 	/**
 	 * Configure the reply destination type. By default, the configured {@code pubSubDomain}
-	 * value is used (see {@link #isPubSubDomain()}.
+	 * value is used (see {@link #isPubSubDomain()}).
 	 * <p>This setting primarily indicates what type of destination to resolve if dynamic
 	 * destinations are enabled.
 	 * @param replyPubSubDomain "true" for the Publish/Subscribe domain ({@link Topic Topics}),
