@@ -259,9 +259,7 @@ public class ResponseEntityResultHandlerTests {
 				"{\"type\":\"about:blank\"," +
 						"\"title\":\"Bad Request\"," +
 						"\"status\":400," +
-						"\"detail\":null," +
-						"\"instance\":\"/path\"," +
-						"\"properties\":null}");
+						"\"instance\":\"/path\"}");
 	}
 
 	@Test
@@ -280,9 +278,7 @@ public class ResponseEntityResultHandlerTests {
 				"{\"type\":\"about:blank\"," +
 						"\"title\":\"Bad Request\"," +
 						"\"status\":400," +
-						"\"detail\":null," +
-						"\"instance\":\"/path\"," +
-						"\"properties\":null}");
+						"\"instance\":\"/path\"}");
 	}
 
 	@Test

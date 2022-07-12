@@ -24,12 +24,20 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Representation of an RFC 7807 problem detail, including all RFC-defined
- * properties.
+ * Representation for an RFC 7807 problem detail. Includes spec-defined
+ * properties, and a {@link #getProperties() properties} map for additional,
+ * non-standard properties.
  *
- * <p>For an extended response, create a subclass with additional properties.
- * A subclass can use the {@link ProblemDetail#ProblemDetail(ProblemDetail)}
- * copy constructor to extend an existing {@code ProblemDetail} instance.
+ * <p>For an extended response, an application can add to the
+ * {@link #getProperties() properties} map. When using the Jackson library, the
+ * {@code properties} map is expanded as top level JSON properties through the
+ * {@link org.springframework.http.converter.json.ProblemDetailJacksonMixin}.
+ *
+ * <p>For an extended response, an application can also create a subclass with
+ * additional properties. Subclasses can use the protected copy constructor to
+ * re-create an existing {@code ProblemDetail} instance as the subclass, e.g.
+ * from an {@code @ControllerAdvice} such as
+ * {@link org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler}.
  *
  * @author Rossen Stoyanchev
  * @since 6.0
@@ -203,7 +211,9 @@ public class ProblemDetail {
 	}
 
 	/**
-	 * Return a generic map of properties that are not known ahead of time.
+	 * Return a generic map of properties that are not known ahead of time,
+	 * possibly {@code null} if no properties have been added. To add a property,
+	 * use {@link #setProperty(String, Object)}.
 	 */
 	@Nullable
 	public Map<String, Object> getProperties() {
