@@ -637,11 +637,11 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	/**
 	 * Whether the given targetUrl has a host that is a "foreign" system in which
 	 * case {@link HttpServletResponse#encodeRedirectURL} will not be applied.
-	 * This method returns {@code true} if the {@link #setHosts(String[])}
+	 * <p>This method returns {@code true} if the {@link #setHosts(String[])}
 	 * property is configured and the target URL has a host that does not match.
 	 * @param targetUrl the target redirect URL
-	 * @return {@code true} the target URL has a remote host, {@code false} if
-	 * the URL does not have a host or the "host" property is not configured.
+	 * @return {@code true} if the target URL has a remote host, {@code false} if
+	 * the URL does not have a host or the "host" property is not configured
 	 * @since 4.3
 	 */
 	protected boolean isRemoteHost(String targetUrl) {

@@ -525,7 +525,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	/**
 	 * Initialize the strategy to use to determine the media type for a resource.
 	 * @deprecated as of 5.2.4 this method returns {@code null}, and if a
-	 * subclass returns an actual instance,the instance is used only as a
+	 * subclass returns an actual instance, the instance is used only as a
 	 * source of media type mappings, if it contains any. Please, use
 	 * {@link #setMediaTypes(Map)} instead, or if you need to change behavior,
 	 * you can override {@link #getMediaType(HttpServletRequest, Resource)}.
