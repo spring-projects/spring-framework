@@ -331,7 +331,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		}
 
 		/**
-		 * Sub-classes can invoke this before sending a message (false) and
+		 * Subclasses can invoke this before sending a message (false) and
 		 * after receiving the async send callback (true) effective translating
 		 * async completion callback into simple flow control.
 		 */
