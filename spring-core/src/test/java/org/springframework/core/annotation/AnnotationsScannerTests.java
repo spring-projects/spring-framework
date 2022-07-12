@@ -123,7 +123,7 @@ class AnnotationsScannerTests {
 	}
 
 	@Test
-	void inheritedAnnotationsStrategyOnClassWhenHasAnnotationOnBothClassesIncudesOnlyOne() {
+	void inheritedAnnotationsStrategyOnClassWhenHasAnnotationOnBothClassesIncludesOnlyOne() {
 		Class<?> source = WithSingleSuperclassAndDoubleInherited.class;
 		assertThat(Arrays.stream(source.getAnnotations()).map(
 				Annotation::annotationType).map(Class::getName)).containsExactly(

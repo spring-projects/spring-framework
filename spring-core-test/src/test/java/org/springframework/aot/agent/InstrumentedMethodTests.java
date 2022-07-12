@@ -126,7 +126,7 @@ class InstrumentedMethodTests {
 		}
 
 		@Test
-		void classGetConstructorShouldMatchInstrospectPublicConstructorsHint() {
+		void classGetConstructorShouldMatchIntrospectPublicConstructorsHint() {
 			hints.reflection().registerType(String.class, typeHint -> typeHint.withMembers(MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS));
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETCONSTRUCTOR, this.stringGetConstructor);
 		}
@@ -150,7 +150,7 @@ class InstrumentedMethodTests {
 		}
 
 		@Test
-		void classGetConstructorShouldMatchInstrospectConstructorHint() {
+		void classGetConstructorShouldMatchIntrospectConstructorHint() {
 			hints.reflection().registerType(String.class, typeHint -> typeHint.withConstructor(Collections.emptyList(),
 					constructorHint -> constructorHint.setModes(ExecutableMode.INTROSPECT)));
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETCONSTRUCTOR, this.stringGetConstructor);
@@ -200,7 +200,7 @@ class InstrumentedMethodTests {
 		}
 
 		@Test
-		void classGetDeclaredConstructorShouldMatchInstrospectConstructorHint() {
+		void classGetDeclaredConstructorShouldMatchIntrospectConstructorHint() {
 			List<TypeReference> parameterTypes = List.of(TypeReference.of(byte[].class), TypeReference.of(byte.class));
 			hints.reflection().registerType(String.class, typeHint -> typeHint.withConstructor(parameterTypes, constructorHint -> constructorHint.setModes(ExecutableMode.INTROSPECT)));
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETDECLAREDCONSTRUCTOR, this.stringGetDeclaredConstructor);
@@ -317,14 +317,14 @@ class InstrumentedMethodTests {
 		}
 
 		@Test
-		void classGetMethodsShouldMatchInstrospectDeclaredMethodsHint() {
+		void classGetMethodsShouldMatchIntrospectDeclaredMethodsHint() {
 			RecordedInvocation invocation = RecordedInvocation.of(InstrumentedMethod.CLASS_GETMETHODS).onInstance(String.class).build();
 			hints.reflection().registerType(String.class, typeHint -> typeHint.withMembers(MemberCategory.INTROSPECT_DECLARED_METHODS));
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETMETHODS, invocation);
 		}
 
 		@Test
-		void classGetMethodsShouldMatchInstrospectPublicMethodsHint() {
+		void classGetMethodsShouldMatchIntrospectPublicMethodsHint() {
 			RecordedInvocation invocation = RecordedInvocation.of(InstrumentedMethod.CLASS_GETMETHODS).onInstance(String.class).build();
 			hints.reflection().registerType(String.class, hint -> hint.withMembers(MemberCategory.INTROSPECT_PUBLIC_METHODS));
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETMETHODS, invocation);
@@ -352,7 +352,7 @@ class InstrumentedMethodTests {
 		}
 
 		@Test
-		void classGetMethodShouldMatchInstrospectPublicMethodsHint() throws NoSuchMethodException {
+		void classGetMethodShouldMatchIntrospectPublicMethodsHint() throws NoSuchMethodException {
 			hints.reflection().registerType(String.class, typeHint -> typeHint.withMembers(MemberCategory.INTROSPECT_PUBLIC_METHODS));
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETMETHOD, this.stringGetToStringMethod);
 		}
@@ -364,7 +364,7 @@ class InstrumentedMethodTests {
 		}
 
 		@Test
-		void classGetMethodShouldMatchInstrospectDeclaredMethodsHint() throws NoSuchMethodException {
+		void classGetMethodShouldMatchIntrospectDeclaredMethodsHint() throws NoSuchMethodException {
 			hints.reflection().registerType(String.class, typeHint -> typeHint.withMembers(MemberCategory.INTROSPECT_DECLARED_METHODS));
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETMETHOD, this.stringGetToStringMethod);
 		}
@@ -390,13 +390,13 @@ class InstrumentedMethodTests {
 		}
 
 		@Test
-		void classGetMethodShouldNotMatchInstrospectPublicMethodsHintWhenPrivate() throws Exception {
+		void classGetMethodShouldNotMatchIntrospectPublicMethodsHintWhenPrivate() throws Exception {
 			hints.reflection().registerType(String.class, typeHint -> typeHint.withMembers(MemberCategory.INTROSPECT_PUBLIC_METHODS));
 			assertThatInvocationDoesNotMatch(InstrumentedMethod.CLASS_GETMETHOD, this.stringGetScaleMethod);
 		}
 
 		@Test
-		void classGetMethodShouldMatchInstrospectDeclaredMethodsHintWhenPrivate() {
+		void classGetMethodShouldMatchIntrospectDeclaredMethodsHintWhenPrivate() {
 			hints.reflection().registerType(String.class, typeHint -> typeHint.withMembers(MemberCategory.INTROSPECT_DECLARED_METHODS));
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETMETHOD, this.stringGetScaleMethod);
 		}

@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Phillip Webb
  * @since 5.2
  */
-class AnnotationBackCompatibiltyTests {
+class AnnotationBackCompatibilityTests {
 
 	@Test
 	void multiplRoutesToMetaAnnotation() {

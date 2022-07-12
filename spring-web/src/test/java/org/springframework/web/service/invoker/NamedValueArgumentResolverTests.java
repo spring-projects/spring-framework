@@ -134,7 +134,7 @@ class NamedValueArgumentResolverTests {
 	}
 
 	@Test
-	void optionalEmpthyWithDefaultValue() {
+	void optionalEmptyWithDefaultValue() {
 		this.service.executeOptionalWithDefaultValue(Optional.empty());
 		assertTestValue("value", "default");
 	}

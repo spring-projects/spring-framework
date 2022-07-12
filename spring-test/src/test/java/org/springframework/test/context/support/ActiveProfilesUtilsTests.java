@@ -168,7 +168,7 @@ class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsTests {
 	 * @since 4.0
 	 */
 	@Test
-	void resolveActiveProfilesWithOverridenInheritedResolver() {
+	void resolveActiveProfilesWithOverriddenInheritedResolver() {
 		assertResolvedProfiles(OverriddenInheritedFooActiveProfilesResolverTestCase.class, "bar");
 	}
 

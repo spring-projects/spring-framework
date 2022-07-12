@@ -62,7 +62,7 @@ class GeneratedMethodTests {
 	}
 
 	@Test
-	void usingWhenBuilderChanagesNameThrowsException() {
+	void usingWhenBuilderChangesNameThrowsException() {
 		GeneratedMethod method = new GeneratedMethod(NAME);
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> method.using(builder -> builder.setName("badname")))

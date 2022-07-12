@@ -75,7 +75,7 @@ public class DefaultControllerSpecTests {
 	@Test
 	public void configurerConsumers() {
 		TestConsumer<ArgumentResolverConfigurer> argumentResolverConsumer = new TestConsumer<>();
-		TestConsumer<RequestedContentTypeResolverBuilder> contenTypeResolverConsumer = new TestConsumer<>();
+		TestConsumer<RequestedContentTypeResolverBuilder> contentTypeResolverConsumer = new TestConsumer<>();
 		TestConsumer<CorsRegistry> corsRegistryConsumer = new TestConsumer<>();
 		TestConsumer<FormatterRegistry> formatterConsumer = new TestConsumer<>();
 		TestConsumer<ServerCodecConfigurer> codecsConsumer = new TestConsumer<>();
@@ -84,7 +84,7 @@ public class DefaultControllerSpecTests {
 
 		new DefaultControllerSpec(new MyController())
 				.argumentResolvers(argumentResolverConsumer)
-				.contentTypeResolver(contenTypeResolverConsumer)
+				.contentTypeResolver(contentTypeResolverConsumer)
 				.corsMappings(corsRegistryConsumer)
 				.formatters(formatterConsumer)
 				.httpMessageCodecs(codecsConsumer)
@@ -93,7 +93,7 @@ public class DefaultControllerSpecTests {
 				.build();
 
 		assertThat(argumentResolverConsumer.getValue()).isNotNull();
-		assertThat(contenTypeResolverConsumer.getValue()).isNotNull();
+		assertThat(contentTypeResolverConsumer.getValue()).isNotNull();
 		assertThat(corsRegistryConsumer.getValue()).isNotNull();
 		assertThat(formatterConsumer.getValue()).isNotNull();
 		assertThat(codecsConsumer.getValue()).isNotNull();

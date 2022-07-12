@@ -111,7 +111,7 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 	}
 
 	@Test
-	void getBeanDefinitionMethodGeneratorWhenRegisteredBeanIsAotProcessorFilteresBean() {
+	void getBeanDefinitionMethodGeneratorWhenRegisteredBeanIsAotProcessorFilteredBean() {
 		MockSpringFactoriesLoader springFactoriesLoader = new MockSpringFactoriesLoader();
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		beanFactory.registerBeanDefinition("test1", BeanDefinitionBuilder
@@ -127,7 +127,7 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 	}
 
 	@Test
-	void getBeanDefinitionMethodGeneratorWhenRegisteredBeanIsAotProcessorAndFilteresBeanBeanRegistrationExcludeFilterDoesNotFilterBean() {
+	void getBeanDefinitionMethodGeneratorWhenRegisteredBeanIsAotProcessorAndFilteredBeanBeanRegistrationExcludeFilterDoesNotFilterBean() {
 		MockSpringFactoriesLoader springFactoriesLoader = new MockSpringFactoriesLoader();
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		beanFactory.registerBeanDefinition("test", BeanDefinitionBuilder
