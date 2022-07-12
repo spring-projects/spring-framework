@@ -25,7 +25,8 @@ import org.springframework.aot.hint.SerializationHints;
 
 /**
  * Static generator of predicates that test whether the given {@link RuntimeHints}
- * instance matches the expected behavior for reflection, resource, or proxy generation.
+ * instance matches the expected behavior for reflection, resource, serialization,
+ * or proxy generation.
  *
  * <p>This utility class can be used by {@link RuntimeHintsRegistrar} to conditionally
  * register hints depending on what's present already. This can also be used as a
@@ -36,6 +37,7 @@ import org.springframework.aot.hint.SerializationHints;
  * </pre>
  *
  * @author Brian Clozel
+ * @author Stephane Nicoll
  * @since 6.0
  */
 public abstract class RuntimeHintsPredicates {
