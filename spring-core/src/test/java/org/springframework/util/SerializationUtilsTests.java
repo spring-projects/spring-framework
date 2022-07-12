@@ -16,6 +16,8 @@
 
 package org.springframework.util;
 
+import java.io.NotSerializableException;
+import java.io.Serializable;
 import java.math.BigInteger;
 
 import org.junit.jupiter.api.Test;
@@ -28,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * Unit tests for {@link SerializationUtils}.
  *
  * @author Dave Syer
+ * @author Sam Brannen
  * @since 3.0.5
  */
 class SerializationUtilsTests {
@@ -41,6 +44,24 @@ class SerializationUtilsTests {
 	@SuppressWarnings("deprecation")
 	void serializeCycleSunnyDay() {
 		assertThat(SerializationUtils.deserialize(SerializationUtils.serialize("foo"))).isEqualTo("foo");
+	}
+
+	@Test
+	@SuppressWarnings("deprecation")
+	void serializeNonSerializableRecord() {
+		record Person(String firstName, String lastName) {}
+		Person jane = new Person("Jane", "Doe");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> SerializationUtils.serialize(jane))
+			.withCauseExactlyInstanceOf(NotSerializableException.class);
+	}
+
+	@Test
+	@SuppressWarnings("deprecation")
+	void serializeAndDeserializeSerializableRecord() {
+		record Person(String firstName, String lastName) implements Serializable {}
+		Person jane = new Person("Jane", "Doe");
+		assertThat(SerializationUtils.deserialize(SerializationUtils.serialize(jane))).isEqualTo(jane);
 	}
 
 	@Test
