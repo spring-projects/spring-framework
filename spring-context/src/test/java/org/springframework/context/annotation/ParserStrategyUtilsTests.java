@@ -98,7 +98,7 @@ public class ParserStrategyUtilsTests {
 
 	@Test
 	public void instantiateClassWhenHasMultipleConstructorsUsesNoArgsConstructor() {
-		// Remain back-compatible by using the default constructor if there's more then one
+		// Remain back-compatible by using the default constructor if there's more than one
 		MultipleConstructors instance = instantiateClass(MultipleConstructors.class);
 		assertThat(instance.usedDefaultConstructor).isTrue();
 	}

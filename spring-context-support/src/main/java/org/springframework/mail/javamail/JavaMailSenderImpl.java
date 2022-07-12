@@ -132,10 +132,10 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 	/**
-	 * Allow Map access to the JavaMail properties of this sender,
+	 * Allow {code Map} access to the JavaMail properties of this sender,
 	 * with the option to add or override specific entries.
 	 * <p>Useful for specifying entries directly, for example via
-	 * "javaMailProperties[mail.smtp.auth]".
+	 * {code javaMailProperties[mail.smtp.auth]}.
 	 */
 	public Properties getJavaMailProperties() {
 		return this.javaMailProperties;
@@ -156,7 +156,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 	/**
 	 * Return the JavaMail {@code Session},
-	 * lazily initializing it if hasn't been specified explicitly.
+	 * lazily initializing it if it hasn't been specified explicitly.
 	 */
 	public synchronized Session getSession() {
 		if (this.session == null) {
