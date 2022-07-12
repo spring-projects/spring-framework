@@ -24,7 +24,7 @@ import org.springframework.context.NoSuchMessageException;
  * Messages are looked up using the ApplicationContext's ThemeSource,
  * and thus should support internationalization.
  *
- * <p>Regards a HTML escaping setting, either on this tag instance,
+ * <p>Regards an HTML escaping setting, either on this tag instance,
  * the page level, or the web.xml level.
  *
  * <p>If "code" isn't set or cannot be resolved, "text" will be used
@@ -78,7 +78,7 @@ import org.springframework.context.NoSuchMessageException;
  * <td>false</td>
  * <td>true</td>
  * <td>Set JavaScript escaping for this tag, as boolean value.
- * Default is false.</td>
+ * Default is {@code false}.</td>
  * </tr>
  * <tr>
  * <td>message</td>

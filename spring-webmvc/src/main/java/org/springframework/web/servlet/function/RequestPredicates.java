@@ -335,14 +335,14 @@ public abstract class RequestPredicates {
 		void method(Set<HttpMethod> methods);
 
 		/**
-		 * Receive notification of an path predicate.
+		 * Receive notification of a path predicate.
 		 * @param pattern the path pattern that makes up the predicate
 		 * @see RequestPredicates#path(String)
 		 */
 		void path(String pattern);
 
 		/**
-		 * Receive notification of an path extension predicate.
+		 * Receive notification of a path extension predicate.
 		 * @param extension the path extension that makes up the predicate
 		 * @see RequestPredicates#pathExtension(String)
 		 */

@@ -290,7 +290,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	/**
 	 * Handle the case where no
 	 * {@linkplain org.springframework.http.converter.HttpMessageConverter message converters}
-	 * were found that were acceptable for the client (expressed via the {@code Accept} header.
+	 * were found that were acceptable for the client (expressed via the {@code Accept} header).
 	 * <p>The default implementation returns {@code null} in which case the
 	 * exception is handled in {@link #handleErrorResponse}.
 	 * @param ex the HttpMediaTypeNotAcceptableException to be handled

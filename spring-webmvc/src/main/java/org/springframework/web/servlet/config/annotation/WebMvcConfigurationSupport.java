@@ -1094,7 +1094,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	/**
 	 * Register a {@link ViewResolverComposite} that contains a chain of view resolvers
 	 * to use for view resolution.
-	 * By default this resolver is ordered at 0 unless content negotiation view
+	 * By default, this resolver is ordered at 0 unless content negotiation view
 	 * resolution is used in which case the order is raised to
 	 * {@link org.springframework.core.Ordered#HIGHEST_PRECEDENCE
 	 * Ordered.HIGHEST_PRECEDENCE}.
@@ -1152,7 +1152,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Override this method to configure cross origin requests processing.
+	 * Override this method to configure cross-origin requests processing.
 	 * @since 4.2
 	 * @see CorsRegistry
 	 */
