@@ -22,7 +22,7 @@ package org.springframework.beans;
  * {@link org.springframework.beans.PropertyEditorRegistry property editor registry}.
  *
  * <p>This is particularly useful when you need to use the same set of
- * property editors in several different situations: write a corresponding
+ * property editors in several situations: write a corresponding
  * registrar and reuse that in each case.
  *
  * @author Juergen Hoeller

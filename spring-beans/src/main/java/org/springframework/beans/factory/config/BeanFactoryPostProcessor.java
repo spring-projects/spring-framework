@@ -30,7 +30,7 @@ import org.springframework.beans.BeansException;
  *
  * <p>A {@code BeanFactoryPostProcessor} may interact with and modify bean
  * definitions, but never bean instances. Doing so may cause premature bean
- * instantiation, violating the container and causing unintended side-effects.
+ * instantiation, violating the container and causing unintended side effects.
  * If bean instance interaction is required, consider implementing
  * {@link BeanPostProcessor} instead.
  *

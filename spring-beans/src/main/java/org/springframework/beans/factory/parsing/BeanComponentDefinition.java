@@ -124,7 +124,7 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 	}
 
 	/**
-	 * This implementations expects the other object to be of type BeanComponentDefinition
+	 * This implementation expects the other object to be of type BeanComponentDefinition
 	 * as well, in addition to the superclass's equality requirements.
 	 */
 	@Override

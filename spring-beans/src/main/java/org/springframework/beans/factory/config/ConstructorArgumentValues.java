@@ -65,7 +65,7 @@ public class ConstructorArgumentValues {
 
 	/**
 	 * Copy all given argument values into this object, using separate holder
-	 * instances to keep the values independent from the original object.
+	 * instances to keep the values independent of the original object.
 	 * <p>Note: Identical ValueHolder instances will only be registered once,
 	 * to allow for merging and re-merging of argument value definitions. Distinct
 	 * ValueHolder instances carrying the same content are of course allowed.
