@@ -18,9 +18,16 @@ package org.springframework.util;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.lang.Nullable;
@@ -193,6 +200,12 @@ public abstract class NumberUtils {
 		Assert.notNull(targetClass, "Target class must not be null");
 		String trimmed = StringUtils.trimAllWhitespace(text);
 
+		// If it is a formula
+		if (text.contains("+") || text.contains("-") || text.contains("*") || text.contains("/") || text.contains("(")){
+			BigDecimal calculate = calculate(trimmed);
+			trimmed = calculate.toString();
+		}
+
 		if (Byte.class == targetClass) {
 			return (T) (isHexNumber(trimmed) ? Byte.decode(trimmed) : Byte.valueOf(trimmed));
 		}
@@ -313,6 +326,147 @@ public abstract class NumberUtils {
 
 		BigInteger result = new BigInteger(value.substring(index), radix);
 		return (negative ? result.negate() : result);
+	}
+
+
+
+
+
+	/**
+	 * calculate arithmetic formula result.
+	 * @param infixExpression infix expression
+	 * @return calculation result
+	 */
+	public static BigDecimal calculate(String infixExpression) {
+		infixExpression = StringUtils.trimAllWhitespace(infixExpression);
+		// split infix expression to List
+		List<Object> infixList = splitCalculateItem(infixExpression);
+		// parse infix to suffix
+		Deque<Object> suffixStack = parseInfixToSuffixStack(infixList);
+		return calculateBySuffixStack(suffixStack);
+	}
+
+	private static Map<Character, Integer> level = new HashMap<>(){
+		{
+			put('(',0);
+			put('+',1);
+			put('-',1);
+			put('*',2);
+			put('/',2);
+		}
+	};
+	private static List<Object> splitCalculateItem(String infixExpression){
+
+		List<Object> list = new LinkedList<>();
+		int idx1;
+		int idx2;
+		boolean isNumber = false;
+		for (idx1 = 0, idx2=0; idx1 < infixExpression.length() && idx2 < infixExpression.length()  ;) {
+			char ch = infixExpression.charAt(idx2);
+			if (isNumber(ch)) {
+				isNumber = true;
+				idx2++;
+			}
+			else {
+				if (isNumber) {
+					list.add(new BigDecimal(infixExpression.substring(idx1, idx2)));
+				}
+				isNumber = false;
+				list.add(ch);
+				idx2++;
+				idx1 = idx2;
+			}
+		}
+		if (isNumber) {
+			list.add(new BigDecimal(infixExpression.substring(idx1, idx2)));
+		}
+		return list;
+	}
+	private static BigDecimal calculateBySuffixStack(Deque<Object> suffixStack){
+		ArrayDeque<BigDecimal> result = new ArrayDeque<>();
+		while (!suffixStack.isEmpty()) {
+			Object pop = suffixStack.pop();
+			if (pop instanceof BigDecimal) {
+				result.push((BigDecimal) pop);
+			}
+			else if (pop instanceof Character) {
+				BigDecimal v1 = result.pop();
+				BigDecimal v2 = result.pop();
+				if (pop.equals('+')) {
+					result.push(v1.add(v2));
+				}
+				else if (pop.equals('-')) {
+					result.push(v2.subtract(v1));
+				}
+				else if (pop.equals('*')) {
+					result.push(v2.multiply(v1));
+				}
+				else if (pop.equals('/')) {
+					result.push(v2.divide(v1, 10, RoundingMode.HALF_UP));
+				}
+			}
+		}
+		Assert.state(result.size()==1,"illegal expression");
+		return result.pop();
+	}
+
+	/**
+	 * Infix expression to suffix expression.
+	 * @param infixList infix expression parsed List
+	 * @return suffixStack
+	 */
+	private static Deque<Object> parseInfixToSuffixStack(List<Object> infixList){
+		ArrayDeque<Object> suffixStack = new ArrayDeque<>();
+		ArrayDeque<Character> tmpStack = new ArrayDeque<>();
+
+		infixList.stream().forEach(item -> {
+			if (item instanceof BigDecimal) {
+				suffixStack.offer(item);
+			}
+			else if (item instanceof Character){
+				Character ch = (Character) item;
+				switch (ch) {
+					case '(':
+						tmpStack.push(ch);
+						break;
+					case ')':
+						while (!tmpStack.isEmpty()) {
+							Character pop = tmpStack.pop();
+							if (!pop.equals('(')) {
+								suffixStack.offer(pop);
+							}
+							else {
+								break;
+							}
+						}
+						break;
+					default:
+						boolean flag = false;
+						while (!tmpStack.isEmpty()) {
+							Character peek = tmpStack.peek();
+							if (flag = level.get(ch) > level.get(peek)) {
+								tmpStack.push(ch);
+								break;
+							}
+							else {
+								suffixStack.offer(tmpStack.pop());
+							}
+						}
+						if (!flag) {
+							tmpStack.push(ch);
+						}
+				}
+
+			}
+		});
+		while (!tmpStack.isEmpty()) {
+			suffixStack.offer(tmpStack.pop());
+		}
+		return suffixStack;
+	}
+
+	private static boolean isNumber(char character){
+		return (character >= '0' && character <= '9') || character == '.';
 	}
 
 }

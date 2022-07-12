@@ -402,8 +402,8 @@ class NumberUtilsTests {
 	private void assertToNumberOverflow(Number number, Class<? extends Number> targetClass) {
 		String msg = "overflow: from=" + number + ", toClass=" + targetClass;
 		assertThatIllegalArgumentException().as(msg).isThrownBy(() ->
-				NumberUtils.convertNumberToTargetClass(number, targetClass))
-			.withMessageEndingWith("overflow");
+						NumberUtils.convertNumberToTargetClass(number, targetClass))
+				.withMessageEndingWith("overflow");
 	}
 
 }
