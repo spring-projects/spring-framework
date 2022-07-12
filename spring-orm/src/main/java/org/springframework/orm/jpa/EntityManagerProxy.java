@@ -37,7 +37,7 @@ public interface EntityManagerProxy extends EntityManager {
 	 * raw EntityManager.
 	 * <p>In case of a shared ("transactional") EntityManager, this will be
 	 * the raw EntityManager that is currently associated with the transaction.
-	 * Outside of a transaction, an IllegalStateException will be thrown.
+	 * Outside a transaction, an IllegalStateException will be thrown.
 	 * @return the underlying raw EntityManager (never {@code null})
 	 * @throws IllegalStateException if no underlying EntityManager is available
 	 */
