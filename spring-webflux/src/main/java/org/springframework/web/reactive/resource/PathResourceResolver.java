@@ -146,7 +146,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 
 	/**
 	 * Perform additional checks on a resolved resource beyond checking whether the
-	 * resources exist and is readable. The default implementation also verifies
+	 * resource exists and is readable. The default implementation also verifies
 	 * the resource is either under the location relative to which it was found or
 	 * is under one of the {@link #setAllowedLocations allowed locations}.
 	 * @param resource the resource to check
