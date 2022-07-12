@@ -224,7 +224,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	/**
-	 * A variant of {@link #doCommit(Supplier)} for a response without no body.
+	 * A variant of {@link #doCommit(Supplier)} for a response without a body.
 	 * @return a completion publisher
 	 */
 	protected Mono<Void> doCommit() {
@@ -290,9 +290,9 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	protected abstract void applyStatusCode();
 
 	/**
-	 * Invoked when the response is getting committed allowing sub-classes to
+	 * Invoked when the response is getting committed allowing subclasses to
 	 * make apply header values to the underlying response.
-	 * <p>Note that most sub-classes use an {@link HttpHeaders} instance that
+	 * <p>Note that most subclasses use an {@link HttpHeaders} instance that
 	 * wraps an adapter to the native response headers such that changes are
 	 * propagated to the underlying response on the go. That means this callback
 	 * is typically not used other than for specialized updates such as setting
@@ -307,7 +307,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	protected abstract void applyCookies();
 
 	/**
-	 * Allow sub-classes to associate a hint with the data buffer if it is a
+	 * Allow subclasses to associate a hint with the data buffer if it is a
 	 * pooled buffer and supports leak tracking.
 	 * @param buffer the buffer to attach a hint to
 	 * @since 5.3.2

@@ -202,7 +202,7 @@ public interface ServerWebExchange {
 	/**
 	 * Transform the given url according to the registered transformation function(s).
 	 * By default, this method returns the given {@code url}, though additional
-	 * transformation functions can by registered with {@link #addUrlTransformer}
+	 * transformation functions can be registered with {@link #addUrlTransformer}
 	 * @param url the URL to transform
 	 * @return the transformed URL
 	 */

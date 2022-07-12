@@ -35,7 +35,7 @@ import org.springframework.util.StringUtils;
  * <strong>any</strong> of the following selectors match:
  * <ul>
  * <li>Base packages -- for selecting handlers by their package.
- * <li>Assignable types -- for selecting handlers by super type.
+ * <li>Assignable types -- for selecting handlers by supertype.
  * <li>Annotations -- for selecting handlers annotated in a specific way.
  * </ul>
  * <p>Composability methods on {@link Predicate} can be used :

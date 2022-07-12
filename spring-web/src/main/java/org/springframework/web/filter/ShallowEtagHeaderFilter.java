@@ -129,7 +129,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
 	/**
 	 * Whether an ETag should be calculated for the given request and response
-	 * exchange. By default this is {@code true} if all of the following match:
+	 * exchange. By default, this is {@code true} if all the following match:
 	 * <ul>
 	 * <li>Response is not committed.</li>
 	 * <li>Response status codes is in the {@code 2xx} series.</li>

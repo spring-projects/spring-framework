@@ -110,9 +110,9 @@ public interface MultipartResolver {
 	MultipartHttpServletRequest resolveMultipart(HttpServletRequest request) throws MultipartException;
 
 	/**
-	 * Cleanup any resources used for the multipart handling,
+	 * Clean up any resources used for the multipart handling,
 	 * like a storage for the uploaded files.
-	 * @param request the request to cleanup resources for
+	 * @param request the request to clean up resources for
 	 */
 	void cleanupMultipart(MultipartHttpServletRequest request);
 

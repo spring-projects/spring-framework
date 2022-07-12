@@ -53,7 +53,7 @@ import org.springframework.util.FastByteArrayOutputStream;
 
 /**
  * Subscribes to a token stream (i.e. the result of
- * {@link MultipartParser#parse(Flux, byte[], int, Charset)}, and produces a flux of {@link Part} objects.
+ * {@link MultipartParser#parse(Flux, byte[], int, Charset)}), and produces a flux of {@link Part} objects.
  *
  * @author Arjen Poutsma
  * @since 5.3
@@ -219,7 +219,7 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 	 * creating a single {@link Part}.
 	 * {@link State} instances are stateful, and created when a new
 	 * {@link MultipartParser.HeadersToken} is accepted (see
-	 * {@link #newPart(State, HttpHeaders)}.
+	 * {@link #newPart(State, HttpHeaders)}).
 	 * The following rules determine which state the creator will have:
 	 * <ol>
 	 * <li>If the part is a {@linkplain MultipartUtils#isFormField(HttpHeaders) form field},
