@@ -109,7 +109,7 @@ public class CallableStatementCreatorFactory {
 
 
 	/**
-	 * Return a new CallableStatementCreator instance given this parameters.
+	 * Return a new CallableStatementCreator instance given those parameters.
 	 * @param params list of parameters (may be {@code null})
 	 */
 	public CallableStatementCreator newCallableStatementCreator(@Nullable Map<String, ?> params) {

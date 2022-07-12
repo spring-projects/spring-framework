@@ -234,7 +234,7 @@ public interface JdbcOperations {
 	 * Each element in the list will be of the form returned by this interface's
 	 * {@code queryForMap} methods.
 	 * @param sql the SQL query to execute
-	 * @return an List that contains a Map per row
+	 * @return a List that contains a Map per row
 	 * @throws DataAccessException if there is any problem executing the query
 	 * @see #queryForList(String, Object...)
 	 */
