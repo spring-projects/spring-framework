@@ -41,7 +41,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.WebUtils;
 
 /**
- * A sub-class of {@code DispatcherServlet} that saves the result in an
+ * A subclass of {@code DispatcherServlet} that saves the result in an
  * {@link MvcResult}. The {@code MvcResult} instance is expected to be available
  * as the request attribute {@link MockMvc#MVC_RESULT_ATTRIBUTE}.
  *

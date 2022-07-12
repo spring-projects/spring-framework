@@ -66,7 +66,7 @@ import java.lang.annotation.Target;
  * {@code SoapWebServiceTests} and {@code RestWebServiceTests} both extend
  * {@code AbstractWebTests} and define a context hierarchy via {@code @ContextHierarchy}.
  * The result is that three application contexts will be loaded (one for each
- * declaration of {@code @ContextConfiguration}, and the application context
+ * declaration of {@code @ContextConfiguration}), and the application context
  * loaded based on the configuration in {@code AbstractWebTests} will be set as
  * the parent context for each of the contexts loaded for the concrete subclasses.
  *

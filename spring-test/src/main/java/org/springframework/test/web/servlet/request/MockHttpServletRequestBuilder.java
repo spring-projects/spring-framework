@@ -306,7 +306,7 @@ public class MockHttpServletRequestBuilder
 
 	/**
 	 * Set the 'Content-Type' header of the request as a raw String value,
-	 * possibly not even well formed (for testing purposes).
+	 * possibly not even well-formed (for testing purposes).
 	 * @param contentType the content type
 	 * @since 4.1.2
 	 */
@@ -327,8 +327,8 @@ public class MockHttpServletRequestBuilder
 	}
 
 	/**
-	 * Set the 'Accept' header using raw String values, possibly not even well
-	 * formed (for testing purposes).
+	 * Set the {@code Accept} header using raw String values, possibly not even
+	 * well-formed (for testing purposes).
 	 * @param mediaTypes one or more media types; internally joined as
 	 * comma-separated String
 	 */
@@ -408,7 +408,7 @@ public class MockHttpServletRequestBuilder
 
 	/**
 	 * Append to the query string and also add to the
-	 * {@link #params(MultiValueMap)}  request parameters} map. The parameter
+	 * {@link #params(MultiValueMap) request parameters} map. The parameter
 	 * name and value are encoded when they are added to the query string.
 	 * @param params the parameters to add
 	 * @since 5.2.2

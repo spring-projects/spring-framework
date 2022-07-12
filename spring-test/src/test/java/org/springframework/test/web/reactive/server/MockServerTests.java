@@ -152,7 +152,7 @@ public class MockServerTests {
 				.expectStatus().isOk()
 				.returnResult(String.class);
 
-		// Get the raw content without consuming the response body flux..
+		// Get the raw content without consuming the response body flux.
 		byte[] bytes = result.getResponseBodyContent();
 
 		assertThat(bytes).isNotNull();

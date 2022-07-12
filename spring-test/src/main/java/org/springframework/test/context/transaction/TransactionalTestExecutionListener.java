@@ -97,7 +97,7 @@ import org.springframework.util.StringUtils;
  *
  * <h3>Executing Code outside of a Transaction</h3>
  * <p>When executing transactional tests, it is sometimes useful to be able to
- * execute certain <em>set up</em> or <em>tear down</em> code outside of a
+ * execute certain <em>set up</em> or <em>tear down</em> code outside a
  * transaction. {@code TransactionalTestExecutionListener} provides such
  * support for methods annotated with {@link BeforeTransaction @BeforeTransaction}
  * or {@link AfterTransaction @AfterTransaction}. As of Spring Framework 4.3,
@@ -390,7 +390,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	}
 
 	/**
-	 * Determine whether or not to rollback transactions by default for the
+	 * Determine whether to rollback transactions by default for the
 	 * supplied {@linkplain TestContext test context}.
 	 * <p>Supports {@link Rollback @Rollback} or {@link Commit @Commit} at the
 	 * class-level.
@@ -418,7 +418,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	}
 
 	/**
-	 * Determine whether or not to rollback transactions for the supplied
+	 * Determine whether to rollback transactions for the supplied
 	 * {@linkplain TestContext test context} by taking into consideration the
 	 * {@linkplain #isDefaultRollback(TestContext) default rollback} flag and a
 	 * possible method-level override via the {@link Rollback @Rollback}

@@ -290,7 +290,7 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 		MergedContextConfiguration parent = mergedConfig.getParent();
 		assertThat(parent).as("parent config").isNotNull();
 		// The following does not work -- at least not in Eclipse.
-		// asssertThat(parent.getClasses())...
+		// assertThat(parent.getClasses())...
 		// So we use AssertionsForClassTypes directly.
 		AssertionsForClassTypes.assertThat(parent.getClasses()).containsExactly(FooConfig.class);
 

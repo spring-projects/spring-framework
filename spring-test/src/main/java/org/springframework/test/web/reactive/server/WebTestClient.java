@@ -180,7 +180,7 @@ public interface WebTestClient {
 	 * There are builder methods to customize the Java config. The resulting
 	 * WebFlux application will be tested without an HTTP server using a mock
 	 * request and response.
-	 * @param controllers one or more controller instances to tests
+	 * @param controllers one or more controller instances to test
 	 * (specified {@code Class} will be turned into instance)
 	 * @return chained API to customize server and client config; use
 	 * {@link MockServerSpec#configureClient()} to transition to client config
@@ -203,7 +203,7 @@ public interface WebTestClient {
 	}
 
 	/**
-	 * Use this option to setup a server from the Spring configuration of your
+	 * Use this option to set up a server from the Spring configuration of your
 	 * application, or some subset of it. Internally the provided configuration
 	 * is passed to {@code WebHttpHandlerBuilder} to set up the request
 	 * processing chain. The resulting WebFlux application will be tested
@@ -796,7 +796,7 @@ public interface WebTestClient {
 		 * <p>If a single {@link Error} or {@link RuntimeException} is thrown,
 		 * it will be rethrown.
 		 * <p>If multiple exceptions are thrown, this method will throw an
-		 * {@link AssertionError} whose error message is a summary of all of the
+		 * {@link AssertionError} whose error message is a summary of all the
 		 * exceptions. In addition, each exception will be added as a
 		 * {@linkplain Throwable#addSuppressed(Throwable) suppressed exception} to
 		 * the {@code AssertionError}.

@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 /**
  * Demo <em>composed annotation</em> for {@link DisabledIf @DisabledIf} that
  * disables a test class or test method if the current operating system is
- * Mac OS.
+ * macOS.
  *
  * @author Sam Brannen
  * @since 5.0

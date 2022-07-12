@@ -66,8 +66,8 @@ public class ContentResultMatchers {
 
 	/**
 	 * Assert the ServletResponse content type. The given content type must
-	 * fully match including type, sub-type, and parameters. For checking
-	 * only the type and sub-type see {@link #contentTypeCompatibleWith(String)}.
+	 * fully match including type, subtype, and parameters. For checking
+	 * only the type and subtype see {@link #contentTypeCompatibleWith(String)}.
 	 */
 	public ResultMatcher contentType(String contentType) {
 		return contentType(MediaType.parseMediaType(contentType));
@@ -75,8 +75,8 @@ public class ContentResultMatchers {
 
 	/**
 	 * Assert the ServletResponse content type after parsing it as a MediaType.
-	 * The given content type must fully match including type, sub-type, and
-	 * parameters. For checking only the type and sub-type see
+	 * The given content type must fully match including type, subtype, and
+	 * parameters. For checking only the type and subtype see
 	 * {@link #contentTypeCompatibleWith(MediaType)}.
 	 */
 	public ResultMatcher contentType(MediaType contentType) {
