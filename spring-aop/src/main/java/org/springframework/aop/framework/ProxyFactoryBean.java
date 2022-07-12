@@ -60,7 +60,7 @@ import org.springframework.util.ObjectUtils;
  * to use the "targetName"/"target"/"targetSource" properties instead.
  *
  * <p>Global interceptors and advisors can be added at the factory level. The specified
- * ones are expanded in an interceptor list where an "xxx*" entry is included in the
+ * ones are expanded in an interceptor list where a "xxx*" entry is included in the
  * list, matching the given prefix with the bean names (e.g. "global*" would match
  * both "globalBean1" and "globalBean2", "*" all defined interceptors). The matching
  * interceptors get applied according to their returned order value, if they implement
@@ -406,7 +406,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		if (namedBeanClass != null) {
 			return (Advisor.class.isAssignableFrom(namedBeanClass) || Advice.class.isAssignableFrom(namedBeanClass));
 		}
-		// Treat it as an target bean if we can't tell.
+		// Treat it as a target bean if we can't tell.
 		if (logger.isDebugEnabled()) {
 			logger.debug("Could not determine type of bean with name '" + beanName +
 					"' - assuming it is neither an Advisor nor an Advice");

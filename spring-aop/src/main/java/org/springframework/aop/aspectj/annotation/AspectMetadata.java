@@ -67,7 +67,7 @@ public class AspectMetadata implements Serializable {
 
 	/**
 	 * Spring AOP pointcut corresponding to the per clause of the
-	 * aspect. Will be the Pointcut.TRUE canonical instance in the
+	 * aspect. Will be the {@code Pointcut.TRUE} canonical instance in the
 	 * case of a singleton, otherwise an AspectJExpressionPointcut.
 	 */
 	private final Pointcut perClausePointcut;

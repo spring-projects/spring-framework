@@ -931,7 +931,7 @@ abstract class AbstractMakeModifiable {
 			return setter.getDeclaringClass().getMethod(getterName);
 		}
 		catch (NoSuchMethodException ex) {
-			// must be write only
+			// must be write-only
 			return null;
 		}
 	}

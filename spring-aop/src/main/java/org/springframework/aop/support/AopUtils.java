@@ -217,7 +217,7 @@ public abstract class AopUtils {
 	 * out a pointcut for a class.
 	 * @param pc the static or dynamic pointcut to check
 	 * @param targetClass the class to test
-	 * @param hasIntroductions whether or not the advisor chain
+	 * @param hasIntroductions whether the advisor chain
 	 * for this bean includes any introductions
 	 * @return whether the pointcut can apply on any method
 	 */
@@ -261,7 +261,7 @@ public abstract class AopUtils {
 	/**
 	 * Can the given advisor apply at all on the given class?
 	 * This is an important test as it can be used to optimize
-	 * out a advisor for a class.
+	 * out an advisor for a class.
 	 * @param advisor the advisor to check
 	 * @param targetClass class we're testing
 	 * @return whether the pointcut can apply on any method
@@ -272,11 +272,11 @@ public abstract class AopUtils {
 
 	/**
 	 * Can the given advisor apply at all on the given class?
-	 * <p>This is an important test as it can be used to optimize out a advisor for a class.
+	 * <p>This is an important test as it can be used to optimize out an advisor for a class.
 	 * This version also takes into account introductions (for IntroductionAwareMethodMatchers).
 	 * @param advisor the advisor to check
 	 * @param targetClass class we're testing
-	 * @param hasIntroductions whether or not the advisor chain for this bean includes
+	 * @param hasIntroductions whether the advisor chain for this bean includes
 	 * any introductions
 	 * @return whether the pointcut can apply on any method
 	 */

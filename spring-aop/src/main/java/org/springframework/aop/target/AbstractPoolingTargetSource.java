@@ -37,7 +37,7 @@ import org.springframework.lang.Nullable;
  * {@link AbstractPrototypeBasedTargetSource} can be used to create objects
  * in order to put them into the pool.
  *
- * <p>Subclasses must also implement some of the monitoring methods from the
+ * <p>Subclasses must also implement some monitoring methods from the
  * {@link PoolingConfig} interface. The {@link #getPoolingConfigMixin()} method
  * makes these stats available on proxied objects through an IntroductionAdvisor.
  *
