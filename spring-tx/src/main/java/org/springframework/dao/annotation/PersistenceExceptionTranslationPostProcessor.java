@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * bean marked with Spring's @{@link org.springframework.stereotype.Repository Repository}
  * annotation, adding a corresponding {@link PersistenceExceptionTranslationAdvisor} to
  * the exposed proxy (either an existing AOP proxy or a newly generated proxy that
- * implements all of the target's interfaces).
+ * implements all the target's interfaces).
  *
  * <p>Translates native resource exceptions to Spring's
  * {@link org.springframework.dao.DataAccessException DataAccessException} hierarchy.

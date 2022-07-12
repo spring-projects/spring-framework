@@ -57,7 +57,7 @@ import org.springframework.transaction.TransactionDefinition;
  * rules to be specified as types or patterns, respectively.
  *
  * <p>When a rollback rule is defined with an exception type, that type will be
- * used to match against the type of a thrown exception and its super types,
+ * used to match against the type of a thrown exception and its supertypes,
  * providing type safety and avoiding any unintentional matches that may occur
  * when using a pattern. For example, a value of
  * {@code jakarta.servlet.ServletException.class} will only match thrown exceptions

@@ -22,7 +22,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Rule determining whether or not a given exception should cause a rollback.
+ * Rule determining whether a given exception should cause a rollback.
  *
  * <p>Multiple such rules can be applied to determine whether a transaction
  * should commit or rollback after an exception has been thrown.
@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  * respectively.
  *
  * <p>When a rollback rule is defined with an exception type, that type will be
- * used to match against the type of a thrown exception and its super types,
+ * used to match against the type of a thrown exception and its supertypes,
  * providing type safety and avoiding any unintentional matches that may occur
  * when using a pattern. For example, a value of
  * {@code jakarta.servlet.ServletException.class} will only match thrown exceptions
