@@ -16,6 +16,8 @@
 
 package org.springframework.aot.hint;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -27,6 +29,7 @@ import org.springframework.util.ConcurrentLruCache;
  * match the expected behavior for resources.
  *
  * @author Brian Clozel
+ * @author Stephane Nicoll
  * @since 6.0
  */
 public class ResourceHintsPredicates {
@@ -78,16 +81,31 @@ public class ResourceHintsPredicates {
 	 * @return the {@link RuntimeHints} predicate
 	 */
 	public Predicate<RuntimeHints> forResource(String resourceName) {
-		return hints -> hints.resources().resourcePatterns().reduce(ResourcePatternHints::merge)
-				.map(hint -> {
-					boolean isExcluded = hint.getExcludes().stream()
-							.anyMatch(excluded -> CACHED_RESOURCE_PATTERNS.get(excluded).matcher(resourceName).matches());
-					if (isExcluded) {
-						return false;
-					}
-					return hint.getIncludes().stream()
-							.anyMatch(included -> CACHED_RESOURCE_PATTERNS.get(included).matcher(resourceName).matches());
-				}).orElse(false);
+		return hints -> {
+			AggregatedResourcePatternHints aggregatedResourcePatternHints = AggregatedResourcePatternHints.of(
+					hints.resources());
+			boolean isExcluded = aggregatedResourcePatternHints.excludes().stream().anyMatch(excluded ->
+					CACHED_RESOURCE_PATTERNS.get(excluded).matcher(resourceName).matches());
+			if (isExcluded) {
+				return false;
+			}
+			return aggregatedResourcePatternHints.includes().stream().anyMatch(included ->
+					CACHED_RESOURCE_PATTERNS.get(included).matcher(resourceName).matches());
+		};
+	}
+
+	private record AggregatedResourcePatternHints(List<ResourcePatternHint> includes, List<ResourcePatternHint> excludes) {
+
+		static AggregatedResourcePatternHints of(ResourceHints resourceHints) {
+			List<ResourcePatternHint> includes = new ArrayList<>();
+			List<ResourcePatternHint> excludes = new ArrayList<>();
+			resourceHints.resourcePatterns().forEach(resourcePatternHint -> {
+				includes.addAll(resourcePatternHint.getIncludes());
+				excludes.addAll(resourcePatternHint.getExcludes());
+			});
+			return new AggregatedResourcePatternHints(includes, excludes);
+		}
+
 	}
 
 }

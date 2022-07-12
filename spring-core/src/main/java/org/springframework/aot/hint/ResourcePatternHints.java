@@ -45,11 +45,6 @@ public final class ResourcePatternHints {
 		this.excludes = new ArrayList<>(builder.excludes);
 	}
 
-	private ResourcePatternHints(List<ResourcePatternHint> includes, List<ResourcePatternHint> excludes) {
-		this.includes = includes;
-		this.excludes = excludes;
-	}
-
 	/**
 	 * Return the include patterns to use to identify the resources to match.
 	 * @return the include patterns
@@ -64,16 +59,6 @@ public final class ResourcePatternHints {
 	 */
 	public List<ResourcePatternHint> getExcludes() {
 		return this.excludes;
-	}
-
-	ResourcePatternHints merge(ResourcePatternHints resourcePatternHints) {
-		List<ResourcePatternHint> includes = new ArrayList<>();
-		includes.addAll(this.includes);
-		includes.addAll(resourcePatternHints.includes);
-		List<ResourcePatternHint> excludes = new ArrayList<>();
-		excludes.addAll(this.excludes);
-		excludes.addAll(resourcePatternHints.excludes);
-		return new ResourcePatternHints(includes, excludes);
 	}
 
 

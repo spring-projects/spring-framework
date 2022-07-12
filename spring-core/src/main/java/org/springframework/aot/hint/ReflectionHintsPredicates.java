@@ -36,6 +36,7 @@ import org.springframework.util.ReflectionUtils;
  * match the expected behavior for reflection.
  *
  * @author Brian Clozel
+ * @author Stephane Nicoll
  * @since 6.0
  */
 public class ReflectionHintsPredicates {
@@ -248,15 +249,17 @@ public class ReflectionHintsPredicates {
 		abstract Predicate<RuntimeHints> exactMatch();
 
 		/**
-		 * Indicate whether the first {@code ExecutableHint} covers the reflection needs for the other one.
-		 * For that, both hints must apply to the same member (same type, name and parameters)
-		 * and the configured {@code ExecutableMode} of the first must cover the second.
+		 * Indicate whether the specified {@code ExecutableHint} covers the
+		 * reflection needs of the specified executable definition.
+		 * @return {@code true} if the member matches (same type, name and parameters),
+		 * and the configured {@code ExecutableMode} is compatibe
 		 */
-		static boolean includes(ExecutableHint hint, ExecutableHint other) {
-			return hint.getName().equals(other.getName())
-					&& hint.getParameterTypes().equals(other.getParameterTypes())
+		static boolean includes(ExecutableHint hint, String name,
+				List<TypeReference> parameterTypes, List<ExecutableMode> executableModes) {
+			return hint.getName().equals(name)
+					&& hint.getParameterTypes().equals(parameterTypes)
 					&& (hint.getModes().contains(ExecutableMode.INVOKE)
-					|| !other.getModes().contains(ExecutableMode.INVOKE));
+					|| !executableModes.contains(ExecutableMode.INVOKE));
 		}
 	}
 
@@ -269,31 +272,32 @@ public class ReflectionHintsPredicates {
 		@Override
 		MemberCategory[] getPublicMemberCategories() {
 			if (this.executableMode == ExecutableMode.INTROSPECT) {
-				return new MemberCategory[] {MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS,
-						MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS};
+				return new MemberCategory[] { MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS,
+						MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS };
 			}
-			return new MemberCategory[] {MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS};
+			return new MemberCategory[] { MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS };
 		}
 
 		@Override
 		MemberCategory[] getDeclaredMemberCategories() {
 			if (this.executableMode == ExecutableMode.INTROSPECT) {
-				return new MemberCategory[] {MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
-						MemberCategory.INVOKE_DECLARED_CONSTRUCTORS};
+				return new MemberCategory[] { MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
+						MemberCategory.INVOKE_DECLARED_CONSTRUCTORS };
 			}
-			return new MemberCategory[] {MemberCategory.INVOKE_DECLARED_CONSTRUCTORS};
+			return new MemberCategory[] { MemberCategory.INVOKE_DECLARED_CONSTRUCTORS };
 		}
 
 		@Override
 		Predicate<RuntimeHints> exactMatch() {
 			return hints -> (hints.reflection().getTypeHint(this.executable.getDeclaringClass()) != null) &&
 					hints.reflection().getTypeHint(this.executable.getDeclaringClass()).constructors().anyMatch(executableHint -> {
-				List<TypeReference> parameters = Arrays.stream(this.executable.getParameterTypes()).map(TypeReference::of).toList();
-				ExecutableHint syntheticHint = ExecutableHint.ofConstructor(parameters)
-						.setModes(this.executableMode).build();
-				return includes(executableHint, syntheticHint);
-			});
+						List<TypeReference> parameters = Arrays.stream(this.executable.getParameterTypes())
+								.map(TypeReference::of).toList();
+						return includes(executableHint, "<init>",
+								parameters, List.of(this.executableMode));
+					});
 		}
+
 	}
 
 	public static class MethodHintPredicate extends ExecutableHintPredicate<Method> {
@@ -306,32 +310,33 @@ public class ReflectionHintsPredicates {
 		@Override
 		MemberCategory[] getPublicMemberCategories() {
 			if (this.executableMode == ExecutableMode.INTROSPECT) {
-				return new MemberCategory[] {MemberCategory.INTROSPECT_PUBLIC_METHODS,
-						MemberCategory.INVOKE_PUBLIC_METHODS};
+				return new MemberCategory[] { MemberCategory.INTROSPECT_PUBLIC_METHODS,
+						MemberCategory.INVOKE_PUBLIC_METHODS };
 			}
-			return new MemberCategory[] {MemberCategory.INVOKE_PUBLIC_METHODS};
+			return new MemberCategory[] { MemberCategory.INVOKE_PUBLIC_METHODS };
 		}
 
 		@Override
 		MemberCategory[] getDeclaredMemberCategories() {
 
 			if (this.executableMode == ExecutableMode.INTROSPECT) {
-				return new MemberCategory[] {MemberCategory.INTROSPECT_DECLARED_METHODS,
-						MemberCategory.INVOKE_DECLARED_METHODS};
+				return new MemberCategory[] { MemberCategory.INTROSPECT_DECLARED_METHODS,
+						MemberCategory.INVOKE_DECLARED_METHODS };
 			}
-			return new MemberCategory[] {MemberCategory.INVOKE_DECLARED_METHODS};
+			return new MemberCategory[] { MemberCategory.INVOKE_DECLARED_METHODS };
 		}
 
 		@Override
 		Predicate<RuntimeHints> exactMatch() {
 			return hints -> (hints.reflection().getTypeHint(this.executable.getDeclaringClass()) != null) &&
 					hints.reflection().getTypeHint(this.executable.getDeclaringClass()).methods().anyMatch(executableHint -> {
-						List<TypeReference> parameters = Arrays.stream(this.executable.getParameterTypes()).map(TypeReference::of).toList();
-						ExecutableHint syntheticHint = ExecutableHint.ofMethod(this.executable.getName(), parameters)
-								.setModes(this.executableMode).build();
-						return includes(executableHint, syntheticHint);
+						List<TypeReference> parameters = Arrays.stream(this.executable.getParameterTypes())
+								.map(TypeReference::of).toList();
+						return includes(executableHint, this.executable.getName(),
+								parameters, List.of(this.executableMode));
 					});
 		}
+
 	}
 
 	public static class FieldHintPredicate implements Predicate<RuntimeHints> {
