@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.aot.hint;
+package org.springframework.aot.hint.predicate;
 
 import java.util.Arrays;
 import java.util.function.Predicate;
 
+import org.springframework.aot.hint.ProxyHints;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.TypeReference;
 import org.springframework.util.Assert;
 
 /**

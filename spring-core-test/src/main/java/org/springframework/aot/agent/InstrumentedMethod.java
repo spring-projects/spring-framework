@@ -28,8 +28,8 @@ import java.util.function.Predicate;
 
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.RuntimeHintsPredicates;
 import org.springframework.aot.hint.TypeReference;
+import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 
 /**
  * Java method that is instrumented by the {@link RuntimeHintsAgent}.
@@ -38,7 +38,7 @@ import org.springframework.aot.hint.TypeReference;
  * {@link #matcher(RecordedInvocation) is matching} the runtime behavior of the codebase.
  *
  * @author Brian Clozel
- * @see org.springframework.aot.hint.RuntimeHintsPredicates
+ * @see RuntimeHintsPredicates
  */
 enum InstrumentedMethod {
 

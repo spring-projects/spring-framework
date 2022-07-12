@@ -21,8 +21,8 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.RuntimeHintsPredicates;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.support.SpringFactoriesLoader;

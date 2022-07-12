@@ -22,7 +22,7 @@ import org.springframework.aop.SpringProxy;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.MemberCategory;
-import org.springframework.aot.hint.RuntimeHintsPredicates;
+import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;

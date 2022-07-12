@@ -28,7 +28,7 @@ import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.RuntimeHintsPredicates;
+import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.aot.test.generator.compile.CompileWithTargetClassAccess;
 import org.springframework.aot.test.generator.compile.Compiled;
 import org.springframework.aot.test.generator.compile.TestCompiler;

@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.RuntimeHintsPredicates;
+import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.aot.test.generator.compile.Compiled;
 import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.beans.factory.config.BeanDefinition;

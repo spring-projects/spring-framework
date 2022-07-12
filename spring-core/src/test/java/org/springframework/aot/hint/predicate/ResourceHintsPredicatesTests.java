@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.aot.hint;
+package org.springframework.aot.hint.predicate;
 
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.TypeReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -54,7 +57,7 @@ class ResourceHintsPredicatesTests {
 
 	@Test
 	void resourcePatternMatchesTypeAndResourceName() {
-		this.runtimeHints.resources().registerPattern("/org/springframework/aot/hint/spring.*");
+		this.runtimeHints.resources().registerPattern("/org/springframework/aot/hint/predicate/spring.*");
 		assertPredicateMatches(resources.forResource(TypeReference.of(getClass()), "spring.properties"));
 	}
 

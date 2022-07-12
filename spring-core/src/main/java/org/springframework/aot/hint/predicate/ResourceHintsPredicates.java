@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package org.springframework.aot.hint;
+package org.springframework.aot.hint.predicate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import org.springframework.aot.hint.ResourceHints;
+import org.springframework.aot.hint.ResourcePatternHint;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.TypeReference;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentLruCache;
 

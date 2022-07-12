@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.aot.hint;
+package org.springframework.aot.hint.predicate;
 
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import org.springframework.aot.hint.RuntimeHints;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

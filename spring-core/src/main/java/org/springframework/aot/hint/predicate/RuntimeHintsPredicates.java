@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.aot.hint;
+package org.springframework.aot.hint.predicate;
+
+import org.springframework.aot.hint.ProxyHints;
+import org.springframework.aot.hint.ReflectionHints;
+import org.springframework.aot.hint.ResourceHints;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.aot.hint.SerializationHints;
 
 /**
  * Static generator of predicates that test whether the given {@link RuntimeHints}

@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.aot.hint;
+package org.springframework.aot.hint.predicate;
 
 import org.junit.jupiter.api.Test;
+
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.TypeReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
