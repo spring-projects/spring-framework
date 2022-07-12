@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
 /**
  * Decorator for an {@link ExecutorSubscribableChannel} that ensures messages
  * are processed in the order they were published to the channel. Messages are
- * sent one at a time with the next one released when the prevoius has been
+ * sent one at a time with the next one released when the previous has been
  * processed. This decorator is intended to be applied per session.
  *
  * @author Rossen Stoyanchev

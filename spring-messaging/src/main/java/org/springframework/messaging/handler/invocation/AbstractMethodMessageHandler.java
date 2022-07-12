@@ -340,7 +340,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	/**
 	 * Provide the mapping for a handler method.
 	 * @param method the method to provide a mapping for
-	 * @param handlerType the handler type, possibly a sub-type of the method's declaring class
+	 * @param handlerType the handler type, possibly a subtype of the method's declaring class
 	 * @return the mapping, or {@code null} if the method is not mapped
 	 */
 	@Nullable
