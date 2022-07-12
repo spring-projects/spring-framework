@@ -14,27 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.validation.beanvalidation;
+package org.springframework.http;
 
-import jakarta.validation.Validator;
-
-import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.lang.Nullable;
 
 /**
- * {@link RuntimeHintsRegistrar} implementation that registers proxy entries
- * for {@link MethodValidationPostProcessor}.
+ * {@link RuntimeHintsRegistrar} implementation that makes sure mime types
+ * are available in constrained environments.
  *
- * @author Sebastien Deleuze
+ * @author Stephane Nicoll
  * @since 6.0
  */
-public class MethodValidationRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
+class HttpMimeTypesRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
 	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
-		hints.proxies().registerJdkProxy(AopProxyUtils.completeJdkProxyInterfaces(Validator.class));
+		hints.resources().registerPattern("org/springframework/http/mime.types");
 	}
-
 }

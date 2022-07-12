@@ -29,7 +29,8 @@ import org.springframework.aot.hint.TypeReference;
  * @author Sebastien Deleuze
  * @since 6.0
  */
-public class JacksonBuilderRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
+class JacksonModulesRuntimeHints implements RuntimeHintsRegistrar {
+
 	@Override
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
 		ReflectionHints reflectionHints = hints.reflection();

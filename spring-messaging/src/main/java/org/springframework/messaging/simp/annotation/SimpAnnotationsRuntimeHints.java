@@ -14,28 +14,26 @@
  * limitations under the License.
  */
 
-package org.springframework.aot.hint.support;
+package org.springframework.messaging.simp.annotation;
 
 import java.util.stream.Stream;
 
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
-import org.springframework.core.annotation.AliasFor;
-import org.springframework.core.annotation.Order;
-import org.springframework.lang.Nullable;
+import org.springframework.aot.hint.support.RuntimeHintsUtils;
 
 /**
- * {@link RuntimeHintsRegistrar} for core annotations.
+ * {@link RuntimeHintsRegistrar} implementation that makes Simp annotations
+ * available at runtime.
  *
- * @author Phillip Webb
+ * @author Sebastien Deleuze
  * @since 6.0
  */
-class CoreAnnotationsRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
+public class SimpAnnotationsRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
-	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
-		Stream.of(AliasFor.class, Order.class).forEach(annotationType ->
-				RuntimeHintsUtils.registerAnnotation(hints, annotationType));
+	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+		Stream.of(SendToUser.class, SubscribeMapping.class).forEach(
+				annotationType -> RuntimeHintsUtils.registerAnnotation(hints, annotationType));
 	}
-
 }

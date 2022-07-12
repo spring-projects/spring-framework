@@ -33,10 +33,11 @@ import org.springframework.util.ClassUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link JakartaAnnotationsRuntimeHintsRegistrar}.
+ * Tests for {@link JakartaAnnotationsRuntimeHints}.
+ *
  * @author Brian Clozel
  */
-class JakartaAnnotationsRuntimeHintsRegistrarTests {
+class JakartaAnnotationsRuntimeHintsTests {
 
 	private final RuntimeHints hints = new RuntimeHints();
 

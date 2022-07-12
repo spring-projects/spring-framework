@@ -40,7 +40,7 @@ import org.springframework.util.ClassUtils;
  * @since 6.0
  * @see SpringFactoriesLoader
  */
-class SpringFactoriesLoaderRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
+class SpringFactoriesLoaderRuntimeHints implements RuntimeHintsRegistrar {
 
 	private static final List<String> RESOURCE_LOCATIONS =
 			List.of(SpringFactoriesLoader.FACTORIES_RESOURCE_LOCATION);
@@ -48,7 +48,7 @@ class SpringFactoriesLoaderRuntimeHintsRegistrar implements RuntimeHintsRegistra
 	private static final Consumer<TypeHint.Builder> HINT = builder ->
 			builder.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 
-	private static final Log logger = LogFactory.getLog(SpringFactoriesLoaderRuntimeHintsRegistrar.class);
+	private static final Log logger = LogFactory.getLog(SpringFactoriesLoaderRuntimeHints.class);
 
 
 	@Override

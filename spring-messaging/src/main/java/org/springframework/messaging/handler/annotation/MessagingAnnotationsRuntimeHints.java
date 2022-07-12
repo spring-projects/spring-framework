@@ -31,7 +31,7 @@ import org.springframework.stereotype.Controller;
  * @author Sebastien Deleuze
  * @since 6.0
  */
-public class MessagingAnnotationsRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
+public class MessagingAnnotationsRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
 	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {

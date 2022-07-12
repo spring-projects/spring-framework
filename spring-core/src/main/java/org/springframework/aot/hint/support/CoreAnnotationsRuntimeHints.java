@@ -14,23 +14,28 @@
  * limitations under the License.
  */
 
-package org.springframework.mail.javamail;
+package org.springframework.aot.hint.support;
+
+import java.util.stream.Stream;
 
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.core.annotation.AliasFor;
+import org.springframework.core.annotation.Order;
 import org.springframework.lang.Nullable;
 
 /**
- * {@link RuntimeHintsRegistrar} implementation that makes sure mime types
- * are available in constrained environments.
+ * {@link RuntimeHintsRegistrar} for core annotations.
  *
- * @author Sebastien Deleuze
+ * @author Phillip Webb
  * @since 6.0
  */
-class MimeTypeResourceHintsRegistrar implements RuntimeHintsRegistrar {
+class CoreAnnotationsRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
 	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
-		hints.resources().registerPattern("org/springframework/mail/javamail/mime.types");
+		Stream.of(AliasFor.class, Order.class).forEach(annotationType ->
+				RuntimeHintsUtils.registerAnnotation(hints, annotationType));
 	}
+
 }

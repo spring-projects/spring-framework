@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http;
+package org.springframework.mail.javamail;
 
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
@@ -24,13 +24,14 @@ import org.springframework.lang.Nullable;
  * {@link RuntimeHintsRegistrar} implementation that makes sure mime types
  * are available in constrained environments.
  *
- * @author Stephane Nicoll
+ * @author Sebastien Deleuze
  * @since 6.0
  */
-class MediaTypeResourceHintsRegistrar implements RuntimeHintsRegistrar {
+class JavaMailMimeTypesRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
 	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
-		hints.resources().registerPattern("org/springframework/http/mime.types");
+		hints.resources().registerPattern("org/springframework/mail/javamail/mime.types");
 	}
+
 }

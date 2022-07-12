@@ -38,7 +38,7 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
  */
 @Configuration(proxyBeanMethods = false)
 @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-@ImportRuntimeHints(TransactionRuntimeHintsRegistrar.class)
+@ImportRuntimeHints(TransactionRuntimeHints.class)
 public class ProxyTransactionManagementConfiguration extends AbstractTransactionManagementConfiguration {
 
 	@Bean(name = TransactionManagementConfigUtils.TRANSACTION_ADVISOR_BEAN_NAME)

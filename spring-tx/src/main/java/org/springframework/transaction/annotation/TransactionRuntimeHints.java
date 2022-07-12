@@ -14,35 +14,35 @@
  * limitations under the License.
  */
 
-package org.springframework.http.codec;
+package org.springframework.transaction.annotation;
+
+import java.util.List;
 
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeReference;
-import org.springframework.http.codec.support.DefaultClientCodecConfigurer;
-import org.springframework.http.codec.support.DefaultServerCodecConfigurer;
-import org.springframework.lang.Nullable;
+import org.springframework.aot.hint.support.RuntimeHintsUtils;
+import org.springframework.transaction.TransactionDefinition;
 
 /**
  * {@link RuntimeHintsRegistrar} implementation that registers runtime hints for
- * implementations listed in {@code CodecConfigurer.properties}.
+ * transaction management.
  *
  * @author Sebastien Deleuze
  * @since 6.0
+ * @see TransactionBeanRegistrationAotProcessor
  */
-public class CodecConfigurerHintsRegistrar implements RuntimeHintsRegistrar {
+class TransactionRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
-	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
-		hints.resources().registerPattern("org/springframework/http/codec/CodecConfigurer.properties");
-		registerType(hints, DefaultClientCodecConfigurer.class);
-		registerType(hints, DefaultServerCodecConfigurer.class);
-	}
-
-	private void registerType(RuntimeHints hints, Class<?> type) {
-		hints.reflection().registerType(type, builder ->
-				builder.onReachableType(TypeReference.of(CodecConfigurerFactory.class))
-						.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
+	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+		RuntimeHintsUtils.registerAnnotation(hints, Transactional.class);
+		hints.reflection()
+				.registerTypes(List.of(
+								TypeReference.of(Isolation.class),
+								TypeReference.of(Propagation.class),
+								TypeReference.of(TransactionDefinition.class)),
+						builder -> builder.withMembers(MemberCategory.DECLARED_FIELDS));
 	}
 }

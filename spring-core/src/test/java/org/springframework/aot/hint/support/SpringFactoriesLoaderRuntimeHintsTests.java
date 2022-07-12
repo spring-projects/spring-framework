@@ -23,39 +23,45 @@ import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
-import org.springframework.core.annotation.AliasFor;
-import org.springframework.core.annotation.Order;
+import org.springframework.core.io.support.DummyFactory;
+import org.springframework.core.io.support.MyDummyFactory1;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link CoreAnnotationsRuntimeHintsRegistrar}.
+ * Tests for {@link SpringFactoriesLoaderRuntimeHints}.
  *
  * @author Phillip Webb
  */
-class CoreAnnotationsRuntimeHintsRegistrarTests {
+class SpringFactoriesLoaderRuntimeHintsTests {
 
-	private RuntimeHints hints = new RuntimeHints();
+	private RuntimeHints hints;
 
 	@BeforeEach
 	void setup() {
+		this.hints = new RuntimeHints();
 		SpringFactoriesLoader.forResourceLocation("META-INF/spring/aot.factories")
 				.load(RuntimeHintsRegistrar.class).forEach(registrar -> registrar
 						.registerHints(this.hints, ClassUtils.getDefaultClassLoader()));
 	}
 
 	@Test
-	void aliasForHasHints() {
-		assertThat(RuntimeHintsPredicates.reflection().onType(AliasFor.class)
-				.withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(this.hints);
+	void resourceLocationHasHints() {
+		assertThat(RuntimeHintsPredicates.resource().forResource(SpringFactoriesLoader.FACTORIES_RESOURCE_LOCATION)).accepts(this.hints);
 	}
 
 	@Test
-	void orderAnnotationHasHints() {
-		assertThat(RuntimeHintsPredicates.reflection().onType(Order.class)
-				.withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(this.hints);
+	void factoryTypeHasHint() {
+		assertThat(RuntimeHintsPredicates.reflection().onType(DummyFactory.class)
+				.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.hints);
+	}
+
+	@Test
+	void factoryImplementationHasHint() {
+		assertThat(RuntimeHintsPredicates.reflection().onType(MyDummyFactory1.class)
+				.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.hints);
 	}
 
 }

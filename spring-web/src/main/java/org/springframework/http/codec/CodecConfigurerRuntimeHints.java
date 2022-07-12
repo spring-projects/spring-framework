@@ -14,35 +14,35 @@
  * limitations under the License.
  */
 
-package org.springframework.transaction.annotation;
+package org.springframework.http.codec;
 
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeReference;
-import org.springframework.aot.hint.support.RuntimeHintsUtils;
-
-import static java.util.Arrays.asList;
+import org.springframework.http.codec.support.DefaultClientCodecConfigurer;
+import org.springframework.http.codec.support.DefaultServerCodecConfigurer;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link RuntimeHintsRegistrar} implementation that registers runtime hints for
- * transaction management.
+ * implementations listed in {@code CodecConfigurer.properties}.
  *
  * @author Sebastien Deleuze
  * @since 6.0
- * @see TransactionBeanRegistrationAotProcessor
  */
-public class TransactionRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
+class CodecConfigurerRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
-	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
-		RuntimeHintsUtils.registerAnnotation(hints, org.springframework.transaction.annotation.Transactional.class);
+	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
+		hints.resources().registerPattern("org/springframework/http/codec/CodecConfigurer.properties");
+		registerType(hints, DefaultClientCodecConfigurer.class);
+		registerType(hints, DefaultServerCodecConfigurer.class);
+	}
 
-		hints.reflection()
-				.registerTypes(asList(
-								TypeReference.of(org.springframework.transaction.annotation.Isolation.class),
-								TypeReference.of(org.springframework.transaction.annotation.Propagation.class),
-								TypeReference.of(org.springframework.transaction.TransactionDefinition.class)),
-						builder -> builder.withMembers(MemberCategory.DECLARED_FIELDS));
+	private void registerType(RuntimeHints hints, Class<?> type) {
+		hints.reflection().registerType(type, builder ->
+				builder.onReachableType(TypeReference.of(CodecConfigurerFactory.class))
+						.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
 	}
 }

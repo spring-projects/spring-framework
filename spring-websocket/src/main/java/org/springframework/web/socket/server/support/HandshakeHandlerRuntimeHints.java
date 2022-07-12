@@ -30,7 +30,7 @@ import org.springframework.util.ClassUtils;
  * @author Sebastien Deleuze
  * @since 6.0
  */
-public class HandshakeHandlerRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
+class HandshakeHandlerRuntimeHints implements RuntimeHintsRegistrar {
 
 	private static final boolean tomcatWsPresent;
 

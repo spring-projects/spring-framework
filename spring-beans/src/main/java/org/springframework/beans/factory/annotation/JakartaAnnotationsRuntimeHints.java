@@ -29,7 +29,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Brian Clozel
  */
-class JakartaAnnotationsRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
+class JakartaAnnotationsRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {

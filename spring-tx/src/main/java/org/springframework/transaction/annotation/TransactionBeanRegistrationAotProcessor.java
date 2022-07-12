@@ -39,9 +39,9 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Sebastien Deleuze
  * @since 6.0
- * @see TransactionRuntimeHintsRegistrar
+ * @see TransactionRuntimeHints
  */
-public class TransactionBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
+class TransactionBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
 
 	private final static String JAKARTA_TRANSACTIONAL_CLASS_NAME = "jakarta.transaction.Transactional";
 
@@ -70,7 +70,7 @@ public class TransactionBeanRegistrationAotProcessor implements BeanRegistration
 
 	private static class TransactionBeanRegistrationAotContribution implements BeanRegistrationAotContribution {
 
-		private Class<?> beanClass;
+		private final Class<?> beanClass;
 
 		public TransactionBeanRegistrationAotContribution(Class<?> beanClass) {
 			this.beanClass = beanClass;
