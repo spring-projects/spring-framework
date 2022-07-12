@@ -178,7 +178,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 	/**
 	 * Convert the stream's data to a byte array and return the byte array.
 	 * <p>Also replaces the internal structures with the byte array to conserve memory:
-	 * if the byte array is being made anyways, mind as well as use it. This approach
+	 * if the byte array is being made anyway, mind as well as use it. This approach
 	 * also means that if this method is called twice without any writes in between,
 	 * the second call is a no-op.
 	 * <p>This method is "unsafe" as it returns the internal buffer.

@@ -754,7 +754,7 @@ public abstract class AnnotationUtils {
 	/**
 	 * Check the declared attributes of the given annotation, in particular covering
 	 * Google App Engine's late arrival of {@code TypeNotPresentExceptionProxy} for
-	 * {@code Class} values (instead of early {@code Class.getAnnotations() failure}.
+	 * {@code Class} values (instead of early {@code Class.getAnnotations() failure}).
 	 * <p>This method not failing indicates that {@link #getAnnotationAttributes(Annotation)}
 	 * won't failure either (when attempted later on).
 	 * @param annotation the annotation to validate

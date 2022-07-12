@@ -59,7 +59,7 @@ public interface AttributeAccessor {
 	 * in this {@code AttributeAccessor}, the existing value will be returned
 	 * without applying the supplied compute function.
 	 * <p>The default implementation of this method is not thread safe but can
-	 * overridden by concrete implementations of this interface.
+	 * be overridden by concrete implementations of this interface.
 	 * @param <T> the type of the attribute value
 	 * @param name the unique attribute key
 	 * @param computeFunction a function that computes a new value for the attribute

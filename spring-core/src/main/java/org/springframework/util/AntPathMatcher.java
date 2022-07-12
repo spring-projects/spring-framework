@@ -58,7 +58,7 @@ import org.springframework.lang.Nullable;
  * </ul>
  *
  * <p><strong>Note:</strong> a pattern and a path must both be absolute or must
- * both be relative in order for the two to match. Therefore it is recommended
+ * both be relative in order for the two to match. Therefore, it is recommended
  * that users of this implementation to sanitize patterns in order to prefix
  * them with "/" as it makes sense in the context in which they're used.
  *
@@ -427,7 +427,7 @@ public class AntPathMatcher implements PathMatcher {
 	}
 
 	/**
-	 * Test whether or not a string matches against a pattern.
+	 * Test whether a string matches against a pattern.
 	 * @param pattern the pattern to match against (never {@code null})
 	 * @param str the String which must be matched against the pattern (never {@code null})
 	 * @return {@code true} if the string matches against the pattern, or {@code false} otherwise
@@ -636,7 +636,7 @@ public class AntPathMatcher implements PathMatcher {
 
 
 	/**
-	 * Tests whether or not a string matches against a pattern via a {@link Pattern}.
+	 * Tests whether a string matches against a pattern via a {@link Pattern}.
 	 * <p>The pattern may contain special characters: '*' means zero or more characters; '?' means one and
 	 * only one character; '{' and '}' indicate a URI template pattern. For example <tt>/users/{user}</tt>.
 	 */
