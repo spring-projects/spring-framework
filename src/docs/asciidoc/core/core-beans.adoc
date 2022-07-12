@@ -4689,7 +4689,7 @@ example:
 ----
 	class SimpleMovieLister {
 
-		@set:Autowired
+		@set:Required
 		lateinit var movieFinder: MovieFinder
 
 		// ...
