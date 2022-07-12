@@ -354,7 +354,7 @@ public abstract class AbstractJCacheAnnotationTests {
 
 		assertThatNullPointerException().isThrownBy(() ->
 				service.earlyRemoveWithException(this.keyItem, false));
-		// This will be remove anyway as the earlyRemove has removed the cache before
+		// This will be removed anyway as the earlyRemove has removed the cache before
 		assertThat(cache.get(key)).isNull();
 	}
 
@@ -428,7 +428,7 @@ public abstract class AbstractJCacheAnnotationTests {
 
 		assertThatNullPointerException().isThrownBy(() ->
 				service.earlyRemoveAllWithException(false));
-		// This will be remove anyway as the earlyRemove has removed the cache before
+		// This will be removed anyway as the earlyRemove has removed the cache before
 		assertThat(isEmpty(cache)).isTrue();
 	}
 

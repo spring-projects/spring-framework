@@ -306,7 +306,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	}
 
 	/**
-	 * Indicates whether or not the managed resource should be exposed on the
+	 * Indicates whether the managed resource should be exposed on the
 	 * {@link Thread#getContextClassLoader() thread context ClassLoader} before
 	 * allowing any invocations on the MBean to occur.
 	 * <p>The default value is {@code true}, exposing a {@link SpringModelMBean}
@@ -513,7 +513,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * {@code ModelMBean}. The actual implementation of the
 	 * {@code ModelMBean} interface used depends on the implementation of
 	 * the {@code ModelMBeanProvider} interface that is configured. By
-	 * default the {@code RequiredModelMBean} class that is supplied with
+	 * default, the {@code RequiredModelMBean} class that is supplied with
 	 * all JMX implementations is used.
 	 * <p>The management interface produced for each bean is dependent on the
 	 * {@code MBeanInfoAssembler} implementation being used. The
@@ -914,7 +914,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	}
 
 	/**
-	 * Indicates whether or not a particular bean name is present in the excluded beans list.
+	 * Indicates whether a particular bean name is present in the excluded beans list.
 	 */
 	private boolean isExcluded(String beanName) {
 		return (this.excludedBeans.contains(beanName) ||
@@ -1067,7 +1067,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 
 		/**
 		 * Called during the autodetection process to decide whether
-		 * or not a bean should be included.
+		 * a bean should be included.
 		 * @param beanClass the class of the bean
 		 * @param beanName the name of the bean
 		 */
