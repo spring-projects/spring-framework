@@ -214,7 +214,7 @@ public abstract class MethodVisitor {
   }
 
   /**
-   * Visits a non standard attribute of this method.
+   * Visits a non-standard attribute of this method.
    *
    * @param attribute an attribute.
    */
@@ -285,8 +285,8 @@ public abstract class MethodVisitor {
    * @param stack the operand stack types in this frame. This array must not be modified. Its
    *     content has the same format as the "local" array.
    * @throws IllegalStateException if a frame is visited just after another one, without any
-   *     instruction between the two (unless this frame is a Opcodes#F_SAME frame, in which case it
-   *     is silently ignored).
+   *     instruction between the two (unless this frame is a {@link Opcodes#F_SAME} frame,
+   *     in which case it is silently ignored).
    */
   public void visitFrame(
       final int type,
@@ -528,7 +528,7 @@ public abstract class MethodVisitor {
    * }
    * </pre>
    *
-   * @param value the constant to be loaded on the stack. This parameter must be a non null {@link
+   * @param value the constant to be loaded on the stack. This parameter must be a non-null {@link
    *     Integer}, a {@link Float}, a {@link Long}, a {@link Double}, a {@link String}, a {@link
    *     Type} of OBJECT or ARRAY sort for {@code .class} constants, for classes whose version is
    *     49, a {@link Type} of METHOD sort for MethodType, a {@link Handle} for MethodHandle

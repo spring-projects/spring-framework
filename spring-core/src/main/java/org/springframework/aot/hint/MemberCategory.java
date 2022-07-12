@@ -78,7 +78,7 @@ public enum MemberCategory {
 
 	/**
 	 * A category that defines public {@linkplain Method methods}, including
-	 * inherited ones can be introspect, but not invoked.
+	 * inherited ones, can be introspected but not invoked.
 	 * @see Class#getMethods()
 	 * @see ExecutableMode#INTROSPECT
 	 */

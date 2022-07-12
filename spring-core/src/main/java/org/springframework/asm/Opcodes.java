@@ -165,7 +165,7 @@ public interface Opcodes {
    *
    * <h1>ASM subclasses</h1>
    *
-   * <p>In ASM packages, subclasses of StuffVisitor can typically be sub classed again by the user,
+   * <p>In ASM packages, subclasses of StuffVisitor can typically be subclassed again by the user,
    * and can be used with API_OLD or API_NEW. Because of this, if such a subclass must override
    * visitNewStuff, it must do so in the following way (and must not override visitOldStuff):
    *

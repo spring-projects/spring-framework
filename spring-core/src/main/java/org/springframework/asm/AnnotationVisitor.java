@@ -131,7 +131,7 @@ public abstract class AnnotationVisitor {
   /**
    * Visits an array value of the annotation. Note that arrays of primitive values (such as byte,
    * boolean, short, char, int, long, float or double) can be passed as value to {@link #visit
-   * visit}. This is what {@link ClassReader} does for non empty arrays of primitive values.
+   * visit}. This is what {@link ClassReader} does for non-empty arrays of primitive values.
    *
    * @param name the value name.
    * @return a visitor to visit the actual array value elements, or {@literal null} if this visitor

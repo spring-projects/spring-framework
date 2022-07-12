@@ -275,7 +275,7 @@ public class Label {
    * <p>List of labels are used in {@link MethodWriter#computeAllFrames} and {@link
    * MethodWriter#computeMaxStackAndLocal} to compute stack map frames and the maximum stack size,
    * respectively, as well as in {@link #markSubroutine} and {@link #addSubroutineRetSuccessors} to
-   * compute the basic blocks belonging to subroutines and their outgoing edges. Outside of these
+   * compute the basic blocks belonging to subroutines and their outgoing edges. Outside these
    * methods, this field should be null (this property is a precondition and a postcondition of
    * these methods).
    */

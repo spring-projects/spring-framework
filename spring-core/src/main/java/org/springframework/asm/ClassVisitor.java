@@ -92,8 +92,8 @@ public abstract class ClassVisitor {
    * @param name the internal name of the class (see {@link Type#getInternalName()}).
    * @param signature the signature of this class. May be {@literal null} if the class is not a
    *     generic one, and does not extend or implement generic classes or interfaces.
-   * @param superName the internal of name of the super class (see {@link Type#getInternalName()}).
-   *     For interfaces, the super class is {@link Object}. May be {@literal null}, but only for the
+   * @param superName the internal of name of the superclass (see {@link Type#getInternalName()}).
+   *     For interfaces, the superclass is {@link Object}. May be {@literal null}, but only for the
    *     {@link Object} class.
    * @param interfaces the internal names of the class's interfaces (see {@link
    *     Type#getInternalName()}). May be {@literal null}.
@@ -224,7 +224,7 @@ public abstract class ClassVisitor {
   }
 
   /**
-   * Visits a non standard attribute of the class.
+   * Visits a non-standard attribute of the class.
    *
    * @param attribute an attribute.
    */
@@ -320,7 +320,7 @@ public abstract class ClassVisitor {
    *     field does not have an initial value, must be an {@link Integer}, a {@link Float}, a {@link
    *     Long}, a {@link Double} or a {@link String} (for {@code int}, {@code float}, {@code long}
    *     or {@code String} fields respectively). <i>This parameter is only used for static
-   *     fields</i>. Its value is ignored for non static fields, which must be initialized through
+   *     fields</i>. Its value is ignored for non-static fields, which must be initialized through
    *     bytecode instructions in constructors or methods.
    * @return a visitor to visit field annotations and attributes, or {@literal null} if this class
    *     visitor is not interested in visiting these annotations and attributes.

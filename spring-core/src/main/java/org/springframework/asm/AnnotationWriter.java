@@ -321,7 +321,7 @@ final class AnnotationWriter extends AnnotationVisitor {
 
   /**
    * Returns the size of a Runtime[In]Visible[Type]Annotations attribute containing this annotation
-   * and all its <i>predecessors</i> (see {@link #previousAnnotation}. Also adds the attribute name
+   * and all its <i>predecessors</i> (see {@link #previousAnnotation}). Also adds the attribute name
    * to the constant pool of the class (if not null).
    *
    * @param attributeName one of "Runtime[In]Visible[Type]Annotations", or {@literal null}.
@@ -345,7 +345,7 @@ final class AnnotationWriter extends AnnotationVisitor {
 
   /**
    * Returns the size of the Runtime[In]Visible[Type]Annotations attributes containing the given
-   * annotations and all their <i>predecessors</i> (see {@link #previousAnnotation}. Also adds the
+   * annotations and all their <i>predecessors</i> (see {@link #previousAnnotation}). Also adds the
    * attribute names to the constant pool of the class (if not null).
    *
    * @param lastRuntimeVisibleAnnotation The last runtime visible annotation of a field, method or
@@ -394,8 +394,8 @@ final class AnnotationWriter extends AnnotationVisitor {
   }
 
   /**
-   * Puts a Runtime[In]Visible[Type]Annotations attribute containing this annotations and all its
-   * <i>predecessors</i> (see {@link #previousAnnotation} in the given ByteVector. Annotations are
+   * Puts a Runtime[In]Visible[Type]Annotations attribute containing this annotation and all its
+   * <i>predecessors</i> (see {@link #previousAnnotation} in the given ByteVector). Annotations are
    * put in the same order they have been visited.
    *
    * @param attributeNameIndex the constant pool index of the attribute name (one of
@@ -427,7 +427,7 @@ final class AnnotationWriter extends AnnotationVisitor {
 
   /**
    * Puts the Runtime[In]Visible[Type]Annotations attributes containing the given annotations and
-   * all their <i>predecessors</i> (see {@link #previousAnnotation} in the given ByteVector.
+   * all their <i>predecessors</i> (see {@link #previousAnnotation} in the given ByteVector).
    * Annotations are put in the same order they have been visited.
    *
    * @param symbolTable where the constants used in the AnnotationWriter instances are stored.

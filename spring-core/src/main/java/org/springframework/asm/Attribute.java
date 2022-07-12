@@ -28,7 +28,7 @@
 package org.springframework.asm;
 
 /**
- * A non standard class, field, method or Code attribute, as defined in the Java Virtual Machine
+ * A non-standard class, field, method or Code attribute, as defined in the Java Virtual Machine
  * Specification (JVMS).
  *
  * @see <a href= "https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.7">JVMS
@@ -137,7 +137,7 @@ public class Attribute {
    * ByteVector.
    *
    * @param classWriter the class to which this attribute must be added. This parameter can be used
-   *     to add the items that corresponds to this attribute to the constant pool of this class.
+   *     to add the items that correspond to this attribute to the constant pool of this class.
    * @param code the bytecode of the method corresponding to this Code attribute, or {@literal null}
    *     if this attribute is not a Code attribute. Corresponds to the 'code' field of the Code
    *     attribute.

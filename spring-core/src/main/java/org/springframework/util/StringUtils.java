@@ -1165,7 +1165,7 @@ public abstract class StringUtils {
 	 * {@code String} array.
 	 * <p>A single {@code delimiter} may consist of more than one character,
 	 * but it will still be considered as a single delimiter string, rather
-	 * than as bunch of potential delimiter characters, in contrast to
+	 * than as a bunch of potential delimiter characters, in contrast to
 	 * {@link #tokenizeToStringArray}.
 	 * @param str the input {@code String} (potentially {@code null} or empty)
 	 * @param delimiter the delimiter between elements (this is a single delimiter,
@@ -1182,7 +1182,7 @@ public abstract class StringUtils {
 	 * a {@code String} array.
 	 * <p>A single {@code delimiter} may consist of more than one character,
 	 * but it will still be considered as a single delimiter string, rather
-	 * than as bunch of potential delimiter characters, in contrast to
+	 * than as a bunch of potential delimiter characters, in contrast to
 	 * {@link #tokenizeToStringArray}.
 	 * @param str the input {@code String} (potentially {@code null} or empty)
 	 * @param delimiter the delimiter between elements (this is a single delimiter,

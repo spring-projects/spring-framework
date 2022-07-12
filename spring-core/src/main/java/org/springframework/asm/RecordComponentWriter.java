@@ -37,7 +37,7 @@ final class RecordComponentWriter extends RecordComponentVisitor {
   /** The name_index field of the Record attribute. */
   private final int nameIndex;
 
-  /** The descriptor_index field of the the Record attribute. */
+  /** The descriptor_index field of the Record attribute. */
   private final int descriptorIndex;
 
   /**
@@ -71,7 +71,7 @@ final class RecordComponentWriter extends RecordComponentVisitor {
   private AnnotationWriter lastRuntimeInvisibleTypeAnnotation;
 
   /**
-   * The first non standard attribute of this record component. The next ones can be accessed with
+   * The first non-standard attribute of this record component. The next ones can be accessed with
    * the {@link Attribute#nextAttribute} field. May be {@literal null}.
    *
    * <p><b>WARNING</b>: this list stores the attributes in the <i>reverse</i> order of their visit.

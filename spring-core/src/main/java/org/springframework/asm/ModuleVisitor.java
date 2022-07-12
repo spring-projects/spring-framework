@@ -173,7 +173,7 @@ public abstract class ModuleVisitor {
 
   /**
    * Visits the end of the module. This method, which is the last one to be called, is used to
-   * inform the visitor that everything have been visited.
+   * inform the visitor that everything has been visited.
    */
   public void visitEnd() {
     if (mv != null) {

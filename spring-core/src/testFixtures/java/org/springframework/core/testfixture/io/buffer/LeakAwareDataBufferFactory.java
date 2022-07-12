@@ -76,7 +76,7 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 
 
 	/**
-	 * Checks whether all of the data buffers allocated by this factory have also been released.
+	 * Checks whether all the data buffers allocated by this factory have also been released.
 	 * If not, then an {@link AssertionError} is thrown. Typically used from a JUnit <em>after</em>
 	 * method.
 	 */

@@ -143,7 +143,7 @@ final class Handler {
       return new Handler(firstHandler, firstHandler.startPc, start);
     } else {
       // [handlerStart,handlerEnd[ - [rangeStart,rangeEnd[ =
-      //     [handlerStart,rangeStart[ + [rangeEnd,handerEnd[
+      //     [handlerStart,rangeStart[ + [rangeEnd,handlerEnd[
       firstHandler.nextHandler = new Handler(firstHandler, end, firstHandler.endPc);
       return new Handler(firstHandler, firstHandler.startPc, start);
     }

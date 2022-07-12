@@ -35,7 +35,7 @@ import org.springframework.lang.Nullable;
 /**
  * Abstract base class for SAX {@code ContentHandler} and {@code LexicalHandler}
  * implementations that use StAX as a basis. All methods delegate to internal template
- * methods, capable of throwing a {@code XMLStreamException}. Additionally, an namespace
+ * methods, capable of throwing a {@code XMLStreamException}. Additionally, a namespace
  * context stack is used to keep track of declared namespaces.
  *
  * @author Arjen Poutsma

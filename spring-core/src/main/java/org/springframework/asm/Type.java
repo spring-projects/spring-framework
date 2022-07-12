@@ -298,7 +298,7 @@ public final class Type {
     int numArgumentTypes = 0;
     // Skip the first character, which is always a '('.
     int currentOffset = 1;
-    // Parse the argument types, one at a each loop iteration.
+    // Parse the argument types, one at each loop iteration.
     while (methodDescriptor.charAt(currentOffset) != ')') {
       while (methodDescriptor.charAt(currentOffset) == '[') {
         currentOffset++;
@@ -388,7 +388,7 @@ public final class Type {
   static int getReturnTypeOffset(final String methodDescriptor) {
     // Skip the first character, which is always a '('.
     int currentOffset = 1;
-    // Skip the argument types, one at a each loop iteration.
+    // Skip the argument types, one at each loop iteration.
     while (methodDescriptor.charAt(currentOffset) != ')') {
       while (methodDescriptor.charAt(currentOffset) == '[') {
         currentOffset++;
@@ -729,7 +729,7 @@ public final class Type {
     // Skip the first character, which is always a '('.
     int currentOffset = 1;
     int currentChar = methodDescriptor.charAt(currentOffset);
-    // Parse the argument types and compute their size, one at a each loop iteration.
+    // Parse the argument types and compute their size, one at each loop iteration.
     while (currentChar != ')') {
       if (currentChar == 'J' || currentChar == 'D') {
         currentOffset++;

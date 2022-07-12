@@ -128,7 +128,7 @@ public abstract class RecordComponentVisitor {
   }
 
   /**
-   * Visits a non standard attribute of the record component.
+   * Visits a non-standard attribute of the record component.
    *
    * @param attribute an attribute.
    */
@@ -140,7 +140,7 @@ public abstract class RecordComponentVisitor {
 
   /**
    * Visits the end of the record component. This method, which is the last one to be called, is
-   * used to inform the visitor that everything have been visited.
+   * used to inform the visitor that everything has been visited.
    */
   public void visitEnd() {
     if (delegate != null) {

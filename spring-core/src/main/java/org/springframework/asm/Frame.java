@@ -637,7 +637,7 @@ class Frame {
    * @param abstractType an abstract type.
    * @return the REFERENCE_KIND abstract type corresponding to abstractType if it is
    *     UNINITIALIZED_THIS or an UNINITIALIZED_KIND abstract type for one of the types on which a
-   *     constructor is invoked in the basic block. Otherwise returns abstractType.
+   *     constructor is invoked in the basic block. Otherwise, returns abstractType.
    */
   private int getInitializedType(final SymbolTable symbolTable, final int abstractType) {
     if (abstractType == UNINITIALIZED_THIS
@@ -1292,7 +1292,7 @@ class Frame {
         // If srcType has the same array dimension and the same kind as dstType.
         if ((dstType & KIND_MASK) == REFERENCE_KIND) {
           // If srcType and dstType are reference types with the same array dimension,
-          // merge(srcType, dstType) = dim(srcType) | common super class of srcType and dstType.
+          // merge(srcType, dstType) = dim(srcType) | common superclass of srcType and dstType.
           mergedType =
               (srcType & DIM_MASK)
                   | REFERENCE_KIND
@@ -1323,7 +1323,7 @@ class Frame {
         mergedType = TOP;
       }
     } else if (dstType == NULL) {
-      // If dstType is the NULL type, merge(srcType, dstType) = srcType, or TOP if srcType is not a
+      // If dstType is the NULL type, merge(srcType, dstType) = srcType, or TOP if srcType is not
       // an array type or a reference type.
       mergedType =
           (srcType & DIM_MASK) != 0 || (srcType & KIND_MASK) == REFERENCE_KIND ? srcType : TOP;

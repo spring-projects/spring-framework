@@ -62,7 +62,7 @@ final class Context {
 
   /**
    * The labels of the current method, indexed by bytecode offset (only bytecode offsets for which a
-   * label is needed have a non null associated Label).
+   * label is needed to have a non-null associated Label).
    */
   Label[] currentMethodLabels;
 

@@ -914,7 +914,7 @@ final class SymbolTable {
    * @param tag one of {@link Symbol#CONSTANT_DYNAMIC_TAG} or {@link
    *     Symbol#CONSTANT_INVOKE_DYNAMIC_TAG}.
    * @param name a method name.
-   * @param descriptor a field descriptor for CONSTANT_DYNAMIC_TAG) or a method descriptor for
+   * @param descriptor a field descriptor for CONSTANT_DYNAMIC_TAG or a method descriptor for
    *     CONSTANT_INVOKE_DYNAMIC_TAG.
    * @param bootstrapMethodIndex the index of a bootstrap method in the BootstrapMethods attribute.
    * @return a new or already existing Symbol with the given value.
@@ -1182,7 +1182,7 @@ final class SymbolTable {
    * @param typeTableIndex2 another {@link Symbol#TYPE_TAG} type, specified by its index in the type
    *     table.
    * @return the index of a new or already existing {@link Symbol#TYPE_TAG} type Symbol,
-   *     corresponding to the common super class of the given types.
+   *     corresponding to the common superclass of the given types.
    */
   int addMergedType(final int typeTableIndex1, final int typeTableIndex2) {
     long data =

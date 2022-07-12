@@ -67,7 +67,7 @@ public class ClassReader {
   public static final int SKIP_FRAMES = 4;
 
   /**
-   * A flag to expand the stack map frames. By default stack map frames are visited in their
+   * A flag to expand the stack map frames. By default, stack map frames are visited in their
    * original format (i.e. "expanded" for classes whose version is less than V1_6, and "compressed"
    * for the other classes). If this flag is set, stack map frames are always visited in expanded
    * format (this option adds a decompression/compression step in ClassReader and ClassWriter which
@@ -120,9 +120,9 @@ public class ClassReader {
 
   /**
    * The offset in bytes, in {@link #classFileBuffer}, of each cp_info entry of the ClassFile's
-   * constant_pool array, <i>plus one</i>. In other words, the offset of constant pool entry i is
-   * given by cpInfoOffsets[i] - 1, i.e. its cp_info's tag field is given by b[cpInfoOffsets[i] -
-   * 1].
+   * constant_pool array, <i>plus one</i>. In other words, the offset of constant pool entry
+   * {@code i} is given by {@code cpInfoOffsets[i] - 1}, i.e. its cp_info's tag field is given
+   * by {@code b[cpInfoOffsets[i] - 1]}.
    */
   private final int[] cpInfoOffsets;
 
@@ -376,10 +376,10 @@ public class ClassReader {
   }
 
   /**
-   * Returns the internal of name of the super class (see {@link Type#getInternalName()}). For
-   * interfaces, the super class is {@link Object}.
+   * Returns the internal of name of the superclass (see {@link Type#getInternalName()}). For
+   * interfaces, the superclass is {@link Object}.
    *
-   * @return the internal name of the super class, or {@literal null} for {@link Object} class.
+   * @return the internal name of the superclass, or {@literal null} for {@link Object} class.
    * @see ClassVisitor#visit(int, int, String, String, String, String[])
    */
   public String getSuperName() {
@@ -495,7 +495,7 @@ public class ClassReader {
     int permittedSubclassesOffset = 0;
     // - The offset of the Record attribute, or 0.
     int recordOffset = 0;
-    // - The non standard attributes (linked with their {@link Attribute#nextAttribute} field).
+    // - The non-standard attributes (linked with their {@link Attribute#nextAttribute} field).
     //   This list in the <i>reverse order</i> or their order in the ClassFile structure.
     Attribute attributes = null;
 
@@ -680,7 +680,7 @@ public class ClassReader {
       }
     }
 
-    // Visit the non standard attributes.
+    // Visit the non-standard attributes.
     while (attributes != null) {
       // Copy and reset the nextAttribute field so that it can also be used in ClassWriter.
       Attribute nextAttribute = attributes.nextAttribute;
@@ -911,7 +911,7 @@ public class ClassReader {
     int runtimeVisibleTypeAnnotationsOffset = 0;
     // - The offset of the RuntimeInvisibleTypeAnnotations attribute, or 0.
     int runtimeInvisibleTypeAnnotationsOffset = 0;
-    // - The non standard attributes (linked with their {@link Attribute#nextAttribute} field).
+    // - The non-standard attributes (linked with their {@link Attribute#nextAttribute} field).
     //   This list in the <i>reverse order</i> or their order in the ClassFile structure.
     Attribute attributes = null;
 
@@ -1040,7 +1040,7 @@ public class ClassReader {
       }
     }
 
-    // Visit the non standard attributes.
+    // Visit the non-standard attributes.
     while (attributes != null) {
       // Copy and reset the nextAttribute field so that it can also be used in FieldWriter.
       Attribute nextAttribute = attributes.nextAttribute;
@@ -1087,7 +1087,7 @@ public class ClassReader {
     int runtimeVisibleTypeAnnotationsOffset = 0;
     // - The offset of the RuntimeInvisibleTypeAnnotations attribute, or 0.
     int runtimeInvisibleTypeAnnotationsOffset = 0;
-    // - The non standard attributes (linked with their {@link Attribute#nextAttribute} field).
+    // - The non-standard attributes (linked with their {@link Attribute#nextAttribute} field).
     //   This list in the <i>reverse order</i> or their order in the ClassFile structure.
     Attribute attributes = null;
 
@@ -1224,7 +1224,7 @@ public class ClassReader {
       }
     }
 
-    // Visit the non standard attributes.
+    // Visit the non-standard attributes.
     while (attributes != null) {
       // Copy and reset the nextAttribute field so that it can also be used in FieldWriter.
       Attribute nextAttribute = attributes.nextAttribute;
@@ -1285,7 +1285,7 @@ public class ClassReader {
     int annotationDefaultOffset = 0;
     // - The offset of the MethodParameters attribute, or 0.
     int methodParametersOffset = 0;
-    // - The non standard attributes (linked with their {@link Attribute#nextAttribute} field).
+    // - The non-standard attributes (linked with their {@link Attribute#nextAttribute} field).
     //   This list in the <i>reverse order</i> or their order in the ClassFile structure.
     Attribute attributes = null;
 
@@ -1500,7 +1500,7 @@ public class ClassReader {
           /* visible = */ false);
     }
 
-    // Visit the non standard attributes.
+    // Visit the non-standard attributes.
     while (attributes != null) {
       // Copy and reset the nextAttribute field so that it can also be used in MethodWriter.
       Attribute nextAttribute = attributes.nextAttribute;
@@ -1879,7 +1879,7 @@ public class ClassReader {
     // - The offset of each 'type_annotation' entry in the RuntimeInvisibleTypeAnnotations
     // attribute, or null.
     int[] invisibleTypeAnnotationOffsets = null;
-    // - The non standard attributes (linked with their {@link Attribute#nextAttribute} field).
+    // - The non-standard attributes (linked with their {@link Attribute#nextAttribute} field).
     //   This list in the <i>reverse order</i> or their order in the ClassFile structure.
     Attribute attributes = null;
 
@@ -1949,7 +1949,7 @@ public class ClassReader {
         // labels it contains are also extracted one frame at a time. Thanks to the ordering of
         // frames, having only a "one frame lookahead" is not a problem, i.e. it is not possible to
         // see an offset smaller than the offset of the current instruction and for which no Label
-        // exist. Except for UNINITIALIZED type offsets. We solve this by parsing the stack map
+        // exists. Except for UNINITIALIZED type offsets. We solve this by parsing the stack map
         // table without a full decoding (see below).
       } else if ("StackMap".equals(attributeName)) {
         if ((context.parsingOptions & SKIP_FRAMES) == 0) {
@@ -2039,7 +2039,7 @@ public class ClassReader {
     int currentInvisibleTypeAnnotationBytecodeOffset =
         getTypeAnnotationBytecodeOffset(invisibleTypeAnnotationOffsets, 0);
 
-    // Whether a F_INSERT stack map frame must be inserted before the current instruction.
+    // Whether an F_INSERT stack map frame must be inserted before the current instruction.
     boolean insertFrame = false;
 
     // The delta to subtract from a goto_w or jsr_w opcode to get the corresponding goto or jsr
@@ -2653,7 +2653,7 @@ public class ClassReader {
       }
     }
 
-    // Visit the non standard attributes.
+    // Visit the non-standard attributes.
     while (attributes != null) {
       // Copy and reset the nextAttribute field so that it can also be used in MethodWriter.
       Attribute nextAttribute = attributes.nextAttribute;
@@ -2672,9 +2672,9 @@ public class ClassReader {
    *
    * @param bytecodeOffset a bytecode offset in a method.
    * @param labels the already created labels, indexed by their offset. If a label already exists
-   *     for bytecodeOffset this method must not create a new one. Otherwise it must store the new
+   *     for bytecodeOffset this method must not create a new one. Otherwise, it must store the new
    *     label in this array.
-   * @return a non null Label, which must be equal to labels[bytecodeOffset].
+   * @return a non-null Label, which must be equal to {@code labels[bytecodeOffset]}.
    */
   protected Label readLabel(final int bytecodeOffset, final Label[] labels) {
     // SPRING PATCH: leniently handle offset mismatch
@@ -3505,7 +3505,7 @@ public class ClassReader {
   }
 
   /**
-   * Reads a non standard JVMS 'attribute' structure in {@link #classFileBuffer}.
+   * Reads a non-standard JVMS 'attribute' structure in {@link #classFileBuffer}.
    *
    * @param attributePrototypes prototypes of the attributes that must be parsed during the visit of
    *     the class. Any attribute whose type is not equal to the type of one the prototypes will not

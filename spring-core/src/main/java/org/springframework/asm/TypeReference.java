@@ -51,7 +51,7 @@ public class TypeReference {
   public static final int METHOD_TYPE_PARAMETER = 0x01;
 
   /**
-   * The sort of type references that target the super class of a class or one of the interfaces it
+   * The sort of type references that target the superclass of a class or one of the interfaces it
    * implements. See {@link #getSort}.
    */
   public static final int CLASS_EXTENDS = 0x10;
@@ -231,12 +231,12 @@ public class TypeReference {
   }
 
   /**
-   * Returns a reference to the super class or to an interface of the 'implements' clause of a
+   * Returns a reference to the superclass or to an interface of the 'implements' clause of a
    * class.
    *
    * @param itfIndex the index of an interface in the 'implements' clause of a class, or -1 to
-   *     reference the super class of the class.
-   * @return a reference to the given super type of a class.
+   *     reference the superclass of the class.
+   * @return a reference to the given supertype of a class.
    */
   public static TypeReference newSuperTypeReference(final int itfIndex) {
     return new TypeReference((CLASS_EXTENDS << 24) | ((itfIndex & 0xFFFF) << 8));
@@ -328,11 +328,11 @@ public class TypeReference {
   }
 
   /**
-   * Returns the index of the "super type" of a class that is referenced by this type reference.
+   * Returns the index of the "supertype" of a class that is referenced by this type reference.
    * This method must only be used for type references whose sort is {@link #CLASS_EXTENDS}.
    *
    * @return the index of an interface in the 'implements' clause of a class, or -1 if this type
-   *     reference references the type of the super class.
+   *     references the type of the superclass.
    */
   public int getSuperTypeIndex() {
     return (short) ((targetTypeAndInfo & 0x00FFFF00) >> 8);

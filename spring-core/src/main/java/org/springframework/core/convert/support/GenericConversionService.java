@@ -240,7 +240,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	}
 
 	/**
-	 * Hook method to lookup the converter for a given sourceType/targetType pair.
+	 * Hook method to look up the converter for a given sourceType/targetType pair.
 	 * First queries this ConversionService's converter cache.
 	 * On a cache miss, then performs an exhaustive search for a matching converter.
 	 * If no converter matches, returns the default converter.

@@ -118,7 +118,7 @@ public abstract class FieldVisitor {
   }
 
   /**
-   * Visits a non standard attribute of the field.
+   * Visits a non-standard attribute of the field.
    *
    * @param attribute an attribute.
    */

@@ -58,7 +58,7 @@ final class MethodWriter extends MethodVisitor {
   /**
    * Indicates that the stack map frames of type F_INSERT must be computed. The other frames are not
    * computed. They should all be of type F_NEW and should be sufficient to compute the content of
-   * the F_INSERT frames, together with the bytecode instructions between a F_NEW and a F_INSERT
+   * the F_INSERT frames, together with the bytecode instructions between an F_NEW and an F_INSERT
    * frame - and without any knowledge of the type hierarchy (by definition of F_INSERT).
    */
   static final int COMPUTE_INSERTED_FRAMES = 3;
@@ -375,7 +375,7 @@ final class MethodWriter extends MethodVisitor {
   private AnnotationWriter lastCodeRuntimeInvisibleTypeAnnotation;
 
   /**
-   * The first non standard attribute of the Code attribute. The next ones can be accessed with the
+   * The first non-standard attribute of the Code attribute. The next ones can be accessed with the
    * {@link Attribute#nextAttribute} field. May be {@literal null}.
    *
    * <p><b>WARNING</b>: this list stores the attributes in the <i>reverse</i> order of their visit.
@@ -450,7 +450,7 @@ final class MethodWriter extends MethodVisitor {
   private ByteVector parameters;
 
   /**
-   * The first non standard attribute of this method. The next ones can be accessed with the {@link
+   * The first non-standard attribute of this method. The next ones can be accessed with the {@link
    * Attribute#nextAttribute} field. May be {@literal null}.
    *
    * <p><b>WARNING</b>: this list stores the attributes in the <i>reverse</i> order of their visit.
