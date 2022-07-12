@@ -36,9 +36,9 @@ import org.springframework.util.ObjectUtils;
  * key {@link #NATIVE_HEADERS}. This allows separating processing headers from
  * headers that need to be sent to or received from the external source.
  *
- * <p>This class is likely to be used through indirectly through a protocol
- * specific sub-class that also provide factory methods to translate
- * message headers to an from an external messaging source.
+ * <p>This class is likely to be used indirectly through a protocol-specific
+ * subclass that also provide factory methods to translate
+ * message headers to and from an external messaging source.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

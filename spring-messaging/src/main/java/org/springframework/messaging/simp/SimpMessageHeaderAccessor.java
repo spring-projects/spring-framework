@@ -91,7 +91,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 	/**
 	 * A constructor for creating new message headers.
-	 * This constructor is protected. See factory methods in this and sub-classes.
+	 * This constructor is protected. See factory methods in this and subclasses.
 	 */
 	protected SimpMessageHeaderAccessor(SimpMessageType messageType,
 			@Nullable Map<String, List<String>> externalSourceHeaders) {
@@ -104,7 +104,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 	/**
 	 * A constructor for accessing and modifying existing message headers. This
-	 * constructor is protected. See factory methods in this and sub-classes.
+	 * constructor is protected. See factory methods in this and subclasses.
 	 */
 	protected SimpMessageHeaderAccessor(Message<?> message) {
 		super(message);
