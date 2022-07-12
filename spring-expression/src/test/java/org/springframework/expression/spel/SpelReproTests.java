@@ -602,7 +602,7 @@ class SpelReproTests extends AbstractExpressionTests {
 	/**
 	 * Test whether {@link ReflectiveMethodResolver} follows Java Method Invocation
 	 * Conversion order. And more precisely that widening reference conversion is 'higher'
-	 * than a unboxing conversion.
+	 * than an unboxing conversion.
 	 */
 	@Test
 	void conversionPriority_SPR8224() throws Exception {
