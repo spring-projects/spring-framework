@@ -272,7 +272,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertCanCompile(expression);
 		assertThat(expression.getValue()).asInstanceOf(BOOLEAN).isTrue();
 
-		// Only when the right hand operand is a direct type reference
+		// Only when the right-hand operand is a direct type reference
 		// will it be compilable.
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 		ctx.setVariable("foo", String.class);
@@ -4155,7 +4155,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	void propertyReference() {
 		TestClass6 tc = new TestClass6();
 
-		// non static field
+		// non-static field
 		expression = parser.parseExpression("orange");
 		assertCantCompile(expression);
 		assertThat(expression.getValue(tc)).isEqualTo("value1");
