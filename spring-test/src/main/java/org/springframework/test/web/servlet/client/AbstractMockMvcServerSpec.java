@@ -30,11 +30,11 @@ import org.springframework.test.web.servlet.setup.MockMvcConfigurer;
 /**
  * Base class for implementations of {@link MockMvcWebTestClient.MockMvcServerSpec}
  * that simply delegates to a {@link ConfigurableMockMvcBuilder} supplied by
- * the concrete sub-classes.
+ * the concrete subclasses.
  *
  * @author Rossen Stoyanchev
  * @since 5.3
- * @param <B> the type of the concrete sub-class spec
+ * @param <B> the type of the concrete subclass spec
  */
 abstract class AbstractMockMvcServerSpec<B extends MockMvcWebTestClient.MockMvcServerSpec<B>>
 		implements MockMvcWebTestClient.MockMvcServerSpec<B> {

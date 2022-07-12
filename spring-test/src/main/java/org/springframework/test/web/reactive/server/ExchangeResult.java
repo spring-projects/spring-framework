@@ -44,7 +44,7 @@ import org.springframework.util.MultiValueMap;
  * {@link WebTestClient}.
  *
  * <p>Note that a decoded response body is not exposed at this level since the
- * body may not have been decoded and consumed yet. Sub-types
+ * body may not have been decoded and consumed yet. Subtypes
  * {@link EntityExchangeResult} and {@link FluxExchangeResult} provide access
  * to a decoded response entity and a decoded (but not consumed) response body
  * respectively.
@@ -161,7 +161,7 @@ public class ExchangeResult {
 	 * Return the raw request body content written through the request.
 	 * <p><strong>Note:</strong> If the request content has not been consumed
 	 * for any reason yet, use of this method will trigger consumption.
-	 * @throws IllegalStateException if the request body is not been fully written.
+	 * @throws IllegalStateException if the request body has not been fully written.
 	 */
 	@Nullable
 	public byte[] getRequestBodyContent() {
@@ -204,7 +204,7 @@ public class ExchangeResult {
 	 * Return the raw request body content written to the response.
 	 * <p><strong>Note:</strong> If the response content has not been consumed
 	 * yet, use of this method will trigger consumption.
-	 * @throws IllegalStateException if the response is not been fully read.
+	 * @throws IllegalStateException if the response has not been fully read.
 	 */
 	@Nullable
 	public byte[] getResponseBodyContent() {
