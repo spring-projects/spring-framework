@@ -23,7 +23,7 @@ import org.springframework.beans.BeansException;
  * (possibly shared or independent) when invoked.
  *
  * <p>This interface is typically used to encapsulate a generic factory which
- * returns a new instance (prototype) of some target object on each invocation.
+ * returns a new instance (prototype) of some target objects on each invocation.
  *
  * <p>This interface is similar to {@link FactoryBean}, but implementations
  * of the latter are normally meant to be defined as SPI instances in a

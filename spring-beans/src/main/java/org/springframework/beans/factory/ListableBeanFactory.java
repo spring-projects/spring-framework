@@ -343,7 +343,7 @@ public interface ListableBeanFactory extends BeanFactory {
 
 	/**
 	 * Find an {@link Annotation} of {@code annotationType} on the specified bean,
-	 * traversing its interfaces and super classes if no annotation can be found on
+	 * traversing its interfaces and superclasses if no annotation can be found on
 	 * the given class itself, as well as checking the bean's factory method (if any).
 	 * @param beanName the name of the bean to look for annotations on
 	 * @param annotationType the type of annotation to look for
@@ -361,7 +361,7 @@ public interface ListableBeanFactory extends BeanFactory {
 
 	/**
 	 * Find an {@link Annotation} of {@code annotationType} on the specified bean,
-	 * traversing its interfaces and super classes if no annotation can be found on
+	 * traversing its interfaces and superclasses if no annotation can be found on
 	 * the given class itself, as well as checking the bean's factory method (if any).
 	 * @param beanName the name of the bean to look for annotations on
 	 * @param annotationType the type of annotation to look for

@@ -1362,7 +1362,7 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	/**
-	 * Parse a custom element (outside of the default namespace).
+	 * Parse a custom element (outside the default namespace).
 	 * @param ele the element to parse
 	 * @return the resulting bean definition
 	 */
@@ -1372,7 +1372,7 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	/**
-	 * Parse a custom element (outside of the default namespace).
+	 * Parse a custom element (outside the default namespace).
 	 * @param ele the element to parse
 	 * @param containingBd the containing bean definition (if any)
 	 * @return the resulting bean definition

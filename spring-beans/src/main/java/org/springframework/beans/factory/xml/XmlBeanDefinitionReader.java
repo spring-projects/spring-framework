@@ -184,7 +184,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * Set whether or not the XML parser should be XML namespace aware.
+	 * Set whether the XML parser should be XML namespace aware.
 	 * Default is "false".
 	 * <p>This is typically not needed when schema validation is active.
 	 * However, without validation, this has to be switched to "true"
@@ -195,7 +195,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * Return whether or not the XML parser should be XML namespace aware.
+	 * Return whether the XML parser should be XML namespace aware.
 	 */
 	public boolean isNamespaceAware() {
 		return this.namespaceAware;
