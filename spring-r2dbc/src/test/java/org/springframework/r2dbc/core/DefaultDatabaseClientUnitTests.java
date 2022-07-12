@@ -428,7 +428,7 @@ class DefaultDatabaseClientUnitTests {
 	}
 
 	/**
-	 * Mocks a {@link Result} with a single column "name" and a single row if a non null
+	 * Mocks a {@link Result} with a single column "name" and a single row if a non-null
 	 * row is provided.
 	 */
 	private MockResult mockSingleColumnResult(@Nullable MockRow.Builder row) {
