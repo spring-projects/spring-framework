@@ -102,7 +102,7 @@ public final class Parameter {
 	}
 
 	/**
-	 * Return whether this {@link Parameter} has a empty.
+	 * Return whether this {@link Parameter} has an empty value.
 	 * @return {@code true} if {@link #getValue()} is {@code null}
 	 */
 	public boolean isEmpty() {

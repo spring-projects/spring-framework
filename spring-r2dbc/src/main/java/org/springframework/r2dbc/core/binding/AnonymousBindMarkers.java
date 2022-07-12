@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
  * the placeholder. This implementation creates indexed bind markers using
  * an anonymous placeholder that correlates with an index.
  *
- * <p>Note: Anonymous bind markers are problematic because the have to appear
+ * <p>Note: Anonymous bind markers are problematic because they have to appear
  * in generated SQL in the same order they get generated. This might cause
  * challenges in the future with complex generate statements. For example those
  * containing subselects which limit the freedom of arranging bind markers.
