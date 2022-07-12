@@ -22,7 +22,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Rule determining whether or not a given exception should cause a rollback.
+ * Rule determining whether a given exception should cause a rollback.
  *
  * <p>Multiple such rules can be applied to determine whether a transaction
  * should commit or rollback after an exception has been thrown.
