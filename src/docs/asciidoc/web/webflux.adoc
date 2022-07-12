@@ -650,7 +650,7 @@ a proxy at the boundary of trust should be configured to remove untrusted forwar
 from the outside. You can also configure the `ForwardedHeaderTransformer` with
 `removeOnly=true`, in which case it removes but does not use the headers.
 
-NOTE: In 5.1 `ForwardedHeaderFilter` was deprecated and superceded by
+NOTE: In 5.1 `ForwardedHeaderFilter` was deprecated and superseded by
 `ForwardedHeaderTransformer` so forwarded headers can be processed earlier, before the
 exchange is created. If the filter is configured anyway, it is taken out of the list of
 filters, and `ForwardedHeaderTransformer` is used instead.
@@ -2256,7 +2256,7 @@ The following example gets the value of the `Accept-Encoding` and `Keep-Alive` h
 		//...
 	}
 ----
-<1> Get the value of the `Accept-Encoging` header.
+<1> Get the value of the `Accept-Encoding` header.
 <2> Get the value of the `Keep-Alive` header.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -2269,7 +2269,7 @@ The following example gets the value of the `Accept-Encoding` and `Keep-Alive` h
 		//...
 	}
 ----
-<1> Get the value of the `Accept-Encoging` header.
+<1> Get the value of the `Accept-Encoding` header.
 <2> Get the value of the `Keep-Alive` header.
 
 Type conversion is applied automatically if the target method parameter type is not

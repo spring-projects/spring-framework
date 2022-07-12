@@ -533,7 +533,7 @@ resolve exceptions thrown during request processing. Those exception resolvers a
 customizing the logic to address exceptions. See <<mvc-exceptionhandlers>> for more details.
 
 For HTTP caching support, handlers can use the `checkNotModified` methods of `WebRequest`,
-along with further options for annoated controllers as described in
+along with further options for annotated controllers as described in
 <<mvc-caching-etag-lastmodified,HTTP Caching for Controllers>>.
 
 You can customize individual `DispatcherServlet` instances by adding Servlet
@@ -691,7 +691,7 @@ The following table lists the available `HandlerExceptionResolver` implementatio
 |===
 
 
-[[mvc-excetionhandlers-handling]]
+[[mvc-exceptionhandlers-handling]]
 ==== Chain of Resolvers
 
 You can form an exception resolver chain by declaring multiple `HandlerExceptionResolver`
