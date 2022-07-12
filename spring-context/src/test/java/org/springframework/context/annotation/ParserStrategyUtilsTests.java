@@ -75,7 +75,7 @@ public class ParserStrategyUtilsTests {
 	}
 
 	@Test
-	public void instantiateClassWhenHasSingleContructorInjectsParams() {
+	public void instantiateClassWhenHasSingleConstructorInjectsParams() {
 		ArgsConstructor instance = instantiateClass(ArgsConstructor.class);
 		assertThat(instance.environment).isSameAs(this.environment);
 		assertThat(instance.beanFactory).isSameAs(this.registry);
@@ -84,7 +84,7 @@ public class ParserStrategyUtilsTests {
 	}
 
 	@Test
-	public void instantiateClassWhenHasSingleContructorAndAwareInjectsParamsAndCallsAware() {
+	public void instantiateClassWhenHasSingleConstructorAndAwareInjectsParamsAndCallsAware() {
 		ArgsConstructorAndAware instance = instantiateClass(ArgsConstructorAndAware.class);
 		assertThat(instance.environment).isSameAs(this.environment);
 		assertThat(instance.setEnvironment).isSameAs(this.environment);
@@ -104,7 +104,7 @@ public class ParserStrategyUtilsTests {
 	}
 
 	@Test
-	public void instantiateClassWhenHasMutlipleConstructorsAndNotDefaultThrowsException() {
+	public void instantiateClassWhenHasMultipleConstructorsAndNotDefaultThrowsException() {
 		assertThatExceptionOfType(BeanInstantiationException.class).isThrownBy(() ->
 				instantiateClass(MultipleConstructorsWithNoDefault.class));
 	}

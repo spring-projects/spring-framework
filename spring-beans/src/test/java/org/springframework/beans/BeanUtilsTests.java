@@ -280,7 +280,7 @@ class BeanUtilsTests {
 	 * {@code Number} can NOT be copied to {@code Integer}.
 	 */
 	@Test
-	void copyPropertiesDoesNotCopyeFromSuperTypeToSubType() {
+	void copyPropertiesDoesNotCopyFromSuperTypeToSubType() {
 		NumberHolder numberHolder = new NumberHolder();
 		numberHolder.setNumber(Integer.valueOf(42));
 		IntegerHolder integerHolder = new IntegerHolder();
