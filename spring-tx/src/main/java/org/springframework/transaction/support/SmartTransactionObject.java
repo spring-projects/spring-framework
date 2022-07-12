@@ -20,7 +20,7 @@ import java.io.Flushable;
 
 /**
  * Interface to be implemented by transaction objects that are able to
- * return an internal rollback-only marker, typically from a another
+ * return an internal rollback-only marker, typically from another
  * transaction that has participated and marked it as rollback-only.
  *
  * <p>Autodetected by DefaultTransactionStatus, to always return a

@@ -35,7 +35,7 @@ import org.springframework.util.ReflectionUtils;
  * {@link javax.resource.spi.endpoint.MessageEndpointFactory} interface,
  * providing transaction management capabilities for any kind of message
  * listener object (e.g. {@link javax.jms.MessageListener} objects or
- * {@link javax.resource.cci.MessageListener} objects.
+ * {@link javax.resource.cci.MessageListener} objects).
  *
  * <p>Uses AOP proxies for concrete endpoint instances, simply wrapping
  * the specified message listener object and exposing all of its implemented
