@@ -1368,7 +1368,7 @@ The following example shows the corresponding `ExampleBean` class:
 		}
 	}
 ----
-[source,java,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 class ExampleBean(
@@ -4727,7 +4727,7 @@ as the following example shows:
 ----
 	class SimpleMovieLister {
 
-		@Autowired
+		@set:Autowired
 		lateinit var movieFinder: MovieFinder
 
 		// ...
@@ -5880,7 +5880,7 @@ named `movieFinder` injected into its setter method:
 ----
 	class SimpleMovieLister {
 
-		@Resource
+		@set:Resource
 		private lateinit var movieFinder: MovieFinder
 
 	}
@@ -7247,11 +7247,11 @@ preceding example:
 	class SimpleMovieLister {
 
 		@Inject
-		lateinit var movieFinder: MovieFinder
+		lateinit var movieFinder: Provider<MovieFinder>
 
 
 		fun listMovies() {
-			movieFinder.findMovies(...)
+			movieFinder.get().findMovies(...)
 			// ...
 		}
 	}
@@ -9594,7 +9594,7 @@ of creating a custom composed annotation. The following example defines a custom
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@Target(AnnotationTarget.TYPE)
+	@Target(AnnotationTarget.CLASS)
 	@Retention(AnnotationRetention.RUNTIME)
 	@Profile("production")
 	annotation class Production
