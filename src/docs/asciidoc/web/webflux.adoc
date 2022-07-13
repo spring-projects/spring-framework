@@ -3410,26 +3410,6 @@ Support for `@ExceptionHandler` methods in Spring WebFlux is provided by the
 for more detail.
 
 
-[[webflux-ann-rest-exceptions]]
-==== REST API exceptions
-[.small]#<<web.adoc#mvc-ann-rest-exceptions, Web MVC>>#
-
-A common requirement for REST services is to include error details in the body of the
-response. The Spring Framework does not automatically do so, because the representation
-of error details in the response body is application-specific. However, a
-`@RestController` can use `@ExceptionHandler` methods with a `ResponseEntity` return
-value to set the status and the body of the response. Such methods can also be declared
-in `@ControllerAdvice` classes to apply them globally.
-
-Applications that implement global exception handling with error details in the response
-body should consider extending
-{api-spring-framework}/web/reactive/result/method/annotation/ResponseEntityExceptionHandler.html[`ResponseEntityExceptionHandler`],
-which provides handling for exceptions that Spring MVC raises and provides hooks to
-customize the response body. To make use of this, create a subclass of
-`ResponseEntityExceptionHandler`, annotate it with `@ControllerAdvice`, override the
-necessary methods, and declare it as a Spring bean.
-
-
 
 
 [[webflux-ann-controller-advice]]
@@ -3511,6 +3491,26 @@ include::web-uris.adoc[leveloffset=+2]
 include::webflux-cors.adoc[leveloffset=+1]
 
 
+[[webflux-ann-rest-exceptions]]
+== REST API exceptions
+[.small]#<<web.adoc#mvc-ann-rest-exceptions, Web MVC>>#
+
+A common requirement for REST services is to include error details in the body of the
+response. The Spring Framework does not automatically do so, because the representation
+of error details in the response body is application-specific. However, a
+`@RestController` can use `@ExceptionHandler` methods with a `ResponseEntity` return
+value to set the status and the body of the response. Such methods can also be declared
+in `@ControllerAdvice` classes to apply them globally.
+
+Applications that implement global exception handling with error details in the response
+body should consider extending
+{api-spring-framework}/web/reactive/result/method/annotation/ResponseEntityExceptionHandler.html[`ResponseEntityExceptionHandler`],
+which provides handling for exceptions that Spring MVC raises and provides hooks to
+customize the response body. To make use of this, create a subclass of
+`ResponseEntityExceptionHandler`, annotate it with `@ControllerAdvice`, override the
+necessary methods, and declare it as a Spring bean.
+
+
 
 
 [[webflux-web-security]]
@@ -3525,8 +3525,6 @@ reference documentation, including:
 * {doc-spring-security}/reactive/test/index.html[WebFlux Testing Support]
 * {doc-spring-security}/features/exploits/csrf.html#csrf-protection[CSRF protection]
 * {doc-spring-security}/features/exploits/headers.html[Security Response Headers]
-
-include::webflux-view.adoc[leveloffset=+1]
 
 
 
@@ -3700,6 +3698,7 @@ You should serve static resources with a `Cache-Control` and conditional respons
 for optimal performance. See the section on configuring <<webflux-config-static-resources>>.
 
 
+include::webflux-view.adoc[leveloffset=+1]
 
 
 [[webflux-config]]

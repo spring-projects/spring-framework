@@ -4016,26 +4016,6 @@ level, <<mvc-exceptionhandlers, HandlerExceptionResolver>> mechanism.
 |===
 
 
-[[mvc-ann-rest-exceptions]]
-==== REST API exceptions
-[.small]#<<web-reactive.adoc#webflux-ann-rest-exceptions, WebFlux>>#
-
-A common requirement for REST services is to include error details in the body of the
-response. The Spring Framework does not automatically do this because the representation
-of error details in the response body is application-specific. However, a
-`@RestController` may use `@ExceptionHandler` methods with a `ResponseEntity` return
-value to set the status and the body of the response. Such methods can also be declared
-in `@ControllerAdvice` classes to apply them globally.
-
-Applications that implement global exception handling with error details in the response
-body should consider extending
-{api-spring-framework}/web/servlet/mvc/method/annotation/ResponseEntityExceptionHandler.html[`ResponseEntityExceptionHandler`],
-which provides handling for exceptions that Spring MVC raises and provides hooks to
-customize the response body. To make use of this, create a subclass of
-`ResponseEntityExceptionHandler`, annotate it with `@ControllerAdvice`, override the
-necessary methods, and declare it as a Spring bean.
-
-
 
 [[mvc-ann-controller-advice]]
 === Controller Advice
@@ -4835,7 +4815,28 @@ Note that you can also set the default timeout value on a `DeferredResult`,
 a `ResponseBodyEmitter`, and an `SseEmitter`. For a `Callable`, you can use
 `WebAsyncTask` to provide a timeout value.
 
+
 include::webmvc-cors.adoc[leveloffset=+1]
+
+
+[[mvc-ann-rest-exceptions]]
+== REST API exceptions
+[.small]#<<web-reactive.adoc#webflux-ann-rest-exceptions, WebFlux>>#
+
+A common requirement for REST services is to include error details in the body of the
+response. The Spring Framework does not automatically do this because the representation
+of error details in the response body is application-specific. However, a
+`@RestController` may use `@ExceptionHandler` methods with a `ResponseEntity` return
+value to set the status and the body of the response. Such methods can also be declared
+in `@ControllerAdvice` classes to apply them globally.
+
+Applications that implement global exception handling with error details in the response
+body should consider extending
+{api-spring-framework}/web/servlet/mvc/method/annotation/ResponseEntityExceptionHandler.html[`ResponseEntityExceptionHandler`],
+which provides handling for exceptions that Spring MVC raises and provides hooks to
+customize the response body. To make use of this, create a subclass of
+`ResponseEntityExceptionHandler`, annotate it with `@ControllerAdvice`, override the
+necessary methods, and declare it as a Spring bean.
 
 
 
