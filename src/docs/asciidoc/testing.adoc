@@ -7367,7 +7367,7 @@ no other expectations will be asserted.
 	import org.springframework.test.web.servlet.get
 
 	mockMvc.get("/accounts/1").andExpect {
-		status().isOk()
+		status { isOk() }
 	}
 ----
 
@@ -7415,7 +7415,7 @@ The following test asserts that binding or validation failed:
 	import org.springframework.test.web.servlet.post
 
 	mockMvc.post("/persons").andExpect {
-		status().isOk()
+		status { isOk() }
 		model {
 			attributeHasErrors("person")
 		}
@@ -7443,7 +7443,7 @@ request. You can do so as follows, where `print()` is a static import from
 	mockMvc.post("/persons").andDo {
 			print()
 		}.andExpect {
-			status().isOk()
+			status { isOk() }
 			model {
 				attributeHasErrors("person")
 			}
@@ -7473,7 +7473,7 @@ other expectations, as the following example shows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	var mvcResult = mockMvc.post("/persons").andExpect { status().isOk() }.andReturn()
+	var mvcResult = mockMvc.post("/persons").andExpect { status { isOk() } }.andReturn()
 	// ...
 ----
 
@@ -7593,7 +7593,7 @@ or reactive type such as Reactor `Mono`:
 	@Test
 	fun test() {
 		var mvcResult = mockMvc.get("/path").andExpect {
-			status().isOk() // <1>
+			status { isOk() } // <1>
 			request { asyncStarted() } // <2>
 			// TODO Remove unused generic parameter
 			request { asyncResult<Nothing>("body") } // <3>
@@ -7602,7 +7602,7 @@ or reactive type such as Reactor `Mono`:
 
 		mockMvc.perform(asyncDispatch(mvcResult)) // <4>
 				.andExpect {
-					status().isOk() // <5>
+					status { isOk() } // <5>
 					content().string("body")
 				}
 	}
