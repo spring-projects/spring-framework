@@ -10582,7 +10582,7 @@ shows such a class:
 ----
 	class BlockedListNotifier : ApplicationListener<BlockedListEvent> {
 
-		lateinit var notificationAddres: String
+		lateinit var notificationAddress: String
 
 		override fun onApplicationEvent(event: BlockedListEvent) {
 			// notify appropriate parties via notificationAddress...
