@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,26 +180,25 @@ public final class CollectionFactory {
 	@SuppressWarnings("unchecked")
 	public static <E> Collection<E> createCollection(Class<?> collectionType, @Nullable Class<?> elementType, int capacity) {
 		Assert.notNull(collectionType, "Collection type must not be null");
-		if (collectionType.isInterface()) {
-			if (Set.class == collectionType || Collection.class == collectionType) {
-				return new LinkedHashSet<>(capacity);
-			}
-			else if (List.class == collectionType) {
-				return new ArrayList<>(capacity);
-			}
-			else if (SortedSet.class == collectionType || NavigableSet.class == collectionType) {
-				return new TreeSet<>();
-			}
-			else {
-				throw new IllegalArgumentException("Unsupported Collection interface: " + collectionType.getName());
-			}
+		if (LinkedHashSet.class == collectionType || HashSet.class == collectionType ||
+				Set.class == collectionType || Collection.class == collectionType) {
+			return new LinkedHashSet<>(capacity);
+		}
+		else if (ArrayList.class == collectionType || List.class == collectionType) {
+			return new ArrayList<>(capacity);
+		}
+		else if (LinkedList.class == collectionType) {
+			return new LinkedList<>();
+		}
+		else if (SortedSet.class == collectionType || NavigableSet.class == collectionType) {
+			return new TreeSet<>();
 		}
 		else if (EnumSet.class.isAssignableFrom(collectionType)) {
 			Assert.notNull(elementType, "Cannot create EnumSet for unknown element type");
 			return EnumSet.noneOf(asEnumType(elementType));
 		}
 		else {
-			if (!Collection.class.isAssignableFrom(collectionType)) {
+			if (collectionType.isInterface() || !Collection.class.isAssignableFrom(collectionType)) {
 				throw new IllegalArgumentException("Unsupported Collection type: " + collectionType.getName());
 			}
 			try {
