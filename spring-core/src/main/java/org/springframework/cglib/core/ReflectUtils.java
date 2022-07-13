@@ -490,7 +490,7 @@ public class ReflectUtils {
 		return defineClass(className, b, loader, protectionDomain, null);
 	}
 
-	@SuppressWarnings("deprecation")  // on JDK 9
+	@SuppressWarnings({"deprecation", "serial"})
 	public static Class defineClass(String className, byte[] b, ClassLoader loader,
 			ProtectionDomain protectionDomain, Class<?> contextClass) throws Exception {
 
@@ -577,6 +577,16 @@ public class ReflectUtils {
 			}
 			catch (InvocationTargetException ex) {
 				throw new CodeGenerationException(ex.getTargetException());
+			}
+			catch (IllegalAccessException ex) {
+				throw new CodeGenerationException(ex) {
+					@Override
+					public String getMessage() {
+						return "ClassLoader mismatch for [" + contextClass.getName() +
+								"]: JVM should be started with --add-opens=java.base/java.lang=ALL-UNNAMED " +
+								"for ClassLoader.defineClass to be accessible on " + loader.getClass().getName();
+					}
+				};
 			}
 			catch (Throwable ex) {
 				throw new CodeGenerationException(ex);
