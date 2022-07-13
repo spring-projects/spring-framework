@@ -4786,7 +4786,7 @@ as the following example shows:
 ----
 	class SimpleMovieLister {
 
-		@Autowired
+		@set:Autowired
 		lateinit var movieFinder: MovieFinder
 
 		// ...
@@ -5937,7 +5937,7 @@ named `movieFinder` injected into its setter method:
 ----
 	class SimpleMovieLister {
 
-		@Resource
+		@set:Resource
 		private lateinit var movieFinder: MovieFinder
 
 	}
@@ -7303,11 +7303,11 @@ preceding example:
 	class SimpleMovieLister {
 
 		@Inject
-		lateinit var movieFinder: MovieFinder
+		lateinit var movieFinder: Provider<MovieFinder>
 
 
 		fun listMovies() {
-			movieFinder.findMovies(...)
+			movieFinder.get().findMovies(...)
 			// ...
 		}
 	}
