@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -701,8 +701,8 @@ public class AntPathMatcher implements PathMatcher {
 			else {
 				this.exactMatch = false;
 				patternBuilder.append(quote(pattern, end, pattern.length()));
-				this.pattern = (this.caseSensitive ? Pattern.compile(patternBuilder.toString()) :
-						Pattern.compile(patternBuilder.toString(), Pattern.CASE_INSENSITIVE));
+				this.pattern = Pattern.compile(patternBuilder.toString(),
+						Pattern.DOTALL | (this.caseSensitive ? 0 : Pattern.CASE_INSENSITIVE));
 			}
 		}
 
