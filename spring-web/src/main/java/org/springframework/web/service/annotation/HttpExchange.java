@@ -28,13 +28,13 @@ import org.springframework.web.bind.annotation.Mapping;
 /**
  * Annotation to declare a method on an HTTP service interface as an HTTP
  * endpoint. The endpoint details are defined statically through attributes of
- * the annotation, as well as through the input method argument values.
+ * the annotation, as well as through the input method argument types.
  *
  * <p>Supported at the type level to express common attributes, to be inherited
  * by all methods, such as a base URL path.
  *
- * <p>At the method level, it's more common to use one of the below HTTP method
- * specific, shortcut annotation, each of which is itself <em>meta-annotated</em>
+ * <p>At the method level, it's more common to use one of the following HTTP method
+ * specific, shortcut annotations, each of which is itself <em>meta-annotated</em>
  * with {@code HttpExchange}:
  *
  * <ul>
