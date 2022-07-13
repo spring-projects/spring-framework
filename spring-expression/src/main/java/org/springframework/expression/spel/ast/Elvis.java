@@ -26,8 +26,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Represents the elvis operator ?:. For an expression "a?:b" if a is not null, the value
- * of the expression is "a", if a is null then the value of the expression is "b".
+ * Represents the elvis operator <code>?:</code>. For an expression <code>a?:b</code> if <code>a</code> is not null,
+ * the value of the expression is <code>a</code>, if <code>a</code> is null then the value of the expression is
+ * <code>b</code>.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -117,7 +118,7 @@ public class Elvis extends SpelNodeImpl {
 				this.exitTypeDescriptor = conditionDescriptor;
 			}
 			else {
-				// Use the easiest to compute common super type
+				// Use the easiest to compute common supertype
 				this.exitTypeDescriptor = "Ljava/lang/Object";
 			}
 		}

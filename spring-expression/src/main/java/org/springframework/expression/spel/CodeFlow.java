@@ -171,7 +171,7 @@ public class CodeFlow implements Opcodes {
 
 	/**
 	 * Called after the main expression evaluation method has been generated, this
-	 * method will callback any registered FieldAdders or ClinitAdders to add any
+	 * method will call back any registered FieldAdders or ClinitAdders to add any
 	 * extra information to the class representing the compiled expression.
 	 */
 	public void finish() {
@@ -1008,7 +1008,7 @@ public class CodeFlow implements Opcodes {
 	/**
 	 * For use in mathematical operators, handles converting from a (possibly boxed)
 	 * number on the stack to a primitive numeric type.
-	 * <p>For example, from a Integer to a double, just need to call 'Number.doubleValue()'
+	 * <p>For example, from an Integer to a double, just need to call 'Number.doubleValue()'
 	 * but from an int to a double, need to use the bytecode 'i2d'.
 	 * @param mv the method visitor when instructions should be appended
 	 * @param stackDescriptor a descriptor of the operand on the stack
