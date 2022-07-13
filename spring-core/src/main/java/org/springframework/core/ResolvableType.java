@@ -1012,7 +1012,7 @@ public class ResolvableType implements Serializable {
 	/**
 	 * Return a {@link ResolvableType} for the specified {@link Class},
 	 * doing assignability checks against the raw class only (analogous to
-	 * {@link Class#isAssignableFrom}), which this serves as a wrapper for.
+	 * {@link Class#isAssignableFrom}, which this serves as a wrapper for).
 	 * <p>For example: {@code ResolvableType.forRawClass(List.class)}.
 	 * @param clazz the class to introspect ({@code null} is semantically
 	 * equivalent to {@code Object.class} for typical use cases here)
