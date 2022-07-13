@@ -1368,7 +1368,7 @@ The following example shows the corresponding `ExampleBean` class:
 		}
 	}
 ----
-[source,java,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 class ExampleBean(
