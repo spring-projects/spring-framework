@@ -9654,7 +9654,7 @@ of creating a custom composed annotation. The following example defines a custom
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@Target(AnnotationTarget.TYPE)
+	@Target(AnnotationTarget.CLASS)
 	@Retention(AnnotationRetention.RUNTIME)
 	@Profile("production")
 	annotation class Production
