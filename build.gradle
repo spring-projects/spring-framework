@@ -39,7 +39,7 @@ configure(allprojects) { project ->
 			mavenBom "org.junit:junit-bom:5.8.2"
 		}
 		dependencies {
-			dependencySet(group: 'org.apache.logging.log4j', version: '2.17.2') {
+			dependencySet(group: 'org.apache.logging.log4j', version: '2.18.0') {
 				entry 'log4j-api'
 				entry 'log4j-core'
 				entry 'log4j-jul'
@@ -79,7 +79,7 @@ configure(allprojects) { project ->
 			dependency "com.google.code.gson:gson:2.8.9"
 			dependency "com.google.protobuf:protobuf-java-util:3.19.3"
 			dependency "com.googlecode.protobuf-java-format:protobuf-java-format:1.4"
-			dependency("com.thoughtworks.xstream:xstream:1.4.18") {
+			dependency("com.thoughtworks.xstream:xstream:1.4.19") {
 				exclude group: "xpp3", name: "xpp3_min"
 				exclude group: "xmlpull", name: "xmlpull"
 			}
@@ -94,9 +94,9 @@ configure(allprojects) { project ->
 			dependency "org.ogce:xpp3:1.1.6"
 			dependency "org.yaml:snakeyaml:1.30"
 
-			dependency "com.h2database:h2:2.1.212"
+			dependency "com.h2database:h2:2.1.214"
 			dependency "com.github.ben-manes.caffeine:caffeine:2.9.3"
-			dependency "com.github.librepdf:openpdf:1.3.28"
+			dependency "com.github.librepdf:openpdf:1.3.29"
 			dependency "com.rometools:rome:1.18.0"
 			dependency "commons-io:commons-io:2.5"
 			dependency "io.vavr:vavr:0.10.4"
@@ -150,7 +150,7 @@ configure(allprojects) { project ->
 				}
 			}
 
-			dependency "org.eclipse.jetty:jetty-reactive-httpclient:1.1.11"
+			dependency "org.eclipse.jetty:jetty-reactive-httpclient:1.1.12"
 			dependency 'org.apache.httpcomponents.client5:httpclient5:5.1.3'
 			dependency 'org.apache.httpcomponents.core5:httpcore5-reactive:5.1.3'
 			dependency("org.apache.httpcomponents:httpclient:4.5.13") {
@@ -206,10 +206,10 @@ configure(allprojects) { project ->
 			}
 			dependency "io.mockk:mockk:1.12.1"
 
-			dependency("net.sourceforge.htmlunit:htmlunit:2.62.0") {
+			dependency("net.sourceforge.htmlunit:htmlunit:2.63.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
-			dependency("org.seleniumhq.selenium:htmlunit-driver:2.62.0") {
+			dependency("org.seleniumhq.selenium:htmlunit-driver:2.63.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.seleniumhq.selenium:selenium-java:3.141.59") {
