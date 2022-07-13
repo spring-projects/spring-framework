@@ -119,7 +119,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	}
 
 	/**
-	 * Specify whether or not multiple jobs should be run in a concurrent fashion.
+	 * Specify whether multiple jobs should be run in a concurrent fashion.
 	 * The behavior when one does not want concurrent jobs to be executed is
 	 * realized through adding the {@code @PersistJobDataAfterExecution} and
 	 * {@code @DisallowConcurrentExecution} markers.
@@ -286,7 +286,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 
 	/**
 	 * Extension of the MethodInvokingJob, implementing the StatefulJob interface.
-	 * Quartz checks whether or not jobs are stateful and if so,
+	 * Quartz checks whether jobs are stateful and if so,
 	 * won't let jobs interfere with each other.
 	 */
 	@PersistJobDataAfterExecution

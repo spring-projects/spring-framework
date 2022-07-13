@@ -254,7 +254,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 				}
 				scriptClassToExecute = this.scriptClass;
 
-				// Process re-execution outside of the synchronized block.
+				// Process re-execution outside the synchronized block.
 				return executeScript(scriptSource, scriptClassToExecute);
 			}
 			catch (CompilationFailedException ex) {

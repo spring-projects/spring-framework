@@ -135,7 +135,7 @@ public class CachePutEvaluationTests {
 		}
 
 		/**
-		 * Represent an invalid use case. If the result of the operation is non null, then we put
+		 * Represent an invalid use case. If the result of the operation is non-null, then we put
 		 * the value with a different key. This forces the method to be executed every time.
 		 */
 		@Cacheable

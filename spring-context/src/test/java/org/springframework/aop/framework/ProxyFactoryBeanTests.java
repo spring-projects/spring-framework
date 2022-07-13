@@ -510,7 +510,7 @@ public class ProxyFactoryBeanTests {
 		agi = (AddedGlobalInterface) l;
 		assertThat(agi.globalsAdded() == -1).isTrue();
 
-		assertThat(factory.getBean("test1")).as("Aspect interface should't be implemeneted without globals")
+		assertThat(factory.getBean("test1")).as("Aspect interface shouldn't be implemented without globals")
 				.isNotInstanceOf(AddedGlobalInterface.class);
 	}
 
@@ -588,7 +588,7 @@ public class ProxyFactoryBeanTests {
 
 		assertThatExceptionOfType(LockedException.class).isThrownBy(() -> bean1.setAge(5));
 
-		bean2.setAge(6); //do not expect LockedException"
+		bean2.setAge(6); //do not expect LockedException
 	}
 
 	@Test

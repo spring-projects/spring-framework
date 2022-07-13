@@ -133,7 +133,7 @@ public abstract class Hints {
 	 * Merge a single hint into a map of hints, possibly creating and copying
 	 * all hints into a new map, or otherwise if the map of hints is empty,
 	 * creating a new single entry map.
-	 * @param hints a map of hints to be merge
+	 * @param hints a map of hints to be merged
 	 * @param hintName the hint name to merge
 	 * @param hintValue the hint value to merge
 	 * @return a single map with all hints
