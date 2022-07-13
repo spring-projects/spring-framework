@@ -26,7 +26,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.KeyHolder;
 
 /**
- * A SimpleJdbcInsert is a multi-threaded, reusable object providing easy insert
+ * A SimpleJdbcInsert is a multithreaded, reusable object providing easy insert
  * capabilities for a table. It provides meta-data processing to simplify the code
  * needed to construct a basic insert statement. All you need to provide is the
  * name of the table and a Map containing the column names and the column values.

@@ -115,7 +115,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 	/**
 	 * Set the R2DBC {@link ConnectionFactory} that this instance should manage transactions for.
-	 * <p>This will typically be a locally defined {@code ConnectionFactory}, for example an connection pool.
+	 * <p>This will typically be a locally defined {@code ConnectionFactory}, for example a connection pool.
 	 * <p><b>The {@code ConnectionFactory} passed in here needs to return independent {@link Connection}s.</b>
 	 * The {@code Connection}s may come from a pool (the typical case), but the {@code ConnectionFactory}
 	 * must not return scoped {@code Connection}s or the like.
@@ -146,7 +146,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 	/**
 	 * Specify whether to enforce the read-only nature of a transaction (as indicated by
-	 * {@link TransactionDefinition#isReadOnly()} through an explicit statement on the
+	 * {@link TransactionDefinition#isReadOnly()}) through an explicit statement on the
 	 * transactional connection: "SET TRANSACTION READ ONLY" as understood by Oracle,
 	 * MySQL and Postgres.
 	 * <p>The exact treatment, including any SQL statement executed on the connection,
