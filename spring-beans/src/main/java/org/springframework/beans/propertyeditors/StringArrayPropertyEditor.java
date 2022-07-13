@@ -26,7 +26,7 @@ import org.springframework.util.StringUtils;
  * Custom {@link java.beans.PropertyEditor} for String arrays.
  *
  * <p>Strings must be in CSV format, with a customizable separator.
- * By default values in the result are trimmed of whitespace.
+ * By default, values in the result are trimmed of whitespace.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -86,7 +86,7 @@ public class StringArrayPropertyEditor extends PropertyEditorSupport {
 	 * @param emptyArrayAsNull {@code true} if an empty String array
 	 * is to be transformed into {@code null}
 	 * @param trimValues {@code true} if the values in the parsed arrays
-	 * are to be trimmed of whitespace (default is true)
+	 * are to be trimmed of whitespace (default is {@code true})
 	 */
 	public StringArrayPropertyEditor(String separator, boolean emptyArrayAsNull, boolean trimValues) {
 		this(separator, null, emptyArrayAsNull, trimValues);
@@ -114,7 +114,7 @@ public class StringArrayPropertyEditor extends PropertyEditorSupport {
 	 * @param emptyArrayAsNull {@code true} if an empty String array
 	 * is to be transformed into {@code null}
 	 * @param trimValues {@code true} if the values in the parsed arrays
-	 * are to be trimmed of whitespace (default is true)
+	 * are to be trimmed of whitespace (default is {@code true})
 	 */
 	public StringArrayPropertyEditor(
 			String separator, @Nullable String charsToDelete, boolean emptyArrayAsNull, boolean trimValues) {

@@ -313,7 +313,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
-	 * Add all of the given advisors to this proxy configuration.
+	 * Add all the given advisors to this proxy configuration.
 	 * @param advisors the advisors to register
 	 */
 	public void addAdvisors(Advisor... advisors) {
@@ -321,7 +321,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
-	 * Add all of the given advisors to this proxy configuration.
+	 * Add all the given advisors to this proxy configuration.
 	 * @param advisors the advisors to register
 	 */
 	public void addAdvisors(Collection<Advisor> advisors) {

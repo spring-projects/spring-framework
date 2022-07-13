@@ -957,7 +957,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
-	 * Specify whether or not the configured initializer method is the default.
+	 * Specify whether the configured initializer method is the default.
 	 * <p>The default value is {@code true} for a locally specified init method
 	 * but switched to {@code false} for a shared setting in a defaults section
 	 * (e.g. {@code bean init-method} versus {@code beans default-init-method}
@@ -1016,7 +1016,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
-	 * Specify whether or not the configured destroy method is the default.
+	 * Specify whether the configured destroy method is the default.
 	 * <p>The default value is {@code true} for a locally specified destroy method
 	 * but switched to {@code false} for a shared setting in a defaults section
 	 * (e.g. {@code bean destroy-method} versus {@code beans default-destroy-method}
