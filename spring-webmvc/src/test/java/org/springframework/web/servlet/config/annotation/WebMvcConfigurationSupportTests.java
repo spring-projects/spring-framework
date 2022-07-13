@@ -335,7 +335,7 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 	@Test
-	public void defaultThemeResolverfiguration() {
+	public void defaultThemeResolverConfiguration() {
 		ApplicationContext context = initContext(WebConfig.class);
 		ThemeResolver themeResolver = context.getBean(THEME_RESOLVER_BEAN_NAME, ThemeResolver.class);
 

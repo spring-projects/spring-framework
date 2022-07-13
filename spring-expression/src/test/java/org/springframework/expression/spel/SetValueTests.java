@@ -139,13 +139,13 @@ public class SetValueTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testSetGenericListElementValueTypeCoersion() {
+	public void testSetGenericListElementValueTypeCoercion() {
 		// TODO currently failing since setValue does a getValue and "Wien" string != PlaceOfBirth - check with andy
 		setValue("placesLivedList[0]", "Wien");
 	}
 
 	@Test
-	public void testSetGenericListElementValueTypeCoersionOK() {
+	public void testSetGenericListElementValueTypeCoercionOK() {
 		setValue("booleanList[0]", "true", Boolean.TRUE);
 	}
 
@@ -171,12 +171,12 @@ public class SetValueTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testSetPropertyTypeCoersion() {
+	public void testSetPropertyTypeCoercion() {
 		setValue("publicBoolean", "true", Boolean.TRUE);
 	}
 
 	@Test
-	public void testSetPropertyTypeCoersionThroughSetter() {
+	public void testSetPropertyTypeCoercionThroughSetter() {
 		setValue("SomeProperty", "true", Boolean.TRUE);
 	}
 

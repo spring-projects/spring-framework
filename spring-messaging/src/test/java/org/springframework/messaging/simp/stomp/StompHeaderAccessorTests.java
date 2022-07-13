@@ -70,7 +70,7 @@ public class StompHeaderAccessorTests {
 	}
 
 	@Test
-	public void createWithUnubscribeNativeHeaders() {
+	public void createWithUnsubscribeNativeHeaders() {
 		MultiValueMap<String, String> extHeaders = new LinkedMultiValueMap<>();
 		extHeaders.add(StompHeaderAccessor.STOMP_ID_HEADER, "s1");
 
