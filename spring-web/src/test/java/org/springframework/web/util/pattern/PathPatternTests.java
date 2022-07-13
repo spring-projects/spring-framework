@@ -301,6 +301,7 @@ public class PathPatternTests {
 		checkCapture("{var:f o}","f%20o","var","f o"); // constraint is expressed in non encoded form
 		checkCapture("{var:f.o}","f%20o","var","f o");
 		checkCapture("{var:f\\|o}","f%7co","var","f|o");
+		checkCapture("{var:.*}","x\ny","var","x\ny");
 	}
 
 	@Test
@@ -320,6 +321,8 @@ public class PathPatternTests {
 		checkCapture("/{var1}_ _{var2}","/f%20o_%20_f%7co","var1","f o","var2","f|o");
 		checkCapture("/{var1}_ _{var2:f\\|o}","/f%20o_%20_f%7co","var1","f o","var2","f|o");
 		checkCapture("/{var1:f o}_ _{var2:f\\|o}","/f%20o_%20_f%7co","var1","f o","var2","f|o");
+		checkCapture("/{var1:f o}_ _{var2:f\\|o}","/f%20o_%20_f%7co","var1","f o","var2","f|o");
+		checkCapture("/{var1}_{var2}","/f\noo_foo","var1","f\noo","var2","foo");
 	}
 
 	@Test
