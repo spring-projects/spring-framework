@@ -50,7 +50,7 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} implementation that builds an
- * AOP proxy based on beans in Spring {@link org.springframework.beans.factory.BeanFactory}.
+ * AOP proxy based on beans in a Spring {@link org.springframework.beans.factory.BeanFactory}.
  *
  * <p>{@link org.aopalliance.intercept.MethodInterceptor MethodInterceptors} and
  * {@link org.springframework.aop.Advisor Advisors} are identified by a list of bean
@@ -60,11 +60,12 @@ import org.springframework.util.ObjectUtils;
  * to use the "targetName"/"target"/"targetSource" properties instead.
  *
  * <p>Global interceptors and advisors can be added at the factory level. The specified
- * ones are expanded in an interceptor list where a "xxx*" entry is included in the
- * list, matching the given prefix with the bean names (e.g. "global*" would match
- * both "globalBean1" and "globalBean2", "*" all defined interceptors). The matching
- * interceptors get applied according to their returned order value, if they implement
- * the {@link org.springframework.core.Ordered} interface.
+ * ones are expanded in an interceptor list where an "xxx*" entry is included in the
+ * list, matching the given prefix with the bean names &mdash; for example, "global*"
+ * would match both "globalBean1" and "globalBean2"; whereas, "*" would match all
+ * defined interceptors. The matching interceptors get applied according to their
+ * returned order value, if they implement the {@link org.springframework.core.Ordered}
+ * interface.
  *
  * <p>Creates a JDK proxy when proxy interfaces are given, and a CGLIB proxy for the
  * actual target class if not. Note that the latter will only work if the target class
@@ -75,7 +76,7 @@ import org.springframework.util.ObjectUtils;
  * This won't work for existing prototype references, which are independent. However,
  * it will work for prototypes subsequently obtained from the factory. Changes to
  * interception will work immediately on singletons (including existing references).
- * However, to change interfaces or target it's necessary to obtain a new instance
+ * However, to change interfaces or a target it's necessary to obtain a new instance
  * from the factory. This means that singleton instances obtained from the factory
  * do not have the same object identity. However, they do have the same interceptors
  * and target, and changing any reference will change all objects.
