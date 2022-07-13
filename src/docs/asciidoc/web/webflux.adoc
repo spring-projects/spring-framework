@@ -3421,10 +3421,14 @@ of error details in the response body is application-specific. However, a
 value to set the status and the body of the response. Such methods can also be declared
 in `@ControllerAdvice` classes to apply them globally.
 
-NOTE: Note that Spring WebFlux does not have an equivalent for the Spring MVC
-`ResponseEntityExceptionHandler`, because WebFlux raises only `ResponseStatusException`
-(or subclasses thereof), and those do not need to be translated to
-an HTTP status code.
+Applications that implement global exception handling with error details in the response
+body should consider extending
+{api-spring-framework}/web/reactive/result/method/annotation/ResponseEntityExceptionHandler.html[`ResponseEntityExceptionHandler`],
+which provides handling for exceptions that Spring MVC raises and provides hooks to
+customize the response body. To make use of this, create a subclass of
+`ResponseEntityExceptionHandler`, annotate it with `@ControllerAdvice`, override the
+necessary methods, and declare it as a Spring bean.
+
 
 
 

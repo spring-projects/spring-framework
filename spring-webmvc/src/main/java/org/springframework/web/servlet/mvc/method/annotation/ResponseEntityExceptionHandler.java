@@ -51,7 +51,7 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * A class with an {@code @ExceptionHandler} method that handles all Spring MVC
- * raised exceptions by returning a {@link ResponseEntity} with RFC-7807
+ * raised exceptions by returning a {@link ResponseEntity} with RFC 7807
  * formatted error details in the body.
  *
  * <p>Convenient as a base class of an {@link ControllerAdvice @ControllerAdvice}
@@ -63,8 +63,6 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Rossen Stoyanchev
  * @since 3.2
- * @see #handleException(Exception, WebRequest)
- * @see org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver
  */
 public abstract class ResponseEntityExceptionHandler {
 
@@ -143,8 +141,8 @@ public abstract class ResponseEntityExceptionHandler {
 		else if (ex instanceof AsyncRequestTimeoutException subEx) {
 			return handleAsyncRequestTimeoutException(subEx, subEx.getHeaders(), subEx.getStatusCode(), request);
 		}
-		else if (ex instanceof ErrorResponse errorEx) {
-			return handleExceptionInternal(ex, null, errorEx.getHeaders(), errorEx.getStatusCode(), request);
+		else if (ex instanceof ErrorResponseException subEx) {
+			return handleErrorResponseException(subEx, subEx.getHeaders(), subEx.getStatusCode(), request);
 		}
 
 		// Lower level exceptions, and exceptions used symmetrically on client and server
@@ -166,7 +164,7 @@ public abstract class ResponseEntityExceptionHandler {
 		}
 		else {
 			// Unknown exception, typically a wrapper with a common MVC exception as cause
-			// (since @ExceptionHandler type declarations also match first-level causes):
+			// (since @ExceptionHandler type declarations also match nested causes):
 			// We only deal with top-level MVC exceptions here, so let's rethrow the given
 			// exception for further processing through the HandlerExceptionResolver chain.
 			throw ex;
@@ -343,6 +341,24 @@ public abstract class ResponseEntityExceptionHandler {
 	@Nullable
 	protected ResponseEntity<Object> handleAsyncRequestTimeoutException(
 			AsyncRequestTimeoutException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+
+		return handleExceptionInternal(ex, null, headers, status, request);
+	}
+
+	/**
+	 * Customize the handling of any {@link ErrorResponseException}.
+	 * <p>This method delegates to {@link #handleExceptionInternal}.
+	 * @param ex the exception to handle
+	 * @param headers the headers to use for the response
+	 * @param status the status code to use for the response
+	 * @param request the current request
+	 * @return a {@code ResponseEntity} for the response to use, possibly
+	 * {@code null} when the response is already committed
+	 * @since 6.0
+	 */
+	@Nullable
+	protected ResponseEntity<Object> handleErrorResponseException(
+			ErrorResponseException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
 		return handleExceptionInternal(ex, null, headers, status, request);
 	}
