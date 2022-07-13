@@ -41,7 +41,7 @@ public final class GeneratedMethod {
 
 	/**
 	 * Create a new {@link GeneratedMethod} instance with the given name. This
-	 * constructor is package-private since names should only be generated via a
+	 * constructor is package-private since names should only be generated via
 	 * {@link GeneratedMethods}.
 	 * @param name the generated name
 	 */
@@ -66,7 +66,7 @@ public final class GeneratedMethod {
 	 */
 	public MethodSpec getSpec() {
 		Assert.state(this.spec != null,
-				() -> String.format("Method '%s' has no method spec defined", this.name));
+				() -> "Method '%s' has no method spec defined".formatted(this.name));
 		return this.spec;
 	}
 
@@ -86,8 +86,8 @@ public final class GeneratedMethod {
 	}
 
 	private void assertNameHasNotBeenChanged(MethodSpec spec) {
-		Assert.isTrue(this.name.equals(spec.name), () -> String
-				.format("'spec' must use the generated name \"%s\"", this.name));
+		Assert.isTrue(this.name.equals(spec.name),
+				() -> "'spec' must use the generated name '%s'".formatted(this.name));
 	}
 
 	@Override

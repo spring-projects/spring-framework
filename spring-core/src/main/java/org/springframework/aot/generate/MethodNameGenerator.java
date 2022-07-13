@@ -95,8 +95,7 @@ public class MethodNameGenerator {
 	public static String join(Object... parts) {
 		Stream<String> capitalizedPartNames = Arrays.stream(parts)
 				.map(MethodNameGenerator::getPartName).map(StringUtils::capitalize);
-		return StringUtils
-				.uncapitalize(capitalizedPartNames.collect(Collectors.joining()));
+		return StringUtils.uncapitalize(capitalizedPartNames.collect(Collectors.joining()));
 	}
 
 	private static String getPartName(@Nullable Object part) {

@@ -43,7 +43,7 @@ class GeneratedMethodTests {
 	void getSpecReturnsSpec() {
 		GeneratedMethod method = new GeneratedMethod(NAME);
 		method.using(builder -> builder.addJavadoc("Test"));
-		assertThat(method.getSpec().javadoc.toString()).contains("Test");
+		assertThat(method.getSpec().javadoc).asString().contains("Test");
 	}
 
 	@Test
@@ -57,7 +57,7 @@ class GeneratedMethodTests {
 	void usingAddsSpec() {
 		GeneratedMethod method = new GeneratedMethod(NAME);
 		method.using(builder -> builder.addModifiers(Modifier.PUBLIC));
-		assertThat(method.getSpec().toString())
+		assertThat(method.getSpec()).asString()
 				.isEqualToIgnoringNewLines("public void spring() {}");
 	}
 
@@ -66,7 +66,7 @@ class GeneratedMethodTests {
 		GeneratedMethod method = new GeneratedMethod(NAME);
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> method.using(builder -> builder.setName("badname")))
-				.withMessage("'spec' must use the generated name \"spring\"");
+				.withMessage("'spec' must use the generated name 'spring'");
 	}
 
 }

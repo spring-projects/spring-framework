@@ -142,8 +142,7 @@ public class GeneratedClasses {
 		 * @param typeSpecCustomizer a customizer for the {@link TypeSpec.Builder}
 		 * @return a {@link GeneratedClass} instance
 		 */
-		public GeneratedClass getOrGenerate(String id,
-				Consumer<TypeSpec.Builder> typeSpecCustomizer) {
+		public GeneratedClass getOrGenerate(String id, Consumer<TypeSpec.Builder> typeSpecCustomizer) {
 			Assert.hasLength(id, "'id' must not be empty");
 			Assert.notNull(typeSpecCustomizer, "'typeSpecCustomizer' must not be null");
 			Owner owner = new Owner(id, GeneratedClasses.this.classNameGenerator

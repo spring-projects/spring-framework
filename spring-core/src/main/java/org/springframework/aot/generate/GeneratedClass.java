@@ -73,8 +73,7 @@ public final class GeneratedClass {
 		TypeSpec.Builder typeSpecBuilder = TypeSpec.classBuilder(this.name);
 		this.typeSpecCustomizer.accept(typeSpecBuilder);
 		this.methods.doWithMethodSpecs(typeSpecBuilder::addMethod);
-		return JavaFile.builder(this.name.packageName(), typeSpecBuilder.build())
-				.build();
+		return JavaFile.builder(this.name.packageName(), typeSpecBuilder.build()).build();
 	}
 
 }
