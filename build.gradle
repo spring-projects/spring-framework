@@ -28,11 +28,11 @@ configure(allprojects) { project ->
 	dependencyManagement {
 		imports {
 			mavenBom "com.fasterxml.jackson:jackson-bom:2.12.7"
-			mavenBom "io.netty:netty-bom:4.1.77.Final"
+			mavenBom "io.netty:netty-bom:4.1.79.Final"
 			mavenBom "io.projectreactor:reactor-bom:2020.0.21"
 			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR13"
 			mavenBom "io.rsocket:rsocket-bom:1.1.2"
-			mavenBom "org.eclipse.jetty:jetty-bom:9.4.46.v20220331"
+			mavenBom "org.eclipse.jetty:jetty-bom:9.4.48.v20220622"
 			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.5.32"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.5.2"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-serialization-bom:1.2.2"
@@ -139,7 +139,7 @@ configure(allprojects) { project ->
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
-			dependencySet(group: 'io.undertow', version: '2.2.17.Final') {
+			dependencySet(group: 'io.undertow', version: '2.2.18.Final') {
 				entry 'undertow-core'
 				entry('undertow-servlet') {
 					exclude group: "org.jboss.spec.javax.servlet", name: "jboss-servlet-api_4.0_spec"
@@ -340,7 +340,7 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "10.3"
+		toolVersion = "10.3.1"
 		configDirectory.set(rootProject.file("src/checkstyle"))
 	}
 
