@@ -81,8 +81,6 @@ public abstract class ResponseEntityExceptionHandler {
 			ErrorResponseException.class
 	})
 	public final Mono<ResponseEntity<Object>> handleException(Exception ex, ServerWebExchange exchange) {
-		HttpHeaders headers = new HttpHeaders();
-
 		if (ex instanceof MethodNotAllowedException theEx) {
 			return handleMethodNotAllowedException(theEx, theEx.getHeaders(), theEx.getStatusCode(), exchange);
 		}

@@ -109,8 +109,6 @@ public abstract class ResponseEntityExceptionHandler {
 		})
 	@Nullable
 	public final ResponseEntity<Object> handleException(Exception ex, WebRequest request) throws Exception {
-		HttpHeaders headers = new HttpHeaders();
-
 		if (ex instanceof HttpRequestMethodNotSupportedException subEx) {
 			return handleHttpRequestMethodNotSupported(subEx, subEx.getHeaders(), subEx.getStatusCode(), request);
 		}
@@ -147,6 +145,7 @@ public abstract class ResponseEntityExceptionHandler {
 
 		// Lower level exceptions, and exceptions used symmetrically on client and server
 
+		HttpHeaders headers = new HttpHeaders();
 		if (ex instanceof ConversionNotSupportedException theEx) {
 			return handleConversionNotSupported(theEx, headers, HttpStatus.INTERNAL_SERVER_ERROR, request);
 		}
