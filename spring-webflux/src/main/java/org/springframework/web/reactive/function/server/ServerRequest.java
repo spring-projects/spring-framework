@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -526,6 +526,14 @@ public interface ServerRequest {
 		 * @return this builder
 		 */
 		Builder uri(URI uri);
+
+		/**
+		 * Set the context path of the request.
+		 * @param contextPath the new context path
+		 * @return this builder
+		 * @since 5.3.23
+		 */
+		Builder contextPath(@Nullable String contextPath);
 
 		/**
 		 * Add the given header value(s) under the given name.
