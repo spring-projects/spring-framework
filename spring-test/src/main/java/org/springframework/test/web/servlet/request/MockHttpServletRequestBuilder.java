@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,7 +148,7 @@ public class MockHttpServletRequestBuilder
 
 	private static URI initUri(String url, Object[] vars) {
 		Assert.notNull(url, "'url' must not be null");
-		Assert.isTrue(url.startsWith("/") || url.startsWith("http://") || url.startsWith("https://"), "" +
+		Assert.isTrue(url.isEmpty() || url.startsWith("/") || url.startsWith("http://") || url.startsWith("https://"),
 				"'url' should start with a path or be a complete HTTP URL: " + url);
 		return UriComponentsBuilder.fromUriString(url).buildAndExpand(vars).encode().toUri();
 	}
