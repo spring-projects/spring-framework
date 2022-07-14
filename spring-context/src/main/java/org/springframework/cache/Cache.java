@@ -24,7 +24,7 @@ import org.springframework.lang.Nullable;
  * Interface that defines common cache operations.
  *
  * <b>Note:</b> Due to the generic use of caching, it is recommended that
- * implementations allow storage of <tt>null</tt> values (for example to
+ * implementations allow storage of {@code null} values (for example to
  * cache methods that return {@code null}).
  *
  * @author Costin Leau

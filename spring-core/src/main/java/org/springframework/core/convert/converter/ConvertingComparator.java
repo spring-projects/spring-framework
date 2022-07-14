@@ -104,7 +104,7 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 
 
 	/**
-	 * Adapts a {@link ConversionService} and <tt>targetType</tt> to a {@link Converter}.
+	 * Adapts a {@link ConversionService} and {@code targetType} to a {@link Converter}.
 	 */
 	private static class ConversionServiceConverter<S, T> implements Converter<S, T> {
 

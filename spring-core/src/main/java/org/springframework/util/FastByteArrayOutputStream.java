@@ -150,7 +150,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 
 	/**
 	 * Convert the buffer's contents into a string decoding bytes using the
-	 * platform's default character set. The length of the new <tt>String</tt>
+	 * platform's default character set. The length of the new {@code String}
 	 * is a function of the character set, and hence may not be equal to the
 	 * size of the buffer.
 	 * <p>This method always replaces malformed-input and unmappable-character

@@ -38,9 +38,9 @@ import org.springframework.util.Assert;
  * the following invariant holds for the read and write positions, and the capacity:
  *
  * <blockquote>
- *     <tt>0</tt> <tt>&lt;=</tt>
- *     <i>readPosition</i> <tt>&lt;=</tt>
- *     <i>writePosition</i> <tt>&lt;=</tt>
+ *     {@code 0} {@code <=}
+ *     <i>readPosition</i> {@code <=}
+ *     <i>writePosition</i> {@code <=}
  *     <i>capacity</i>
  * </blockquote>
  *
