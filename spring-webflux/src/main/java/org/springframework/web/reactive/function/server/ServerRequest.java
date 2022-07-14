@@ -529,6 +529,14 @@ public interface ServerRequest {
 		Builder uri(URI uri);
 
 		/**
+		 * Set the context path of the request.
+		 * @param contextPath the new context path
+		 * @return this builder
+		 * @since 5.3.23
+		 */
+		Builder contextPath(@Nullable String contextPath);
+
+		/**
 		 * Add the given header value(s) under the given name.
 		 * @param headerName the header name
 		 * @param headerValues the header value(s)
