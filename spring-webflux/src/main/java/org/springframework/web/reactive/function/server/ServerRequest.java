@@ -67,15 +67,13 @@ public interface ServerRequest {
 
 	/**
 	 * Get the HTTP method.
-	 * @return the HTTP method as an HttpMethod enum value, or {@code null}
-	 * if not resolvable (e.g. in case of a non-standard HTTP method)
 	 */
 	HttpMethod method();
 
 	/**
 	 * Get the name of the HTTP method.
 	 * @return the HTTP method as a String
-	 * @deprecated in favor of {@link #method()}
+	 * @deprecated as of 6.0, in favor of {@link #method()}
 	 */
 	@Deprecated
 	String methodName();
