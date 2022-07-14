@@ -708,8 +708,8 @@ public final class Type {
    *
    * @return the size of the arguments of the method (plus one for the implicit this argument),
    *     argumentsSize, and the size of its return value, returnSize, packed into a single int i =
-   *     {@code (argumentsSize &lt;&lt; 2) | returnSize} (argumentsSize is therefore equal to {@code
-   *     i &gt;&gt; 2}, and returnSize to {@code i &amp; 0x03}).
+   *     {@code (argumentsSize << 2) | returnSize} (argumentsSize is therefore equal to {@code
+   *     i >> 2}, and returnSize to {@code i & 0x03}).
    */
   public int getArgumentsAndReturnSizes() {
     return getArgumentsAndReturnSizes(getDescriptor());
@@ -721,8 +721,8 @@ public final class Type {
    * @param methodDescriptor a method descriptor.
    * @return the size of the arguments of the method (plus one for the implicit this argument),
    *     argumentsSize, and the size of its return value, returnSize, packed into a single int i =
-   *     {@code (argumentsSize &lt;&lt; 2) | returnSize} (argumentsSize is therefore equal to {@code
-   *     i &gt;&gt; 2}, and returnSize to {@code i &amp; 0x03}).
+   *     {@code (argumentsSize << 2) | returnSize} (argumentsSize is therefore equal to {@code
+   *     i >> 2}, and returnSize to {@code i & 0x03}).
    */
   public static int getArgumentsAndReturnSizes(final String methodDescriptor) {
     int argumentsSize = 1;

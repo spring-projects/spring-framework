@@ -125,8 +125,8 @@ public abstract class DigestUtils {
 
 	private static byte[] digest(String algorithm, InputStream inputStream) throws IOException {
 		MessageDigest messageDigest = getDigest(algorithm);
-		if (inputStream instanceof UpdateMessageDigestInputStream digestIntputStream){
-			digestIntputStream.updateMessageDigest(messageDigest);
+		if (inputStream instanceof UpdateMessageDigestInputStream digestInputStream){
+			digestInputStream.updateMessageDigest(messageDigest);
 			return messageDigest.digest();
 		}
 		else {

@@ -148,7 +148,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	/**
 	 * Set whether the proxy should be frozen, preventing advice
 	 * from being added to it once it is created.
-	 * <p>Overridden from the super class to prevent the proxy configuration
+	 * <p>Overridden from the superclass to prevent the proxy configuration
 	 * from being frozen before the proxy is created.
 	 */
 	@Override

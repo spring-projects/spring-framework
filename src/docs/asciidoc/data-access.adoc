@@ -1052,7 +1052,7 @@ be configured via the `rollbackFor`/`noRollbackFor` and
 defined based on exception types or patterns, respectively.
 
 When a rollback rule is defined with an exception type, that type will be used to match
-against the type of a thrown exception and its super types, providing type safety and
+against the type of a thrown exception and its supertypes, providing type safety and
 avoiding any unintentional matches that may occur when using a pattern. For example, a
 value of `jakarta.servlet.ServletException.class` will only match thrown exceptions of
 type `jakarta.servlet.ServletException` and its subclasses.
