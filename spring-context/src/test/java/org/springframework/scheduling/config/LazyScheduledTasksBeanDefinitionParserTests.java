@@ -23,9 +23,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 
 /**
- * Tests ensuring that tasks scheduled using the &lt;task:scheduled&gt; element
- * are never marked lazy, even if the enclosing &lt;beans&gt; element declares
- * default-lazy-init="true". See  SPR-8498
+ * Tests ensuring that tasks scheduled using the {@code <task:scheduled>} element
+ * are never marked lazy, even if the enclosing {@code <beans>} element declares
+ * {@code default-lazy-init="true"}. See SPR-8498.
  *
  * @author Mike Youngstrom
  * @author Chris Beams

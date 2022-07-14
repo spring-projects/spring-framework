@@ -29,7 +29,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.lang.Nullable;
 
 /**
- * Parser for the &lt;context:annotation-config/&gt; element.
+ * Parser for the {@code <context:annotation-config/>} element.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller

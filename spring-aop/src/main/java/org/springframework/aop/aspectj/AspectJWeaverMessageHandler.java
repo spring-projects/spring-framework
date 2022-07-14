@@ -35,7 +35,7 @@ import org.aspectj.bridge.IMessageHandler;
  * <p>to the weaver; for example, specifying the following in a
  * "{@code META-INF/aop.xml} file:
  *
- * <p><code class="code">&lt;weaver options="..."/&gt;</code>
+ * <p>{@code <weaver options="..."/>}
  *
  * @author Adrian Colyer
  * @author Juergen Hoeller

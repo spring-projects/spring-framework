@@ -24,7 +24,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.transaction.jta.JtaTransactionManager;
 
 /**
- * Parser for the &lt;tx:jta-transaction-manager/&gt; XML configuration element.
+ * Parser for the {@code <tx:jta-transaction-manager/>} XML configuration element.
  *
  * @author Juergen Hoeller
  * @author Christian Dupuis

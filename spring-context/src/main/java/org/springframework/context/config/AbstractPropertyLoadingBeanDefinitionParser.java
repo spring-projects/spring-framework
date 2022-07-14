@@ -25,7 +25,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
 
 /**
- * Abstract parser for &lt;context:property-.../&gt; elements.
+ * Abstract parser for {@code <context:property-.../>} elements.
  *
  * @author Juergen Hoeller
  * @author Arjen Poutsma

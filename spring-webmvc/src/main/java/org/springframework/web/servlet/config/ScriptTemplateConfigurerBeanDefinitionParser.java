@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
 /**
- * Parse the <code>&lt;mvc:script-template-configurer&gt;</code> MVC namespace element and
+ * Parse the {@code <mvc:script-template-configurer>} MVC namespace element and
  * register a {@code ScriptTemplateConfigurer} bean.
  *
  * @author Sebastien Deleuze

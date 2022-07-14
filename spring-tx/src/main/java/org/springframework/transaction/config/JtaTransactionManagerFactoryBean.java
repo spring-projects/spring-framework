@@ -23,7 +23,7 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.jta.JtaTransactionManager;
 
 /**
- * A {@link FactoryBean} equivalent to the &lt;tx:jta-transaction-manager/&gt; XML element.
+ * A {@link FactoryBean} equivalent to the {@code <tx:jta-transaction-manager/>} XML element.
  *
  * @author Juergen Hoeller
  * @since 4.1.1

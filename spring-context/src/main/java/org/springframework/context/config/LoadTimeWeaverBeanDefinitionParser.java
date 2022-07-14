@@ -31,7 +31,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
- * Parser for the &lt;context:load-time-weaver/&gt; element.
+ * Parser for the {@code <context:load-time-weaver/>} element.
  *
  * @author Juergen Hoeller
  * @since 2.5

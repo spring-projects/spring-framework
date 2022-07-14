@@ -137,7 +137,7 @@ public class UndertowWebSocketClient implements WebSocketClient {
 	}
 
 	/**
-	 * Return the configured <code>Consumer&lt;ConnectionBuilder&gt;</code>.
+	 * Return the configured {@code Consumer<ConnectionBuilder>}.
 	 */
 	public Consumer<ConnectionBuilder> getConnectionBuilderConsumer() {
 		return this.builderConsumer;

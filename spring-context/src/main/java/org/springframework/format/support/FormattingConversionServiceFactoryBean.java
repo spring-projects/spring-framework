@@ -110,7 +110,7 @@ public class FormattingConversionServiceFactoryBean
 	 * formatting. All types related needed to support the formatting
 	 * category can be registered from one place.
 	 * <p>FormatterRegistrars can also be used to register Formatters
-	 * indexed under a specific field type different from its own &lt;T&gt;,
+	 * indexed under a specific field type different from its own {@code <T>},
 	 * or when registering a Formatter from a Printer/Parser pair.
 	 * @see FormatterRegistry#addFormatterForFieldType(Class, Formatter)
 	 * @see FormatterRegistry#addFormatterForFieldType(Class, Printer, Parser)

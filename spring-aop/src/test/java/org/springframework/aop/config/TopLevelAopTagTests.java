@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
- * Tests that the &lt;aop:config/&gt; element can be used as a top level element.
+ * Tests that the {@code <aop:config/>} element can be used as a top level element.
  *
  * @author Rob Harrop
  * @author Chris Beams

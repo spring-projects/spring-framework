@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
  * advice applied if Spring AOP's proxy-based model is capable of applying it.
  * This covers method execution joinpoints.
  *
- * <p>If the &lt;aop:include&gt; element is used, only @AspectJ beans with names matched by
+ * <p>If the {@code <aop:include>} element is used, only @AspectJ beans with names matched by
  * an include pattern will be considered as defining aspects to use for Spring auto-proxying.
  *
  * <p>Processing of Spring Advisors follows the rules established in

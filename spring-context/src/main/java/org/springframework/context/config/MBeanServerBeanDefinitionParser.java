@@ -27,7 +27,7 @@ import org.springframework.jmx.support.MBeanServerFactoryBean;
 import org.springframework.util.StringUtils;
 
 /**
- * Parser for the &lt;context:mbean-server/&gt; element.
+ * Parser for the {@code <context:mbean-server/>} element.
  *
  * <p>Registers an instance of
  * {@link org.springframework.jmx.export.annotation.AnnotationMBeanExporter}

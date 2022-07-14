@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatException;
 /**
  * With Spring 3.1, bean id attributes (and all other id attributes across the
  * core schemas) are no longer typed as xsd:id, but as xsd:string.  This allows
- * for using the same bean id within nested &lt;beans&gt; elements.
+ * for using the same bean id within nested {@code <beans>} elements.
  *
  * Duplicate ids *within the same level of nesting* will still be treated as an
  * error through the ProblemReporter, as this could never be an intended/valid
