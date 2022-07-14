@@ -29,7 +29,7 @@ import org.springframework.util.StringUtils;
  * {@link TransactionAttributeEditor} in this package.
  *
  * <p>Strings are in property syntax, with the form:<br>
- * {@code FQCN.methodName=&lt;transaction attribute string&gt;}
+ * {@code FQCN.methodName=<transaction attribute string>}
  *
  * <p>For example:<br>
  * {@code com.mycompany.mycode.MyClass.myMethod=PROPAGATION_MANDATORY,ISOLATION_DEFAULT}

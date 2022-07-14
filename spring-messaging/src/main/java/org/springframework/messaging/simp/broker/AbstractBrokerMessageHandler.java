@@ -262,7 +262,7 @@ public abstract class AbstractBrokerMessageHandler
 	 * may still independently alternate between being on and off depending on the
 	 * concrete subclass implementation.
 	 * <p>Application components may implement
-	 * {@code org.springframework.context.ApplicationListener&lt;BrokerAvailabilityEvent&gt;}
+	 * {@code org.springframework.context.ApplicationListener<BrokerAvailabilityEvent>}
 	 * to receive notifications when broker becomes available and unavailable.
 	 */
 	public boolean isBrokerAvailable() {

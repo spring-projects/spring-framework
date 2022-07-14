@@ -24,7 +24,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Convenient super class for application classes that need REST access.
+ * Convenient superclass for application classes that need REST access.
  *
  * <p>Requires a {@link ClientHttpRequestFactory} or a {@link RestTemplate} instance to be set.
  *
