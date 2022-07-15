@@ -94,6 +94,13 @@ class TestClassScanner {
 	private final Set<Path> classpathRoots;
 
 
+	/**
+	 * Create a {@code TestClassScanner} for the given classpath roots.
+	 * <p>For example, in a Gradle project that only supports Java-based tests,
+	 * the supplied set would contain a single {@link Path} representing the
+	 * absolute path to the project's {@code build/classes/java/test} folder.
+	 * @param classpathRoots the classpath roots to scan
+	 */
 	TestClassScanner(Set<Path> classpathRoots) {
 		Assert.notEmpty(classpathRoots, "'classpathRoots' must not be null or empty");
 		Assert.noNullElements(classpathRoots, "'classpathRoots' must not contain null elements");
@@ -111,9 +118,12 @@ class TestClassScanner {
 	/**
 	 * Scan the configured classpath roots for Spring integration test classes
 	 * in the given packages.
+	 * <p>This method is currently only intended to be used within our own test
+	 * suite to validate the behavior of this scanner with a limited scope. In
+	 * production scenarios one should invoke {@link #scan()} to scan all packages
+	 * in the configured classpath roots.
 	 */
 	Stream<Class<?>> scan(String... packageNames) {
-		Assert.notEmpty(packageNames, "'packageNames' must not be null or empty");
 		Assert.noNullElements(packageNames, "'packageNames' must not contain null elements");
 
 		if (logger.isInfoEnabled()) {

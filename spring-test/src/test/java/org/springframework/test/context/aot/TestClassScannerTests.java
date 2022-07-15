@@ -87,11 +87,22 @@ class TestClassScannerTests {
 			);
 	}
 
+	@Test
+	void scanEntireSpringTestModule() {
+		assertThat(scan()).hasSizeGreaterThan(400);
+	}
+
+	private Stream<Class<?>> scan() {
+		return new TestClassScanner(classpathRoots()).scan();
+	}
+
 	private Stream<Class<?>> scan(String... packageNames) {
+		return new TestClassScanner(classpathRoots()).scan(packageNames);
+	}
+
+	private Set<Path> classpathRoots() {
 		try {
-			Set<Path> classpathRoots = Set.of(
-				Paths.get(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()));
-			return new TestClassScanner(classpathRoots).scan(packageNames);
+			return Set.of(Paths.get(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()));
 		}
 		catch (Exception ex) {
 			throw new RuntimeException(ex);
