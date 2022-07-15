@@ -79,14 +79,14 @@ import static org.springframework.core.annotation.MergedAnnotations.SearchStrate
  */
 class TestClassScanner {
 
+	// JUnit Jupiter
+	private static final String EXTEND_WITH_ANNOTATION_NAME = "org.junit.jupiter.api.extension.ExtendWith";
+	private static final String SPRING_EXTENSION_NAME = "org.springframework.test.context.junit.jupiter.SpringExtension";
+
 	// JUnit 4
 	private static final String RUN_WITH_ANNOTATION_NAME = "org.junit.runner.RunWith";
 	private static final String SPRING_JUNIT4_CLASS_RUNNER_NAME = "org.springframework.test.context.junit4.SpringJUnit4ClassRunner";
 	private static final String SPRING_RUNNER_NAME = "org.springframework.test.context.junit4.SpringRunner";
-
-	// JUnit Jupiter
-	private static final String EXTEND_WITH_ANNOTATION_NAME = "org.junit.jupiter.api.extension.ExtendWith";
-	private static final String SPRING_EXTENSION_NAME = "org.springframework.test.context.junit.jupiter.SpringExtension";
 
 
 	private final Log logger = LogFactory.getLog(TestClassScanner.class);
