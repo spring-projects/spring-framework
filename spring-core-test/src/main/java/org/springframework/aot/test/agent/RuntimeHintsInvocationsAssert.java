@@ -34,15 +34,15 @@ import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.Assert;
 
 /**
- * AssertJ {@link org.assertj.core.api.Assert assertions} that can be applied to an {@link RuntimeHintsInvocations}.
+ * AssertJ {@link org.assertj.core.api.Assert assertions} that can be applied to
+ * {@link RuntimeHintsInvocations}.
  *
  * @author Brian Clozel
  * @since 6.0
  */
 public class RuntimeHintsInvocationsAssert extends AbstractAssert<RuntimeHintsInvocationsAssert, RuntimeHintsInvocations> {
 
-
-	List<Consumer<RuntimeHints>> configurers = new ArrayList<>();
+	private final List<Consumer<RuntimeHints>> configurers = new ArrayList<>();
 
 	RuntimeHintsInvocationsAssert(RuntimeHintsInvocations invocations) {
 		super(invocations, RuntimeHintsInvocationsAssert.class);
@@ -122,6 +122,5 @@ public class RuntimeHintsInvocationsAssert extends AbstractAssert<RuntimeHintsIn
 		}
 		return this;
 	}
-
 
 }
