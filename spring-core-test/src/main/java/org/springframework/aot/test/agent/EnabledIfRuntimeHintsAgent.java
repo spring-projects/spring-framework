@@ -22,6 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.condition.EnabledIf;
 
 import org.springframework.aot.agent.RuntimeHintsAgent;
@@ -29,6 +30,8 @@ import org.springframework.aot.agent.RuntimeHintsAgent;
 /**
  * {@code @EneabledIfRuntimeHintsAgent} signals that the annotated test class or test method
  * is only enabled if the {@link RuntimeHintsAgent} is loaded on the current JVM.
+ * <p>This is meta-annotated with {@code @Tag("RuntimeHintsTests")} so that test suites
+ * can choose to target or ignore those tests.
  *
  * <pre class="code">
  * &#064;EnabledIfRuntimeHintsAgent
@@ -58,5 +61,6 @@ import org.springframework.aot.agent.RuntimeHintsAgent;
 @Documented
 @EnabledIf(value = "org.springframework.aot.agent.RuntimeHintsAgent#isLoaded",
 		disabledReason = "RuntimeHintsAgent is not loaded on the current JVM")
+@Tag("RuntimeHintsTests")
 public @interface EnabledIfRuntimeHintsAgent {
 }
