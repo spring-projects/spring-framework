@@ -37,8 +37,8 @@ import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasspathRoots;
 import static org.junit.platform.engine.discovery.PackageNameFilter.includePackageNames;
@@ -170,7 +170,7 @@ class TestClassScanner {
 
 	private static boolean isJupiterSpringTestClass(Class<?> clazz) {
 		return MergedAnnotations.search(TYPE_HIERARCHY)
-				.withEnclosingClasses(TestContextAnnotationUtils::searchEnclosingClass)
+				.withEnclosingClasses(ClassUtils::isInnerClass)
 				.from(clazz)
 				.stream(EXTEND_WITH_ANNOTATION_NAME)
 				.map(annotation -> annotation.getClassArray(VALUE))
