@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.support;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -200,7 +201,9 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * @see SpringFactoriesLoader#load(Class, FailureHandler)
 	 */
 	protected List<TestExecutionListener> getDefaultTestExecutionListeners() {
-		FailureHandler failureHandler = (factoryType, factoryImplementationName, ex) -> {
+		FailureHandler failureHandler = (factoryType, factoryImplementationName, failure) -> {
+			Throwable ex = (failure instanceof InvocationTargetException ite ?
+					ite.getTargetException() : failure);
 			if (ex instanceof LinkageError || ex instanceof ClassNotFoundException) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Could not load default TestExecutionListener [" + factoryImplementationName +
