@@ -33,6 +33,7 @@ import org.springframework.http.server.reactive.AbstractListenerReadPublisher;
 import org.springframework.http.server.reactive.AbstractListenerWriteProcessor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -221,7 +222,12 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 			// Ignore result: can't overflow, ok if not first or no one listens
 			this.handlerCompletionSink.tryEmitError(ex);
 		}
-		close(CloseStatus.SERVER_ERROR.withReason(ex.getMessage()));
+		if(!StringUtils.hasText(ex.getMessage())) {
+			close(CloseStatus.SERVER_ERROR);
+		}
+		else {
+			close(CloseStatus.SERVER_ERROR.withReason(ex.getMessage()));
+		}
 	}
 
 	@Override
