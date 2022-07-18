@@ -71,6 +71,9 @@ public final class ResourcePatternHints {
 
 		private final Set<ResourcePatternHint> excludes = new LinkedHashSet<>();
 
+		Builder() {
+		}
+
 		/**
 		 * Includes the resources matching the specified pattern.
 		 * @param reachableType the type that should be reachable for this hint to apply
