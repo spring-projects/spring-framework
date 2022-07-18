@@ -153,7 +153,7 @@ class BeanDefinitionMethodGenerator {
 			nonGeneratedParent = nonGeneratedParent.getParent();
 		}
 		if (nonGeneratedParent != null) {
-			return StringUtils.uncapitalize(getSimpleBeanName(nonGeneratedParent.getBeanName()) + "InnerBean");
+			return getSimpleBeanName(nonGeneratedParent.getBeanName()) + "InnerBean";
 		}
 		return "innerBean";
 	}
@@ -163,7 +163,7 @@ class BeanDefinitionMethodGenerator {
 		beanName = (lastDot != -1) ? beanName.substring(lastDot + 1) : beanName;
 		int lastDollar = beanName.lastIndexOf('$');
 		beanName = (lastDollar != -1) ? beanName.substring(lastDollar + 1) : beanName;
-		return beanName;
+		return StringUtils.uncapitalize(beanName);
 	}
 
 }

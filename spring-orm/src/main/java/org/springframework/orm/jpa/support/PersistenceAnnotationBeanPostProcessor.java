@@ -825,8 +825,8 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 						EntityManagerFactoryUtils.class, ListableBeanFactory.class,
 						REGISTERED_BEAN_PARAMETER, unitName);
 			}
-			String methodName = "get" + StringUtils.capitalize(unitName) + "EntityManager";
-			GeneratedMethod generatedMethod = generatedMethods.add(methodName, method ->
+			String[] methodNameParts = { "get" , unitName, "EntityManager" };
+			GeneratedMethod generatedMethod = generatedMethods.add(methodNameParts, method ->
 							generateGetEntityManagerMethod(method, injectedElement));
 			return CodeBlock.of("$L($L)", generatedMethod.getName(), REGISTERED_BEAN_PARAMETER);
 		}

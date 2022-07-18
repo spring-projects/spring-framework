@@ -69,12 +69,24 @@ public class GeneratedMethods {
 	 */
 	public GeneratedMethod add(String suggestedName, Consumer<Builder> method) {
 		Assert.notNull(suggestedName, "'suggestedName' must not be null");
+		return add(new String[] { suggestedName }, method);
+	}
+
+	/**
+	 * Add a new {@link GeneratedMethod}.
+	 * @param suggestedNameParts the suggested name parts for the method
+	 * @param method a {@link Consumer} used to build method
+	 * @return the newly added {@link GeneratedMethod}
+	 */
+	public GeneratedMethod add(String[] suggestedNameParts, Consumer<Builder> method) {
+		Assert.notNull(suggestedNameParts, "'suggestedNameParts' must not be null");
 		Assert.notNull(method, "'method' must not be null");
-		String generatedName = this.methodNameGenerator.apply(this.prefix.and(suggestedName));
+		String generatedName = this.methodNameGenerator.apply(this.prefix.and(suggestedNameParts));
 		GeneratedMethod generatedMethod = new GeneratedMethod(generatedName, method);
 		this.generatedMethods.add(generatedMethod);
 		return generatedMethod;
 	}
+
 
 	public GeneratedMethods withPrefix(String prefix) {
 		Assert.notNull(prefix, "'prefix' must not be null");
