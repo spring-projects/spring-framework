@@ -36,7 +36,7 @@ public interface BeanFactoryInitializationCode {
 
 	/**
 	 * Return the {@link GeneratedMethods} being used by the Initializing code.
-	 * @return the method generator
+	 * @return the generated methods
 	 */
 	GeneratedMethods getMethods();
 

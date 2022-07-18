@@ -52,12 +52,12 @@ class BeanRegistrationCodeGenerator implements BeanRegistrationCode {
 	private final BeanRegistrationCodeFragments codeFragments;
 
 
-	BeanRegistrationCodeGenerator(ClassName className, GeneratedMethods methodGenerator,
+	BeanRegistrationCodeGenerator(ClassName className, GeneratedMethods generatedMethods,
 			RegisteredBean registeredBean, Executable constructorOrFactoryMethod,
 			BeanRegistrationCodeFragments codeFragments) {
 
 		this.className = className;
-		this.generatedMethods = methodGenerator;
+		this.generatedMethods = generatedMethods;
 		this.registeredBean = registeredBean;
 		this.constructorOrFactoryMethod = constructorOrFactoryMethod;
 		this.codeFragments = codeFragments;

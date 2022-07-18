@@ -40,7 +40,7 @@ public interface BeanRegistrationCode {
 
 	/**
 	 * Return a {@link GeneratedMethods} being used by the registrations code.
-	 * @return the method generator
+	 * @return the generated methods
 	 */
 	GeneratedMethods getMethods();
 
