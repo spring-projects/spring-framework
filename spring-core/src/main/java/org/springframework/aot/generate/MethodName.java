@@ -28,7 +28,7 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @since 6.0
  */
-public final class MethodName {
+final class MethodName {
 
 	private static final String[] PREFIXES = { "get", "set", "is" };
 
@@ -51,7 +51,7 @@ public final class MethodName {
 	 * @param parts the parts the form the name
 	 * @return a method name instance
 	 */
-	public static MethodName of(String... parts) {
+	static MethodName of(String... parts) {
 		Assert.notNull(parts, "'parts' must not be null");
 		return new MethodName(join(parts));
 	}
@@ -61,7 +61,7 @@ public final class MethodName {
 	 * @param name the name to concatenate
 	 * @return a new method name instance
 	 */
-	public MethodName and(MethodName name) {
+	MethodName and(MethodName name) {
 		Assert.notNull(name, "'name' must not be null");
 		return and(name.value);
 	}
@@ -71,7 +71,7 @@ public final class MethodName {
 	 * @param parts the parts to concatenate
 	 * @return a new method name instance
 	 */
-	public MethodName and(String... parts) {
+	MethodName and(String... parts) {
 		Assert.notNull(parts, "'parts' must not be null");
 		String joined = join(parts);
 		String prefix = getPrefix(joined);

@@ -25,12 +25,12 @@ import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.generate.MethodName;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.javapoet.ClassName;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 /**
  * Generates a method that returns a {@link BeanDefinition} to be registered.
@@ -153,7 +153,7 @@ class BeanDefinitionMethodGenerator {
 			nonGeneratedParent = nonGeneratedParent.getParent();
 		}
 		if (nonGeneratedParent != null) {
-			return MethodName.of(getSimpleBeanName(nonGeneratedParent.getBeanName()), "innerBean").toString();
+			return StringUtils.uncapitalize(getSimpleBeanName(nonGeneratedParent.getBeanName()) + "InnerBean");
 		}
 		return "innerBean";
 	}

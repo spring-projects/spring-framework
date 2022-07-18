@@ -53,20 +53,6 @@ class GeneratedMethodsTests {
 	}
 
 	@Test
-	void addWithMethodNameWhenSuggestedMethodIsNullThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				this.methods.add((MethodName) null, methodSpecCustomizer))
-			.withMessage("'suggestedName' must not be null");
-	}
-
-	@Test
-	void addWithMethodNameWhenMethodIsNullThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				this.methods.add(MethodName.of("test"), null))
-		.withMessage("'method' must not be null");
-	}
-
-	@Test
 	void addWithStringNameWhenSuggestedMethodIsNullThrowsException() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.methods.add((String) null, methodSpecCustomizer))

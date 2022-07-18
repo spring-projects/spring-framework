@@ -69,17 +69,6 @@ public class GeneratedMethods {
 	 */
 	public GeneratedMethod add(String suggestedName, Consumer<Builder> method) {
 		Assert.notNull(suggestedName, "'suggestedName' must not be null");
-		return add(MethodName.of(suggestedName), method);
-	}
-
-	/**
-	 * Add a new {@link GeneratedMethod}.
-	 * @param suggestedName the suggested name for the method
-	 * @param method a {@link Consumer} used to build the method
-	 * @return the newly added {@link GeneratedMethod}
-	 */
-	public GeneratedMethod add(MethodName suggestedName, Consumer<Builder> method) {
-		Assert.notNull(suggestedName, "'suggestedName' must not be null");
 		Assert.notNull(method, "'method' must not be null");
 		String generatedName = this.methodNameGenerator.apply(this.prefix.and(suggestedName));
 		GeneratedMethod generatedMethod = new GeneratedMethod(generatedName, method);
