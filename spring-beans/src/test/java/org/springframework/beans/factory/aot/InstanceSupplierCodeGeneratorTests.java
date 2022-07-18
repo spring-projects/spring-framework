@@ -172,7 +172,7 @@ class InstanceSupplierCodeGeneratorTests {
 					instanceSupplier);
 			assertThat(bean).isInstanceOf(TestBeanWithPrivateConstructor.class);
 			assertThat(compiled.getSourceFile())
-					.contains("resolveAndInstantiate(registeredBean)");
+					.contains("return BeanInstanceSupplier.forConstructor();");
 		});
 		assertThat(getReflectionHints().getTypeHint(TestBeanWithPrivateConstructor.class))
 				.satisfies(hasConstructorWithMode(ExecutableMode.INVOKE));
@@ -211,7 +211,8 @@ class InstanceSupplierCodeGeneratorTests {
 			assertThat(bean).isInstanceOf(String.class);
 			assertThat(bean).isEqualTo("Hello");
 			assertThat(compiled.getSourceFile())
-					.contains("resolveAndInstantiate(registeredBean)");
+					.contains("BeanInstanceSupplier.forFactoryMethod")
+					.doesNotContain("withGenerator");
 		});
 		assertThat(getReflectionHints().getTypeHint(SimpleConfiguration.class))
 				.satisfies(hasMethodWithMode(ExecutableMode.INVOKE));
@@ -271,7 +272,7 @@ class InstanceSupplierCodeGeneratorTests {
 			Integer bean = getBean(beanFactory, beanDefinition, instanceSupplier);
 			assertThat(bean).isInstanceOf(Integer.class);
 			assertThat(bean).isEqualTo(42);
-			assertThat(compiled.getSourceFile()).contains(") throws Exception {");
+			assertThat(compiled.getSourceFile()).doesNotContain(") throws Exception {");
 		});
 		assertThat(getReflectionHints().getTypeHint(SimpleConfiguration.class))
 				.satisfies(hasMethodWithMode(ExecutableMode.INTROSPECT));

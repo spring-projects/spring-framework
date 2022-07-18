@@ -16,8 +16,10 @@
 
 package org.springframework.beans.factory.support;
 
+import java.lang.reflect.Method;
 import java.util.function.Supplier;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.function.ThrowingBiFunction;
 import org.springframework.util.function.ThrowingSupplier;
@@ -29,6 +31,7 @@ import org.springframework.util.function.ThrowingSupplier;
  * supply the instance.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 6.0
  * @param <T> the type of instance supplied by this supplier
  * @see RegisteredBean
@@ -48,6 +51,17 @@ public interface InstanceSupplier<T> extends ThrowingSupplier<T> {
 	 * @throws Exception on error
 	 */
 	T get(RegisteredBean registeredBean) throws Exception;
+
+	/**
+	 * Return the factory method that this supplier uses to create the
+	 * instance, or {@code null} if it is not known or this supplier uses
+	 * another mean.
+	 * @return the factory method used to create the instance, or {@code null}
+	 */
+	@Nullable
+	default Method getFactoryMethod() {
+		return null;
+	}
 
 	/**
 	 * Return a composed instance supplier that first obtains the instance from
