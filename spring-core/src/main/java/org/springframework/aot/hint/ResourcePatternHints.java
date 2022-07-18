@@ -120,7 +120,7 @@ public final class ResourcePatternHints {
 		 * builder.
 		 * @return a resource pattern hint
 		 */
-		ResourcePatternHints build() {
+		public ResourcePatternHints build() {
 			return new ResourcePatternHints(this);
 		}
 
