@@ -16,12 +16,14 @@
 
 package org.springframework.beans.factory.aot;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.util.List;
 import java.util.function.Predicate;
 
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.InstanceSupplier;
@@ -69,12 +71,19 @@ class DefaultBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments
 	public Class<?> getTarget(RegisteredBean registeredBean,
 			Executable constructorOrFactoryMethod) {
 
-		Class<?> target = ClassUtils
-				.getUserClass(constructorOrFactoryMethod.getDeclaringClass());
+		Class<?> target = extractDeclaringClass(constructorOrFactoryMethod);
 		while (target.getName().startsWith("java.") && registeredBean.isInnerBean()) {
 			target = registeredBean.getParent().getBeanClass();
 		}
 		return target;
+	}
+
+	private Class<?> extractDeclaringClass(Executable executable) {
+		Class<?> declaringClass = ClassUtils.getUserClass(executable.getDeclaringClass());
+		if (executable instanceof Constructor<?> && FactoryBean.class.isAssignableFrom(declaringClass)) {
+			return ResolvableType.forType(declaringClass).as(FactoryBean.class).getGeneric(0).toClass();
+		}
+		return executable.getDeclaringClass();
 	}
 
 	@Override
@@ -107,7 +116,7 @@ class DefaultBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments
 				generationContext.getRuntimeHints(), attributeFilter,
 				beanRegistrationCode.getMethods(),
 				(name, value) -> generateValueCode(generationContext, name, value))
-						.generateCode(beanDefinition);
+				.generateCode(beanDefinition);
 	}
 
 	@Nullable
@@ -171,7 +180,7 @@ class DefaultBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments
 		return new InstanceSupplierCodeGenerator(generationContext,
 				beanRegistrationCode.getClassName(),
 				beanRegistrationCode.getMethods(), allowDirectSupplierShortcut)
-						.generateCode(this.registeredBean, constructorOrFactoryMethod);
+				.generateCode(this.registeredBean, constructorOrFactoryMethod);
 	}
 
 	@Override
