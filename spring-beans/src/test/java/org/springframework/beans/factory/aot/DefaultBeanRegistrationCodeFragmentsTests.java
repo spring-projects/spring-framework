@@ -51,10 +51,17 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 	}
 
 	@Test
-	void getTargetOnConstructorToFactoryBean() {
+	void getTargetOnConstructorToPublicFactoryBean() {
 		RegisteredBean registeredBean = registerTestBean(TestBean.class);
 		assertThat(createInstance(registeredBean).getTarget(registeredBean,
 				TestBeanFactoryBean.class.getDeclaredConstructors()[0])).isEqualTo(TestBean.class);
+	}
+
+	@Test
+	void getTargetOnConstructorToProtectedFactoryBean() {
+		RegisteredBean registeredBean = registerTestBean(TestBean.class);
+		assertThat(createInstance(registeredBean).getTarget(registeredBean,
+				PrivilegedTestBeanFactoryBean.class.getDeclaredConstructors()[0])).isEqualTo(PrivilegedTestBeanFactoryBean.class);
 	}
 
 	@Test
@@ -135,13 +142,7 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 		return "Test";
 	}
 
-	@SuppressWarnings("unused")
-	static class TestBean {
-
-	}
-
-
-	static class TestBeanFactoryBean implements FactoryBean<TestBean> {
+	static class PrivilegedTestBeanFactoryBean implements FactoryBean<TestBean> {
 
 		@Override
 		public TestBean getObject() throws Exception {

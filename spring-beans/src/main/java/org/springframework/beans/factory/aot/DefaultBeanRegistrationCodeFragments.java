@@ -21,6 +21,7 @@ import java.lang.reflect.Executable;
 import java.util.List;
 import java.util.function.Predicate;
 
+import org.springframework.aot.generate.AccessVisibility;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.beans.factory.FactoryBean;
@@ -80,7 +81,9 @@ class DefaultBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments
 
 	private Class<?> extractDeclaringClass(Executable executable) {
 		Class<?> declaringClass = ClassUtils.getUserClass(executable.getDeclaringClass());
-		if (executable instanceof Constructor<?> && FactoryBean.class.isAssignableFrom(declaringClass)) {
+		if (executable instanceof Constructor<?>
+				&& AccessVisibility.forMember(executable) == AccessVisibility.PUBLIC
+				&& FactoryBean.class.isAssignableFrom(declaringClass)) {
 			return ResolvableType.forType(declaringClass).as(FactoryBean.class).getGeneric(0).toClass();
 		}
 		return executable.getDeclaringClass();
