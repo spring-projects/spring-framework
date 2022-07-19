@@ -72,7 +72,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			new SetDelegate(),
 			new MapDelegate(),
 			new BeanReferenceDelegate()
-		);
+	);
 
 
 	BeanDefinitionPropertyValueCodeGenerator(GeneratedMethods generatedMethods) {
@@ -127,7 +127,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 				'\"', "\"",
 				'\'', "\\'",
 				'\\', "\\\\"
-			);
+		);
 
 
 		@Override
@@ -485,20 +485,20 @@ class BeanDefinitionPropertyValueCodeGenerator {
 		private <K, V> CodeBlock generateLinkedHashMapCode(Map<K, V> map,
 				ResolvableType keyType, ResolvableType valueType) {
 			GeneratedMethod generatedMethod = generatedMethods.add("getMap", method -> {
-						method.addAnnotation(AnnotationSpec
-								.builder(SuppressWarnings.class)
-								.addMember("value", "{\"rawtypes\", \"unchecked\"}")
-								.build());
-						method.returns(Map.class);
-						method.addStatement("$T map = new $T($L)", Map.class,
-								LinkedHashMap.class, map.size());
-						map.forEach((key, value) -> method.addStatement("map.put($L, $L)",
-								BeanDefinitionPropertyValueCodeGenerator.this
-										.generateCode(key, keyType),
-								BeanDefinitionPropertyValueCodeGenerator.this
-										.generateCode(value, valueType)));
-						method.addStatement("return map");
-					});
+				method.addAnnotation(AnnotationSpec
+						.builder(SuppressWarnings.class)
+						.addMember("value", "{\"rawtypes\", \"unchecked\"}")
+						.build());
+				method.returns(Map.class);
+				method.addStatement("$T map = new $T($L)", Map.class,
+						LinkedHashMap.class, map.size());
+				map.forEach((key, value) -> method.addStatement("map.put($L, $L)",
+						BeanDefinitionPropertyValueCodeGenerator.this
+								.generateCode(key, keyType),
+						BeanDefinitionPropertyValueCodeGenerator.this
+								.generateCode(value, valueType)));
+				method.addStatement("return map");
+			});
 			return CodeBlock.of("$L()", generatedMethod.getName());
 		}
 
