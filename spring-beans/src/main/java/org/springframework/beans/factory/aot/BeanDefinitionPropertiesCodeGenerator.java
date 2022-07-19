@@ -21,6 +21,7 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,6 +74,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Olga Maciaszek-Sharma
  * @since 6.0
  */
 class BeanDefinitionPropertiesCodeGenerator {
@@ -143,12 +145,13 @@ class BeanDefinitionPropertiesCodeGenerator {
 			Class<?> beanType = ClassUtils
 					.getUserClass(beanDefinition.getResolvableType().toClass());
 			Builder arguments = CodeBlock.builder();
-			for (int i = 0; i < methodNames.length; i++) {
-				String methodName = methodNames[i];
-				if (!AbstractBeanDefinition.INFER_METHOD.equals(methodName)) {
-					arguments.add((i != 0) ? ", $S" : "$S", methodName);
-					addInitDestroyHint(beanType, methodName);
-				}
+			String[] filteredMethodNames = Arrays.stream(methodNames)
+					.filter(methodName -> !AbstractBeanDefinition.INFER_METHOD.equals(methodName))
+					.toArray(String[]::new);
+			for (int i = 0; i < filteredMethodNames.length; i++) {
+				String methodName = filteredMethodNames[i];
+				arguments.add((i != 0) ? ", $S" : "$S", methodName);
+				addInitDestroyHint(beanType, methodName);
 			}
 			if (!arguments.isEmpty()) {
 				builder.addStatement(format, BEAN_DEFINITION_VARIABLE, arguments.build());

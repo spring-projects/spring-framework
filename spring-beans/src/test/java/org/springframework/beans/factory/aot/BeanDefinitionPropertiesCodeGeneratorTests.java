@@ -57,6 +57,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Olga Maciaszek-Sharma
  */
 class BeanDefinitionPropertiesCodeGeneratorTests {
 
@@ -391,6 +392,18 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 			assertThat(actual.isPrimary()).isTrue();
 			assertThat(actual.getScope()).isEqualTo("test");
 			assertThat(actual.getRole()).isEqualTo(BeanDefinition.ROLE_SUPPORT);
+		});
+	}
+
+	@Test
+	void inferredMethodsAtTheBeginning() {
+		this.beanDefinition.setInitMethodNames(AbstractBeanDefinition.INFER_METHOD, "init");
+		this.beanDefinition.setDestroyMethodNames(AbstractBeanDefinition.INFER_METHOD, "destroy");
+		compile((actual, compiled) -> {
+			assertThat(compiled.getSourceFile().getContent())
+					.contains("beanDefinition.setInitMethodNames(\"init\");");
+			assertThat(compiled.getSourceFile().getContent())
+					.contains("beanDefinition.setDestroyMethodNames(\"destroy\");");
 		});
 	}
 
