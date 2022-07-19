@@ -380,8 +380,7 @@ configure([rootProject] + javaProjects) { project ->
 			"https://fasterxml.github.io/jackson-core/javadoc/2.10/",
 			"https://fasterxml.github.io/jackson-databind/javadoc/2.10/",
 			"https://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.10/",
-			// TODO Uncomment once httpclient5 API docs are again online.
-			// "https://hc.apache.org/httpcomponents-client-5.1.x/current/httpclient5/apidocs/",
+			"https://hc.apache.org/httpcomponents-client-5.1.x/current/httpclient5/apidocs/",
 			"https://projectreactor.io/docs/test/release/api/",
 			"https://junit.org/junit4/javadoc/4.13.2/",
 			// Disabling linking to JUnit 5.8.2, since the `package-list` file no longer exists due to
