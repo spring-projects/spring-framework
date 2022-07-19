@@ -513,7 +513,12 @@ class BeanDefinitionPropertyValueCodeGenerator {
 		@Override
 		@Nullable
 		public CodeBlock generateCode(Object value, ResolvableType type) {
-			if (value instanceof BeanReference beanReference) {
+			if (value instanceof RuntimeBeanReference runtimeBeanReference
+					&& runtimeBeanReference.getBeanType() != null) {
+				return CodeBlock.of("new $T($T.class)", RuntimeBeanReference.class,
+						runtimeBeanReference.getBeanType());
+			}
+			else if (value instanceof BeanReference beanReference) {
 				return CodeBlock.of("new $T($S)", RuntimeBeanReference.class,
 						beanReference.getBeanName());
 			}

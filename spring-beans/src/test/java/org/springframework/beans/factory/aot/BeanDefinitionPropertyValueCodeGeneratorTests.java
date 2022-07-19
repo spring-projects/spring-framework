@@ -40,6 +40,7 @@ import org.springframework.aot.test.generator.compile.Compiled;
 import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.RuntimeBeanNameReference;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedSet;
@@ -465,10 +466,31 @@ class BeanDefinitionPropertyValueCodeGeneratorTests {
 	class BeanReferenceTests {
 
 		@Test
-		void generatedWhenBeanReference() {
-			BeanReference beanReference = new RuntimeBeanNameReference("test");
-			compile(beanReference, (instance, compiler) ->
-					assertThat(((BeanReference) instance).getBeanName()).isEqualTo(beanReference.getBeanName()));
+		void generatedWhenBeanNameReference() {
+			RuntimeBeanNameReference beanReference = new RuntimeBeanNameReference("test");
+			compile(beanReference, (instance, compiler) ->  {
+				RuntimeBeanReference actual = (RuntimeBeanReference) instance;
+				assertThat(actual.getBeanName()).isEqualTo(beanReference.getBeanName());
+			});
+		}
+
+		@Test
+		void generatedWhenBeanReferenceByName() {
+			RuntimeBeanReference beanReference = new RuntimeBeanReference("test");
+			compile(beanReference, (instance, compiler) ->  {
+				RuntimeBeanReference actual = (RuntimeBeanReference) instance;
+				assertThat(actual.getBeanName()).isEqualTo(beanReference.getBeanName());
+				assertThat(actual.getBeanType()).isEqualTo(beanReference.getBeanType());
+			});
+		}
+
+		@Test
+		void generatedWhenBeanReferenceByType() {
+			BeanReference beanReference = new RuntimeBeanReference(String.class);
+			compile(beanReference, (instance, compiler) -> {
+				RuntimeBeanReference actual = (RuntimeBeanReference) instance;
+				assertThat(actual.getBeanType()).isEqualTo(String.class);
+			});
 		}
 
 	}
