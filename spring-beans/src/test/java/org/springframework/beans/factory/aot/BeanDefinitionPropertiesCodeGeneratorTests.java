@@ -246,6 +246,13 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 	}
 
 	@Test
+	void setInitMethodWithInferredMethodFirst() {
+		this.beanDefinition.setInitMethodNames(AbstractBeanDefinition.INFER_METHOD, "init");
+		compile((actual, compiled) -> assertThat(compiled.getSourceFile().getContent())
+				.contains("beanDefinition.setInitMethodNames(\"init\");"));
+	}
+
+	@Test
 	void setDestroyMethodWhenDestroyInitMethod() {
 		this.beanDefinition.setTargetType(InitDestroyBean.class);
 		this.beanDefinition.setDestroyMethodName("d1");
@@ -272,6 +279,13 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 						.containsExactly("d1", "d2"));
 		String[] methodNames = { "d1", "d2" };
 		assertHasMethodInvokeHints(InitDestroyBean.class, methodNames);
+	}
+
+	@Test
+	void setDestroyMethodWithInferredMethodFirst() {
+		this.beanDefinition.setDestroyMethodNames(AbstractBeanDefinition.INFER_METHOD, "destroy");
+		compile((actual, compiled) -> assertThat(compiled.getSourceFile().getContent())
+				.contains("beanDefinition.setDestroyMethodNames(\"destroy\");"));
 	}
 
 	private void assertHasMethodInvokeHints(Class<?> beanType, String... methodNames) {
@@ -392,18 +406,6 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 			assertThat(actual.isPrimary()).isTrue();
 			assertThat(actual.getScope()).isEqualTo("test");
 			assertThat(actual.getRole()).isEqualTo(BeanDefinition.ROLE_SUPPORT);
-		});
-	}
-
-	@Test
-	void inferredMethodsAtTheBeginning() {
-		this.beanDefinition.setInitMethodNames(AbstractBeanDefinition.INFER_METHOD, "init");
-		this.beanDefinition.setDestroyMethodNames(AbstractBeanDefinition.INFER_METHOD, "destroy");
-		compile((actual, compiled) -> {
-			assertThat(compiled.getSourceFile().getContent())
-					.contains("beanDefinition.setInitMethodNames(\"init\");");
-			assertThat(compiled.getSourceFile().getContent())
-					.contains("beanDefinition.setDestroyMethodNames(\"destroy\");");
 		});
 	}
 

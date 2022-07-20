@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -74,7 +75,6 @@ import org.springframework.util.StringUtils;
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
- * @author Olga Maciaszek-Sharma
  * @since 6.0
  */
 class BeanDefinitionPropertiesCodeGenerator {
@@ -144,17 +144,14 @@ class BeanDefinitionPropertiesCodeGenerator {
 		if (!ObjectUtils.isEmpty(methodNames)) {
 			Class<?> beanType = ClassUtils
 					.getUserClass(beanDefinition.getResolvableType().toClass());
-			Builder arguments = CodeBlock.builder();
-			String[] filteredMethodNames = Arrays.stream(methodNames)
-					.filter(methodName -> !AbstractBeanDefinition.INFER_METHOD.equals(methodName))
-					.toArray(String[]::new);
-			for (int i = 0; i < filteredMethodNames.length; i++) {
-				String methodName = filteredMethodNames[i];
-				arguments.add((i != 0) ? ", $S" : "$S", methodName);
-				addInitDestroyHint(beanType, methodName);
-			}
-			if (!arguments.isEmpty()) {
-				builder.addStatement(format, BEAN_DEFINITION_VARIABLE, arguments.build());
+			List<String> filteredMethodNames = Arrays.stream(methodNames)
+					.filter(candidate -> !AbstractBeanDefinition.INFER_METHOD.equals(candidate))
+					.toList();
+			if (!ObjectUtils.isEmpty(filteredMethodNames)) {
+				filteredMethodNames.forEach(methodName -> addInitDestroyHint(beanType, methodName));
+				CodeBlock arguments = CodeBlock.join(filteredMethodNames.stream()
+						.map(name -> CodeBlock.of("$S", name)).toList(), ", ");
+				builder.addStatement(format, BEAN_DEFINITION_VARIABLE, arguments);
 			}
 		}
 	}
@@ -277,11 +274,11 @@ class BeanDefinitionPropertiesCodeGenerator {
 
 	private Object toRole(int value) {
 		return switch (value) {
-		case BeanDefinition.ROLE_INFRASTRUCTURE -> CodeBlock.builder()
-				.add("$T.ROLE_INFRASTRUCTURE", BeanDefinition.class).build();
-		case BeanDefinition.ROLE_SUPPORT -> CodeBlock.builder()
-				.add("$T.ROLE_SUPPORT", BeanDefinition.class).build();
-		default -> value;
+			case BeanDefinition.ROLE_INFRASTRUCTURE -> CodeBlock.builder()
+					.add("$T.ROLE_INFRASTRUCTURE", BeanDefinition.class).build();
+			case BeanDefinition.ROLE_SUPPORT -> CodeBlock.builder()
+					.add("$T.ROLE_SUPPORT", BeanDefinition.class).build();
+			default -> value;
 		};
 	}
 
