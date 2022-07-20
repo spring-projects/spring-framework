@@ -140,20 +140,21 @@ class BeanDefinitionPropertiesCodeGenerator {
 
 	private void addInitDestroyMethods(Builder builder,
 			AbstractBeanDefinition beanDefinition, @Nullable String[] methodNames, String format) {
-
-		if (!ObjectUtils.isEmpty(methodNames)) {
-			Class<?> beanType = ClassUtils
-					.getUserClass(beanDefinition.getResolvableType().toClass());
-			List<String> filteredMethodNames = Arrays.stream(methodNames)
-					.filter(candidate -> !AbstractBeanDefinition.INFER_METHOD.equals(candidate))
-					.toList();
-			if (!ObjectUtils.isEmpty(filteredMethodNames)) {
-				filteredMethodNames.forEach(methodName -> addInitDestroyHint(beanType, methodName));
-				CodeBlock arguments = CodeBlock.join(filteredMethodNames.stream()
-						.map(name -> CodeBlock.of("$S", name)).toList(), ", ");
-				builder.addStatement(format, BEAN_DEFINITION_VARIABLE, arguments);
-			}
+		List<String> filteredMethodNames = (!ObjectUtils.isEmpty(methodNames))
+				? Arrays.stream(methodNames).filter(this::isNotInferredMethod).toList()
+				: Collections.emptyList();
+		if (!filteredMethodNames.isEmpty()) {
+			Class<?> beanType = ClassUtils.getUserClass(beanDefinition.getResolvableType().toClass());
+			filteredMethodNames.forEach(methodName -> addInitDestroyHint(beanType, methodName));
+			CodeBlock arguments = filteredMethodNames.stream()
+					.map(name -> CodeBlock.of("$S", name))
+					.collect(CodeBlock.joining(", "));
+			builder.addStatement(format, BEAN_DEFINITION_VARIABLE, arguments);
 		}
+	}
+
+	private boolean isNotInferredMethod(String candidate) {
+		return !AbstractBeanDefinition.INFER_METHOD.equals(candidate);
 	}
 
 	private void addInitDestroyHint(Class<?> beanUserClass, String methodName) {
@@ -264,12 +265,8 @@ class BeanDefinitionPropertiesCodeGenerator {
 	}
 
 	private CodeBlock toStringVarArgs(String[] strings) {
-		CodeBlock.Builder builder = CodeBlock.builder();
-		for (int i = 0; i < strings.length; i++) {
-			builder.add((i != 0) ? ", " : "");
-			builder.add("$S", strings[i]);
-		}
-		return builder.build();
+		return Arrays.stream(strings).map(string -> CodeBlock.of("$S", string))
+				.collect(CodeBlock.joining(","));
 	}
 
 	private Object toRole(int value) {

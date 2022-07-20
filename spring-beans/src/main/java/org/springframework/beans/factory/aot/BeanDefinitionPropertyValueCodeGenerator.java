@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory.aot;
 
-import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GeneratedMethods;
@@ -43,6 +44,7 @@ import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.CodeBlock.Builder;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Internal code generator used to generate code for a single value contained in
@@ -247,17 +249,11 @@ class BeanDefinitionPropertyValueCodeGenerator {
 		public CodeBlock generateCode(@Nullable Object value, ResolvableType type) {
 			if (type.isArray()) {
 				ResolvableType componentType = type.getComponentType();
-				int length = Array.getLength(value);
+				Stream<CodeBlock> elements = Arrays.stream(ObjectUtils.toObjectArray(value)).map(component ->
+						BeanDefinitionPropertyValueCodeGenerator.this.generateCode(component, componentType));
 				CodeBlock.Builder builder = CodeBlock.builder();
 				builder.add("new $T {", type.toClass());
-				for (int i = 0; i < length; i++) {
-					Object component = Array.get(value, i);
-					if (i != 0) {
-						builder.add(", ");
-					}
-					builder.add("$L", BeanDefinitionPropertyValueCodeGenerator.this
-							.generateCode(component, componentType));
-				}
+				builder.add(elements.collect(CodeBlock.joining(", ")));
 				builder.add("}");
 				return builder.build();
 			}
