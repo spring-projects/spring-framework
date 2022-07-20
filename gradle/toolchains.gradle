@@ -44,7 +44,7 @@ def mainToolchainLanguageVersion() {
 	if (mainToolchainConfigured()) {
 		return JavaLanguageVersion.of(project.mainToolchain.toString())
 	}
-	return JavaLanguageVersion.of(8)
+	return JavaLanguageVersion.of(11)
 }
 
 def testToolchainLanguageVersion() {
@@ -66,7 +66,7 @@ plugins.withType(JavaPlugin) {
 	else {
 		// Fallback to JDK8
 		java {
-			sourceCompatibility = JavaVersion.VERSION_1_8
+			sourceCompatibility = JavaVersion.VERSION_11
 		}
 	}
 	// Configure a specific Java Toolchain for compiling and running tests if the 'testToolchain' property is defined
@@ -89,7 +89,7 @@ plugins.withType(GroovyPlugin) {
 	// Fallback to JDK8
 	if (!mainToolchainConfigured()) {
 		compileGroovy {
-			sourceCompatibility = JavaVersion.VERSION_1_8
+			sourceCompatibility = JavaVersion.VERSION_11
 		}
 	}
 }
@@ -121,12 +121,12 @@ pluginManager.withPlugin("kotlin") {
 		// Fallback to JDK8
 		compileKotlin {
 			kotlinOptions {
-				jvmTarget = '1.8'
+				jvmTarget = '11'
 			}
 		}
 		compileTestKotlin {
 			kotlinOptions {
-				jvmTarget = '1.8'
+				jvmTarget = '11'
 			}
 		}
 	}

@@ -55,3 +55,5 @@ settings.gradle.projectsLoaded {
 		}
 	}
 }
+include 'spring-debug'
+
