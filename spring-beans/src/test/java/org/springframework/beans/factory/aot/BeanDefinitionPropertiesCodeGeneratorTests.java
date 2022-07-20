@@ -57,6 +57,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Olga Maciaszek-Sharma
  */
 class BeanDefinitionPropertiesCodeGeneratorTests {
 
@@ -245,6 +246,13 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 	}
 
 	@Test
+	void setInitMethodWithInferredMethodFirst() {
+		this.beanDefinition.setInitMethodNames(AbstractBeanDefinition.INFER_METHOD, "init");
+		compile((actual, compiled) -> assertThat(compiled.getSourceFile().getContent())
+				.contains("beanDefinition.setInitMethodNames(\"init\");"));
+	}
+
+	@Test
 	void setDestroyMethodWhenDestroyInitMethod() {
 		this.beanDefinition.setTargetType(InitDestroyBean.class);
 		this.beanDefinition.setDestroyMethodName("d1");
@@ -271,6 +279,13 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 						.containsExactly("d1", "d2"));
 		String[] methodNames = { "d1", "d2" };
 		assertHasMethodInvokeHints(InitDestroyBean.class, methodNames);
+	}
+
+	@Test
+	void setDestroyMethodWithInferredMethodFirst() {
+		this.beanDefinition.setDestroyMethodNames(AbstractBeanDefinition.INFER_METHOD, "destroy");
+		compile((actual, compiled) -> assertThat(compiled.getSourceFile().getContent())
+				.contains("beanDefinition.setDestroyMethodNames(\"destroy\");"));
 	}
 
 	private void assertHasMethodInvokeHints(Class<?> beanType, String... methodNames) {
