@@ -16,10 +16,18 @@
 
 package org.springframework.core.io;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -141,6 +149,34 @@ class ClassPathResourceTests {
 		assertThat(jarDir.getURL()).asString().startsWith("jar:");
 		assertThat(jarDir.exists()).isTrue();
 		assertThat(jarDir.isReadable()).isFalse();
+	}
+
+	@Test
+	void emptyFileReadable(@TempDir File tempDir) throws IOException {
+		File file = new File(tempDir, "empty.txt");
+		assertThat(file.createNewFile()).isTrue();
+		assertThat(file.isFile());
+
+		ClassLoader fileClassLoader = new URLClassLoader(new URL[]{tempDir.toURI().toURL()});
+
+		Resource emptyFile = new ClassPathResource("empty.txt", fileClassLoader);
+		assertThat(emptyFile.exists()).isTrue();
+		assertThat(emptyFile.isReadable()).isTrue();
+		assertThat(emptyFile.contentLength()).isEqualTo(0);
+
+		File jarFile = new File(tempDir, "test.jar");
+		try (ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(jarFile))) {
+			zipOut.putNextEntry(new ZipEntry("empty2.txt"));
+			zipOut.closeEntry();
+		}
+		assertThat(jarFile.isFile());
+
+		ClassLoader jarClassLoader = new URLClassLoader(new URL[]{jarFile.toURI().toURL()});
+
+		Resource emptyJarEntry = new ClassPathResource("empty2.txt", jarClassLoader);
+		assertThat(emptyJarEntry.exists()).isTrue();
+		assertThat(emptyJarEntry.isReadable()).isTrue();
+		assertThat(emptyJarEntry.contentLength()).isEqualTo(0);
 	}
 
 }
