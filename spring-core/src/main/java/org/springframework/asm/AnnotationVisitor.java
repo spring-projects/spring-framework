@@ -27,6 +27,8 @@
 // THE POSSIBILITY OF SUCH DAMAGE.
 package org.springframework.asm;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A visitor to visit a Java annotation. The methods of this class must be called in the following
  * order: ( {@code visit} | {@code visitEnum} | {@code visitAnnotation} | {@code visitArray} )*
@@ -121,6 +123,7 @@ public abstract class AnnotationVisitor {
    *     visitor is not interested in visiting this nested annotation. <i>The nested annotation
    *     value must be fully visited before calling other methods on this annotation visitor</i>.
    */
+  @Nullable
   public AnnotationVisitor visitAnnotation(final String name, final String descriptor) {
     if (av != null) {
       return av.visitAnnotation(name, descriptor);
