@@ -166,7 +166,7 @@ public class WebMvcStompWebSocketEndpointRegistrationTests {
 		WebMvcStompWebSocketEndpointRegistration registration =
 				new WebMvcStompWebSocketEndpointRegistration(new String[] {"/foo"}, this.handler, this.scheduler);
 
-		registration.withSockJS().setSupressCors(true);
+		registration.withSockJS().setSuppressCors(true);
 
 		MultiValueMap<HttpRequestHandler, String> mappings = registration.getMappings();
 		assertThat(mappings.size()).isEqualTo(1);
