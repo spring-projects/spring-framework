@@ -79,21 +79,22 @@ import org.springframework.util.function.ThrowingSupplier;
  * @author Phillip Webb
  * @author Stephane Nicoll
  * @since 6.0
+ * @param <T> the type of instance supplied by this supplier
  * @see AutowiredArguments
  */
-public final class BeanInstanceSupplier extends AutowiredElementResolver implements InstanceSupplier<Object> {
+public final class BeanInstanceSupplier<T> extends AutowiredElementResolver implements InstanceSupplier<T> {
 
 	private final ExecutableLookup lookup;
 
 	@Nullable
-	private final ThrowingBiFunction<RegisteredBean, AutowiredArguments, Object> generator;
+	private final ThrowingBiFunction<RegisteredBean, AutowiredArguments, T> generator;
 
 	@Nullable
 	private final String[] shortcuts;
 
 
 	private BeanInstanceSupplier(ExecutableLookup lookup,
-			@Nullable ThrowingBiFunction<RegisteredBean, AutowiredArguments, Object> generator,
+			@Nullable ThrowingBiFunction<RegisteredBean, AutowiredArguments, T> generator,
 			@Nullable String[] shortcuts) {
 		this.lookup = lookup;
 		this.generator = generator;
@@ -103,28 +104,30 @@ public final class BeanInstanceSupplier extends AutowiredElementResolver impleme
 	/**
 	 * Create a {@link BeanInstanceSupplier} that resolves
 	 * arguments for the specified bean constructor.
+	 * @param <T> the type of instance supplied
 	 * @param parameterTypes the constructor parameter types
 	 * @return a new {@link BeanInstanceSupplier} instance
 	 */
-	public static BeanInstanceSupplier forConstructor(
+	public static <T> BeanInstanceSupplier<T> forConstructor(
 			Class<?>... parameterTypes) {
 
 		Assert.notNull(parameterTypes, "'parameterTypes' must not be null");
 		Assert.noNullElements(parameterTypes,
 				"'parameterTypes' must not contain null elements");
-		return new BeanInstanceSupplier(
+		return new BeanInstanceSupplier<>(
 				new ConstructorLookup(parameterTypes), null, null);
 	}
 
 	/**
 	 * Create a new {@link BeanInstanceSupplier} that
 	 * resolves arguments for the specified factory method.
+	 * @param <T> the type of instance supplied
 	 * @param declaringClass the class that declares the factory method
 	 * @param methodName the factory method name
 	 * @param parameterTypes the factory method parameter types
 	 * @return a new {@link BeanInstanceSupplier} instance
 	 */
-	public static BeanInstanceSupplier forFactoryMethod(
+	public static <T> BeanInstanceSupplier<T> forFactoryMethod(
 			Class<?> declaringClass, String methodName, Class<?>... parameterTypes) {
 
 		Assert.notNull(declaringClass, "'declaringClass' must not be null");
@@ -132,7 +135,7 @@ public final class BeanInstanceSupplier extends AutowiredElementResolver impleme
 		Assert.notNull(parameterTypes, "'parameterTypes' must not be null");
 		Assert.noNullElements(parameterTypes,
 				"'parameterTypes' must not contain null elements");
-		return new BeanInstanceSupplier(
+		return new BeanInstanceSupplier<>(
 				new FactoryMethodLookup(declaringClass, methodName, parameterTypes),
 				null, null);
 	}
@@ -151,10 +154,10 @@ public final class BeanInstanceSupplier extends AutowiredElementResolver impleme
 	 * @return a new {@link BeanInstanceSupplier} instance with the specified
 	 * generator
 	 */
-	public BeanInstanceSupplier withGenerator(
-			ThrowingBiFunction<RegisteredBean, AutowiredArguments, Object> generator) {
+	public BeanInstanceSupplier<T> withGenerator(
+			ThrowingBiFunction<RegisteredBean, AutowiredArguments, T> generator) {
 		Assert.notNull(generator, "'generator' must not be null");
-		return new BeanInstanceSupplier(this.lookup, generator, this.shortcuts);
+		return new BeanInstanceSupplier<T>(this.lookup, generator, this.shortcuts);
 	}
 
 	/**
@@ -165,10 +168,10 @@ public final class BeanInstanceSupplier extends AutowiredElementResolver impleme
 	 * @return a new {@link BeanInstanceSupplier} instance with the specified
 	 * generator
 	 */
-	public BeanInstanceSupplier withGenerator(
-			ThrowingFunction<RegisteredBean, Object> generator) {
+	public BeanInstanceSupplier<T> withGenerator(
+			ThrowingFunction<RegisteredBean, T> generator) {
 		Assert.notNull(generator, "'generator' must not be null");
-		return new BeanInstanceSupplier(this.lookup, (registeredBean, args) ->
+		return new BeanInstanceSupplier<>(this.lookup, (registeredBean, args) ->
 				generator.apply(registeredBean), this.shortcuts);
 	}
 
@@ -180,9 +183,9 @@ public final class BeanInstanceSupplier extends AutowiredElementResolver impleme
 	 * @return a new {@link BeanInstanceSupplier} instance with the specified
 	 * generator
 	 */
-	public BeanInstanceSupplier withGenerator(ThrowingSupplier<Object> generator) {
+	public BeanInstanceSupplier<T> withGenerator(ThrowingSupplier<T> generator) {
 		Assert.notNull(generator, "'generator' must not be null");
-		return new BeanInstanceSupplier(this.lookup, (registeredBean, args) ->
+		return new BeanInstanceSupplier<>(this.lookup, (registeredBean, args) ->
 				generator.get(), this.shortcuts);
 	}
 
@@ -194,22 +197,19 @@ public final class BeanInstanceSupplier extends AutowiredElementResolver impleme
 	 * @return a new {@link BeanInstanceSupplier} instance
 	 * that uses the shortcuts
 	 */
-	public BeanInstanceSupplier withShortcuts(String... beanNames) {
-		return new BeanInstanceSupplier(this.lookup, this.generator, beanNames);
+	public BeanInstanceSupplier<T> withShortcuts(String... beanNames) {
+		return new BeanInstanceSupplier<T>(this.lookup, this.generator, beanNames);
 	}
 
 	@Override
-	public Object get(RegisteredBean registeredBean) throws Exception {
+	public T get(RegisteredBean registeredBean) throws Exception {
 		Assert.notNull(registeredBean, "'registeredBean' must not be null");
 		Executable executable = this.lookup.get(registeredBean);
 		AutowiredArguments arguments = resolveArguments(registeredBean, executable);
 		if (this.generator != null) {
 			return this.generator.apply(registeredBean, arguments);
 		}
-		else {
-			return instantiate(registeredBean.getBeanFactory(), executable,
-					arguments.toArray());
-		}
+		return instantiate(registeredBean.getBeanFactory(), executable, arguments.toArray());
 	}
 
 	@Nullable
@@ -351,15 +351,16 @@ public final class BeanInstanceSupplier extends AutowiredElementResolver impleme
 		}
 	}
 
-	private Object instantiate(ConfigurableBeanFactory beanFactory, Executable executable,
+	@SuppressWarnings("unchecked")
+	private T instantiate(ConfigurableBeanFactory beanFactory, Executable executable,
 			Object[] arguments) {
 
 		try {
 			if (executable instanceof Constructor<?> constructor) {
-				return instantiate(constructor, arguments);
+				return (T) instantiate(constructor, arguments);
 			}
 			if (executable instanceof Method method) {
-				return instantiate(beanFactory, method, arguments);
+				return (T) instantiate(beanFactory, method, arguments);
 			}
 		}
 		catch (Exception ex) {

@@ -94,7 +94,7 @@ class BeanInstanceSupplierTests {
 
 	@Test
 	void forConstructorWhenNotFoundThrowsException() {
-		BeanInstanceSupplier resolver = BeanInstanceSupplier
+		BeanInstanceSupplier<InputStream> resolver = BeanInstanceSupplier
 				.forConstructor(InputStream.class);
 		Source source = new Source(SingleArgConstructor.class, resolver);
 		RegisteredBean registerBean = source.registerBean(this.beanFactory);
@@ -106,7 +106,7 @@ class BeanInstanceSupplierTests {
 
 	@Test
 	void forConstructorReturnsNullFactoryMethod() {
-		BeanInstanceSupplier resolver = BeanInstanceSupplier.forConstructor(String.class);
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier.forConstructor(String.class);
 		assertThat(resolver.getFactoryMethod()).isNull();
 	}
 
@@ -146,7 +146,7 @@ class BeanInstanceSupplierTests {
 
 	@Test
 	void forFactoryMethodWhenNotFoundThrowsException() {
-		BeanInstanceSupplier resolver = BeanInstanceSupplier
+		BeanInstanceSupplier<InputStream> resolver = BeanInstanceSupplier
 				.forFactoryMethod(SingleArgFactory.class, "single", InputStream.class);
 		Source source = new Source(String.class, resolver);
 		RegisteredBean registerBean = source.registerBean(this.beanFactory);
@@ -158,7 +158,7 @@ class BeanInstanceSupplierTests {
 
 	@Test
 	void forFactoryMethodReturnsFactoryMethod() {
-		BeanInstanceSupplier resolver = BeanInstanceSupplier
+		BeanInstanceSupplier<String> resolver = BeanInstanceSupplier
 				.forFactoryMethod(SingleArgFactory.class, "single", String.class);
 		Method factoryMethod = ReflectionUtils.findMethod(SingleArgFactory.class, "single", String.class);
 		assertThat(factoryMethod).isNotNull();
@@ -167,7 +167,7 @@ class BeanInstanceSupplierTests {
 
 	@Test
 	void withGeneratorWhenBiFunctionIsNullThrowsException() {
-		BeanInstanceSupplier resolver = BeanInstanceSupplier
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier
 				.forConstructor();
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> resolver.withGenerator(
@@ -177,7 +177,7 @@ class BeanInstanceSupplierTests {
 
 	@Test
 	void withGeneratorWhenFunctionIsNullThrowsException() {
-		BeanInstanceSupplier resolver = BeanInstanceSupplier
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier
 				.forConstructor();
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> resolver.withGenerator(
@@ -187,7 +187,7 @@ class BeanInstanceSupplierTests {
 
 	@Test
 	void withGeneratorWhenSupplierIsNullThrowsException() {
-		BeanInstanceSupplier resolver = BeanInstanceSupplier
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier
 				.forConstructor();
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> resolver.withGenerator(
@@ -197,7 +197,7 @@ class BeanInstanceSupplierTests {
 
 	@Test
 	void getWithConstructorDoesNotSetResolvedFactoryMethod() throws Exception {
-		BeanInstanceSupplier resolver = BeanInstanceSupplier
+		BeanInstanceSupplier<SingleArgConstructor> resolver = BeanInstanceSupplier
 				.forConstructor(String.class);
 		this.beanFactory.registerSingleton("one", "1");
 		Source source = new Source(SingleArgConstructor.class, resolver);
@@ -211,7 +211,7 @@ class BeanInstanceSupplierTests {
 	void getWithFactoryMethodSetsResolvedFactoryMethod() {
 		Method factoryMethod = ReflectionUtils.findMethod(SingleArgFactory.class, "single", String.class);
 		assertThat(factoryMethod).isNotNull();
-		BeanInstanceSupplier resolver = BeanInstanceSupplier
+		BeanInstanceSupplier<String> resolver = BeanInstanceSupplier
 				.forFactoryMethod(SingleArgFactory.class, "single", String.class);
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(String.class);
 		assertThat(beanDefinition.getResolvedFactoryMethod()).isNull();
@@ -225,7 +225,7 @@ class BeanInstanceSupplierTests {
 		this.beanFactory.registerSingleton("one", "1");
 		RegisteredBean registerBean = registrar.registerBean(this.beanFactory);
 		List<Object> result = new ArrayList<>();
-		BeanInstanceSupplier resolver = BeanInstanceSupplier
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier
 				.forConstructor(String.class)
 				.withGenerator((registeredBean, args) -> result.add(args));
 		resolver.get(registerBean);
@@ -238,8 +238,8 @@ class BeanInstanceSupplierTests {
 		BeanRegistrar registrar = new BeanRegistrar(SingleArgConstructor.class);
 		this.beanFactory.registerSingleton("one", "1");
 		RegisteredBean registerBean = registrar.registerBean(this.beanFactory);
-		BeanInstanceSupplier resolver = BeanInstanceSupplier
-				.forConstructor(String.class)
+		BeanInstanceSupplier<String> resolver = BeanInstanceSupplier
+				.<String>forConstructor(String.class)
 				.withGenerator(registeredBean -> "1");
 		assertThat(resolver.get(registerBean)).isInstanceOf(String.class).isEqualTo("1");
 	}
@@ -249,15 +249,15 @@ class BeanInstanceSupplierTests {
 		BeanRegistrar registrar = new BeanRegistrar(SingleArgConstructor.class);
 		this.beanFactory.registerSingleton("one", "1");
 		RegisteredBean registerBean = registrar.registerBean(this.beanFactory);
-		BeanInstanceSupplier resolver = BeanInstanceSupplier
-				.forConstructor(String.class)
+		BeanInstanceSupplier<String> resolver = BeanInstanceSupplier
+				.<String>forConstructor(String.class)
 				.withGenerator(() -> "1");
 		assertThat(resolver.get(registerBean)).isInstanceOf(String.class).isEqualTo("1");
 	}
 
 	@Test
 	void getWhenRegisteredBeanIsNullThrowsException() {
-		BeanInstanceSupplier resolver = BeanInstanceSupplier
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier
 				.forConstructor(String.class);
 		assertThatIllegalArgumentException().isThrownBy(() -> resolver.get((RegisteredBean) null))
 				.withMessage("'registeredBean' must not be null");
@@ -548,7 +548,7 @@ class BeanInstanceSupplierTests {
 			}
 
 		};
-		BeanInstanceSupplier resolver = BeanInstanceSupplier
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier
 				.forConstructor(String.class);
 		Source source = new Source(String.class, resolver);
 		beanFactory.registerSingleton("one", "1");
@@ -561,7 +561,7 @@ class BeanInstanceSupplierTests {
 
 	@Test
 	void resolveArgumentsRegistersDependantBeans() {
-		BeanInstanceSupplier resolver = BeanInstanceSupplier
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier
 				.forConstructor(String.class);
 		Source source = new Source(SingleArgConstructor.class, resolver);
 		this.beanFactory.registerSingleton("one", "1");
@@ -724,7 +724,7 @@ class BeanInstanceSupplierTests {
 		protected abstract void setup();
 
 		protected final void add(Class<?> beanClass,
-				BeanInstanceSupplier resolver) {
+				BeanInstanceSupplier<?> resolver) {
 			this.arguments.add(Arguments.of(new Source(beanClass, resolver)));
 		}
 
@@ -762,15 +762,15 @@ class BeanInstanceSupplierTests {
 
 	static class Source extends BeanRegistrar {
 
-		private final BeanInstanceSupplier resolver;
+		private final BeanInstanceSupplier<?> resolver;
 
 		public Source(Class<?> beanClass,
-				BeanInstanceSupplier resolver) {
+				BeanInstanceSupplier<?> resolver) {
 			super(beanClass);
 			this.resolver = resolver;
 		}
 
-		BeanInstanceSupplier getResolver() {
+		BeanInstanceSupplier<?> getResolver() {
 			return this.resolver;
 		}
 

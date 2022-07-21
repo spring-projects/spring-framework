@@ -158,6 +158,45 @@ class BeanDefinitionMethodGeneratorTests {
 		});
 	}
 
+	@Test // gh-28748
+	void generateBeanDefinitionMethodWhenHasInstancePostProcessorAndFactoryMethodGeneratesMethod() {
+		this.beanFactory.registerBeanDefinition("testBeanConfiguration", new RootBeanDefinition(TestBeanConfiguration.class));
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(TestBean.class);
+		beanDefinition.setFactoryBeanName("testBeanConfiguration");
+		beanDefinition.setFactoryMethodName("testBean");
+		RegisteredBean registeredBean = registerBean(beanDefinition);
+		BeanRegistrationAotContribution aotContribution = (generationContext,
+				beanRegistrationCode) -> {
+			GeneratedMethod generatedMethod = beanRegistrationCode.getMethods().add("postProcess", method ->
+					method.addModifiers(Modifier.STATIC)
+							.addParameter(RegisteredBean.class, "registeredBean")
+							.addParameter(TestBean.class, "testBean")
+							.returns(TestBean.class).addCode("return new $T($S);", TestBean.class, "postprocessed"));
+			beanRegistrationCode.addInstancePostProcessor(MethodReference.ofStatic(
+					beanRegistrationCode.getClassName(), generatedMethod.getName()));
+		};
+		List<BeanRegistrationAotContribution> aotContributions = Collections
+				.singletonList(aotContribution);
+		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
+				this.methodGeneratorFactory, registeredBean, null, aotContributions);
+		MethodReference method = generator.generateBeanDefinitionMethod(
+				this.generationContext, this.beanRegistrationsCode);
+		compile(method, (actual, compiled) -> {
+			assertThat(compiled.getSourceFile(".*BeanDefinitions")).contains("BeanInstanceSupplier");
+			assertThat(actual.getBeanClass()).isEqualTo(TestBean.class);
+			InstanceSupplier<?> supplier = (InstanceSupplier<?>) actual
+					.getInstanceSupplier();
+			try {
+				TestBean instance = (TestBean) supplier.get(registeredBean);
+				assertThat(instance.getName()).isEqualTo("postprocessed");
+			}
+			catch (Exception ex) {
+			}
+			SourceFile sourceFile = compiled.getSourceFile(".*BeanDefinitions");
+			assertThat(sourceFile).contains("instanceSupplier.andThen(");
+		});
+	}
+
 	@Test
 	void generateBeanDefinitionMethodWhenHasCodeFragmentsCustomizerGeneratesMethod() {
 		RegisteredBean registeredBean = registerBean(
@@ -373,7 +412,7 @@ class BeanDefinitionMethodGeneratorTests {
 					.addCode("return $L;", method.toInvokeCodeBlock()).build());
 		});
 		this.generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(this.generatedFiles).compile(compiled ->
+		TestCompiler.forSystem().withFiles(this.generatedFiles).printFiles(System.out).compile(compiled ->
 				result.accept((RootBeanDefinition) compiled.getInstance(Supplier.class).get(), compiled));
 	}
 

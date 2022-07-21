@@ -41,9 +41,7 @@ import org.springframework.javapoet.MethodSpec;
 class BeanRegistrationsAotContribution
 		implements BeanFactoryInitializationAotContribution {
 
-
 	private static final String BEAN_FACTORY_PARAMETER_NAME = "beanFactory";
-
 
 	private final Map<String, BeanDefinitionMethodGenerator> registrations;
 

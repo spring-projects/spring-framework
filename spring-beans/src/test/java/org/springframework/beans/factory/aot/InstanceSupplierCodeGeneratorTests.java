@@ -172,7 +172,7 @@ class InstanceSupplierCodeGeneratorTests {
 					instanceSupplier);
 			assertThat(bean).isInstanceOf(TestBeanWithPrivateConstructor.class);
 			assertThat(compiled.getSourceFile())
-					.contains("return BeanInstanceSupplier.forConstructor();");
+					.contains("return BeanInstanceSupplier.<TestBeanWithPrivateConstructor>forConstructor();");
 		});
 		assertThat(getReflectionHints().getTypeHint(TestBeanWithPrivateConstructor.class))
 				.satisfies(hasConstructorWithMode(ExecutableMode.INVOKE));
@@ -211,7 +211,7 @@ class InstanceSupplierCodeGeneratorTests {
 			assertThat(bean).isInstanceOf(String.class);
 			assertThat(bean).isEqualTo("Hello");
 			assertThat(compiled.getSourceFile())
-					.contains("BeanInstanceSupplier.forFactoryMethod")
+					.contains("forFactoryMethod")
 					.doesNotContain("withGenerator");
 		});
 		assertThat(getReflectionHints().getTypeHint(SimpleConfiguration.class))
@@ -325,7 +325,7 @@ class InstanceSupplierCodeGeneratorTests {
 					.addStatement("return $L", generatedCode).build());
 		});
 		this.generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(this.generatedFiles).compile(compiled ->
+		TestCompiler.forSystem().withFiles(this.generatedFiles).printFiles(System.out).compile(compiled ->
 			result.accept((InstanceSupplier<?>) compiled.getInstance(Supplier.class).get(), compiled));
 	}
 
