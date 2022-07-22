@@ -25,7 +25,7 @@ dependencies {
 	testImplementation("jakarta.servlet:jakarta.servlet-api")
 	testImplementation("org.aspectj:aspectjweaver")
 	testImplementation("org.hsqldb:hsqldb")
-	testImplementation("org.hibernate:hibernate-core-jakarta")
+	testImplementation("org.hibernate:hibernate-core")
 }
 
 normalization {

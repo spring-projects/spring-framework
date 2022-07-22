@@ -57,7 +57,7 @@ dependencies {
 	testImplementation("jakarta.ejb:jakarta.ejb-api")
 	testImplementation("jakarta.interceptor:jakarta.interceptor-api")
 	testImplementation("jakarta.mail:jakarta.mail-api")
-	testImplementation("org.hibernate:hibernate-core-jakarta")
+	testImplementation("org.hibernate:hibernate-core")
 	testImplementation("org.hibernate:hibernate-validator")
 	testImplementation("jakarta.validation:jakarta.validation-api")
 	testImplementation("org.junit.platform:junit-platform-testkit")
