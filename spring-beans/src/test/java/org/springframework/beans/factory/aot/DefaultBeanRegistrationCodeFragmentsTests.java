@@ -68,10 +68,10 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 	@Test
 	void getTargetOnMethod() {
 		RegisteredBean registeredBean = registerTestBean(SimpleBean.class);
-		Method method = ReflectionUtils.findMethod(SimpleBeanFactoryBean.class, "getObject");
+		Method method = ReflectionUtils.findMethod(SimpleBeanConfiguration.class, "simpleBean");
 		assertThat(method).isNotNull();
 		assertThat(createInstance(registeredBean).getTarget(registeredBean,
-				method)).isEqualTo(SimpleBeanFactoryBean.class);
+				method)).isEqualTo(SimpleBeanConfiguration.class);
 	}
 
 	@Test
@@ -107,9 +107,10 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 		RegisteredBean registeredBean = registerTestBean(DummyFactory.class);
 		RegisteredBean innerBean = RegisteredBean.ofInnerBean(registeredBean, "innerTestBean",
 				new RootBeanDefinition(SimpleBean.class));
-		Method method = ReflectionUtils.findMethod(SimpleBeanFactoryBean.class, "getObject");
+		Method method = ReflectionUtils.findMethod(SimpleBeanConfiguration.class, "simpleBean");
 		assertThat(method).isNotNull();
-		assertThat(createInstance(innerBean).getTarget(innerBean, method)).isEqualTo(SimpleBeanFactoryBean.class);
+		assertThat(createInstance(innerBean).getTarget(innerBean, method))
+				.isEqualTo(SimpleBeanConfiguration.class);
 	}
 
 	@Test
