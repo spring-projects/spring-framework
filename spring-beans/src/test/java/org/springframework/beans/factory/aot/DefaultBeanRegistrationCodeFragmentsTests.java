@@ -27,6 +27,7 @@ import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.factory.DummyFactory;
 import org.springframework.beans.testfixture.beans.factory.aot.MockBeanRegistrationsCode;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.testfixture.aot.generate.TestGenerationContext;
 import org.springframework.util.ReflectionUtils;
 
@@ -55,6 +56,29 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 		RegisteredBean registeredBean = registerTestBean(SimpleBean.class);
 		assertThat(createInstance(registeredBean).getTarget(registeredBean,
 				SimpleBeanFactoryBean.class.getDeclaredConstructors()[0])).isEqualTo(SimpleBean.class);
+	}
+
+	@Test
+	void getTargetOnConstructorToPublicGenericFactoryBeanExtractTargetFromFactoryBeanType() {
+		RegisteredBean registeredBean = registerTestBean(ResolvableType
+				.forClassWithGenerics(GenericFactoryBean.class, SimpleBean.class));
+		assertThat(createInstance(registeredBean).getTarget(registeredBean,
+				GenericFactoryBean.class.getDeclaredConstructors()[0])).isEqualTo(SimpleBean.class);
+	}
+
+	@Test
+	void getTargetOnConstructorToPublicGenericFactoryBeanWithBoundExtractTargetFromFactoryBeanType() {
+		RegisteredBean registeredBean = registerTestBean(ResolvableType
+				.forClassWithGenerics(NumberFactoryBean.class, Integer.class));
+		assertThat(createInstance(registeredBean).getTarget(registeredBean,
+				NumberFactoryBean.class.getDeclaredConstructors()[0])).isEqualTo(Integer.class);
+	}
+
+	@Test
+	void getTargetOnConstructorToPublicGenericFactoryBeanUseBeanTypeAsFallback() {
+		RegisteredBean registeredBean = registerTestBean(SimpleBean.class);
+		assertThat(createInstance(registeredBean).getTarget(registeredBean,
+				GenericFactoryBean.class.getDeclaredConstructors()[0])).isEqualTo(SimpleBean.class);
 	}
 
 	@Test
@@ -133,6 +157,12 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 
 
 	private RegisteredBean registerTestBean(Class<?> beanType) {
+		this.beanFactory.registerBeanDefinition("testBean",
+				new RootBeanDefinition(beanType));
+		return RegisteredBean.of(this.beanFactory, "testBean");
+	}
+
+	private RegisteredBean registerTestBean(ResolvableType beanType) {
 		this.beanFactory.registerBeanDefinition("testBean",
 				new RootBeanDefinition(beanType));
 		return RegisteredBean.of(this.beanFactory, "testBean");

@@ -16,17 +16,32 @@
 
 package org.springframework.beans.factory.aot;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.lang.Nullable;
 
 /**
- * A public {@link FactoryBean} with a resolved generic for {@link GenericFactoryBean}.
+ * A public {@link FactoryBean} with a generic type.
  *
  * @author Stephane Nicoll
  */
-public class SimpleBeanFactoryBean extends GenericFactoryBean<SimpleBean> {
+public class GenericFactoryBean<T> implements FactoryBean<T> {
 
-	public SimpleBeanFactoryBean() {
-		super(SimpleBean.class);
+	private final Class<T> beanType;
+
+	public GenericFactoryBean(Class<T> beanType) {
+		this.beanType = beanType;
 	}
 
+	@Nullable
+	@Override
+	public T getObject() throws Exception {
+		return BeanUtils.instantiateClass(this.beanType);
+	}
+
+	@Nullable
+	@Override
+	public Class<?> getObjectType() {
+		return this.beanType;
+	}
 }

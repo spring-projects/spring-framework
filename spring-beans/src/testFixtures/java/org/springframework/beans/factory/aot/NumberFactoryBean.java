@@ -16,17 +16,15 @@
 
 package org.springframework.beans.factory.aot;
 
-import org.springframework.beans.factory.FactoryBean;
-
 /**
- * A public {@link FactoryBean} with a resolved generic for {@link GenericFactoryBean}.
+ * A {@link GenericFactoryBean} that has a bound for the target type.
  *
  * @author Stephane Nicoll
  */
-public class SimpleBeanFactoryBean extends GenericFactoryBean<SimpleBean> {
+public class NumberFactoryBean<T extends Number> extends GenericFactoryBean<T> {
 
-	public SimpleBeanFactoryBean() {
-		super(SimpleBean.class);
+	public NumberFactoryBean(Class<T> beanType) {
+		super(beanType);
 	}
 
 }

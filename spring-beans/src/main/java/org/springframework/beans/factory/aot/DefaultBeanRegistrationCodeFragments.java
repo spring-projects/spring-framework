@@ -72,21 +72,43 @@ class DefaultBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments
 	public Class<?> getTarget(RegisteredBean registeredBean,
 			Executable constructorOrFactoryMethod) {
 
-		Class<?> target = extractDeclaringClass(constructorOrFactoryMethod);
+		Class<?> target = extractDeclaringClass(registeredBean.getBeanType(),
+				constructorOrFactoryMethod);
 		while (target.getName().startsWith("java.") && registeredBean.isInnerBean()) {
 			target = registeredBean.getParent().getBeanClass();
 		}
 		return target;
 	}
 
-	private Class<?> extractDeclaringClass(Executable executable) {
+	private Class<?> extractDeclaringClass(ResolvableType beanType, Executable executable) {
 		Class<?> declaringClass = ClassUtils.getUserClass(executable.getDeclaringClass());
 		if (executable instanceof Constructor<?>
 				&& AccessVisibility.forMember(executable) == AccessVisibility.PUBLIC
 				&& FactoryBean.class.isAssignableFrom(declaringClass)) {
-			return ResolvableType.forType(declaringClass).as(FactoryBean.class).getGeneric(0).toClass();
+			return extractTargetClassFromFactoryBean(declaringClass, beanType);
 		}
 		return executable.getDeclaringClass();
+	}
+
+	/**
+	 * Extract the target class of a public {@link FactoryBean} based on its
+	 * constructor. If the implementation does not resolve the target class
+	 * because it itself uses a generic, attempt to extract it from the
+	 * bean type.
+	 * @param factoryBeanType the factory bean type
+	 * @param beanType the bean type
+	 * @return the target class to use
+	 */
+	private Class<?> extractTargetClassFromFactoryBean(Class<?> factoryBeanType, ResolvableType beanType) {
+		ResolvableType target = ResolvableType.forType(factoryBeanType)
+				.as(FactoryBean.class).getGeneric(0);
+		if (target.getType().equals(Class.class)) {
+			return target.toClass();
+		}
+		else if (factoryBeanType.isAssignableFrom(beanType.toClass())) {
+			return beanType.as(FactoryBean.class).getGeneric(0).toClass();
+		}
+		return beanType.toClass();
 	}
 
 	@Override
