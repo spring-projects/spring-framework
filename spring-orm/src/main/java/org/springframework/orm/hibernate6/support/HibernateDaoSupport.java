@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.hibernate5.support;
+package org.springframework.orm.hibernate6.support;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -22,14 +22,14 @@ import org.hibernate.SessionFactory;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.support.DaoSupport;
 import org.springframework.lang.Nullable;
-import org.springframework.orm.hibernate5.HibernateTemplate;
+import org.springframework.orm.hibernate6.HibernateTemplate;
 import org.springframework.util.Assert;
 
 /**
  * Convenient super class for Hibernate-based data access objects.
  *
  * <p>Requires a {@link SessionFactory} to be set, providing a
- * {@link org.springframework.orm.hibernate5.HibernateTemplate} based on it to
+ * {@link org.springframework.orm.hibernate6.HibernateTemplate} based on it to
  * subclasses through the {@link #getHibernateTemplate()} method.
  * Can alternatively be initialized directly with a HibernateTemplate,
  * in order to reuse the latter's settings such as the SessionFactory,
@@ -51,7 +51,7 @@ import org.springframework.util.Assert;
  * @since 4.2
  * @see #setSessionFactory
  * @see #getHibernateTemplate
- * @see org.springframework.orm.hibernate5.HibernateTemplate
+ * @see org.springframework.orm.hibernate6.HibernateTemplate
  */
 public abstract class HibernateDaoSupport extends DaoSupport {
 

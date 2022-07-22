@@ -700,8 +700,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	public static class DefaultVendorSpecificPrivatePersistenceContextField {
 
 		@PersistenceContext
-		@SuppressWarnings("deprecation")
-		private org.hibernate.ejb.HibernateEntityManager em;
+		private EntityManager em;
 	}
 
 

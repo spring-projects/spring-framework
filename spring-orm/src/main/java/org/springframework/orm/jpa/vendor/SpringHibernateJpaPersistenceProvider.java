@@ -42,19 +42,18 @@ import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
 class SpringHibernateJpaPersistenceProvider extends HibernatePersistenceProvider {
 
 	@Override
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({"rawtypes","unchecked"})
 	public EntityManagerFactory createContainerEntityManagerFactory(PersistenceUnitInfo info, Map properties) {
 		final List<String> mergedClassesAndPackages = new ArrayList<>(info.getManagedClassNames());
-		if (info instanceof SmartPersistenceUnitInfo) {
-			mergedClassesAndPackages.addAll(((SmartPersistenceUnitInfo) info).getManagedPackages());
+		if (info instanceof SmartPersistenceUnitInfo smartPersistenceUnitInfo) {
+			mergedClassesAndPackages.addAll(smartPersistenceUnitInfo.getManagedPackages());
 		}
-		return new EntityManagerFactoryBuilderImpl(
-				new PersistenceUnitInfoDescriptor(info) {
-					@Override
-					public List<String> getManagedClassNames() {
-						return mergedClassesAndPackages;
-					}
-				}, properties).build();
+		return new EntityManagerFactoryBuilderImpl(new PersistenceUnitInfoDescriptor(info) {
+			@Override
+			public List<String> getManagedClassNames() {
+				return mergedClassesAndPackages;
+			}
+		}, properties).build();
 	}
 
 }

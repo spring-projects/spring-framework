@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.hibernate5;
+package org.springframework.orm.hibernate6;
 
 import java.util.Map;
 import java.util.function.Consumer;

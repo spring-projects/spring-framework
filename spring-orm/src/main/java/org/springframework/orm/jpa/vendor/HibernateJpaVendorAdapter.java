@@ -28,15 +28,14 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.dialect.DB2Dialect;
-import org.hibernate.dialect.DerbyTenSevenDialect;
+import org.hibernate.dialect.DerbyDialect;
 import org.hibernate.dialect.H2Dialect;
 import org.hibernate.dialect.HANAColumnStoreDialect;
 import org.hibernate.dialect.HSQLDialect;
-import org.hibernate.dialect.Informix10Dialect;
-import org.hibernate.dialect.MySQL57Dialect;
-import org.hibernate.dialect.Oracle12cDialect;
-import org.hibernate.dialect.PostgreSQL95Dialect;
-import org.hibernate.dialect.SQLServer2012Dialect;
+import org.hibernate.dialect.MySQLDialect;
+import org.hibernate.dialect.OracleDialect;
+import org.hibernate.dialect.PostgreSQLDialect;
+import org.hibernate.dialect.SQLServerDialect;
 import org.hibernate.dialect.SybaseDialect;
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 
@@ -171,15 +170,14 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	protected Class<?> determineDatabaseDialectClass(Database database) {
 		return switch (database) {
 			case DB2 -> DB2Dialect.class;
-			case DERBY -> DerbyTenSevenDialect.class;
+			case DERBY -> DerbyDialect.class;
 			case H2 -> H2Dialect.class;
 			case HANA -> HANAColumnStoreDialect.class;
 			case HSQL -> HSQLDialect.class;
-			case INFORMIX -> Informix10Dialect.class;
-			case MYSQL -> MySQL57Dialect.class;
-			case ORACLE -> Oracle12cDialect.class;
-			case POSTGRESQL -> PostgreSQL95Dialect.class;
-			case SQL_SERVER -> SQLServer2012Dialect.class;
+			case MYSQL -> MySQLDialect.class;
+			case ORACLE -> OracleDialect.class;
+			case POSTGRESQL -> PostgreSQLDialect.class;
+			case SQL_SERVER -> SQLServerDialect.class;
 			case SYBASE -> SybaseDialect.class;
 			default -> null;
 		};

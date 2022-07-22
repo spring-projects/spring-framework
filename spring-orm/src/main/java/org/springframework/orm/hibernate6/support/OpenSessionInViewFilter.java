@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.hibernate5.support;
+package org.springframework.orm.hibernate6.support;
 
 import java.io.IOException;
 
@@ -28,8 +28,8 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.orm.hibernate5.SessionFactoryUtils;
-import org.springframework.orm.hibernate5.SessionHolder;
+import org.springframework.orm.hibernate6.SessionFactoryUtils;
+import org.springframework.orm.hibernate6.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.async.CallableProcessingInterceptor;
@@ -46,7 +46,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  *
  * <p>This filter makes Hibernate Sessions available via the current thread, which
  * will be autodetected by transaction managers. It is suitable for service layer
- * transactions via {@link org.springframework.orm.hibernate5.HibernateTransactionManager}
+ * transactions via {@link org.springframework.orm.hibernate6.HibernateTransactionManager}
  * as well as for non-transactional execution (if configured appropriately).
  *
  * <p><b>NOTE</b>: This filter will by default <i>not</i> flush the Hibernate Session,
@@ -71,7 +71,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * @see #lookupSessionFactory
  * @see OpenSessionInViewInterceptor
  * @see OpenSessionInterceptor
- * @see org.springframework.orm.hibernate5.HibernateTransactionManager
+ * @see org.springframework.orm.hibernate6.HibernateTransactionManager
  * @see TransactionSynchronizationManager
  * @see SessionFactory#getCurrentSession()
  */

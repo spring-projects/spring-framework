@@ -3,7 +3,7 @@
  */
 @NonNullApi
 @NonNullFields
-package org.springframework.orm.hibernate5.support;
+package org.springframework.orm.hibernate6.support;
 
 import org.springframework.lang.NonNullApi;
 import org.springframework.lang.NonNullFields;

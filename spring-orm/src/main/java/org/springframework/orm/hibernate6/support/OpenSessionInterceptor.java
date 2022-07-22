@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.hibernate5.support;
+package org.springframework.orm.hibernate6.support;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -26,8 +26,8 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.lang.Nullable;
-import org.springframework.orm.hibernate5.SessionFactoryUtils;
-import org.springframework.orm.hibernate5.SessionHolder;
+import org.springframework.orm.hibernate6.SessionFactoryUtils;
+import org.springframework.orm.hibernate6.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
@@ -44,7 +44,7 @@ import org.springframework.util.Assert;
  * @since 4.2
  * @see OpenSessionInViewInterceptor
  * @see OpenSessionInViewFilter
- * @see org.springframework.orm.hibernate5.HibernateTransactionManager
+ * @see org.springframework.orm.hibernate6.HibernateTransactionManager
  * @see TransactionSynchronizationManager
  * @see SessionFactory#getCurrentSession()
  */
