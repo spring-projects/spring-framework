@@ -114,8 +114,8 @@ configure(allprojects) { project ->
 			dependency "org.quartz-scheduler:quartz:2.3.2"
 			dependency "org.ehcache:jcache:1.0.1"
 			dependency "org.ehcache:ehcache:3.4.0"
-			dependency "org.hibernate:hibernate-core:6.1.1.Final"
-			dependency "org.hibernate:hibernate-validator:7.0.4.Final"
+			dependency "org.hibernate.orm:hibernate-core:6.1.1.Final"
+			dependency "org.hibernate.validator:hibernate-validator:7.0.4.Final"
 			dependency "org.webjars:webjars-locator-core:0.48"
 			dependency "org.webjars:underscorejs:1.8.3"
 

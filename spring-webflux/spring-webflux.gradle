@@ -32,7 +32,7 @@ dependencies {
 	testImplementation(testFixtures(project(":spring-web")))
 	testImplementation("jakarta.xml.bind:jakarta.xml.bind-api")
 	testImplementation("com.fasterxml:aalto-xml")
-	testImplementation("org.hibernate:hibernate-validator")
+	testImplementation("org.hibernate.validator:hibernate-validator")
 	testImplementation("jakarta.validation:jakarta.validation-api")
 	testImplementation("io.reactivex.rxjava3:rxjava")
 	testImplementation("io.projectreactor:reactor-test")

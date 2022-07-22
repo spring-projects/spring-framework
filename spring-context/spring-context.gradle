@@ -23,7 +23,7 @@ dependencies {
 	optional("org.aspectj:aspectjweaver")
 	optional("org.apache.groovy:groovy")
 	optional("org.apache-extras.beanshell:bsh")
-	optional("org.hibernate:hibernate-validator")
+	optional("org.hibernate.validator:hibernate-validator")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("org.reactivestreams:reactive-streams")

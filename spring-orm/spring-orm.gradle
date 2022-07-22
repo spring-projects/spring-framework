@@ -9,7 +9,7 @@ dependencies {
 	optional(project(":spring-context"))
 	optional(project(":spring-web"))
 	optional("org.eclipse.persistence:org.eclipse.persistence.jpa")
-	optional("org.hibernate:hibernate-core")
+	optional("org.hibernate.orm:hibernate-core")
 	optional("jakarta.servlet:jakarta.servlet-api")
 	testImplementation(project(":spring-core-test"))
 	testImplementation(testFixtures(project(":spring-beans")))

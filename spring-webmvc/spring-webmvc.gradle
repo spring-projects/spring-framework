@@ -49,7 +49,7 @@ dependencies {
 	testImplementation("jaxen:jaxen")
 	testImplementation("org.xmlunit:xmlunit-assertj")
 	testImplementation("org.xmlunit:xmlunit-matchers")
-	testImplementation("org.hibernate:hibernate-validator")
+	testImplementation("org.hibernate.validator:hibernate-validator")
 	testImplementation("jakarta.validation:jakarta.validation-api")
 	testImplementation("io.projectreactor:reactor-core")
 	testImplementation("io.reactivex.rxjava3:rxjava")
