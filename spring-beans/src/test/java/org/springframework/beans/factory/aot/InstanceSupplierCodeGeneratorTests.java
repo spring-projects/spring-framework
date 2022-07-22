@@ -72,8 +72,6 @@ class InstanceSupplierCodeGeneratorTests {
 
 	private final DefaultGenerationContext generationContext;
 
-	private boolean allowDirectSupplierShortcut = false;
-
 
 	InstanceSupplierCodeGeneratorTests() {
 		this.generatedFiles = new InMemoryGeneratedFiles();
@@ -302,7 +300,6 @@ class InstanceSupplierCodeGeneratorTests {
 		return (T) beanFactory.getBean("testBean");
 	}
 
-	@SuppressWarnings("unchecked")
 	private void compile(DefaultListableBeanFactory beanFactory,
 			BeanDefinition beanDefinition,
 			BiConsumer<InstanceSupplier<?>, Compiled> result) {
@@ -313,8 +310,9 @@ class InstanceSupplierCodeGeneratorTests {
 		GeneratedClass generateClass = this.generationContext.getGeneratedClasses().addForFeature("TestCode", typeBuilder);
 		InstanceSupplierCodeGenerator generator = new InstanceSupplierCodeGenerator(
 				this.generationContext, generateClass.getName(),
-				generateClass.getMethods(), this.allowDirectSupplierShortcut);
+				generateClass.getMethods(), false);
 		Executable constructorOrFactoryMethod = ConstructorOrFactoryMethodResolver.resolve(registeredBean);
+		assertThat(constructorOrFactoryMethod).isNotNull();
 		CodeBlock generatedCode = generator.generateCode(registeredBean, constructorOrFactoryMethod);
 		typeBuilder.set(type -> {
 			type.addModifiers(Modifier.PUBLIC);
