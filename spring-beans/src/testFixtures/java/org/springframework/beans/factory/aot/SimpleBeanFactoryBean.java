@@ -23,16 +23,16 @@ import org.springframework.beans.factory.FactoryBean;
  *
  * @author Stephane Nicoll
  */
-public class TestBeanFactoryBean implements FactoryBean<TestBean> {
+public class SimpleBeanFactoryBean implements FactoryBean<SimpleBean> {
 
 	@Override
-	public TestBean getObject() throws Exception {
-		return new TestBean();
+	public SimpleBean getObject() throws Exception {
+		return new SimpleBean();
 	}
 
 	@Override
 	public Class<?> getObjectType() {
-		return TestBean.class;
+		return SimpleBean.class;
 	}
 
 }

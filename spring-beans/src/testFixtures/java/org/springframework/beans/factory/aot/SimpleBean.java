@@ -21,5 +21,5 @@ package org.springframework.beans.factory.aot;
  *
  * @author Stephane Nicoll
  */
-public class TestBean {
+public class SimpleBean {
 }
