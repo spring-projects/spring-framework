@@ -250,24 +250,23 @@ public class SockJsServiceRegistration {
 	 * This option can be used to disable automatic addition of CORS headers for
 	 * SockJS requests.
 	 * <p>The default value is "false".
-	 * @since 4.1.2
-	 * @deprecated as of 5.3.23, in favor of {@link #setSuppressCors(boolean)},
-	 * to be removed in Spring Framework 6.0
+	 * @since 5.3.23
 	 */
-	@Deprecated
-	public SockJsServiceRegistration setSupressCors(boolean suppressCors) {
-		return this.setSuppressCors(suppressCors);
+	public SockJsServiceRegistration setSuppressCors(boolean suppressCors) {
+		this.suppressCors = suppressCors;
+		return this;
 	}
 
 	/**
 	 * This option can be used to disable automatic addition of CORS headers for
 	 * SockJS requests.
 	 * <p>The default value is "false".
-	 * @since 4.1.2 (was named {@code setSupressCors} prior to 5.3.23)
+	 * @since 4.1.2
+	 * @deprecated as of 5.3.23, in favor of {@link #setSuppressCors(boolean)}
 	 */
-	public SockJsServiceRegistration setSuppressCors(boolean suppressCors) {
-		this.suppressCors = suppressCors;
-		return this;
+	@Deprecated
+	public SockJsServiceRegistration setSupressCors(boolean suppressCors) {
+		return this.setSuppressCors(suppressCors);
 	}
 
 	/**
