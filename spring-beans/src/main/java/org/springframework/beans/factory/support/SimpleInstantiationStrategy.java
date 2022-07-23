@@ -84,10 +84,13 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 					}
 				}
 			}
+			//通过BeanUtils进行实例化，这个BeanUtils的实例化通过Constructor来实例化Bean，
+			//在BeanUtils中可以看到具体的调用ctor.newInstance(argsWithDefaultValues)
 			return BeanUtils.instantiateClass(constructorToUse);
 		}
 		else {
 			// Must generate CGLIB subclass.
+			//使用cglib方式来实例化对象
 			return instantiateWithMethodInjection(bd, beanName, owner);
 		}
 	}
