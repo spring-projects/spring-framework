@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.web.util.WebUtils;
  * @since 17.06.2003
  * @see #setThemeName
  */
+@SuppressWarnings("deprecation")
 public class CookieThemeResolver extends CookieGenerator implements ThemeResolver {
 
 	/**

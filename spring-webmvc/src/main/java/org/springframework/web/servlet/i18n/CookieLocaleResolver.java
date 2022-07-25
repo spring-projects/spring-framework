@@ -57,6 +57,7 @@ import org.springframework.web.util.WebUtils;
  * @see #setDefaultLocale
  * @see #setDefaultTimeZone
  */
+@SuppressWarnings("deprecation")
 public class CookieLocaleResolver extends CookieGenerator implements LocaleContextResolver {
 
 	/**
