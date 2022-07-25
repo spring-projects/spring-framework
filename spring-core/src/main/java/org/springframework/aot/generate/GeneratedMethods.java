@@ -42,8 +42,8 @@ public class GeneratedMethods {
 	private final List<GeneratedMethod> generatedMethods;
 
 	/**
-	 * Create a new {@link GeneratedMethods} instance backed by the given
-	 * {@link MethodNameGenerator}.
+	 * Create a new {@link GeneratedMethods} using the specified method name
+	 * generator.
 	 * @param methodNameGenerator the method name generator
 	 */
 	GeneratedMethods(Function<MethodName, String> methodNameGenerator) {
