@@ -37,7 +37,9 @@ import org.springframework.util.Assert;
  * @see #addCookie
  * @see #removeCookie
  * @see org.springframework.web.servlet.theme.CookieThemeResolver
+ * @deprecated since 6.0 in favor of {@link org.springframework.http.ResponseCookie}
  */
+@Deprecated
 public class CookieGenerator {
 
 	/**
