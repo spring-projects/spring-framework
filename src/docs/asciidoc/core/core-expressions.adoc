@@ -1684,7 +1684,7 @@ ternary operator.
 === The Elvis Operator
 
 The Elvis operator is a shortening of the ternary operator syntax and is used in the
-http://www.groovy-lang.org/operators.html#_elvis_operator[Groovy] language.
+https://www.groovy-lang.org/operators.html#_elvis_operator[Groovy] language.
 With the ternary operator syntax, you usually have to repeat a variable twice, as the
 following example shows:
 
@@ -1763,7 +1763,7 @@ This will inject a system property `pop3.port` if it is defined or 25 if not.
 === Safe Navigation Operator
 
 The safe navigation operator is used to avoid a `NullPointerException` and comes from
-the http://www.groovy-lang.org/operators.html#_safe_navigation_operator[Groovy]
+the https://www.groovy-lang.org/operators.html#_safe_navigation_operator[Groovy]
 language. Typically, when you have a reference to an object, you might need to verify that
 it is not null before accessing methods or properties of the object. To avoid this, the
 safe navigation operator returns null instead of throwing an exception. The following

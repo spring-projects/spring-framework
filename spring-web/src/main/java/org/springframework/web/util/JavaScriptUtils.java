@@ -21,7 +21,7 @@ package org.springframework.web.util;
  * Escapes based on the JavaScript 1.5 recommendation.
  *
  * <p>Reference:
- * <a href="https://developer.mozilla.org/en-US/docs/JavaScript/Guide/Values,_variables,_and_literals#String_literals">
+ * <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Grammar_and_types#string_literals">
  * JavaScript Guide</a> on Mozilla Developer Network.
  *
  * @author Juergen Hoeller
