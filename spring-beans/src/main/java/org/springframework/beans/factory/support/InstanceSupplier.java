@@ -138,7 +138,7 @@ public interface InstanceSupplier<T> extends ThrowingSupplier<T> {
 	 * Lambda friendly method that can be used to create a
 	 * {@link InstanceSupplier} and add post processors in a single call. For
 	 * example: {@code
-	 * InstanceSupplier.of(registeredBean -> ...).withPostProcessor(...)}.
+	 * InstanceSupplier.of(registeredBean -> ...).andThen(...)}.
 	 * @param <T> the type of instance supplied by this supplier
 	 * @param instanceSupplier the source instance supplier
 	 * @return a new {@link InstanceSupplier}
