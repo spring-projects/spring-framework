@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
 /**
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter}
  * that can read and write JSON using the
- * <a href="http://json-b.net/">JSON Binding API</a>.
+ * <a href="https://javaee.github.io/jsonb-spec/">JSON Binding API</a>.
  *
  * <p>This converter can be used to bind to typed beans or untyped {@code HashMap}s.
  * By default, it supports {@code application/json} and {@code application/*+json} with

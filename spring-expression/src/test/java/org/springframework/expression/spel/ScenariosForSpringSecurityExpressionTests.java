@@ -39,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 ///CLOVER:OFF
 /**
- * Spring Security scenarios from https://wiki.springsource.com/display/SECURITY/Spring+Security+Expression-based+Authorization
+ * Spring Security scenarios from https://docs.spring.io/spring-security/reference/servlet/authorization/expression-based.html
  *
  * @author Andy Clement
  */

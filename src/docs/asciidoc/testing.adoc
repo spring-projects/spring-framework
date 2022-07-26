@@ -92,7 +92,7 @@ parties such as https://github.com/h-thurow/Simple-JNDI[Simple-JNDI].
 The `org.springframework.mock.web` package contains a comprehensive set of Servlet API
 mock objects that are useful for testing web contexts, controllers, and filters. These
 mock objects are targeted at usage with Spring's Web MVC framework and are generally more
-convenient to use than dynamic mock objects (such as http://easymock.org/[EasyMock])
+convenient to use than dynamic mock objects (such as https://easymock.org/[EasyMock])
 or alternative Servlet API mock objects (such as http://www.mockobjects.com[MockObjects]).
 
 TIP: Since Spring Framework 5.0, the mock objects in `org.springframework.mock.web` are
@@ -7729,13 +7729,13 @@ WebTestClient]. Browse these examples for further ideas.
 ==== HtmlUnit Integration
 
 Spring provides integration between <<spring-mvc-test-server, MockMvc>> and
-http://htmlunit.sourceforge.net/[HtmlUnit]. This simplifies performing end-to-end testing
+https://htmlunit.sourceforge.io/[HtmlUnit]. This simplifies performing end-to-end testing
 when using HTML-based views. This integration lets you:
 
 * Easily test HTML pages by using tools such as
-  http://htmlunit.sourceforge.net/[HtmlUnit],
+  https://htmlunit.sourceforge.io/[HtmlUnit],
   https://www.seleniumhq.org[WebDriver], and
-  http://www.gebish.org/manual/current/#spock-junit-testng[Geb] without the need to
+  https://www.gebish.org/manual/current/#spock-junit-testng[Geb] without the need to
   deploy to a Servlet container.
 * Test JavaScript within pages.
 * Optionally, test using mock services to speed up testing.
@@ -8062,11 +8062,11 @@ First, we no longer have to explicitly verify our form and then create a request
 looks like the form. Instead, we request the form, fill it out, and submit it, thereby
 significantly reducing the overhead.
 
-Another important factor is that http://htmlunit.sourceforge.net/javascript.html[HtmlUnit
+Another important factor is that https://htmlunit.sourceforge.io/javascript.html[HtmlUnit
 uses the Mozilla Rhino engine] to evaluate JavaScript. This means that we can also test
 the behavior of JavaScript within our pages.
 
-See the http://htmlunit.sourceforge.net/gettingStarted.html[HtmlUnit documentation] for
+See the https://htmlunit.sourceforge.io/gettingStarted.html[HtmlUnit documentation] for
 additional information about using HtmlUnit.
 
 [[spring-mvc-test-server-htmlunit-mah-advanced-builder]]
@@ -8673,7 +8673,7 @@ TIP: For additional information on creating a `MockMvc` instance, see
 ===== MockMvc and Geb
 
 In the previous section, we saw how to use MockMvc with WebDriver. In this section, we
-use http://www.gebish.org/[Geb] to make our tests even Groovy-er.
+use https://www.gebish.org/[Geb] to make our tests even Groovy-er.
 
 [[spring-mvc-test-server-htmlunit-geb-why]]
 ====== Why Geb and MockMvc?
@@ -8776,7 +8776,7 @@ if we were at the wrong page.
 
 Next, we create a `content` closure that specifies all the areas of interest within the
 page. We can use a
-http://www.gebish.org/manual/current/#the-jquery-ish-navigator-api[jQuery-ish Navigator
+https://www.gebish.org/manual/current/#the-jquery-ish-navigator-api[jQuery-ish Navigator
 API] to select the content in which we are interested.
 
 Finally, we can verify that a new message was created successfully, as follows:
@@ -8793,7 +8793,7 @@ message == expectedMessage
 ----
 
 For further details on how to get the most out of Geb, see
-http://www.gebish.org/manual/current/[The Book of Geb] user's manual.
+https://www.gebish.org/manual/current/[The Book of Geb] user's manual.
 
 
 [[spring-mvc-test-client]]

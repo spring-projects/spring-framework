@@ -40,7 +40,7 @@ import org.springframework.util.Assert;
 /**
  * {@code MockMvcWebConnection} enables {@link MockMvc} to transform a
  * {@link WebRequest} into a {@link WebResponse}.
- * <p>This is the core integration with <a href="http://htmlunit.sourceforge.net/">HtmlUnit</a>.
+ * <p>This is the core integration with <a href="https://htmlunit.sourceforge.io/">HtmlUnit</a>.
  * <p>Example usage can be seen below.
  *
  * <pre class="code">
