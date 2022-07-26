@@ -26,7 +26,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.hint.ResourceBundleHint;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
@@ -56,7 +55,7 @@ class RuntimeHintsBeanFactoryInitializationAotProcessorTests {
 
 	@BeforeEach
 	void setup() {
-		this.generationContext = new TestGenerationContext(new InMemoryGeneratedFiles());
+		this.generationContext = new TestGenerationContext();
 		this.generator = new ApplicationContextAotGenerator();
 	}
 

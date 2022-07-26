@@ -25,8 +25,6 @@ import javax.lang.model.element.Modifier;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.AopInfrastructureBean;
-import org.springframework.aot.generate.DefaultGenerationContext;
-import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.test.generator.compile.Compiled;
 import org.springframework.aot.test.generator.compile.TestCompiler;
@@ -64,9 +62,7 @@ class ScopedProxyBeanRegistrationAotProcessorTests {
 
 	private final TestBeanRegistrationsAotProcessor processor;
 
-	private final InMemoryGeneratedFiles generatedFiles;
-
-	private final DefaultGenerationContext generationContext;
+	private final TestGenerationContext generationContext;
 
 	private final MockBeanFactoryInitializationCode beanFactoryInitializationCode;
 
@@ -74,8 +70,7 @@ class ScopedProxyBeanRegistrationAotProcessorTests {
 	ScopedProxyBeanRegistrationAotProcessorTests() {
 		this.beanFactory = new DefaultListableBeanFactory();
 		this.processor = new TestBeanRegistrationsAotProcessor();
-		this.generatedFiles = new InMemoryGeneratedFiles();
-		this.generationContext = new TestGenerationContext(this.generatedFiles);
+		this.generationContext = new TestGenerationContext();
 		this.beanFactoryInitializationCode = new MockBeanFactoryInitializationCode(this.generationContext);
 	}
 
@@ -152,7 +147,7 @@ class ScopedProxyBeanRegistrationAotProcessorTests {
 					.build());
 		});
 		this.generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(this.generatedFiles).compile(compiled -> {
+		TestCompiler.forSystem().withFiles(this.generationContext.getGeneratedFiles()).compile(compiled -> {
 			DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory();
 			freshBeanFactory.setBeanClassLoader(compiled.getClassLoader());
 			compiled.getInstance(Consumer.class).accept(freshBeanFactory);

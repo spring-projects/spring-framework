@@ -29,9 +29,7 @@ import javax.lang.model.element.Modifier;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.ClassNameGenerator;
-import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.test.generator.compile.Compiled;
 import org.springframework.aot.test.generator.compile.TestCompiler;
@@ -61,9 +59,7 @@ class BeanRegistrationsAotContributionTests {
 
 	private DefaultListableBeanFactory beanFactory;
 
-	private final InMemoryGeneratedFiles generatedFiles;
-
-	private DefaultGenerationContext generationContext;
+	private TestGenerationContext generationContext;
 
 	private final BeanDefinitionMethodGeneratorFactory methodGeneratorFactory;
 
@@ -73,8 +69,7 @@ class BeanRegistrationsAotContributionTests {
 	BeanRegistrationsAotContributionTests() {
 		this.springFactoriesLoader = new MockSpringFactoriesLoader();
 		this.beanFactory = new DefaultListableBeanFactory();
-		this.generatedFiles = new InMemoryGeneratedFiles();
-		this.generationContext = new TestGenerationContext(this.generatedFiles);
+		this.generationContext = new TestGenerationContext();
 		this.methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
 				new AotFactoriesLoader(this.beanFactory, this.springFactoriesLoader));
 		this.beanFactoryInitializationCode = new MockBeanFactoryInitializationCode(this.generationContext);
@@ -102,8 +97,8 @@ class BeanRegistrationsAotContributionTests {
 
 	@Test
 	void applyToWhenHasNameGeneratesPrefixedFeatureName() {
-		this.generationContext = new DefaultGenerationContext(
-				new ClassNameGenerator(TestTarget.class, "Management"), this.generatedFiles);
+		this.generationContext = new TestGenerationContext(
+				new ClassNameGenerator(TestTarget.class, "Management"));
 		this.beanFactoryInitializationCode = new MockBeanFactoryInitializationCode(this.generationContext);
 		Map<String, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
 		RegisteredBean registeredBean = registerBean(
@@ -170,7 +165,7 @@ class BeanRegistrationsAotContributionTests {
 					.build());
 		});
 		this.generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(this.generatedFiles).printFiles(System.out).compile(compiled ->
+		TestCompiler.forSystem().withFiles(this.generationContext.getGeneratedFiles()).compile(compiled ->
 				result.accept(compiled.getInstance(Consumer.class), compiled));
 	}
 

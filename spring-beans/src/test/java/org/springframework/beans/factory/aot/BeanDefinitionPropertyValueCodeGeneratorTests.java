@@ -33,9 +33,7 @@ import javax.lang.model.element.Modifier;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.GeneratedClass;
-import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.test.generator.compile.Compiled;
 import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.beans.factory.config.BeanReference;
@@ -64,8 +62,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BeanDefinitionPropertyValueCodeGeneratorTests {
 
 	private void compile(Object value, BiConsumer<Object, Compiled> result) {
-		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
-		DefaultGenerationContext generationContext = new TestGenerationContext(generatedFiles);
+		TestGenerationContext generationContext = new TestGenerationContext();
 		DeferredTypeBuilder typeBuilder = new DeferredTypeBuilder();
 		GeneratedClass generatedClass = generationContext.getGeneratedClasses().addForFeature("TestCode", typeBuilder);
 		CodeBlock generatedCode = new BeanDefinitionPropertyValueCodeGenerator(
@@ -78,7 +75,7 @@ class BeanDefinitionPropertyValueCodeGeneratorTests {
 					.returns(Object.class).addStatement("return $L", generatedCode).build());
 		});
 		generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(generatedFiles).compile(compiled ->
+		TestCompiler.forSystem().withFiles(generationContext.getGeneratedFiles()).compile(compiled ->
 				result.accept(compiled.getInstance(Supplier.class).get(), compiled));
 	}
 
@@ -468,7 +465,7 @@ class BeanDefinitionPropertyValueCodeGeneratorTests {
 		@Test
 		void generatedWhenBeanNameReference() {
 			RuntimeBeanNameReference beanReference = new RuntimeBeanNameReference("test");
-			compile(beanReference, (instance, compiler) ->  {
+			compile(beanReference, (instance, compiler) -> {
 				RuntimeBeanReference actual = (RuntimeBeanReference) instance;
 				assertThat(actual.getBeanName()).isEqualTo(beanReference.getBeanName());
 			});
@@ -477,7 +474,7 @@ class BeanDefinitionPropertyValueCodeGeneratorTests {
 		@Test
 		void generatedWhenBeanReferenceByName() {
 			RuntimeBeanReference beanReference = new RuntimeBeanReference("test");
-			compile(beanReference, (instance, compiler) ->  {
+			compile(beanReference, (instance, compiler) -> {
 				RuntimeBeanReference actual = (RuntimeBeanReference) instance;
 				assertThat(actual.getBeanName()).isEqualTo(beanReference.getBeanName());
 				assertThat(actual.getBeanType()).isEqualTo(beanReference.getBeanType());

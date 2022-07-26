@@ -16,6 +16,7 @@
 
 package org.springframework.aot.generate;
 
+import java.io.IOException;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
@@ -118,7 +119,7 @@ class DefaultGenerationContextTests {
 	}
 
 	@Test
-	void withNameKeepsTrackOfAllGeneratedFiles() {
+	void withNameKeepsTrackOfAllGeneratedFiles() throws IOException {
 		DefaultGenerationContext context = new DefaultGenerationContext(
 				new ClassNameGenerator(TestTarget.class), this.generatedFiles);
 		context.getGeneratedClasses().addForFeature("Test", typeSpecCustomizer);
@@ -132,7 +133,7 @@ class DefaultGenerationContextTests {
 	}
 
 	@Test
-	void withNameGeneratesUniqueName() {
+	void withNameGeneratesUniqueName() throws IOException {
 		DefaultGenerationContext context = new DefaultGenerationContext(
 				new ClassNameGenerator(Object.class), this.generatedFiles);
 		context.withName("Test").getGeneratedClasses()

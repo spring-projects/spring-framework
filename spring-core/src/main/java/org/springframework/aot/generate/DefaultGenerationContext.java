@@ -27,6 +27,10 @@ import org.springframework.util.Assert;
 /**
  * Default {@link GenerationContext} implementation.
  *
+ * <p>Generated classes are flushed out using {@link #writeGeneratedContent()}
+ * and should be called once the generation process using this instance has
+ * completed.
+ *
  * @author Phillip Webb
  * @author Stephane Nicoll
  * @since 6.0
@@ -104,13 +108,8 @@ public class DefaultGenerationContext implements GenerationContext {
 	/**
 	 * Write any generated content out to the generated files.
 	 */
-	public void writeGeneratedContent() {
-		try {
-			this.generatedClasses.writeTo(this.generatedFiles);
-		}
-		catch (IOException ex) {
-			throw new IllegalStateException(ex);
-		}
+	public void writeGeneratedContent() throws IOException {
+		this.generatedClasses.writeTo(this.generatedFiles);
 	}
 
 }

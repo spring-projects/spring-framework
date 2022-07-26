@@ -27,9 +27,7 @@ import javax.lang.model.element.Modifier;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.GeneratedClass;
-import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.aot.test.generator.compile.Compiled;
 import org.springframework.aot.test.generator.compile.TestCompiler;
@@ -63,9 +61,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 
 	private final RootBeanDefinition beanDefinition = new RootBeanDefinition();
 
-	private final InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
-
-	private final DefaultGenerationContext generationContext = new TestGenerationContext(this.generatedFiles);
+	private final TestGenerationContext generationContext = new TestGenerationContext();
 
 	@Test
 	void setPrimaryWhenFalse() {
@@ -434,7 +430,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 					.addStatement("return beanDefinition").build());
 		});
 		this.generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(this.generatedFiles).compile(compiled -> {
+		TestCompiler.forSystem().withFiles(this.generationContext.getGeneratedFiles()).compile(compiled -> {
 			RootBeanDefinition suppliedBeanDefinition = (RootBeanDefinition) compiled
 					.getInstance(Supplier.class).get();
 			result.accept(suppliedBeanDefinition, compiled);

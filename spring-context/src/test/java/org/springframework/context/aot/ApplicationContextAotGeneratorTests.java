@@ -20,8 +20,6 @@ import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aot.generate.DefaultGenerationContext;
-import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.test.generator.compile.Compiled;
 import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.beans.BeansException;
@@ -187,11 +185,10 @@ class ApplicationContextAotGeneratorTests {
 	private void testCompiledResult(GenericApplicationContext applicationContext,
 			BiConsumer<ApplicationContextInitializer<GenericApplicationContext>, Compiled> result) {
 		ApplicationContextAotGenerator generator = new ApplicationContextAotGenerator();
-		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
-		DefaultGenerationContext generationContext = new TestGenerationContext(generatedFiles);
+		TestGenerationContext generationContext = new TestGenerationContext();
 		generator.generateApplicationContext(applicationContext, generationContext);
 		generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(generatedFiles).compile(compiled ->
+		TestCompiler.forSystem().withFiles(generationContext.getGeneratedFiles()).compile(compiled ->
 				result.accept(compiled.getInstance(ApplicationContextInitializer.class), compiled));
 	}
 

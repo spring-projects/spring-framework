@@ -25,9 +25,7 @@ import javax.lang.model.element.Modifier;
 import org.assertj.core.api.ThrowingConsumer;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.GeneratedClass;
-import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.hint.ExecutableHint;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.ReflectionHints;
@@ -68,14 +66,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class InstanceSupplierCodeGeneratorTests {
 
-	private final InMemoryGeneratedFiles generatedFiles;
-
-	private final DefaultGenerationContext generationContext;
+	private final TestGenerationContext generationContext;
 
 
 	InstanceSupplierCodeGeneratorTests() {
-		this.generatedFiles = new InMemoryGeneratedFiles();
-		this.generationContext = new TestGenerationContext(this.generatedFiles);
+		this.generationContext = new TestGenerationContext();
 	}
 
 
@@ -323,8 +318,8 @@ class InstanceSupplierCodeGeneratorTests {
 					.addStatement("return $L", generatedCode).build());
 		});
 		this.generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(this.generatedFiles).printFiles(System.out).compile(compiled ->
-			result.accept((InstanceSupplier<?>) compiled.getInstance(Supplier.class).get(), compiled));
+		TestCompiler.forSystem().withFiles(this.generationContext.getGeneratedFiles()).compile(compiled ->
+				result.accept((InstanceSupplier<?>) compiled.getInstance(Supplier.class).get(), compiled));
 	}
 
 }

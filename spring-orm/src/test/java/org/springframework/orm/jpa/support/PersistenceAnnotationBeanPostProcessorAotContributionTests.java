@@ -32,8 +32,6 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aot.generate.DefaultGenerationContext;
-import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.aot.test.generator.compile.CompileWithTargetClassAccess;
 import org.springframework.aot.test.generator.compile.Compiled;
@@ -60,15 +58,12 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 
 	private DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
-	private InMemoryGeneratedFiles generatedFiles;
-
-	private DefaultGenerationContext generationContext;
+	private TestGenerationContext generationContext;
 
 	@BeforeEach
 	void setup() {
 		this.beanFactory = new DefaultListableBeanFactory();
-		this.generatedFiles = new InMemoryGeneratedFiles();
-		this.generationContext = new TestGenerationContext(generatedFiles);
+		this.generationContext = new TestGenerationContext();
 	}
 
 	@Test
@@ -185,7 +180,7 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 		BeanRegistrationCode beanRegistrationCode = mock(BeanRegistrationCode.class);
 		contribution.applyTo(generationContext, beanRegistrationCode);
 		generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(generatedFiles)
+		TestCompiler.forSystem().withFiles(generationContext.getGeneratedFiles())
 				.compile(compiled -> result.accept(new Invoker(compiled), compiled));
 	}
 

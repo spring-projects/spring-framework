@@ -24,8 +24,6 @@ import javax.lang.model.element.Modifier;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aot.generate.DefaultGenerationContext;
-import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.hint.ResourcePatternHint;
 import org.springframework.aot.test.generator.compile.Compiled;
@@ -54,16 +52,13 @@ import static org.assertj.core.api.Assertions.entry;
  */
 class ConfigurationClassPostProcessorAotContributionTests {
 
-	private final InMemoryGeneratedFiles generatedFiles;
-
-	private final DefaultGenerationContext generationContext;
+	private final TestGenerationContext generationContext;
 
 	private final MockBeanFactoryInitializationCode beanFactoryInitializationCode;
 
 
 	ConfigurationClassPostProcessorAotContributionTests() {
-		this.generatedFiles = new InMemoryGeneratedFiles();
-		this.generationContext = new TestGenerationContext(this.generatedFiles);
+		this.generationContext = new TestGenerationContext();
 		this.beanFactoryInitializationCode = new MockBeanFactoryInitializationCode(this.generationContext);
 	}
 
@@ -123,7 +118,7 @@ class ConfigurationClassPostProcessorAotContributionTests {
 					.build());
 		});
 		this.generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(this.generatedFiles).compile(compiled ->
+		TestCompiler.forSystem().withFiles(this.generationContext.getGeneratedFiles()).compile(compiled ->
 				result.accept(compiled.getInstance(Consumer.class), compiled));
 	}
 
