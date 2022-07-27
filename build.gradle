@@ -35,7 +35,7 @@ configure(allprojects) { project ->
 			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.7.10"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.2"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-serialization-bom:1.3.3"
-			mavenBom "org.junit:junit-bom:5.9.0-RC1"
+			mavenBom "org.junit:junit-bom:5.9.0"
 		}
 		dependencies {
 			dependencySet(group: 'org.apache.logging.log4j', version: '2.18.0') {
@@ -346,9 +346,9 @@ configure([rootProject] + javaProjects) { project ->
 			// TODO Uncomment link to JUnit 5 docs once we have sorted out
 			// the following warning in the build.
 			//
-			// warning: The code being documented uses packages in the unnamed module, but the packages defined in https://junit.org/junit5/docs/5.8.1/api/ are in named modules.
+			// warning: The code being documented uses packages in the unnamed module, but the packages defined in https://junit.org/junit5/docs/5.9.0/api/ are in named modules.
 			//
-			// "https://junit.org/junit5/docs/5.8.2/api/",
+			// "https://junit.org/junit5/docs/5.9.0/api/",
 			"https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/",
 			"https://javadoc.io/static/io.rsocket/rsocket-core/1.1.1/",
 			"https://r2dbc.io/spec/1.0.0.RELEASE/api/",
