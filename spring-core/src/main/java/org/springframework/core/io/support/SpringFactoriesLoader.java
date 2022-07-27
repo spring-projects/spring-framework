@@ -268,7 +268,9 @@ public class SpringFactoriesLoader {
 	 * {@code null} to use the default
 	 * @throws IllegalArgumentException if an error occurs while loading factory names
 	 * @see #loadFactories
+	 * @deprecated as of 6.0 in favor of {@link #load(Class, ArgumentResolver, FailureHandler)}
 	 */
+	@Deprecated
 	public static List<String> loadFactoryNames(Class<?> factoryType, @Nullable ClassLoader classLoader) {
 		return forDefaultResourceLocation(classLoader).loadFactoryNames(factoryType);
 	}
