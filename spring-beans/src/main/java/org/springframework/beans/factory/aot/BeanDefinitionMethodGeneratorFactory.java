@@ -111,11 +111,14 @@ class BeanDefinitionMethodGeneratorFactory {
 
 	private boolean isImplicitlyExcluded(RegisteredBean registeredBean) {
 		Class<?> beanClass = registeredBean.getBeanClass();
-		if (BeanRegistrationExcludeFilter.class.isAssignableFrom(beanClass)) {
-			return false;
+		if (BeanFactoryInitializationAotProcessor.class.isAssignableFrom(beanClass)) {
+			return true;
 		}
-		return BeanFactoryInitializationAotProcessor.class.isAssignableFrom(beanClass)
-				|| BeanRegistrationAotProcessor.class.isAssignableFrom(beanClass);
+		if (BeanRegistrationAotProcessor.class.isAssignableFrom(beanClass)) {
+			BeanRegistrationAotProcessor processor = this.aotProcessors.findByBeanName(registeredBean.getBeanName());
+			return (processor == null) || processor.isBeanExcludedFromAotProcessing();
+		}
+		return false;
 	}
 
 	private List<BeanRegistrationAotContribution> getAotContributions(

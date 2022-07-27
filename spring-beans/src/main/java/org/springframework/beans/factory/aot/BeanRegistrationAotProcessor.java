@@ -47,4 +47,16 @@ public interface BeanRegistrationAotProcessor {
 	@Nullable
 	BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean);
 
+	/**
+	 * Return if the bean instance associated with this processor should be
+	 * excluded from AOT processing itself. By default this method will return
+	 * {@code true} to automatically exclude the bean, if the definition should
+	 * be written then this method may be overridden to return {@code true}.
+	 * @return if the bean should be excluded from AOT processing
+	 * @see BeanRegistrationExcludeFilter
+	 */
+	default boolean isBeanExcludedFromAotProcessing() {
+		return true;
+	}
+
 }

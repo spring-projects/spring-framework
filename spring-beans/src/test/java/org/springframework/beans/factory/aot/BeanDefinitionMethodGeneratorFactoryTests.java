@@ -127,11 +127,11 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 	}
 
 	@Test
-	void getBeanDefinitionMethodGeneratorWhenRegisteredBeanIsAotProcessorAndFiltersBeanBeanRegistrationExcludeFilterDoesNotFilterBean() {
+	void getBeanDefinitionMethodGeneratorWhenRegisteredBeanIsAotProcessorAndIsNotExcludedAndBeanRegistrationExcludeFilterDoesNotFilterBean() {
 		MockSpringFactoriesLoader springFactoriesLoader = new MockSpringFactoriesLoader();
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		beanFactory.registerBeanDefinition("test", BeanDefinitionBuilder
-				.rootBeanDefinition(TestBeanRegistrationAotProcessorAndFilterBean.class).getBeanDefinition());
+				.rootBeanDefinition(TestBeanRegistrationAotProcessorAndNotExcluded.class).getBeanDefinition());
 		RegisteredBean registeredBean1 = RegisteredBean.of(beanFactory, "test");
 		BeanDefinitionMethodGeneratorFactory methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
 				AotServices.factoriesAndBeans(springFactoriesLoader, beanFactory));
@@ -197,12 +197,11 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 
 	}
 
-	static class TestBeanRegistrationAotProcessorAndFilterBean
-			extends TestBeanRegistrationAotProcessorBean
-			implements BeanRegistrationExcludeFilter {
+	static class TestBeanRegistrationAotProcessorAndNotExcluded
+			extends TestBeanRegistrationAotProcessorBean {
 
 		@Override
-		public boolean isExcluded(RegisteredBean registeredBean) {
+		public boolean isBeanExcludedFromAotProcessing() {
 			return false;
 		}
 
