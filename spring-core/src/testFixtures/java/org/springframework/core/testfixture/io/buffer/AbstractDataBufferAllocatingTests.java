@@ -34,6 +34,7 @@ import io.netty.buffer.PoolArenaMetric;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.PooledByteBufAllocatorMetric;
 import io.netty.buffer.UnpooledByteBufAllocator;
+import io.netty5.buffer.api.BufferAllocator;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -45,6 +46,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.io.buffer.Netty5DataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -162,18 +164,26 @@ public abstract class AbstractDataBufferAllocatingTests {
 	@SuppressWarnings("deprecation") // PooledByteBufAllocator no longer supports tinyCacheSize.
 	public static Stream<Arguments> dataBufferFactories() {
 		return Stream.of(
-			arguments(named("NettyDataBufferFactory - UnpooledByteBufAllocator - preferDirect = true",
-					new NettyDataBufferFactory(new UnpooledByteBufAllocator(true)))),
+//			arguments(named("NettyDataBufferFactory - UnpooledByteBufAllocator - preferDirect = true",
+//					new NettyDataBufferFactory(new UnpooledByteBufAllocator(true)))),
 			arguments(named("NettyDataBufferFactory - UnpooledByteBufAllocator - preferDirect = false",
 					new NettyDataBufferFactory(new UnpooledByteBufAllocator(false)))),
 			// 1) Disable caching for reliable leak detection, see https://github.com/netty/netty/issues/5275
 			// 2) maxOrder is 4 (vs default 11) but can be increased if necessary
-			arguments(named("NettyDataBufferFactory - PooledByteBufAllocator - preferDirect = true",
-					new NettyDataBufferFactory(new PooledByteBufAllocator(true, 1, 1, 4096, 4, 0, 0, 0, true)))),
-			arguments(named("NettyDataBufferFactory - PooledByteBufAllocator - preferDirect = false",
-					new NettyDataBufferFactory(new PooledByteBufAllocator(false, 1, 1, 4096, 4, 0, 0, 0, true)))),
-			arguments(named("DefaultDataBufferFactory - preferDirect = true",
-					new DefaultDataBufferFactory(true))),
+//			arguments(named("NettyDataBufferFactory - PooledByteBufAllocator - preferDirect = true",
+//					new NettyDataBufferFactory(new PooledByteBufAllocator(true, 1, 1, 4096, 4, 0, 0, 0, true)))),
+//			arguments(named("NettyDataBufferFactory - PooledByteBufAllocator - preferDirect = false",
+//					new NettyDataBufferFactory(new PooledByteBufAllocator(false, 1, 1, 4096, 4, 0, 0, 0, true)))),
+			arguments(named("Netty5DataBufferFactory - BufferAllocator.onHeapUnpooled()",
+					new Netty5DataBufferFactory(BufferAllocator.onHeapUnpooled()))),
+//			arguments(named("Netty5DataBufferFactory - BufferAllocator.offHeapUnpooled()",
+//					new Netty5DataBufferFactory(BufferAllocator.offHeapUnpooled()))),
+//			arguments(named("Netty5DataBufferFactory - BufferAllocator.onHeapPooled()",
+//					new Netty5DataBufferFactory(BufferAllocator.onHeapPooled()))),
+//			arguments(named("Netty5DataBufferFactory - BufferAllocator.offHeapPooled()",
+//					new Netty5DataBufferFactory(BufferAllocator.offHeapPooled()))),
+//			arguments(named("DefaultDataBufferFactory - preferDirect = true",
+//					new DefaultDataBufferFactory(true))),
 			arguments(named("DefaultDataBufferFactory - preferDirect = false",
 					new DefaultDataBufferFactory(false)))
 		);

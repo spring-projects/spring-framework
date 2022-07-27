@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,10 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageEncoder;
 import org.springframework.lang.Nullable;
+import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.MimeType;
 
 /**
@@ -86,25 +86,19 @@ public class ProtobufEncoder extends ProtobufCodecSupport implements HttpMessage
 
 	private DataBuffer encodeValue(Message message, DataBufferFactory bufferFactory, boolean delimited) {
 
-		DataBuffer buffer = bufferFactory.allocateBuffer();
-		boolean release = true;
+		FastByteArrayOutputStream bos = new FastByteArrayOutputStream();
 		try {
 			if (delimited) {
-				message.writeDelimitedTo(buffer.asOutputStream());
+				message.writeDelimitedTo(bos);
 			}
 			else {
-				message.writeTo(buffer.asOutputStream());
+				message.writeTo(bos);
 			}
-			release = false;
-			return buffer;
+			byte[] bytes = bos.toByteArrayUnsafe();
+			return bufferFactory.wrap(bytes);
 		}
 		catch (IOException ex) {
 			throw new IllegalStateException("Unexpected I/O error while writing to data buffer", ex);
-		}
-		finally {
-			if (release) {
-				DataBufferUtils.release(buffer);
-			}
 		}
 	}
 

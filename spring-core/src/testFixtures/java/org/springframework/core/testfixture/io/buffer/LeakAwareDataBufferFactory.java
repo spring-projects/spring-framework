@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,6 +107,7 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 	}
 
 	@Override
+	@Deprecated
 	public DataBuffer allocateBuffer() {
 		return createLeakAwareDataBuffer(this.delegate.allocateBuffer());
 	}
@@ -141,6 +142,11 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 				.map(o -> o instanceof LeakAwareDataBuffer ? ((LeakAwareDataBuffer) o).dataBuffer() : o)
 				.collect(Collectors.toList());
 		return new LeakAwareDataBuffer(this.delegate.join(dataBuffers), this);
+	}
+
+	@Override
+	public boolean isDirect() {
+		return this.delegate.isDirect();
 	}
 
 }

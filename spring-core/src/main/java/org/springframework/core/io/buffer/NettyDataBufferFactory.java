@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
 
 /**
  * Implementation of the {@code DataBufferFactory} interface based on a
- * Netty {@link ByteBufAllocator}.
+ * Netty 4 {@link ByteBufAllocator}.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
@@ -61,6 +61,7 @@ public class NettyDataBufferFactory implements DataBufferFactory {
 	}
 
 	@Override
+	@Deprecated
 	public NettyDataBuffer allocateBuffer() {
 		ByteBuf byteBuf = this.byteBufAllocator.buffer();
 		return new NettyDataBuffer(byteBuf, this);
@@ -113,6 +114,11 @@ public class NettyDataBufferFactory implements DataBufferFactory {
 		return new NettyDataBuffer(composite, this);
 	}
 
+	@Override
+	public boolean isDirect() {
+		return this.byteBufAllocator.isDirectBufferPooled();
+	}
+
 	/**
 	 * Return the given Netty {@link DataBuffer} as a {@link ByteBuf}.
 	 * <p>Returns the {@linkplain NettyDataBuffer#getNativeBuffer() native buffer}
@@ -126,7 +132,7 @@ public class NettyDataBufferFactory implements DataBufferFactory {
 			return nettyDataBuffer.getNativeBuffer();
 		}
 		else {
-			return Unpooled.wrappedBuffer(buffer.asByteBuffer());
+			return Unpooled.wrappedBuffer(buffer.toByteBuffer());
 		}
 	}
 

@@ -54,6 +54,7 @@ dependencies {
 	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
 	testRuntimeOnly("com.sun.activation:jakarta.activation")
+	testRuntimeOnly("io.netty:netty5-buffer:5.0.0.Alpha4")
 }
 
 test {

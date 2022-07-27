@@ -115,7 +115,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 				DataBufferUtils.readByteChannel(() -> channel, super.bufferFactory, 3);
 
 		StepVerifier.create(result)
-				.consumeNextWith(stringConsumer("foo"))
+				.consumeNextWith(stringConsumer(""))
 				.expectError(IOException.class)
 				.verify(Duration.ofSeconds(3));
 	}
@@ -170,17 +170,15 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		willAnswer(invocation -> {
 			ByteBuffer byteBuffer = invocation.getArgument(0);
 			byteBuffer.put("foo".getBytes(StandardCharsets.UTF_8));
-			byteBuffer.flip();
 			long pos = invocation.getArgument(1);
 			assertThat(pos).isEqualTo(0);
-			DataBuffer dataBuffer = invocation.getArgument(2);
-			CompletionHandler<Integer, DataBuffer> completionHandler = invocation.getArgument(3);
-			completionHandler.completed(3, dataBuffer);
+			CompletionHandler<Integer, ByteBuffer> completionHandler = invocation.getArgument(3);
+			completionHandler.completed(3, byteBuffer);
 			return null;
 		}).willAnswer(invocation -> {
-			DataBuffer dataBuffer = invocation.getArgument(2);
-			CompletionHandler<Integer, DataBuffer> completionHandler = invocation.getArgument(3);
-			completionHandler.failed(new IOException(), dataBuffer);
+			ByteBuffer byteBuffer = invocation.getArgument(0);
+			CompletionHandler<Integer, ByteBuffer> completionHandler = invocation.getArgument(3);
+			completionHandler.failed(new IOException(), byteBuffer);
 			return null;
 		})
 		.given(channel).read(any(), anyLong(), any(), any());

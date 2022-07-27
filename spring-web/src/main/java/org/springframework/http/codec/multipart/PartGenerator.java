@@ -729,7 +729,7 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 		@SuppressWarnings("BlockingMethodInNonBlockingContext")
 		private Mono<Void> writeInternal(DataBuffer dataBuffer) {
 			try {
-				ByteBuffer byteBuffer = dataBuffer.asByteBuffer();
+				ByteBuffer byteBuffer = dataBuffer.toByteBuffer();
 				while (byteBuffer.hasRemaining()) {
 					this.channel.write(byteBuffer);
 				}

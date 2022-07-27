@@ -16,47 +16,53 @@
 
 package org.springframework.core.codec;
 
-import java.nio.ByteBuffer;
 import java.util.Map;
+
+import io.netty5.buffer.api.Buffer;
+import io.netty5.buffer.api.DefaultBufferAllocators;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.Netty5DataBuffer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 /**
- * Decoder for {@link ByteBuffer ByteBuffers}.
+ * Decoder for {@link Buffer Buffers}.
  *
- * @author Sebastien Deleuze
- * @author Arjen Poutsma
- * @author Rossen Stoyanchev
- * @since 5.0
+ * @author Violeta Georgieva
+ * @since 6.0
  */
-public class ByteBufferDecoder extends AbstractDataBufferDecoder<ByteBuffer> {
+public class Netty5BufferDecoder extends AbstractDataBufferDecoder<Buffer> {
 
-	public ByteBufferDecoder() {
+	public Netty5BufferDecoder() {
 		super(MimeTypeUtils.ALL);
 	}
 
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		return (ByteBuffer.class.isAssignableFrom(elementType.toClass()) &&
+		return (Buffer.class.isAssignableFrom(elementType.toClass()) &&
 				super.canDecode(elementType, mimeType));
 	}
 
 	@Override
-	public ByteBuffer decode(DataBuffer dataBuffer, ResolvableType elementType,
+	public Buffer decode(DataBuffer dataBuffer, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		ByteBuffer result = dataBuffer.toByteBuffer();
 		if (logger.isDebugEnabled()) {
 			logger.debug(Hints.getLogPrefix(hints) + "Read " + dataBuffer.readableByteCount() + " bytes");
 		}
+		if (dataBuffer instanceof Netty5DataBuffer netty5DataBuffer) {
+			return netty5DataBuffer.getNativeBuffer();
+		}
+		byte[] bytes = new byte[dataBuffer.readableByteCount()];
+		dataBuffer.read(bytes);
+		Buffer buffer = DefaultBufferAllocators.preferredAllocator().copyOf(bytes);
 		DataBufferUtils.release(dataBuffer);
-		return result;
+		return buffer;
 	}
 
 }
