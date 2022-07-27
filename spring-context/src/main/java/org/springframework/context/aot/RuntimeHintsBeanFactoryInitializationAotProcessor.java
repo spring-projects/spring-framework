@@ -57,7 +57,7 @@ class RuntimeHintsBeanFactoryInitializationAotProcessor
 	public BeanFactoryInitializationAotContribution processAheadOfTime(
 			ConfigurableListableBeanFactory beanFactory) {
 		Map<Class<? extends RuntimeHintsRegistrar>, RuntimeHintsRegistrar> registrars = AotServices
-				.factoriesAndBeans(beanFactory).load(RuntimeHintsRegistrar.class).stream()
+				.factories(beanFactory.getBeanClassLoader()).load(RuntimeHintsRegistrar.class).stream()
 				.collect(LinkedHashMap::new, (map, item) -> map.put(item.getClass(), item), Map::putAll);
 		extractFromBeanFactory(beanFactory).forEach(registrarClass ->
 				registrars.computeIfAbsent(registrarClass, BeanUtils::instantiateClass));
