@@ -24,7 +24,6 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -140,21 +139,14 @@ class BeanDefinitionPropertiesCodeGenerator {
 
 	private void addInitDestroyMethods(Builder builder,
 			AbstractBeanDefinition beanDefinition, @Nullable String[] methodNames, String format) {
-		List<String> filteredMethodNames = (!ObjectUtils.isEmpty(methodNames))
-				? Arrays.stream(methodNames).filter(this::isNotInferredMethod).toList()
-				: Collections.emptyList();
-		if (!filteredMethodNames.isEmpty()) {
+		if (!ObjectUtils.isEmpty(methodNames)) {
 			Class<?> beanType = ClassUtils.getUserClass(beanDefinition.getResolvableType().toClass());
-			filteredMethodNames.forEach(methodName -> addInitDestroyHint(beanType, methodName));
-			CodeBlock arguments = filteredMethodNames.stream()
+			Arrays.stream(methodNames).forEach(methodName -> addInitDestroyHint(beanType, methodName));
+			CodeBlock arguments = Arrays.stream(methodNames)
 					.map(name -> CodeBlock.of("$S", name))
 					.collect(CodeBlock.joining(", "));
 			builder.addStatement(format, BEAN_DEFINITION_VARIABLE, arguments);
 		}
-	}
-
-	private boolean isNotInferredMethod(String candidate) {
-		return !AbstractBeanDefinition.INFER_METHOD.equals(candidate);
 	}
 
 	private void addInitDestroyHint(Class<?> beanUserClass, String methodName) {

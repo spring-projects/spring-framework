@@ -36,7 +36,6 @@ import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.config.RuntimeBeanNameReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
@@ -225,9 +224,8 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 	}
 
 	@Test
-	void setInitMethodWhenSingleInferredInitMethod() {
+	void setInitMethodWhenNoInitMethod() {
 		this.beanDefinition.setTargetType(InitDestroyBean.class);
-		this.beanDefinition.setInitMethodName(AbstractBeanDefinition.INFER_METHOD);
 		compile((actual, compiled) -> assertThat(actual.getInitMethodNames()).isNull());
 	}
 
@@ -242,13 +240,6 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 	}
 
 	@Test
-	void setInitMethodWithInferredMethodFirst() {
-		this.beanDefinition.setInitMethodNames(AbstractBeanDefinition.INFER_METHOD, "init");
-		compile((actual, compiled) -> assertThat(compiled.getSourceFile().getContent())
-				.contains("beanDefinition.setInitMethodNames(\"init\");"));
-	}
-
-	@Test
 	void setDestroyMethodWhenDestroyInitMethod() {
 		this.beanDefinition.setTargetType(InitDestroyBean.class);
 		this.beanDefinition.setDestroyMethodName("d1");
@@ -260,9 +251,8 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 	}
 
 	@Test
-	void setDestroyMethodWhenSingleInferredInitMethod() {
+	void setDestroyMethodWhenNoDestroyMethod() {
 		this.beanDefinition.setTargetType(InitDestroyBean.class);
-		this.beanDefinition.setDestroyMethodName(AbstractBeanDefinition.INFER_METHOD);
 		compile((actual, compiled) -> assertThat(actual.getDestroyMethodNames()).isNull());
 	}
 
@@ -275,13 +265,6 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 						.containsExactly("d1", "d2"));
 		String[] methodNames = { "d1", "d2" };
 		assertHasMethodInvokeHints(InitDestroyBean.class, methodNames);
-	}
-
-	@Test
-	void setDestroyMethodWithInferredMethodFirst() {
-		this.beanDefinition.setDestroyMethodNames(AbstractBeanDefinition.INFER_METHOD, "destroy");
-		compile((actual, compiled) -> assertThat(compiled.getSourceFile().getContent())
-				.contains("beanDefinition.setDestroyMethodNames(\"destroy\");"));
 	}
 
 	private void assertHasMethodInvokeHints(Class<?> beanType, String... methodNames) {

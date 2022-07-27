@@ -57,4 +57,39 @@ class RootBeanDefinitionTests {
 		verify(instanceSupplier).getFactoryMethod();
 	}
 
+	@Test
+	void resolveDestroyMethodWithMatchingCandidateReplacedInferredVaue() {
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(BeanWithCloseMethod.class);
+		beanDefinition.setDestroyMethodName(AbstractBeanDefinition.INFER_METHOD);
+		beanDefinition.resolveDestroyMethodIfNecessary();
+		assertThat(beanDefinition.getDestroyMethodNames()).containsExactly("close");
+	}
+
+	@Test
+	void resolveDestroyMethodWithNoCandidateSetDestroyMethodNameToNull() {
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(BeanWithNoDestroyMethod.class);
+		beanDefinition.setDestroyMethodName(AbstractBeanDefinition.INFER_METHOD);
+		beanDefinition.resolveDestroyMethodIfNecessary();
+		assertThat(beanDefinition.getDestroyMethodNames()).isNull();
+	}
+
+	@Test
+	void resolveDestroyMethodWithNoResolvableType() {
+		RootBeanDefinition beanDefinition = new RootBeanDefinition();
+		beanDefinition.setDestroyMethodName(AbstractBeanDefinition.INFER_METHOD);
+		beanDefinition.resolveDestroyMethodIfNecessary();
+		assertThat(beanDefinition.getDestroyMethodNames()).isNull();
+	}
+
+	static class BeanWithCloseMethod {
+
+		public void close() {
+		}
+
+	}
+
+	static class BeanWithNoDestroyMethod {
+
+	}
+
 }

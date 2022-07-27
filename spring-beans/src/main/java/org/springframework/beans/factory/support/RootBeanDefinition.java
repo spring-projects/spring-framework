@@ -551,6 +551,15 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
+	 * Resolve the inferred destroy method if necessary.
+	 * @since 6.0
+	 */
+	public void resolveDestroyMethodIfNecessary() {
+		setDestroyMethodNames(DisposableBeanAdapter
+				.inferDestroyMethodsIfNecessary(getResolvableType().toClass(), this));
+	}
+
+	/**
 	 * Register an externally managed configuration destruction method &mdash;
 	 * for example, a method annotated with JSR-250's
 	 * {@link jakarta.annotation.PreDestroy} annotation.
