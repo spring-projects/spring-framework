@@ -174,7 +174,7 @@ class InstanceSupplierCodeGenerator {
 		boolean hasArguments = constructor.getParameterCount() > 0;
 		CodeBlock arguments = hasArguments
 				? new AutowiredArgumentsCodeGenerator(declaringClass, constructor)
-						.generateCode(constructor.getParameterTypes(), parameterOffset)
+				.generateCode(constructor.getParameterTypes(), parameterOffset)
 				: NO_ARGS;
 		CodeBlock newInstance = generateNewInstanceCodeForConstructor(dependsOnBean,
 				declaringClass, arguments);
@@ -267,7 +267,7 @@ class InstanceSupplierCodeGenerator {
 		boolean hasArguments = factoryMethod.getParameterCount() > 0;
 		CodeBlock arguments = hasArguments
 				? new AutowiredArgumentsCodeGenerator(declaringClass, factoryMethod)
-						.generateCode(factoryMethod.getParameterTypes())
+				.generateCode(factoryMethod.getParameterTypes())
 				: NO_ARGS;
 		CodeBlock newInstance = generateNewInstanceCodeForMethod(dependsOnBean,
 				declaringClass, factoryMethodName, arguments);

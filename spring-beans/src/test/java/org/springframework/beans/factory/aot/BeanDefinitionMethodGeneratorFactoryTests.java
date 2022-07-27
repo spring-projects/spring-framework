@@ -111,7 +111,7 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 	}
 
 	@Test
-	void getBeanDefinitionMethodGeneratorWhenRegisteredBeanIsAotProcessorFilteresBean() {
+	void getBeanDefinitionMethodGeneratorWhenRegisteredBeanIsAotProcessorFiltersBean() {
 		MockSpringFactoriesLoader springFactoriesLoader = new MockSpringFactoriesLoader();
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		beanFactory.registerBeanDefinition("test1", BeanDefinitionBuilder
@@ -127,7 +127,7 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 	}
 
 	@Test
-	void getBeanDefinitionMethodGeneratorWhenRegisteredBeanIsAotProcessorAndFilteresBeanBeanRegistrationExcludeFilterDoesNotFilterBean() {
+	void getBeanDefinitionMethodGeneratorWhenRegisteredBeanIsAotProcessorAndFiltersBeanBeanRegistrationExcludeFilterDoesNotFilterBean() {
 		MockSpringFactoriesLoader springFactoriesLoader = new MockSpringFactoriesLoader();
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		beanFactory.registerBeanDefinition("test", BeanDefinitionBuilder
@@ -179,7 +179,7 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 
 	}
 
-	static class TestBeanFactoryInitializationAotProcessorBean implements BeanFactoryInitializationAotProcessor{
+	static class TestBeanFactoryInitializationAotProcessorBean implements BeanFactoryInitializationAotProcessor {
 
 		@Override
 		public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {

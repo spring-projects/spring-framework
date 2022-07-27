@@ -281,7 +281,8 @@ class ConstructorOrFactoryMethodResolver {
 			return true;
 		}
 		return switch (fallbackMode) {
-			case ASSIGNABLE_ELEMENT -> isAssignable(valueType).test(extractElementType(parameterType));
+			case ASSIGNABLE_ELEMENT ->
+					isAssignable(valueType).test(extractElementType(parameterType));
 			case TYPE_CONVERSION -> typeConversionFallback(valueType).test(parameterType);
 			default -> false;
 		};

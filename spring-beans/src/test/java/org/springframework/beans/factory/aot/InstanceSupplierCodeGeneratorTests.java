@@ -147,8 +147,7 @@ class InstanceSupplierCodeGeneratorTests {
 		compile(beanFactory, beanDefinition, (instanceSupplier, compiled) -> {
 			NumberHolder<?> bean = getBean(beanFactory, beanDefinition, instanceSupplier);
 			assertThat(bean).isInstanceOf(NumberHolder.class);
-			assertThat(bean).extracting("number").isNull(); // No property
-															// actually set
+			assertThat(bean).extracting("number").isNull(); // No property actually set
 			assertThat(compiled.getSourceFile()).contains("NumberHolderFactoryBean::new");
 		});
 		assertThat(getReflectionHints().getTypeHint(NumberHolderFactoryBean.class))

@@ -90,7 +90,7 @@ class BeanRegistrationCodeGenerator implements BeanRegistrationCode {
 				generationContext, this, this.constructorOrFactoryMethod,
 				this.instancePostProcessors.isEmpty());
 		builder.add(this.codeFragments.generateSetBeanInstanceSupplierCode(generationContext,
-						this, instanceSupplierCode, this.instancePostProcessors));
+				this, instanceSupplierCode, this.instancePostProcessors));
 		builder.add(this.codeFragments.generateReturnCode(generationContext, this));
 		return builder.build();
 	}

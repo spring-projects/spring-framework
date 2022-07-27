@@ -446,7 +446,7 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 			try {
 				Class<?>[] actualParameterTypes = (!ClassUtils.isInnerClass(beanClass))
 						? this.parameterTypes : ObjectUtils.addObjectToArray(
-								this.parameterTypes, beanClass.getEnclosingClass(), 0);
+						this.parameterTypes, beanClass.getEnclosingClass(), 0);
 				return beanClass.getDeclaredConstructor(actualParameterTypes);
 			}
 			catch (NoSuchMethodException ex) {

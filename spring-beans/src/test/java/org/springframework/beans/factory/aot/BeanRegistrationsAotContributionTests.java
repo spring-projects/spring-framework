@@ -55,23 +55,21 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class BeanRegistrationsAotContributionTests {
 
-	private final MockSpringFactoriesLoader springFactoriesLoader;
-
-	private DefaultListableBeanFactory beanFactory;
-
-	private TestGenerationContext generationContext;
+	private final DefaultListableBeanFactory beanFactory;
 
 	private final BeanDefinitionMethodGeneratorFactory methodGeneratorFactory;
+
+	private TestGenerationContext generationContext;
 
 	private MockBeanFactoryInitializationCode beanFactoryInitializationCode;
 
 
 	BeanRegistrationsAotContributionTests() {
-		this.springFactoriesLoader = new MockSpringFactoriesLoader();
+		MockSpringFactoriesLoader springFactoriesLoader = new MockSpringFactoriesLoader();
 		this.beanFactory = new DefaultListableBeanFactory();
-		this.generationContext = new TestGenerationContext();
 		this.methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
-				new AotFactoriesLoader(this.beanFactory, this.springFactoriesLoader));
+				new AotFactoriesLoader(this.beanFactory, springFactoriesLoader));
+		this.generationContext = new TestGenerationContext();
 		this.beanFactoryInitializationCode = new MockBeanFactoryInitializationCode(this.generationContext);
 	}
 

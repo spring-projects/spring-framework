@@ -86,7 +86,7 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 		RegisteredBean registeredBean = registerTestBean(SimpleBean.class);
 		assertThat(createInstance(registeredBean).getTarget(registeredBean,
 				PrivilegedTestBeanFactoryBean.class.getDeclaredConstructors()[0])).isEqualTo(
-						PrivilegedTestBeanFactoryBean.class);
+				PrivilegedTestBeanFactoryBean.class);
 	}
 
 	@Test
