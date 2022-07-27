@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import org.springframework.http.server.reactive.AbstractListenerReadPublisher;
 import org.springframework.http.server.reactive.AbstractListenerWriteProcessor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
@@ -248,12 +247,13 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		if (this.handlerCompletionMono != null) {
 			this.handlerCompletionMono.onError(ex);
 		}
-		if(!StringUtils.hasText(ex.getMessage())) {
-			close(CloseStatus.SERVER_ERROR);
+		if (logger.isDebugEnabled()) {
+			logger.debug("WebSocket session completed with error", ex);
 		}
-		else {
-			close(CloseStatus.SERVER_ERROR.withReason(ex.getMessage()));
+		else if (logger.isInfoEnabled()) {
+			logger.info("WebSocket session completed with error: " + ex.getMessage());
 		}
+		close(CloseStatus.SERVER_ERROR);
 	}
 
 	@Override
