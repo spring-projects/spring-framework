@@ -41,6 +41,7 @@ public abstract class FutureUtils {
 	 * @param callable a function that returns the value to be used, or throws
 	 * an exception
 	 * @return the new CompletableFuture
+	 * @see CompletableFuture#supplyAsync(Supplier)
 	 */
 	public static <T> CompletableFuture<T> callAsync(Callable<T> callable) {
 		Assert.notNull(callable, "Callable must not be null");
@@ -52,11 +53,12 @@ public abstract class FutureUtils {
 	/**
 	 * Return a new {@code CompletableFuture} that is asynchronously completed
 	 * by a task running in the given executor with the value obtained
-	 * by calling the given Supplier.
+	 * by calling the given {@code Callable}.
 	 * @param callable a function that returns the value to be used, or throws
 	 * an exception
 	 * @param executor the executor to use for asynchronous execution
 	 * @return the new CompletableFuture
+	 * @see CompletableFuture#supplyAsync(Supplier, Executor)
 	 */
 	public static <T> CompletableFuture<T> callAsync(Callable<T> callable, Executor executor) {
 		Assert.notNull(callable, "Callable must not be null");
