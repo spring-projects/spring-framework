@@ -43,9 +43,9 @@ class BeanDefinitionMethodGeneratorFactory {
 			.getLog(BeanDefinitionMethodGeneratorFactory.class);
 
 
-	private final List<BeanRegistrationAotProcessor> aotProcessors;
+	private final AotServices<BeanRegistrationAotProcessor> aotProcessors;
 
-	private final List<BeanRegistrationExcludeFilter> excludeFilters;
+	private final AotServices<BeanRegistrationExcludeFilter> excludeFilters;
 
 
 	/**
@@ -54,15 +54,15 @@ class BeanDefinitionMethodGeneratorFactory {
 	 * @param beanFactory the bean factory use
 	 */
 	BeanDefinitionMethodGeneratorFactory(ConfigurableListableBeanFactory beanFactory) {
-		this(new AotFactoriesLoader(beanFactory));
+		this(AotServices.factoriesAndBeans(beanFactory));
 	}
 
 	/**
 	 * Create a new {@link BeanDefinitionMethodGeneratorFactory} backed by the
-	 * given {@link AotFactoriesLoader}.
-	 * @param loader the AOT factory loader to use
+	 * given {@link AotServices.Loader}.
+	 * @param loader the AOT services loader to use
 	 */
-	BeanDefinitionMethodGeneratorFactory(AotFactoriesLoader loader) {
+	BeanDefinitionMethodGeneratorFactory(AotServices.Loader loader) {
 		this.aotProcessors = loader.load(BeanRegistrationAotProcessor.class);
 		this.excludeFilters = loader.load(BeanRegistrationExcludeFilter.class);
 	}

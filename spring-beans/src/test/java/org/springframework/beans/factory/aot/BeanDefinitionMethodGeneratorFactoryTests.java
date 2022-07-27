@@ -43,7 +43,7 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 				new MockBeanRegistrationExcludeFilter(true, 0));
 		RegisteredBean registeredBean = registerTestBean(beanFactory);
 		BeanDefinitionMethodGeneratorFactory methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
-				new AotFactoriesLoader(beanFactory, springFactoriesLoader));
+				AotServices.factoriesAndBeans(springFactoriesLoader, beanFactory));
 		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean,
 				null)).isNull();
 	}
@@ -56,7 +56,7 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 		beanFactory.registerSingleton("filter",
 				new MockBeanRegistrationExcludeFilter(true, 0));
 		BeanDefinitionMethodGeneratorFactory methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
-				new AotFactoriesLoader(beanFactory, springFactoriesLoader));
+				AotServices.factoriesAndBeans(springFactoriesLoader, beanFactory));
 		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean,
 				null)).isNull();
 	}
@@ -77,7 +77,7 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 		beanFactory.registerSingleton("filter6", filter6);
 		RegisteredBean registeredBean = registerTestBean(beanFactory);
 		BeanDefinitionMethodGeneratorFactory methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
-				new AotFactoriesLoader(beanFactory, springFactoriesLoader));
+				AotServices.factoriesAndBeans(springFactoriesLoader, beanFactory));
 		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean,
 				null)).isNull();
 		assertThat(filter1.wasCalled()).isTrue();
@@ -103,7 +103,7 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 				loaderProcessor);
 		RegisteredBean registeredBean = registerTestBean(beanFactory);
 		BeanDefinitionMethodGeneratorFactory methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
-				new AotFactoriesLoader(beanFactory, springFactoriesLoader));
+				AotServices.factoriesAndBeans(springFactoriesLoader, beanFactory));
 		BeanDefinitionMethodGenerator methodGenerator = methodGeneratorFactory
 				.getBeanDefinitionMethodGenerator(registeredBean, null);
 		assertThat(methodGenerator).extracting("aotContributions").asList()
@@ -121,7 +121,7 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 				.rootBeanDefinition(TestBeanRegistrationAotProcessorBean.class).getBeanDefinition());
 		RegisteredBean registeredBean2 = RegisteredBean.of(beanFactory, "test2");
 		BeanDefinitionMethodGeneratorFactory methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
-				new AotFactoriesLoader(beanFactory, springFactoriesLoader));
+				AotServices.factoriesAndBeans(springFactoriesLoader, beanFactory));
 		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean1, null)).isNull();
 		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean2, null)).isNull();
 	}
@@ -134,7 +134,7 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 				.rootBeanDefinition(TestBeanRegistrationAotProcessorAndFilterBean.class).getBeanDefinition());
 		RegisteredBean registeredBean1 = RegisteredBean.of(beanFactory, "test");
 		BeanDefinitionMethodGeneratorFactory methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
-				new AotFactoriesLoader(beanFactory, springFactoriesLoader));
+				AotServices.factoriesAndBeans(springFactoriesLoader, beanFactory));
 		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean1, null)).isNotNull();
 	}
 

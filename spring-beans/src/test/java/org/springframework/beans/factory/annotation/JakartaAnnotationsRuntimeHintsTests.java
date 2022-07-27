@@ -26,8 +26,7 @@ import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
-import org.springframework.beans.factory.aot.AotFactoriesLoader;
-import org.springframework.core.io.support.SpringFactoriesLoader;
+import org.springframework.beans.factory.aot.AotServices;
 import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,9 +42,9 @@ class JakartaAnnotationsRuntimeHintsTests {
 
 	@BeforeEach
 	void setup() {
-		SpringFactoriesLoader.forResourceLocation(AotFactoriesLoader.FACTORIES_RESOURCE_LOCATION)
-				.load(RuntimeHintsRegistrar.class).forEach(registrar -> registrar
-						.registerHints(this.hints, ClassUtils.getDefaultClassLoader()));
+		AotServices.factories().load(RuntimeHintsRegistrar.class)
+				.forEach(registrar -> registrar.registerHints(this.hints,
+						ClassUtils.getDefaultClassLoader()));
 	}
 
 	@Test

@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.beans.factory.aot.AotFactoriesLoader;
+import org.springframework.beans.factory.aot.AotServices;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotProcessor;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
@@ -41,19 +41,19 @@ class BeanFactoryInitializationAotContributions {
 
 
 	BeanFactoryInitializationAotContributions(DefaultListableBeanFactory beanFactory) {
-		this(beanFactory, new AotFactoriesLoader(beanFactory));
+		this(beanFactory, AotServices.factoriesAndBeans(beanFactory));
 	}
 
 	BeanFactoryInitializationAotContributions(DefaultListableBeanFactory beanFactory,
-			AotFactoriesLoader loader) {
+			AotServices.Loader loader) {
 		this.contributions = getContributions(beanFactory, getProcessors(loader));
 	}
 
 
-	private List<BeanFactoryInitializationAotProcessor> getProcessors(
-			AotFactoriesLoader loader) {
+	private static List<BeanFactoryInitializationAotProcessor> getProcessors(
+			AotServices.Loader loader) {
 		List<BeanFactoryInitializationAotProcessor> processors = new ArrayList<>(
-				loader.load(BeanFactoryInitializationAotProcessor.class));
+				loader.load(BeanFactoryInitializationAotProcessor.class).asList());
 		processors.add(new RuntimeHintsBeanFactoryInitializationAotProcessor());
 		return Collections.unmodifiableList(processors);
 	}

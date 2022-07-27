@@ -68,7 +68,7 @@ class BeanRegistrationsAotContributionTests {
 		MockSpringFactoriesLoader springFactoriesLoader = new MockSpringFactoriesLoader();
 		this.beanFactory = new DefaultListableBeanFactory();
 		this.methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
-				new AotFactoriesLoader(this.beanFactory, springFactoriesLoader));
+				AotServices.factoriesAndBeans(springFactoriesLoader, this.beanFactory));
 		this.generationContext = new TestGenerationContext();
 		this.beanFactoryInitializationCode = new MockBeanFactoryInitializationCode(this.generationContext);
 	}
