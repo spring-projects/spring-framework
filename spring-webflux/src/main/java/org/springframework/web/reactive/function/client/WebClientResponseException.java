@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,10 +96,25 @@ public class WebClientResponseException extends WebClientException {
 
 		this.statusCode = statusCode;
 		this.statusText = statusText;
-		this.headers = (headers != null ? headers : HttpHeaders.EMPTY);
+		this.headers = copy(headers);
 		this.responseBody = (responseBody != null ? responseBody : new byte[0]);
 		this.responseCharset = charset;
 		this.request = request;
+	}
+
+	/**
+	 * Not all {@code HttpHeaders} implementations are serializable, so we
+	 * make a copy to ensure that {@code WebClientResponseException} is.
+	 */
+	private static HttpHeaders copy(@Nullable HttpHeaders headers) {
+		if (headers == null) {
+			return HttpHeaders.EMPTY;
+		}
+		else {
+			HttpHeaders result = new HttpHeaders();
+			result.putAll(headers);
+			return result;
+		}
 	}
 
 
