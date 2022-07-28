@@ -18,6 +18,8 @@ package org.springframework.web.reactive.function.client;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -53,11 +55,11 @@ public class WebClientResponseException extends WebClientException {
 	private final Charset responseCharset;
 
 	@Nullable
-	private final HttpRequest request;
+	private transient final HttpRequest request;
 
 	@SuppressWarnings("MutableException")
 	@Nullable
-	private Function<ResolvableType, ?> bodyDecodeFunction;
+	private transient Function<ResolvableType, ?> bodyDecodeFunction;
 
 
 	/**
@@ -133,10 +135,29 @@ public class WebClientResponseException extends WebClientException {
 
 		this.statusCode = statusCode;
 		this.statusText = statusText;
-		this.headers = (headers != null ? headers : HttpHeaders.EMPTY);
+		this.headers = copy(headers);
 		this.responseBody = (responseBody != null ? responseBody : new byte[0]);
 		this.responseCharset = charset;
 		this.request = request;
+	}
+
+	/**
+	 * Not all {@code HttpHeaders} implementations are serializable, so we
+	 * make a copy to ensure that {@code WebClientResponseException} is.
+	 */
+	private static HttpHeaders copy(@Nullable HttpHeaders headers) {
+		if (headers == null) {
+			return HttpHeaders.EMPTY;
+		}
+		else {
+			HttpHeaders result = new HttpHeaders();
+			for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+				for (String value : entry.getValue()) {
+					result.add(entry.getKey(), value);
+				}
+			}
+			return result;
+		}
 	}
 
 
