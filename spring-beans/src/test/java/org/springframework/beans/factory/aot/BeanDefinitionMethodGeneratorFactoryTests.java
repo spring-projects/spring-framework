@@ -26,6 +26,8 @@ import org.springframework.core.Ordered;
 import org.springframework.core.mock.MockSpringFactoriesLoader;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -34,6 +36,25 @@ import static org.mockito.Mockito.mock;
  * @author Phillip Webb
  */
 class BeanDefinitionMethodGeneratorFactoryTests {
+
+	@Test
+	void createWhenBeanRegistrationExcludeFilterBeanIsNotAotProcessorThrowsException() {
+		BeanRegistrationExcludeFilter filter = registeredBean -> false;
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.registerSingleton("filter", filter);
+		assertThatIllegalStateException()
+				.isThrownBy(() -> new BeanDefinitionMethodGeneratorFactory(beanFactory))
+				.withMessageContaining("also implement an AOT processor interface");
+	}
+
+	@Test
+	void createWhenBeanRegistrationExcludeFilterFactoryIsNotAotProcessorLoads() {
+		BeanRegistrationExcludeFilter filter = registeredBean -> false;
+		MockSpringFactoriesLoader loader = new MockSpringFactoriesLoader();
+		loader.addInstance(BeanRegistrationExcludeFilter.class, filter);
+		assertThatNoException().isThrownBy(() -> new BeanDefinitionMethodGeneratorFactory(
+				AotServices.factories(loader)));
+	}
 
 	@Test
 	void getBeanDefinitionMethodGeneratorWhenExcludedByBeanRegistrationExcludeFilterReturnsNull() {
@@ -144,8 +165,8 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 		return RegisteredBean.of(beanFactory, "test");
 	}
 
-	static class MockBeanRegistrationExcludeFilter
-			implements BeanRegistrationExcludeFilter, Ordered {
+	static class MockBeanRegistrationExcludeFilter implements
+			BeanRegistrationAotProcessor, BeanRegistrationExcludeFilter, Ordered {
 
 		private final boolean excluded;
 
@@ -159,7 +180,13 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 		}
 
 		@Override
-		public boolean isExcluded(RegisteredBean registeredBean) {
+		public BeanRegistrationAotContribution processAheadOfTime(
+				RegisteredBean registeredBean) {
+			return null;
+		}
+
+		@Override
+		public boolean isExcludedFromAotProcessing(RegisteredBean registeredBean) {
 			this.registeredBean = registeredBean;
 			return this.excluded;
 		}

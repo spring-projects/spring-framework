@@ -22,10 +22,12 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.aot.AotServices.Source;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.core.log.LogMessage;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -65,6 +67,14 @@ class BeanDefinitionMethodGeneratorFactory {
 	BeanDefinitionMethodGeneratorFactory(AotServices.Loader loader) {
 		this.aotProcessors = loader.load(BeanRegistrationAotProcessor.class);
 		this.excludeFilters = loader.load(BeanRegistrationExcludeFilter.class);
+		for (BeanRegistrationExcludeFilter excludeFilter : this.excludeFilters) {
+			if (this.excludeFilters.getSource(excludeFilter) == Source.BEAN_FACTORY) {
+				Assert.state(excludeFilter instanceof BeanRegistrationAotProcessor
+						|| excludeFilter instanceof BeanFactoryInitializationAotProcessor,
+						() -> "BeanRegistrationExcludeFilter bean of type %s must also implement an AOT processor interface"
+								.formatted(excludeFilter.getClass().getName()));
+			}
+		}
 	}
 
 
@@ -97,7 +107,7 @@ class BeanDefinitionMethodGeneratorFactory {
 			return true;
 		}
 		for (BeanRegistrationExcludeFilter excludeFilter : this.excludeFilters) {
-			if (excludeFilter.isExcluded(registeredBean)) {
+			if (excludeFilter.isExcludedFromAotProcessing(registeredBean)) {
 				logger.trace(LogMessage.format(
 						"Excluding registered bean '%s' from bean factory %s due to %s",
 						registeredBean.getBeanName(),
