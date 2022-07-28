@@ -45,7 +45,7 @@ dependencies {
 	cglib("cglib:cglib:${cglibVersion}@jar")
 	javapoet("com.squareup:javapoet:${javapoetVersion}@jar")
 	objenesis("org.objenesis:objenesis:${objenesisVersion}@jar")
-	graalvm(project(path: ":spring-core-graalvm", configuration: 'classesOnlyElements'))
+	graalvm(project(path: ":graalvm-feature", configuration: 'classesOnlyElements'))
 	api(files(cglibRepackJar))
 	api(files(javapoetRepackJar))
 	api(files(objenesisRepackJar))

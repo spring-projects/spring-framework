@@ -34,15 +34,3 @@ eclipse.classpath.file {
 dependencies {
 	compileOnly("org.graalvm.nativeimage:svm")
 }
-
-tasks.withType(PublishToMavenRepository) {
-	enabled = false
-}
-
-tasks.withType(PublishToMavenLocal) {
-	enabled = false
-}
-
-tasks.withType(Javadoc) {
-	enabled = false
-}
