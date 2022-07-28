@@ -22,6 +22,7 @@ import java.util.Enumeration;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.aot.AotServices.Source;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.Ordered;
@@ -30,6 +31,8 @@ import org.springframework.core.mock.MockSpringFactoriesLoader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.mockito.Mockito.mock;
 
 /**
  * Tests for {@link AotServices}.
@@ -163,6 +166,25 @@ class AotServicesTests {
 		assertThat(loaded).map(Object::toString).containsExactly("b1", "l1", "b2", "l2");
 	}
 
+	@Test
+	void getSourceReturnsSource() {
+		MockSpringFactoriesLoader loader = new MockSpringFactoriesLoader();
+		loader.addInstance(TestService.class, new TestServiceImpl());
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
+		AotServices<TestService> loaded = AotServices.factoriesAndBeans(loader, beanFactory).load(TestService.class);
+		assertThat(loaded.getSource(loaded.asList().get(0))).isEqualTo(Source.SPRING_FACTORIES_LOADER);
+		assertThat(loaded.getSource(loaded.asList().get(1))).isEqualTo(Source.BEAN_FACTORY);
+		TestService missing = mock(TestService.class);
+		assertThatIllegalStateException().isThrownBy(()->loaded.getSource(missing));
+	}
+
+	@Test
+	void getSourceWhenMissingThrowsException() {
+		AotServices<TestService> loaded = AotServices.factories().load(TestService.class);
+		TestService missing = mock(TestService.class);
+		assertThatIllegalStateException().isThrownBy(()->loaded.getSource(missing));
+	}
 
 	interface TestService {
 	}

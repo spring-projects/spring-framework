@@ -17,12 +17,15 @@
 package org.springframework.beans.factory.aot;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -30,6 +33,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * A collection of AOT services that can be {@link Loader loaded} from
@@ -50,16 +54,30 @@ public final class AotServices<T> implements Iterable<T> {
 
 	private final Map<String, T> beans;
 
+	private final Map<T, Source> sources;
+
 
 	private AotServices(List<T> loaded, Map<String, T> beans) {
+		this.services = collectServices(loaded, beans);
+		this.sources = collectSources(loaded, beans.values());
+		this.beans = beans;
+	}
+
+	private List<T> collectServices(List<T> loaded, Map<String, T> beans) {
 		List<T> services = new ArrayList<>();
 		services.addAll(beans.values());
 		services.addAll(loaded);
 		AnnotationAwareOrderComparator.sort(services);
-		this.services = Collections.unmodifiableList(services);
-		this.beans = beans;
+		return Collections.unmodifiableList(services);
 	}
 
+	private Map<T, Source> collectSources(Collection<T> loaded,
+			Collection<T> beans) {
+		Map<T, Source> sources = new IdentityHashMap<>();
+		loaded.forEach(service -> sources.put(service, Source.SPRING_FACTORIES_LOADER));
+		beans.forEach(service -> sources.put(service, Source.BEAN_FACTORY));
+		return Collections.unmodifiableMap(sources);
+	}
 
 	/**
 	 * Return a new {@link Loader} that will obtain AOT services from
@@ -154,6 +172,18 @@ public final class AotServices<T> implements Iterable<T> {
 		return this.beans.get(beanName);
 	}
 
+	/**
+	 * Return the source of the given service.
+	 * @param service the service instance
+	 * @return the source of the service
+	 */
+	public Source getSource(T service) {
+		Source source = this.sources.get(service);
+		Assert.state(source != null,
+				"Unable to find service " + ObjectUtils.identityToString(source));
+		return source;
+	}
+
 
 	/**
 	 * Loader class used to actually load the services.
@@ -186,6 +216,23 @@ public final class AotServices<T> implements Iterable<T> {
 					.beansOfTypeIncludingAncestors(this.beanFactory, type, true, false)
 					: Collections.emptyMap();
 		}
+
+	}
+
+	/**
+	 * Sources from which services were obtained.
+	 */
+	public enum Source {
+
+		/**
+		 * An AOT service loaded from {@link SpringFactoriesLoader}.
+		 */
+		SPRING_FACTORIES_LOADER,
+
+		/**
+		 * An AOT service loaded from a {@link BeanFactory}.
+		 */
+		BEAN_FACTORY
 
 	}
 
