@@ -17,6 +17,8 @@
 package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -56,7 +58,11 @@ public class WebClientRequestException extends WebClientException {
 	 */
 	private static HttpHeaders copy(HttpHeaders headers) {
 		HttpHeaders result = new HttpHeaders();
-		result.putAll(headers);
+		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+			for (String value : entry.getValue()) {
+				result.add(entry.getKey(), value);
+			}
+		}
 		return result;
 	}
 

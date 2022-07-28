@@ -18,6 +18,8 @@ package org.springframework.web.reactive.function.client;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
@@ -47,7 +49,7 @@ public class WebClientResponseException extends WebClientException {
 	private final Charset responseCharset;
 
 	@Nullable
-	private final HttpRequest request;
+	private transient final HttpRequest request;
 
 
 	/**
@@ -112,7 +114,11 @@ public class WebClientResponseException extends WebClientException {
 		}
 		else {
 			HttpHeaders result = new HttpHeaders();
-			result.putAll(headers);
+			for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+				for (String value : entry.getValue()) {
+					result.add(entry.getKey(), value);
+				}
+			}
 			return result;
 		}
 	}
