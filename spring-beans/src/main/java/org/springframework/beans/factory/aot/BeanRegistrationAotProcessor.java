@@ -16,12 +16,23 @@
 
 package org.springframework.beans.factory.aot;
 
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.lang.Nullable;
 
 /**
  * AOT processor that makes bean registration contributions by processing
  * {@link RegisteredBean} instances.
+ *
+ * <p>{@link BeanRegistrationAotProcessor} implementations may be registered in
+ * a {@value AotServices#FACTORIES_RESOURCE_LOCATION} resource or as a bean.
+ *
+ * <p>
+ * Note: Using this interface on a registered bean will cause the bean
+ * <em>and</em> all of its dependencies to be initialized during AOT processing.
+ * We generally recommend that interface is only used with infrastructure beans
+ * such as {@link BeanFactoryPostProcessor} which have limited dependencies and
+ * are already initialized early in the bean factory lifecycle.
  *
  * @author Phillip Webb
  * @since 6.0
