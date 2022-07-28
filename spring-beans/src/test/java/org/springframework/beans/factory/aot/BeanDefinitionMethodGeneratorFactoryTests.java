@@ -24,6 +24,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.core.Ordered;
 import org.springframework.core.mock.MockSpringFactoriesLoader;
+import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -172,6 +173,7 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 
 		private final int order;
 
+		@Nullable
 		private RegisteredBean registeredBean;
 
 		MockBeanRegistrationExcludeFilter(boolean excluded, int order) {
@@ -234,6 +236,7 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 
 	}
 
+	@SuppressWarnings("unused")
 	static class InnerTestBean {
 
 	}

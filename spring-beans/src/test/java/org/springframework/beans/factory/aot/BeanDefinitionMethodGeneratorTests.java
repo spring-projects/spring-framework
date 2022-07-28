@@ -75,7 +75,7 @@ class BeanDefinitionMethodGeneratorTests {
 		this.generationContext = new TestGenerationContext();
 		this.beanFactory = new DefaultListableBeanFactory();
 		this.methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
-				AotServices.factoriesAndBeans( new MockSpringFactoriesLoader(), beanFactory));
+				AotServices.factoriesAndBeans(new MockSpringFactoriesLoader(), this.beanFactory));
 		this.beanRegistrationsCode = new MockBeanRegistrationsCode(this.generationContext);
 	}
 

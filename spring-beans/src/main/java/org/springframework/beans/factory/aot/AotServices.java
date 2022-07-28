@@ -192,6 +192,7 @@ public final class AotServices<T> implements Iterable<T> {
 
 		private final SpringFactoriesLoader springFactoriesLoader;
 
+		@Nullable
 		private final ListableBeanFactory beanFactory;
 
 
@@ -208,7 +209,7 @@ public final class AotServices<T> implements Iterable<T> {
 		 * @return a new {@link AotServices} instance
 		 */
 		public <T> AotServices<T> load(Class<T> type) {
-			return new AotServices<T>(this.springFactoriesLoader.load(type), loadBeans(type));
+			return new AotServices<>(this.springFactoriesLoader.load(type), loadBeans(type));
 		}
 
 		private <T> Map<String, T> loadBeans(Class<T> type) {
