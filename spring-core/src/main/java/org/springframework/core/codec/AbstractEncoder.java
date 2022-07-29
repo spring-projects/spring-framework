@@ -27,7 +27,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 
 /**
- * Abstract base class for {@link Decoder} implementations.
+ * Abstract base class for {@link Encoder} implementations.
  *
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
