@@ -17,12 +17,17 @@
 package org.springframework.aop.framework;
 
 import java.io.Serializable;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -37,6 +42,7 @@ import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.RawTargetAccess;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.cglib.core.ClassLoaderAwareGeneratorStrategy;
 import org.springframework.cglib.core.CodeGenerationException;
 import org.springframework.cglib.core.SpringNamingPolicy;
@@ -199,7 +205,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			}
 			// fixedInterceptorMap only populated at this point, after getCallbacks call above
 			enhancer.setCallbackFilter(new ProxyCallbackFilter(
-					this.advised.getConfigurationOnlyCopy(), this.fixedInterceptorMap, this.fixedInterceptorOffset));
+					new AdvisedConfiguration(this.advised), this.fixedInterceptorMap, this.fixedInterceptorOffset));
 			enhancer.setCallbackTypes(types);
 
 			// Generate the proxy class and create a proxy instance.
@@ -818,14 +824,14 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 */
 	private static class ProxyCallbackFilter implements CallbackFilter {
 
-		private final AdvisedSupport advised;
+		private final AdvisedConfiguration advised;
 
 		private final Map<Method, Integer> fixedInterceptorMap;
 
 		private final int fixedInterceptorOffset;
 
 		public ProxyCallbackFilter(
-				AdvisedSupport advised, Map<Method, Integer> fixedInterceptorMap, int fixedInterceptorOffset) {
+				AdvisedConfiguration advised, Map<Method, Integer> fixedInterceptorMap, int fixedInterceptorOffset) {
 
 			this.advised = advised;
 			this.fixedInterceptorMap = fixedInterceptorMap;
@@ -962,7 +968,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			if (!(other instanceof ProxyCallbackFilter otherCallbackFilter)) {
 				return false;
 			}
-			AdvisedSupport otherAdvised = otherCallbackFilter.advised;
+			AdvisedConfiguration otherAdvised = otherCallbackFilter.advised;
 			if (this.advised.isFrozen() != otherAdvised.isFrozen()) {
 				return false;
 			}
@@ -972,16 +978,17 @@ class CglibAopProxy implements AopProxy, Serializable {
 			if (this.advised.getTargetSource().isStatic() != otherAdvised.getTargetSource().isStatic()) {
 				return false;
 			}
-			if (!AopProxyUtils.equalsProxiedInterfaces(this.advised, otherAdvised)) {
+			if (!Arrays.equals(this.advised.getProxiedInterfaces(), otherAdvised.getProxiedInterfaces())) {
 				return false;
 			}
-			// Advice instance identity is unimportant to the proxy class:
-			// All that matters is type and ordering.
-			if (this.advised.getAdvisorCount() != otherAdvised.getAdvisorCount()) {
-				return false;
-			}
+
 			Advisor[] thisAdvisors = this.advised.getAdvisors();
 			Advisor[] thatAdvisors = otherAdvised.getAdvisors();
+			// Advice instance identity is unimportant to the proxy class:
+			// All that matters is type and ordering.
+			if (thisAdvisors.length != thatAdvisors.length) {
+				return false;
+			}
 			for (int i = 0; i < thisAdvisors.length; i++) {
 				Advisor thisAdvisor = thisAdvisors[i];
 				Advisor thatAdvisor = thatAdvisors[i];
@@ -1020,6 +1027,54 @@ class CglibAopProxy implements AopProxy, Serializable {
 			hashCode = 13 * hashCode + (this.advised.isOptimize() ? 1 : 0);
 			hashCode = 13 * hashCode + (this.advised.isOpaque() ? 1 : 0);
 			return hashCode;
+		}
+	}
+
+	/**
+	 * {@link AdvisedSupport} config wrapper to be used in {@link ProxyCallbackFilter}, use {@link WeakReference} to avoid memory leaks.
+	 * See https://github.com/spring-projects/spring-framework/issues/26266
+	 */
+	private static class AdvisedConfiguration  extends ProxyConfig {
+
+		private final TargetSource targetSource;
+
+		private final AdvisorChainFactory advisorChainFactory;
+
+		private final List<Class<?>> interfaces;
+
+		private final List<Reference<Advisor>> advisors = new ArrayList<>();
+
+		public AdvisedConfiguration(AdvisedSupport advised) {
+			copyFrom(advised);
+			this.advisorChainFactory = advised.getAdvisorChainFactory();
+			this.targetSource = EmptyTargetSource.forClass(advised.getTargetClass(), advised.getTargetSource().isStatic());
+			this.interfaces = Arrays.asList(advised.getProxiedInterfaces());
+			for (Advisor advisor : advised.getAdvisors()) {
+				this.advisors.add(new WeakReference<>(advisor));
+			}
+		}
+
+		public Class<?>[] getProxiedInterfaces() {
+			return ClassUtils.toClassArray(this.interfaces);
+		}
+
+		public Advisor[] getAdvisors() {
+			return this.advisors.stream().map(Reference::get).filter(Objects::nonNull).toArray(Advisor[]::new);
+		}
+
+		public TargetSource getTargetSource() {
+			return this.targetSource;
+		}
+
+		@Nullable
+		public Class<?> getTargetClass() {
+			return this.targetSource.getTargetClass();
+		}
+
+		public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Method method, @Nullable Class<?> targetClass) {
+			AdvisedSupport advised  = AdvisedSupport.createConfigurationOnly(this,
+					this.targetSource, this.advisorChainFactory, this.interfaces, getAdvisors());
+			return advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
 		}
 	}
 

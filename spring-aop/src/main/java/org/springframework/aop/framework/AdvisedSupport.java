@@ -512,6 +512,20 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
+	 * Build a configuration-only of AdvisedSupport.
+	 */
+	static AdvisedSupport createConfigurationOnly(ProxyConfig config, TargetSource targetSource,
+			AdvisorChainFactory advisorChainFactory, List<Class<?>> interfaces, Advisor[] advisors) {
+		AdvisedSupport advised = new AdvisedSupport();
+		advised.copyFrom(config);
+		advised.targetSource = targetSource;
+		advised.advisorChainFactory = advisorChainFactory;
+		advised.interfaces = interfaces;
+		advised.advisors = Arrays.asList(advisors);
+		return advised;
+	}
+
+	/**
 	 * Build a configuration-only copy of this AdvisedSupport,
 	 * replacing the TargetSource.
 	 */
