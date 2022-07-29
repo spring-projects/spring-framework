@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,8 @@ public @interface CacheEvict {
 
 	/**
 	 * Spring Expression Language (SpEL) expression used for making the cache
-	 * eviction operation conditional.
+	 * eviction operation conditional. Evict that cache if the condition evaluates
+	 * to {@code true}.
 	 * <p>Default is {@code ""}, meaning the cache eviction is always performed.
 	 * <p>The SpEL expression evaluates against a dedicated context that provides the
 	 * following meta-data:
