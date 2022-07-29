@@ -44,7 +44,7 @@ Kotlin https://kotlinlang.org/docs/reference/extensions.html[extensions] provide
 to extend existing classes with additional functionality. The Spring Framework Kotlin APIs
 use these extensions to add new Kotlin-specific conveniences to existing Spring APIs.
 
-The {docs-spring-framework}/kdoc-api/spring-framework/[Spring Framework KDoc API] lists
+The {docs-spring-framework}/kdoc-api/[Spring Framework KDoc API] lists
 and documents all available Kotlin extensions and DSLs.
 
 NOTE: Keep in mind that Kotlin extensions need to be imported to be used. This means,
