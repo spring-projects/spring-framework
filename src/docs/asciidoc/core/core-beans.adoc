@@ -9982,9 +9982,9 @@ is configured with two PropertySource objects -- one representing the set of JVM
 
 NOTE: These default property sources are present for `StandardEnvironment`, for use in standalone
 applications. {api-spring-framework}/web/context/support/StandardServletEnvironment.html[`StandardServletEnvironment`]
-is populated with additional default property sources including servlet config and servlet
-context parameters. It can optionally enable a {api-spring-framework}/jndi/JndiPropertySource.html[`JndiPropertySource`].
-See the javadoc for details.
+is populated with additional default property sources including servlet config, servlet
+context parameters, and a {api-spring-framework}/jndi/JndiPropertySource.html[`JndiPropertySource`]
+if JNDI is available.
 
 Concretely, when you use the `StandardEnvironment`, the call to `env.containsProperty("my-property")`
 returns true if a `my-property` system property or `my-property` environment variable is present at
