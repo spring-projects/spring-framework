@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -238,13 +238,13 @@ public final class ResponseCookie extends HttpCookie {
 			}
 
 			@Override
-			public ResponseCookieBuilder domain(String domain) {
+			public ResponseCookieBuilder domain(@Nullable String domain) {
 				this.domain = initDomain(domain);
 				return this;
 			}
 
 			@Nullable
-			private String initDomain(String domain) {
+			private String initDomain(@Nullable String domain) {
 				if (lenient && StringUtils.hasLength(domain)) {
 					String str = domain.trim();
 					if (str.startsWith("\"") && str.endsWith("\"")) {
@@ -257,7 +257,7 @@ public final class ResponseCookie extends HttpCookie {
 			}
 
 			@Override
-			public ResponseCookieBuilder path(String path) {
+			public ResponseCookieBuilder path(@Nullable String path) {
 				this.path = path;
 				return this;
 			}
@@ -312,12 +312,12 @@ public final class ResponseCookie extends HttpCookie {
 		/**
 		 * Set the cookie "Path" attribute.
 		 */
-		ResponseCookieBuilder path(String path);
+		ResponseCookieBuilder path(@Nullable String path);
 
 		/**
 		 * Set the cookie "Domain" attribute.
 		 */
-		ResponseCookieBuilder domain(String domain);
+		ResponseCookieBuilder domain(@Nullable String domain);
 
 		/**
 		 * Add the "Secure" attribute to the cookie.
