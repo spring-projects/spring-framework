@@ -208,6 +208,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		Object beanInstance;
 
 		// Eagerly check singleton cache for manually registered singletons.
+		// 先去获取一次，如果不为null,此处就会走缓存了
 		Object sharedInstance = getSingleton(beanName);
 		if (sharedInstance != null && args == null) {
 			if (logger.isTraceEnabled()) {
@@ -251,6 +252,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 			}
 
+			// 标记beanName a是已经创建过至少一次的，它会一直存留在缓存中不会被移除(除非是抛异常)
+			// 参考缓存 Set<String> alreadyCreated = Collections.newSetFromMap(new ConcurrentHashMap<>(256))
 			if (!typeCheckOnly) {
 				markBeanAsCreated(beanName);
 			}
@@ -286,6 +289,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 				// 开始创建bean实例
 				if (mbd.isSingleton()) {
+					// TODO 这个getSingleton()方法非常关键
+					// 标注bean正在创建中
+
+					// 这个 getSingleton 方法不是 SingletonBeanRegister 中的方法，属于实现类DefaultSingletonBeanRegisry的一个public重载方法
+					// 它的特点是在执行 singletonFactory.getobject();前后会执行beforeSingletonCreation(beanName)和afterSingletonCreation(beanName)方法
+					// 也就是保证这个bean在创建的过程中，放入正在创建的缓存池中，可以看到它实际创建bean调用的是我们的 createBean() 方法
 					sharedInstance = getSingleton(beanName, () -> {
 						try {
 							return createBean(beanName, mbd, args);
@@ -391,6 +400,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
 
+		// 此处bean不存在任何一级缓存中，且不是在创建中，所以此处返回为null
+		// 若此处不为null，然后从缓存中拿就可以了(主要是为了处理FactoryBean和BeanFactory情况吧)
 		Object beanInstance = getSingleton(beanName, false);
 		if (beanInstance != null) {
 			if (beanInstance instanceof FactoryBean) {
@@ -1768,8 +1779,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * but only if it hasn't been used for other purposes than type checking.
 	 * @param beanName the name of the bean
 	 * @return {@code true} if actually removed, {@code false} otherwise
+	 * TODO 虽然是remove方法，但是它的返回值也非常重要
+	 *  该方法唯一调用的地方就是循环依赖最后的检查处
 	 */
 	protected boolean removeSingletonIfCreatedForTypeCheckOnly(String beanName) {
+		// 如果这个bean不在创建中，比如说是 ForTypeChackOnly的 那就移除掉
 		if (!this.alreadyCreated.contains(beanName)) {
 			removeSingleton(beanName);
 			return true;
