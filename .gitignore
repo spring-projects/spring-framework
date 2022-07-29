@@ -27,6 +27,7 @@ buildSrc/build
 /integration-tests/build
 /src/asciidoc/build
 target/
+/gradle/wrapper/gradle-7.2-all.zip
 
 # Eclipse artifacts, including WTP generated manifests
 .classpath
