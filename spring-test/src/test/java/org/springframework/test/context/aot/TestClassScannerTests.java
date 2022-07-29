@@ -16,13 +16,9 @@
 
 package org.springframework.test.context.aot;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Set;
-import java.util.stream.Stream;
-
 import org.junit.jupiter.api.Test;
 
+import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterSharedConfigTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringTestNGTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringVintageTests;
@@ -35,12 +31,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 6.0
  */
-class TestClassScannerTests {
+class TestClassScannerTests extends AbstractAotTests {
 
 	@Test
 	void scanBasicTestClasses() {
 		assertThat(scan("org.springframework.test.context.aot.samples.basic"))
 			.containsExactlyInAnyOrder(
+				BasicSpringJupiterSharedConfigTests.class,
 				BasicSpringJupiterTests.class,
 				BasicSpringJupiterTests.NestedTests.class,
 				BasicSpringVintageTests.class,
@@ -51,7 +48,8 @@ class TestClassScannerTests {
 	@Test
 	void scanTestSuitesForJupiter() {
 		assertThat(scan("org.springframework.test.context.aot.samples.suites.jupiter"))
-			.containsExactlyInAnyOrder(BasicSpringJupiterTests.class, BasicSpringJupiterTests.NestedTests.class);
+			.containsExactlyInAnyOrder(BasicSpringJupiterSharedConfigTests.class,
+				BasicSpringJupiterTests.class, BasicSpringJupiterTests.NestedTests.class);
 	}
 
 	@Test
@@ -70,6 +68,7 @@ class TestClassScannerTests {
 	void scanTestSuitesForAllTestEngines() {
 		assertThat(scan("org.springframework.test.context.aot.samples.suites.all"))
 			.containsExactlyInAnyOrder(
+				BasicSpringJupiterSharedConfigTests.class,
 				BasicSpringJupiterTests.class,
 				BasicSpringJupiterTests.NestedTests.class,
 				BasicSpringVintageTests.class,
@@ -81,6 +80,7 @@ class TestClassScannerTests {
 	void scanTestSuitesWithNestedSuites() {
 		assertThat(scan("org.springframework.test.context.aot.samples.suites.nested"))
 			.containsExactlyInAnyOrder(
+				BasicSpringJupiterSharedConfigTests.class,
 				BasicSpringJupiterTests.class,
 				BasicSpringJupiterTests.NestedTests.class,
 				BasicSpringVintageTests.class
@@ -90,23 +90,6 @@ class TestClassScannerTests {
 	@Test
 	void scanEntireSpringTestModule() {
 		assertThat(scan()).hasSizeGreaterThan(400);
-	}
-
-	private Stream<Class<?>> scan() {
-		return new TestClassScanner(classpathRoots()).scan();
-	}
-
-	private Stream<Class<?>> scan(String... packageNames) {
-		return new TestClassScanner(classpathRoots()).scan(packageNames);
-	}
-
-	private Set<Path> classpathRoots() {
-		try {
-			return Set.of(Paths.get(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()));
-		}
-		catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
 	}
 
 }

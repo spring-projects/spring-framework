@@ -19,6 +19,7 @@ package org.springframework.test.context.aot;
 import java.lang.annotation.Annotation;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -156,7 +157,8 @@ class TestClassScanner {
 				.map(this::getJavaClass)
 				.flatMap(Optional::stream)
 				.filter(this::isSpringTestClass)
-				.distinct();
+				.distinct()
+				.sorted(Comparator.comparing(Class::getName));
 	}
 
 	private Optional<Class<?>> getJavaClass(ClassSource classSource) {

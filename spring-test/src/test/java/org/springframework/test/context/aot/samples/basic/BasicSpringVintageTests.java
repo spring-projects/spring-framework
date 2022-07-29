@@ -19,7 +19,10 @@ package org.springframework.test.context.aot.samples.basic;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.aot.samples.common.MessageService;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -31,14 +34,24 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = BasicTestConfiguration.class)
+@TestPropertySource(properties = "test.engine = vintage")
 public class BasicSpringVintageTests {
+
+	@Autowired
+	ApplicationContext context;
 
 	@Autowired
 	MessageService messageService;
 
+	@Value("${test.engine}")
+	String testEngine;
+
 	@org.junit.Test
 	public void test() {
 		assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
+		assertThat(testEngine).isEqualTo("vintage");
+		assertThat(context.getEnvironment().getProperty("test.engine"))
+			.as("@TestPropertySource").isEqualTo("vintage");
 	}
 
 }

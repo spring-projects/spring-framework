@@ -16,10 +16,6 @@
 
 package org.springframework.test.context.aot.samples.basic;
 
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.Extension;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -30,42 +26,30 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Uses configuration identical to {@link BasicSpringJupiterTests}.
+ *
  * @author Sam Brannen
  * @since 6.0
  */
-// Register an extension other than the SpringExtension to verify proper lookups
-// for repeated annotations.
-@ExtendWith(DummyExtension.class)
 @SpringJUnitConfig(BasicTestConfiguration.class)
 @TestPropertySource(properties = "test.engine = jupiter")
-public class BasicSpringJupiterTests {
+public class BasicSpringJupiterSharedConfigTests {
+
+	@Autowired
+	ApplicationContext context;
+
+	@Autowired
+	MessageService messageService;
+
+	@Value("${test.engine}")
+	String testEngine;
 
 	@org.junit.jupiter.api.Test
-	void test(@Autowired ApplicationContext context, @Autowired MessageService messageService,
-			@Value("${test.engine}") String testEngine) {
+	void test() {
 		assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
 		assertThat(testEngine).isEqualTo("jupiter");
 		assertThat(context.getEnvironment().getProperty("test.engine"))
 			.as("@TestPropertySource").isEqualTo("jupiter");
 	}
 
-	@Nested
-	@TestPropertySource(properties = "foo=bar")
-	public class NestedTests {
-
-		@org.junit.jupiter.api.Test
-		void test(@Autowired ApplicationContext context, @Autowired MessageService messageService,
-				@Value("${test.engine}") String testEngine, @Value("${foo}") String foo) {
-			assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
-			assertThat(foo).isEqualTo("bar");
-			assertThat(testEngine).isEqualTo("jupiter");
-			assertThat(context.getEnvironment().getProperty("test.engine"))
-				.as("@TestPropertySource").isEqualTo("jupiter");
-		}
-
-	}
-
-}
-
-class DummyExtension implements Extension {
 }
