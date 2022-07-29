@@ -60,13 +60,15 @@ class RuntimeHintsUtilsTests {
 	}
 
 	@Test
-	void registerAnnotationTypeProxyRegistersJdkProxy() {
+	void registerAnnotationTypeProxyRegistersJdkProxies() {
 		RuntimeHintsUtils.registerAnnotation(this.hints, RetryInvoker.class);
 		assertThat(this.hints.reflection().typeHints())
 				.anySatisfy(annotationHint(RetryInvoker.class))
 				.anySatisfy(annotationHint(SampleInvoker.class));
-		assertThat(this.hints.proxies().jdkProxies()).singleElement()
-				.satisfies(annotationProxy(RetryInvoker.class));
+		assertThat(this.hints.proxies().jdkProxies())
+				.anySatisfy(annotationProxy(RetryInvoker.class))
+				.anySatisfy(annotationProxy(SampleInvoker.class))
+				.hasSize(2);
 	}
 
 	@Test
@@ -78,8 +80,11 @@ class RuntimeHintsUtilsTests {
 				.anySatisfy(annotationHint(RetryInvoker.class))
 				.anySatisfy(annotationHint(SampleInvoker.class))
 				.hasSize(3);
-		assertThat(this.hints.proxies().jdkProxies()).singleElement()
-				.satisfies(annotationProxy(RetryWithEnabledFlagInvoker.class));
+		assertThat(this.hints.proxies().jdkProxies())
+				.anySatisfy(annotationProxy(RetryWithEnabledFlagInvoker.class))
+				.anySatisfy(annotationProxy(RetryInvoker.class))
+				.anySatisfy(annotationProxy(SampleInvoker.class))
+				.hasSize(3);
 	}
 
 	private Consumer<TypeHint> annotationHint(Class<?> type) {

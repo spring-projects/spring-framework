@@ -60,7 +60,10 @@ public abstract class RuntimeHintsUtils {
 		hints.reflection().registerType(annotationType, ANNOTATION_HINT);
 		Set<Class<?>> allAnnotations = new LinkedHashSet<>();
 		collectAliasedAnnotations(new HashSet<>(), allAnnotations, annotationType);
-		allAnnotations.forEach(annotation -> hints.reflection().registerType(annotation, ANNOTATION_HINT));
+		allAnnotations.forEach(annotation -> {
+			hints.reflection().registerType(annotation, ANNOTATION_HINT);
+			hints.proxies().registerJdkProxy(annotation, SynthesizedAnnotation.class);
+		});
 		if (!allAnnotations.isEmpty()) {
 			hints.proxies().registerJdkProxy(annotationType, SynthesizedAnnotation.class);
 		}
