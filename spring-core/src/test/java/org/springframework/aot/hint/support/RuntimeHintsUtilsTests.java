@@ -51,6 +51,15 @@ class RuntimeHintsUtilsTests {
 	}
 
 	@Test
+	void registerComposableAnnotationType() {
+		RuntimeHintsUtils.registerComposableAnnotation(this.hints, SampleInvoker.class);
+		assertThat(this.hints.reflection().typeHints()).singleElement()
+				.satisfies(annotationHint(SampleInvoker.class));
+		assertThat(this.hints.proxies().jdkProxies()).singleElement()
+				.satisfies(annotationProxy(SampleInvoker.class));
+	}
+
+	@Test
 	void registerAnnotationTypeWithLocalUseOfAliasForRegistersProxy() {
 		RuntimeHintsUtils.registerAnnotation(this.hints, LocalMapping.class);
 		assertThat(this.hints.reflection().typeHints()).singleElement()
