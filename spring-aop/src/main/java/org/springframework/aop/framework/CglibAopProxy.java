@@ -1038,7 +1038,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 		private final TargetSource targetSource;
 
-		private final AdvisorChainFactory advisorChainFactory;
+		private final Reference<AdvisorChainFactory> advisorChainFactory;
 
 		private final List<Class<?>> interfaces;
 
@@ -1046,7 +1046,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 		public AdvisedConfiguration(AdvisedSupport advised) {
 			copyFrom(advised);
-			this.advisorChainFactory = advised.getAdvisorChainFactory();
+			this.advisorChainFactory = new WeakReference<>(advised.getAdvisorChainFactory());
 			this.targetSource = EmptyTargetSource.forClass(advised.getTargetClass(), advised.getTargetSource().isStatic());
 			this.interfaces = Arrays.asList(advised.getProxiedInterfaces());
 			for (Advisor advisor : advised.getAdvisors()) {
@@ -1072,8 +1072,13 @@ class CglibAopProxy implements AopProxy, Serializable {
 		}
 
 		public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Method method, @Nullable Class<?> targetClass) {
+			AdvisorChainFactory chainFactory = this.advisorChainFactory.get();
+			//this should never happen
+			if (chainFactory == null) {
+				return Collections.emptyList();
+			}
 			AdvisedSupport advised  = AdvisedSupport.createConfigurationOnly(this,
-					this.targetSource, this.advisorChainFactory, this.interfaces, getAdvisors());
+					this.targetSource, chainFactory, this.interfaces, getAdvisors());
 			return advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
 		}
 	}
