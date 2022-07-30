@@ -34,8 +34,7 @@ import org.springframework.aot.generate.GenerationContext;
 public interface BeanFactoryInitializationAotContribution {
 
 	/**
-	 * Apply this contribution to the given
-	 * {@link BeanFactoryInitializationCode}.
+	 * Apply this contribution to the given {@link BeanFactoryInitializationCode}.
 	 * @param generationContext the active generation context
 	 * @param beanFactoryInitializationCode the bean factory initialization code
 	 */

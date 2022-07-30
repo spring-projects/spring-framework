@@ -30,12 +30,12 @@ import org.springframework.aot.generate.MethodReference;
 public interface BeanFactoryInitializationCode {
 
 	/**
-	 * The recommended variable name to used referring to the bean factory.
+	 * The recommended variable name to use to refer to the bean factory.
 	 */
 	String BEAN_FACTORY_VARIABLE = "beanFactory";
 
 	/**
-	 * Return the {@link GeneratedMethods} being used by the Initializing code.
+	 * Get the {@link GeneratedMethods} used by the initializing code.
 	 * @return the generated methods
 	 */
 	GeneratedMethods getMethods();

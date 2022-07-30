@@ -71,8 +71,7 @@ public final class AotServices<T> implements Iterable<T> {
 		return Collections.unmodifiableList(services);
 	}
 
-	private Map<T, Source> collectSources(Collection<T> loaded,
-			Collection<T> beans) {
+	private Map<T, Source> collectSources(Collection<T> loaded, Collection<T> beans) {
 		Map<T, Source> sources = new IdentityHashMap<>();
 		loaded.forEach(service -> sources.put(service, Source.SPRING_FACTORIES_LOADER));
 		beans.forEach(service -> sources.put(service, Source.BEAN_FACTORY));
@@ -80,7 +79,7 @@ public final class AotServices<T> implements Iterable<T> {
 	}
 
 	/**
-	 * Return a new {@link Loader} that will obtain AOT services from
+	 * Create a new {@link Loader} that will obtain AOT services from
 	 * {@value #FACTORIES_RESOURCE_LOCATION}.
 	 * @return a new {@link Loader} instance
 	 */
@@ -89,7 +88,7 @@ public final class AotServices<T> implements Iterable<T> {
 	}
 
 	/**
-	 * Return a new {@link Loader} that will obtain AOT services from
+	 * Create a new {@link Loader} that will obtain AOT services from
 	 * {@value #FACTORIES_RESOURCE_LOCATION}.
 	 * @param classLoader the class loader used to load the factories resource
 	 * @return a new {@link Loader} instance
@@ -99,7 +98,7 @@ public final class AotServices<T> implements Iterable<T> {
 	}
 
 	/**
-	 * Return a new {@link Loader} that will obtain AOT services from the given
+	 * Create a new {@link Loader} that will obtain AOT services from the given
 	 * {@link SpringFactoriesLoader}.
 	 * @param springFactoriesLoader the spring factories loader
 	 * @return a new {@link Loader} instance
@@ -110,20 +109,20 @@ public final class AotServices<T> implements Iterable<T> {
 	}
 
 	/**
-	 * Return a new {@link Loader} that will obtain AOT services from
+	 * Create a new {@link Loader} that will obtain AOT services from
 	 * {@value #FACTORIES_RESOURCE_LOCATION} as well as the given
 	 * {@link ListableBeanFactory}.
 	 * @param beanFactory the bean factory
 	 * @return a new {@link Loader} instance
 	 */
 	public static Loader factoriesAndBeans(ListableBeanFactory beanFactory) {
-		ClassLoader classLoader = (beanFactory instanceof ConfigurableBeanFactory configurableBeanFactory)
-				? configurableBeanFactory.getBeanClassLoader() : null;
+		ClassLoader classLoader = (beanFactory instanceof ConfigurableBeanFactory configurableBeanFactory ?
+				configurableBeanFactory.getBeanClassLoader() : null);
 		return factoriesAndBeans(getSpringFactoriesLoader(classLoader), beanFactory);
 	}
 
 	/**
-	 * Return a new {@link Loader} that will obtain AOT services from the given
+	 * Create a new {@link Loader} that will obtain AOT services from the given
 	 * {@link SpringFactoriesLoader} and {@link ListableBeanFactory}.
 	 * @param springFactoriesLoader the spring factories loader
 	 * @param beanFactory the bean factory
@@ -163,7 +162,7 @@ public final class AotServices<T> implements Iterable<T> {
 	}
 
 	/**
-	 * Return the AOT services that was loaded for the given bean name.
+	 * Find the AOT service that was loaded for the given bean name.
 	 * @param beanName the bean name
 	 * @return the AOT service or {@code null}
 	 */
@@ -173,7 +172,7 @@ public final class AotServices<T> implements Iterable<T> {
 	}
 
 	/**
-	 * Return the source of the given service.
+	 * Get the source of the given service.
 	 * @param service the service instance
 	 * @return the source of the service
 	 */
