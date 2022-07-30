@@ -44,7 +44,7 @@ import org.springframework.util.StringUtils;
  * @see BootstrapContext
  * @see TestContextBootstrapper
  */
-abstract class BootstrapUtils {
+public abstract class BootstrapUtils {
 
 	private static final String DEFAULT_BOOTSTRAP_CONTEXT_CLASS_NAME =
 			"org.springframework.test.context.support.DefaultBootstrapContext";
