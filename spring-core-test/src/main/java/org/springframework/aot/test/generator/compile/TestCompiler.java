@@ -103,12 +103,11 @@ public final class TestCompiler {
 	 */
 	public TestCompiler withFiles(InMemoryGeneratedFiles generatedFiles) {
 		List<SourceFile> sourceFiles = new ArrayList<>();
-		generatedFiles.getGeneratedFiles(Kind.SOURCE).forEach((path,
-				inputStreamSource) -> sourceFiles.add(SourceFile.of(inputStreamSource)));
+		generatedFiles.getGeneratedFiles(Kind.SOURCE).forEach(
+				(path, inputStreamSource) -> sourceFiles.add(SourceFile.of(inputStreamSource)));
 		List<ResourceFile> resourceFiles = new ArrayList<>();
-		generatedFiles.getGeneratedFiles(Kind.RESOURCE)
-				.forEach((path, inputStreamSource) -> resourceFiles
-						.add(ResourceFile.of(path, inputStreamSource)));
+		generatedFiles.getGeneratedFiles(Kind.RESOURCE).forEach(
+				(path, inputStreamSource) -> resourceFiles.add(ResourceFile.of(path, inputStreamSource)));
 		return withSources(sourceFiles).withResources(resourceFiles);
 	}
 
@@ -256,7 +255,7 @@ public final class TestCompiler {
 		}
 		catch (IllegalAccessError ex) {
 			throw new IllegalAccessError(ex.getMessage() + ". " +
-					"For non-public access ensure annotate your tests with @CompileWithTargetClassAccess");
+					"For non-public access ensure you annotate your test class or test method with @CompileWithTargetClassAccess");
 		}
 		finally {
 			Thread.currentThread().setContextClassLoader(previousClassLoader);
@@ -318,12 +317,12 @@ public final class TestCompiler {
 		@Override
 		public void report(Diagnostic<? extends JavaFileObject> diagnostic) {
 			if (diagnostic.getKind() == Diagnostic.Kind.ERROR) {
-				this.message.append("\n");
+				this.message.append('\n');
 				this.message.append(diagnostic.getMessage(Locale.getDefault()));
-				this.message.append(" ");
+				this.message.append(' ');
 				this.message.append(diagnostic.getSource().getName());
-				this.message.append(" ");
-				this.message.append(diagnostic.getLineNumber()).append(":")
+				this.message.append(' ');
+				this.message.append(diagnostic.getLineNumber()).append(':')
 						.append(diagnostic.getColumnNumber());
 			}
 		}

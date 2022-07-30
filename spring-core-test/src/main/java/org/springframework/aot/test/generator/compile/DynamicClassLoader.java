@@ -184,7 +184,6 @@ public class DynamicClassLoader extends ClassLoader {
 		public InputStream getInputStream() throws IOException {
 			return new ByteArrayInputStream(
 					this.file.getContent().getBytes(StandardCharsets.UTF_8));
-
 		}
 
 	}

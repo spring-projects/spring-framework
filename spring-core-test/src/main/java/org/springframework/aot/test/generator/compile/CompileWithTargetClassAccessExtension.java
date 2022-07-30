@@ -161,6 +161,7 @@ class CompileWithTargetClassAccessExtension implements InvocationInterceptor {
 	}
 
 
+	@FunctionalInterface
 	interface Action {
 
 		static Action NONE = () -> {

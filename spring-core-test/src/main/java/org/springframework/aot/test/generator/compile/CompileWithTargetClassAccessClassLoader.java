@@ -63,6 +63,7 @@ final class CompileWithTargetClassAccessClassLoader extends ClassLoader {
 	}
 
 
+	// Invoked reflectively by DynamicClassLoader.findDefineClassMethod(ClassLoader)
 	Class<?> defineClassWithTargetAccess(String name, byte[] b, int off, int len) {
 		return super.defineClass(name, b, off, len);
 	}

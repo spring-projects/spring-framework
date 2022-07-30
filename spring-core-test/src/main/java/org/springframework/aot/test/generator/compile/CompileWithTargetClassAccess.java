@@ -37,5 +37,4 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Documented
 @ExtendWith(CompileWithTargetClassAccessExtension.class)
 public @interface CompileWithTargetClassAccess {
-
 }
