@@ -129,6 +129,7 @@ public class TestContextManager {
 	 * <p>Delegates to the supplied {@code TestContextBootstrapper} for building
 	 * the {@code TestContext} and retrieving the {@code TestExecutionListeners}.
 	 * @param testContextBootstrapper the bootstrapper to use
+	 * @since 4.2
 	 * @see TestContextBootstrapper#buildTestContext
 	 * @see TestContextBootstrapper#getTestExecutionListeners
 	 * @see #registerTestExecutionListeners
