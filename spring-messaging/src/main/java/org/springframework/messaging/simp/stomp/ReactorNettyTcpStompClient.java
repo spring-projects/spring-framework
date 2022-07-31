@@ -23,8 +23,6 @@ import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.tcp.TcpOperations;
 import org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient;
 import org.springframework.util.Assert;
-import org.springframework.util.concurrent.CompletableToListenableFutureAdapter;
-import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * A STOMP over TCP client that uses {@link ReactorNettyTcpClient}.
@@ -77,15 +75,17 @@ public class ReactorNettyTcpStompClient extends StompClientSupport {
 	 * @deprecated as of 6.0, in favor of {@link #connectAsync(StompSessionHandler)}
 	 */
 	@Deprecated
-	public ListenableFuture<StompSession> connect(StompSessionHandler handler) {
-		return new CompletableToListenableFutureAdapter<>(connectAsync(handler));
+	public org.springframework.util.concurrent.ListenableFuture<StompSession> connect(
+			StompSessionHandler handler) {
+		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(
+				connectAsync(handler));
 	}
 
 	/**
 	 * Connect and notify the given {@link StompSessionHandler} when connected
 	 * on the STOMP level.
 	 * @param handler the handler for the STOMP session
-	 * @return a ListenableFuture for access to the session when ready for use
+	 * @return a CompletableFuture for access to the session when ready for use
 	 * @since 6.0
 	 */
 	public CompletableFuture<StompSession> connectAsync(StompSessionHandler handler) {
@@ -101,7 +101,8 @@ public class ReactorNettyTcpStompClient extends StompClientSupport {
 	 * @deprecated as of 6.0, in favor of {@link #connectAsync(StompHeaders, StompSessionHandler)}
 	 */
 	@Deprecated
-	public ListenableFuture<StompSession> connect(@Nullable StompHeaders connectHeaders, StompSessionHandler handler) {
+	public org.springframework.util.concurrent.ListenableFuture<StompSession> connect(
+			@Nullable StompHeaders connectHeaders, StompSessionHandler handler) {
 		ConnectionHandlingStompSession session = createSession(connectHeaders, handler);
 		this.tcpClient.connectAsync(session);
 		return session.getSessionFuture();
@@ -131,4 +132,5 @@ public class ReactorNettyTcpStompClient extends StompClientSupport {
 	public String toString() {
 		return "ReactorNettyTcpStompClient[" + this.tcpClient + "]";
 	}
+
 }

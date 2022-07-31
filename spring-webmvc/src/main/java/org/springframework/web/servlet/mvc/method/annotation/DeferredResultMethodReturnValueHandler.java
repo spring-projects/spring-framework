@@ -21,8 +21,6 @@ import java.util.concurrent.CompletionStage;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncUtils;
@@ -31,7 +29,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
  * Handler for return values of type {@link DeferredResult},
- * {@link ListenableFuture}, and {@link CompletionStage}.
+ * {@link org.springframework.util.concurrent.ListenableFuture}, and
+ * {@link CompletionStage}.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -43,7 +42,7 @@ public class DeferredResultMethodReturnValueHandler implements HandlerMethodRetu
 	public boolean supportsReturnType(MethodParameter returnType) {
 		Class<?> type = returnType.getParameterType();
 		return (DeferredResult.class.isAssignableFrom(type) ||
-				ListenableFuture.class.isAssignableFrom(type) ||
+				org.springframework.util.concurrent.ListenableFuture.class.isAssignableFrom(type) ||
 				CompletionStage.class.isAssignableFrom(type));
 	}
 
@@ -59,14 +58,14 @@ public class DeferredResultMethodReturnValueHandler implements HandlerMethodRetu
 
 		DeferredResult<?> result;
 
-		if (returnValue instanceof DeferredResult) {
-			result = (DeferredResult<?>) returnValue;
+		if (returnValue instanceof DeferredResult<?> deferredResult) {
+			result = deferredResult;
 		}
-		else if (returnValue instanceof ListenableFuture) {
-			result = adaptListenableFuture((ListenableFuture<?>) returnValue);
+		else if (returnValue instanceof org.springframework.util.concurrent.ListenableFuture<?> listenableFuture) {
+			result = adaptListenableFuture(listenableFuture);
 		}
-		else if (returnValue instanceof CompletionStage) {
-			result = adaptCompletionStage((CompletionStage<?>) returnValue);
+		else if (returnValue instanceof CompletionStage<?> completionStage) {
+			result = adaptCompletionStage(completionStage);
 		}
 		else {
 			// Should not happen...
@@ -77,9 +76,9 @@ public class DeferredResultMethodReturnValueHandler implements HandlerMethodRetu
 	}
 
 	@SuppressWarnings("deprecation")
-	private DeferredResult<Object> adaptListenableFuture(ListenableFuture<?> future) {
+	private DeferredResult<Object> adaptListenableFuture(org.springframework.util.concurrent.ListenableFuture<?> future) {
 		DeferredResult<Object> result = new DeferredResult<>();
-		future.addCallback(new ListenableFutureCallback<Object>() {
+		future.addCallback(new org.springframework.util.concurrent.ListenableFutureCallback<Object>() {
 			@Override
 			public void onSuccess(@Nullable Object value) {
 				result.setResult(value);

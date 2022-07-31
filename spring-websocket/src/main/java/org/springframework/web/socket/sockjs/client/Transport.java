@@ -19,8 +19,6 @@ package org.springframework.web.socket.sockjs.client;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import org.springframework.util.concurrent.CompletableToListenableFutureAdapter;
-import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.sockjs.transport.TransportType;
@@ -34,29 +32,31 @@ import org.springframework.web.socket.sockjs.transport.TransportType;
 public interface Transport {
 
 	/**
-	 * Return the SockJS transport types that this transport can be used for.
-	 * In particular since from a client perspective there is no difference
+	 * Get the SockJS transport types that this transport can be used for.
+	 * <p>In particular since from a client perspective there is no difference
 	 * between XHR and XHR streaming, an {@code XhrTransport} could do both.
 	 */
 	List<TransportType> getTransportTypes();
 
 	/**
 	 * Connect the transport.
-	 * @param request the transport request.
-	 * @param webSocketHandler the application handler to delegate lifecycle events to.
-	 * @return a future to indicate success or failure to connect.
+	 * @param request the transport request
+	 * @param webSocketHandler the application handler to delegate lifecycle events to
+	 * @return a future to indicate success or failure to connect
 	 * @deprecated as of 6.0, in favor of {@link #connectAsync(TransportRequest, WebSocketHandler)}
 	 */
 	@Deprecated
-	default ListenableFuture<WebSocketSession> connect(TransportRequest request, WebSocketHandler webSocketHandler) {
-		return new CompletableToListenableFutureAdapter<>(connectAsync(request, webSocketHandler));
+	default org.springframework.util.concurrent.ListenableFuture<WebSocketSession> connect(
+			TransportRequest request, WebSocketHandler webSocketHandler) {
+		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(
+				connectAsync(request, webSocketHandler));
 	}
 
 	/**
 	 * Connect the transport.
-	 * @param request the transport request.
-	 * @param webSocketHandler the application handler to delegate lifecycle events to.
-	 * @return a future to indicate success or failure to connect.
+	 * @param request the transport request
+	 * @param webSocketHandler the application handler to delegate lifecycle events to
+	 * @return a future to indicate success or failure to connect
 	 * @since 6.0
 	 */
 	CompletableFuture<WebSocketSession> connectAsync(TransportRequest request, WebSocketHandler webSocketHandler);

@@ -59,7 +59,6 @@ import org.springframework.messaging.handler.invocation.CompletableFutureReturnV
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandlerComposite;
-import org.springframework.messaging.handler.invocation.ListenableFutureReturnValueHandler;
 import org.springframework.messaging.handler.invocation.ReactiveReturnValueHandler;
 import org.springframework.messaging.simp.SimpAttributesContextHolder;
 import org.springframework.messaging.simp.SimpLogging;
@@ -326,14 +325,14 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		return resolvers;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
+	@SuppressWarnings("deprecation")
 	protected List<? extends HandlerMethodReturnValueHandler> initReturnValueHandlers() {
 		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>();
 
 		// Single-purpose return value types
 
-		handlers.add(new ListenableFutureReturnValueHandler());
+		handlers.add(new org.springframework.messaging.handler.invocation.ListenableFutureReturnValueHandler());
 		handlers.add(new CompletableFutureReturnValueHandler());
 		if (reactorPresent) {
 			handlers.add(new ReactiveReturnValueHandler());

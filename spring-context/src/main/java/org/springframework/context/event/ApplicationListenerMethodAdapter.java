@@ -50,7 +50,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * {@link GenericApplicationListener} adapter that delegates the processing of
@@ -253,8 +252,8 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		}
 		Class<?> declaredEventClass = declaredEventType.toClass();
 		if (!ApplicationEvent.class.isAssignableFrom(declaredEventClass) &&
-				event instanceof PayloadApplicationEvent) {
-			Object payload = ((PayloadApplicationEvent<?>) event).getPayload();
+				event instanceof PayloadApplicationEvent<?> payloadEvent) {
+			Object payload = payloadEvent.getPayload();
 			if (declaredEventClass.isInstance(payload)) {
 				return new Object[] {payload};
 			}
@@ -262,15 +261,15 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		return new Object[] {event};
 	}
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings({ "deprecation", "unchecked" })
 	protected void handleResult(Object result) {
 		if (reactiveStreamsPresent && new ReactiveResultHandler().subscribeToPublisher(result)) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Adapted to reactive result: " + result);
 			}
 		}
-		else if (result instanceof CompletionStage) {
-			((CompletionStage<?>) result).whenComplete((event, ex) -> {
+		else if (result instanceof CompletionStage<?> completionStage) {
+			completionStage.whenComplete((event, ex) -> {
 				if (ex != null) {
 					handleAsyncError(ex);
 				}
@@ -279,8 +278,8 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 				}
 			});
 		}
-		else if (result instanceof ListenableFuture) {
-			((ListenableFuture<?>) result).addCallback(this::publishEvents, this::handleAsyncError);
+		else if (result instanceof org.springframework.util.concurrent.ListenableFuture<?> listenableFuture) {
+			listenableFuture.addCallback(this::publishEvents, this::handleAsyncError);
 		}
 		else {
 			publishEvents(result);
@@ -353,8 +352,8 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		catch (InvocationTargetException ex) {
 			// Throw underlying exception
 			Throwable targetException = ex.getTargetException();
-			if (targetException instanceof RuntimeException) {
-				throw (RuntimeException) targetException;
+			if (targetException instanceof RuntimeException runtimeException) {
+				throw runtimeException;
 			}
 			else {
 				String msg = getInvocationErrorMessage(bean, "Failed to invoke event listener method", args);
@@ -441,8 +440,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	@Nullable
 	private ResolvableType getResolvableType(ApplicationEvent event) {
 		ResolvableType payloadType = null;
-		if (event instanceof PayloadApplicationEvent) {
-			PayloadApplicationEvent<?> payloadEvent = (PayloadApplicationEvent<?>) event;
+		if (event instanceof PayloadApplicationEvent<?> payloadEvent) {
 			ResolvableType eventType = payloadEvent.getResolvableType();
 			if (eventType != null) {
 				payloadType = eventType.as(PayloadApplicationEvent.class).getGeneric();

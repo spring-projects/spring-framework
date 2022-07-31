@@ -166,7 +166,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	}
 
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class JettyUpgradeStrategyConfig extends AbstractRequestUpgradeStrategyConfig {
 
 		@Override
@@ -177,7 +177,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	}
 
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class TomcatUpgradeStrategyConfig extends AbstractRequestUpgradeStrategyConfig {
 
 		@Override
@@ -188,7 +188,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	}
 
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class UndertowUpgradeStrategyConfig extends AbstractRequestUpgradeStrategyConfig {
 
 		@Override

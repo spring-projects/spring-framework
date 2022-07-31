@@ -27,7 +27,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.ErrorHandler;
@@ -46,8 +45,9 @@ class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutorTests {
 	private final ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
 
 
+	@SuppressWarnings("deprecation")
 	@Override
-	protected AsyncListenableTaskExecutor buildExecutor() {
+	protected org.springframework.core.task.AsyncListenableTaskExecutor buildExecutor() {
 		scheduler.setThreadNamePrefix(this.threadNamePrefix);
 		scheduler.afterPropertiesSet();
 		return scheduler;

@@ -18,7 +18,6 @@ package org.springframework.web.socket.client;
 
 import java.net.URI;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,7 +29,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketHttpHeaders;
@@ -45,19 +43,16 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public abstract class AbstractWebSocketClient implements WebSocketClient {
 
-	private static final Set<String> specialHeaders = new HashSet<>();
-
-	static {
-		specialHeaders.add("cache-control");
-		specialHeaders.add("connection");
-		specialHeaders.add("host");
-		specialHeaders.add("sec-websocket-extensions");
-		specialHeaders.add("sec-websocket-key");
-		specialHeaders.add("sec-websocket-protocol");
-		specialHeaders.add("sec-websocket-version");
-		specialHeaders.add("pragma");
-		specialHeaders.add("upgrade");
-	}
+	private static final Set<String> specialHeaders = Set.of(
+			"cache-control",
+			"connection",
+			"host",
+			"sec-websocket-extensions",
+			"sec-websocket-key",
+			"sec-websocket-protocol",
+			"sec-websocket-version",
+			"pragma",
+			"upgrade");
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -119,13 +114,14 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 	 * @param extensions requested WebSocket extensions, or an empty list
 	 * @param attributes the attributes to associate with the WebSocketSession, i.e. via
 	 * {@link WebSocketSession#getAttributes()}; currently always an empty map.
-	 * @return the established WebSocket session wrapped in a ListenableFuture.
+	 * @return the established WebSocket session wrapped in a {@code ListenableFuture}.
 	 * @deprecated as of 6.0, in favor of {@link #executeInternal(WebSocketHandler, HttpHeaders, URI, List, List, Map)}
 	 */
 	@Deprecated
-	protected ListenableFuture<WebSocketSession> doHandshakeInternal(WebSocketHandler webSocketHandler,
-			HttpHeaders headers, URI uri, List<String> subProtocols, List<WebSocketExtension> extensions,
-			Map<String, Object> attributes) {
+	protected org.springframework.util.concurrent.ListenableFuture<WebSocketSession> doHandshakeInternal(
+			WebSocketHandler webSocketHandler, HttpHeaders headers, URI uri, List<String> subProtocols,
+			List<WebSocketExtension> extensions, Map<String, Object> attributes) {
+
 		throw new UnsupportedOperationException("doHandshakeInternal is deprecated in favor of executeInternal");
 	}
 
@@ -138,8 +134,8 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 	 * @param subProtocols requested sub-protocols, or an empty list
 	 * @param extensions requested WebSocket extensions, or an empty list
 	 * @param attributes the attributes to associate with the WebSocketSession, i.e. via
-	 * {@link WebSocketSession#getAttributes()}; currently always an empty map.
-	 * @return the established WebSocket session wrapped in a ListenableFuture.
+	 * {@link WebSocketSession#getAttributes()}; currently always an empty map
+	 * @return the established WebSocket session wrapped in a {@code CompletableFuture}.
 	 */
 	protected abstract CompletableFuture<WebSocketSession> executeInternal(WebSocketHandler webSocketHandler,
 			HttpHeaders headers, URI uri, List<String> subProtocols, List<WebSocketExtension> extensions,

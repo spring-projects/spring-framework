@@ -20,8 +20,6 @@ import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.concurrent.CompletableToListenableFutureAdapter;
-import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
@@ -47,9 +45,10 @@ public interface WebSocketClient {
 	 * @deprecated as of 6.0, in favor of {@link #execute(WebSocketHandler, String, Object...)}
 	 */
 	@Deprecated
-	default ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
-			String uriTemplate, Object... uriVariables) {
-		return new CompletableToListenableFutureAdapter<>(execute(webSocketHandler, uriTemplate, uriVariables));
+	default org.springframework.util.concurrent.ListenableFuture<WebSocketSession> doHandshake(
+			WebSocketHandler webSocketHandler, String uriTemplate, Object... uriVariables) {
+		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(
+				execute(webSocketHandler, uriTemplate, uriVariables));
 	}
 
 	/**
@@ -73,9 +72,10 @@ public interface WebSocketClient {
 	 * @deprecated as of 6.0, in favor of {@link #execute(WebSocketHandler, WebSocketHttpHeaders, URI)}
 	 */
 	@Deprecated
-	default ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
-			@Nullable WebSocketHttpHeaders headers, URI uri) {
-		return new CompletableToListenableFutureAdapter<>(execute(webSocketHandler, headers, uri));
+	default org.springframework.util.concurrent.ListenableFuture<WebSocketSession> doHandshake(
+			WebSocketHandler webSocketHandler, @Nullable WebSocketHttpHeaders headers, URI uri) {
+		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(
+				execute(webSocketHandler, headers, uri));
 	}
 
 	/**

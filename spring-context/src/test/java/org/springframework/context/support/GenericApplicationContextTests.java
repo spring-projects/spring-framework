@@ -433,6 +433,7 @@ class GenericApplicationContextTests {
 		assertThat(context.getBeanFactory().getMergedBeanDefinition("test")
 				.hasAttribute("mbdppCalled")).isTrue();
 		assertThat(context.getBean("test")).isEqualTo("42");
+		context.close();
 	}
 
 	@Test

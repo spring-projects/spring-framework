@@ -33,11 +33,14 @@ import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 
 /**
  * Java method that is instrumented by the {@link RuntimeHintsAgent}.
- * <p>All their {@link RecordedInvocation invocations are recorded} by the agent at runtime.
- * We can then verify that the {@link RuntimeHints} configuration
- * {@link #matcher(RecordedInvocation) is matching} the runtime behavior of the codebase.
+ *
+ * <p>All {@linkplain RecordedInvocation invocations are recorded} by the agent
+ * at runtime. We can then verify that the {@link RuntimeHints} configuration
+ * {@linkplain #matcher(RecordedInvocation) matches} the runtime behavior of the
+ * codebase.
  *
  * @author Brian Clozel
+ * @since 6.0
  * @see RuntimeHintsPredicates
  */
 enum InstrumentedMethod {
@@ -388,10 +391,6 @@ enum InstrumentedMethod {
 	 */
 	Predicate<RuntimeHints> matcher(RecordedInvocation invocation) {
 		return this.hintsMatcherGenerator.apply(invocation);
-	}
-
-	private static Predicate<RuntimeHints> hasReturnValue(RecordedInvocation invocation) {
-		return runtimeHints -> invocation.getReturnValue() != null;
 	}
 
 }

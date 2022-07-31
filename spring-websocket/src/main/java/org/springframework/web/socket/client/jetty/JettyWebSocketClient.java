@@ -30,10 +30,8 @@ import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 
 import org.springframework.context.Lifecycle;
-import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.concurrent.FutureUtils;
@@ -84,8 +82,8 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 
 
 	/**
-	 * Set an {@link AsyncListenableTaskExecutor} to use when opening connections.
-	 * If this property is set to {@code null}, calls to any of the
+	 * Set an {@link AsyncTaskExecutor} to use when opening connections.
+	 * <p>If this property is set to {@code null}, calls to any of the
 	 * {@code doHandshake} methods will block until the connection is established.
 	 * <p>By default an instance of {@code SimpleAsyncTaskExecutor} is used.
 	 */
@@ -94,7 +92,7 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 	}
 
 	/**
-	 * Return the configured {@link TaskExecutor}.
+	 * Return the configured {@link AsyncTaskExecutor}.
 	 */
 	@Nullable
 	public AsyncTaskExecutor getTaskExecutor() {

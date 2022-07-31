@@ -20,8 +20,6 @@ import java.io.Closeable;
 import java.util.concurrent.CompletableFuture;
 
 import org.springframework.messaging.Message;
-import org.springframework.util.concurrent.CompletableToListenableFutureAdapter;
-import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * A contract for sending messages and managing a TCP connection.
@@ -40,8 +38,9 @@ public interface TcpConnection<P> extends Closeable {
 	 * @deprecated as of 6.0, in favor of {@link #sendAsync(Message)}
 	 */
 	@Deprecated
-	default ListenableFuture<Void> send(Message<P> message) {
-		return new CompletableToListenableFutureAdapter<>(sendAsync(message));
+	default org.springframework.util.concurrent.ListenableFuture<Void> send(Message<P> message) {
+		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(
+				sendAsync(message));
 	}
 
 	/**

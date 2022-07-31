@@ -346,6 +346,7 @@ public class EnableAsyncTests {
 	}
 
 
+	@SuppressWarnings("deprecation")
 	static class AsyncBeanWithExecutorQualifiedByName {
 
 		@Async
@@ -369,6 +370,7 @@ public class EnableAsyncTests {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	static class AsyncBeanWithExecutorQualifiedByExpressionOrPlaceholder {
 
 		@Async("#{environment['myExecutor']}")

@@ -25,7 +25,6 @@ import java.util.concurrent.CompletableFuture;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketExtension;
@@ -56,11 +55,13 @@ public class XhrClientSockJsSession extends AbstractClientSockJsSession {
 
 	/**
 	 * Create a new {@code XhrClientSockJsSession}.
-	 * @deprecated as of 6.0, in favor of {@link #XhrClientSockJsSession(TransportRequest, WebSocketHandler, XhrTransport, CompletableFuture)}
+	 * @deprecated as of 6.0, in favor of
+	 * {@link #XhrClientSockJsSession(TransportRequest, WebSocketHandler, XhrTransport, CompletableFuture)}
 	 */
 	@Deprecated
-	public XhrClientSockJsSession(TransportRequest request, WebSocketHandler handler,
-			XhrTransport transport, SettableListenableFuture<WebSocketSession> connectFuture) {
+	public XhrClientSockJsSession(
+			TransportRequest request, WebSocketHandler handler, XhrTransport transport,
+			org.springframework.util.concurrent.SettableListenableFuture<WebSocketSession> connectFuture) {
 
 		super(request, handler, connectFuture);
 		Assert.notNull(transport, "XhrTransport is required");
@@ -72,6 +73,10 @@ public class XhrClientSockJsSession extends AbstractClientSockJsSession {
 		this.sendUrl = request.getSockJsUrlInfo().getTransportUrl(TransportType.XHR_SEND);
 	}
 
+	/**
+	 * Create a new {@code XhrClientSockJsSession}.
+	 * @since 6.0
+	 */
 	public XhrClientSockJsSession(TransportRequest request, WebSocketHandler handler,
 			XhrTransport transport, CompletableFuture<WebSocketSession> connectFuture) {
 

@@ -20,13 +20,12 @@ import java.util.concurrent.CompletableFuture;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
-import org.springframework.util.concurrent.CompletableToListenableFutureAdapter;
-import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * An extension of {@link HandlerMethodReturnValueHandler} for handling async,
  * Future-like return value types that support success and error callbacks.
- * Essentially anything that can be adapted to a {@link ListenableFuture}.
+ * Essentially anything that can be adapted to a
+ * {@link org.springframework.util.concurrent.ListenableFuture ListenableFuture}.
  *
  * <p>Implementations should consider extending the convenient base class
  * {@link AbstractAsyncReturnValueHandler}.
@@ -52,8 +51,9 @@ public interface AsyncHandlerMethodReturnValueHandler extends HandlerMethodRetur
 	boolean isAsyncReturnValue(Object returnValue, MethodParameter returnType);
 
 	/**
-	 * Adapt the asynchronous return value to a {@link ListenableFuture}.
-	 * Implementations should consider returning an instance of
+	 * Adapt the asynchronous return value to a
+	 * {@link org.springframework.util.concurrent.ListenableFuture ListenableFuture}.
+	 * <p>Implementations should consider returning an instance of
 	 * {@link org.springframework.util.concurrent.SettableListenableFuture
 	 * SettableListenableFuture}. Return value handling will then continue when
 	 * the ListenableFuture is completed with either success or error.
@@ -69,14 +69,17 @@ public interface AsyncHandlerMethodReturnValueHandler extends HandlerMethodRetur
 	 */
 	@Deprecated
 	@Nullable
-	default ListenableFuture<?> toListenableFuture(Object returnValue, MethodParameter returnType) {
+	default org.springframework.util.concurrent.ListenableFuture<?> toListenableFuture(
+			Object returnValue, MethodParameter returnType) {
 		CompletableFuture<?> result = toCompletableFuture(returnValue, returnType);
-		return (result != null) ? new CompletableToListenableFutureAdapter<>(result) : null;
+		return (result != null ?
+				new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(result) :
+				null);
 	}
 
 	/**
 	 * Adapt the asynchronous return value to a {@link CompletableFuture}.
-	 * Return value handling will then continue when
+	 * <p>Return value handling will then continue when
 	 * the CompletableFuture is completed with either success or error.
 	 * <p><strong>Note:</strong> this method will only be invoked after
 	 * {@link #supportsReturnType(org.springframework.core.MethodParameter)}
