@@ -16,8 +16,10 @@
 
 package org.springframework.core.annotation;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
@@ -986,6 +988,21 @@ class AnnotationUtilsTests {
 		assertThat(findAnnotation(SubclassOfDeprecatedClass.class, Deprecated.class)).isNotNull();
 	}
 
+	@Test
+	void findAnnotationOnAnonymousClassWithSuperclass() {
+		assertThat(findAnnotation((new @TypeUseAnnotation Object() {}).getClass(), TypeUseAnnotation.class)).isNotNull();
+		assertThat(findAnnotation((new @TypeUseAnnotation MetaMetaAnnotatedClass() {}).getClass(), TypeUseAnnotation.class)).isNotNull();
+		assertThat(findAnnotation((new Object() {}).getClass(), TypeUseAnnotation.class)).isNull();
+		assertThat(findAnnotation((new MetaMetaAnnotatedClass() {}).getClass(), TypeUseAnnotation.class)).isNull();
+	}
+
+	@Test
+	void findAnnotationOnAnonymousClassWithInterface() {
+		assertThat(findAnnotation((new @TypeUseAnnotation Serializable() {}).getClass(), TypeUseAnnotation.class)).isNotNull();
+		assertThat(findAnnotation((new @TypeUseAnnotation InterfaceWithMetaAnnotation() {}).getClass(), TypeUseAnnotation.class)).isNotNull();
+		assertThat(findAnnotation((new Serializable() {}).getClass(), TypeUseAnnotation.class)).isNull();
+		assertThat(findAnnotation((new InterfaceWithMetaAnnotation() {}).getClass(), TypeUseAnnotation.class)).isNull();
+	}
 
 	@SafeVarargs
 	static <T> T[] asArray(T... arr) {
@@ -1835,4 +1852,8 @@ class AnnotationUtilsTests {
 	static class SubclassOfDeprecatedClass extends DeprecatedClass {
 	}
 
+	@Target(ElementType.TYPE_USE)
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface TypeUseAnnotation {
+	}
 }

@@ -22,12 +22,15 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.MirrorSet;
@@ -558,6 +561,18 @@ public abstract class AnnotationUtils {
 	public static <A extends Annotation> A findAnnotation(Class<?> clazz, @Nullable Class<A> annotationType) {
 		if (annotationType == null) {
 			return null;
+		}
+
+		// check if we are dealing with an annotation on an anonymous class (no need for class hierarchy traversal)
+		final A annotationOnAnonymous = Stream
+				.concat(Stream.of(clazz.getAnnotatedSuperclass()), Arrays.stream(clazz.getAnnotatedInterfaces()))
+				.filter(Objects::nonNull)
+				.map(a -> findAnnotation(a, annotationType))
+				.filter(Objects::nonNull)
+				.findFirst()
+				.orElse(null);
+		if (annotationOnAnonymous != null) {
+			return annotationOnAnonymous;
 		}
 
 		// Shortcut: directly present on the element, with no merging needed?
