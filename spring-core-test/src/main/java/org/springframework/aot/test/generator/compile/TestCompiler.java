@@ -77,18 +77,17 @@ public final class TestCompiler {
 
 
 	/**
-	 * Return a new {@link TestCompiler} backed by the system java compiler.
-	 * @return a new {@link TestCompiler} instance
+	 * Create a new {@code TestCompiler} backed by the system java compiler.
+	 * @return a new {@code TestCompiler} instance
 	 */
 	public static TestCompiler forSystem() {
 		return forCompiler(ToolProvider.getSystemJavaCompiler());
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} backed by the given
-	 * {@link JavaCompiler}.
+	 * Create a new {@code TestCompiler} backed by the given {@link JavaCompiler}.
 	 * @param javaCompiler the java compiler to use
-	 * @return a new {@link TestCompiler} instance
+	 * @return a new {@code TestCompiler} instance
 	 */
 	public static TestCompiler forCompiler(JavaCompiler javaCompiler) {
 		return new TestCompiler(null, javaCompiler, SourceFiles.none(),
@@ -96,10 +95,10 @@ public final class TestCompiler {
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with additional generated
+	 * Create a new {@code TestCompiler} instance with additional generated
 	 * source and resource files.
 	 * @param generatedFiles the generated files to add
-	 * @return a new {@link TestCompiler} instance
+	 * @return a new {@code TestCompiler} instance
 	 */
 	public TestCompiler withFiles(InMemoryGeneratedFiles generatedFiles) {
 		List<SourceFile> sourceFiles = new ArrayList<>();
@@ -112,9 +111,9 @@ public final class TestCompiler {
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with additional source files.
+	 * Create a new {@code TestCompiler} instance with additional source files.
 	 * @param sourceFiles the additional source files
-	 * @return a new {@link TestCompiler} instance
+	 * @return a new {@code TestCompiler} instance
 	 */
 	public TestCompiler withSources(SourceFile... sourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler,
@@ -122,9 +121,9 @@ public final class TestCompiler {
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with additional source files.
+	 * Create a new {@code TestCompiler} instance with additional source files.
 	 * @param sourceFiles the additional source files
-	 * @return a new {@link TestCompiler} instance
+	 * @return a new {@code TestCompiler} instance
 	 */
 	public TestCompiler withSources(Iterable<SourceFile> sourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler,
@@ -132,9 +131,9 @@ public final class TestCompiler {
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with additional source files.
+	 * Create a new {@code TestCompiler} instance with additional source files.
 	 * @param sourceFiles the additional source files
-	 * @return a new {@link TestCompiler} instance
+	 * @return a new {@code TestCompiler} instance
 	 */
 	public TestCompiler withSources(SourceFiles sourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler,
@@ -142,9 +141,9 @@ public final class TestCompiler {
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with additional resource files.
+	 * Create a new {@code TestCompiler} instance with additional resource files.
 	 * @param resourceFiles the additional resource files
-	 * @return a new {@link TestCompiler} instance
+	 * @return a new {@code TestCompiler} instance
 	 */
 	public TestCompiler withResources(ResourceFile... resourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler, this.sourceFiles,
@@ -152,9 +151,9 @@ public final class TestCompiler {
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with additional source files.
+	 * Create a new {@code TestCompiler} instance with additional source files.
 	 * @param resourceFiles the additional source files
-	 * @return a new {@link TestCompiler} instance
+	 * @return a new {@code TestCompiler} instance
 	 */
 	public TestCompiler withResources(Iterable<ResourceFile> resourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler, this.sourceFiles,
@@ -162,9 +161,9 @@ public final class TestCompiler {
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with additional resource files.
+	 * Create a new {@code TestCompiler} instance with additional resource files.
 	 * @param resourceFiles the additional resource files
-	 * @return a new {@link TestCompiler} instance
+	 * @return a new {@code TestCompiler} instance
 	 */
 	public TestCompiler withResources(ResourceFiles resourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler, this.sourceFiles,
@@ -172,9 +171,9 @@ public final class TestCompiler {
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with additional annotation processors.
+	 * Create a new {@code TestCompiler} instance with additional annotation processors.
 	 * @param processors the additional annotation processors
-	 * @return a new {@link TestCompiler} instance
+	 * @return a new {@code TestCompiler} instance
 	 */
 	public TestCompiler withProcessors(Processor... processors) {
 		List<Processor> mergedProcessors = new ArrayList<>(this.processors);
@@ -184,9 +183,9 @@ public final class TestCompiler {
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with additional annotation processors.
+	 * Create a new {@code TestCompiler} instance with additional annotation processors.
 	 * @param processors the additional annotation processors
-	 * @return a new {@link TestCompiler} instance
+	 * @return a new {@code TestCompiler} instance
 	 */
 	public TestCompiler withProcessors(Iterable<Processor> processors) {
 		List<Processor> mergedProcessors = new ArrayList<>(this.processors);
@@ -233,7 +232,7 @@ public final class TestCompiler {
 	 * source and resource files.
 	 * @param sourceFiles the additional source files to compile
 	 * @param resourceFiles the additional resource files to include
-	 * @param compiled a consumed used to further assert the compiled code
+	 * @param compiled a {@code Consumer} used to further assert the compiled code
 	 * @throws CompilationException if source cannot be compiled
 	 */
 	public void compile(SourceFiles sourceFiles, ResourceFiles resourceFiles,
@@ -243,7 +242,7 @@ public final class TestCompiler {
 
 	/**
 	 * Compile content from this instance.
-	 * @param compiled a consumed used to further assert the compiled code
+	 * @param compiled a {@code Consumer} used to further assert the compiled code
 	 * @throws CompilationException if source cannot be compiled
 	 */
 	public void compile(Consumer<Compiled> compiled) throws CompilationException {
