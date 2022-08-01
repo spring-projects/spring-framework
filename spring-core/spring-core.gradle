@@ -21,44 +21,65 @@ configurations {
 }
 
 task cglibRepackJar(type: ShadowJar) {
-	archiveBaseName.set('spring-cglib-repack')
-	archiveVersion.set(cglibVersion)
+	archiveBaseName = 'spring-cglib-repack'
+	archiveVersion = cglibVersion
 	configurations = [project.configurations.cglib]
-	relocate 'net.sf.cglib', 'org.springframework.cglib'
-	relocate 'org.objectweb.asm', 'org.springframework.asm'
+	relocate('net.sf.cglib', 'org.springframework.cglib')
+	relocate('org.objectweb.asm', 'org.springframework.asm')
 }
 
 task cglibSource(type: ShadowSource) {
 	configurations = [project.configurations.cglib]
-	relocate 'net.sf.cglib', 'org.springframework.cglib'
-	relocate 'org.objectweb.asm', 'org.springframework.asm'
+	relocate('net.sf.cglib', 'org.springframework.cglib')
+	relocate('org.objectweb.asm', 'org.springframework.asm')
 	outputDirectory = file("build/shadow-source/cglib")
 }
 
+task cglibSourceJar(type: Jar) {
+	archiveBaseName = 'spring-cglib-repack'
+	archiveVersion = cglibVersion
+	archiveClassifier = 'sources'
+	from cglibSource
+}
+
 task javapoetRepackJar(type: ShadowJar) {
-	archiveBaseName.set('spring-javapoet-repack')
-	archiveVersion.set(javapoetVersion)
+	archiveBaseName = 'spring-javapoet-repack'
+	archiveVersion = javapoetVersion
 	configurations = [project.configurations.javapoet]
-	relocate 'com.squareup.javapoet', 'org.springframework.javapoet'
+	relocate('com.squareup.javapoet', 'org.springframework.javapoet')
 }
 
 task javapoetSource(type: ShadowSource) {
 	configurations = [project.configurations.javapoet]
-	relocate 'com.squareup.javapoet', 'org.springframework.javapoet'
+	relocate('com.squareup.javapoet', 'org.springframework.javapoet')
 	outputDirectory = file("build/shadow-source/javapoet")
 }
 
+task javapoetSourceJar(type: Jar) {
+	archiveBaseName = 'spring-javapoet-repack'
+	archiveVersion = javapoetVersion
+	archiveClassifier = 'sources'
+	from javapoetSource
+}
+
 task objenesisRepackJar(type: ShadowJar) {
-	archiveBaseName.set('spring-objenesis-repack')
-	archiveVersion.set(objenesisVersion)
+	archiveBaseName = 'spring-objenesis-repack'
+	archiveVersion = objenesisVersion
 	configurations = [project.configurations.objenesis]
-	relocate 'org.objenesis', 'org.springframework.objenesis'
+	relocate('org.objenesis', 'org.springframework.objenesis')
 }
 
 task objenesisSource(type: ShadowSource) {
 	configurations = [project.configurations.objenesis]
-	relocate 'org.objenesis', 'org.springframework.objenesis'
+	relocate('org.objenesis', 'org.springframework.objenesis')
 	outputDirectory = file("build/shadow-source/objenesis")
+}
+
+task objenesisSourceJar(type: Jar) {
+	archiveBaseName = 'spring-objenesis-repack'
+	archiveVersion = objenesisVersion
+	archiveClassifier = 'sources'
+	from objenesisSource
 }
 
 dependencies {
@@ -144,7 +165,27 @@ test {
 }
 
 sourcesJar {
+	dependsOn cglibSourceJar
+	dependsOn javapoetSourceJar
+	dependsOn objenesisSourceJar
 	from cglibSource
 	from javapoetSource
 	from objenesisSource
+}
+
+eclipse {
+	synchronizationTasks cglibSourceJar, javapoetSourceJar, objenesisSourceJar
+	classpath {
+		file {
+			whenMerged {
+				def pattern = ~/\/spring-\w+-repack-/
+				entries.forEach {
+					if (pattern.matcher(it.path).find()) {
+						def sourcesJar = it.path.replace('.jar', '-sources.jar');
+						it.sourcePath = fileReference(file(sourcesJar))
+					}
+				}
+			}
+		}
+	}
 }
