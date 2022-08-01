@@ -22,6 +22,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.InvocationInterceptor;
 import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
+import org.junit.platform.launcher.EngineFilter;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.TestPlan;
@@ -40,6 +41,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Christoph Dreis
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 6.0
  */
 class CompileWithTargetClassAccessExtension implements InvocationInterceptor {
@@ -134,6 +136,7 @@ class CompileWithTargetClassAccessExtension implements InvocationInterceptor {
 		Method testMethod = findMethod(testClass, testMethodName);
 		LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
 				.selectors(DiscoverySelectors.selectMethod(testClass, testMethod))
+				.filters(EngineFilter.includeEngines("junit-jupiter"))
 				.build();
 		Launcher launcher = LauncherFactory.create();
 		TestPlan testPlan = launcher.discover(request);
