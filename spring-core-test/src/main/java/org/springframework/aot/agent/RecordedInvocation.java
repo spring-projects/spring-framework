@@ -110,10 +110,15 @@ public final class RecordedInvocation {
 	 */
 	public TypeReference getInstanceTypeReference() {
 		Assert.notNull(this.instance, "Cannot resolve 'this' for static invocations");
-		if (this.instance instanceof Class<?>) {
-			return TypeReference.of((Class<?>) this.instance);
-		}
 		return TypeReference.of(this.instance.getClass());
+	}
+
+	/**
+	 * Return whether the current invocation is static.
+	 * @return {@code true} if the invocation is static
+	 */
+	public boolean isStatic() {
+		return this.instance == null;
 	}
 
 	/**
@@ -172,8 +177,15 @@ public final class RecordedInvocation {
 
 	@Override
 	public String toString() {
-		return String.format("<%s> invocation of <%s> on type <%s> with arguments %s",
-				getHintType().hintClassName(), getMethodReference(), getInstanceTypeReference(), getArguments());
+		if(isStatic()) {
+			return String.format("<%s> invocation of <%s> with arguments %s",
+					getHintType().hintClassName(), getMethodReference(), getArguments());
+		}
+		else {
+			Class<?> instanceType = (getInstance() instanceof  Class<?>) ? getInstance() : getInstance().getClass();
+			return String.format("<%s> invocation of <%s> on type <%s> with arguments %s",
+					getHintType().hintClassName(), getMethodReference(), instanceType.getCanonicalName(), getArguments());
+		}
 	}
 
 	/**
