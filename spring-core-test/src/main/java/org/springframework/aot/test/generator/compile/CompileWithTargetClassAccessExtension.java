@@ -119,16 +119,14 @@ class CompileWithTargetClassAccessExtension implements InvocationInterceptor {
 				testClass.getClassLoader());
 		Thread.currentThread().setContextClassLoader(forkedClassPathClassLoader);
 		try {
-			runTest(forkedClassPathClassLoader, testClass, testMethod);
+			runTest(testClass, testMethod);
 		}
 		finally {
 			Thread.currentThread().setContextClassLoader(originalClassLoader);
 		}
 	}
 
-	private void runTest(ClassLoader classLoader, Class<?> testClass, Method testMethod)
-			throws Throwable {
-
+	private void runTest(Class<?> testClass, Method testMethod) throws Throwable {
 		LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
 				.selectors(selectMethod(getFullyQualifiedMethodName(testClass, testMethod)))
 				.filters(includeEngines("junit-jupiter"))
