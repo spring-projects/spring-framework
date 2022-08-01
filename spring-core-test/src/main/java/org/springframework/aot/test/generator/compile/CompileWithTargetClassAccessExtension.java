@@ -28,9 +28,7 @@ import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 import org.junit.platform.launcher.listeners.TestExecutionSummary;
 
-import org.springframework.util.Assert;
-import org.springframework.util.ReflectionUtils;
-
+import static org.junit.platform.commons.util.ReflectionUtils.getFullyQualifiedMethodName;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
 import static org.junit.platform.launcher.EngineFilter.includeEngines;
 
@@ -121,20 +119,18 @@ class CompileWithTargetClassAccessExtension implements InvocationInterceptor {
 				testClass.getClassLoader());
 		Thread.currentThread().setContextClassLoader(forkedClassPathClassLoader);
 		try {
-			runTest(forkedClassPathClassLoader, testClass.getName(), testMethod.getName());
+			runTest(forkedClassPathClassLoader, testClass, testMethod);
 		}
 		finally {
 			Thread.currentThread().setContextClassLoader(originalClassLoader);
 		}
 	}
 
-	private void runTest(ClassLoader classLoader, String testClassName, String testMethodName)
+	private void runTest(ClassLoader classLoader, Class<?> testClass, Method testMethod)
 			throws Throwable {
 
-		Class<?> testClass = classLoader.loadClass(testClassName);
-		Method testMethod = findMethod(testClass, testMethodName);
 		LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
-				.selectors(selectMethod(testClass, testMethod))
+				.selectors(selectMethod(getFullyQualifiedMethodName(testClass, testMethod)))
 				.filters(includeEngines("junit-jupiter"))
 				.build();
 		SummaryGeneratingListener listener = new SummaryGeneratingListener();
@@ -144,20 +140,6 @@ class CompileWithTargetClassAccessExtension implements InvocationInterceptor {
 		if (summary.getTotalFailureCount() > 0) {
 			throw summary.getFailures().get(0).getException();
 		}
-	}
-
-	private Method findMethod(Class<?> testClass, String testMethodName) {
-		Method method = ReflectionUtils.findMethod(testClass, testMethodName);
-		if (method == null) {
-			Method[] methods = ReflectionUtils.getUniqueDeclaredMethods(testClass);
-			for (Method candidate : methods) {
-				if (candidate.getName().equals(testMethodName)) {
-					return candidate;
-				}
-			}
-		}
-		Assert.state(method != null, () -> "Unable to find " + testClass + "." + testMethodName);
-		return method;
 	}
 
 
