@@ -20,20 +20,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
-import java.util.Set;
 
 /**
  * {@link ClassLoader} implementation to support
  * {@link CompileWithTargetClassAccess @CompileWithTargetClassAccess}.
  *
  * @author Phillip Webb
- * @author Sam Brannen
  * @since 6.0
  */
 final class CompileWithTargetClassAccessClassLoader extends ClassLoader {
-
-	private static final Set<String> passthroughPackages =
-			Set.of("org.junit", "org.testng", "org.hamcrest");
 
 	private final ClassLoader testClassLoader;
 
@@ -46,7 +41,7 @@ final class CompileWithTargetClassAccessClassLoader extends ClassLoader {
 
 	@Override
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
-		if (passthroughPackages.stream().anyMatch(pkg -> name.startsWith(pkg))) {
+		if (name.startsWith("org.junit") || name.startsWith("org.hamcrest")) {
 			return Class.forName(name, false, this.testClassLoader);
 		}
 		return super.loadClass(name);
