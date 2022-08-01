@@ -10,6 +10,7 @@
 	<mvc:cors>
 
 		<mvc:mapping path="/api/**" allowed-origins="https://domain1.com, https://domain2.com"
+					 allowed-origin-patterns="http://*.domain.com"
 					 allowed-methods="GET, PUT" allowed-headers="header1, header2, header3"
 					 exposed-headers="header1, header2" allow-credentials="false" max-age="123" />
 

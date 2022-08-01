@@ -16,7 +16,7 @@
 
 package org.springframework.orm.jpa;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.SavepointManager;
@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
 /**
  * Resource holder wrapping a JPA {@link EntityManager}.
  * {@link JpaTransactionManager} binds instances of this class to the thread,
- * for a given {@link javax.persistence.EntityManagerFactory}.
+ * for a given {@link jakarta.persistence.EntityManagerFactory}.
  *
  * <p>Also serves as a base class for {@link org.springframework.orm.hibernate5.SessionHolder},
  * as of 5.1.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package org.springframework.web.reactive.result.condition;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.Map;
 
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -34,8 +34,6 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  * @since 5.0
  */
 abstract class AbstractMediaTypeExpression implements Comparable<AbstractMediaTypeExpression>, MediaTypeExpression {
-
-	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final MediaType mediaType;
 
@@ -83,10 +81,31 @@ abstract class AbstractMediaTypeExpression implements Comparable<AbstractMediaTy
 	protected abstract boolean matchMediaType(ServerWebExchange exchange)
 			throws NotAcceptableStatusException, UnsupportedMediaTypeStatusException;
 
+	protected boolean matchParameters(MediaType contentType) {
+		for (Map.Entry<String, String> entry : getMediaType().getParameters().entrySet()) {
+			if (StringUtils.hasText(entry.getValue())) {
+				String value = contentType.getParameter(entry.getKey());
+				if (StringUtils.hasText(value) && !entry.getValue().equals(value)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 
 	@Override
 	public int compareTo(AbstractMediaTypeExpression other) {
-		return MediaType.SPECIFICITY_COMPARATOR.compare(this.getMediaType(), other.getMediaType());
+		MediaType mediaType1 = this.getMediaType();
+		MediaType mediaType2 = other.getMediaType();
+		if (mediaType1.isMoreSpecific(mediaType2)) {
+			return -1;
+		}
+		else if (mediaType1.isLessSpecific(mediaType2)) {
+			return 1;
+		}
+		else {
+			return 0;
+		}
 	}
 
 	@Override

@@ -70,7 +70,7 @@ class AopNamespaceHandlerScopeIntegrationTests {
 		assertThat(singletonScoped.getName()).isEqualTo(rob);
 		singletonScoped.setName(bram);
 		assertThat(singletonScoped.getName()).isEqualTo(bram);
-		ITestBean deserialized = (ITestBean) SerializationTestUtils.serializeAndDeserialize(singletonScoped);
+		ITestBean deserialized = SerializationTestUtils.serializeAndDeserialize(singletonScoped);
 		assertThat(deserialized.getName()).isEqualTo(bram);
 	}
 

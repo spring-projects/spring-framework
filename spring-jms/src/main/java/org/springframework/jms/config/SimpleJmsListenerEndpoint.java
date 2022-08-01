@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.jms.config;
 
-import javax.jms.MessageListener;
+import jakarta.jms.MessageListener;
 
 import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.lang.Nullable;
@@ -63,7 +63,7 @@ public class SimpleJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 	@Override
 	protected StringBuilder getEndpointDescription() {
 		return super.getEndpointDescription()
-				.append(" | messageListener='").append(this.messageListener).append("'");
+				.append(" | messageListener='").append(this.messageListener).append('\'');
 	}
 
 }

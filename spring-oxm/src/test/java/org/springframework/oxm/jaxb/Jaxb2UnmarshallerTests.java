@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,18 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 
-import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
-import javax.xml.bind.JAXBElement;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
+import jakarta.activation.DataHandler;
+import jakarta.activation.FileDataSource;
+import jakarta.xml.bind.JAXBElement;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.oxm.AbstractUnmarshallerTests;
 import org.springframework.oxm.jaxb.test.FlightType;
@@ -56,7 +57,7 @@ public class Jaxb2UnmarshallerTests extends AbstractUnmarshallerTests<Jaxb2Marsh
 	protected Jaxb2Marshaller createUnmarshaller() throws Exception {
 		Jaxb2Marshaller unmarshaller = new Jaxb2Marshaller();
 		unmarshaller.setContextPath("org.springframework.oxm.jaxb.test");
-		unmarshaller.setSchema(new ClassPathResource("org/springframework/oxm/flight.xsd"));
+		unmarshaller.setSchema(new FileSystemResource("src/test/schema/flight.xsd"));
 		unmarshaller.afterPropertiesSet();
 		return unmarshaller;
 	}
@@ -125,7 +126,7 @@ public class Jaxb2UnmarshallerTests extends AbstractUnmarshallerTests<Jaxb2Marsh
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void unmarshalAnXmlReferingToAWrappedXmlElementDecl() throws Exception {
+	public void unmarshalAnXmlReferringToAWrappedXmlElementDecl() throws Exception {
 		// SPR-10714
 		unmarshaller = new Jaxb2Marshaller();
 		unmarshaller.setPackagesToScan(new String[] { "org.springframework.oxm.jaxb" });

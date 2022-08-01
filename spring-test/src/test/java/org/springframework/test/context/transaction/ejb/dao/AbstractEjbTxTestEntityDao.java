@@ -16,9 +16,9 @@
 
 package org.springframework.test.context.transaction.ejb.dao;
 
-import javax.ejb.TransactionAttribute;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.springframework.test.context.transaction.ejb.model.TestEntity;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -207,7 +207,7 @@ abstract class AbstractMergedAnnotation<A extends Annotation> implements MergedA
 		}
 		A synthesized = this.synthesizedAnnotation;
 		if (synthesized == null) {
-			synthesized = createSynthesized();
+			synthesized = createSynthesizedAnnotation();
 			this.synthesizedAnnotation = synthesized;
 		}
 		return synthesized;
@@ -237,7 +237,11 @@ abstract class AbstractMergedAnnotation<A extends Annotation> implements MergedA
 
 	/**
 	 * Factory method used to create the synthesized annotation.
+	 * <p>If the source is an annotation that is not <em>synthesizable</em>, it
+	 * will be returned unmodified.
+	 * <p>Consult the documentation for {@link MergedAnnotation#synthesize()}
+	 * for an explanation of what is considered synthesizable.
 	 */
-	protected abstract A createSynthesized();
+	protected abstract A createSynthesizedAnnotation();
 
 }

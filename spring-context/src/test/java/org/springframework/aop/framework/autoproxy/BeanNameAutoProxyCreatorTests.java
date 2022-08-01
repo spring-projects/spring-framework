@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import test.mixin.Lockable;
 import test.mixin.LockedException;
@@ -40,42 +39,36 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Rob Harrop
  * @author Chris Beams
  */
-public class BeanNameAutoProxyCreatorTests {
+class BeanNameAutoProxyCreatorTests {
 
-	private BeanFactory beanFactory;
-
-
-	@BeforeEach
-	public void setup() {
-		// Note that we need an ApplicationContext, not just a BeanFactory,
-		// for post-processing and hence auto-proxying to work.
-		beanFactory = new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
-	}
+	// Note that we need an ApplicationContext, not just a BeanFactory,
+	// for post-processing and hence auto-proxying to work.
+	private final BeanFactory beanFactory = new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
 
 
 	@Test
-	public void testNoProxy() {
+	void noProxy() {
 		TestBean tb = (TestBean) beanFactory.getBean("noproxy");
 		assertThat(AopUtils.isAopProxy(tb)).isFalse();
 		assertThat(tb.getName()).isEqualTo("noproxy");
 	}
 
 	@Test
-	public void testJdkProxyWithExactNameMatch() {
+	void proxyWithExactNameMatch() {
 		ITestBean tb = (ITestBean) beanFactory.getBean("onlyJdk");
 		jdkAssertions(tb, 1);
 		assertThat(tb.getName()).isEqualTo("onlyJdk");
 	}
 
 	@Test
-	public void testJdkProxyWithDoubleProxying() {
+	void proxyWithDoubleProxying() {
 		ITestBean tb = (ITestBean) beanFactory.getBean("doubleJdk");
 		jdkAssertions(tb, 2);
 		assertThat(tb.getName()).isEqualTo("doubleJdk");
 	}
 
 	@Test
-	public void testJdkIntroduction() {
+	void jdkIntroduction() {
 		ITestBean tb = (ITestBean) beanFactory.getBean("introductionUsingJdk");
 		NopInterceptor nop = (NopInterceptor) beanFactory.getBean("introductionNopInterceptor");
 		assertThat(nop.getCount()).isEqualTo(0);
@@ -110,7 +103,7 @@ public class BeanNameAutoProxyCreatorTests {
 	}
 
 	@Test
-	public void testJdkIntroductionAppliesToCreatedObjectsNotFactoryBean() {
+	void jdkIntroductionAppliesToCreatedObjectsNotFactoryBean() {
 		ITestBean tb = (ITestBean) beanFactory.getBean("factory-introductionUsingJdk");
 		NopInterceptor nop = (NopInterceptor) beanFactory.getBean("introductionNopInterceptor");
 		assertThat(nop.getCount()).as("NOP should not have done any work yet").isEqualTo(0);
@@ -118,8 +111,7 @@ public class BeanNameAutoProxyCreatorTests {
 		int age = 5;
 		tb.setAge(age);
 		assertThat(tb.getAge()).isEqualTo(age);
-		boolean condition = tb instanceof TimeStamped;
-		assertThat(condition).as("Introduction was made").isTrue();
+		assertThat(tb).as("Introduction was made").isInstanceOf(TimeStamped.class);
 		assertThat(((TimeStamped) tb).getTimeStamp()).isEqualTo(0);
 		assertThat(nop.getCount()).isEqualTo(3);
 
@@ -144,23 +136,33 @@ public class BeanNameAutoProxyCreatorTests {
 	}
 
 	@Test
-	public void testJdkProxyWithWildcardMatch() {
+	void proxyWithWildcardMatch() {
 		ITestBean tb = (ITestBean) beanFactory.getBean("jdk1");
 		jdkAssertions(tb, 1);
 		assertThat(tb.getName()).isEqualTo("jdk1");
 	}
 
 	@Test
-	public void testCglibProxyWithWildcardMatch() {
+	void cglibProxyWithWildcardMatch() {
 		TestBean tb = (TestBean) beanFactory.getBean("cglib1");
 		cglibAssertions(tb);
 		assertThat(tb.getName()).isEqualTo("cglib1");
 	}
 
 	@Test
-	public void testWithFrozenProxy() {
+	void withFrozenProxy() {
 		ITestBean testBean = (ITestBean) beanFactory.getBean("frozenBean");
 		assertThat(((Advised)testBean).isFrozen()).isTrue();
+	}
+
+	@Test
+	void customTargetSourceCreatorsApplyOnlyToConfiguredBeanNames() {
+		ITestBean lazy1 = beanFactory.getBean("lazy1", ITestBean.class);
+		ITestBean alias1 = beanFactory.getBean("lazy1alias", ITestBean.class);
+		ITestBean lazy2 = beanFactory.getBean("lazy2", ITestBean.class);
+		assertThat(AopUtils.isAopProxy(lazy1)).isTrue();
+		assertThat(AopUtils.isAopProxy(alias1)).isTrue();
+		assertThat(AopUtils.isAopProxy(lazy2)).isFalse();
 	}
 
 
@@ -195,25 +197,16 @@ public class BeanNameAutoProxyCreatorTests {
 
 class CreatesTestBean implements FactoryBean<Object> {
 
-	/**
-	 * @see org.springframework.beans.factory.FactoryBean#getObject()
-	 */
 	@Override
 	public Object getObject() throws Exception {
 		return new TestBean();
 	}
 
-	/**
-	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
-	 */
 	@Override
 	public Class<?> getObjectType() {
 		return TestBean.class;
 	}
 
-	/**
-	 * @see org.springframework.beans.factory.FactoryBean#isSingleton()
-	 */
 	@Override
 	public boolean isSingleton() {
 		return true;

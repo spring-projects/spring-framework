@@ -43,7 +43,7 @@ public class MethodInvokingFactoryBeanTests {
 	@Test
 	public void testParameterValidation() throws Exception {
 
-		// assert that only static OR non static are set, but not both or none
+		// assert that only static OR non-static are set, but not both or none
 		MethodInvokingFactoryBean mcfb = new MethodInvokingFactoryBean();
 		assertThatIllegalArgumentException().isThrownBy(mcfb::afterPropertiesSet);
 
@@ -113,7 +113,7 @@ public class MethodInvokingFactoryBeanTests {
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
-		mcfb.setArguments(new ArrayList<>(), new ArrayList<Object>(), "hello");
+		mcfb.setArguments(new ArrayList<>(), new ArrayList<>(), "hello");
 		mcfb.afterPropertiesSet();
 		mcfb.getObjectType();
 
@@ -184,7 +184,7 @@ public class MethodInvokingFactoryBeanTests {
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
-		mcfb.setArguments(new ArrayList<>(), new ArrayList<Object>(), "hello");
+		mcfb.setArguments(new ArrayList<>(), new ArrayList<>(), "hello");
 		// should pass
 		mcfb.afterPropertiesSet();
 	}
@@ -194,7 +194,7 @@ public class MethodInvokingFactoryBeanTests {
 		MethodInvokingFactoryBean mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
-		mcfb.setArguments(new ArrayList<>(), new ArrayList<Object>(), "hello", "bogus");
+		mcfb.setArguments(new ArrayList<>(), new ArrayList<>(), "hello", "bogus");
 		assertThatExceptionOfType(NoSuchMethodException.class).as(
 				"Matched method with wrong number of args").isThrownBy(
 						mcfb::afterPropertiesSet);
@@ -210,14 +210,14 @@ public class MethodInvokingFactoryBeanTests {
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes2");
-		mcfb.setArguments(new ArrayList<>(), new ArrayList<Object>(), "hello", "bogus");
+		mcfb.setArguments(new ArrayList<>(), new ArrayList<>(), "hello", "bogus");
 		mcfb.afterPropertiesSet();
 		assertThat(mcfb.getObject()).isEqualTo("hello");
 
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes2");
-		mcfb.setArguments(new ArrayList<>(), new ArrayList<Object>(), new Object());
+		mcfb.setArguments(new ArrayList<>(), new ArrayList<>(), new Object());
 		assertThatExceptionOfType(NoSuchMethodException.class).as(
 				"Matched method when shouldn't have matched").isThrownBy(
 						mcfb::afterPropertiesSet);

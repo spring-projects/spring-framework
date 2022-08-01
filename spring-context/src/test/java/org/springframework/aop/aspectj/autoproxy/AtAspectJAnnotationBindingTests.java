@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class AtAspectJAnnotationBindingTests {
 
 	private AnnotatedTestBean testBean;
+
 	private ClassPathXmlApplicationContext ctx;
 
 
@@ -70,8 +71,7 @@ public class AtAspectJAnnotationBindingTests {
 class AtAspectJAnnotationBindingTestAspect {
 
 	@Around("execution(* *(..)) && @annotation(testAnn)")
-	public Object doWithAnnotation(ProceedingJoinPoint pjp, TestAnnotation testAnn)
-	throws Throwable {
+	public Object doWithAnnotation(ProceedingJoinPoint pjp, TestAnnotation testAnn) throws Throwable {
 		String annValue = testAnn.value();
 		Object result = pjp.proceed();
 		return (result instanceof String ? annValue + " " + result : result);

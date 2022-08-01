@@ -11,8 +11,8 @@ EL, to name a few -- the Spring Expression Language was created to provide the S
 community with a single well supported expression language that can be used across all
 the products in the Spring portfolio. Its language features are driven by the
 requirements of the projects in the Spring portfolio, including tooling requirements
-for code completion support within the Eclipse-based Spring Tool Suite. That said,
-SpEL is based on a technology-agnostic API that lets other expression language
+for code completion support within the https://spring.io/tools[Spring Tools for Eclipse].
+That said, SpEL is based on a technology-agnostic API that lets other expression language
 implementations be integrated, should the need arise.
 
 While SpEL serves as the foundation for expression evaluation within the Spring
@@ -332,15 +332,20 @@ being placed in it. The following example shows how to do so:
 [[expressions-parser-configuration]]
 === Parser Configuration
 
-It is possible to configure the SpEL expression parser by using a parser configuration object
-(`org.springframework.expression.spel.SpelParserConfiguration`). The configuration
+It is possible to configure the SpEL expression parser by using a parser configuration
+object (`org.springframework.expression.spel.SpelParserConfiguration`). The configuration
 object controls the behavior of some of the expression components. For example, if you
-index into an array or collection and the element at the specified index is `null`,
-you can automatically create the element. This is useful when using expressions made up of a
-chain of property references. If you index into an array or list
-and specifying an index that is beyond the end of the current size of the array or
-list, you can automatically grow the array or list to accommodate that index. The following
-example demonstrates how to automatically grow the list:
+index into an array or collection and the element at the specified index is `null`, SpEL
+can automatically create the element. This is useful when using expressions made up of a
+chain of property references. If you index into an array or list and specify an index
+that is beyond the end of the current size of the array or list, SpEL can automatically
+grow the array or list to accommodate that index. In order to add an element at the
+specified index, SpEL will try to create the element using the element type's default
+constructor before setting the specified value. If the element type does not have a
+default constructor, `null` will be added to the array or list. If there is no built-in
+or custom converter that knows how to set the value, `null` will remain in the array or
+list at the specified index. The following example demonstrates how to automatically grow
+the list:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -352,7 +357,7 @@ example demonstrates how to automatically grow the list:
 	// Turn on:
 	// - auto null reference initialization
 	// - auto collection growing
-	SpelParserConfiguration config = new SpelParserConfiguration(true,true);
+	SpelParserConfiguration config = new SpelParserConfiguration(true, true);
 
 	ExpressionParser parser = new SpelExpressionParser(config);
 
@@ -428,9 +433,9 @@ interpreter and only 3ms using the compiled version of the expression.
 
 The compiler is not turned on by default, but you can turn it on in either of two
 different ways. You can turn it on by using the parser configuration process
-(<<expressions-parser-configuration, discussed earlier>>) or by using a system
-property when SpEL usage is embedded inside another component. This section
-discusses both of these options.
+(<<expressions-parser-configuration, discussed earlier>>) or by using a Spring property
+when SpEL usage is embedded inside another component. This section discusses both of
+these options.
 
 The compiler can operate in one of three modes, which are captured in the
 `org.springframework.expression.spel.SpelCompilerMode` enum. The modes are as follows:
@@ -460,7 +465,7 @@ following example shows how to do so:
 .Java
 ----
 	SpelParserConfiguration config = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE,
-		this.getClass().getClassLoader());
+			this.getClass().getClassLoader());
 
 	SpelExpressionParser parser = new SpelExpressionParser(config);
 
@@ -491,10 +496,12 @@ It is important to ensure that, if a classloader is specified, it can see all th
 the expression evaluation process. If you do not specify a classloader, a default classloader is used
 (typically the context classloader for the thread that is running during expression evaluation).
 
-The second way to configure the compiler is for use when SpEL is embedded inside some other
-component and it may not be possible to configure it through a configuration object. In these
-cases, it is possible to use a system property. You can set the `spring.expression.compiler.mode`
-property to one of the `SpelCompilerMode` enum values (`off`, `immediate`, or `mixed`).
+The second way to configure the compiler is for use when SpEL is embedded inside some
+other component and it may not be possible to configure it through a configuration
+object. In these cases, it is possible to set the `spring.expression.compiler.mode`
+property via a JVM system property (or via the
+<<appendix.adoc#appendix-spring-properties,`SpringProperties`>> mechanism) to one of the
+`SpelCompilerMode` enum values (`off`, `immediate`, or `mixed`).
 
 
 [[expressions-compiler-limitations]]
@@ -510,7 +517,7 @@ kinds of expression cannot be compiled at the moment:
 * Expressions using custom resolvers or accessors
 * Expressions using selection or projection
 
-More types of expression will be compilable in the future.
+More types of expressions will be compilable in the future.
 
 
 
@@ -539,8 +546,12 @@ example shows:
 	</bean>
 ----
 
-The `systemProperties` variable is predefined, so you can use it in your expressions, as
-the following example shows:
+All beans in the application context are available as predefined variables with their
+common bean name. This includes standard context beans such as `environment` (of type
+`org.springframework.core.env.Environment`) as well as `systemProperties` and
+`systemEnvironment` (of type `Map<String, Object>`) for access to the runtime environment.
+
+The following example shows access to the `systemProperties` bean as a SpEL variable:
 
 [source,xml,indent=0,subs="verbatim"]
 ----
@@ -551,8 +562,7 @@ the following example shows:
 	</bean>
 ----
 
-Note that you do not have to prefix the predefined variable with the `#`
-symbol in this context.
+Note that you do not have to prefix the predefined variable with the `#` symbol here.
 
 You can also refer to other bean properties by name, as the following example shows:
 
@@ -576,10 +586,10 @@ You can also refer to other bean properties by name, as the following example sh
 [[expressions-beandef-annotation-based]]
 === Annotation Configuration
 
-To specify a default value, you can place the `@Value` annotation on fields, methods, and method or constructor
-parameters.
+To specify a default value, you can place the `@Value` annotation on fields, methods,
+and method or constructor parameters.
 
-The following example sets the default value of a field variable:
+The following example sets the default value of a field:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -778,7 +788,7 @@ using a literal on one side of a logical comparison operator.
 ----
 
 Numbers support the use of the negative sign, exponential notation, and decimal points.
-By default, real numbers are parsed by using Double.parseDouble().
+By default, real numbers are parsed by using `Double.parseDouble()`.
 
 
 
@@ -786,31 +796,39 @@ By default, real numbers are parsed by using Double.parseDouble().
 === Properties, Arrays, Lists, Maps, and Indexers
 
 Navigating with property references is easy. To do so, use a period to indicate a nested
-property value. The instances of the `Inventor` class, `pupin` and `tesla`, were populated with
-data listed in the <<expressions-example-classes, Classes used in the examples>> section.
-To navigate "`down`" and get Tesla's year of birth and Pupin's city of birth, we use the following
-expressions:
+property value. The instances of the `Inventor` class, `pupin` and `tesla`, were
+populated with data listed in the <<expressions-example-classes, Classes used in the
+examples>> section. To navigate "down" the object graph and get Tesla's year of birth and
+Pupin's city of birth, we use the following expressions:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
 	// evals to 1856
-	int year = (Integer) parser.parseExpression("Birthdate.Year + 1900").getValue(context);
+	int year = (Integer) parser.parseExpression("birthdate.year + 1900").getValue(context);
 
-	String city = (String) parser.parseExpression("placeOfBirth.City").getValue(context);
+	String city = (String) parser.parseExpression("placeOfBirth.city").getValue(context);
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	// evals to 1856
-	val year = parser.parseExpression("Birthdate.Year + 1900").getValue(context) as Int
+	val year = parser.parseExpression("birthdate.year + 1900").getValue(context) as Int
 
-	val city = parser.parseExpression("placeOfBirth.City").getValue(context) as String
+	val city = parser.parseExpression("placeOfBirth.city").getValue(context) as String
 ----
 
-Case insensitivity is allowed for the first letter of property names. The contents of
-arrays and lists are obtained by using square bracket notation, as the following example
-shows:
+[NOTE]
+====
+Case insensitivity is allowed for the first letter of property names. Thus, the
+expressions in the above example may be written as `Birthdate.Year + 1900` and
+`PlaceOfBirth.City`, respectively. In addition, properties may optionally be accessed via
+method invocations -- for example, `getPlaceOfBirth().getCity()` instead of
+`placeOfBirth.city`.
+====
+
+The contents of arrays and lists are obtained by using square bracket notation, as the
+following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -827,12 +845,12 @@ shows:
 	// Members List
 
 	// evaluates to "Nikola Tesla"
-	String name = parser.parseExpression("Members[0].Name").getValue(
+	String name = parser.parseExpression("members[0].name").getValue(
 			context, ieee, String.class);
 
 	// List and Array navigation
 	// evaluates to "Wireless communication"
-	String invention = parser.parseExpression("Members[0].Inventions[6]").getValue(
+	String invention = parser.parseExpression("members[0].inventions[6]").getValue(
 			context, ieee, String.class);
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -850,17 +868,17 @@ shows:
 	// Members List
 
 	// evaluates to "Nikola Tesla"
-	val name = parser.parseExpression("Members[0].Name").getValue(
+	val name = parser.parseExpression("members[0].name").getValue(
 			context, ieee, String::class.java)
 
 	// List and Array navigation
 	// evaluates to "Wireless communication"
-	val invention = parser.parseExpression("Members[0].Inventions[6]").getValue(
+	val invention = parser.parseExpression("members[0].inventions[6]").getValue(
 			context, ieee, String::class.java)
 ----
 
 The contents of maps are obtained by specifying the literal key value within the
-brackets. In the following example, because keys for the `Officers` map are strings, we can specify
+brackets. In the following example, because keys for the `officers` map are strings, we can specify
 string literals:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -868,15 +886,15 @@ string literals:
 ----
 	// Officer's Dictionary
 
-	Inventor pupin = parser.parseExpression("Officers['president']").getValue(
+	Inventor pupin = parser.parseExpression("officers['president']").getValue(
 			societyContext, Inventor.class);
 
 	// evaluates to "Idvor"
-	String city = parser.parseExpression("Officers['president'].PlaceOfBirth.City").getValue(
+	String city = parser.parseExpression("officers['president'].placeOfBirth.city").getValue(
 			societyContext, String.class);
 
 	// setting values
-	parser.parseExpression("Officers['advisors'][0].PlaceOfBirth.Country").setValue(
+	parser.parseExpression("officers['advisors'][0].placeOfBirth.country").setValue(
 			societyContext, "Croatia");
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -884,15 +902,15 @@ string literals:
 ----
 	// Officer's Dictionary
 
-	val pupin = parser.parseExpression("Officers['president']").getValue(
+	val pupin = parser.parseExpression("officers['president']").getValue(
 			societyContext, Inventor::class.java)
 
 	// evaluates to "Idvor"
-	val city = parser.parseExpression("Officers['president'].PlaceOfBirth.City").getValue(
+	val city = parser.parseExpression("officers['president'].placeOfBirth.city").getValue(
 			societyContext, String::class.java)
 
 	// setting values
-	parser.parseExpression("Officers['advisors'][0].PlaceOfBirth.Country").setValue(
+	parser.parseExpression("officers['advisors'][0].placeOfBirth.country").setValue(
 			societyContext, "Croatia")
 ----
 
@@ -921,7 +939,7 @@ You can directly express lists in an expression by using `{}` notation.
 ----
 
 `{}` by itself means an empty list. For performance reasons, if the list is itself
-entirely composed of fixed literals,  a constant list is created to represent the
+entirely composed of fixed literals, a constant list is created to represent the
 expression (rather than building a new list on each evaluation).
 
 
@@ -940,7 +958,7 @@ following example shows how to do so:
 
 	Map mapOfMaps = (Map) parser.parseExpression("{name:{first:'Nikola',last:'Tesla'},dob:{day:10,month:'July',year:1856}}").getValue(context);
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
 .Kotlin
 ----
 	// evaluates to a Java map containing the two entries
@@ -949,10 +967,11 @@ following example shows how to do so:
 	val mapOfMaps = parser.parseExpression("{name:{first:'Nikola',last:'Tesla'},dob:{day:10,month:'July',year:1856}}").getValue(context) as Map<*, *>	
 ----
 
-`{:}` by itself means an empty map. For performance reasons, if the map is itself composed
-of fixed literals or other nested constant structures (lists or maps), a constant map is created
-to represent the expression (rather than building a new map on each evaluation). Quoting of the map keys
-is optional. The examples above do not use quoted keys.
+`{:}` by itself means an empty map. For performance reasons, if the map is itself
+composed of fixed literals or other nested constant structures (lists or maps), a
+constant map is created to represent the expression (rather than building a new map on
+each evaluation). Quoting of the map keys is optional (unless the key contains a period
+(`.`)). The examples above do not use quoted keys.
 
 
 
@@ -985,8 +1004,7 @@ to have the array populated at construction time. The following example shows ho
 	val numbers3 = parser.parseExpression("new int[4][5]").getValue(context) as Array<IntArray>
 ----
 
-You cannot currently supply an initializer when you construct
-multi-dimensional array.
+You cannot currently supply an initializer when you construct a multi-dimensional array.
 
 
 
@@ -1034,8 +1052,9 @@ The Spring Expression Language supports the following kinds of operators:
 ==== Relational Operators
 
 The relational operators (equal, not equal, less than, less than or equal, greater than,
-and greater than or equal) are supported by using standard operator notation. The
-following listing shows a few examples of operators:
+and greater than or equal) are supported by using standard operator notation.
+These operators work on `Number` types as well as types implementing `Comparable`.
+The following listing shows a few examples of operators:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1048,6 +1067,9 @@ following listing shows a few examples of operators:
 
 	// evaluates to true
 	boolean trueValue = parser.parseExpression("'black' < 'block'").getValue(Boolean.class);
+
+	// uses CustomValue:::compareTo
+	boolean trueValue = parser.parseExpression("new CustomValue(1) < new CustomValue(2)").getValue(Boolean.class);
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -1060,6 +1082,9 @@ following listing shows a few examples of operators:
 
 	// evaluates to true
 	val trueValue = parser.parseExpression("'black' < 'block'").getValue(Boolean::class.java)
+
+	// uses CustomValue:::compareTo
+	val trueValue = parser.parseExpression("new CustomValue(1) < new CustomValue(2)").getValue(Boolean::class.java);
 ----
 
 [NOTE]
@@ -1087,7 +1112,7 @@ expression-based `matches` operator. The following listing shows examples of bot
 	boolean trueValue = parser.parseExpression(
 			"'5.00' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
 
-	//evaluates to false
+	// evaluates to false
 	boolean falseValue = parser.parseExpression(
 			"'5.0067' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
 ----
@@ -1102,14 +1127,14 @@ expression-based `matches` operator. The following listing shows examples of bot
 	val trueValue = parser.parseExpression(
 			"'5.00' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean::class.java)
 
-	//evaluates to false
+	// evaluates to false
 	val falseValue = parser.parseExpression(
 			"'5.0067' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean::class.java)
 ----
 
-CAUTION: Be careful with primitive types, as they are immediately boxed up to the wrapper type,
-so `1 instanceof T(int)` evaluates to `false` while `1 instanceof T(Integer)`
-evaluates to `true`, as expected.
+CAUTION: Be careful with primitive types, as they are immediately boxed up to their
+wrapper types. For example, `1 instanceof T(int)` evaluates to `false`, while
+`1 instanceof T(Integer)` evaluates to `true`, as expected.
 
 Each symbolic operator can also be specified as a purely alphabetic equivalent. This
 avoids problems where the symbols used have special meaning for the document type in
@@ -1137,7 +1162,7 @@ SpEL supports the following logical operators:
 * `or` (`||`)
 * `not` (`!`)
 
-The following example shows how to use the logical operators
+The following example shows how to use the logical operators:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1204,10 +1229,11 @@ The following example shows how to use the logical operators
 [[expressions-operators-mathematical]]
 ==== Mathematical Operators
 
-You can use the addition operator on both numbers and strings. You can use the subtraction, multiplication,
-and division operators only on numbers. You can also use
-the modulus (%) and exponential power (^) operators. Standard operator precedence is enforced. The
-following example shows the mathematical operators in use:
+You can use the addition operator (`+`) on both numbers and strings. You can use the
+subtraction (`-`), multiplication (`*`), and division (`/`) operators only on numbers.
+You can also use the modulus (`%`) and exponential power (`^`) operators on numbers.
+Standard operator precedence is enforced. The following example shows the mathematical
+operators in use:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1278,9 +1304,9 @@ following example shows the mathematical operators in use:
 [[expressions-assignment]]
 ==== The Assignment Operator
 
-To setting a property, use the assignment operator (`=`). This is typically
-done within a call to `setValue` but can also be done inside a call to `getValue`. The
-following listing shows both ways to use the assignment operator:
+To set a property, use the assignment operator (`=`). This is typically done within a
+call to `setValue` but can also be done inside a call to `getValue`. The following
+listing shows both ways to use the assignment operator:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1288,11 +1314,11 @@ following listing shows both ways to use the assignment operator:
 	Inventor inventor = new Inventor();
 	EvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding().build();
 
-	parser.parseExpression("Name").setValue(context, inventor, "Aleksandar Seovic");
+	parser.parseExpression("name").setValue(context, inventor, "Aleksandar Seovic");
 
 	// alternatively
 	String aleks = parser.parseExpression(
-			"Name = 'Aleksandar Seovic'").getValue(context, inventor, String.class);
+			"name = 'Aleksandar Seovic'").getValue(context, inventor, String.class);
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -1300,11 +1326,11 @@ following listing shows both ways to use the assignment operator:
 	val inventor = Inventor()
 	val context = SimpleEvaluationContext.forReadWriteDataBinding().build()
 
-	parser.parseExpression("Name").setValue(context, inventor, "Aleksandar Seovic")
+	parser.parseExpression("name").setValue(context, inventor, "Aleksandar Seovic")
 
 	// alternatively
 	val aleks = parser.parseExpression(
-			"Name = 'Aleksandar Seovic'").getValue(context, inventor, String::class.java)
+			"name = 'Aleksandar Seovic'").getValue(context, inventor, String::class.java)
 ----
 
 
@@ -1315,9 +1341,9 @@ You can use the special `T` operator to specify an instance of `java.lang.Class`
 type). Static methods are invoked by using this operator as well. The
 `StandardEvaluationContext` uses a `TypeLocator` to find types, and the
 `StandardTypeLocator` (which can be replaced) is built with an understanding of the
-`java.lang` package. This means that `T()` references to types within `java.lang` do not need to be
-fully qualified, but all other type references must be. The following example shows how
-to use the `T` operator:
+`java.lang` package. This means that `T()` references to types within the `java.lang`
+package do not need to be fully qualified, but all other type references must be. The
+following example shows how to use the `T` operator:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1347,9 +1373,10 @@ to use the `T` operator:
 [[expressions-constructors]]
 === Constructors
 
-You can invoke constructors by using the `new` operator. You should use the fully qualified class name
-for all but the primitive types (`int`, `float`, and so on) and String. The following
-example shows how to use the `new` operator to invoke constructors:
+You can invoke constructors by using the `new` operator. You should use the fully
+qualified class name for all types except those located in the `java.lang` package
+(`Integer`, `Float`, `String`, and so on). The following example shows how to use the
+`new` operator to invoke constructors:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1358,7 +1385,7 @@ example shows how to use the `new` operator to invoke constructors:
 			"new org.spring.samples.spel.inventor.Inventor('Albert Einstein', 'German')")
 			.getValue(Inventor.class);
 
-	//create new inventor instance within add method of List
+	// create new Inventor instance within the add() method of List
 	p.parseExpression(
 			"Members.add(new org.spring.samples.spel.inventor.Inventor(
 				'Albert Einstein', 'German'))").getValue(societyContext);
@@ -1370,7 +1397,7 @@ example shows how to use the `new` operator to invoke constructors:
 			"new org.spring.samples.spel.inventor.Inventor('Albert Einstein', 'German')")
 			.getValue(Inventor::class.java)
 
-	//create new inventor instance within add method of List
+	// create new Inventor instance within the add() method of List
 	p.parseExpression(
 			"Members.add(new org.spring.samples.spel.inventor.Inventor('Albert Einstein', 'German'))")
 			.getValue(societyContext)
@@ -1405,7 +1432,7 @@ The following example shows how to use variables.
 	EvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding().build();
 	context.setVariable("newName", "Mike Tesla");
 
-	parser.parseExpression("Name = #newName").getValue(context, tesla);
+	parser.parseExpression("name = #newName").getValue(context, tesla);
 	System.out.println(tesla.getName())  // "Mike Tesla"
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -1416,7 +1443,7 @@ The following example shows how to use variables.
 	val context = SimpleEvaluationContext.forReadWriteDataBinding().build()
 	context.setVariable("newName", "Mike Tesla")
 
-	parser.parseExpression("Name = #newName").getValue(context, tesla)
+	parser.parseExpression("name = #newName").getValue(context, tesla)
 	println(tesla.name)  // "Mike Tesla"
 ----
 
@@ -1625,7 +1652,7 @@ realistic example follows:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	parser.parseExpression("Name").setValue(societyContext, "IEEE");
+	parser.parseExpression("name").setValue(societyContext, "IEEE");
 	societyContext.setVariable("queryName", "Nikola Tesla");
 
 	expression = "isMember(#queryName)? #queryName + ' is a member of the ' " +
@@ -1638,7 +1665,7 @@ realistic example follows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	parser.parseExpression("Name").setValue(societyContext, "IEEE")
+	parser.parseExpression("name").setValue(societyContext, "IEEE")
 	societyContext.setVariable("queryName", "Nikola Tesla")
 
 	expression = "isMember(#queryName)? #queryName + ' is a member of the ' " + "+ Name + ' Society' : #queryName + ' is not a member of the ' + Name + ' Society'"
@@ -1675,7 +1702,7 @@ The following example shows how to use the Elvis operator:
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 
-	String name = parser.parseExpression("name?:'Unknown'").getValue(String.class);
+	String name = parser.parseExpression("name?:'Unknown'").getValue(new Inventor(), String.class);
 	System.out.println(name);  // 'Unknown'
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -1683,7 +1710,7 @@ The following example shows how to use the Elvis operator:
 ----
 	val parser = SpelExpressionParser()
 
-	val name = parser.parseExpression("name?:'Unknown'").getValue(String::class.java)
+	val name = parser.parseExpression("name?:'Unknown'").getValue(Inventor(), String::class.java)
 	println(name)  // 'Unknown'
 ----
 
@@ -1696,11 +1723,11 @@ The following listing shows a more complex example:
 	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
 
 	Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
-	String name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, tesla, String.class);
+	String name = parser.parseExpression("name?:'Elvis Presley'").getValue(context, tesla, String.class);
 	System.out.println(name);  // Nikola Tesla
 
 	tesla.setName(null);
-	name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, tesla, String.class);
+	name = parser.parseExpression("name?:'Elvis Presley'").getValue(context, tesla, String.class);
 	System.out.println(name);  // Elvis Presley
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -1710,11 +1737,11 @@ The following listing shows a more complex example:
 	val context = SimpleEvaluationContext.forReadOnlyDataBinding().build()
 
 	val tesla = Inventor("Nikola Tesla", "Serbian")
-	var name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, tesla, String::class.java)
+	var name = parser.parseExpression("name?:'Elvis Presley'").getValue(context, tesla, String::class.java)
 	println(name)  // Nikola Tesla
 
 	tesla.setName(null)
-	name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, tesla, String::class.java)
+	name = parser.parseExpression("name?:'Elvis Presley'").getValue(context, tesla, String::class.java)
 	println(name)  // Elvis Presley
 ----
 
@@ -1751,11 +1778,11 @@ example shows how to use the safe navigation operator:
 	Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
 	tesla.setPlaceOfBirth(new PlaceOfBirth("Smiljan"));
 
-	String city = parser.parseExpression("PlaceOfBirth?.City").getValue(context, tesla, String.class);
+	String city = parser.parseExpression("placeOfBirth?.city").getValue(context, tesla, String.class);
 	System.out.println(city);  // Smiljan
 
 	tesla.setPlaceOfBirth(null);
-	city = parser.parseExpression("PlaceOfBirth?.City").getValue(context, tesla, String.class);
+	city = parser.parseExpression("placeOfBirth?.city").getValue(context, tesla, String.class);
 	System.out.println(city);  // null - does not throw NullPointerException!!!
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -1767,11 +1794,11 @@ example shows how to use the safe navigation operator:
 	val tesla = Inventor("Nikola Tesla", "Serbian")
 	tesla.setPlaceOfBirth(PlaceOfBirth("Smiljan"))
 
-	var city = parser.parseExpression("PlaceOfBirth?.City").getValue(context, tesla, String::class.java)
+	var city = parser.parseExpression("placeOfBirth?.city").getValue(context, tesla, String::class.java)
 	println(city)  // Smiljan
 
 	tesla.setPlaceOfBirth(null)
-	city = parser.parseExpression("PlaceOfBirth?.City").getValue(context, tesla, String::class.java)
+	city = parser.parseExpression("placeOfBirth?.city").getValue(context, tesla, String::class.java)
 	println(city)  // null - does not throw NullPointerException!!!
 ----
 
@@ -1784,30 +1811,30 @@ Selection is a powerful expression language feature that lets you transform a
 source collection into another collection by selecting from its entries.
 
 Selection uses a syntax of `.?[selectionExpression]`. It filters the collection and
-returns a new collection that contain a subset of the original elements. For example,
+returns a new collection that contains a subset of the original elements. For example,
 selection lets us easily get a list of Serbian inventors, as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
 	List<Inventor> list = (List<Inventor>) parser.parseExpression(
-			"Members.?[Nationality == 'Serbian']").getValue(societyContext);
+			"members.?[nationality == 'Serbian']").getValue(societyContext);
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	val list = parser.parseExpression(
-			"Members.?[Nationality == 'Serbian']").getValue(societyContext) as List<Inventor>
+			"members.?[nationality == 'Serbian']").getValue(societyContext) as List<Inventor>
 ----
 
-Selection is possible upon both lists and maps. For a list, the selection
-criteria is evaluated against each individual list element. Against a map, the
-selection criteria is evaluated against each map entry (objects of the Java type
-`Map.Entry`). Each map entry has its key and value accessible as properties for use in
-the selection.
+Selection is supported for arrays and anything that implements `java.lang.Iterable` or
+`java.util.Map`. For a list or array, the selection criteria is evaluated against each
+individual element. Against a map, the selection criteria is evaluated against each map
+entry (objects of the Java type `Map.Entry`). Each map entry has its `key` and `value`
+accessible as properties for use in the selection.
 
-The following expression returns a new map that consists of those elements of the original map
-where the entry value is less than 27:
+The following expression returns a new map that consists of those elements of the
+original map where the entry's value is less than 27:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1820,9 +1847,8 @@ where the entry value is less than 27:
 	val newMap = parser.parseExpression("map.?[value<27]").getValue()
 ----
 
-
-In addition to returning all the selected elements, you can retrieve only the
-first or the last value. To obtain the first entry matching the selection, the syntax is
+In addition to returning all the selected elements, you can retrieve only the first or
+the last element. To obtain the first element matching the selection, the syntax is
 `.^[selectionExpression]`. To obtain the last matching selection, the syntax is
 `.$[selectionExpression]`.
 
@@ -1831,26 +1857,27 @@ first or the last value. To obtain the first entry matching the selection, the s
 [[expressions-collection-projection]]
 === Collection Projection
 
-Projection lets a collection drive the evaluation of a sub-expression, and the
-result is a new collection. The syntax for projection is `.![projectionExpression]`. For
-example, suppose we have a list of inventors but want the list of
-cities where they were born. Effectively, we want to evaluate 'placeOfBirth.city' for
-every entry in the inventor list. The following example uses projection to do so:
+Projection lets a collection drive the evaluation of a sub-expression, and the result is
+a new collection. The syntax for projection is `.![projectionExpression]`. For example,
+suppose we have a list of inventors but want the list of cities where they were born.
+Effectively, we want to evaluate 'placeOfBirth.city' for every entry in the inventor
+list. The following example uses projection to do so:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
 	// returns ['Smiljan', 'Idvor' ]
-	List placesOfBirth = (List)parser.parseExpression("Members.![placeOfBirth.city]");
+	List placesOfBirth = (List)parser.parseExpression("members.![placeOfBirth.city]");
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	// returns ['Smiljan', 'Idvor' ]
-	val placesOfBirth = parser.parseExpression("Members.![placeOfBirth.city]") as List<*>
+	val placesOfBirth = parser.parseExpression("members.![placeOfBirth.city]") as List<*>
 ----
 
-You can also use a map to drive projection and, in this case, the projection expression is
+Projection is supported for arrays and anything that implements `java.lang.Iterable` or
+`java.util.Map`. When using a map to drive projection, the projection expression is
 evaluated against each entry in the map (represented as a Java `Map.Entry`). The result
 of a projection across a map is a list that consists of the evaluation of the projection
 expression against each map entry.

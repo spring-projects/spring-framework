@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,18 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Unit tests for {@link SimpleAliasRegistry}.
+ *
  * @author Juergen Hoeller
+ * @author Nha Vuong
+ * @author Sam Brannen
  */
 class SimpleAliasRegistryTests {
 
+	private final SimpleAliasRegistry registry = new SimpleAliasRegistry();
+
 	@Test
 	void aliasChaining() {
-		SimpleAliasRegistry registry = new SimpleAliasRegistry();
 		registry.registerAlias("test", "testAlias");
 		registry.registerAlias("testAlias", "testAlias2");
 		registry.registerAlias("testAlias2", "testAlias3");
@@ -42,7 +47,6 @@ class SimpleAliasRegistryTests {
 
 	@Test  // SPR-17191
 	void aliasChainingWithMultipleAliases() {
-		SimpleAliasRegistry registry = new SimpleAliasRegistry();
 		registry.registerAlias("name", "alias_a");
 		registry.registerAlias("name", "alias_b");
 		assertThat(registry.hasAlias("name", "alias_a")).isTrue();
@@ -58,6 +62,37 @@ class SimpleAliasRegistryTests {
 		assertThat(registry.hasAlias("real_name", "alias_a")).isTrue();
 		assertThat(registry.hasAlias("real_name", "alias_b")).isTrue();
 		assertThat(registry.hasAlias("real_name", "alias_c")).isTrue();
+	}
+
+	@Test
+	void removeAlias() {
+		registry.registerAlias("real_name", "nickname");
+		assertThat(registry.hasAlias("real_name", "nickname")).isTrue();
+
+		registry.removeAlias("nickname");
+		assertThat(registry.hasAlias("real_name", "nickname")).isFalse();
+	}
+
+	@Test
+	void isAlias() {
+		registry.registerAlias("real_name", "nickname");
+		assertThat(registry.isAlias("nickname")).isTrue();
+		assertThat(registry.isAlias("real_name")).isFalse();
+		assertThat(registry.isAlias("fake")).isFalse();
+	}
+
+	@Test
+	void getAliases() {
+		registry.registerAlias("test", "testAlias1");
+		assertThat(registry.getAliases("test")).containsExactly("testAlias1");
+
+		registry.registerAlias("testAlias1", "testAlias2");
+		registry.registerAlias("testAlias2", "testAlias3");
+		assertThat(registry.getAliases("test")).containsExactlyInAnyOrder("testAlias1", "testAlias2", "testAlias3");
+		assertThat(registry.getAliases("testAlias1")).containsExactlyInAnyOrder("testAlias2", "testAlias3");
+		assertThat(registry.getAliases("testAlias2")).containsExactly("testAlias3");
+
+		assertThat(registry.getAliases("testAlias3")).isEmpty();
 	}
 
 }

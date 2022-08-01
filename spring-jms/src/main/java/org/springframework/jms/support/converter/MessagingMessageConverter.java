@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package org.springframework.jms.support.converter;
 
 import java.util.Map;
 
-import javax.jms.JMSException;
-import javax.jms.Session;
+import jakarta.jms.JMSException;
+import jakarta.jms.Session;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jms.support.JmsHeaderMapper;
@@ -27,13 +27,13 @@ import org.springframework.jms.support.SimpleJmsHeaderMapper;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.core.AbstractMessagingTemplate;
+import org.springframework.messaging.core.AbstractMessageSendingTemplate;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 
 /**
  * Convert a {@link Message} from the messaging abstraction to and from a
- * {@link javax.jms.Message} using an underlying {@link MessageConverter}
+ * {@link jakarta.jms.Message} using an underlying {@link MessageConverter}
  * for the payload and a {@link org.springframework.jms.support.JmsHeaderMapper}
  * to map the JMS headers to and from standard message headers.
  *
@@ -100,22 +100,22 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 
 
 	@Override
-	public javax.jms.Message toMessage(Object object, Session session) throws JMSException, MessageConversionException {
+	public jakarta.jms.Message toMessage(Object object, Session session) throws JMSException, MessageConversionException {
 		if (!(object instanceof Message)) {
 			throw new IllegalArgumentException("Could not convert [" + object + "] - only [" +
 					Message.class.getName() + "] is handled by this converter");
 		}
 		Message<?> input = (Message<?>) object;
 		MessageHeaders headers = input.getHeaders();
-		Object conversionHint = headers.get(AbstractMessagingTemplate.CONVERSION_HINT_HEADER);
-		javax.jms.Message reply = createMessageForPayload(input.getPayload(), session, conversionHint);
+		Object conversionHint = headers.get(AbstractMessageSendingTemplate.CONVERSION_HINT_HEADER);
+		jakarta.jms.Message reply = createMessageForPayload(input.getPayload(), session, conversionHint);
 		this.headerMapper.fromHeaders(headers, reply);
 		return reply;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Object fromMessage(javax.jms.Message message) throws JMSException, MessageConversionException {
+	public Object fromMessage(jakarta.jms.Message message) throws JMSException, MessageConversionException {
 		Map<String, Object> mappedHeaders = extractHeaders(message);
 		Object convertedObject = extractPayload(message);
 		MessageBuilder<Object> builder = (convertedObject instanceof org.springframework.messaging.Message ?
@@ -125,9 +125,9 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 	}
 
 	/**
-	 * Extract the payload of the specified {@link javax.jms.Message}.
+	 * Extract the payload of the specified {@link jakarta.jms.Message}.
 	 */
-	protected Object extractPayload(javax.jms.Message message) throws JMSException {
+	protected Object extractPayload(jakarta.jms.Message message) throws JMSException {
 		return this.payloadConverter.fromMessage(message);
 	}
 
@@ -138,13 +138,13 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 	 * @since 4.3
 	 * @see MessageConverter#toMessage(Object, Session)
 	 */
-	protected javax.jms.Message createMessageForPayload(
+	protected jakarta.jms.Message createMessageForPayload(
 			Object payload, Session session, @Nullable Object conversionHint) throws JMSException {
 
 		return this.payloadConverter.toMessage(payload, session);
 	}
 
-	protected final MessageHeaders extractHeaders(javax.jms.Message message) {
+	protected final MessageHeaders extractHeaders(jakarta.jms.Message message) {
 		return this.headerMapper.toHeaders(message);
 	}
 

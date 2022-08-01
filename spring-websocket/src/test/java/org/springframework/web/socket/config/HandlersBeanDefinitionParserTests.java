@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,8 @@ package org.springframework.web.socket.config;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
@@ -226,8 +227,8 @@ public class HandlersBeanDefinitionParserTests {
 		List<HandshakeInterceptor> interceptors = transportService.getHandshakeInterceptors();
 		assertThat(interceptors).extracting("class").containsExactly(OriginHandshakeInterceptor.class);
 		assertThat(transportService.shouldSuppressCors()).isTrue();
-		assertThat(transportService.getAllowedOrigins().contains("https://mydomain1.example")).isTrue();
-		assertThat(transportService.getAllowedOrigins().contains("https://mydomain2.example")).isTrue();
+		assertThat(transportService.getAllowedOrigins()).containsExactly("https://mydomain1.example", "https://mydomain2.example");
+		assertThat(transportService.getAllowedOriginPatterns()).containsExactly("https://*.mydomain.example");
 	}
 
 
@@ -320,27 +321,27 @@ class TestTaskScheduler implements TaskScheduler {
 	}
 
 	@Override
-	public ScheduledFuture schedule(Runnable task, Date startTime) {
+	public ScheduledFuture schedule(Runnable task, Instant startTime) {
 		return null;
 	}
 
 	@Override
-	public ScheduledFuture scheduleAtFixedRate(Runnable task, Date startTime, long period) {
+	public ScheduledFuture scheduleAtFixedRate(Runnable task, Instant startTime, Duration period) {
 		return null;
 	}
 
 	@Override
-	public ScheduledFuture scheduleAtFixedRate(Runnable task, long period) {
+	public ScheduledFuture scheduleAtFixedRate(Runnable task, Duration period) {
 		return null;
 	}
 
 	@Override
-	public ScheduledFuture scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
+	public ScheduledFuture scheduleWithFixedDelay(Runnable task, Instant startTime, Duration delay) {
 		return null;
 	}
 
 	@Override
-	public ScheduledFuture scheduleWithFixedDelay(Runnable task, long delay) {
+	public ScheduledFuture scheduleWithFixedDelay(Runnable task, Duration delay) {
 		return null;
 	}
 }

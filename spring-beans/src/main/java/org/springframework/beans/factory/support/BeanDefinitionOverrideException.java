@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public class BeanDefinitionOverrideException extends BeanDefinitionStoreExceptio
 
 		super(beanDefinition.getResourceDescription(), beanName,
 				"Cannot register bean definition [" + beanDefinition + "] for bean '" + beanName +
-				"': There is already [" + existingDefinition + "] bound.");
+				"' since there is already [" + existingDefinition + "] bound.");
 		this.beanDefinition = beanDefinition;
 		this.existingDefinition = existingDefinition;
 	}

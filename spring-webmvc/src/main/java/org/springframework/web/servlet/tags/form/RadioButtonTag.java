@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 /**
  * The {@code <radiobutton>} tag renders an HTML 'input' tag with type 'radio'.
@@ -24,7 +24,7 @@ import javax.servlet.jsp.JspException;
  * <p>Rendered elements are marked as 'checked' if the configured
  * {@link #setValue(Object) value} matches the {@link #getValue bound value}.
  *
- * <p>A typical usage pattern will involved multiple tag instances bound
+ * <p>A typical usage pattern will involve multiple tag instances bound
  * to the same property but with different values.
  *
  * <p>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Rob Harrop
  */
-public class PropertiesBeanDefinitionReaderTests {
+@SuppressWarnings("deprecation")
+class PropertiesBeanDefinitionReaderTests {
 
 	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
@@ -34,14 +35,14 @@ public class PropertiesBeanDefinitionReaderTests {
 
 
 	@Test
-	public void withSimpleConstructorArg() {
+	void withSimpleConstructorArg() {
 		this.reader.loadBeanDefinitions(new ClassPathResource("simpleConstructorArg.properties", getClass()));
 		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
 		assertThat(bean.getName()).isEqualTo("Rob Harrop");
 	}
 
 	@Test
-	public void withConstructorArgRef() {
+	void withConstructorArgRef() {
 		this.reader.loadBeanDefinitions(new ClassPathResource("refConstructorArg.properties", getClass()));
 		TestBean rob = (TestBean) this.beanFactory.getBean("rob");
 		TestBean sally = (TestBean) this.beanFactory.getBean("sally");
@@ -49,7 +50,7 @@ public class PropertiesBeanDefinitionReaderTests {
 	}
 
 	@Test
-	public void withMultipleConstructorsArgs() {
+	void withMultipleConstructorsArgs() {
 		this.reader.loadBeanDefinitions(new ClassPathResource("multiConstructorArgs.properties", getClass()));
 		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
 		assertThat(bean.getName()).isEqualTo("Rob Harrop");

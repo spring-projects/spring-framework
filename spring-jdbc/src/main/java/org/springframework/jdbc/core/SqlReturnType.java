@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public interface SqlReturnType {
 	 * @see java.sql.Types
 	 * @see java.sql.CallableStatement#getObject
 	 */
-	Object getTypeValue(CallableStatement cs, int paramIndex, int sqlType, @Nullable  String typeName)
+	Object getTypeValue(CallableStatement cs, int paramIndex, int sqlType, @Nullable String typeName)
 			throws SQLException;
 
 }

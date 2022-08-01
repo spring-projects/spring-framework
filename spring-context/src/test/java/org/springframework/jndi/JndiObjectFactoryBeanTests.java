@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -177,7 +177,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setExpectedType(Integer.class);
 		jof.setDefaultObject("5");
 		jof.afterPropertiesSet();
-		assertThat(jof.getObject()).isEqualTo(new Integer(5));
+		assertThat(jof.getObject()).isEqualTo(5);
 	}
 
 	@Test
@@ -189,7 +189,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setDefaultObject("5");
 		jof.setBeanFactory(new DefaultListableBeanFactory());
 		jof.afterPropertiesSet();
-		assertThat(jof.getObject()).isEqualTo(new Integer(5));
+		assertThat(jof.getObject()).isEqualTo(5);
 	}
 
 	@Test

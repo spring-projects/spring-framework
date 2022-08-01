@@ -56,7 +56,7 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	 * introspect to create AJType metadata using the type returned for the
 	 * given bean name from the BeanFactory.
 	 * @param beanFactory the BeanFactory to obtain instance(s) from
-	 * @param name name of the bean
+	 * @param name the name of the bean
 	 */
 	public BeanFactoryAspectInstanceFactory(BeanFactory beanFactory, String name) {
 		this(beanFactory, name, null);

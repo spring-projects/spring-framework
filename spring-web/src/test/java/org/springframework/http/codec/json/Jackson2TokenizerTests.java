@@ -72,46 +72,43 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 				singletonList("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"), false);
 
 		testTokenize(
-				asList("{\"foo\": \"foofoo\"",
-						", \"bar\": \"barbar\"}"),
+				asList(
+						"{\"foo\": \"foofoo\"",
+						", \"bar\": \"barbar\"}"
+				),
 				singletonList("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"), false);
 
 		testTokenize(
-				singletonList("[" +
-						"{\"foo\": \"foofoo\", \"bar\": \"barbar\"}," +
-						"{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"),
-				singletonList("[" +
-						"{\"foo\": \"foofoo\", \"bar\": \"barbar\"}," +
-						"{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"), false);
+				singletonList("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"),
+				singletonList("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"),
+				false);
 
 		testTokenize(
 				singletonList("[{\"foo\": \"bar\"},{\"foo\": \"baz\"}]"),
 				singletonList("[{\"foo\": \"bar\"},{\"foo\": \"baz\"}]"), false);
 
 		testTokenize(
-				asList("[" +
-						"{\"foo\": \"foofoo\", \"bar\"", ": \"barbar\"}," +
-						"{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"),
-				singletonList("[" +
-						"{\"foo\": \"foofoo\", \"bar\": \"barbar\"}," +
-						"{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"), false);
+				asList(
+						"[{\"foo\": \"foofoo\", \"bar\"",
+						": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"
+				),
+				singletonList("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"),
+				false);
 
 		testTokenize(
-				asList("[",
+				asList(
+						"[",
 						"{\"id\":1,\"name\":\"Robert\"}", ",",
 						"{\"id\":2,\"name\":\"Raide\"}", ",",
-						"{\"id\":3,\"name\":\"Ford\"}", "]"),
-				singletonList("[" +
-						"{\"id\":1,\"name\":\"Robert\"}," +
-						"{\"id\":2,\"name\":\"Raide\"}," +
-						"{\"id\":3,\"name\":\"Ford\"}]"), false);
+						"{\"id\":3,\"name\":\"Ford\"}", "]"
+				),
+				singletonList("[{\"id\":1,\"name\":\"Robert\"},{\"id\":2,\"name\":\"Raide\"},{\"id\":3,\"name\":\"Ford\"}]"),
+				false);
 
 		// SPR-16166: top-level JSON values
-		testTokenize(asList("\"foo", "bar\""),singletonList("\"foobar\""), false);
-
-		testTokenize(asList("12", "34"),singletonList("1234"), false);
-
-		testTokenize(asList("12.", "34"),singletonList("12.34"), false);
+		testTokenize(asList("\"foo", "bar\""), singletonList("\"foobar\""), false);
+		testTokenize(asList("12", "34"), singletonList("1234"), false);
+		testTokenize(asList("12.", "34"), singletonList("12.34"), false);
 
 		// note that we do not test for null, true, or false, which are also valid top-level values,
 		// but are unsupported by JSONassert
@@ -124,20 +121,27 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 				singletonList("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"), true);
 
 		testTokenize(
-				asList("{\"foo\": \"foofoo\"", ", \"bar\": \"barbar\"}"),
+				asList(
+						"{\"foo\": \"foofoo\"",
+						", \"bar\": \"barbar\"}"
+				),
 				singletonList("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"), true);
 
 		testTokenize(
-				singletonList("[" +
-						"{\"foo\": \"foofoo\", \"bar\": \"barbar\"}," +
-						"{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"),
+				singletonList("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"),
 				asList(
 						"{\"foo\": \"foofoo\", \"bar\": \"barbar\"}",
-						"{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}"), true);
+						"{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}"
+				),
+				true);
 
 		testTokenize(
 				singletonList("[{\"foo\": \"bar\"},{\"foo\": \"baz\"}]"),
-				asList("{\"foo\": \"bar\"}", "{\"foo\": \"baz\"}"), true);
+				asList(
+						"{\"foo\": \"bar\"}",
+						"{\"foo\": \"baz\"}"
+				),
+				true);
 
 		// SPR-15803: nested array
 		testTokenize(
@@ -149,7 +153,9 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 				asList(
 						"{\"id\":\"0\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}",
 						"{\"id\":\"1\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}",
-						"{\"id\":\"2\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}"), true);
+						"{\"id\":\"2\",\"start\":[-999999999,1,1],\"end\":[999999999,12,31]}"
+				),
+				true);
 
 		// SPR-15803: nested array, no top-level array
 		testTokenize(
@@ -157,34 +163,75 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 				singletonList("{\"speakerIds\":[\"tastapod\"],\"language\":\"ENGLISH\"}"), true);
 
 		testTokenize(
-				asList("[" +
-						"{\"foo\": \"foofoo\", \"bar\"", ": \"barbar\"}," +
-						"{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"),
+				asList(
+						"[{\"foo\": \"foofoo\", \"bar\"",
+						": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"
+				),
 				asList(
 						"{\"foo\": \"foofoo\", \"bar\": \"barbar\"}",
 						"{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}"), true);
 
 		testTokenize(
-				asList("[",
+				asList(
+						"[",
 						"{\"id\":1,\"name\":\"Robert\"}",
 						",",
 						"{\"id\":2,\"name\":\"Raide\"}",
 						",",
 						"{\"id\":3,\"name\":\"Ford\"}",
-						"]"),
-				asList("{\"id\":1,\"name\":\"Robert\"}",
+						"]"
+				),
+				asList(
+						"{\"id\":1,\"name\":\"Robert\"}",
 						"{\"id\":2,\"name\":\"Raide\"}",
-						"{\"id\":3,\"name\":\"Ford\"}"), true);
+						"{\"id\":3,\"name\":\"Ford\"}"
+				),
+				true);
 
 		// SPR-16166: top-level JSON values
-		testTokenize(asList("\"foo", "bar\""),singletonList("\"foobar\""), true);
-
-		testTokenize(asList("12", "34"),singletonList("1234"), true);
-
-		testTokenize(asList("12.", "34"),singletonList("12.34"), true);
+		testTokenize(asList("\"foo", "bar\""), singletonList("\"foobar\""), true);
+		testTokenize(asList("12", "34"), singletonList("1234"), true);
+		testTokenize(asList("12.", "34"), singletonList("12.34"), true);
 
 		// SPR-16407
 		testTokenize(asList("[1", ",2,", "3]"), asList("1", "2", "3"), true);
+	}
+
+	@Test
+	void tokenizeStream() {
+
+		// NDJSON (Newline Delimited JSON), JSON Lines
+		testTokenize(
+				asList(
+						"{\"id\":1,\"name\":\"Robert\"}",
+						"\n",
+						"{\"id\":2,\"name\":\"Raide\"}",
+						"\n",
+						"{\"id\":3,\"name\":\"Ford\"}"
+				),
+				asList(
+						"{\"id\":1,\"name\":\"Robert\"}",
+						"{\"id\":2,\"name\":\"Raide\"}",
+						"{\"id\":3,\"name\":\"Ford\"}"
+				),
+				true);
+
+		// JSON Sequence with newline separator
+		testTokenize(
+				asList(
+						"\n",
+						"{\"id\":1,\"name\":\"Robert\"}",
+						"\n",
+						"{\"id\":2,\"name\":\"Raide\"}",
+						"\n",
+						"{\"id\":3,\"name\":\"Ford\"}"
+				),
+				asList(
+						"{\"id\":1,\"name\":\"Robert\"}",
+						"{\"id\":2,\"name\":\"Raide\"}",
+						"{\"id\":3,\"name\":\"Ford\"}"
+				),
+				true);
 	}
 
 	private void testTokenize(List<String> input, List<String> output, boolean tokenize) {
@@ -202,12 +249,13 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 
 	@Test
 	public void testLimit() {
-
-		List<String> source = asList("[",
+		List<String> source = asList(
+				"[",
 				"{", "\"id\":1,\"name\":\"Dan\"", "},",
 				"{", "\"id\":2,\"name\":\"Ron\"", "},",
 				"{", "\"id\":3,\"name\":\"Bartholomew\"", "}",
-				"]");
+				"]"
+		);
 
 		String expected = String.join("", source);
 		int maxInMemorySize = expected.length();
@@ -223,11 +271,13 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 	@Test
 	public void testLimitTokenized() {
 
-		List<String> source = asList("[",
+		List<String> source = asList(
+				"[",
 				"{", "\"id\":1, \"name\":\"Dan\"", "},",
 				"{", "\"id\":2, \"name\":\"Ron\"", "},",
 				"{", "\"id\":3, \"name\":\"Bartholomew\"", "}",
-				"]");
+				"]"
+		);
 
 		String expected = "{\"id\":3,\"name\":\"Bartholomew\"}";
 		int maxInMemorySize = expected.length();
@@ -271,7 +321,8 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 	@ValueSource(booleans = {false, true})
 	public void useBigDecimalForFloats(boolean useBigDecimalForFloats) {
 		Flux<DataBuffer> source = Flux.just(stringBuffer("1E+2"));
-		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(source, this.jsonFactory, this.objectMapper, false, useBigDecimalForFloats, -1);
+		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(
+				source, this.jsonFactory, this.objectMapper, false, useBigDecimalForFloats, -1);
 
 		StepVerifier.create(tokens)
 				.assertNext(tokenBuffer -> {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.beans.factory.BeanExpressionException;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParserContext;
@@ -41,8 +42,13 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.beans.factory.config.BeanExpressionResolver}
  * interface, parsing and evaluating Spring EL using Spring's expression module.
  *
+ * <p>All beans in the containing {@code BeanFactory} are made available as
+ * predefined variables with their common bean name, including standard context
+ * beans such as "environment", "systemProperties" and "systemEnvironment".
+ *
  * @author Juergen Hoeller
  * @since 3.0
+ * @see BeanExpressionContext#getBeanFactory()
  * @see org.springframework.expression.ExpressionParser
  * @see org.springframework.expression.spel.standard.SpelExpressionParser
  * @see org.springframework.expression.spel.support.StandardEvaluationContext
@@ -132,7 +138,7 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 
 	@Override
 	@Nullable
-	public Object evaluate(@Nullable String value, BeanExpressionContext evalContext) throws BeansException {
+	public Object evaluate(@Nullable String value, BeanExpressionContext beanExpressionContext) throws BeansException {
 		if (!StringUtils.hasLength(value)) {
 			return value;
 		}
@@ -142,21 +148,21 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 				expr = this.expressionParser.parseExpression(value, this.beanExpressionParserContext);
 				this.expressionCache.put(value, expr);
 			}
-			StandardEvaluationContext sec = this.evaluationCache.get(evalContext);
+			StandardEvaluationContext sec = this.evaluationCache.get(beanExpressionContext);
 			if (sec == null) {
-				sec = new StandardEvaluationContext(evalContext);
+				sec = new StandardEvaluationContext(beanExpressionContext);
 				sec.addPropertyAccessor(new BeanExpressionContextAccessor());
 				sec.addPropertyAccessor(new BeanFactoryAccessor());
 				sec.addPropertyAccessor(new MapAccessor());
 				sec.addPropertyAccessor(new EnvironmentAccessor());
-				sec.setBeanResolver(new BeanFactoryResolver(evalContext.getBeanFactory()));
-				sec.setTypeLocator(new StandardTypeLocator(evalContext.getBeanFactory().getBeanClassLoader()));
-				ConversionService conversionService = evalContext.getBeanFactory().getConversionService();
-				if (conversionService != null) {
-					sec.setTypeConverter(new StandardTypeConverter(conversionService));
-				}
+				sec.setBeanResolver(new BeanFactoryResolver(beanExpressionContext.getBeanFactory()));
+				sec.setTypeLocator(new StandardTypeLocator(beanExpressionContext.getBeanFactory().getBeanClassLoader()));
+				sec.setTypeConverter(new StandardTypeConverter(() -> {
+					ConversionService cs = beanExpressionContext.getBeanFactory().getConversionService();
+					return (cs != null ? cs : DefaultConversionService.getSharedInstance());
+				}));
 				customizeEvaluationContext(sec);
-				this.evaluationCache.put(evalContext, sec);
+				this.evaluationCache.put(beanExpressionContext, sec);
 			}
 			return expr.getValue(sec);
 		}

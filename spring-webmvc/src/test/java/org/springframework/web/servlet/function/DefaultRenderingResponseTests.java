@@ -20,16 +20,13 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.Cookie;
-
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.servlet.ModelAndView;
@@ -43,13 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class DefaultRenderingResponseTests {
 
-	static final ServerResponse.Context EMPTY_CONTEXT = new ServerResponse.Context() {
-		@Override
-		public List<HttpMessageConverter<?>> messageConverters() {
-			return Collections.emptyList();
-		}
-
-	};
+	static final ServerResponse.Context EMPTY_CONTEXT = () -> Collections.emptyList();
 
 	@Test
 	public void create() throws Exception {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,7 @@ public class URIEditor extends PropertyEditorSupport {
 					setValue(createURI(uri));
 				}
 				catch (URISyntaxException ex) {
-					throw new IllegalArgumentException("Invalid URI syntax: " + ex);
+					throw new IllegalArgumentException("Invalid URI syntax: " + ex.getMessage());
 				}
 			}
 		}
@@ -130,7 +130,7 @@ public class URIEditor extends PropertyEditorSupport {
 
 	/**
 	 * Create a URI instance for the given user-specified String value.
-	 * <p>The default implementation encodes the value into a RFC-2396 compliant URI.
+	 * <p>The default implementation encodes the value into an RFC-2396 compliant URI.
 	 * @param value the value to convert into a URI instance
 	 * @return the URI instance
 	 * @throws java.net.URISyntaxException if URI conversion failed

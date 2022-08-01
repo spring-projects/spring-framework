@@ -16,8 +16,8 @@
 
 package org.springframework.web.context.support;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.support.AbstractRefreshableConfigApplicationContext;
@@ -43,7 +43,7 @@ import org.springframework.web.context.ServletContextAware;
  * on web application startup.
  *
  * <p>This class is as easy to subclass as AbstractRefreshableApplicationContext:
- * All you need to implements is the {@link #loadBeanDefinitions} method;
+ * All you need to implement is the {@link #loadBeanDefinitions} method;
  * see the superclass javadoc for details. Note that implementations are supposed
  * to load bean definitions from the files specified by the locations returned
  * by the {@link #getConfigLocations} method.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,15 @@ package org.springframework.context.annotation;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.core.type.MethodMetadata;
+import org.springframework.lang.Nullable;
 
 /**
- * Represents a {@link Configuration @Configuration} class method marked with the
- * {@link Bean @Bean} annotation.
+ * Represents a {@link Configuration @Configuration} class method annotated with
+ * {@link Bean @Bean}.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  * @see ConfigurationClass
  * @see ConfigurationClassParser
@@ -33,7 +35,7 @@ import org.springframework.core.type.MethodMetadata;
  */
 final class BeanMethod extends ConfigurationMethod {
 
-	public BeanMethod(MethodMetadata metadata, ConfigurationClass configurationClass) {
+	BeanMethod(MethodMetadata metadata, ConfigurationClass configurationClass) {
 		super(metadata, configurationClass);
 	}
 
@@ -52,12 +54,28 @@ final class BeanMethod extends ConfigurationMethod {
 		}
 	}
 
+	@Override
+	public boolean equals(@Nullable Object obj) {
+		return ((this == obj) || ((obj instanceof BeanMethod) &&
+				this.metadata.equals(((BeanMethod) obj).metadata)));
+	}
+
+	@Override
+	public int hashCode() {
+		return this.metadata.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return "BeanMethod: " + this.metadata;
+	}
 
 	private class NonOverridableMethodError extends Problem {
 
-		public NonOverridableMethodError() {
+		NonOverridableMethodError() {
 			super(String.format("@Bean method '%s' must not be private or final; change the method's modifiers to continue",
 					getMetadata().getMethodName()), getResourceLocation());
 		}
 	}
+
 }

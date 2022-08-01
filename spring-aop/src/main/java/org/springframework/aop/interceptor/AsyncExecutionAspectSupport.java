@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
@@ -34,14 +33,14 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
-import org.springframework.core.task.AsyncListenableTaskExecutor;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.EmbeddedValueResolver;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.task.support.TaskExecutorAdapter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.function.SingletonSupplier;
 
 /**
@@ -156,7 +155,6 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 
 	/**
 	 * Determine the specific executor to use when executing the given method.
-	 * Should preferably return an {@link AsyncListenableTaskExecutor} implementation.
 	 * @return the executor to use (or {@code null}, but just if no default executor is available)
 	 */
 	@Nullable
@@ -174,8 +172,8 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 			if (targetExecutor == null) {
 				return null;
 			}
-			executor = (targetExecutor instanceof AsyncListenableTaskExecutor ?
-					(AsyncListenableTaskExecutor) targetExecutor : new TaskExecutorAdapter(targetExecutor));
+			executor = (targetExecutor instanceof AsyncTaskExecutor ?
+					(AsyncTaskExecutor) targetExecutor : new TaskExecutorAdapter(targetExecutor));
 			this.executors.put(method, executor);
 		}
 		return executor;
@@ -184,7 +182,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	/**
 	 * Return the qualifier or bean name of the executor to be used when executing the
 	 * given async method, typically specified in the form of an annotation attribute.
-	 * Returning an empty string or {@code null} indicates that no specific executor has
+	 * <p>Returning an empty string or {@code null} indicates that no specific executor has
 	 * been specified and that the {@linkplain #setExecutor(Executor) default executor}
 	 * should be used.
 	 * @param method the method to inspect for executor qualifier metadata
@@ -208,12 +206,16 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 			throw new IllegalStateException("BeanFactory must be set on " + getClass().getSimpleName() +
 					" to access qualified executor '" + qualifier + "'");
 		}
+		if (beanFactory instanceof ConfigurableBeanFactory configurableBeanFactory) {
+			EmbeddedValueResolver embeddedValueResolver = new EmbeddedValueResolver(configurableBeanFactory);
+			qualifier = embeddedValueResolver.resolveStringValue(qualifier);
+		}
 		return BeanFactoryAnnotationUtils.qualifiedBeanOfType(beanFactory, Executor.class, qualifier);
 	}
 
 	/**
 	 * Retrieve or build a default executor for this advice instance.
-	 * An executor returned from here will be cached for further use.
+	 * <p>An executor returned from here will be cached for further use.
 	 * <p>The default implementation searches for a unique {@link TaskExecutor} bean
 	 * in the context, or for an {@link Executor} bean named "taskExecutor" otherwise.
 	 * If neither of the two is resolvable, this implementation will return {@code null}.
@@ -233,7 +235,8 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 				return beanFactory.getBean(TaskExecutor.class);
 			}
 			catch (NoUniqueBeanDefinitionException ex) {
-				logger.debug("Could not find unique TaskExecutor bean", ex);
+				logger.debug("Could not find unique TaskExecutor bean. " +
+						"Continuing search for an Executor bean named 'taskExecutor'", ex);
 				try {
 					return beanFactory.getBean(DEFAULT_TASK_EXECUTOR_BEAN_NAME, Executor.class);
 				}
@@ -246,7 +249,8 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 				}
 			}
 			catch (NoSuchBeanDefinitionException ex) {
-				logger.debug("Could not find default TaskExecutor bean", ex);
+				logger.debug("Could not find default TaskExecutor bean. " +
+						"Continuing search for an Executor bean named 'taskExecutor'", ex);
 				try {
 					return beanFactory.getBean(DEFAULT_TASK_EXECUTOR_BEAN_NAME, Executor.class);
 				}
@@ -269,26 +273,24 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * @return the execution result (potentially a corresponding {@link Future} handle)
 	 */
 	@Nullable
+	@SuppressWarnings("deprecation")
 	protected Object doSubmit(Callable<Object> task, AsyncTaskExecutor executor, Class<?> returnType) {
 		if (CompletableFuture.class.isAssignableFrom(returnType)) {
-			return CompletableFuture.supplyAsync(() -> {
-				try {
-					return task.call();
-				}
-				catch (Throwable ex) {
-					throw new CompletionException(ex);
-				}
-			}, executor);
+			return executor.submitCompletable(task);
 		}
-		else if (ListenableFuture.class.isAssignableFrom(returnType)) {
-			return ((AsyncListenableTaskExecutor) executor).submitListenable(task);
+		else if (org.springframework.util.concurrent.ListenableFuture.class.isAssignableFrom(returnType)) {
+			return ((org.springframework.core.task.AsyncListenableTaskExecutor) executor).submitListenable(task);
 		}
 		else if (Future.class.isAssignableFrom(returnType)) {
 			return executor.submit(task);
 		}
-		else {
+		else if (void.class == returnType) {
 			executor.submit(task);
 			return null;
+		}
+		else {
+			throw new IllegalArgumentException(
+					"Invalid return type for async method (only Future and void supported): " + returnType);
 		}
 	}
 

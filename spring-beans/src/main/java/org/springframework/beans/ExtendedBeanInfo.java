@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,9 +137,10 @@ class ExtendedBeanInfo implements BeanInfo {
 			}
 		}
 		// Sort non-void returning write methods to guard against the ill effects of
-		// non-deterministic sorting of methods returned from Class#getDeclaredMethods
-		// under JDK 7. See https://bugs.java.com/view_bug.do?bug_id=7023180
-		matches.sort((m1, m2) -> m2.toString().compareTo(m1.toString()));
+		// non-deterministic sorting of methods returned from Class#getMethods.
+		// For historical reasons, the natural sort order is reversed.
+		// See https://github.com/spring-projects/spring-framework/issues/14744.
+		matches.sort(Comparator.comparing(Method::toString).reversed());
 		return matches;
 	}
 
@@ -188,8 +189,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		for (PropertyDescriptor pd : this.propertyDescriptors) {
 			final Class<?> candidateType;
 			final String candidateName = pd.getName();
-			if (pd instanceof IndexedPropertyDescriptor) {
-				IndexedPropertyDescriptor ipd = (IndexedPropertyDescriptor) pd;
+			if (pd instanceof IndexedPropertyDescriptor ipd) {
 				candidateType = ipd.getIndexedPropertyType();
 				if (candidateName.equals(propertyName) &&
 						(candidateType.equals(propertyType) || candidateType.equals(propertyType.getComponentType()))) {
@@ -494,10 +494,9 @@ class ExtendedBeanInfo implements BeanInfo {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof IndexedPropertyDescriptor)) {
+			if (!(other instanceof IndexedPropertyDescriptor otherPd)) {
 				return false;
 			}
-			IndexedPropertyDescriptor otherPd = (IndexedPropertyDescriptor) other;
 			return (ObjectUtils.nullSafeEquals(getIndexedReadMethod(), otherPd.getIndexedReadMethod()) &&
 					ObjectUtils.nullSafeEquals(getIndexedWriteMethod(), otherPd.getIndexedWriteMethod()) &&
 					ObjectUtils.nullSafeEquals(getIndexedPropertyType(), otherPd.getIndexedPropertyType()) &&

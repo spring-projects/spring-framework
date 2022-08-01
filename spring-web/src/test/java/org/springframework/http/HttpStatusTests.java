@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
-public class HttpStatusTests {
+class HttpStatusTests {
 
-	private Map<Integer, String> statusCodes = new LinkedHashMap<>();
+	private final Map<Integer, String> statusCodes = new LinkedHashMap<>();
 
 
 	@BeforeEach
-	public void createStatusCodes() {
+	void createStatusCodes() {
 		statusCodes.put(100, "CONTINUE");
 		statusCodes.put(101, "SWITCHING_PROTOCOLS");
 		statusCodes.put(102, "PROCESSING");
@@ -107,7 +107,7 @@ public class HttpStatusTests {
 
 
 	@Test
-	public void fromMapToEnum() {
+	void fromMapToEnum() {
 		for (Map.Entry<Integer, String> entry : statusCodes.entrySet()) {
 			int value = entry.getKey();
 			HttpStatus status = HttpStatus.valueOf(value);
@@ -117,14 +117,24 @@ public class HttpStatusTests {
 	}
 
 	@Test
-	public void fromEnumToMap() {
+	void fromEnumToMap() {
 		for (HttpStatus status : HttpStatus.values()) {
-			int value = status.value();
-			if (value == 302 || value == 413 || value == 414) {
+			int code = status.value();
+			// The following status codes have more than one corresponding HttpStatus enum constant.
+			if (code == 302 || code == 413 || code == 414) {
 				continue;
 			}
-			assertThat(statusCodes.containsKey(value)).as("Map has no value for [" + value + "]").isTrue();
-			assertThat(status.name()).as("Invalid name for [" + value + "]").isEqualTo(statusCodes.get(value));
+			assertThat(statusCodes).as("Map has no value for [" + code + "]").containsKey(code);
+			assertThat(status.name()).as("Invalid name for [" + code + "]").isEqualTo(statusCodes.get(code));
+		}
+	}
+
+	@Test
+	void allStatusSeriesShouldMatchExpectations() {
+		// The Series of an HttpStatus is set manually, so we make sure it is the correct one.
+		for (HttpStatus status : HttpStatus.values()) {
+			HttpStatus.Series expectedSeries = HttpStatus.Series.valueOf(status.value());
+			assertThat(status.series()).isEqualTo(expectedSeries);
 		}
 	}
 

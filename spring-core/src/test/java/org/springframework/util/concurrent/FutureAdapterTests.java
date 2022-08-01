@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Arjen Poutsma
  */
+@SuppressWarnings("deprecation")
 class FutureAdapterTests {
 
 	private FutureAdapter<String, Integer> adapter;
@@ -41,7 +42,7 @@ class FutureAdapterTests {
 	@SuppressWarnings("unchecked")
 	void setUp() {
 		adaptee = mock(Future.class);
-		adapter = new FutureAdapter<String, Integer>(adaptee) {
+		adapter = new FutureAdapter<>(adaptee) {
 			@Override
 			protected String adapt(Integer adapteeResult) throws ExecutionException {
 				return adapteeResult.toString();
@@ -50,7 +51,7 @@ class FutureAdapterTests {
 	}
 
 	@Test
-	void cancel() throws Exception {
+	void cancel() {
 		given(adaptee.cancel(true)).willReturn(true);
 		boolean result = adapter.cancel(true);
 		assertThat(result).isTrue();
@@ -83,6 +84,5 @@ class FutureAdapterTests {
 		String result = adapter.get(1, TimeUnit.SECONDS);
 		assertThat(result).isEqualTo("42");
 	}
-
 
 }

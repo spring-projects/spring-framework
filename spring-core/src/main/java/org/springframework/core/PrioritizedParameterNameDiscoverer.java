@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.core;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.lang.Nullable;
@@ -26,7 +26,7 @@ import org.springframework.lang.Nullable;
 /**
  * {@link ParameterNameDiscoverer} implementation that tries several discoverer
  * delegates in succession. Those added first in the {@code addDiscoverer} method
- * have highest priority. If one returns {@code null}, the next will be tried.
+ * have the highest priority. If one returns {@code null}, the next will be tried.
  *
  * <p>The default behavior is to return {@code null} if no discoverer matches.
  *
@@ -36,7 +36,7 @@ import org.springframework.lang.Nullable;
  */
 public class PrioritizedParameterNameDiscoverer implements ParameterNameDiscoverer {
 
-	private final List<ParameterNameDiscoverer> parameterNameDiscoverers = new LinkedList<>();
+	private final List<ParameterNameDiscoverer> parameterNameDiscoverers = new ArrayList<>(2);
 
 
 	/**

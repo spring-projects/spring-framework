@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,11 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.EnumSet;
 
 import org.springframework.lang.Nullable;
+
+import static java.nio.file.FileVisitOption.FOLLOW_LINKS;
 
 /**
  * Utility methods for working with the file system.
@@ -65,11 +68,11 @@ public abstract class FileSystemUtils {
 	}
 
 	/**
-	 * Delete the supplied {@link File} - for directories,
+	 * Delete the supplied {@link File} &mdash; for directories,
 	 * recursively delete any nested directories or files as well.
 	 * @param root the root {@code File} to delete
 	 * @return {@code true} if the {@code File} existed and was deleted,
-	 * or {@code false} it it did not exist
+	 * or {@code false} if it did not exist
 	 * @throws IOException in the case of I/O errors
 	 * @since 5.0
 	 */
@@ -123,7 +126,7 @@ public abstract class FileSystemUtils {
 		BasicFileAttributes srcAttr = Files.readAttributes(src, BasicFileAttributes.class);
 
 		if (srcAttr.isDirectory()) {
-			Files.walkFileTree(src, new SimpleFileVisitor<Path>() {
+			Files.walkFileTree(src, EnumSet.of(FOLLOW_LINKS), Integer.MAX_VALUE, new SimpleFileVisitor<Path>() {
 				@Override
 				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
 					Files.createDirectories(dest.resolve(src.relativize(dir)));

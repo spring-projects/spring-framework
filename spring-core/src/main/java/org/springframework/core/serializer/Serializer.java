@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.core.serializer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -24,8 +25,10 @@ import java.io.OutputStream;
  *
  * @author Gary Russell
  * @author Mark Fisher
+ * @author Juergen Hoeller
  * @since 3.0.5
  * @param <T> the object type
+ * @see Deserializer
  */
 @FunctionalInterface
 public interface Serializer<T> {
@@ -40,5 +43,18 @@ public interface Serializer<T> {
 	 * @throws IOException in case of errors writing to the stream
 	 */
 	void serialize(T object, OutputStream outputStream) throws IOException;
+
+	/**
+	 * Turn an object of type T into a serialized byte array.
+	 * @param object the object to serialize
+	 * @return the resulting byte array
+	 * @throws IOException in case of serialization failure
+	 * @since 5.2.7
+	 */
+	default byte[] serializeToByteArray(T object) throws IOException {
+		ByteArrayOutputStream out = new ByteArrayOutputStream(1024);
+		serialize(object, out);
+		return out.toByteArray();
+	}
 
 }

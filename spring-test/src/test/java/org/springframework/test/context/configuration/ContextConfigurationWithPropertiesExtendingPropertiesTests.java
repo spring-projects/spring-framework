@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import org.springframework.beans.testfixture.beans.Pet;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.junit4.PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests;
-import org.springframework.test.context.support.GenericPropertiesContextLoader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,7 +37,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @see PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests
  * @see ContextConfigurationWithPropertiesExtendingPropertiesAndInheritedLoaderTests
  */
-@ContextConfiguration(loader = GenericPropertiesContextLoader.class)
+@SuppressWarnings("deprecation")
+@ContextConfiguration(loader = org.springframework.test.context.support.GenericPropertiesContextLoader.class)
 public class ContextConfigurationWithPropertiesExtendingPropertiesTests extends
 		PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests {
 

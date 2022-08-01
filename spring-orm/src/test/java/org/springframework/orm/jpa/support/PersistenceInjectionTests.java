@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-import javax.persistence.PersistenceProperty;
-import javax.persistence.PersistenceUnit;
-
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceContextType;
+import jakarta.persistence.PersistenceProperty;
+import jakarta.persistence.PersistenceUnit;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.FactoryBean;
@@ -105,7 +104,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 	@Test
-	public void testPublicExtendedPersistenceContextSetter() throws Exception {
+	public void testPublicExtendedPersistenceContextSetter() {
 		EntityManager mockEm = mock(EntityManager.class);
 		given(mockEmf.createEntityManager()).willReturn(mockEm);
 
@@ -123,7 +122,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 	@Test
-	public void testPublicSpecificExtendedPersistenceContextSetter() throws Exception {
+	public void testPublicSpecificExtendedPersistenceContextSetter() {
 		EntityManagerFactory mockEmf2 = mock(EntityManagerFactory.class);
 		EntityManager mockEm2 = mock(EntityManager.class);
 		given(mockEmf2.createEntityManager()).willReturn(mockEm2);
@@ -187,23 +186,22 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		assertThat(bean.em).isNotNull();
 		assertThat(SerializationTestUtils.serializeAndDeserialize(bean.em)).isNotNull();
 
-		SimpleMapScope serialized = (SimpleMapScope) SerializationTestUtils.serializeAndDeserialize(myScope);
+		SimpleMapScope serialized = SerializationTestUtils.serializeAndDeserialize(myScope);
 		serialized.close();
 		assertThat(DummyInvocationHandler.closed).isTrue();
 		DummyInvocationHandler.closed = false;
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public void testPublicExtendedPersistenceContextSetterWithEntityManagerInfoAndSerialization() throws Exception {
 		EntityManager mockEm = mock(EntityManager.class, withSettings().serializable());
 		given(mockEm.isOpen()).willReturn(true);
 		EntityManagerFactoryWithInfo mockEmf = mock(EntityManagerFactoryWithInfo.class);
-		given(mockEmf.getNativeEntityManagerFactory()).willReturn(mockEmf);
 		given(mockEmf.getJpaDialect()).willReturn(new DefaultJpaDialect());
-		given(mockEmf.getEntityManagerInterface()).willReturn((Class)EntityManager.class);
+		given(mockEmf.getEntityManagerInterface()).willReturn((Class) EntityManager.class);
 		given(mockEmf.getBeanClassLoader()).willReturn(getClass().getClassLoader());
-		given(mockEmf.createEntityManager()).willReturn(mockEm);
+		given(mockEmf.createNativeEntityManager(null)).willReturn(mockEm);
 
 		GenericApplicationContext gac = new GenericApplicationContext();
 		gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory", mockEmf);

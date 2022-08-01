@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -209,6 +209,21 @@ class ResourceTests {
 	}
 
 	@Test
+	void urlResourceFactoryMethods() throws IOException {
+		Resource resource1 = new UrlResource("file:core/io/Resource.class");
+		Resource resource2 = UrlResource.from("file:core/io/Resource.class");
+		Resource resource3 = UrlResource.from(resource1.getURI());
+
+		assertThat(resource2.getURL()).isEqualTo(resource1.getURL());
+		assertThat(resource3.getURL()).isEqualTo(resource1.getURL());
+
+		assertThat(UrlResource.from("file:core/../core/io/./Resource.class")).isEqualTo(resource1);
+		assertThat(UrlResource.from("file:/dir/test.txt?argh").getFilename()).isEqualTo("test.txt");
+		assertThat(UrlResource.from("file:\\dir\\test.txt?argh").getFilename()).isEqualTo("test.txt");
+		assertThat(UrlResource.from("file:\\dir/test.txt?argh").getFilename()).isEqualTo("test.txt");
+	}
+
+	@Test
 	void classPathResourceWithRelativePath() throws IOException {
 		Resource resource = new ClassPathResource("dir/");
 		Resource relative = resource.createRelative("subdir");
@@ -298,18 +313,11 @@ class ResourceTests {
 	@Test
 	void readableChannel() throws IOException {
 		Resource resource = new FileSystemResource(getClass().getResource("Resource.class").getFile());
-		ReadableByteChannel channel = null;
-		try {
-			channel = resource.readableChannel();
+		try (ReadableByteChannel channel = resource.readableChannel()) {
 			ByteBuffer buffer = ByteBuffer.allocate((int) resource.contentLength());
 			channel.read(buffer);
 			buffer.rewind();
 			assertThat(buffer.limit() > 0).isTrue();
-		}
-		finally {
-			if (channel != null) {
-				channel.close();
-			}
 		}
 	}
 

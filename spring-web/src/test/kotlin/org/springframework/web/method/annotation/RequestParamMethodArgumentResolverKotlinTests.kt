@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.method.annotation
 
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.BeforeEach
@@ -26,10 +25,6 @@ import org.springframework.core.annotation.SynthesizingMethodParameter
 import org.springframework.core.convert.support.DefaultConversionService
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
-import org.springframework.web.testfixture.servlet.MockHttpServletRequest
-import org.springframework.web.testfixture.servlet.MockHttpServletResponse
-import org.springframework.web.testfixture.servlet.MockMultipartFile
-import org.springframework.web.testfixture.servlet.MockMultipartHttpServletRequest
 import org.springframework.util.ReflectionUtils
 import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.bind.annotation.RequestParam
@@ -40,6 +35,10 @@ import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.context.request.ServletWebRequest
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.multipart.support.MissingServletRequestPartException
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse
+import org.springframework.web.testfixture.servlet.MockMultipartFile
+import org.springframework.web.testfixture.servlet.MockMultipartHttpServletRequest
 
 /**
  * Kotlin test fixture for [RequestParamMethodArgumentResolver].
@@ -139,7 +138,7 @@ class RequestParamMethodArgumentResolverKotlinTests {
 
 	@Test
 	fun resolveNonNullableNotRequiredWithoutParameter() {
-		assertThatExceptionOfType(TypeCastException::class.java).isThrownBy {
+		assertThatExceptionOfType(NullPointerException::class.java).isThrownBy {
 			resolver.resolveArgument(nonNullableParamNotRequired, null, webRequest, binderFactory) as String
 		}
 	}
@@ -157,7 +156,7 @@ class RequestParamMethodArgumentResolverKotlinTests {
 
 	@Test
 	fun resolveNullableRequiredWithoutMultipartParameter() {
-		request.method = HttpMethod.POST.name
+		request.method = HttpMethod.POST.name()
 		request.contentType = MediaType.MULTIPART_FORM_DATA_VALUE
 
 		var result = resolver.resolveArgument(nullableMultipartParamRequired, null, webRequest, binderFactory)
@@ -177,7 +176,7 @@ class RequestParamMethodArgumentResolverKotlinTests {
 
 	@Test
 	fun resolveNullableNotRequiredWithoutMultipartParameter() {
-		request.method = HttpMethod.POST.name
+		request.method = HttpMethod.POST.name()
 		request.contentType = MediaType.MULTIPART_FORM_DATA_VALUE
 
 		var result = resolver.resolveArgument(nullableMultipartParamNotRequired, null, webRequest, binderFactory)
@@ -197,7 +196,7 @@ class RequestParamMethodArgumentResolverKotlinTests {
 
 	@Test
 	fun resolveNonNullableRequiredWithoutMultipartParameter() {
-		request.method = HttpMethod.POST.name
+		request.method = HttpMethod.POST.name()
 		request.contentType = MediaType.MULTIPART_FORM_DATA_VALUE
 
 		assertThatExceptionOfType(MissingServletRequestPartException::class.java).isThrownBy {
@@ -218,10 +217,10 @@ class RequestParamMethodArgumentResolverKotlinTests {
 
 	@Test
 	fun resolveNonNullableNotRequiredWithoutMultipartParameter() {
-		request.method = HttpMethod.POST.name
+		request.method = HttpMethod.POST.name()
 		request.contentType = MediaType.MULTIPART_FORM_DATA_VALUE
 
-		assertThatExceptionOfType(TypeCastException::class.java).isThrownBy {
+		assertThatExceptionOfType(NullPointerException::class.java).isThrownBy {
 			resolver.resolveArgument(nonNullableMultipartParamNotRequired, null, webRequest, binderFactory) as MultipartFile
 		}
 	}

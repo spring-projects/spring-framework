@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Contextual descriptor about a type to convert from or to.
- * Capable of representing arrays and generic collection types.
+ * <p>Capable of representing arrays and generic collection types.
  *
  * @author Keith Donald
  * @author Andy Clement
@@ -197,7 +197,7 @@ public class TypeDescriptor implements Serializable {
 	/**
 	 * Cast this {@link TypeDescriptor} to a superclass or implemented interface
 	 * preserving annotations and nested type context.
-	 * @param superType the super type to cast to (can be {@code null})
+	 * @param superType the supertype to cast to (can be {@code null})
 	 * @return a new TypeDescriptor for the up-cast type
 	 * @throws IllegalArgumentException if this type is not assignable to the super-type
 	 * @since 3.2
@@ -341,19 +341,19 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	/**
-	 * If this type is a {@link Collection} or an array, creates a element TypeDescriptor
+	 * If this type is a {@link Collection} or an array, creates an element TypeDescriptor
 	 * from the provided collection or array element.
 	 * <p>Narrows the {@link #getElementTypeDescriptor() elementType} property to the class
 	 * of the provided collection or array element. For example, if this describes a
-	 * {@code java.util.List&lt;java.lang.Number&lt;} and the element argument is an
+	 * {@code java.util.List<java.lang.Number>} and the element argument is a
 	 * {@code java.lang.Integer}, the returned TypeDescriptor will be {@code java.lang.Integer}.
-	 * If this describes a {@code java.util.List&lt;?&gt;} and the element argument is an
+	 * If this describes a {@code java.util.List<?>} and the element argument is a
 	 * {@code java.lang.Integer}, the returned TypeDescriptor will be {@code java.lang.Integer}
 	 * as well.
 	 * <p>Annotation and nested type context will be preserved in the narrowed
 	 * TypeDescriptor that is returned.
 	 * @param element the collection or array element
-	 * @return a element type descriptor, narrowed to the type of the provided element
+	 * @return an element type descriptor, narrowed to the type of the provided element
 	 * @see #getElementTypeDescriptor()
 	 * @see #narrow(Object)
 	 */
@@ -388,9 +388,9 @@ public class TypeDescriptor implements Serializable {
 	 * from the provided map key.
 	 * <p>Narrows the {@link #getMapKeyTypeDescriptor() mapKeyType} property
 	 * to the class of the provided map key. For example, if this describes a
-	 * {@code java.util.Map&lt;java.lang.Number, java.lang.String&lt;} and the key
+	 * {@code java.util.Map<java.lang.Number, java.lang.String>} and the key
 	 * argument is a {@code java.lang.Integer}, the returned TypeDescriptor will be
-	 * {@code java.lang.Integer}. If this describes a {@code java.util.Map&lt;?, ?&gt;}
+	 * {@code java.lang.Integer}. If this describes a {@code java.util.Map<?, ?>}
 	 * and the key argument is a {@code java.lang.Integer}, the returned
 	 * TypeDescriptor will be {@code java.lang.Integer} as well.
 	 * <p>Annotation and nested type context will be preserved in the narrowed
@@ -425,9 +425,9 @@ public class TypeDescriptor implements Serializable {
 	 * from the provided map value.
 	 * <p>Narrows the {@link #getMapValueTypeDescriptor() mapValueType} property
 	 * to the class of the provided map value. For example, if this describes a
-	 * {@code java.util.Map&lt;java.lang.String, java.lang.Number&lt;} and the value
+	 * {@code java.util.Map<java.lang.String, java.lang.Number>} and the value
 	 * argument is a {@code java.lang.Integer}, the returned TypeDescriptor will be
-	 * {@code java.lang.Integer}. If this describes a {@code java.util.Map&lt;?, ?&gt;}
+	 * {@code java.lang.Integer}. If this describes a {@code java.util.Map<?, ?>}
 	 * and the value argument is a {@code java.lang.Integer}, the returned
 	 * TypeDescriptor will be {@code java.lang.Integer} as well.
 	 * <p>Annotation and nested type context will be preserved in the narrowed
@@ -458,10 +458,9 @@ public class TypeDescriptor implements Serializable {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof TypeDescriptor)) {
+		if (!(other instanceof TypeDescriptor otherDesc)) {
 			return false;
 		}
-		TypeDescriptor otherDesc = (TypeDescriptor) other;
 		if (getType() != otherDesc.getType()) {
 			return false;
 		}
@@ -513,9 +512,9 @@ public class TypeDescriptor implements Serializable {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		for (Annotation ann : getAnnotations()) {
-			builder.append("@").append(ann.annotationType().getName()).append(' ');
+			builder.append('@').append(ann.annotationType().getName()).append(' ');
 		}
-		builder.append(getResolvableType().toString());
+		builder.append(getResolvableType());
 		return builder.toString();
 	}
 

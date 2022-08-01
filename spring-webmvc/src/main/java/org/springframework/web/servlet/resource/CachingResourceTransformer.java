@@ -18,8 +18,7 @@ package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,8 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
  * <p>Annotated JMS listener methods are allowed to have flexible signatures similar
  * to what {@link MessageMapping} provides:
  * <ul>
- * <li>{@link javax.jms.Session} to get access to the JMS session</li>
- * <li>{@link javax.jms.Message} or one of its subclasses to get access to the raw JMS message</li>
+ * <li>{@link jakarta.jms.Session} to get access to the JMS session</li>
+ * <li>{@link jakarta.jms.Message} or one of its subclasses to get access to the raw JMS message</li>
  * <li>{@link org.springframework.messaging.Message} to use Spring's messaging abstraction counterpart</li>
  * <li>{@link org.springframework.messaging.handler.annotation.Payload @Payload}-annotated method
  * arguments, including support for validation</li>
@@ -71,6 +71,9 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
  * is not set, a default destination can be provided by adding
  * {@link org.springframework.messaging.handler.annotation.SendTo @SendTo} to the
  * method declaration.
+ *
+ * <p>This annotation can be used as a <em>{@linkplain Repeatable repeatable}</em>
+ * annotation.
  *
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em> with attribute overrides.

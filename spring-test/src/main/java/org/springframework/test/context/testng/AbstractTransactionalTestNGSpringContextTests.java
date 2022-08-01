@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.event.ApplicationEventsTestExecutionListener;
 import org.springframework.test.context.event.EventPublishingTestExecutionListener;
 import org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
@@ -61,6 +62,7 @@ import org.springframework.util.Assert;
  * <ul>
  * <li>{@link org.springframework.test.context.web.ServletTestExecutionListener}
  * <li>{@link org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener}
+ * <li>{@link org.springframework.test.context.event.ApplicationEventsTestExecutionListener}</li>
  * <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener}
  * <li>{@link org.springframework.test.context.support.DirtiesContextTestExecutionListener}
  * <li>{@link org.springframework.test.context.transaction.TransactionalTestExecutionListener}
@@ -84,8 +86,8 @@ import org.springframework.util.Assert;
  * @see org.springframework.test.jdbc.JdbcTestUtils
  * @see org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests
  */
-@TestExecutionListeners(listeners = { ServletTestExecutionListener.class,
-	DirtiesContextBeforeModesTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
+@TestExecutionListeners(listeners = { ServletTestExecutionListener.class, DirtiesContextBeforeModesTestExecutionListener.class,
+	ApplicationEventsTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
 	DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class,
 	SqlScriptsTestExecutionListener.class, EventPublishingTestExecutionListener.class }, inheritListeners = false)
 @Transactional
@@ -175,7 +177,7 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	}
 
 	/**
-	 * Convenience method for dropping all of the specified tables.
+	 * Convenience method for dropping all the specified tables.
 	 * <p>Use with caution outside of a transaction!
 	 * @param names the names of the tables to drop
 	 * @since 3.2
@@ -191,7 +193,7 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	 * <p>The script will normally be loaded by classpath.
 	 * <p><b>Do not use this method to execute DDL if you expect rollback.</b>
 	 * @param sqlResourcePath the Spring resource path for the SQL script
-	 * @param continueOnError whether or not to continue without throwing an
+	 * @param continueOnError whether to continue without throwing an
 	 * exception in the event of an error
 	 * @throws DataAccessException if there is an error executing a statement
 	 * @see ResourceDatabasePopulator

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -407,15 +407,15 @@ public abstract class AbstractCacheAnnotationTests {
 	}
 
 	protected void testConditionalCacheUpdate(CacheableService<?> service) {
-		Integer one = 1;
-		Integer three = 3;
+		int one = 1;
+		int three = 3;
 
 		Cache cache = this.cm.getCache("testCache");
-		assertThat((int) Integer.valueOf(service.conditionalUpdate(one).toString())).isEqualTo((int) one);
+		assertThat(Integer.parseInt(service.conditionalUpdate(one).toString())).isEqualTo(one);
 		assertThat(cache.get(one)).isNull();
 
-		assertThat((int) Integer.valueOf(service.conditionalUpdate(three).toString())).isEqualTo((int) three);
-		assertThat((int) Integer.valueOf(cache.get(three).get().toString())).isEqualTo((int) three);
+		assertThat(Integer.parseInt(service.conditionalUpdate(three).toString())).isEqualTo(three);
+		assertThat(Integer.parseInt(cache.get(three).get().toString())).isEqualTo(three);
 	}
 
 	protected void testMultiCache(CacheableService<?> service) {

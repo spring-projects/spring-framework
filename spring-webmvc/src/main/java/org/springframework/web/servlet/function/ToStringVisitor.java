@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.function;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -38,6 +39,7 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 
 
 	// RouterFunctions.Visitor
+
 	@Override
 	public void startNested(RequestPredicate predicate) {
 		indent();
@@ -68,16 +70,21 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 	}
 
 	@Override
+	public void attributes(Map<String, Object> attributes) {
+	}
+
+	@Override
 	public void unknown(RouterFunction<?> routerFunction) {
 		indent();
 		this.builder.append(routerFunction);
 	}
 
 	private void indent() {
-		for (int i=0; i < this.indent; i++) {
+		for (int i = 0; i < this.indent; i++) {
 			this.builder.append(' ');
 		}
 	}
+
 
 	// RequestPredicates.Visitor
 
@@ -156,6 +163,7 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 	public void unknown(RequestPredicate predicate) {
 		this.builder.append(predicate);
 	}
+
 	@Override
 	public String toString() {
 		String result = this.builder.toString();
@@ -164,4 +172,5 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 		}
 		return result;
 	}
+
 }

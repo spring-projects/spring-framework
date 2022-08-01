@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,13 @@ import reactor.test.StepVerifier;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.core.testfixture.io.buffer.DataBufferTestUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.web.reactive.function.BodyExtractors;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.BDDMockito.given;
@@ -170,7 +171,7 @@ public class ExchangeFilterFunctionsTests {
 		ExchangeFunction exchange = r -> Mono.just(response);
 
 		ExchangeFilterFunction errorHandler = ExchangeFilterFunctions.statusError(
-				HttpStatus::is4xxClientError, r -> new MyException());
+				HttpStatusCode::is4xxClientError, r -> new MyException());
 
 		Mono<ClientResponse> result = errorHandler.filter(request, exchange);
 
@@ -186,7 +187,7 @@ public class ExchangeFilterFunctionsTests {
 		given(response.statusCode()).willReturn(HttpStatus.NOT_FOUND);
 
 		Mono<ClientResponse> result = ExchangeFilterFunctions
-				.statusError(HttpStatus::is5xxServerError, req -> new MyException())
+				.statusError(HttpStatusCode::is5xxServerError, req -> new MyException())
 				.filter(request, req -> Mono.just(response));
 
 		StepVerifier.create(result)
@@ -197,10 +198,9 @@ public class ExchangeFilterFunctionsTests {
 
 	@Test
 	public void limitResponseSize() {
-		DefaultDataBufferFactory bufferFactory = new DefaultDataBufferFactory();
-		DataBuffer b1 = dataBuffer("foo", bufferFactory);
-		DataBuffer b2 = dataBuffer("bar", bufferFactory);
-		DataBuffer b3 = dataBuffer("baz", bufferFactory);
+		DataBuffer b1 = dataBuffer("foo");
+		DataBuffer b2 = dataBuffer("bar");
+		DataBuffer b3 = dataBuffer("baz");
 
 		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL).build();
 		ClientResponse response = ClientResponse.create(HttpStatus.OK).body(Flux.just(b1, b2, b3)).build();
@@ -217,13 +217,13 @@ public class ExchangeFilterFunctionsTests {
 	}
 
 	private String string(DataBuffer buffer) {
-		String value = DataBufferTestUtils.dumpString(buffer, StandardCharsets.UTF_8);
+		String value = buffer.toString(UTF_8);
 		DataBufferUtils.release(buffer);
 		return value;
 	}
 
-	private DataBuffer dataBuffer(String foo, DefaultDataBufferFactory bufferFactory) {
-		return bufferFactory.wrap(foo.getBytes(StandardCharsets.UTF_8));
+	private DataBuffer dataBuffer(String foo) {
+		return DefaultDataBufferFactory.sharedInstance.wrap(foo.getBytes(StandardCharsets.UTF_8));
 	}
 
 

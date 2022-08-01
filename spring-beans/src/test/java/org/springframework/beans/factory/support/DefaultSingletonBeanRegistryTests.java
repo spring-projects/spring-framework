@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package org.springframework.beans.factory.support;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.testfixture.beans.DerivedTestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
 
@@ -40,12 +38,7 @@ public class DefaultSingletonBeanRegistryTests {
 		beanRegistry.registerSingleton("tb", tb);
 		assertThat(beanRegistry.getSingleton("tb")).isSameAs(tb);
 
-		TestBean tb2 = (TestBean) beanRegistry.getSingleton("tb2", new ObjectFactory<Object>() {
-			@Override
-			public Object getObject() throws BeansException {
-				return new TestBean();
-			}
-		});
+		TestBean tb2 = (TestBean) beanRegistry.getSingleton("tb2", TestBean::new);
 		assertThat(beanRegistry.getSingleton("tb2")).isSameAs(tb2);
 
 		assertThat(beanRegistry.getSingleton("tb")).isSameAs(tb);

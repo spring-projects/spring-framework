@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,10 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.reactive.result.SimpleHandlerAdapter;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebHandler;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.method.ResolvableMethod;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
@@ -37,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.withSettings;
 
 /**
@@ -50,7 +54,7 @@ public class DispatcherHandlerTests {
 
 
 	@Test
-	public void handlerMappingOrder() {
+	void handlerMappingOrder() {
 		HandlerMapping hm1 = mock(HandlerMapping.class, withSettings().extraInterfaces(Ordered.class));
 		HandlerMapping hm2 = mock(HandlerMapping.class, withSettings().extraInterfaces(Ordered.class));
 		given(((Ordered) hm1).getOrder()).willReturn(1);
@@ -65,13 +69,34 @@ public class DispatcherHandlerTests {
 		context.registerBean(HandlerResultHandler.class, StringHandlerResultHandler::new);
 		context.refresh();
 
-		DispatcherHandler dispatcherHandler = new DispatcherHandler(context);
-
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
-		dispatcherHandler.handle(exchange).block(Duration.ofSeconds(0));
+		new DispatcherHandler(context).handle(exchange).block(Duration.ofSeconds(0));
+
 		assertThat(exchange.getResponse().getBodyAsString().block(Duration.ofSeconds(5))).isEqualTo("1");
 	}
 
+	@Test
+	void preFlightRequest() {
+		WebHandler webHandler = mock(WebHandler.class);
+		HandlerMapping handlerMapping = mock(HandlerMapping.class);
+		given((handlerMapping).getHandler(any())).willReturn(Mono.just(webHandler));
+
+		StaticApplicationContext context = new StaticApplicationContext();
+		context.registerBean("handlerMapping", HandlerMapping.class, () -> handlerMapping);
+		context.registerBean(HandlerAdapter.class, SimpleHandlerAdapter::new);
+		context.registerBean(HandlerResultHandler.class, StringHandlerResultHandler::new);
+		context.refresh();
+
+		MockServerHttpRequest request = MockServerHttpRequest.options("/")
+				.header(HttpHeaders.ORIGIN, "https://domain.com")
+				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET")
+				.build();
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		new DispatcherHandler(context).handle(exchange).block(Duration.ofSeconds(0));
+
+		verifyNoInteractions(webHandler);
+	}
 
 	@SuppressWarnings("unused")
 	private void handle() {}
@@ -101,8 +126,12 @@ public class DispatcherHandlerTests {
 
 		@Override
 		public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
-			byte[] bytes = ((String) result.getReturnValue()).getBytes(StandardCharsets.UTF_8);
-			DataBuffer dataBuffer = new DefaultDataBufferFactory().wrap(bytes);
+			Object returnValue = result.getReturnValue();
+			if (returnValue == null) {
+				return Mono.empty();
+			}
+			byte[] bytes = ((String) returnValue).getBytes(StandardCharsets.UTF_8);
+			DataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(bytes);
 			return exchange.getResponse().writeWith(Mono.just(dataBuffer));
 		}
 	}

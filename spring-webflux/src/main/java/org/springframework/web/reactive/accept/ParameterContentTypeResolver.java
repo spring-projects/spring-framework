@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.accept;
 
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Resolver that checks a query parameter and uses it to lookup a matching
+ * Resolver that checks a query parameter and uses it to look up a matching
  * MediaType. Lookup keys can be registered or as a fallback
  * {@link MediaTypeFactory} can be used to perform a lookup.
  *

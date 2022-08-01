@@ -18,7 +18,7 @@ package org.springframework.web.servlet.config.annotation;
 
 import java.util.Collections;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
@@ -90,7 +90,7 @@ public class DefaultServletHandlerConfigurer {
 	 * Return a handler mapping instance ordered at {@link Ordered#LOWEST_PRECEDENCE}
 	 * containing the {@link DefaultServletHttpRequestHandler} instance mapped
 	 * to {@code "/**"}; or {@code null} if default servlet handling was not
-	 * been enabled.
+	 * enabled.
 	 * @since 4.3.12
 	 */
 	@Nullable

@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
  * connection pool, implementing the same standard interface, but creating new
  * Connections on every call.
  *
- * <p>In a Java EE container, it is recommended to use a JNDI DataSource provided by
+ * <p>In a Jakarta EE container, it is recommended to use a JNDI DataSource provided by
  * the container. Such a DataSource can be exposed as a DataSource bean in a Spring
  * ApplicationContext via {@link org.springframework.jndi.JndiObjectFactoryBean},
  * for seamless switching to and from a local DataSource bean like this class.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -34,13 +35,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.FormFieldPart;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
 import org.springframework.http.codec.multipart.Part;
+import org.springframework.http.codec.multipart.PartEvent;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.MultiValueMap;
@@ -51,13 +56,14 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.config.EnableWebFlux;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.UndertowHttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
@@ -83,15 +89,16 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	void requestPart(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		Mono<ClientResponse> result = webClient
+		Mono<ResponseEntity<Void>> result = webClient
 				.post()
 				.uri("/requestPart")
 				.bodyValue(generateBody())
-				.exchange();
+				.retrieve()
+				.toBodilessEntity();
 
 		StepVerifier
 				.create(result)
-				.consumeNextWith(response -> assertThat(response.statusCode()).isEqualTo(HttpStatus.OK))
+				.consumeNextWith(entity -> assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK))
 				.verifyComplete();
 	}
 
@@ -161,6 +168,9 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@ParameterizedHttpServerTest
 	void transferTo(HttpServer httpServer) throws Exception {
+		// TODO Determine why Undertow fails: https://github.com/spring-projects/spring-framework/issues/25310
+		assumeFalse(httpServer instanceof UndertowHttpServer, "Undertow currently fails with transferTo");
+
 		startServer(httpServer);
 
 		Flux<String> result = webClient
@@ -193,6 +203,22 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.verifyComplete();
 	}
 
+	@ParameterizedHttpServerTest
+	void partData(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
+		Mono<String> result = webClient
+				.post()
+				.uri("/partData")
+				.bodyValue(generateBody())
+				.retrieve()
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.consumeNextWith(body -> assertThat(body).isEqualTo("fieldPart,foo.txt:fileParts,logo.png:fileParts,jsonPart,"))
+				.verifyComplete();
+	}
+
 	private MultiValueMap<String, HttpEntity<?>> generateBody() {
 		MultipartBodyBuilder builder = new MultipartBodyBuilder();
 		builder.part("fieldPart", "fieldValue");
@@ -204,10 +230,9 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private static void verifyContents(Path tempFile, Resource resource) {
 		try {
-			byte[] tempBytes = Files.readAllBytes(tempFile);
 			// Use FileCopyUtils since the resource might reside in a JAR instead of in the file system.
 			byte[] resourceBytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
-			assertThat(tempBytes).isEqualTo(resourceBytes);
+			assertThat(tempFile).hasBinaryContent(resourceBytes);
 		}
 		catch (IOException ex) {
 			throw new AssertionError(ex);
@@ -265,23 +290,52 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 		@PostMapping("/transferTo")
 		Flux<String> transferTo(@RequestPart("fileParts") Flux<FilePart> parts) {
-			return parts.flatMap(filePart -> {
-				try {
-					Path tempFile = Files.createTempFile("MultipartIntegrationTests", filePart.filename());
-					return filePart.transferTo(tempFile)
-							.then(Mono.just(tempFile.toString() + "\n"));
+			return parts.concatMap(filePart -> createTempFile(filePart.filename())
+					.flatMap(tempFile -> filePart.transferTo(tempFile)
+							.then(Mono.just(tempFile.toString() + "\n"))));
+		}
 
-				}
-				catch (IOException e) {
-					return Mono.error(e);
-				}
-			});
+		private Mono<Path> createTempFile(String suffix) {
+			return Mono.defer(() -> {
+						try {
+							return Mono.just(Files.createTempFile("MultipartIntegrationTests", suffix));
+						}
+						catch (IOException ex) {
+							return Mono.error(ex);
+						}
+					})
+					.subscribeOn(Schedulers.boundedElastic());
 		}
 
 		@PostMapping("/modelAttribute")
 		String modelAttribute(@ModelAttribute FormBean formBean) {
 			return formBean.toString();
 		}
+
+		@PostMapping("/partData")
+		Flux<String> tokens(@RequestBody Flux<PartEvent> partData) {
+			return partData.map(data -> {
+				if (data.isLast()) {
+					ContentDisposition cd = data.headers().getContentDisposition();
+					StringBuilder sb = new StringBuilder();
+					if (cd.getFilename() != null) {
+						sb.append(cd.getFilename())
+								.append(':')
+								.append(cd.getName());
+					}
+					else if (cd.getName() != null) {
+						sb.append(cd.getName());
+					}
+					sb.append(',');
+					DataBufferUtils.release(data.content());
+					return sb.toString();
+				}
+				else {
+					return "";
+				}
+			});
+		}
+
 	}
 
 	private static String partMapDescription(MultiValueMap<String, Part> partsMap) {

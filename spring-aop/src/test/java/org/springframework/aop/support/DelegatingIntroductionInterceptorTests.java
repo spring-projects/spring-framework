@@ -239,7 +239,7 @@ public class DelegatingIntroductionInterceptorTests {
 		assertThat(p.getName()).isEqualTo(name);
 		assertThat(((TimeStamped) p).getTimeStamp()).isEqualTo(time);
 
-		Person p1 = (Person) SerializationTestUtils.serializeAndDeserialize(p);
+		Person p1 = SerializationTestUtils.serializeAndDeserialize(p);
 		assertThat(p1.getName()).isEqualTo(name);
 		assertThat(((TimeStamped) p1).getTimeStamp()).isEqualTo(time);
 	}
@@ -307,7 +307,7 @@ public class DelegatingIntroductionInterceptorTests {
 	}
 
 
-	private static interface SubTimeStamped extends TimeStamped {
+	private interface SubTimeStamped extends TimeStamped {
 	}
 
 }

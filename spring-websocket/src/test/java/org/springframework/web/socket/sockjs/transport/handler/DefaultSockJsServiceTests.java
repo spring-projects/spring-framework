@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -153,7 +154,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 
 		assertThat(this.servletResponse.getStatus()).isEqualTo(200);
 		verify(this.xhrHandler).handleRequest(this.request, this.response, this.wsHandler, this.session);
-		verify(taskScheduler).scheduleAtFixedRate(any(Runnable.class), eq(service.getDisconnectDelay()));
+		verify(taskScheduler).scheduleAtFixedRate(any(Runnable.class), eq(Duration.ofMillis(this.service.getDisconnectDelay())));
 
 		assertThat(this.response.getHeaders().getCacheControl()).isEqualTo("no-store, no-cache, must-revalidate, max-age=0");
 		assertThat(this.servletResponse.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isNull();
@@ -286,7 +287,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		String sockJsPath = "/websocket";
 		setRequest("GET", sockJsPrefix + sockJsPath);
 		wsService.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
-		assertThat(this.servletResponse.getStatus()).isNotEqualTo((long) 403);
+		assertThat(this.servletResponse.getStatus()).isNotEqualTo(403);
 
 		resetRequestAndResponse();
 		List<String> allowed = Collections.singletonList("https://mydomain1.example");
@@ -295,7 +296,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		setRequest("GET", sockJsPrefix + sockJsPath);
 		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain1.example");
 		wsService.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
-		assertThat(this.servletResponse.getStatus()).isNotEqualTo((long) 403);
+		assertThat(this.servletResponse.getStatus()).isNotEqualTo(403);
 
 		resetRequestAndResponse();
 		setRequest("GET", sockJsPrefix + sockJsPath);
@@ -309,7 +310,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		String sockJsPath = "/iframe.html";
 		setRequest("GET", sockJsPrefix + sockJsPath);
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
-		assertThat(this.servletResponse.getStatus()).isNotEqualTo((long) 404);
+		assertThat(this.servletResponse.getStatus()).isNotEqualTo(404);
 		assertThat(this.servletResponse.getHeader("X-Frame-Options")).isEqualTo("SAMEORIGIN");
 
 		resetRequestAndResponse();
@@ -323,7 +324,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		setRequest("GET", sockJsPrefix + sockJsPath);
 		this.service.setAllowedOrigins(Collections.singletonList("*"));
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
-		assertThat(this.servletResponse.getStatus()).isNotEqualTo((long) 404);
+		assertThat(this.servletResponse.getStatus()).isNotEqualTo(404);
 		assertThat(this.servletResponse.getHeader("X-Frame-Options")).isNull();
 	}
 

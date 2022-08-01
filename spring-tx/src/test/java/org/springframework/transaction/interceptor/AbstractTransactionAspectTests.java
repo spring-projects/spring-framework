@@ -559,7 +559,7 @@ public abstract class AbstractTransactionAspectTests {
 	 * have been created, as there's no distinction between target and proxy.
 	 * In the case of Spring's own AOP framework, a proxy must be created
 	 * using a suitably configured transaction interceptor
-	 * @param target target if there's a distinct target. If not (AspectJ),
+	 * @param target the target if there's a distinct target. If not (AspectJ),
 	 * return target.
 	 * @return transactional advised object
 	 */

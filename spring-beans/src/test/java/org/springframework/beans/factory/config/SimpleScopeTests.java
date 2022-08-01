@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +47,7 @@ public class SimpleScopeTests {
 		beanFactory = new DefaultListableBeanFactory();
 		Scope scope = new NoOpScope() {
 			private int index;
-			private List<TestBean> objects = new LinkedList<>(); {
+			private List<TestBean> objects = new ArrayList<>(); {
 				objects.add(new TestBean());
 				objects.add(new TestBean());
 			}

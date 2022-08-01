@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.http.converter;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -29,9 +28,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.mail.internet.MimeUtility;
-
 import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -160,8 +158,6 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-	static final MediaType MULTIPART_ALL = new MediaType("multipart", "*");
-
 	private static final MediaType DEFAULT_FORM_DATA_MEDIA_TYPE =
 			new MediaType(MediaType.APPLICATION_FORM_URLENCODED, DEFAULT_CHARSET);
 
@@ -234,6 +230,15 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	}
 
 	/**
+	 * Return the {@linkplain #setPartConverters configured converters} for MIME
+	 * parts.
+	 * @since 5.3
+	 */
+	public List<HttpMessageConverter<?>> getPartConverters() {
+		return Collections.unmodifiableList(this.partConverters);
+	}
+
+	/**
 	 * Add a message body converter. Such a converter is used to convert objects
 	 * to MIME parts.
 	 */
@@ -267,8 +272,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 */
 	private void applyDefaultCharset() {
 		for (HttpMessageConverter<?> candidate : this.partConverters) {
-			if (candidate instanceof AbstractHttpMessageConverter) {
-				AbstractHttpMessageConverter<?> converter = (AbstractHttpMessageConverter<?>) candidate;
+			if (candidate instanceof AbstractHttpMessageConverter<?> converter) {
 				// Only override default charset if the converter operates with a charset to begin with...
 				if (converter.getDefaultCharset() != null) {
 					converter.setDefaultCharset(this.charset);
@@ -280,7 +284,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	/**
 	 * Set the character set to use when writing multipart data to encode file
 	 * names. Encoding is based on the {@code encoded-word} syntax defined in
-	 * RFC 2047 and relies on {@code MimeUtility} from {@code javax.mail}.
+	 * RFC 2047 and relies on {@code MimeUtility} from {@code jakarta.mail}.
 	 * <p>As of 5.0 by default part headers, including {@code Content-Disposition}
 	 * (and its filename parameter) will be encoded based on the setting of
 	 * {@link #setCharset(Charset)} or {@code UTF-8} by default.
@@ -301,7 +305,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			return true;
 		}
 		for (MediaType supportedMediaType : getSupportedMediaTypes()) {
-			if (MULTIPART_ALL.includes(supportedMediaType)) {
+			if (supportedMediaType.getType().equalsIgnoreCase("multipart")) {
 				// We can't read multipart, so skip this supported media type.
 				continue;
 			}
@@ -342,11 +346,11 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		for (String pair : pairs) {
 			int idx = pair.indexOf('=');
 			if (idx == -1) {
-				result.add(URLDecoder.decode(pair, charset.name()), null);
+				result.add(URLDecoder.decode(pair, charset), null);
 			}
 			else {
-				String name = URLDecoder.decode(pair.substring(0, idx), charset.name());
-				String value = URLDecoder.decode(pair.substring(idx + 1), charset.name());
+				String name = URLDecoder.decode(pair.substring(0, idx), charset);
+				String value = URLDecoder.decode(pair.substring(idx + 1), charset);
 				result.add(name, value);
 			}
 		}
@@ -369,7 +373,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	private boolean isMultipart(MultiValueMap<String, ?> map, @Nullable MediaType contentType) {
 		if (contentType != null) {
-			return MULTIPART_ALL.includes(contentType);
+			return contentType.getType().equalsIgnoreCase("multipart");
 		}
 		for (List<?> values : map.values()) {
 			for (Object value : values) {
@@ -393,8 +397,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		byte[] bytes = serializeForm(formData, charset).getBytes(charset);
 		outputMessage.getHeaders().setContentLength(bytes.length);
 
-		if (outputMessage instanceof StreamingHttpOutputMessage) {
-			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;
+		if (outputMessage instanceof StreamingHttpOutputMessage streamingOutputMessage) {
 			streamingOutputMessage.setBody(outputStream -> StreamUtils.copy(bytes, outputStream));
 		}
 		else {
@@ -433,18 +436,13 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 					return;
 				}
 				values.forEach(value -> {
-					try {
-						if (builder.length() != 0) {
-							builder.append('&');
-						}
-						builder.append(URLEncoder.encode(name, charset.name()));
-						if (value != null) {
-							builder.append('=');
-							builder.append(URLEncoder.encode(String.valueOf(value), charset.name()));
-						}
+					if (builder.length() != 0) {
+						builder.append('&');
 					}
-					catch (UnsupportedEncodingException ex) {
-						throw new IllegalStateException(ex);
+					builder.append(URLEncoder.encode(name, charset));
+					if (value != null) {
+						builder.append('=');
+						builder.append(URLEncoder.encode(String.valueOf(value), charset));
 					}
 				});
 		});
@@ -463,10 +461,15 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			contentType = MediaType.MULTIPART_FORM_DATA;
 		}
 
+		Map<String, String> parameters = new LinkedHashMap<>(contentType.getParameters().size() + 2);
+		parameters.putAll(contentType.getParameters());
+
 		byte[] boundary = generateMultipartBoundary();
-		Map<String, String> parameters = new LinkedHashMap<>(2);
 		if (!isFilenameCharsetSet()) {
-			parameters.put("charset", this.charset.name());
+			if (!this.charset.equals(StandardCharsets.UTF_8) &&
+					!this.charset.equals(StandardCharsets.US_ASCII)) {
+				parameters.put("charset", this.charset.name());
+			}
 		}
 		parameters.put("boundary", new String(boundary, StandardCharsets.US_ASCII));
 
@@ -474,8 +477,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		contentType = new MediaType(contentType, parameters);
 		outputMessage.getHeaders().setContentType(contentType);
 
-		if (outputMessage instanceof StreamingHttpOutputMessage) {
-			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;
+		if (outputMessage instanceof StreamingHttpOutputMessage streamingOutputMessage) {
 			streamingOutputMessage.setBody(outputStream -> {
 				writeParts(outputStream, parts, boundary);
 				writeEnd(outputStream, boundary);
@@ -522,7 +524,13 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			if (messageConverter.canWrite(partType, partContentType)) {
 				Charset charset = isFilenameCharsetSet() ? StandardCharsets.US_ASCII : this.charset;
 				HttpOutputMessage multipartMessage = new MultipartHttpOutputMessage(os, charset);
-				multipartMessage.getHeaders().setContentDispositionFormData(name, getFilename(partBody));
+				String filename = getFilename(partBody);
+				ContentDisposition.Builder cd = ContentDisposition.formData()
+						.name(name);
+				if (filename != null) {
+					cd.filename(filename, this.multipartCharset);
+				}
+				multipartMessage.getHeaders().setContentDisposition(cd.build());
 				if (!partHeaders.isEmpty()) {
 					multipartMessage.getHeaders().putAll(partHeaders);
 				}
@@ -550,7 +558,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 * or a newly built {@link HttpEntity} wrapper for that part
 	 */
 	protected HttpEntity<?> getHttpEntity(Object part) {
-		return (part instanceof HttpEntity ? (HttpEntity<?>) part : new HttpEntity<>(part));
+		return (part instanceof HttpEntity<?> httpEntity ? httpEntity : new HttpEntity<>(part));
 	}
 
 	/**
@@ -563,13 +571,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 */
 	@Nullable
 	protected String getFilename(Object part) {
-		if (part instanceof Resource) {
-			Resource resource = (Resource) part;
-			String filename = resource.getFilename();
-			if (filename != null && this.multipartCharset != null) {
-				filename = MimeDelegate.encode(filename, this.multipartCharset.name());
-			}
-			return filename;
+		if (part instanceof Resource resource) {
+			return resource.getFilename();
 		}
 		else {
 			return null;
@@ -649,22 +652,6 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 		private byte[] getBytes(String name) {
 			return name.getBytes(this.charset);
-		}
-	}
-
-
-	/**
-	 * Inner class to avoid a hard dependency on the JavaMail API.
-	 */
-	private static class MimeDelegate {
-
-		public static String encode(String value, String charset) {
-			try {
-				return MimeUtility.encodeText(value, charset, null);
-			}
-			catch (UnsupportedEncodingException ex) {
-				throw new IllegalStateException(ex);
-			}
 		}
 	}
 

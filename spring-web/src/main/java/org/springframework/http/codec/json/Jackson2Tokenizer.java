@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,18 +154,10 @@ final class Jackson2Tokenizer {
 
 	private void updateDepth(JsonToken token) {
 		switch (token) {
-			case START_OBJECT:
-				this.objectDepth++;
-				break;
-			case END_OBJECT:
-				this.objectDepth--;
-				break;
-			case START_ARRAY:
-				this.arrayDepth++;
-				break;
-			case END_ARRAY:
-				this.arrayDepth--;
-				break;
+			case START_OBJECT -> this.objectDepth++;
+			case END_OBJECT -> this.objectDepth--;
+			case START_ARRAY -> this.arrayDepth++;
+			case END_ARRAY -> this.arrayDepth--;
 		}
 	}
 

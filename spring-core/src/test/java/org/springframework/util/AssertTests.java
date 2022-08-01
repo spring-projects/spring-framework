@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,12 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
@@ -402,6 +404,69 @@ class AssertTests {
 	}
 
 	@Test
+	void noNullElementsWithCollection() {
+		assertThatCode(() ->
+				Assert.noNullElements(asList("foo", "bar"), "enigma"))
+			.doesNotThrowAnyException();
+	}
+
+	@Test
+	void noNullElementsWithEmptyCollection() {
+		assertThatCode(() ->
+				Assert.noNullElements(emptyList(), "enigma"))
+			.doesNotThrowAnyException();
+	}
+
+	@Test
+	void noNullElementsWithNullCollection() {
+		assertThatCode(() ->
+				Assert.noNullElements((Collection<Object>) null, "enigma"))
+			.doesNotThrowAnyException();
+	}
+
+	@Test
+	void noNullElementsWithCollectionAndNullElement() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				Assert.noNullElements(asList("foo", null, "bar"), "enigma"))
+			.withMessageContaining("enigma");
+	}
+
+	@Test
+	void noNullElementsWithCollectionAndMessageSupplier() {
+		assertThatCode(() ->
+				Assert.noNullElements(asList("foo", "bar"), () -> "enigma"))
+			.doesNotThrowAnyException();
+	}
+
+	@Test
+	void noNullElementsWithEmptyCollectionAndMessageSupplier() {
+		assertThatCode(() ->
+				Assert.noNullElements(emptyList(), "enigma"))
+			.doesNotThrowAnyException();
+	}
+
+	@Test
+	void noNullElementsWithNullCollectionAndMessageSupplier() {
+		assertThatCode(() ->
+				Assert.noNullElements((Collection<Object>) null, () -> "enigma"))
+			.doesNotThrowAnyException();
+	}
+
+	@Test
+	void noNullElementsWithCollectionAndNullElementAndMessageSupplier() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				Assert.noNullElements(asList("foo", null, "bar"), () -> "enigma"))
+			.withMessageContaining("enigma");
+	}
+
+	@Test
+	void noNullElementsWithCollectionAndNullElementAndNullMessageSupplier() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				Assert.noNullElements(asList("foo", null, "bar"), (Supplier<String>) null))
+			.withMessage(null);
+	}
+
+	@Test
 	void notEmptyCollection() {
 		Assert.notEmpty(singletonList("foo"), "enigma");
 	}
@@ -580,7 +645,7 @@ class AssertTests {
 	void isAssignableWithNullSupertype() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				Assert.isAssignable(null, Integer.class, "enigma"))
-			.withMessageContaining("Super type to check against must not be null");
+			.withMessageContaining("Supertype to check against must not be null");
 	}
 
 	@Test
@@ -627,7 +692,7 @@ class AssertTests {
 	void isAssignableWithNullSupertypeAndMessageSupplier() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				Assert.isAssignable(null, Integer.class, () -> "enigma"))
-			.withMessageContaining("Super type to check against must not be null");
+			.withMessageContaining("Supertype to check against must not be null");
 	}
 
 	@Test

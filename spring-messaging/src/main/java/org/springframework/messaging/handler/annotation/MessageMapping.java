@@ -22,6 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.messaging.Message;
 
 /**
@@ -106,6 +107,7 @@ import org.springframework.messaging.Message;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Reflective(MessageMappingReflectiveProcessor.class)
 public @interface MessageMapping {
 
 	/**

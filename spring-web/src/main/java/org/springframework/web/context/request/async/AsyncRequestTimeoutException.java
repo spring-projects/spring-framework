@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,11 @@
 
 package org.springframework.web.context.request.async;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ProblemDetail;
+import org.springframework.web.ErrorResponse;
+
 /**
  * Exception to be thrown when an async request times out.
  * Alternatively an applications can register a
@@ -30,6 +35,16 @@ package org.springframework.web.context.request.async;
  * @since 4.2.8
  */
 @SuppressWarnings("serial")
-public class AsyncRequestTimeoutException extends RuntimeException {
+public class AsyncRequestTimeoutException extends RuntimeException implements ErrorResponse {
+
+	@Override
+	public HttpStatusCode getStatusCode() {
+		return HttpStatus.SERVICE_UNAVAILABLE;
+	}
+
+	@Override
+	public ProblemDetail getBody() {
+		return ProblemDetail.forStatus(getStatusCode());
+	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -28,6 +27,7 @@ import java.util.regex.Pattern;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Representation of a URI template that can be expanded with URI variables via
@@ -92,7 +92,7 @@ public class UriTemplate implements Serializable {
 	 * UriTemplate template = new UriTemplate("https://example.com/hotels/{hotel}/bookings/{booking}");
 	 * Map&lt;String, String&gt; uriVariables = new HashMap&lt;String, String&gt;();
 	 * uriVariables.put("booking", "42");
-	 * uriVariables.put("hotel", "Rest & Relax");
+	 * uriVariables.put("hotel", "Rest &amp; Relax");
 	 * System.out.println(template.expand(uriVariables));
 	 * </pre>
 	 * will print: <blockquote>{@code https://example.com/hotels/Rest%20%26%20Relax/bookings/42}</blockquote>
@@ -113,7 +113,7 @@ public class UriTemplate implements Serializable {
 	 * <p>Example:
 	 * <pre class="code">
 	 * UriTemplate template = new UriTemplate("https://example.com/hotels/{hotel}/bookings/{booking}");
-	 * System.out.println(template.expand("Rest & Relax", 42));
+	 * System.out.println(template.expand("Rest &amp; Relax", 42));
 	 * </pre>
 	 * will print: <blockquote>{@code https://example.com/hotels/Rest%20%26%20Relax/bookings/42}</blockquote>
 	 * @param uriVariableValues the array of URI variables
@@ -154,7 +154,7 @@ public class UriTemplate implements Serializable {
 	 */
 	public Map<String, String> match(String uri) {
 		Assert.notNull(uri, "'uri' must not be null");
-		Map<String, String> result = new LinkedHashMap<>(this.variableNames.size());
+		Map<String, String> result = CollectionUtils.newLinkedHashMap(this.variableNames.size());
 		Matcher matcher = this.matchPattern.matcher(uri);
 		if (matcher.find()) {
 			for (int i = 1; i <= matcher.groupCount(); i++) {
@@ -225,7 +225,7 @@ public class UriTemplate implements Serializable {
 								throw new IllegalArgumentException(
 										"No custom regular expression specified after ':' in \"" + variable + "\"");
 							}
-							String regex = variable.substring(idx + 1, variable.length());
+							String regex = variable.substring(idx + 1);
 							pattern.append('(');
 							pattern.append(regex);
 							pattern.append(')');

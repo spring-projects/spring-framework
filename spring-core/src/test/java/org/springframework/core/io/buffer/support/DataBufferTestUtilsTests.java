@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DataBufferTestUtilsTests extends AbstractDataBufferAllocatingTests {
 
 	@ParameterizedDataBufferAllocatingTest
-	void dumpBytes(String displayName, DataBufferFactory bufferFactory) {
+	void dumpBytes(DataBufferFactory bufferFactory) {
 		this.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = this.bufferFactory.allocateBuffer(4);
@@ -47,18 +47,16 @@ class DataBufferTestUtilsTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void dumpString(String displayName, DataBufferFactory bufferFactory) {
+	void dumpString(DataBufferFactory bufferFactory) {
 		this.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = this.bufferFactory.allocateBuffer(4);
 		String source = "abcd";
 		buffer.write(source.getBytes(StandardCharsets.UTF_8));
-
-		String result = DataBufferTestUtils.dumpString(buffer, StandardCharsets.UTF_8);
+		String result = buffer.toString(StandardCharsets.UTF_8);
+		release(buffer);
 
 		assertThat(result).isEqualTo(source);
-
-		release(buffer);
 	}
 
 }

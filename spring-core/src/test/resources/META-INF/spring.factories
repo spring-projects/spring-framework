@@ -1,5 +1,6 @@
 org.springframework.core.io.support.DummyFactory =\
 org.springframework.core.io.support.MyDummyFactory2, \
+org.springframework.core.io.support.MyDummyFactory1, \
 org.springframework.core.io.support.MyDummyFactory1
 
 java.lang.String=\

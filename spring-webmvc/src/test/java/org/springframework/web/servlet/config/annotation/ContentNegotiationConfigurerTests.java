@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,26 +59,34 @@ public class ContentNegotiationConfigurerTests {
 
 		this.servletRequest.setRequestURI("/flower.gif");
 
-		assertThat(manager.resolveMediaTypes(this.webRequest).get(0)).as("Should be able to resolve file extensions by default").isEqualTo(MediaType.IMAGE_GIF);
+		assertThat(manager.resolveMediaTypes(this.webRequest))
+				.as("Should not resolve file extensions by default")
+				.containsExactly(MediaType.ALL);
 
 		this.servletRequest.setRequestURI("/flower?format=gif");
 		this.servletRequest.addParameter("format", "gif");
 
-		assertThat(manager.resolveMediaTypes(this.webRequest)).as("Should not resolve request parameters by default").isEqualTo(ContentNegotiationStrategy.MEDIA_TYPE_ALL_LIST);
+		assertThat(manager.resolveMediaTypes(this.webRequest))
+				.as("Should not resolve request parameters by default")
+				.isEqualTo(ContentNegotiationStrategy.MEDIA_TYPE_ALL_LIST);
 
 		this.servletRequest.setRequestURI("/flower");
 		this.servletRequest.addHeader("Accept", MediaType.IMAGE_GIF_VALUE);
 
-		assertThat(manager.resolveMediaTypes(this.webRequest).get(0)).as("Should resolve Accept header by default").isEqualTo(MediaType.IMAGE_GIF);
+		assertThat(manager.resolveMediaTypes(this.webRequest))
+				.as("Should resolve Accept header by default")
+				.containsExactly(MediaType.IMAGE_GIF);
 	}
 
 	@Test
 	public void addMediaTypes() throws Exception {
+		this.configurer.favorParameter(true);
 		this.configurer.mediaTypes(Collections.singletonMap("json", MediaType.APPLICATION_JSON));
 		ContentNegotiationManager manager = this.configurer.buildContentNegotiationManager();
 
-		this.servletRequest.setRequestURI("/flower.json");
-		assertThat(manager.resolveMediaTypes(this.webRequest).get(0)).isEqualTo(MediaType.APPLICATION_JSON);
+		this.servletRequest.setRequestURI("/flower");
+		this.servletRequest.addParameter("format", "json");
+		assertThat(manager.resolveMediaTypes(this.webRequest)).containsExactly(MediaType.APPLICATION_JSON);
 	}
 
 	@Test
@@ -97,6 +105,7 @@ public class ContentNegotiationConfigurerTests {
 	@Test
 	public void ignoreAcceptHeader() throws Exception {
 		this.configurer.ignoreAcceptHeader(true);
+		this.configurer.favorParameter(true);
 		ContentNegotiationManager manager = this.configurer.buildContentNegotiationManager();
 
 		this.servletRequest.setRequestURI("/flower");

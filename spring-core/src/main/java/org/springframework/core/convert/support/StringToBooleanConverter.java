@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,37 +16,28 @@
 
 package org.springframework.core.convert.support;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.lang.Nullable;
 
 /**
- * Converts String to a Boolean.
+ * Converts a String to a Boolean.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 final class StringToBooleanConverter implements Converter<String, Boolean> {
 
-	private static final Set<String> trueValues = new HashSet<>(4);
+	private static final Set<String> trueValues = Set.of("true", "on", "yes", "1");
 
-	private static final Set<String> falseValues = new HashSet<>(4);
+	private static final Set<String> falseValues = Set.of("false", "off", "no", "0");
 
-	static {
-		trueValues.add("true");
-		trueValues.add("on");
-		trueValues.add("yes");
-		trueValues.add("1");
-
-		falseValues.add("false");
-		falseValues.add("off");
-		falseValues.add("no");
-		falseValues.add("0");
-	}
 
 	@Override
+	@Nullable
 	public Boolean convert(String source) {
 		String value = source.trim();
 		if (value.isEmpty()) {

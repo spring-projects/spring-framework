@@ -54,7 +54,7 @@ public class JCacheEhCacheApiTests extends AbstractValueAdaptingCacheTests<JCach
 	}
 
 	protected CachingProvider getCachingProvider() {
-		return Caching.getCachingProvider("org.ehcache.jcache.JCacheCachingProvider");
+		return Caching.getCachingProvider("org.ehcache.jsr107.EhcacheCachingProvider");
 	}
 
 	@AfterEach

@@ -18,9 +18,9 @@ package org.springframework.web.servlet.tags.form;
 
 import java.io.IOException;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.BodyContent;
-import javax.servlet.jsp.tagext.BodyTag;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.BodyContent;
+import jakarta.servlet.jsp.tagext.BodyTag;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -62,7 +62,7 @@ public abstract class AbstractHtmlElementBodyTag extends AbstractHtmlElementTag 
 	 * If {@link #shouldRender rendering}, flush any buffered
 	 * {@link BodyContent} or, if no {@link BodyContent} is supplied,
 	 * {@link #renderDefaultContent render the default content}.
-	 * @return a {@link javax.servlet.jsp.tagext.Tag#EVAL_PAGE} result
+	 * @return a {@link jakarta.servlet.jsp.tagext.Tag#EVAL_PAGE} result
 	 */
 	@Override
 	public int doEndTag() throws JspException {
@@ -122,21 +122,21 @@ public abstract class AbstractHtmlElementBodyTag extends AbstractHtmlElementTag 
 
 	/**
 	 * Called during {@link #writeTagContent} allowing subclasses to add any attributes to the
-	 * {@link javax.servlet.jsp.PageContext} as needed.
+	 * {@link jakarta.servlet.jsp.PageContext} as needed.
 	 */
 	protected void exposeAttributes() throws JspException {
 	}
 
 	/**
 	 * Called by {@link #doFinally} allowing subclasses to remove any attributes from the
-	 * {@link javax.servlet.jsp.PageContext} as needed.
+	 * {@link jakarta.servlet.jsp.PageContext} as needed.
 	 */
 	protected void removeAttributes() {
 	}
 
 	/**
 	 * The user customised the output of the error messages - flush the
-	 * buffered content into the main {@link javax.servlet.jsp.JspWriter}.
+	 * buffered content into the main {@link jakarta.servlet.jsp.JspWriter}.
 	 */
 	protected void flushBufferedBodyContent(BodyContent bodyContent) throws JspException {
 		try {

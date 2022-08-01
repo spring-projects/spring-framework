@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Arrays;
 import org.springframework.core.testfixture.io.buffer.AbstractDataBufferAllocatingTests;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
@@ -35,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class DataBufferTests extends AbstractDataBufferAllocatingTests {
 
 	@ParameterizedDataBufferAllocatingTest
-	void byteCountsAndPositions(String displayName, DataBufferFactory bufferFactory) {
+	void byteCountsAndPositions(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(2);
@@ -78,13 +79,12 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void readPositionSmallerThanZero(String displayName, DataBufferFactory bufferFactory) {
+	void readPositionSmallerThanZero(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(1);
 		try {
-			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
-					buffer.readPosition(-1));
+			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() -> buffer.readPosition(-1));
 		}
 		finally {
 			release(buffer);
@@ -92,13 +92,12 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void readPositionGreaterThanWritePosition(String displayName, DataBufferFactory bufferFactory) {
+	void readPositionGreaterThanWritePosition(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(1);
 		try {
-			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
-					buffer.readPosition(1));
+			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() -> buffer.readPosition(1));
 		}
 		finally {
 			release(buffer);
@@ -106,15 +105,14 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void writePositionSmallerThanReadPosition(String displayName, DataBufferFactory bufferFactory) {
+	void writePositionSmallerThanReadPosition(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(2);
 		try {
 			buffer.write((byte) 'a');
 			buffer.read();
-			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
-					buffer.writePosition(0));
+			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() -> buffer.writePosition(0));
 		}
 		finally {
 			release(buffer);
@@ -122,13 +120,12 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void writePositionGreaterThanCapacity(String displayName, DataBufferFactory bufferFactory) {
+	void writePositionGreaterThanCapacity(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(1);
 		try {
-			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
-					buffer.writePosition(2));
+			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() -> buffer.writePosition(2));
 		}
 		finally {
 			release(buffer);
@@ -136,7 +133,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void writeAndRead(String displayName, DataBufferFactory bufferFactory) {
+	void writeAndRead(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(5);
@@ -157,7 +154,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void writeNullString(String displayName, DataBufferFactory bufferFactory) {
+	void writeNullString(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(1);
@@ -171,7 +168,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void writeNullCharset(String displayName, DataBufferFactory bufferFactory) {
+	void writeNullCharset(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(1);
@@ -185,7 +182,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void writeEmptyString(String displayName, DataBufferFactory bufferFactory) {
+	void writeEmptyString(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(1);
@@ -197,7 +194,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void writeUtf8String(String displayName, DataBufferFactory bufferFactory) {
+	void writeUtf8String(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(6);
@@ -211,7 +208,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void writeUtf8StringOutGrowsCapacity(String displayName, DataBufferFactory bufferFactory) {
+	void writeUtf8StringOutGrowsCapacity(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(5);
@@ -225,7 +222,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void writeIsoString(String displayName, DataBufferFactory bufferFactory) {
+	void writeIsoString(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(3);
@@ -239,7 +236,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void writeMultipleUtf8String(String displayName, DataBufferFactory bufferFactory) {
+	void writeMultipleUtf8String(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(1);
@@ -261,7 +258,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void toStringNullCharset(String displayName, DataBufferFactory bufferFactory) {
+	void toStringNullCharset(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(1);
@@ -275,7 +272,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void toStringUtf8(String displayName, DataBufferFactory bufferFactory) {
+	void toStringUtf8(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		String spring = "Spring";
@@ -290,7 +287,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void toStringSection(String displayName, DataBufferFactory bufferFactory) {
+	void toStringSection(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		String spring = "Spring";
@@ -305,7 +302,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void inputStream(String displayName, DataBufferFactory bufferFactory) throws Exception {
+	void inputStream(DataBufferFactory bufferFactory) throws Exception {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(4);
@@ -339,30 +336,25 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void inputStreamReleaseOnClose(String displayName, DataBufferFactory bufferFactory) throws Exception {
+	void inputStreamReleaseOnClose(DataBufferFactory bufferFactory) throws Exception {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(3);
 		byte[] bytes = {'a', 'b', 'c'};
 		buffer.write(bytes);
 
-		InputStream inputStream = buffer.asInputStream(true);
-
-		try {
+		try (InputStream inputStream = buffer.asInputStream(true)) {
 			byte[] result = new byte[3];
 			int len = inputStream.read(result);
 			assertThat(len).isEqualTo(3);
 			assertThat(result).isEqualTo(bytes);
-		}
-		finally {
-			inputStream.close();
 		}
 
 		// AbstractDataBufferAllocatingTests.leakDetector will verify the buffer's release
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void outputStream(String displayName, DataBufferFactory bufferFactory) throws Exception {
+	void outputStream(DataBufferFactory bufferFactory) throws Exception {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(4);
@@ -382,7 +374,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void expand(String displayName, DataBufferFactory bufferFactory) {
+	void expand(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(1);
@@ -396,7 +388,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void increaseCapacity(String displayName, DataBufferFactory bufferFactory) {
+	void increaseCapacity(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(1);
@@ -409,7 +401,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void decreaseCapacityLowReadPosition(String displayName, DataBufferFactory bufferFactory) {
+	void decreaseCapacityLowReadPosition(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(2);
@@ -421,7 +413,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void decreaseCapacityHighReadPosition(String displayName, DataBufferFactory bufferFactory) {
+	void decreaseCapacityHighReadPosition(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(2);
@@ -434,7 +426,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void capacityLessThanZero(String displayName, DataBufferFactory bufferFactory) {
+	void capacityLessThanZero(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(1);
@@ -448,7 +440,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void writeByteBuffer(String displayName, DataBufferFactory bufferFactory) {
+	void writeByteBuffer(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer1 = createDataBuffer(1);
@@ -477,7 +469,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void writeDataBuffer(String displayName, DataBufferFactory bufferFactory) {
+	void writeDataBuffer(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer1 = createDataBuffer(1);
@@ -500,7 +492,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void asByteBuffer(String displayName, DataBufferFactory bufferFactory) {
+	void asByteBuffer(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(4);
@@ -521,7 +513,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void asByteBufferIndexLength(String displayName, DataBufferFactory bufferFactory) {
+	void asByteBufferIndexLength(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(3);
@@ -541,7 +533,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void byteBufferContainsDataBufferChanges(String displayName, DataBufferFactory bufferFactory) {
+	void byteBufferContainsDataBufferChanges(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer dataBuffer = createDataBuffer(1);
@@ -557,7 +549,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void dataBufferContainsByteBufferChanges(String displayName, DataBufferFactory bufferFactory) {
+	void dataBufferContainsByteBufferChanges(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer dataBuffer = createDataBuffer(1);
@@ -573,7 +565,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void emptyAsByteBuffer(String displayName, DataBufferFactory bufferFactory) {
+	void emptyAsByteBuffer(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(1);
@@ -585,7 +577,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void indexOf(String displayName, DataBufferFactory bufferFactory) {
+	void indexOf(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(3);
@@ -607,7 +599,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void lastIndexOf(String displayName, DataBufferFactory bufferFactory) {
+	void lastIndexOf(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(3);
@@ -638,7 +630,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void slice(String displayName, DataBufferFactory bufferFactory) {
+	void slice(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(3);
@@ -646,8 +638,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 
 		DataBuffer slice = buffer.slice(1, 2);
 		assertThat(slice.readableByteCount()).isEqualTo(2);
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-				slice.write((byte) 0));
+		assertThatException().isThrownBy(() -> slice.write((byte) 0));
 		buffer.write((byte) 'c');
 
 		assertThat(buffer.readableByteCount()).isEqualTo(3);
@@ -667,7 +658,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void retainedSlice(String displayName, DataBufferFactory bufferFactory) {
+	void retainedSlice(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(3);
@@ -675,8 +666,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 
 		DataBuffer slice = buffer.retainedSlice(1, 2);
 		assertThat(slice.readableByteCount()).isEqualTo(2);
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-				slice.write((byte) 0));
+		assertThatException().isThrownBy(() -> slice.write((byte) 0));
 		buffer.write((byte) 'c');
 
 		assertThat(buffer.readableByteCount()).isEqualTo(3);
@@ -696,7 +686,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void spr16351(String displayName, DataBufferFactory bufferFactory) {
+	void spr16351(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(6);
@@ -716,7 +706,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void join(String displayName, DataBufferFactory bufferFactory) {
+	void join(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer composite = this.bufferFactory.join(Arrays.asList(stringBuffer("a"),
@@ -731,7 +721,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void getByte(String displayName, DataBufferFactory bufferFactory) {
+	void getByte(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = stringBuffer("abc");
@@ -739,11 +729,8 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 		assertThat(buffer.getByte(0)).isEqualTo((byte) 'a');
 		assertThat(buffer.getByte(1)).isEqualTo((byte) 'b');
 		assertThat(buffer.getByte(2)).isEqualTo((byte) 'c');
-		assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
-				buffer.getByte(-1));
-
-		assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
-			buffer.getByte(3));
+		assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() -> buffer.getByte(-1));
+		assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() -> buffer.getByte(3));
 
 		release(buffer);
 	}

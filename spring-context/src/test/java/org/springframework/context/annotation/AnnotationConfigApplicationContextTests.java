@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,25 +148,51 @@ class AnnotationConfigApplicationContextTests {
 	void nullReturningBeanPostProcessor() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(AutowiredConfig.class);
+		// 1st BPP always gets invoked
+		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
+			@Override
+			public Object postProcessBeforeInitialization(Object bean, String beanName) {
+				if (bean instanceof TestBean testBean) {
+					testBean.name = testBean.name + "-before";
+				}
+				return bean;
+			}
+			@Override
+			public Object postProcessAfterInitialization(Object bean, String beanName) {
+				if (bean instanceof TestBean testBean) {
+					testBean.name = testBean.name + "-after";
+				}
+				return bean;
+			}
+		});
+		// 2nd BPP always returns null for a TestBean
 		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
 			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
 				return (bean instanceof TestBean ? null : bean);
 			}
+			@Override
+			public Object postProcessAfterInitialization(Object bean, String beanName) {
+				return (bean instanceof TestBean ? null : bean);
+			}
 		});
+		// 3rd BPP never gets invoked with a TestBean
 		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
 			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
-				bean.getClass().getName();
+				assertThat(bean).isNotInstanceOf(TestBean.class);
 				return bean;
 			}
 			@Override
 			public Object postProcessAfterInitialization(Object bean, String beanName) {
-				bean.getClass().getName();
+				assertThat(bean).isNotInstanceOf(TestBean.class);
 				return bean;
 			}
 		});
 		context.refresh();
+		TestBean testBean = context.getBean(TestBean.class);
+		assertThat(testBean).isNotNull();
+		assertThat(testBean.name).isEqualTo("foo-before-after");
 	}
 
 	@Test
@@ -271,9 +297,15 @@ class AnnotationConfigApplicationContextTests {
 		assertThat(ObjectUtils.containsElement(context.getBeanNamesForType(BeanA.class), "a")).isTrue();
 		assertThat(ObjectUtils.containsElement(context.getBeanNamesForType(BeanB.class), "b")).isTrue();
 		assertThat(ObjectUtils.containsElement(context.getBeanNamesForType(BeanC.class), "c")).isTrue();
+
 		assertThat(context.getBeansOfType(BeanA.class)).isEmpty();
 		assertThat(context.getBeansOfType(BeanB.class).values().iterator().next()).isSameAs(context.getBean(BeanB.class));
 		assertThat(context.getBeansOfType(BeanC.class).values().iterator().next()).isSameAs(context.getBean(BeanC.class));
+
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
+				context.getBeanFactory().resolveNamedBean(BeanA.class));
+		assertThat(context.getBeanFactory().resolveNamedBean(BeanB.class).getBeanInstance()).isSameAs(context.getBean(BeanB.class));
+		assertThat(context.getBeanFactory().resolveNamedBean(BeanC.class).getBeanInstance()).isSameAs(context.getBean(BeanC.class));
 	}
 
 	@Test
@@ -336,6 +368,8 @@ class AnnotationConfigApplicationContextTests {
 
 		assertThat(context.getType("fb")).isEqualTo(String.class);
 		assertThat(context.getType("&fb")).isEqualTo(NonInstantiatedFactoryBean.class);
+		assertThat(context.getBeanNamesForType(FactoryBean.class)).hasSize(1);
+		assertThat(context.getBeanNamesForType(NonInstantiatedFactoryBean.class)).hasSize(1);
 	}
 
 	@Test
@@ -386,6 +420,33 @@ class AnnotationConfigApplicationContextTests {
 		assertThat(context.getType("fb")).isEqualTo(String.class);
 		assertThat(context.getBeanNamesForType(FactoryBean.class)).hasSize(1);
 		assertThat(context.getBeanNamesForType(TypedFactoryBean.class)).hasSize(1);
+	}
+
+	@Test
+	void refreshForAotProcessingWithConfiguration() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(Config.class);
+		context.refreshForAotProcessing();
+		assertThat(context.getBeanFactory().getBeanDefinitionNames()).contains(
+				"annotationConfigApplicationContextTests.Config", "testBean");
+	}
+
+	@Test
+	void refreshForAotCanInstantiateBeanWithAutowiredApplicationContext() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(BeanD.class);
+		context.refreshForAotProcessing();
+		BeanD bean = context.getBean(BeanD.class);
+		assertThat(bean.applicationContext).isSameAs(context);
+	}
+
+	@Test
+	void refreshForAotCanInstantiateBeanWithFieldAutowiredApplicationContext() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(BeanB.class);
+		context.refreshForAotProcessing();
+		BeanB bean = context.getBean(BeanB.class);
+		assertThat(bean.applicationContext).isSameAs(context);
 	}
 
 
@@ -463,6 +524,16 @@ class AnnotationConfigApplicationContextTests {
 
 	static class BeanC {}
 
+	static class BeanD {
+
+		private final ApplicationContext applicationContext;
+
+		public BeanD(ApplicationContext applicationContext) {
+			this.applicationContext = applicationContext;
+		}
+
+	}
+
 	static class NonInstantiatedFactoryBean implements FactoryBean<String> {
 
 		NonInstantiatedFactoryBean() {
@@ -536,19 +607,24 @@ class TestBean {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		TestBean other = (TestBean) obj;
 		if (name == null) {
-			if (other.name != null)
+			if (other.name != null) {
 				return false;
+			}
 		}
-		else if (!name.equals(other.name))
+		else if (!name.equals(other.name)) {
 			return false;
+		}
 		return true;
 	}
 

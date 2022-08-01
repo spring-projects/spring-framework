@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.test.context.jdbc;
 
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
@@ -35,6 +34,7 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContext;
+import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.context.jdbc.SqlConfig.ErrorMode;
 import org.springframework.test.context.jdbc.SqlConfig.TransactionMode;
@@ -46,6 +46,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
+import org.springframework.transaction.support.TransactionSynchronizationUtils;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -162,18 +163,33 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	}
 
 	/**
-	 * Get the {@code @SqlMergeMode} annotation declared on the supplied {@code element}.
+	 * Get the {@code @SqlMergeMode} annotation declared on the supplied class.
 	 */
 	@Nullable
-	private SqlMergeMode getSqlMergeModeFor(AnnotatedElement element) {
-		return AnnotatedElementUtils.findMergedAnnotation(element, SqlMergeMode.class);
+	private SqlMergeMode getSqlMergeModeFor(Class<?> clazz) {
+		return TestContextAnnotationUtils.findMergedAnnotation(clazz, SqlMergeMode.class);
 	}
 
 	/**
-	 * Get the {@code @Sql} annotations declared on the supplied {@code element}.
+	 * Get the {@code @SqlMergeMode} annotation declared on the supplied method.
 	 */
-	private Set<Sql> getSqlAnnotationsFor(AnnotatedElement element) {
-		return AnnotatedElementUtils.getMergedRepeatableAnnotations(element, Sql.class, SqlGroup.class);
+	@Nullable
+	private SqlMergeMode getSqlMergeModeFor(Method method) {
+		return AnnotatedElementUtils.findMergedAnnotation(method, SqlMergeMode.class);
+	}
+
+	/**
+	 * Get the {@code @Sql} annotations declared on the supplied class.
+	 */
+	private Set<Sql> getSqlAnnotationsFor(Class<?> clazz) {
+		return TestContextAnnotationUtils.getMergedRepeatableAnnotations(clazz, Sql.class);
+	}
+
+	/**
+	 * Get the {@code @Sql} annotations declared on the supplied method.
+	 */
+	private Set<Sql> getSqlAnnotationsFor(Method method) {
+		return AnnotatedElementUtils.getMergedRepeatableAnnotations(method, Sql.class, SqlGroup.class);
 	}
 
 	/**
@@ -243,7 +259,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		else {
 			DataSource dataSourceFromTxMgr = getDataSourceFromTransactionManager(txMgr);
 			// Ensure user configured an appropriate DataSource/TransactionManager pair.
-			if (dataSource != null && dataSourceFromTxMgr != null && !dataSource.equals(dataSourceFromTxMgr)) {
+			if (dataSource != null && dataSourceFromTxMgr != null && !sameDataSource(dataSource, dataSourceFromTxMgr)) {
 				throw new IllegalStateException(String.format("Failed to execute SQL scripts for test context %s: " +
 						"the configured DataSource [%s] (named '%s') is not the one associated with " +
 						"transaction manager [%s] (named '%s').", testContext, dataSource.getClass().getName(),
@@ -275,6 +291,17 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		populator.setContinueOnError(mergedSqlConfig.getErrorMode() == ErrorMode.CONTINUE_ON_ERROR);
 		populator.setIgnoreFailedDrops(mergedSqlConfig.getErrorMode() == ErrorMode.IGNORE_FAILED_DROPS);
 		return populator;
+	}
+
+	/**
+	 * Determine if the two data sources are effectively the same, unwrapping
+	 * proxies as necessary to compare the target instances.
+	 * @since 5.3.4
+	 * @see TransactionSynchronizationUtils#unwrapResourceIfNecessary(Object)
+	 */
+	private static boolean sameDataSource(DataSource ds1, DataSource ds2) {
+		return TransactionSynchronizationUtils.unwrapResourceIfNecessary(ds1)
+					.equals(TransactionSynchronizationUtils.unwrapResourceIfNecessary(ds2));
 	}
 
 	@Nullable

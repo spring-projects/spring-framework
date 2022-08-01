@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
  * See {@link org.springframework.jdbc.core.JdbcTemplate}.
  *
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 28.11.2003
  * @see org.springframework.jdbc.core.JdbcTemplate
  */
@@ -87,7 +88,12 @@ public abstract class JdbcAccessor implements InitializingBean {
 	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
 	 */
 	public void setDatabaseProductName(String dbName) {
-		this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dbName);
+		if (SQLErrorCodeSQLExceptionTranslator.hasUserProvidedErrorCodesFile()) {
+			this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dbName);
+		}
+		else {
+			this.exceptionTranslator = new SQLExceptionSubclassTranslator();
+		}
 	}
 
 	/**
@@ -117,12 +123,11 @@ public abstract class JdbcAccessor implements InitializingBean {
 		synchronized (this) {
 			exceptionTranslator = this.exceptionTranslator;
 			if (exceptionTranslator == null) {
-				DataSource dataSource = getDataSource();
-				if (dataSource != null) {
-					exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dataSource);
+				if (SQLErrorCodeSQLExceptionTranslator.hasUserProvidedErrorCodesFile()) {
+					exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(obtainDataSource());
 				}
 				else {
-					exceptionTranslator = new SQLStateSQLExceptionTranslator();
+					exceptionTranslator = new SQLExceptionSubclassTranslator();
 				}
 				this.exceptionTranslator = exceptionTranslator;
 			}

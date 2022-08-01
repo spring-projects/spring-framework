@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,11 @@ import java.io.OutputStream;
 
 /**
  * Utilities for testing serializability of objects.
- * Exposes static methods for use in other test cases.
+ *
+ * <p>Exposes static methods for use in other test cases.
  *
  * @author Rod Johnson
+ * @author Sam Brannen
  */
 public class SerializationTestUtils {
 
@@ -49,18 +51,32 @@ public class SerializationTestUtils {
 		}
 	}
 
-	public static Object serializeAndDeserialize(Object o) throws IOException, ClassNotFoundException {
+	@SuppressWarnings("unchecked")
+	public static <T> T serializeAndDeserialize(T o) throws IOException, ClassNotFoundException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
 			oos.writeObject(o);
 			oos.flush();
 		}
-		baos.flush();
 		byte[] bytes = baos.toByteArray();
 
 		ByteArrayInputStream is = new ByteArrayInputStream(bytes);
 		try (ObjectInputStream ois = new ObjectInputStream(is)) {
-			return ois.readObject();
+			return (T) ois.readObject();
+		}
+	}
+
+	public static <T> T serializeAndDeserialize(Object o, Class<T> expectedType) throws IOException, ClassNotFoundException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+			oos.writeObject(o);
+			oos.flush();
+		}
+		byte[] bytes = baos.toByteArray();
+
+		ByteArrayInputStream is = new ByteArrayInputStream(bytes);
+		try (ObjectInputStream ois = new ObjectInputStream(is)) {
+			return expectedType.cast(ois.readObject());
 		}
 	}
 

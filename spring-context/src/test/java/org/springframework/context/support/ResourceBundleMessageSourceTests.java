@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,55 +36,55 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @since 03.02.2004
  */
-public class ResourceBundleMessageSourceTests {
+class ResourceBundleMessageSourceTests {
 
 	@Test
-	public void testMessageAccessWithDefaultMessageSource() {
+	void messageAccessWithDefaultMessageSource() {
 		doTestMessageAccess(false, true, false, false, false);
 	}
 
 	@Test
-	public void testMessageAccessWithDefaultMessageSourceAndMessageFormat() {
+	void messageAccessWithDefaultMessageSourceAndMessageFormat() {
 		doTestMessageAccess(false, true, false, false, true);
 	}
 
 	@Test
-	public void testMessageAccessWithDefaultMessageSourceAndFallbackToGerman() {
+	void messageAccessWithDefaultMessageSourceAndFallbackToGerman() {
 		doTestMessageAccess(false, true, true, true, false);
 	}
 
 	@Test
-	public void testMessageAccessWithDefaultMessageSourceAndFallbackTurnedOff() {
+	void messageAccessWithDefaultMessageSourceAndFallbackTurnedOff() {
 		doTestMessageAccess(false, false, false, false, false);
 	}
 
 	@Test
-	public void testMessageAccessWithDefaultMessageSourceAndFallbackTurnedOffAndFallbackToGerman() {
+	void messageAccessWithDefaultMessageSourceAndFallbackTurnedOffAndFallbackToGerman() {
 		doTestMessageAccess(false, false, true, true, false);
 	}
 
 	@Test
-	public void testMessageAccessWithReloadableMessageSource() {
+	void messageAccessWithReloadableMessageSource() {
 		doTestMessageAccess(true, true, false, false, false);
 	}
 
 	@Test
-	public void testMessageAccessWithReloadableMessageSourceAndMessageFormat() {
+	void messageAccessWithReloadableMessageSourceAndMessageFormat() {
 		doTestMessageAccess(true, true, false, false, true);
 	}
 
 	@Test
-	public void testMessageAccessWithReloadableMessageSourceAndFallbackToGerman() {
+	void messageAccessWithReloadableMessageSourceAndFallbackToGerman() {
 		doTestMessageAccess(true, true, true, true, false);
 	}
 
 	@Test
-	public void testMessageAccessWithReloadableMessageSourceAndFallbackTurnedOff() {
+	void messageAccessWithReloadableMessageSourceAndFallbackTurnedOff() {
 		doTestMessageAccess(true, false, false, false, false);
 	}
 
 	@Test
-	public void testMessageAccessWithReloadableMessageSourceAndFallbackTurnedOffAndFallbackToGerman() {
+	void messageAccessWithReloadableMessageSourceAndFallbackTurnedOffAndFallbackToGerman() {
 		doTestMessageAccess(true, false, true, true, false);
 	}
 
@@ -201,7 +201,8 @@ public class ResourceBundleMessageSourceTests {
 	}
 
 	@Test
-	public void testDefaultApplicationContextMessageSource() {
+	@SuppressWarnings("resource")
+	void defaultApplicationContextMessageSource() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		ac.refresh();
 		assertThat(ac.getMessage("code1", null, "default", Locale.ENGLISH)).isEqualTo("default");
@@ -209,7 +210,8 @@ public class ResourceBundleMessageSourceTests {
 	}
 
 	@Test
-	public void testDefaultApplicationContextMessageSourceWithParent() {
+	@SuppressWarnings("resource")
+	void defaultApplicationContextMessageSourceWithParent() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		GenericApplicationContext parent = new GenericApplicationContext();
 		parent.refresh();
@@ -220,7 +222,8 @@ public class ResourceBundleMessageSourceTests {
 	}
 
 	@Test
-	public void testStaticApplicationContextMessageSourceWithStaticParent() {
+	@SuppressWarnings("resource")
+	void staticApplicationContextMessageSourceWithStaticParent() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		StaticApplicationContext parent = new StaticApplicationContext();
 		parent.refresh();
@@ -231,7 +234,8 @@ public class ResourceBundleMessageSourceTests {
 	}
 
 	@Test
-	public void testStaticApplicationContextMessageSourceWithDefaultParent() {
+	@SuppressWarnings("resource")
+	void staticApplicationContextMessageSourceWithDefaultParent() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		GenericApplicationContext parent = new GenericApplicationContext();
 		parent.refresh();
@@ -242,7 +246,7 @@ public class ResourceBundleMessageSourceTests {
 	}
 
 	@Test
-	public void testResourceBundleMessageSourceStandalone() {
+	void resourceBundleMessageSourceStandalone() {
 		ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
 		ms.setBasename("org/springframework/context/support/messages");
 		assertThat(ms.getMessage("code1", null, Locale.ENGLISH)).isEqualTo("message1");
@@ -250,7 +254,7 @@ public class ResourceBundleMessageSourceTests {
 	}
 
 	@Test
-	public void testResourceBundleMessageSourceWithWhitespaceInBasename() {
+	void resourceBundleMessageSourceWithWhitespaceInBasename() {
 		ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
 		ms.setBasename("  org/springframework/context/support/messages  ");
 		assertThat(ms.getMessage("code1", null, Locale.ENGLISH)).isEqualTo("message1");
@@ -258,7 +262,7 @@ public class ResourceBundleMessageSourceTests {
 	}
 
 	@Test
-	public void testResourceBundleMessageSourceWithDefaultCharset() {
+	void resourceBundleMessageSourceWithDefaultCharset() {
 		ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
 		ms.setBasename("org/springframework/context/support/messages");
 		ms.setDefaultEncoding("ISO-8859-1");
@@ -267,7 +271,7 @@ public class ResourceBundleMessageSourceTests {
 	}
 
 	@Test
-	public void testResourceBundleMessageSourceWithInappropriateDefaultCharset() {
+	void resourceBundleMessageSourceWithInappropriateDefaultCharset() {
 		ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
 		ms.setBasename("org/springframework/context/support/messages");
 		ms.setDefaultEncoding("argh");
@@ -277,7 +281,7 @@ public class ResourceBundleMessageSourceTests {
 	}
 
 	@Test
-	public void testReloadableResourceBundleMessageSourceStandalone() {
+	void reloadableResourceBundleMessageSourceStandalone() {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 		ms.setBasename("org/springframework/context/support/messages");
 		assertThat(ms.getMessage("code1", null, Locale.ENGLISH)).isEqualTo("message1");
@@ -285,36 +289,36 @@ public class ResourceBundleMessageSourceTests {
 	}
 
 	@Test
-	public void testReloadableResourceBundleMessageSourceWithCacheSeconds() throws InterruptedException {
+	void reloadableResourceBundleMessageSourceWithCacheSeconds() throws InterruptedException {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 		ms.setBasename("org/springframework/context/support/messages");
-		ms.setCacheSeconds(1);
+		ms.setCacheMillis(100);
 		// Initial cache attempt
 		assertThat(ms.getMessage("code1", null, Locale.ENGLISH)).isEqualTo("message1");
 		assertThat(ms.getMessage("code2", null, Locale.GERMAN)).isEqualTo("nachricht2");
-		Thread.sleep(1100);
+		Thread.sleep(200);
 		// Late enough for a re-cache attempt
 		assertThat(ms.getMessage("code1", null, Locale.ENGLISH)).isEqualTo("message1");
 		assertThat(ms.getMessage("code2", null, Locale.GERMAN)).isEqualTo("nachricht2");
 	}
 
 	@Test
-	public void testReloadableResourceBundleMessageSourceWithNonConcurrentRefresh() throws InterruptedException {
+	void reloadableResourceBundleMessageSourceWithNonConcurrentRefresh() throws InterruptedException {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 		ms.setBasename("org/springframework/context/support/messages");
-		ms.setCacheSeconds(1);
+		ms.setCacheMillis(100);
 		ms.setConcurrentRefresh(false);
 		// Initial cache attempt
 		assertThat(ms.getMessage("code1", null, Locale.ENGLISH)).isEqualTo("message1");
 		assertThat(ms.getMessage("code2", null, Locale.GERMAN)).isEqualTo("nachricht2");
-		Thread.sleep(1100);
+		Thread.sleep(200);
 		// Late enough for a re-cache attempt
 		assertThat(ms.getMessage("code1", null, Locale.ENGLISH)).isEqualTo("message1");
 		assertThat(ms.getMessage("code2", null, Locale.GERMAN)).isEqualTo("nachricht2");
 	}
 
 	@Test
-	public void testReloadableResourceBundleMessageSourceWithCommonMessages() {
+	void reloadableResourceBundleMessageSourceWithCommonMessages() {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 		Properties commonMessages = new Properties();
 		commonMessages.setProperty("warning", "Do not do {0}");
@@ -327,7 +331,7 @@ public class ResourceBundleMessageSourceTests {
 	}
 
 	@Test
-	public void testReloadableResourceBundleMessageSourceWithWhitespaceInBasename() {
+	void reloadableResourceBundleMessageSourceWithWhitespaceInBasename() {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 		ms.setBasename("  org/springframework/context/support/messages  ");
 		assertThat(ms.getMessage("code1", null, Locale.ENGLISH)).isEqualTo("message1");
@@ -335,7 +339,7 @@ public class ResourceBundleMessageSourceTests {
 	}
 
 	@Test
-	public void testReloadableResourceBundleMessageSourceWithDefaultCharset() {
+	void reloadableResourceBundleMessageSourceWithDefaultCharset() {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 		ms.setBasename("org/springframework/context/support/messages");
 		ms.setDefaultEncoding("ISO-8859-1");
@@ -344,7 +348,7 @@ public class ResourceBundleMessageSourceTests {
 	}
 
 	@Test
-	public void testReloadableResourceBundleMessageSourceWithInappropriateDefaultCharset() {
+	void reloadableResourceBundleMessageSourceWithInappropriateDefaultCharset() {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 		ms.setBasename("org/springframework/context/support/messages");
 		ms.setDefaultEncoding("unicode");
@@ -357,7 +361,7 @@ public class ResourceBundleMessageSourceTests {
 	}
 
 	@Test
-	public void testReloadableResourceBundleMessageSourceWithInappropriateEnglishCharset() {
+	void reloadableResourceBundleMessageSourceWithInappropriateEnglishCharset() {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 		ms.setBasename("org/springframework/context/support/messages");
 		ms.setFallbackToSystemLocale(false);
@@ -369,7 +373,7 @@ public class ResourceBundleMessageSourceTests {
 	}
 
 	@Test
-	public void testReloadableResourceBundleMessageSourceWithInappropriateGermanCharset() {
+	void reloadableResourceBundleMessageSourceWithInappropriateGermanCharset() {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 		ms.setBasename("org/springframework/context/support/messages");
 		ms.setFallbackToSystemLocale(false);
@@ -381,7 +385,7 @@ public class ResourceBundleMessageSourceTests {
 	}
 
 	@Test
-	public void testReloadableResourceBundleMessageSourceFileNameCalculation() {
+	void reloadableResourceBundleMessageSourceFileNameCalculation() {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 
 		List<String> filenames = ms.calculateFilenamesForLocale("messages", Locale.ENGLISH);
@@ -414,7 +418,7 @@ public class ResourceBundleMessageSourceTests {
 	}
 
 	@Test
-	public void testMessageSourceResourceBundle() {
+	void messageSourceResourceBundle() {
 		ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
 		ms.setBasename("org/springframework/context/support/messages");
 		MessageSourceResourceBundle rbe = new MessageSourceResourceBundle(ms, Locale.ENGLISH);
@@ -427,7 +431,7 @@ public class ResourceBundleMessageSourceTests {
 
 
 	@AfterEach
-	public void tearDown() {
+	void tearDown() {
 		ResourceBundle.clearCache();
 	}
 

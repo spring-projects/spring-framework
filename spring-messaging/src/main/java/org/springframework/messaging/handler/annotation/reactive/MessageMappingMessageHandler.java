@@ -44,6 +44,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.CompositeMessageCondition;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.HandlerMethod;
+import org.springframework.messaging.handler.MessagingAdviceBean;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.support.AnnotationExceptionHandlerMethodResolver;
 import org.springframework.messaging.handler.invocation.AbstractExceptionHandlerMethodResolver;
@@ -64,7 +65,7 @@ import org.springframework.validation.Validator;
 /**
  * Extension of {@link AbstractMethodMessageHandler} for reactive, non-blocking
  * handling of messages via {@link MessageMapping @MessageMapping} methods.
- * By default such methods are detected in {@code @Controller} Spring beans but
+ * By default, such methods are detected in {@code @Controller} Spring beans but
  * that can be changed via {@link #setHandlerPredicate(Predicate)}.
  *
  * <p>Payloads for incoming messages are decoded through the configured
@@ -73,7 +74,7 @@ import org.springframework.validation.Validator;
  *
  * <p>There is no default handling for return values but
  * {@link #setReturnValueHandlerConfigurer} can be used to configure custom
- * return value handlers. Sub-classes may also override
+ * return value handlers. Subclasses may also override
  * {@link #initReturnValueHandlers()} to set up default return value handlers.
  *
  * @author Rossen Stoyanchev
@@ -189,6 +190,39 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 		this.valueResolver = resolver;
 	}
 
+	/**
+	 * Use this method to register a {@link MessagingAdviceBean} that may contain
+	 * globally applicable
+	 * {@link org.springframework.messaging.handler.annotation.MessageExceptionHandler @MessageExceptionHandler}
+	 * methods.
+	 * <p>Note: spring-messaging does not depend on spring-web and therefore it
+	 * is not possible to explicitly support the registration of a
+	 * {@code @ControllerAdvice} bean. You can use the following adapter code
+	 * to register {@code @ControllerAdvice} beans here:
+	 * <pre>
+	 * ControllerAdviceBean.findAnnotatedBeans(context).forEach(bean -&gt;
+	 *         messageHandler.registerMessagingAdvice(new ControllerAdviceWrapper(bean));
+	 *
+	 * public class ControllerAdviceWrapper implements MessagingAdviceBean {
+	 *     private final ControllerAdviceBean delegate;
+	 *     // delegate all methods
+	 * }
+	 * </pre>
+	 * @param bean the bean to check for {@code @MessageExceptionHandler} methods
+	 * @since 5.3.5
+	 */
+	public void registerMessagingAdvice(MessagingAdviceBean bean) {
+		Class<?> type = bean.getBeanType();
+		if (type != null) {
+			AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(type);
+			if (resolver.hasExceptionMappings()) {
+				registerExceptionHandlerAdvice(bean, resolver);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Detected @MessageExceptionHandler methods in " + bean);
+				}
+			}
+		}
+	}
 
 	@Override
 	public void afterPropertiesSet() {

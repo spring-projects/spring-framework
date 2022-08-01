@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,12 +39,12 @@ public class BeanInfoTests {
 	public void testComplexObject() {
 		ValueBean bean = new ValueBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
-		Integer value = new Integer(1);
+		Integer value = 1;
 
 		bw.setPropertyValue("value", value);
 		assertThat(value).as("value not set correctly").isEqualTo(bean.getValue());
 
-		value = new Integer(2);
+		value = 2;
 		bw.setPropertyValue("value", value.toString());
 		assertThat(value).as("value not converted").isEqualTo(bean.getValue());
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,7 +134,7 @@ public class HotSwappableTargetSourceTests {
 		hts.swap(sp2);
 		assertThat(p.getName()).isEqualTo(sp2.getName());
 
-		p = (Person) SerializationTestUtils.serializeAndDeserialize(p);
+		p = SerializationTestUtils.serializeAndDeserialize(p);
 		// We need to get a reference to the client-side targetsource
 		hts = (HotSwappableTargetSource) ((Advised) p).getTargetSource();
 		assertThat(p.getName()).isEqualTo(sp2.getName());

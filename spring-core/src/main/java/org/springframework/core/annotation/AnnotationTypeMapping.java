@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.MirrorSet;
 import org.springframework.lang.Nullable;
@@ -45,6 +49,17 @@ import org.springframework.util.StringUtils;
  * @see AnnotationTypeMappings
  */
 final class AnnotationTypeMapping {
+
+	private static final Log logger = LogFactory.getLog(AnnotationTypeMapping.class);
+
+	/**
+	 * Set of fully qualified class names concatenated with attribute names for
+	 * annotations which we have already checked for use of convention-based
+	 * annotation attribute overrides.
+	 * @since 6.0
+	 * @see #addConventionMappings()
+	 */
+	private static final Set<String> conventionBasedOverrideCheckCache = ConcurrentHashMap.newKeySet();
 
 	private static final MirrorSet[] EMPTY_MIRROR_SETS = new MirrorSet[0];
 
@@ -77,6 +92,8 @@ final class AnnotationTypeMapping {
 
 	private final Map<Method, List<Method>> aliasedBy;
 
+	private final boolean synthesizable;
+
 	private final Set<Method> claimedAliases = new HashSet<>();
 
 
@@ -101,6 +118,7 @@ final class AnnotationTypeMapping {
 		processAliases();
 		addConventionMappings();
 		addConventionAnnotationValues();
+		this.synthesizable = computeSynthesizableFlag();
 	}
 
 
@@ -268,10 +286,21 @@ final class AnnotationTypeMapping {
 		int[] mappings = this.conventionMappings;
 		for (int i = 0; i < mappings.length; i++) {
 			String name = this.attributes.get(i).getName();
-			MirrorSet mirrors = getMirrorSets().getAssigned(i);
 			int mapped = rootAttributes.indexOf(name);
-			if (!MergedAnnotation.VALUE.equals(name) && mapped != -1) {
+			if (!MergedAnnotation.VALUE.equals(name) && mapped != -1 && !isExplicitAttributeOverride(name)) {
+				String rootAnnotationTypeName = this.root.annotationType.getName();
+				String cacheKey = rootAnnotationTypeName + "." + name;
+				// We want to avoid duplicate log warnings as much as possible, without full synchronization.
+				if (conventionBasedOverrideCheckCache.add(cacheKey) && logger.isWarnEnabled()) {
+					logger.warn("""
+							Support for convention-based annotation attribute overrides is \
+							deprecated and will be removed in Spring Framework 6.1. Please \
+							annotate the '%s' attribute in @%s with an appropriate @AliasFor \
+							declaration -- for example, @AliasFor(annotation = %s.class)."""
+								.formatted(name, rootAnnotationTypeName, this.annotationType.getName()));
+				}
 				mappings[i] = mapped;
+				MirrorSet mirrors = getMirrorSets().getAssigned(i);
 				if (mirrors != null) {
 					for (int j = 0; j < mirrors.size(); j++) {
 						mappings[mirrors.getAttributeIndex(j)] = mapped;
@@ -279,6 +308,27 @@ final class AnnotationTypeMapping {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Determine if the given annotation attribute in the {@linkplain #getRoot()
+	 * root annotation} is an explicit annotation attribute override for an
+	 * attribute in a meta-annotation, explicit in the sense that the override
+	 * is declared via {@link AliasFor @AliasFor}.
+	 * <p>If the named attribute does not exist in the root annotation, this
+	 * method returns {@code false}.
+	 * @param name the name of the annotation attribute to check
+	 * @since 6.0
+	 */
+	private boolean isExplicitAttributeOverride(String name) {
+		Method attribute = this.root.getAttributes().get(name);
+		if (attribute != null) {
+			AliasFor aliasFor = AnnotationsScanner.getDeclaredAnnotation(attribute, AliasFor.class);
+			return ((aliasFor != null) &&
+					(aliasFor.annotation() != Annotation.class) &&
+					(aliasFor.annotation() != this.root.annotationType));
+		}
+		return false;
 	}
 
 	private void addConventionAnnotationValues() {
@@ -305,6 +355,47 @@ final class AnnotationTypeMapping {
 		}
 		int existingDistance = this.annotationValueSource[index].distance;
 		return !isValueAttribute && existingDistance > mapping.distance;
+	}
+
+	@SuppressWarnings("unchecked")
+	private boolean computeSynthesizableFlag() {
+		// Uses @AliasFor for local aliases?
+		for (int index : this.aliasMappings) {
+			if (index != -1) {
+				return true;
+			}
+		}
+
+		// Uses @AliasFor for attribute overrides in meta-annotations?
+		if (!this.aliasedBy.isEmpty()) {
+			return true;
+		}
+
+		// Uses convention-based attribute overrides in meta-annotations?
+		for (int index : this.conventionMappings) {
+			if (index != -1) {
+				return true;
+			}
+		}
+
+		// Has nested annotations or arrays of annotations that are synthesizable?
+		if (getAttributes().hasNestedAnnotation()) {
+			AttributeMethods attributeMethods = getAttributes();
+			for (int i = 0; i < attributeMethods.size(); i++) {
+				Method method = attributeMethods.get(i);
+				Class<?> type = method.getReturnType();
+				if (type.isAnnotation() || (type.isArray() && type.getComponentType().isAnnotation())) {
+					Class<? extends Annotation> annotationType =
+							(Class<? extends Annotation>) (type.isAnnotation() ? type : type.getComponentType());
+					AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(annotationType).get(0);
+					if (mapping.isSynthesizable()) {
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -465,7 +556,6 @@ final class AnnotationTypeMapping {
 	 * @return {@code true} if the value is equivalent to the default value
 	 */
 	boolean isEquivalentToDefaultValue(int attributeIndex, Object value, ValueExtractor valueExtractor) {
-
 		Method attribute = this.attributes.get(attributeIndex);
 		return isEquivalentToDefaultValue(attribute, value, valueExtractor);
 	}
@@ -476,6 +566,17 @@ final class AnnotationTypeMapping {
 	 */
 	MirrorSets getMirrorSets() {
 		return this.mirrorSets;
+	}
+
+	/**
+	 * Determine if the mapped annotation is <em>synthesizable</em>.
+	 * <p>Consult the documentation for {@link MergedAnnotation#synthesize()}
+	 * for an explanation of what is considered synthesizable.
+	 * @return {@code true} if the mapped annotation is synthesizable
+	 * @since 5.2.6
+	 */
+	boolean isSynthesizable() {
+		return this.synthesizable;
 	}
 
 
@@ -497,14 +598,14 @@ final class AnnotationTypeMapping {
 		if (ObjectUtils.nullSafeEquals(value, extractedValue)) {
 			return true;
 		}
-		if (value instanceof Class && extractedValue instanceof String) {
-			return areEquivalent((Class<?>) value, (String) extractedValue);
+		if (value instanceof Class<?> clazz && extractedValue instanceof String string) {
+			return areEquivalent(clazz, string);
 		}
-		if (value instanceof Class[] && extractedValue instanceof String[]) {
-			return areEquivalent((Class[]) value, (String[]) extractedValue);
+		if (value instanceof Class<?>[] classes && extractedValue instanceof String[] strings) {
+			return areEquivalent(classes, strings);
 		}
-		if (value instanceof Annotation) {
-			return areEquivalent((Annotation) value, extractedValue, valueExtractor);
+		if (value instanceof Annotation annotation) {
+			return areEquivalent(annotation, extractedValue, valueExtractor);
 		}
 		return false;
 	}
@@ -533,8 +634,8 @@ final class AnnotationTypeMapping {
 			Method attribute = attributes.get(i);
 			Object value1 = ReflectionUtils.invokeMethod(attribute, annotation);
 			Object value2;
-			if (extractedValue instanceof TypeMappedAnnotation) {
-				value2 = ((TypeMappedAnnotation<?>) extractedValue).getValue(attribute.getName()).orElse(null);
+			if (extractedValue instanceof TypeMappedAnnotation<?> typeMappedAnnotation) {
+				value2 = typeMappedAnnotation.getValue(attribute.getName()).orElse(null);
 			}
 			else {
 				value2 = valueExtractor.extract(attribute, extractedValue);

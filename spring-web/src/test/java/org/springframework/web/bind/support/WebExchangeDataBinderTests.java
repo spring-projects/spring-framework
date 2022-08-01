@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,6 +102,15 @@ public class WebExchangeDataBinderTests {
 		formData.remove("postProcessed");
 		this.binder.bind(exchange(formData)).block(Duration.ofMillis(5000));
 		assertThat(this.testBean.isPostProcessed()).isFalse();
+	}
+
+	@Test // gh-25836
+	public void testFieldWithEmptyArrayIndex() {
+		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+		formData.add("stringArray[]", "ONE");
+		formData.add("stringArray[]", "TWO");
+		this.binder.bind(exchange(formData)).block(Duration.ofMillis(5000));
+		assertThat(this.testBean.getStringArray()).containsExactly("ONE", "TWO");
 	}
 
 	@Test

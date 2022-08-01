@@ -131,8 +131,7 @@ public class SimpAttributesContextHolderTests {
 
 	@Test
 	public void currentAttributesNone() {
-		assertThatIllegalStateException().isThrownBy(() ->
-				SimpAttributesContextHolder.currentAttributes())
+		assertThatIllegalStateException().isThrownBy(SimpAttributesContextHolder::currentAttributes)
 			.withMessageStartingWith("No thread-bound SimpAttributes found");
 	}
 

@@ -70,7 +70,7 @@ public interface DataBufferFactory {
 	 * <p>Note that the given data buffers do <strong>not</strong> have to be released, as they are
 	 * released as part of the returned composite.
 	 * @param dataBuffers the data buffers to be composed
-	 * @return a buffer that is composed from the {@code dataBuffers} argument
+	 * @return a buffer that is composed of the {@code dataBuffers} argument
 	 * @since 5.0.3
 	 */
 	DataBuffer join(List<? extends DataBuffer> dataBuffers);

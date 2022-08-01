@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,13 @@
 
 package org.springframework.web.servlet.view;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
-import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.ServletRequestPathUtils;
 
 /**
  * {@link RequestToViewNameTranslator} that simply transforms the URI of
@@ -72,8 +71,6 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 
 	private boolean stripExtension = true;
 
-	private UrlPathHelper urlPathHelper = new UrlPathHelper();
-
 
 	/**
 	 * Set the prefix to prepend to generated view names.
@@ -101,7 +98,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	}
 
 	/**
-	 * Set whether or not leading slashes should be stripped from the URI when
+	 * Set whether leading slashes should be stripped from the URI when
 	 * generating the view name. Default is "true".
 	 */
 	public void setStripLeadingSlash(boolean stripLeadingSlash) {
@@ -109,7 +106,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	}
 
 	/**
-	 * Set whether or not trailing slashes should be stripped from the URI when
+	 * Set whether trailing slashes should be stripped from the URI when
 	 * generating the view name. Default is "true".
 	 */
 	public void setStripTrailingSlash(boolean stripTrailingSlash) {
@@ -117,59 +114,26 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	}
 
 	/**
-	 * Set whether or not file extensions should be stripped from the URI when
+	 * Set whether file extensions should be stripped from the URI when
 	 * generating the view name. Default is "true".
 	 */
 	public void setStripExtension(boolean stripExtension) {
 		this.stripExtension = stripExtension;
 	}
 
-	/**
-	 * Shortcut to same property on underlying {@link #setUrlPathHelper UrlPathHelper}.
-	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath
-	 */
-	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
-		this.urlPathHelper.setAlwaysUseFullPath(alwaysUseFullPath);
-	}
-
-	/**
-	 * Shortcut to same property on underlying {@link #setUrlPathHelper UrlPathHelper}.
-	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode
-	 */
-	public void setUrlDecode(boolean urlDecode) {
-		this.urlPathHelper.setUrlDecode(urlDecode);
-	}
-
-	/**
-	 * Set if ";" (semicolon) content should be stripped from the request URI.
-	 * @see org.springframework.web.util.UrlPathHelper#setRemoveSemicolonContent(boolean)
-	 */
-	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
-		this.urlPathHelper.setRemoveSemicolonContent(removeSemicolonContent);
-	}
-
-	/**
-	 * Set the {@link org.springframework.web.util.UrlPathHelper} to use for
-	 * the resolution of lookup paths.
-	 * <p>Use this to override the default UrlPathHelper with a custom subclass,
-	 * or to share common UrlPathHelper settings across multiple web components.
-	 */
-	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
-		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");
-		this.urlPathHelper = urlPathHelper;
-	}
-
 
 	/**
 	 * Translates the request URI of the incoming {@link HttpServletRequest}
 	 * into the view name based on the configured parameters.
-	 * @see org.springframework.web.util.UrlPathHelper#getLookupPathForRequest
+	 * @throws IllegalArgumentException if neither a parsed RequestPath, nor a
+	 * String lookupPath have been resolved and cached as a request attribute.
+	 * @see ServletRequestPathUtils#getCachedPath(ServletRequest)
 	 * @see #transformPath
 	 */
 	@Override
 	public String getViewName(HttpServletRequest request) {
-		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request, HandlerMapping.LOOKUP_PATH);
-		return (this.prefix + transformPath(lookupPath) + this.suffix);
+		String path = ServletRequestPathUtils.getCachedPathValue(request);
+		return (this.prefix + transformPath(path) + this.suffix);
 	}
 
 	/**

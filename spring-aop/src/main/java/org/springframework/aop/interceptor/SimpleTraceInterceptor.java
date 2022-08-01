@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.aop.interceptor;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
+
+import org.springframework.util.Assert;
 
 /**
  * Simple AOP Alliance {@code MethodInterceptor} that can be introduced
@@ -73,7 +75,9 @@ public class SimpleTraceInterceptor extends AbstractTraceInterceptor {
 	 * @return the description
 	 */
 	protected String getInvocationDescription(MethodInvocation invocation) {
-		String className = invocation.getThis().getClass().getName();
+		Object target = invocation.getThis();
+		Assert.state(target != null, "Target must not be null");
+		String className = target.getClass().getName();
 		return "method '" + invocation.getMethod().getName() + "' of class [" + className + "]";
 	}
 

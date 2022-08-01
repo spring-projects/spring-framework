@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.orm.hibernate5;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.engine.spi.SessionImplementor;
 
 import org.springframework.core.Ordered;
 import org.springframework.dao.DataAccessException;
@@ -69,7 +70,10 @@ public class SpringSessionSynchronization implements TransactionSynchronization,
 		if (this.holderActive) {
 			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
 			// Eagerly disconnect the Session here, to make release mode "on_close" work on JBoss.
-			getCurrentSession().disconnect();
+			Session session = getCurrentSession();
+			if (session instanceof SessionImplementor sessionImpl) {
+				sessionImpl.getJdbcCoordinator().getLogicalConnection().manualDisconnect();
+			}
 		}
 	}
 
@@ -91,23 +95,24 @@ public class SpringSessionSynchronization implements TransactionSynchronization,
 			Session session = getCurrentSession();
 			// Read-write transaction -> flush the Hibernate Session.
 			// Further check: only flush when not FlushMode.MANUAL.
-			if (!FlushMode.MANUAL.equals(SessionFactoryUtils.getFlushMode(session))) {
+			if (!FlushMode.MANUAL.equals(session.getHibernateFlushMode())) {
 				SessionFactoryUtils.flush(getCurrentSession(), true);
 			}
 		}
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public void beforeCompletion() {
 		try {
 			Session session = this.sessionHolder.getSession();
 			if (this.sessionHolder.getPreviousFlushMode() != null) {
 				// In case of pre-bound Session, restore previous flush mode.
-				session.setFlushMode(this.sessionHolder.getPreviousFlushMode());
+				session.setHibernateFlushMode(this.sessionHolder.getPreviousFlushMode());
 			}
 			// Eagerly disconnect the Session here, to make release mode "on_close" work nicely.
-			session.disconnect();
+			if (session instanceof SessionImplementor sessionImpl) {
+				sessionImpl.getJdbcCoordinator().getLogicalConnection().manualDisconnect();
+			}
 		}
 		finally {
 			// Unbind at this point if it's a new Session...

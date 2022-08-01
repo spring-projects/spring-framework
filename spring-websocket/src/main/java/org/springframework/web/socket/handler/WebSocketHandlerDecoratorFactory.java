@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public interface WebSocketHandlerDecoratorFactory {
 	/**
 	 * Decorate the given WebSocketHandler.
 	 * @param handler the handler to be decorated.
-	 * @return the same handler or the handler wrapped with a sub-class of
+	 * @return the same handler or the handler wrapped with a subclass of
 	 * {@code WebSocketHandlerDecorator}.
 	 */
 	WebSocketHandler decorate(WebSocketHandler handler);

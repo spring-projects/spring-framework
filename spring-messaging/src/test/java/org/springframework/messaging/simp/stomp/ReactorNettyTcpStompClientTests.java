@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,16 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.lang.reflect.Type;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.activemq.broker.BrokerService;
+import org.apache.activemq.broker.TransportConnector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.AfterEach;
@@ -36,8 +39,6 @@ import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.stomp.StompSession.Subscription;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.Assert;
-import org.springframework.util.SocketUtils;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,13 +59,12 @@ public class ReactorNettyTcpStompClientTests {
 
 
 	@BeforeEach
-	public void setUp(TestInfo testInfo) throws Exception {
+	public void setup(TestInfo testInfo) throws Exception {
 		logger.debug("Setting up before '" + testInfo.getTestMethod().get().getName() + "'");
 
-		int port = SocketUtils.findAvailableTcpPort(61613);
-
+		TransportConnector stompConnector = createStompConnector();
 		this.activeMQBroker = new BrokerService();
-		this.activeMQBroker.addConnector("stomp://127.0.0.1:" + port);
+		this.activeMQBroker.addConnector(stompConnector);
 		this.activeMQBroker.setStartAsync(false);
 		this.activeMQBroker.setPersistent(false);
 		this.activeMQBroker.setUseJmx(false);
@@ -75,13 +75,19 @@ public class ReactorNettyTcpStompClientTests {
 		ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
 		taskScheduler.afterPropertiesSet();
 
-		this.client = new ReactorNettyTcpStompClient("127.0.0.1", port);
+		this.client = new ReactorNettyTcpStompClient("127.0.0.1", stompConnector.getServer().getSocketAddress().getPort());
 		this.client.setMessageConverter(new StringMessageConverter());
 		this.client.setTaskScheduler(taskScheduler);
 	}
 
+	private TransportConnector createStompConnector() throws Exception {
+		TransportConnector connector = new TransportConnector();
+		connector.setUri(new URI("stomp://127.0.0.1:0"));
+		return connector;
+	}
+
 	@AfterEach
-	public void tearDown() throws Exception {
+	public void shutdown() throws Exception {
 		try {
 			this.client.shutdown();
 		}
@@ -101,10 +107,10 @@ public class ReactorNettyTcpStompClientTests {
 	public void publishSubscribe() throws Exception {
 		String destination = "/topic/foo";
 		ConsumingHandler consumingHandler1 = new ConsumingHandler(destination);
-		ListenableFuture<StompSession> consumerFuture1 = this.client.connect(consumingHandler1);
+		CompletableFuture<StompSession> consumerFuture1 = this.client.connectAsync(consumingHandler1);
 
 		ConsumingHandler consumingHandler2 = new ConsumingHandler(destination);
-		ListenableFuture<StompSession> consumerFuture2 = this.client.connect(consumingHandler2);
+		CompletableFuture<StompSession> consumerFuture2 = this.client.connectAsync(consumingHandler2);
 
 		assertThat(consumingHandler1.awaitForSubscriptions(5000)).isTrue();
 		assertThat(consumingHandler2.awaitForSubscriptions(5000)).isTrue();
@@ -112,7 +118,7 @@ public class ReactorNettyTcpStompClientTests {
 		ProducingHandler producingHandler = new ProducingHandler();
 		producingHandler.addToSend(destination, "foo1");
 		producingHandler.addToSend(destination, "foo2");
-		ListenableFuture<StompSession> producerFuture = this.client.connect(producingHandler);
+		CompletableFuture<StompSession> producerFuture = this.client.connectAsync(producingHandler);
 
 		assertThat(consumingHandler1.awaitForMessageCount(2, 5000)).isTrue();
 		assertThat(consumingHandler1.getReceived()).containsExactly("foo1", "foo2");

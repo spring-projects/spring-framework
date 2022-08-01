@@ -29,8 +29,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * The operator 'instanceof' checks if an object is of the class specified in the right
- * hand operand, in the same way that {@code instanceof} does in Java.
+ * The operator 'instanceof' checks if an object is of the class specified in the
+ * right-hand operand, in the same way that {@code instanceof} does in Java.
  *
  * @author Andy Clement
  * @since 3.0
@@ -62,7 +62,7 @@ public class OperatorInstanceof extends Operator {
 		Object leftValue = left.getValue();
 		Object rightValue = right.getValue();
 		BooleanTypedValue result;
-		if (rightValue == null || !(rightValue instanceof Class)) {
+		if (!(rightValue instanceof Class)) {
 			throw new SpelEvaluationException(getRightOperand().getStartPosition(),
 					SpelMessage.INSTANCEOF_OPERATOR_NEEDS_CLASS_OPERAND,
 					(rightValue == null ? "null" : rightValue.getClass().getName()));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,9 +154,9 @@ public final class GenericTypeResolver {
 	 */
 	public static Type resolveType(Type genericType, @Nullable Class<?> contextClass) {
 		if (contextClass != null) {
-			if (genericType instanceof TypeVariable) {
+			if (genericType instanceof TypeVariable<?> typeVariable) {
 				ResolvableType resolvedTypeVariable = resolveVariable(
-						(TypeVariable<?>) genericType, ResolvableType.forClass(contextClass));
+						typeVariable, ResolvableType.forClass(contextClass));
 				if (resolvedTypeVariable != ResolvableType.NONE) {
 					Class<?> resolved = resolvedTypeVariable.resolve();
 					if (resolved != null) {
@@ -164,10 +164,9 @@ public final class GenericTypeResolver {
 					}
 				}
 			}
-			else if (genericType instanceof ParameterizedType) {
+			else if (genericType instanceof ParameterizedType parameterizedType) {
 				ResolvableType resolvedType = ResolvableType.forType(genericType);
 				if (resolvedType.hasUnresolvableGenerics()) {
-					ParameterizedType parameterizedType = (ParameterizedType) genericType;
 					Class<?>[] generics = new Class<?>[parameterizedType.getActualTypeArguments().length];
 					Type[] typeArguments = parameterizedType.getActualTypeArguments();
 					ResolvableType contextType = ResolvableType.forClass(contextClass);
@@ -237,7 +236,7 @@ public final class GenericTypeResolver {
 	/**
 	 * Build a mapping of {@link TypeVariable#getName TypeVariable names} to
 	 * {@link Class concrete classes} for the specified {@link Class}.
-	 * Searches all super types, enclosing types and interfaces.
+	 * Searches all supertypes, enclosing types and interfaces.
 	 * @see #resolveType(Type, Map)
 	 */
 	@SuppressWarnings("rawtypes")

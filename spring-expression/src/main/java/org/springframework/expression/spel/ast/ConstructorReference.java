@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,11 +53,19 @@ import org.springframework.util.Assert;
  *
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 public class ConstructorReference extends SpelNodeImpl {
 
-	private boolean isArrayConstructor = false;
+	/**
+	 * Maximum number of elements permitted in an array declaration, applying
+	 * to one-dimensional as well as multi-dimensional arrays.
+	 * @since 5.3.17
+	 */
+	private static final int MAX_ARRAY_ELEMENTS = 256 * 1024; // 256K
+
+	private final boolean isArrayConstructor;
 
 	@Nullable
 	private SpelNodeImpl[] dimensions;
@@ -132,12 +140,12 @@ public class ConstructorReference extends SpelNodeImpl {
 
 				// To determine which situation it is, the AccessException will contain a cause.
 				// If the cause is an InvocationTargetException, a user exception was thrown inside the constructor.
-				// Otherwise the constructor could not be invoked.
+				// Otherwise, the constructor could not be invoked.
 				if (ex.getCause() instanceof InvocationTargetException) {
 					// User exception was the root cause - exit now
 					Throwable rootCause = ex.getCause().getCause();
-					if (rootCause instanceof RuntimeException) {
-						throw (RuntimeException) rootCause;
+					if (rootCause instanceof RuntimeException runtimeException) {
+						throw runtimeException;
 					}
 					else {
 						String typeName = (String) this.children[0].getValueInternal(state).getValue();
@@ -158,9 +166,9 @@ public class ConstructorReference extends SpelNodeImpl {
 		executorToUse = findExecutorForConstructor(typeName, argumentTypes, state);
 		try {
 			this.cachedExecutor = executorToUse;
-			if (executorToUse instanceof ReflectiveConstructorExecutor) {
+			if (executorToUse instanceof ReflectiveConstructorExecutor reflectiveConstructorExecutor) {
 				this.exitTypeDescriptor = CodeFlow.toDescriptor(
-						((ReflectiveConstructorExecutor) executorToUse).getConstructor().getDeclaringClass());
+						reflectiveConstructorExecutor.getConstructor().getDeclaringClass());
 
 			}
 			return executorToUse.execute(state.getEvaluationContext(), arguments);
@@ -208,14 +216,14 @@ public class ConstructorReference extends SpelNodeImpl {
 		StringBuilder sb = new StringBuilder("new ");
 		int index = 0;
 		sb.append(getChild(index++).toStringAST());
-		sb.append("(");
+		sb.append('(');
 		for (int i = index; i < getChildCount(); i++) {
 			if (i > index) {
-				sb.append(",");
+				sb.append(',');
 			}
 			sb.append(getChild(i).toStringAST());
 		}
-		sb.append(")");
+		sb.append(')');
 		return sb.toString();
 	}
 
@@ -228,13 +236,13 @@ public class ConstructorReference extends SpelNodeImpl {
 	private TypedValue createArray(ExpressionState state) throws EvaluationException {
 		// First child gives us the array type which will either be a primitive or reference type
 		Object intendedArrayType = getChild(0).getValue(state);
-		if (!(intendedArrayType instanceof String)) {
+		if (!(intendedArrayType instanceof String type)) {
 			throw new SpelEvaluationException(getChild(0).getStartPosition(),
 					SpelMessage.TYPE_NAME_EXPECTED_FOR_ARRAY_CONSTRUCTION,
 					FormatHelper.formatClassNameForMessage(
 							intendedArrayType != null ? intendedArrayType.getClass() : null));
 		}
-		String type = (String) intendedArrayType;
+
 		Class<?> componentType;
 		TypeCode arrayTypeCode = TypeCode.forName(type);
 		if (arrayTypeCode == TypeCode.OBJECT) {
@@ -243,7 +251,8 @@ public class ConstructorReference extends SpelNodeImpl {
 		else {
 			componentType = arrayTypeCode.getType();
 		}
-		Object newArray;
+
+		Object newArray = null;
 		if (!hasInitializer()) {
 			// Confirm all dimensions were specified (for example [3][][5] is missing the 2nd dimension)
 			if (this.dimensions != null) {
@@ -252,30 +261,34 @@ public class ConstructorReference extends SpelNodeImpl {
 						throw new SpelEvaluationException(getStartPosition(), SpelMessage.MISSING_ARRAY_DIMENSION);
 					}
 				}
-			}
-			TypeConverter typeConverter = state.getEvaluationContext().getTypeConverter();
-
-			// Shortcut for 1 dimensional
-			if (this.dimensions.length == 1) {
-				TypedValue o = this.dimensions[0].getTypedValue(state);
-				int arraySize = ExpressionUtils.toInt(typeConverter, o);
-				newArray = Array.newInstance(componentType, arraySize);
-			}
-			else {
-				// Multi-dimensional - hold onto your hat!
-				int[] dims = new int[this.dimensions.length];
-				for (int d = 0; d < this.dimensions.length; d++) {
-					TypedValue o = this.dimensions[d].getTypedValue(state);
-					dims[d] = ExpressionUtils.toInt(typeConverter, o);
+				TypeConverter typeConverter = state.getEvaluationContext().getTypeConverter();
+				if (this.dimensions.length == 1) {
+					// Shortcut for 1-dimensional
+					TypedValue o = this.dimensions[0].getTypedValue(state);
+					int arraySize = ExpressionUtils.toInt(typeConverter, o);
+					checkNumElements(arraySize);
+					newArray = Array.newInstance(componentType, arraySize);
 				}
-				newArray = Array.newInstance(componentType, dims);
+				else {
+					// Multidimensional - hold onto your hat!
+					int[] dims = new int[this.dimensions.length];
+					long numElements = 1;
+					for (int d = 0; d < this.dimensions.length; d++) {
+						TypedValue o = this.dimensions[d].getTypedValue(state);
+						int arraySize = ExpressionUtils.toInt(typeConverter, o);
+						dims[d] = arraySize;
+						numElements *= arraySize;
+						checkNumElements(numElements);
+					}
+					newArray = Array.newInstance(componentType, dims);
+				}
 			}
 		}
 		else {
 			// There is an initializer
 			if (this.dimensions == null || this.dimensions.length > 1) {
-				// There is an initializer but this is a multi-dimensional array (e.g. new int[][]{{1,2},{3,4}}) - this
-				// is not currently supported
+				// There is an initializer but this is a multidimensional array (e.g. new int[][]{{1,2},{3,4}})
+				// - this is not currently supported
 				throw new SpelEvaluationException(getStartPosition(),
 						SpelMessage.MULTIDIM_ARRAY_INITIALIZER_NOT_SUPPORTED);
 			}
@@ -324,6 +337,13 @@ public class ConstructorReference extends SpelNodeImpl {
 			}
 		}
 		return new TypedValue(newArray);
+	}
+
+	private void checkNumElements(long numElements) {
+		if (numElements >= MAX_ARRAY_ELEMENTS) {
+			throw new SpelEvaluationException(getStartPosition(),
+					SpelMessage.MAX_ARRAY_ELEMENTS_THRESHOLD_EXCEEDED, MAX_ARRAY_ELEMENTS);
+		}
 	}
 
 	private void populateReferenceTypeArray(ExpressionState state, Object newArray, TypeConverter typeConverter,

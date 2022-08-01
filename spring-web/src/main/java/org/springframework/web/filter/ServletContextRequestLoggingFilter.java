@@ -16,7 +16,7 @@
 
 package org.springframework.web.filter;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Simple request logging filter that writes the request URI
@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletRequest;
  * @see #setBeforeMessageSuffix
  * @see #setAfterMessagePrefix
  * @see #setAfterMessageSuffix
- * @see javax.servlet.ServletContext#log(String)
+ * @see jakarta.servlet.ServletContext#log(String)
  */
 public class ServletContextRequestLoggingFilter extends AbstractRequestLoggingFilter {
 

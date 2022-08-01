@@ -2,7 +2,7 @@
 = RSocket
 :gh-rsocket: https://github.com/rsocket
 :gh-rsocket-java: {gh-rsocket}/rsocket-java
-:gh-rsocket-extentions: {gh-rsocket}/rsocket/blob/master/Extensions
+:gh-rsocket-extensions: {gh-rsocket}/rsocket/blob/master/Extensions
 
 This section describes Spring Framework's support for the RSocket protocol.
 
@@ -53,7 +53,7 @@ through RSocket across the network.
 === The Protocol
 
 One of the benefits of RSocket is that it has well defined behavior on the wire and an
-easy to read https://rsocket.io/docs/Protocol[specification] along with some protocol
+easy to read https://rsocket.io/about/Protocol[specification] along with some protocol
 {gh-rsocket}/rsocket/tree/master/Extensions[extensions]. Therefore it is
 a good idea to read the spec, independent of language implementations and higher level
 framework APIs. This section provides a succinct overview to establish some context.
@@ -99,9 +99,9 @@ and therefore only included in the first message on a request, i.e. with one of 
 
 Protocol extensions define common metadata formats for use in applications:
 
-* {gh-rsocket-extentions}/CompositeMetadata.md[Composite Metadata]-- multiple,
+* {gh-rsocket-extensions}/CompositeMetadata.md[Composite Metadata]-- multiple,
   independently formatted metadata entries.
-* {gh-rsocket-extentions}/Routing.md[Routing] -- the route for a request.
+* {gh-rsocket-extensions}/Routing.md[Routing] -- the route for a request.
 
 
 
@@ -176,80 +176,33 @@ symmetrically, to make requests from clients and to make requests from servers.
 [[rsocket-requester-client]]
 === Client Requester
 
-To obtain an `RSocketRequester` on the client side requires connecting to a server along with
-preparing and sending the initial RSocket `SETUP` frame. `RSocketRequester` provides a
-builder for that. Internally uses RSocket Java's `RSocketFactory`.
+To obtain an `RSocketRequester` on the client side is to connect to a server which involves
+sending an RSocket `SETUP` frame with connection settings. `RSocketRequester` provides a
+builder that helps to prepare an `io.rsocket.core.RSocketConnector` including connection
+settings for the `SETUP` frame.
 
 This is the most basic way to connect with default settings:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	Mono<RSocketRequester> requesterMono = RSocketRequester.builder()
-		.connectTcp("localhost", 7000);
+	RSocketRequester requester = RSocketRequester.builder().tcp("localhost", 7000);
 
-	Mono<RSocketRequester> requesterMono = RSocketRequester.builder()
-		.connectWebSocket(URI.create("https://example.org:8080/rsocket"));
+	URI url = URI.create("https://example.org:8080/rsocket");
+	RSocketRequester requester = RSocketRequester.builder().webSocket(url);
 ----
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	import org.springframework.messaging.rsocket.connectTcpAndAwait
-	import org.springframework.messaging.rsocket.connectWebSocketAndAwait
+	val requester = RSocketRequester.builder().tcp("localhost", 7000)
 
-	val requester = RSocketRequester.builder()
-			.connectTcpAndAwait("localhost", 7000)
-
-	val requester = RSocketRequester.builder()
-			.connectWebSocketAndAwait(URI.create("https://example.org:8080/rsocket"))
+	URI url = URI.create("https://example.org:8080/rsocket");
+	val requester = RSocketRequester.builder().webSocket(url)
 ----
 
-The above is deferred. To actually connect and use the requester:
-
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
-----
-	// Connect asynchronously
-	RSocketRequester.builder().connectTcp("localhost", 7000)
-		.subscribe(requester -> {
-			// ...
-		});
-
-	// Or block
-	RSocketRequester requester = RSocketRequester.builder()
-		.connectTcp("localhost", 7000)
-		.block(Duration.ofSeconds(5));
-----
-
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	// Connect asynchronously
-	import org.springframework.messaging.rsocket.connectTcpAndAwait
-
-	class MyService {
-
-		private var requester: RSocketRequester? = null
-
-		private suspend fun requester() = requester ?:
-			RSocketRequester.builder().connectTcpAndAwait("localhost", 7000).also { requester = it }
-
-		suspend fun doSomething() = requester().route(...)
-	}
-
-	// Or block
-	import org.springframework.messaging.rsocket.connectTcpAndAwait
-
-	class MyService {
-
-		private val requester = runBlocking {
-			RSocketRequester.builder().connectTcpAndAwait("localhost", 7000)
-		}
-
-		suspend fun doSomething() = requester.route(...)
-	}
-----
+The above does not connect immediately. When requests are made, a shared connection is
+established transparently and used.
 
 
 [[rsocket-requester-client-setup]]
@@ -265,7 +218,7 @@ The above is deferred. To actually connect and use the requester:
 
 For data, the default mime type is derived from the first configured `Decoder`. For
 metadata, the default mime type is
-{gh-rsocket-extentions}/CompositeMetadata.md[composite metadata] which allows multiple
+{gh-rsocket-extensions}/CompositeMetadata.md[composite metadata] which allows multiple
 metadata value and mime type pairs per request. Typically both don't need to be changed.
 
 Data and metadata in the `SETUP` frame is optional. On the server side,
@@ -291,16 +244,14 @@ can be registered as follows:
 		.decoders(decoders -> decoders.add(new Jackson2CborDecoder()))
 		.build();
 
-	Mono<RSocketRequester> requesterMono = RSocketRequester.builder()
+	RSocketRequester requester = RSocketRequester.builder()
 		.rsocketStrategies(strategies)
-		.connectTcp("localhost", 7000);
+		.tcp("localhost", 7000);
 ----
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	import org.springframework.messaging.rsocket.connectTcpAndAwait
-
 	val strategies = RSocketStrategies.builder()
 			.encoders { it.add(Jackson2CborEncoder()) }
 			.decoders { it.add(Jackson2CborDecoder()) }
@@ -308,7 +259,7 @@ can be registered as follows:
 
 	val requester = RSocketRequester.builder()
 			.rsocketStrategies(strategies)
-			.connectTcpAndAwait("localhost", 7000)
+			.tcp("localhost", 7000)
 ----
 
 `RSocketStrategies` is designed for re-use. In some scenarios, e.g. client and server in
@@ -331,36 +282,36 @@ infrastructure that's used on a server, but registered programmatically as follo
 		.routeMatcher(new PathPatternRouteMatcher())  // <1>
 		.build();
 
-	ClientHandler handler = new ClientHandler(); // <2>
+	SocketAcceptor responder =
+		RSocketMessageHandler.responder(strategies, new ClientHandler()); // <2>
 
-	Mono<RSocketRequester> requesterMono = RSocketRequester.builder()
-		.rsocketFactory(RSocketMessageHandler.clientResponder(strategies, handler)) // <3>
-		.connectTcp("localhost", 7000);
+	RSocketRequester requester = RSocketRequester.builder()
+		.rsocketConnector(connector -> connector.acceptor(responder)) // <3>
+		.tcp("localhost", 7000);
 ----
 <1> Use `PathPatternRouteMatcher`, if `spring-web` is present, for efficient
     route matching.
-<2> Create responder that contains `@MessageMaping` or `@ConnectMapping` methods.
-<3> Use static factory method in `RSocketMessageHandler` to register one or more responders.
+<2> Create a responder from a class with `@MessageMapping` and/or `@ConnectMapping` methods.
+<3> Register the responder.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	import org.springframework.messaging.rsocket.connectTcpAndAwait
-
 	val strategies = RSocketStrategies.builder()
 			.routeMatcher(PathPatternRouteMatcher())  // <1>
 			.build()
 
-	val handler = ClientHandler() // <2>
+	val responder =
+		RSocketMessageHandler.responder(strategies, new ClientHandler()); // <2>
 
 	val requester = RSocketRequester.builder()
-			.rsocketFactory(RSocketMessageHandler.clientResponder(strategies, handler)) // <3>
-			.connectTcpAndAwait("localhost", 7000)
+			.rsocketConnector { it.acceptor(responder) } // <3>
+			.tcp("localhost", 7000)
 ----
 <1> Use `PathPatternRouteMatcher`, if `spring-web` is present, for efficient
 route matching.
-<2> Create responder that contains `@MessageMaping` or `@ConnectMapping` methods.
-<3> Use static factory method in `RSocketMessageHandler` to register one or more responders.
+<2> Create a responder from a class with `@MessageMapping` and/or `@ConnectMapping` methods.
+<3> Register the responder.
 
 Note the above is only a shortcut designed for programmatic registration of client
 responders. For alternative scenarios, where client responders are in Spring configuration,
@@ -372,23 +323,22 @@ you can still declare `RSocketMessageHandler` as a Spring bean and then apply as
 	ApplicationContext context = ... ;
 	RSocketMessageHandler handler = context.getBean(RSocketMessageHandler.class);
 
-	Mono<RSocketRequester> requesterMono = RSocketRequester.builder()
-		.rsocketFactory(factory -> factory.acceptor(handler.responder()))
-		.connectTcp("localhost", 7000);
+	RSocketRequester requester = RSocketRequester.builder()
+		.rsocketConnector(connector -> connector.acceptor(handler.responder()))
+		.tcp("localhost", 7000);
 ----
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	import org.springframework.beans.factory.getBean
-	import org.springframework.messaging.rsocket.connectTcpAndAwait
 
 	val context: ApplicationContext = ...
 	val handler = context.getBean<RSocketMessageHandler>()
 
 	val requester = RSocketRequester.builder()
-			.rsocketFactory { it.acceptor(handler.responder()) }
-			.connectTcpAndAwait("localhost", 7000)
+			.rsocketConnector { it.acceptor(handler.responder()) }
+			.tcp("localhost", 7000)
 ----
 
 For the above you may also need to use `setHandlerPredicate` in `RSocketMessageHandler` to
@@ -404,29 +354,28 @@ See also <<rsocket-annot-responders>>, for more on the programming model.
 ==== Advanced
 
 `RSocketRequesterBuilder` provides a callback to expose the underlying
-`ClientRSocketFactory` from RSocket Java for further configuration options for
-keepalive intervals, session resumption, interceptors, and more. You can configure options
+`io.rsocket.core.RSocketConnector` for further configuration options for keepalive
+intervals, session resumption, interceptors, and more. You can configure options
 at that level as follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	Mono<RSocketRequester> requesterMono = RSocketRequester.builder()
-		.rsocketFactory(factory -> {
+	RSocketRequester requester = RSocketRequester.builder()
+		.rsocketConnector(connector -> {
 			// ...
 		})
-		.connectTcp("localhost", 7000);
+		.tcp("localhost", 7000);
 ----
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	import org.springframework.messaging.rsocket.connectTcpAndAwait
-
 	val requester = RSocketRequester.builder()
-			.rsocketFactory {
+			.rsocketConnector {
 				//...
-			}.connectTcpAndAwait("localhost", 7000)
+			}
+			.tcp("localhost", 7000)
 ----
 
 
@@ -545,7 +494,7 @@ The `data(Object)` step is optional. Skip it for requests that don't send data:
 ----
 
 Extra metadata values can be added if using
-{gh-rsocket-extentions}/CompositeMetadata.md[composite metadata] (the default) and if the
+{gh-rsocket-extensions}/CompositeMetadata.md[composite metadata] (the default) and if the
 values are supported by a registered `Encoder`. For example:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -579,6 +528,8 @@ values are supported by a registered `Encoder`. For example:
 
 For `Fire-and-Forget` use the `send()` method that returns `Mono<Void>`. Note that the `Mono`
 indicates only that the message was successfully sent, and not that it was handled.
+
+For `Metadata-Push` use the `sendMetadata()` method with a `Mono<Void>` return value.
 
 
 
@@ -636,10 +587,8 @@ Then start an RSocket server through the Java RSocket API and plug the
 	RSocketMessageHandler handler = context.getBean(RSocketMessageHandler.class);
 
 	CloseableChannel server =
-		RSocketFactory.receive()
-			.acceptor(handler.responder())
-			.transport(TcpServerTransport.create("localhost", 7000))
-			.start()
+		RSocketServer.create(handler.responder())
+			.bind(TcpServerTransport.create("localhost", 7000))
 			.block();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -650,15 +599,14 @@ Then start an RSocket server through the Java RSocket API and plug the
 	val context: ApplicationContext = ...
 	val handler = context.getBean<RSocketMessageHandler>()
 
-	val server = RSocketFactory.receive()
-			.acceptor(handler.responder())
-			.transport(TcpServerTransport.create("localhost", 7000))
-			.start().awaitFirst()
+	val server = RSocketServer.create(handler.responder())
+			.bind(TcpServerTransport.create("localhost", 7000))
+			.awaitSingle()
 ----
 
 `RSocketMessageHandler` supports
-{gh-rsocket-extentions}/CompositeMetadata.md[composite] and
-{gh-rsocket-extentions}/Routing.md[routing] metadata by default. You can set its
+{gh-rsocket-extensions}/CompositeMetadata.md[composite] and
+{gh-rsocket-extensions}/Routing.md[routing] metadata by default. You can set its
 <<rsocket-metadata-extractor>> if you need to switch to a
 different mime type or register additional metadata mime types.
 
@@ -873,7 +821,7 @@ requests to the `RSocketRequester` for the connection. See
 == MetadataExtractor
 
 Responders must interpret metadata.
-{gh-rsocket-extentions}/CompositeMetadata.md[Composite metadata] allows independently
+{gh-rsocket-extensions}/CompositeMetadata.md[Composite metadata] allows independently
 formatted metadata values (e.g. for routing, security, tracing) each with its own mime
 type. Applications need a way to configure metadata mime types to support, and a way
 to access extracted values.
@@ -884,7 +832,7 @@ in annotated handler methods.
 
 `DefaultMetadataExtractor` can be given `Decoder` instances to decode metadata. Out of
 the box it has built-in support for
-{gh-rsocket-extentions}/Routing.md["message/x.rsocket.routing.v0"] which it decodes to
+{gh-rsocket-extensions}/Routing.md["message/x.rsocket.routing.v0"] which it decodes to
 `String` and saves under the "route" key. For any other mime type you'll need to provide
 a `Decoder` and register the mime type as follows:
 

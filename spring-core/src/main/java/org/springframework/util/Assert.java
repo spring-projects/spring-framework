@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,11 +43,14 @@ import org.springframework.lang.Nullable;
  *
  * <pre class="code">
  * Assert.notNull(clazz, "The class must not be null");
- * Assert.isTrue(i > 0, "The value must be greater than zero");</pre>
+ * Assert.isTrue(i &gt; 0, "The value must be greater than zero");</pre>
  *
- * <p>Mainly for internal use within the framework; consider
- * <a href="https://commons.apache.org/proper/commons-lang/">Apache's Commons Lang</a>
- * for a more comprehensive suite of {@code String} utilities.
+ * <p>Mainly for internal use within the framework; for a more comprehensive suite
+ * of assertion utilities consider {@code org.apache.commons.lang3.Validate} from
+ * <a href="https://commons.apache.org/proper/commons-lang/">Apache Commons Lang</a>,
+ * Google Guava's
+ * <a href="https://github.com/google/guava/wiki/PreconditionsExplained">Preconditions</a>,
+ * or similar third-party libraries.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
@@ -80,8 +83,8 @@ public abstract class Assert {
 	 * <p>Call {@link #isTrue} if you wish to throw an {@code IllegalArgumentException}
 	 * on an assertion failure.
 	 * <pre class="code">
-	 * Assert.state(id == null,
-	 *     () -&gt; "ID for " + entity.getName() + " must not already be initialized");
+	 * Assert.state(entity.getId() == null,
+	 *     () -&gt; "ID for entity " + entity.getName() + " must not already be initialized");
 	 * </pre>
 	 * @param expression a boolean expression
 	 * @param messageSupplier a supplier for the exception message to use if the
@@ -202,7 +205,8 @@ public abstract class Assert {
 	/**
 	 * Assert that an object is not {@code null}.
 	 * <pre class="code">
-	 * Assert.notNull(clazz, () -&gt; "The class '" + clazz.getName() + "' must not be null");
+	 * Assert.notNull(entity.getId(),
+	 *     () -&gt; "ID for entity " + entity.getName() + " must not be null");
 	 * </pre>
 	 * @param object the object to check
 	 * @param messageSupplier a supplier for the exception message to use if the
@@ -244,7 +248,8 @@ public abstract class Assert {
 	 * Assert that the given String is not empty; that is,
 	 * it must not be {@code null} and not the empty String.
 	 * <pre class="code">
-	 * Assert.hasLength(name, () -&gt; "Name for account '" + account.getId() + "' must not be empty");
+	 * Assert.hasLength(account.getName(),
+	 *     () -&gt; "Name for account '" + account.getId() + "' must not be empty");
 	 * </pre>
 	 * @param text the String to check
 	 * @param messageSupplier a supplier for the exception message to use if the
@@ -289,7 +294,8 @@ public abstract class Assert {
 	 * Assert that the given String contains valid text content; that is, it must not
 	 * be {@code null} and must contain at least one non-whitespace character.
 	 * <pre class="code">
-	 * Assert.hasText(name, () -&gt; "Name for account '" + account.getId() + "' must not be empty");
+	 * Assert.hasText(account.getName(),
+	 *     () -&gt; "Name for account '" + account.getId() + "' must not be empty");
 	 * </pre>
 	 * @param text the String to check
 	 * @param messageSupplier a supplier for the exception message to use if the
@@ -630,17 +636,17 @@ public abstract class Assert {
 	/**
 	 * Assert that {@code superType.isAssignableFrom(subType)} is {@code true}.
 	 * <pre class="code">Assert.isAssignable(Number.class, myClass, "Number expected");</pre>
-	 * @param superType the super type to check against
-	 * @param subType the sub type to check
+	 * @param superType the supertype to check against
+	 * @param subType the subtype to check
 	 * @param message a message which will be prepended to provide further context.
 	 * If it is empty or ends in ":" or ";" or "," or ".", a full exception message
-	 * will be appended. If it ends in a space, the name of the offending sub type
+	 * will be appended. If it ends in a space, the name of the offending subtype
 	 * will be appended. In any other case, a ":" with a space and the name of the
-	 * offending sub type will be appended.
+	 * offending subtype will be appended.
 	 * @throws IllegalArgumentException if the classes are not assignable
 	 */
 	public static void isAssignable(Class<?> superType, @Nullable Class<?> subType, String message) {
-		notNull(superType, "Super type to check against must not be null");
+		notNull(superType, "Supertype to check against must not be null");
 		if (subType == null || !superType.isAssignableFrom(subType)) {
 			assignableCheckFailed(superType, subType, message);
 		}
@@ -651,15 +657,15 @@ public abstract class Assert {
 	 * <pre class="code">
 	 * Assert.isAssignable(Number.class, myClass, () -&gt; "Processing " + myAttributeName + ":");
 	 * </pre>
-	 * @param superType the super type to check against
-	 * @param subType the sub type to check
+	 * @param superType the supertype to check against
+	 * @param subType the subtype to check
 	 * @param messageSupplier a supplier for the exception message to use if the
 	 * assertion fails. See {@link #isAssignable(Class, Class, String)} for details.
 	 * @throws IllegalArgumentException if the classes are not assignable
 	 * @since 5.0
 	 */
 	public static void isAssignable(Class<?> superType, @Nullable Class<?> subType, Supplier<String> messageSupplier) {
-		notNull(superType, "Super type to check against must not be null");
+		notNull(superType, "Supertype to check against must not be null");
 		if (subType == null || !superType.isAssignableFrom(subType)) {
 			assignableCheckFailed(superType, subType, nullSafeGet(messageSupplier));
 		}
@@ -668,8 +674,8 @@ public abstract class Assert {
 	/**
 	 * Assert that {@code superType.isAssignableFrom(subType)} is {@code true}.
 	 * <pre class="code">Assert.isAssignable(Number.class, myClass);</pre>
-	 * @param superType the super type to check
-	 * @param subType the sub type to check
+	 * @param superType the supertype to check
+	 * @param subType the subtype to check
 	 * @throws IllegalArgumentException if the classes are not assignable
 	 */
 	public static void isAssignable(Class<?> superType, Class<?> subType) {

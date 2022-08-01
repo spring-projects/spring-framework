@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public class DefaultContentTypeResolverTests {
 	@Test
 	public void resolveUnknownHeaderType() {
 		Map<String, Object> map = new HashMap<>();
-		map.put(MessageHeaders.CONTENT_TYPE, new Integer(1));
+		map.put(MessageHeaders.CONTENT_TYPE, 1);
 		MessageHeaders headers = new MessageHeaders(map);
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.resolver.resolve(headers));

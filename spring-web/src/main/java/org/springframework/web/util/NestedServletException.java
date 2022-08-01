@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.web.util;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.lang.Nullable;
@@ -37,10 +37,11 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @since 1.2.5
  * @see #getMessage
- * @see #printStackTrace
  * @see org.springframework.core.NestedCheckedException
  * @see org.springframework.core.NestedRuntimeException
+ * @deprecated as of 6.0, in favor of standard {@link ServletException} nesting
  */
+@Deprecated
 public class NestedServletException extends ServletException {
 
 	/** Use serialVersionUID from Spring 1.2 for interoperability. */
@@ -68,18 +69,7 @@ public class NestedServletException extends ServletException {
 	 * @param cause the nested exception
 	 */
 	public NestedServletException(@Nullable String msg, @Nullable Throwable cause) {
-		super(msg, cause);
-	}
-
-
-	/**
-	 * Return the detail message, including the message from the nested exception
-	 * if there is one.
-	 */
-	@Override
-	@Nullable
-	public String getMessage() {
-		return NestedExceptionUtils.buildMessage(super.getMessage(), getCause());
+		super(NestedExceptionUtils.buildMessage(msg, cause), cause);
 	}
 
 }

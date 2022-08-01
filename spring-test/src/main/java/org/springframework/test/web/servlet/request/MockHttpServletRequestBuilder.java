@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -29,10 +30,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.Mergeable;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -82,9 +83,6 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public class MockHttpServletRequestBuilder
 		implements ConfigurableSmartRequestBuilder<MockHttpServletRequestBuilder>, Mergeable {
-
-	private static final UrlPathHelper urlPathHelper = new UrlPathHelper();
-
 
 	private final String method;
 
@@ -150,7 +148,7 @@ public class MockHttpServletRequestBuilder
 
 	private static URI initUri(String url, Object[] vars) {
 		Assert.notNull(url, "'url' must not be null");
-		Assert.isTrue(url.startsWith("/") || url.startsWith("http://") || url.startsWith("https://"), "" +
+		Assert.isTrue(url.isEmpty() || url.startsWith("/") || url.startsWith("http://") || url.startsWith("https://"),
 				"'url' should start with a path or be a complete HTTP URL: " + url);
 		return UriComponentsBuilder.fromUriString(url).buildAndExpand(vars).encode().toUri();
 	}
@@ -187,7 +185,7 @@ public class MockHttpServletRequestBuilder
 	 * the requestURI. This is because most applications don't actually depend
 	 * on the name under which they're deployed. If specified here, the context
 	 * path must start with a "/" and must not end with a "/".
-	 * @see javax.servlet.http.HttpServletRequest#getContextPath()
+	 * @see jakarta.servlet.http.HttpServletRequest#getContextPath()
 	 */
 	public MockHttpServletRequestBuilder contextPath(String contextPath) {
 		if (StringUtils.hasText(contextPath)) {
@@ -209,7 +207,7 @@ public class MockHttpServletRequestBuilder
 	 * {@code "/accounts/1"} as opposed to {@code "/main/accounts/1"}.
 	 * If specified here, the servletPath must start with a "/" and must not
 	 * end with a "/".
-	 * @see javax.servlet.http.HttpServletRequest#getServletPath()
+	 * @see jakarta.servlet.http.HttpServletRequest#getServletPath()
 	 */
 	public MockHttpServletRequestBuilder servletPath(String servletPath) {
 		if (StringUtils.hasText(servletPath)) {
@@ -226,7 +224,7 @@ public class MockHttpServletRequestBuilder
 	 * by removing the contextPath and the servletPath from the requestURI and using any
 	 * remaining part. If specified here, the pathInfo must start with a "/".
 	 * <p>If specified, the pathInfo will be used as-is.
-	 * @see javax.servlet.http.HttpServletRequest#getPathInfo()
+	 * @see jakarta.servlet.http.HttpServletRequest#getPathInfo()
 	 */
 	public MockHttpServletRequestBuilder pathInfo(@Nullable String pathInfo) {
 		if (StringUtils.hasText(pathInfo)) {
@@ -244,6 +242,17 @@ public class MockHttpServletRequestBuilder
 	public MockHttpServletRequestBuilder secure(boolean secure){
 		this.secure = secure;
 		return this;
+	}
+
+	/**
+	 * Set the character encoding of the request.
+	 * @param encoding the character encoding
+	 * @since 5.3.10
+	 * @see StandardCharsets
+	 * @see #characterEncoding(String)
+	 */
+	public MockHttpServletRequestBuilder characterEncoding(Charset encoding) {
+		return this.characterEncoding(encoding.name());
 	}
 
 	/**
@@ -297,7 +306,7 @@ public class MockHttpServletRequestBuilder
 
 	/**
 	 * Set the 'Content-Type' header of the request as a raw String value,
-	 * possibly not even well formed (for testing purposes).
+	 * possibly not even well-formed (for testing purposes).
 	 * @param contentType the content type
 	 * @since 4.1.2
 	 */
@@ -318,8 +327,8 @@ public class MockHttpServletRequestBuilder
 	}
 
 	/**
-	 * Set the 'Accept' header using raw String values, possibly not even well
-	 * formed (for testing purposes).
+	 * Set the {@code Accept} header using raw String values, possibly not even
+	 * well-formed (for testing purposes).
 	 * @param mediaTypes one or more media types; internally joined as
 	 * comma-separated String
 	 */
@@ -399,7 +408,7 @@ public class MockHttpServletRequestBuilder
 
 	/**
 	 * Append to the query string and also add to the
-	 * {@link #params(MultiValueMap)}  request parameters} map. The parameter
+	 * {@link #params(MultiValueMap) request parameters} map. The parameter
 	 * name and value are encoded when they are added to the query string.
 	 * @param params the parameters to add
 	 * @since 5.2.2
@@ -552,11 +561,9 @@ public class MockHttpServletRequestBuilder
 		if (parent == null) {
 			return this;
 		}
-		if (!(parent instanceof MockHttpServletRequestBuilder)) {
+		if (!(parent instanceof MockHttpServletRequestBuilder parentBuilder)) {
 			throw new IllegalArgumentException("Cannot merge with [" + parent.getClass().getName() + "]");
 		}
-		MockHttpServletRequestBuilder parentBuilder = (MockHttpServletRequestBuilder) parent;
-
 		if (!StringUtils.hasText(this.contextPath)) {
 			this.contextPath = parentBuilder.contextPath;
 		}
@@ -703,8 +710,8 @@ public class MockHttpServletRequestBuilder
 
 		String query = this.url.getRawQuery();
 		if (!this.queryParams.isEmpty()) {
-			String s = UriComponentsBuilder.newInstance().queryParams(this.queryParams).build().encode().getQuery();
-			query = StringUtils.isEmpty(query) ? s : query + "&" + s;
+			String str = UriComponentsBuilder.newInstance().queryParams(this.queryParams).build().encode().getQuery();
+			query = StringUtils.hasLength(query) ? (query + "&" + str) : str;
 		}
 		if (query != null) {
 			request.setQueryString(query);
@@ -781,7 +788,7 @@ public class MockHttpServletRequestBuilder
 			}
 			String extraPath = requestUri.substring(this.contextPath.length() + this.servletPath.length());
 			this.pathInfo = (StringUtils.hasText(extraPath) ?
-					urlPathHelper.decodeRequestString(request, extraPath) : null);
+					UrlPathHelper.defaultInstance.decodeRequestString(request, extraPath) : null);
 		}
 		request.setPathInfo(this.pathInfo);
 	}

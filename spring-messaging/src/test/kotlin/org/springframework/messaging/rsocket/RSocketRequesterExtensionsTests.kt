@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.anyInt
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
 import reactor.core.publisher.Flux
@@ -40,6 +39,7 @@ class RSocketRequesterExtensionsTests {
 	private val stringTypeRefMatcher: (ParameterizedTypeReference<*>) -> Boolean  = { it.type == String::class.java }
 
 	@Test
+	@Suppress("DEPRECATION")
 	fun connectAndAwait() {
 		val requester = mockk<RSocketRequester>()
 		val builder = mockk<RSocketRequester.Builder>()
@@ -50,17 +50,19 @@ class RSocketRequesterExtensionsTests {
 	}
 
 	@Test
+	@Suppress("DEPRECATION")
 	fun connectTcpAndAwait() {
 		val host = "127.0.0.1"
 		val requester = mockk<RSocketRequester>()
 		val builder = mockk<RSocketRequester.Builder>()
-		every { builder.connectTcp(host, anyInt()) } returns Mono.just(requester)
+		every { builder.connectTcp(host, any()) } returns Mono.just(requester)
 		runBlocking {
 			assertThat(builder.connectTcpAndAwait(host, 0)).isEqualTo(requester)
 		}
 	}
 
 	@Test
+	@Suppress("DEPRECATION")
 	fun connectWebSocketAndAwait() {
 		val requester = mockk<RSocketRequester>()
 		val builder = mockk<RSocketRequester.Builder>()

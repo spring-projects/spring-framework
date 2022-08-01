@@ -28,6 +28,6 @@
 
 	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
 
-	<bean id="invalid" class="javax.persistence.AttributeConverter" lazy-init="true"/>
+	<bean id="invalid" class="jakarta.persistence.AttributeConverter" lazy-init="true"/>
 
 </beans>

@@ -18,7 +18,7 @@ package org.springframework.beans.factory.config;
 
 import java.io.Serializable;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -27,18 +27,18 @@ import org.springframework.util.Assert;
 
 /**
  * A {@link org.springframework.beans.factory.FactoryBean} implementation that
- * returns a value which is a JSR-330 {@link javax.inject.Provider} that in turn
+ * returns a value which is a JSR-330 {@link jakarta.inject.Provider} that in turn
  * returns a bean sourced from a {@link org.springframework.beans.factory.BeanFactory}.
  *
  * <p>This is basically a JSR-330 compliant variant of Spring's good old
  * {@link ObjectFactoryCreatingFactoryBean}. It can be used for traditional
  * external dependency injection configuration that targets a property or
- * constructor argument of type {@code javax.inject.Provider}, as an
+ * constructor argument of type {@code jakarta.inject.Provider}, as an
  * alternative to JSR-330's {@code @Inject} annotation-driven approach.
  *
  * @author Juergen Hoeller
  * @since 3.0.2
- * @see javax.inject.Provider
+ * @see jakarta.inject.Provider
  * @see ObjectFactoryCreatingFactoryBean
  */
 public class ProviderCreatingFactoryBean extends AbstractFactoryBean<Provider<Object>> {

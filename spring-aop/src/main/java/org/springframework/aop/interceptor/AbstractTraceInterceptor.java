@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Base {@code MethodInterceptor} implementation for tracing.
@@ -55,7 +56,7 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 	protected transient Log defaultLogger = LogFactory.getLog(getClass());
 
 	/**
-	 * Indicates whether or not proxy class names should be hidden when using dynamic loggers.
+	 * Indicates whether proxy class names should be hidden when using dynamic loggers.
 	 * @see #setUseDynamicLogger
 	 */
 	private boolean hideProxyClassNames = false;
@@ -118,7 +119,7 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 
 
 	/**
-	 * Determines whether or not logging is enabled for the particular {@code MethodInvocation}.
+	 * Determines whether logging is enabled for the particular {@code MethodInvocation}.
 	 * If not, the method invocation proceeds as normal, otherwise the method invocation is passed
 	 * to the {@code invokeUnderTrace} method for handling.
 	 * @see #invokeUnderTrace(org.aopalliance.intercept.MethodInvocation, org.apache.commons.logging.Log)
@@ -151,6 +152,7 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 		}
 		else {
 			Object target = invocation.getThis();
+			Assert.state(target != null, "Target must not be null");
 			return LogFactory.getLog(getClassForLogging(target));
 		}
 	}

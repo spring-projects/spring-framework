@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.context;
 
 import java.util.EventListener;
+import java.util.function.Consumer;
 
 /**
  * Interface to be implemented by application event listeners.
@@ -34,6 +35,8 @@ import java.util.EventListener;
  * @param <E> the specific {@code ApplicationEvent} subclass to listen to
  * @see org.springframework.context.ApplicationEvent
  * @see org.springframework.context.event.ApplicationEventMulticaster
+ * @see org.springframework.context.event.SmartApplicationListener
+ * @see org.springframework.context.event.GenericApplicationListener
  * @see org.springframework.context.event.EventListener
  */
 @FunctionalInterface
@@ -44,5 +47,18 @@ public interface ApplicationListener<E extends ApplicationEvent> extends EventLi
 	 * @param event the event to respond to
 	 */
 	void onApplicationEvent(E event);
+
+
+	/**
+	 * Create a new {@code ApplicationListener} for the given payload consumer.
+	 * @param consumer the event payload consumer
+	 * @param <T> the type of the event payload
+	 * @return a corresponding {@code ApplicationListener} instance
+	 * @since 5.3
+	 * @see PayloadApplicationEvent
+	 */
+	static <T> ApplicationListener<PayloadApplicationEvent<T>> forPayload(Consumer<T> consumer) {
+		return event -> consumer.accept(event.getPayload());
+	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,8 +77,10 @@ public class MethodMessageHandlerTests {
 	public void bestMatch() throws NoSuchMethodException {
 		TestMethodMessageHandler handler = new TestMethodMessageHandler();
 		TestController controller = new TestController();
-		handler.register(controller, TestController.class.getMethod("handleMessageMatch1"), "/bestmatch/{foo}/path");
-		handler.register(controller, TestController.class.getMethod("handleMessageMatch2"), "/bestmatch/*/*");
+		handler.registerHandlerMethod(controller,
+				TestController.class.getMethod("handleMessageMatch1"), "/bestmatch/{foo}/path");
+		handler.registerHandlerMethod(controller,
+				TestController.class.getMethod("handleMessageMatch2"), "/bestmatch/*/*");
 		handler.afterPropertiesSet();
 
 		Message<?> message = new GenericMessage<>("body", Collections.singletonMap(
@@ -219,10 +221,6 @@ public class MethodMessageHandlerTests {
 		@Nullable
 		public Object getLastReturnValue() {
 			return this.returnValueHandler.getLastReturnValue();
-		}
-
-		public void register(Object handler, Method method, String mapping) {
-			super.registerHandlerMethod(handler, method, mapping);
 		}
 
 		@Override

@@ -76,7 +76,7 @@ public class NameMatchMethodPointcutAdvisor extends AbstractGenericPointcutAdvis
 	 * Add another eligible method name, in addition to those already named.
 	 * Like the set methods, this method is for use when configuring proxies,
 	 * before a proxy is used.
-	 * @param name name of the additional method that will match
+	 * @param name the name of the additional method that will match
 	 * @return this pointcut to allow for multiple additions in one line
 	 * @see NameMatchMethodPointcut#addMethodName
 	 */

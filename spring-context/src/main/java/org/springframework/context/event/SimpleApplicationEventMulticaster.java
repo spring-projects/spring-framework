@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ErrorHandler;
@@ -44,6 +45,7 @@ import org.springframework.util.ErrorHandler;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Brian Clozel
  * @see #setTaskExecutor
  */
 public class SimpleApplicationEventMulticaster extends AbstractApplicationEventMulticaster {
@@ -53,6 +55,9 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 
 	@Nullable
 	private ErrorHandler errorHandler;
+
+	@Nullable
+	private volatile Log lazyLogger;
 
 
 	/**
@@ -121,7 +126,6 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 		return this.errorHandler;
 	}
 
-
 	@Override
 	public void multicastEvent(ApplicationEvent event) {
 		multicastEvent(event, resolveDefaultEventType(event));
@@ -173,12 +177,18 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 		}
 		catch (ClassCastException ex) {
 			String msg = ex.getMessage();
-			if (msg == null || matchesClassCastMessage(msg, event.getClass())) {
+			if (msg == null || matchesClassCastMessage(msg, event.getClass()) ||
+					(event instanceof PayloadApplicationEvent &&
+							matchesClassCastMessage(msg, ((PayloadApplicationEvent) event).getPayload().getClass()))) {
 				// Possibly a lambda-defined listener which we could not resolve the generic event type for
-				// -> let's suppress the exception and just log a debug message.
-				Log logger = LogFactory.getLog(getClass());
-				if (logger.isTraceEnabled()) {
-					logger.trace("Non-matching event type for listener: " + listener, ex);
+				// -> let's suppress the exception.
+				Log loggerToUse = this.lazyLogger;
+				if (loggerToUse == null) {
+					loggerToUse = LogFactory.getLog(getClass());
+					this.lazyLogger = loggerToUse;
+				}
+				if (loggerToUse.isTraceEnabled()) {
+					loggerToUse.trace("Non-matching event type for listener: " + listener, ex);
 				}
 			}
 			else {
