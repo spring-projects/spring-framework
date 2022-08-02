@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.test.context;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 
 /**
  * Strategy interface for loading an {@link ApplicationContext application context}
@@ -122,5 +123,33 @@ public interface SmartContextLoader extends ContextLoader {
 	 * @see org.springframework.context.ConfigurableApplicationContext#getEnvironment()
 	 */
 	ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception;
+
+	/**
+	 * {@code SmartContextLoader} does not support deprecated {@link ContextLoader} methods.
+	 * Call {@link #processContextConfiguration(ContextConfigurationAttributes)} instead.
+	 * @throws UnsupportedOperationException in this implementation
+	 * @since 6.0
+	 */
+	@Override
+	@SuppressWarnings("deprecation")
+	default String[] processLocations(Class<?> clazz, @Nullable String... locations) {
+		throw new UnsupportedOperationException("""
+				SmartContextLoader does not support the ContextLoader SPI. \
+				Call processContextConfiguration(ContextConfigurationAttributes) instead.""");
+	}
+
+	/**
+	 * {@code SmartContextLoader} does not support deprecated {@link ContextLoader} methods.
+	 * <p>Call {@link #loadContext(MergedContextConfiguration)} instead.
+	 * @throws UnsupportedOperationException in this implementation
+	 * @since 6.0
+	 */
+	@Override
+	@SuppressWarnings("deprecation")
+	default ApplicationContext loadContext(String... locations) throws Exception {
+		throw new UnsupportedOperationException("""
+				SmartContextLoader does not support the ContextLoader SPI. \
+				Call loadContext(MergedContextConfiguration) instead.""");
+	}
 
 }

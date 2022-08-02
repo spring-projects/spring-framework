@@ -57,6 +57,7 @@ class GenericXmlContextLoaderResourceLocationsTests {
 		ContextConfiguration contextConfig = testClass.getAnnotation(ContextConfiguration.class);
 		ContextLoader contextLoader = new GenericXmlContextLoader();
 		String[] configuredLocations = (String[]) AnnotationUtils.getValue(contextConfig);
+		@SuppressWarnings("deprecation")
 		String[] processedLocations = contextLoader.processLocations(testClass, configuredLocations);
 
 		if (logger.isDebugEnabled()) {

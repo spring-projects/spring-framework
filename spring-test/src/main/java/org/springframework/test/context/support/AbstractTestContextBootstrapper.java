@@ -373,6 +373,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				classes.addAll(0, Arrays.asList(configAttributes.getClasses()));
 			}
 			else {
+				@SuppressWarnings("deprecation")
 				String[] processedLocations = contextLoader.processLocations(
 						configAttributes.getDeclaringClass(), configAttributes.getLocations());
 				locations.addAll(0, Arrays.asList(processedLocations));
