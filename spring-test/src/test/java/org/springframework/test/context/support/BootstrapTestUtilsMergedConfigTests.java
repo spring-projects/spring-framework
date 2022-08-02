@@ -29,7 +29,6 @@ import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.BootstrapTestUtils;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.support.BootstrapTestUtilsMergedConfigTests.EmptyConfigTestCase.Nested;
@@ -138,28 +137,6 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 			WebDelegatingSmartContextLoader.class);
 		assertMergedConfig(standardMergedConfig, standardTestClass, EMPTY_STRING_ARRAY,
 			array(FooConfig.class), DelegatingSmartContextLoader.class);
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	void buildMergedConfigWithLocalAnnotationAndOverriddenContextLoaderAndLocations() {
-		Class<?> testClass = PropertiesLocationsFoo.class;
-		Class<? extends ContextLoader> expectedContextLoaderClass = org.springframework.test.context.support.GenericPropertiesContextLoader.class;
-		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
-
-		assertMergedConfig(mergedConfig, testClass, array("classpath:/foo.properties"), EMPTY_CLASS_ARRAY,
-			expectedContextLoaderClass);
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	void buildMergedConfigWithLocalAnnotationAndOverriddenContextLoaderAndClasses() {
-		Class<?> testClass = PropertiesClassesFoo.class;
-		Class<? extends ContextLoader> expectedContextLoaderClass = org.springframework.test.context.support.GenericPropertiesContextLoader.class;
-		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
-
-		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, array(FooConfig.class),
-			expectedContextLoaderClass);
 	}
 
 	@Test
