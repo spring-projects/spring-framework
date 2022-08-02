@@ -388,8 +388,8 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * Load or refresh the persistent representation of the configuration up to
 	 * a point where the underlying bean factory is ready to create bean
 	 * instances.
-	 * <p>This variant of {@link #refresh()} is used by Ahead of Time processing
-	 * that optimizes the application context, typically at build-time.
+	 * <p>This variant of {@link #refresh()} is used by Ahead of Time (AOT)
+	 * processing that optimizes the application context, typically at build time.
 	 * <p>In this mode, only {@link BeanDefinitionRegistryPostProcessor} and
 	 * {@link MergedBeanDefinitionPostProcessor} are invoked.
 	 * @throws BeansException if the bean factory could not be initialized

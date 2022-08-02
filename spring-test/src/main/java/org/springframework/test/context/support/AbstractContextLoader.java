@@ -321,7 +321,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * Get the suffix to append to {@link ApplicationContext} resource locations
 	 * when detecting default locations.
 	 * <p>Subclasses must provide an implementation of this method that returns
-	 * a single suffix. Alternatively subclasses may provide a  <em>no-op</em>
+	 * a single suffix. Alternatively subclasses may provide a <em>no-op</em>
 	 * implementation of this method and override {@link #getResourceSuffixes()}
 	 * in order to provide multiple custom suffixes.
 	 * @return the resource suffix; never {@code null} or empty
