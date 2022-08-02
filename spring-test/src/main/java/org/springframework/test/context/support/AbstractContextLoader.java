@@ -75,13 +75,13 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	// SmartContextLoader
 
 	/**
-	 * For backwards compatibility with the {@link ContextLoader} SPI, the
-	 * default implementation simply delegates to {@link #processLocations(Class, String...)},
-	 * passing it the {@link ContextConfigurationAttributes#getDeclaringClass()
-	 * declaring class} and {@link ContextConfigurationAttributes#getLocations()
+	 * The default implementation processes locations analogous to
+	 * {@link #processLocations(Class, String...)}, using the
+	 * {@link ContextConfigurationAttributes#getDeclaringClass() declaring class}
+	 * as the test class and the {@link ContextConfigurationAttributes#getLocations()
 	 * resource locations} retrieved from the supplied
-	 * {@link ContextConfigurationAttributes configuration attributes}. The
-	 * processed locations are then
+	 * {@link ContextConfigurationAttributes configuration attributes} as the
+	 * locations to process. The processed locations are then
 	 * {@link ContextConfigurationAttributes#setLocations(String[]) set} in
 	 * the supplied configuration attributes.
 	 * <p>Can be overridden in subclasses &mdash; for example, to process
@@ -92,7 +92,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	@Override
 	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
 		String[] processedLocations =
-				processLocations(configAttributes.getDeclaringClass(), configAttributes.getLocations());
+				processLocationsInternal(configAttributes.getDeclaringClass(), configAttributes.getLocations());
 		configAttributes.setLocations(processedLocations);
 	}
 
@@ -214,6 +214,10 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	@Override
 	@SuppressWarnings("deprecation")
 	public final String[] processLocations(Class<?> clazz, String... locations) {
+		return processLocationsInternal(clazz, locations);
+	}
+
+	private String[] processLocationsInternal(Class<?> clazz, String... locations) {
 		return (ObjectUtils.isEmpty(locations) && isGenerateDefaultLocations()) ?
 				generateDefaultLocations(clazz) : modifyLocations(clazz, locations);
 	}
