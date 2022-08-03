@@ -53,7 +53,7 @@ class CustomizedGenericXmlContextLoaderTests {
 
 		MergedContextConfiguration mergedConfig =
 				new MergedContextConfiguration(getClass(), null, null, null, null);
-		customLoader.loadContext(mergedConfig);
+		customLoader.loadContext(mergedConfig, true);
 
 		assertThat(customizeInvoked).as("customizeContext() should have been invoked").isTrue();
 	}

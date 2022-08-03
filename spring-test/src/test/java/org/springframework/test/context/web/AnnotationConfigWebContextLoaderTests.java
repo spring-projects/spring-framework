@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ class AnnotationConfigWebContextLoaderTests {
 				new String[] { "config.xml" }, EMPTY_CLASS_ARRAY, null, EMPTY_STRING_ARRAY, EMPTY_STRING_ARRAY,
 				EMPTY_STRING_ARRAY, "resource/path", loader, null, null);
 		assertThatIllegalStateException()
-			.isThrownBy(() -> loader.loadContext(mergedConfig))
+			.isThrownBy(() -> loader.loadContext(mergedConfig, true))
 			.withMessageContaining("does not support resource locations");
 	}
 

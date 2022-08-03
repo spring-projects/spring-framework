@@ -62,7 +62,7 @@ import org.springframework.util.StringUtils;
  * @see ActiveProfiles
  * @see TestPropertySource
  * @see ContextConfigurationAttributes
- * @see SmartContextLoader#loadContext(MergedContextConfiguration)
+ * @see SmartContextLoader#loadContext(MergedContextConfiguration, boolean)
  */
 public class MergedContextConfiguration implements Serializable {
 

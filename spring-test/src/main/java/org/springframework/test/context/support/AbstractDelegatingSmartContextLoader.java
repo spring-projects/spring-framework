@@ -176,6 +176,18 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	}
 
 	/**
+	 * Although this method is officially deprecated, for backward compatibility
+	 * it delegates to {@link #loadContext(MergedContextConfiguration, boolean)},
+	 * supplying {@code true} for the {@code refresh} flag.
+	 * @deprecated as of Spring Framework 6.0, in favor of {@link #loadContext(MergedContextConfiguration, boolean)}
+	 */
+	@Override
+	@Deprecated
+	public final ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
+		return loadContext(mergedConfig, true);
+	}
+
+	/**
 	 * Delegates to an appropriate candidate {@code SmartContextLoader} to load
 	 * an {@link ApplicationContext}.
 	 * <p>Delegation is based on explicit knowledge of the implementations of the
@@ -191,12 +203,16 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	 * the annotation-based loader will load the {@code ApplicationContext}.</li>
 	 * </ul>
 	 * @param mergedConfig the merged context configuration to use to load the application context
+	 * @param refresh whether to refresh the {@code ApplicationContext} and register
+	 * a JVM shutdown hook for it
+	 * @return a new application context
 	 * @throws IllegalArgumentException if the supplied merged configuration is {@code null}
 	 * @throws IllegalStateException if neither candidate loader is capable of loading an
 	 * {@code ApplicationContext} from the supplied merged context configuration
+	 * @since 6.0
 	 */
 	@Override
-	public ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
+	public ApplicationContext loadContext(MergedContextConfiguration mergedConfig, boolean refresh) throws Exception {
 		Assert.notNull(mergedConfig, "MergedContextConfiguration must not be null");
 
 		Assert.state(!(mergedConfig.hasLocations() && mergedConfig.hasClasses()), () -> String.format(
@@ -209,7 +225,7 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 			// Determine if each loader can load a context from the mergedConfig. If it
 			// can, let it; otherwise, keep iterating.
 			if (supports(loader, mergedConfig)) {
-				return delegateLoading(loader, mergedConfig);
+				return delegateLoading(loader, mergedConfig, refresh);
 			}
 		}
 
@@ -217,7 +233,7 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 		// ACIs or customizers were declared, then delegate to the annotation config
 		// loader.
 		if (!mergedConfig.getContextInitializerClasses().isEmpty() || !mergedConfig.getContextCustomizers().isEmpty()) {
-			return delegateLoading(getAnnotationConfigLoader(), mergedConfig);
+			return delegateLoading(getAnnotationConfigLoader(), mergedConfig, refresh);
 		}
 
 		// else...
@@ -235,13 +251,14 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 		loader.processContextConfiguration(configAttributes);
 	}
 
-	private static ApplicationContext delegateLoading(SmartContextLoader loader, MergedContextConfiguration mergedConfig)
+	private static ApplicationContext delegateLoading(
+			SmartContextLoader loader, MergedContextConfiguration mergedConfig, boolean refresh)
 			throws Exception {
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Delegating to %s to load context from %s.", name(loader), mergedConfig));
 		}
-		return loader.loadContext(mergedConfig);
+		return loader.loadContext(mergedConfig, refresh);
 	}
 
 	private boolean supports(SmartContextLoader loader, MergedContextConfiguration mergedConfig) {

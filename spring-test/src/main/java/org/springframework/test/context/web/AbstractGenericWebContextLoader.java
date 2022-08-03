@@ -65,6 +65,18 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	// SmartContextLoader
 
 	/**
+	 * Although this method is officially deprecated, for backward compatibility
+	 * it delegates to {@link #loadContext(MergedContextConfiguration, boolean)},
+	 * supplying {@code true} for the {@code refresh} flag.
+	 * @deprecated as of Spring Framework 6.0, in favor of {@link #loadContext(MergedContextConfiguration, boolean)}
+	 */
+	@Override
+	@Deprecated
+	public final ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
+		return loadContext(mergedConfig, true);
+	}
+
+	/**
 	 * Load a Spring {@link WebApplicationContext} from the supplied
 	 * {@link MergedContextConfiguration}.
 	 * <p>Implementation details:
@@ -94,12 +106,19 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	 * <li>{@link ConfigurableApplicationContext#refresh Refreshes} the
 	 * context and registers a JVM shutdown hook for it.</li>
 	 * </ul>
+	 * @param mergedConfig the merged context configuration to use to load the
+	 * application context
+	 * @param refresh whether to refresh the {@code ApplicationContext} and register
+	 * a JVM shutdown hook for it
 	 * @return a new web application context
-	 * @see org.springframework.test.context.SmartContextLoader#loadContext(MergedContextConfiguration)
+	 * @since 6.0
+	 * @see org.springframework.test.context.SmartContextLoader#loadContext(MergedContextConfiguration, boolean)
 	 * @see GenericWebApplicationContext
 	 */
 	@Override
-	public final ConfigurableApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
+	public final ConfigurableApplicationContext loadContext(
+			MergedContextConfiguration mergedConfig, boolean refresh) throws Exception {
+
 		Assert.isTrue(mergedConfig instanceof WebMergedContextConfiguration,
 				() -> String.format("Cannot load WebApplicationContext from non-web merged context configuration %s. " +
 						"Consider annotating your test class with @WebAppConfiguration.", mergedConfig));
@@ -125,8 +144,12 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 		loadBeanDefinitions(context, webMergedConfig);
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		customizeContext(context, webMergedConfig);
-		context.refresh();
-		context.registerShutdownHook();
+
+		if (refresh) {
+			context.refresh();
+			context.registerShutdownHook();
+		}
+
 		return context;
 	}
 

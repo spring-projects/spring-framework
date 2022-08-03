@@ -25,34 +25,34 @@ import org.springframework.lang.Nullable;
  *
  * <p>The {@code SmartContextLoader} SPI supersedes the {@link ContextLoader} SPI
  * introduced in Spring 2.5: a {@code SmartContextLoader} can choose to process
- * resource locations, annotated classes, or a combination of both. Furthermore, a
+ * resource locations, component classes, or a combination of both. Furthermore, a
  * {@code SmartContextLoader} can configure the context that it
- * {@linkplain #loadContext(MergedContextConfiguration) loads} based on any
- * properties available in the provided {@link MergedContextConfiguration}. For
- * example, active bean definition profiles can be configured for the context
+ * {@linkplain #loadContext(MergedContextConfiguration, boolean) loads} based on
+ * any properties available in the provided {@link MergedContextConfiguration}.
+ * For example, active bean definition profiles can be configured for the context
  * based on {@link MergedContextConfiguration#getActiveProfiles()}.
  *
  * <p>See the Javadoc for {@link ContextConfiguration @ContextConfiguration}
- * for a definition of <em>annotated class</em>.
+ * for a definition of <em>component classes</em>.
  *
  * <p>Clients of a {@code SmartContextLoader} should call
  * {@link #processContextConfiguration(ContextConfigurationAttributes)
  * processContextConfiguration()} prior to calling
- * {@link #loadContext(MergedContextConfiguration) loadContext()}. This gives a
- * {@code SmartContextLoader} the opportunity to provide custom support for
- * modifying resource locations or detecting default resource locations or
+ * {@link #loadContext(MergedContextConfiguration, boolean) loadContext()}. This
+ * gives a {@code SmartContextLoader} the opportunity to provide custom support
+ * for modifying resource locations or detecting default resource locations or
  * default configuration classes. The results of
  * {@link #processContextConfiguration(ContextConfigurationAttributes)
  * processContextConfiguration()} should be merged for all classes in the
  * hierarchy of the root test class and then supplied to
- * {@link #loadContext(MergedContextConfiguration) loadContext()}.
+ * {@link #loadContext(MergedContextConfiguration, boolean) loadContext()}.
  *
  * <p>NOTE: As of Spring Framework 6.0, {@code SmartContextLoader} no longer
  * supports methods defined in the {@code ContextLoader} SPI.
  *
  * <p>Concrete implementations must provide a {@code public} no-args constructor.
  *
- * <p>Spring provides the following out-of-the-box implementations:
+ * <p>Spring provides the following {@code SmartContextLoader} implementations.
  * <ul>
  * <li>{@link org.springframework.test.context.support.DelegatingSmartContextLoader DelegatingSmartContextLoader}</li>
  * <li>{@link org.springframework.test.context.support.AnnotationConfigContextLoader AnnotationConfigContextLoader}</li>
@@ -92,10 +92,9 @@ public interface SmartContextLoader extends ContextLoader {
 	void processContextConfiguration(ContextConfigurationAttributes configAttributes);
 
 	/**
-	 * Load a new {@linkplain ApplicationContext context} based on the supplied
-	 * {@link MergedContextConfiguration merged context configuration},
-	 * configure the context, and return the context in a fully <em>refreshed</em>
-	 * state.
+	 * Load a new {@link ApplicationContext} based on the supplied
+	 * {@link MergedContextConfiguration}, configure the context, and return the
+	 * context in a fully <em>refreshed</em> state.
 	 * <p>Concrete implementations should register annotation configuration
 	 * processors with bean factories of
 	 * {@link ApplicationContext application contexts} loaded by this
@@ -134,8 +133,67 @@ public interface SmartContextLoader extends ContextLoader {
 	 * @see #processContextConfiguration(ContextConfigurationAttributes)
 	 * @see org.springframework.context.annotation.AnnotationConfigUtils#registerAnnotationConfigProcessors(org.springframework.beans.factory.support.BeanDefinitionRegistry)
 	 * @see org.springframework.context.ConfigurableApplicationContext#getEnvironment()
+	 * @deprecated as of Spring Framework 6.0, in favor of {@link #loadContext(MergedContextConfiguration, boolean)}
 	 */
+	@Deprecated
 	ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception;
+
+	/**
+	 * Load a new {@linkplain ApplicationContext} based on the supplied
+	 * {@link MergedContextConfiguration}, configure the context, and return the
+	 * context.
+	 * <p>Concrete implementations should register annotation configuration
+	 * processors with bean factories of
+	 * {@linkplain ApplicationContext application contexts} loaded by this
+	 * {@code SmartContextLoader}. Beans will therefore automatically be
+	 * candidates for annotation-based dependency injection using
+	 * {@link org.springframework.beans.factory.annotation.Autowired @Autowired},
+	 * {@link jakarta.annotation.Resource @Resource}, and
+	 * {@link jakarta.inject.Inject @Inject}. In addition, concrete implementations
+	 * should perform the following actions.
+	 * <ul>
+	 * <li>Set the parent {@code ApplicationContext} if appropriate (see
+	 * {@link MergedContextConfiguration#getParent()}).</li>
+	 * <li>Set the active bean definition profiles in the context's
+	 * {@link org.springframework.core.env.Environment Environment} (see
+	 * {@link MergedContextConfiguration#getActiveProfiles()}).</li>
+	 * <li>Add test {@link org.springframework.core.env.PropertySource PropertySources}
+	 * to the {@code Environment} (see
+	 * {@link MergedContextConfiguration#getPropertySourceLocations()},
+	 * {@link MergedContextConfiguration#getPropertySourceProperties()}, and
+	 * {@link org.springframework.test.context.support.TestPropertySourceUtils
+	 * TestPropertySourceUtils}).</li>
+	 * <li>Invoke {@link org.springframework.context.ApplicationContextInitializer
+	 * ApplicationContextInitializers} (see
+	 * {@link MergedContextConfiguration#getContextInitializerClasses()}).</li>
+	 * <li>Invoke {@link ContextCustomizer ContextCustomizers} (see
+	 * {@link MergedContextConfiguration#getContextCustomizers()}).</li>
+	 * <li>If the supplied {@code refresh} flag is {@code true},
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#refresh()
+	 * refresh} the {@code ApplicationContext} and
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#registerShutdownHook()
+	 * register a JVM shutdown hook} for it.</li>
+	 * </ul>
+	 * <p>The default implementation delegates to {@link #loadContext(MergedContextConfiguration)}
+	 * for backward compatibility. Concrete implementations should therefore
+	 * override this method in order to honor the {@code refresh} flag which is
+	 * required for AOT (ahead of time) processing support.
+	 * @param mergedConfig the merged context configuration to use to load the
+	 * application context
+	 * @param refresh whether to refresh the {@code ApplicationContext} and register
+	 * a JVM shutdown hook for it
+	 * @return a new application context
+	 * @throws Exception if context loading failed
+	 * @since 6.0
+	 * @see #processContextConfiguration(ContextConfigurationAttributes)
+	 * @see org.springframework.context.annotation.AnnotationConfigUtils#registerAnnotationConfigProcessors(org.springframework.beans.factory.support.BeanDefinitionRegistry)
+	 * @see org.springframework.context.ConfigurableApplicationContext#getEnvironment()
+	 * @see org.springframework.context.ConfigurableApplicationContext#registerShutdownHook()
+	 */
+	@SuppressWarnings("deprecation")
+	default ApplicationContext loadContext(MergedContextConfiguration mergedConfig, boolean refresh) throws Exception {
+		return loadContext(mergedConfig);
+	}
 
 	/**
 	 * {@code SmartContextLoader} does not support deprecated {@link ContextLoader} methods.
@@ -153,7 +211,7 @@ public interface SmartContextLoader extends ContextLoader {
 
 	/**
 	 * {@code SmartContextLoader} does not support deprecated {@link ContextLoader} methods.
-	 * <p>Call {@link #loadContext(MergedContextConfiguration)} instead.
+	 * <p>Call {@link #loadContext(MergedContextConfiguration, boolean)} instead.
 	 * @throws UnsupportedOperationException in this implementation
 	 * @since 6.0
 	 */
@@ -162,7 +220,7 @@ public interface SmartContextLoader extends ContextLoader {
 	default ApplicationContext loadContext(String... locations) throws Exception {
 		throw new UnsupportedOperationException("""
 				SmartContextLoader does not support the ContextLoader SPI. \
-				Call loadContext(MergedContextConfiguration) instead.""");
+				Call loadContext(MergedContextConfiguration, boolean) instead.""");
 	}
 
 }
