@@ -1,6 +1,8 @@
 buildscript {
 	repositories {
 		gradlePluginPortal()
+		//添加阿里云镜像
+        maven { url "http://maven.aliyun.com/nexus/content/groups/public" }
 		maven { url "https://repo.spring.io/plugins-release" }
 	}
 	dependencies {
@@ -152,6 +154,8 @@ configure(allprojects) { project ->
 	}
 
 	repositories {
+		//添加阿里云镜像
+        maven { url "http://maven.aliyun.com/nexus/content/groups/public" }
 		mavenCentral()
 		maven { url "https://repo.spring.io/libs-spring-framework-build" }
 	}
