@@ -568,8 +568,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					MAPPINGS_VARIABLE, type, from));
 			builder.addStatement("$T $L = new $T($T.class)", RootBeanDefinition.class,
 					BEAN_DEFINITION_VARIABLE, RootBeanDefinition.class, ImportAwareAotBeanPostProcessor.class);
-			builder.addStatement("$L.getConstructorArgumentValues().addIndexedArgumentValue(0, $L)",
-					BEAN_DEFINITION_VARIABLE, MAPPINGS_VARIABLE);
+			builder.addStatement("$L.setInstanceSupplier(() -> new $T($L))",
+					BEAN_DEFINITION_VARIABLE, ImportAwareAotBeanPostProcessor.class, MAPPINGS_VARIABLE);
 			builder.addStatement("$L.registerBeanDefinition($S, $L)",
 					BEAN_FACTORY_VARIABLE, BEAN_NAME, BEAN_DEFINITION_VARIABLE);
 			return builder.build();
