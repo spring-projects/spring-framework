@@ -14,34 +14,16 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.aot;
-
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.lang.Nullable;
+package org.springframework.beans.testfixture.beans.factory.aot;
 
 /**
- * A public {@link FactoryBean} with a generic type.
  *
  * @author Stephane Nicoll
  */
-public class GenericFactoryBean<T> implements FactoryBean<T> {
+public class SimpleBeanConfiguration {
 
-	private final Class<T> beanType;
-
-	public GenericFactoryBean(Class<T> beanType) {
-		this.beanType = beanType;
+	public SimpleBean simpleBean() {
+		return new SimpleBean();
 	}
 
-	@Nullable
-	@Override
-	public T getObject() throws Exception {
-		return BeanUtils.instantiateClass(this.beanType);
-	}
-
-	@Nullable
-	@Override
-	public Class<?> getObjectType() {
-		return this.beanType;
-	}
 }

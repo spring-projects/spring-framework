@@ -14,17 +14,34 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.aot;
+package org.springframework.beans.testfixture.beans.factory.aot;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.lang.Nullable;
 
 /**
- * A {@link GenericFactoryBean} that has a bound for the target type.
+ * A public {@link FactoryBean} with a generic type.
  *
  * @author Stephane Nicoll
  */
-public class NumberFactoryBean<T extends Number> extends GenericFactoryBean<T> {
+public class GenericFactoryBean<T> implements FactoryBean<T> {
 
-	public NumberFactoryBean(Class<T> beanType) {
-		super(beanType);
+	private final Class<T> beanType;
+
+	public GenericFactoryBean(Class<T> beanType) {
+		this.beanType = beanType;
 	}
 
+	@Nullable
+	@Override
+	public T getObject() throws Exception {
+		return BeanUtils.instantiateClass(this.beanType);
+	}
+
+	@Nullable
+	@Override
+	public Class<?> getObjectType() {
+		return this.beanType;
+	}
 }

@@ -42,16 +42,13 @@ public class MockBeanFactoryInitializationCode implements BeanFactoryInitializat
 
 
 	public MockBeanFactoryInitializationCode(GenerationContext generationContext) {
-		this.generatedClass = generationContext.getGeneratedClasses().addForFeature("TestCode", typeBuilder);
+		this.generatedClass = generationContext.getGeneratedClasses()
+				.addForFeature("TestCode", this.typeBuilder);
 	}
 
 
 	public DeferredTypeBuilder getTypeBuilder() {
-		return typeBuilder;
-	}
-
-	public GeneratedClass getGeneratedClass() {
-		return generatedClass;
+		return this.typeBuilder;
 	}
 
 	@Override

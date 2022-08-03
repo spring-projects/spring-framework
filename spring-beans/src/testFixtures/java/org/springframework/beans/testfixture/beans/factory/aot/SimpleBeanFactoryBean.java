@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.aot;
+package org.springframework.beans.testfixture.beans.factory.aot;
 
 import org.springframework.beans.factory.FactoryBean;
 
