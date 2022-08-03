@@ -40,6 +40,7 @@ import org.springframework.beans.BeanInfoFactory;
 import org.springframework.beans.ExtendedBeanInfoFactory;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
@@ -173,7 +174,7 @@ class BeanDefinitionPropertiesCodeGenerator {
 	}
 
 	private void addPropertyValues(CodeBlock.Builder builder,
-			BeanDefinition beanDefinition) {
+			RootBeanDefinition beanDefinition) {
 
 		MutablePropertyValues propertyValues = beanDefinition.getPropertyValues();
 		if (!propertyValues.isEmpty()) {
@@ -187,9 +188,8 @@ class BeanDefinitionPropertiesCodeGenerator {
 				builder.addStatement("$L.getPropertyValues().addPropertyValue($S, $L)",
 						BEAN_DEFINITION_VARIABLE, propertyValue.getName(), code);
 			}
-			Class<?> beanType = ClassUtils
-					.getUserClass(beanDefinition.getResolvableType().toClass());
-			BeanInfo beanInfo = (beanType != Object.class) ? getBeanInfo(beanType) : null;
+			Class<?> infrastructureType = getInfrastructureType(beanDefinition);
+			BeanInfo beanInfo = (infrastructureType != Object.class) ? getBeanInfo(infrastructureType) : null;
 			if (beanInfo != null) {
 				Map<String, Method> writeMethods = getWriteMethods(beanInfo);
 				for (PropertyValue propertyValue : propertyValues) {
@@ -200,6 +200,16 @@ class BeanDefinitionPropertiesCodeGenerator {
 				}
 			}
 		}
+	}
+
+	private Class<?> getInfrastructureType(RootBeanDefinition beanDefinition) {
+		if (beanDefinition.hasBeanClass()) {
+			Class<?> beanClass = beanDefinition.getBeanClass();
+			if (FactoryBean.class.isAssignableFrom(beanClass)) {
+				return beanClass;
+			}
+		}
+		return ClassUtils.getUserClass(beanDefinition.getResolvableType().toClass());
 	}
 
 	@Nullable
