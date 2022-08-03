@@ -107,7 +107,7 @@ class BeanDefinitionPropertiesCodeGenerator {
 	}
 
 
-	CodeBlock generateCode(BeanDefinition beanDefinition) {
+	CodeBlock generateCode(RootBeanDefinition beanDefinition) {
 		CodeBlock.Builder builder = CodeBlock.builder();
 		addStatementForValue(builder, beanDefinition, BeanDefinition::isPrimary,
 				"$L.setPrimary($L)");
@@ -119,18 +119,14 @@ class BeanDefinitionPropertiesCodeGenerator {
 				"$L.setAutowireCandidate($L)");
 		addStatementForValue(builder, beanDefinition, BeanDefinition::getRole,
 				this::hasRole, "$L.setRole($L)", this::toRole);
-		if (beanDefinition instanceof AbstractBeanDefinition abstractBeanDefinition) {
-			addStatementForValue(builder, beanDefinition,
-					AbstractBeanDefinition::getLazyInit, "$L.setLazyInit($L)");
-			addStatementForValue(builder, beanDefinition,
-					AbstractBeanDefinition::isSynthetic, "$L.setSynthetic($L)");
-			addInitDestroyMethods(builder, abstractBeanDefinition,
-					abstractBeanDefinition.getInitMethodNames(),
-					"$L.setInitMethodNames($L)");
-			addInitDestroyMethods(builder, abstractBeanDefinition,
-					abstractBeanDefinition.getDestroyMethodNames(),
-					"$L.setDestroyMethodNames($L)");
-		}
+		addStatementForValue(builder, beanDefinition, AbstractBeanDefinition::getLazyInit,
+				"$L.setLazyInit($L)");
+		addStatementForValue(builder, beanDefinition, AbstractBeanDefinition::isSynthetic,
+				"$L.setSynthetic($L)");
+		addInitDestroyMethods(builder, beanDefinition, beanDefinition.getInitMethodNames(),
+				"$L.setInitMethodNames($L)");
+		addInitDestroyMethods(builder, beanDefinition, beanDefinition.getDestroyMethodNames(),
+				"$L.setDestroyMethodNames($L)");
 		addConstructorArgumentValues(builder, beanDefinition);
 		addPropertyValues(builder, beanDefinition);
 		addAttributes(builder, beanDefinition);
