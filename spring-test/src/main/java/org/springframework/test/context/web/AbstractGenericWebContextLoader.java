@@ -65,19 +65,7 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	// SmartContextLoader
 
 	/**
-	 * Although this method is officially deprecated, for backward compatibility
-	 * it delegates to {@link #loadContext(MergedContextConfiguration, boolean)},
-	 * supplying {@code true} for the {@code refresh} flag.
-	 * @deprecated as of Spring Framework 6.0, in favor of {@link #loadContext(MergedContextConfiguration, boolean)}
-	 */
-	@Override
-	@Deprecated
-	public final ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
-		return loadContext(mergedConfig, true);
-	}
-
-	/**
-	 * Load a Spring {@link WebApplicationContext} from the supplied
+	 * Load a {@link GenericWebApplicationContext} for the supplied
 	 * {@link MergedContextConfiguration}.
 	 * <p>Implementation details:
 	 * <ul>
@@ -108,15 +96,52 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	 * </ul>
 	 * @param mergedConfig the merged context configuration to use to load the
 	 * application context
+	 * @return a new web application context
+	 * @see org.springframework.test.context.SmartContextLoader#loadContext(MergedContextConfiguration)
+	 * @see GenericWebApplicationContext
+	 */
+	@Override
+	public final ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
+		return loadContext(mergedConfig, true);
+	}
+
+	/**
+	 * Load a {@link GenericWebApplicationContext} for the supplied
+	 * {@link MergedContextConfiguration}.
+	 * <p>In contrast to {@link #loadContext(MergedContextConfiguration)}, this
+	 * method does not
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#refresh()
+	 * refresh} the {@code ApplicationContext} or
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#registerShutdownHook()
+	 * register a JVM shutdown hook} for it. Otherwise, this method behaves
+	 * identical to {@link #loadContext(MergedContextConfiguration)}.
+	 * @param mergedConfig the merged context configuration to use to load the
+	 * application context
+	 * @return a new web application context
+	 * @since 6.0
+	 * @see org.springframework.test.context.SmartContextLoader#loadContextForAotProcessing(MergedContextConfiguration)
+	 * @see GenericWebApplicationContext
+	 */
+	@Override
+	public final ApplicationContext loadContextForAotProcessing(
+			MergedContextConfiguration mergedConfig) throws Exception {
+
+		return loadContext(mergedConfig, false);
+	}
+
+	/**
+	 * Load a {@link GenericWebApplicationContext} for the supplied
+	 * {@link MergedContextConfiguration}.
+	 * @param mergedConfig the merged context configuration to use to load the
+	 * application context
 	 * @param refresh whether to refresh the {@code ApplicationContext} and register
 	 * a JVM shutdown hook for it
 	 * @return a new web application context
 	 * @since 6.0
-	 * @see org.springframework.test.context.SmartContextLoader#loadContext(MergedContextConfiguration, boolean)
-	 * @see GenericWebApplicationContext
+	 * @see org.springframework.test.context.SmartContextLoader#loadContext(MergedContextConfiguration)
+	 * @see org.springframework.test.context.SmartContextLoader#loadContextForAotProcessing(MergedContextConfiguration)
 	 */
-	@Override
-	public final ConfigurableApplicationContext loadContext(
+	private final GenericWebApplicationContext loadContext(
 			MergedContextConfiguration mergedConfig, boolean refresh) throws Exception {
 
 		Assert.isTrue(mergedConfig instanceof WebMergedContextConfiguration,

@@ -40,7 +40,7 @@ class GenericXmlContextLoaderTests {
 		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
 			new Class<?>[] { getClass() }, EMPTY_STRING_ARRAY, loader);
 		assertThatIllegalStateException()
-			.isThrownBy(() -> loader.loadContext(mergedConfig, true))
+			.isThrownBy(() -> loader.loadContext(mergedConfig))
 			.withMessageContaining("does not support annotated classes");
 	}
 

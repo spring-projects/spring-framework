@@ -96,7 +96,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 		ApplicationContext applicationContext;
 
 		if (contextLoader instanceof SmartContextLoader smartContextLoader) {
-			applicationContext = smartContextLoader.loadContext(mergedContextConfiguration, true);
+			applicationContext = smartContextLoader.loadContext(mergedContextConfiguration);
 		}
 		else {
 			String[] locations = mergedContextConfiguration.getLocations();

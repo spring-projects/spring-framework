@@ -20,6 +20,7 @@ import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.MergedContextConfiguration;
 
@@ -48,7 +49,7 @@ class AnnotationConfigContextLoaderTests {
 		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(getClass(),
 			new String[] { "config.xml" }, EMPTY_CLASS_ARRAY, EMPTY_STRING_ARRAY, contextLoader);
 		assertThatIllegalStateException()
-			.isThrownBy(() -> contextLoader.loadContext(mergedConfig, true))
+			.isThrownBy(() -> contextLoader.loadContext(mergedConfig))
 			.withMessageContaining("does not support resource locations");
 	}
 
@@ -56,30 +57,34 @@ class AnnotationConfigContextLoaderTests {
 	 * @since 6.0
 	 */
 	@Test
-	void loadContextHonorsRefreshTrue() throws Exception {
+	void loadContextRefreshesContext() throws Exception {
 		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(
 				AnnotatedFooConfigInnerClassTestCase.class, EMPTY_STRING_ARRAY,
 				new Class<?>[] {AnnotatedFooConfigInnerClassTestCase.FooConfig.class},
 				EMPTY_STRING_ARRAY, contextLoader);
-		ConfigurableApplicationContext context = contextLoader.loadContext(mergedConfig, true);
-		assertThat(context).isNotNull();
-		assertThat(context.isActive()).as("ApplicationContext is active").isTrue();
+		ApplicationContext context = contextLoader.loadContext(mergedConfig);
+		assertThat(context).isInstanceOf(ConfigurableApplicationContext.class);
+		ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
+		assertThat(cac.isActive()).as("ApplicationContext is active").isTrue();
 		assertThat(context.getBean(String.class)).isEqualTo("foo");
+		cac.close();
 	}
 
 	/**
 	 * @since 6.0
 	 */
 	@Test
-	void loadContextHonorsRefreshFalse() throws Exception {
+	void loadContextForAotProcessingDoesNotRefreshContext() throws Exception {
 		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(
 				AnnotatedFooConfigInnerClassTestCase.class, EMPTY_STRING_ARRAY,
 				new Class<?>[] {AnnotatedFooConfigInnerClassTestCase.FooConfig.class},
 				EMPTY_STRING_ARRAY, contextLoader);
-		ConfigurableApplicationContext context = contextLoader.loadContext(mergedConfig, false);
-		assertThat(context).isNotNull();
-		assertThat(context.isActive()).as("ApplicationContext is active").isFalse();
+		ApplicationContext context = contextLoader.loadContextForAotProcessing(mergedConfig);
+		assertThat(context).isInstanceOf(ConfigurableApplicationContext.class);
+		ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
+		assertThat(cac.isActive()).as("ApplicationContext is active").isFalse();
 		assertThat(Arrays.stream(context.getBeanDefinitionNames())).anyMatch(name -> name.contains("FooConfig"));
+		cac.close();
 	}
 
 	@Test

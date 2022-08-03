@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
  * and enclosing class hierarchy that is annotated with
  * {@link ContextConfiguration @ContextConfiguration}, and the candidate that
  * supports the merged, processed configuration will be used to actually
- * {@linkplain #loadContext load} the context.
+ * {@linkplain #loadContext(MergedContextConfiguration) load} the context.
  *
  * <p>Any reference to an <em>XML-based loader</em> can be interpreted to mean
  * a context loader that supports only XML configuration files or one that
@@ -176,13 +176,28 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	}
 
 	/**
-	 * Although this method is officially deprecated, for backward compatibility
-	 * it delegates to {@link #loadContext(MergedContextConfiguration, boolean)},
-	 * supplying {@code true} for the {@code refresh} flag.
-	 * @deprecated as of Spring Framework 6.0, in favor of {@link #loadContext(MergedContextConfiguration, boolean)}
+	 * Delegates to an appropriate candidate {@code SmartContextLoader} to load
+	 * an {@link ApplicationContext}.
+	 * <p>Delegation is based on explicit knowledge of the implementations of the
+	 * default loaders for {@linkplain #getXmlLoader() XML configuration files and
+	 * Groovy scripts} and {@linkplain #getAnnotationConfigLoader() annotated classes}.
+	 * Specifically, the delegation algorithm is as follows:
+	 * <ul>
+	 * <li>If the resource locations in the supplied {@code MergedContextConfiguration}
+	 * are not empty and the annotated classes are empty,
+	 * the XML-based loader will load the {@code ApplicationContext}.</li>
+	 * <li>If the annotated classes in the supplied {@code MergedContextConfiguration}
+	 * are not empty and the resource locations are empty,
+	 * the annotation-based loader will load the {@code ApplicationContext}.</li>
+	 * </ul>
+	 * @param mergedConfig the merged context configuration to use to load the application context
+	 * @return a new application context
+	 * @throws IllegalArgumentException if the supplied merged configuration is {@code null}
+	 * @throws IllegalStateException if neither candidate loader is capable of loading an
+	 * {@code ApplicationContext} from the supplied merged context configuration
+	 * @since 6.0
 	 */
 	@Override
-	@Deprecated
 	public final ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
 		return loadContext(mergedConfig, true);
 	}
@@ -203,8 +218,6 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	 * the annotation-based loader will load the {@code ApplicationContext}.</li>
 	 * </ul>
 	 * @param mergedConfig the merged context configuration to use to load the application context
-	 * @param refresh whether to refresh the {@code ApplicationContext} and register
-	 * a JVM shutdown hook for it
 	 * @return a new application context
 	 * @throws IllegalArgumentException if the supplied merged configuration is {@code null}
 	 * @throws IllegalStateException if neither candidate loader is capable of loading an
@@ -212,7 +225,22 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	 * @since 6.0
 	 */
 	@Override
-	public ApplicationContext loadContext(MergedContextConfiguration mergedConfig, boolean refresh) throws Exception {
+	public ApplicationContext loadContextForAotProcessing(MergedContextConfiguration mergedConfig) throws Exception {
+		return loadContext(mergedConfig, false);
+	}
+
+	/**
+	 * Delegates to an appropriate candidate {@code SmartContextLoader} to load
+	 * an {@link ApplicationContext}.
+	 * @param mergedConfig the merged context configuration to use to load the application context
+	 * @param refresh whether to refresh the {@code ApplicationContext} and register
+	 * a JVM shutdown hook for it
+	 * @return a new application context
+	 * @throws IllegalArgumentException if the supplied merged configuration is {@code null}
+	 * @throws IllegalStateException if neither candidate loader is capable of loading an
+	 * {@code ApplicationContext} from the supplied merged context configuration
+	 */
+	private ApplicationContext loadContext(MergedContextConfiguration mergedConfig, boolean refresh) throws Exception {
 		Assert.notNull(mergedConfig, "MergedContextConfiguration must not be null");
 
 		Assert.state(!(mergedConfig.hasLocations() && mergedConfig.hasClasses()), () -> String.format(
@@ -242,7 +270,6 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 				name(getXmlLoader()), name(getAnnotationConfigLoader()), mergedConfig));
 	}
 
-
 	private static void delegateProcessing(SmartContextLoader loader, ContextConfigurationAttributes configAttributes) {
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Delegating to %s to process context configuration %s.",
@@ -258,7 +285,7 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Delegating to %s to load context from %s.", name(loader), mergedConfig));
 		}
-		return loader.loadContext(mergedConfig, refresh);
+		return (refresh ? loader.loadContext(mergedConfig) : loader.loadContextForAotProcessing(mergedConfig));
 	}
 
 	private boolean supports(SmartContextLoader loader, MergedContextConfiguration mergedConfig) {

@@ -100,7 +100,7 @@ class DelegatingSmartContextLoaderTests {
 
 		@Test
 		void loadContextWithNullConfig() throws Exception {
-			assertThatIllegalArgumentException().isThrownBy(() -> loader.loadContext(null, true));
+			assertThatIllegalArgumentException().isThrownBy(() -> loader.loadContext((MergedContextConfiguration) null));
 		}
 
 		@Test
@@ -108,7 +108,7 @@ class DelegatingSmartContextLoaderTests {
 			MergedContextConfiguration mergedConfig = new MergedContextConfiguration(
 					getClass(), EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, EMPTY_STRING_ARRAY, loader);
 			assertThatIllegalStateException()
-			.isThrownBy(() -> loader.loadContext(mergedConfig, true))
+			.isThrownBy(() -> loader.loadContext(mergedConfig))
 				.withMessageStartingWith("Neither")
 				.withMessageContaining("was able to load an ApplicationContext from");
 		}
@@ -121,7 +121,7 @@ class DelegatingSmartContextLoaderTests {
 			MergedContextConfiguration mergedConfig = new MergedContextConfiguration(getClass(),
 					new String[] {"test.xml"}, new Class<?>[] {getClass()}, EMPTY_STRING_ARRAY, loader);
 			assertThatIllegalStateException()
-				.isThrownBy(() -> loader.loadContext(mergedConfig, true))
+				.isThrownBy(() -> loader.loadContext(mergedConfig))
 				.withMessageStartingWith("Neither")
 				.withMessageContaining("declare either 'locations' or 'classes' but not both.");
 		}
@@ -147,7 +147,7 @@ class DelegatingSmartContextLoaderTests {
 		private void assertApplicationContextLoadsAndContainsFooString(MergedContextConfiguration mergedConfig)
 				throws Exception {
 
-			ApplicationContext applicationContext = loader.loadContext(mergedConfig, true);
+			ApplicationContext applicationContext = loader.loadContext(mergedConfig);
 			assertThat(applicationContext).isInstanceOf(ConfigurableApplicationContext.class);
 			assertThat(applicationContext.getBean(String.class)).isEqualTo("foo");
 			ConfigurableApplicationContext cac = (ConfigurableApplicationContext) applicationContext;
@@ -164,7 +164,7 @@ class DelegatingSmartContextLoaderTests {
 					new String[] {"classpath:/org/springframework/test/context/support/DelegatingSmartContextLoaderTests$XmlTestCase-context.xml"},
 					EMPTY_CLASS_ARRAY, EMPTY_STRING_ARRAY, loader);
 
-			assertApplicationContextLoadsWithoutRefresh(mergedConfig, "foo");
+			assertApplicationContextLoadsForAotProcessing(mergedConfig, "foo");
 		}
 
 		/**
@@ -175,13 +175,13 @@ class DelegatingSmartContextLoaderTests {
 			MergedContextConfiguration mergedConfig = new MergedContextConfiguration(ConfigClassTestCase.class,
 					EMPTY_STRING_ARRAY, new Class<?>[] {ConfigClassTestCase.Config.class}, EMPTY_STRING_ARRAY, loader);
 
-			assertApplicationContextLoadsWithoutRefresh(mergedConfig, "ConfigClassTestCase.Config");
+			assertApplicationContextLoadsForAotProcessing(mergedConfig, "ConfigClassTestCase.Config");
 		}
 
-		private void assertApplicationContextLoadsWithoutRefresh(MergedContextConfiguration mergedConfig,
+		private void assertApplicationContextLoadsForAotProcessing(MergedContextConfiguration mergedConfig,
 				String expectedBeanDefName) throws Exception {
 
-			ApplicationContext context = loader.loadContext(mergedConfig, false);
+			ApplicationContext context = loader.loadContextForAotProcessing(mergedConfig);
 			assertThat(context).isInstanceOf(ConfigurableApplicationContext.class);
 			ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
 			assertThat(cac.isActive()).as("ApplicationContext is active").isFalse();

@@ -40,7 +40,7 @@ import org.springframework.util.StringUtils;
  * <li>If instances of concrete subclasses are invoked via the
  * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader}
  * SPI, the context will be loaded from the {@link MergedContextConfiguration}
- * provided to {@link #loadContext(MergedContextConfiguration, boolean)}. In such
+ * provided to {@link #loadContext(MergedContextConfiguration)}. In such
  * cases, a {@code SmartContextLoader} will decide whether to load the context
  * from <em>locations</em> or <em>annotated classes</em>.</li>
  * </ul>
@@ -54,26 +54,15 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Phillip Webb
  * @since 2.5
- * @see #loadContext(MergedContextConfiguration, boolean)
+ * @see #loadContext(MergedContextConfiguration)
  */
 public abstract class AbstractGenericContextLoader extends AbstractContextLoader {
 
 	protected static final Log logger = LogFactory.getLog(AbstractGenericContextLoader.class);
 
 	/**
-	 * Although this method is officially deprecated, for backward compatibility
-	 * it delegates to {@link #loadContext(MergedContextConfiguration, boolean)},
-	 * supplying {@code true} for the {@code refresh} flag.
-	 * @deprecated as of Spring Framework 6.0, in favor of {@link #loadContext(MergedContextConfiguration, boolean)}
-	 */
-	@Override
-	@Deprecated
-	public final ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
-		return loadContext(mergedConfig, true);
-	}
-
-	/**
-	 * Load a Spring ApplicationContext from the supplied {@link MergedContextConfiguration}.
+	 * Load a {@link GenericApplicationContext} for the supplied
+	 * {@link MergedContextConfiguration}.
 	 * <p>Implementation details:
 	 * <ul>
 	 * <li>Calls {@link #validateMergedContextConfiguration(MergedContextConfiguration)}
@@ -104,20 +93,52 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * <li>Calls {@link #customizeContext(ConfigurableApplicationContext, MergedContextConfiguration)} to
 	 * allow for customizing the context before it is refreshed.</li>
 	 * <li>{@link ConfigurableApplicationContext#refresh Refreshes} the
-	 * context and registers a JVM shutdown hook for it if the supplied the
-	 * {@code refresh} flag is {@code true}.</li>
+	 * context and registers a JVM shutdown hook for it.</li>
 	 * </ul>
+	 * @param mergedConfig the merged context configuration to use to load the
+	 * application context
+	 * @return a new application context
+	 * @see org.springframework.test.context.SmartContextLoader#loadContext(MergedContextConfiguration)
+	 */
+	@Override
+	public final ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
+		return loadContext(mergedConfig, true);
+	}
+
+	/**
+	 * Load a {@link GenericApplicationContext} for the supplied
+	 * {@link MergedContextConfiguration}.
+	 * <p>In contrast to {@link #loadContext(MergedContextConfiguration)}, this
+	 * method does not
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#refresh()
+	 * refresh} the {@code ApplicationContext} or
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#registerShutdownHook()
+	 * register a JVM shutdown hook} for it. Otherwise, this method behaves
+	 * identical to {@link #loadContext(MergedContextConfiguration)}.
+	 * @param mergedConfig the merged context configuration to use to load the
+	 * application context
+	 * @return a new application context
+	 * @since 6.0
+	 * @see org.springframework.test.context.SmartContextLoader#loadContextForAotProcessing(MergedContextConfiguration)
+	 */
+	@Override
+	public final ApplicationContext loadContextForAotProcessing(
+			MergedContextConfiguration mergedConfig) throws Exception {
+
+		return loadContext(mergedConfig, false);
+	}
+
+	/**
+	 * Load a {@link GenericApplicationContext} for the supplied
+	 * {@link MergedContextConfiguration}.
 	 * @param mergedConfig the merged context configuration to use to load the
 	 * application context
 	 * @param refresh whether to refresh the {@code ApplicationContext} and register
 	 * a JVM shutdown hook for it
 	 * @return a new application context
 	 * @since 6.0
-	 * @see org.springframework.test.context.SmartContextLoader#loadContext(MergedContextConfiguration, boolean)
-	 * @see GenericApplicationContext
 	 */
-	@Override
-	public final ConfigurableApplicationContext loadContext(
+	private final GenericApplicationContext loadContext(
 			MergedContextConfiguration mergedConfig, boolean refresh) throws Exception {
 
 		if (logger.isDebugEnabled()) {
@@ -185,15 +206,15 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * context and registers a JVM shutdown hook for it.</li>
 	 * </ul>
 	 * <p><b>Note</b>: this method does not provide a means to set active bean definition
-	 * profiles for the loaded context. See {@link #loadContext(MergedContextConfiguration, boolean)}
+	 * profiles for the loaded context. See {@link #loadContext(MergedContextConfiguration)}
 	 * and {@link AbstractContextLoader#prepareContext(ConfigurableApplicationContext, MergedContextConfiguration)}
 	 * for an alternative.
 	 * @return a new application context
 	 * @since 2.5
 	 * @see org.springframework.test.context.ContextLoader#loadContext
 	 * @see GenericApplicationContext
-	 * @see #loadContext(MergedContextConfiguration, boolean)
-	 * @deprecated as of Spring Framework 6.0, in favor of {@link #loadContext(MergedContextConfiguration, boolean)}
+	 * @see #loadContext(MergedContextConfiguration)
+	 * @deprecated as of Spring Framework 6.0, in favor of {@link #loadContextForAotProcessing(MergedContextConfiguration)}
 	 */
 	@Deprecated
 	@Override
@@ -238,8 +259,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * customize {@code GenericApplicationContext}'s standard settings.
 	 * @param context the context that should be prepared
 	 * @since 2.5
-	 * @see #loadContext(MergedContextConfiguration, boolean)
-	 * @see #loadContext(String...)
+	 * @see #loadContext(MergedContextConfiguration)
 	 * @see GenericApplicationContext#setAllowBeanDefinitionOverriding
 	 * @see GenericApplicationContext#setResourceLoader
 	 * @see GenericApplicationContext#setId
@@ -255,8 +275,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * to customize {@code DefaultListableBeanFactory}'s standard settings.
 	 * @param beanFactory the bean factory created by this {@code ContextLoader}
 	 * @since 2.5
-	 * @see #loadContext(MergedContextConfiguration, boolean)
-	 * @see #loadContext(String...)
+	 * @see #loadContext(MergedContextConfiguration)
 	 * @see DefaultListableBeanFactory#setAllowBeanDefinitionOverriding
 	 * @see DefaultListableBeanFactory#setAllowEagerClassLoading
 	 * @see DefaultListableBeanFactory#setAllowCircularReferences
@@ -280,7 +299,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * @param context the context into which the bean definitions should be loaded
 	 * @param mergedConfig the merged context configuration
 	 * @since 3.1
-	 * @see #loadContext(MergedContextConfiguration, boolean)
+	 * @see #loadContext(MergedContextConfiguration)
 	 */
 	protected void loadBeanDefinitions(GenericApplicationContext context, MergedContextConfiguration mergedConfig) {
 		createBeanDefinitionReader(context).loadBeanDefinitions(mergedConfig.getLocations());
@@ -293,7 +312,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * should be created
 	 * @return a {@code BeanDefinitionReader} for the supplied context
 	 * @since 2.5
-	 * @see #loadContext(String...)
+	 * @see #loadContext(MergedContextConfiguration)
 	 * @see #loadBeanDefinitions
 	 * @see BeanDefinitionReader
 	 */
@@ -307,8 +326,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * to customize the application context.
 	 * @param context the newly created application context
 	 * @since 2.5
-	 * @see #loadContext(MergedContextConfiguration, boolean)
-	 * @see #loadContext(String...)
+	 * @see #loadContext(MergedContextConfiguration)
 	 * @see #customizeContext(ConfigurableApplicationContext, MergedContextConfiguration)
 	 */
 	protected void customizeContext(GenericApplicationContext context) {

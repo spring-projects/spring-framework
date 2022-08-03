@@ -39,7 +39,7 @@ class AnnotationConfigWebContextLoaderTests {
 				new String[] { "config.xml" }, EMPTY_CLASS_ARRAY, null, EMPTY_STRING_ARRAY, EMPTY_STRING_ARRAY,
 				EMPTY_STRING_ARRAY, "resource/path", loader, null, null);
 		assertThatIllegalStateException()
-			.isThrownBy(() -> loader.loadContext(mergedConfig, true))
+			.isThrownBy(() -> loader.loadContext(mergedConfig))
 			.withMessageContaining("does not support resource locations");
 	}
 
