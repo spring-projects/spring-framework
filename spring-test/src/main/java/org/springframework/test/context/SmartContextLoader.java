@@ -146,8 +146,8 @@ public interface SmartContextLoader extends ContextLoader {
 	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#refresh()
 	 * refresh} the {@code ApplicationContext} or
 	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#registerShutdownHook()
-	 * register a JVM shutdown hook} for it. Otherwise, this method should behave
-	 * identical to {@link #loadContext(MergedContextConfiguration)}.
+	 * register a JVM shutdown hook} for it. Otherwise, this method should implement
+	 * behavior identical to {@link #loadContext(MergedContextConfiguration)}.
 	 * <p>The default implementation throws an {@link UnsupportedOperationException}.
 	 * Concrete implementations must therefore override this method in order to
 	 * support AOT (ahead of time) processing.

@@ -113,8 +113,8 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#refresh()
 	 * refresh} the {@code ApplicationContext} or
 	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#registerShutdownHook()
-	 * register a JVM shutdown hook} for it. Otherwise, this method behaves
-	 * identical to {@link #loadContext(MergedContextConfiguration)}.
+	 * register a JVM shutdown hook} for it. Otherwise, this method implements
+	 * behavior identical to {@link #loadContext(MergedContextConfiguration)}.
 	 * @param mergedConfig the merged context configuration to use to load the
 	 * application context
 	 * @return a new application context
@@ -136,7 +136,6 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * @param refresh whether to refresh the {@code ApplicationContext} and register
 	 * a JVM shutdown hook for it
 	 * @return a new application context
-	 * @since 6.0
 	 */
 	private final GenericApplicationContext loadContext(
 			MergedContextConfiguration mergedConfig, boolean refresh) throws Exception {

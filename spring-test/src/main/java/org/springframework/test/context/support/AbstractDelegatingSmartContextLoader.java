@@ -195,7 +195,6 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	 * @throws IllegalArgumentException if the supplied merged configuration is {@code null}
 	 * @throws IllegalStateException if neither candidate loader is capable of loading an
 	 * {@code ApplicationContext} from the supplied merged context configuration
-	 * @since 6.0
 	 */
 	@Override
 	public final ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
@@ -204,7 +203,7 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 
 	/**
 	 * Delegates to an appropriate candidate {@code SmartContextLoader} to load
-	 * an {@link ApplicationContext}.
+	 * an {@link ApplicationContext} for AOT processing.
 	 * <p>Delegation is based on explicit knowledge of the implementations of the
 	 * default loaders for {@linkplain #getXmlLoader() XML configuration files and
 	 * Groovy scripts} and {@linkplain #getAnnotationConfigLoader() annotated classes}.
