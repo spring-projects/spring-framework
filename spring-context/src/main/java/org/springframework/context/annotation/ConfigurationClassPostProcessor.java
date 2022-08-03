@@ -59,6 +59,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationStartupAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
@@ -518,6 +519,10 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 		private static final String MAPPINGS_VARIABLE = "mappings";
 
+		private static final String BEAN_DEFINITION_VARIABLE = "beanDefinition";
+
+		private static final String BEAN_NAME = "org.springframework.context.annotation.internalImportAwareAotProcessor";
+
 
 		private final ConfigurableListableBeanFactory beanFactory;
 
@@ -561,9 +566,12 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					MAPPINGS_VARIABLE, HashMap.class);
 			mappings.forEach((type, from) -> builder.addStatement("$L.put($S, $S)",
 					MAPPINGS_VARIABLE, type, from));
-			builder.addStatement("$L.addBeanPostProcessor(new $T($L))",
-					BEAN_FACTORY_VARIABLE, ImportAwareAotBeanPostProcessor.class,
-					MAPPINGS_VARIABLE);
+			builder.addStatement("$T $L = new $T($T.class)", RootBeanDefinition.class,
+					BEAN_DEFINITION_VARIABLE, RootBeanDefinition.class, ImportAwareAotBeanPostProcessor.class);
+			builder.addStatement("$L.getConstructorArgumentValues().addIndexedArgumentValue(0, $L)",
+					BEAN_DEFINITION_VARIABLE, MAPPINGS_VARIABLE);
+			builder.addStatement("$L.registerBeanDefinition($S, $L)",
+					BEAN_FACTORY_VARIABLE, BEAN_NAME, BEAN_DEFINITION_VARIABLE);
 			return builder.build();
 		}
 

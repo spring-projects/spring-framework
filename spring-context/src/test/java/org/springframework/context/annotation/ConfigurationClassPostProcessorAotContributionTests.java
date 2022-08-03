@@ -16,6 +16,8 @@
 
 package org.springframework.context.annotation;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -28,14 +30,20 @@ import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.hint.ResourcePatternHint;
 import org.springframework.aot.test.generator.compile.Compiled;
 import org.springframework.aot.test.generator.compile.TestCompiler;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.factory.aot.MockBeanFactoryInitializationCode;
 import org.springframework.beans.testfixture.beans.factory.generator.SimpleConfiguration;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.testfixture.context.generator.annotation.ImportAwareConfiguration;
 import org.springframework.context.testfixture.context.generator.annotation.ImportConfiguration;
 import org.springframework.core.testfixture.aot.generate.TestGenerationContext;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
@@ -62,6 +70,10 @@ class ConfigurationClassPostProcessorAotContributionTests {
 		this.beanFactoryInitializationCode = new MockBeanFactoryInitializationCode(this.generationContext);
 	}
 
+	@Test
+	void processAheadOfTimeWhenNoImportAwareConfigurationReturnsNull() {
+		assertThat(getContribution(SimpleConfiguration.class)).isNull();
+	}
 
 	@Test
 	void applyToWhenHasImportAwareConfigurationRegistersBeanPostProcessorWithMapEntry() {
@@ -69,12 +81,32 @@ class ConfigurationClassPostProcessorAotContributionTests {
 				ImportConfiguration.class);
 		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
 		compile((initializer, compiled) -> {
-			DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory();
+			GenericApplicationContext freshContext = new GenericApplicationContext();
+			DefaultListableBeanFactory freshBeanFactory = freshContext.getDefaultListableBeanFactory();
 			initializer.accept(freshBeanFactory);
-			ImportAwareAotBeanPostProcessor postProcessor = (ImportAwareAotBeanPostProcessor) freshBeanFactory
-					.getBeanPostProcessors().get(0);
-			assertPostProcessorEntry(postProcessor, ImportAwareConfiguration.class,
-					ImportConfiguration.class);
+			freshContext.refresh();
+			assertThat(freshBeanFactory.getBeanPostProcessors()).filteredOn(ImportAwareAotBeanPostProcessor.class::isInstance)
+					.singleElement().satisfies(postProcessor -> assertPostProcessorEntry(postProcessor, ImportAwareConfiguration.class,
+							ImportConfiguration.class));
+		});
+	}
+
+	@Test
+	void applyToWhenHasImportAwareConfigurationRegistersBeanPostProcessorAfterApplicationContextAwareProcessor() {
+		BeanFactoryInitializationAotContribution contribution = getContribution(
+				ImportConfiguration.class);
+		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
+		compile((initializer, compiled) -> {
+			GenericApplicationContext freshContext = new AnnotationConfigApplicationContext();
+			DefaultListableBeanFactory freshBeanFactory = freshContext.getDefaultListableBeanFactory();
+			initializer.accept(freshBeanFactory);
+			freshContext.registerBean(TestAwareCallbackConfiguration.class);
+			freshContext.refresh();
+			TestAwareCallbackBean bean = freshContext.getBean(TestAwareCallbackBean.class);
+			assertThat(bean.instances).hasSize(2);
+			assertThat(bean.instances.get(0)).isEqualTo(freshContext);
+			assertThat(bean.instances.get(1)).isInstanceOfSatisfying(AnnotationMetadata.class, metadata ->
+					assertThat(metadata.getClassName()).isEqualTo(TestAwareCallbackConfiguration.class.getName()));
 		});
 	}
 
@@ -91,11 +123,6 @@ class ConfigurationClassPostProcessorAotContributionTests {
 								+ "ImportConfiguration.class"));
 	}
 
-	@Test
-	void processAheadOfTimeWhenNoImportAwareConfigurationReturnsNull() {
-		assertThat(getContribution(SimpleConfiguration.class)).isNull();
-	}
-
 	@Nullable
 	private BeanFactoryInitializationAotContribution getContribution(Class<?> type) {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
@@ -103,6 +130,13 @@ class ConfigurationClassPostProcessorAotContributionTests {
 		ConfigurationClassPostProcessor postProcessor = new ConfigurationClassPostProcessor();
 		postProcessor.postProcessBeanFactory(beanFactory);
 		return postProcessor.processAheadOfTime(beanFactory);
+	}
+
+	private void assertPostProcessorEntry(BeanPostProcessor postProcessor,
+			Class<?> key, Class<?> value) {
+		assertThat(postProcessor).extracting("importsMapping")
+				.asInstanceOf(InstanceOfAssertFactories.MAP)
+				.containsExactly(entry(key.getName(), value.getName()));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -122,11 +156,26 @@ class ConfigurationClassPostProcessorAotContributionTests {
 				result.accept(compiled.getInstance(Consumer.class), compiled));
 	}
 
-	private void assertPostProcessorEntry(ImportAwareAotBeanPostProcessor postProcessor,
-			Class<?> key, Class<?> value) {
-		assertThat(postProcessor).extracting("importsMapping")
-				.asInstanceOf(InstanceOfAssertFactories.MAP)
-				.containsExactly(entry(key.getName(), value.getName()));
+	@Configuration(proxyBeanMethods = false)
+	@Import(TestAwareCallbackBean.class)
+	static class TestAwareCallbackConfiguration {
+
+	}
+
+	static class TestAwareCallbackBean implements ImportAware, ApplicationContextAware {
+
+		private final List<Object> instances = new ArrayList<>();
+
+		@Override
+		public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+			this.instances.add(applicationContext);
+		}
+
+		@Override
+		public void setImportMetadata(AnnotationMetadata importMetadata) {
+			this.instances.add(importMetadata);
+		}
+
 	}
 
 }
