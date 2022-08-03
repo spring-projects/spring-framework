@@ -131,7 +131,7 @@ public class CorsConfiguration {
 	 * is rejected in favor of using {@link #setAllowedOriginPatterns
 	 * allowedOriginPatterns} instead.
 	 * <p>By default this is not set which means that no origins are allowed.
-	 * However an instance of this class is often initialized further, e.g. for
+	 * However, an instance of this class is often initialized further, e.g. for
 	 * {@code @CrossOrigin}, via {@link #applyPermitDefaultValues()}.
 	 */
 	public void setAllowedOrigins(@Nullable List<String> origins) {
@@ -457,7 +457,7 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Validate that when {@link #setAllowCredentials allowCredentials} is true,
+	 * Validate that when {@link #setAllowCredentials allowCredentials} is {@code true},
 	 * {@link #setAllowedOrigins allowedOrigins} does not contain the special
 	 * value {@code "*"} since in that case the "Access-Control-Allow-Origin"
 	 * cannot be set to {@code "*"}.

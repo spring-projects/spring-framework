@@ -16,12 +16,15 @@
 
 package org.springframework.beans.factory.aot;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.util.List;
 import java.util.function.Predicate;
 
+import org.springframework.aot.generate.AccessVisibility;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.InstanceSupplier;
@@ -69,12 +72,43 @@ class DefaultBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments
 	public Class<?> getTarget(RegisteredBean registeredBean,
 			Executable constructorOrFactoryMethod) {
 
-		Class<?> target = ClassUtils
-				.getUserClass(constructorOrFactoryMethod.getDeclaringClass());
+		Class<?> target = extractDeclaringClass(registeredBean.getBeanType(),
+				constructorOrFactoryMethod);
 		while (target.getName().startsWith("java.") && registeredBean.isInnerBean()) {
 			target = registeredBean.getParent().getBeanClass();
 		}
 		return target;
+	}
+
+	private Class<?> extractDeclaringClass(ResolvableType beanType, Executable executable) {
+		Class<?> declaringClass = ClassUtils.getUserClass(executable.getDeclaringClass());
+		if (executable instanceof Constructor<?>
+				&& AccessVisibility.forMember(executable) == AccessVisibility.PUBLIC
+				&& FactoryBean.class.isAssignableFrom(declaringClass)) {
+			return extractTargetClassFromFactoryBean(declaringClass, beanType);
+		}
+		return executable.getDeclaringClass();
+	}
+
+	/**
+	 * Extract the target class of a public {@link FactoryBean} based on its
+	 * constructor. If the implementation does not resolve the target class
+	 * because it itself uses a generic, attempt to extract it from the
+	 * bean type.
+	 * @param factoryBeanType the factory bean type
+	 * @param beanType the bean type
+	 * @return the target class to use
+	 */
+	private Class<?> extractTargetClassFromFactoryBean(Class<?> factoryBeanType, ResolvableType beanType) {
+		ResolvableType target = ResolvableType.forType(factoryBeanType)
+				.as(FactoryBean.class).getGeneric(0);
+		if (target.getType().equals(Class.class)) {
+			return target.toClass();
+		}
+		else if (factoryBeanType.isAssignableFrom(beanType.toClass())) {
+			return beanType.as(FactoryBean.class).getGeneric(0).toClass();
+		}
+		return beanType.toClass();
 	}
 
 	@Override
@@ -105,9 +139,9 @@ class DefaultBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments
 
 		return new BeanDefinitionPropertiesCodeGenerator(
 				generationContext.getRuntimeHints(), attributeFilter,
-				beanRegistrationCode.getMethodGenerator(),
+				beanRegistrationCode.getMethods(),
 				(name, value) -> generateValueCode(generationContext, name, value))
-						.generateCode(beanDefinition);
+				.generateCode(beanDefinition);
 	}
 
 	@Nullable
@@ -170,8 +204,8 @@ class DefaultBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments
 
 		return new InstanceSupplierCodeGenerator(generationContext,
 				beanRegistrationCode.getClassName(),
-				beanRegistrationCode.getMethodGenerator(), allowDirectSupplierShortcut)
-						.generateCode(this.registeredBean, constructorOrFactoryMethod);
+				beanRegistrationCode.getMethods(), allowDirectSupplierShortcut)
+				.generateCode(this.registeredBean, constructorOrFactoryMethod);
 	}
 
 	@Override

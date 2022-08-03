@@ -326,7 +326,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	/**
 	 * Register the specified property as "processed" in the sense
 	 * of some processor calling the corresponding setter method
-	 * outside of the PropertyValue(s) mechanism.
+	 * outside the PropertyValue(s) mechanism.
 	 * <p>This will lead to {@code true} being returned from
 	 * a {@link #contains} call for the specified property.
 	 * @param propertyName the name of the property.

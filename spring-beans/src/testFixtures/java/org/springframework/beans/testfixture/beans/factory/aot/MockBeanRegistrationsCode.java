@@ -16,7 +16,9 @@
 
 package org.springframework.beans.testfixture.beans.factory.aot;
 
+import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.generate.GeneratedMethods;
+import org.springframework.aot.generate.GenerationContext;
 import org.springframework.beans.factory.aot.BeanRegistrationsCode;
 import org.springframework.javapoet.ClassName;
 
@@ -28,26 +30,28 @@ import org.springframework.javapoet.ClassName;
  */
 public class MockBeanRegistrationsCode implements BeanRegistrationsCode {
 
-	private final ClassName className;
+	private final GeneratedClass generatedClass;
 
-	private final GeneratedMethods generatedMethods = new GeneratedMethods();
+	private final DeferredTypeBuilder typeBuilder = new DeferredTypeBuilder();
 
-	public MockBeanRegistrationsCode(ClassName className) {
-		this.className = className;
+
+	public MockBeanRegistrationsCode(GenerationContext generationContext) {
+		this.generatedClass = generationContext.getGeneratedClasses().addForFeature("TestCode", this.typeBuilder);
 	}
 
-	public MockBeanRegistrationsCode() {
-		this(ClassName.get("com.example", "Test"));
+
+	public DeferredTypeBuilder getTypeBuilder() {
+		return this.typeBuilder;
 	}
 
 	@Override
 	public ClassName getClassName() {
-		return this.className;
+		return this.generatedClass.getName();
 	}
 
 	@Override
-	public GeneratedMethods getMethodGenerator() {
-		return this.generatedMethods;
+	public GeneratedMethods getMethods() {
+		return this.generatedClass.getMethods();
 	}
 
 }

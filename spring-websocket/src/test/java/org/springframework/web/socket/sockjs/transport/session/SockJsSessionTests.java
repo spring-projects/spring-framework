@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package org.springframework.web.socket.sockjs.transport.session;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Collections;
-import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
 
 import org.junit.jupiter.api.Test;
@@ -262,7 +262,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 		assertThat(this.session.getSockJsFramesWritten().size()).isEqualTo(1);
 		assertThat(this.session.getSockJsFramesWritten().get(0)).isEqualTo(SockJsFrame.heartbeatFrame());
 
-		verify(this.taskScheduler).schedule(any(Runnable.class), any(Date.class));
+		verify(this.taskScheduler).schedule(any(Runnable.class), any(Instant.class));
 		verifyNoMoreInteractions(this.taskScheduler);
 	}
 
@@ -286,12 +286,12 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	@Test
 	public void scheduleAndCancelHeartbeat() {
 		ScheduledFuture<?> task = mock(ScheduledFuture.class);
-		willReturn(task).given(this.taskScheduler).schedule(any(Runnable.class), any(Date.class));
+		willReturn(task).given(this.taskScheduler).schedule(any(Runnable.class), any(Instant.class));
 
 		this.session.setActive(true);
 		this.session.scheduleHeartbeat();
 
-		verify(this.taskScheduler).schedule(any(Runnable.class), any(Date.class));
+		verify(this.taskScheduler).schedule(any(Runnable.class), any(Instant.class));
 		verifyNoMoreInteractions(this.taskScheduler);
 
 		given(task.isCancelled()).willReturn(false);

@@ -167,7 +167,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		assertThat(responseEntity.getBody()).isNull();
 
 		// As we're on the same connection, the 2nd request proves server response handling
-		// did complete after the 1st request..
+		// did complete after the 1st request.
 		responseEntity = performGet("/person-response/mono-empty", JSON, Person.class);
 		assertThat(responseEntity.getHeaders().getContentLength()).isEqualTo(0);
 		assertThat(responseEntity.getBody()).isNull();

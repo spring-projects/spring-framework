@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.generate.MethodGenerator;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.javapoet.ClassName;
@@ -37,11 +37,11 @@ import org.springframework.util.Assert;
  */
 class BeanRegistrationCodeGenerator implements BeanRegistrationCode {
 
-	private static final Predicate<String> NO_ATTRIBUTE_FILTER = attribute -> true;
+	private static final Predicate<String> REJECT_ALL_ATTRIBUTES_FILTER = attribute -> false;
 
 	private final ClassName className;
 
-	private final MethodGenerator methodGenerator;
+	private final GeneratedMethods generatedMethods;
 
 	private final List<MethodReference> instancePostProcessors = new ArrayList<>();
 
@@ -52,12 +52,12 @@ class BeanRegistrationCodeGenerator implements BeanRegistrationCode {
 	private final BeanRegistrationCodeFragments codeFragments;
 
 
-	BeanRegistrationCodeGenerator(ClassName className, MethodGenerator methodGenerator,
+	BeanRegistrationCodeGenerator(ClassName className, GeneratedMethods generatedMethods,
 			RegisteredBean registeredBean, Executable constructorOrFactoryMethod,
 			BeanRegistrationCodeFragments codeFragments) {
 
 		this.className = className;
-		this.methodGenerator = methodGenerator;
+		this.generatedMethods = generatedMethods;
 		this.registeredBean = registeredBean;
 		this.constructorOrFactoryMethod = constructorOrFactoryMethod;
 		this.codeFragments = codeFragments;
@@ -69,8 +69,8 @@ class BeanRegistrationCodeGenerator implements BeanRegistrationCode {
 	}
 
 	@Override
-	public MethodGenerator getMethodGenerator() {
-		return this.methodGenerator;
+	public GeneratedMethods getMethods() {
+		return this.generatedMethods;
 	}
 
 	@Override
@@ -85,12 +85,12 @@ class BeanRegistrationCodeGenerator implements BeanRegistrationCode {
 				this.registeredBean.getBeanType(), this));
 		builder.add(this.codeFragments.generateSetBeanDefinitionPropertiesCode(
 				generationContext, this, this.registeredBean.getMergedBeanDefinition(),
-				NO_ATTRIBUTE_FILTER));
+				REJECT_ALL_ATTRIBUTES_FILTER));
 		CodeBlock instanceSupplierCode = this.codeFragments.generateInstanceSupplierCode(
 				generationContext, this, this.constructorOrFactoryMethod,
 				this.instancePostProcessors.isEmpty());
 		builder.add(this.codeFragments.generateSetBeanInstanceSupplierCode(generationContext,
-						this, instanceSupplierCode, this.instancePostProcessors));
+				this, instanceSupplierCode, this.instancePostProcessors));
 		builder.add(this.codeFragments.generateReturnCode(generationContext, this));
 		return builder.build();
 	}

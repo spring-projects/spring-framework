@@ -122,7 +122,7 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 
 
 	/**
-	 * Set user credententials for this proxy and the current thread.
+	 * Set user credentials for this proxy and the current thread.
 	 * The given username and password will be applied to all subsequent
 	 * {@code getConnection()} calls on this DataSource proxy.
 	 * <p>This will override any statically specified user credentials,

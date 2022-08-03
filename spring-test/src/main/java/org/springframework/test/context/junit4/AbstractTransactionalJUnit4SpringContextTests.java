@@ -193,7 +193,7 @@ public abstract class AbstractTransactionalJUnit4SpringContextTests extends Abst
 	}
 
 	/**
-	 * Convenience method for dropping all of the specified tables.
+	 * Convenience method for dropping all the specified tables.
 	 * <p>Use with caution outside of a transaction!
 	 * @param names the names of the tables to drop
 	 * @since 3.2
@@ -209,7 +209,7 @@ public abstract class AbstractTransactionalJUnit4SpringContextTests extends Abst
 	 * <p>The script will normally be loaded by classpath.
 	 * <p><b>Do not use this method to execute DDL if you expect rollback.</b>
 	 * @param sqlResourcePath the Spring resource path for the SQL script
-	 * @param continueOnError whether or not to continue without throwing an
+	 * @param continueOnError whether to continue without throwing an
 	 * exception in the event of an error
 	 * @throws DataAccessException if there is an error executing a statement
 	 * @see ResourceDatabasePopulator

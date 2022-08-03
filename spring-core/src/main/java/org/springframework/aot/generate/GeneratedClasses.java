@@ -46,11 +46,12 @@ public class GeneratedClasses {
 
 	private final Map<Owner, GeneratedClass> classesByOwner;
 
+
 	/**
 	 * Create a new instance using the specified naming conventions.
 	 * @param classNameGenerator the class name generator to use
 	 */
-	public GeneratedClasses(ClassNameGenerator classNameGenerator) {
+	GeneratedClasses(ClassNameGenerator classNameGenerator) {
 		this(classNameGenerator, new ArrayList<>(), new ConcurrentHashMap<>());
 	}
 
@@ -62,29 +63,92 @@ public class GeneratedClasses {
 		this.classesByOwner = classesByOwner;
 	}
 
+
 	/**
-	 * Prepare a {@link GeneratedClass} for the specified {@code featureName}
-	 * targeting the specified {@code component}.
-	 * @param featureName the name of the feature to associate with the generated class
-	 * @param component the target component
-	 * @return a {@link Builder} for further configuration
+	 * Get or add a generated class for the specified {@code featureName} and no
+	 * particular component. If this method has previously been called with the
+	 * given {@code featureName} the existing class will be returned, otherwise
+	 * a new class will be generated.
+	 * @param featureName the name of the feature to associate with the
+	 * generated class
+	 * @param type a {@link Consumer} used to build the type
+	 * @return an existing or newly generated class
 	 */
-	public Builder forFeatureComponent(String featureName, Class<?> component) {
+	public GeneratedClass getOrAddForFeature(String featureName,
+			Consumer<TypeSpec.Builder> type) {
+
 		Assert.hasLength(featureName, "'featureName' must not be empty");
-		Assert.notNull(component, "'component' must not be null");
-		return new Builder(featureName, component);
+		Assert.notNull(type, "'type' must not be null");
+		Owner owner = new Owner(this.classNameGenerator.getFeatureNamePrefix(), featureName, null);
+		GeneratedClass generatedClass = this.classesByOwner.computeIfAbsent(owner, key -> createAndAddGeneratedClass(featureName, null, type));
+		generatedClass.assertSameType(type);
+		return generatedClass;
 	}
 
 	/**
-	 * Prepare a {@link GeneratedClass} for the specified {@code featureName}
-	 * and no particular component. This should be used for high-level code
-	 * generation that are widely applicable and for entry points.
-	 * @param featureName the name of the feature to associate with the generated class
-	 * @return a {@link Builder} for further configuration
+	 * Get or add a generated class for the specified {@code featureName}
+	 * targeting the specified {@code component}. If this method has previously
+	 * been called with the given {@code featureName}/{@code target} the
+	 * existing class will be returned, otherwise a new class will be generated,
+	 * otherwise a new class will be generated.
+	 * @param featureName the name of the feature to associate with the
+	 * generated class
+	 * @param targetComponent the target component
+	 * @param type a {@link Consumer} used to build the type
+	 * @return an existing or newly generated class
 	 */
-	public Builder forFeature(String featureName) {
+	public GeneratedClass getOrAddForFeatureComponent(String featureName,
+			Class<?> targetComponent, Consumer<TypeSpec.Builder> type) {
+
 		Assert.hasLength(featureName, "'featureName' must not be empty");
-		return new Builder(featureName, null);
+		Assert.notNull(targetComponent, "'targetComponent' must not be null");
+		Assert.notNull(type, "'type' must not be null");
+		Owner owner = new Owner(this.classNameGenerator.getFeatureNamePrefix(), featureName, targetComponent);
+		GeneratedClass generatedClass = this.classesByOwner.computeIfAbsent(owner, key ->
+				createAndAddGeneratedClass(featureName, targetComponent, type));
+		generatedClass.assertSameType(type);
+		return generatedClass;
+	}
+
+	/**
+	 * Add a new generated class for the specified {@code featureName} and no
+	 * particular component.
+	 * @param featureName the name of the feature to associate with the
+	 * generated class
+	 * @param type a {@link Consumer} used to build the type
+	 * @return the newly generated class
+	 */
+	public GeneratedClass addForFeature(String featureName, Consumer<TypeSpec.Builder> type) {
+		Assert.hasLength(featureName, "'featureName' must not be empty");
+		Assert.notNull(type, "'type' must not be null");
+		return createAndAddGeneratedClass(featureName, null, type);
+	}
+
+	/**
+	 * Add a new generated class for the specified {@code featureName} targeting
+	 * the specified {@code component}.
+	 * @param featureName the name of the feature to associate with the
+	 * generated class
+	 * @param targetComponent the target component
+	 * @param type a {@link Consumer} used to build the type
+	 * @return the newly generated class
+	 */
+	public GeneratedClass addForFeatureComponent(String featureName,
+			Class<?> targetComponent, Consumer<TypeSpec.Builder> type) {
+
+		Assert.hasLength(featureName, "'featureName' must not be empty");
+		Assert.notNull(targetComponent, "'targetComponent' must not be null");
+		Assert.notNull(type, "'type' must not be null");
+		return createAndAddGeneratedClass(featureName, targetComponent, type);
+	}
+
+	private GeneratedClass createAndAddGeneratedClass(String featureName,
+			@Nullable Class<?> targetComponent, Consumer<TypeSpec.Builder> type) {
+
+		ClassName className = this.classNameGenerator.generateClassName(featureName, targetComponent);
+		GeneratedClass generatedClass = new GeneratedClass(className, type);
+		this.classes.add(generatedClass);
+		return generatedClass;
 	}
 
 	/**
@@ -93,7 +157,7 @@ public class GeneratedClasses {
 	 * @param generatedFiles where to write the generated classes
 	 * @throws IOException on IO error
 	 */
-	public void writeTo(GeneratedFiles generatedFiles) throws IOException {
+	void writeTo(GeneratedFiles generatedFiles) throws IOException {
 		Assert.notNull(generatedFiles, "'generatedFiles' must not be null");
 		List<GeneratedClass> generatedClasses = new ArrayList<>(this.classes);
 		generatedClasses.sort(Comparator.comparing(GeneratedClass::getName));
@@ -102,63 +166,12 @@ public class GeneratedClasses {
 		}
 	}
 
-	GeneratedClasses withName(String name) {
-		return new GeneratedClasses(this.classNameGenerator.usingFeatureNamePrefix(name),
+	GeneratedClasses withFeatureNamePrefix(String name) {
+		return new GeneratedClasses(this.classNameGenerator.withFeatureNamePrefix(name),
 				this.classes, this.classesByOwner);
 	}
 
-	private record Owner(String id, String className) {
-
-	}
-
-	public class Builder {
-
-		private final String featureName;
-
-		@Nullable
-		private final Class<?> target;
-
-
-		Builder(String featureName, @Nullable Class<?> target) {
-			this.target = target;
-			this.featureName = featureName;
-		}
-
-		/**
-		 * Generate a new {@link GeneratedClass} using the specified type
-		 * customizer.
-		 * @param typeSpecCustomizer a customizer for the {@link TypeSpec.Builder}
-		 * @return a new {@link GeneratedClass}
-		 */
-		public GeneratedClass generate(Consumer<TypeSpec.Builder> typeSpecCustomizer) {
-			Assert.notNull(typeSpecCustomizer, "'typeSpecCustomizer' must not be null");
-			return createGeneratedClass(typeSpecCustomizer);
-		}
-
-
-		/**
-		 * Get or generate a new {@link GeneratedClass} for the specified {@code id}.
-		 * @param id a unique identifier
-		 * @param typeSpecCustomizer a customizer for the {@link TypeSpec.Builder}
-		 * @return a {@link GeneratedClass} instance
-		 */
-		public GeneratedClass getOrGenerate(String id,
-				Consumer<TypeSpec.Builder> typeSpecCustomizer) {
-			Assert.hasLength(id, "'id' must not be empty");
-			Assert.notNull(typeSpecCustomizer, "'typeSpecCustomizer' must not be null");
-			Owner owner = new Owner(id, GeneratedClasses.this.classNameGenerator
-					.getClassName(this.target, this.featureName));
-			return GeneratedClasses.this.classesByOwner.computeIfAbsent(owner,
-					key -> createGeneratedClass(typeSpecCustomizer));
-		}
-
-		private GeneratedClass createGeneratedClass(Consumer<TypeSpec.Builder> typeSpecCustomizer) {
-			ClassName className = GeneratedClasses.this.classNameGenerator
-					.generateClassName(this.target, this.featureName);
-			GeneratedClass generatedClass = new GeneratedClass(typeSpecCustomizer, className);
-			GeneratedClasses.this.classes.add(generatedClass);
-			return generatedClass;
-		}
+	private record Owner(String featureNamePrefix, String featureName, @Nullable Class<?> target) {
 
 	}
 

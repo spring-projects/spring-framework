@@ -650,7 +650,7 @@ a proxy at the boundary of trust should be configured to remove untrusted forwar
 from the outside. You can also configure the `ForwardedHeaderTransformer` with
 `removeOnly=true`, in which case it removes but does not use the headers.
 
-NOTE: In 5.1 `ForwardedHeaderFilter` was deprecated and superceded by
+NOTE: In 5.1 `ForwardedHeaderFilter` was deprecated and superseded by
 `ForwardedHeaderTransformer` so forwarded headers can be processed earlier, before the
 exchange is created. If the filter is configured anyway, it is taken out of the list of
 filters, and `ForwardedHeaderTransformer` is used instead.
@@ -2279,7 +2279,7 @@ The following example gets the value of the `Accept-Encoding` and `Keep-Alive` h
 		//...
 	}
 ----
-<1> Get the value of the `Accept-Encoging` header.
+<1> Get the value of the `Accept-Encoding` header.
 <2> Get the value of the `Keep-Alive` header.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -2292,7 +2292,7 @@ The following example gets the value of the `Accept-Encoding` and `Keep-Alive` h
 		//...
 	}
 ----
-<1> Get the value of the `Accept-Encoging` header.
+<1> Get the value of the `Accept-Encoding` header.
 <2> Get the value of the `Keep-Alive` header.
 
 Type conversion is applied automatically if the target method parameter type is not
@@ -3410,22 +3410,6 @@ Support for `@ExceptionHandler` methods in Spring WebFlux is provided by the
 for more detail.
 
 
-[[webflux-ann-rest-exceptions]]
-==== REST API exceptions
-[.small]#<<web.adoc#mvc-ann-rest-exceptions, Web MVC>>#
-
-A common requirement for REST services is to include error details in the body of the
-response. The Spring Framework does not automatically do so, because the representation
-of error details in the response body is application-specific. However, a
-`@RestController` can use `@ExceptionHandler` methods with a `ResponseEntity` return
-value to set the status and the body of the response. Such methods can also be declared
-in `@ControllerAdvice` classes to apply them globally.
-
-NOTE: Note that Spring WebFlux does not have an equivalent for the Spring MVC
-`ResponseEntityExceptionHandler`, because WebFlux raises only `ResponseStatusException`
-(or subclasses thereof), and those do not need to be translated to
-an HTTP status code.
-
 
 
 [[webflux-ann-controller-advice]]
@@ -3507,6 +3491,53 @@ include::web-uris.adoc[leveloffset=+2]
 include::webflux-cors.adoc[leveloffset=+1]
 
 
+[[webflux-ann-rest-exceptions]]
+== REST API exceptions
+[.small]#<<web.adoc#mvc-ann-rest-exceptions, Web MVC>>#
+
+A common requirement for REST services is to include error details in the body of the
+response. The Spring Framework provides support for
+https://www.rfc-editor.org/rfc/rfc7807.html[RFC 7807] formatted error responses.
+
+Main abstractions and supporting infrastructure:
+
+- `ProblemDetail` in the `spring-web` module is the core abstraction that represents an
+RFC 7807 problem detail. It helps to enable a range of features in Spring WebFlux for the
+handling and rendering of such responses.
+- `ErrorResponse` is an interface that defines an error response, including status, headers,
+and `ProblemDetail` as its body. All Spring web exceptions implement this interface, and
+thus encapsulate a default opinion on how they map to an RFC 7807 error response.
+- `ErrorResponseException` is a `RuntimeException` that implements `ErrorResponse`, which
+can be raised directly or serve as a base class for other exceptions.
+- {api-spring-framework}/web/reactive/result/method/annotation/ResponseEntityExceptionHandler.html[`ResponseEntityExceptionHandler`]
+provides handling for Spring WebFlux exceptions and for any `ErrorResponseException`.
+Applications can extend this as an <<webflux-ann-controller-advice>> to enable RFC 7807 support.
+
+`ProblemDetail` and `ErrorResponse` are supported as return values from
+`@ExceptionHandler` and `@RequestMapping` controller methods. The `status` property of
+`ProblemDetail` is used to set the response status, while the `instance` property is set
+from the current URL path, if not already set.
+
+The Jackson `Encoder` returns "application/problem+json" as a preferred
+choice to serialize `ProblemDetail` to JSON as part of content negotiation. If no suitable
+media type is found to render a `ProblemDetail` response body, content negotiation falls
+back on "application/problem+json".
+
+Applications can extend `ProblemDetail` with non-standard fields in one of two ways:
+
+. Add properties to the generic `properties` map in `ProblemDetail`. When using
+the Jackson library, this `properties` map is unwrapped and as top level JSON
+properties with the help of `ProblemDetailJacksonMixin`.
+. Create a `ProblemDetail` subclass that defines the extra, non-standard fields.
+Subclasses can use a protected copy constructor in order to re-create an existing
+`ProblemDetail` as a subclass. This can be done centrally from an `@ControllerAdvice`
+such as `ResponseEntityExceptionHandler`.
+
+On the client side, `WebClientResponseException` provides methods that decode the response
+body to some target type. This is useful to decode to a `ProblemDetail`, or to any other
+class, including subclasses of `ProblemDetail`.
+
+
 
 
 [[webflux-web-security]]
@@ -3521,8 +3552,6 @@ reference documentation, including:
 * {doc-spring-security}/reactive/test/index.html[WebFlux Testing Support]
 * {doc-spring-security}/features/exploits/csrf.html#csrf-protection[CSRF protection]
 * {doc-spring-security}/features/exploits/headers.html[Security Response Headers]
-
-include::webflux-view.adoc[leveloffset=+1]
 
 
 
@@ -3696,6 +3725,7 @@ You should serve static resources with a `Cache-Control` and conditional respons
 for optimal performance. See the section on configuring <<webflux-config-static-resources>>.
 
 
+include::webflux-view.adoc[leveloffset=+1]
 
 
 [[webflux-config]]

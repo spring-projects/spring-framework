@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -167,7 +167,7 @@ class DelegatingSmartContextLoaderTests {
 	}
 
 	@Test
-	void loadContextFromLocations() throws Exception {
+	void loadContextFromLocations() {
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
 				loader.loadContext(EMPTY_STRING_ARRAY));
 	}
@@ -180,7 +180,7 @@ class DelegatingSmartContextLoaderTests {
 
 	static class ConfigClassTestCase {
 
-		@Configuration
+		@Configuration(proxyBeanMethods = false)
 		static class Config {
 
 			@Bean

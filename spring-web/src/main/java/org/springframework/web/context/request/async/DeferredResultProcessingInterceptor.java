@@ -115,7 +115,7 @@ public interface DeferredResultProcessingInterceptor {
 	 * subsequent interceptors are not invoked
 	 * @param t the error that occurred while request processing
 	 * @return {@code true} if error handling should continue, or {@code false} if
-	 * other interceptors should by bypassed and not be invoked
+	 * other interceptors should be bypassed and not be invoked
 	 * @throws Exception in case of errors
 	 */
 	default <T> boolean handleError(NativeWebRequest request, DeferredResult<T> deferredResult,

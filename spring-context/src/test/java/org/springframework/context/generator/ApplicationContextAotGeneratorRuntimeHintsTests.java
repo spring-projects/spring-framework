@@ -20,8 +20,6 @@ import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aot.generate.DefaultGenerationContext;
-import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
@@ -110,11 +108,10 @@ class ApplicationContextAotGeneratorRuntimeHintsTests {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void compile(GenericApplicationContext applicationContext, BiConsumer<RuntimeHints, RuntimeHintsInvocations> initializationResult) {
 		ApplicationContextAotGenerator generator = new ApplicationContextAotGenerator();
-		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
-		DefaultGenerationContext generationContext = new TestGenerationContext(generatedFiles);
+		TestGenerationContext generationContext = new TestGenerationContext();
 		generator.generateApplicationContext(applicationContext, generationContext);
 		generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(generatedFiles).compile(compiled -> {
+		TestCompiler.forSystem().withFiles(generationContext.getGeneratedFiles()).compile(compiled -> {
 			ApplicationContextInitializer instance = compiled.getInstance(ApplicationContextInitializer.class);
 			GenericApplicationContext freshContext = new GenericApplicationContext();
 			RuntimeHintsInvocations recordedInvocations = RuntimeHintsRecorder.record(() -> {

@@ -533,7 +533,7 @@ resolve exceptions thrown during request processing. Those exception resolvers a
 customizing the logic to address exceptions. See <<mvc-exceptionhandlers>> for more details.
 
 For HTTP caching support, handlers can use the `checkNotModified` methods of `WebRequest`,
-along with further options for annoated controllers as described in
+along with further options for annotated controllers as described in
 <<mvc-caching-etag-lastmodified,HTTP Caching for Controllers>>.
 
 You can customize individual `DispatcherServlet` instances by adding Servlet
@@ -650,12 +650,13 @@ See <<mvc-config-interceptors>> in the section on MVC configuration for examples
 configure interceptors. You can also register them directly by using setters on individual
 `HandlerMapping` implementations.
 
-Note that `postHandle` is less useful with `@ResponseBody` and `ResponseEntity` methods for
+`postHandle` method is less useful with `@ResponseBody` and `ResponseEntity` methods for
 which the response is written and committed within the `HandlerAdapter` and before
 `postHandle`. That means it is too late to make any changes to the response, such as adding
 an extra header. For such scenarios, you can implement `ResponseBodyAdvice` and either
 declare it as an <<mvc-ann-controller-advice>> bean or configure it directly on
 `RequestMappingHandlerAdapter`.
+
 
 
 
@@ -693,7 +694,7 @@ The following table lists the available `HandlerExceptionResolver` implementatio
 |===
 
 
-[[mvc-excetionhandlers-handling]]
+[[mvc-exceptionhandlers-handling]]
 ==== Chain of Resolvers
 
 You can form an exception resolver chain by declaring multiple `HandlerExceptionResolver`
@@ -2183,7 +2184,7 @@ and others) and is equivalent to `required=false`.
 | Any other argument
 | If a method argument is not matched to any of the earlier values in this table and it is
   a simple type (as determined by
-	{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty],
+	{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty]),
   it is resolved as a `@RequestParam`. Otherwise, it is resolved as a `@ModelAttribute`.
 |===
 
@@ -4016,26 +4017,6 @@ level, <<mvc-exceptionhandlers, HandlerExceptionResolver>> mechanism.
 |===
 
 
-[[mvc-ann-rest-exceptions]]
-==== REST API exceptions
-[.small]#<<web-reactive.adoc#webflux-ann-rest-exceptions, WebFlux>>#
-
-A common requirement for REST services is to include error details in the body of the
-response. The Spring Framework does not automatically do this because the representation
-of error details in the response body is application-specific. However, a
-`@RestController` may use `@ExceptionHandler` methods with a `ResponseEntity` return
-value to set the status and the body of the response. Such methods can also be declared
-in `@ControllerAdvice` classes to apply them globally.
-
-Applications that implement global exception handling with error details in the response
-body should consider extending
-{api-spring-framework}/web/servlet/mvc/method/annotation/ResponseEntityExceptionHandler.html[`ResponseEntityExceptionHandler`],
-which provides handling for exceptions that Spring MVC raises and provides hooks to
-customize the response body. To make use of this, create a subclass of
-`ResponseEntityExceptionHandler`, annotate it with `@ControllerAdvice`, override the
-necessary methods, and declare it as a Spring bean.
-
-
 
 [[mvc-ann-controller-advice]]
 === Controller Advice
@@ -4835,8 +4816,55 @@ Note that you can also set the default timeout value on a `DeferredResult`,
 a `ResponseBodyEmitter`, and an `SseEmitter`. For a `Callable`, you can use
 `WebAsyncTask` to provide a timeout value.
 
+
 include::webmvc-cors.adoc[leveloffset=+1]
 
+
+[[mvc-ann-rest-exceptions]]
+== REST API exceptions
+[.small]#<<web-reactive.adoc#webflux-ann-rest-exceptions, WebFlux>>#
+
+A common requirement for REST services is to include error details in the body of the
+response. The Spring Framework provides support for
+https://www.rfc-editor.org/rfc/rfc7807.html[RFC 7807] formatted error responses.
+
+Main abstractions and supporting infrastructure:
+
+- `ProblemDetail` in the `spring-web` module is the core abstraction that represents an
+RFC 7807 problem detail. It helps to enable a range of features in Spring MVC for the
+handling and rendering of such responses.
+- `ErrorResponse` is an interface that defines an error response, including status, headers,
+and `ProblemDetail` as its body. All Spring web exceptions implement this interface, and
+thus encapsulate a default opinion on how they map to an RFC 7807 error response.
+- `ErrorResponseException` is a `RuntimeException` that implements `ErrorResponse`, which
+can be raised directly or serve as a base class for other exceptions.
+- {api-spring-framework}/web/servlet/mvc/method/annotation/ResponseEntityExceptionHandler.html[`ResponseEntityExceptionHandler`]
+provides handling for Spring MVC exceptions and for any `ErrorResponseException`.
+Applications can extend this as an <<mvc-ann-controller-advice>> to enable RFC 7807 support.
+
+`ProblemDetail` and `ErrorResponse` are supported as return values from
+`@ExceptionHandler` and `@RequestMapping` controller methods. The `status` property of
+`ProblemDetail` is used to set the response status, while the `instance` property is set
+from the current URL path, if not already set.
+
+The Jackson `HttpMessageConverter` returns "application/problem+json" as a preferred
+choice to serialize `ProblemDetail` to JSON as part of content negotiation. If no suitable
+media type is found to render a `ProblemDetail` response body, content negotiation falls
+back on "application/problem+json".
+
+Applications can extend `ProblemDetail` with non-standard fields in one of two ways:
+
+. Add properties to the generic `properties` map in `ProblemDetail`. When using
+the Jackson library, this `properties` map is unwrapped and as top level JSON
+properties with the help of `ProblemDetailJacksonMixin`.
+. Create a `ProblemDetail` subclass that defines the extra, non-standard fields.
+Subclasses can use a protected copy constructor in order to re-create an existing
+`ProblemDetail` as a subclass. This can be done centrally from an `@ControllerAdvice`
+such as `ResponseEntityExceptionHandler`.
+
+On the client side, `WebClientResponseException` and `RestClientResponseException` provide
+methods that decode the response body to some target type. This is useful to decode to a
+`ProblemDetail`, or to any other class, including subclasses of `ProblemDetail`.
 
 
 
@@ -5370,7 +5398,6 @@ the following example shows:
 		public void addInterceptors(InterceptorRegistry registry) {
 			registry.addInterceptor(new LocaleChangeInterceptor());
 			registry.addInterceptor(new ThemeChangeInterceptor()).addPathPatterns("/**").excludePathPatterns("/admin/**");
-			registry.addInterceptor(new SecurityInterceptor()).addPathPatterns("/secure/*");
 		}
 	}
 ----
@@ -5384,7 +5411,6 @@ the following example shows:
 		override fun addInterceptors(registry: InterceptorRegistry) {
 			registry.addInterceptor(LocaleChangeInterceptor())
 			registry.addInterceptor(ThemeChangeInterceptor()).addPathPatterns("/**").excludePathPatterns("/admin/**")
-			registry.addInterceptor(SecurityInterceptor()).addPathPatterns("/secure/*")
 		}
 	}
 ----
@@ -5400,12 +5426,18 @@ The following example shows how to achieve the same configuration in XML:
 			<mvc:exclude-mapping path="/admin/**"/>
 			<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor"/>
 		</mvc:interceptor>
-		<mvc:interceptor>
-			<mvc:mapping path="/secure/*"/>
-			<bean class="org.example.SecurityInterceptor"/>
-		</mvc:interceptor>
 	</mvc:interceptors>
 ----
+
+NOTE: Mapped interceptors are not ideally suited as a security layer due to the potential
+for a mismatch with annotated controller path matching, which can also match trailing
+slashes and path extensions transparently, along with other path matching options. Many
+of these options have been deprecated but the potential for a mismatch remains.
+Generally, we recommend using Spring Security which includes a dedicated
+https://docs.spring.io/spring-security/reference/servlet/integrations/mvc.html#mvc-requestmatcher[MvcRequestMatcher]
+to align with Spring MVC path matching and also has a security firewall that blocks many
+unwanted characters in URL paths.
+
 
 
 

@@ -78,7 +78,7 @@ public @interface TestExecutionListeners {
 	Class<? extends TestExecutionListener>[] listeners() default {};
 
 	/**
-	 * Whether or not {@link #listeners TestExecutionListeners} from superclasses
+	 * Whether {@link #listeners TestExecutionListeners} from superclasses
 	 * and enclosing classes should be <em>inherited</em>.
 	 * <p>The default value is {@code true}, which means that an annotated class
 	 * will <em>inherit</em> the listeners defined by an annotated superclass or
@@ -130,7 +130,7 @@ public @interface TestExecutionListeners {
 
 
 	/**
-	 * Enumeration of <em>modes</em> that dictate whether or not explicitly
+	 * Enumeration of <em>modes</em> that dictate whether explicitly
 	 * declared listeners are merged with the default listeners when
 	 * {@code @TestExecutionListeners} is declared on a class that does
 	 * <strong>not</strong> inherit listeners from a superclass or enclosing

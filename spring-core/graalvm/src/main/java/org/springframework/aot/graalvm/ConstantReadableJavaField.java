@@ -18,6 +18,7 @@ package org.springframework.aot.graalvm;
 
 import java.lang.annotation.Annotation;
 
+import com.oracle.graal.pointsto.infrastructure.WrappedElement;
 import com.oracle.svm.core.meta.ReadableJavaField;
 import jdk.vm.ci.meta.JavaConstant;
 import jdk.vm.ci.meta.JavaType;
@@ -31,7 +32,7 @@ import jdk.vm.ci.meta.ResolvedJavaType;
  * @author Phillip Webb
  * @since 6.0
  */
-class ConstantReadableJavaField implements ReadableJavaField {
+class ConstantReadableJavaField implements ReadableJavaField, WrappedElement {
 
 	private final ResolvedJavaField original;
 
@@ -109,4 +110,8 @@ class ConstantReadableJavaField implements ReadableJavaField {
 		return true;
 	}
 
+	@Override
+	public Object getWrapped() {
+		return this.original;
+	}
 }

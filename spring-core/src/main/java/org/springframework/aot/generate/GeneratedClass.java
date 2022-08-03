@@ -16,15 +16,18 @@
 
 package org.springframework.aot.generate;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.JavaFile;
 import org.springframework.javapoet.TypeSpec;
-import org.springframework.javapoet.TypeSpec.Builder;
+import org.springframework.util.Assert;
 
 /**
- * A generated class is a container for generated methods.
+ * A single generated class.
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
@@ -33,11 +36,13 @@ import org.springframework.javapoet.TypeSpec.Builder;
  */
 public final class GeneratedClass {
 
-	private final Consumer<Builder> typeSpecCustomizer;
-
 	private final ClassName name;
 
 	private final GeneratedMethods methods;
+
+	private final Consumer<TypeSpec.Builder> type;
+
+	private final Map<MethodName, AtomicInteger> methodNameSequenceGenerator = new ConcurrentHashMap<>();
 
 
 	/**
@@ -45,13 +50,34 @@ public final class GeneratedClass {
 	 * constructor is package-private since names should only be generated via a
 	 * {@link GeneratedClasses}.
 	 * @param name the generated name
+	 * @param type a {@link Consumer} used to build the type
 	 */
-	GeneratedClass(Consumer<Builder> typeSpecCustomizer, ClassName name) {
-		this.typeSpecCustomizer = typeSpecCustomizer;
+	GeneratedClass(ClassName name, Consumer<TypeSpec.Builder> type) {
 		this.name = name;
-		this.methods = new GeneratedMethods(new MethodNameGenerator());
+		this.type = type;
+		this.methods = new GeneratedMethods(this::generateSequencedMethodName);
 	}
 
+
+	/**
+	 * Update this instance with a set of reserved method names that should not
+	 * be used for generated methods. Reserved names are often needed when a
+	 * generated class implements a specific interface.
+	 * @param reservedMethodNames the reserved method names
+	 */
+	public void reserveMethodNames(String... reservedMethodNames) {
+		for (String reservedMethodName : reservedMethodNames) {
+			String generatedName = generateSequencedMethodName(MethodName.of(reservedMethodNames));
+			Assert.state(generatedName.equals(reservedMethodName),
+					() -> String.format("Unable to reserve method name '%s'", reservedMethodName));
+		}
+	}
+
+	private String generateSequencedMethodName(MethodName name) {
+		int sequence = this.methodNameSequenceGenerator
+				.computeIfAbsent(name, key -> new AtomicInteger()).getAndIncrement();
+		return (sequence > 0) ? name.toString() + sequence : name.toString();
+	}
 
 	/**
 	 * Return the name of the generated class.
@@ -62,19 +88,28 @@ public final class GeneratedClass {
 	}
 
 	/**
-	 * Return the method generator that can be used for this generated class.
-	 * @return the method generator
+	 * Return generated methods for this instance.
+	 * @return the generated methods
 	 */
-	public MethodGenerator getMethodGenerator() {
+	public GeneratedMethods getMethods() {
 		return this.methods;
 	}
 
 	JavaFile generateJavaFile() {
-		TypeSpec.Builder typeSpecBuilder = TypeSpec.classBuilder(this.name);
-		this.typeSpecCustomizer.accept(typeSpecBuilder);
-		this.methods.doWithMethodSpecs(typeSpecBuilder::addMethod);
-		return JavaFile.builder(this.name.packageName(), typeSpecBuilder.build())
-				.build();
+		TypeSpec.Builder type = getBuilder(this.type);
+		this.methods.doWithMethodSpecs(type::addMethod);
+		return JavaFile.builder(this.name.packageName(), type.build()).build();
+	}
+
+	private TypeSpec.Builder getBuilder(Consumer<TypeSpec.Builder> type) {
+		TypeSpec.Builder builder = TypeSpec.classBuilder(this.name);
+		type.accept(builder);
+		return builder;
+	}
+
+	void assertSameType(Consumer<TypeSpec.Builder> type) {
+		Assert.state(type == this.type || getBuilder(this.type).build().equals(getBuilder(type).build()),
+				"'type' consumer generated different result");
 	}
 
 }

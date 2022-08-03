@@ -24,7 +24,8 @@ import org.assertj.core.api.AssertProvider;
 import org.springframework.aot.agent.RecordedInvocation;
 
 /**
- * A wrapper for {@link RecordedInvocation} that is the starting point for {@code RuntimeHints} AssertJ assertions.
+ * A wrapper for {@link RecordedInvocation} that is the starting point for
+ * {@code RuntimeHints} AssertJ assertions.
  *
  * @author Brian Clozel
  * @since 6.0

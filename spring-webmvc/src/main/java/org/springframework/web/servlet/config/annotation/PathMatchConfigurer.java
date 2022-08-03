@@ -151,9 +151,9 @@ public class PathMatchConfigurer {
 	 * {@code false} and use of this property becomes unnecessary.
 	 */
 	@Deprecated
-	public PathMatchConfigurer setUseSuffixPatternMatch(Boolean suffixPatternMatch) {
+	public PathMatchConfigurer setUseSuffixPatternMatch(@Nullable Boolean suffixPatternMatch) {
 		this.suffixPatternMatch = suffixPatternMatch;
-		this.preferPathMatcher |= suffixPatternMatch;
+		this.preferPathMatcher |= (suffixPatternMatch != null && suffixPatternMatch);
 		return this;
 	}
 
@@ -173,9 +173,9 @@ public class PathMatchConfigurer {
 	 * config options.
 	 */
 	@Deprecated
-	public PathMatchConfigurer setUseRegisteredSuffixPatternMatch(Boolean registeredSuffixPatternMatch) {
+	public PathMatchConfigurer setUseRegisteredSuffixPatternMatch(@Nullable Boolean registeredSuffixPatternMatch) {
 		this.registeredSuffixPatternMatch = registeredSuffixPatternMatch;
-		this.preferPathMatcher |= registeredSuffixPatternMatch;
+		this.preferPathMatcher |= (registeredSuffixPatternMatch != null && registeredSuffixPatternMatch);
 		return this;
 	}
 

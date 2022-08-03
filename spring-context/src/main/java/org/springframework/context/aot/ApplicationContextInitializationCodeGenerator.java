@@ -18,12 +18,12 @@ package org.springframework.context.aot;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import javax.lang.model.element.Modifier;
 
+import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.generate.GeneratedMethods;
-import org.springframework.aot.generate.MethodGenerator;
+import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -44,45 +44,41 @@ import org.springframework.javapoet.TypeSpec;
 class ApplicationContextInitializationCodeGenerator
 		implements BeanFactoryInitializationCode {
 
+	private static final String INITIALIZE_METHOD = "initialize";
+
 	private static final String APPLICATION_CONTEXT_VARIABLE = "applicationContext";
-
-
-	private final GeneratedMethods generatedMethods = new GeneratedMethods();
 
 	private final List<MethodReference> initializers = new ArrayList<>();
 
+	private final GeneratedClass generatedClass;
 
-	@Override
-	public MethodGenerator getMethodGenerator() {
-		return this.generatedMethods;
+
+	ApplicationContextInitializationCodeGenerator(GenerationContext generationContext) {
+		this.generatedClass = generationContext.getGeneratedClasses()
+				.addForFeature("ApplicationContextInitializer", this::generateType);
+		this.generatedClass.reserveMethodNames(INITIALIZE_METHOD);
 	}
 
-	@Override
-	public void addInitializer(MethodReference methodReference) {
-		this.initializers.add(methodReference);
+
+	private void generateType(TypeSpec.Builder type) {
+		type.addJavadoc(
+				"{@link $T} to restore an application context based on previous AOT processing.",
+				ApplicationContextInitializer.class);
+		type.addModifiers(Modifier.PUBLIC);
+		type.addSuperinterface(ParameterizedTypeName.get(
+				ApplicationContextInitializer.class, GenericApplicationContext.class));
+		type.addMethod(generateInitializeMethod());
 	}
 
-	Consumer<TypeSpec.Builder> generateJavaFile() {
-		return builder -> {
-			builder.addJavadoc(
-					"{@link $T} to restore an application context based on previous AOT processing.",
-					ApplicationContextInitializer.class);
-			builder.addModifiers(Modifier.PUBLIC);
-			builder.addSuperinterface(ParameterizedTypeName.get(
-					ApplicationContextInitializer.class, GenericApplicationContext.class));
-			builder.addMethod(generateInitializeMethod());
-			this.generatedMethods.doWithMethodSpecs(builder::addMethod);
-		};
-	}
 
 	private MethodSpec generateInitializeMethod() {
-		MethodSpec.Builder builder = MethodSpec.methodBuilder("initialize");
-		builder.addAnnotation(Override.class);
-		builder.addModifiers(Modifier.PUBLIC);
-		builder.addParameter(GenericApplicationContext.class,
+		MethodSpec.Builder method = MethodSpec.methodBuilder(INITIALIZE_METHOD);
+		method.addAnnotation(Override.class);
+		method.addModifiers(Modifier.PUBLIC);
+		method.addParameter(GenericApplicationContext.class,
 				APPLICATION_CONTEXT_VARIABLE);
-		builder.addCode(generateInitializeCode());
-		return builder.build();
+		method.addCode(generateInitializeCode());
+		return method.build();
 	}
 
 	private CodeBlock generateInitializeCode() {
@@ -93,10 +89,23 @@ class ApplicationContextInitializationCodeGenerator
 		builder.addStatement("$L.setAutowireCandidateResolver(new $T())",
 				BEAN_FACTORY_VARIABLE, ContextAnnotationAutowireCandidateResolver.class);
 		for (MethodReference initializer : this.initializers) {
-			builder.addStatement(
-					initializer.toInvokeCodeBlock(CodeBlock.of(BEAN_FACTORY_VARIABLE)));
+			builder.addStatement(initializer.toInvokeCodeBlock(CodeBlock.of(BEAN_FACTORY_VARIABLE)));
 		}
 		return builder.build();
+	}
+
+	GeneratedClass getGeneratedClass() {
+		return this.generatedClass;
+	}
+
+	@Override
+	public GeneratedMethods getMethods() {
+		return this.generatedClass.getMethods();
+	}
+
+	@Override
+	public void addInitializer(MethodReference methodReference) {
+		this.initializers.add(methodReference);
 	}
 
 }

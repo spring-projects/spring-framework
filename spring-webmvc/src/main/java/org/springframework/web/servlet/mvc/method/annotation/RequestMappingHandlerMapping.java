@@ -82,7 +82,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	private boolean useRegisteredSuffixPatternMatch = false;
 
-	private boolean useTrailingSlashMatch = true;
+	private boolean useTrailingSlashMatch = false;
 
 	private Map<String, Predicate<Class<?>>> pathPrefixes = Collections.emptyMap();
 

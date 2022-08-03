@@ -58,7 +58,7 @@ public interface PublishedEvents {
 		/**
 		 * Further constrain the event type for downstream assertions.
 		 *
-		 * @param subType the sub type
+		 * @param subType the subtype
 		 * @return will never be {@literal null}
 		 */
 		<S extends T> TypedPublishedEvents<S> ofSubType(Class<S> subType);

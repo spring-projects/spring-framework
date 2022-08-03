@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
-import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
@@ -267,9 +266,11 @@ class AnnotationDrivenEventListenerTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void listenableFutureReply() {
 		load(TestEventListener.class, ReplyEventListener.class);
-		SettableListenableFuture<String> future = new SettableListenableFuture<>();
+		org.springframework.util.concurrent.SettableListenableFuture<String> future =
+				new org.springframework.util.concurrent.SettableListenableFuture<>();
 		future.set("dummy");
 		AnotherTestEvent event = new AnotherTestEvent(this, future);
 		ReplyEventListener replyEventListener = this.context.getBean(ReplyEventListener.class);

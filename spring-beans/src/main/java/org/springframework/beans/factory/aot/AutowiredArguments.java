@@ -26,7 +26,7 @@ import org.springframework.util.ClassUtils;
  * @author Phillip Webb
  * @author Stephane Nicoll
  * @since 6.0
- * @see AutowiredInstantiationArgumentsResolver
+ * @see BeanInstanceSupplier
  * @see AutowiredMethodArgumentsResolver
  */
 @FunctionalInterface

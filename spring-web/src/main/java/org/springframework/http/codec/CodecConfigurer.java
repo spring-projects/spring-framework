@@ -44,7 +44,7 @@ import org.springframework.lang.Nullable;
  * <li>Catch-all readers or writers, e.g. String with any media type.
  * </ol>
  *
- * <p>Typed and object readers are further sub-divided and ordered as follows:
+ * <p>Typed and object readers are further subdivided and ordered as follows:
  * <ol>
  * <li>Default HTTP reader and writer registrations.
  * <li>Custom readers and writers.

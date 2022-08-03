@@ -25,8 +25,7 @@ import java.util.Objects;
 import org.springframework.lang.Nullable;
 
 /**
- * A hint that describes the need of a JDK {@link Proxy}, that is an
- * interfaces-based proxy.
+ * A hint that describes the need for a JDK interface-based {@link Proxy}.
  *
  * @author Stephane Nicoll
  * @author Brian Clozel
@@ -145,17 +144,19 @@ public final class JdkProxyHint implements ConditionalHint {
 
 		/**
 		 * Create a {@link JdkProxyHint} based on the state of this builder.
-		 * @return a jdk proxy hint
+		 * @return a JDK proxy hint
 		 */
 		JdkProxyHint build() {
 			return new JdkProxyHint(this);
 		}
 
 		private static List<TypeReference> toTypeReferences(Class<?>... proxiedInterfaces) {
-			List<String> concreteTypes = Arrays.stream(proxiedInterfaces)
-					.filter(candidate -> !candidate.isInterface()).map(Class::getName).toList();
-			if (!concreteTypes.isEmpty()) {
-				throw new IllegalArgumentException("Not an interface: " + concreteTypes);
+			List<String> invalidTypes = Arrays.stream(proxiedInterfaces)
+					.filter(candidate -> !candidate.isInterface() || candidate.isSealed())
+					.map(Class::getName)
+					.toList();
+			if (!invalidTypes.isEmpty()) {
+				throw new IllegalArgumentException("The following must be non-sealed interfaces: " + invalidTypes);
 			}
 			return Arrays.stream(proxiedInterfaces).map(TypeReference::of).toList();
 		}

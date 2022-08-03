@@ -75,6 +75,24 @@ public class RequestMappingReflectiveProcessorTests {
 	}
 
 	@Test
+	void registerReflectiveHintsForMethodWithModelAttribute() throws NoSuchMethodException {
+		Method method = SampleController.class.getDeclaredMethod("postForm", Request.class);
+		processor.registerReflectionHints(hints, method);
+		assertThat(hints.typeHints()).satisfiesExactlyInAnyOrder(
+				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleController.class)),
+				typeHint -> {
+					assertThat(typeHint.getType()).isEqualTo(TypeReference.of(Request.class));
+					assertThat(typeHint.getMemberCategories()).containsExactlyInAnyOrder(
+							MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+							MemberCategory.DECLARED_FIELDS);
+					assertThat(typeHint.methods()).satisfiesExactlyInAnyOrder(
+							hint -> assertThat(hint.getName()).isEqualTo("getMessage"),
+							hint -> assertThat(hint.getName()).isEqualTo("setMessage"));
+				},
+				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(String.class)));
+	}
+
+	@Test
 	void registerReflectiveHintsForMethodWithRestController() throws NoSuchMethodException {
 		Method method = SampleRestController.class.getDeclaredMethod("get");
 		processor.registerReflectionHints(hints, method);
@@ -177,6 +195,10 @@ public class RequestMappingReflectiveProcessorTests {
 		void post(@RequestBody Request request) {
 		}
 
+		@PostMapping
+		void postForm(@ModelAttribute Request request) {
+		}
+
 		@GetMapping
 		@ResponseBody
 		String message() {
@@ -185,10 +207,11 @@ public class RequestMappingReflectiveProcessorTests {
 
 		@GetMapping
 		HttpEntity<Response> getHttpEntity() {
-			return new HttpEntity(new Response("response"));
+			return new HttpEntity<>(new Response("response"));
 		}
 
 		@GetMapping
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		HttpEntity getRawHttpEntity() {
 			return new HttpEntity(new Response("response"));
 		}
@@ -198,6 +221,7 @@ public class RequestMappingReflectiveProcessorTests {
 		}
 
 		@PostMapping
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		void postRawHttpEntity(HttpEntity  entity) {
 		}
 

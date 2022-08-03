@@ -41,7 +41,7 @@ final class CompileWithTargetClassAccessClassLoader extends ClassLoader {
 
 	@Override
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
-		if (name.startsWith("org.junit") || name.startsWith("org.hamcrest")) {
+		if (name.startsWith("org.junit")) {
 			return Class.forName(name, false, this.testClassLoader);
 		}
 		return super.loadClass(name);
@@ -63,6 +63,7 @@ final class CompileWithTargetClassAccessClassLoader extends ClassLoader {
 	}
 
 
+	// Invoked reflectively by DynamicClassLoader.findDefineClassMethod(ClassLoader)
 	Class<?> defineClassWithTargetAccess(String name, byte[] b, int off, int len) {
 		return super.defineClass(name, b, off, len);
 	}

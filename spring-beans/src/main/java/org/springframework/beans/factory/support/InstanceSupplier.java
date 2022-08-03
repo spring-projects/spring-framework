@@ -16,8 +16,10 @@
 
 package org.springframework.beans.factory.support;
 
+import java.lang.reflect.Method;
 import java.util.function.Supplier;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.function.ThrowingBiFunction;
 import org.springframework.util.function.ThrowingSupplier;
@@ -29,6 +31,7 @@ import org.springframework.util.function.ThrowingSupplier;
  * supply the instance.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 6.0
  * @param <T> the type of instance supplied by this supplier
  * @see RegisteredBean
@@ -50,6 +53,17 @@ public interface InstanceSupplier<T> extends ThrowingSupplier<T> {
 	T get(RegisteredBean registeredBean) throws Exception;
 
 	/**
+	 * Return the factory method that this supplier uses to create the
+	 * instance, or {@code null} if it is not known or this supplier uses
+	 * another mean.
+	 * @return the factory method used to create the instance, or {@code null}
+	 */
+	@Nullable
+	default Method getFactoryMethod() {
+		return null;
+	}
+
+	/**
 	 * Return a composed instance supplier that first obtains the instance from
 	 * this supplier, and then applied the {@code after} function to obtain the
 	 * result.
@@ -61,8 +75,19 @@ public interface InstanceSupplier<T> extends ThrowingSupplier<T> {
 	default <V> InstanceSupplier<V> andThen(
 			ThrowingBiFunction<RegisteredBean, ? super T, ? extends V> after) {
 		Assert.notNull(after, "After must not be null");
-		return registeredBean -> after.applyWithException(registeredBean,
-				get(registeredBean));
+		return new InstanceSupplier<V>() {
+
+			@Override
+			public V get(RegisteredBean registeredBean) throws Exception {
+				return after.applyWithException(registeredBean, InstanceSupplier.this.get(registeredBean));
+			}
+
+			@Override
+			public Method getFactoryMethod() {
+				return InstanceSupplier.this.getFactoryMethod();
+			}
+
+		};
 	}
 
 	/**
@@ -81,10 +106,39 @@ public interface InstanceSupplier<T> extends ThrowingSupplier<T> {
 	}
 
 	/**
+	 * Factory method to create an {@link InstanceSupplier} from a
+	 * {@link ThrowingSupplier}.
+	 * @param <T> the type of instance supplied by this supplier
+	 * @param factoryMethod the factory method being used
+	 * @param supplier the source supplier
+	 * @return a new {@link InstanceSupplier}
+	 */
+	static <T> InstanceSupplier<T> using(@Nullable Method factoryMethod, ThrowingSupplier<T> supplier) {
+		Assert.notNull(supplier, "Supplier must not be null");
+		if (supplier instanceof InstanceSupplier<T> instanceSupplier
+				&& instanceSupplier.getFactoryMethod() == factoryMethod) {
+			return instanceSupplier;
+		}
+		return new InstanceSupplier<T>() {
+
+			@Override
+			public T get(RegisteredBean registeredBean) throws Exception {
+				return supplier.getWithException();
+			}
+
+			@Override
+			public Method getFactoryMethod() {
+				return factoryMethod;
+			}
+
+		};
+	}
+
+	/**
 	 * Lambda friendly method that can be used to create a
 	 * {@link InstanceSupplier} and add post processors in a single call. For
 	 * example: {@code
-	 * InstanceSupplier.of(registeredBean -> ...).withPostProcessor(...)}.
+	 * InstanceSupplier.of(registeredBean -> ...).andThen(...)}.
 	 * @param <T> the type of instance supplied by this supplier
 	 * @param instanceSupplier the source instance supplier
 	 * @return a new {@link InstanceSupplier}

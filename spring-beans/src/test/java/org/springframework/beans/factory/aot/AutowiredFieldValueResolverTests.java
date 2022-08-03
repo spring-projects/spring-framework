@@ -62,8 +62,8 @@ class AutowiredFieldValueResolverTests {
 
 	@Test
 	void resolveWhenRegisteredBeanIsNullThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(
-				() -> AutowiredFieldValueResolver.forField("string").resolve(null))
+		assertThatIllegalArgumentException().isThrownBy(() ->
+						AutowiredFieldValueResolver.forField("string").resolve(null))
 				.withMessage("'registeredBean' must not be null");
 	}
 

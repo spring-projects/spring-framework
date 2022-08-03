@@ -358,7 +358,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.ACCEPTED.value());
 		assertThat(new String(response.getContentAsByteArray(), "UTF-8")).isEqualTo("Handled requestBody=[Hello Server]");
 		assertThat(response.getHeader("header")).isEqualTo("headerValue");
-		// set because of @SesstionAttributes
+		// set because of @SessionAttributes
 		assertThat(response.getHeader("Cache-Control")).isEqualTo("no-store");
 	}
 

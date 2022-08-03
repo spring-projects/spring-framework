@@ -119,7 +119,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
 
 	/**
-	 * Indicates whether or not the proxy should be frozen. Overridden from super
+	 * Indicates whether the proxy should be frozen. Overridden from super
 	 * to prevent the configuration from becoming frozen too early.
 	 */
 	private boolean freezeProxy = false;
@@ -145,7 +145,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 
 	/**
-	 * Set whether or not the proxy should be frozen, preventing advice
+	 * Set whether the proxy should be frozen, preventing advice
 	 * from being added to it once it is created.
 	 * <p>Overridden from the super class to prevent the proxy configuration
 	 * from being frozen before the proxy is created.

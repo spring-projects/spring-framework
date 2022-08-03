@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ import org.springframework.util.StringUtils;
  * {@code BootstrapUtils} is a collection of utility methods to assist with
  * bootstrapping the <em>Spring TestContext Framework</em>.
  *
+ * <p>Only intended for internal use.
+ *
  * @author Sam Brannen
  * @author Phillip Webb
  * @since 4.1
@@ -42,7 +44,7 @@ import org.springframework.util.StringUtils;
  * @see BootstrapContext
  * @see TestContextBootstrapper
  */
-abstract class BootstrapUtils {
+public abstract class BootstrapUtils {
 
 	private static final String DEFAULT_BOOTSTRAP_CONTEXT_CLASS_NAME =
 			"org.springframework.test.context.support.DefaultBootstrapContext";
@@ -112,6 +114,27 @@ abstract class BootstrapUtils {
 		catch (Throwable ex) {
 			throw new IllegalStateException("Could not create CacheAwareContextLoaderDelegate [" + className + "]", ex);
 		}
+	}
+
+	/**
+	 * Resolve the {@link TestContextBootstrapper} type for the supplied test class
+	 * using the default {@link BootstrapContext}, instantiate the bootstrapper,
+	 * and provide it a reference to the {@code BootstrapContext}.
+	 * <p>If the {@link BootstrapWith @BootstrapWith} annotation is present on
+	 * the test class, either directly or as a meta-annotation, then its
+	 * {@link BootstrapWith#value value} will be used as the bootstrapper type.
+	 * Otherwise, either the
+	 * {@link org.springframework.test.context.support.DefaultTestContextBootstrapper
+	 * DefaultTestContextBootstrapper} or the
+	 * {@link org.springframework.test.context.web.WebTestContextBootstrapper
+	 * WebTestContextBootstrapper} will be used, depending on the presence of
+	 * {@link org.springframework.test.context.web.WebAppConfiguration @WebAppConfiguration}.
+	 * @param testClass the test class for which the bootstrapper should be created
+	 * @return a fully configured {@code TestContextBootstrapper}
+	 * @since 6.0
+	 */
+	public static TestContextBootstrapper resolveTestContextBootstrapper(Class<?> testClass) {
+		return resolveTestContextBootstrapper(createBootstrapContext(testClass));
 	}
 
 	/**

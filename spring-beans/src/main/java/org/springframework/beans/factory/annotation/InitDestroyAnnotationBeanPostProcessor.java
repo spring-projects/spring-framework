@@ -159,6 +159,7 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 	@Override
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		RootBeanDefinition beanDefinition = registeredBean.getMergedBeanDefinition();
+		beanDefinition.resolveDestroyMethodIfNecessary();
 		LifecycleMetadata metadata = findInjectionMetadata(beanDefinition, registeredBean.getBeanClass());
 		if (!CollectionUtils.isEmpty(metadata.initMethods)) {
 			String[] initMethodNames = safeMerge(beanDefinition.getInitMethodNames(), metadata.initMethods);

@@ -107,14 +107,14 @@ import org.springframework.util.StringUtils;
  * <p><b>Implications on portability:</b>
  *
  * <p>If the specified path is already a file URL (either explicitly, or
- * implicitly because the base {@code ResourceLoader} is a filesystem one,
+ * implicitly because the base {@code ResourceLoader} is a filesystem one),
  * then wildcarding is guaranteed to work in a completely portable fashion.
  *
  * <p>If the specified path is a classpath location, then the resolver must
  * obtain the last non-wildcard path segment URL via a
  * {@code Classloader.getResource()} call. Since this is just a
  * node of the path (not the file at the end) it is actually undefined
- * (in the ClassLoader Javadocs) exactly what sort of a URL is returned in
+ * (in the ClassLoader Javadocs) exactly what sort of URL is returned in
  * this case. In practice, it is usually a {@code java.io.File} representing
  * the directory, where the classpath resource resolves to a filesystem
  * location, or a jar URL of some sort, where the classpath resource resolves

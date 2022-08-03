@@ -278,19 +278,19 @@ public class ServiceLocatorFactoryBeanTests {
 	}
 
 
-	public static interface TestServiceLocator {
+	public interface TestServiceLocator {
 
 		TestService getTestService();
 	}
 
 
-	public static interface TestServiceLocator2 {
+	public interface TestServiceLocator2 {
 
 		TestService getTestService(String id) throws CustomServiceLocatorException2;
 	}
 
 
-	public static interface TestServiceLocator3 {
+	public interface TestServiceLocator3 {
 
 		TestService getTestService();
 
@@ -302,13 +302,13 @@ public class ServiceLocatorFactoryBeanTests {
 	}
 
 
-	public static interface TestService2Locator {
+	public interface TestService2Locator {
 
 		TestService2 getTestService() throws CustomServiceLocatorException3;
 	}
 
 
-	public static interface ServiceLocatorInterfaceWithExtraNonCompliantMethod {
+	public interface ServiceLocatorInterfaceWithExtraNonCompliantMethod {
 
 		TestService2 getTestService();
 

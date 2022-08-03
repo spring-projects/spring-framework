@@ -74,7 +74,7 @@ public class ModelAndViewContainer {
 
 
 	/**
-	 * By default the content of the "default" model is used both during
+	 * By default, the content of the "default" model is used both during
 	 * rendering and redirect scenarios. Alternatively controller methods
 	 * can declare an argument of type {@code RedirectAttributes} and use
 	 * it to provide attributes to prepare the redirect URL.
@@ -115,7 +115,7 @@ public class ModelAndViewContainer {
 	}
 
 	/**
-	 * Return the View object, or {@code null} if we using a view name
+	 * Return the View object, or {@code null} if we are using a view name
 	 * to be resolved by the DispatcherServlet via a ViewResolver.
 	 */
 	@Nullable

@@ -49,7 +49,7 @@ final class BitsCronField extends CronField {
 	}
 
 	/**
-	 * Return a {@code BitsCronField} enabled for 0 nano seconds.
+	 * Return a {@code BitsCronField} enabled for 0 nanoseconds.
 	 */
 	public static BitsCronField zeroNanos() {
 		if (zeroNanos == null) {
@@ -75,7 +75,7 @@ final class BitsCronField extends CronField {
 	}
 
 	/**
-	 * Parse the given value into a hours {@code BitsCronField}, the third entry of a cron expression.
+	 * Parse the given value into an hours {@code BitsCronField}, the third entry of a cron expression.
 	 */
 	public static BitsCronField parseHours(String value) {
 		return BitsCronField.parseField(value, Type.HOUR);

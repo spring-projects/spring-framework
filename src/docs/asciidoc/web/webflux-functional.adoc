@@ -145,7 +145,7 @@ val string = request.awaitBody<String>()
 
 
 The following example extracts the body to a `Flux<Person>` (or a `Flow<Person>` in Kotlin),
-where `Person` objects are decoded from someserialized form, such as JSON or XML:
+where `Person` objects are decoded from some serialized form, such as JSON or XML:
 
 [source,java,role="primary"]
 .Java

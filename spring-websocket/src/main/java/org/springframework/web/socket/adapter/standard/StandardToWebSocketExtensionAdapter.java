@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.web.socket.WebSocketExtension;
 
 /**
- * A sub-class of {@link org.springframework.web.socket.WebSocketExtension} that
- * can be constructed from an {@link jakarta.websocket.Extension}.
+ * A subclass of {@link WebSocketExtension} that can be constructed from a
+ * {@link jakarta.websocket.Extension}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

@@ -80,7 +80,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 	 * Loads the schema URL &rarr; schema file location mappings using the default
 	 * mapping file pattern "META-INF/spring.schemas".
 	 * @param classLoader the ClassLoader to use for loading
-	 * (can be {@code null}) to use the default ClassLoader)
+	 * (can be {@code null} to use the default ClassLoader)
 	 * @see PropertiesLoaderUtils#loadAllProperties(String, ClassLoader)
 	 */
 	public PluggableSchemaResolver(@Nullable ClassLoader classLoader) {
@@ -92,7 +92,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 	 * Loads the schema URL &rarr; schema file location mappings using the given
 	 * mapping file pattern.
 	 * @param classLoader the ClassLoader to use for loading
-	 * (can be {@code null}) to use the default ClassLoader)
+	 * (can be {@code null} to use the default ClassLoader)
 	 * @param schemaMappingsLocation the location of the file that defines schema mappings
 	 * (must not be empty)
 	 * @see PropertiesLoaderUtils#loadAllProperties(String, ClassLoader)

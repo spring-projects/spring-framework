@@ -113,7 +113,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	/** If this pattern has no trailing slash, allow candidates to include one and still match successfully. */
 	private final boolean matchOptionalTrailingSeparator;
 
-	/** Will this match candidates in a case sensitive way? (case sensitivity  at parse time). */
+	/** Will this match candidates in a case-sensitive way? (case sensitivity  at parse time). */
 	private final boolean caseSensitive;
 
 	/** First path element in the parsed chain of path elements for this pattern. */

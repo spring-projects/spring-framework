@@ -40,7 +40,7 @@ import org.springframework.web.util.WebUtils;
  * {@link jakarta.servlet.DispatcherType#ASYNC ASYNC} dispatches that occur in
  * separate threads. A filter can be configured in {@code web.xml} whether it
  * should be involved in async dispatches. However, in some cases servlet
- * containers assume different default configuration. Therefore sub-classes can
+ * containers assume different default configuration. Therefore, subclasses can
  * override the method {@link #shouldNotFilterAsyncDispatch()} to declare
  * statically if they should indeed be invoked, <em>once</em>, during both types
  * of dispatches in order to provide thread initialization, logging, security,

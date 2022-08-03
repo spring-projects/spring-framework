@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.asm.Attribute;
 import org.springframework.asm.Type;
 
 /**
@@ -438,7 +437,7 @@ public class ReflectUtils {
 		return defineClass(className, b, loader, protectionDomain, null);
 	}
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings({"deprecation", "serial"})
 	public static Class defineClass(String className, byte[] b, ClassLoader loader,
 			ProtectionDomain protectionDomain, Class<?> contextClass) throws Exception {
 
@@ -515,6 +514,16 @@ public class ReflectUtils {
 				MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(contextClass, MethodHandles.lookup());
 				c = lookup.defineClass(b);
 			}
+			catch (IllegalAccessException ex) {
+				throw new CodeGenerationException(ex) {
+					@Override
+					public String getMessage() {
+						return "ClassLoader mismatch for [" + contextClass.getName() +
+								"]: JVM should be started with --add-opens=java.base/java.lang=ALL-UNNAMED " +
+								"for ClassLoader.defineClass to be accessible on " + loader.getClass().getName();
+					}
+				};
+			}
 			catch (Throwable ex) {
 				throw new CodeGenerationException(ex);
 			}
@@ -561,10 +570,6 @@ public class ReflectUtils {
 
 			public Type[] getExceptionTypes() {
 				return ReflectUtils.getExceptionTypes(member);
-			}
-
-			public Attribute getAttribute() {
-				return null;
 			}
 		};
 	}

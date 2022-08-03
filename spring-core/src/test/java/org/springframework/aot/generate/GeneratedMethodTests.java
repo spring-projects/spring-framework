@@ -16,12 +16,13 @@
 
 package org.springframework.aot.generate;
 
-import javax.lang.model.element.Modifier;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.javapoet.MethodSpec;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
@@ -31,42 +32,27 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  */
 class GeneratedMethodTests {
 
+	private static final Consumer<MethodSpec.Builder> methodSpecCustomizer = method -> {};
+
 	private static final String NAME = "spring";
 
 	@Test
 	void getNameReturnsName() {
-		GeneratedMethod method = new GeneratedMethod(NAME);
-		assertThat(method.getName()).isSameAs(NAME);
+		GeneratedMethod generatedMethod = new GeneratedMethod(NAME, methodSpecCustomizer);
+		assertThat(generatedMethod.getName()).isSameAs(NAME);
 	}
 
 	@Test
-	void getSpecReturnsSpec() {
-		GeneratedMethod method = new GeneratedMethod(NAME);
-		method.using(builder -> builder.addJavadoc("Test"));
-		assertThat(method.getSpec().javadoc.toString()).contains("Test");
+	void generateMethodSpecReturnsMethodSpec() {
+		GeneratedMethod generatedMethod = new GeneratedMethod(NAME, method -> method.addJavadoc("Test"));
+		assertThat(generatedMethod.getMethodSpec().javadoc).asString().contains("Test");
 	}
 
 	@Test
-	void getSpecReturnsSpecWhenNoSpecDefinedThrowsException() {
-		GeneratedMethod method = new GeneratedMethod(NAME);
-		assertThatIllegalStateException().isThrownBy(() -> method.getSpec())
-				.withMessage("Method 'spring' has no method spec defined");
-	}
-
-	@Test
-	void usingAddsSpec() {
-		GeneratedMethod method = new GeneratedMethod(NAME);
-		method.using(builder -> builder.addModifiers(Modifier.PUBLIC));
-		assertThat(method.getSpec().toString())
-				.isEqualToIgnoringNewLines("public void spring() {}");
-	}
-
-	@Test
-	void usingWhenBuilderChanagesNameThrowsException() {
-		GeneratedMethod method = new GeneratedMethod(NAME);
-		assertThatIllegalArgumentException()
-				.isThrownBy(() -> method.using(builder -> builder.setName("badname")))
-				.withMessage("'spec' must use the generated name \"spring\"");
+	void generateMethodSpecWhenMethodNameIsChangedThrowsException() {
+		assertThatIllegalStateException().isThrownBy(() ->
+				new GeneratedMethod(NAME, method -> method.setName("badname")).getMethodSpec())
+			.withMessage("'method' consumer must not change the generated method name");
 	}
 
 }

@@ -33,21 +33,21 @@ import javax.lang.model.element.Modifier;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aot.generate.GeneratedMethods;
+import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.test.generator.compile.Compiled;
 import org.springframework.aot.test.generator.compile.TestCompiler;
-import org.springframework.aot.test.generator.file.SourceFile;
 import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.RuntimeBeanNameReference;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedSet;
+import org.springframework.beans.testfixture.beans.factory.aot.DeferredTypeBuilder;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.testfixture.aot.generate.TestGenerationContext;
 import org.springframework.javapoet.CodeBlock;
-import org.springframework.javapoet.JavaFile;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
-import org.springframework.javapoet.TypeSpec;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -61,28 +61,22 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class BeanDefinitionPropertyValueCodeGeneratorTests {
 
-	private GeneratedMethods generatedMethods = new GeneratedMethods();
-
-	private BeanDefinitionPropertyValueCodeGenerator instance = new BeanDefinitionPropertyValueCodeGenerator(
-			generatedMethods);
-
 	private void compile(Object value, BiConsumer<Object, Compiled> result) {
-		CodeBlock code = instance.generateCode(value);
-		JavaFile javaFile = createJavaFile(code);
-		TestCompiler.forSystem().compile(SourceFile.of(javaFile::writeTo),
-				compiled -> result.accept(compiled.getInstance(Supplier.class).get(),
-						compiled));
-	}
-
-	private JavaFile createJavaFile(CodeBlock code) {
-		TypeSpec.Builder builder = TypeSpec.classBuilder("InstanceSupplier");
-		builder.addModifiers(Modifier.PUBLIC);
-		builder.addSuperinterface(
-				ParameterizedTypeName.get(Supplier.class, Object.class));
-		builder.addMethod(MethodSpec.methodBuilder("get").addModifiers(Modifier.PUBLIC)
-				.returns(Object.class).addStatement("return $L", code).build());
-		generatedMethods.doWithMethodSpecs(builder::addMethod);
-		return JavaFile.builder("com.example", builder.build()).build();
+		TestGenerationContext generationContext = new TestGenerationContext();
+		DeferredTypeBuilder typeBuilder = new DeferredTypeBuilder();
+		GeneratedClass generatedClass = generationContext.getGeneratedClasses().addForFeature("TestCode", typeBuilder);
+		CodeBlock generatedCode = new BeanDefinitionPropertyValueCodeGenerator(
+				generatedClass.getMethods()).generateCode(value);
+		typeBuilder.set(type -> {
+			type.addModifiers(Modifier.PUBLIC);
+			type.addSuperinterface(
+					ParameterizedTypeName.get(Supplier.class, Object.class));
+			type.addMethod(MethodSpec.methodBuilder("get").addModifiers(Modifier.PUBLIC)
+					.returns(Object.class).addStatement("return $L", generatedCode).build());
+		});
+		generationContext.writeGeneratedContent();
+		TestCompiler.forSystem().withFiles(generationContext.getGeneratedFiles()).compile(compiled ->
+				result.accept(compiled.getInstance(Supplier.class).get(), compiled));
 	}
 
 	@Nested
@@ -469,10 +463,31 @@ class BeanDefinitionPropertyValueCodeGeneratorTests {
 	class BeanReferenceTests {
 
 		@Test
-		void generatedWhenBeanReference() {
-			BeanReference beanReference = new RuntimeBeanNameReference("test");
-			compile(beanReference, (instance, compiler) ->
-					assertThat(((BeanReference) instance).getBeanName()).isEqualTo(beanReference.getBeanName()));
+		void generatedWhenBeanNameReference() {
+			RuntimeBeanNameReference beanReference = new RuntimeBeanNameReference("test");
+			compile(beanReference, (instance, compiler) -> {
+				RuntimeBeanReference actual = (RuntimeBeanReference) instance;
+				assertThat(actual.getBeanName()).isEqualTo(beanReference.getBeanName());
+			});
+		}
+
+		@Test
+		void generatedWhenBeanReferenceByName() {
+			RuntimeBeanReference beanReference = new RuntimeBeanReference("test");
+			compile(beanReference, (instance, compiler) -> {
+				RuntimeBeanReference actual = (RuntimeBeanReference) instance;
+				assertThat(actual.getBeanName()).isEqualTo(beanReference.getBeanName());
+				assertThat(actual.getBeanType()).isEqualTo(beanReference.getBeanType());
+			});
+		}
+
+		@Test
+		void generatedWhenBeanReferenceByType() {
+			BeanReference beanReference = new RuntimeBeanReference(String.class);
+			compile(beanReference, (instance, compiler) -> {
+				RuntimeBeanReference actual = (RuntimeBeanReference) instance;
+				assertThat(actual.getBeanType()).isEqualTo(String.class);
+			});
 		}
 
 	}

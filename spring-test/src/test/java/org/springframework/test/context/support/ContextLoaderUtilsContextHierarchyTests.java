@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextHierarchy;
@@ -365,7 +366,7 @@ class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConfigurati
 	@ContextConfiguration("foo.xml")
 	@ContextHierarchy(@ContextConfiguration("bar.xml"))
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface ContextConfigurationAndContextHierarchyOnSingleMeta {
+	private @interface ContextConfigurationAndContextHierarchyOnSingleMeta {
 	}
 
 	@ContextConfigurationAndContextHierarchyOnSingleMeta
@@ -542,17 +543,17 @@ class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConfigurati
 
 	@ContextHierarchy(@ContextConfiguration("A.xml"))
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface ContextHierarchyA {
+	private @interface ContextHierarchyA {
 	}
 
 	@ContextHierarchy(@ContextConfiguration({ "B-one.xml", "B-two.xml" }))
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface ContextHierarchyB {
+	private @interface ContextHierarchyB {
 	}
 
 	@ContextHierarchy(@ContextConfiguration("C.xml"))
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface ContextHierarchyC {
+	private @interface ContextHierarchyC {
 	}
 
 	@ContextHierarchyA
@@ -577,8 +578,9 @@ class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConfigurati
 
 	@ContextConfiguration
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface ContextConfigWithOverrides {
+	private @interface ContextConfigWithOverrides {
 
+		@AliasFor(annotation = ContextConfiguration.class)
 		String[] locations() default "A.xml";
 	}
 

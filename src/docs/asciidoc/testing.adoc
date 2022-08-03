@@ -498,7 +498,7 @@ The following example shows such a case:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@ContextConfiguration(initializers = CustomContextIntializer.class) // <1>
+	@ContextConfiguration(initializers = CustomContextInitializer.class) // <1>
 	class ContextInitializerTests {
 		// class body...
 	}
@@ -508,7 +508,7 @@ The following example shows such a case:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@ContextConfiguration(initializers = [CustomContextIntializer::class]) // <1>
+	@ContextConfiguration(initializers = [CustomContextInitializer::class]) // <1>
 	class ContextInitializerTests {
 		// class body...
 	}
@@ -2522,7 +2522,7 @@ listeners. The following listing demonstrates this style of configuration:
 	}
 ----
 
-[source,java,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	@ContextConfiguration
@@ -6963,7 +6963,7 @@ do they involve any of the supporting `@InitBinder`, `@ModelAttribute`, or
 
 The Spring MVC Test framework, also known as `MockMvc`, aims to provide more complete
 testing for Spring MVC controllers without a running server. It does that by invoking
-the `DispacherServlet` and passing
+the `DispatcherServlet` and passing
 <<mock-objects-servlet, "`mock`" implementations of the Servlet API>> from the
 `spring-test` module which replicates the full Spring MVC request handling without
 a running server.
@@ -7366,7 +7366,7 @@ no other expectations will be asserted.
 	import org.springframework.test.web.servlet.get
 
 	mockMvc.get("/accounts/1").andExpect {
-		status().isOk()
+		status { isOk() }
 	}
 ----
 
@@ -7414,7 +7414,7 @@ The following test asserts that binding or validation failed:
 	import org.springframework.test.web.servlet.post
 
 	mockMvc.post("/persons").andExpect {
-		status().isOk()
+		status { isOk() }
 		model {
 			attributeHasErrors("person")
 		}
@@ -7442,7 +7442,7 @@ request. You can do so as follows, where `print()` is a static import from
 	mockMvc.post("/persons").andDo {
 			print()
 		}.andExpect {
-			status().isOk()
+			status { isOk() }
 			model {
 				attributeHasErrors("person")
 			}
@@ -7472,7 +7472,7 @@ other expectations, as the following example shows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	var mvcResult = mockMvc.post("/persons").andExpect { status().isOk() }.andReturn()
+	var mvcResult = mockMvc.post("/persons").andExpect { status { isOk() } }.andReturn()
 	// ...
 ----
 
@@ -7592,7 +7592,7 @@ or reactive type such as Reactor `Mono`:
 	@Test
 	fun test() {
 		var mvcResult = mockMvc.get("/path").andExpect {
-			status().isOk() // <1>
+			status { isOk() } // <1>
 			request { asyncStarted() } // <2>
 			// TODO Remove unused generic parameter
 			request { asyncResult<Nothing>("body") } // <3>
@@ -7601,7 +7601,7 @@ or reactive type such as Reactor `Mono`:
 
 		mockMvc.perform(asyncDispatch(mvcResult)) // <4>
 				.andExpect {
-					status().isOk() // <5>
+					status { isOk() } // <5>
 					content().string("body")
 				}
 	}

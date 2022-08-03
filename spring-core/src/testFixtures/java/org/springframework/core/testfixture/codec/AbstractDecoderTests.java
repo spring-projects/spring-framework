@@ -85,7 +85,7 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 	// Flux
 
 	/**
-	 * Helper methods that tests for a variety of {@link Flux} decoding scenarios. This methods
+	 * Helper method that tests for a variety of {@link Flux} decoding scenarios. This method
 	 * invokes:
 	 * <ul>
 	 *     <li>{@link #testDecode(Publisher, ResolvableType, Consumer, MimeType, Map)}</li>
@@ -106,7 +106,7 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 	}
 
 	/**
-	 * Helper methods that tests for a variety of {@link Flux} decoding scenarios. This methods
+	 * Helper method that tests for a variety of {@link Flux} decoding scenarios. This method
 	 * invokes:
 	 * <ul>
 	 *     <li>{@link #testDecode(Publisher, ResolvableType, Consumer, MimeType, Map)}</li>
@@ -249,7 +249,7 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 	// Mono
 
 	/**
-	 * Helper methods that tests for a variety of {@link Mono} decoding scenarios. This methods
+	 * Helper method that tests for a variety of {@link Mono} decoding scenarios. This method
 	 * invokes:
 	 * <ul>
 	 *     <li>{@link #testDecodeToMono(Publisher, ResolvableType, Consumer, MimeType, Map)}</li>
@@ -270,7 +270,7 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 	}
 
 	/**
-	 * Helper methods that tests for a variety of {@link Mono} decoding scenarios. This methods
+	 * Helper method that tests for a variety of {@link Mono} decoding scenarios. This method
 	 * invokes:
 	 * <ul>
 	 *     <li>{@link #testDecodeToMono(Publisher, ResolvableType, Consumer, MimeType, Map)}</li>

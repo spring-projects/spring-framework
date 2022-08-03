@@ -167,7 +167,7 @@ public class Bindings implements Iterable<Bindings.Binding> {
 
 		/**
 		 * Return whether the binding is empty.
-		 * @return {@code true} if this is is a {@code NULL} binding
+		 * @return {@code true} if this is a {@code NULL} binding
 		 */
 		public boolean isNull() {
 			return !hasValue();

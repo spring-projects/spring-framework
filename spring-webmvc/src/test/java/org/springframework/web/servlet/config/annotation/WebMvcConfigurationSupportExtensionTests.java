@@ -94,7 +94,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_XML;
 
 /**
- * A test fixture with a sub-class of {@link WebMvcConfigurationSupport} that also
+ * A test fixture with a subclass of {@link WebMvcConfigurationSupport} that also
  * implements the various {@link WebMvcConfigurer} extension points.
  *
  * The former doesn't implement the latter but the two must have compatible

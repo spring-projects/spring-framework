@@ -105,7 +105,7 @@ public final class AutowiredMethodArgumentsResolver extends AutowiredElementReso
 	}
 
 	/**
-	 * Return a new {@link AutowiredInstantiationArgumentsResolver} instance
+	 * Return a new {@link AutowiredMethodArgumentsResolver} instance
 	 * that uses direct bean name injection shortcuts for specific parameters.
 	 * @param beanNames the bean names to use as shortcuts (aligned with the
 	 * method parameters)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,6 @@ import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
-import org.springframework.util.concurrent.ListenableFutureTask;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
@@ -535,21 +534,22 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 	@Controller
 	@MessageMapping("listenable-future")
+	@SuppressWarnings("deprecation")
 	private static class ListenableFutureController {
 
-		private ListenableFutureTask<String> future;
+		private org.springframework.util.concurrent.ListenableFutureTask<String> future;
 
 		private boolean exceptionCaught = false;
 
 		@MessageMapping("success")
-		public ListenableFutureTask<String> handleListenableFuture() {
-			this.future = new ListenableFutureTask<>(() -> "foo");
+		public org.springframework.util.concurrent.ListenableFutureTask<String> handleListenableFuture() {
+			this.future = new org.springframework.util.concurrent.ListenableFutureTask<>(() -> "foo");
 			return this.future;
 		}
 
 		@MessageMapping("failure")
-		public ListenableFutureTask<String> handleListenableFutureException() {
-			this.future = new ListenableFutureTask<>(() -> {
+		public org.springframework.util.concurrent.ListenableFutureTask<String> handleListenableFutureException() {
+			this.future = new org.springframework.util.concurrent.ListenableFutureTask<>(() -> {
 				throw new IllegalStateException();
 			});
 			return this.future;

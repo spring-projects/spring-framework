@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextLoader;
@@ -85,37 +84,6 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	 */
 	protected abstract SmartContextLoader getAnnotationConfigLoader();
 
-
-	// ContextLoader
-
-	/**
-	 * {@code AbstractDelegatingSmartContextLoader} does not support the
-	 * {@link ContextLoader#processLocations(Class, String...)} method. Call
-	 * {@link #processContextConfiguration(ContextConfigurationAttributes)} instead.
-	 * @throws UnsupportedOperationException in this implementation
-	 */
-	@Override
-	public final String[] processLocations(Class<?> clazz, @Nullable String... locations) {
-		throw new UnsupportedOperationException(
-				"DelegatingSmartContextLoaders do not support the ContextLoader SPI. " +
-						"Call processContextConfiguration(ContextConfigurationAttributes) instead.");
-	}
-
-	/**
-	 * {@code AbstractDelegatingSmartContextLoader} does not support the
-	 * {@link ContextLoader#loadContext(String...) } method. Call
-	 * {@link #loadContext(MergedContextConfiguration)} instead.
-	 * @throws UnsupportedOperationException in this implementation
-	 */
-	@Override
-	public final ApplicationContext loadContext(String... locations) throws Exception {
-		throw new UnsupportedOperationException(
-				"DelegatingSmartContextLoaders do not support the ContextLoader SPI. " +
-						"Call loadContext(MergedContextConfiguration) instead.");
-	}
-
-
-	// SmartContextLoader
 
 	/**
 	 * Delegates to candidate {@code SmartContextLoaders} to process the supplied

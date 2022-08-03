@@ -43,7 +43,7 @@ public class MethodInvokingFactoryBeanTests {
 	@Test
 	public void testParameterValidation() throws Exception {
 
-		// assert that only static OR non static are set, but not both or none
+		// assert that only static OR non-static are set, but not both or none
 		MethodInvokingFactoryBean mcfb = new MethodInvokingFactoryBean();
 		assertThatIllegalArgumentException().isThrownBy(mcfb::afterPropertiesSet);
 

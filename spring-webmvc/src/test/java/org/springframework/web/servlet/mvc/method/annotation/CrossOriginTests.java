@@ -30,6 +30,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.PropertiesPropertySource;
@@ -550,8 +551,10 @@ class CrossOriginTests {
 	@CrossOrigin
 	private @interface ComposedCrossOrigin {
 
+		@AliasFor(annotation = CrossOrigin.class)
 		String[] origins() default {};
 
+		@AliasFor(annotation = CrossOrigin.class)
 		String allowCredentials() default "";
 	}
 
@@ -563,8 +566,6 @@ class CrossOriginTests {
 		@RequestMapping(path = "/foo", method = RequestMethod.GET)
 		public void foo() {
 		}
-
-
 	}
 
 
@@ -619,6 +620,11 @@ class CrossOriginTests {
 				return requestPath.pathWithinApplication().value();
 			}
 			return super.initLookupPath(request);
+		}
+
+		@Override
+		public String toString() {
+			return "PatternParser = " + (getPatternParser() != null ? getPatternParser().getClass().getSimpleName() : null) ;
 		}
 	}
 

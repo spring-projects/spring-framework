@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 
@@ -55,7 +56,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -135,14 +135,14 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 	@Override
 	protected void connectInternal(TransportRequest request, WebSocketHandler handler, URI receiveUrl,
 			HttpHeaders handshakeHeaders, XhrClientSockJsSession session,
-			SettableListenableFuture<WebSocketSession> connectFuture) {
+			CompletableFuture<WebSocketSession> connectFuture) {
 
 		executeReceiveRequest(request, receiveUrl, handshakeHeaders, session, connectFuture);
 	}
 
 	private void executeReceiveRequest(final TransportRequest transportRequest,
 			final URI url, final HttpHeaders headers, final XhrClientSockJsSession session,
-			final SettableListenableFuture<WebSocketSession> connectFuture) {
+			final CompletableFuture<WebSocketSession> connectFuture) {
 
 		if (logger.isTraceEnabled()) {
 			logger.trace("Starting XHR receive request for " + url);
@@ -180,7 +180,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 
 	private ClientCallback<ClientExchange> createReceiveCallback(final TransportRequest transportRequest,
 			final URI url, final HttpHeaders headers, final XhrClientSockJsSession sockJsSession,
-			final SettableListenableFuture<WebSocketSession> connectFuture) {
+			final CompletableFuture<WebSocketSession> connectFuture) {
 
 		return new ClientCallback<>() {
 			@Override
@@ -231,7 +231,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 			}
 
 			private void onFailure(Throwable failure) {
-				if (connectFuture.setException(failure)) {
+				if (connectFuture.completeExceptionally(failure)) {
 					return;
 				}
 				if (sockJsSession.isDisconnected()) {
@@ -374,13 +374,13 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 
 		private final XhrClientSockJsSession session;
 
-		private final SettableListenableFuture<WebSocketSession> connectFuture;
+		private final CompletableFuture<WebSocketSession> connectFuture;
 
 		private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
 		public SockJsResponseListener(TransportRequest request, ClientConnection connection, URI url,
 				HttpHeaders headers, XhrClientSockJsSession sockJsSession,
-				SettableListenableFuture<WebSocketSession> connectFuture) {
+				CompletableFuture<WebSocketSession> connectFuture) {
 
 			this.request = request;
 			this.connection = connection;
@@ -462,7 +462,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 
 		public void onFailure(Throwable failure) {
 			IoUtils.safeClose(this.connection);
-			if (this.connectFuture.setException(failure)) {
+			if (this.connectFuture.completeExceptionally(failure)) {
 				return;
 			}
 			if (this.session.isDisconnected()) {

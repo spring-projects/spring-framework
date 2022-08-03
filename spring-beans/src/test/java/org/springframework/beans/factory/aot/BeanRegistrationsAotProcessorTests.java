@@ -35,7 +35,7 @@ class BeanRegistrationsAotProcessorTests {
 
 	@Test
 	void beanRegistrationsAotProcessorIsRegistered() {
-		assertThat(new AotFactoriesLoader(new DefaultListableBeanFactory())
+		assertThat(AotServices.factoriesAndBeans(new DefaultListableBeanFactory())
 				.load(BeanFactoryInitializationAotProcessor.class))
 				.anyMatch(BeanRegistrationsAotProcessor.class::isInstance);
 	}

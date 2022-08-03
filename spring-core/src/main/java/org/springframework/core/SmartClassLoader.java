@@ -26,7 +26,7 @@ import org.springframework.lang.Nullable;
  * Spring's CGLIB proxy factory for making a caching decision.
  *
  * <p>If a ClassLoader does <i>not</i> implement this interface,
- * then all of the classes obtained from it should be considered
+ * then all the classes obtained from it should be considered
  * as not reloadable (i.e. cacheable).
  *
  * @author Juergen Hoeller

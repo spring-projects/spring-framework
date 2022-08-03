@@ -41,9 +41,9 @@ class ConstantFieldFeature implements Feature {
 		DebugContext debug = access.getDebugContext();
 		try (DebugContext.Scope scope = debug.scope("ConstantFieldFeature.duringSetup")) {
 			debug.log("Installing constant field substitution processor : " + scope);
-			ClassLoader applicationClassLoader = access.getApplicationClassLoader();
+			ClassLoader classLoader = ConstantFieldFeature.class.getClassLoader();
 			ConstantFieldSubstitutionProcessor substitutionProcessor =
-					new ConstantFieldSubstitutionProcessor(debug, applicationClassLoader);
+					new ConstantFieldSubstitutionProcessor(debug, classLoader);
 			access.registerSubstitutionProcessor(substitutionProcessor);
 		}
 	}

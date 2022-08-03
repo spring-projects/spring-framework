@@ -16,11 +16,8 @@
 
 package org.springframework.aot.hint.support;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
@@ -54,6 +51,15 @@ class RuntimeHintsUtilsTests {
 	}
 
 	@Test
+	void registerComposableAnnotationType() {
+		RuntimeHintsUtils.registerComposableAnnotation(this.hints, SampleInvoker.class);
+		assertThat(this.hints.reflection().typeHints()).singleElement()
+				.satisfies(annotationHint(SampleInvoker.class));
+		assertThat(this.hints.proxies().jdkProxies()).singleElement()
+				.satisfies(annotationProxy(SampleInvoker.class));
+	}
+
+	@Test
 	void registerAnnotationTypeWithLocalUseOfAliasForRegistersProxy() {
 		RuntimeHintsUtils.registerAnnotation(this.hints, LocalMapping.class);
 		assertThat(this.hints.reflection().typeHints()).singleElement()
@@ -63,13 +69,15 @@ class RuntimeHintsUtilsTests {
 	}
 
 	@Test
-	void registerAnnotationTypeProxyRegistersJdkProxy() {
+	void registerAnnotationTypeProxyRegistersJdkProxies() {
 		RuntimeHintsUtils.registerAnnotation(this.hints, RetryInvoker.class);
 		assertThat(this.hints.reflection().typeHints())
 				.anySatisfy(annotationHint(RetryInvoker.class))
 				.anySatisfy(annotationHint(SampleInvoker.class));
-		assertThat(this.hints.proxies().jdkProxies()).singleElement()
-				.satisfies(annotationProxy(RetryInvoker.class));
+		assertThat(this.hints.proxies().jdkProxies())
+				.anySatisfy(annotationProxy(RetryInvoker.class))
+				.anySatisfy(annotationProxy(SampleInvoker.class))
+				.hasSize(2);
 	}
 
 	@Test
@@ -81,8 +89,11 @@ class RuntimeHintsUtilsTests {
 				.anySatisfy(annotationHint(RetryInvoker.class))
 				.anySatisfy(annotationHint(SampleInvoker.class))
 				.hasSize(3);
-		assertThat(this.hints.proxies().jdkProxies()).singleElement()
-				.satisfies(annotationProxy(RetryWithEnabledFlagInvoker.class));
+		assertThat(this.hints.proxies().jdkProxies())
+				.anySatisfy(annotationProxy(RetryWithEnabledFlagInvoker.class))
+				.anySatisfy(annotationProxy(RetryInvoker.class))
+				.anySatisfy(annotationProxy(SampleInvoker.class))
+				.hasSize(3);
 	}
 
 	private Consumer<TypeHint> annotationHint(Class<?> type) {
@@ -102,21 +113,7 @@ class RuntimeHintsUtilsTests {
 	}
 
 
-	@SampleInvoker
-	static class SampleInvokerClass {
-	}
-
-	@RetryInvoker
-	static class RetryInvokerClass {
-	}
-
-	@RetryWithEnabledFlagInvoker
-	static class RetryWithEnabledFlagInvokerClass {
-	}
-
-	@Target({ ElementType.TYPE, ElementType.ANNOTATION_TYPE })
 	@Retention(RetentionPolicy.RUNTIME)
-	@Documented
 	@interface LocalMapping {
 
 		@AliasFor("retries")
@@ -128,18 +125,14 @@ class RuntimeHintsUtilsTests {
 	}
 
 
-	@Target({ ElementType.TYPE, ElementType.ANNOTATION_TYPE })
 	@Retention(RetentionPolicy.RUNTIME)
-	@Documented
 	@interface SampleInvoker {
 
 		int retries() default 0;
 
 	}
 
-	@Target({ ElementType.TYPE })
 	@Retention(RetentionPolicy.RUNTIME)
-	@Documented
 	@SampleInvoker
 	@interface RetryInvoker {
 
@@ -148,9 +141,7 @@ class RuntimeHintsUtilsTests {
 
 	}
 
-	@Target({ ElementType.TYPE })
 	@Retention(RetentionPolicy.RUNTIME)
-	@Documented
 	@RetryInvoker
 	@interface RetryWithEnabledFlagInvoker {
 

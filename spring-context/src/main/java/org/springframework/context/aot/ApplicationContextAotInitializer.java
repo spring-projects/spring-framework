@@ -37,7 +37,7 @@ public class ApplicationContextAotInitializer {
 
 	/**
 	 * Initialize the specified application context using the specified
-	 * {@link ApplicationContextInitializer} class names. Each class name is
+	 * {@link ApplicationContextInitializer} class names. Each class is
 	 * expected to have a default constructor.
 	 * @param context the context to initialize
 	 * @param initializerClassNames the application context initializer class names

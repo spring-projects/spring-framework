@@ -305,7 +305,7 @@ class ConstructorOrFactoryMethodResolverTests {
 	void beanDefinitionWithClassArrayFactoryMethodArgAndAnotherMatchingConstructor() {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		BeanDefinition beanDefinition = BeanDefinitionBuilder.rootBeanDefinition(
-				ClassArrayFactoryMethodSampleWithAnotherFactoryMethod.class.getName())
+						ClassArrayFactoryMethodSampleWithAnotherFactoryMethod.class.getName())
 				.setFactoryMethod("of").addConstructorArgValue("test1")
 				.getBeanDefinition();
 		Executable executable = resolve(beanFactory, beanDefinition);

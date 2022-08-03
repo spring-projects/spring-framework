@@ -45,8 +45,7 @@ public class InMemoryGeneratedFiles implements GeneratedFiles {
 		Assert.notNull(content, "'content' must not be null");
 		Map<String, InputStreamSource> paths = this.files.computeIfAbsent(kind,
 				key -> new LinkedHashMap<>());
-		Assert.state(!paths.containsKey(path),
-				() -> "Path '" + path + "' already in use");
+		Assert.state(!paths.containsKey(path), () -> "Path '" + path + "' already in use");
 		paths.put(path, content);
 	}
 
@@ -57,8 +56,7 @@ public class InMemoryGeneratedFiles implements GeneratedFiles {
 	 */
 	public Map<String, InputStreamSource> getGeneratedFiles(Kind kind) {
 		Assert.notNull(kind, "'kind' must not be null");
-		return Collections
-				.unmodifiableMap(this.files.getOrDefault(kind, Collections.emptyMap()));
+		return Collections.unmodifiableMap(this.files.getOrDefault(kind, Collections.emptyMap()));
 	}
 
 	/**
@@ -72,8 +70,7 @@ public class InMemoryGeneratedFiles implements GeneratedFiles {
 	public String getGeneratedFileContent(Kind kind, String path) throws IOException {
 		InputStreamSource source = getGeneratedFile(kind, path);
 		if (source != null) {
-			return new String(source.getInputStream().readAllBytes(),
-					StandardCharsets.UTF_8);
+			return new String(source.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 		}
 		return null;
 	}

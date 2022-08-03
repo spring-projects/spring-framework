@@ -78,7 +78,7 @@ public abstract class AbstractEncoderTests<E extends Encoder<?>> extends Abstrac
 
 
 	/**
-	 * Helper methods that tests for a variety of encoding scenarios. This methods
+	 * Helper method that tests for a variety of encoding scenarios. This method
 	 * invokes:
 	 * <ul>
 	 *     <li>{@link #testEncode(Publisher, ResolvableType, MimeType, Map, Consumer)}</li>
@@ -99,7 +99,7 @@ public abstract class AbstractEncoderTests<E extends Encoder<?>> extends Abstrac
 	}
 
 	/**
-	 * Helper methods that tests for a variety of decoding scenarios. This methods
+	 * Helper method that tests for a variety of decoding scenarios. This method
 	 * invokes:
 	 * <ul>
 	 *     <li>{@link #testEncode(Publisher, ResolvableType, MimeType, Map, Consumer)}</li>

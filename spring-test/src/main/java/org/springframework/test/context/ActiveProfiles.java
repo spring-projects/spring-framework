@@ -78,7 +78,7 @@ public @interface ActiveProfiles {
 	Class<? extends ActiveProfilesResolver> resolver() default ActiveProfilesResolver.class;
 
 	/**
-	 * Whether or not bean definition profiles from superclasses and enclosing
+	 * Whether bean definition profiles from superclasses and enclosing
 	 * classes should be <em>inherited</em>.
 	 * <p>The default value is {@code true}, which means that a test class will
 	 * <em>inherit</em> bean definition profiles defined by a test superclass or

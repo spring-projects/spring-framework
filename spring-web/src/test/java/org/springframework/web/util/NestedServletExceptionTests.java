@@ -22,6 +22,7 @@ import org.springframework.core.NestedExceptionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SuppressWarnings("deprecation")
 public class NestedServletExceptionTests {
 
 	@Test

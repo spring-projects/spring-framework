@@ -57,11 +57,32 @@ public abstract class RuntimeHintsUtils {
 	 * @see SynthesizedAnnotation
 	 */
 	public static void registerAnnotation(RuntimeHints hints, Class<?> annotationType) {
+		registerAnnotation(hints, annotationType, false);
+	}
+
+	/**
+	 * Register the necessary hints so that the specified <em>composable</em>
+	 * annotation is visible at runtime. Use this method rather than the regular
+	 * {@link #registerAnnotation(RuntimeHints, Class)} when the specified
+	 * annotation is meta-annotated, but the meta-annotated annotations do not
+	 * need to be visible.
+	 * @param hints the {@link RuntimeHints} instance to use
+	 * @param annotationType the composable annotation type
+	 * @see #registerAnnotation(RuntimeHints, Class)
+	 */
+	public static void registerComposableAnnotation(RuntimeHints hints, Class<?> annotationType) {
+		registerAnnotation(hints, annotationType, true);
+	}
+
+	private static void registerAnnotation(RuntimeHints hints, Class<?> annotationType, boolean withProxy) {
 		hints.reflection().registerType(annotationType, ANNOTATION_HINT);
 		Set<Class<?>> allAnnotations = new LinkedHashSet<>();
 		collectAliasedAnnotations(new HashSet<>(), allAnnotations, annotationType);
-		allAnnotations.forEach(annotation -> hints.reflection().registerType(annotation, ANNOTATION_HINT));
-		if (!allAnnotations.isEmpty()) {
+		allAnnotations.forEach(annotation -> {
+			hints.reflection().registerType(annotation, ANNOTATION_HINT);
+			hints.proxies().registerJdkProxy(annotation, SynthesizedAnnotation.class);
+		});
+		if (!allAnnotations.isEmpty() || withProxy) {
 			hints.proxies().registerJdkProxy(annotationType, SynthesizedAnnotation.class);
 		}
 	}

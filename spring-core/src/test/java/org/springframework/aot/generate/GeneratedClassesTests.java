@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.GeneratedFiles.Kind;
 import org.springframework.javapoet.TypeSpec;
-import org.springframework.javapoet.TypeSpec.Builder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -52,93 +51,112 @@ class GeneratedClassesTests {
 	}
 
 	@Test
-	void forFeatureComponentWhenTargetIsNullThrowsException() {
+	void addForFeatureComponentWhenFeatureNameIsEmptyThrowsException() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> this.generatedClasses.forFeatureComponent("test", null))
-				.withMessage("'component' must not be null");
-	}
-
-	@Test
-	void forFeatureComponentWhenFeatureNameIsEmptyThrowsException() {
-		assertThatIllegalArgumentException()
-				.isThrownBy(() -> this.generatedClasses.forFeatureComponent("", TestComponent.class))
+				.isThrownBy(() -> this.generatedClasses.addForFeatureComponent("",
+						TestComponent.class, emptyTypeCustomizer))
 				.withMessage("'featureName' must not be empty");
 	}
 
 	@Test
-	void forFeatureWhenFeatureNameIsEmptyThrowsException() {
+	void addForFeatureWhenFeatureNameIsEmptyThrowsException() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> this.generatedClasses.forFeature(""))
+				.isThrownBy(() -> this.generatedClasses.addForFeature("", emptyTypeCustomizer))
 				.withMessage("'featureName' must not be empty");
 	}
 
 	@Test
-	void generateWhenTypeSpecCustomizerIsNullThrowsException() {
+	void addForFeatureComponentWhenTypeSpecCustomizerIsNullThrowsException() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> this.generatedClasses
-						.forFeatureComponent("test", TestComponent.class).generate(null))
-				.withMessage("'typeSpecCustomizer' must not be null");
+						.addForFeatureComponent("test", TestComponent.class, null))
+				.withMessage("'type' must not be null");
 	}
 
 	@Test
-	void forFeatureUsesDefaultTarget() {
-		GeneratedClass generatedClass = this.generatedClasses
-				.forFeature("Test").generate(emptyTypeCustomizer);
+	void addForFeatureUsesDefaultTarget() {
+		GeneratedClass generatedClass = this.generatedClasses.addForFeature("Test", emptyTypeCustomizer);
 		assertThat(generatedClass.getName()).hasToString("java.lang.Object__Test");
 	}
 
 	@Test
-	void forFeatureComponentUsesComponent() {
+	void addForFeatureComponentUsesTarget() {
 		GeneratedClass generatedClass = this.generatedClasses
-				.forFeatureComponent("Test", TestComponent.class).generate(emptyTypeCustomizer);
+				.addForFeatureComponent("Test", TestComponent.class, emptyTypeCustomizer);
 		assertThat(generatedClass.getName().toString()).endsWith("TestComponent__Test");
 	}
 
 	@Test
-	void generateReturnsDifferentInstances() {
-		Consumer<Builder> typeCustomizer = mockTypeCustomizer();
+	void addForFeatureComponentWithSameNameReturnsDifferentInstances() {
 		GeneratedClass generatedClass1 = this.generatedClasses
-				.forFeatureComponent("one", TestComponent.class).generate(typeCustomizer);
+				.addForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
 		GeneratedClass generatedClass2 = this.generatedClasses
-				.forFeatureComponent("one", TestComponent.class).generate(typeCustomizer);
+				.addForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
 		assertThat(generatedClass1).isNotSameAs(generatedClass2);
 		assertThat(generatedClass1.getName().simpleName()).endsWith("__One");
 		assertThat(generatedClass2.getName().simpleName()).endsWith("__One1");
 	}
 
 	@Test
-	void getOrGenerateWhenNewReturnsGeneratedMethod() {
-		Consumer<Builder> typeCustomizer = mockTypeCustomizer();
+	void getOrAddForFeatureComponentWhenNewReturnsGeneratedMethod() {
 		GeneratedClass generatedClass1 = this.generatedClasses
-				.forFeatureComponent("one", TestComponent.class).getOrGenerate("facet", typeCustomizer);
+				.getOrAddForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
 		GeneratedClass generatedClass2 = this.generatedClasses
-				.forFeatureComponent("two", TestComponent.class).getOrGenerate("facet", typeCustomizer);
+				.getOrAddForFeatureComponent("two", TestComponent.class, emptyTypeCustomizer);
 		assertThat(generatedClass1).isNotNull().isNotEqualTo(generatedClass2);
 		assertThat(generatedClass2).isNotNull();
 	}
 
 	@Test
-	void getOrGenerateWhenRepeatReturnsSameGeneratedMethod() {
-		Consumer<Builder> typeCustomizer = mockTypeCustomizer();
+	void getOrAddForFeatureWhenNewReturnsGeneratedMethod() {
 		GeneratedClass generatedClass1 = this.generatedClasses
-				.forFeatureComponent("one", TestComponent.class).getOrGenerate("facet", typeCustomizer);
+				.getOrAddForFeature("one", emptyTypeCustomizer);
 		GeneratedClass generatedClass2 = this.generatedClasses
-				.forFeatureComponent("one", TestComponent.class).getOrGenerate("facet", typeCustomizer);
+				.getOrAddForFeature("two", emptyTypeCustomizer);
+		assertThat(generatedClass1).isNotNull().isNotEqualTo(generatedClass2);
+		assertThat(generatedClass2).isNotNull();
+	}
+
+	@Test
+	void getOrAddForFeatureComponentWhenRepeatReturnsSameGeneratedMethod() {
+		GeneratedClass generatedClass1 = this.generatedClasses
+				.getOrAddForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
+		GeneratedClass generatedClass2 = this.generatedClasses
+				.getOrAddForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
 		GeneratedClass generatedClass3 = this.generatedClasses
-				.forFeatureComponent("one", TestComponent.class).getOrGenerate("facet", typeCustomizer);
+				.getOrAddForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
 		assertThat(generatedClass1).isNotNull().isSameAs(generatedClass2)
 				.isSameAs(generatedClass3);
-		verifyNoInteractions(typeCustomizer);
-		generatedClass1.generateJavaFile();
-		verify(typeCustomizer).accept(any());
+	}
+
+	@Test
+	void getOrAddForFeatureWhenRepeatReturnsSameGeneratedMethod() {
+		GeneratedClass generatedClass1 = this.generatedClasses
+				.getOrAddForFeature("one", emptyTypeCustomizer);
+		GeneratedClass generatedClass2 = this.generatedClasses
+				.getOrAddForFeature("one", emptyTypeCustomizer);
+		GeneratedClass generatedClass3 = this.generatedClasses
+				.getOrAddForFeature("one", emptyTypeCustomizer);
+		assertThat(generatedClass1).isNotNull().isSameAs(generatedClass2)
+				.isSameAs(generatedClass3);
+	}
+
+	@Test
+	void getOrAddForFeatureComponentWhenHasFeatureNamePrefix() {
+		GeneratedClasses prefixed = this.generatedClasses.withFeatureNamePrefix("prefix");
+		GeneratedClass generatedClass1 = this.generatedClasses.getOrAddForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
+		GeneratedClass generatedClass2 = this.generatedClasses.getOrAddForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
+		GeneratedClass generatedClass3 = prefixed.getOrAddForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
+		GeneratedClass generatedClass4 = prefixed.getOrAddForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
+		assertThat(generatedClass1).isSameAs(generatedClass2).isNotSameAs(generatedClass3);
+		assertThat(generatedClass3).isSameAs(generatedClass4);
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
 	void writeToInvokeTypeSpecCustomizer() throws IOException {
 		Consumer<TypeSpec.Builder> typeSpecCustomizer = mock(Consumer.class);
-		this.generatedClasses.forFeatureComponent("one", TestComponent.class)
-				.generate(typeSpecCustomizer);
+		this.generatedClasses.addForFeatureComponent("one", TestComponent.class, typeSpecCustomizer);
 		verifyNoInteractions(typeSpecCustomizer);
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
 		this.generatedClasses.writeTo(generatedFiles);
@@ -149,17 +167,11 @@ class GeneratedClassesTests {
 	@Test
 	void withNameUpdatesNamingConventions() {
 		GeneratedClass generatedClass1 = this.generatedClasses
-				.forFeatureComponent("one", TestComponent.class).generate(emptyTypeCustomizer);
-		GeneratedClass generatedClass2 = this.generatedClasses.withName("Another")
-				.forFeatureComponent("one", TestComponent.class).generate(emptyTypeCustomizer);
+				.addForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
+		GeneratedClass generatedClass2 = this.generatedClasses.withFeatureNamePrefix("Another")
+				.addForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
 		assertThat(generatedClass1.getName().toString()).endsWith("TestComponent__One");
 		assertThat(generatedClass2.getName().toString()).endsWith("TestComponent__AnotherOne");
-	}
-
-
-	@SuppressWarnings("unchecked")
-	private Consumer<TypeSpec.Builder> mockTypeCustomizer() {
-		return mock(Consumer.class);
 	}
 
 

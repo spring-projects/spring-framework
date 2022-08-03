@@ -72,7 +72,8 @@ class RequestMappingReflectiveProcessor implements ReflectiveProcessor {
 		hints.registerMethod(method, hint -> hint.setModes(ExecutableMode.INVOKE));
 		for (Parameter parameter : method.getParameters()) {
 			MethodParameter methodParameter = MethodParameter.forParameter(parameter);
-			if (methodParameter.hasParameterAnnotation(RequestBody.class)) {
+			if (methodParameter.hasParameterAnnotation(RequestBody.class) ||
+					methodParameter.hasParameterAnnotation(ModelAttribute.class)) {
 				this.bindingRegistrar.registerReflectionHints(hints, methodParameter.getGenericParameterType());
 			}
 			else if (HttpEntity.class.isAssignableFrom(methodParameter.getParameterType())) {

@@ -35,8 +35,7 @@ class DynamicClassFileObject extends SimpleJavaFileObject {
 
 
 	DynamicClassFileObject(String className) {
-		super(URI.create("class:///" + className.replace('.', '/') + ".class"),
-				Kind.CLASS);
+		super(URI.create("class:///" + className.replace('.', '/') + ".class"), Kind.CLASS);
 	}
 
 

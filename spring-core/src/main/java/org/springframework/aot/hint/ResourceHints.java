@@ -137,7 +137,7 @@ public class ResourceHints {
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public ResourceHints registerResourceBundle(String baseName, @Nullable Consumer<ResourceBundleHint.Builder> resourceHint) {
-		ResourceBundleHint.Builder builder = new ResourceBundleHint.Builder().baseName(baseName);
+		ResourceBundleHint.Builder builder = new ResourceBundleHint.Builder(baseName);
 		if (resourceHint != null) {
 			resourceHint.accept(builder);
 		}

@@ -78,7 +78,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	/**
 	 * Return a read-only view of registered path patterns and handlers which may
-	 * may be an actual handler instance or the bean name of lazily initialized
+	 * be an actual handler instance or the bean name of lazily initialized
 	 * handler.
 	 */
 	public final Map<PathPattern, Object> getHandlerMap() {

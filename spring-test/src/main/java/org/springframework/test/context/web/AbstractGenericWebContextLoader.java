@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -263,6 +263,7 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	 * @see org.springframework.test.context.ContextLoader#loadContext(java.lang.String[])
 	 */
 	@Override
+	@SuppressWarnings("deprecation")
 	public final ApplicationContext loadContext(String... locations) throws Exception {
 		throw new UnsupportedOperationException(
 				"AbstractGenericWebContextLoader does not support the loadContext(String... locations) method");

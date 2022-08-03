@@ -16,14 +16,19 @@
 
 package org.springframework.context.support;
 
+import java.nio.file.InvalidPathException;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.OS;
 import org.mockito.ArgumentCaptor;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
@@ -245,27 +250,46 @@ class GenericApplicationContextTests {
 		assertGetResourceSemantics(new FileSystemResourceLoader(), FileSystemResource.class);
 	}
 
-	private void assertGetResourceSemantics(ResourceLoader resourceLoader, Class<? extends Resource> defaultResouceType) {
+	private void assertGetResourceSemantics(ResourceLoader resourceLoader, Class<? extends Resource> defaultResourceType) {
 		if (resourceLoader != null) {
 			context.setResourceLoader(resourceLoader);
 		}
 
-		String pingLocation = "ping:foo";
+		String relativePathLocation = "foo";
 		String fileLocation = "file:foo";
+		String pingLocation = "ping:foo";
 
-		Resource resource = context.getResource(pingLocation);
-		assertThat(resource).isInstanceOf(defaultResouceType);
+		Resource resource = context.getResource(relativePathLocation);
+		assertThat(resource).isInstanceOf(defaultResourceType);
 		resource = context.getResource(fileLocation);
 		assertThat(resource).isInstanceOf(FileUrlResource.class);
 
+		// If we are using a FileSystemResourceLoader on Windows, we expect an error
+		// similar to the following since "ping:foo" is not a valid file name in the
+		// Windows file system and since the PingPongProtocolResolver has not yet been
+		// registered.
+		//
+		// java.nio.file.InvalidPathException: Illegal char <:> at index 4: ping:foo
+		if (resourceLoader instanceof FileSystemResourceLoader && OS.WINDOWS.isCurrentOs()) {
+			assertThatExceptionOfType(InvalidPathException.class)
+				.isThrownBy(() -> context.getResource(pingLocation))
+				.withMessageContaining(pingLocation);
+		}
+		else {
+			resource = context.getResource(pingLocation);
+			assertThat(resource).isInstanceOf(defaultResourceType);
+		}
+
 		context.addProtocolResolver(new PingPongProtocolResolver());
 
+		resource = context.getResource(relativePathLocation);
+		assertThat(resource).isInstanceOf(defaultResourceType);
+		resource = context.getResource(fileLocation);
+		assertThat(resource).isInstanceOf(FileUrlResource.class);
 		resource = context.getResource(pingLocation);
 		assertThat(resource).asInstanceOf(type(ByteArrayResource.class))
 			.extracting(bar -> new String(bar.getByteArray(), UTF_8))
 			.isEqualTo("pong:foo");
-		resource = context.getResource(fileLocation);
-		assertThat(resource).isInstanceOf(FileUrlResource.class);
 	}
 
 	@Test
@@ -382,6 +406,33 @@ class GenericApplicationContextTests {
 		verify(bpp).postProcessMergedBeanDefinition(getBeanDefinition(context, "test"), BeanD.class, "test");
 		verify(bpp).postProcessMergedBeanDefinition(any(RootBeanDefinition.class), eq(Integer.class), captor.capture());
 		assertThat(captor.getValue()).startsWith("(inner bean)");
+		context.close();
+	}
+
+	@Test
+	void refreshForAotInvokesBeanPostProcessorContractOnMergedBeanDefinitionPostProcessors() {
+		MergedBeanDefinitionPostProcessor bpp = new MergedBeanDefinitionPostProcessor() {
+			@Override
+			public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+				beanDefinition.setAttribute("mbdppCalled", true);
+			}
+
+			@Override
+			public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+				return (beanName.equals("test") ? "42" : bean);
+			}
+		};
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.registerBeanDefinition("bpp", BeanDefinitionBuilder.rootBeanDefinition(
+						MergedBeanDefinitionPostProcessor.class, () -> bpp)
+				.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
+		AbstractBeanDefinition bd = BeanDefinitionBuilder.rootBeanDefinition(String.class)
+				.addConstructorArgValue("value").getBeanDefinition();
+		context.registerBeanDefinition("test", bd);
+		context.refreshForAotProcessing();
+		assertThat(context.getBeanFactory().getMergedBeanDefinition("test")
+				.hasAttribute("mbdppCalled")).isTrue();
+		assertThat(context.getBean("test")).isEqualTo("42");
 		context.close();
 	}
 

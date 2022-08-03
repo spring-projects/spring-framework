@@ -431,6 +431,24 @@ class AnnotationConfigApplicationContextTests {
 				"annotationConfigApplicationContextTests.Config", "testBean");
 	}
 
+	@Test
+	void refreshForAotCanInstantiateBeanWithAutowiredApplicationContext() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(BeanD.class);
+		context.refreshForAotProcessing();
+		BeanD bean = context.getBean(BeanD.class);
+		assertThat(bean.applicationContext).isSameAs(context);
+	}
+
+	@Test
+	void refreshForAotCanInstantiateBeanWithFieldAutowiredApplicationContext() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(BeanB.class);
+		context.refreshForAotProcessing();
+		BeanB bean = context.getBean(BeanB.class);
+		assertThat(bean.applicationContext).isSameAs(context);
+	}
+
 
 	@Configuration
 	static class Config {
@@ -505,6 +523,16 @@ class AnnotationConfigApplicationContextTests {
 	}
 
 	static class BeanC {}
+
+	static class BeanD {
+
+		private final ApplicationContext applicationContext;
+
+		public BeanD(ApplicationContext applicationContext) {
+			this.applicationContext = applicationContext;
+		}
+
+	}
 
 	static class NonInstantiatedFactoryBean implements FactoryBean<String> {
 

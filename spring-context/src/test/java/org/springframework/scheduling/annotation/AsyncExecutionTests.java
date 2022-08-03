@@ -50,7 +50,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-@SuppressWarnings("resource")
+@SuppressWarnings({ "resource", "deprecation" })
 public class AsyncExecutionTests {
 
 	private static String originalThreadName;

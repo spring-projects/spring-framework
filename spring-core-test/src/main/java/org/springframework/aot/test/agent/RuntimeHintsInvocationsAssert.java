@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.ListAssert;
 import org.assertj.core.error.BasicErrorMessageFactory;
 import org.assertj.core.error.ErrorMessageFactory;
 
@@ -33,15 +34,15 @@ import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.Assert;
 
 /**
- * AssertJ {@link org.assertj.core.api.Assert assertions} that can be applied to an {@link RuntimeHintsInvocations}.
+ * AssertJ {@link org.assertj.core.api.Assert assertions} that can be applied to
+ * {@link RuntimeHintsInvocations}.
  *
  * @author Brian Clozel
  * @since 6.0
  */
 public class RuntimeHintsInvocationsAssert extends AbstractAssert<RuntimeHintsInvocationsAssert, RuntimeHintsInvocations> {
 
-
-	List<Consumer<RuntimeHints>> configurers = new ArrayList<>();
+	private final List<Consumer<RuntimeHints>> configurers = new ArrayList<>();
 
 	RuntimeHintsInvocationsAssert(RuntimeHintsInvocations invocations) {
 		super(invocations, RuntimeHintsInvocationsAssert.class);
@@ -68,7 +69,7 @@ public class RuntimeHintsInvocationsAssert extends AbstractAssert<RuntimeHintsIn
 	 * Example: <pre class="code">
 	 * RuntimeHints hints = new RuntimeHints();
 	 * hints.reflection().registerType(MyType.class);
-	 * assertThat(invocations).allMatch(hints); </pre>
+	 * assertThat(invocations).match(hints); </pre>
 	 * @param runtimeHints the runtime hints configuration to test against
 	 * @throws AssertionError if any of the recorded invocations has no match in the provided hints
 	 */
@@ -82,12 +83,27 @@ public class RuntimeHintsInvocationsAssert extends AbstractAssert<RuntimeHintsIn
 		}
 	}
 
+	public ListAssert<RecordedInvocation> notMatching(RuntimeHints runtimeHints) {
+		Assert.notNull(runtimeHints, "RuntimeHints should not be null");
+		configureRuntimeHints(runtimeHints);
+		return ListAssert.assertThatStream(this.actual.recordedInvocations()
+				.filter(invocation -> !invocation.matches(runtimeHints)));
+	}
+
 
 	private ErrorMessageFactory errorMessageForInvocation(RecordedInvocation invocation) {
-		return new BasicErrorMessageFactory("%nMissing <%s> for invocation <%s> on type <%s> %nwith arguments %s.%nStacktrace:%n<%s>",
-				invocation.getHintType().hintClassName(), invocation.getMethodReference(),
-				invocation.getInstanceTypeReference(), invocation.getArguments(),
-				formatStackTrace(invocation.getStackFrames()));
+		if (invocation.isStatic()) {
+			return new BasicErrorMessageFactory("%nMissing <%s> for invocation <%s>%nwith arguments %s.%nStacktrace:%n<%s>",
+					invocation.getHintType().hintClassName(), invocation.getMethodReference(),
+					invocation.getArguments(), formatStackTrace(invocation.getStackFrames()));
+		}
+		else {
+			Class<?> instanceType = (invocation.getInstance() instanceof  Class<?>) ? invocation.getInstance() : invocation.getInstance().getClass();
+			return new BasicErrorMessageFactory("%nMissing <%s> for invocation <%s> on type <%s> %nwith arguments %s.%nStacktrace:%n<%s>",
+					invocation.getHintType().hintClassName(), invocation.getMethodReference(),
+					instanceType, invocation.getArguments(),
+					formatStackTrace(invocation.getStackFrames()));
+		}
 	}
 
 	private String formatStackTrace(Stream<StackWalker.StackFrame> stackTraceElements) {
@@ -114,6 +130,5 @@ public class RuntimeHintsInvocationsAssert extends AbstractAssert<RuntimeHintsIn
 		}
 		return this;
 	}
-
 
 }

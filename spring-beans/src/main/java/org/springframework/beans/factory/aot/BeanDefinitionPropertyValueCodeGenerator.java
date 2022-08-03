@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory.aot;
 
-import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -28,10 +28,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 import org.springframework.aot.generate.GeneratedMethod;
-import org.springframework.aot.generate.MethodGenerator;
-import org.springframework.aot.generate.MethodNameGenerator;
+import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -44,6 +44,7 @@ import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.CodeBlock.Builder;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Internal code generator used to generate code for a single value contained in
@@ -57,7 +58,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 
 	static final CodeBlock NULL_VALUE_CODE_BLOCK = CodeBlock.of("null");
 
-	private final MethodGenerator methodGenerator;
+	private final GeneratedMethods generatedMethods;
 
 	private final List<Delegate> delegates = List.of(
 			new PrimitiveDelegate(),
@@ -73,11 +74,11 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			new SetDelegate(),
 			new MapDelegate(),
 			new BeanReferenceDelegate()
-		);
+	);
 
 
-	BeanDefinitionPropertyValueCodeGenerator(MethodGenerator methodGenerator) {
-		this.methodGenerator = methodGenerator;
+	BeanDefinitionPropertyValueCodeGenerator(GeneratedMethods generatedMethods) {
+		this.generatedMethods = generatedMethods;
 	}
 
 
@@ -128,7 +129,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 				'\"', "\"",
 				'\'', "\\'",
 				'\\', "\\\\"
-			);
+		);
 
 
 		@Override
@@ -248,17 +249,11 @@ class BeanDefinitionPropertyValueCodeGenerator {
 		public CodeBlock generateCode(@Nullable Object value, ResolvableType type) {
 			if (type.isArray()) {
 				ResolvableType componentType = type.getComponentType();
-				int length = Array.getLength(value);
+				Stream<CodeBlock> elements = Arrays.stream(ObjectUtils.toObjectArray(value)).map(component ->
+						BeanDefinitionPropertyValueCodeGenerator.this.generateCode(component, componentType));
 				CodeBlock.Builder builder = CodeBlock.builder();
 				builder.add("new $T {", type.toClass());
-				for (int i = 0; i < length; i++) {
-					Object component = Array.get(value, i);
-					if (i != 0) {
-						builder.add(", ");
-					}
-					builder.add("$L", BeanDefinitionPropertyValueCodeGenerator.this
-							.generateCode(component, componentType));
-				}
+				builder.add(elements.collect(CodeBlock.joining(", ")));
 				builder.add("}");
 				return builder.build();
 			}
@@ -485,24 +480,22 @@ class BeanDefinitionPropertyValueCodeGenerator {
 
 		private <K, V> CodeBlock generateLinkedHashMapCode(Map<K, V> map,
 				ResolvableType keyType, ResolvableType valueType) {
-			GeneratedMethod method = BeanDefinitionPropertyValueCodeGenerator.this.methodGenerator
-					.generateMethod(MethodNameGenerator.join("get", "map"))
-					.using(builder -> {
-						builder.addAnnotation(AnnotationSpec
-								.builder(SuppressWarnings.class)
-								.addMember("value", "{\"rawtypes\", \"unchecked\"}")
-								.build());
-						builder.returns(Map.class);
-						builder.addStatement("$T map = new $T($L)", Map.class,
-								LinkedHashMap.class, map.size());
-						map.forEach((key, value) -> builder.addStatement("map.put($L, $L)",
-								BeanDefinitionPropertyValueCodeGenerator.this
-										.generateCode(key, keyType),
-								BeanDefinitionPropertyValueCodeGenerator.this
-										.generateCode(value, valueType)));
-						builder.addStatement("return map");
-					});
-			return CodeBlock.of("$L()", method.getName());
+			GeneratedMethod generatedMethod = generatedMethods.add("getMap", method -> {
+				method.addAnnotation(AnnotationSpec
+						.builder(SuppressWarnings.class)
+						.addMember("value", "{\"rawtypes\", \"unchecked\"}")
+						.build());
+				method.returns(Map.class);
+				method.addStatement("$T map = new $T($L)", Map.class,
+						LinkedHashMap.class, map.size());
+				map.forEach((key, value) -> method.addStatement("map.put($L, $L)",
+						BeanDefinitionPropertyValueCodeGenerator.this
+								.generateCode(key, keyType),
+						BeanDefinitionPropertyValueCodeGenerator.this
+								.generateCode(value, valueType)));
+				method.addStatement("return map");
+			});
+			return CodeBlock.of("$L()", generatedMethod.getName());
 		}
 
 	}
@@ -516,7 +509,12 @@ class BeanDefinitionPropertyValueCodeGenerator {
 		@Override
 		@Nullable
 		public CodeBlock generateCode(Object value, ResolvableType type) {
-			if (value instanceof BeanReference beanReference) {
+			if (value instanceof RuntimeBeanReference runtimeBeanReference
+					&& runtimeBeanReference.getBeanType() != null) {
+				return CodeBlock.of("new $T($T.class)", RuntimeBeanReference.class,
+						runtimeBeanReference.getBeanType());
+			}
+			else if (value instanceof BeanReference beanReference) {
 				return CodeBlock.of("new $T($S)", RuntimeBeanReference.class,
 						beanReference.getBeanName());
 			}

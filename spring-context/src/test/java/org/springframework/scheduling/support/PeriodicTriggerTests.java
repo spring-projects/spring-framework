@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,13 @@
 
 package org.springframework.scheduling.support;
 
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.NumberUtils;
 
@@ -30,153 +32,158 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Fisher
  * @since 3.0
  */
-public class PeriodicTriggerTests {
+class PeriodicTriggerTests {
 
 	@Test
-	public void fixedDelayFirstExecution() {
-		Date now = new Date();
-		PeriodicTrigger trigger = new PeriodicTrigger(5000);
-		Date next = trigger.nextExecutionTime(context(null, null, null));
+	void fixedDelayFirstExecution() {
+		Instant now = Instant.now();
+		PeriodicTrigger trigger = new PeriodicTrigger(Duration.ofMillis(5000));
+		Instant next = trigger.nextExecution(context(null, null, null));
 		assertNegligibleDifference(now, next);
 	}
 
 	@Test
-	public void fixedDelayWithInitialDelayFirstExecution() {
-		Date now = new Date();
+	@SuppressWarnings("deprecation")
+	void fixedDelayWithInitialDelayFirstExecution() {
+		Instant now = Instant.now();
 		long period = 5000;
 		long initialDelay = 30000;
-		PeriodicTrigger trigger = new PeriodicTrigger(period);
+		PeriodicTrigger trigger = new PeriodicTrigger(Duration.ofMillis(period));
 		trigger.setInitialDelay(initialDelay);
-		Date next = trigger.nextExecutionTime(context(null, null, null));
+		Instant next = trigger.nextExecution(context(null, null, null));
 		assertApproximateDifference(now, next, initialDelay);
 	}
 
 	@Test
-	public void fixedDelayWithTimeUnitFirstExecution() {
-		Date now = new Date();
-		PeriodicTrigger trigger = new PeriodicTrigger(5, TimeUnit.SECONDS);
-		Date next = trigger.nextExecutionTime(context(null, null, null));
+	void fixedDelayWithTimeUnitFirstExecution() {
+		Instant now = Instant.now();
+		PeriodicTrigger trigger = new PeriodicTrigger(Duration.ofSeconds(5));
+		Instant next = trigger.nextExecution(context(null, null, null));
 		assertNegligibleDifference(now, next);
 	}
 
 	@Test
-	public void fixedDelayWithTimeUnitAndInitialDelayFirstExecution() {
-		Date now = new Date();
+	void fixedDelayWithTimeUnitAndInitialDelayFirstExecution() {
+		Instant now = Instant.now();
 		long period = 5;
 		long initialDelay = 30;
-		PeriodicTrigger trigger = new PeriodicTrigger(period, TimeUnit.SECONDS);
-		trigger.setInitialDelay(initialDelay);
-		Date next = trigger.nextExecutionTime(context(null, null, null));
+		PeriodicTrigger trigger = new PeriodicTrigger(Duration.ofSeconds(period));
+		trigger.setInitialDelay(Duration.ofSeconds(initialDelay));
+		Instant next = trigger.nextExecution(context(null, null, null));
 		assertApproximateDifference(now, next, initialDelay * 1000);
 	}
 
 	@Test
-	public void fixedDelaySubsequentExecution() {
-		Date now = new Date();
+	void fixedDelaySubsequentExecution() {
+		Instant now = Instant.now();
 		long period = 5000;
-		PeriodicTrigger trigger = new PeriodicTrigger(period);
-		Date next = trigger.nextExecutionTime(context(now, 500, 3000));
+		PeriodicTrigger trigger = new PeriodicTrigger(Duration.ofMillis(period));
+		Instant next = trigger.nextExecution(context(now, 500, 3000));
 		assertApproximateDifference(now, next, period + 3000);
 	}
 
 	@Test
-	public void fixedDelayWithInitialDelaySubsequentExecution() {
-		Date now = new Date();
+	@SuppressWarnings("deprecation")
+	void fixedDelayWithInitialDelaySubsequentExecution() {
+		Instant now = Instant.now();
 		long period = 5000;
 		long initialDelay = 30000;
-		PeriodicTrigger trigger = new PeriodicTrigger(period);
+		PeriodicTrigger trigger = new PeriodicTrigger(Duration.ofMillis(period));
 		trigger.setInitialDelay(initialDelay);
-		Date next = trigger.nextExecutionTime(context(now, 500, 3000));
+		Instant next = trigger.nextExecution(context(now, 500, 3000));
 		assertApproximateDifference(now, next, period + 3000);
 	}
 
 	@Test
-	public void fixedDelayWithTimeUnitSubsequentExecution() {
-		Date now = new Date();
+	void fixedDelayWithTimeUnitSubsequentExecution() {
+		Instant now = Instant.now();
 		long period = 5;
-		PeriodicTrigger trigger = new PeriodicTrigger(period, TimeUnit.SECONDS);
-		Date next = trigger.nextExecutionTime(context(now, 500, 3000));
+		PeriodicTrigger trigger = new PeriodicTrigger(Duration.ofSeconds(period));
+		Instant next = trigger.nextExecution(context(now, 500, 3000));
 		assertApproximateDifference(now, next, (period * 1000) + 3000);
 	}
 
 	@Test
-	public void fixedRateFirstExecution() {
-		Date now = new Date();
-		PeriodicTrigger trigger = new PeriodicTrigger(5000);
+	void fixedRateFirstExecution() {
+		Instant now = Instant.now();
+		PeriodicTrigger trigger = new PeriodicTrigger(Duration.ofMillis(5000));
 		trigger.setFixedRate(true);
-		Date next = trigger.nextExecutionTime(context(null, null, null));
+		Instant next = trigger.nextExecution(context(null, null, null));
 		assertNegligibleDifference(now, next);
 	}
 
 	@Test
-	public void fixedRateWithTimeUnitFirstExecution() {
-		Date now = new Date();
-		PeriodicTrigger trigger = new PeriodicTrigger(5, TimeUnit.SECONDS);
+	void fixedRateWithTimeUnitFirstExecution() {
+		Instant now = Instant.now();
+		PeriodicTrigger trigger = new PeriodicTrigger(Duration.ofSeconds(5));
 		trigger.setFixedRate(true);
-		Date next = trigger.nextExecutionTime(context(null, null, null));
+		Instant next = trigger.nextExecution(context(null, null, null));
 		assertNegligibleDifference(now, next);
 	}
 
 	@Test
-	public void fixedRateWithInitialDelayFirstExecution() {
-		Date now = new Date();
+	@SuppressWarnings("deprecation")
+	void fixedRateWithInitialDelayFirstExecution() {
+		Instant now = Instant.now();
 		long period = 5000;
 		long initialDelay = 30000;
-		PeriodicTrigger trigger = new PeriodicTrigger(period);
+		PeriodicTrigger trigger = new PeriodicTrigger(Duration.ofMillis(period));
 		trigger.setFixedRate(true);
 		trigger.setInitialDelay(initialDelay);
-		Date next = trigger.nextExecutionTime(context(null, null, null));
+		Instant next = trigger.nextExecution(context(null, null, null));
 		assertApproximateDifference(now, next, initialDelay);
 	}
 
 	@Test
-	public void fixedRateWithTimeUnitAndInitialDelayFirstExecution() {
-		Date now = new Date();
+	void fixedRateWithTimeUnitAndInitialDelayFirstExecution() {
+		Instant now = Instant.now();
 		long period = 5;
 		long initialDelay = 30;
-		PeriodicTrigger trigger = new PeriodicTrigger(period, TimeUnit.MINUTES);
+		PeriodicTrigger trigger = new PeriodicTrigger(Duration.ofMinutes(period));
 		trigger.setFixedRate(true);
-		trigger.setInitialDelay(initialDelay);
-		Date next = trigger.nextExecutionTime(context(null, null, null));
+		trigger.setInitialDelay(Duration.ofMinutes(initialDelay));
+		Instant next = trigger.nextExecution(context(null, null, null));
 		assertApproximateDifference(now, next, (initialDelay * 60 * 1000));
 	}
 
 	@Test
-	public void fixedRateSubsequentExecution() {
-		Date now = new Date();
+	void fixedRateSubsequentExecution() {
+		Instant now = Instant.now();
 		long period = 5000;
-		PeriodicTrigger trigger = new PeriodicTrigger(period);
+		PeriodicTrigger trigger = new PeriodicTrigger(Duration.ofMillis(period));
 		trigger.setFixedRate(true);
-		Date next = trigger.nextExecutionTime(context(now, 500, 3000));
+		Instant next = trigger.nextExecution(context(now, 500, 3000));
 		assertApproximateDifference(now, next, period);
 	}
 
 	@Test
-	public void fixedRateWithInitialDelaySubsequentExecution() {
-		Date now = new Date();
+	@SuppressWarnings("deprecation")
+	void fixedRateWithInitialDelaySubsequentExecution() {
+		Instant now = Instant.now();
 		long period = 5000;
 		long initialDelay = 30000;
-		PeriodicTrigger trigger = new PeriodicTrigger(period);
+		PeriodicTrigger trigger = new PeriodicTrigger(Duration.ofMillis(period));
 		trigger.setFixedRate(true);
 		trigger.setInitialDelay(initialDelay);
-		Date next = trigger.nextExecutionTime(context(now, 500, 3000));
+		Instant next = trigger.nextExecution(context(now, 500, 3000));
 		assertApproximateDifference(now, next, period);
 	}
 
 	@Test
-	public void fixedRateWithTimeUnitSubsequentExecution() {
-		Date now = new Date();
+	void fixedRateWithTimeUnitSubsequentExecution() {
+		Instant now = Instant.now();
 		long period = 5;
-		PeriodicTrigger trigger = new PeriodicTrigger(period, TimeUnit.HOURS);
+		PeriodicTrigger trigger = new PeriodicTrigger(Duration.ofHours(period));
 		trigger.setFixedRate(true);
-		Date next = trigger.nextExecutionTime(context(now, 500, 3000));
+		Instant next = trigger.nextExecution(context(now, 500, 3000));
 		assertApproximateDifference(now, next, (period * 60 * 60 * 1000));
 	}
 
 	@Test
-	public void equalsVerification() {
-		PeriodicTrigger trigger1 = new PeriodicTrigger(3000);
-		PeriodicTrigger trigger2 = new PeriodicTrigger(3000);
+	@SuppressWarnings("deprecation")
+	void equalsVerification() {
+		PeriodicTrigger trigger1 = new PeriodicTrigger(Duration.ofMillis(3000));
+		PeriodicTrigger trigger2 = new PeriodicTrigger(Duration.ofMillis(3000));
 		assertThat(trigger1.equals(new String("not a trigger"))).isFalse();
 		assertThat(trigger1.equals(null)).isFalse();
 		assertThat(trigger1).isEqualTo(trigger1);
@@ -192,44 +199,46 @@ public class PeriodicTriggerTests {
 		assertThat(trigger2.equals(trigger1)).isFalse();
 		trigger1.setFixedRate(true);
 		assertThat(trigger2).isEqualTo(trigger1);
-		PeriodicTrigger trigger3 = new PeriodicTrigger(3, TimeUnit.SECONDS);
-		trigger3.setInitialDelay(7);
+		PeriodicTrigger trigger3 = new PeriodicTrigger(Duration.ofSeconds(3));
+		trigger3.setInitialDelay(Duration.ofSeconds(7));
 		trigger3.setFixedRate(true);
 		assertThat(trigger1.equals(trigger3)).isFalse();
 		assertThat(trigger3.equals(trigger1)).isFalse();
-		trigger1.setInitialDelay(7000);
+		trigger1.setInitialDelay(Duration.ofMillis(7000));
 		assertThat(trigger3).isEqualTo(trigger1);
 	}
 
 
 	// utility methods
 
-	private static void assertNegligibleDifference(Date d1, Date d2) {
-		long diff = Math.abs(d1.getTime() - d2.getTime());
-		assertThat(diff < 100).as("difference exceeds threshold: " + diff).isTrue();
+	private static void assertNegligibleDifference(Instant d1, @Nullable Instant d2) {
+		assertThat(Duration.between(d1, d2)).isLessThan(Duration.ofMillis(100));
 	}
 
-	private static void assertApproximateDifference(Date lesser, Date greater, long expected) {
-		long diff = greater.getTime() - lesser.getTime();
+	private static void assertApproximateDifference(Instant lesser, Instant greater, long expected) {
+		long diff = greater.toEpochMilli() - lesser.toEpochMilli();
 		long variance = Math.abs(expected - diff);
 		assertThat(variance < 100).as("expected approximate difference of " + expected +
 				", but actual difference was " + diff).isTrue();
 	}
 
-	private static TriggerContext context(Object scheduled, Object actual, Object completion) {
-		return new TestTriggerContext(asDate(scheduled), asDate(actual), asDate(completion));
+	private static TriggerContext context(@Nullable Object scheduled, @Nullable Object actual,
+			@Nullable Object completion) {
+		return new TestTriggerContext(toInstant(scheduled), toInstant(actual), toInstant(completion));
 	}
 
-	private static Date asDate(Object o) {
+	@Nullable
+	private static Instant toInstant(@Nullable Object o) {
 		if (o == null) {
 			return null;
 		}
-		if (o instanceof Date) {
-			return (Date) o;
+		if (o instanceof Instant) {
+			return (Instant) o;
 		}
 		if (o instanceof Number) {
-			return new Date(System.currentTimeMillis() +
-					NumberUtils.convertNumberToTargetClass((Number) o, Long.class));
+			return Instant.now()
+					.plus(NumberUtils.convertNumberToTargetClass((Number) o, Long.class),
+							ChronoUnit.MILLIS);
 		}
 		throw new IllegalArgumentException(
 				"expected Date or Number, but actual type was: " + o.getClass());
@@ -240,30 +249,35 @@ public class PeriodicTriggerTests {
 
 	private static class TestTriggerContext implements TriggerContext {
 
-		private final Date scheduled;
+		@Nullable
+		private final Instant scheduled;
 
-		private final Date actual;
+		@Nullable
+		private final Instant actual;
 
-		private final Date completion;
+		@Nullable
+		private final Instant completion;
 
-		TestTriggerContext(Date scheduled, Date actual, Date completion) {
+		TestTriggerContext(@Nullable Instant scheduled,
+				@Nullable Instant actual, @Nullable Instant completion) {
+
 			this.scheduled = scheduled;
 			this.actual = actual;
 			this.completion = completion;
 		}
 
 		@Override
-		public Date lastActualExecutionTime() {
+		public Instant lastActualExecution() {
 			return this.actual;
 		}
 
 		@Override
-		public Date lastCompletionTime() {
+		public Instant lastCompletion() {
 			return this.completion;
 		}
 
 		@Override
-		public Date lastScheduledExecutionTime() {
+		public Instant lastScheduledExecution() {
 			return this.scheduled;
 		}
 	}

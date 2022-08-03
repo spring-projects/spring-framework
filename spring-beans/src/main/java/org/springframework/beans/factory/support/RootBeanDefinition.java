@@ -429,6 +429,16 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		return this.factoryMethodToIntrospect;
 	}
 
+	@Override
+	public void setInstanceSupplier(@Nullable Supplier<?> instanceSupplier) {
+		super.setInstanceSupplier(instanceSupplier);
+		Method factoryMethod = (instanceSupplier instanceof InstanceSupplier<?>)
+				? ((InstanceSupplier<?>) instanceSupplier).getFactoryMethod() : null;
+		if (factoryMethod != null) {
+			setResolvedFactoryMethod(factoryMethod);
+		}
+	}
+
 	/**
 	 * Register an externally managed configuration method or field.
 	 */
@@ -538,6 +548,15 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 					Collections.unmodifiableSet(new LinkedHashSet<>(this.externallyManagedInitMethods)) :
 					Collections.emptySet());
 		}
+	}
+
+	/**
+	 * Resolve the inferred destroy method if necessary.
+	 * @since 6.0
+	 */
+	public void resolveDestroyMethodIfNecessary() {
+		setDestroyMethodNames(DisposableBeanAdapter
+				.inferDestroyMethodsIfNecessary(getResolvableType().toClass(), this));
 	}
 
 	/**
