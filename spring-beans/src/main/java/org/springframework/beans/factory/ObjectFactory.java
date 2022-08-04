@@ -35,6 +35,7 @@ import org.springframework.beans.BeansException;
  * @since 1.0.2
  * @param <T> the object type
  * @see FactoryBean
+ * TODO 它可以将创建对象的步骤封装到ObjectFactory中，交给自定义的scope来选择是否需要创建对象来灵活的视线scope
  */
 @FunctionalInterface
 public interface ObjectFactory<T> {
