@@ -94,13 +94,13 @@ class ConfigurationClassPostProcessorAotContributionTests {
 	@Test
 	void applyToWhenHasImportAwareConfigurationRegistersBeanPostProcessorAfterApplicationContextAwareProcessor() {
 		BeanFactoryInitializationAotContribution contribution = getContribution(
-				ImportConfiguration.class);
+				TestAwareCallbackConfiguration.class);
 		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
 		compile((initializer, compiled) -> {
-			GenericApplicationContext freshContext = new AnnotationConfigApplicationContext();
+			GenericApplicationContext freshContext = new GenericApplicationContext();
 			DefaultListableBeanFactory freshBeanFactory = freshContext.getDefaultListableBeanFactory();
 			initializer.accept(freshBeanFactory);
-			freshContext.registerBean(TestAwareCallbackConfiguration.class);
+			freshContext.registerBean(TestAwareCallbackBean.class);
 			freshContext.refresh();
 			TestAwareCallbackBean bean = freshContext.getBean(TestAwareCallbackBean.class);
 			assertThat(bean.instances).hasSize(2);
