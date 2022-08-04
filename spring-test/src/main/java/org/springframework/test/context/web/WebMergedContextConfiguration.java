@@ -50,7 +50,7 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.test.context.ContextConfiguration
  * @see org.springframework.test.context.ActiveProfiles
  * @see org.springframework.test.context.ContextConfigurationAttributes
- * @see org.springframework.test.context.SmartContextLoader#loadContext(MergedContextConfiguration, boolean)
+ * @see org.springframework.test.context.SmartContextLoader#loadContext(MergedContextConfiguration)
  */
 public class WebMergedContextConfiguration extends MergedContextConfiguration {
 

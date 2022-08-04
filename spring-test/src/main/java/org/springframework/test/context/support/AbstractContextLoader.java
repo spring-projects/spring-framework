@@ -128,7 +128,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * @see TestPropertySourceUtils#addPropertiesFilesToEnvironment
 	 * @see TestPropertySourceUtils#addInlinedPropertiesToEnvironment
 	 * @see ApplicationContextInitializer#initialize(ConfigurableApplicationContext)
-	 * @see #loadContext(MergedContextConfiguration, boolean)
+	 * @see #loadContext(MergedContextConfiguration)
 	 * @see ConfigurableApplicationContext#setId
 	 */
 	protected void prepareContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
