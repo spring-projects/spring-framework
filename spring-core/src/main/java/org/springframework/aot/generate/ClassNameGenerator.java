@@ -27,9 +27,11 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Generate unique class names based on target {@link Class} and a feature
- * name. This class is stateful so the same instance should be used for all
- * name generation.
+ * Generate unique class names based on a target {@link Class} and a feature
+ * name.
+ *
+ * <p>This class is stateful, so the same instance should be used for all name
+ * generation.
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
@@ -134,7 +136,7 @@ public final class ClassNameGenerator {
 
 
 	/**
-	 * Return a new {@link ClassNameGenerator} instance for the specified
+	 * Create a new {@link ClassNameGenerator} instance for the specified
 	 * feature name prefix, keeping track of all the class names generated
 	 * by this instance.
 	 * @param featureNamePrefix the feature name prefix to use
