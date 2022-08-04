@@ -31,6 +31,7 @@ import org.springframework.aot.hint.ResourcePatternHint;
 import org.springframework.aot.test.generator.compile.Compiled;
 import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -42,12 +43,14 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.testfixture.context.generator.annotation.ImportAwareConfiguration;
 import org.springframework.context.testfixture.context.generator.annotation.ImportConfiguration;
+import org.springframework.core.Ordered;
 import org.springframework.core.testfixture.aot.generate.TestGenerationContext;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
@@ -107,6 +110,27 @@ class ConfigurationClassPostProcessorAotContributionTests {
 			assertThat(bean.instances.get(0)).isEqualTo(freshContext);
 			assertThat(bean.instances.get(1)).isInstanceOfSatisfying(AnnotationMetadata.class, metadata ->
 					assertThat(metadata.getClassName()).isEqualTo(TestAwareCallbackConfiguration.class.getName()));
+		});
+	}
+
+	@Test
+	void applyToWhenHasImportAwareConfigurationRegistersBeanPostProcessorBeforeRegularBeanPostProcessor() {
+		BeanFactoryInitializationAotContribution contribution = getContribution(
+				TestImportAwareBeanPostProcessorConfiguration.class);
+		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
+		compile((initializer, compiled) -> {
+			GenericApplicationContext freshContext = new GenericApplicationContext();
+			DefaultListableBeanFactory freshBeanFactory = freshContext.getDefaultListableBeanFactory();
+			initializer.accept(freshBeanFactory);
+			freshBeanFactory.registerBeanDefinition(TestImportAwareBeanPostProcessor.class.getName(),
+					new RootBeanDefinition(TestImportAwareBeanPostProcessor.class));
+			RootBeanDefinition bd = new RootBeanDefinition(String.class);
+			bd.setInstanceSupplier(() -> "test");
+			freshBeanFactory.registerBeanDefinition("testProcessing", bd);
+			freshContext.refresh();
+			assertThat(freshContext.getBean("testProcessing")).isInstanceOfSatisfying(AnnotationMetadata.class, metadata ->
+					assertThat(metadata.getClassName()).isEqualTo(TestImportAwareBeanPostProcessorConfiguration.class.getName())
+			);
 		});
 	}
 
@@ -174,6 +198,43 @@ class ConfigurationClassPostProcessorAotContributionTests {
 		@Override
 		public void setImportMetadata(AnnotationMetadata importMetadata) {
 			this.instances.add(importMetadata);
+		}
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@Import(TestImportAwareBeanPostProcessor.class)
+	static class TestImportAwareBeanPostProcessorConfiguration {
+
+	}
+
+	static class TestImportAwareBeanPostProcessor implements BeanPostProcessor, ImportAware,
+			Ordered, InitializingBean {
+
+		private AnnotationMetadata metadata;
+
+		@Override
+		public void setImportMetadata(AnnotationMetadata importMetadata) {
+			this.metadata = importMetadata;
+		}
+
+		@Nullable
+		@Override
+		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+			if (beanName.equals("testProcessing")) {
+				return this.metadata;
+			}
+			return bean;
+		}
+
+		@Override
+		public int getOrder() {
+			return Ordered.HIGHEST_PRECEDENCE;
+		}
+
+		@Override
+		public void afterPropertiesSet() throws Exception {
+			Assert.notNull(this.metadata, "Metadata was not injected");
 		}
 
 	}
