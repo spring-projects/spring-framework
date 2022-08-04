@@ -22,7 +22,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Map;
 
-import jakarta.servlet.http.Cookie;
+import javax.servlet.http.Cookie;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;

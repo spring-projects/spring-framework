@@ -21,10 +21,8 @@ import java.time.Duration;
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.IsolationLevel;
-import io.r2dbc.spi.Option;
 import io.r2dbc.spi.R2dbcException;
 import io.r2dbc.spi.Result;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -74,13 +72,7 @@ import org.springframework.util.Assert;
  * synchronizations (if synchronization is generally active), assuming resources
  * operating on the underlying R2DBC {@code Connection}.
  *
- * <p>Spring's {@code TransactionDefinition} attributes are carried forward to R2DBC drivers
- * using extensible R2DBC {@link io.r2dbc.spi.TransactionDefinition}. Subclasses may
- * override {@link #createTransactionDefinition(TransactionDefinition)} to customize
- * transaction definitions for vendor-specific attributes.
- *
  * @author Mark Paluch
- * @author Juergen Hoeller
  * @since 5.3
  * @see ConnectionFactoryUtils#getConnection(ConnectionFactory)
  * @see ConnectionFactoryUtils#releaseConnection
@@ -150,8 +142,8 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 	 * transactional connection: "SET TRANSACTION READ ONLY" as understood by Oracle,
 	 * MySQL and Postgres.
 	 * <p>The exact treatment, including any SQL statement executed on the connection,
-	 * can be customized through {@link #prepareTransactionalConnection}.
-	 * @see #prepareTransactionalConnection
+	 * can be customized through {@link #prepareTransactionalConnection(Connection, TransactionDefinition)}.
+	 * @see #prepareTransactionalConnection(Connection, TransactionDefinition)
 	 */
 	public void setEnforceReadOnly(boolean enforceReadOnly) {
 		this.enforceReadOnly = enforceReadOnly;
@@ -187,6 +179,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 		return (txObject.hasConnectionHolder() && txObject.getConnectionHolder().isTransactionActive());
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected Mono<Void> doBegin(TransactionSynchronizationManager synchronizationManager, Object transaction,
 			TransactionDefinition definition) throws TransactionException {
@@ -210,8 +203,8 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 				connectionMono = Mono.just(txObject.getConnectionHolder().getConnection());
 			}
 
-			return connectionMono.flatMap(con -> switchAutoCommitIfNecessary(con, transaction)
-					.then(Mono.from(doBegin(definition, con)))
+			return connectionMono.flatMap(con -> prepareTransactionalConnection(con, definition, transaction)
+					.then(Mono.from(con.beginTransaction()))
 					.then(prepareTransactionalConnection(con, definition))
 					.doOnSuccess(v -> {
 						txObject.getConnectionHolder().setTransactionActive(true);
@@ -230,37 +223,12 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 									.then(Mono.error(e));
 						}
 						return Mono.error(e);
-					})).onErrorResume(e -> {
-						CannotCreateTransactionException ex = new CannotCreateTransactionException(
-								"Could not open R2DBC Connection for transaction", e);
-						return Mono.error(ex);
-					});
+			})).onErrorResume(e -> {
+				CannotCreateTransactionException ex = new CannotCreateTransactionException(
+						"Could not open R2DBC Connection for transaction", e);
+				return Mono.error(ex);
+			});
 		}).then();
-	}
-
-	private Publisher<Void> doBegin(TransactionDefinition definition, Connection con) {
-		io.r2dbc.spi.TransactionDefinition transactionDefinition = createTransactionDefinition(definition);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Starting R2DBC transaction on Connection [" + con + "] using [" + transactionDefinition + "]");
-		}
-		return con.beginTransaction(transactionDefinition);
-	}
-
-	/**
-	 * Determine the transaction definition from our {@code TransactionDefinition}.
-	 * Can be overridden to wrap the R2DBC {@code TransactionDefinition} to adjust or
-	 * enhance transaction attributes.
-	 * @param definition the transaction definition
-	 * @return the actual transaction definition to use
-	 * @since 6.0
-	 * @see io.r2dbc.spi.TransactionDefinition
-	 */
-	protected io.r2dbc.spi.TransactionDefinition createTransactionDefinition(TransactionDefinition definition) {
-		// Apply specific isolation level, if any.
-		IsolationLevel isolationLevelToUse = resolveIsolationLevel(definition.getIsolationLevel());
-		return new ExtendedTransactionDefinition(definition.getName(), definition.isReadOnly(),
-				definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT ? isolationLevelToUse : null,
-				determineTimeout(definition));
 	}
 
 	/**
@@ -360,6 +328,11 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 				afterCleanup = afterCleanup.then(Mono.from(con.setAutoCommit(true)));
 			}
 
+			if (txObject.getPreviousIsolationLevel() != null) {
+				afterCleanup = afterCleanup
+						.then(Mono.from(con.setTransactionIsolationLevel(txObject.getPreviousIsolationLevel())));
+			}
+
 			return afterCleanup.then(Mono.defer(() -> {
 				try {
 					if (txObject.isNewConnectionHolder()) {
@@ -377,9 +350,32 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 		});
 	}
 
-	private Mono<Void> switchAutoCommitIfNecessary(Connection con, Object transaction) {
+	/**
+	 * Prepare the transactional {@link Connection} right before transaction begin.
+	 * @deprecated in favor of {@link #prepareTransactionalConnection(Connection, TransactionDefinition)}
+	 * since this variant gets called too early (before transaction begin) for read-only customization
+	 */
+	@Deprecated
+	protected Mono<Void> prepareTransactionalConnection(
+			Connection con, TransactionDefinition definition, Object transaction) {
+
 		ConnectionFactoryTransactionObject txObject = (ConnectionFactoryTransactionObject) transaction;
 		Mono<Void> prepare = Mono.empty();
+
+		// Apply specific isolation level, if any.
+		IsolationLevel isolationLevelToUse = resolveIsolationLevel(definition.getIsolationLevel());
+		if (isolationLevelToUse != null && definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
+
+			if (logger.isDebugEnabled()) {
+				logger.debug("Changing isolation level of R2DBC Connection [" + con + "] to " + isolationLevelToUse.asSql());
+			}
+			IsolationLevel currentIsolation = con.getTransactionIsolationLevel();
+			if (!currentIsolation.asSql().equalsIgnoreCase(isolationLevelToUse.asSql())) {
+
+				txObject.setPreviousIsolationLevel(currentIsolation);
+				prepare = prepare.then(Mono.from(con.setTransactionIsolationLevel(isolationLevelToUse)));
+			}
+		}
 
 		// Switch to manual commit if necessary. This is very expensive in some R2DBC drivers,
 		// so we don't want to do it unnecessarily (for example if we've explicitly
@@ -429,13 +425,17 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 	 */
 	@Nullable
 	protected IsolationLevel resolveIsolationLevel(int isolationLevel) {
-		return switch (isolationLevel) {
-			case TransactionDefinition.ISOLATION_READ_COMMITTED -> IsolationLevel.READ_COMMITTED;
-			case TransactionDefinition.ISOLATION_READ_UNCOMMITTED -> IsolationLevel.READ_UNCOMMITTED;
-			case TransactionDefinition.ISOLATION_REPEATABLE_READ -> IsolationLevel.REPEATABLE_READ;
-			case TransactionDefinition.ISOLATION_SERIALIZABLE -> IsolationLevel.SERIALIZABLE;
-			default -> null;
-		};
+		switch (isolationLevel) {
+			case TransactionDefinition.ISOLATION_READ_COMMITTED:
+				return IsolationLevel.READ_COMMITTED;
+			case TransactionDefinition.ISOLATION_READ_UNCOMMITTED:
+				return IsolationLevel.READ_UNCOMMITTED;
+			case TransactionDefinition.ISOLATION_REPEATABLE_READ:
+				return IsolationLevel.REPEATABLE_READ;
+			case TransactionDefinition.ISOLATION_SERIALIZABLE:
+				return IsolationLevel.SERIALIZABLE;
+		}
+		return null;
 	}
 
 	/**
@@ -451,61 +451,6 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 
 	/**
-	 * Extended R2DBC transaction definition object providing transaction attributes
-	 * to R2DBC drivers when starting a transaction.
-	 */
-	private record ExtendedTransactionDefinition(@Nullable String transactionName,
-			boolean readOnly, @Nullable IsolationLevel isolationLevel, Duration lockWaitTimeout)
-			implements io.r2dbc.spi.TransactionDefinition {
-
-		private ExtendedTransactionDefinition(@Nullable String transactionName, boolean readOnly,
-				@Nullable IsolationLevel isolationLevel, Duration lockWaitTimeout) {
-
-			this.transactionName = transactionName;
-			this.readOnly = readOnly;
-			this.isolationLevel = isolationLevel;
-			this.lockWaitTimeout = lockWaitTimeout;
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public <T> T getAttribute(Option<T> option) {
-			return (T) doGetValue(option);
-		}
-
-		@Nullable
-		private Object doGetValue(Option<?> option) {
-			if (io.r2dbc.spi.TransactionDefinition.ISOLATION_LEVEL.equals(option)) {
-				return this.isolationLevel;
-			}
-			if (io.r2dbc.spi.TransactionDefinition.NAME.equals(option)) {
-				return this.transactionName;
-			}
-			if (io.r2dbc.spi.TransactionDefinition.READ_ONLY.equals(option)) {
-				return this.readOnly;
-			}
-			if (io.r2dbc.spi.TransactionDefinition.LOCK_WAIT_TIMEOUT.equals(option)
-				&& !this.lockWaitTimeout.isZero()) {
-				return this.lockWaitTimeout;
-			}
-			return null;
-		}
-
-		@Override
-		public String toString() {
-			StringBuilder sb = new StringBuilder();
-			sb.append(getClass().getSimpleName());
-			sb.append(" [transactionName='").append(this.transactionName).append('\'');
-			sb.append(", readOnly=").append(this.readOnly);
-			sb.append(", isolationLevel=").append(this.isolationLevel);
-			sb.append(", lockWaitTimeout=").append(this.lockWaitTimeout);
-			sb.append(']');
-			return sb.toString();
-		}
-	}
-
-
-	/**
 	 * ConnectionFactory transaction object, representing a ConnectionHolder.
 	 * Used as transaction object by R2dbcTransactionManager.
 	 */
@@ -513,6 +458,9 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 		@Nullable
 		private ConnectionHolder connectionHolder;
+
+		@Nullable
+		private IsolationLevel previousIsolationLevel;
 
 		private boolean newConnectionHolder;
 
@@ -542,6 +490,15 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 		public boolean hasConnectionHolder() {
 			return (this.connectionHolder != null);
+		}
+
+		public void setPreviousIsolationLevel(@Nullable IsolationLevel previousIsolationLevel) {
+			this.previousIsolationLevel = previousIsolationLevel;
+		}
+
+		@Nullable
+		public IsolationLevel getPreviousIsolationLevel() {
+			return this.previousIsolationLevel;
 		}
 
 		public void setMustRestoreAutoCommit(boolean mustRestoreAutoCommit) {

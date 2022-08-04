@@ -16,6 +16,8 @@
 
 package org.springframework.http.converter.xml;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import javax.xml.transform.Result;
@@ -42,6 +44,9 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 /**
  * Tests for {@link MarshallingHttpMessageConverter}.
@@ -83,7 +88,8 @@ public class MarshallingHttpMessageConverterTests {
 	@Test
 	public void read() throws Exception {
 		String body = "<root>Hello World</root>";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
+		InputStream inputStream = spy(new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(inputStream);
 
 		Unmarshaller unmarshaller = mock(Unmarshaller.class);
 		given(unmarshaller.unmarshal(isA(StreamSource.class))).willReturn(body);
@@ -93,6 +99,7 @@ public class MarshallingHttpMessageConverterTests {
 
 		String result = (String) converter.read(Object.class, inputMessage);
 		assertThat(result).as("Invalid result").isEqualTo(body);
+		verify(inputStream, never()).close();
 	}
 
 	@Test
@@ -137,6 +144,7 @@ public class MarshallingHttpMessageConverterTests {
 
 		assertThat(outputMessage.getHeaders().getContentType())
 				.as("Invalid content-type").isEqualTo(new MediaType("application", "xml"));
+		verify(outputMessage.getBody(), never()).close();
 	}
 
 	@Test

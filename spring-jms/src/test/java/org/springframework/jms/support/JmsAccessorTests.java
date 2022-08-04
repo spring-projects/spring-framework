@@ -16,7 +16,8 @@
 
 package org.springframework.jms.support;
 
-import jakarta.jms.Session;
+import javax.jms.Session;
+
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

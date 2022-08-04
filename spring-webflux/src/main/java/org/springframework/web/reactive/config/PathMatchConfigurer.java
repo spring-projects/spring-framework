@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 import org.springframework.lang.Nullable;
-import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Assist with configuring {@code HandlerMapping}'s with path matching options.
@@ -56,12 +55,8 @@ public class PathMatchConfigurer {
 	/**
 	 * Whether to match to URLs irrespective of the presence of a trailing slash.
 	 * If enabled a method mapped to "/users" also matches to "/users/".
-	 * <p>The default was changed in 6.0 from {@code true} to {@code false} in
-	 * order to support the deprecation of the property.
-	 * @deprecated as of 6.0, see
-	 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
+	 * <p>The default value is {@code true}.
 	 */
-	@Deprecated
 	public PathMatchConfigurer setUseTrailingSlashMatch(Boolean trailingSlashMatch) {
 		this.trailingSlashMatch = trailingSlashMatch;
 		return this;
@@ -88,7 +83,6 @@ public class PathMatchConfigurer {
 
 
 	@Nullable
-	@Deprecated
 	protected Boolean isUseTrailingSlashMatch() {
 		return this.trailingSlashMatch;
 	}

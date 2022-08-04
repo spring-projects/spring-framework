@@ -35,6 +35,9 @@
 					<mvc:content-version-strategy patterns="/**"/>
 				</mvc:version-resolver>
 			</mvc:resolvers>
+			<mvc:transformers>
+				<bean class="org.springframework.web.servlet.resource.AppCacheManifestTransformer"/>
+			</mvc:transformers>
 		</mvc:resource-chain>
 	</mvc:resources>
 

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:lang="http://www.springframework.org/schema/lang"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+				http://www.springframework.org/schema/lang https://www.springframework.org/schema/lang/spring-lang-4.2.xsd">
+
+	<lang:std id="messengerWithInterface" script-source="classpath:org/springframework/scripting/support/Messenger.js"
+			  script-interfaces="org.springframework.scripting.Messenger"/>
+
+	<lang:std id="refreshableMessengerWithInterface" refresh-check-delay="5000"
+			  script-source="classpath:org/springframework/scripting/support/Messenger.js"
+			  script-interfaces="org.springframework.scripting.Messenger">
+	</lang:std>
+
+	<lang:std id="inlineMessengerWithInterface" engine="JavaScript"
+			  script-interfaces="org.springframework.scripting.Messenger">
+		<lang:inline-script>
+			function getMessage() { return "Hello World!" }
+		</lang:inline-script>
+	</lang:std>
+
+</beans>

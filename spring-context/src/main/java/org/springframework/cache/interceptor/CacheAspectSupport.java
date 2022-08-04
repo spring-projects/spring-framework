@@ -857,9 +857,10 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof CacheOperationCacheKey otherKey)) {
+			if (!(other instanceof CacheOperationCacheKey)) {
 				return false;
 			}
+			CacheOperationCacheKey otherKey = (CacheOperationCacheKey) other;
 			return (this.cacheOperation.equals(otherKey.cacheOperation) &&
 					this.methodCacheKey.equals(otherKey.methodCacheKey));
 		}

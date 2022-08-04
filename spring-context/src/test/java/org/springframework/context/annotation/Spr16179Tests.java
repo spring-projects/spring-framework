@@ -52,7 +52,7 @@ class Spr16179Tests {
 
 		@Bean
 		Assembler<SomeType> someAssembler() {
-			return new Assembler<>() {};
+			return new Assembler<SomeType>() {};
 		}
 	}
 

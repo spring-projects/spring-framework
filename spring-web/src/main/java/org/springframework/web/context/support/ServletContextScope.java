@@ -19,7 +19,7 @@ package org.springframework.web.context.support;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import jakarta.servlet.ServletContext;
+import javax.servlet.ServletContext;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.ObjectFactory;

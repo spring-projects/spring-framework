@@ -21,7 +21,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;

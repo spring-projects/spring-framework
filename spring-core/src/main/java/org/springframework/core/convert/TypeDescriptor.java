@@ -458,9 +458,10 @@ public class TypeDescriptor implements Serializable {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof TypeDescriptor otherDesc)) {
+		if (!(other instanceof TypeDescriptor)) {
 			return false;
 		}
+		TypeDescriptor otherDesc = (TypeDescriptor) other;
 		if (getType() != otherDesc.getType()) {
 			return false;
 		}

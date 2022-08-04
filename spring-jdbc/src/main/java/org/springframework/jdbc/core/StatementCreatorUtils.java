@@ -208,7 +208,8 @@ public abstract class StatementCreatorUtils {
 		Object inValueToUse = inValue;
 
 		// override type info?
-		if (inValue instanceof SqlParameterValue parameterValue) {
+		if (inValue instanceof SqlParameterValue) {
+			SqlParameterValue parameterValue = (SqlParameterValue) inValue;
 			if (logger.isDebugEnabled()) {
 				logger.debug("Overriding type info with runtime info from SqlParameterValue: column index " + paramIndex +
 						", SQL type " + parameterValue.getSqlType() + ", type name " + parameterValue.getTypeName());
@@ -355,7 +356,8 @@ public abstract class StatementCreatorUtils {
 					ps.setDate(paramIndex, new java.sql.Date(((java.util.Date) inValue).getTime()));
 				}
 			}
-			else if (inValue instanceof Calendar cal) {
+			else if (inValue instanceof Calendar) {
+				Calendar cal = (Calendar) inValue;
 				ps.setDate(paramIndex, new java.sql.Date(cal.getTime().getTime()), cal);
 			}
 			else {
@@ -371,7 +373,8 @@ public abstract class StatementCreatorUtils {
 					ps.setTime(paramIndex, new java.sql.Time(((java.util.Date) inValue).getTime()));
 				}
 			}
-			else if (inValue instanceof Calendar cal) {
+			else if (inValue instanceof Calendar) {
+				Calendar cal = (Calendar) inValue;
 				ps.setTime(paramIndex, new java.sql.Time(cal.getTime().getTime()), cal);
 			}
 			else {
@@ -387,7 +390,8 @@ public abstract class StatementCreatorUtils {
 					ps.setTimestamp(paramIndex, new java.sql.Timestamp(((java.util.Date) inValue).getTime()));
 				}
 			}
-			else if (inValue instanceof Calendar cal) {
+			else if (inValue instanceof Calendar) {
+				Calendar cal = (Calendar) inValue;
 				ps.setTimestamp(paramIndex, new java.sql.Timestamp(cal.getTime().getTime()), cal);
 			}
 			else {
@@ -402,7 +406,8 @@ public abstract class StatementCreatorUtils {
 			else if (isDateValue(inValue.getClass())) {
 				ps.setTimestamp(paramIndex, new java.sql.Timestamp(((java.util.Date) inValue).getTime()));
 			}
-			else if (inValue instanceof Calendar cal) {
+			else if (inValue instanceof Calendar) {
+				Calendar cal = (Calendar) inValue;
 				ps.setTimestamp(paramIndex, new java.sql.Timestamp(cal.getTime().getTime()), cal);
 			}
 			else {

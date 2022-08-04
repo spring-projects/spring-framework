@@ -16,10 +16,11 @@
 
 package org.springframework.web.servlet.tags;
 
-import jakarta.servlet.jsp.JspException;
-import jakarta.servlet.jsp.JspTagException;
-import jakarta.servlet.jsp.tagext.TagSupport;
-import jakarta.servlet.jsp.tagext.TryCatchFinally;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspTagException;
+import javax.servlet.jsp.tagext.TagSupport;
+import javax.servlet.jsp.tagext.TryCatchFinally;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -50,7 +51,7 @@ import org.springframework.web.servlet.support.RequestContext;
 public abstract class RequestContextAwareTag extends TagSupport implements TryCatchFinally {
 
 	/**
-	 * {@link jakarta.servlet.jsp.PageContext} attribute for the
+	 * {@link javax.servlet.jsp.PageContext} attribute for the
 	 * page-level {@link RequestContext} instance.
 	 */
 	public static final String REQUEST_CONTEXT_PAGE_ATTRIBUTE =
@@ -104,7 +105,7 @@ public abstract class RequestContextAwareTag extends TagSupport implements TryCa
 	 * @return same as TagSupport.doStartTag
 	 * @throws Exception any exception, any checked one other than
 	 * a JspException gets wrapped in a JspException by doStartTag
-	 * @see jakarta.servlet.jsp.tagext.TagSupport#doStartTag
+	 * @see javax.servlet.jsp.tagext.TagSupport#doStartTag
 	 */
 	protected abstract int doStartTagInternal() throws Exception;
 

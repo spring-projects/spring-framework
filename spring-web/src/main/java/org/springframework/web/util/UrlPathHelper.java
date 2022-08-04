@@ -21,11 +21,12 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.Map;
 import java.util.Properties;
 
-import jakarta.servlet.RequestDispatcher;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.http.HttpServletMapping;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.MappingMatch;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletMapping;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.MappingMatch;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -50,7 +51,7 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @since 14.01.2004
  * @see #getLookupPathForRequest
- * @see jakarta.servlet.RequestDispatcher
+ * @see javax.servlet.RequestDispatcher
  */
 public class UrlPathHelper {
 
@@ -91,7 +92,7 @@ public class UrlPathHelper {
 	/**
 	 * Whether URL lookups should always use the full path within the current
 	 * web application context, i.e. within
-	 * {@link jakarta.servlet.ServletContext#getContextPath()}.
+	 * {@link javax.servlet.ServletContext#getContextPath()}.
 	 * <p>If set to {@literal false} the path within the current servlet mapping
 	 * is used instead if applicable (i.e. in the case of a prefix based Servlet
 	 * mapping such as "/myServlet/*").
@@ -117,7 +118,7 @@ public class UrlPathHelper {
 	 * @see #getContextPath
 	 * @see #getRequestUri
 	 * @see WebUtils#DEFAULT_CHARACTER_ENCODING
-	 * @see jakarta.servlet.ServletRequest#getCharacterEncoding()
+	 * @see javax.servlet.ServletRequest#getCharacterEncoding()
 	 * @see java.net.URLDecoder#decode(String, String)
 	 */
 	public void setUrlDecode(boolean urlDecode) {
@@ -158,8 +159,8 @@ public class UrlPathHelper {
 	 * {@code ServletRequest.setCharacterEncoding} method.
 	 * @param defaultEncoding the character encoding to use
 	 * @see #determineEncoding
-	 * @see jakarta.servlet.ServletRequest#getCharacterEncoding()
-	 * @see jakarta.servlet.ServletRequest#setCharacterEncoding(String)
+	 * @see javax.servlet.ServletRequest#getCharacterEncoding()
+	 * @see javax.servlet.ServletRequest#setCharacterEncoding(String)
 	 * @see WebUtils#DEFAULT_CHARACTER_ENCODING
 	 */
 	public void setDefaultEncoding(String defaultEncoding) {
@@ -559,7 +560,7 @@ public class UrlPathHelper {
 	 * @param source the String to decode
 	 * @return the decoded String
 	 * @see WebUtils#DEFAULT_CHARACTER_ENCODING
-	 * @see jakarta.servlet.ServletRequest#getCharacterEncoding
+	 * @see javax.servlet.ServletRequest#getCharacterEncoding
 	 * @see java.net.URLDecoder#decode(String, String)
 	 * @see java.net.URLDecoder#decode(String)
 	 */
@@ -592,7 +593,7 @@ public class UrlPathHelper {
 	 * falling back to the default encoding specified for this resolver.
 	 * @param request current HTTP request
 	 * @return the encoding for the request (never {@code null})
-	 * @see jakarta.servlet.ServletRequest#getCharacterEncoding()
+	 * @see javax.servlet.ServletRequest#getCharacterEncoding()
 	 * @see #setDefaultEncoding
 	 */
 	protected String determineEncoding(HttpServletRequest request) {

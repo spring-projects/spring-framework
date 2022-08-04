@@ -241,10 +241,11 @@ public class StandardScriptFactory implements ScriptFactory, BeanClassLoaderAwar
 
 		if (adaptedIfc != null) {
 			ScriptEngine scriptEngine = this.scriptEngine;
-			if (!(scriptEngine instanceof Invocable invocable)) {
+			if (!(scriptEngine instanceof Invocable)) {
 				throw new ScriptCompilationException(scriptSource,
 						"ScriptEngine must implement Invocable in order to adapt it to an interface: " + scriptEngine);
 			}
+			Invocable invocable = (Invocable) scriptEngine;
 			if (script != null) {
 				script = invocable.getInterface(script, adaptedIfc);
 			}

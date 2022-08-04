@@ -16,7 +16,8 @@
 
 package org.springframework.test.web.servlet.request;
 
-import jakarta.servlet.http.Part;
+import javax.servlet.http.Part;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;

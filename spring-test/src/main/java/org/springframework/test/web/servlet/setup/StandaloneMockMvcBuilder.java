@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import jakarta.servlet.ServletContext;
+import javax.servlet.ServletContext;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
@@ -58,6 +58,7 @@ import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
@@ -67,7 +68,6 @@ import org.springframework.web.servlet.support.SessionFlashMapManager;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
 import org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
-import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
@@ -127,8 +127,6 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	@Nullable
 	private FlashMapManager flashMapManager;
 
-	private boolean preferPathMatcher = false;
-
 	@Nullable
 	private PathPatternParser patternParser;
 
@@ -139,7 +137,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	@Nullable
 	private Boolean removeSemicolonContent;
 
-	private final Map<String, String> placeholderValues = new HashMap<>();
+	private Map<String, String> placeholderValues = new HashMap<>();
 
 	private Supplier<RequestMappingHandlerMapping> handlerMappingFactory = RequestMappingHandlerMapping::new;
 
@@ -319,10 +317,8 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	 * @param parser the parser to use
 	 * @since 5.3
 	 */
-	public StandaloneMockMvcBuilder setPatternParser(@Nullable PathPatternParser parser) {
+	public void setPatternParser(PathPatternParser parser) {
 		this.patternParser = parser;
-		this.preferPathMatcher = (this.patternParser == null);
-		return this;
 	}
 
 	/**
@@ -336,17 +332,14 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	@Deprecated
 	public StandaloneMockMvcBuilder setUseSuffixPatternMatch(boolean useSuffixPatternMatch) {
 		this.useSuffixPatternMatch = useSuffixPatternMatch;
-		this.preferPathMatcher |= useSuffixPatternMatch;
 		return this;
 	}
 
 	/**
 	 * Whether to match to URLs irrespective of the presence of a trailing slash.
 	 * If enabled a method mapped to "/users" also matches to "/users/".
-	 * @deprecated as of 6.0, see
-	 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
+	 * <p>The default value is {@code true}.
 	 */
-	@Deprecated
 	public StandaloneMockMvcBuilder setUseTrailingSlashPatternMatch(boolean useTrailingSlashPatternMatch) {
 		this.useTrailingSlashPatternMatch = useTrailingSlashPatternMatch;
 		return this;
@@ -355,7 +348,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	/**
 	 * Set if ";" (semicolon) content should be stripped from the request URI. The value,
 	 * if provided, is in turn set on
-	 * {@link org.springframework.web.util.UrlPathHelper#setRemoveSemicolonContent(boolean)}.
+	 * {@link AbstractHandlerMapping#setRemoveSemicolonContent(boolean)}.
 	 */
 	public StandaloneMockMvcBuilder setRemoveSemicolonContent(boolean removeSemicolonContent) {
 		this.removeSemicolonContent = removeSemicolonContent;
@@ -475,17 +468,14 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 			RequestMappingHandlerMapping handlerMapping = handlerMappingFactory.get();
 			handlerMapping.setEmbeddedValueResolver(new StaticStringValueResolver(placeholderValues));
-			if (patternParser == null && preferPathMatcher) {
-				handlerMapping.setPatternParser(null);
+			if (patternParser != null) {
+				handlerMapping.setPatternParser(patternParser);
+			}
+			else {
 				handlerMapping.setUseSuffixPatternMatch(useSuffixPatternMatch);
 				if (removeSemicolonContent != null) {
-					UrlPathHelper pathHelper = new UrlPathHelper();
-					pathHelper.setRemoveSemicolonContent(removeSemicolonContent);
-					handlerMapping.setUrlPathHelper(pathHelper);
+					handlerMapping.setRemoveSemicolonContent(removeSemicolonContent);
 				}
-			}
-			else if (patternParser != null) {
-				handlerMapping.setPatternParser(patternParser);
 			}
 			handlerMapping.setUseTrailingSlashMatch(useTrailingSlashPatternMatch);
 			handlerMapping.setOrder(0);

@@ -22,7 +22,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.inject.Provider;
+import javax.inject.Provider;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanFactory;

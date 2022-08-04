@@ -39,8 +39,6 @@ import org.springframework.util.MultiValueMap;
  * <p>There is a duplicate of this class in the server package!
  *
  * @author Rossen Stoyanchev
- * @author Juergen Hoeller
- * @author Sam Brannen
  * @since 5.3
  */
 class JettyHeadersAdapter implements MultiValueMap<String, String> {
@@ -60,10 +58,7 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public void add(String key, @Nullable String value) {
-		if (!(this.headers instanceof HttpFields.Mutable mutableHttpFields)) {
-			throw new IllegalStateException("Immutable headers");
-		}
-		mutableHttpFields.add(key, value);
+		this.headers.add(key, value);
 	}
 
 	@Override
@@ -78,10 +73,7 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public void set(String key, @Nullable String value) {
-		if (!(this.headers instanceof HttpFields.Mutable mutableHttpFields)) {
-			throw new IllegalStateException("Immutable headers");
-		}
-		mutableHttpFields.put(key, value);
+		this.headers.put(key, value);
 	}
 
 	@Override
@@ -113,13 +105,13 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public boolean containsKey(Object key) {
-		return (key instanceof String headerName && this.headers.contains(headerName));
+		return (key instanceof String && this.headers.containsKey((String) key));
 	}
 
 	@Override
 	public boolean containsValue(Object value) {
-		return (value instanceof String searchString &&
-				this.headers.stream().anyMatch(field -> field.contains(searchString)));
+		return (value instanceof String &&
+				this.headers.stream().anyMatch(field -> field.contains((String) value)));
 	}
 
 	@Nullable
@@ -134,23 +126,17 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 	@Nullable
 	@Override
 	public List<String> put(String key, List<String> value) {
-		if (!(this.headers instanceof HttpFields.Mutable mutableHttpFields)) {
-			throw new IllegalStateException("Immutable headers");
-		}
 		List<String> oldValues = get(key);
-		mutableHttpFields.put(key, value);
+		this.headers.put(key, value);
 		return oldValues;
 	}
 
 	@Nullable
 	@Override
 	public List<String> remove(Object key) {
-		if (!(this.headers instanceof HttpFields.Mutable mutableHttpFields)) {
-			throw new IllegalStateException("Immutable headers");
-		}
-		if (key instanceof String name) {
+		if (key instanceof String) {
 			List<String> oldValues = get(key);
-			mutableHttpFields.remove(name);
+			this.headers.remove((String) key);
 			return oldValues;
 		}
 		return null;
@@ -163,10 +149,7 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public void clear() {
-		if (!(this.headers instanceof HttpFields.Mutable mutableHttpFields)) {
-			throw new IllegalStateException("Immutable headers");
-		}
-		mutableHttpFields.clear();
+		this.headers.clear();
 	}
 
 	@Override
@@ -182,7 +165,7 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public Set<Entry<String, List<String>>> entrySet() {
-		return new AbstractSet<>() {
+		return new AbstractSet<Entry<String, List<String>>>() {
 			@Override
 			public Iterator<Entry<String, List<String>>> iterator() {
 				return new EntryIterator();
@@ -238,11 +221,8 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 		@Override
 		public List<String> setValue(List<String> value) {
-			if (!(headers instanceof HttpFields.Mutable mutableHttpFields)) {
-				throw new IllegalStateException("Immutable headers");
-			}
 			List<String> previousValues = headers.getValuesList(this.key);
-			mutableHttpFields.put(this.key, value);
+			headers.put(this.key, value);
 			return previousValues;
 		}
 	}
@@ -286,16 +266,13 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 		@Override
 		public void remove() {
-			if (!(headers instanceof HttpFields.Mutable mutableHttpFields)) {
-				throw new IllegalStateException("Immutable headers");
-			}
 			if (this.currentName == null) {
 				throw new IllegalStateException("No current Header in iterator");
 			}
-			if (!headers.contains(this.currentName)) {
+			if (!headers.containsKey(this.currentName)) {
 				throw new IllegalStateException("Header not present: " + this.currentName);
 			}
-			mutableHttpFields.remove(this.currentName);
+			headers.remove(this.currentName);
 		}
 	}
 

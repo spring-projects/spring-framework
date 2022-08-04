@@ -212,8 +212,8 @@ public class ResolvableType implements Serializable {
 			return this.resolved;
 		}
 		Type rawType = this.type;
-		if (rawType instanceof ParameterizedType parameterizedType) {
-			rawType = parameterizedType.getRawType();
+		if (rawType instanceof ParameterizedType) {
+			rawType = ((ParameterizedType) rawType).getRawType();
 		}
 		return (rawType instanceof Class ? (Class<?>) rawType : null);
 	}
@@ -313,7 +313,8 @@ public class ResolvableType implements Serializable {
 		boolean exactMatch = (matchedBefore != null);  // We're checking nested generic variables now...
 		boolean checkGenerics = true;
 		Class<?> ourResolved = null;
-		if (this.type instanceof TypeVariable<?> variable) {
+		if (this.type instanceof TypeVariable) {
+			TypeVariable<?> variable = (TypeVariable<?>) this.type;
 			// Try default variable resolution
 			if (this.variableResolver != null) {
 				ResolvableType resolved = this.variableResolver.resolveVariable(variable);
@@ -392,12 +393,12 @@ public class ResolvableType implements Serializable {
 		if (this.componentType != null) {
 			return this.componentType;
 		}
-		if (this.type instanceof Class<?> clazz) {
-			Class<?> componentType = clazz.getComponentType();
+		if (this.type instanceof Class) {
+			Class<?> componentType = ((Class<?>) this.type).getComponentType();
 			return forType(componentType, this.variableResolver);
 		}
-		if (this.type instanceof GenericArrayType genericArrayType) {
-			return forType(genericArrayType.getGenericComponentType(), this.variableResolver);
+		if (this.type instanceof GenericArrayType) {
+			return forType(((GenericArrayType) this.type).getGenericComponentType(), this.variableResolver);
 		}
 		return resolveType().getComponentType();
 	}
@@ -554,8 +555,8 @@ public class ResolvableType implements Serializable {
 		if (resolved != null) {
 			try {
 				for (Type genericInterface : resolved.getGenericInterfaces()) {
-					if (genericInterface instanceof Class<?> clazz) {
-						if (forClass(clazz).hasGenerics()) {
+					if (genericInterface instanceof Class) {
+						if (forClass((Class<?>) genericInterface).hasGenerics()) {
 							return true;
 						}
 					}
@@ -574,10 +575,11 @@ public class ResolvableType implements Serializable {
 	 * cannot be resolved through the associated variable resolver.
 	 */
 	private boolean isUnresolvableTypeVariable() {
-		if (this.type instanceof TypeVariable<?> variable) {
+		if (this.type instanceof TypeVariable) {
 			if (this.variableResolver == null) {
 				return true;
 			}
+			TypeVariable<?> variable = (TypeVariable<?>) this.type;
 			ResolvableType resolved = this.variableResolver.resolveVariable(variable);
 			if (resolved == null || resolved.isUnresolvableTypeVariable()) {
 				return true;
@@ -591,7 +593,8 @@ public class ResolvableType implements Serializable {
 	 * without specific bounds (i.e., equal to {@code ? extends Object}).
 	 */
 	private boolean isWildcardWithoutBounds() {
-		if (this.type instanceof WildcardType wt) {
+		if (this.type instanceof WildcardType) {
+			WildcardType wt = (WildcardType) this.type;
 			if (wt.getLowerBounds().length == 0) {
 				Type[] upperBounds = wt.getUpperBounds();
 				if (upperBounds.length == 0 || (upperBounds.length == 1 && Object.class == upperBounds[0])) {
@@ -703,15 +706,15 @@ public class ResolvableType implements Serializable {
 		}
 		ResolvableType[] generics = this.generics;
 		if (generics == null) {
-			if (this.type instanceof Class<?> clazz) {
-				Type[] typeParams = clazz.getTypeParameters();
+			if (this.type instanceof Class) {
+				Type[] typeParams = ((Class<?>) this.type).getTypeParameters();
 				generics = new ResolvableType[typeParams.length];
 				for (int i = 0; i < generics.length; i++) {
 					generics[i] = ResolvableType.forType(typeParams[i], this);
 				}
 			}
-			else if (this.type instanceof ParameterizedType parameterizedType) {
-				Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+			else if (this.type instanceof ParameterizedType) {
+				Type[] actualTypeArguments = ((ParameterizedType) this.type).getActualTypeArguments();
 				generics = new ResolvableType[actualTypeArguments.length];
 				for (int i = 0; i < actualTypeArguments.length; i++) {
 					generics[i] = forType(actualTypeArguments[i], this.variableResolver);
@@ -812,8 +815,8 @@ public class ResolvableType implements Serializable {
 		if (this.type == EmptyType.INSTANCE) {
 			return null;
 		}
-		if (this.type instanceof Class<?> clazz) {
-			return clazz;
+		if (this.type instanceof Class) {
+			return (Class<?>) this.type;
 		}
 		if (this.type instanceof GenericArrayType) {
 			Class<?> resolvedComponent = getComponentType().resolve();
@@ -828,17 +831,18 @@ public class ResolvableType implements Serializable {
 	 * as it cannot be serialized.
 	 */
 	ResolvableType resolveType() {
-		if (this.type instanceof ParameterizedType parameterizedType) {
-			return forType(parameterizedType.getRawType(), this.variableResolver);
+		if (this.type instanceof ParameterizedType) {
+			return forType(((ParameterizedType) this.type).getRawType(), this.variableResolver);
 		}
-		if (this.type instanceof WildcardType wildcardType) {
-			Type resolved = resolveBounds(wildcardType.getUpperBounds());
+		if (this.type instanceof WildcardType) {
+			Type resolved = resolveBounds(((WildcardType) this.type).getUpperBounds());
 			if (resolved == null) {
-				resolved = resolveBounds(wildcardType.getLowerBounds());
+				resolved = resolveBounds(((WildcardType) this.type).getLowerBounds());
 			}
 			return forType(resolved, this.variableResolver);
 		}
-		if (this.type instanceof TypeVariable<?> variable) {
+		if (this.type instanceof TypeVariable) {
+			TypeVariable<?> variable = (TypeVariable<?>) this.type;
 			// Try default variable resolution
 			if (this.variableResolver != null) {
 				ResolvableType resolved = this.variableResolver.resolveVariable(variable);
@@ -865,7 +869,8 @@ public class ResolvableType implements Serializable {
 		if (this.type instanceof TypeVariable) {
 			return resolveType().resolveVariable(variable);
 		}
-		if (this.type instanceof ParameterizedType parameterizedType) {
+		if (this.type instanceof ParameterizedType) {
+			ParameterizedType parameterizedType = (ParameterizedType) this.type;
 			Class<?> resolved = resolve();
 			if (resolved == null) {
 				return null;
@@ -900,10 +905,11 @@ public class ResolvableType implements Serializable {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof ResolvableType otherType)) {
+		if (!(other instanceof ResolvableType)) {
 			return false;
 		}
 
+		ResolvableType otherType = (ResolvableType) other;
 		if (!ObjectUtils.nullSafeEquals(this.type, otherType.type)) {
 			return false;
 		}
@@ -972,7 +978,8 @@ public class ResolvableType implements Serializable {
 		if (this.resolved == null) {
 			return "?";
 		}
-		if (this.type instanceof TypeVariable<?> variable) {
+		if (this.type instanceof TypeVariable) {
+			TypeVariable<?> variable = (TypeVariable<?>) this.type;
 			if (this.variableResolver == null || this.variableResolver.resolveVariable(variable) == null) {
 				// Don't bother with variable boundaries for toString()...
 				// Can cause infinite recursions in case of self-references
@@ -1102,8 +1109,8 @@ public class ResolvableType implements Serializable {
 	 * @see ResolvableTypeProvider
 	 */
 	public static ResolvableType forInstance(@Nullable Object instance) {
-		if (instance instanceof ResolvableTypeProvider resolvableTypeProvider) {
-			ResolvableType type = resolvableTypeProvider.getResolvableType();
+		if (instance instanceof ResolvableTypeProvider) {
+			ResolvableType type = ((ResolvableTypeProvider) instance).getResolvableType();
 			if (type != null) {
 				return type;
 			}
@@ -1565,9 +1572,10 @@ public class ResolvableType implements Serializable {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof ParameterizedType otherType)) {
+			if (!(other instanceof ParameterizedType)) {
 				return false;
 			}
+			ParameterizedType otherType = (ParameterizedType) other;
 			return (otherType.getOwnerType() == null && this.rawType.equals(otherType.getRawType()) &&
 					Arrays.equals(this.typeArguments, otherType.getActualTypeArguments()));
 		}

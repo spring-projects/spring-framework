@@ -168,9 +168,10 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof GenericTypeAwarePropertyDescriptor otherPd)) {
+		if (!(other instanceof GenericTypeAwarePropertyDescriptor)) {
 			return false;
 		}
+		GenericTypeAwarePropertyDescriptor otherPd = (GenericTypeAwarePropertyDescriptor) other;
 		return (getBeanClass().equals(otherPd.getBeanClass()) && PropertyDescriptorUtils.equals(this, otherPd));
 	}
 

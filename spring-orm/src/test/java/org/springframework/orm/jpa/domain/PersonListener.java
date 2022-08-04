@@ -16,7 +16,7 @@
 
 package org.springframework.orm.jpa.domain;
 
-import jakarta.persistence.PostLoad;
+import javax.persistence.PostLoad;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;

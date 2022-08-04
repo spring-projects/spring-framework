@@ -293,7 +293,8 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 				publishEvent(event);
 			}
 		}
-		else if (result instanceof Collection<?> events) {
+		else if (result instanceof Collection<?>) {
+			Collection<?> events = (Collection<?>) result;
 			for (Object event : events) {
 				publishEvent(event);
 			}

@@ -16,7 +16,7 @@
 
 package org.springframework.transaction.aspectj;
 
-import jakarta.transaction.Transactional;
+import javax.transaction.Transactional;
 
 import org.aspectj.lang.annotation.RequiredTypes;
 
@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.AnnotationTransactionAttribute
 
 /**
  * Concrete AspectJ transaction aspect using the JTA 1.2
- * {@link jakarta.transaction.Transactional} annotation.
+ * {@link javax.transaction.Transactional} annotation.
  *
  * <p>When using this aspect, you <i>must</i> annotate the implementation class
  * (and/or methods within that class), <i>not</i> the interface (if any) that
@@ -42,10 +42,10 @@ import org.springframework.transaction.annotation.AnnotationTransactionAttribute
  *
  * @author Stephane Nicoll
  * @since 4.2
- * @see jakarta.transaction.Transactional
+ * @see javax.transaction.Transactional
  * @see AnnotationTransactionAspect
  */
-@RequiredTypes("jakarta.transaction.Transactional")
+@RequiredTypes("javax.transaction.Transactional")
 public aspect JtaAnnotationTransactionAspect extends AbstractTransactionAspect {
 
 	public JtaAnnotationTransactionAspect() {

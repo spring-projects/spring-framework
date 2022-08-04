@@ -16,7 +16,8 @@
 
 package org.springframework.test.context.hierarchies.web;
 
-import jakarta.servlet.ServletContext;
+import javax.servlet.ServletContext;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 

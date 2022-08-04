@@ -16,7 +16,7 @@
 
 package org.springframework.http.codec.xml.jaxb;
 
-import jakarta.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Arjen Poutsma

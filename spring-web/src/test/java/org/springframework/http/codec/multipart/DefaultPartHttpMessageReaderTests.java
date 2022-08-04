@@ -118,10 +118,6 @@ class DefaultPartHttpMessageReaderTests  {
 		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
 
 		StepVerifier.create(result)
-				.consumeNextWith(part -> {
-					assertThat(part.headers().getFirst("Header")).isEqualTo("Value");
-					part.content().subscribe(DataBufferUtils::release);
-				})
 				.expectError(DecodingException.class)
 				.verify();
 	}

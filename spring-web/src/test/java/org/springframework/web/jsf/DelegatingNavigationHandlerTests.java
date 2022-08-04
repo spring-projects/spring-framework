@@ -16,8 +16,9 @@
 
 package org.springframework.web.jsf;
 
-import jakarta.faces.application.NavigationHandler;
-import jakarta.faces.context.FacesContext;
+import javax.faces.application.NavigationHandler;
+import javax.faces.context.FacesContext;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanFactory;

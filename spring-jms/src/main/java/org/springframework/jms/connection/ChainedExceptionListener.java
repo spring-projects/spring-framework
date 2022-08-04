@@ -19,8 +19,8 @@ package org.springframework.jms.connection;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.jms.ExceptionListener;
-import jakarta.jms.JMSException;
+import javax.jms.ExceptionListener;
+import javax.jms.JMSException;
 
 import org.springframework.util.Assert;
 

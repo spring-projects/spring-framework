@@ -16,7 +16,8 @@
 
 package org.springframework.test.web.servlet.result;
 
-import jakarta.servlet.http.Cookie;
+import javax.servlet.http.Cookie;
+
 import org.hamcrest.Matcher;
 
 import org.springframework.test.web.servlet.MvcResult;

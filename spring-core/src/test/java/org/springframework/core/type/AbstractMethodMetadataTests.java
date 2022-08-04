@@ -286,7 +286,8 @@ public abstract class AbstractMethodMetadataTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@interface DirectAnnotation {
+	// Must be public. See AnnotationAttributesReadingVisitor.recursivelyCollectMetaAnnotations().
+	public @interface DirectAnnotation {
 	}
 
 	@DirectAnnotation
@@ -322,7 +323,8 @@ public abstract class AbstractMethodMetadataTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@interface AnnotationAttributes {
+	// Must be public. See AnnotationAttributesReadingVisitor.recursivelyCollectMetaAnnotations().
+	public @interface AnnotationAttributes {
 
 		String name();
 

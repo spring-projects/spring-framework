@@ -107,7 +107,7 @@ class NettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public boolean containsKey(Object key) {
-		return (key instanceof String headerName && this.headers.contains(headerName));
+		return (key instanceof String && this.headers.contains((String) key));
 	}
 
 	@Override
@@ -137,9 +137,9 @@ class NettyHeadersAdapter implements MultiValueMap<String, String> {
 	@Nullable
 	@Override
 	public List<String> remove(Object key) {
-		if (key instanceof String headerName) {
-			List<String> previousValues = this.headers.getAll(headerName);
-			this.headers.remove(headerName);
+		if (key instanceof String) {
+			List<String> previousValues = this.headers.getAll((String) key);
+			this.headers.remove((String) key);
 			return previousValues;
 		}
 		return null;
@@ -168,7 +168,7 @@ class NettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public Set<Entry<String, List<String>>> entrySet() {
-		return new AbstractSet<>() {
+		return new AbstractSet<Entry<String, List<String>>>() {
 			@Override
 			public Iterator<Entry<String, List<String>>> iterator() {
 				return new EntryIterator();
@@ -190,7 +190,7 @@ class NettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	private class EntryIterator implements Iterator<Entry<String, List<String>>> {
 
-		private final Iterator<String> names = headers.names().iterator();
+		private Iterator<String> names = headers.names().iterator();
 
 		@Override
 		public boolean hasNext() {

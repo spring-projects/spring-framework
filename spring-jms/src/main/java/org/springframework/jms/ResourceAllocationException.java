@@ -21,12 +21,12 @@ package org.springframework.jms;
  *
  * @author Mark Pollack
  * @since 1.1
- * @see jakarta.jms.ResourceAllocationException
+ * @see javax.jms.ResourceAllocationException
  */
 @SuppressWarnings("serial")
 public class ResourceAllocationException extends JmsException {
 
-	public ResourceAllocationException(jakarta.jms.ResourceAllocationException cause) {
+	public ResourceAllocationException(javax.jms.ResourceAllocationException cause) {
 		super(cause);
 	}
 

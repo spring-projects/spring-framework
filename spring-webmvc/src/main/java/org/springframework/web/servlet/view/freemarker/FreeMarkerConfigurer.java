@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,11 @@ package org.springframework.web.servlet.view.freemarker;
 import java.io.IOException;
 import java.util.List;
 
+import javax.servlet.ServletContext;
+
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.TemplateLoader;
+import freemarker.ext.jsp.TaglibFactory;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 
@@ -29,6 +32,7 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactory;
 import org.springframework.util.Assert;
+import org.springframework.web.context.ServletContextAware;
 
 /**
  * JavaBean to configure FreeMarker for web usage, via the "configLocation"
@@ -74,10 +78,13 @@ import org.springframework.util.Assert;
  * @see FreeMarkerView
  */
 public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
-		implements FreeMarkerConfig, InitializingBean, ResourceLoaderAware {
+		implements FreeMarkerConfig, InitializingBean, ResourceLoaderAware, ServletContextAware {
 
 	@Nullable
 	private Configuration configuration;
+
+	@Nullable
+	private TaglibFactory taglibFactory;
 
 
 	/**
@@ -89,6 +96,14 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	 */
 	public void setConfiguration(Configuration configuration) {
 		this.configuration = configuration;
+	}
+
+	/**
+	 * Initialize the {@link TaglibFactory} for the given ServletContext.
+	 */
+	@Override
+	public void setServletContext(ServletContext servletContext) {
+		this.taglibFactory = new TaglibFactory(servletContext);
 	}
 
 
@@ -123,6 +138,15 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	public Configuration getConfiguration() {
 		Assert.state(this.configuration != null, "No Configuration available");
 		return this.configuration;
+	}
+
+	/**
+	 * Return the TaglibFactory object wrapped by this bean.
+	 */
+	@Override
+	public TaglibFactory getTaglibFactory() {
+		Assert.state(this.taglibFactory != null, "No TaglibFactory available");
+		return this.taglibFactory;
 	}
 
 }

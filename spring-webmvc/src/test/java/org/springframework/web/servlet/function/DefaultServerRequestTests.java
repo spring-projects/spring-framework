@@ -32,8 +32,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.Part;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.Part;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

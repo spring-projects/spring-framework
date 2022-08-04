@@ -16,9 +16,9 @@
 
 package org.springframework.jms.core;
 
-import jakarta.jms.JMSException;
-import jakarta.jms.Message;
-import jakarta.jms.Session;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.Session;
 
 /**
  * Creates a JMS message given a {@link Session}.
@@ -27,7 +27,7 @@ import jakarta.jms.Session;
  * of the {@link JmsTemplate} class.
  *
  * <p>Implementations <i>do not</i> need to concern themselves with
- * checked {@code JMSExceptions} (from the '{@code jakarta.jms}'
+ * checked {@code JMSExceptions} (from the '{@code javax.jms}'
  * package) that may be thrown from operations they attempt. The
  * {@code JmsTemplate} will catch and handle these
  * {@code JMSExceptions} appropriately.
@@ -43,7 +43,7 @@ public interface MessageCreator {
 	 * @param session the JMS {@link Session} to be used to create the
 	 * {@code Message} (never {@code null})
 	 * @return the {@code Message} to be sent
-	 * @throws jakarta.jms.JMSException if thrown by JMS API methods
+	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 */
 	Message createMessage(Session session) throws JMSException;
 

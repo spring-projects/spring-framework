@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,8 @@ public final class Conventions {
 			valueClass = value.getClass().getComponentType();
 			pluralize = true;
 		}
-		else if (value instanceof Collection<?> collection) {
+		else if (value instanceof Collection) {
+			Collection<?> collection = (Collection<?>) value;
 			if (collection.isEmpty()) {
 				throw new IllegalArgumentException(
 						"Cannot generate variable name for an empty Collection");
@@ -187,10 +188,11 @@ public final class Conventions {
 		else if (Collection.class.isAssignableFrom(resolvedType)) {
 			valueClass = ResolvableType.forMethodReturnType(method).asCollection().resolveGeneric();
 			if (valueClass == null) {
-				if (!(value instanceof Collection<?> collection)) {
+				if (!(value instanceof Collection)) {
 					throw new IllegalArgumentException("Cannot generate variable name " +
 							"for non-typed Collection return type and a non-Collection value");
 				}
+				Collection<?> collection = (Collection<?>) value;
 				if (collection.isEmpty()) {
 					throw new IllegalArgumentException("Cannot generate variable name " +
 							"for non-typed Collection return type and an empty Collection value");

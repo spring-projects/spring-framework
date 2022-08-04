@@ -18,10 +18,11 @@ package org.springframework.web.socket.adapter.standard;
 
 import java.net.URI;
 
-import jakarta.websocket.CloseReason;
-import jakarta.websocket.CloseReason.CloseCodes;
-import jakarta.websocket.MessageHandler;
-import jakarta.websocket.Session;
+import javax.websocket.CloseReason;
+import javax.websocket.CloseReason.CloseCodes;
+import javax.websocket.MessageHandler;
+import javax.websocket.Session;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

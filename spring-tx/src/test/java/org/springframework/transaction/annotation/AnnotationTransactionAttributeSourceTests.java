@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 
+import javax.ejb.TransactionAttributeType;
+
 import groovy.lang.GroovyObject;
 import groovy.lang.MetaClass;
-import jakarta.ejb.TransactionAttributeType;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.transaction.TransactionManager;
@@ -669,7 +669,6 @@ public class AnnotationTransactionAttributeSourceTests {
 	@Transactional(rollbackFor = Exception.class, noRollbackFor = IOException.class)
 	@interface TxWithAttribute {
 
-		@AliasFor(annotation = Transactional.class)
 		boolean readOnly();
 	}
 
@@ -746,7 +745,7 @@ public class AnnotationTransactionAttributeSourceTests {
 		private int age;
 
 		@Override
-		@jakarta.ejb.TransactionAttribute(TransactionAttributeType.SUPPORTS)
+		@javax.ejb.TransactionAttribute(TransactionAttributeType.SUPPORTS)
 		public String getName() {
 			return name;
 		}
@@ -757,7 +756,7 @@ public class AnnotationTransactionAttributeSourceTests {
 		}
 
 		@Override
-		@jakarta.ejb.TransactionAttribute
+		@javax.ejb.TransactionAttribute
 		public int getAge() {
 			return age;
 		}
@@ -769,7 +768,7 @@ public class AnnotationTransactionAttributeSourceTests {
 	}
 
 
-	@jakarta.ejb.TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	@javax.ejb.TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	static class Ejb3AnnotatedBean2 implements ITestBean1 {
 
 		private String name;
@@ -787,7 +786,7 @@ public class AnnotationTransactionAttributeSourceTests {
 		}
 
 		@Override
-		@jakarta.ejb.TransactionAttribute
+		@javax.ejb.TransactionAttribute
 		public int getAge() {
 			return age;
 		}
@@ -799,10 +798,10 @@ public class AnnotationTransactionAttributeSourceTests {
 	}
 
 
-	@jakarta.ejb.TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	@javax.ejb.TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	interface ITestEjb {
 
-		@jakarta.ejb.TransactionAttribute
+		@javax.ejb.TransactionAttribute
 		int getAge();
 
 		void setAge(int age);
@@ -848,7 +847,7 @@ public class AnnotationTransactionAttributeSourceTests {
 		private int age;
 
 		@Override
-		@jakarta.transaction.Transactional(jakarta.transaction.Transactional.TxType.SUPPORTS)
+		@javax.transaction.Transactional(javax.transaction.Transactional.TxType.SUPPORTS)
 		public String getName() {
 			return name;
 		}
@@ -859,7 +858,7 @@ public class AnnotationTransactionAttributeSourceTests {
 		}
 
 		@Override
-		@jakarta.transaction.Transactional
+		@javax.transaction.Transactional
 		public int getAge() {
 			return age;
 		}
@@ -871,7 +870,7 @@ public class AnnotationTransactionAttributeSourceTests {
 	}
 
 
-	@jakarta.transaction.Transactional(jakarta.transaction.Transactional.TxType.SUPPORTS)
+	@javax.transaction.Transactional(javax.transaction.Transactional.TxType.SUPPORTS)
 	static class JtaAnnotatedBean2 implements ITestBean1 {
 
 		private String name;
@@ -889,7 +888,7 @@ public class AnnotationTransactionAttributeSourceTests {
 		}
 
 		@Override
-		@jakarta.transaction.Transactional
+		@javax.transaction.Transactional
 		public int getAge() {
 			return age;
 		}
@@ -901,10 +900,10 @@ public class AnnotationTransactionAttributeSourceTests {
 	}
 
 
-	@jakarta.transaction.Transactional(jakarta.transaction.Transactional.TxType.SUPPORTS)
+	@javax.transaction.Transactional(javax.transaction.Transactional.TxType.SUPPORTS)
 	interface ITestJta {
 
-		@jakarta.transaction.Transactional
+		@javax.transaction.Transactional
 		int getAge();
 
 		void setAge(int age);

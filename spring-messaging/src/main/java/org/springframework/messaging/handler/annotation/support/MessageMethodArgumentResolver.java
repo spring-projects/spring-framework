@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,7 +134,8 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 
 	private Object convertPayload(Message<?> message, MethodParameter parameter, Class<?> targetPayloadType) {
 		Object result = null;
-		if (this.converter instanceof SmartMessageConverter smartConverter) {
+		if (this.converter instanceof SmartMessageConverter) {
+			SmartMessageConverter smartConverter = (SmartMessageConverter) this.converter;
 			result = smartConverter.fromMessage(message, targetPayloadType, parameter);
 		}
 		else if (this.converter != null) {

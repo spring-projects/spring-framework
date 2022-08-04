@@ -30,7 +30,6 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.client.reactive.ClientHttpResponse;
@@ -47,7 +46,7 @@ import org.springframework.util.MultiValueMap;
  */
 public class MockClientHttpResponse implements ClientHttpResponse {
 
-	private final HttpStatusCode statusCode;
+	private final int status;
 
 	private final HttpHeaders headers = new HttpHeaders();
 
@@ -56,25 +55,25 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 	private Flux<DataBuffer> body = Flux.empty();
 
 
+	public MockClientHttpResponse(HttpStatus status) {
+		Assert.notNull(status, "HttpStatus is required");
+		this.status = status.value();
+	}
+
 	public MockClientHttpResponse(int status) {
-		this(HttpStatusCode.valueOf(status));
-	}
-
-	public MockClientHttpResponse(HttpStatusCode status) {
-		Assert.notNull(status, "HttpStatusCode is required");
-		this.statusCode = status;
+		Assert.isTrue(status > 99 && status < 1000, "Status must be between 100 and 999");
+		this.status = status;
 	}
 
 
 	@Override
-	public HttpStatusCode getStatusCode() {
-		return this.statusCode;
+	public HttpStatus getStatusCode() {
+		return HttpStatus.valueOf(this.status);
 	}
 
 	@Override
-	@Deprecated
 	public int getRawStatusCode() {
-		return this.statusCode.value();
+		return this.status;
 	}
 
 	@Override
@@ -141,11 +140,7 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 
 	@Override
 	public String toString() {
-		if (this.statusCode instanceof HttpStatus status) {
-			return status.name() + "(" + this.statusCode + ")" + this.headers;
-		}
-		else {
-			return "Status (" + this.statusCode + ")" + this.headers;
-		}
+		HttpStatus code = HttpStatus.resolve(this.status);
+		return (code != null ? code.name() + "(" + this.status + ")" : "Status (" + this.status + ")") + this.headers;
 	}
 }

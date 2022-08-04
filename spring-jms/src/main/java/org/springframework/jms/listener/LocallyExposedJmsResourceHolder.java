@@ -16,7 +16,7 @@
 
 package org.springframework.jms.listener;
 
-import jakarta.jms.Session;
+import javax.jms.Session;
 
 import org.springframework.jms.connection.JmsResourceHolder;
 

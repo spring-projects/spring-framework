@@ -18,8 +18,9 @@ package org.springframework.jms.support;
 
 import java.util.Map;
 
-import jakarta.jms.Destination;
-import jakarta.jms.JMSException;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.jms.StubTextMessage;

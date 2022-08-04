@@ -225,7 +225,8 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 		final MediaType selectedContentType = getContentType(contentType);
 		outputMessage.getHeaders().setContentType(selectedContentType);
 
-		if (outputMessage instanceof StreamingHttpOutputMessage streamingOutputMessage) {
+		if (outputMessage instanceof StreamingHttpOutputMessage) {
+			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;
 			streamingOutputMessage.setBody(outputStream -> writeInternal(image, selectedContentType, outputStream));
 		}
 		else {

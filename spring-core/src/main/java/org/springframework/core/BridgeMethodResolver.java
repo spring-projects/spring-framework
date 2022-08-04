@@ -95,10 +95,10 @@ public final class BridgeMethodResolver {
 	 * Returns {@code true} if the supplied '{@code candidateMethod}' can be
 	 * considered a valid candidate for the {@link Method} that is {@link Method#isBridge() bridged}
 	 * by the supplied {@link Method bridge Method}. This method performs inexpensive
-	 * checks and can be used to quickly filter for a set of possible matches.
+	 * checks and can be used quickly to filter for a set of possible matches.
 	 */
 	private static boolean isBridgedCandidateFor(Method candidateMethod, Method bridgeMethod) {
-		return (!candidateMethod.isBridge() &&
+		return (!candidateMethod.isBridge() && !candidateMethod.equals(bridgeMethod) &&
 				candidateMethod.getName().equals(bridgeMethod.getName()) &&
 				candidateMethod.getParameterCount() == bridgeMethod.getParameterCount());
 	}

@@ -25,16 +25,17 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import jakarta.jms.Connection;
-import jakarta.jms.ConnectionFactory;
-import jakarta.jms.ExceptionListener;
-import jakarta.jms.JMSContext;
-import jakarta.jms.JMSException;
-import jakarta.jms.QueueConnection;
-import jakarta.jms.QueueConnectionFactory;
-import jakarta.jms.Session;
-import jakarta.jms.TopicConnection;
-import jakarta.jms.TopicConnectionFactory;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.ExceptionListener;
+import javax.jms.JMSContext;
+import javax.jms.JMSException;
+import javax.jms.QueueConnection;
+import javax.jms.QueueConnectionFactory;
+import javax.jms.Session;
+import javax.jms.TopicConnection;
+import javax.jms.TopicConnectionFactory;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -48,7 +49,7 @@ import org.springframework.util.ObjectUtils;
 /**
  * A JMS ConnectionFactory adapter that returns the same Connection
  * from all {@link #createConnection()} calls, and ignores calls to
- * {@link jakarta.jms.Connection#close()}. According to the JMS Connection
+ * {@link javax.jms.Connection#close()}. According to the JMS Connection
  * model, this is perfectly thread-safe (in contrast to e.g. JDBC). The
  * shared Connection can be automatically recovered in case of an Exception.
  *
@@ -169,7 +170,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 * <p>Note that client IDs need to be unique among all active Connections
 	 * of the underlying JMS provider. Furthermore, a client ID can only be
 	 * assigned if the original ConnectionFactory hasn't already assigned one.
-	 * @see jakarta.jms.Connection#setClientID
+	 * @see javax.jms.Connection#setClientID
 	 * @see #setTargetConnectionFactory
 	 */
 	public void setClientId(@Nullable String clientId) {
@@ -244,7 +245,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 
 	@Override
 	public Connection createConnection(String username, String password) throws JMSException {
-		throw new jakarta.jms.IllegalStateException(
+		throw new javax.jms.IllegalStateException(
 				"SingleConnectionFactory does not support custom username and password");
 	}
 
@@ -256,7 +257,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 			con = createConnection();
 		}
 		if (!(con instanceof QueueConnection)) {
-			throw new jakarta.jms.IllegalStateException(
+			throw new javax.jms.IllegalStateException(
 					"This SingleConnectionFactory does not hold a QueueConnection but rather: " + con);
 		}
 		return ((QueueConnection) con);
@@ -264,7 +265,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 
 	@Override
 	public QueueConnection createQueueConnection(String username, String password) throws JMSException {
-		throw new jakarta.jms.IllegalStateException(
+		throw new javax.jms.IllegalStateException(
 				"SingleConnectionFactory does not support custom username and password");
 	}
 
@@ -276,7 +277,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 			con = createConnection();
 		}
 		if (!(con instanceof TopicConnection)) {
-			throw new jakarta.jms.IllegalStateException(
+			throw new javax.jms.IllegalStateException(
 					"This SingleConnectionFactory does not hold a TopicConnection but rather: " + con);
 		}
 		return ((TopicConnection) con);
@@ -284,7 +285,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 
 	@Override
 	public TopicConnection createTopicConnection(String username, String password) throws JMSException {
-		throw new jakarta.jms.IllegalStateException(
+		throw new javax.jms.IllegalStateException(
 				"SingleConnectionFactory does not support custom username and password");
 	}
 
@@ -318,7 +319,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	/**
 	 * Obtain an initialized shared Connection.
 	 * @return the Connection (never {@code null})
-	 * @throws jakarta.jms.JMSException if thrown by JMS API methods
+	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 * @see #initConnection()
 	 */
 	protected Connection getConnection() throws JMSException {
@@ -334,7 +335,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 * Initialize the underlying shared Connection.
 	 * <p>Closes and reinitializes the Connection if an underlying
 	 * Connection is present already.
-	 * @throws jakarta.jms.JMSException if thrown by JMS API methods
+	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 * @see #prepareConnection
 	 */
 	public void initConnection() throws JMSException {
@@ -395,7 +396,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	/**
 	 * Create a JMS Connection via this template's ConnectionFactory.
 	 * @return the new JMS Connection
-	 * @throws jakarta.jms.JMSException if thrown by JMS API methods
+	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 */
 	protected Connection doCreateConnection() throws JMSException {
 		ConnectionFactory cf = getTargetConnectionFactory();
@@ -501,7 +502,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 				con.close();
 			}
 		}
-		catch (jakarta.jms.IllegalStateException ex) {
+		catch (javax.jms.IllegalStateException ex) {
 			logger.debug("Ignoring Connection state exception - assuming already closed: " + ex);
 		}
 		catch (Throwable ex) {
@@ -568,7 +569,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 						return null;
 					}
 					else {
-						throw new jakarta.jms.IllegalStateException(
+						throw new javax.jms.IllegalStateException(
 								"setClientID call not supported on proxy for shared Connection. " +
 								"Set the 'clientId' property on the SingleConnectionFactory instead.");
 					}
@@ -589,7 +590,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 							return null;
 						}
 						else {
-							throw new jakarta.jms.IllegalStateException(
+							throw new javax.jms.IllegalStateException(
 									"setExceptionListener call not supported on proxy for shared Connection. " +
 									"Set the 'exceptionListener' property on the SingleConnectionFactory instead. " +
 									"Alternatively, activate SingleConnectionFactory's 'reconnectOnException' feature, " +
@@ -649,7 +650,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 							catch (Throwable ex) {
 								logger.trace("Failed to close newly obtained JMS Session", ex);
 							}
-							throw new jakarta.jms.IllegalStateException(msg);
+							throw new javax.jms.IllegalStateException(msg);
 						}
 						return session;
 					}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -409,7 +409,7 @@ public class MethodParameter {
 
 	/**
 	 * Check whether this method parameter is annotated with any variant of a
-	 * {@code Nullable} annotation, e.g. {@code jakarta.annotation.Nullable} or
+	 * {@code Nullable} annotation, e.g. {@code javax.annotation.Nullable} or
 	 * {@code edu.umd.cs.findbugs.annotations.Nullable}.
 	 */
 	private boolean hasNullableAnnotation() {
@@ -552,20 +552,20 @@ public class MethodParameter {
 		if (this.nestingLevel > 1) {
 			Type type = getGenericParameterType();
 			for (int i = 2; i <= this.nestingLevel; i++) {
-				if (type instanceof ParameterizedType parameterizedType) {
-					Type[] args = parameterizedType.getActualTypeArguments();
+				if (type instanceof ParameterizedType) {
+					Type[] args = ((ParameterizedType) type).getActualTypeArguments();
 					Integer index = getTypeIndexForLevel(i);
 					type = args[index != null ? index : args.length - 1];
 				}
 				// TODO: Object.class if unresolvable
 			}
-			if (type instanceof Class<?> clazz) {
-				return clazz;
+			if (type instanceof Class) {
+				return (Class<?>) type;
 			}
-			else if (type instanceof ParameterizedType parameterizedType) {
-				Type arg = parameterizedType.getRawType();
-				if (arg instanceof Class<?> clazz) {
-					return clazz;
+			else if (type instanceof ParameterizedType) {
+				Type arg = ((ParameterizedType) type).getRawType();
+				if (arg instanceof Class) {
+					return (Class<?>) arg;
 				}
 			}
 			return Object.class;
@@ -585,8 +585,8 @@ public class MethodParameter {
 		if (this.nestingLevel > 1) {
 			Type type = getGenericParameterType();
 			for (int i = 2; i <= this.nestingLevel; i++) {
-				if (type instanceof ParameterizedType parameterizedType) {
-					Type[] args = parameterizedType.getActualTypeArguments();
+				if (type instanceof ParameterizedType) {
+					Type[] args = ((ParameterizedType) type).getActualTypeArguments();
 					Integer index = getTypeIndexForLevel(i);
 					type = args[index != null ? index : args.length - 1];
 				}
@@ -708,11 +708,11 @@ public class MethodParameter {
 		ParameterNameDiscoverer discoverer = this.parameterNameDiscoverer;
 		if (discoverer != null) {
 			String[] parameterNames = null;
-			if (this.executable instanceof Method method) {
-				parameterNames = discoverer.getParameterNames(method);
+			if (this.executable instanceof Method) {
+				parameterNames = discoverer.getParameterNames((Method) this.executable);
 			}
-			else if (this.executable instanceof Constructor<?> constructor) {
-				parameterNames = discoverer.getParameterNames(constructor);
+			else if (this.executable instanceof Constructor) {
+				parameterNames = discoverer.getParameterNames((Constructor<?>) this.executable);
 			}
 			if (parameterNames != null) {
 				this.parameterName = parameterNames[this.parameterIndex];
@@ -753,9 +753,10 @@ public class MethodParameter {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof MethodParameter otherParam)) {
+		if (!(other instanceof MethodParameter)) {
 			return false;
 		}
+		MethodParameter otherParam = (MethodParameter) other;
 		return (getContainingClass() == otherParam.getContainingClass() &&
 				ObjectUtils.nullSafeEquals(this.typeIndexesPerLevel, otherParam.typeIndexesPerLevel) &&
 				this.nestingLevel == otherParam.nestingLevel &&
@@ -791,11 +792,11 @@ public class MethodParameter {
 	 */
 	@Deprecated
 	public static MethodParameter forMethodOrConstructor(Object methodOrConstructor, int parameterIndex) {
-		if (!(methodOrConstructor instanceof Executable executable)) {
+		if (!(methodOrConstructor instanceof Executable)) {
 			throw new IllegalArgumentException(
 					"Given object [" + methodOrConstructor + "] is neither a Method nor a Constructor");
 		}
-		return forExecutable(executable, parameterIndex);
+		return forExecutable((Executable) methodOrConstructor, parameterIndex);
 	}
 
 	/**
@@ -808,11 +809,11 @@ public class MethodParameter {
 	 * @since 5.0
 	 */
 	public static MethodParameter forExecutable(Executable executable, int parameterIndex) {
-		if (executable instanceof Method method) {
-			return new MethodParameter(method, parameterIndex);
+		if (executable instanceof Method) {
+			return new MethodParameter((Method) executable, parameterIndex);
 		}
-		else if (executable instanceof Constructor<?> constructor) {
-			return new MethodParameter(constructor, parameterIndex);
+		else if (executable instanceof Constructor) {
+			return new MethodParameter((Constructor<?>) executable, parameterIndex);
 		}
 		else {
 			throw new IllegalArgumentException("Not a Method/Constructor: " + executable);

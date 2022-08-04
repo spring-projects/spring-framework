@@ -16,7 +16,7 @@
 
 package org.springframework.orm.jpa;
 
-import jakarta.persistence.OptimisticLockException;
+import javax.persistence.OptimisticLockException;
 
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 

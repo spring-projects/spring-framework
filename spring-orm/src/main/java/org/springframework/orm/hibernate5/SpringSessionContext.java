@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 package org.springframework.orm.hibernate5;
 
-import jakarta.transaction.Status;
-import jakarta.transaction.SystemException;
-import jakarta.transaction.TransactionManager;
+import javax.transaction.Status;
+import javax.transaction.SystemException;
+import javax.transaction.TransactionManager;
+
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
@@ -81,11 +82,12 @@ public class SpringSessionContext implements CurrentSessionContext {
 	@Override
 	public Session currentSession() throws HibernateException {
 		Object value = TransactionSynchronizationManager.getResource(this.sessionFactory);
-		if (value instanceof Session session) {
-			return session;
+		if (value instanceof Session) {
+			return (Session) value;
 		}
-		else if (value instanceof SessionHolder sessionHolder) {
+		else if (value instanceof SessionHolder) {
 			// HibernateTransactionManager
+			SessionHolder sessionHolder = (SessionHolder) value;
 			Session session = sessionHolder.getSession();
 			if (!sessionHolder.isSynchronizedWithTransaction() &&
 					TransactionSynchronizationManager.isSynchronizationActive()) {
@@ -103,9 +105,9 @@ public class SpringSessionContext implements CurrentSessionContext {
 			}
 			return session;
 		}
-		else if (value instanceof EntityManagerHolder entityManagerHolder) {
+		else if (value instanceof EntityManagerHolder) {
 			// JpaTransactionManager
-			return entityManagerHolder.getEntityManager().unwrap(Session.class);
+			return ((EntityManagerHolder) value).getEntityManager().unwrap(Session.class);
 		}
 
 		if (this.transactionManager != null && this.jtaSessionContext != null) {

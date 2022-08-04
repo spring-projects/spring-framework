@@ -22,7 +22,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -74,7 +75,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 	/**
 	 * Configure a {@code UrlPathHelper} to use in
-	 * {@link #getForRequestUrl(jakarta.servlet.http.HttpServletRequest, String)}
+	 * {@link #getForRequestUrl(javax.servlet.http.HttpServletRequest, String)}
 	 * in order to derive the lookup path for a target request URL path.
 	 */
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
@@ -154,7 +155,8 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		for (SimpleUrlHandlerMapping mapping : mappings) {
 			for (String pattern : mapping.getHandlerMap().keySet()) {
 				Object handler = mapping.getHandlerMap().get(pattern);
-				if (handler instanceof ResourceHttpRequestHandler resourceHandler) {
+				if (handler instanceof ResourceHttpRequestHandler) {
+					ResourceHttpRequestHandler resourceHandler = (ResourceHttpRequestHandler) handler;
 					this.handlerMap.put(pattern, resourceHandler);
 				}
 			}

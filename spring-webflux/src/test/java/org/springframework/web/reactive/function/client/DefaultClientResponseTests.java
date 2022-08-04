@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.codec.ByteArrayDecoder;
@@ -39,7 +38,6 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRange;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -50,6 +48,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -59,7 +58,7 @@ import static org.springframework.web.reactive.function.BodyExtractors.toMono;
  * @author Arjen Poutsma
  * @author Denys Ivano
  */
-class DefaultClientResponseTests {
+public class DefaultClientResponseTests {
 
 	private ClientHttpResponse mockResponse;
 
@@ -71,7 +70,7 @@ class DefaultClientResponseTests {
 
 
 	@BeforeEach
-	void createMocks() {
+	public void createMocks() {
 		mockResponse = mock(ClientHttpResponse.class);
 		given(mockResponse.getHeaders()).willReturn(this.httpHeaders);
 		mockExchangeStrategies = mock(ExchangeStrategies.class);
@@ -80,7 +79,7 @@ class DefaultClientResponseTests {
 
 
 	@Test
-	void statusCode() {
+	public void statusCode() {
 		HttpStatus status = HttpStatus.CONTINUE;
 		given(mockResponse.getStatusCode()).willReturn(status);
 
@@ -88,8 +87,7 @@ class DefaultClientResponseTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	void rawStatusCode() {
+	public void rawStatusCode() {
 		int status = 999;
 		given(mockResponse.getRawStatusCode()).willReturn(status);
 
@@ -97,7 +95,7 @@ class DefaultClientResponseTests {
 	}
 
 	@Test
-	void header() {
+	public void header() {
 		long contentLength = 42L;
 		httpHeaders.setContentLength(contentLength);
 		MediaType contentType = MediaType.TEXT_PLAIN;
@@ -116,7 +114,7 @@ class DefaultClientResponseTests {
 	}
 
 	@Test
-	void cookies() {
+	public void cookies() {
 		ResponseCookie cookie = ResponseCookie.from("foo", "bar").build();
 		MultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
 		cookies.add("foo", cookie);
@@ -128,7 +126,7 @@ class DefaultClientResponseTests {
 
 
 	@Test
-	void body() {
+	public void body() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -143,7 +141,7 @@ class DefaultClientResponseTests {
 	}
 
 	@Test
-	void bodyToMono() {
+	public void bodyToMono() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -158,7 +156,7 @@ class DefaultClientResponseTests {
 	}
 
 	@Test
-	void bodyToMonoTypeReference() {
+	public void bodyToMonoTypeReference() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -175,7 +173,7 @@ class DefaultClientResponseTests {
 	}
 
 	@Test
-	void bodyToFlux() {
+	public void bodyToFlux() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -191,7 +189,7 @@ class DefaultClientResponseTests {
 	}
 
 	@Test
-	void bodyToFluxTypeReference() {
+	public void bodyToFluxTypeReference() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -209,8 +207,7 @@ class DefaultClientResponseTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	void toEntity() {
+	public void toEntity() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -228,15 +225,15 @@ class DefaultClientResponseTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	void toEntityWithUnknownStatusCode() throws Exception {
+	public void toEntityWithUnknownStatusCode() throws Exception {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
 		given(mockResponse.getHeaders()).willReturn(httpHeaders);
-		given(mockResponse.getStatusCode()).willReturn(HttpStatusCode.valueOf(999));
+		given(mockResponse.getStatusCode()).willThrow(new IllegalArgumentException("999"));
+		given(mockResponse.getRawStatusCode()).willReturn(999);
 		given(mockResponse.getBody()).willReturn(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections
@@ -245,14 +242,14 @@ class DefaultClientResponseTests {
 
 		ResponseEntity<String> result = defaultClientResponse.toEntity(String.class).block();
 		assertThat(result.getBody()).isEqualTo("foo");
-		assertThat(result.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(999));
+		assertThatIllegalArgumentException().isThrownBy(
+				result::getStatusCode);
 		assertThat(result.getStatusCodeValue()).isEqualTo(999);
 		assertThat(result.getHeaders().getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	void toEntityTypeReference() {
+	public void toEntityTypeReference() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -272,8 +269,7 @@ class DefaultClientResponseTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	void toEntityList() {
+	public void toEntityList() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -291,15 +287,15 @@ class DefaultClientResponseTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	void toEntityListWithUnknownStatusCode() {
+	public void toEntityListWithUnknownStatusCode() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
 		given(mockResponse.getHeaders()).willReturn(httpHeaders);
-		given(mockResponse.getStatusCode()).willReturn(HttpStatusCode.valueOf(999));
+		given(mockResponse.getStatusCode()).willThrow(new IllegalArgumentException("999"));
+		given(mockResponse.getRawStatusCode()).willReturn(999);
 		given(mockResponse.getBody()).willReturn(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections
@@ -308,14 +304,14 @@ class DefaultClientResponseTests {
 
 		ResponseEntity<List<String>> result = defaultClientResponse.toEntityList(String.class).block();
 		assertThat(result.getBody()).isEqualTo(Collections.singletonList("foo"));
-		assertThat(result.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(999));
+		assertThatIllegalArgumentException().isThrownBy(
+				result::getStatusCode);
 		assertThat(result.getStatusCodeValue()).isEqualTo(999);
 		assertThat(result.getHeaders().getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	void toEntityListTypeReference() {
+	public void toEntityListTypeReference() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -335,8 +331,7 @@ class DefaultClientResponseTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	void createException() {
+	public void createException() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -358,38 +353,7 @@ class DefaultClientResponseTests {
 		assertThat(exception.getResponseBodyAsByteArray()).isEqualTo(bytes);
 	}
 
-	@Test
-	@SuppressWarnings("deprecation")
-	void createError() {
-		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
-		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
-		Flux<DataBuffer> body = Flux.just(dataBuffer);
-		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
-		given(mockResponse.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
-		given(mockResponse.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
-		given(mockResponse.getBody()).willReturn(body);
 
-		List<HttpMessageReader<?>> messageReaders = Collections.singletonList(
-				new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
-		given(mockExchangeStrategies.messageReaders()).willReturn(messageReaders);
-
-		Mono<String> resultMono = defaultClientResponse.createError();
-		StepVerifier.create(resultMono)
-				.consumeErrorWith(t -> {
-					assertThat(t).isInstanceOf(WebClientResponseException.class);
-					WebClientResponseException exception = (WebClientResponseException) t;
-					assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-					assertThat(exception.getMessage()).isEqualTo("404 Not Found");
-					assertThat(exception.getHeaders()).containsExactly(entry("Content-Type",
-							Collections.singletonList("text/plain")));
-					assertThat(exception.getResponseBodyAsByteArray()).isEqualTo(bytes);
-
-				})
-				.verify();
-	}
-
-
-	@SuppressWarnings("deprecation")
 	private void mockTextPlainResponse(Flux<DataBuffer> body) {
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
 		given(mockResponse.getStatusCode()).willReturn(HttpStatus.OK);

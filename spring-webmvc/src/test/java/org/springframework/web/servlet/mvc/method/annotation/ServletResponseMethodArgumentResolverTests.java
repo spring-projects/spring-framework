@@ -20,7 +20,8 @@ import java.io.OutputStream;
 import java.io.Writer;
 import java.lang.reflect.Method;
 
-import jakarta.servlet.ServletResponse;
+import javax.servlet.ServletResponse;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

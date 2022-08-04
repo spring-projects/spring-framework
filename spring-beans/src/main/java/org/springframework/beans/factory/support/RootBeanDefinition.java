@@ -139,6 +139,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @see #setPropertyValues
 	 */
 	public RootBeanDefinition() {
+		super();
 	}
 
 	/**
@@ -147,17 +148,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @see #setBeanClass
 	 */
 	public RootBeanDefinition(@Nullable Class<?> beanClass) {
+		super();
 		setBeanClass(beanClass);
-	}
-
-	/**
-	 * Create a new RootBeanDefinition for a singleton.
-	 * @param beanType the type of bean to instantiate
-	 * @since 6.0
-	 * @see #setTargetType(ResolvableType)
-	 */
-	public RootBeanDefinition(@Nullable ResolvableType beanType) {
-		setTargetType(beanType);
 	}
 
 	/**
@@ -170,6 +162,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @see #setInstanceSupplier
 	 */
 	public <T> RootBeanDefinition(@Nullable Class<T> beanClass, @Nullable Supplier<T> instanceSupplier) {
+		super();
 		setBeanClass(beanClass);
 		setInstanceSupplier(instanceSupplier);
 	}
@@ -185,6 +178,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @see #setInstanceSupplier
 	 */
 	public <T> RootBeanDefinition(@Nullable Class<T> beanClass, String scope, @Nullable Supplier<T> instanceSupplier) {
+		super();
 		setBeanClass(beanClass);
 		setScope(scope);
 		setInstanceSupplier(instanceSupplier);
@@ -199,6 +193,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * (not applicable to autowiring a constructor, thus ignored there)
 	 */
 	public RootBeanDefinition(@Nullable Class<?> beanClass, int autowireMode, boolean dependencyCheck) {
+		super();
 		setBeanClass(beanClass);
 		setAutowireMode(autowireMode);
 		if (dependencyCheck && getResolvedAutowireMode() != AUTOWIRE_CONSTRUCTOR) {
@@ -429,16 +424,6 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		return this.factoryMethodToIntrospect;
 	}
 
-	@Override
-	public void setInstanceSupplier(@Nullable Supplier<?> instanceSupplier) {
-		super.setInstanceSupplier(instanceSupplier);
-		Method factoryMethod = (instanceSupplier instanceof InstanceSupplier<?>)
-				? ((InstanceSupplier<?>) instanceSupplier).getFactoryMethod() : null;
-		if (factoryMethod != null) {
-			setResolvedFactoryMethod(factoryMethod);
-		}
-	}
-
 	/**
 	 * Register an externally managed configuration method or field.
 	 */
@@ -476,7 +461,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	/**
 	 * Register an externally managed configuration initialization method &mdash;
 	 * for example, a method annotated with JSR-250's
-	 * {@link jakarta.annotation.PostConstruct} annotation.
+	 * {@link javax.annotation.PostConstruct} annotation.
 	 * <p>The supplied {@code initMethod} may be the
 	 * {@linkplain Method#getName() simple method name} for non-private methods or the
 	 * {@linkplain org.springframework.util.ClassUtils#getQualifiedMethodName(Method)
@@ -553,7 +538,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	/**
 	 * Register an externally managed configuration destruction method &mdash;
 	 * for example, a method annotated with JSR-250's
-	 * {@link jakarta.annotation.PreDestroy} annotation.
+	 * {@link javax.annotation.PreDestroy} annotation.
 	 * <p>The supplied {@code destroyMethod} may be the
 	 * {@linkplain Method#getName() simple method name} for non-private methods or the
 	 * {@linkplain org.springframework.util.ClassUtils#getQualifiedMethodName(Method)

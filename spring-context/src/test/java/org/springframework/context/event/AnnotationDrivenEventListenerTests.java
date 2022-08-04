@@ -30,8 +30,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.inject.Inject;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -774,7 +775,8 @@ class AnnotationDrivenEventListenerTests {
 			if (event.content == null) {
 				return null;
 			}
-			else if (event.content instanceof String s) {
+			else if (event.content instanceof String) {
+				String s = (String) event.content;
 				if (s.equals("String")) {
 					return event.content;
 				}

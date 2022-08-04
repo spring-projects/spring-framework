@@ -16,8 +16,8 @@
 
 package org.springframework.web.context.support;
 
-import jakarta.servlet.ServletConfig;
-import jakarta.servlet.ServletContext;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -60,7 +60,7 @@ import org.springframework.web.context.ServletContextAware;
  * Component classes include in particular
  * {@link org.springframework.context.annotation.Configuration @Configuration}
  * classes but also plain {@link org.springframework.stereotype.Component @Component}
- * classes as well as JSR-330 compliant classes using {@code jakarta.inject} annotations.
+ * classes as well as JSR-330 compliant classes using {@code javax.inject} annotations.
  *
  * <pre class="code">
  * GenericWebApplicationContext context = new GenericWebApplicationContext();

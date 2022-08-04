@@ -19,7 +19,8 @@ package org.springframework.web.context.request.async;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

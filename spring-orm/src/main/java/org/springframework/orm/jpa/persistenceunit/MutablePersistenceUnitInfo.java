@@ -21,12 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import javax.persistence.SharedCacheMode;
+import javax.persistence.ValidationMode;
+import javax.persistence.spi.ClassTransformer;
+import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
-
-import jakarta.persistence.SharedCacheMode;
-import jakarta.persistence.ValidationMode;
-import jakarta.persistence.spi.ClassTransformer;
-import jakarta.persistence.spi.PersistenceUnitTransactionType;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -34,7 +33,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Spring's base implementation of the JPA
- * {@link jakarta.persistence.spi.PersistenceUnitInfo} interface,
+ * {@link javax.persistence.spi.PersistenceUnitInfo} interface,
  * used to bootstrap an {@code EntityManagerFactory} in a container.
  *
  * <p>This implementation is largely a JavaBean, offering mutators
@@ -172,7 +171,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 
 	/**
 	 * Add a managed class name to the persistence provider's metadata.
-	 * @see jakarta.persistence.spi.PersistenceUnitInfo#getManagedClassNames()
+	 * @see javax.persistence.spi.PersistenceUnitInfo#getManagedClassNames()
 	 * @see #addManagedPackage
 	 */
 	public void addManagedClassName(String managedClassName) {

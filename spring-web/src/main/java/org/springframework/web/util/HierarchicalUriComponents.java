@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
@@ -557,9 +558,10 @@ final class HierarchicalUriComponents extends UriComponents {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof HierarchicalUriComponents otherComp)) {
+		if (!(other instanceof HierarchicalUriComponents)) {
 			return false;
 		}
+		HierarchicalUriComponents otherComp = (HierarchicalUriComponents) other;
 		return (ObjectUtils.nullSafeEquals(getScheme(), otherComp.getScheme()) &&
 				ObjectUtils.nullSafeEquals(getUserInfo(), otherComp.getUserInfo()) &&
 				ObjectUtils.nullSafeEquals(getHost(), otherComp.getHost()) &&
@@ -902,7 +904,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		@Override
 		public List<String> getPathSegments() {
 			String[] segments = StringUtils.tokenizeToStringArray(getPath(), PATH_DELIMITER_STRING);
-			return List.of(segments);
+			return Collections.unmodifiableList(Arrays.asList(segments));
 		}
 
 		@Override
@@ -929,8 +931,8 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			return (this == other || (other instanceof FullPathComponent fullPathComponent &&
-					getPath().equals(fullPathComponent.getPath())));
+			return (this == other || (other instanceof FullPathComponent &&
+					getPath().equals(((FullPathComponent) other).getPath())));
 		}
 
 		@Override
@@ -1003,8 +1005,8 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			return (this == other || (other instanceof PathSegmentComponent pathSegmentComponent &&
-					getPathSegments().equals(pathSegmentComponent.getPathSegments())));
+			return (this == other || (other instanceof PathSegmentComponent &&
+					getPathSegments().equals(((PathSegmentComponent) other).getPathSegments())));
 		}
 
 		@Override

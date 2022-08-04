@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,9 +88,10 @@ public class GenericBeanDefinition extends AbstractBeanDefinition {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof GenericBeanDefinition that)) {
+		if (!(other instanceof GenericBeanDefinition)) {
 			return false;
 		}
+		GenericBeanDefinition that = (GenericBeanDefinition) other;
 		return (ObjectUtils.nullSafeEquals(this.parentName, that.parentName) && super.equals(other));
 	}
 

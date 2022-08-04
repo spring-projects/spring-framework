@@ -1796,7 +1796,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		((SpelExpression) expression).compileExpression();
 		assertThat(expression.getValue(context, Boolean.class)).isFalse();
 
-		List<String> ls = new ArrayList<>();
+		List<String> ls = new ArrayList<String>();
 		ls.add(new String("foo"));
 		context = new StandardEvaluationContext(ls);
 		expression = parse("get(0) != 'foo'");
@@ -1844,7 +1844,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(aa.gotComparedTo).isEqualTo(bb);
 
 
-		List<String> ls = new ArrayList<>();
+		List<String> ls = new ArrayList<String>();
 		ls.add(new String("foo"));
 		StandardEvaluationContext context = new StandardEvaluationContext(ls);
 		expression = parse("get(0) == 'foo'");
@@ -5109,26 +5109,29 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	private String stringify(Object object) {
 		StringBuilder s = new StringBuilder();
-		if (object instanceof List<?> list) {
-			for (Object l: list) {
+		if (object instanceof List) {
+			List<?> ls = (List<?>) object;
+			for (Object l: ls) {
 				s.append(l);
 				s.append(' ');
 			}
 		}
-		else if (object instanceof Object[] objects) {
-			for (Object o: objects) {
+		else if (object instanceof Object[]) {
+			Object[] os = (Object[]) object;
+			for (Object o: os) {
 				s.append(o);
 				s.append(' ');
 			}
 		}
-		else if (object instanceof int[] ints) {
-			for (int i: ints) {
+		else if (object instanceof int[]) {
+			int[] is = (int[]) object;
+			for (int i: is) {
 				s.append(i);
 				s.append(' ');
 			}
 		}
 		else {
-			s.append(object);
+			s.append(object.toString());
 		}
 		return s.toString().trim();
 	}

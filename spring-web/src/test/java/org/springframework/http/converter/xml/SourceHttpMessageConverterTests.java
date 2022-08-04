@@ -16,7 +16,9 @@
 
 package org.springframework.http.converter.xml;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
@@ -50,6 +52,9 @@ import org.springframework.util.FileCopyUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Arjen Poutsma
@@ -90,11 +95,13 @@ public class SourceHttpMessageConverterTests {
 
 	@Test
 	public void readDOMSource() throws Exception {
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(BODY.getBytes(StandardCharsets.UTF_8));
+		InputStream inputStream = spy(new ByteArrayInputStream(BODY.getBytes(StandardCharsets.UTF_8)));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(inputStream);
 		inputMessage.getHeaders().setContentType(MediaType.APPLICATION_XML);
 		DOMSource result = (DOMSource) converter.read(DOMSource.class, inputMessage);
 		Document document = (Document) result.getNode();
 		assertThat(document.getDocumentElement().getLocalName()).as("Invalid result").isEqualTo("root");
+		verify(inputStream, never()).close();
 	}
 
 	@Test
@@ -294,6 +301,7 @@ public class SourceHttpMessageConverterTests {
 				.as("Invalid content-type").isEqualTo(MediaType.APPLICATION_XML);
 		assertThat(outputMessage.getHeaders().getContentLength())
 				.as("Invalid content-length").isEqualTo(outputMessage.getBodyAsBytes().length);
+		verify(outputMessage.getBody(), never()).close();
 	}
 
 	@Test

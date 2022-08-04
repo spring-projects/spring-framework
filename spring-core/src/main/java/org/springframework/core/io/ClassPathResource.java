@@ -99,6 +99,22 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 		this.clazz = clazz;
 	}
 
+	/**
+	 * Create a new {@code ClassPathResource} with optional {@code ClassLoader}
+	 * and {@code Class}. Only for internal usage.
+	 * @param path relative or absolute path within the classpath
+	 * @param classLoader the class loader to load the resource with, if any
+	 * @param clazz the class to load resources with, if any
+	 * @deprecated as of 4.3.13, in favor of selective use of
+	 * {@link #ClassPathResource(String, ClassLoader)} vs {@link #ClassPathResource(String, Class)}
+	 */
+	@Deprecated
+	protected ClassPathResource(String path, @Nullable ClassLoader classLoader, @Nullable Class<?> clazz) {
+		this.path = StringUtils.cleanPath(path);
+		this.classLoader = classLoader;
+		this.clazz = clazz;
+	}
+
 
 	/**
 	 * Return the path for this resource (as resource path within the class path).
@@ -251,9 +267,10 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof ClassPathResource otherRes)) {
+		if (!(other instanceof ClassPathResource)) {
 			return false;
 		}
+		ClassPathResource otherRes = (ClassPathResource) other;
 		return (this.path.equals(otherRes.path) &&
 				ObjectUtils.nullSafeEquals(this.classLoader, otherRes.classLoader) &&
 				ObjectUtils.nullSafeEquals(this.clazz, otherRes.clazz));

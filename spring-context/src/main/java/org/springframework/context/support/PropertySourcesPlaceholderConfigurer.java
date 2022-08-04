@@ -137,8 +137,8 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 				// local PropertyResolver to enforce that setting, since the Environment is most
 				// likely not configured with ignoreUnresolvablePlaceholders set to true.
 				// See https://github.com/spring-projects/spring-framework/issues/27947
-				if (this.ignoreUnresolvablePlaceholders &&
-						(this.environment instanceof ConfigurableEnvironment configurableEnvironment)) {
+				if (this.ignoreUnresolvablePlaceholders && (this.environment instanceof ConfigurableEnvironment)) {
+					ConfigurableEnvironment configurableEnvironment = (ConfigurableEnvironment) this.environment;
 					PropertySourcesPropertyResolver resolver =
 							new PropertySourcesPropertyResolver(configurableEnvironment.getPropertySources());
 					resolver.setIgnoreUnresolvableNestedPlaceholders(true);
@@ -146,7 +146,7 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 				}
 				PropertyResolver propertyResolverToUse = propertyResolver;
 				this.propertySources.addLast(
-					new PropertySource<>(ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME, this.environment) {
+					new PropertySource<Environment>(ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME, this.environment) {
 						@Override
 						@Nullable
 						public String getProperty(String key) {

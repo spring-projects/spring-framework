@@ -16,7 +16,7 @@
 
 package org.springframework.context.index.sample.cdi;
 
-import jakarta.inject.Named;
+import javax.inject.Named;
 
 /**
  * Test candidate for a CDI {@link Named} bean.

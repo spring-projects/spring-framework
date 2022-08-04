@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -34,9 +35,9 @@ public class ManagedMapTests {
 
 	@Test
 	public void mergeSunnyDay() {
-		ManagedMap parent = ManagedMap.ofEntries(Map.entry("one", "one"),
-				Map.entry("two", "two"));
-		ManagedMap child = ManagedMap.ofEntries(Map.entry("tree", "three"));
+		ManagedMap parent = ManagedMap.ofEntries(new SimpleEntry<>("one", "one"),
+				new SimpleEntry<>("two", "two"));
+		ManagedMap child = ManagedMap.ofEntries(new SimpleEntry<>("tree", "three"));
 		child.setMergeEnabled(true);
 		Map mergedMap = (Map) child.merge(parent);
 		assertThat(mergedMap.size()).as("merge() obviously did not work.").isEqualTo(3);
@@ -65,8 +66,8 @@ public class ManagedMapTests {
 
 	@Test
 	public void mergeEmptyChild() {
-		ManagedMap parent = ManagedMap.ofEntries(Map.entry("one", "one"),
-				Map.entry("two", "two"));
+		ManagedMap parent = ManagedMap.ofEntries(new SimpleEntry<>("one", "one"),
+				new SimpleEntry<>("two", "two"));
 		ManagedMap child = new ManagedMap();
 		child.setMergeEnabled(true);
 		Map mergedMap = (Map) child.merge(parent);
@@ -75,9 +76,9 @@ public class ManagedMapTests {
 
 	@Test
 	public void mergeChildValuesOverrideTheParents() {
-		ManagedMap parent = ManagedMap.ofEntries(Map.entry("one", "one"),
-				Map.entry("two", "two"));
-		ManagedMap child = ManagedMap.ofEntries(Map.entry("one", "fork"));
+		ManagedMap parent = ManagedMap.ofEntries(new SimpleEntry<>("one", "one"),
+				new SimpleEntry<>("two", "two"));
+		ManagedMap child = ManagedMap.ofEntries(new SimpleEntry<>("one", "fork"));
 		child.setMergeEnabled(true);
 		Map mergedMap = (Map) child.merge(parent);
 		// child value for 'one' must override parent value...

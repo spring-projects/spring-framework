@@ -468,9 +468,10 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof TestBean tb2)) {
+		if (!(other instanceof TestBean)) {
 			return false;
 		}
+		TestBean tb2 = (TestBean) other;
 		return (ObjectUtils.nullSafeEquals(this.name, tb2.name) && this.age == tb2.age);
 	}
 

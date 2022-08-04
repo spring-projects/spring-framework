@@ -18,7 +18,7 @@ package org.springframework.test.web.servlet.request;
 
 import java.net.URI;
 
-import jakarta.servlet.DispatcherType;
+import javax.servlet.DispatcherType;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -246,6 +246,29 @@ public abstract class MockMvcRequestBuilders {
 	public static MockMultipartHttpServletRequestBuilder multipart(HttpMethod httpMethod, URI uri) {
 		return new MockMultipartHttpServletRequestBuilder(httpMethod, uri);
 	}
+
+	/**
+	 * Create a {@link MockMultipartHttpServletRequestBuilder} for a multipart request.
+	 * @param urlTemplate a URL template; the resulting URL will be encoded
+	 * @param uriVariables zero or more URI variables
+	 * @deprecated in favor of {@link #multipart(String, Object...)}
+	 */
+	@Deprecated
+	public static MockMultipartHttpServletRequestBuilder fileUpload(String urlTemplate, Object... uriVariables) {
+		return new MockMultipartHttpServletRequestBuilder(urlTemplate, uriVariables);
+	}
+
+	/**
+	 * Create a {@link MockMultipartHttpServletRequestBuilder} for a multipart request.
+	 * @param uri the URL
+	 * @since 4.0.3
+	 * @deprecated in favor of {@link #multipart(URI)}
+	 */
+	@Deprecated
+	public static MockMultipartHttpServletRequestBuilder fileUpload(URI uri) {
+		return new MockMultipartHttpServletRequestBuilder(uri);
+	}
+
 
 	/**
 	 * Create a {@link RequestBuilder} for an async dispatch from the

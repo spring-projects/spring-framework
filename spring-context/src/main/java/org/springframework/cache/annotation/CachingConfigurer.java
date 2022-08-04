@@ -50,7 +50,7 @@ public interface CachingConfigurer {
 	 * <pre class="code">
 	 * &#064;Configuration
 	 * &#064;EnableCaching
-	 * public class AppConfig implements CachingConfigurer {
+	 * public class AppConfig extends CachingConfigurerSupport {
 	 *     &#064;Bean // important!
 	 *     &#064;Override
 	 *     public CacheManager cacheManager() {
@@ -77,7 +77,7 @@ public interface CachingConfigurer {
 	 * <pre class="code">
 	 * &#064;Configuration
 	 * &#064;EnableCaching
-	 * public class AppConfig implements CachingConfigurer {
+	 * public class AppConfig extends CachingConfigurerSupport {
 	 *     &#064;Bean // important!
 	 *     &#064;Override
 	 *     public CacheResolver cacheResolver() {
@@ -100,7 +100,7 @@ public interface CachingConfigurer {
 	 * <pre class="code">
 	 * &#064;Configuration
 	 * &#064;EnableCaching
-	 * public class AppConfig implements CachingConfigurer {
+	 * public class AppConfig extends CachingConfigurerSupport {
 	 *     &#064;Bean // important!
 	 *     &#064;Override
 	 *     public KeyGenerator keyGenerator() {
@@ -125,7 +125,7 @@ public interface CachingConfigurer {
 	 * <pre class="code">
 	 * &#064;Configuration
 	 * &#064;EnableCaching
-	 * public class AppConfig implements CachingConfigurer {
+	 * public class AppConfig extends CachingConfigurerSupport {
 	 *     &#064;Bean // important!
 	 *     &#064;Override
 	 *     public CacheErrorHandler errorHandler() {

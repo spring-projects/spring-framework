@@ -18,8 +18,8 @@ package org.springframework.web.util;
 
 import java.io.Serializable;
 
-import jakarta.servlet.http.HttpSessionEvent;
-import jakarta.servlet.http.HttpSessionListener;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
 
 /**
  * Servlet HttpSessionListener that automatically exposes the session mutex
@@ -39,7 +39,7 @@ import jakarta.servlet.http.HttpSessionListener;
  * @author Juergen Hoeller
  * @since 1.2.7
  * @see WebUtils#SESSION_MUTEX_ATTRIBUTE
- * @see WebUtils#getSessionMutex(jakarta.servlet.http.HttpSession)
+ * @see WebUtils#getSessionMutex(javax.servlet.http.HttpSession)
  * @see org.springframework.web.servlet.mvc.AbstractController#setSynchronizeOnSession
  */
 public class HttpSessionMutexListener implements HttpSessionListener {

@@ -16,8 +16,9 @@
 
 package org.springframework.transaction.support;
 
-import jakarta.transaction.TransactionManager;
-import jakarta.transaction.UserTransaction;
+import javax.transaction.TransactionManager;
+import javax.transaction.UserTransaction;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.testfixture.jndi.SimpleNamingContextBuilder;

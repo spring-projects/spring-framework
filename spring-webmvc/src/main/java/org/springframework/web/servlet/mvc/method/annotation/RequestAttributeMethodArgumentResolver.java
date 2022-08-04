@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import jakarta.servlet.ServletException;
+import javax.servlet.ServletException;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;

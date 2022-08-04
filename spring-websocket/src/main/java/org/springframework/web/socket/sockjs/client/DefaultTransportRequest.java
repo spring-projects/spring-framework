@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,8 @@ package org.springframework.web.socket.sockjs.client;
 
 import java.net.URI;
 import java.security.Principal;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -60,7 +59,7 @@ class DefaultTransportRequest implements TransportRequest {
 
 	private final TransportType serverTransportType;
 
-	private final SockJsMessageCodec codec;
+	private SockJsMessageCodec codec;
 
 	@Nullable
 	private Principal user;
@@ -161,7 +160,7 @@ class DefaultTransportRequest implements TransportRequest {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Scheduling connect to time out after " + this.timeoutValue + " ms.");
 			}
-			Instant timeoutDate = Instant.now().plus(this.timeoutValue, ChronoUnit.MILLIS);
+			Date timeoutDate = new Date(System.currentTimeMillis() + this.timeoutValue);
 			this.timeoutScheduler.schedule(connectHandler, timeoutDate);
 		}
 		else if (logger.isTraceEnabled()) {

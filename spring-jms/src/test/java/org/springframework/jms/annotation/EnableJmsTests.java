@@ -19,8 +19,9 @@ package org.springframework.jms.annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import jakarta.jms.JMSException;
-import jakarta.jms.MessageListener;
+import javax.jms.JMSException;
+import javax.jms.MessageListener;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;

@@ -16,7 +16,7 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
-import java.time.Instant;
+import java.util.Date;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -81,7 +81,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
 
 		assertThat(this.servletRequest.isAsyncStarted()).as("Polling request should remain open").isTrue();
-		verify(this.taskScheduler).schedule(any(Runnable.class), any(Instant.class));
+		verify(this.taskScheduler).schedule(any(Runnable.class), any(Date.class));
 
 		resetRequestAndResponse();
 		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);

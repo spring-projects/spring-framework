@@ -18,7 +18,7 @@ package org.springframework.web.servlet.support;
 
 import java.util.Map;
 
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
 

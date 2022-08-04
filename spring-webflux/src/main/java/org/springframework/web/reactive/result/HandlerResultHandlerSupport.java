@@ -18,6 +18,7 @@ package org.springframework.web.reactive.result;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,7 +33,6 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
@@ -111,25 +111,14 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 	}
 
 	/**
-	 * Select the best media type for the current request through a content
-	 * negotiation algorithm.
+	 * Select the best media type for the current request through a content negotiation algorithm.
 	 * @param exchange the current request
-	 * @param producibleTypesSupplier the media types producible for the request
+	 * @param producibleTypesSupplier the media types that can be produced for the current request
 	 * @return the selected media type, or {@code null} if none
 	 */
 	@Nullable
-	protected MediaType selectMediaType(ServerWebExchange exchange, Supplier<List<MediaType>> producibleTypesSupplier) {
-		return selectMediaType(exchange, producibleTypesSupplier, getAcceptableTypes(exchange));
-	}
-
-	/**
-	 * Variant of {@link #selectMediaType(ServerWebExchange, Supplier)} with a
-	 * given list of requested (acceptable) media types.
-	 */
-	@Nullable
 	protected MediaType selectMediaType(
-			ServerWebExchange exchange, Supplier<List<MediaType>> producibleTypesSupplier,
-			List<MediaType> acceptableTypes) {
+			ServerWebExchange exchange, Supplier<List<MediaType>> producibleTypesSupplier) {
 
 		MediaType contentType = exchange.getResponse().getHeaders().getContentType();
 		if (contentType != null && contentType.isConcrete()) {
@@ -139,6 +128,7 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 			return contentType;
 		}
 
+		List<MediaType> acceptableTypes = getAcceptableTypes(exchange);
 		List<MediaType> producibleTypes = getProducibleTypes(exchange, producibleTypesSupplier);
 
 		Set<MediaType> compatibleMediaTypes = new LinkedHashSet<>();
@@ -151,7 +141,7 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 		}
 
 		List<MediaType> result = new ArrayList<>(compatibleMediaTypes);
-		MimeTypeUtils.sortBySpecificity(result);
+		MediaType.sortBySpecificityAndQuality(result);
 
 		MediaType selected = null;
 		for (MediaType mediaType : result) {
@@ -193,12 +183,8 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 
 	private MediaType selectMoreSpecificMediaType(MediaType acceptable, MediaType producible) {
 		producible = producible.copyQualityValue(acceptable);
-		if (acceptable.isLessSpecific(producible)) {
-			return producible;
-		}
-		else {
-			return acceptable;
-		}
+		Comparator<MediaType> comparator = MediaType.SPECIFICITY_COMPARATOR;
+		return (comparator.compare(acceptable, producible) <= 0 ? acceptable : producible);
 	}
 
 }

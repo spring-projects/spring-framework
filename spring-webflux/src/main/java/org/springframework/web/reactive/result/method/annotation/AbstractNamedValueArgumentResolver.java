@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
-import org.springframework.web.server.MissingRequestValueException;
 import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
@@ -245,8 +244,9 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 	 * @param parameter the method parameter
 	 */
 	protected void handleMissingValue(String name, MethodParameter parameter) {
-		throw new MissingRequestValueException(
-				name, parameter.getNestedParameterType(), "request value", parameter);
+		String typeName = parameter.getNestedParameterType().getSimpleName();
+		throw new ServerWebInputException("Missing argument '" + name + "' for method " +
+				"parameter of type " + typeName, parameter);
 	}
 
 	/**

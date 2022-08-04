@@ -16,7 +16,7 @@
 
 package org.springframework.orm.jpa;
 
-import jakarta.persistence.EntityNotFoundException;
+import javax.persistence.EntityNotFoundException;
 
 import org.springframework.orm.ObjectRetrievalFailureException;
 

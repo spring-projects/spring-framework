@@ -83,7 +83,6 @@ import org.springframework.util.MultiValueMap;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
- * @author Sam Brannen
  * @since 5.0.2
  * @see <a href="https://tools.ietf.org/html/rfc7578">RFC 7578</a>
  */
@@ -128,7 +127,8 @@ public final class MultipartBodyBuilder {
 		Assert.hasLength(name, "'name' must not be empty");
 		Assert.notNull(part, "'part' must not be null");
 
-		if (part instanceof Part partObject) {
+		if (part instanceof Part) {
+			Part partObject = (Part) part;
 			PartBuilder builder = asyncPart(name, partObject.content(), DataBuffer.class);
 			if (!partObject.headers().isEmpty()) {
 				builder.headers(headers -> {
@@ -144,8 +144,8 @@ public final class MultipartBodyBuilder {
 			return builder;
 		}
 
-		if (part instanceof PublisherEntity<?,?> publisherEntity) {
-			PublisherPartBuilder<?, ?> builder = new PublisherPartBuilder<>(name, publisherEntity);
+		if (part instanceof PublisherEntity<?,?>) {
+			PublisherPartBuilder<?, ?> builder = new PublisherPartBuilder<>(name, (PublisherEntity<?, ?>) part);
 			if (contentType != null) {
 				builder.contentType(contentType);
 			}
@@ -155,20 +155,20 @@ public final class MultipartBodyBuilder {
 
 		Object partBody;
 		HttpHeaders partHeaders = null;
-		if (part instanceof HttpEntity<?> httpEntity) {
-			partBody = httpEntity.getBody();
+		if (part instanceof HttpEntity) {
+			partBody = ((HttpEntity<?>) part).getBody();
 			partHeaders = new HttpHeaders();
-			partHeaders.putAll(httpEntity.getHeaders());
+			partHeaders.putAll(((HttpEntity<?>) part).getHeaders());
 		}
 		else {
 			partBody = part;
 		}
 
 		if (partBody instanceof Publisher) {
-			throw new IllegalArgumentException("""
-					Use asyncPart(String, Publisher, Class) \
-					or asyncPart(String, Publisher, ParameterizedTypeReference) \
-					or MultipartBodyBuilder.PublisherEntity""");
+			throw new IllegalArgumentException(
+					"Use asyncPart(String, Publisher, Class)" +
+							" or asyncPart(String, Publisher, ParameterizedTypeReference) or" +
+							" or MultipartBodyBuilder.PublisherEntity");
 		}
 
 		DefaultPartBuilder builder = new DefaultPartBuilder(name, partHeaders, partBody);

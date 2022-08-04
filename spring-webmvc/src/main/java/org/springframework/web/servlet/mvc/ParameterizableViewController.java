@@ -16,12 +16,11 @@
 
 package org.springframework.web.servlet.mvc;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
@@ -43,7 +42,7 @@ public class ParameterizableViewController extends AbstractController {
 	private Object view;
 
 	@Nullable
-	private HttpStatusCode statusCode;
+	private HttpStatus statusCode;
 
 	private boolean statusOnly;
 
@@ -68,7 +67,8 @@ public class ParameterizableViewController extends AbstractController {
 	 */
 	@Nullable
 	public String getViewName() {
-		if (this.view instanceof String viewName) {
+		if (this.view instanceof String) {
+			String viewName = (String) this.view;
 			if (getStatusCode() != null && getStatusCode().is3xxRedirection()) {
 				return viewName.startsWith("redirect:") ? viewName : "redirect:" + viewName;
 			}
@@ -109,7 +109,7 @@ public class ParameterizableViewController extends AbstractController {
 	 * fully handled within the controller.
 	 * @since 4.1
 	 */
-	public void setStatusCode(@Nullable HttpStatusCode statusCode) {
+	public void setStatusCode(@Nullable HttpStatus statusCode) {
 		this.statusCode = statusCode;
 	}
 
@@ -118,7 +118,7 @@ public class ParameterizableViewController extends AbstractController {
 	 * @since 4.1
 	 */
 	@Nullable
-	public HttpStatusCode getStatusCode() {
+	public HttpStatus getStatusCode() {
 		return this.statusCode;
 	}
 

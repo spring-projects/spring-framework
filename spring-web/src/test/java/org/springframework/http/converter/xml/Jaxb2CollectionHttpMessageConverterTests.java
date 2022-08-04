@@ -16,18 +16,20 @@
 
 package org.springframework.http.converter.xml;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.stream.XMLInputFactory;
 
-import jakarta.xml.bind.annotation.XmlAttribute;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -39,6 +41,9 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 /**
  * Test fixture for {@link Jaxb2CollectionHttpMessageConverter}.
@@ -80,12 +85,14 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 	@SuppressWarnings("unchecked")
 	public void readXmlRootElementList() throws Exception {
 		String content = "<list><rootElement><type s=\"1\"/></rootElement><rootElement><type s=\"2\"/></rootElement></list>";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes(StandardCharsets.UTF_8));
+		InputStream inputStream = spy(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(inputStream);
 		List<RootElement> result = (List<RootElement>) converter.read(rootElementListType, null, inputMessage);
 
 		assertThat(result.size()).as("Invalid result").isEqualTo(2);
 		assertThat(result.get(0).type.s).as("Invalid result").isEqualTo("1");
 		assertThat(result.get(1).type.s).as("Invalid result").isEqualTo("2");
+		verify(inputStream, never()).close();
 	}
 
 	@Test
@@ -224,7 +231,8 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 			if (this == o) {
 				return true;
 			}
-			if (o instanceof RootElement other) {
+			if (o instanceof RootElement) {
+				RootElement other = (RootElement) o;
 				return this.type.equals(other.type);
 			}
 			return false;
@@ -255,7 +263,8 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 			if (this == o) {
 				return true;
 			}
-			if (o instanceof TestType other) {
+			if (o instanceof TestType) {
+				TestType other = (TestType) o;
 				return this.s.equals(other.s);
 			}
 			return false;

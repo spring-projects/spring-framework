@@ -18,8 +18,8 @@ package org.springframework.web.context.request;
 
 import java.io.Serializable;
 
-import jakarta.servlet.http.HttpSessionBindingEvent;
-import jakarta.servlet.http.HttpSessionBindingListener;
+import javax.servlet.http.HttpSessionBindingEvent;
+import javax.servlet.http.HttpSessionBindingListener;
 
 /**
  * Adapter that implements the Servlet HttpSessionBindingListener interface,

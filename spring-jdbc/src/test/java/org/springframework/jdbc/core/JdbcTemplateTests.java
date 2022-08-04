@@ -944,8 +944,6 @@ public class JdbcTemplateTests {
 		mockDatabaseMetaData(false);
 		given(this.connection.createStatement()).willReturn(this.preparedStatement);
 
-		this.template.setExceptionTranslator(new SQLErrorCodeSQLExceptionTranslator(this.dataSource));
-
 		assertThatExceptionOfType(BadSqlGrammarException.class).isThrownBy(() ->
 				this.template.query(sql, (RowCallbackHandler) rs -> {
 					throw sqlException;
@@ -964,10 +962,13 @@ public class JdbcTemplateTests {
 		given(this.resultSet.next()).willReturn(true);
 		given(this.connection.createStatement()).willReturn(this.preparedStatement);
 
-		this.template.setExceptionTranslator(new SQLErrorCodeSQLExceptionTranslator("MySQL"));
+		JdbcTemplate template = new JdbcTemplate();
+		template.setDataSource(this.dataSource);
+		template.setDatabaseProductName("MySQL");
+		template.afterPropertiesSet();
 
 		assertThatExceptionOfType(BadSqlGrammarException.class).isThrownBy(() ->
-				this.template.query(sql, (RowCallbackHandler) rs -> {
+				template.query(sql, (RowCallbackHandler) rs -> {
 					throw sqlException;
 				}))
 			.withCause(sqlException);

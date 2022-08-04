@@ -18,7 +18,7 @@ package org.springframework.test.web.servlet.setup;
 
 import java.nio.charset.Charset;
 
-import jakarta.servlet.Filter;
+import javax.servlet.Filter;
 
 import org.springframework.test.web.servlet.DispatcherServletCustomizer;
 import org.springframework.test.web.servlet.MockMvcBuilder;

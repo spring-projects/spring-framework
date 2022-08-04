@@ -128,7 +128,8 @@ public abstract class AbstractFallbackTransactionAttributeSource
 			}
 			else {
 				String methodIdentification = ClassUtils.getQualifiedMethodName(method, targetClass);
-				if (txAttr instanceof DefaultTransactionAttribute dta) {
+				if (txAttr instanceof DefaultTransactionAttribute) {
+					DefaultTransactionAttribute dta = (DefaultTransactionAttribute) txAttr;
 					dta.setDescriptor(methodIdentification);
 					dta.resolveAttributeStrings(this.embeddedValueResolver);
 				}

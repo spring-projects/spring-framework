@@ -284,7 +284,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType, boolean allowEagerInit) {
-		return new ObjectProvider<>() {
+		return new ObjectProvider<T>() {
 			@Override
 			public T getObject() throws BeansException {
 				String[] beanNames = getBeanNamesForType(requiredType);

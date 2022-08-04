@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,6 @@ import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.web.util.UrlPathHelper;
 
 import static org.hamcrest.core.Is.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -118,11 +117,11 @@ public class EncodedUriTests {
 
 		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-			if (bean instanceof RequestMappingHandlerMapping requestMappingHandlerMapping) {
+			if (bean instanceof RequestMappingHandlerMapping) {
+				RequestMappingHandlerMapping requestMappingHandlerMapping = (RequestMappingHandlerMapping) bean;
+
 				// URL decode after request mapping, not before.
-				UrlPathHelper pathHelper = new UrlPathHelper();
-				pathHelper.setUrlDecode(false);
-				requestMappingHandlerMapping.setUrlPathHelper(pathHelper);
+				requestMappingHandlerMapping.setUrlDecode(false);
 			}
 			return bean;
 		}

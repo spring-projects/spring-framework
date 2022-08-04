@@ -26,17 +26,16 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.UUID;
 
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.URLDataSource;
 import javax.imageio.ImageIO;
+import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
-
-import jakarta.activation.DataHandler;
-import jakarta.activation.DataSource;
-import jakarta.activation.URLDataSource;
-import jakarta.xml.bind.JAXBElement;
 
 /**
  * Used by {@link org.springframework.oxm.jaxb.Jaxb2MarshallerTests}.
@@ -59,7 +58,7 @@ public class StandardClasses {
 	javax.xml.datatype.Duration
 	java.lang.Object
 	java.awt.Image
-	jakarta.activation.DataHandler
+	javax.activation.DataHandler
 	javax.xml.transform.Source
 	java.util.UUID
 		 */

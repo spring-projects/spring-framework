@@ -16,7 +16,7 @@
 
 package org.springframework.orm.jpa.persistenceunit;
 
-import jakarta.persistence.spi.ClassTransformer;
+import javax.persistence.spi.ClassTransformer;
 
 import org.springframework.core.DecoratingClassLoader;
 import org.springframework.instrument.classloading.LoadTimeWeaver;

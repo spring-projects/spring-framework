@@ -20,14 +20,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import jakarta.websocket.Extension;
+import javax.websocket.Extension;
 
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.web.socket.WebSocketExtension;
 
 /**
- * A subclass of {@link WebSocketExtension} that can be constructed from a
- * {@link jakarta.websocket.Extension}.
+ * A subclass of {@link org.springframework.web.socket.WebSocketExtension} that
+ * can be constructed from a {@link javax.websocket.Extension}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

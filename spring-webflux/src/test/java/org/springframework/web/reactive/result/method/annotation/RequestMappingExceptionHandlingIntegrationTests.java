@@ -29,7 +29,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -104,7 +103,7 @@ class RequestMappingExceptionHandlingIntegrationTests extends AbstractRequestMap
 		assertThatExceptionOfType(HttpStatusCodeException.class).isThrownBy(() ->
 				performGet("/SPR-16318", headers, String.class).getBody())
 			.satisfies(ex -> {
-				assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+				assertThat(ex.getRawStatusCode()).isEqualTo(500);
 				assertThat(ex.getResponseHeaders().getContentType().toString()).isEqualTo("application/problem+json");
 				assertThat(ex.getResponseBodyAsString()).isEqualTo("{\"reason\":\"error\"}");
 			});

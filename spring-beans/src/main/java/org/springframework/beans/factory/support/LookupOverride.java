@@ -102,9 +102,10 @@ public class LookupOverride extends MethodOverride {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (!(other instanceof LookupOverride that) || !super.equals(other)) {
+		if (!(other instanceof LookupOverride) || !super.equals(other)) {
 			return false;
 		}
+		LookupOverride that = (LookupOverride) other;
 		return (ObjectUtils.nullSafeEquals(this.method, that.method) &&
 				ObjectUtils.nullSafeEquals(this.beanName, that.beanName));
 	}

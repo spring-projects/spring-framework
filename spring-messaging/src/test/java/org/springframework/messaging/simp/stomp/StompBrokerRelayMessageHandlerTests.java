@@ -16,7 +16,6 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -167,7 +166,7 @@ class StompBrokerRelayMessageHandlerTests {
 		this.tcpClient.handleMessage(MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders()));
 
 		// Run the messageCountTask to clear the message count
-		verify(this.brokerRelay.getTaskScheduler()).scheduleWithFixedDelay(this.messageCountTaskCaptor.capture(), eq(Duration.ofMillis(5000L)));
+		verify(this.brokerRelay.getTaskScheduler()).scheduleWithFixedDelay(this.messageCountTaskCaptor.capture(), eq(5000L));
 		this.messageCountTaskCaptor.getValue().run();
 
 		accessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);

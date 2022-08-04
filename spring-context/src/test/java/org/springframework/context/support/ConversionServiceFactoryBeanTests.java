@@ -55,8 +55,6 @@ class ConversionServiceFactoryBeanTests {
 	void createDefaultConversionServiceWithSupplements() {
 		ConversionServiceFactoryBean factory = new ConversionServiceFactoryBean();
 		Set<Object> converters = new HashSet<>();
-		// The following String -> Foo Converter cannot be implemented as a lambda
-		// due to type erasure of the source and target types.
 		converters.add(new Converter<String, Foo>() {
 			@Override
 			public Foo convert(String source) {
@@ -66,7 +64,7 @@ class ConversionServiceFactoryBeanTests {
 		converters.add(new ConverterFactory<String, Bar>() {
 			@Override
 			public <T extends Bar> Converter<String, T> getConverter(Class<T> targetType) {
-				return new Converter<> () {
+				return new Converter<String, T> () {
 					@SuppressWarnings("unchecked")
 					@Override
 					public T convert(String source) {

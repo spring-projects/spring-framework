@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Abstract base regular expression pointcut bean. JavaBean properties are:
@@ -80,7 +81,7 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 		Assert.notEmpty(patterns, "'patterns' must not be empty");
 		this.patterns = new String[patterns.length];
 		for (int i = 0; i < patterns.length; i++) {
-			this.patterns[i] = patterns[i].strip();
+			this.patterns[i] = StringUtils.trimWhitespace(patterns[i]);
 		}
 		initPatternRepresentation(this.patterns);
 	}
@@ -110,7 +111,7 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 		Assert.notEmpty(excludedPatterns, "'excludedPatterns' must not be empty");
 		this.excludedPatterns = new String[excludedPatterns.length];
 		for (int i = 0; i < excludedPatterns.length; i++) {
-			this.excludedPatterns[i] = excludedPatterns[i].strip();
+			this.excludedPatterns[i] = StringUtils.trimWhitespace(excludedPatterns[i]);
 		}
 		initExcludedPatternRepresentation(this.excludedPatterns);
 	}
@@ -199,9 +200,10 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof AbstractRegexpMethodPointcut otherPointcut)) {
+		if (!(other instanceof AbstractRegexpMethodPointcut)) {
 			return false;
 		}
+		AbstractRegexpMethodPointcut otherPointcut = (AbstractRegexpMethodPointcut) other;
 		return (Arrays.equals(this.patterns, otherPointcut.patterns) &&
 				Arrays.equals(this.excludedPatterns, otherPointcut.excludedPatterns));
 	}

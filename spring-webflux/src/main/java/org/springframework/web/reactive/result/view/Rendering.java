@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 
@@ -58,7 +58,7 @@ public interface Rendering {
 	 * Return the HTTP status to set the response to.
 	 */
 	@Nullable
-	HttpStatusCode status();
+	HttpStatus status();
 
 	/**
 	 * Return headers to add to the response.
@@ -121,7 +121,7 @@ public interface Rendering {
 		/**
 		 * Specify the status to use for the response.
 		 */
-		B status(HttpStatusCode status);
+		B status(HttpStatus status);
 
 		/**
 		 * Specify a header to add to the response.

@@ -79,10 +79,11 @@ import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import kotlin.ranges.IntRange;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.FatalBeanException;
-import org.springframework.http.ProblemDetail;
 import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -281,6 +282,10 @@ class Jackson2ObjectMapperBuilderTests {
 	void wellKnownModules() throws JsonProcessingException, UnsupportedEncodingException {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
 
+		Long timestamp = 1322903730000L;
+		DateTime dateTime = new DateTime(timestamp, DateTimeZone.UTC);
+		assertThat(new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8")).isEqualTo(timestamp.toString());
+
 		Path file = Paths.get("foo");
 		assertThat(new String(objectMapper.writeValueAsBytes(file), "UTF-8").endsWith("foo\"")).isTrue();
 
@@ -290,6 +295,41 @@ class Jackson2ObjectMapperBuilderTests {
 		// Kotlin module
 		IntRange range = new IntRange(1, 3);
 		assertThat(new String(objectMapper.writeValueAsBytes(range), "UTF-8")).isEqualTo("{\"start\":1,\"end\":3}");
+	}
+
+	@Test  // SPR-12634
+	void customizeWellKnownModulesWithModule()
+			throws JsonProcessingException, UnsupportedEncodingException {
+
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
+				.modulesToInstall(new CustomIntegerModule())
+				.build();
+		DateTime dateTime = new DateTime(1322903730000L, DateTimeZone.UTC);
+		assertThat(new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8")).isEqualTo("1322903730000");
+		assertThat(new String(objectMapper.writeValueAsBytes(4), "UTF-8")).contains("customid");
+	}
+
+	@Test  // SPR-12634
+	void customizeWellKnownModulesWithModuleClass()
+			throws JsonProcessingException, UnsupportedEncodingException {
+
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
+				.modulesToInstall(CustomIntegerModule.class)
+				.build();
+		DateTime dateTime = new DateTime(1322903730000L, DateTimeZone.UTC);
+		assertThat(new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8")).isEqualTo("1322903730000");
+		assertThat(new String(objectMapper.writeValueAsBytes(4), "UTF-8")).contains("customid");
+	}
+
+	@Test  // SPR-12634
+	void customizeWellKnownModulesWithSerializer()
+			throws JsonProcessingException, UnsupportedEncodingException {
+
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
+				.serializerByType(Integer.class, new CustomIntegerSerializer()).build();
+		DateTime dateTime = new DateTime(1322903730000L, DateTimeZone.UTC);
+		assertThat(new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8")).isEqualTo("1322903730000");
+		assertThat(new String(objectMapper.writeValueAsBytes(4), "UTF-8")).contains("customid");
 	}
 
 	@Test  // gh-22576
@@ -368,13 +408,12 @@ class Jackson2ObjectMapperBuilderTests {
 		Class<?> target = String.class;
 		Class<?> mixInSource = Object.class;
 
-		ObjectMapper mapper = Jackson2ObjectMapperBuilder.json()
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
 				.modules().mixIn(target, mixInSource)
 				.build();
 
-		assertThat(mapper.mixInCount()).isEqualTo(2);
-		assertThat(mapper.findMixInClassFor(ProblemDetail.class)).isAssignableFrom(ProblemDetailJacksonMixin.class);
-		assertThat(mapper.findMixInClassFor(target)).isSameAs(mixInSource);
+		assertThat(objectMapper.mixInCount()).isEqualTo(1);
+		assertThat(objectMapper.findMixInClassFor(target)).isSameAs(mixInSource);
 	}
 
 	@Test
@@ -384,13 +423,12 @@ class Jackson2ObjectMapperBuilderTests {
 		Map<Class<?>, Class<?>> mixIns = new HashMap<>();
 		mixIns.put(target, mixInSource);
 
-		ObjectMapper mapper = Jackson2ObjectMapperBuilder.json()
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
 				.modules().mixIns(mixIns)
 				.build();
 
-		assertThat(mapper.mixInCount()).isEqualTo(2);
-		assertThat(mapper.findMixInClassFor(ProblemDetail.class)).isAssignableFrom(ProblemDetailJacksonMixin.class);
-		assertThat(mapper.findMixInClassFor(target)).isSameAs(mixInSource);
+		assertThat(objectMapper.mixInCount()).isEqualTo(1);
+		assertThat(objectMapper.findMixInClassFor(target)).isSameAs(mixInSource);
 	}
 
 	@Test

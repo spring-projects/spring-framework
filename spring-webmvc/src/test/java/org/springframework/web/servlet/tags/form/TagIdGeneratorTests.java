@@ -18,7 +18,8 @@ package org.springframework.web.servlet.tags.form;
 
 import java.util.stream.IntStream;
 
-import jakarta.servlet.jsp.PageContext;
+import javax.servlet.jsp.PageContext;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.testfixture.servlet.MockPageContext;

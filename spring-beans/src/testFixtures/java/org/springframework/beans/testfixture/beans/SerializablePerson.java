@@ -64,9 +64,10 @@ public class SerializablePerson implements Person, Serializable {
 
 	@Override
 	public boolean equals(Object other) {
-		if (!(other instanceof SerializablePerson p)) {
+		if (!(other instanceof SerializablePerson)) {
 			return false;
 		}
+		SerializablePerson p = (SerializablePerson) other;
 		return p.age == age && ObjectUtils.nullSafeEquals(name, p.name);
 	}
 

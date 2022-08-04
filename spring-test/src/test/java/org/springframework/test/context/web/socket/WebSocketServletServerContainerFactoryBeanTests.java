@@ -16,7 +16,8 @@
 
 package org.springframework.test.context.web.socket;
 
-import jakarta.websocket.server.ServerContainer;
+import javax.websocket.server.ServerContainer;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;

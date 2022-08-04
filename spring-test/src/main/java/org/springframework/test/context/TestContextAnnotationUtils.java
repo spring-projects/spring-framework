@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,10 +91,7 @@ public abstract class TestContextAnnotationUtils {
 	 * @see #findMergedAnnotation(Class, Class)
 	 */
 	public static boolean hasAnnotation(Class<?> clazz, Class<? extends Annotation> annotationType) {
-		return MergedAnnotations.search(SearchStrategy.TYPE_HIERARCHY)
-				.withEnclosingClasses(TestContextAnnotationUtils::searchEnclosingClass)
-				.from(clazz)
-				.isPresent(annotationType);
+		return (findMergedAnnotation(clazz, annotationType) != null);
 	}
 
 	/**
@@ -128,11 +125,9 @@ public abstract class TestContextAnnotationUtils {
 	private static <T extends Annotation> T findMergedAnnotation(Class<?> clazz, Class<T> annotationType,
 			Predicate<Class<?>> searchEnclosingClass) {
 
-		return MergedAnnotations.search(SearchStrategy.TYPE_HIERARCHY)
-				.withEnclosingClasses(searchEnclosingClass)
-				.from(clazz)
-				.get(annotationType)
-				.synthesize(MergedAnnotation::isPresent).orElse(null);
+		AnnotationDescriptor<T> descriptor =
+				findAnnotationDescriptor(clazz, annotationType, searchEnclosingClass, new HashSet<>());
+		return (descriptor != null ? descriptor.getAnnotation() : null);
 	}
 
 	/**

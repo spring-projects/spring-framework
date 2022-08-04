@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import jakarta.servlet.ServletContext;
+import javax.servlet.ServletContext;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -33,7 +33,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.SpringProperties;
 import org.springframework.core.convert.converter.Converter;
@@ -71,7 +70,6 @@ import org.springframework.validation.Validator;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.WebAnnotationsRuntimeHintsRegistrar;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.cors.CorsConfiguration;
@@ -190,7 +188,6 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * @see EnableWebMvc
  * @see WebMvcConfigurer
  */
-@ImportRuntimeHints(WebAnnotationsRuntimeHintsRegistrar.class)
 public class WebMvcConfigurationSupport implements ApplicationContextAware, ServletContextAware {
 
 	/**
@@ -221,14 +218,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	static {
 		ClassLoader classLoader = WebMvcConfigurationSupport.class.getClassLoader();
 		romePresent = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", classLoader);
-		jaxb2Present = ClassUtils.isPresent("jakarta.xml.bind.Binder", classLoader);
+		jaxb2Present = ClassUtils.isPresent("javax.xml.bind.Binder", classLoader);
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
 		jackson2XmlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
 		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
 		jackson2CborPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", classLoader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
-		jsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
+		jsonbPresent = ClassUtils.isPresent("javax.json.bind.Jsonb", classLoader);
 		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
 	}
 
@@ -282,7 +279,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Set the {@link jakarta.servlet.ServletContext}, e.g. for resource handling,
+	 * Set the {@link javax.servlet.ServletContext}, e.g. for resource handling,
 	 * looking up file extensions, etc.
 	 */
 	@Override
@@ -291,7 +288,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Return the associated {@link jakarta.servlet.ServletContext}.
+	 * Return the associated {@link javax.servlet.ServletContext}.
 	 * @since 4.2
 	 */
 	@Nullable
@@ -313,12 +310,18 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 		RequestMappingHandlerMapping mapping = createRequestMappingHandlerMapping();
 		mapping.setOrder(0);
+		mapping.setInterceptors(getInterceptors(conversionService, resourceUrlProvider));
 		mapping.setContentNegotiationManager(contentNegotiationManager);
-
-		initHandlerMapping(mapping, conversionService, resourceUrlProvider);
+		mapping.setCorsConfigurations(getCorsConfigurations());
 
 		PathMatchConfigurer pathConfig = getPathMatchConfigurer();
-		if (pathConfig.preferPathMatcher()) {
+		if (pathConfig.getPatternParser() != null) {
+			mapping.setPatternParser(pathConfig.getPatternParser());
+		}
+		else {
+			mapping.setUrlPathHelper(pathConfig.getUrlPathHelperOrDefault());
+			mapping.setPathMatcher(pathConfig.getPathMatcherOrDefault());
+
 			Boolean useSuffixPatternMatch = pathConfig.isUseSuffixPatternMatch();
 			if (useSuffixPatternMatch != null) {
 				mapping.setUseSuffixPatternMatch(useSuffixPatternMatch);
@@ -328,12 +331,10 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 				mapping.setUseRegisteredSuffixPatternMatch(useRegisteredSuffixPatternMatch);
 			}
 		}
-
 		Boolean useTrailingSlashMatch = pathConfig.isUseTrailingSlashMatch();
 		if (useTrailingSlashMatch != null) {
 			mapping.setUseTrailingSlashMatch(useTrailingSlashMatch);
 		}
-
 		if (pathConfig.getPathPrefixes() != null) {
 			mapping.setPathPrefixes(pathConfig.getPathPrefixes());
 		}
@@ -493,29 +494,21 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		ViewControllerRegistry registry = new ViewControllerRegistry(this.applicationContext);
 		addViewControllers(registry);
 
-		AbstractHandlerMapping mapping = registry.buildHandlerMapping();
-		initHandlerMapping(mapping, conversionService, resourceUrlProvider);
-		return mapping;
-	}
-
-	private void initHandlerMapping(
-			@Nullable AbstractHandlerMapping mapping, FormattingConversionService conversionService,
-			ResourceUrlProvider resourceUrlProvider) {
-
-		if (mapping == null) {
-			return;
+		AbstractHandlerMapping handlerMapping = registry.buildHandlerMapping();
+		if (handlerMapping == null) {
+			return null;
 		}
 		PathMatchConfigurer pathConfig = getPathMatchConfigurer();
-		if (pathConfig.preferPathMatcher()) {
-			mapping.setPatternParser(null);
-			mapping.setUrlPathHelper(pathConfig.getUrlPathHelperOrDefault());
-			mapping.setPathMatcher(pathConfig.getPathMatcherOrDefault());
+		if (pathConfig.getPatternParser() != null) {
+			handlerMapping.setPatternParser(pathConfig.getPatternParser());
 		}
-		else if (pathConfig.getPatternParser() != null) {
-			mapping.setPatternParser(pathConfig.getPatternParser());
+		else {
+			handlerMapping.setUrlPathHelper(pathConfig.getUrlPathHelperOrDefault());
+			handlerMapping.setPathMatcher(pathConfig.getPathMatcherOrDefault());
 		}
-		mapping.setInterceptors(getInterceptors(conversionService, resourceUrlProvider));
-		mapping.setCorsConfigurations(getCorsConfigurations());
+		handlerMapping.setInterceptors(getInterceptors(conversionService, resourceUrlProvider));
+		handlerMapping.setCorsConfigurations(getCorsConfigurations());
+		return handlerMapping;
 	}
 
 	/**
@@ -536,7 +529,18 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 		BeanNameUrlHandlerMapping mapping = new BeanNameUrlHandlerMapping();
 		mapping.setOrder(2);
-		initHandlerMapping(mapping, conversionService, resourceUrlProvider);
+
+		PathMatchConfigurer pathConfig = getPathMatchConfigurer();
+		if (pathConfig.getPatternParser() != null) {
+			mapping.setPatternParser(pathConfig.getPatternParser());
+		}
+		else {
+			mapping.setUrlPathHelper(pathConfig.getUrlPathHelperOrDefault());
+			mapping.setPathMatcher(pathConfig.getPathMatcherOrDefault());
+		}
+
+		mapping.setInterceptors(getInterceptors(conversionService, resourceUrlProvider));
+		mapping.setCorsConfigurations(getCorsConfigurations());
 		return mapping;
 	}
 
@@ -592,9 +596,20 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 				this.servletContext, contentNegotiationManager, pathConfig.getUrlPathHelper());
 		addResourceHandlers(registry);
 
-		AbstractHandlerMapping mapping = registry.getHandlerMapping();
-		initHandlerMapping(mapping, conversionService, resourceUrlProvider);
-		return mapping;
+		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
+		if (handlerMapping == null) {
+			return null;
+		}
+		if (pathConfig.getPatternParser() != null) {
+			handlerMapping.setPatternParser(pathConfig.getPatternParser());
+		}
+		else {
+			handlerMapping.setUrlPathHelper(pathConfig.getUrlPathHelperOrDefault());
+			handlerMapping.setPathMatcher(pathConfig.getPathMatcherOrDefault());
+		}
+		handlerMapping.setInterceptors(getInterceptors(conversionService, resourceUrlProvider));
+		handlerMapping.setCorsConfigurations(getCorsConfigurations());
+		return handlerMapping;
 	}
 
 	/**
@@ -759,7 +774,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	public Validator mvcValidator() {
 		Validator validator = getValidator();
 		if (validator == null) {
-			if (ClassUtils.isPresent("jakarta.validation.Validator", getClass().getClassLoader())) {
+			if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
 				Class<?> clazz;
 				try {
 					String className = "org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean";

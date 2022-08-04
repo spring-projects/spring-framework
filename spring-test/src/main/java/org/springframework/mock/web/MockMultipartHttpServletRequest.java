@@ -23,11 +23,10 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Part;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.Part;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -103,7 +102,12 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 	@Override
 	public List<MultipartFile> getFiles(String name) {
 		List<MultipartFile> multipartFiles = this.multipartFiles.get(name);
-		return Objects.requireNonNullElse(multipartFiles, Collections.emptyList());
+		if (multipartFiles != null) {
+			return multipartFiles;
+		}
+		else {
+			return Collections.emptyList();
+		}
 	}
 
 	@Override
@@ -137,9 +141,7 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 
 	@Override
 	public HttpMethod getRequestMethod() {
-		String method = getMethod();
-		Assert.state(method != null, "Method must not be null");
-		return HttpMethod.valueOf(method);
+		return HttpMethod.resolve(getMethod());
 	}
 
 	@Override

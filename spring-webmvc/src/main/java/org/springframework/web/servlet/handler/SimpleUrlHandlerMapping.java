@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,9 +44,10 @@ import org.springframework.util.CollectionUtils;
  * with a slash, one is prepended.
  *
  * <p>Supports direct matches (given "/test" -&gt; registered "/test") and "*"
- * matches (given "/test" -&gt; registered "/t*"). For details on the pattern
- * options, see the {@link org.springframework.web.util.pattern.PathPattern}
- * javadoc.
+ * pattern matches (given "/test" -&gt; registered "/t*"). Note that the default
+ * is to map within the current servlet mapping if applicable; see the
+ * {@link #setAlwaysUseFullPath "alwaysUseFullPath"} property. For details on the
+ * pattern options, see the {@link org.springframework.util.AntPathMatcher} javadoc.
 
  * @author Rod Johnson
  * @author Juergen Hoeller

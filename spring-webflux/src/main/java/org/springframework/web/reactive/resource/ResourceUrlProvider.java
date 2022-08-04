@@ -106,7 +106,8 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 		mappings.forEach(mapping ->
 			mapping.getHandlerMap().forEach((pattern, handler) -> {
-				if (handler instanceof ResourceWebHandler resourceHandler) {
+				if (handler instanceof ResourceWebHandler) {
+					ResourceWebHandler resourceHandler = (ResourceWebHandler) handler;
 					this.handlerMap.put(pattern, resourceHandler);
 				}
 			}));

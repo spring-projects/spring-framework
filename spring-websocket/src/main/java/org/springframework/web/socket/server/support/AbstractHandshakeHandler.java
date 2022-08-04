@@ -68,12 +68,15 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
  * @see org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy
  * @see org.springframework.web.socket.server.standard.UndertowRequestUpgradeStrategy
  * @see org.springframework.web.socket.server.standard.GlassFishRequestUpgradeStrategy
+ * @see org.springframework.web.socket.server.standard.WebLogicRequestUpgradeStrategy
  */
 public abstract class AbstractHandshakeHandler implements HandshakeHandler, Lifecycle {
 
 	private static final boolean tomcatWsPresent;
 
 	private static final boolean jettyWsPresent;
+
+	private static final boolean jetty10WsPresent;
 
 	private static final boolean undertowWsPresent;
 
@@ -87,8 +90,10 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 		ClassLoader classLoader = AbstractHandshakeHandler.class.getClassLoader();
 		tomcatWsPresent = ClassUtils.isPresent(
 				"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", classLoader);
-		jettyWsPresent = ClassUtils.isPresent(
+		jetty10WsPresent = ClassUtils.isPresent(
 				"org.eclipse.jetty.websocket.server.JettyWebSocketServerContainer", classLoader);
+		jettyWsPresent = ClassUtils.isPresent(
+				"org.eclipse.jetty.websocket.server.WebSocketServerFactory", classLoader);
 		undertowWsPresent = ClassUtils.isPresent(
 				"io.undertow.websockets.jsr.ServerWebSocketContainer", classLoader);
 		glassfishWsPresent = ClassUtils.isPresent(
@@ -135,6 +140,9 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 		}
 		else if (jettyWsPresent) {
 			className = "org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy";
+		}
+		else if (jetty10WsPresent) {
+			className = "org.springframework.web.socket.server.jetty.Jetty10RequestUpgradeStrategy";
 		}
 		else if (undertowWsPresent) {
 			className = "org.springframework.web.socket.server.standard.UndertowRequestUpgradeStrategy";

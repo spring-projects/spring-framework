@@ -30,7 +30,6 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerSentEventHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
-import org.springframework.http.codec.multipart.PartEventHttpMessageWriter;
 import org.springframework.lang.Nullable;
 
 /**
@@ -101,7 +100,6 @@ class ClientDefaultCodecsImpl extends BaseDefaultCodecs implements ClientCodecCo
 	@Override
 	protected void extendTypedWriters(List<HttpMessageWriter<?>> typedWriters) {
 		addCodec(typedWriters, new MultipartHttpMessageWriter(getPartWriters(), new FormHttpMessageWriter()));
-		addCodec(typedWriters, new PartEventHttpMessageWriter());
 	}
 
 	private List<HttpMessageWriter<?>> getPartWriters() {

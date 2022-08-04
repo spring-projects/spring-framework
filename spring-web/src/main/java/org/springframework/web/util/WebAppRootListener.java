@@ -16,8 +16,8 @@
 
 package org.springframework.web.util;
 
-import jakarta.servlet.ServletContextEvent;
-import jakarta.servlet.ServletContextListener;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 
 /**
  * Listener that sets a system property to the web application root directory.

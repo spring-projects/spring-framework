@@ -145,6 +145,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	protected void addSingletonFactory(String beanName, ObjectFactory<?> singletonFactory) {
 		Assert.notNull(singletonFactory, "Singleton factory must not be null");
+		// 在bean实例化完成之后，还未进行属性填充之前，Spring将bean包装成一个工程添加到三级缓存中
 		synchronized (this.singletonObjects) {
 			// 首先从一级缓存中去获取bean，当然，现在肯定是没有完整的bean实例
 			if (!this.singletonObjects.containsKey(beanName)) {

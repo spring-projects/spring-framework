@@ -20,21 +20,24 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletRequestWrapper;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpServletResponseWrapper;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
@@ -166,23 +169,23 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	 */
 	private static class ForwardedHeaderRemovingRequest extends HttpServletRequestWrapper {
 
-		private final Set<String> headerNames;
+		private final Map<String, List<String>> headers;
 
 		public ForwardedHeaderRemovingRequest(HttpServletRequest request) {
 			super(request);
-			this.headerNames = headerNames(request);
+			this.headers = initHeaders(request);
 		}
 
-		private static Set<String> headerNames(HttpServletRequest request) {
-			Set<String> headerNames = Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(Locale.ENGLISH));
+		private static Map<String, List<String>> initHeaders(HttpServletRequest request) {
+			Map<String, List<String>> headers = new LinkedCaseInsensitiveMap<>(Locale.ENGLISH);
 			Enumeration<String> names = request.getHeaderNames();
 			while (names.hasMoreElements()) {
 				String name = names.nextElement();
 				if (!FORWARDED_HEADER_NAMES.contains(name)) {
-					headerNames.add(name);
+					headers.put(name, Collections.list(request.getHeaders(name)));
 				}
 			}
-			return Collections.unmodifiableSet(headerNames);
+			return headers;
 		}
 
 		// Override header accessors to not expose forwarded headers
@@ -190,23 +193,19 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		@Override
 		@Nullable
 		public String getHeader(String name) {
-			if (FORWARDED_HEADER_NAMES.contains(name)) {
-				return null;
-			}
-			return super.getHeader(name);
+			List<String> value = this.headers.get(name);
+			return (CollectionUtils.isEmpty(value) ? null : value.get(0));
 		}
 
 		@Override
 		public Enumeration<String> getHeaders(String name) {
-			if (FORWARDED_HEADER_NAMES.contains(name)) {
-				return Collections.emptyEnumeration();
-			}
-			return super.getHeaders(name);
+			List<String> value = this.headers.get(name);
+			return (Collections.enumeration(value != null ? value : Collections.emptySet()));
 		}
 
 		@Override
 		public Enumeration<String> getHeaderNames() {
-			return Collections.enumeration(this.headerNames);
+			return Collections.enumeration(this.headers.keySet());
 		}
 	}
 

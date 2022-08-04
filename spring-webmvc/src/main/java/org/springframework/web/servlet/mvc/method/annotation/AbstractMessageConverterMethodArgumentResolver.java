@@ -23,12 +23,14 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -47,7 +49,6 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.ValidationAnnotationUtils;
@@ -67,7 +68,8 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
  */
 public abstract class AbstractMessageConverterMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
-	private static final Set<HttpMethod> SUPPORTED_METHODS = Set.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
+	private static final Set<HttpMethod> SUPPORTED_METHODS =
+			EnumSet.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
 
 	private static final Object NO_VALUE = new Object();
 
@@ -206,7 +208,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 				return null;
 			}
 			throw new HttpMediaTypeNotSupportedException(contentType,
-					getSupportedMediaTypes(targetClass != null ? targetClass : Object.class), httpMethod);
+					getSupportedMediaTypes(targetClass != null ? targetClass : Object.class));
 		}
 
 		MediaType selectedContentType = contentType;
@@ -232,7 +234,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 
 	/**
 	 * Validate the binding target if applicable.
-	 * <p>The default implementation checks for {@code @jakarta.validation.Valid},
+	 * <p>The default implementation checks for {@code @javax.validation.Valid},
 	 * Spring's {@link org.springframework.validation.annotation.Validated},
 	 * and custom annotations whose name starts with "Valid".
 	 * @param binder the DataBinder to be used
@@ -267,7 +269,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 
 	/**
 	 * Return the media types supported by all provided message converters sorted
-	 * by specificity via {@link MimeTypeUtils#sortBySpecificity(List)}.
+	 * by specificity via {@link MediaType#sortBySpecificity(List)}.
 	 * @since 5.3.4
 	 */
 	protected List<MediaType> getSupportedMediaTypes(Class<?> clazz) {
@@ -276,7 +278,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 			mediaTypeSet.addAll(converter.getSupportedMediaTypes(clazz));
 		}
 		List<MediaType> result = new ArrayList<>(mediaTypeSet);
-		MimeTypeUtils.sortBySpecificity(result);
+		MediaType.sortBySpecificity(result);
 		return result;
 	}
 

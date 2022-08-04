@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,12 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
+import freemarker.ext.servlet.AllHttpScopesHashModel;
 import freemarker.template.Configuration;
-import freemarker.template.SimpleHash;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContextException;
@@ -91,6 +92,7 @@ public class FreeMarkerViewTests {
 		Map<String, FreeMarkerConfig> configs = new HashMap<>();
 		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 		configurer.setConfiguration(new TestConfiguration());
+		configurer.setServletContext(sc);
 		configs.put("configurer", configurer);
 		given(wac.getBeansOfType(FreeMarkerConfig.class, true, false)).willReturn(configs);
 		given(wac.getServletContext()).willReturn(sc);
@@ -121,6 +123,7 @@ public class FreeMarkerViewTests {
 		Map<String, FreeMarkerConfig> configs = new HashMap<>();
 		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 		configurer.setConfiguration(new TestConfiguration());
+		configurer.setServletContext(sc);
 		configs.put("configurer", configurer);
 		given(wac.getBeansOfType(FreeMarkerConfig.class, true, false)).willReturn(configs);
 		given(wac.getServletContext()).willReturn(sc);
@@ -148,6 +151,7 @@ public class FreeMarkerViewTests {
 
 		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 		configurer.setConfiguration(new TestConfiguration());
+		configurer.setServletContext(sc);
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(sc);
@@ -187,8 +191,9 @@ public class FreeMarkerViewTests {
 					@Override
 					public void process(Object model, Writer writer) throws TemplateException, IOException {
 						assertThat(locale).isEqualTo(Locale.US);
-						assertThat(model instanceof SimpleHash).isTrue();
-						SimpleHash fmModel = (SimpleHash) model;
+						boolean condition = model instanceof AllHttpScopesHashModel;
+						assertThat(condition).isTrue();
+						AllHttpScopesHashModel fmModel = (AllHttpScopesHashModel) model;
 						assertThat(fmModel.get("myattr").toString()).isEqualTo("myvalue");
 					}
 				};

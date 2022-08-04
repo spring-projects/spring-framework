@@ -18,7 +18,8 @@ package org.springframework.beans.factory.config;
 
 import java.util.Date;
 
-import jakarta.inject.Provider;
+import javax.inject.Provider;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

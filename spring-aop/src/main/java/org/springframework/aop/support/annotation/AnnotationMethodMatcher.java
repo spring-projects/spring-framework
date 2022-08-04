@@ -93,9 +93,10 @@ public class AnnotationMethodMatcher extends StaticMethodMatcher {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof AnnotationMethodMatcher otherMm)) {
+		if (!(other instanceof AnnotationMethodMatcher)) {
 			return false;
 		}
+		AnnotationMethodMatcher otherMm = (AnnotationMethodMatcher) other;
 		return (this.annotationType.equals(otherMm.annotationType) && this.checkInherited == otherMm.checkInherited);
 	}
 

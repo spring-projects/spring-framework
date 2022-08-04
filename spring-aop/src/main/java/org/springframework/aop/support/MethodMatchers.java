@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,9 +146,10 @@ public abstract class MethodMatchers {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof UnionMethodMatcher that)) {
+			if (!(other instanceof UnionMethodMatcher)) {
 				return false;
 			}
+			UnionMethodMatcher that = (UnionMethodMatcher) other;
 			return (this.mm1.equals(that.mm1) && this.mm2.equals(that.mm2));
 		}
 
@@ -222,7 +223,8 @@ public abstract class MethodMatchers {
 			}
 			ClassFilter otherCf1 = ClassFilter.TRUE;
 			ClassFilter otherCf2 = ClassFilter.TRUE;
-			if (other instanceof ClassFilterAwareUnionMethodMatcher cfa) {
+			if (other instanceof ClassFilterAwareUnionMethodMatcher) {
+				ClassFilterAwareUnionMethodMatcher cfa = (ClassFilterAwareUnionMethodMatcher) other;
 				otherCf1 = cfa.cf1;
 				otherCf2 = cfa.cf2;
 			}
@@ -310,9 +312,10 @@ public abstract class MethodMatchers {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof IntersectionMethodMatcher that)) {
+			if (!(other instanceof IntersectionMethodMatcher)) {
 				return false;
 			}
+			IntersectionMethodMatcher that = (IntersectionMethodMatcher) other;
 			return (this.mm1.equals(that.mm1) && this.mm2.equals(that.mm2));
 		}
 

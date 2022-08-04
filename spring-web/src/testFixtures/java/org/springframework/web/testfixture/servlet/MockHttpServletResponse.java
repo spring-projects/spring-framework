@@ -38,9 +38,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import jakarta.servlet.ServletOutputStream;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -51,7 +51,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Mock implementation of the {@link jakarta.servlet.http.HttpServletResponse} interface.
+ * Mock implementation of the {@link javax.servlet.http.HttpServletResponse} interface.
  *
  * <p>As of Spring Framework 5.0, this set of mocks is designed on a Servlet 4.0 baseline.
  *
@@ -279,11 +279,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * @see #setContentType(String)
 	 */
 	public String getContentAsString(Charset fallbackCharset) throws UnsupportedEncodingException {
-		if (this.characterEncodingSet) {
-			return this.content.toString(getCharacterEncoding());
-		}
-
-		return this.content.toString(fallbackCharset);
+		String charsetName = (this.characterEncodingSet ? getCharacterEncoding() : fallbackCharset.name());
+		return this.content.toString(charsetName);
 	}
 
 	@Override
@@ -386,7 +383,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setLocale(@Nullable Locale locale) {
-		// Although the Javadoc for jakarta.servlet.ServletResponse.setLocale(Locale) does not
+		// Although the Javadoc for javax.servlet.ServletResponse.setLocale(Locale) does not
 		// state how a null value for the supplied Locale should be handled, both Tomcat and
 		// Jetty simply ignore a null value. So we do the same here.
 		if (locale == null) {
@@ -423,7 +420,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			buf.append("; Domain=").append(cookie.getDomain());
 		}
 		int maxAge = cookie.getMaxAge();
-		ZonedDateTime expires = (cookie instanceof MockCookie mockCookie? mockCookie.getExpires() : null);
+		ZonedDateTime expires = (cookie instanceof MockCookie ? ((MockCookie) cookie).getExpires() : null);
 		if (maxAge >= 0) {
 			buf.append("; Max-Age=").append(maxAge);
 			buf.append("; Expires=");
@@ -447,7 +444,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		if (cookie.isHttpOnly()) {
 			buf.append("; HttpOnly");
 		}
-		if (cookie instanceof MockCookie mockCookie) {
+		if (cookie instanceof MockCookie) {
+			MockCookie mockCookie = (MockCookie) cookie;
 			if (StringUtils.hasText(mockCookie.getSameSite())) {
 				buf.append("; SameSite=").append(mockCookie.getSameSite());
 			}
@@ -695,7 +693,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			return true;
 		}
 		else if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
-			setContentLength(value instanceof Number number ? number.intValue() :
+			setContentLength(value instanceof Number ? ((Number) value).intValue() :
 					Integer.parseInt(value.toString()));
 			return true;
 		}

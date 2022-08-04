@@ -19,7 +19,6 @@ package org.springframework.web.socket.sockjs.transport.handler;
 import java.io.IOException;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
@@ -45,7 +44,7 @@ public class XhrReceivingTransportHandler extends AbstractHttpReceivingTransport
 	}
 
 	@Override
-	protected HttpStatusCode getResponseStatus() {
+	protected HttpStatus getResponseStatus() {
 		return HttpStatus.NO_CONTENT;
 	}
 

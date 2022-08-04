@@ -152,14 +152,16 @@ class AnnotationConfigApplicationContextTests {
 		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
 			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
-				if (bean instanceof TestBean testBean) {
+				if (bean instanceof TestBean) {
+					TestBean testBean = (TestBean) bean;
 					testBean.name = testBean.name + "-before";
 				}
 				return bean;
 			}
 			@Override
 			public Object postProcessAfterInitialization(Object bean, String beanName) {
-				if (bean instanceof TestBean testBean) {
+				if (bean instanceof TestBean) {
+					TestBean testBean = (TestBean) bean;
 					testBean.name = testBean.name + "-after";
 				}
 				return bean;
@@ -420,15 +422,6 @@ class AnnotationConfigApplicationContextTests {
 		assertThat(context.getType("fb")).isEqualTo(String.class);
 		assertThat(context.getBeanNamesForType(FactoryBean.class)).hasSize(1);
 		assertThat(context.getBeanNamesForType(TypedFactoryBean.class)).hasSize(1);
-	}
-
-	@Test
-	void refreshForAotProcessingWithConfiguration() {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.register(Config.class);
-		context.refreshForAotProcessing();
-		assertThat(context.getBeanFactory().getBeanDefinitionNames()).contains(
-				"annotationConfigApplicationContextTests.Config", "testBean");
 	}
 
 

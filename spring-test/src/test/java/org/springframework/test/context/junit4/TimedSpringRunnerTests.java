@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.junit.runner.RunWith;
 import org.junit.runner.Runner;
 import org.junit.runners.JUnit4;
 
-import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.TestExecutionListeners;
 
@@ -119,7 +118,6 @@ public class TimedSpringRunnerTests {
 	@Timed(millis = 1000)
 	@Retention(RetentionPolicy.RUNTIME)
 	private @interface MetaTimedWithOverride {
-		@AliasFor(annotation = Timed.class)
 		long millis() default 1000;
 	}
 

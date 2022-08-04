@@ -16,7 +16,7 @@
 
 package org.springframework.context.index.sample.jpa;
 
-import jakarta.persistence.Converter;
+import javax.persistence.Converter;
 
 /**
  * Test candidate for {@link Converter}.

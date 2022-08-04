@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -133,7 +134,11 @@ public class StompDecoder {
 	private Message<byte[]> decodeMessage(ByteBuffer byteBuffer, @Nullable MultiValueMap<String, String> headers) {
 		Message<byte[]> decodedMessage = null;
 		skipEol(byteBuffer);
-		byteBuffer.mark();
+
+		// Explicit mark/reset access via Buffer base type for compatibility
+		// with covariant return type on JDK 9's ByteBuffer...
+		Buffer buffer = byteBuffer;
+		buffer.mark();
 
 		String command = readCommand(byteBuffer);
 		if (command.length() > 0) {
@@ -143,7 +148,7 @@ public class StompDecoder {
 				StompCommand stompCommand = StompCommand.valueOf(command);
 				headerAccessor = StompHeaderAccessor.create(stompCommand);
 				initHeaders(headerAccessor);
-				readHeaders(byteBuffer, headerAccessor, stompCommand);
+				readHeaders(byteBuffer, headerAccessor);
 				payload = readPayload(byteBuffer, headerAccessor);
 			}
 			if (payload != null) {
@@ -171,7 +176,7 @@ public class StompDecoder {
 						headers.putAll(map);
 					}
 				}
-				byteBuffer.reset();
+				buffer.reset();
 			}
 		}
 		else {
@@ -215,12 +220,7 @@ public class StompDecoder {
 		return StreamUtils.copyToString(command, StandardCharsets.UTF_8);
 	}
 
-	private void readHeaders(ByteBuffer byteBuffer, StompHeaderAccessor headerAccessor, StompCommand command) {
-
-		boolean shouldUnescape = (command != StompCommand.CONNECT &&
-				command != StompCommand.CONNECTED &&
-				command != StompCommand.STOMP);
-
+	private void readHeaders(ByteBuffer byteBuffer, StompHeaderAccessor headerAccessor) {
 		while (true) {
 			ByteArrayOutputStream headerStream = new ByteArrayOutputStream(256);
 			boolean headerComplete = false;
@@ -241,8 +241,8 @@ public class StompDecoder {
 					}
 				}
 				else {
-					String headerName = shouldUnescape ? unescape(header.substring(0, colonIndex)) : header.substring(0, colonIndex);
-					String headerValue = shouldUnescape ? unescape(header.substring(colonIndex + 1)) : header.substring(colonIndex + 1);
+					String headerName = unescape(header.substring(0, colonIndex));
+					String headerValue = unescape(header.substring(colonIndex + 1));
 					try {
 						headerAccessor.addNativeHeader(headerName, headerValue);
 					}
@@ -357,7 +357,8 @@ public class StompDecoder {
 					throw new StompConversionException("'\\r' must be followed by '\\n'");
 				}
 			}
-			byteBuffer.position(byteBuffer.position() - 1);
+			// Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer
+			((Buffer) byteBuffer).position(byteBuffer.position() - 1);
 		}
 		return false;
 	}

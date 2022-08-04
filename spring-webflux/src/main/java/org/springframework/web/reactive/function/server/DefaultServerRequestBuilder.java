@@ -69,9 +69,9 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	private final List<HttpMessageReader<?>> messageReaders;
 
-	private final ServerWebExchange exchange;
+	private ServerWebExchange exchange;
 
-	private HttpMethod method;
+	private String methodName;
 
 	private URI uri;
 
@@ -91,7 +91,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		Assert.notNull(other, "ServerRequest must not be null");
 		this.messageReaders = other.messageReaders();
 		this.exchange = other.exchange();
-		this.method = other.method();
+		this.methodName = other.methodName();
 		this.uri = other.uri();
 		this.contextPath = other.requestPath().contextPath().value();
 		this.headers.addAll(other.headers().asHttpHeaders());
@@ -103,7 +103,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 	@Override
 	public ServerRequest.Builder method(HttpMethod method) {
 		Assert.notNull(method, "HttpMethod must not be null");
-		this.method = method;
+		this.methodName = method.name();
 		return this;
 	}
 
@@ -187,7 +187,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 	@Override
 	public ServerRequest build() {
 		ServerHttpRequest serverHttpRequest = new BuiltServerHttpRequest(this.exchange.getRequest().getId(),
-				this.method, this.uri, this.contextPath, this.headers, this.cookies, this.body);
+				this.methodName, this.uri, this.contextPath, this.headers, this.cookies, this.body);
 		ServerWebExchange exchange = new DelegatingServerWebExchange(
 				serverHttpRequest, this.attributes, this.exchange, this.messageReaders);
 		return new DefaultServerRequest(exchange, this.messageReaders);
@@ -200,7 +200,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 		private final String id;
 
-		private final HttpMethod method;
+		private final String method;
 
 		private final URI uri;
 
@@ -214,7 +214,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 		private final Flux<DataBuffer> body;
 
-		public BuiltServerHttpRequest(String id, HttpMethod method, URI uri, @Nullable String contextPath,
+		public BuiltServerHttpRequest(String id, String method, URI uri, @Nullable String contextPath,
 				HttpHeaders headers, MultiValueMap<String, HttpCookie> cookies, Flux<DataBuffer> body) {
 
 			this.id = id;
@@ -258,14 +258,8 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		}
 
 		@Override
-		public HttpMethod getMethod() {
-			return this.method;
-		}
-
-		@Override
-		@Deprecated
 		public String getMethodValue() {
-			return this.method.name();
+			return this.method;
 		}
 
 		@Override

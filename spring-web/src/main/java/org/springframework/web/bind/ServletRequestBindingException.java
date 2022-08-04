@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,7 @@
 
 package org.springframework.web.bind;
 
-import jakarta.servlet.ServletException;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ProblemDetail;
-import org.springframework.web.ErrorResponse;
+import org.springframework.web.util.NestedServletException;
 
 /**
  * Fatal binding exception, thrown when we want to
@@ -35,10 +30,7 @@ import org.springframework.web.ErrorResponse;
  * @author Juergen Hoeller
  */
 @SuppressWarnings("serial")
-public class ServletRequestBindingException extends ServletException implements ErrorResponse {
-
-	private final ProblemDetail body = ProblemDetail.forStatus(getStatusCode());
-
+public class ServletRequestBindingException extends NestedServletException {
 
 	/**
 	 * Constructor for ServletRequestBindingException.
@@ -55,16 +47,6 @@ public class ServletRequestBindingException extends ServletException implements 
 	 */
 	public ServletRequestBindingException(String msg, Throwable cause) {
 		super(msg, cause);
-	}
-
-	@Override
-	public HttpStatusCode getStatusCode() {
-		return HttpStatus.BAD_REQUEST;
-	}
-
-	@Override
-	public ProblemDetail getBody() {
-		return this.body;
 	}
 
 }

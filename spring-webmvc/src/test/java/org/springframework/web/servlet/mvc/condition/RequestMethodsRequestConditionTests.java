@@ -18,8 +18,9 @@ package org.springframework.web.servlet.mvc.condition;
 
 import java.util.Collections;
 
-import jakarta.servlet.DispatcherType;
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.DispatcherType;
+import javax.servlet.http.HttpServletRequest;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;

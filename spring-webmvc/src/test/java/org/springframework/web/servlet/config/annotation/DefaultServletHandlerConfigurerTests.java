@@ -16,7 +16,8 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import jakarta.servlet.RequestDispatcher;
+import javax.servlet.RequestDispatcher;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

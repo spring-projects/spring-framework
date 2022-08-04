@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,7 @@ import java.util.stream.Collectors;
 
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
-import io.r2dbc.spi.Parameter;
-import io.r2dbc.spi.Parameters;
 import io.r2dbc.spi.R2dbcException;
-import io.r2dbc.spi.Readable;
 import io.r2dbc.spi.Result;
 import io.r2dbc.spi.Row;
 import io.r2dbc.spi.RowMetadata;
@@ -191,12 +188,11 @@ class DefaultDatabaseClient implements DatabaseClient {
 				new CloseSuppressingInvocationHandler(con));
 	}
 
-	private static Mono<Long> sumRowsUpdated(
+	private static Mono<Integer> sumRowsUpdated(
 			Function<Connection, Flux<Result>> resultFunction, Connection it) {
 		return resultFunction.apply(it)
 				.flatMap(Result::getRowsUpdated)
-				.cast(Number.class)
-				.collect(Collectors.summingLong(Number::longValue));
+				.collect(Collectors.summingInt(Integer::intValue));
 	}
 
 	/**
@@ -247,21 +243,17 @@ class DefaultDatabaseClient implements DatabaseClient {
 		}
 
 		@Override
-		@SuppressWarnings("deprecation")
 		public DefaultGenericExecuteSpec bind(int index, Object value) {
 			assertNotPreparedOperation();
 			Assert.notNull(value, () -> String.format(
 					"Value at index %d must not be null. Use bindNull(…) instead.", index));
 
 			Map<Integer, Parameter> byIndex = new LinkedHashMap<>(this.byIndex);
-			if (value instanceof Parameter p) {
-				byIndex.put(index, p);
-			}
-			else if (value instanceof org.springframework.r2dbc.core.Parameter p) {
-				byIndex.put(index, p.hasValue() ? Parameters.in(p.getValue()) : Parameters.in(p.getType()));
+			if (value instanceof Parameter) {
+				byIndex.put(index, (Parameter) value);
 			}
 			else {
-				byIndex.put(index, Parameters.in(value));
+				byIndex.put(index, Parameter.fromOrEmpty(value, value.getClass()));
 			}
 
 			return new DefaultGenericExecuteSpec(byIndex, this.byName, this.sqlSupplier, this.filterFunction);
@@ -272,13 +264,12 @@ class DefaultDatabaseClient implements DatabaseClient {
 			assertNotPreparedOperation();
 
 			Map<Integer, Parameter> byIndex = new LinkedHashMap<>(this.byIndex);
-			byIndex.put(index, Parameters.in(type));
+			byIndex.put(index, Parameter.empty(type));
 
 			return new DefaultGenericExecuteSpec(byIndex, this.byName, this.sqlSupplier, this.filterFunction);
 		}
 
 		@Override
-		@SuppressWarnings("deprecation")
 		public DefaultGenericExecuteSpec bind(String name, Object value) {
 			assertNotPreparedOperation();
 
@@ -287,14 +278,11 @@ class DefaultDatabaseClient implements DatabaseClient {
 					"Value for parameter %s must not be null. Use bindNull(…) instead.", name));
 
 			Map<String, Parameter> byName = new LinkedHashMap<>(this.byName);
-			if (value instanceof Parameter p) {
-				byName.put(name, p);
-			}
-			else if (value instanceof org.springframework.r2dbc.core.Parameter p) {
-				byName.put(name, p.hasValue() ? Parameters.in(p.getValue()) : Parameters.in(p.getType()));
+			if (value instanceof Parameter) {
+				byName.put(name, (Parameter) value);
 			}
 			else {
-				byName.put(name, Parameters.in(value));
+				byName.put(name, Parameter.fromOrEmpty(value, value.getClass()));
 			}
 
 			return new DefaultGenericExecuteSpec(this.byIndex, byName, this.sqlSupplier, this.filterFunction);
@@ -306,7 +294,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 			Assert.hasText(name, "Parameter name must not be null or empty!");
 
 			Map<String, Parameter> byName = new LinkedHashMap<>(this.byName);
-			byName.put(name, Parameters.in(type));
+			byName.put(name, Parameter.empty(type));
 
 			return new DefaultGenericExecuteSpec(this.byIndex, byName, this.sqlSupplier, this.filterFunction);
 		}
@@ -319,26 +307,14 @@ class DefaultDatabaseClient implements DatabaseClient {
 		}
 
 		@Override
-		public <R> FetchSpec<R> map(Function<? super Readable, R> mappingFunction) {
-			Assert.notNull(mappingFunction, "Mapping function must not be null");
-			return execute(this.sqlSupplier, result -> result.map(mappingFunction));
-		}
-
-		@Override
 		public <R> FetchSpec<R> map(BiFunction<Row, RowMetadata, R> mappingFunction) {
 			Assert.notNull(mappingFunction, "Mapping function must not be null");
-			return execute(this.sqlSupplier, result -> result.map(mappingFunction));
-		}
-
-		@Override
-		public <R> Flux<R> flatMap(Function<Result, Publisher<R>> mappingFunction) {
-			Assert.notNull(mappingFunction, "Mapping function must not be null");
-			return flatMap(this.sqlSupplier, mappingFunction);
+			return execute(this.sqlSupplier, mappingFunction);
 		}
 
 		@Override
 		public FetchSpec<Map<String, Object>> fetch() {
-			return execute(this.sqlSupplier, result -> result.map(ColumnMapRowMapper.INSTANCE));
+			return execute(this.sqlSupplier, ColumnMapRowMapper.INSTANCE);
 		}
 
 		@Override
@@ -346,7 +322,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 			return fetch().rowsUpdated().then();
 		}
 
-		private ResultFunction getResultFunction(Supplier<String> sqlSupplier) {
+		private <T> FetchSpec<T> execute(Supplier<String> sqlSupplier, BiFunction<Row, RowMetadata, T> mappingFunction) {
 			String sql = getRequiredSql(sqlSupplier);
 			Function<Connection, Statement> statementFunction = connection -> {
 				if (logger.isDebugEnabled()) {
@@ -400,25 +376,11 @@ class DefaultDatabaseClient implements DatabaseClient {
 				.cast(Result.class).checkpoint("SQL \"" + sql + "\" [DatabaseClient]");
 			};
 
-			return new ResultFunction(resultFunction, sql);
-		}
-
-		private <T> FetchSpec<T> execute(Supplier<String> sqlSupplier, Function<Result, Publisher<T>> resultAdapter) {
-			ResultFunction resultHandler = getResultFunction(sqlSupplier);
-
 			return new DefaultFetchSpec<>(
-					DefaultDatabaseClient.this, resultHandler.sql(),
-					new ConnectionFunction<>(resultHandler.sql(), resultHandler.function()),
-					new ConnectionFunction<>(resultHandler.sql(), connection -> sumRowsUpdated(resultHandler.function(), connection)),
-					resultAdapter);
-		}
-
-		private <T> Flux<T> flatMap(Supplier<String> sqlSupplier, Function<Result, Publisher<T>> mappingFunction) {
-			ResultFunction resultHandler = getResultFunction(sqlSupplier);
-			ConnectionFunction<Flux<T>> connectionFunction = new ConnectionFunction<>(resultHandler.sql(), cx -> resultHandler.function()
-					.apply(cx)
-					.flatMap(mappingFunction));
-			return inConnectionMany(connectionFunction);
+					DefaultDatabaseClient.this, sql,
+					new ConnectionFunction<>(sql, resultFunction),
+					new ConnectionFunction<>(sql, connection -> sumRowsUpdated(resultFunction, connection)),
+					mappingFunction);
 		}
 
 		private MapBindParameterSource retrieveParameters(String sql, List<String> parameterNames,
@@ -462,11 +424,27 @@ class DefaultDatabaseClient implements DatabaseClient {
 		}
 
 		private void bindByName(Statement statement, Map<String, Parameter> byName) {
-			byName.forEach(statement::bind);
+			byName.forEach((name, parameter) -> {
+				Object value = parameter.getValue();
+				if (value != null) {
+					statement.bind(name, value);
+				}
+				else {
+					statement.bindNull(name, parameter.getType());
+				}
+			});
 		}
 
 		private void bindByIndex(Statement statement, Map<Integer, Parameter> byIndex) {
-			byIndex.forEach(statement::bind);
+			byIndex.forEach((i, parameter) -> {
+				Object value = parameter.getValue();
+				if (value != null) {
+					statement.bind(i, value);
+				}
+				else {
+					statement.bindNull(i, parameter.getType());
+				}
+			});
 		}
 
 		private String getRequiredSql(Supplier<String> sqlSupplier) {
@@ -474,9 +452,6 @@ class DefaultDatabaseClient implements DatabaseClient {
 			Assert.state(StringUtils.hasText(sql), "SQL returned by SQL supplier must not be empty!");
 			return sql;
 		}
-
-		record ResultFunction(Function<Connection, Flux<Result>> function, String sql){}
-
 	}
 
 

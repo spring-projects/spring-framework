@@ -480,8 +480,8 @@ public abstract class DataBufferUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T extends DataBuffer> T retain(T dataBuffer) {
-		if (dataBuffer instanceof PooledDataBuffer pooledDataBuffer) {
-			return (T) pooledDataBuffer.retain();
+		if (dataBuffer instanceof PooledDataBuffer) {
+			return (T) ((PooledDataBuffer) dataBuffer).retain();
 		}
 		else {
 			return dataBuffer;
@@ -498,8 +498,8 @@ public abstract class DataBufferUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T extends DataBuffer> T touch(T dataBuffer, Object hint) {
-		if (dataBuffer instanceof PooledDataBuffer pooledDataBuffer) {
-			return (T) pooledDataBuffer.touch(hint);
+		if (dataBuffer instanceof PooledDataBuffer) {
+			return (T) ((PooledDataBuffer) dataBuffer).touch(hint);
 		}
 		else {
 			return dataBuffer;
@@ -513,7 +513,8 @@ public abstract class DataBufferUtils {
 	 * @return {@code true} if the buffer was released; {@code false} otherwise.
 	 */
 	public static boolean release(@Nullable DataBuffer dataBuffer) {
-		if (dataBuffer instanceof PooledDataBuffer pooledDataBuffer) {
+		if (dataBuffer instanceof PooledDataBuffer) {
+			PooledDataBuffer pooledDataBuffer = (PooledDataBuffer) dataBuffer;
 			if (pooledDataBuffer.isAllocated()) {
 				try {
 					return pooledDataBuffer.release();
@@ -568,12 +569,12 @@ public abstract class DataBufferUtils {
 	 * @throws DataBufferLimitException if maxByteCount is exceeded
 	 * @since 5.1.11
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings("unchecked")
 	public static Mono<DataBuffer> join(Publisher<? extends DataBuffer> buffers, int maxByteCount) {
 		Assert.notNull(buffers, "'dataBuffers' must not be null");
 
-		if (buffers instanceof Mono mono) {
-			return mono;
+		if (buffers instanceof Mono) {
+			return (Mono<DataBuffer>) buffers;
 		}
 
 		return Flux.from(buffers)
@@ -607,14 +608,15 @@ public abstract class DataBufferUtils {
 	}
 
 	private static NestedMatcher createMatcher(byte[] delimiter) {
-		// extract length due to Eclipse IDE compiler error in switch expression
-		int length = delimiter.length;
-		Assert.isTrue(length > 0, "Delimiter must not be empty");
-		return switch (length) {
-			case 1 -> (delimiter[0] == 10 ? SingleByteMatcher.NEWLINE_MATCHER : new SingleByteMatcher(delimiter));
-			case 2 -> new TwoByteMatcher(delimiter);
-			default -> new KnuthMorrisPrattMatcher(delimiter);
-		};
+		Assert.isTrue(delimiter.length > 0, "Delimiter must not be empty");
+		switch (delimiter.length) {
+			case 1:
+				return (delimiter[0] == 10 ? SingleByteMatcher.NEWLINE_MATCHER : new SingleByteMatcher(delimiter));
+			case 2:
+				return new TwoByteMatcher(delimiter);
+			default:
+				return new KnuthMorrisPrattMatcher(delimiter);
+		}
 	}
 
 

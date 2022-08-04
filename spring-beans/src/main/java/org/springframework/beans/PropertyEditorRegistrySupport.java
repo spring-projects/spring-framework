@@ -423,6 +423,9 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 			if (editor == null) {
 				// Find editor for superclass or interface.
 				for (Map.Entry<Class<?>, PropertyEditor> entry : this.customEditors.entrySet()) {
+					if (editor != null) {
+						break;
+					}
 					Class<?> key = entry.getKey();
 					if (key.isAssignableFrom(requiredType)) {
 						editor = entry.getValue();
@@ -432,9 +435,6 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 							this.customEditorCache = new HashMap<>();
 						}
 						this.customEditorCache.put(requiredType, editor);
-						if (editor != null) {
-							break;
-						}
 					}
 				}
 			}

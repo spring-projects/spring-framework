@@ -16,7 +16,7 @@
 
 package org.springframework.web.bind;
 
-import jakarta.servlet.ServletRequest;
+import javax.servlet.ServletRequest;
 
 import org.springframework.lang.Nullable;
 

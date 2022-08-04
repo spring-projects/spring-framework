@@ -155,9 +155,10 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof DefaultIntroductionAdvisor otherAdvisor)) {
+		if (!(other instanceof DefaultIntroductionAdvisor)) {
 			return false;
 		}
+		DefaultIntroductionAdvisor otherAdvisor = (DefaultIntroductionAdvisor) other;
 		return (this.advice.equals(otherAdvisor.advice) && this.interfaces.equals(otherAdvisor.interfaces));
 	}
 

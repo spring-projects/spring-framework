@@ -137,9 +137,6 @@ public abstract class BodyExtractors {
 
 	/**
 	 * Extractor to read multipart data into a {@code MultiValueMap<String, Part>}.
-	 * <p><strong>Note:</strong> that resources used for part handling,
-	 * like storage for the uploaded files, is not deleted automatically, but
-	 * should be done via {@link Part#delete()}.
 	 * @return {@code BodyExtractor} for multipart data
 	 */
 	// Parameterized for server-side use
@@ -154,9 +151,6 @@ public abstract class BodyExtractors {
 
 	/**
 	 * Extractor to read multipart data into {@code Flux<Part>}.
-	 * <p><strong>Note:</strong> that resources used for part handling,
-	 * like storage for the uploaded files, is not deleted automatically, but
-	 * should be done via {@link Part#delete()}.
 	 * @return {@code BodyExtractor} for multipart request parts
 	 */
 	// Parameterized for server-side use

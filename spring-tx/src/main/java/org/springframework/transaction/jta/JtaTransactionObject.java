@@ -16,16 +16,16 @@
 
 package org.springframework.transaction.jta;
 
-import jakarta.transaction.Status;
-import jakarta.transaction.SystemException;
-import jakarta.transaction.UserTransaction;
+import javax.transaction.Status;
+import javax.transaction.SystemException;
+import javax.transaction.UserTransaction;
 
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.SmartTransactionObject;
 import org.springframework.transaction.support.TransactionSynchronizationUtils;
 
 /**
- * JTA transaction object, representing a {@link jakarta.transaction.UserTransaction}.
+ * JTA transaction object, representing a {@link javax.transaction.UserTransaction}.
  * Used as transaction object by Spring's {@link JtaTransactionManager}.
  *
  * <p>Note: This is an SPI class, not intended to be used by applications.
@@ -33,7 +33,7 @@ import org.springframework.transaction.support.TransactionSynchronizationUtils;
  * @author Juergen Hoeller
  * @since 1.1
  * @see JtaTransactionManager
- * @see jakarta.transaction.UserTransaction
+ * @see javax.transaction.UserTransaction
  */
 public class JtaTransactionObject implements SmartTransactionObject {
 

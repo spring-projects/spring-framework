@@ -44,9 +44,9 @@ import java.lang.annotation.Target;
  *
  * <p>In addition to its role for component initialization, this annotation may also be placed
  * on injection points marked with {@link org.springframework.beans.factory.annotation.Autowired}
- * or {@link jakarta.inject.Inject}: In that context, it leads to the creation of a
+ * or {@link javax.inject.Inject}: In that context, it leads to the creation of a
  * lazy-resolution proxy for all affected dependencies, as an alternative to using
- * {@link org.springframework.beans.factory.ObjectFactory} or {@link jakarta.inject.Provider}.
+ * {@link org.springframework.beans.factory.ObjectFactory} or {@link javax.inject.Provider}.
  * Please note that such a lazy-resolution proxy will always be injected; if the target
  * dependency does not exist, you will only be able to find out through an exception on
  * invocation. As a consequence, such an injection point results in unintuitive behavior

@@ -18,10 +18,11 @@ package org.springframework.web.socket.adapter.standard;
 
 import java.nio.ByteBuffer;
 
-import jakarta.websocket.DecodeException;
-import jakarta.websocket.Decoder;
-import jakarta.websocket.EncodeException;
-import jakarta.websocket.Encoder;
+import javax.websocket.DecodeException;
+import javax.websocket.Decoder;
+import javax.websocket.EncodeException;
+import javax.websocket.Encoder;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

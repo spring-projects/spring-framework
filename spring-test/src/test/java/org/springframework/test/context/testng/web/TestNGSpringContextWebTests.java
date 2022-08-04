@@ -18,7 +18,8 @@ package org.springframework.test.context.testng.web;
 
 import java.io.File;
 
-import jakarta.servlet.ServletContext;
+import javax.servlet.ServletContext;
+
 import org.testng.annotations.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;

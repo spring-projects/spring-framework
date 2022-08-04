@@ -52,7 +52,8 @@ public class BindingAwareModelMap extends ExtendedModelMap {
 	}
 
 	private void removeBindingResultIfNecessary(Object key, @Nullable Object value) {
-		if (key instanceof String attributeName) {
+		if (key instanceof String) {
+			String attributeName = (String) key;
 			if (!attributeName.startsWith(BindingResult.MODEL_KEY_PREFIX)) {
 				String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + attributeName;
 				BindingResult bindingResult = (BindingResult) get(bindingResultKey);

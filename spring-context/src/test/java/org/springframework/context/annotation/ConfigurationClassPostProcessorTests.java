@@ -23,7 +23,8 @@ import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.annotation.PostConstruct;
+import javax.annotation.PostConstruct;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -56,7 +57,6 @@ import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
@@ -1371,7 +1371,7 @@ class ConfigurationClassPostProcessorTests {
 
 		@Bean
 		public Repository<String> stringRepo() {
-			return new Repository<>() {
+			return new Repository<String>() {
 				@Override
 				public String toString() {
 					return "Repository<String>";
@@ -1381,7 +1381,7 @@ class ConfigurationClassPostProcessorTests {
 
 		@Bean
 		public Repository<Integer> integerRepo() {
-			return new Repository<>() {
+			return new Repository<Integer>() {
 				@Override
 				public String toString() {
 					return "Repository<Integer>";
@@ -1391,7 +1391,7 @@ class ConfigurationClassPostProcessorTests {
 
 		@Bean
 		public Repository<?> genericRepo() {
-			return new Repository<>() {
+			return new Repository<Object>() {
 				@Override
 				public String toString() {
 					return "Repository<Object>";
@@ -1436,7 +1436,7 @@ class ConfigurationClassPostProcessorTests {
 		@Bean
 		@Scope("prototype")
 		public Repository<String> stringRepo() {
-			return new Repository<>() {
+			return new Repository<String>() {
 				@Override
 				public String toString() {
 					return "Repository<String>";
@@ -1447,7 +1447,7 @@ class ConfigurationClassPostProcessorTests {
 		@Bean
 		@Scope("prototype")
 		public Repository<Integer> integerRepo() {
-			return new Repository<>() {
+			return new Repository<Integer>() {
 				@Override
 				public String toString() {
 					return "Repository<Integer>";
@@ -1459,7 +1459,7 @@ class ConfigurationClassPostProcessorTests {
 		@Scope("prototype")
 		@SuppressWarnings("rawtypes")
 		public Repository genericRepo() {
-			return new Repository<>() {
+			return new Repository<Object>() {
 				@Override
 				public String toString() {
 					return "Repository<Object>";
@@ -1472,7 +1472,6 @@ class ConfigurationClassPostProcessorTests {
 	@Scope(scopeName = "prototype")
 	public @interface PrototypeScoped {
 
-		@AliasFor(annotation = Scope.class)
 		ScopedProxyMode proxyMode() default ScopedProxyMode.TARGET_CLASS;
 	}
 
@@ -1482,7 +1481,7 @@ class ConfigurationClassPostProcessorTests {
 		@Bean
 		@Scope(scopeName = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
 		public Repository<String> stringRepo() {
-			return new Repository<>() {
+			return new Repository<String>() {
 				@Override
 				public String toString() {
 					return "Repository<String>";
@@ -1493,7 +1492,7 @@ class ConfigurationClassPostProcessorTests {
 		@Bean
 		@PrototypeScoped
 		public Repository<Integer> integerRepo() {
-			return new Repository<>() {
+			return new Repository<Integer>() {
 				@Override
 				public String toString() {
 					return "Repository<Integer>";
@@ -1630,10 +1629,8 @@ class ConfigurationClassPostProcessorTests {
 	@Target(ElementType.TYPE)
 	public @interface ComposedConfigurationWithAttributeOverrides {
 
-		@AliasFor(annotation = ComponentScan.class)
 		String[] basePackages() default {};
 
-		@AliasFor(annotation = ComponentScan.class)
 		ComponentScan.Filter[] excludeFilters() default {};
 	}
 
@@ -1660,7 +1657,6 @@ class ConfigurationClassPostProcessorTests {
 	@Target(ElementType.TYPE)
 	public @interface ComposedComposedConfigurationWithAttributeOverrides {
 
-		@AliasFor(annotation = ComposedConfigurationWithAttributeOverrides.class)
 		String[] basePackages() default {};
 	}
 
@@ -1680,7 +1676,6 @@ class ConfigurationClassPostProcessorTests {
 	@Target(ElementType.TYPE)
 	public @interface MetaComponentScanConfigurationWithAttributeOverrides {
 
-		@AliasFor(annotation = ComponentScan.class)
 		String[] basePackages() default {};
 	}
 

@@ -17,7 +17,6 @@
 package org.springframework.messaging.converter;
 
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -75,8 +74,8 @@ public class JsonbMessageConverterTests {
 		HashMap<String, Object> actual = (HashMap<String, Object>) converter.fromMessage(message, HashMap.class);
 
 		assertThat(actual.get("string")).isEqualTo("Foo");
-		assertThat(actual.get("number")).isEqualTo(new BigDecimal(42));
-		assertThat((BigDecimal) actual.get("fraction")).isCloseTo(new BigDecimal(42), within(new BigDecimal(0)));
+		assertThat(actual.get("number")).isEqualTo(42);
+		assertThat((Double) actual.get("fraction")).isCloseTo(42D, within(0D));
 		assertThat(actual.get("array")).isEqualTo(Arrays.asList("Foo", "Bar"));
 		assertThat(actual.get("bool")).isEqualTo(Boolean.TRUE);
 	}

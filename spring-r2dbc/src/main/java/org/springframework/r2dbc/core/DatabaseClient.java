@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,12 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import io.r2dbc.spi.ConnectionFactory;
-import io.r2dbc.spi.Readable;
-import io.r2dbc.spi.Result;
 import io.r2dbc.spi.Row;
 import io.r2dbc.spi.RowMetadata;
 import io.r2dbc.spi.Statement;
-import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.r2dbc.core.binding.BindMarkersFactory;
@@ -162,9 +157,9 @@ public interface DatabaseClient extends ConnectionAccessor {
 
 		/**
 		 * Bind a non-{@code null} value to a parameter identified by its
-		 * {@code index}. {@code value} can be either a scalar value or {@link io.r2dbc.spi.Parameter}.
+		 * {@code index}. {@code value} can be either a scalar value or {@link Parameter}.
 		 * @param index zero based index to bind the parameter to
-		 * @param value either a scalar value or {@link io.r2dbc.spi.Parameter}
+		 * @param value either a scalar value or {@link Parameter}
 		 */
 		GenericExecuteSpec bind(int index, Object value);
 
@@ -218,12 +213,14 @@ public interface DatabaseClient extends ConnectionAccessor {
 
 		/**
 		 * Configure a result mapping {@link Function function} and enter the execution stage.
-		 * @param mappingFunction a function that maps from {@link Readable} to the result type
+		 * @param mappingFunction a function that maps from {@link Row} to the result type
 		 * @param <R> the result type
 		 * @return a {@link FetchSpec} for configuration what to fetch
-		 * @since 6.0
 		 */
-		<R> RowsFetchSpec<R> map(Function<? super Readable, R> mappingFunction);
+		default <R> RowsFetchSpec<R> map(Function<Row, R> mappingFunction) {
+			Assert.notNull(mappingFunction, "Mapping function must not be null");
+			return map((row, rowMetadata) -> mappingFunction.apply(row));
+		}
 
 		/**
 		 * Configure a result mapping {@link BiFunction function} and enter the execution stage.
@@ -233,17 +230,6 @@ public interface DatabaseClient extends ConnectionAccessor {
 		 * @return a {@link FetchSpec} for configuration what to fetch
 		 */
 		<R> RowsFetchSpec<R> map(BiFunction<Row, RowMetadata, R> mappingFunction);
-
-		/**
-		 * Perform the SQL call and apply {@link BiFunction function} to the {@link  Result}.
-		 * @param mappingFunction a function that maps from {@link Result} into a result publisher
-		 * @param <R> the result type
-		 * @return a {@link Flux} emitting mapped elements
-		 * @since 6.0
-		 * @see Result#filter(Predicate)
-		 * @see Result#flatMap(Function)
-		 */
-		<R> Flux<R> flatMap(Function<Result, Publisher<R>> mappingFunction);
 
 		/**
 		 * Perform the SQL call and retrieve the result by entering the execution stage.

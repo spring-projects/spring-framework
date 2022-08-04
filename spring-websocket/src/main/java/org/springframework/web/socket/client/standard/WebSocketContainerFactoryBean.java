@@ -16,13 +16,13 @@
 
 package org.springframework.web.socket.client.standard;
 
-import jakarta.websocket.ContainerProvider;
-import jakarta.websocket.WebSocketContainer;
+import javax.websocket.ContainerProvider;
+import javax.websocket.WebSocketContainer;
 
 import org.springframework.beans.factory.FactoryBean;
 
 /**
- * A FactoryBean for creating and configuring a {@link jakarta.websocket.WebSocketContainer}
+ * A FactoryBean for creating and configuring a {@link javax.websocket.WebSocketContainer}
  * through Spring XML configuration. In Java configuration, ignore this class and use
  * {@code ContainerProvider.getWebSocketContainer()} instead.
  *

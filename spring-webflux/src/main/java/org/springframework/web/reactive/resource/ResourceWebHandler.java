@@ -17,11 +17,12 @@
 package org.springframework.web.reactive.resource;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -90,7 +91,7 @@ import org.springframework.web.server.WebHandler;
  */
 public class ResourceWebHandler implements WebHandler, InitializingBean {
 
-	private static final Set<HttpMethod> SUPPORTED_METHODS = Set.of(HttpMethod.GET, HttpMethod.HEAD);
+	private static final Set<HttpMethod> SUPPORTED_METHODS = EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
 
 	private static final Log logger = LogFactory.getLog(ResourceWebHandler.class);
 
@@ -376,7 +377,8 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 			return;
 		}
 		for (int i = getResourceResolvers().size() - 1; i >= 0; i--) {
-			if (getResourceResolvers().get(i) instanceof PathResourceResolver resolver) {
+			if (getResourceResolvers().get(i) instanceof PathResourceResolver) {
+				PathResourceResolver resolver = (PathResourceResolver) getResourceResolvers().get(i);
 				if (ObjectUtils.isEmpty(resolver.getAllowedLocations())) {
 					resolver.setAllowedLocations(getLocations().toArray(new Resource[0]));
 				}
@@ -407,7 +409,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 				}))
 				.flatMap(resource -> {
 					try {
-						if (HttpMethod.OPTIONS.equals(exchange.getRequest().getMethod())) {
+						if (HttpMethod.OPTIONS.matches(exchange.getRequest().getMethodValue())) {
 							exchange.getResponse().getHeaders().add("Allow", "GET,HEAD,OPTIONS");
 							return Mono.empty();
 						}
@@ -416,7 +418,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 						HttpMethod httpMethod = exchange.getRequest().getMethod();
 						if (!SUPPORTED_METHODS.contains(httpMethod)) {
 							return Mono.error(new MethodNotAllowedException(
-									exchange.getRequest().getMethod(), SUPPORTED_METHODS));
+									exchange.getRequest().getMethodValue(), SUPPORTED_METHODS));
 						}
 
 						// Header phase
@@ -438,17 +440,10 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 						// Content phase
 						ResourceHttpMessageWriter writer = getResourceHttpMessageWriter();
 						Assert.state(writer != null, "No ResourceHttpMessageWriter");
-						if (HttpMethod.HEAD == httpMethod) {
-							writer.addHeaders(exchange.getResponse(), resource, mediaType,
-									Hints.from(Hints.LOG_PREFIX_HINT, exchange.getLogPrefix()));
-							return exchange.getResponse().setComplete();
-						}
-						else {
-							return writer.write(Mono.just(resource),
-									null, ResolvableType.forClass(Resource.class), mediaType,
-									exchange.getRequest(), exchange.getResponse(),
-									Hints.from(Hints.LOG_PREFIX_HINT, exchange.getLogPrefix()));
-						}
+						return writer.write(Mono.just(resource),
+								null, ResolvableType.forClass(Resource.class), mediaType,
+								exchange.getRequest(), exchange.getResponse(),
+								Hints.from(Hints.LOG_PREFIX_HINT, exchange.getLogPrefix()));
 					}
 					catch (IOException ex) {
 						return Mono.error(ex);
@@ -541,7 +536,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 		if (path.contains("%")) {
 			try {
 				// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars
-				String decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8);
+				String decodedPath = URLDecoder.decode(path, "UTF-8");
 				if (isInvalidPath(decodedPath)) {
 					return true;
 				}
@@ -552,6 +547,9 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 			}
 			catch (IllegalArgumentException ex) {
 				// May not be possible to decode...
+			}
+			catch (UnsupportedEncodingException ex) {
+				// Should never happen...
 			}
 		}
 		return false;
@@ -637,8 +635,9 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 			headers.setContentType(mediaType);
 		}
 
-		if (resource instanceof HttpResource httpResource) {
-			exchange.getResponse().getHeaders().putAll(httpResource.getResponseHeaders());
+		if (resource instanceof HttpResource) {
+			HttpHeaders resourceHeaders = ((HttpResource) resource).getResponseHeaders();
+			exchange.getResponse().getHeaders().putAll(resourceHeaders);
 		}
 	}
 

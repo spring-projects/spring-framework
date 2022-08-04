@@ -18,8 +18,9 @@ package org.springframework.web.filter;
 
 import java.nio.charset.StandardCharsets;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.FilterChain;
+import javax.servlet.http.HttpServletResponse;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.util.FileCopyUtils;
@@ -30,7 +31,6 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link ShallowEtagHeaderFilter}.
  * @author Arjen Poutsma
  * @author Brian Clozel
  * @author Juergen Hoeller

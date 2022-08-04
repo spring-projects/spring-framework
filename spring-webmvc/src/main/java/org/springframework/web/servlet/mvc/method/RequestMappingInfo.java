@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.web.servlet.mvc.method;
 import java.util.List;
 import java.util.Set;
 
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
@@ -470,9 +470,10 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof RequestMappingInfo otherInfo)) {
+		if (!(other instanceof RequestMappingInfo)) {
 			return false;
 		}
+		RequestMappingInfo otherInfo = (RequestMappingInfo) other;
 		return (getActivePatternsCondition().equals(otherInfo.getActivePatternsCondition()) &&
 				this.methodsCondition.equals(otherInfo.methodsCondition) &&
 				this.paramsCondition.equals(otherInfo.paramsCondition) &&
@@ -876,7 +877,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		@Nullable
 		private PathMatcher pathMatcher;
 
-		private boolean trailingSlashMatch = false;
+		private boolean trailingSlashMatch = true;
 
 		private boolean suffixPatternMatch = false;
 
@@ -949,21 +950,15 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		/**
 		 * Set whether to apply trailing slash matching in PatternsRequestCondition.
-		 * <p>The default was changed in 6.0 from {@code true} to {@code false} in
-		 * order to support the deprecation of the property.
-		 * @deprecated as of 6.0, see
-		 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
+		 * <p>By default this is set to 'true'.
 		 */
-		@Deprecated
 		public void setTrailingSlashMatch(boolean trailingSlashMatch) {
 			this.trailingSlashMatch = trailingSlashMatch;
 		}
 
 		/**
 		 * Return whether to apply trailing slash matching in PatternsRequestCondition.
-		 * @deprecated as of 6.0 together with {@link #setTrailingSlashMatch(boolean)}
 		 */
-		@Deprecated
 		public boolean useTrailingSlashMatch() {
 			return this.trailingSlashMatch;
 		}

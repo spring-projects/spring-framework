@@ -959,9 +959,10 @@ class CglibAopProxy implements AopProxy, Serializable {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof ProxyCallbackFilter otherCallbackFilter)) {
+			if (!(other instanceof ProxyCallbackFilter)) {
 				return false;
 			}
+			ProxyCallbackFilter otherCallbackFilter = (ProxyCallbackFilter) other;
 			AdvisedSupport otherAdvised = otherCallbackFilter.advised;
 			if (this.advised.isFrozen() != otherAdvised.isFrozen()) {
 				return false;

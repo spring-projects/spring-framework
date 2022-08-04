@@ -34,7 +34,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
@@ -105,8 +105,8 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 		if (reactorNettyRequestChannelOperationsIdPresent) {
 			id = ChannelOperationsIdHelper.getId(this.response);
 		}
-		if (id == null && this.response instanceof Connection connection) {
-			id = connection.channel().id().asShortText();
+		if (id == null && this.response instanceof Connection) {
+			id = ((Connection) this.response).channel().id().asShortText();
 		}
 		return (id != null ? id : ObjectUtils.getIdentityHexString(this));
 	}
@@ -135,12 +135,11 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	}
 
 	@Override
-	public HttpStatusCode getStatusCode() {
-		return HttpStatusCode.valueOf(this.response.status().code());
+	public HttpStatus getStatusCode() {
+		return HttpStatus.valueOf(getRawStatusCode());
 	}
 
 	@Override
-	@Deprecated
 	public int getRawStatusCode() {
 		return this.response.status().code();
 	}
@@ -164,7 +163,8 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	@Nullable
 	private static String getSameSite(Cookie cookie) {
-		if (cookie instanceof DefaultCookie defaultCookie) {
+		if (cookie instanceof DefaultCookie) {
+			DefaultCookie defaultCookie = (DefaultCookie) cookie;
 			if (defaultCookie.sameSite() != null) {
 				return defaultCookie.sameSite().name();
 			}
@@ -206,8 +206,10 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 
 		@Nullable
 		public static String getId(HttpClientResponse response) {
-			if (response instanceof reactor.netty.ChannelOperationsId id) {
-				return (logger.isDebugEnabled() ? id.asLongText() : id.asShortText());
+			if (response instanceof reactor.netty.ChannelOperationsId) {
+				return (logger.isDebugEnabled() ?
+						((reactor.netty.ChannelOperationsId) response).asLongText() :
+						((reactor.netty.ChannelOperationsId) response).asShortText());
 			}
 			return null;
 		}

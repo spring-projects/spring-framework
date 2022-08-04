@@ -502,7 +502,7 @@ class CustomEditorTests {
 		CharBean cb = new CharBean();
 		BeanWrapper bw = new BeanWrapperImpl(cb);
 
-		bw.setPropertyValue("myChar", Character.valueOf('c'));
+		bw.setPropertyValue("myChar", new Character('c'));
 		assertThat(cb.getMyChar()).isEqualTo('c');
 
 		bw.setPropertyValue("myChar", "c");

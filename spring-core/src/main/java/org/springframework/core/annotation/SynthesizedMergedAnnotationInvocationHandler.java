@@ -144,32 +144,32 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 	private int getValueHashCode(Object value) {
 		// Use Arrays.hashCode(...) since Spring's ObjectUtils doesn't comply
 		// with the requirements specified in Annotation#hashCode().
-		if (value instanceof boolean[] booleans) {
-			return Arrays.hashCode(booleans);
+		if (value instanceof boolean[]) {
+			return Arrays.hashCode((boolean[]) value);
 		}
-		if (value instanceof byte[] bytes) {
-			return Arrays.hashCode(bytes);
+		if (value instanceof byte[]) {
+			return Arrays.hashCode((byte[]) value);
 		}
-		if (value instanceof char[] chars) {
-			return Arrays.hashCode(chars);
+		if (value instanceof char[]) {
+			return Arrays.hashCode((char[]) value);
 		}
-		if (value instanceof double[] doubles) {
-			return Arrays.hashCode(doubles);
+		if (value instanceof double[]) {
+			return Arrays.hashCode((double[]) value);
 		}
-		if (value instanceof float[] floats) {
-			return Arrays.hashCode(floats);
+		if (value instanceof float[]) {
+			return Arrays.hashCode((float[]) value);
 		}
-		if (value instanceof int[] ints) {
-			return Arrays.hashCode(ints);
+		if (value instanceof int[]) {
+			return Arrays.hashCode((int[]) value);
 		}
-		if (value instanceof long[] longs) {
-			return Arrays.hashCode(longs);
+		if (value instanceof long[]) {
+			return Arrays.hashCode((long[]) value);
 		}
-		if (value instanceof short[] shorts) {
-			return Arrays.hashCode(shorts);
+		if (value instanceof short[]) {
+			return Arrays.hashCode((short[]) value);
 		}
-		if (value instanceof Object[] objects) {
-			return Arrays.hashCode(objects);
+		if (value instanceof Object[]) {
+			return Arrays.hashCode((Object[]) value);
 		}
 		return value.hashCode();
 	}
@@ -208,8 +208,8 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 	 * @return the formatted string representation
 	 */
 	private String toString(Object value) {
-		if (value instanceof String str) {
-			return '"' + str + '"';
+		if (value instanceof String) {
+			return '"' + value.toString() + '"';
 		}
 		if (value instanceof Character) {
 			return '\'' + value.toString() + '\'';
@@ -217,20 +217,20 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 		if (value instanceof Byte) {
 			return String.format("(byte) 0x%02X", value);
 		}
-		if (value instanceof Long longValue) {
-			return Long.toString(longValue) + 'L';
+		if (value instanceof Long) {
+			return Long.toString(((Long) value)) + 'L';
 		}
-		if (value instanceof Float floatValue) {
-			return Float.toString(floatValue) + 'f';
+		if (value instanceof Float) {
+			return Float.toString(((Float) value)) + 'f';
 		}
-		if (value instanceof Double doubleValue) {
-			return Double.toString(doubleValue) + 'd';
+		if (value instanceof Double) {
+			return Double.toString(((Double) value)) + 'd';
 		}
-		if (value instanceof Enum<?> e) {
-			return e.name();
+		if (value instanceof Enum) {
+			return ((Enum<?>) value).name();
 		}
-		if (value instanceof Class<?> clazz) {
-			return getName(clazz) + ".class";
+		if (value instanceof Class) {
+			return getName((Class<?>) value) + ".class";
 		}
 		if (value.getClass().isArray()) {
 			StringBuilder builder = new StringBuilder("{");
@@ -267,29 +267,29 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 	 * @param array the array to clone
 	 */
 	private Object cloneArray(Object array) {
-		if (array instanceof boolean[] booleans) {
-			return booleans.clone();
+		if (array instanceof boolean[]) {
+			return ((boolean[]) array).clone();
 		}
-		if (array instanceof byte[] bytes) {
-			return bytes.clone();
+		if (array instanceof byte[]) {
+			return ((byte[]) array).clone();
 		}
-		if (array instanceof char[] chars) {
-			return chars.clone();
+		if (array instanceof char[]) {
+			return ((char[]) array).clone();
 		}
-		if (array instanceof double[] doubles) {
-			return doubles.clone();
+		if (array instanceof double[]) {
+			return ((double[]) array).clone();
 		}
-		if (array instanceof float[] floats) {
-			return floats.clone();
+		if (array instanceof float[]) {
+			return ((float[]) array).clone();
 		}
-		if (array instanceof int[] ints) {
-			return ints.clone();
+		if (array instanceof int[]) {
+			return ((int[]) array).clone();
 		}
-		if (array instanceof long[] longs) {
-			return longs.clone();
+		if (array instanceof long[]) {
+			return ((long[]) array).clone();
 		}
-		if (array instanceof short[] shorts) {
-			return shorts.clone();
+		if (array instanceof short[]) {
+			return ((short[]) array).clone();
 		}
 
 		// else

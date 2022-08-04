@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,6 +69,21 @@ public class RSocketFrameTypeMessageCondition extends AbstractMessageCondition<R
 	/** Empty condition that does not match to any RSocket frames (e.g. for type-level mappings) */
 	public static final RSocketFrameTypeMessageCondition EMPTY_CONDITION = new RSocketFrameTypeMessageCondition();
 
+
+	/**
+	 * Condition to match "REQUEST_FNF", "REQUEST_RESPONSE", "REQUEST_STREAM",
+	 * and "REQUEST_CHANNEL".
+	 * @deprecated as of 5.2.2 because matching to all interaction types is too
+	 * flexible. Please use one of the other constants in this class that match
+	 * to specific frames.
+	 */
+	@Deprecated
+	public static final RSocketFrameTypeMessageCondition REQUEST_CONDITION =
+			new RSocketFrameTypeMessageCondition(
+					FrameType.REQUEST_FNF,
+					FrameType.REQUEST_RESPONSE,
+					FrameType.REQUEST_STREAM,
+					FrameType.REQUEST_CHANNEL);
 
 	/** Per FrameType cache to return ready instances from getMatchingCondition. */
 	private static final Map<String, RSocketFrameTypeMessageCondition> frameTypeConditionCache;
@@ -192,16 +207,20 @@ public class RSocketFrameTypeMessageCondition extends AbstractMessageCondition<R
 	 * @since 5.2.2
 	 */
 	public static RSocketFrameTypeMessageCondition getCondition(int cardinalityIn, int cardinalityOut) {
-		return switch (cardinalityIn) {
-			case 0, 1 -> switch (cardinalityOut) {
-				case 0 -> REQUEST_FNF_OR_RESPONSE_CONDITION;
-				case 1 -> REQUEST_RESPONSE_CONDITION;
-				case 2 -> REQUEST_STREAM_CONDITION;
-				default -> throw new IllegalStateException("Invalid response cardinality: " + cardinalityOut);
-			};
-			case 2 -> REQUEST_CHANNEL_CONDITION;
-			default -> throw new IllegalStateException("Invalid request cardinality: " + cardinalityIn);
-		};
+		switch (cardinalityIn) {
+			case 0:
+			case 1:
+				switch (cardinalityOut) {
+					case 0: return REQUEST_FNF_OR_RESPONSE_CONDITION;
+					case 1: return REQUEST_RESPONSE_CONDITION;
+					case 2: return REQUEST_STREAM_CONDITION;
+					default: throw new IllegalStateException("Invalid cardinality: " + cardinalityOut);
+				}
+			case 2:
+				return REQUEST_CHANNEL_CONDITION;
+			default:
+				throw new IllegalStateException("Invalid cardinality: " + cardinalityIn);
+		}
 	}
 
 }

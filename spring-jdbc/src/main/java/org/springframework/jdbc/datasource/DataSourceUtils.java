@@ -402,7 +402,7 @@ public abstract class DataSourceUtils {
 	 * @see SmartDataSource#shouldClose(Connection)
 	 */
 	public static void doCloseConnection(Connection con, @Nullable DataSource dataSource) throws SQLException {
-		if (!(dataSource instanceof SmartDataSource smartDataSource) || smartDataSource.shouldClose(con)) {
+		if (!(dataSource instanceof SmartDataSource) || ((SmartDataSource) dataSource).shouldClose(con)) {
 			con.close();
 		}
 	}
@@ -474,7 +474,7 @@ public abstract class DataSourceUtils {
 
 		private final DataSource dataSource;
 
-		private final int order;
+		private int order;
 
 		private boolean holderActive = true;
 

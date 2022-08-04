@@ -19,8 +19,8 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.OutputStream;
 import java.util.concurrent.Callable;
 
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
@@ -71,8 +71,9 @@ public class StreamingResponseBodyReturnValueHandler implements HandlerMethodRet
 		Assert.state(response != null, "No HttpServletResponse");
 		ServerHttpResponse outputMessage = new ServletServerHttpResponse(response);
 
-		if (returnValue instanceof ResponseEntity<?> responseEntity) {
-			response.setStatus(responseEntity.getStatusCode().value());
+		if (returnValue instanceof ResponseEntity) {
+			ResponseEntity<?> responseEntity = (ResponseEntity<?>) returnValue;
+			response.setStatus(responseEntity.getStatusCodeValue());
 			outputMessage.getHeaders().putAll(responseEntity.getHeaders());
 			returnValue = responseEntity.getBody();
 			if (returnValue == null) {

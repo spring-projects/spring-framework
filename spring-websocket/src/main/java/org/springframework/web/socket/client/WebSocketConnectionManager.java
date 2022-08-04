@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import org.springframework.web.socket.handler.LoggingWebSocketHandlerDecorator;
  * this will be done automatically when the Spring ApplicationContext is refreshed.
  *
  * @author Rossen Stoyanchev
- * @author Sam Brannen
  * @since 4.0
  */
 public class WebSocketConnectionManager extends ConnectionManagerSupport {
@@ -47,7 +46,7 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 	@Nullable
 	private WebSocketSession webSocketSession;
 
-	private final WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
+	private WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 
 
 	public WebSocketConnectionManager(WebSocketClient client,
@@ -117,16 +116,16 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 
 	@Override
 	public void startInternal() {
-		if (this.client instanceof Lifecycle lifecycle && !lifecycle.isRunning()) {
-			lifecycle.start();
+		if (this.client instanceof Lifecycle && !((Lifecycle) this.client).isRunning()) {
+			((Lifecycle) this.client).start();
 		}
 		super.startInternal();
 	}
 
 	@Override
 	public void stopInternal() throws Exception {
-		if (this.client instanceof Lifecycle lifecycle && lifecycle.isRunning()) {
-			lifecycle.stop();
+		if (this.client instanceof Lifecycle && ((Lifecycle) this.client).isRunning()) {
+			((Lifecycle) this.client).stop();
 		}
 		super.stopInternal();
 	}

@@ -16,9 +16,10 @@
 
 package org.springframework.test.context.testng.transaction.ejb;
 
-import jakarta.ejb.EJB;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import javax.ejb.EJB;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 

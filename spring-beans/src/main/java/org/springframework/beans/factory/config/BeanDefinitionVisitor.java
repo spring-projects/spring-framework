@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,7 +178,8 @@ public class BeanDefinitionVisitor {
 		else if (value instanceof BeanDefinitionHolder) {
 			visitBeanDefinition(((BeanDefinitionHolder) value).getBeanDefinition());
 		}
-		else if (value instanceof RuntimeBeanReference ref) {
+		else if (value instanceof RuntimeBeanReference) {
+			RuntimeBeanReference ref = (RuntimeBeanReference) value;
 			String newBeanName = resolveStringValue(ref.getBeanName());
 			if (newBeanName == null) {
 				return null;
@@ -187,7 +188,8 @@ public class BeanDefinitionVisitor {
 				return new RuntimeBeanReference(newBeanName);
 			}
 		}
-		else if (value instanceof RuntimeBeanNameReference ref) {
+		else if (value instanceof RuntimeBeanNameReference) {
+			RuntimeBeanNameReference ref = (RuntimeBeanNameReference) value;
 			String newBeanName = resolveStringValue(ref.getBeanName());
 			if (newBeanName == null) {
 				return null;
@@ -208,7 +210,8 @@ public class BeanDefinitionVisitor {
 		else if (value instanceof Map) {
 			visitMap((Map) value);
 		}
-		else if (value instanceof TypedStringValue typedStringValue) {
+		else if (value instanceof TypedStringValue) {
+			TypedStringValue typedStringValue = (TypedStringValue) value;
 			String stringValue = typedStringValue.getValue();
 			if (stringValue != null) {
 				String visitedString = resolveStringValue(stringValue);

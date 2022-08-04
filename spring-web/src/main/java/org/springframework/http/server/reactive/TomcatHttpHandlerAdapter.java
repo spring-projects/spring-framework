@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,15 @@ import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
-import jakarta.servlet.AsyncContext;
-import jakarta.servlet.ServletInputStream;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletRequestWrapper;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpServletResponseWrapper;
+import javax.servlet.AsyncContext;
+import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
+
 import org.apache.catalina.connector.CoyoteInputStream;
 import org.apache.catalina.connector.CoyoteOutputStream;
 import org.apache.catalina.connector.RequestFacade;
@@ -52,7 +53,6 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Violeta Georgieva
  * @author Brian Clozel
- * @author Sam Brannen
  * @since 5.0
  * @see org.springframework.web.server.adapter.AbstractReactiveWebInitializer
  */
@@ -116,10 +116,11 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 		}
 
 		private static RequestFacade getRequestFacade(HttpServletRequest request) {
-			if (request instanceof RequestFacade facade) {
-				return facade;
+			if (request instanceof RequestFacade) {
+				return (RequestFacade) request;
 			}
-			else if (request instanceof HttpServletRequestWrapper wrapper) {
+			else if (request instanceof HttpServletRequestWrapper) {
+				HttpServletRequestWrapper wrapper = (HttpServletRequestWrapper) request;
 				HttpServletRequest wrappedRequest = (HttpServletRequest) wrapper.getRequest();
 				return getRequestFacade(wrappedRequest);
 			}
@@ -132,7 +133,7 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 		@Override
 		protected DataBuffer readFromInputStream() throws IOException {
 			ServletInputStream inputStream = ((ServletRequest) getNativeRequest()).getInputStream();
-			if (!(inputStream instanceof CoyoteInputStream coyoteInputStream)) {
+			if (!(inputStream instanceof CoyoteInputStream)) {
 				// It's possible InputStream can be wrapped, preventing use of CoyoteInputStream
 				return super.readFromInputStream();
 			}
@@ -141,7 +142,7 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 			DataBuffer dataBuffer = this.factory.allocateBuffer(capacity);
 			try {
 				ByteBuffer byteBuffer = dataBuffer.asByteBuffer(0, capacity);
-				int read = coyoteInputStream.read(byteBuffer);
+				int read = ((CoyoteInputStream) inputStream).read(byteBuffer);
 				logBytesRead(read);
 				if (read > 0) {
 					dataBuffer.writePosition(read);
@@ -192,10 +193,11 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 		}
 
 		private static ResponseFacade getResponseFacade(HttpServletResponse response) {
-			if (response instanceof ResponseFacade facade) {
-				return facade;
+			if (response instanceof ResponseFacade) {
+				return (ResponseFacade) response;
 			}
-			else if (response instanceof HttpServletResponseWrapper wrapper) {
+			else if (response instanceof HttpServletResponseWrapper) {
+				HttpServletResponseWrapper wrapper = (HttpServletResponseWrapper) response;
 				HttpServletResponse wrappedResponse = (HttpServletResponse) wrapper.getResponse();
 				return getResponseFacade(wrappedResponse);
 			}

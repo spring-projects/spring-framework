@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,9 @@ package org.springframework.web;
 import java.util.Collections;
 import java.util.List;
 
-import jakarta.servlet.ServletException;
+import javax.servlet.ServletException;
 
 import org.springframework.http.MediaType;
-import org.springframework.http.ProblemDetail;
 
 /**
  * Abstract base for exceptions related to media types. Adds a list of supported {@link MediaType MediaTypes}.
@@ -31,11 +30,9 @@ import org.springframework.http.ProblemDetail;
  * @since 3.0
  */
 @SuppressWarnings("serial")
-public abstract class HttpMediaTypeException extends ServletException implements ErrorResponse {
+public abstract class HttpMediaTypeException extends ServletException {
 
 	private final List<MediaType> supportedMediaTypes;
-
-	private final ProblemDetail body = ProblemDetail.forStatus(getStatusCode());
 
 
 	/**
@@ -62,11 +59,6 @@ public abstract class HttpMediaTypeException extends ServletException implements
 	 */
 	public List<MediaType> getSupportedMediaTypes() {
 		return this.supportedMediaTypes;
-	}
-
-	@Override
-	public ProblemDetail getBody() {
-		return this.body;
 	}
 
 }

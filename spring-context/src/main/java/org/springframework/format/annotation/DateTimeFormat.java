@@ -66,6 +66,7 @@ import java.lang.annotation.Target;
  * @author Sam Brannen
  * @since 3.0
  * @see java.time.format.DateTimeFormatter
+ * @see org.joda.time.format.DateTimeFormat
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

@@ -21,7 +21,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import jakarta.persistence.PersistenceException;
+import javax.persistence.PersistenceException;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;

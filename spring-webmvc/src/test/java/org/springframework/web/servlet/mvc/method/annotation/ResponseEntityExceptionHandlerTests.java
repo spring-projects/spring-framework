@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,13 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 
-import jakarta.servlet.ServletException;
+import javax.servlet.ServletException;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.ConversionNotSupportedException;
@@ -29,14 +31,13 @@ import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindException;
-import org.springframework.validation.MapBindingResult;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -53,7 +54,6 @@ import org.springframework.web.context.request.async.AsyncRequestTimeoutExceptio
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.DispatcherServlet;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -61,57 +61,59 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockServletConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link ResponseEntityExceptionHandler}.
+ * Test fixture for {@link ResponseEntityExceptionHandler}.
  *
  * @author Rossen Stoyanchev
  */
 public class ResponseEntityExceptionHandlerTests {
 
-	private final ResponseEntityExceptionHandler exceptionHandler = new ApplicationExceptionHandler();
+	private ResponseEntityExceptionHandler exceptionHandlerSupport = new ApplicationExceptionHandler();
 
-	private final DefaultHandlerExceptionResolver exceptionResolver = new DefaultHandlerExceptionResolver();
+	private DefaultHandlerExceptionResolver defaultExceptionResolver = new DefaultHandlerExceptionResolver();
 
 	private MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
 
-	private final MockHttpServletResponse servletResponse = new MockHttpServletResponse();
+	private MockHttpServletResponse servletResponse = new MockHttpServletResponse();
 
 	private WebRequest request = new ServletWebRequest(this.servletRequest, this.servletResponse);
 
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void supportsAllDefaultHandlerExceptionResolverExceptionTypes() throws Exception {
+		Class<ResponseEntityExceptionHandler> clazz = ResponseEntityExceptionHandler.class;
+		Method handleExceptionMethod = clazz.getMethod("handleException", Exception.class, WebRequest.class);
+		ExceptionHandler annotation = handleExceptionMethod.getAnnotation(ExceptionHandler.class);
+		List<Class<?>> exceptionTypes = Arrays.asList(annotation.value());
 
-		ExceptionHandler annotation = ResponseEntityExceptionHandler.class
-				.getMethod("handleException", Exception.class, WebRequest.class)
-				.getAnnotation(ExceptionHandler.class);
-
-		Arrays.stream(DefaultHandlerExceptionResolver.class.getDeclaredMethods())
-				.filter(method -> method.getName().startsWith("handle") && (method.getParameterCount() == 4))
-				.filter(method -> !method.getName().equals("handleErrorResponse"))
-				.map(method -> method.getParameterTypes()[0])
-				.forEach(exceptionType -> assertThat(annotation.value())
-						.as("@ExceptionHandler is missing declaration for " + exceptionType.getName())
-						.contains((Class<Exception>) exceptionType));
+		for (Method method : DefaultHandlerExceptionResolver.class.getDeclaredMethods()) {
+			Class<?>[] paramTypes = method.getParameterTypes();
+			if (method.getName().startsWith("handle") && (paramTypes.length == 4)) {
+				String name = paramTypes[0].getSimpleName();
+				assertThat(exceptionTypes.contains(paramTypes[0])).as("@ExceptionHandler is missing " + name).isTrue();
+			}
+		}
 	}
 
 	@Test
 	public void httpRequestMethodNotSupported() {
-		ResponseEntity<Object> entity =
-				testException(new HttpRequestMethodNotSupportedException("GET", List.of("POST", "DELETE")));
+		List<String> supported = Arrays.asList("POST", "DELETE");
+		Exception ex = new HttpRequestMethodNotSupportedException("GET", supported);
 
-		assertThat(entity.getHeaders().getFirst(HttpHeaders.ALLOW)).isEqualTo("POST, DELETE");
+		ResponseEntity<Object> responseEntity = testException(ex);
+		assertThat(responseEntity.getHeaders().getAllow()).isEqualTo(EnumSet.of(HttpMethod.POST, HttpMethod.DELETE));
 	}
 
 	@Test
 	public void handleHttpMediaTypeNotSupported() {
-		ResponseEntity<Object> entity = testException(new HttpMediaTypeNotSupportedException(
-				MediaType.APPLICATION_JSON, List.of(MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML)));
+		List<MediaType> acceptable = Arrays.asList(MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML);
+		Exception ex = new HttpMediaTypeNotSupportedException(MediaType.APPLICATION_JSON, acceptable);
 
-		assertThat(entity.getHeaders().getFirst(HttpHeaders.ACCEPT)).isEqualTo("application/atom+xml, application/xml");
-		assertThat(entity.getHeaders().getAcceptPatch()).isEmpty();
+		ResponseEntity<Object> responseEntity = testException(ex);
+		assertThat(responseEntity.getHeaders().getAccept()).isEqualTo(acceptable);
+		assertThat(responseEntity.getHeaders().getAcceptPatch()).isEmpty();
 	}
 
 	@Test
@@ -119,80 +121,90 @@ public class ResponseEntityExceptionHandlerTests {
 		this.servletRequest = new MockHttpServletRequest("PATCH", "/");
 		this.request = new ServletWebRequest(this.servletRequest, this.servletResponse);
 
-		ResponseEntity<Object> entity = testException(
-				new HttpMediaTypeNotSupportedException(
-						MediaType.APPLICATION_JSON,
-						List.of(MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML),
-						HttpMethod.PATCH));
+		List<MediaType> acceptable = Arrays.asList(MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML);
+		Exception ex = new HttpMediaTypeNotSupportedException(MediaType.APPLICATION_JSON, acceptable);
 
-		HttpHeaders headers = entity.getHeaders();
-		assertThat(headers.getFirst(HttpHeaders.ACCEPT)).isEqualTo("application/atom+xml, application/xml");
-		assertThat(headers.getFirst(HttpHeaders.ACCEPT)).isEqualTo("application/atom+xml, application/xml");
-		assertThat(headers.getFirst(HttpHeaders.ACCEPT_PATCH)).isEqualTo("application/atom+xml, application/xml");
+		ResponseEntity<Object> responseEntity = testException(ex);
+		assertThat(responseEntity.getHeaders().getAccept()).isEqualTo(acceptable);
+		assertThat(responseEntity.getHeaders().getAcceptPatch()).isEqualTo(acceptable);
 	}
 
 	@Test
 	public void httpMediaTypeNotAcceptable() {
-		testException(new HttpMediaTypeNotAcceptableException(""));
+		Exception ex = new HttpMediaTypeNotAcceptableException("");
+		testException(ex);
 	}
 
 	@Test
 	public void missingPathVariable() throws NoSuchMethodException {
-		testException(new MissingPathVariableException("param",
-				new MethodParameter(getClass().getDeclaredMethod("handle", String.class), 0)));
+		Method method = getClass().getDeclaredMethod("handle", String.class);
+		MethodParameter parameter = new MethodParameter(method, 0);
+		Exception ex = new MissingPathVariableException("param", parameter);
+		testException(ex);
 	}
 
 	@Test
 	public void missingServletRequestParameter() {
-		testException(new MissingServletRequestParameterException("param", "type"));
+		Exception ex = new MissingServletRequestParameterException("param", "type");
+		testException(ex);
 	}
 
 	@Test
 	public void servletRequestBindingException() {
-		testException(new ServletRequestBindingException("message"));
+		Exception ex = new ServletRequestBindingException("message");
+		testException(ex);
 	}
 
 	@Test
 	public void conversionNotSupported() {
-		testException(new ConversionNotSupportedException(new Object(), Object.class, null));
+		Exception ex = new ConversionNotSupportedException(new Object(), Object.class, null);
+		testException(ex);
 	}
 
 	@Test
 	public void typeMismatch() {
-		testException(new TypeMismatchException("foo", String.class));
+		Exception ex = new TypeMismatchException("foo", String.class);
+		testException(ex);
 	}
 
 	@Test
 	@SuppressWarnings("deprecation")
 	public void httpMessageNotReadable() {
-		testException(new HttpMessageNotReadableException("message"));
+		Exception ex = new HttpMessageNotReadableException("message");
+		testException(ex);
 	}
 
 	@Test
 	public void httpMessageNotWritable() {
-		testException(new HttpMessageNotWritableException(""));
+		Exception ex = new HttpMessageNotWritableException("");
+		testException(ex);
 	}
 
 	@Test
-	public void methodArgumentNotValid() throws Exception {
-		testException(new MethodArgumentNotValidException(
-				new MethodParameter(getClass().getDeclaredMethod("handle", String.class), 0),
-				new MapBindingResult(Collections.emptyMap(), "name")));
+	public void methodArgumentNotValid() {
+		Exception ex = mock(MethodArgumentNotValidException.class);
+		testException(ex);
 	}
 
 	@Test
 	public void missingServletRequestPart() {
-		testException(new MissingServletRequestPartException("partName"));
+		Exception ex = new MissingServletRequestPartException("partName");
+		testException(ex);
 	}
 
 	@Test
 	public void bindException() {
-		testException(new BindException(new Object(), "name"));
+		Exception ex = new BindException(new Object(), "name");
+		testException(ex);
 	}
 
 	@Test
 	public void noHandlerFoundException() {
-		testException(new NoHandlerFoundException("GET", "/resource", HttpHeaders.EMPTY));
+		ServletServerHttpRequest req = new ServletServerHttpRequest(
+				new MockHttpServletRequest("GET","/resource"));
+		Exception ex = new NoHandlerFoundException(req.getMethod().toString(),
+				req.getServletRequest().getRequestURI(),req.getHeaders());
+		testException(ex);
 	}
 
 	@Test
@@ -228,11 +240,8 @@ public class ResponseEntityExceptionHandlerTests {
 		resolver.setApplicationContext(ctx);
 		resolver.afterPropertiesSet();
 
-		ModelAndView mav = resolver.resolveException(
-				this.servletRequest, this.servletResponse, null,
-				new IllegalStateException(new ServletRequestBindingException("message")));
-
-		assertThat(mav).isNull();
+		IllegalStateException ex = new IllegalStateException(new ServletRequestBindingException("message"));
+		assertThat(resolver.resolveException(this.servletRequest, this.servletResponse, null, ex)).isNull();
 	}
 
 	@Test
@@ -274,18 +283,18 @@ public class ResponseEntityExceptionHandlerTests {
 
 	private ResponseEntity<Object> testException(Exception ex) {
 		try {
-			ResponseEntity<Object> entity = this.exceptionHandler.handleException(ex, this.request);
+			ResponseEntity<Object> responseEntity = this.exceptionHandlerSupport.handleException(ex, this.request);
 
 			// SPR-9653
-			if (HttpStatus.INTERNAL_SERVER_ERROR.equals(entity.getStatusCode())) {
-				assertThat(this.servletRequest.getAttribute("jakarta.servlet.error.exception")).isSameAs(ex);
+			if (HttpStatus.INTERNAL_SERVER_ERROR.equals(responseEntity.getStatusCode())) {
+				assertThat(this.servletRequest.getAttribute("javax.servlet.error.exception")).isSameAs(ex);
 			}
 
-			// Verify DefaultHandlerExceptionResolver would set the same status
-			this.exceptionResolver.resolveException(this.servletRequest, this.servletResponse, null, ex);
-			assertThat(entity.getStatusCode().value()).isEqualTo(this.servletResponse.getStatus());
+			this.defaultExceptionResolver.resolveException(this.servletRequest, this.servletResponse, null, ex);
 
-			return entity;
+			assertThat(responseEntity.getStatusCode().value()).isEqualTo(this.servletResponse.getStatus());
+
+			return responseEntity;
 		}
 		catch (Exception ex2) {
 			throw new IllegalStateException("handleException threw exception", ex2);
@@ -318,9 +327,8 @@ public class ResponseEntityExceptionHandlerTests {
 
 		@Override
 		protected ResponseEntity<Object> handleServletRequestBindingException(
-				ServletRequestBindingException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+				ServletRequestBindingException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
 
-			headers = new HttpHeaders();
 			headers.set("someHeader", "someHeaderValue");
 			return handleExceptionInternal(ex, "error content", headers, status, request);
 		}

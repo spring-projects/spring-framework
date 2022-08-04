@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,7 +70,7 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 public abstract class AbstractMessageReaderArgumentResolver extends HandlerMethodArgumentResolverSupport {
 
 	private static final Set<HttpMethod> SUPPORTED_METHODS =
-			Set.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
+			EnumSet.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
 
 
 	private final List<HttpMessageReader<?>> messageReaders;
@@ -202,7 +203,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 		// No compatible reader but body may be empty.
 
 		HttpMethod method = request.getMethod();
-		if (contentType == null && SUPPORTED_METHODS.contains(method)) {
+		if (contentType == null && method != null && SUPPORTED_METHODS.contains(method)) {
 			Flux<DataBuffer> body = request.getBody().doOnNext(buffer -> {
 				DataBufferUtils.release(buffer);
 				// Body not empty, back toy 415..
@@ -225,14 +226,8 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	}
 
 	private ServerWebInputException handleMissingBody(MethodParameter parameter) {
-
-		DecodingException cause = new DecodingException(
-				"No request body for: " + parameter.getExecutable().toGenericString());
-
-		ServerWebInputException ex = new ServerWebInputException("No request body", parameter, cause);
-		ex.setDetail("Invalid request content");
-
-		return ex;
+		String paramInfo = parameter.getExecutable().toGenericString();
+		return new ServerWebInputException("Request body is missing: " + paramInfo, parameter);
 	}
 
 	/**

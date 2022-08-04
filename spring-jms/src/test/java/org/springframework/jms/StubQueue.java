@@ -16,10 +16,10 @@
 
 package org.springframework.jms;
 
-import jakarta.jms.Queue;
+import javax.jms.Queue;
 
 /**
- * Stub implementation of the {@link jakarta.jms.Queue} interface.
+ * Stub implementation of the {@link javax.jms.Queue} interface.
  *
  * @author Rick Evans
  */

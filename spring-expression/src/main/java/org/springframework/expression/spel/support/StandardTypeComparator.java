@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import org.springframework.expression.TypeComparator;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.NumberUtils;
 
 /**
@@ -45,9 +44,8 @@ public class StandardTypeComparator implements TypeComparator {
 		if (left instanceof Number && right instanceof Number) {
 			return true;
 		}
-		if (left instanceof Comparable && right instanceof Comparable) {
-			Class<?> ancestor = ClassUtils.determineCommonAncestor(left.getClass(), right.getClass());
-			return ancestor != null && Comparable.class.isAssignableFrom(ancestor);
+		if (left instanceof Comparable) {
+			return true;
 		}
 		return false;
 	}
@@ -64,7 +62,10 @@ public class StandardTypeComparator implements TypeComparator {
 		}
 
 		// Basic number comparisons
-		if (left instanceof Number leftNumber && right instanceof Number rightNumber) {
+		if (left instanceof Number && right instanceof Number) {
+			Number leftNumber = (Number) left;
+			Number rightNumber = (Number) right;
+
 			if (leftNumber instanceof BigDecimal || rightNumber instanceof BigDecimal) {
 				BigDecimal leftBigDecimal = NumberUtils.convertNumberToTargetClass(leftNumber, BigDecimal.class);
 				BigDecimal rightBigDecimal = NumberUtils.convertNumberToTargetClass(rightNumber, BigDecimal.class);
@@ -94,7 +95,7 @@ public class StandardTypeComparator implements TypeComparator {
 				return Byte.compare(leftNumber.byteValue(), rightNumber.byteValue());
 			}
 			else {
-				// Unknown Number subtype -> best guess is double multiplication
+				// Unknown Number subtypes -> best guess is double multiplication
 				return Double.compare(leftNumber.doubleValue(), rightNumber.doubleValue());
 			}
 		}

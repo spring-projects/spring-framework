@@ -16,7 +16,7 @@
 
 package org.springframework.test.web.servlet.setup;
 
-import jakarta.servlet.ServletContext;
+import javax.servlet.ServletContext;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;

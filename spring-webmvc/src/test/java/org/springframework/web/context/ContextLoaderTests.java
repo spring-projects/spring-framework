@@ -19,9 +19,10 @@ package org.springframework.web.context;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletContextEvent;
-import jakarta.servlet.ServletContextListener;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;
@@ -347,7 +348,7 @@ class ContextLoaderTests {
 		@Override
 		public void initialize(ConfigurableApplicationContext applicationContext) {
 			ConfigurableEnvironment environment = applicationContext.getEnvironment();
-			environment.getPropertySources().addFirst(new PropertySource<>("testPropertySource") {
+			environment.getPropertySources().addFirst(new PropertySource<Object>("testPropertySource") {
 				@Override
 				public Object getProperty(String key) {
 					return "name".equals(key) ? "testName" : null;

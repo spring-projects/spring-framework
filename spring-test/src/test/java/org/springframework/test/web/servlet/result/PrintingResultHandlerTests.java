@@ -22,8 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpSession;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpSession;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -347,7 +348,7 @@ public class PrintingResultHandlerTests {
 
 			private String printedHeading;
 
-			private final Map<String, Map<String, Object>> printedValues = new HashMap<>();
+			private Map<String, Map<String, Object>> printedValues = new HashMap<>();
 
 			@Override
 			public void printHeading(String heading) {

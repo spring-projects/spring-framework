@@ -19,11 +19,11 @@ package org.springframework.web.util;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import jakarta.servlet.RequestDispatcher;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.http.HttpServletMapping;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.MappingMatch;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletMapping;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.MappingMatch;
 
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
@@ -252,9 +252,6 @@ public abstract class ServletRequestPathUtils {
 			if (UrlPathHelper.servlet4Present) {
 				String servletPathPrefix = Servlet4Delegate.getServletPathPrefix(request);
 				if (StringUtils.hasText(servletPathPrefix)) {
-					if (servletPathPrefix.endsWith("/")) {
-						servletPathPrefix = servletPathPrefix.substring(0, servletPathPrefix.length() - 1);
-					}
 					return new ServletRequestPath(requestUri, request.getContextPath(), servletPathPrefix);
 				}
 			}
@@ -275,7 +272,8 @@ public abstract class ServletRequestPathUtils {
 			if (mapping == null) {
 				mapping = request.getHttpServletMapping();
 			}
-			if (!ObjectUtils.nullSafeEquals(mapping.getMappingMatch(), MappingMatch.PATH)) {
+			MappingMatch match = mapping.getMappingMatch();
+			if (!ObjectUtils.nullSafeEquals(match, MappingMatch.PATH)) {
 				return null;
 			}
 			String servletPath = (String) request.getAttribute(WebUtils.INCLUDE_SERVLET_PATH_ATTRIBUTE);

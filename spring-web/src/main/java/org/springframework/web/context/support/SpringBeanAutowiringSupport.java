@@ -16,7 +16,8 @@
 
 package org.springframework.web.context.support;
 
-import jakarta.servlet.ServletContext;
+import javax.servlet.ServletContext;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -100,7 +101,7 @@ public abstract class SpringBeanAutowiringSupport {
 	 * <p>Intended for use as a delegate.
 	 * @param target the target object to process
 	 * @param servletContext the ServletContext to find the Spring web application context in
-	 * @see WebApplicationContextUtils#getWebApplicationContext(jakarta.servlet.ServletContext)
+	 * @see WebApplicationContextUtils#getWebApplicationContext(javax.servlet.ServletContext)
 	 */
 	public static void processInjectionBasedOnServletContext(Object target, ServletContext servletContext) {
 		Assert.notNull(target, "Target object must not be null");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -272,9 +272,10 @@ public abstract class HttpRange {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof ByteRange otherRange)) {
+			if (!(other instanceof ByteRange)) {
 				return false;
 			}
+			ByteRange otherRange = (ByteRange) other;
 			return (this.firstPos == otherRange.firstPos &&
 					ObjectUtils.nullSafeEquals(this.lastPos, otherRange.lastPos));
 		}
@@ -334,9 +335,10 @@ public abstract class HttpRange {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof SuffixByteRange otherRange)) {
+			if (!(other instanceof SuffixByteRange)) {
 				return false;
 			}
+			SuffixByteRange otherRange = (SuffixByteRange) other;
 			return (this.suffixLength == otherRange.suffixLength);
 		}
 

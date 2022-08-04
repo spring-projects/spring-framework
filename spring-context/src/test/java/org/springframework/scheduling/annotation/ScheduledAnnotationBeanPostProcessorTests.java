@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
@@ -91,11 +90,11 @@ class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 	@ParameterizedTest
-	@CsvSource(textBlock = """
-		FixedDelay, 5_000
-		FixedDelayInSeconds, 5_000
-		FixedDelayInMinutes, 180_000
-	""")
+	@CsvSource({
+		"FixedDelay, 5000",
+		"FixedDelayInSeconds, 5000",
+		"FixedDelayInMinutes, 180000"
+	})
 	void fixedDelayTask(@NameToClass Class<?> beanClass, long expectedInterval) {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(beanClass);
@@ -119,16 +118,16 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		Method targetMethod = runnable.getMethod();
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("fixedDelay");
-		assertThat(task.getInitialDelayDuration()).isZero();
-		assertThat(task.getIntervalDuration()).isEqualTo(Duration.ofMillis(expectedInterval));
+		assertThat(task.getInitialDelay()).isEqualTo(0L);
+		assertThat(task.getInterval()).isEqualTo(expectedInterval);
 	}
 
 	@ParameterizedTest
-	@CsvSource(textBlock = """
-		FixedRate, 3_000
-		FixedRateInSeconds, 5_000
-		FixedRateInMinutes, 180_000
-	""")
+	@CsvSource({
+		"FixedRate, 3000",
+		"FixedRateInSeconds, 5000",
+		"FixedRateInMinutes, 180000"
+	})
 	void fixedRateTask(@NameToClass Class<?> beanClass, long expectedInterval) {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(beanClass);
@@ -153,17 +152,17 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("fixedRate");
 		assertSoftly(softly -> {
-			softly.assertThat(task.getInitialDelayDuration()).as("initial delay").isZero();
-			softly.assertThat(task.getIntervalDuration()).as("interval").isEqualTo(Duration.ofMillis(expectedInterval));
+			softly.assertThat(task.getInitialDelay()).as("initial delay").isEqualTo(0);
+			softly.assertThat(task.getInterval()).as("interval").isEqualTo(expectedInterval);
 		});
 	}
 
 	@ParameterizedTest
-	@CsvSource(textBlock = """
-		FixedRateWithInitialDelay, 1_000, 3_000
-		FixedRateWithInitialDelayInSeconds, 5_000, 3_000
-		FixedRateWithInitialDelayInMinutes, 60_000, 180_000
-	""")
+	@CsvSource({
+		"FixedRateWithInitialDelay, 1000, 3000",
+		"FixedRateWithInitialDelayInSeconds, 5000, 3000",
+		"FixedRateWithInitialDelayInMinutes, 60000, 180000"
+	})
 	void fixedRateTaskWithInitialDelay(@NameToClass Class<?> beanClass, long expectedInitialDelay, long expectedInterval) {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(beanClass);
@@ -188,8 +187,8 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("fixedRate");
 		assertSoftly(softly -> {
-			softly.assertThat(task.getInitialDelayDuration()).as("initial delay").isEqualTo(Duration.ofMillis(expectedInitialDelay));
-			softly.assertThat(task.getIntervalDuration()).as("interval").isEqualTo(Duration.ofMillis(expectedInterval));
+			softly.assertThat(task.getInitialDelay()).as("initial delay").isEqualTo(expectedInitialDelay);
+			softly.assertThat(task.getInterval()).as("interval").isEqualTo(expectedInterval);
 		});
 	}
 
@@ -252,16 +251,16 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		Method targetMethod = runnable1.getMethod();
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("fixedRate");
-		assertThat(task1.getInitialDelayDuration()).isZero();
-		assertThat(task1.getIntervalDuration()).isEqualTo(Duration.ofMillis(4_000L));
+		assertThat(task1.getInitialDelay()).isEqualTo(0);
+		assertThat(task1.getInterval()).isEqualTo(4000L);
 		IntervalTask task2 = fixedRateTasks.get(1);
 		ScheduledMethodRunnable runnable2 = (ScheduledMethodRunnable) task2.getRunnable();
 		targetObject = runnable2.getTarget();
 		targetMethod = runnable2.getMethod();
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("fixedRate");
-		assertThat(task2.getInitialDelayDuration()).isEqualTo(Duration.ofMillis(2_000L));
-		assertThat(task2.getIntervalDuration()).isEqualTo(Duration.ofMillis(4_000L));
+		assertThat(task2.getInitialDelay()).isEqualTo(2000L);
+		assertThat(task2.getInterval()).isEqualTo(4000L);
 	}
 
 	@Test
@@ -321,20 +320,20 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		boolean condition = trigger instanceof CronTrigger;
 		assertThat(condition).isTrue();
 		CronTrigger cronTrigger = (CronTrigger) trigger;
-		ZonedDateTime dateTime = ZonedDateTime.of(2013, 4, 15, 4, 0, 0, 0, ZoneId.of("GMT+10"));
-//		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+10"));
-//		cal.clear();
-//		cal.set(2013, 3, 15, 4, 0);  // 15-04-2013 4:00 GMT+10;
-		Instant lastScheduledExecution = dateTime.toInstant();
-		Instant lastActualExecution = dateTime.toInstant();
-		dateTime = dateTime.plusMinutes(30);
-		Instant lastCompletion = dateTime.toInstant();
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+10"));
+		cal.clear();
+		cal.set(2013, 3, 15, 4, 0);  // 15-04-2013 4:00 GMT+10
+		Date lastScheduledExecutionTime = cal.getTime();
+		Date lastActualExecutionTime = cal.getTime();
+		cal.add(Calendar.MINUTE, 30);  // 4:30
+		Date lastCompletionTime = cal.getTime();
 		TriggerContext triggerContext = new SimpleTriggerContext(
-				lastScheduledExecution, lastActualExecution, lastCompletion);
-		dateTime = dateTime.plusMinutes(90); // 6:00
-		Instant nextExecutionTime = cronTrigger.nextExecution(triggerContext);
+				lastScheduledExecutionTime, lastActualExecutionTime, lastCompletionTime);
+		cal.add(Calendar.MINUTE, 30);
+		cal.add(Calendar.HOUR_OF_DAY, 1);  // 6:00
+		Date nextExecutionTime = cronTrigger.nextExecutionTime(triggerContext);
 		// assert that 6:00 is next execution time
-		assertThat(nextExecutionTime).isEqualTo(dateTime.toInstant());
+		assertThat(nextExecutionTime).isEqualTo(cal.getTime());
 	}
 
 	@Test
@@ -408,7 +407,7 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		Method targetMethod = runnable.getMethod();
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("checkForUpdates");
-		assertThat(task.getIntervalDuration()).isEqualTo(Duration.ofMillis(5_000L));
+		assertThat(task.getInterval()).isEqualTo(5000L);
 	}
 
 	@Test
@@ -435,8 +434,8 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		Method targetMethod = runnable.getMethod();
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("checkForUpdates");
-		assertThat(task.getIntervalDuration()).isEqualTo(Duration.ofMillis(5_000L));
-		assertThat(task.getInitialDelayDuration()).isEqualTo(Duration.ofMillis(1_000L));
+		assertThat(task.getInterval()).isEqualTo(5000L);
+		assertThat(task.getInitialDelay()).isEqualTo(1000L);
 	}
 
 	@Test
@@ -518,12 +517,12 @@ class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 	@ParameterizedTest
-	@CsvSource(textBlock = """
-		PropertyPlaceholderWithFixedDelay, 5000, 1000, 5_000, 1_000
-		PropertyPlaceholderWithFixedDelay, PT5S, PT1S, 5_000, 1_000
-		PropertyPlaceholderWithFixedDelayInSeconds, 5000, 1000, 5_000_000, 1_000_000
-		PropertyPlaceholderWithFixedDelayInSeconds, PT5S, PT1S, 5_000, 1_000
-	""")
+	@CsvSource({
+		"PropertyPlaceholderWithFixedDelay, 5000, 1000, 5000, 1000",
+		"PropertyPlaceholderWithFixedDelay, PT5S, PT1S, 5000, 1000",
+		"PropertyPlaceholderWithFixedDelayInSeconds, 5000, 1000, 5000000, 1000000",
+		"PropertyPlaceholderWithFixedDelayInSeconds, PT5S, PT1S, 5000, 1000"
+	})
 	void propertyPlaceholderWithFixedDelay(@NameToClass Class<?> beanClass, String fixedDelay, String initialDelay,
 			long expectedInterval, long expectedInitialDelay) {
 
@@ -556,18 +555,18 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("fixedDelay");
 		assertSoftly(softly -> {
-			softly.assertThat(task.getInitialDelayDuration()).as("initial delay").isEqualTo(Duration.ofMillis(expectedInitialDelay));
-			softly.assertThat(task.getIntervalDuration()).as("interval").isEqualTo(Duration.ofMillis(expectedInterval));
+			softly.assertThat(task.getInitialDelay()).as("initial delay").isEqualTo(expectedInitialDelay);
+			softly.assertThat(task.getInterval()).as("interval").isEqualTo(expectedInterval);
 		});
 	}
 
 	@ParameterizedTest
-	@CsvSource(textBlock = """
-		PropertyPlaceholderWithFixedRate, 3000, 1000, 3_000, 1_000
-		PropertyPlaceholderWithFixedRate, PT3S, PT1S, 3_000, 1_000
-		PropertyPlaceholderWithFixedRateInSeconds, 3000, 1000, 3_000_000, 1_000_000
-		PropertyPlaceholderWithFixedRateInSeconds, PT3S, PT1S, 3_000, 1_000
-	""")
+	@CsvSource({
+		"PropertyPlaceholderWithFixedRate, 3000, 1000, 3000, 1000",
+		"PropertyPlaceholderWithFixedRate, PT3S, PT1S, 3000, 1000",
+		"PropertyPlaceholderWithFixedRateInSeconds, 3000, 1000, 3000000, 1000000",
+		"PropertyPlaceholderWithFixedRateInSeconds, PT3S, PT1S, 3000, 1000"
+	})
 	void propertyPlaceholderWithFixedRate(@NameToClass Class<?> beanClass, String fixedRate, String initialDelay,
 			long expectedInterval, long expectedInitialDelay) {
 
@@ -600,8 +599,8 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("fixedRate");
 		assertSoftly(softly -> {
-			softly.assertThat(task.getInitialDelayDuration()).as("initial delay").isEqualTo(Duration.ofMillis(expectedInitialDelay));
-			softly.assertThat(task.getIntervalDuration()).as("interval").isEqualTo(Duration.ofMillis(expectedInterval));
+			softly.assertThat(task.getInitialDelay()).as("initial delay").isEqualTo(expectedInitialDelay);
+			softly.assertThat(task.getInterval()).as("interval").isEqualTo(expectedInterval);
 		});
 	}
 
@@ -729,7 +728,7 @@ class ScheduledAnnotationBeanPostProcessorTests {
 
 	static class FixedDelay {
 
-		@Scheduled(fixedDelay = 5_000)
+		@Scheduled(fixedDelay = 5000)
 		void fixedDelay() {
 		}
 	}
@@ -751,7 +750,7 @@ class ScheduledAnnotationBeanPostProcessorTests {
 
 	static class FixedRate {
 
-		@Scheduled(fixedRate = 3_000)
+		@Scheduled(fixedRate = 3000)
 		void fixedRate() {
 		}
 	}
@@ -773,7 +772,7 @@ class ScheduledAnnotationBeanPostProcessorTests {
 
 	static class FixedRateWithInitialDelay {
 
-		@Scheduled(fixedRate = 3_000, initialDelay = 1_000)
+		@Scheduled(fixedRate = 3000, initialDelay = 1000)
 		void fixedRate() {
 		}
 	}
@@ -795,7 +794,7 @@ class ScheduledAnnotationBeanPostProcessorTests {
 
 	static class SeveralFixedRatesWithSchedulesContainerAnnotationTestBean {
 
-		@Schedules({@Scheduled(fixedRate = 4_000), @Scheduled(fixedRate = 4_000, initialDelay = 2_000)})
+		@Schedules({@Scheduled(fixedRate = 4000), @Scheduled(fixedRate = 4000, initialDelay = 2000)})
 		void fixedRate() {
 		}
 	}
@@ -803,8 +802,8 @@ class ScheduledAnnotationBeanPostProcessorTests {
 
 	static class SeveralFixedRatesWithRepeatedScheduledAnnotationTestBean {
 
-		@Scheduled(fixedRate = 4_000)
-		@Scheduled(fixedRate = 4_000, initialDelay = 2_000)
+		@Scheduled(fixedRate = 4000)
+		@Scheduled(fixedRate = 4000, initialDelay = 2000)
 		void fixedRate() {
 		}
 
@@ -820,8 +819,8 @@ class ScheduledAnnotationBeanPostProcessorTests {
 
 	static class FixedRatesBaseBean {
 
-		@Scheduled(fixedRate = 4_000)
-		@Scheduled(fixedRate = 4_000, initialDelay = 2_000)
+		@Scheduled(fixedRate = 4000)
+		@Scheduled(fixedRate = 4000, initialDelay = 2000)
 		void fixedRate() {
 		}
 	}
@@ -833,8 +832,8 @@ class ScheduledAnnotationBeanPostProcessorTests {
 
 	interface FixedRatesDefaultMethod {
 
-		@Scheduled(fixedRate = 4_000)
-		@Scheduled(fixedRate = 4_000, initialDelay = 2_000)
+		@Scheduled(fixedRate = 4000)
+		@Scheduled(fixedRate = 4000, initialDelay = 2000)
 		default void fixedRate() {
 		}
 	}
@@ -917,13 +916,13 @@ class ScheduledAnnotationBeanPostProcessorTests {
 
 	static class NonEmptyParamListTestBean {
 
-		@Scheduled(fixedRate = 3_000)
+		@Scheduled(fixedRate = 3000)
 		void invalid(String oops) {
 		}
 	}
 
 
-	@Scheduled(fixedRate = 5_000)
+	@Scheduled(fixedRate = 5000)
 	@Target(ElementType.METHOD)
 	@Retention(RetentionPolicy.RUNTIME)
 	private @interface EveryFiveSeconds {
@@ -935,7 +934,7 @@ class ScheduledAnnotationBeanPostProcessorTests {
 	private @interface Hourly {
 	}
 
-	@Scheduled(initialDelay = 1_000)
+	@Scheduled(initialDelay = 1000)
 	@Retention(RetentionPolicy.RUNTIME)
 	private @interface WaitASec {
 
@@ -957,7 +956,7 @@ class ScheduledAnnotationBeanPostProcessorTests {
 
 	static class ComposedAnnotationFixedRateTestBean {
 
-		@WaitASec(fixedRate = 5_000)
+		@WaitASec(fixedRate = 5000)
 		void checkForUpdates() {
 		}
 	}

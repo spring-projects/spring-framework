@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import io.r2dbc.spi.Parameters;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.r2dbc.core.binding.BindMarkersFactory;
@@ -39,12 +38,10 @@ import static org.mockito.Mockito.verify;
  *
  * @author Mark Paluch
  * @author Jens Schauder
- * @author Anton Naydenov
  */
 public class NamedParameterUtilsUnitTests {
 
 	private final BindMarkersFactory BIND_MARKERS = BindMarkersFactory.indexed("$", 1);
-
 
 	@Test
 	public void shouldParseSql() {
@@ -148,6 +145,7 @@ public class NamedParameterUtilsUnitTests {
 		String sql = "select 'first name' from artists where info->'stat'->'albums' = ?? :album and '[\"1\",\"2\",\"3\"]'::jsonb ?? '4'";
 
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+
 		assertThat(parsedSql.getTotalParameterCount()).isEqualTo(1);
 		assertThat(expand(parsedSql)).isEqualTo(expectedSql);
 	}
@@ -158,6 +156,7 @@ public class NamedParameterUtilsUnitTests {
 		String sql = "select '[\"3\", \"11\"]'::jsonb ?| '{1,3,11,12,17}'::text[]";
 
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+
 		assertThat(parsedSql.getTotalParameterCount()).isEqualTo(0);
 		assertThat(expand(parsedSql)).isEqualTo(expectedSql);
 	}
@@ -178,6 +177,7 @@ public class NamedParameterUtilsUnitTests {
 		String sql = "select '0\\:0' as a, foo from bar where baz < DATE(:p1 23\\:59\\:59) and baz = :p2";
 
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+
 		assertThat(parsedSql.getParameterNames()).containsExactly("p1", "p2");
 		assertThat(expand(parsedSql)).isEqualTo(expectedSql);
 	}
@@ -198,6 +198,7 @@ public class NamedParameterUtilsUnitTests {
 		String sql = "select foo from bar where baz = b:{}z";
 
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+
 		assertThat(parsedSql.getParameterNames()).isEmpty();
 		assertThat(expand(parsedSql)).isEqualTo(expectedSql);
 
@@ -224,11 +225,13 @@ public class NamedParameterUtilsUnitTests {
 		String expectedSql = "xxx & yyyy";
 
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(expectedSql);
+
 		assertThat(expand(parsedSql)).isEqualTo(expectedSql);
 	}
 
 	@Test
 	public void substituteNamedParametersWithLogicalAnd() {
+
 		String expectedSql = "xxx & yyyy";
 
 		assertThat(expand(expectedSql)).isEqualTo(expectedSql);
@@ -246,6 +249,7 @@ public class NamedParameterUtilsUnitTests {
 		String sql = "SELECT ':foo'':doo', :xxx FROM DUAL";
 
 		ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);
+
 		assertThat(psql.getTotalParameterCount()).isEqualTo(1);
 		assertThat(psql.getParameterNames()).containsExactly("xxx");
 	}
@@ -255,6 +259,7 @@ public class NamedParameterUtilsUnitTests {
 		String sql = "SELECT /*:doo*/':foo', :xxx FROM DUAL";
 
 		ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);
+
 		assertThat(psql.getTotalParameterCount()).isEqualTo(1);
 		assertThat(psql.getParameterNames()).containsExactly("xxx");
 	}
@@ -264,24 +269,18 @@ public class NamedParameterUtilsUnitTests {
 		String sql2 = "SELECT ':foo'/*:doo*/, :xxx FROM DUAL";
 
 		ParsedSql psql2 = NamedParameterUtils.parseSqlStatement(sql2);
+
 		assertThat(psql2.getTotalParameterCount()).isEqualTo(1);
 		assertThat(psql2.getParameterNames()).containsExactly("xxx");
 	}
 
-	@Test  // gh-27716
-	public void parseSqlStatementWithSquareBracket() {
-		String sql = "SELECT ARRAY[:ext]";
-
-		ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);
-		assertThat(psql.getNamedParameterCount()).isEqualTo(1);
-		assertThat(psql.getParameterNames()).containsExactly("ext");
-	}
-
 	@Test
 	public void shouldAllowParsingMultipleUseOfParameter() {
+
 		String sql = "SELECT * FROM person where name = :id or lastname = :id";
 
 		ParsedSql parsed = NamedParameterUtils.parseSqlStatement(sql);
+
 		assertThat(parsed.getTotalParameterCount()).isEqualTo(2);
 		assertThat(parsed.getNamedParameterCount()).isEqualTo(1);
 		assertThat(parsed.getParameterNames()).containsExactly("id", "id");
@@ -295,25 +294,29 @@ public class NamedParameterUtilsUnitTests {
 
 		PreparedOperation<String> operation = NamedParameterUtils.substituteNamedParameters(
 				sql, factory, new MapBindParameterSource(
-						Collections.singletonMap("id", Parameters.in("foo"))));
+						Collections.singletonMap("id", Parameter.from("foo"))));
 
 		assertThat(operation.toQuery()).isEqualTo(
 				"SELECT * FROM person where name = $0 or lastname = $0");
 
 		operation.bindTo(new BindTarget() {
+
 			@Override
 			public void bind(String identifier, Object value) {
 				throw new UnsupportedOperationException();
 			}
+
 			@Override
 			public void bind(int index, Object value) {
 				assertThat(index).isEqualTo(0);
-				assertThat(value).isEqualTo(Parameters.in("foo"));
+				assertThat(value).isEqualTo("foo");
 			}
+
 			@Override
 			public void bindNull(String identifier, Class<?> type) {
 				throw new UnsupportedOperationException();
 			}
+
 			@Override
 			public void bindNull(int index, Class<?> type) {
 				throw new UnsupportedOperationException();
@@ -331,26 +334,31 @@ public class NamedParameterUtilsUnitTests {
 
 		PreparedOperation<String> operation = NamedParameterUtils.substituteNamedParameters(
 				sql, factory, new MapBindParameterSource(Collections.singletonMap("ids",
-						Parameters.in(Arrays.asList("foo", "bar", "baz")))));
+						Parameter.from(Arrays.asList("foo", "bar", "baz")))));
 
 		assertThat(operation.toQuery()).isEqualTo(
 				"SELECT * FROM person where name IN ($0, $1, $2) or lastname IN ($0, $1, $2)");
 
 		operation.bindTo(new BindTarget() {
+
 			@Override
 			public void bind(String identifier, Object value) {
 				throw new UnsupportedOperationException();
 			}
+
 			@Override
 			public void bind(int index, Object value) {
 				assertThat(index).isIn(0, 1, 2);
 				assertThat(value).isIn("foo", "bar", "baz");
+
 				bindings.add(index, value);
 			}
+
 			@Override
 			public void bindNull(String identifier, Class<?> type) {
 				throw new UnsupportedOperationException();
 			}
+
 			@Override
 			public void bindNull(int index, Class<?> type) {
 				throw new UnsupportedOperationException();
@@ -370,7 +378,7 @@ public class NamedParameterUtilsUnitTests {
 
 		PreparedOperation<String> operation = NamedParameterUtils.substituteNamedParameters(
 				sql, factory, new MapBindParameterSource(
-						Collections.singletonMap("id", Parameters.in("foo"))));
+						Collections.singletonMap("id", Parameter.from("foo"))));
 
 		assertThat(operation.toQuery()).isEqualTo(
 				"SELECT * FROM person where name = ? or lastname = ?");
@@ -378,25 +386,29 @@ public class NamedParameterUtilsUnitTests {
 		Map<Integer, Object> bindValues = new LinkedHashMap<>();
 
 		operation.bindTo(new BindTarget() {
+
 			@Override
 			public void bind(String identifier, Object value) {
 				throw new UnsupportedOperationException();
 			}
+
 			@Override
 			public void bind(int index, Object value) {
 				bindValues.put(index, value);
 			}
+
 			@Override
 			public void bindNull(String identifier, Class<?> type) {
 				throw new UnsupportedOperationException();
 			}
+
 			@Override
 			public void bindNull(int index, Class<?> type) {
 				throw new UnsupportedOperationException();
 			}
 		});
 
-		assertThat(bindValues).hasSize(2).containsEntry(0, Parameters.in("foo")).containsEntry(1, Parameters.in("foo"));
+		assertThat(bindValues).hasSize(2).containsEntry(0, "foo").containsEntry(1, "foo");
 	}
 
 	@Test
@@ -407,32 +419,35 @@ public class NamedParameterUtilsUnitTests {
 
 		PreparedOperation<String> operation = NamedParameterUtils.substituteNamedParameters(
 				sql, factory, new MapBindParameterSource(
-						Collections.singletonMap("id", Parameters.in(String.class))));
+						Collections.singletonMap("id", Parameter.empty(String.class))));
 
 		assertThat(operation.toQuery()).isEqualTo(
 				"SELECT * FROM person where name = $0 or lastname = $0");
 
 		operation.bindTo(new BindTarget() {
+
 			@Override
 			public void bind(String identifier, Object value) {
 				throw new UnsupportedOperationException();
 			}
+
 			@Override
 			public void bind(int index, Object value) {
-				assertThat(index).isEqualTo(0);
-				assertThat(value).isEqualTo(Parameters.in(String.class));
+				throw new UnsupportedOperationException();
 			}
+
 			@Override
 			public void bindNull(String identifier, Class<?> type) {
 				throw new UnsupportedOperationException();
 			}
+
 			@Override
 			public void bindNull(int index, Class<?> type) {
-				throw new UnsupportedOperationException();
+				assertThat(index).isEqualTo(0);
+				assertThat(type).isEqualTo(String.class);
 			}
 		});
 	}
-
 
 	private String expand(ParsedSql sql) {
 		return NamedParameterUtils.substituteNamedParameters(sql, BIND_MARKERS,

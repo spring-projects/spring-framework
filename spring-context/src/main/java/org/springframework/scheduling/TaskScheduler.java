@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.lang.Nullable;
  * and adding extended trigger capabilities.
  *
  * <p>This interface is roughly equivalent to a JSR-236
- * {@code ManagedScheduledExecutorService} as supported in Jakarta EE
+ * {@code ManagedScheduledExecutorService} as supported in Java EE 7
  * environments but aligned with Spring's {@code TaskExecutor} model.
  *
  * @author Juergen Hoeller
@@ -89,8 +89,11 @@ public interface TaskScheduler {
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
 	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
 	 * @since 5.0
+	 * @see #schedule(Runnable, Date)
 	 */
-	ScheduledFuture<?> schedule(Runnable task, Instant startTime);
+	default ScheduledFuture<?> schedule(Runnable task, Instant startTime) {
+		return schedule(task, Date.from(startTime));
+	}
 
 	/**
 	 * Schedule the given {@link Runnable}, invoking it at the specified execution time.
@@ -102,12 +105,8 @@ public interface TaskScheduler {
 	 * @return a {@link ScheduledFuture} representing pending completion of the task
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
 	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
-	 * @deprecated as of 6.0, in favor of {@link #schedule(Runnable, Instant)}
 	 */
-	@Deprecated
-	default ScheduledFuture<?> schedule(Runnable task, Date startTime) {
-		return schedule(task, startTime.toInstant());
-	}
+	ScheduledFuture<?> schedule(Runnable task, Date startTime);
 
 	/**
 	 * Schedule the given {@link Runnable}, invoking it at the specified execution time
@@ -122,8 +121,11 @@ public interface TaskScheduler {
 	 * @throws org.springframework.core.task.TaskRejectedException if  the given task was not accepted
 	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
 	 * @since 5.0
+	 * @see #scheduleAtFixedRate(Runnable, Date, long)
 	 */
-	ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Instant startTime, Duration period);
+	default ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Instant startTime, Duration period) {
+		return scheduleAtFixedRate(task, Date.from(startTime), period.toMillis());
+	}
 
 	/**
 	 * Schedule the given {@link Runnable}, invoking it at the specified execution time
@@ -137,12 +139,8 @@ public interface TaskScheduler {
 	 * @return a {@link ScheduledFuture} representing pending completion of the task
 	 * @throws org.springframework.core.task.TaskRejectedException if  the given task was not accepted
 	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
-	 * @deprecated as of 6.0, in favor of {@link #scheduleAtFixedRate(Runnable, Instant, Duration)}
 	 */
-	@Deprecated
-	default ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Date startTime, long period) {
-		return scheduleAtFixedRate(task, startTime.toInstant(), Duration.ofMillis(period));
-	}
+	ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Date startTime, long period);
 
 	/**
 	 * Schedule the given {@link Runnable}, starting as soon as possible and
@@ -155,8 +153,11 @@ public interface TaskScheduler {
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
 	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
 	 * @since 5.0
+	 * @see #scheduleAtFixedRate(Runnable, long)
 	 */
-	ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Duration period);
+	default ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Duration period) {
+		return scheduleAtFixedRate(task, period.toMillis());
+	}
 
 	/**
 	 * Schedule the given {@link Runnable}, starting as soon as possible and
@@ -168,12 +169,8 @@ public interface TaskScheduler {
 	 * @return a {@link ScheduledFuture} representing pending completion of the task
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
 	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
-	 * @deprecated as of 6.0, in favor of {@link #scheduleAtFixedRate(Runnable, Duration)}
 	 */
-	@Deprecated
-	default ScheduledFuture<?> scheduleAtFixedRate(Runnable task, long period) {
-		return scheduleAtFixedRate(task, Duration.ofMillis(period));
-	}
+	ScheduledFuture<?> scheduleAtFixedRate(Runnable task, long period);
 
 	/**
 	 * Schedule the given {@link Runnable}, invoking it at the specified execution time
@@ -189,8 +186,11 @@ public interface TaskScheduler {
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
 	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
 	 * @since 5.0
+	 * @see #scheduleWithFixedDelay(Runnable, Date, long)
 	 */
-	ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Instant startTime, Duration delay);
+	default ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Instant startTime, Duration delay) {
+		return scheduleWithFixedDelay(task, Date.from(startTime), delay.toMillis());
+	}
 
 	/**
 	 * Schedule the given {@link Runnable}, invoking it at the specified execution time
@@ -206,12 +206,8 @@ public interface TaskScheduler {
 	 * @return a {@link ScheduledFuture} representing pending completion of the task
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
 	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
-	 * @deprecated as of 6.0, in favor of {@link #scheduleWithFixedDelay(Runnable, Instant, Duration)}
 	 */
-	@Deprecated
-	default ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
-		return scheduleWithFixedDelay(task, startTime.toInstant(), Duration.ofMillis(delay));
-	}
+	ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Date startTime, long delay);
 
 	/**
 	 * Schedule the given {@link Runnable}, starting as soon as possible and invoking it with
@@ -224,8 +220,11 @@ public interface TaskScheduler {
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
 	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
 	 * @since 5.0
+	 * @see #scheduleWithFixedDelay(Runnable, long)
 	 */
-	ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Duration delay);
+	default ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Duration delay) {
+		return scheduleWithFixedDelay(task, delay.toMillis());
+	}
 
 	/**
 	 * Schedule the given {@link Runnable}, starting as soon as possible and invoking it with
@@ -238,11 +237,7 @@ public interface TaskScheduler {
 	 * @return a {@link ScheduledFuture} representing pending completion of the task
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
 	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
-	 * @deprecated as of 6.0, in favor of {@link #scheduleWithFixedDelay(Runnable, Duration)}
 	 */
-	@Deprecated
-	default ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, long delay) {
-		return scheduleWithFixedDelay(task, Duration.ofMillis(delay));
-	}
+	ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, long delay);
 
 }
