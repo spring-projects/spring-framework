@@ -32,6 +32,9 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
+import java.time.Duration;
+import java.time.Period;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -308,6 +311,36 @@ public abstract class JdbcUtils {
 				obj = rs.getTimestamp(index);
 			}
 		}
+                else if ("oracle.sql.INTERVALYM".equals(className)) {
+                        if (ClassUtils.isPresent("oracle.sql.INTERVALYM", obj.getClass().getClassLoader())) {
+                                try {
+                                        Class<?> intervalym = Class.forName("oracle.sql.INTERVALYM");
+                                        Method method = intervalym.getMethod("getPeriod");
+                                        Period period = (Period) method.invoke(obj);
+                                        obj = period;
+                                }
+                                catch (ClassNotFoundException | IllegalAccessException |
+                                                IllegalArgumentException | InvocationTargetException |
+                                                NoSuchMethodException | SecurityException e) {
+                                        throw new RuntimeException(e);
+                                }
+                        }
+                }
+                else if ("oracle.sql.INTERVALDS".equals(className)) {
+                        if (ClassUtils.isPresent("oracle.sql.INTERVALDS", obj.getClass().getClassLoader())) {
+                                try {
+                                        Class<?> intervalds = Class.forName("oracle.sql.INTERVALDS");
+                                        Method method = intervalds.getMethod("getDuration");
+                                        Duration duration = (Duration) method.invoke(obj);
+                                        obj = duration;
+                                }
+                                catch (ClassNotFoundException | IllegalAccessException |
+                                                IllegalArgumentException | InvocationTargetException |
+                                                NoSuchMethodException | SecurityException e) {
+                                        throw new RuntimeException(e);
+                                }
+                        }
+                }
 		return obj;
 	}
 
