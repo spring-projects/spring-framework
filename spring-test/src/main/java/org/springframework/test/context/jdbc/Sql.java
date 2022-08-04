@@ -45,9 +45,10 @@ import org.springframework.core.annotation.AliasFor;
  * XML namespace element. Consult the javadocs of individual attributes in this
  * annotation and {@link SqlConfig @SqlConfig} for details.
  *
- * <p>{@code @Sql} can be used as a <em>{@linkplain Repeatable repeatable}</em>
- * annotation. Otherwise, {@link SqlGroup @SqlGroup} can be used as an explicit
- * container for declaring multiple instances of {@code @Sql}.
+ * <p>Beginning with Java 8, {@code @Sql} can be used as a
+ * <em>{@linkplain Repeatable repeatable}</em> annotation. Otherwise,
+ * {@link SqlGroup @SqlGroup} can be used as an explicit container for declaring
+ * multiple instances of {@code @Sql}.
  *
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em> with attribute overrides.

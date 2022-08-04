@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,12 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-import jakarta.websocket.CloseReason;
-import jakarta.websocket.CloseReason.CloseCodes;
-import jakarta.websocket.SendHandler;
-import jakarta.websocket.SendResult;
-import jakarta.websocket.Session;
+import javax.websocket.CloseReason;
+import javax.websocket.CloseReason.CloseCodes;
+import javax.websocket.SendHandler;
+import javax.websocket.SendResult;
+import javax.websocket.Session;
+
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
@@ -37,7 +38,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 
 /**
  * Spring {@link WebSocketSession} adapter for a standard Java (JSR 356)
- * {@link jakarta.websocket.Session}.
+ * {@link javax.websocket.Session}.
  *
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
@@ -46,13 +47,20 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 public class StandardWebSocketSession extends AbstractListenerWebSocketSession<Session> {
 
 	public StandardWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory) {
-		this(session, info, factory, null);
+		this(session, info, factory, (Sinks.Empty<Void>) null);
 	}
 
 	public StandardWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory,
 			@Nullable Sinks.Empty<Void> completionSink) {
 
 		super(session, session.getId(), info, factory, completionSink);
+	}
+
+	@Deprecated
+	public StandardWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory,
+			@Nullable reactor.core.publisher.MonoProcessor<Void> completionMono) {
+
+		super(session, session.getId(), info, factory, completionMono);
 	}
 
 

@@ -107,7 +107,7 @@ public class SqlQueryTests  {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt(1)).willReturn(1);
 
-		SqlQuery<Integer> query = new MappingSqlQueryWithParameters<>() {
+		SqlQuery<Integer> query = new MappingSqlQueryWithParameters<Integer>() {
 			@Override
 			protected Integer mapRow(ResultSet rs, int rownum, @Nullable Object[] params, @Nullable Map<? ,?> context)
 					throws SQLException {
@@ -129,7 +129,7 @@ public class SqlQueryTests  {
 
 	@Test
 	public void testQueryWithoutEnoughParams() {
-		MappingSqlQuery<Integer> query = new MappingSqlQuery<>() {
+		MappingSqlQuery<Integer> query = new MappingSqlQuery<Integer>() {
 			@Override
 			protected Integer mapRow(ResultSet rs, int rownum) throws SQLException {
 				return rs.getInt(1);
@@ -147,7 +147,7 @@ public class SqlQueryTests  {
 
 	@Test
 	public void testQueryWithMissingMapParams() {
-		MappingSqlQuery<Integer> query = new MappingSqlQuery<>() {
+		MappingSqlQuery<Integer> query = new MappingSqlQuery<Integer>() {
 			@Override
 			protected Integer mapRow(ResultSet rs, int rownum) throws SQLException {
 				return rs.getInt(1);

@@ -16,7 +16,7 @@
 
 package org.springframework.web.filter;
 
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Simple request logging filter that writes the request URI

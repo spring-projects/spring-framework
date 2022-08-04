@@ -65,7 +65,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class VersionResourceResolver extends AbstractResourceResolver {
 
-	private final AntPathMatcher pathMatcher = new AntPathMatcher();
+	private AntPathMatcher pathMatcher = new AntPathMatcher();
 
 	/** Map from path pattern -> VersionStrategy. */
 	private final Map<String, VersionStrategy> versionStrategyMap = new LinkedHashMap<>();
@@ -315,8 +315,8 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 
 		@Override
 		public HttpHeaders getResponseHeaders() {
-			HttpHeaders headers = (this.original instanceof HttpResource httpResource ?
-					httpResource.getResponseHeaders() : new HttpHeaders());
+			HttpHeaders headers = (this.original instanceof HttpResource ?
+					((HttpResource) this.original).getResponseHeaders() : new HttpHeaders());
 			headers.setETag("W/\"" + this.version + "\"");
 			return headers;
 		}

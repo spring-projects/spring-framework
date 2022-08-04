@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -369,10 +369,10 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	}
 
 	private void assertNotException(String attributeName, Object attributeValue) {
-		if (attributeValue instanceof Throwable throwable) {
+		if (attributeValue instanceof Throwable) {
 			throw new IllegalArgumentException(String.format(
 					"Attribute '%s' for annotation [%s] was not resolvable due to exception [%s]",
-					attributeName, this.displayName, attributeValue), throwable);
+					attributeName, this.displayName, attributeValue), (Throwable) attributeValue);
 		}
 	}
 
@@ -406,8 +406,8 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		if (value == this) {
 			return "(this Map)";
 		}
-		if (value instanceof Object[] objects) {
-			return "[" + StringUtils.arrayToDelimitedString(objects, ", ") + "]";
+		if (value instanceof Object[]) {
+			return "[" + StringUtils.arrayToDelimitedString((Object[]) value, ", ") + "]";
 		}
 		return String.valueOf(value);
 	}
@@ -426,8 +426,8 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		if (map == null) {
 			return null;
 		}
-		if (map instanceof AnnotationAttributes annotationAttributes) {
-			return annotationAttributes;
+		if (map instanceof AnnotationAttributes) {
+			return (AnnotationAttributes) map;
 		}
 		return new AnnotationAttributes(map);
 	}

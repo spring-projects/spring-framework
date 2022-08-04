@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,9 +85,10 @@ public class SingletonTargetSource implements TargetSource, Serializable {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof SingletonTargetSource otherTargetSource)) {
+		if (!(other instanceof SingletonTargetSource)) {
 			return false;
 		}
+		SingletonTargetSource otherTargetSource = (SingletonTargetSource) other;
 		return this.target.equals(otherTargetSource.target);
 	}
 

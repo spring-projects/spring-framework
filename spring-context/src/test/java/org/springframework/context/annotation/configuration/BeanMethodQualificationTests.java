@@ -33,7 +33,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Component;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -142,17 +141,16 @@ class BeanMethodQualificationTests {
 		assertThat(ctx.getBeanNamesForAnnotation(Configuration.class)).isEqualTo(new String[] {"beanMethodQualificationTests.StandardConfig"});
 		assertThat(ctx.getBeanNamesForAnnotation(Scope.class)).isEqualTo(new String[] {});
 		assertThat(ctx.getBeanNamesForAnnotation(Lazy.class)).isEqualTo(new String[] {"testBean1"});
-		assertThat(ctx.getBeanNamesForAnnotation(Boring.class)).isEqualTo(new String[] {"beanMethodQualificationTests.StandardConfig", "testBean2"});
+		assertThat(ctx.getBeanNamesForAnnotation(Boring.class)).isEqualTo(new String[] {"testBean2"});
 		ctx.close();
 	}
 
 
 	@Configuration
-	@Boring
 	static class StandardConfig {
 
 		@Bean @Qualifier("interesting") @Lazy
-		public static TestBean testBean1() {
+		public TestBean testBean1() {
 			return new TestBean("interesting");
 		}
 
@@ -165,11 +163,10 @@ class BeanMethodQualificationTests {
 	}
 
 	@Configuration
-	@Boring
 	static class ScopedConfig {
 
 		@Bean @Qualifier("interesting") @Scope("prototype")
-		public static TestBean testBean1() {
+		public TestBean testBean1() {
 			return new TestBean("interesting");
 		}
 
@@ -182,11 +179,10 @@ class BeanMethodQualificationTests {
 	}
 
 	@Configuration
-	@Boring
 	static class ScopedProxyConfig {
 
 		@Bean @Qualifier("interesting") @Scope(value="prototype", proxyMode=ScopedProxyMode.TARGET_CLASS)
-		public static TestBean testBean1() {
+		public TestBean testBean1() {
 			return new TestBean("interesting");
 		}
 
@@ -260,7 +256,6 @@ class BeanMethodQualificationTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface InterestingBeanWithName {
 
-		@AliasFor(annotation = Bean.class)
 		String name();
 	}
 
@@ -273,7 +268,6 @@ class BeanMethodQualificationTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface InterestingNeedWithRequiredOverride {
 
-		@AliasFor(annotation = Autowired.class)
 		boolean required();
 	}
 

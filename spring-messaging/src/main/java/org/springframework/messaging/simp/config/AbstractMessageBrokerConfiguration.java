@@ -28,7 +28,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.lang.Nullable;
@@ -42,12 +41,10 @@ import org.springframework.messaging.converter.KotlinSerializationJsonMessageCon
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
-import org.springframework.messaging.handler.annotation.MessagingAnnotationsRuntimeHints;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.annotation.SimpAnnotationsRuntimeHints;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
 import org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler;
 import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
@@ -98,7 +95,6 @@ import org.springframework.validation.Validator;
  * @author Sebastien Deleuze
  * @since 4.0
  */
-@ImportRuntimeHints({ MessagingAnnotationsRuntimeHints.class, SimpAnnotationsRuntimeHints.class })
 public abstract class AbstractMessageBrokerConfiguration implements ApplicationContextAware {
 
 	private static final String MVC_VALIDATOR_NAME = "mvcValidator";
@@ -117,7 +113,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
-		jsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
+		jsonbPresent = ClassUtils.isPresent("javax.json.bind.Jsonb", classLoader);
 		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
 	}
 
@@ -514,13 +510,27 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
+	@SuppressWarnings("deprecation")
 	public SimpUserRegistry userRegistry(
 			AbstractSubscribableChannel clientInboundChannel, AbstractSubscribableChannel clientOutboundChannel) {
 
+		SimpUserRegistry userRegistry = createLocalUserRegistry();
 		MessageBrokerRegistry brokerRegistry = getBrokerRegistry(clientInboundChannel, clientOutboundChannel);
-		SimpUserRegistry userRegistry = createLocalUserRegistry(brokerRegistry.getUserRegistryOrder());
+		if (userRegistry == null) {
+			userRegistry = createLocalUserRegistry(brokerRegistry.getUserRegistryOrder());
+		}
 		boolean broadcast = brokerRegistry.getUserRegistryBroadcast() != null;
 		return (broadcast ? new MultiServerUserRegistry(userRegistry) : userRegistry);
+	}
+
+	/**
+	 * Create the user registry that provides access to local users.
+	 * @deprecated as of 5.1 in favor of {@link #createLocalUserRegistry(Integer)}
+	 */
+	@Deprecated
+	@Nullable
+	protected SimpUserRegistry createLocalUserRegistry() {
+		return null;
 	}
 
 	/**
@@ -549,7 +559,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 			if (this.applicationContext != null && this.applicationContext.containsBean(MVC_VALIDATOR_NAME)) {
 				validator = this.applicationContext.getBean(MVC_VALIDATOR_NAME, Validator.class);
 			}
-			else if (ClassUtils.isPresent("jakarta.validation.Validator", getClass().getClassLoader())) {
+			else if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
 				Class<?> clazz;
 				try {
 					String className = "org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean";

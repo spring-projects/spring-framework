@@ -18,7 +18,7 @@ package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
 
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.Resource;
 

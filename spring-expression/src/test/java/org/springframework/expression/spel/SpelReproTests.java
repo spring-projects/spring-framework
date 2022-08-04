@@ -1321,14 +1321,20 @@ class SpelReproTests extends AbstractExpressionTests {
 		assertThat(Array.get(result, 1)).isEqualTo(ABC.B);
 		assertThat(Array.get(result, 2)).isEqualTo(ABC.C);
 
-		context.addMethodResolver((context2, targetObject, name, argumentTypes) -> (context1, target, arguments) -> {
-			try {
-				Method method = XYZ.class.getMethod("values");
-				Object value = method.invoke(target, arguments);
-				return new TypedValue(value, new TypeDescriptor(new MethodParameter(method, -1)).narrow(value));
-			}
-			catch (Exception ex) {
-				throw new AccessException(ex.getMessage(), ex);
+		context.addMethodResolver(new MethodResolver() {
+			@Override
+			public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
+					List<TypeDescriptor> argumentTypes) throws AccessException {
+				return (context1, target, arguments) -> {
+					try {
+						Method method = XYZ.class.getMethod("values");
+						Object value = method.invoke(target, arguments);
+						return new TypedValue(value, new TypeDescriptor(new MethodParameter(method, -1)).narrow(value));
+					}
+					catch (Exception ex) {
+						throw new AccessException(ex.getMessage(), ex);
+					}
+				};
 			}
 		});
 

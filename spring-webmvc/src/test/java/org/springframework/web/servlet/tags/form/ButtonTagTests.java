@@ -18,7 +18,8 @@ package org.springframework.web.servlet.tags.form;
 
 import java.io.Writer;
 
-import jakarta.servlet.jsp.tagext.Tag;
+import javax.servlet.jsp.tagext.Tag;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.testfixture.beans.TestBean;

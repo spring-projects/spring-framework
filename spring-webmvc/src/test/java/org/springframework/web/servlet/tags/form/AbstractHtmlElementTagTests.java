@@ -21,8 +21,9 @@ import java.io.Writer;
 import java.util.Collections;
 import java.util.Map;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.jsp.JspException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.jsp.JspException;
+
 import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.validation.BindingResult;

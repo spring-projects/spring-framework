@@ -165,7 +165,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	private boolean exposeManagedResourceClassLoader = true;
 
 	/** A set of bean names that should be excluded from autodetection. */
-	private final Set<String> excludedBeans = new HashSet<>();
+	private Set<String> excludedBeans = new HashSet<>();
 
 	/** The MBeanExporterListeners registered with this exporter. */
 	@Nullable

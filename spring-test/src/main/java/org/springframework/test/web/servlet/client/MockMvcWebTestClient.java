@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.test.web.servlet.client;
 
 import java.util.function.Supplier;
 
-import jakarta.servlet.Filter;
+import javax.servlet.Filter;
 
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -358,10 +358,7 @@ public interface MockMvcWebTestClient {
 		 * Whether to match trailing slashes.
 		 * <p>This is delegated to
 		 * {@link StandaloneMockMvcBuilder#setUseTrailingSlashPatternMatch(boolean)}.
-		 * @deprecated as of 6.0, see
-		 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
 		 */
-		@Deprecated
 		ControllerSpec useTrailingSlashPatternMatch(boolean useTrailingSlashPatternMatch);
 
 		/**

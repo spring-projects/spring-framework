@@ -47,7 +47,7 @@ import static org.springframework.test.context.cache.ContextCacheTestUtils.asser
  */
 class ContextCacheTests {
 
-	private final ContextCache contextCache = new DefaultContextCache();
+	private ContextCache contextCache = new DefaultContextCache();
 
 
 	@BeforeEach

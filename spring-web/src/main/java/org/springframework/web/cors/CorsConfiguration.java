@@ -18,6 +18,7 @@ package org.springframework.web.cors;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -64,10 +65,11 @@ public class CorsConfiguration {
 
 	private static final List<String> DEFAULT_PERMIT_ALL = Collections.singletonList(ALL);
 
-	private static final List<HttpMethod> DEFAULT_METHODS = List.of(HttpMethod.GET, HttpMethod.HEAD);
+	private static final List<HttpMethod> DEFAULT_METHODS = Collections.unmodifiableList(
+			Arrays.asList(HttpMethod.GET, HttpMethod.HEAD));
 
-	private static final List<String> DEFAULT_PERMIT_METHODS = List.of(HttpMethod.GET.name(),
-			HttpMethod.HEAD.name(), HttpMethod.POST.name());
+	private static final List<String> DEFAULT_PERMIT_METHODS = Collections.unmodifiableList(
+			Arrays.asList(HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name()));
 
 
 	@Nullable
@@ -256,7 +258,7 @@ public class CorsConfiguration {
 					this.resolvedMethods = null;
 					break;
 				}
-				this.resolvedMethods.add(HttpMethod.valueOf(method));
+				this.resolvedMethods.add(HttpMethod.resolve(method));
 			}
 		}
 		else {
@@ -300,7 +302,7 @@ public class CorsConfiguration {
 				this.resolvedMethods = null;
 			}
 			else if (this.resolvedMethods != null) {
-				this.resolvedMethods.add(HttpMethod.valueOf(method));
+				this.resolvedMethods.add(HttpMethod.resolve(method));
 			}
 		}
 	}
@@ -445,7 +447,7 @@ public class CorsConfiguration {
 		if (this.allowedMethods == null) {
 			this.allowedMethods = DEFAULT_PERMIT_METHODS;
 			this.resolvedMethods = DEFAULT_PERMIT_METHODS
-					.stream().map(HttpMethod::valueOf).collect(Collectors.toList());
+					.stream().map(HttpMethod::resolve).collect(Collectors.toList());
 		}
 		if (this.allowedHeaders == null) {
 			this.allowedHeaders = DEFAULT_PERMIT_ALL;

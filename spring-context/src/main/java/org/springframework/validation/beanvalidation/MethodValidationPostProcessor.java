@@ -18,24 +18,20 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.annotation.Annotation;
 
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+
 import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.Pointcut;
-import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.framework.autoproxy.AbstractBeanFactoryAwareAdvisingPostProcessor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
-import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.validation.beanvalidation.MethodValidationPostProcessor.MethodValidationRuntimeHints;
 
 /**
  * A convenient {@link BeanPostProcessor} implementation that delegates to a
@@ -59,10 +55,9 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
  * @author Juergen Hoeller
  * @since 3.1
  * @see MethodValidationInterceptor
- * @see jakarta.validation.executable.ExecutableValidator
+ * @see javax.validation.executable.ExecutableValidator
  */
 @SuppressWarnings("serial")
-@ImportRuntimeHints(MethodValidationRuntimeHints.class)
 public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvisingPostProcessor
 		implements InitializingBean {
 
@@ -106,7 +101,7 @@ public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvis
 	 * Set the JSR-303 ValidatorFactory to delegate to for validating methods,
 	 * using its default Validator.
 	 * <p>Default is the default ValidatorFactory's default Validator.
-	 * @see jakarta.validation.ValidatorFactory#getValidator()
+	 * @see javax.validation.ValidatorFactory#getValidator()
 	 */
 	public void setValidatorFactory(ValidatorFactory validatorFactory) {
 		this.validator = validatorFactory.getValidator();
@@ -129,16 +124,6 @@ public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvis
 	 */
 	protected Advice createMethodValidationAdvice(@Nullable Validator validator) {
 		return (validator != null ? new MethodValidationInterceptor(validator) : new MethodValidationInterceptor());
-	}
-
-
-	static class MethodValidationRuntimeHints implements RuntimeHintsRegistrar {
-
-		@Override
-		public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
-			hints.proxies().registerJdkProxy(AopProxyUtils.completeJdkProxyInterfaces(Validator.class));
-		}
-
 	}
 
 }

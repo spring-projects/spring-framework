@@ -16,7 +16,7 @@
 
 package org.springframework.jms.listener.endpoint;
 
-import jakarta.jms.Destination;
+import javax.jms.Destination;
 
 import org.springframework.jca.StubActivationSpec;
 

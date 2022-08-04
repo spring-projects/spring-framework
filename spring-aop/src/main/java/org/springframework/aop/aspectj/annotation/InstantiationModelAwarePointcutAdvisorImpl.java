@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -220,18 +220,21 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 		}
 		else {
 			switch (aspectJAnnotation.getAnnotationType()) {
-				case AtPointcut, AtAround -> {
+				case AtPointcut:
+				case AtAround:
 					this.isBeforeAdvice = false;
 					this.isAfterAdvice = false;
-				}
-				case AtBefore -> {
+					break;
+				case AtBefore:
 					this.isBeforeAdvice = true;
 					this.isAfterAdvice = false;
-				}
-				case AtAfter, AtAfterReturning, AtAfterThrowing -> {
+					break;
+				case AtAfter:
+				case AtAfterReturning:
+				case AtAfterThrowing:
 					this.isBeforeAdvice = false;
 					this.isAfterAdvice = true;
-				}
+					break;
 			}
 		}
 	}

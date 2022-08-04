@@ -86,7 +86,7 @@ public class HttpOptionsTests {
 	@Controller
 	private static class MyController {
 
-		private final AtomicInteger counter = new AtomicInteger();
+		private AtomicInteger counter = new AtomicInteger();
 
 
 		@RequestMapping(value = "/myUrl", method = RequestMethod.OPTIONS)

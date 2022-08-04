@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
  * event-listener read APIs and Reactive Streams.
  *
  * <p>Specifically a base class for reading from the HTTP request body with
- * Servlet non-blocking I/O and Undertow XNIO as well as handling incoming
+ * Servlet 3.1 non-blocking I/O and Undertow XNIO as well as handling incoming
  * WebSocket messages with standard Java WebSocket (JSR-356), Jetty, and
  * Undertow.
  *

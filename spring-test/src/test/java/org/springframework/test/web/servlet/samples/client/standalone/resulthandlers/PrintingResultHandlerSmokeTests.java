@@ -18,8 +18,9 @@ package org.springframework.test.web.servlet.samples.client.standalone.resulthan
 
 import java.nio.charset.StandardCharsets;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 

@@ -400,9 +400,10 @@ public abstract class AbstractApplicationEventMulticaster
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof ListenerCacheKey otherKey)) {
+			if (!(other instanceof ListenerCacheKey)) {
 				return false;
 			}
+			ListenerCacheKey otherKey = (ListenerCacheKey) other;
 			return (this.eventType.equals(otherKey.eventType) &&
 					ObjectUtils.nullSafeEquals(this.sourceType, otherKey.sourceType));
 		}

@@ -32,9 +32,9 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
+import javax.annotation.Resource;
 import javax.annotation.meta.When;
 
-import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -1061,8 +1061,6 @@ class AnnotatedElementUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ConventionBasedComposedContextConfig {
 
-		// Do NOT use @AliasFor here until Spring 6.1
-		// @AliasFor(annotation = ContextConfig.class)
 		String[] locations() default {};
 	}
 
@@ -1070,8 +1068,6 @@ class AnnotatedElementUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface InvalidConventionBasedComposedContextConfig {
 
-		// Do NOT use @AliasFor here until Spring 6.1
-		// @AliasFor(annotation = ContextConfig.class)
 		String[] locations();
 	}
 
@@ -1229,13 +1225,9 @@ class AnnotatedElementUtilsTests {
 		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
 		String[] locations() default {};
 
-		// Do NOT use @AliasFor(annotation = ...) here until Spring 6.1
-		// @AliasFor(annotation = ContextConfig.class, attribute = "classes")
 		@AliasFor("value")
 		Class<?>[] classes() default {};
 
-		// Do NOT use @AliasFor(annotation = ...) here until Spring 6.1
-		// @AliasFor(annotation = ContextConfig.class, attribute = "classes")
 		@AliasFor("classes")
 		Class<?>[] value() default {};
 	}
@@ -1274,8 +1266,6 @@ class AnnotatedElementUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ConventionBasedSinglePackageComponentScan {
 
-		// Do NOT use @AliasFor here until Spring 6.1
-		// @AliasFor(annotation = ComponentScan.class)
 		String basePackages();
 	}
 

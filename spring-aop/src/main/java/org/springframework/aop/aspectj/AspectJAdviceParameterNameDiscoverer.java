@@ -158,7 +158,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 
 	/** The pointcut expression associated with the advice, as a simple String. */
 	@Nullable
-	private final String pointcutExpression;
+	private String pointcutExpression;
 
 	private boolean raiseExceptions;
 
@@ -486,7 +486,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		}
 		String[] tokens = StringUtils.tokenizeToStringArray(argsSpec, ",");
 		for (int i = 0; i < tokens.length; i++) {
-			tokens[i] = tokens[i].strip();
+			tokens[i] = StringUtils.trimWhitespace(tokens[i]);
 			String varName = maybeExtractVariableName(tokens[i]);
 			if (varName != null) {
 				varNames.add(varName);
@@ -759,10 +759,10 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	 */
 	private static class PointcutBody {
 
-		private final int numTokensConsumed;
+		private int numTokensConsumed;
 
 		@Nullable
-		private final String text;
+		private String text;
 
 		public PointcutBody(int tokens, @Nullable String text) {
 			this.numTokensConsumed = tokens;

@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import jakarta.servlet.jsp.PageContext;
+import javax.servlet.jsp.PageContext;
 
 /**
  * Utility class for generating '{@code id}' attributes values for JSP tags. Given the

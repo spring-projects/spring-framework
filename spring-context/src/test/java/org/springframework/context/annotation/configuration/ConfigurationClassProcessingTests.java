@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import jakarta.annotation.Resource;
-import jakarta.inject.Provider;
+import javax.annotation.Resource;
+import javax.inject.Provider;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -630,7 +631,7 @@ class ConfigurationClassProcessingTests {
 	}
 
 
-	@Configuration(enforceUniqueMethods = false)
+	@Configuration
 	public static class OverloadedBeanMismatch {
 
 		@Bean(name = "other")
@@ -672,11 +673,14 @@ class ConfigurationClassProcessingTests {
 
 		@Bean
 		@Scope(value = "prototype")
-		public PrototypeInterface getDemoBean(int i) {
-			return switch (i) {
-				case 1 -> new PrototypeOne();
-				default -> new PrototypeTwo();
-			};
+		public PrototypeInterface getDemoBean( int i) {
+			switch ( i) {
+				case 1: return new PrototypeOne();
+				case 2:
+				default:
+					return new PrototypeTwo();
+
+			}
 		}
 	}
 

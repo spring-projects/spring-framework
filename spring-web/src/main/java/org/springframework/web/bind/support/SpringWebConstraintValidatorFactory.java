@@ -16,8 +16,8 @@
 
 package org.springframework.web.bind.support;
 
-import jakarta.validation.ConstraintValidator;
-import jakarta.validation.ConstraintValidatorFactory;
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorFactory;
 
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;

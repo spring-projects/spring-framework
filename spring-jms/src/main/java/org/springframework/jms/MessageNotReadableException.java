@@ -21,12 +21,12 @@ package org.springframework.jms;
  *
  * @author Mark Pollack
  * @since 1.1
- * @see jakarta.jms.MessageNotReadableException
+ * @see javax.jms.MessageNotReadableException
  */
 @SuppressWarnings("serial")
 public class MessageNotReadableException extends JmsException {
 
-	public MessageNotReadableException(jakarta.jms.MessageNotReadableException cause) {
+	public MessageNotReadableException(javax.jms.MessageNotReadableException cause) {
 		super(cause);
 	}
 

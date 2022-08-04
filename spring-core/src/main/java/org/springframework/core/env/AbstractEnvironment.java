@@ -16,6 +16,7 @@
 
 package org.springframework.core.env;
 
+import java.security.AccessControlException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -60,7 +61,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * <p>The default is "false", falling back to system environment variable checks if a
 	 * Spring environment property (e.g. a placeholder in a configuration String) isn't
 	 * resolvable otherwise. Consider switching this flag to "true" if you experience
-	 * log warnings from {@code getenv} calls coming from Spring.
+	 * log warnings from {@code getenv} calls coming from Spring, e.g. on WebSphere
+	 * with strict SecurityManager settings and AccessControlExceptions warnings.
 	 * @see #suppressGetenvAccess()
 	 */
 	public static final String IGNORE_GETENV_PROPERTY_NAME = "spring.getenv.ignore";
@@ -442,7 +444,27 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	@Override
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public Map<String, Object> getSystemProperties() {
-		return (Map) System.getProperties();
+		try {
+			return (Map) System.getProperties();
+		}
+		catch (AccessControlException ex) {
+			return (Map) new ReadOnlySystemAttributesMap() {
+				@Override
+				@Nullable
+				protected String getSystemAttribute(String attributeName) {
+					try {
+						return System.getProperty(attributeName);
+					}
+					catch (AccessControlException ex) {
+						if (logger.isInfoEnabled()) {
+							logger.info("Caught AccessControlException when accessing system property '" +
+									attributeName + "'; its value will be returned [null]. Reason: " + ex.getMessage());
+						}
+						return null;
+					}
+				}
+			};
+		}
 	}
 
 	@Override
@@ -451,7 +473,27 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		if (suppressGetenvAccess()) {
 			return Collections.emptyMap();
 		}
-		return (Map) System.getenv();
+		try {
+			return (Map) System.getenv();
+		}
+		catch (AccessControlException ex) {
+			return (Map) new ReadOnlySystemAttributesMap() {
+				@Override
+				@Nullable
+				protected String getSystemAttribute(String attributeName) {
+					try {
+						return System.getenv(attributeName);
+					}
+					catch (AccessControlException ex) {
+						if (logger.isInfoEnabled()) {
+							logger.info("Caught AccessControlException when accessing system environment variable '" +
+									attributeName + "'; its value will be returned [null]. Reason: " + ex.getMessage());
+						}
+						return null;
+					}
+				}
+			};
+		}
 	}
 
 	/**

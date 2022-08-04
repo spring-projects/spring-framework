@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 package org.springframework.orm.hibernate5;
 
-import jakarta.persistence.PersistenceException;
+import javax.persistence.PersistenceException;
+
 import org.hibernate.HibernateException;
 import org.hibernate.JDBCException;
 
@@ -90,7 +91,8 @@ public class HibernateExceptionTranslator implements PersistenceExceptionTransla
 	 * @see SessionFactoryUtils#convertHibernateAccessException
 	 */
 	protected DataAccessException convertHibernateAccessException(HibernateException ex) {
-		if (this.jdbcExceptionTranslator != null && ex instanceof JDBCException jdbcEx) {
+		if (this.jdbcExceptionTranslator != null && ex instanceof JDBCException) {
+			JDBCException jdbcEx = (JDBCException) ex;
 			DataAccessException dae = this.jdbcExceptionTranslator.translate(
 					"Hibernate operation: " + jdbcEx.getMessage(), jdbcEx.getSQL(), jdbcEx.getSQLException());
 			if (dae != null) {

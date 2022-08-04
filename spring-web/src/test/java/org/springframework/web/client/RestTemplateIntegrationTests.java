@@ -23,6 +23,7 @@ import java.lang.annotation.Target;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -93,6 +94,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 		return Stream.of(
 			named("JDK", new SimpleClientHttpRequestFactory()),
 			named("HttpComponents", new HttpComponentsClientHttpRequestFactory()),
+			named("Netty", new org.springframework.http.client.Netty4ClientHttpRequestFactory()),
 			named("OkHttp", new OkHttp3ClientHttpRequestFactory())
 		);
 	}
@@ -117,7 +119,8 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	 */
 	@RegisterExtension
 	TestExecutionExceptionHandler serverErrorToAssertionErrorConverter = (context, throwable) -> {
-		if (throwable instanceof HttpServerErrorException ex) {
+		if (throwable instanceof HttpServerErrorException) {
+			HttpServerErrorException ex = (HttpServerErrorException) throwable;
 			String responseBody = ex.getResponseBodyAsString();
 			String prefix = AssertionError.class.getName() + ": ";
 			if (responseBody.startsWith(prefix)) {
@@ -275,7 +278,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 		setUpClient(clientHttpRequestFactory);
 
 		Set<HttpMethod> allowed = template.optionsForAllow(new URI(baseUrl + "/get"));
-		assertThat(allowed).as("Invalid response").isEqualTo(Set.of(HttpMethod.GET, HttpMethod.OPTIONS, HttpMethod.HEAD, HttpMethod.TRACE));
+		assertThat(allowed).as("Invalid response").isEqualTo(EnumSet.of(HttpMethod.GET, HttpMethod.OPTIONS, HttpMethod.HEAD, HttpMethod.TRACE));
 	}
 
 	@ParameterizedRestTemplateTest

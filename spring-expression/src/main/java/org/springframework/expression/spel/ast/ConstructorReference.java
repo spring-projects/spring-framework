@@ -144,8 +144,8 @@ public class ConstructorReference extends SpelNodeImpl {
 				if (ex.getCause() instanceof InvocationTargetException) {
 					// User exception was the root cause - exit now
 					Throwable rootCause = ex.getCause().getCause();
-					if (rootCause instanceof RuntimeException runtimeException) {
-						throw runtimeException;
+					if (rootCause instanceof RuntimeException) {
+						throw (RuntimeException) rootCause;
 					}
 					else {
 						String typeName = (String) this.children[0].getValueInternal(state).getValue();
@@ -166,9 +166,9 @@ public class ConstructorReference extends SpelNodeImpl {
 		executorToUse = findExecutorForConstructor(typeName, argumentTypes, state);
 		try {
 			this.cachedExecutor = executorToUse;
-			if (executorToUse instanceof ReflectiveConstructorExecutor reflectiveConstructorExecutor) {
+			if (executorToUse instanceof ReflectiveConstructorExecutor) {
 				this.exitTypeDescriptor = CodeFlow.toDescriptor(
-						reflectiveConstructorExecutor.getConstructor().getDeclaringClass());
+						((ReflectiveConstructorExecutor) executorToUse).getConstructor().getDeclaringClass());
 
 			}
 			return executorToUse.execute(state.getEvaluationContext(), arguments);
@@ -236,13 +236,14 @@ public class ConstructorReference extends SpelNodeImpl {
 	private TypedValue createArray(ExpressionState state) throws EvaluationException {
 		// First child gives us the array type which will either be a primitive or reference type
 		Object intendedArrayType = getChild(0).getValue(state);
-		if (!(intendedArrayType instanceof String type)) {
+		if (!(intendedArrayType instanceof String)) {
 			throw new SpelEvaluationException(getChild(0).getStartPosition(),
 					SpelMessage.TYPE_NAME_EXPECTED_FOR_ARRAY_CONSTRUCTION,
 					FormatHelper.formatClassNameForMessage(
 							intendedArrayType != null ? intendedArrayType.getClass() : null));
 		}
 
+		String type = (String) intendedArrayType;
 		Class<?> componentType;
 		TypeCode arrayTypeCode = TypeCode.forName(type);
 		if (arrayTypeCode == TypeCode.OBJECT) {

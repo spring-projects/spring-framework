@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,10 +48,10 @@ import static org.mockito.Mockito.mock;
  * @author Arjen Poutsma
  * @since 5.0
  */
-class RouterFunctionsTests {
+public class RouterFunctionsTests {
 
 	@Test
-	void routeMatch() {
+	public void routeMatch() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com").build();
@@ -72,7 +72,7 @@ class RouterFunctionsTests {
 	}
 
 	@Test
-	void routeNoMatch() {
+	public void routeNoMatch() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com").build();
@@ -90,7 +90,7 @@ class RouterFunctionsTests {
 	}
 
 	@Test
-	void nestMatch() {
+	public void nestMatch() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<ServerResponse> routerFunction = request -> Mono.just(handlerFunction);
 
@@ -110,7 +110,7 @@ class RouterFunctionsTests {
 	}
 
 	@Test
-	void nestNoMatch() {
+	public void nestNoMatch() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<ServerResponse> routerFunction = request -> Mono.just(handlerFunction);
 
@@ -129,7 +129,7 @@ class RouterFunctionsTests {
 	}
 
 	@Test
-	void toHttpHandlerNormal() {
+	public void toHttpHandlerNormal() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.accepted().build();
 		RouterFunction<ServerResponse> routerFunction =
 				RouterFunctions.route(RequestPredicates.all(), handlerFunction);
@@ -144,7 +144,7 @@ class RouterFunctionsTests {
 	}
 
 	@Test
-	void toHttpHandlerHandlerThrowsException() {
+	public void toHttpHandlerHandlerThrowsException() {
 		HandlerFunction<ServerResponse> handlerFunction =
 				request -> {
 					throw new IllegalStateException();
@@ -162,7 +162,7 @@ class RouterFunctionsTests {
 	}
 
 	@Test
-	void toHttpHandlerHandlerReturnsException() {
+	public void toHttpHandlerHandlerReturnsException() {
 		HandlerFunction<ServerResponse> handlerFunction =
 				request -> Mono.error(new IllegalStateException());
 		RouterFunction<ServerResponse> routerFunction =
@@ -178,7 +178,7 @@ class RouterFunctionsTests {
 	}
 
 	@Test
-	void toHttpHandlerHandlerResponseStatusException() {
+	public void toHttpHandlerHandlerResponseStatusException() {
 		HandlerFunction<ServerResponse> handlerFunction =
 				request -> Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found"));
 		RouterFunction<ServerResponse> routerFunction =
@@ -194,7 +194,7 @@ class RouterFunctionsTests {
 	}
 
 	@Test
-	void toHttpHandlerRouteNotFoundReturnsResponseStatusException() {
+	public void toHttpHandlerRouteNotFoundReturnsResponseStatusException() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.accepted().build();
 		RouterFunction<ServerResponse> routerFunction =
 				RouterFunctions.route(RequestPredicates.GET("/path"), handlerFunction);
@@ -215,7 +215,7 @@ class RouterFunctionsTests {
 	}
 
 	@Test
-	void toHttpHandlerHandlerReturnResponseStatusExceptionInResponseWriteTo() {
+	public void toHttpHandlerHandlerReturnResponseStatusExceptionInResponseWriteTo() {
 		HandlerFunction<ServerResponse> handlerFunction =
 				// Mono.<ServerResponse> is required for compilation in Eclipse
 				request -> Mono.just(new ServerResponse() {
@@ -223,7 +223,6 @@ class RouterFunctionsTests {
 					public HttpStatus statusCode() {
 						return HttpStatus.OK;
 					}
-					@SuppressWarnings("deprecation")
 					@Override
 					public int rawStatusCode() {
 						return 200;
@@ -254,7 +253,7 @@ class RouterFunctionsTests {
 	}
 
 	@Test
-	void toHttpHandlerHandlerThrowResponseStatusExceptionInResponseWriteTo() {
+	public void toHttpHandlerHandlerThrowResponseStatusExceptionInResponseWriteTo() {
 		HandlerFunction<ServerResponse> handlerFunction =
 				// Mono.<ServerResponse> is required for compilation in Eclipse
 				request -> Mono.just(new ServerResponse() {
@@ -262,7 +261,6 @@ class RouterFunctionsTests {
 					public HttpStatus statusCode() {
 						return HttpStatus.OK;
 					}
-					@SuppressWarnings("deprecation")
 					@Override
 					public int rawStatusCode() {
 						return 200;
@@ -293,7 +291,7 @@ class RouterFunctionsTests {
 	}
 
 	@Test
-	void toHttpHandlerWebFilter() {
+	public void toHttpHandlerWebFilter() {
 		AtomicBoolean filterInvoked = new AtomicBoolean();
 
 		WebFilter webFilter = (exchange, chain) -> {

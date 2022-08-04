@@ -16,13 +16,14 @@
 
 package org.springframework.jms.support;
 
-import jakarta.jms.Connection;
-import jakarta.jms.JMSException;
-import jakarta.jms.MessageConsumer;
-import jakarta.jms.MessageProducer;
-import jakarta.jms.QueueBrowser;
-import jakarta.jms.QueueRequestor;
-import jakarta.jms.Session;
+import javax.jms.Connection;
+import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
+import javax.jms.QueueBrowser;
+import javax.jms.QueueRequestor;
+import javax.jms.Session;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -84,7 +85,7 @@ public abstract class JmsUtils {
 					con.close();
 				}
 			}
-			catch (jakarta.jms.IllegalStateException ex) {
+			catch (javax.jms.IllegalStateException ex) {
 				logger.debug("Ignoring Connection state exception - assuming already closed: " + ex);
 			}
 			catch (JMSException ex) {
@@ -216,7 +217,7 @@ public abstract class JmsUtils {
 		try {
 			session.commit();
 		}
-		catch (jakarta.jms.TransactionInProgressException | jakarta.jms.IllegalStateException ex) {
+		catch (javax.jms.TransactionInProgressException | javax.jms.IllegalStateException ex) {
 			// Ignore -> can only happen in case of a JTA transaction.
 		}
 	}
@@ -231,7 +232,7 @@ public abstract class JmsUtils {
 		try {
 			session.rollback();
 		}
-		catch (jakarta.jms.TransactionInProgressException | jakarta.jms.IllegalStateException ex) {
+		catch (javax.jms.TransactionInProgressException | javax.jms.IllegalStateException ex) {
 			// Ignore -> can only happen in case of a JTA transaction.
 		}
 	}
@@ -241,7 +242,7 @@ public abstract class JmsUtils {
 	 * incorporating a linked exception's message if appropriate.
 	 * @param ex the JMSException to build a message for
 	 * @return the descriptive message String
-	 * @see jakarta.jms.JMSException#getLinkedException()
+	 * @see javax.jms.JMSException#getLinkedException()
 	 */
 	public static String buildExceptionMessage(JMSException ex) {
 		String message = ex.getMessage();
@@ -261,7 +262,7 @@ public abstract class JmsUtils {
 	}
 
 	/**
-	 * Convert the specified checked {@link jakarta.jms.JMSException JMSException} to a
+	 * Convert the specified checked {@link javax.jms.JMSException JMSException} to a
 	 * Spring runtime {@link org.springframework.jms.JmsException JmsException} equivalent.
 	 * @param ex the original checked JMSException to convert
 	 * @return the Spring runtime JmsException wrapping the given exception
@@ -269,41 +270,41 @@ public abstract class JmsUtils {
 	public static JmsException convertJmsAccessException(JMSException ex) {
 		Assert.notNull(ex, "JMSException must not be null");
 
-		if (ex instanceof jakarta.jms.IllegalStateException) {
-			return new org.springframework.jms.IllegalStateException((jakarta.jms.IllegalStateException) ex);
+		if (ex instanceof javax.jms.IllegalStateException) {
+			return new org.springframework.jms.IllegalStateException((javax.jms.IllegalStateException) ex);
 		}
-		if (ex instanceof jakarta.jms.InvalidClientIDException) {
-			return new InvalidClientIDException((jakarta.jms.InvalidClientIDException) ex);
+		if (ex instanceof javax.jms.InvalidClientIDException) {
+			return new InvalidClientIDException((javax.jms.InvalidClientIDException) ex);
 		}
-		if (ex instanceof jakarta.jms.InvalidDestinationException) {
-			return new InvalidDestinationException((jakarta.jms.InvalidDestinationException) ex);
+		if (ex instanceof javax.jms.InvalidDestinationException) {
+			return new InvalidDestinationException((javax.jms.InvalidDestinationException) ex);
 		}
-		if (ex instanceof jakarta.jms.InvalidSelectorException) {
-			return new InvalidSelectorException((jakarta.jms.InvalidSelectorException) ex);
+		if (ex instanceof javax.jms.InvalidSelectorException) {
+			return new InvalidSelectorException((javax.jms.InvalidSelectorException) ex);
 		}
-		if (ex instanceof jakarta.jms.JMSSecurityException) {
-			return new JmsSecurityException((jakarta.jms.JMSSecurityException) ex);
+		if (ex instanceof javax.jms.JMSSecurityException) {
+			return new JmsSecurityException((javax.jms.JMSSecurityException) ex);
 		}
-		if (ex instanceof jakarta.jms.MessageEOFException) {
-			return new MessageEOFException((jakarta.jms.MessageEOFException) ex);
+		if (ex instanceof javax.jms.MessageEOFException) {
+			return new MessageEOFException((javax.jms.MessageEOFException) ex);
 		}
-		if (ex instanceof jakarta.jms.MessageFormatException) {
-			return new MessageFormatException((jakarta.jms.MessageFormatException) ex);
+		if (ex instanceof javax.jms.MessageFormatException) {
+			return new MessageFormatException((javax.jms.MessageFormatException) ex);
 		}
-		if (ex instanceof jakarta.jms.MessageNotReadableException) {
-			return new MessageNotReadableException((jakarta.jms.MessageNotReadableException) ex);
+		if (ex instanceof javax.jms.MessageNotReadableException) {
+			return new MessageNotReadableException((javax.jms.MessageNotReadableException) ex);
 		}
-		if (ex instanceof jakarta.jms.MessageNotWriteableException) {
-			return new MessageNotWriteableException((jakarta.jms.MessageNotWriteableException) ex);
+		if (ex instanceof javax.jms.MessageNotWriteableException) {
+			return new MessageNotWriteableException((javax.jms.MessageNotWriteableException) ex);
 		}
-		if (ex instanceof jakarta.jms.ResourceAllocationException) {
-			return new ResourceAllocationException((jakarta.jms.ResourceAllocationException) ex);
+		if (ex instanceof javax.jms.ResourceAllocationException) {
+			return new ResourceAllocationException((javax.jms.ResourceAllocationException) ex);
 		}
-		if (ex instanceof jakarta.jms.TransactionInProgressException) {
-			return new TransactionInProgressException((jakarta.jms.TransactionInProgressException) ex);
+		if (ex instanceof javax.jms.TransactionInProgressException) {
+			return new TransactionInProgressException((javax.jms.TransactionInProgressException) ex);
 		}
-		if (ex instanceof jakarta.jms.TransactionRolledBackException) {
-			return new TransactionRolledBackException((jakarta.jms.TransactionRolledBackException) ex);
+		if (ex instanceof javax.jms.TransactionRolledBackException) {
+			return new TransactionRolledBackException((javax.jms.TransactionRolledBackException) ex);
 		}
 
 		// fallback

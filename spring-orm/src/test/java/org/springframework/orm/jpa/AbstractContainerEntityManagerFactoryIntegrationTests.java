@@ -19,10 +19,11 @@ package org.springframework.orm.jpa;
 import java.lang.reflect.Proxy;
 import java.util.List;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.FlushModeType;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.Query;
+import javax.persistence.EntityManager;
+import javax.persistence.FlushModeType;
+import javax.persistence.NoResultException;
+import javax.persistence.Query;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.testfixture.io.SerializationTestUtils;

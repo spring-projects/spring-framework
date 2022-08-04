@@ -39,10 +39,7 @@ import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.multipart.Part;
@@ -100,8 +97,8 @@ class DefaultServerRequest implements ServerRequest {
 		}
 
 		if (exchange.checkNotModified(etag, lastModified)) {
-			HttpStatusCode statusCode = exchange.getResponse().getStatusCode();
-			return ServerResponse.status(statusCode != null ? statusCode : HttpStatus.OK)
+			Integer statusCode = exchange.getResponse().getRawStatusCode();
+			return ServerResponse.status(statusCode != null ? statusCode : 200)
 					.headers(headers -> headers.addAll(exchange.getResponse().getHeaders()))
 					.build();
 		}
@@ -111,14 +108,8 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	@Override
-	public HttpMethod method() {
-		return request().getMethod();
-	}
-
-	@Override
-	@Deprecated
 	public String methodName() {
-		return request().getMethod().name();
+		return request().getMethodValue();
 	}
 
 	@Override

@@ -95,13 +95,16 @@ public class ConfigurationWithFactoryBeanBeanEarlyDeductionTests {
 		beanDefinition.setFactoryBeanName("factoryBean");
 		beanDefinition.setFactoryMethodName("myBean");
 		GenericApplicationContext context = new GenericApplicationContext();
-		try (context) {
+		try {
 			context.registerBeanDefinition("factoryBean", factoryBeanDefinition);
 			context.registerBeanDefinition("myBean", beanDefinition);
 			NameCollectingBeanFactoryPostProcessor postProcessor = new NameCollectingBeanFactoryPostProcessor();
 			context.addBeanFactoryPostProcessor(postProcessor);
 			context.refresh();
 			assertContainsMyBeanName(postProcessor.getNames());
+		}
+		finally {
+			context.close();
 		}
 	}
 
@@ -115,12 +118,15 @@ public class ConfigurationWithFactoryBeanBeanEarlyDeductionTests {
 			BeanFactoryPostProcessor... postProcessors) {
 		NameCollectingBeanFactoryPostProcessor postProcessor = new NameCollectingBeanFactoryPostProcessor();
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		try (context) {
+		try {
 			Arrays.stream(postProcessors).forEach(context::addBeanFactoryPostProcessor);
 			context.addBeanFactoryPostProcessor(postProcessor);
 			context.register(configurationClass);
 			context.refresh();
 			assertContainsMyBeanName(postProcessor.getNames());
+		}
+		finally {
+			context.close();
 		}
 	}
 

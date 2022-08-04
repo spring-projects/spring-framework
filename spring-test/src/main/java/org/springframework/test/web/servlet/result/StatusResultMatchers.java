@@ -19,7 +19,6 @@ package org.springframework.test.web.servlet.result;
 import org.hamcrest.Matcher;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 
@@ -105,7 +104,9 @@ public class StatusResultMatchers {
 	}
 
 	private HttpStatus.Series getHttpStatusSeries(MvcResult result) {
-		return HttpStatus.Series.resolve(result.getResponse().getStatus());
+		int statusValue = result.getResponse().getStatus();
+		HttpStatus status = HttpStatus.valueOf(statusValue);
+		return status.series();
 	}
 
 	/**
@@ -622,7 +623,7 @@ public class StatusResultMatchers {
 	/**
 	 * Match the expected response status to that of the HttpServletResponse.
 	 */
-	private ResultMatcher matcher(HttpStatusCode status) {
+	private ResultMatcher matcher(HttpStatus status) {
 		return result -> assertEquals("Status", status.value(), result.getResponse().getStatus());
 	}
 

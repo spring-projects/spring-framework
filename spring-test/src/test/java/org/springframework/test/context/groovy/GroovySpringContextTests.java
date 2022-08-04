@@ -16,7 +16,8 @@
 
 package org.springframework.test.context.groovy;
 
-import jakarta.annotation.Resource;
+import javax.annotation.Resource;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 

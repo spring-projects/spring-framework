@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,9 @@ package org.springframework.web.context.request;
 import java.io.Serializable;
 import java.math.BigInteger;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -50,13 +51,13 @@ public class ServletRequestAttributesTests {
 
 
 	@Test
-	public void ctorRejectsNullArg() {
+	public void ctorRejectsNullArg() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new ServletRequestAttributes(null));
 	}
 
 	@Test
-	public void setRequestScopedAttribute() {
+	public void setRequestScopedAttribute() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_REQUEST);
@@ -65,7 +66,7 @@ public class ServletRequestAttributesTests {
 	}
 
 	@Test
-	public void setRequestScopedAttributeAfterCompletion() {
+	public void setRequestScopedAttributeAfterCompletion() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		request.close();
@@ -74,7 +75,7 @@ public class ServletRequestAttributesTests {
 	}
 
 	@Test
-	public void setSessionScopedAttribute() {
+	public void setSessionScopedAttribute() throws Exception {
 		MockHttpSession session = new MockHttpSession();
 		session.setAttribute(KEY, VALUE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -85,7 +86,7 @@ public class ServletRequestAttributesTests {
 	}
 
 	@Test
-	public void setSessionScopedAttributeAfterCompletion() {
+	public void setSessionScopedAttributeAfterCompletion() throws Exception {
 		MockHttpSession session = new MockHttpSession();
 		session.setAttribute(KEY, VALUE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -99,7 +100,7 @@ public class ServletRequestAttributesTests {
 	}
 
 	@Test
-	public void getSessionScopedAttributeDoesNotForceCreationOfSession() {
+	public void getSessionScopedAttributeDoesNotForceCreationOfSession() throws Exception {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
@@ -109,7 +110,7 @@ public class ServletRequestAttributesTests {
 	}
 
 	@Test
-	public void removeSessionScopedAttribute() {
+	public void removeSessionScopedAttribute() throws Exception {
 		MockHttpSession session = new MockHttpSession();
 		session.setAttribute(KEY, VALUE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -121,7 +122,7 @@ public class ServletRequestAttributesTests {
 	}
 
 	@Test
-	public void removeSessionScopedAttributeDoesNotForceCreationOfSession() {
+	public void removeSessionScopedAttributeDoesNotForceCreationOfSession() throws Exception {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
@@ -130,7 +131,7 @@ public class ServletRequestAttributesTests {
 	}
 
 	@Test
-	public void updateAccessedAttributes() {
+	public void updateAccessedAttributes() throws Exception {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpSession session = mock(HttpSession.class);
 		given(request.getSession(anyBoolean())).willReturn(session);
@@ -152,7 +153,7 @@ public class ServletRequestAttributesTests {
 
 	@Test
 	public void skipImmutableCharacter() {
-		doSkipImmutableValue(Character.valueOf('x'));
+		doSkipImmutableValue(new Character('x'));
 	}
 
 	@Test

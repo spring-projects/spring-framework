@@ -18,7 +18,8 @@ package org.springframework.transaction.aspectj;
 
 import java.io.IOException;
 
-import jakarta.transaction.Transactional;
+import javax.transaction.Transactional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -18,7 +18,8 @@ package org.springframework.web.context.support;
 
 import java.util.Map;
 
-import jakarta.servlet.ServletContext;
+import javax.servlet.ServletContext;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -42,7 +43,7 @@ import org.springframework.web.context.ServletContextAware;
  *
  * @author Juergen Hoeller
  * @since 1.1.4
- * @see jakarta.servlet.ServletContext#getAttribute
+ * @see javax.servlet.ServletContext#getAttribute
  * @see WebApplicationContextUtils#getWebApplicationContext
  */
 public class ServletContextAttributeExporter implements ServletContextAware {

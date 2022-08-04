@@ -16,10 +16,11 @@
 
 package org.springframework.jms.support;
 
-import jakarta.jms.Connection;
-import jakarta.jms.ConnectionFactory;
-import jakarta.jms.JMSException;
-import jakarta.jms.Session;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
+import javax.jms.Session;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -46,7 +47,7 @@ import org.springframework.util.Assert;
  */
 public abstract class JmsAccessor implements InitializingBean {
 
-	/** Constants instance for {@code jakarta.jms.Session}. */
+	/** Constants instance for {@code javax.jms.Session}. */
 	private static final Constants sessionConstants = new Constants(Session.class);
 
 
@@ -94,7 +95,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * Default is "false".
 	 * <p>Note that within a JTA transaction, the parameters passed to
 	 * {@code create(Queue/Topic)Session(boolean transacted, int acknowledgeMode)}
-	 * method are not taken into account. Depending on the Jakarta EE transaction context,
+	 * method are not taken into account. Depending on the Java EE transaction context,
 	 * the container makes its own decisions on these values. Analogously, these
 	 * parameters are not taken into account within a locally managed transaction
 	 * either, since the accessor operates on an existing JMS Session in this case.
@@ -105,7 +106,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * transaction being managed alongside the main transaction (which might
 	 * be a native JDBC transaction), with the JMS transaction committing
 	 * right after the main transaction.
-	 * @see jakarta.jms.Connection#createSession(boolean, int)
+	 * @see javax.jms.Connection#createSession(boolean, int)
 	 */
 	public void setSessionTransacted(boolean sessionTransacted) {
 		this.sessionTransacted = sessionTransacted;
@@ -126,10 +127,10 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * <p>If you want to use vendor-specific extensions to the acknowledgement mode,
 	 * use {@link #setSessionAcknowledgeMode(int)} instead.
 	 * @param constantName the name of the {@link Session} acknowledge mode constant
-	 * @see jakarta.jms.Session#AUTO_ACKNOWLEDGE
-	 * @see jakarta.jms.Session#CLIENT_ACKNOWLEDGE
-	 * @see jakarta.jms.Session#DUPS_OK_ACKNOWLEDGE
-	 * @see jakarta.jms.Connection#createSession(boolean, int)
+	 * @see javax.jms.Session#AUTO_ACKNOWLEDGE
+	 * @see javax.jms.Session#CLIENT_ACKNOWLEDGE
+	 * @see javax.jms.Session#DUPS_OK_ACKNOWLEDGE
+	 * @see javax.jms.Connection#createSession(boolean, int)
 	 */
 	public void setSessionAcknowledgeModeName(String constantName) {
 		setSessionAcknowledgeMode(sessionConstants.asNumber(constantName).intValue());
@@ -146,10 +147,10 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * the container makes its own decisions on these values. See section 17.3.5
 	 * of the EJB spec.
 	 * @param sessionAcknowledgeMode the acknowledgement mode constant
-	 * @see jakarta.jms.Session#AUTO_ACKNOWLEDGE
-	 * @see jakarta.jms.Session#CLIENT_ACKNOWLEDGE
-	 * @see jakarta.jms.Session#DUPS_OK_ACKNOWLEDGE
-	 * @see jakarta.jms.Connection#createSession(boolean, int)
+	 * @see javax.jms.Session#AUTO_ACKNOWLEDGE
+	 * @see javax.jms.Session#CLIENT_ACKNOWLEDGE
+	 * @see javax.jms.Session#DUPS_OK_ACKNOWLEDGE
+	 * @see javax.jms.Connection#createSession(boolean, int)
 	 */
 	public void setSessionAcknowledgeMode(int sessionAcknowledgeMode) {
 		this.sessionAcknowledgeMode = sessionAcknowledgeMode;
@@ -171,7 +172,7 @@ public abstract class JmsAccessor implements InitializingBean {
 
 
 	/**
-	 * Convert the specified checked {@link jakarta.jms.JMSException JMSException} to
+	 * Convert the specified checked {@link javax.jms.JMSException JMSException} to
 	 * a Spring runtime {@link org.springframework.jms.JmsException JmsException}
 	 * equivalent.
 	 * <p>The default implementation delegates to the
@@ -189,7 +190,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * <p>This implementation uses JMS 1.1 API.
 	 * @return the new JMS Connection
 	 * @throws JMSException if thrown by JMS API methods
-	 * @see jakarta.jms.ConnectionFactory#createConnection()
+	 * @see javax.jms.ConnectionFactory#createConnection()
 	 */
 	protected Connection createConnection() throws JMSException {
 		return obtainConnectionFactory().createConnection();
@@ -201,7 +202,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * @param con the JMS Connection to create a Session for
 	 * @return the new JMS Session
 	 * @throws JMSException if thrown by JMS API methods
-	 * @see jakarta.jms.Connection#createSession(boolean, int)
+	 * @see javax.jms.Connection#createSession(boolean, int)
 	 */
 	protected Session createSession(Connection con) throws JMSException {
 		return con.createSession(isSessionTransacted(), getSessionAcknowledgeMode());
@@ -212,9 +213,9 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * <p>This implementation uses JMS 1.1 API.
 	 * @param session the JMS Session to check
 	 * @return whether the given Session is in client acknowledge mode
-	 * @throws jakarta.jms.JMSException if thrown by JMS API methods
-	 * @see jakarta.jms.Session#getAcknowledgeMode()
-	 * @see jakarta.jms.Session#CLIENT_ACKNOWLEDGE
+	 * @throws javax.jms.JMSException if thrown by JMS API methods
+	 * @see javax.jms.Session#getAcknowledgeMode()
+	 * @see javax.jms.Session#CLIENT_ACKNOWLEDGE
 	 */
 	protected boolean isClientAcknowledge(Session session) throws JMSException {
 		return (session.getAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE);

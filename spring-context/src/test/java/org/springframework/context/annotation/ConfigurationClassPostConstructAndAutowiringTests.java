@@ -16,7 +16,8 @@
 
 package org.springframework.context.annotation;
 
-import jakarta.annotation.PostConstruct;
+import javax.annotation.PostConstruct;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;

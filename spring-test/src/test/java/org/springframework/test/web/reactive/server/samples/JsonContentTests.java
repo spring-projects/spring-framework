@@ -52,13 +52,10 @@ class JsonContentTests {
 				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody().json("""
-						[
-							{"firstName":"Jane"},
-							{"firstName":"Jason"},
-							{"firstName":"John"}
-						]
-						""");
+				.expectBody().json(
+						"[{\"firstName\":\"Jane\"}," +
+						"{\"firstName\":\"Jason\"}," +
+						"{\"firstName\":\"John\"}]");
 	}
 
 	@Test
@@ -67,13 +64,10 @@ class JsonContentTests {
 				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody().json("""
-						[
-							{"firstName":"Jane", "lastName":"Williams"},
-							{"firstName":"Jason","lastName":"Johnson"},
-							{"firstName":"John", "lastName":"Smith"}
-						]
-						""",
+				.expectBody().json(
+						"[{\"firstName\":\"Jane\",\"lastName\":\"Williams\"}," +
+						"{\"firstName\":\"Jason\",\"lastName\":\"Johnson\"}," +
+						"{\"firstName\":\"John\",\"lastName\":\"Smith\"}]",
 						true);
 	}
 
@@ -82,13 +76,10 @@ class JsonContentTests {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> this.client.get().uri("/persons")
 				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
-				.expectBody().json("""
-						[
-							{"firstName":"Jane"},
-							{"firstName":"Jason"},
-							{"firstName":"John"}
-						]
-						""",
+				.expectBody().json(
+						"[{\"firstName\":\"Jane\"}," +
+						"{\"firstName\":\"Jason\"}," +
+						"{\"firstName\":\"John\"}]",
 						true)
 		);
 	}
@@ -119,9 +110,7 @@ class JsonContentTests {
 	void postJsonContent() {
 		this.client.post().uri("/persons")
 				.contentType(MediaType.APPLICATION_JSON)
-				.bodyValue("""
-						{"firstName":"John", "lastName":"Smith"}
-						""")
+				.bodyValue("{\"firstName\":\"John\",\"lastName\":\"Smith\"}")
 				.exchange()
 				.expectStatus().isCreated()
 				.expectBody().isEmpty();

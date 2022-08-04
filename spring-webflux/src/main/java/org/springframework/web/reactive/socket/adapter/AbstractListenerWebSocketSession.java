@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,10 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	@Nullable
 	private final Sinks.Empty<Void> handlerCompletionSink;
 
+	@Nullable
+	@SuppressWarnings("deprecation")
+	private final reactor.core.publisher.MonoProcessor<Void> handlerCompletionMono;
+
 	private final WebSocketReceivePublisher receivePublisher;
 
 	@Nullable
@@ -86,7 +90,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	public AbstractListenerWebSocketSession(
 			T delegate, String id, HandshakeInfo info, DataBufferFactory bufferFactory) {
 
-		this(delegate, id, info, bufferFactory, null);
+		this(delegate, id, info, bufferFactory, (Sinks.Empty<Void>) null);
 	}
 
 	/**
@@ -101,6 +105,25 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		super(delegate, id, info, bufferFactory);
 		this.receivePublisher = new WebSocketReceivePublisher();
 		this.handlerCompletionSink = handlerCompletionSink;
+		this.handlerCompletionMono = null;
+	}
+
+	/**
+	 * Alternative constructor with completion MonoProcessor to use to signal
+	 * when the handling of the session is complete, with success or error.
+	 * <p>Primarily for use with {@code WebSocketClient} to be able to
+	 * communicate the end of handling.
+	 * @deprecated as of 5.3 in favor of
+	 * {@link #AbstractListenerWebSocketSession(Object, String, HandshakeInfo, DataBufferFactory, Sinks.Empty)}
+	 */
+	@Deprecated
+	public AbstractListenerWebSocketSession(T delegate, String id, HandshakeInfo info,
+			DataBufferFactory bufferFactory, @Nullable reactor.core.publisher.MonoProcessor<Void> handlerCompletion) {
+
+		super(delegate, id, info, bufferFactory);
+		this.receivePublisher = new WebSocketReceivePublisher();
+		this.handlerCompletionMono = handlerCompletion;
+		this.handlerCompletionSink = null;
 	}
 
 
@@ -221,6 +244,9 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 			// Ignore result: can't overflow, ok if not first or no one listens
 			this.handlerCompletionSink.tryEmitError(ex);
 		}
+		if (this.handlerCompletionMono != null) {
+			this.handlerCompletionMono.onError(ex);
+		}
 		close(CloseStatus.SERVER_ERROR.withReason(ex.getMessage()));
 	}
 
@@ -229,6 +255,9 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		if (this.handlerCompletionSink != null) {
 			// Ignore result: can't overflow, ok if not first or no one listens
 			this.handlerCompletionSink.tryEmitEmpty();
+		}
+		if (this.handlerCompletionMono != null) {
+			this.handlerCompletionMono.onComplete();
 		}
 		close();
 	}

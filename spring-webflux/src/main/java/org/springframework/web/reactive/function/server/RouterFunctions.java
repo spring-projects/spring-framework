@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,9 +52,9 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * {@linkplain #nest(RequestPredicate, RouterFunction) subrouting} on an existing routing
  * function.
  *
- * <p>Additionally, this class can {@linkplain #toHttpHandler(RouterFunction) transform}
- * a {@code RouterFunction} into an {@code HttpHandler}, which can be run in Servlet
- * environments, Reactor, or Undertow.
+ * <p>Additionally, this class can {@linkplain #toHttpHandler(RouterFunction) transform} a
+ * {@code RouterFunction} into an {@code HttpHandler}, which can be run in Servlet 3.1+,
+ * Reactor, or Undertow.
  *
  * @author Arjen Poutsma
  * @since 5.0
@@ -194,7 +194,7 @@ public abstract class RouterFunctions {
 	 * This conversion uses {@linkplain HandlerStrategies#builder() default strategies}.
 	 * <p>The returned handler can be adapted to run in
 	 * <ul>
-	 * <li>Servlet environments using the
+	 * <li>Servlet 3.1+ using the
 	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter},</li>
 	 * <li>Reactor using the
 	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter},</li>
@@ -216,7 +216,7 @@ public abstract class RouterFunctions {
 	 * using the given strategies.
 	 * <p>The returned {@code HttpHandler} can be adapted to run in
 	 * <ul>
-	 * <li>Servlet environments using the
+	 * <li>Servlet 3.1+ using the
 	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter},</li>
 	 * <li>Reactor using the
 	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter},</li>
@@ -1261,7 +1261,8 @@ public abstract class RouterFunctions {
 		}
 
 		private <R> Mono<R> createNotFoundError() {
-			return Mono.defer(() -> Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
+			return Mono.defer(() -> Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
+					"No matching router function")));
 		}
 
 		private static <T> Mono<T> wrapException(Supplier<Mono<T>> supplier) {

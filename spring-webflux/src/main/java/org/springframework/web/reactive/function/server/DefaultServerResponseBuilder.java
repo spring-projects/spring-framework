@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -39,7 +40,7 @@ import org.springframework.core.codec.Hints;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.ResponseCookie;
@@ -64,7 +65,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
-	private final HttpStatusCode statusCode;
+	private final int statusCode;
 
 	private final HttpHeaders headers = new HttpHeaders();
 
@@ -77,15 +78,23 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		Assert.notNull(other, "ServerResponse must not be null");
 		this.headers.addAll(other.headers());
 		this.cookies.addAll(other.cookies());
-		this.statusCode = other.statusCode();
-		if (other instanceof AbstractServerResponse abstractOther) {
+		if (other instanceof AbstractServerResponse) {
+			AbstractServerResponse abstractOther = (AbstractServerResponse) other;
+			this.statusCode = abstractOther.statusCode;
 			this.hints.putAll(abstractOther.hints);
+		}
+		else {
+			this.statusCode = other.statusCode().value();
 		}
 	}
 
-	public DefaultServerResponseBuilder(HttpStatusCode status) {
-		Assert.notNull(status, "HttpStatusCode must not be null");
-		this.statusCode = status;
+	public DefaultServerResponseBuilder(HttpStatus status) {
+		Assert.notNull(status, "HttpStatus must not be null");
+		this.statusCode = status.value();
+	}
+
+	public DefaultServerResponseBuilder(int statusCode) {
+		this.statusCode = statusCode;
 	}
 
 
@@ -289,9 +298,9 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	 */
 	abstract static class AbstractServerResponse implements ServerResponse {
 
-		private static final Set<HttpMethod> SAFE_METHODS = Set.of(HttpMethod.GET, HttpMethod.HEAD);
+		private static final Set<HttpMethod> SAFE_METHODS = EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
 
-		private final HttpStatusCode statusCode;
+		final int statusCode;
 
 		private final HttpHeaders headers;
 
@@ -301,7 +310,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 
 		protected AbstractServerResponse(
-				HttpStatusCode statusCode, HttpHeaders headers, MultiValueMap<String, ResponseCookie> cookies,
+				int statusCode, HttpHeaders headers, MultiValueMap<String, ResponseCookie> cookies,
 				Map<String, Object> hints) {
 
 			this.statusCode = statusCode;
@@ -311,14 +320,13 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		}
 
 		@Override
-		public final HttpStatusCode statusCode() {
-			return this.statusCode;
+		public final HttpStatus statusCode() {
+			return HttpStatus.valueOf(this.statusCode);
 		}
 
 		@Override
-		@Deprecated
 		public int rawStatusCode() {
-			return this.statusCode.value();
+			return this.statusCode;
 		}
 
 		@Override
@@ -345,7 +353,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		}
 
 		private void writeStatusAndHeaders(ServerHttpResponse response) {
-			response.setStatusCode(this.statusCode);
+			response.setRawStatusCode(this.statusCode);
 			copy(this.headers, response.getHeaders());
 			copy(this.cookies, response.getCookies());
 		}
@@ -364,7 +372,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 		private final BiFunction<ServerWebExchange, Context, Mono<Void>> writeFunction;
 
-		public WriterFunctionResponse(HttpStatusCode statusCode, HttpHeaders headers,
+		public WriterFunctionResponse(int statusCode, HttpHeaders headers,
 				MultiValueMap<String, ResponseCookie> cookies,
 				BiFunction<ServerWebExchange, Context, Mono<Void>> writeFunction) {
 
@@ -385,7 +393,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		private final BodyInserter<T, ? super ServerHttpResponse> inserter;
 
 
-		public BodyInserterResponse(HttpStatusCode statusCode, HttpHeaders headers,
+		public BodyInserterResponse(int statusCode, HttpHeaders headers,
 				MultiValueMap<String, ResponseCookie> cookies,
 				BodyInserter<T, ? super ServerHttpResponse> body, Map<String, Object> hints) {
 

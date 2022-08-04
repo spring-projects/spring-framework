@@ -19,10 +19,11 @@ package org.springframework.web.reactive.socket.server.upgrade;
 import java.util.Collections;
 import java.util.function.Supplier;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.websocket.Endpoint;
-import jakarta.websocket.server.ServerContainer;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.websocket.Endpoint;
+import javax.websocket.server.ServerContainer;
+
 import org.apache.tomcat.websocket.server.WsServerContainer;
 import reactor.core.publisher.Mono;
 
@@ -50,7 +51,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
-	private static final String SERVER_CONTAINER_ATTR = "jakarta.websocket.server.ServerContainer";
+	private static final String SERVER_CONTAINER_ATTR = "javax.websocket.server.ServerContainer";
 
 
 	@Nullable
@@ -71,7 +72,7 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	/**
 	 * Exposes the underlying config option on
-	 * {@link jakarta.websocket.server.ServerContainer#setAsyncSendTimeout(long)}.
+	 * {@link javax.websocket.server.ServerContainer#setAsyncSendTimeout(long)}.
 	 */
 	public void setAsyncSendTimeout(Long timeoutInMillis) {
 		this.asyncSendTimeout = timeoutInMillis;
@@ -84,7 +85,7 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	/**
 	 * Exposes the underlying config option on
-	 * {@link jakarta.websocket.server.ServerContainer#setDefaultMaxSessionIdleTimeout(long)}.
+	 * {@link javax.websocket.server.ServerContainer#setDefaultMaxSessionIdleTimeout(long)}.
 	 */
 	public void setMaxSessionIdleTimeout(Long timeoutInMillis) {
 		this.maxSessionIdleTimeout = timeoutInMillis;
@@ -97,7 +98,7 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	/**
 	 * Exposes the underlying config option on
-	 * {@link jakarta.websocket.server.ServerContainer#setDefaultMaxTextMessageBufferSize(int)}.
+	 * {@link javax.websocket.server.ServerContainer#setDefaultMaxTextMessageBufferSize(int)}.
 	 */
 	public void setMaxTextMessageBufferSize(Integer bufferSize) {
 		this.maxTextMessageBufferSize = bufferSize;
@@ -110,7 +111,7 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	/**
 	 * Exposes the underlying config option on
-	 * {@link jakarta.websocket.server.ServerContainer#setDefaultMaxBinaryMessageBufferSize(int)}.
+	 * {@link javax.websocket.server.ServerContainer#setDefaultMaxBinaryMessageBufferSize(int)}.
 	 */
 	public void setMaxBinaryMessageBufferSize(Integer bufferSize) {
 		this.maxBinaryMessageBufferSize = bufferSize;
@@ -163,7 +164,7 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		if (this.serverContainer == null) {
 			Object container = request.getServletContext().getAttribute(SERVER_CONTAINER_ATTR);
 			Assert.state(container instanceof WsServerContainer,
-					"ServletContext attribute 'jakarta.websocket.server.ServerContainer' not found.");
+					"ServletContext attribute 'javax.websocket.server.ServerContainer' not found.");
 			this.serverContainer = (WsServerContainer) container;
 			initServerContainer(this.serverContainer);
 		}

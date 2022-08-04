@@ -16,8 +16,6 @@
 
 package org.springframework.web.socket.config.annotation;
 
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.lang.Nullable;
@@ -38,15 +36,17 @@ public class WebSocketConfigurationSupport {
 	@Nullable
 	private ServletWebSocketHandlerRegistry handlerRegistry;
 
+	@Nullable
+	private TaskScheduler scheduler;
+
 
 	@Bean
 	public HandlerMapping webSocketHandlerMapping(
-		@Qualifier("defaultSockJsSchedulerContainer") DefaultSockJsSchedulerContainer schedulerContainer) {
+			@Qualifier("defaultSockJsTaskScheduler") @Nullable TaskScheduler scheduler) {
 
 		ServletWebSocketHandlerRegistry registry = initHandlerRegistry();
 		if (registry.requiresTaskScheduler()) {
-			TaskScheduler scheduler = schedulerContainer.getScheduler();
-			Assert.notNull(scheduler, "TaskScheduler is required but not initialized");
+			Assert.notNull(scheduler, "Expected default TaskScheduler bean");
 			registry.setTaskScheduler(scheduler);
 		}
 		return registry.getHandlerMapping();
@@ -64,9 +64,8 @@ public class WebSocketConfigurationSupport {
 	}
 
 	/**
-	 * A container of the default TaskScheduler to use if none was registered
-	 * explicitly via {@link SockJsServiceRegistration#setTaskScheduler} as
-	 * follows:
+	 * The default TaskScheduler to use if none is registered explicitly via
+	 * {@link SockJsServiceRegistration#setTaskScheduler}:
 	 * <pre class="code">
 	 * &#064;Configuration
 	 * &#064;EnableWebSocket
@@ -83,50 +82,18 @@ public class WebSocketConfigurationSupport {
 	 * </pre>
 	 */
 	@Bean
-	DefaultSockJsSchedulerContainer defaultSockJsSchedulerContainer() {
-		return (initHandlerRegistry().requiresTaskScheduler() ?
-				new DefaultSockJsSchedulerContainer(initDefaultSockJsScheduler()) :
-				new DefaultSockJsSchedulerContainer(null));
-	}
-
-	private ThreadPoolTaskScheduler initDefaultSockJsScheduler() {
-		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-		scheduler.setThreadNamePrefix("SockJS-");
-		scheduler.setPoolSize(Runtime.getRuntime().availableProcessors());
-		scheduler.setRemoveOnCancelPolicy(true);
-		return scheduler;
-	}
-
-
-	static class DefaultSockJsSchedulerContainer implements InitializingBean, DisposableBean {
-
-		@Nullable
-		private final ThreadPoolTaskScheduler scheduler;
-
-		DefaultSockJsSchedulerContainer(@Nullable ThreadPoolTaskScheduler scheduler) {
-			this.scheduler = scheduler;
-		}
-
-		@Nullable
-		public ThreadPoolTaskScheduler getScheduler() {
-			return this.scheduler;
-		}
-
-		@Override
-		public void afterPropertiesSet() throws Exception {
-			if (this.scheduler != null) {
-				this.scheduler.afterPropertiesSet();
+	@Nullable
+	public TaskScheduler defaultSockJsTaskScheduler() {
+		if (this.scheduler == null) {
+			if (initHandlerRegistry().requiresTaskScheduler()) {
+				ThreadPoolTaskScheduler threadPoolScheduler = new ThreadPoolTaskScheduler();
+				threadPoolScheduler.setThreadNamePrefix("SockJS-");
+				threadPoolScheduler.setPoolSize(Runtime.getRuntime().availableProcessors());
+				threadPoolScheduler.setRemoveOnCancelPolicy(true);
+				this.scheduler = threadPoolScheduler;
 			}
 		}
-
-		@Override
-		public void destroy() throws Exception {
-			if (this.scheduler != null) {
-				this.scheduler.destroy();
-			}
-		}
-
+		return this.scheduler;
 	}
-
 
 }

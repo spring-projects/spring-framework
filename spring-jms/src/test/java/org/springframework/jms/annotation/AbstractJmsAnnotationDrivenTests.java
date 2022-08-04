@@ -18,8 +18,9 @@ package org.springframework.jms.annotation;
 
 import java.lang.reflect.Method;
 
-import jakarta.jms.JMSException;
-import jakarta.jms.Session;
+import javax.jms.JMSException;
+import javax.jms.Session;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;

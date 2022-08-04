@@ -85,7 +85,6 @@ public class ServerRequestWrapper implements ServerRequest {
 	}
 
 	@Override
-	@Deprecated
 	public String methodName() {
 		return this.delegate.methodName();
 	}

@@ -16,7 +16,6 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +26,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.activemq.broker.BrokerService;
-import org.apache.activemq.broker.TransportConnector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.AfterEach;
@@ -72,8 +70,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 	private TestEventPublisher eventPublisher;
 
-	// initial value of zero implies that a random ephemeral port should be used
-	private int port = 0;
+	private int port;
 
 
 	@BeforeEach
@@ -81,6 +78,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 	public void setup(TestInfo testInfo) throws Exception {
 		logger.debug("Setting up before '" + testInfo.getTestMethod().get().getName() + "'");
 
+		this.port = org.springframework.util.SocketUtils.findAvailableTcpPort(61613);
 		this.responseChannel = new ExecutorSubscribableChannel();
 		this.responseHandler = new TestMessageHandler();
 		this.responseChannel.subscribe(this.responseHandler);
@@ -90,25 +88,14 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 	}
 
 	private void startActiveMQBroker() throws Exception {
-		TransportConnector stompConnector = createStompConnector(this.port);
 		this.activeMQBroker = new BrokerService();
-		this.activeMQBroker.addConnector(stompConnector);
+		this.activeMQBroker.addConnector("stomp://localhost:" + this.port);
 		this.activeMQBroker.setStartAsync(false);
 		this.activeMQBroker.setPersistent(false);
 		this.activeMQBroker.setUseJmx(false);
 		this.activeMQBroker.getSystemUsage().getMemoryUsage().setLimit(1024 * 1024 * 5);
 		this.activeMQBroker.getSystemUsage().getTempUsage().setLimit(1024 * 1024 * 5);
 		this.activeMQBroker.start();
-
-		// Reuse existing ephemeral port on restart (i.e., the next time this method
-		// is invoked) since it will already be configured in the relay
-		this.port = (this.port != 0 ? this.port : stompConnector.getServer().getSocketAddress().getPort());
-	}
-
-	private TransportConnector createStompConnector(int port) throws Exception {
-		TransportConnector connector = new TransportConnector();
-		connector.setUri(new URI("stomp://localhost:" + port));
-		return connector;
 	}
 
 	private void createAndStartRelay() throws InterruptedException {

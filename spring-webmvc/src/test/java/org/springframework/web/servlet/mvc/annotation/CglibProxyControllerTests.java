@@ -19,7 +19,8 @@ package org.springframework.web.servlet.mvc.annotation;
 import java.io.IOException;
 import java.io.Writer;
 
-import jakarta.servlet.ServletException;
+import javax.servlet.ServletException;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.Pointcut;

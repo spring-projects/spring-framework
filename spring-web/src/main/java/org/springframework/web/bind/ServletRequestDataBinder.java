@@ -16,8 +16,8 @@
 
 package org.springframework.web.bind;
 
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.http.HttpMethod;
@@ -65,7 +65,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see #bind(jakarta.servlet.ServletRequest)
+ * @see #bind(javax.servlet.ServletRequest)
  * @see #registerCustomEditor
  * @see #setAllowedFields
  * @see #setRequiredFields

@@ -119,7 +119,7 @@ public final class CollectionFactory {
 	 * @see java.util.TreeSet
 	 * @see java.util.LinkedHashSet
 	 */
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({"rawtypes", "unchecked", "cast"})
 	public static <E> Collection<E> createApproximateCollection(@Nullable Object collection, int capacity) {
 		if (collection instanceof LinkedList) {
 			return new LinkedList<>();
@@ -127,13 +127,14 @@ public final class CollectionFactory {
 		else if (collection instanceof List) {
 			return new ArrayList<>(capacity);
 		}
-		else if (collection instanceof EnumSet enumSet) {
-			Collection<E> copy = EnumSet.copyOf(enumSet);
-			copy.clear();
-			return copy;
+		else if (collection instanceof EnumSet) {
+			// Cast is necessary for compilation in Eclipse 4.4.1.
+			Collection<E> enumSet = (Collection<E>) EnumSet.copyOf((EnumSet) collection);
+			enumSet.clear();
+			return enumSet;
 		}
-		else if (collection instanceof SortedSet sortedSet) {
-			return new TreeSet<>(sortedSet.comparator());
+		else if (collection instanceof SortedSet) {
+			return new TreeSet<>(((SortedSet<E>) collection).comparator());
 		}
 		else {
 			return new LinkedHashSet<>(capacity);
@@ -177,7 +178,7 @@ public final class CollectionFactory {
 	 * @see java.util.TreeSet
 	 * @see java.util.EnumSet
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "cast"})
 	public static <E> Collection<E> createCollection(Class<?> collectionType, @Nullable Class<?> elementType, int capacity) {
 		Assert.notNull(collectionType, "Collection type must not be null");
 		if (LinkedHashSet.class == collectionType || HashSet.class == collectionType ||
@@ -195,7 +196,8 @@ public final class CollectionFactory {
 		}
 		else if (EnumSet.class.isAssignableFrom(collectionType)) {
 			Assert.notNull(elementType, "Cannot create EnumSet for unknown element type");
-			return EnumSet.noneOf(asEnumType(elementType));
+			// Cast is necessary for compilation in Eclipse 4.4.1.
+			return (Collection<E>) EnumSet.noneOf(asEnumType(elementType));
 		}
 		else {
 			if (collectionType.isInterface() || !Collection.class.isAssignableFrom(collectionType)) {
@@ -240,13 +242,13 @@ public final class CollectionFactory {
 	 */
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static <K, V> Map<K, V> createApproximateMap(@Nullable Object map, int capacity) {
-		if (map instanceof EnumMap enumMap) {
-			EnumMap copy = new EnumMap(enumMap);
-			copy.clear();
-			return copy;
+		if (map instanceof EnumMap) {
+			EnumMap enumMap = new EnumMap((EnumMap) map);
+			enumMap.clear();
+			return enumMap;
 		}
-		else if (map instanceof SortedMap sortedMap) {
-			return new TreeMap<>(sortedMap.comparator());
+		else if (map instanceof SortedMap) {
+			return new TreeMap<>(((SortedMap<K, V>) map).comparator());
 		}
 		else {
 			return new LinkedHashMap<>(capacity);

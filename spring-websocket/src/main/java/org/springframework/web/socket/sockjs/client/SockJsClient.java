@@ -56,7 +56,6 @@ import org.springframework.web.util.UriComponentsBuilder;
  * the transports it is configured with.
  *
  * @author Rossen Stoyanchev
- * @author Sam Brannen
  * @since 4.1
  * @see <a href="https://github.com/sockjs/sockjs-client">https://github.com/sockjs/sockjs-client</a>
  * @see org.springframework.web.socket.sockjs.client.Transport
@@ -115,8 +114,8 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 
 	private static InfoReceiver initInfoReceiver(List<Transport> transports) {
 		for (Transport transport : transports) {
-			if (transport instanceof InfoReceiver infoReceiver) {
-				return infoReceiver;
+			if (transport instanceof InfoReceiver) {
+				return ((InfoReceiver) transport);
 			}
 		}
 		return new RestTemplateXhrTransport();
@@ -203,8 +202,11 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 		if (!isRunning()) {
 			this.running = true;
 			for (Transport transport : this.transports) {
-				if (transport instanceof Lifecycle lifecycle && !lifecycle.isRunning()) {
-					lifecycle.start();
+				if (transport instanceof Lifecycle) {
+					Lifecycle lifecycle = (Lifecycle) transport;
+					if (!lifecycle.isRunning()) {
+						lifecycle.start();
+					}
 				}
 			}
 		}
@@ -215,8 +217,11 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 		if (isRunning()) {
 			this.running = false;
 			for (Transport transport : this.transports) {
-				if (transport instanceof Lifecycle lifecycle && lifecycle.isRunning()) {
-					lifecycle.stop();
+				if (transport instanceof Lifecycle) {
+					Lifecycle lifecycle = (Lifecycle) transport;
+					if (lifecycle.isRunning()) {
+						lifecycle.stop();
+					}
 				}
 			}
 		}

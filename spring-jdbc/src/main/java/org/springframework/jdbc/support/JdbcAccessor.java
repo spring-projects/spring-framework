@@ -16,14 +16,14 @@
 
 package org.springframework.jdbc.support;
 
-import javax.sql.DataSource;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.SpringProperties;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.sql.DataSource;
 
 /**
  * Base class for {@link org.springframework.jdbc.core.JdbcTemplate} and
@@ -37,8 +37,16 @@ import org.springframework.util.Assert;
  * @author Sebastien Deleuze
  * @since 28.11.2003
  * @see org.springframework.jdbc.core.JdbcTemplate
+ * TODO 使用模版方法模式
  */
 public abstract class JdbcAccessor implements InitializingBean {
+
+	/**
+	 * Boolean flag controlled by a {@code spring.xml.ignore} system property that instructs Spring to
+	 * ignore XML, i.e. to not initialize the XML-related infrastructure.
+	 * <p>The default is "false".
+	 */
+	private static final boolean shouldIgnoreXml = SpringProperties.getFlag("spring.xml.ignore");
 
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -88,11 +96,8 @@ public abstract class JdbcAccessor implements InitializingBean {
 	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
 	 */
 	public void setDatabaseProductName(String dbName) {
-		if (SQLErrorCodeSQLExceptionTranslator.hasUserProvidedErrorCodesFile()) {
+		if (!shouldIgnoreXml) {
 			this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dbName);
-		}
-		else {
-			this.exceptionTranslator = new SQLExceptionSubclassTranslator();
 		}
 	}
 
@@ -123,11 +128,15 @@ public abstract class JdbcAccessor implements InitializingBean {
 		synchronized (this) {
 			exceptionTranslator = this.exceptionTranslator;
 			if (exceptionTranslator == null) {
-				if (SQLErrorCodeSQLExceptionTranslator.hasUserProvidedErrorCodesFile()) {
-					exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(obtainDataSource());
+				DataSource dataSource = getDataSource();
+				if (shouldIgnoreXml) {
+					exceptionTranslator = new SQLExceptionSubclassTranslator();
+				}
+				else if (dataSource != null) {
+					exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dataSource);
 				}
 				else {
-					exceptionTranslator = new SQLExceptionSubclassTranslator();
+					exceptionTranslator = new SQLStateSQLExceptionTranslator();
 				}
 				this.exceptionTranslator = exceptionTranslator;
 			}
@@ -150,6 +159,7 @@ public abstract class JdbcAccessor implements InitializingBean {
 	/**
 	 * Return whether to lazily initialize the SQLExceptionTranslator for this accessor.
 	 * @see #getExceptionTranslator()
+	 * TODO 钩子函数
 	 */
 	public boolean isLazyInit() {
 		return this.lazyInit;

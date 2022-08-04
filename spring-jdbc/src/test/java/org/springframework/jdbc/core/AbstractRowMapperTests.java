@@ -91,7 +91,7 @@ public abstract class AbstractRowMapperTests {
 		verifyPersonViaBeanWrapper(person);
 	}
 
-	protected void verifyPersonViaBeanWrapper(Object person) {
+	private void verifyPersonViaBeanWrapper(Object person) {
 		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(person);
 		assertThat(bw.getPropertyValue("name")).isEqualTo("Bubba");
 		assertThat(bw.getPropertyValue("age")).isEqualTo(22L);

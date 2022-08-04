@@ -16,7 +16,9 @@
 
 package org.springframework.http.converter.json;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
@@ -38,6 +40,9 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.within;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 /**
  * Gson 2.x converter tests.
@@ -72,7 +77,8 @@ public class GsonHttpMessageConverterTests {
 	public void readTyped() throws IOException {
 		String body = "{\"bytes\":[1,2],\"array\":[\"Foo\",\"Bar\"]," +
 				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
+		InputStream inputStream = spy(new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(inputStream);
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 		MyBean result = (MyBean) this.converter.read(MyBean.class, inputMessage);
 
@@ -83,6 +89,7 @@ public class GsonHttpMessageConverterTests {
 		assertThat(result.getArray()).isEqualTo(new String[] {"Foo", "Bar"});
 		assertThat(result.isBool()).isTrue();
 		assertThat(result.getBytes()).isEqualTo(new byte[] {0x1, 0x2});
+		verify(inputStream, never()).close();
 	}
 
 	@Test
@@ -133,6 +140,7 @@ public class GsonHttpMessageConverterTests {
 		assertThat(result.contains("\"bytes\":[1,2]")).isTrue();
 		assertThat(outputMessage.getHeaders().getContentType())
 				.as("Invalid content-type").isEqualTo(new MediaType("application", "json", utf8));
+		verify(outputMessage.getBody(), never()).close();
 	}
 
 	@Test
@@ -207,7 +215,7 @@ public class GsonHttpMessageConverterTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void readAndWriteParameterizedType() throws Exception {
-		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<>() {
+		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<List<MyBean>>() {
 		};
 
 		String body = "[{\"bytes\":[1,2],\"array\":[\"Foo\",\"Bar\"]," +
@@ -234,8 +242,8 @@ public class GsonHttpMessageConverterTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void writeParameterizedBaseType() throws Exception {
-		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<>() {};
-		ParameterizedTypeReference<List<MyBase>> baseList = new ParameterizedTypeReference<>() {};
+		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<List<MyBean>>() {};
+		ParameterizedTypeReference<List<MyBase>> baseList = new ParameterizedTypeReference<List<MyBase>>() {};
 
 		String body = "[{\"bytes\":[1,2],\"array\":[\"Foo\",\"Bar\"]," +
 				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}]";

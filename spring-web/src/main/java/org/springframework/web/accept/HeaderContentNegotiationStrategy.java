@@ -23,7 +23,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
 
@@ -52,7 +51,7 @@ public class HeaderContentNegotiationStrategy implements ContentNegotiationStrat
 		List<String> headerValues = Arrays.asList(headerValueArray);
 		try {
 			List<MediaType> mediaTypes = MediaType.parseMediaTypes(headerValues);
-			MimeTypeUtils.sortBySpecificity(mediaTypes);
+			MediaType.sortBySpecificityAndQuality(mediaTypes);
 			return !CollectionUtils.isEmpty(mediaTypes) ? mediaTypes : MEDIA_TYPE_ALL_LIST;
 		}
 		catch (InvalidMediaTypeException ex) {

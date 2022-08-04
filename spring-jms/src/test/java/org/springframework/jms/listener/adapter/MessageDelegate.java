@@ -16,10 +16,10 @@
 
 package org.springframework.jms.listener.adapter;
 
-import jakarta.jms.BytesMessage;
-import jakarta.jms.MapMessage;
-import jakarta.jms.ObjectMessage;
-import jakarta.jms.TextMessage;
+import javax.jms.BytesMessage;
+import javax.jms.MapMessage;
+import javax.jms.ObjectMessage;
+import javax.jms.TextMessage;
 
 /**
  * See the MessageListenerAdapterTests class for usage.

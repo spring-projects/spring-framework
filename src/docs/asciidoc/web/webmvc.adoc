@@ -14,7 +14,7 @@ whose name, "`Spring WebFlux,`" is also based on its source module
 This section covers Spring Web MVC. The <<web-reactive.adoc#spring-web-reactive, next section>>
 covers Spring WebFlux.
 
-For baseline information and compatibility with Servlet container and Jakarta EE version
+For baseline information and compatibility with Servlet container and Java EE version
 ranges, see the Spring Framework
 https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-Versions[Wiki].
 
@@ -320,9 +320,9 @@ provides many extra convenient options.
 [[mvc-container-config]]
 === Servlet Config
 
-In a Servlet environment, you have the option of configuring the Servlet container
-programmatically as an alternative or in combination with a `web.xml` file.
-The following example registers a `DispatcherServlet`:
+In a Servlet 3.0+ environment, you have the option of configuring the Servlet container
+programmatically as an alternative or in combination with a `web.xml` file. The following
+example registers a `DispatcherServlet`:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -580,8 +580,8 @@ initialization parameters (`init-param` elements) to the Servlet declaration in 
 The Servlet API exposes the full request path as `requestURI` and further sub-divides it
 into `contextPath`, `servletPath`, and `pathInfo` whose values vary depending on how a
 Servlet is mapped. From these inputs, Spring MVC needs to determine the lookup path to
-use for mapping handlers, which should exclude the `contextPath` and any `servletMapping`
-prefix, if applicable.
+use for handler mapping, which is the path within the mapping of the `DispatcherServlet`
+itself, excluding the `contextPath` and any `servletMapping` prefix, if present.
 
 The `servletPath` and `pathInfo` are decoded and that makes them impossible to compare
 directly to the full `requestURI` in order to derive the lookupPath and that makes it
@@ -611,17 +611,15 @@ encoded path which may not always work well. Furthermore, sometimes the
 `DispatcherServlet` needs to share the URL space with another Servlet and may need to
 be mapped by prefix.
 
-The above issues are addressed when using `PathPatternParser` and parsed patterns, as
-an alternative to String path matching with `AntPathMatcher`. The `PathPatternParser` has
-been available for use in Spring MVC from version 5.3, and is enabled by default from
-version 6.0. Unlike `AntPathMatcher` which needs either the lookup path decoded or the
-controller mapping encoded, a parsed `PathPattern` matches to a parsed representation
-of the path called `RequestPath`, one path segment at a time. This allows decoding and
-sanitizing path segment values individually without the risk of altering the structure
-of the path. Parsed `PathPattern` also supports the use of `servletPath` prefix mapping
-as long as a Servlet path mapping is used and the prefix is kept simple, i.e. it has no
-encoded characters. For pattern syntax details and comparison, see
-<<mvc-ann-requestmapping-pattern-comparison>>.
+The above issues can be addressed more comprehensively by switching from `PathMatcher` to
+the parsed `PathPattern` available in 5.3 or higher, see
+<<mvc-ann-requestmapping-pattern-comparison>>. Unlike `AntPathMatcher` which needs
+either the lookup path decoded or the controller mapping encoded, a parsed `PathPattern`
+matches to a parsed representation of the path called `RequestPath`, one path segment
+at a time. This allows decoding and sanitizing path segment values individually without
+the risk of altering the structure of the path. Parsed `PathPattern` also supports
+the use of `servletPath` prefix mapping as long as the prefix is kept simple and does
+not have any characters that need to be encoded.
 
 
 
@@ -744,8 +742,8 @@ or to render a JSON response, as the following example shows:
 		@RequestMapping(path = "/error")
 		public Map<String, Object> handle(HttpServletRequest request) {
 			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("status", request.getAttribute("jakarta.servlet.error.status_code"));
-			map.put("reason", request.getAttribute("jakarta.servlet.error.message"));
+			map.put("status", request.getAttribute("javax.servlet.error.status_code"));
+			map.put("reason", request.getAttribute("javax.servlet.error.message"));
 			return map;
 		}
 	}
@@ -759,8 +757,8 @@ or to render a JSON response, as the following example shows:
 		@RequestMapping(path = ["/error"])
 		fun handle(request: HttpServletRequest): Map<String, Any> {
 			val map = HashMap<String, Any>()
-			map["status"] = request.getAttribute("jakarta.servlet.error.status_code")
-			map["reason"] = request.getAttribute("jakarta.servlet.error.message")
+			map["status"] = request.getAttribute("javax.servlet.error.status_code")
+			map["reason"] = request.getAttribute("javax.servlet.error.message")
 			return map
 		}
 	}
@@ -1140,7 +1138,7 @@ request with a simple request parameter.
 `MultipartResolver` from the `org.springframework.web.multipart` package is a strategy
 for parsing multipart requests including file uploads. There is one implementation
 based on https://commons.apache.org/proper/commons-fileupload[Commons FileUpload] and
-another based on Servlet multipart request parsing.
+another based on Servlet 3.0 multipart request parsing.
 
 To enable multipart handling, you need to declare a `MultipartResolver` bean in your
 `DispatcherServlet` Spring configuration with a name of `multipartResolver`.
@@ -1171,9 +1169,9 @@ javadoc for details and configuration options.
 
 
 [[mvc-multipart-resolver-standard]]
-==== Servlet Multipart Parsing
+==== Servlet 3.0
 
-Servlet multipart parsing needs to be enabled through Servlet container configuration.
+Servlet 3.0 multipart parsing needs to be enabled through Servlet container configuration.
 To do so:
 
 * In Java, set a `MultipartConfigElement` on the Servlet registration.
@@ -1213,7 +1211,7 @@ The following example shows how to set a `MultipartConfigElement` on the Servlet
 	}
 ----
 
-Once the Servlet multipart configuration is in place, you can add a bean of type
+Once the Servlet 3.0 configuration is in place, you can add a bean of type
 `StandardServletMultipartResolver` with a name of `multipartResolver`.
 
 [NOTE]
@@ -1520,23 +1518,17 @@ directly to the response body versus view resolution and rendering with an HTML 
 
 [[mvc-ann-requestmapping-proxying]]
 ==== AOP Proxies
-[.small]#<<web-reactive.adoc#webflux-ann-requestmapping-proxying, WebFlux>>#
 
 In some cases, you may need to decorate a controller with an AOP proxy at runtime.
 One example is if you choose to have `@Transactional` annotations directly on the
 controller. When this is the case, for controllers specifically, we recommend
-using class-based proxying. This is automatically the case with such annotations
-directly on the controller.
-
-If the controller implements an interface, and needs AOP proxying, you may need to
-explicitly configure class-based proxying. For example, with `@EnableTransactionManagement`
-you can change to `@EnableTransactionManagement(proxyTargetClass = true)`, and with
-`<tx:annotation-driven/>` you can change to `<tx:annotation-driven proxy-target-class="true"/>`.
-
-NOTE: Keep in mind that as of 6.0, with interface proxying, Spring MVC no longer detects
-controllers based solely on a type-level `@RequestMapping` annotation on the interface.
-Please, enable class based proxying, or otherwise the interface must also have an
-`@Controller` annotation.
+using class-based proxying. This is typically the default choice with controllers.
+However, if a controller must implement an interface that is not a Spring Context
+callback (such as `InitializingBean`, `*Aware`, and others), you may need to explicitly
+configure class-based proxying. For example, with `<tx:annotation-driven/>` you can
+change to `<tx:annotation-driven proxy-target-class="true"/>`, and with
+`@EnableTransactionManagement` you can change to
+`@EnableTransactionManagement(proxyTargetClass = true)`.
 
 
 
@@ -1620,11 +1612,11 @@ filesystem, and other locations. It is less efficient and the String path input 
 challenge for dealing effectively with encoding and other issues with URLs.
 
 `PathPattern` is the recommended solution for web applications and it is the only choice in
-Spring WebFlux. It was enabled for use in Spring MVC from version 5.3 and is enabled by
-default from version 6.0. See <<mvc-config-path-matching, MVC config>> for
-customizations of path matching options.
+Spring WebFlux. Prior to version 5.3, `AntPathMatcher` was the only choice in Spring MVC
+and continues to be the default. However `PathPattern` can be enabled in the
+<<mvc-config-path-matching, MVC config>>.
 
-`PathPattern` supports the same pattern syntax as `AntPathMatcher`. In addition, it also
+`PathPattern` supports the same pattern syntax as `AntPathMatcher`. In addition it also
 supports the capturing pattern, e.g. `+{*spring}+`, for matching 0 or more path segments
 at the end of a path. `PathPattern` also restricts the use of `+**+` for matching multiple
 path segments such that it's only allowed at the end of a pattern. This eliminates many
@@ -1946,7 +1938,7 @@ instead.
 
 `@GetMapping` (and `@RequestMapping(method=HttpMethod.GET)`) support HTTP HEAD
 transparently for request mapping. Controller methods do not need to change.
-A response wrapper, applied in `jakarta.servlet.http.HttpServlet`, ensures a `Content-Length`
+A response wrapper, applied in `javax.servlet.http.HttpServlet`, ensures a `Content-Length`
 header is set to the number of bytes written (without actually writing to the response).
 
 `@GetMapping` (and `@RequestMapping(method=HttpMethod.GET)`) are implicitly mapped to
@@ -2067,17 +2059,17 @@ and others) and is equivalent to `required=false`.
 | Generic access to request parameters and request and session attributes, without direct
   use of the Servlet API.
 
-| `jakarta.servlet.ServletRequest`, `jakarta.servlet.ServletResponse`
+| `javax.servlet.ServletRequest`, `javax.servlet.ServletResponse`
 | Choose any specific request or response type -- for example, `ServletRequest`, `HttpServletRequest`,
   or Spring's `MultipartRequest`, `MultipartHttpServletRequest`.
 
-| `jakarta.servlet.http.HttpSession`
+| `javax.servlet.http.HttpSession`
 | Enforces the presence of a session. As a consequence, such an argument is never `null`.
   Note that session access is not thread-safe. Consider setting the
   `RequestMappingHandlerAdapter` instance's `synchronizeOnSession` flag to `true` if multiple
   requests are allowed to concurrently access a session.
 
-| `jakarta.servlet.http.PushBuilder`
+| `javax.servlet.http.PushBuilder`
 | Servlet 4.0 push builder API for programmatic HTTP/2 resource pushes.
   Note that, per the Servlet specification, the injected `PushBuilder` instance can be null if the client
   does not support that HTTP/2 feature.
@@ -2791,7 +2783,7 @@ alternatively, set `@ModelAttribute(binding=false)`, as the following example sh
 <1> Setting `@ModelAttribute(binding=false)`.
 
 You can automatically apply validation after data binding by adding the
-`jakarta.validation.Valid` annotation or Spring's `@Validated` annotation
+`javax.validation.Valid` annotation or Spring's `@Validated` annotation
 (<<core.adoc#validation-beanvalidation, Bean Validation>> and
 <<core.adoc#validation, Spring validation>>). The following example shows how to do so:
 
@@ -2941,7 +2933,7 @@ as the following example shows:
 
 For use cases that require adding or removing session attributes, consider injecting
 `org.springframework.web.context.request.WebRequest` or
-`jakarta.servlet.http.HttpSession` into the controller method.
+`javax.servlet.http.HttpSession` into the controller method.
 
 For temporary storage of model attributes in the session as part of a controller
 workflow, consider using `@SessionAttributes` as described in
@@ -3130,7 +3122,7 @@ When the `@RequestParam` annotation is declared as a `Map<String, MultipartFile>
 `MultiValueMap<String, MultipartFile>`, without a parameter name specified in the annotation,
 then the map is populated with the multipart files for each given parameter name.
 
-NOTE: With Servlet multipart parsing, you may also declare `jakarta.servlet.http.Part`
+NOTE: With Servlet 3.0 multipart parsing, you may also declare `javax.servlet.http.Part`
 instead of Spring's `MultipartFile`, as a method argument or collection value type.
 
 You can also use multipart content as part of data binding to a
@@ -3232,7 +3224,7 @@ probably want it deserialized from JSON (similar to `@RequestBody`). Use the
 	}
 ----
 
-You can use `@RequestPart` in combination with `jakarta.validation.Valid` or use Spring's
+You can use `@RequestPart` in combination with `javax.validation.Valid` or use Spring's
 `@Validated` annotation, both of which cause Standard Bean Validation to be applied.
 By default, validation errors cause a `MethodArgumentNotValidException`, which is turned
 into a 400 (BAD_REQUEST) response. Alternatively, you can handle validation errors locally
@@ -3289,7 +3281,7 @@ The following example uses a `@RequestBody` argument:
 You can use the <<mvc-config-message-converters>> option of the <<mvc-config>> to
 configure or customize message conversion.
 
-You can use `@RequestBody` in combination with `jakarta.validation.Valid` or Spring's
+You can use `@RequestBody` in combination with `javax.validation.Valid` or Spring's
 `@Validated` annotation, both of which cause Standard Bean Validation to be applied.
 By default, validation errors cause a `MethodArgumentNotValidException`, which is turned
 into a 400 (BAD_REQUEST) response. Alternatively, you can handle validation errors locally
@@ -3912,11 +3904,11 @@ level, <<mvc-exceptionhandlers, HandlerExceptionResolver>> mechanism.
 | Generic access to request parameters and request and session attributes without direct
   use of the Servlet API.
 
-| `jakarta.servlet.ServletRequest`, `jakarta.servlet.ServletResponse`
+| `javax.servlet.ServletRequest`, `javax.servlet.ServletResponse`
 | Choose any specific request or response type (for example, `ServletRequest` or
   `HttpServletRequest` or Spring's `MultipartRequest` or `MultipartHttpServletRequest`).
 
-| `jakarta.servlet.http.HttpSession`
+| `javax.servlet.http.HttpSession`
 | Enforces the presence of a session. As a consequence, such an argument is never `null`. +
   Note that session access is not thread-safe. Consider setting the
   `RequestMappingHandlerAdapter` instance's `synchronizeOnSession` flag to `true` if multiple
@@ -4015,6 +4007,26 @@ level, <<mvc-exceptionhandlers, HandlerExceptionResolver>> mechanism.
   by default, it is treated as a model attribute to be added to the model. If it is a simple type,
   it remains unresolved.
 |===
+
+
+[[mvc-ann-rest-exceptions]]
+==== REST API exceptions
+[.small]#<<web-reactive.adoc#webflux-ann-rest-exceptions, WebFlux>>#
+
+A common requirement for REST services is to include error details in the body of the
+response. The Spring Framework does not automatically do this because the representation
+of error details in the response body is application-specific. However, a
+`@RestController` may use `@ExceptionHandler` methods with a `ResponseEntity` return
+value to set the status and the body of the response. Such methods can also be declared
+in `@ControllerAdvice` classes to apply them globally.
+
+Applications that implement global exception handling with error details in the response
+body should consider extending
+{api-spring-framework}/web/servlet/mvc/method/annotation/ResponseEntityExceptionHandler.html[`ResponseEntityExceptionHandler`],
+which provides handling for exceptions that Spring MVC raises and provides hooks to
+customize the response body. To make use of this, create a subclass of
+`ResponseEntityExceptionHandler`, annotate it with `@ControllerAdvice`, override the
+necessary methods, and declare it as a Spring bean.
 
 
 
@@ -4365,7 +4377,7 @@ capital letters of the class and the method name (for example, the `getThing` me
 == Asynchronous Requests
 [.small]#<<mvc-ann-async-vs-webflux, Compared to WebFlux>>#
 
-Spring MVC has an extensive integration with Servlet asynchronous request
+Spring MVC has an extensive integration with Servlet 3.0 asynchronous request
 <<mvc-ann-async-processing,processing>>:
 
 * <<mvc-ann-async-deferredresult, `DeferredResult`>> and <<mvc-ann-async-callable, `Callable`>>
@@ -4539,10 +4551,10 @@ methods for timeout and completion callbacks.
 ==== Compared to WebFlux
 
 The Servlet API was originally built for making a single pass through the Filter-Servlet
-chain. Asynchronous request processing lets applications exit the Filter-Servlet chain
-but leave the response open for further processing. The Spring MVC asynchronous support
-is built around that mechanism. When a controller returns a `DeferredResult`, the
-Filter-Servlet chain is exited, and the Servlet container thread is released. Later, when
+chain. Asynchronous request processing, added in Servlet 3.0, lets applications exit
+the Filter-Servlet chain but leave the response open for further processing. The Spring MVC
+asynchronous support is built around that mechanism. When a controller returns a `DeferredResult`,
+the Filter-Servlet chain is exited, and the Servlet container thread is released. Later, when
 the `DeferredResult` is set, an `ASYNC` dispatch (to the same URL) is made, during which the
 controller is mapped again but, rather than invoking it, the `DeferredResult` value is used
 (as if the controller returned it) to resume processing.
@@ -4783,7 +4795,7 @@ The MVC configuration also exposes several options for asynchronous requests.
 
 Filter and Servlet declarations have an `asyncSupported` flag that needs to be set to `true`
 to enable asynchronous request processing. In addition, Filter mappings should be
-declared to handle the `ASYNC` `jakarta.servlet.DispatchType`.
+declared to handle the `ASYNC` `javax.servlet.DispatchType`.
 
 In Java configuration, when you use `AbstractAnnotationConfigDispatcherServletInitializer`
 to initialize the Servlet container, this is done automatically.
@@ -4816,55 +4828,8 @@ Note that you can also set the default timeout value on a `DeferredResult`,
 a `ResponseBodyEmitter`, and an `SseEmitter`. For a `Callable`, you can use
 `WebAsyncTask` to provide a timeout value.
 
-
 include::webmvc-cors.adoc[leveloffset=+1]
 
-
-[[mvc-ann-rest-exceptions]]
-== REST API exceptions
-[.small]#<<web-reactive.adoc#webflux-ann-rest-exceptions, WebFlux>>#
-
-A common requirement for REST services is to include error details in the body of the
-response. The Spring Framework provides support for
-https://www.rfc-editor.org/rfc/rfc7807.html[RFC 7807] formatted error responses.
-
-Main abstractions and supporting infrastructure:
-
-- `ProblemDetail` in the `spring-web` module is the core abstraction that represents an
-RFC 7807 problem detail. It helps to enable a range of features in Spring MVC for the
-handling and rendering of such responses.
-- `ErrorResponse` is an interface that defines an error response, including status, headers,
-and `ProblemDetail` as its body. All Spring web exceptions implement this interface, and
-thus encapsulate a default opinion on how they map to an RFC 7807 error response.
-- `ErrorResponseException` is a `RuntimeException` that implements `ErrorResponse`, which
-can be raised directly or serve as a base class for other exceptions.
-- {api-spring-framework}/web/servlet/mvc/method/annotation/ResponseEntityExceptionHandler.html[`ResponseEntityExceptionHandler`]
-provides handling for Spring MVC exceptions and for any `ErrorResponseException`.
-Applications can extend this as an <<mvc-ann-controller-advice>> to enable RFC 7807 support.
-
-`ProblemDetail` and `ErrorResponse` are supported as return values from
-`@ExceptionHandler` and `@RequestMapping` controller methods. The `status` property of
-`ProblemDetail` is used to set the response status, while the `instance` property is set
-from the current URL path, if not already set.
-
-The Jackson `HttpMessageConverter` returns "application/problem+json" as a preferred
-choice to serialize `ProblemDetail` to JSON as part of content negotiation. If no suitable
-media type is found to render a `ProblemDetail` response body, content negotiation falls
-back on "application/problem+json".
-
-Applications can extend `ProblemDetail` with non-standard fields in one of two ways:
-
-. Add properties to the generic `properties` map in `ProblemDetail`. When using
-the Jackson library, this `properties` map is unwrapped and as top level JSON
-properties with the help of `ProblemDetailJacksonMixin`.
-. Create a `ProblemDetail` subclass that defines the extra, non-standard fields.
-Subclasses can use a protected copy constructor in order to re-create an existing
-`ProblemDetail` as a subclass. This can be done centrally from an `@ControllerAdvice`
-such as `ResponseEntityExceptionHandler`.
-
-On the client side, `WebClientResponseException` and `RestClientResponseException` provide
-methods that decode the response body to some target type. This is useful to decode to a
-`ProblemDetail`, or to any other class, including subclasses of `ProblemDetail`.
 
 
 
@@ -6031,7 +5996,9 @@ The following example shows how to customize path matching in Java configuration
 
 		@Override
 		public void configurePathMatch(PathMatchConfigurer configurer) {
-			configurer.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController.class));
+			configurer
+				.setPatternParser(new PathPatternParser())
+				.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController.class));
 		}
 
 		private PathPatternParser patternParser() {
@@ -6047,7 +6014,9 @@ The following example shows how to customize path matching in Java configuration
 	class WebConfig : WebMvcConfigurer {
 
 		override fun configurePathMatch(configurer: PathMatchConfigurer) {
-			configurer.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController::class.java))
+			configurer
+				.setPatternParser(patternParser)
+				.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController::class.java))
 		}
 
 		fun patternParser(): PathPatternParser {
@@ -6056,12 +6025,13 @@ The following example shows how to customize path matching in Java configuration
 	}
 ----
 
-The following example shows how to customize path matching in XML configuration:
+The following example shows how to achieve the same configuration in XML:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<mvc:annotation-driven>
 		<mvc:path-matching
+			trailing-slash="false"
 			path-helper="pathHelper"
 			path-matcher="pathMatcher"/>
 	</mvc:annotation-driven>
@@ -6158,5 +6128,5 @@ For more details, see the
 https://github.com/spring-projects/spring-framework/wiki/HTTP-2-support[HTTP/2 wiki page].
 
 The Servlet API does expose one construct related to HTTP/2. You can use the
-`jakarta.servlet.http.PushBuilder` to proactively push resources to clients, and it
+`javax.servlet.http.PushBuilder` to proactively push resources to clients, and it
 is supported as a <<mvc-ann-arguments, method argument>> to `@RequestMapping` methods.

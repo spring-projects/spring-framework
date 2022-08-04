@@ -16,7 +16,7 @@
 
 package org.springframework.context.index.sample.jpa;
 
-import jakarta.persistence.Entity;
+import javax.persistence.Entity;
 
 /**
  * Test candidate for {@link Entity}.

@@ -20,7 +20,8 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import jakarta.servlet.ServletException;
+import javax.servlet.ServletException;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;

@@ -137,7 +137,7 @@ class HeadersAdaptersTests {
 			arguments(named("Netty", new NettyHeadersAdapter(new DefaultHttpHeaders()))),
 			arguments(named("Tomcat", new TomcatHeadersAdapter(new MimeHeaders()))),
 			arguments(named("Undertow", new UndertowHeadersAdapter(new HeaderMap()))),
-			arguments(named("Jetty", new JettyHeadersAdapter(HttpFields.build())))
+			arguments(named("Jetty", new JettyHeadersAdapter(new HttpFields())))
 		);
 	}
 

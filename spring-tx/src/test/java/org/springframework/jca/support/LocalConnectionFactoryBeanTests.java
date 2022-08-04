@@ -16,8 +16,9 @@
 
 package org.springframework.jca.support;
 
-import jakarta.resource.spi.ConnectionManager;
-import jakarta.resource.spi.ManagedConnectionFactory;
+import javax.resource.spi.ConnectionManager;
+import javax.resource.spi.ManagedConnectionFactory;
+
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

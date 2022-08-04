@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -181,8 +180,9 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 		assertThat(value).isEqualTo("AaBbCc");
 	}
 
-	@Test  // gh-24582
+	@Test // gh-24582
 	public void writeMultipartRelated() {
+
 		MediaType mediaType = MediaType.parseMediaType("multipart/related;type=foo");
 
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
@@ -241,13 +241,12 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 
 	@Test // SPR-16402
 	public void singleSubscriberWithStrings() {
-		AtomicBoolean subscribed = new AtomicBoolean();
-		Flux<String> publisher = Flux.just("foo", "bar", "baz")
-				.doOnSubscribe(subscription ->
-						assertThat(subscribed.compareAndSet(false, true)).isTrue());
+		@SuppressWarnings("deprecation")
+		reactor.core.publisher.UnicastProcessor<String> processor = reactor.core.publisher.UnicastProcessor.create();
+		Flux.just("foo", "bar", "baz").subscribe(processor);
 
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
-		bodyBuilder.asyncPart("name", publisher, String.class);
+		bodyBuilder.asyncPart("name", processor, String.class);
 
 		Mono<MultiValueMap<String, HttpEntity<?>>> result = Mono.just(bodyBuilder.build());
 
@@ -298,9 +297,9 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 		MediaType contentType = response.getHeaders().getContentType();
 		assertThat(contentType.getParameter("boundary")).as("No boundary found").isNotNull();
 
-		// see if we can read what we wrote
-		DefaultPartHttpMessageReader partReader = new DefaultPartHttpMessageReader();
-		MultipartHttpMessageReader reader = new MultipartHttpMessageReader(partReader);
+		// see if Synchronoss NIO Multipart can read what we wrote
+		SynchronossPartHttpMessageReader synchronossReader = new SynchronossPartHttpMessageReader();
+		MultipartHttpMessageReader reader = new MultipartHttpMessageReader(synchronossReader);
 
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")
 				.contentType(MediaType.parseMediaType(contentType.toString()))

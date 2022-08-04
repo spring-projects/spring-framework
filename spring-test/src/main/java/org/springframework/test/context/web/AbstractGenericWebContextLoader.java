@@ -16,7 +16,8 @@
 
 package org.springframework.test.context.web;
 
-import jakarta.servlet.ServletContext;
+import javax.servlet.ServletContext;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

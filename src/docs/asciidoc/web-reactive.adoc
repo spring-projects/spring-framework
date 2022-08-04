@@ -7,7 +7,7 @@
 
 This part of the documentation covers support for reactive-stack web applications built
 on a https://www.reactive-streams.org/[Reactive Streams] API to run on non-blocking
-servers, such as Netty, Undertow, and Servlet containers. Individual chapters cover
+servers, such as Netty, Undertow, and Servlet 3.1+ containers. Individual chapters cover
 the <<webflux.adoc#webflux, Spring WebFlux>> framework,
 the reactive <<webflux-client, `WebClient`>>, support for <<webflux-test, testing>>,
 and <<webflux-reactive-libraries, reactive libraries>>. For Servlet-stack web applications,
@@ -16,18 +16,6 @@ see <<web.adoc#spring-web, Web on Servlet Stack>>.
 include::web/webflux.adoc[leveloffset=+1]
 
 include::web/webflux-webclient.adoc[leveloffset=+1]
-
-
-[[webflux-http-interface-client]]
-== HTTP Interface Client
-
-The Spring Frameworks lets you define an HTTP service as a Java interface with HTTP
-exchange methods. You can then generate a proxy that implements this interface and
-performs the exchanges. This helps to simplify HTTP remote access and provides additional
-flexibility for to choose an API style such as synchronous or reactive.
-
-See <<integration.adoc#rest-http-interface, REST Endpoints>> for details.
-
 
 include::web/webflux-websocket.adoc[leveloffset=+1]
 
@@ -61,15 +49,21 @@ it helps to express cardinality -- for example, whether a single or multiple asy
 values are expected, and that can be essential for making decisions (for example, when
 encoding or decoding HTTP messages).
 
-For annotated controllers, WebFlux transparently adapts to the reactive library chosen by
-the application. This is done with the help of the
-{api-spring-framework}/core/ReactiveAdapterRegistry.html[`ReactiveAdapterRegistry`], which
-provides pluggable support for reactive library and other asynchronous types. The registry
-has built-in support for RxJava 3, Kotlin coroutines and SmallRye Mutiny, but you can
-register others, too.
+For annotated controllers, WebFlux transparently adapts to the reactive library chosen
+by the application. This is done with the help of the
+{api-spring-framework}/core/ReactiveAdapterRegistry.html[`ReactiveAdapterRegistry`]
+which provides pluggable support for reactive library and other asynchronous types.
+The registry has built-in support for RxJava 3, Kotlin coroutines and SmallRye Mutiny,
+but you can register other third-party adapters as well.
 
-For functional APIs (such as <<webflux-fn>>, the `WebClient`, and others), the general rules
-for WebFlux APIs apply -- `Flux` and `Mono` as return values and a Reactive Streams
+[NOTE]
+====
+As of Spring Framework 5.3.11, support for RxJava 1 and 2 is deprecated, following
+RxJava's own EOL advice and the upgrade recommendation towards RxJava 3.
+====
+
+For functional APIs (such as <<webflux-fn>>, the `WebClient`, and others), the general
+rules for WebFlux APIs apply -- `Flux` and `Mono` as return values and a Reactive Streams
 `Publisher` as input. When a `Publisher`, whether custom or from another reactive library,
 is provided, it can be treated only as a stream with unknown semantics (0..N). If, however,
 the semantics are known, you can wrap it with `Flux` or `Mono.from(Publisher)` instead

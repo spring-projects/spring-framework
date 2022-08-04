@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,13 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-import jakarta.servlet.http.Cookie;
+import javax.servlet.http.Cookie;
+
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -51,20 +52,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
-class DefaultServerResponseBuilderTests {
+public class DefaultServerResponseBuilderTests {
 
 	static final ServerResponse.Context EMPTY_CONTEXT = () -> Collections.emptyList();
 
 	@Test
-	@SuppressWarnings("deprecation")
-	void status() {
+	public void status() {
 		ServerResponse response = ServerResponse.status(HttpStatus.CREATED).build();
 		assertThat(response.statusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(response.rawStatusCode()).isEqualTo(201);
 	}
 
 	@Test
-	void from() {
+	public void from() {
 		Cookie cookie = new Cookie("foo", "bar");
 		ServerResponse other = ServerResponse.ok()
 				.header("foo", "bar")
@@ -78,14 +78,14 @@ class DefaultServerResponseBuilderTests {
 
 
 	@Test
-	void ok() {
+	public void ok() {
 		ServerResponse response = ServerResponse.ok().build();
 
 		assertThat(response.statusCode()).isEqualTo(HttpStatus.OK);
 	}
 
 	@Test
-	void created() {
+	public void created() {
 		URI location = URI.create("https://example.com");
 		ServerResponse response = ServerResponse.created(location).build();
 		assertThat(response.statusCode()).isEqualTo(HttpStatus.CREATED);
@@ -93,19 +93,19 @@ class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
-	void accepted() {
+	public void accepted() {
 		ServerResponse response = ServerResponse.accepted().build();
 		assertThat(response.statusCode()).isEqualTo(HttpStatus.ACCEPTED);
 	}
 
 	@Test
-	void noContent() {
+	public void noContent() {
 		ServerResponse response = ServerResponse.noContent().build();
 		assertThat(response.statusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 	}
 
 	@Test
-	void seeOther() {
+	public void seeOther() {
 		URI location = URI.create("https://example.com");
 		ServerResponse response = ServerResponse.seeOther(location).build();
 		assertThat(response.statusCode()).isEqualTo(HttpStatus.SEE_OTHER);
@@ -113,7 +113,7 @@ class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
-	void temporaryRedirect() {
+	public void temporaryRedirect() {
 		URI location = URI.create("https://example.com");
 		ServerResponse response = ServerResponse.temporaryRedirect(location).build();
 		assertThat(response.statusCode()).isEqualTo(HttpStatus.TEMPORARY_REDIRECT);
@@ -121,7 +121,7 @@ class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
-	void permanentRedirect() {
+	public void permanentRedirect() {
 		URI location = URI.create("https://example.com");
 		ServerResponse response = ServerResponse.permanentRedirect(location).build();
 		assertThat(response.statusCode()).isEqualTo(HttpStatus.PERMANENT_REDIRECT);
@@ -129,49 +129,49 @@ class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
-	void badRequest() {
+	public void badRequest() {
 		ServerResponse response = ServerResponse.badRequest().build();
 		assertThat(response.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 	}
 
 	@Test
-	void notFound() {
+	public void notFound() {
 		ServerResponse response = ServerResponse.notFound().build();
 		assertThat(response.statusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 	}
 
 	@Test
-	void unprocessableEntity() {
+	public void unprocessableEntity() {
 		ServerResponse response = ServerResponse.unprocessableEntity().build();
 		assertThat(response.statusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
 	}
 
 	@Test
-	void allow() {
+	public void allow() {
 		ServerResponse response = ServerResponse.ok().allow(HttpMethod.GET).build();
-		assertThat(response.headers().getAllow()).isEqualTo(Set.of(HttpMethod.GET));
+		assertThat(response.headers().getAllow()).isEqualTo(EnumSet.of(HttpMethod.GET));
 	}
 
 	@Test
-	void contentLength() {
+	public void contentLength() {
 		ServerResponse response = ServerResponse.ok().contentLength(42).build();
 		assertThat(response.headers().getContentLength()).isEqualTo(42L);
 	}
 
 	@Test
-	void contentType() {
+	public void contentType() {
 		ServerResponse response = ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).build();
 		assertThat(response.headers().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
 	}
 
 	@Test
-	void eTag() {
+	public void eTag() {
 		ServerResponse response = ServerResponse.ok().eTag("foo").build();
 		assertThat(response.headers().getETag()).isEqualTo("\"foo\"");
 	}
 
 	@Test
-	void lastModified() {
+	public void lastModified() {
 		ZonedDateTime now = ZonedDateTime.now();
 		ServerResponse response = ServerResponse.ok().lastModified(now).build();
 		long expected = now.toInstant().toEpochMilli() / 1000;
@@ -179,27 +179,28 @@ class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
-	void cacheControlTag() {
+	public void cacheControlTag() {
 		ServerResponse response = ServerResponse.ok().cacheControl(CacheControl.noCache()).build();
 		assertThat(response.headers().getCacheControl()).isEqualTo("no-cache");
 	}
 
 	@Test
-	void varyBy() {
+	public void varyBy() {
 		ServerResponse response = ServerResponse.ok().varyBy("foo").build();
 		List<String> expected = Collections.singletonList("foo");
 		assertThat(response.headers().getVary()).isEqualTo(expected);
 	}
 
+
 	@Test
-	void statusCode() {
+	public void statusCode() {
 		HttpStatus statusCode = HttpStatus.ACCEPTED;
 		ServerResponse response = ServerResponse.status(statusCode).build();
 		assertThat(response.statusCode()).isEqualTo(statusCode);
 	}
 
 	@Test
-	void headers() {
+	public void headers() {
 		HttpHeaders newHeaders = new HttpHeaders();
 		newHeaders.set("foo", "bar");
 		ServerResponse response = ServerResponse.ok()
@@ -209,7 +210,7 @@ class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
-	void cookies() {
+	public void cookies() {
 		MultiValueMap<String, Cookie> newCookies = new LinkedMultiValueMap<>();
 		newCookies.add("name", new Cookie("name", "value"));
 		ServerResponse response = ServerResponse.ok()
@@ -219,7 +220,7 @@ class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
-	void build() throws Exception {
+	public void build() throws Exception {
 		Cookie cookie = new Cookie("name", "value");
 		ServerResponse response = ServerResponse.status(HttpStatus.CREATED)
 				.header("MyKey", "MyValue")
@@ -238,7 +239,7 @@ class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
-	void notModifiedEtag() throws Exception {
+	public void notModifiedEtag() throws Exception {
 		String etag = "\"foo\"";
 		ServerResponse response = ServerResponse.ok()
 				.eTag(etag)
@@ -255,7 +256,7 @@ class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
-	void notModifiedLastModified() throws Exception {
+	public void notModifiedLastModified() throws Exception {
 		ZonedDateTime now = ZonedDateTime.now();
 		ZonedDateTime oneMinuteBeforeNow = now.minus(1, ChronoUnit.MINUTES);
 
@@ -274,7 +275,7 @@ class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
-	void body() throws Exception {
+	public void body() throws Exception {
 		String body = "foo";
 		ServerResponse response = ServerResponse.ok().body(body);
 
@@ -289,7 +290,7 @@ class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
-	void bodyWithParameterizedTypeReference() throws Exception {
+	public void bodyWithParameterizedTypeReference() throws Exception {
 		List<String> body = new ArrayList<>();
 		body.add("foo");
 		body.add("bar");
@@ -306,7 +307,7 @@ class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
-	void bodyCompletionStage() throws Exception {
+	public void bodyCompletionStage() throws Exception {
 		String body = "foo";
 		CompletionStage<String> completionStage = CompletableFuture.completedFuture(body);
 		ServerResponse response = ServerResponse.ok().body(completionStage);
@@ -320,11 +321,12 @@ class DefaultServerResponseBuilderTests {
 		ModelAndView mav = response.writeTo(mockRequest, mockResponse, context);
 		assertThat(mav).isNull();
 
+
 		assertThat(mockResponse.getContentAsString()).isEqualTo(body);
 	}
 
 	@Test
-	void bodyPublisher() throws Exception {
+	public void bodyPublisher() throws Exception {
 		String body = "foo";
 		Publisher<String> publisher = Mono.just(body);
 		ServerResponse response = ServerResponse.ok().body(publisher);

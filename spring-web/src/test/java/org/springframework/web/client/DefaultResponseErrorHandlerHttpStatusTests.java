@@ -66,7 +66,7 @@ class DefaultResponseErrorHandlerHttpStatusTests {
 	@DisplayName("hasError() returns true")
 	@MethodSource("errorCodes")
 	void hasErrorTrue(HttpStatus httpStatus) throws Exception {
-		given(this.response.getStatusCode()).willReturn(httpStatus);
+		given(this.response.getRawStatusCode()).willReturn(httpStatus.value());
 		assertThat(this.handler.hasError(this.response)).isTrue();
 	}
 
@@ -77,7 +77,7 @@ class DefaultResponseErrorHandlerHttpStatusTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
-		given(this.response.getStatusCode()).willReturn(httpStatus);
+		given(this.response.getRawStatusCode()).willReturn(httpStatus.value());
 		given(this.response.getHeaders()).willReturn(headers);
 
 		assertThatExceptionOfType(expectedExceptionClass).isThrownBy(() -> this.handler.handleError(this.response));

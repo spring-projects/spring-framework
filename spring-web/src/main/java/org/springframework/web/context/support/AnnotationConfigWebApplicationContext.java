@@ -38,7 +38,7 @@ import org.springframework.web.context.ContextLoader;
  * implementation which accepts <em>component classes</em> as input &mdash; in particular
  * {@link org.springframework.context.annotation.Configuration @Configuration}
  * classes, but also plain {@link org.springframework.stereotype.Component @Component}
- * classes as well as JSR-330 compliant classes using {@code jakarta.inject} annotations.
+ * classes as well as JSR-330 compliant classes using {@code javax.inject} annotations.
  *
  * <p>Allows for registering classes one by one (specifying class names as config
  * locations) as well as via classpath scanning (specifying base packages as config
@@ -195,7 +195,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	 * and if class loading fails (i.e. a {@code ClassNotFoundException} is raised),
 	 * assume the value is a package and attempt to scan it for component classes.
 	 * <p>Enables the default set of annotation configuration post processors, such that
-	 * {@code @Autowired} and associated annotations can be used.
+	 * {@code @Autowired}, {@code @Required}, and associated annotations can be used.
 	 * <p>Configuration class bean definitions are registered with generated bean
 	 * definition names unless the {@code value} attribute is provided to the stereotype
 	 * annotation.

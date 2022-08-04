@@ -25,6 +25,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.PatternMatchUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Auto proxy creator that identifies beans to proxy via a list of names.
@@ -68,7 +69,7 @@ public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 		Assert.notEmpty(beanNames, "'beanNames' must not be empty");
 		this.beanNames = new ArrayList<>(beanNames.length);
 		for (String mappedName : beanNames) {
-			this.beanNames.add(mappedName.strip());
+			this.beanNames.add(StringUtils.trimWhitespace(mappedName));
 		}
 	}
 

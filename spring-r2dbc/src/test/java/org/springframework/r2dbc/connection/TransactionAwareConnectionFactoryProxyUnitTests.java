@@ -23,7 +23,6 @@ import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.Wrapped;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -131,7 +130,7 @@ class TransactionAwareConnectionFactoryProxyUnitTests {
 
 	@Test
 	void shouldEmitBoundConnection() {
-		when(connectionMock1.beginTransaction(ArgumentMatchers.any())).thenReturn(Mono.empty());
+		when(connectionMock1.beginTransaction()).thenReturn(Mono.empty());
 		when(connectionMock1.commitTransaction()).thenReturn(Mono.empty());
 		when(connectionMock1.close()).thenReturn(Mono.empty());
 

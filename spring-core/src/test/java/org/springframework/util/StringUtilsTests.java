@@ -67,7 +67,6 @@ class StringUtilsTests {
 	}
 
 	@Test
-	@Deprecated
 	void trimWhitespace() {
 		assertThat(StringUtils.trimWhitespace(null)).isNull();
 		assertThat(StringUtils.trimWhitespace("")).isEqualTo("");
@@ -98,7 +97,6 @@ class StringUtilsTests {
 	}
 
 	@Test
-	@Deprecated
 	void trimLeadingWhitespace() {
 		assertThat(StringUtils.trimLeadingWhitespace(null)).isNull();
 		assertThat(StringUtils.trimLeadingWhitespace("")).isEqualTo("");
@@ -114,7 +112,6 @@ class StringUtilsTests {
 	}
 
 	@Test
-	@Deprecated
 	void trimTrailingWhitespace() {
 		assertThat(StringUtils.trimTrailingWhitespace(null)).isNull();
 		assertThat(StringUtils.trimTrailingWhitespace("")).isEqualTo("");
@@ -449,6 +446,21 @@ class StringUtilsTests {
 		assertThat(StringUtils.concatenateStringArrays(input1, null)).isEqualTo(input1);
 		assertThat(StringUtils.concatenateStringArrays(null, input2)).isEqualTo(input2);
 		assertThat(StringUtils.concatenateStringArrays(null, null)).isNull();
+	}
+
+	@Test
+	@Deprecated
+	void mergeStringArrays() {
+		String[] input1 = new String[] {"myString2"};
+		String[] input2 = new String[] {"myString1", "myString2"};
+		String[] result = StringUtils.mergeStringArrays(input1, input2);
+		assertThat(result.length).isEqualTo(2);
+		assertThat(result[0]).isEqualTo("myString2");
+		assertThat(result[1]).isEqualTo("myString1");
+
+		assertThat(StringUtils.mergeStringArrays(input1, null)).isEqualTo(input1);
+		assertThat(StringUtils.mergeStringArrays(null, input2)).isEqualTo(input2);
+		assertThat(StringUtils.mergeStringArrays(null, null)).isNull();
 	}
 
 	@Test

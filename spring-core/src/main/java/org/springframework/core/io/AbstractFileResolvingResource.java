@@ -106,7 +106,8 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 				// Try InputStream resolution for jar resources
 				URLConnection con = url.openConnection();
 				customizeConnection(con);
-				if (con instanceof HttpURLConnection httpCon) {
+				if (con instanceof HttpURLConnection) {
+					HttpURLConnection httpCon = (HttpURLConnection) con;
 					int code = httpCon.getResponseCode();
 					if (code != HttpURLConnection.HTTP_OK) {
 						httpCon.disconnect();
@@ -288,8 +289,8 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 	 */
 	protected void customizeConnection(URLConnection con) throws IOException {
 		ResourceUtils.useCachesIfNecessary(con);
-		if (con instanceof HttpURLConnection httpConn) {
-			customizeConnection(httpConn);
+		if (con instanceof HttpURLConnection) {
+			customizeConnection((HttpURLConnection) con);
 		}
 	}
 

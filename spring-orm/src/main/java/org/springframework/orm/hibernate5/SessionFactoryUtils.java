@@ -19,9 +19,9 @@ package org.springframework.orm.hibernate5;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
 
-import jakarta.persistence.PersistenceException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
@@ -161,7 +161,8 @@ public abstract class SessionFactoryUtils {
 				}
 			}
 		}
-		if (sessionFactory instanceof SessionFactoryImplementor sfi) {
+		if (sessionFactory instanceof SessionFactoryImplementor) {
+			SessionFactoryImplementor sfi = (SessionFactoryImplementor) sessionFactory;
 			try {
 				ConnectionProvider cp = sfi.getServiceRegistry().getService(ConnectionProvider.class);
 				if (cp != null) {
@@ -189,23 +190,29 @@ public abstract class SessionFactoryUtils {
 		if (ex instanceof JDBCConnectionException) {
 			return new DataAccessResourceFailureException(ex.getMessage(), ex);
 		}
-		if (ex instanceof SQLGrammarException jdbcEx) {
+		if (ex instanceof SQLGrammarException) {
+			SQLGrammarException jdbcEx = (SQLGrammarException) ex;
 			return new InvalidDataAccessResourceUsageException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof QueryTimeoutException jdbcEx) {
+		if (ex instanceof QueryTimeoutException) {
+			QueryTimeoutException jdbcEx = (QueryTimeoutException) ex;
 			return new org.springframework.dao.QueryTimeoutException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof LockAcquisitionException jdbcEx) {
+		if (ex instanceof LockAcquisitionException) {
+			LockAcquisitionException jdbcEx = (LockAcquisitionException) ex;
 			return new CannotAcquireLockException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof PessimisticLockException jdbcEx) {
+		if (ex instanceof PessimisticLockException) {
+			PessimisticLockException jdbcEx = (PessimisticLockException) ex;
 			return new PessimisticLockingFailureException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof ConstraintViolationException jdbcEx) {
+		if (ex instanceof ConstraintViolationException) {
+			ConstraintViolationException jdbcEx = (ConstraintViolationException) ex;
 			return new DataIntegrityViolationException(ex.getMessage()  + "; SQL [" + jdbcEx.getSQL() +
 					"]; constraint [" + jdbcEx.getConstraintName() + "]", ex);
 		}
-		if (ex instanceof DataException jdbcEx) {
+		if (ex instanceof DataException) {
+			DataException jdbcEx = (DataException) ex;
 			return new DataIntegrityViolationException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL() + "]", ex);
 		}
 		if (ex instanceof JDBCException) {

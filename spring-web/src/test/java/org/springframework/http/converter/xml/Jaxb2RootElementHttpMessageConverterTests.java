@@ -16,16 +16,19 @@
 
 package org.springframework.http.converter.xml;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import jakarta.xml.bind.Marshaller;
-import jakarta.xml.bind.Unmarshaller;
-import jakarta.xml.bind.annotation.XmlAttribute;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
-import jakarta.xml.bind.annotation.adapters.XmlAdapter;
-import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.xmlunit.diff.DifferenceEvaluator;
@@ -43,6 +46,9 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.xmlunit.diff.ComparisonType.XML_STANDALONE;
 import static org.xmlunit.diff.DifferenceEvaluators.Default;
 import static org.xmlunit.diff.DifferenceEvaluators.chain;
@@ -100,9 +106,11 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 	@Test
 	public void readXmlRootElement() throws Exception {
 		byte[] body = "<rootElement><type s=\"Hello World\"/></rootElement>".getBytes(StandardCharsets.UTF_8);
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
+		InputStream inputStream = spy(new ByteArrayInputStream(body));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(inputStream);
 		RootElement result = (RootElement) converter.read(RootElement.class, inputMessage);
 		assertThat(result.type.s).as("Invalid result").isEqualTo("Hello World");
+		verify(inputStream, never()).close();
 	}
 
 	@Test
@@ -183,6 +191,7 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 		DifferenceEvaluator ev = chain(Default, downgradeDifferencesToEqual(XML_STANDALONE));
 		assertThat(XmlContent.of(outputMessage.getBodyAsString(StandardCharsets.UTF_8)))
 			.isSimilarTo("<rootElement><type s=\"Hello World\"/></rootElement>", ev);
+		verify(outputMessage.getBody(), never()).close();
 	}
 
 	@Test

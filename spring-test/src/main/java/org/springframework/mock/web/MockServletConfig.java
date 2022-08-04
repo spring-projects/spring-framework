@@ -21,14 +21,14 @@ import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import jakarta.servlet.ServletConfig;
-import jakarta.servlet.ServletContext;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Mock implementation of the {@link jakarta.servlet.ServletConfig} interface.
+ * Mock implementation of the {@link javax.servlet.ServletConfig} interface.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

@@ -18,7 +18,8 @@ package org.springframework.web.method.annotation;
 
 import java.lang.reflect.Method;
 
-import jakarta.servlet.http.Cookie;
+import javax.servlet.http.Cookie;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

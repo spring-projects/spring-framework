@@ -57,7 +57,7 @@ import org.springframework.core.annotation.AliasFor;
  * {@link org.springframework.stereotype.Component @Component},
  * {@link org.springframework.stereotype.Service @Service},
  * {@link org.springframework.stereotype.Repository @Repository}, etc.)</li>
- * <li>A JSR-330 compliant class that is annotated with {@code jakarta.inject} annotations</li>
+ * <li>A JSR-330 compliant class that is annotated with {@code javax.inject} annotations</li>
  * <li>Any class that contains {@link org.springframework.context.annotation.Bean @Bean}-methods</li>
  * <li>Any other class that is intended to be registered as a Spring component (i.e., a Spring bean
  * in the {@code ApplicationContext}), potentially taking advantage of automatic autowiring of a
@@ -169,7 +169,7 @@ public @interface ContextConfiguration {
 	Class<? extends ApplicationContextInitializer<?>>[] initializers() default {};
 
 	/**
-	 * Whether {@linkplain #locations resource locations} or
+	 * Whether or not {@linkplain #locations resource locations} or
 	 * {@linkplain #classes <em>component classes</em>} from test superclasses
 	 * and enclosing classes should be <em>inherited</em>.
 	 * <p>The default value is {@code true}. This means that an annotated test
@@ -225,7 +225,7 @@ public @interface ContextConfiguration {
 	boolean inheritLocations() default true;
 
 	/**
-	 * Whether {@linkplain #initializers context initializers} from test
+	 * Whether or not {@linkplain #initializers context initializers} from test
 	 * superclasses and enclosing classes should be <em>inherited</em>.
 	 * <p>The default value is {@code true}. This means that an annotated test
 	 * class will <em>inherit</em> the application context initializers defined

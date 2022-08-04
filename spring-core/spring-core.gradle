@@ -4,19 +4,15 @@ description = "Spring Core"
 
 apply plugin: "kotlin"
 
-// spring-core includes asm, javapoet and repackages cglib, inlining all into the
-// spring-core jar. cglib itself depends on asm and is therefore further transformed by
-// the ShadowJar task to depend on org.springframework.asm; this avoids including two
-// different copies of asm.
+// spring-core includes asm and repackages cglib, inlining both into the spring-core jar.
+// cglib itself depends on asm and is therefore further transformed by the ShadowJar task to
+// depend on org.springframework.asm; this avoids including two different copies of asm.
 def cglibVersion = "3.3.0"
-def javapoetVersion = "1.13.0"
 def objenesisVersion = "3.2"
 
 configurations {
 	cglib
-	javapoet
 	objenesis
-	graalvm
 }
 
 task cglibRepackJar(type: ShadowJar) {
@@ -25,13 +21,6 @@ task cglibRepackJar(type: ShadowJar) {
 	configurations = [project.configurations.cglib]
 	relocate 'net.sf.cglib', 'org.springframework.cglib'
 	relocate 'org.objectweb.asm', 'org.springframework.asm'
-}
-
-task javapoetRepackJar(type: ShadowJar) {
-	archiveBaseName.set('spring-javapoet-repack')
-	archiveVersion.set(javapoetVersion)
-	configurations = [project.configurations.javapoet]
-	relocate 'com.squareup.javapoet', 'org.springframework.javapoet'
 }
 
 task objenesisRepackJar(type: ShadowJar) {
@@ -43,11 +32,8 @@ task objenesisRepackJar(type: ShadowJar) {
 
 dependencies {
 	cglib("cglib:cglib:${cglibVersion}@jar")
-	javapoet("com.squareup:javapoet:${javapoetVersion}@jar")
 	objenesis("org.objenesis:objenesis:${objenesisVersion}@jar")
-	graalvm(project(path: ":spring-core-graalvm", configuration: 'classesOnlyElements'))
 	api(files(cglibRepackJar))
-	api(files(javapoetRepackJar))
 	api(files(objenesisRepackJar))
 	api(project(":spring-jcl"))
 	compileOnly("io.projectreactor.tools:blockhound")
@@ -58,18 +44,20 @@ dependencies {
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	optional("io.projectreactor:reactor-core")
+	optional("io.reactivex:rxjava")
+	optional("io.reactivex:rxjava-reactive-streams")
+	optional("io.reactivex.rxjava2:rxjava")
 	optional("io.reactivex.rxjava3:rxjava")
 	optional("io.smallrye.reactive:mutiny")
 	optional("io.netty:netty-buffer")
-	testImplementation("jakarta.annotation:jakarta.annotation-api")
-	testImplementation("jakarta.xml.bind:jakarta.xml.bind-api")
+	testImplementation("javax.annotation:javax.annotation-api")
+	testImplementation("javax.xml.bind:jaxb-api")
 	testImplementation("com.google.code.findbugs:jsr305")
 	testImplementation("com.fasterxml.woodstox:woodstox-core")
 	testImplementation("org.xmlunit:xmlunit-assertj")
 	testImplementation("org.xmlunit:xmlunit-matchers")
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("io.projectreactor.tools:blockhound")
-	testImplementation("org.skyscreamer:jsonassert")
 	testFixturesImplementation("com.google.code.findbugs:jsr305")
 	testFixturesImplementation("org.junit.platform:junit-platform-launcher")
 	testFixturesImplementation("org.junit.jupiter:junit-jupiter-api")
@@ -98,27 +86,14 @@ jar {
 		exclude "org/springframework/cglib/proxy/MethodProxy*.class"
 	}
 
-	dependsOn javapoetRepackJar
-	from(zipTree(javapoetRepackJar.archivePath)) {
-		include "org/springframework/javapoet/**"
-	}
-
 	dependsOn objenesisRepackJar
 	from(zipTree(objenesisRepackJar.archivePath)) {
 		include "org/springframework/objenesis/**"
 	}
-
-	from configurations.graalvm
 }
 
 test {
 	// Make sure the classes dir is used on the test classpath (required by ResourceTests).
 	// When test fixtures are involved, the JAR is used by default.
-	classpath = sourceSets.main.output.classesDirs + files(sourceSets.main.output.resourcesDir) + classpath - files(jar.archiveFile)
-
-	// Ensure that BlockHound tests run on JDK 13+. For details, see:
-	// https://github.com/reactor/BlockHound/issues/33
-	jvmArgs += [
-		"-XX:+AllowRedefinitionToAddDeleteMethods"
-	]
+	classpath = sourceSets.main.output.classesDirs + classpath - files(jar.archiveFile)
 }

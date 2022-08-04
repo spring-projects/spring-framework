@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,7 @@ package org.springframework.web.socket.config;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Duration;
-import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
@@ -321,27 +320,27 @@ class TestTaskScheduler implements TaskScheduler {
 	}
 
 	@Override
-	public ScheduledFuture schedule(Runnable task, Instant startTime) {
+	public ScheduledFuture schedule(Runnable task, Date startTime) {
 		return null;
 	}
 
 	@Override
-	public ScheduledFuture scheduleAtFixedRate(Runnable task, Instant startTime, Duration period) {
+	public ScheduledFuture scheduleAtFixedRate(Runnable task, Date startTime, long period) {
 		return null;
 	}
 
 	@Override
-	public ScheduledFuture scheduleAtFixedRate(Runnable task, Duration period) {
+	public ScheduledFuture scheduleAtFixedRate(Runnable task, long period) {
 		return null;
 	}
 
 	@Override
-	public ScheduledFuture scheduleWithFixedDelay(Runnable task, Instant startTime, Duration delay) {
+	public ScheduledFuture scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
 		return null;
 	}
 
 	@Override
-	public ScheduledFuture scheduleWithFixedDelay(Runnable task, Duration delay) {
+	public ScheduledFuture scheduleWithFixedDelay(Runnable task, long delay) {
 		return null;
 	}
 }

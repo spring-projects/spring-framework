@@ -214,7 +214,8 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		private String resolveExpression(A annotation) {
 			for (String attributeName : EXPRESSION_ATTRIBUTES) {
 				Object val = AnnotationUtils.getValue(annotation, attributeName);
-				if (val instanceof String str) {
+				if (val instanceof String) {
+					String str = (String) val;
 					if (!str.isEmpty()) {
 						return str;
 					}

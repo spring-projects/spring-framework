@@ -21,8 +21,9 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.function.Function;
 
+import javax.validation.constraints.NotEmpty;
+
 import io.reactivex.rxjava3.core.Single;
-import jakarta.validation.constraints.NotEmpty;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;

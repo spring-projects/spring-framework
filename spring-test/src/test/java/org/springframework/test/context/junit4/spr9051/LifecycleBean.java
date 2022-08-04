@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.junit4.spr9051;
 
-import jakarta.annotation.PostConstruct;
+import javax.annotation.PostConstruct;
 
 /**
  * Simple POJO that contains lifecycle callbacks.

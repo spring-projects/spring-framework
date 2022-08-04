@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.scheduling.annotation;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.IdentityHashMap;
@@ -37,9 +38,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.RuntimeHintsRegistrar;
-import org.springframework.aot.hint.support.RuntimeHintsUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
@@ -58,7 +56,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.EmbeddedValueResolverAware;
-import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.Ordered;
@@ -68,7 +65,6 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
-import org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor.ScheduledAnnotationsRuntimeHints;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.FixedDelayTask;
 import org.springframework.scheduling.config.FixedRateTask;
@@ -111,7 +107,6 @@ import org.springframework.util.StringValueResolver;
  * @see org.springframework.scheduling.config.ScheduledTaskRegistrar
  * @see AsyncAnnotationBeanPostProcessor
  */
-@ImportRuntimeHints(ScheduledAnnotationsRuntimeHints.class)
 public class ScheduledAnnotationBeanPostProcessor
 		implements ScheduledTaskHolder, MergedBeanDefinitionPostProcessor, DestructionAwareBeanPostProcessor,
 		Ordered, EmbeddedValueResolverAware, BeanNameAware, BeanFactoryAware, ApplicationContextAware,
@@ -366,7 +361,7 @@ public class ScheduledAnnotationBeanPostProcessor
 
 		Class<?> targetClass = AopProxyUtils.ultimateTargetClass(bean);
 		if (!this.nonAnnotatedClasses.contains(targetClass) &&
-				AnnotationUtils.isCandidateClass(targetClass, List.of(Scheduled.class, Schedules.class))) {
+				AnnotationUtils.isCandidateClass(targetClass, Arrays.asList(Scheduled.class, Schedules.class))) {
 			Map<Method, Set<Scheduled>> annotatedMethods = MethodIntrospector.selectMethods(targetClass,
 					(MethodIntrospector.MetadataLookup<Set<Scheduled>>) method -> {
 						Set<Scheduled> scheduledAnnotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(
@@ -409,16 +404,16 @@ public class ScheduledAnnotationBeanPostProcessor
 			Set<ScheduledTask> tasks = new LinkedHashSet<>(4);
 
 			// Determine initial delay
-			Duration initialDelay = toDuration(scheduled.initialDelay(), scheduled.timeUnit());
+			long initialDelay = convertToMillis(scheduled.initialDelay(), scheduled.timeUnit());
 			String initialDelayString = scheduled.initialDelayString();
 			if (StringUtils.hasText(initialDelayString)) {
-				Assert.isTrue(initialDelay.isNegative(), "Specify 'initialDelay' or 'initialDelayString', not both");
+				Assert.isTrue(initialDelay < 0, "Specify 'initialDelay' or 'initialDelayString', not both");
 				if (this.embeddedValueResolver != null) {
 					initialDelayString = this.embeddedValueResolver.resolveStringValue(initialDelayString);
 				}
 				if (StringUtils.hasLength(initialDelayString)) {
 					try {
-						initialDelay = toDuration(initialDelayString, scheduled.timeUnit());
+						initialDelay = convertToMillis(initialDelayString, scheduled.timeUnit());
 					}
 					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
@@ -436,7 +431,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					zone = this.embeddedValueResolver.resolveStringValue(zone);
 				}
 				if (StringUtils.hasLength(cron)) {
-					Assert.isTrue(initialDelay.isNegative(), "'initialDelay' not supported for cron triggers");
+					Assert.isTrue(initialDelay == -1, "'initialDelay' not supported for cron triggers");
 					processedSchedule = true;
 					if (!Scheduled.CRON_DISABLED.equals(cron)) {
 						TimeZone timeZone;
@@ -452,13 +447,13 @@ public class ScheduledAnnotationBeanPostProcessor
 			}
 
 			// At this point we don't need to differentiate between initial delay set or not anymore
-			if (initialDelay.isNegative()) {
-				initialDelay = Duration.ZERO;
+			if (initialDelay < 0) {
+				initialDelay = 0;
 			}
 
 			// Check fixed delay
-			Duration fixedDelay = toDuration(scheduled.fixedDelay(), scheduled.timeUnit());
-			if (!fixedDelay.isNegative()) {
+			long fixedDelay = convertToMillis(scheduled.fixedDelay(), scheduled.timeUnit());
+			if (fixedDelay >= 0) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
 				tasks.add(this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, initialDelay)));
@@ -473,7 +468,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					Assert.isTrue(!processedSchedule, errorMessage);
 					processedSchedule = true;
 					try {
-						fixedDelay = toDuration(fixedDelayString, scheduled.timeUnit());
+						fixedDelay = convertToMillis(fixedDelayString, scheduled.timeUnit());
 					}
 					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
@@ -484,8 +479,8 @@ public class ScheduledAnnotationBeanPostProcessor
 			}
 
 			// Check fixed rate
-			Duration fixedRate = toDuration(scheduled.fixedRate(), scheduled.timeUnit());
-			if (!fixedRate.isNegative()) {
+			long fixedRate = convertToMillis(scheduled.fixedRate(), scheduled.timeUnit());
+			if (fixedRate >= 0) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
 				tasks.add(this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, initialDelay)));
@@ -499,7 +494,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					Assert.isTrue(!processedSchedule, errorMessage);
 					processedSchedule = true;
 					try {
-						fixedRate = toDuration(fixedRateString, scheduled.timeUnit());
+						fixedRate = convertToMillis(fixedRateString, scheduled.timeUnit());
 					}
 					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
@@ -539,15 +534,15 @@ public class ScheduledAnnotationBeanPostProcessor
 		return new ScheduledMethodRunnable(target, invocableMethod);
 	}
 
-	private static Duration toDuration(long value, TimeUnit timeUnit) {
-		return Duration.of(value, timeUnit.toChronoUnit());
+	private static long convertToMillis(long value, TimeUnit timeUnit) {
+		return TimeUnit.MILLISECONDS.convert(value, timeUnit);
 	}
 
-	private static Duration toDuration(String value, TimeUnit timeUnit) {
+	private static long convertToMillis(String value, TimeUnit timeUnit) {
 		if (isDurationString(value)) {
-			return Duration.parse(value);
+			return Duration.parse(value).toMillis();
 		}
-		return toDuration(Long.parseLong(value), timeUnit);
+		return convertToMillis(Long.parseLong(value), timeUnit);
 	}
 
 	private static boolean isDurationString(String value) {
@@ -609,16 +604,6 @@ public class ScheduledAnnotationBeanPostProcessor
 			this.scheduledTasks.clear();
 		}
 		this.registrar.destroy();
-	}
-
-	static class ScheduledAnnotationsRuntimeHints implements RuntimeHintsRegistrar {
-
-		@Override
-		public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
-			RuntimeHintsUtils.registerAnnotation(hints, Scheduled.class);
-			RuntimeHintsUtils.registerAnnotation(hints, Schedules.class);
-		}
-
 	}
 
 }

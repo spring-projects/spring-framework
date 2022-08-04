@@ -16,11 +16,13 @@
 
 package org.springframework.r2dbc.core;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.Result;
-import org.reactivestreams.Publisher;
+import io.r2dbc.spi.Row;
+import io.r2dbc.spi.RowMetadata;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -41,21 +43,21 @@ class DefaultFetchSpec<T> implements FetchSpec<T> {
 
 	private final Function<Connection, Flux<Result>> resultFunction;
 
-	private final Function<Connection, Mono<Long>> updatedRowsFunction;
+	private final Function<Connection, Mono<Integer>> updatedRowsFunction;
 
-	private final Function<Result, Publisher<T>> resultAdapter;
+	private final BiFunction<Row, RowMetadata, T> mappingFunction;
 
 
 	DefaultFetchSpec(ConnectionAccessor connectionAccessor, String sql,
 			Function<Connection, Flux<Result>> resultFunction,
-			Function<Connection, Mono<Long>> updatedRowsFunction,
-			Function<Result, Publisher<T>> resultAdapter) {
+			Function<Connection, Mono<Integer>> updatedRowsFunction,
+			BiFunction<Row, RowMetadata, T> mappingFunction) {
 
 		this.sql = sql;
 		this.connectionAccessor = connectionAccessor;
 		this.resultFunction = resultFunction;
 		this.updatedRowsFunction = updatedRowsFunction;
-		this.resultAdapter = resultAdapter;
+		this.mappingFunction = mappingFunction;
 	}
 
 
@@ -84,11 +86,11 @@ class DefaultFetchSpec<T> implements FetchSpec<T> {
 	public Flux<T> all() {
 		return this.connectionAccessor.inConnectionMany(new ConnectionFunction<>(this.sql,
 				connection -> this.resultFunction.apply(connection)
-						.flatMap(this.resultAdapter)));
+						.flatMap(result -> result.map(this.mappingFunction))));
 	}
 
 	@Override
-	public Mono<Long> rowsUpdated() {
+	public Mono<Integer> rowsUpdated() {
 		return this.connectionAccessor.inConnection(this.updatedRowsFunction);
 	}
 

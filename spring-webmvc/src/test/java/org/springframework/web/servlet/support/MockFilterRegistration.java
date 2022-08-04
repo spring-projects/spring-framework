@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.servlet.DispatcherType;
-import jakarta.servlet.FilterRegistration.Dynamic;
+import javax.servlet.DispatcherType;
+import javax.servlet.FilterRegistration.Dynamic;
 
 class MockFilterRegistration implements Dynamic {
 

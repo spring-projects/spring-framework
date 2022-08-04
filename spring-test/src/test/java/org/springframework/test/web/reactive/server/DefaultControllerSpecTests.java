@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,15 +48,6 @@ public class DefaultControllerSpecTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody(String.class).isEqualTo("Success");
-	}
-
-	@Test
-	public void controllerEmptyPath() {
-		new DefaultControllerSpec(new MyController()).build()
-				.get().uri("")
-				.exchange()
-				.expectStatus().isOk()
-				.expectBody(String.class).isEqualTo("Success empty path");
 	}
 
 	@Test
@@ -125,13 +116,8 @@ public class DefaultControllerSpecTests {
 	private static class MyController {
 
 		@GetMapping("/")
-		public String handleRootPath() {
+		public String handle() {
 			return "Success";
-		}
-
-		@GetMapping
-		public String handleEmptyPath() {
-			return "Success empty path";
 		}
 
 		@GetMapping("/exception")

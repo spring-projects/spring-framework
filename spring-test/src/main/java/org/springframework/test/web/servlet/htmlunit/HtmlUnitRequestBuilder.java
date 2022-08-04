@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.test.web.servlet.htmlunit;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -31,15 +33,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import com.gargoylesoftware.htmlunit.CookieManager;
 import com.gargoylesoftware.htmlunit.FormEncodingType;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.util.KeyDataPair;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.Mergeable;
 import org.springframework.http.MediaType;
@@ -57,7 +61,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.web.util.UriUtils;
 
 /**
  * Internal class used to transform a {@link WebRequest} into a
@@ -68,7 +71,6 @@ import org.springframework.web.util.UriUtils;
  *
  * @author Rob Winch
  * @author Sam Brannen
- * @author Rossen Stoyanchev
  * @since 4.2
  * @see MockMvcWebConnection
  */
@@ -111,58 +113,52 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	}
 
 
-	/**
-	 * Set the contextPath to be used.
-	 * <p>The value may be null in which case the first path segment of the
-	 * URL is turned into the contextPath. Otherwise it must conform to
-	 * {@link HttpServletRequest#getContextPath()} which states it can be
-	 * an empty string, or it must start with a "/" and not end with a "/".
-	 * @param contextPath a valid contextPath
-	 * @throws IllegalArgumentException if the contextPath is not a valid
-	 * {@link HttpServletRequest#getContextPath()}
-	 */
-	public void setContextPath(@Nullable String contextPath) {
-		MockMvcWebConnection.validateContextPath(contextPath);
-		this.contextPath = contextPath;
-	}
-
-	public void setForwardPostProcessor(RequestPostProcessor forwardPostProcessor) {
-		this.forwardPostProcessor = forwardPostProcessor;
-	}
-
-
 	@Override
 	public MockHttpServletRequest buildRequest(ServletContext servletContext) {
+		Charset charset = getCharset();
 		String httpMethod = this.webRequest.getHttpMethod().name();
-		UriComponents uri = UriComponentsBuilder.fromUriString(this.webRequest.getUrl().toExternalForm()).build();
+		UriComponents uriComponents = uriComponents();
+		String path = uriComponents.getPath();
 
-		MockHttpServletRequest request = new HtmlUnitMockHttpServletRequest(
-				servletContext, httpMethod, (uri.getPath() != null ? uri.getPath() : ""));
+		MockHttpServletRequest request =
+				new HtmlUnitMockHttpServletRequest(servletContext, httpMethod, (path != null ? path : ""));
 
 		parent(request, this.parentBuilder);
-
-		request.setProtocol("HTTP/1.1");
-		request.setScheme(uri.getScheme() != null ? uri.getScheme() : "");
-		request.setServerName(uri.getHost() != null ? uri.getHost() : "");  // needs to be first for additional headers
-		ports(uri, request);
+		String host = uriComponents.getHost();
+		request.setServerName(host != null ? host : "");  // needs to be first for additional headers
 		authType(request);
-		contextPath(request, uri);
-		servletPath(uri, request);
-		request.setPathInfo(null);
-
-		Charset charset = this.webRequest.getCharset();
-		charset = (charset != null ? charset : StandardCharsets.ISO_8859_1);
 		request.setCharacterEncoding(charset.name());
 		content(request, charset);
+		contextPath(request, uriComponents);
 		contentType(request);
-
 		cookies(request);
-		this.webRequest.getAdditionalHeaders().forEach(request::addHeader);
+		headers(request);
 		locales(request);
-		params(request, uri);
-		request.setQueryString(uri.getQuery());
+		servletPath(uriComponents, request);
+		params(request, uriComponents);
+		ports(uriComponents, request);
+		request.setProtocol("HTTP/1.1");
+		request.setQueryString(uriComponents.getQuery());
+		String scheme = uriComponents.getScheme();
+		request.setScheme(scheme != null ? scheme : "");
+		request.setPathInfo(null);
 
 		return postProcess(request);
+	}
+
+	private Charset getCharset() {
+		Charset charset = this.webRequest.getCharset();
+		return (charset != null ? charset : StandardCharsets.ISO_8859_1);
+	}
+
+	private MockHttpServletRequest postProcess(MockHttpServletRequest request) {
+		if (this.parentPostProcessor != null) {
+			request = this.parentPostProcessor.postProcessRequest(request);
+		}
+		if (this.forwardPostProcessor != null) {
+			request = this.forwardPostProcessor.postProcessRequest(request);
+		}
+		return request;
 	}
 
 	private void parent(MockHttpServletRequest request, @Nullable RequestBuilder parent) {
@@ -214,30 +210,50 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		}
 	}
 
-	private void ports(UriComponents uriComponents, MockHttpServletRequest request) {
-		int serverPort = uriComponents.getPort();
-		request.setServerPort(serverPort);
-		if (serverPort == -1) {
-			int portConnection = this.webRequest.getUrl().getDefaultPort();
-			request.setLocalPort(serverPort);
-			request.setRemotePort(portConnection);
-		}
-		else {
-			request.setRemotePort(serverPort);
-		}
+	/**
+	 * Set the contextPath to be used.
+	 * <p>The value may be null in which case the first path segment of the
+	 * URL is turned into the contextPath. Otherwise it must conform to
+	 * {@link HttpServletRequest#getContextPath()} which states it can be
+	 * an empty string, or it must start with a "/" and not end with a "/".
+	 * @param contextPath a valid contextPath
+	 * @throws IllegalArgumentException if the contextPath is not a valid
+	 * {@link HttpServletRequest#getContextPath()}
+	 */
+	public void setContextPath(@Nullable String contextPath) {
+		MockMvcWebConnection.validateContextPath(contextPath);
+		this.contextPath = contextPath;
+	}
+
+	public void setForwardPostProcessor(RequestPostProcessor forwardPostProcessor) {
+		this.forwardPostProcessor = forwardPostProcessor;
 	}
 
 	private void authType(MockHttpServletRequest request) {
-		String authorization = getHeader("Authorization");
+		String authorization = header("Authorization");
 		String[] authSplit = StringUtils.split(authorization, ": ");
 		if (authSplit != null) {
 			request.setAuthType(authSplit[0]);
 		}
 	}
 
-	@Nullable
-	private String getHeader(String headerName) {
-		return this.webRequest.getAdditionalHeaders().get(headerName);
+	private void content(MockHttpServletRequest request, Charset charset) {
+		String requestBody = this.webRequest.getRequestBody();
+		if (requestBody == null) {
+			return;
+		}
+		request.setContent(requestBody.getBytes(charset));
+	}
+
+	private void contentType(MockHttpServletRequest request) {
+		String contentType = header("Content-Type");
+		if (contentType == null) {
+			FormEncodingType encodingType = this.webRequest.getEncodingType();
+			if (encodingType != null) {
+				contentType = encodingType.getName();
+			}
+		}
+		request.setContentType(contentType != null ? contentType : MediaType.ALL_VALUE);
 	}
 
 	private void contextPath(MockHttpServletRequest request, UriComponents uriComponents) {
@@ -259,37 +275,10 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		}
 	}
 
-	private void servletPath(UriComponents uriComponents, MockHttpServletRequest request) {
-		String path = uriComponents.getPath();
-		String requestPath = (path != null ? path : "");
-		String servletPath = requestPath.substring(request.getContextPath().length());
-		servletPath = UriUtils.decode(servletPath, StandardCharsets.UTF_8);
-		request.setServletPath(servletPath);
-	}
-
-	private void content(MockHttpServletRequest request, Charset charset) {
-		String requestBody = this.webRequest.getRequestBody();
-		if (requestBody == null) {
-			return;
-		}
-		request.setContent(requestBody.getBytes(charset));
-	}
-
-	private void contentType(MockHttpServletRequest request) {
-		String contentType = getHeader("Content-Type");
-		if (contentType == null) {
-			FormEncodingType encodingType = this.webRequest.getEncodingType();
-			if (encodingType != null) {
-				contentType = encodingType.getName();
-			}
-		}
-		request.setContentType(contentType != null ? contentType : MediaType.ALL_VALUE);
-	}
-
 	private void cookies(MockHttpServletRequest request) {
 		List<Cookie> cookies = new ArrayList<>();
 
-		String cookieHeaderValue = getHeader("Cookie");
+		String cookieHeaderValue = header("Cookie");
 		if (cookieHeaderValue != null) {
 			StringTokenizer tokens = new StringTokenizer(cookieHeaderValue, "=;");
 			while (tokens.hasMoreTokens()) {
@@ -325,6 +314,15 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		}
 	}
 
+	@Nullable
+	private String header(String headerName) {
+		return this.webRequest.getAdditionalHeaders().get(headerName);
+	}
+
+	private void headers(MockHttpServletRequest request) {
+		this.webRequest.getAdditionalHeaders().forEach(request::addHeader);
+	}
+
 	private MockHttpSession httpSession(MockHttpServletRequest request, final String sessionid) {
 		MockHttpSession session;
 		synchronized (this.sessions) {
@@ -345,11 +343,11 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	}
 
 	private void addSessionCookie(MockHttpServletRequest request, String sessionid) {
-		this.webClient.getCookieManager().addCookie(createCookie(request, sessionid));
+		getCookieManager().addCookie(createCookie(request, sessionid));
 	}
 
 	private void removeSessionCookie(MockHttpServletRequest request, String sessionid) {
-		this.webClient.getCookieManager().removeCookie(createCookie(request, sessionid));
+		getCookieManager().removeCookie(createCookie(request, sessionid));
 	}
 
 	private com.gargoylesoftware.htmlunit.util.Cookie createCookie(MockHttpServletRequest request, String sessionid) {
@@ -358,7 +356,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	}
 
 	private void locales(MockHttpServletRequest request) {
-		String locale = getHeader("Accept-Language");
+		String locale = header("Accept-Language");
 		if (locale == null) {
 			request.addPreferredLocale(Locale.getDefault());
 		}
@@ -373,7 +371,8 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			});
 		});
 		for (NameValuePair param : this.webRequest.getRequestParameters()) {
-			if (param instanceof KeyDataPair pair) {
+			if (param instanceof KeyDataPair) {
+				KeyDataPair pair = (KeyDataPair) param;
 				File file = pair.getFile();
 				MockPart part;
 				if (file != null) {
@@ -399,7 +398,12 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	}
 
 	private String urlDecode(String value) {
-		return URLDecoder.decode(value, StandardCharsets.UTF_8);
+		try {
+			return URLDecoder.decode(value, "UTF-8");
+		}
+		catch (UnsupportedEncodingException ex) {
+			throw new IllegalStateException(ex);
+		}
 	}
 
 	private byte[] readAllBytes(File file) {
@@ -411,18 +415,36 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		}
 	}
 
-	private MockHttpServletRequest postProcess(MockHttpServletRequest request) {
-		if (this.parentPostProcessor != null) {
-			request = this.parentPostProcessor.postProcessRequest(request);
-		}
-		if (this.forwardPostProcessor != null) {
-			request = this.forwardPostProcessor.postProcessRequest(request);
-		}
-		return request;
+	private void servletPath(MockHttpServletRequest request, String requestPath) {
+		String servletPath = requestPath.substring(request.getContextPath().length());
+		request.setServletPath(servletPath);
 	}
 
+	private void servletPath(UriComponents uriComponents, MockHttpServletRequest request) {
+		if ("".equals(request.getPathInfo())) {
+			request.setPathInfo(null);
+		}
+		String path = uriComponents.getPath();
+		servletPath(request, (path != null ? path : ""));
+	}
 
-	/* Mergeable methods */
+	private void ports(UriComponents uriComponents, MockHttpServletRequest request) {
+		int serverPort = uriComponents.getPort();
+		request.setServerPort(serverPort);
+		if (serverPort == -1) {
+			int portConnection = this.webRequest.getUrl().getDefaultPort();
+			request.setLocalPort(serverPort);
+			request.setRemotePort(portConnection);
+		}
+		else {
+			request.setRemotePort(serverPort);
+		}
+	}
+
+	private UriComponents uriComponents() {
+		URL url = this.webRequest.getUrl();
+		return UriComponentsBuilder.fromUriString(url.toExternalForm()).build();
+	}
 
 	@Override
 	public boolean isMergeEnabled() {
@@ -445,6 +467,10 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			}
 		}
 		return this;
+	}
+
+	private CookieManager getCookieManager() {
+		return this.webClient.getCookieManager();
 	}
 
 

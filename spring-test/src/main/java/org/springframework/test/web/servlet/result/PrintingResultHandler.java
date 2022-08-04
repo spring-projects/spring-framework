@@ -22,9 +22,9 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.http.HttpHeaders;
@@ -181,7 +181,8 @@ public class PrintingResultHandler implements ResultHandler {
 			this.printer.printValue("Type", null);
 		}
 		else {
-			if (handler instanceof HandlerMethod handlerMethod) {
+			if (handler instanceof HandlerMethod) {
+				HandlerMethod handlerMethod = (HandlerMethod) handler;
 				this.printer.printValue("Type", handlerMethod.getBeanType().getName());
 				this.printer.printValue("Method", handlerMethod);
 			}

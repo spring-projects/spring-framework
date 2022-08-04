@@ -20,7 +20,6 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer;
 
 import org.springframework.http.server.reactive.JettyHttpHandlerAdapter;
 import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
@@ -47,7 +46,6 @@ public class JettyHttpServer extends AbstractHttpServer {
 
 		this.contextHandler = new ServletContextHandler(this.jettyServer, "", false, false);
 		this.contextHandler.addServlet(servletHolder, "/");
-		this.contextHandler.addServletContainerInitializer(new JettyWebSocketServletContainerInitializer());
 		this.contextHandler.start();
 
 		ServerConnector connector = new ServerConnector(this.jettyServer);

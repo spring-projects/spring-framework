@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,9 +35,6 @@ public abstract class KotlinDetector {
 	@Nullable
 	private static final Class<? extends Annotation> kotlinMetadata;
 
-	// For ConstantFieldFeature compliance, otherwise could be deduced from kotlinMetadata
-	private static final boolean kotlinPresent;
-
 	private static final boolean kotlinReflectPresent;
 
 	static {
@@ -51,7 +48,6 @@ public abstract class KotlinDetector {
 			metadata = null;
 		}
 		kotlinMetadata = (Class<? extends Annotation>) metadata;
-		kotlinPresent = (kotlinMetadata != null);
 		kotlinReflectPresent = ClassUtils.isPresent("kotlin.reflect.full.KClasses", classLoader);
 	}
 
@@ -60,7 +56,7 @@ public abstract class KotlinDetector {
 	 * Determine whether Kotlin is present in general.
 	 */
 	public static boolean isKotlinPresent() {
-		return kotlinPresent;
+		return (kotlinMetadata != null);
 	}
 
 	/**

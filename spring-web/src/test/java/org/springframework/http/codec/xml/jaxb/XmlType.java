@@ -19,7 +19,7 @@ package org.springframework.http.codec.xml.jaxb;
 /**
  * @author Arjen Poutsma
  */
-@jakarta.xml.bind.annotation.XmlType
+@javax.xml.bind.annotation.XmlType
 public class XmlType {
 
 }

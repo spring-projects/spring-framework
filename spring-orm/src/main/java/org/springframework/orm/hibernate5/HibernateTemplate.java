@@ -25,7 +25,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import jakarta.persistence.PersistenceException;
+import javax.persistence.PersistenceException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;

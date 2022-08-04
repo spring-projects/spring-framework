@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -370,9 +370,10 @@ public class FormattingConversionService extends GenericConversionService
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof AnnotationConverterKey otherKey)) {
+			if (!(other instanceof AnnotationConverterKey)) {
 				return false;
 			}
+			AnnotationConverterKey otherKey = (AnnotationConverterKey) other;
 			return (this.fieldType == otherKey.fieldType && this.annotation.equals(otherKey.annotation));
 		}
 

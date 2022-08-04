@@ -16,8 +16,8 @@
 
 package org.springframework.mock.web;
 
-import jakarta.servlet.http.HttpServletMapping;
-import jakarta.servlet.http.MappingMatch;
+import javax.servlet.http.HttpServletMapping;
+import javax.servlet.http.MappingMatch;
 
 import org.springframework.lang.Nullable;
 

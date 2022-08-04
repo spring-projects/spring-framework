@@ -18,8 +18,8 @@ package org.springframework.web.util;
 
 import java.beans.Introspector;
 
-import jakarta.servlet.ServletContextEvent;
-import jakarta.servlet.ServletContextListener;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 
 import org.springframework.beans.CachedIntrospectionResults;
 

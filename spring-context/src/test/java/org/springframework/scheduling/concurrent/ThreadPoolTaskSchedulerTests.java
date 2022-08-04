@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.scheduling.concurrent;
 
-import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -24,7 +23,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
@@ -41,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Sam Brannen
  * @since 3.0
  */
-class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutorTests {
+public class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutorTests {
 
 	private final ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
 
@@ -89,7 +87,6 @@ class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void scheduleOneTimeTask() throws Exception {
 		TestTask task = new TestTask(this.testName, 1);
 		Future<?> future = scheduler.schedule(task, new Date());
@@ -100,7 +97,6 @@ class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void scheduleOneTimeFailingTaskWithoutErrorHandler() throws Exception {
 		TestTask task = new TestTask(this.testName, 0);
 		Future<?> future = scheduler.schedule(task, new Date());
@@ -109,7 +105,6 @@ class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void scheduleOneTimeFailingTaskWithErrorHandler() throws Exception {
 		TestTask task = new TestTask(this.testName, 0);
 		TestErrorHandler errorHandler = new TestErrorHandler(1);
@@ -121,14 +116,21 @@ class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutorTests {
 		assertThat(errorHandler.lastError).isNotNull();
 	}
 
-	@RepeatedTest(20)
-	void scheduleMultipleTriggerTasks() throws Exception {
+	@Test
+	void scheduleTriggerTask() throws Exception {
 		TestTask task = new TestTask(this.testName, 3);
 		Future<?> future = scheduler.schedule(task, new TestTrigger(3));
 		Object result = future.get(1000, TimeUnit.MILLISECONDS);
 		assertThat(result).isNull();
 		await(task);
 		assertThreadNamePrefix(task);
+	}
+
+	@Test
+	void scheduleMultipleTriggerTasks() throws Exception {
+		for (int i = 0; i < 100; i++) {
+			scheduleTriggerTask();
+		}
 	}
 
 
@@ -180,11 +182,11 @@ class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutorTests {
 		}
 
 		@Override
-		public Instant nextExecution(TriggerContext triggerContext) {
+		public Date nextExecutionTime(TriggerContext triggerContext) {
 			if (this.actualRunCount.incrementAndGet() > this.maxRunCount) {
 				return null;
 			}
-			return Instant.now();
+			return new Date();
 		}
 	}
 

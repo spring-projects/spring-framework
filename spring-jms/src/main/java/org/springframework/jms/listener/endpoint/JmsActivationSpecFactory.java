@@ -16,8 +16,8 @@
 
 package org.springframework.jms.listener.endpoint;
 
-import jakarta.resource.spi.ActivationSpec;
-import jakarta.resource.spi.ResourceAdapter;
+import javax.resource.spi.ActivationSpec;
+import javax.resource.spi.ResourceAdapter;
 
 /**
  * Strategy interface for creating JCA 1.5 ActivationSpec objects
@@ -32,7 +32,7 @@ import jakarta.resource.spi.ResourceAdapter;
  * @since 2.5
  * @see JmsActivationSpecConfig
  * @see JmsMessageEndpointManager#setActivationSpecFactory
- * @see jakarta.resource.spi.ResourceAdapter#endpointActivation
+ * @see javax.resource.spi.ResourceAdapter#endpointActivation
  */
 public interface JmsActivationSpecFactory {
 

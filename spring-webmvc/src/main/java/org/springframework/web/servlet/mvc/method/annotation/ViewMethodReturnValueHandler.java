@@ -50,7 +50,8 @@ public class ViewMethodReturnValueHandler implements HandlerMethodReturnValueHan
 	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
-		if (returnValue instanceof View view) {
+		if (returnValue instanceof View) {
+			View view = (View) returnValue;
 			mavContainer.setView(view);
 			if (view instanceof SmartView && ((SmartView) view).isRedirectView()) {
 				mavContainer.setRedirectModelScenario(true);

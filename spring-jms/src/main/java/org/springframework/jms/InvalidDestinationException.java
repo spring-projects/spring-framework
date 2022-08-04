@@ -21,12 +21,12 @@ package org.springframework.jms;
  *
  * @author Mark Pollack
  * @since 1.1
- * @see jakarta.jms.InvalidDestinationException
+ * @see javax.jms.InvalidDestinationException
  */
 @SuppressWarnings("serial")
 public class InvalidDestinationException extends JmsException {
 
-	public InvalidDestinationException(jakarta.jms.InvalidDestinationException cause) {
+	public InvalidDestinationException(javax.jms.InvalidDestinationException cause) {
 		super(cause);
 	}
 

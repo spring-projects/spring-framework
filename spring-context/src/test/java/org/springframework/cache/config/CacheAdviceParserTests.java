@@ -21,20 +21,19 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.context.support.GenericXmlApplicationContext;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * AOP advice specific parsing tests.
  *
  * @author Stephane Nicoll
  */
-class CacheAdviceParserTests {
+public class CacheAdviceParserTests {
 
 	@Test
-	void keyAndKeyGeneratorCannotBeSetTogether() {
-		assertThatThrownBy(() -> new GenericXmlApplicationContext(
-				"/org/springframework/cache/config/cache-advice-invalid.xml")
-		).isInstanceOf(BeanDefinitionStoreException.class);
+	public void keyAndKeyGeneratorCannotBeSetTogether() {
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
+				new GenericXmlApplicationContext("/org/springframework/cache/config/cache-advice-invalid.xml"));
 		// TODO better exception handling
 	}
 

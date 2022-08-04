@@ -16,10 +16,10 @@
 
 package org.springframework.test.context.transaction.ejb.dao;
 
-import jakarta.ejb.Local;
-import jakarta.ejb.Stateless;
-import jakarta.ejb.TransactionAttribute;
-import jakarta.ejb.TransactionAttributeType;
+import javax.ejb.Local;
+import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 /**
  * EJB implementation of {@link TestEntityDao} which declares transaction

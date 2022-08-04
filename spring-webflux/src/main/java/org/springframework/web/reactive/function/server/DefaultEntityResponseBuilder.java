@@ -35,7 +35,6 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.codec.HttpMessageWriter;
@@ -61,7 +60,7 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 
 	private final BodyInserter<T, ? super ServerHttpResponse> inserter;
 
-	private HttpStatusCode status = HttpStatus.OK;
+	private int status = HttpStatus.OK.value();
 
 	private final HttpHeaders headers = new HttpHeaders();
 
@@ -77,15 +76,16 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 
 
 	@Override
-	public EntityResponse.Builder<T> status(HttpStatusCode status) {
-		Assert.notNull(status, "HttpStatusCode must not be null");
-		this.status = status;
+	public EntityResponse.Builder<T> status(HttpStatus status) {
+		Assert.notNull(status, "HttpStatus must not be null");
+		this.status = status.value();
 		return this;
 	}
 
 	@Override
 	public EntityResponse.Builder<T> status(int status) {
-		return status(HttpStatusCode.valueOf(status));
+		this.status = status;
+		return this;
 	}
 
 	@Override
@@ -195,7 +195,7 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 
 	@Override
 	public Mono<EntityResponse<T>> build() {
-		return Mono.just(new DefaultEntityResponse<>(
+		return Mono.just(new DefaultEntityResponse<T>(
 				this.status, this.headers, this.cookies, this.entity, this.inserter, this.hints));
 	}
 
@@ -209,7 +209,7 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 		private final BodyInserter<T, ? super ServerHttpResponse> inserter;
 
 
-		public DefaultEntityResponse(HttpStatusCode statusCode, HttpHeaders headers,
+		public DefaultEntityResponse(int statusCode, HttpHeaders headers,
 				MultiValueMap<String, ResponseCookie> cookies, T entity,
 				BodyInserter<T, ? super ServerHttpResponse> inserter, Map<String, Object> hints) {
 

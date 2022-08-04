@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ import org.springframework.util.Assert;
  * track of connected users and their subscriptions.
  *
  * @author Rossen Stoyanchev
- * @author Sam Brannen
  * @since 4.2
  */
 public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicationListener {
@@ -106,8 +105,8 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 				return;
 			}
 			String name = user.getName();
-			if (user instanceof DestinationUserNameProvider destinationUserNameProvider) {
-				name = destinationUserNameProvider.getDestinationUserName();
+			if (user instanceof DestinationUserNameProvider) {
+				name = ((DestinationUserNameProvider) user).getDestinationUserName();
 			}
 			synchronized (this.sessionLock) {
 				LocalSimpUser simpUser = this.users.get(name);
@@ -239,7 +238,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 		@Override
 		public boolean equals(@Nullable Object other) {
 			return (this == other ||
-					(other instanceof SimpUser otherSimpUser && getName().equals(otherSimpUser.getName())));
+					(other instanceof SimpUser && getName().equals(((SimpUser) other).getName())));
 		}
 
 		@Override
@@ -295,7 +294,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 		@Override
 		public boolean equals(@Nullable Object other) {
 			return (this == other ||
-					(other instanceof SimpSubscription otherSubscription && getId().equals(otherSubscription.getId())));
+					(other instanceof SimpSubscription && getId().equals(((SimpSubscription) other).getId())));
 		}
 
 		@Override
@@ -347,9 +346,10 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof SimpSubscription otherSubscription)) {
+			if (!(other instanceof SimpSubscription)) {
 				return false;
 			}
+			SimpSubscription otherSubscription = (SimpSubscription) other;
 			return (getId().equals(otherSubscription.getId()) &&
 					getSession().getId().equals(otherSubscription.getSession().getId()));
 		}

@@ -16,7 +16,7 @@
 
 package org.springframework.context.index.sample.jpa;
 
-import jakarta.persistence.Embeddable;
+import javax.persistence.Embeddable;
 
 /**
  * Test candidate for {@link Embeddable}.

@@ -82,7 +82,7 @@ class HandlerMethodAnnotationDetectionTests {
 				// args(ParameterizedSubclassDoesNotOverrideConcreteImplementationsFromGenericAbstractSuperclass.class, true), // CGLIB proxy
 				// args(ParameterizedSubclassDoesNotOverrideConcreteImplementationsFromGenericAbstractSuperclass.class, false),
 
-				// args(InterfaceController.class, true), // JDK dynamic proxy (gh-22154: no longer supported))
+				args(InterfaceController.class, true), // JDK dynamic proxy
 				args(InterfaceController.class, false),
 
 				args(ParameterizedInterfaceController.class, false), // no AOP
@@ -259,7 +259,6 @@ class HandlerMethodAnnotationDetectionTests {
 	 * <p>JDK Dynamic proxy: All annotations must be on the interface.
 	 * <p>Without AOP: Annotations can be on interface methods except parameter annotations.
 	 */
-	@Controller
 	static class InterfaceController implements MappingInterface {
 
 		@Override
@@ -453,7 +452,6 @@ class HandlerMethodAnnotationDetectionTests {
 	 * <p>All annotations can be on interface except parameter annotations.
 	 * <p>Cannot be used as JDK dynamic proxy since parameterized interface does not contain type information.
 	 */
-	@Controller
 	static class ParameterizedInterfaceController implements MappingGenericInterface<String, Date, Date> {
 
 		@Override

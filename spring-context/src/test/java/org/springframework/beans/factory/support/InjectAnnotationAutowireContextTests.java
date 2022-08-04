@@ -21,9 +21,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import jakarta.inject.Qualifier;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Qualifier;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.scope.ScopedProxyUtils;
@@ -39,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * Integration tests for handling JSR-303 {@link jakarta.inject.Qualifier} annotations.
+ * Integration tests for handling JSR-303 {@link javax.inject.Qualifier} annotations.
  *
  * @author Juergen Hoeller
  * @since 3.0

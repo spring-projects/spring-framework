@@ -109,15 +109,15 @@ public abstract class AbstractTransactionalDatabaseClientIntegrationTests  {
 
 	@Test
 	public void executeInsertInTransaction() {
-		Flux<Long> longFlux = databaseClient
+		Flux<Integer> integerFlux = databaseClient
 				.sql(getInsertIntoLegosetStatement())
 				.bind(0, 42055)
 				.bind(1, "SCHAUFELRADBAGGER")
 				.bindNull(2, Integer.class)
 				.fetch().rowsUpdated().flux().as(rxtx::transactional);
 
-		longFlux.as(StepVerifier::create)
-				.expectNext(1L)
+		integerFlux.as(StepVerifier::create)
+				.expectNext(1)
 				.verifyComplete();
 
 		databaseClient

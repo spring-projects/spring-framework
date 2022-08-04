@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.reactive.function.client.support;
 
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -40,20 +41,25 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Arjen Poutsma
  */
-class ClientResponseWrapperTests {
+public class ClientResponseWrapperTests {
 
-	private ClientResponse mockResponse = mock(ClientResponse.class);
+	private ClientResponse mockResponse;
 
-	private ClientResponseWrapper wrapper = new ClientResponseWrapper(mockResponse);
+	private ClientResponseWrapper wrapper;
 
+	@BeforeEach
+	public void createWrapper() {
+		this.mockResponse = mock(ClientResponse.class);
+		this.wrapper = new ClientResponseWrapper(mockResponse);
+	}
 
 	@Test
-	void response() {
+	public void response() {
 		assertThat(wrapper.response()).isSameAs(mockResponse);
 	}
 
 	@Test
-	void statusCode() {
+	public void statusCode() {
 		HttpStatus status = HttpStatus.BAD_REQUEST;
 		given(mockResponse.statusCode()).willReturn(status);
 
@@ -61,8 +67,7 @@ class ClientResponseWrapperTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	void rawStatusCode() {
+	public void rawStatusCode() {
 		int status = 999;
 		given(mockResponse.rawStatusCode()).willReturn(status);
 
@@ -70,7 +75,7 @@ class ClientResponseWrapperTests {
 	}
 
 	@Test
-	void headers() {
+	public void headers() {
 		ClientResponse.Headers headers = mock(ClientResponse.Headers.class);
 		given(mockResponse.headers()).willReturn(headers);
 
@@ -79,7 +84,7 @@ class ClientResponseWrapperTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	void cookies() {
+	public void cookies() {
 		MultiValueMap<String, ResponseCookie> cookies = mock(MultiValueMap.class);
 		given(mockResponse.cookies()).willReturn(cookies);
 
@@ -87,7 +92,7 @@ class ClientResponseWrapperTests {
 	}
 
 	@Test
-	void bodyExtractor() {
+	public void bodyExtractor() {
 		Mono<String> result = Mono.just("foo");
 		BodyExtractor<Mono<String>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(String.class);
 		given(mockResponse.body(extractor)).willReturn(result);
@@ -96,7 +101,7 @@ class ClientResponseWrapperTests {
 	}
 
 	@Test
-	void bodyToMonoClass() {
+	public void bodyToMonoClass() {
 		Mono<String> result = Mono.just("foo");
 		given(mockResponse.bodyToMono(String.class)).willReturn(result);
 
@@ -104,16 +109,16 @@ class ClientResponseWrapperTests {
 	}
 
 	@Test
-	void bodyToMonoParameterizedTypeReference() {
+	public void bodyToMonoParameterizedTypeReference() {
 		Mono<String> result = Mono.just("foo");
-		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<>() {};
+		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<String>() {};
 		given(mockResponse.bodyToMono(reference)).willReturn(result);
 
 		assertThat(wrapper.bodyToMono(reference)).isSameAs(result);
 	}
 
 	@Test
-	void bodyToFluxClass() {
+	public void bodyToFluxClass() {
 		Flux<String> result = Flux.just("foo");
 		given(mockResponse.bodyToFlux(String.class)).willReturn(result);
 
@@ -121,16 +126,16 @@ class ClientResponseWrapperTests {
 	}
 
 	@Test
-	void bodyToFluxParameterizedTypeReference() {
+	public void bodyToFluxParameterizedTypeReference() {
 		Flux<String> result = Flux.just("foo");
-		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<>() {};
+		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<String>() {};
 		given(mockResponse.bodyToFlux(reference)).willReturn(result);
 
 		assertThat(wrapper.bodyToFlux(reference)).isSameAs(result);
 	}
 
 	@Test
-	void toEntityClass() {
+	public void toEntityClass() {
 		Mono<ResponseEntity<String>> result = Mono.just(new ResponseEntity<>("foo", HttpStatus.OK));
 		given(mockResponse.toEntity(String.class)).willReturn(result);
 
@@ -138,16 +143,16 @@ class ClientResponseWrapperTests {
 	}
 
 	@Test
-	void toEntityParameterizedTypeReference() {
+	public void toEntityParameterizedTypeReference() {
 		Mono<ResponseEntity<String>> result = Mono.just(new ResponseEntity<>("foo", HttpStatus.OK));
-		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<>() {};
+		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<String>() {};
 		given(mockResponse.toEntity(reference)).willReturn(result);
 
 		assertThat(wrapper.toEntity(reference)).isSameAs(result);
 	}
 
 	@Test
-	void toEntityListClass() {
+	public void toEntityListClass() {
 		Mono<ResponseEntity<List<String>>> result = Mono.just(new ResponseEntity<>(singletonList("foo"), HttpStatus.OK));
 		given(mockResponse.toEntityList(String.class)).willReturn(result);
 
@@ -155,9 +160,9 @@ class ClientResponseWrapperTests {
 	}
 
 	@Test
-	void toEntityListParameterizedTypeReference() {
+	public void toEntityListParameterizedTypeReference() {
 		Mono<ResponseEntity<List<String>>> result = Mono.just(new ResponseEntity<>(singletonList("foo"), HttpStatus.OK));
-		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<>() {};
+		ParameterizedTypeReference<String> reference = new ParameterizedTypeReference<String>() {};
 		given(mockResponse.toEntityList(reference)).willReturn(result);
 
 		assertThat(wrapper.toEntityList(reference)).isSameAs(result);

@@ -26,8 +26,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.Part;
+import javax.servlet.ServletContext;
+import javax.servlet.http.Part;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -136,7 +136,8 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 		}
 		if (parent instanceof MockHttpServletRequestBuilder) {
 			super.merge(parent);
-			if (parent instanceof MockMultipartHttpServletRequestBuilder parentBuilder) {
+			if (parent instanceof MockMultipartHttpServletRequestBuilder) {
+				MockMultipartHttpServletRequestBuilder parentBuilder = (MockMultipartHttpServletRequestBuilder) parent;
 				this.files.addAll(parentBuilder.files);
 				parentBuilder.parts.keySet().forEach(name ->
 						this.parts.putIfAbsent(name, parentBuilder.parts.get(name)));

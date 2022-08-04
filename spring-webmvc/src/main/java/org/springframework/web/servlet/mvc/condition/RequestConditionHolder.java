@@ -19,7 +19,7 @@ package org.springframework.web.servlet.mvc.condition;
 import java.util.Collection;
 import java.util.Collections;
 
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
 

@@ -8,14 +8,7 @@ sourceSets.main.java.srcDirs = files()
 sourceSets.test.aspectj.srcDir "src/test/java"
 sourceSets.test.java.srcDirs = files()
 
-compileAspectj {
-	sourceCompatibility "17"
-	targetCompatibility "17"
-}
-compileTestAspectj {
-	sourceCompatibility "17"
-	targetCompatibility "17"
-}
+aspectj.version = dependencyManagement.managedVersions['org.aspectj:aspectjweaver']
 
 dependencies {
 	api("org.aspectj:aspectjweaver")
@@ -27,14 +20,14 @@ dependencies {
 	optional(project(":spring-orm"))  // for JPA exception translation support
 	optional(project(":spring-tx"))  // for JPA, @Transactional support
 	optional("javax.cache:cache-api")  // for JCache aspect
-	optional("jakarta.transaction:jakarta.transaction-api")  // for @jakarta.transaction.Transactional support
+	optional("javax.transaction:javax.transaction-api")  // for @javax.transaction.Transactional support
 	testImplementation(project(":spring-core"))  // for CodeStyleAspect
 	testImplementation(project(":spring-test"))
 	testImplementation(testFixtures(project(":spring-context")))
 	testImplementation(testFixtures(project(":spring-context-support")))
 	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation(testFixtures(project(":spring-tx")))
-	testImplementation("jakarta.mail:jakarta.mail-api")
+	testImplementation("javax.mail:javax.mail-api")
 	testCompileOnly("org.aspectj:aspectjrt")
 }
 

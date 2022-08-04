@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.tags;
 
-import jakarta.servlet.jsp.JspTagException;
+import javax.servlet.jsp.JspTagException;
 
 import org.springframework.lang.Nullable;
 

@@ -16,7 +16,7 @@
 
 package org.springframework.jms.listener.adapter;
 
-import jakarta.jms.TextMessage;
+import javax.jms.TextMessage;
 
 /**
  * See the MessageListenerAdapterTests class for usage.

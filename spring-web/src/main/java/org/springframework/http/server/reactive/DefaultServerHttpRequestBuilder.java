@@ -45,9 +45,9 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 	private URI uri;
 
-	private final HttpHeaders headers;
+	private HttpHeaders headers;
 
-	private HttpMethod httpMethod;
+	private String httpMethodValue;
 
 	@Nullable
 	private String uriPath;
@@ -61,7 +61,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 	@Nullable
 	private InetSocketAddress remoteAddress;
 
-	private final Flux<DataBuffer> body;
+	private Flux<DataBuffer> body;
 
 	private final ServerHttpRequest originalRequest;
 
@@ -71,7 +71,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 		this.uri = original.getURI();
 		this.headers = HttpHeaders.writableHttpHeaders(original.getHeaders());
-		this.httpMethod = original.getMethod();
+		this.httpMethodValue = original.getMethodValue();
 		this.contextPath = original.getPath().contextPath().value();
 		this.remoteAddress = original.getRemoteAddress();
 		this.body = original.getBody();
@@ -81,8 +81,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 	@Override
 	public ServerHttpRequest.Builder method(HttpMethod httpMethod) {
-		Assert.notNull(httpMethod, "HttpMethod must not be null");
-		this.httpMethod = httpMethod;
+		this.httpMethodValue = httpMethod.name();
 		return this;
 	}
 
@@ -133,7 +132,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 	@Override
 	public ServerHttpRequest build() {
 		return new MutatedServerHttpRequest(getUriToUse(), this.contextPath,
-				this.httpMethod, this.sslInfo, this.remoteAddress, this.headers, this.body, this.originalRequest);
+				this.httpMethodValue, this.sslInfo, this.remoteAddress, this.headers, this.body, this.originalRequest);
 	}
 
 	private URI getUriToUse() {
@@ -177,13 +176,13 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 	private static class MutatedServerHttpRequest extends AbstractServerHttpRequest {
 
-		private final HttpMethod method;
+		private final String methodValue;
 
 		@Nullable
 		private final SslInfo sslInfo;
 
 		@Nullable
-		private final InetSocketAddress remoteAddress;
+		private InetSocketAddress remoteAddress;
 
 		private final Flux<DataBuffer> body;
 
@@ -191,11 +190,11 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 
 		public MutatedServerHttpRequest(URI uri, @Nullable String contextPath,
-				HttpMethod method, @Nullable SslInfo sslInfo, @Nullable InetSocketAddress remoteAddress,
+				String methodValue, @Nullable SslInfo sslInfo, @Nullable InetSocketAddress remoteAddress,
 				HttpHeaders headers, Flux<DataBuffer> body, ServerHttpRequest originalRequest) {
 
 			super(uri, contextPath, headers);
-			this.method = method;
+			this.methodValue = methodValue;
 			this.remoteAddress = (remoteAddress != null ? remoteAddress : originalRequest.getRemoteAddress());
 			this.sslInfo = (sslInfo != null ? sslInfo : originalRequest.getSslInfo());
 			this.body = body;
@@ -203,14 +202,8 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		}
 
 		@Override
-		public HttpMethod getMethod() {
-			return this.method;
-		}
-
-		@Override
-		@Deprecated
 		public String getMethodValue() {
-			return this.method.name();
+			return this.methodValue;
 		}
 
 		@Override

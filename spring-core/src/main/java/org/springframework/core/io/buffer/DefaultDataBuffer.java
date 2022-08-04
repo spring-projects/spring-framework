@@ -19,6 +19,7 @@ package org.springframework.core.io.buffer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -332,14 +333,18 @@ public class DefaultDataBuffer implements DataBuffer {
 	public DefaultDataBuffer slice(int index, int length) {
 		checkIndex(index, length);
 		int oldPosition = this.byteBuffer.position();
+		// Explicit access via Buffer base type for compatibility
+		// with covariant return type on JDK 9's ByteBuffer...
+		Buffer buffer = this.byteBuffer;
 		try {
-			this.byteBuffer.position(index);
+			buffer.position(index);
 			ByteBuffer slice = this.byteBuffer.slice();
+			// Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer
 			slice.limit(length);
 			return new SlicedDefaultDataBuffer(slice, this.dataBufferFactory, length);
 		}
 		finally {
-			this.byteBuffer.position(oldPosition);
+			buffer.position(oldPosition);
 		}
 	}
 
@@ -353,8 +358,11 @@ public class DefaultDataBuffer implements DataBuffer {
 		checkIndex(index, length);
 
 		ByteBuffer duplicate = this.byteBuffer.duplicate();
-		duplicate.position(index);
-		duplicate.limit(index + length);
+		// Explicit access via Buffer base type for compatibility
+		// with covariant return type on JDK 9's ByteBuffer...
+		Buffer buffer = duplicate;
+		buffer.position(index);
+		buffer.limit(index + length);
 		return duplicate.slice();
 	}
 
@@ -431,9 +439,10 @@ public class DefaultDataBuffer implements DataBuffer {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof DefaultDataBuffer otherBuffer)) {
+		if (!(other instanceof DefaultDataBuffer)) {
 			return false;
 		}
+		DefaultDataBuffer otherBuffer = (DefaultDataBuffer) other;
 		return (this.readPosition == otherBuffer.readPosition &&
 				this.writePosition == otherBuffer.writePosition &&
 				this.byteBuffer.equals(otherBuffer.byteBuffer));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -287,10 +287,9 @@ class TransactionalTestExecutionListenerTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	private @interface MetaTxWithOverride {
 
-		@AliasFor(annotation = Transactional.class)
+		@AliasFor(annotation = Transactional.class, attribute = "value")
 		String transactionManager() default "";
 
-		@AliasFor(annotation = Transactional.class)
 		Propagation propagation() default REQUIRED;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,8 @@ import org.springframework.web.servlet.view.groovy.GroovyMarkupConfigurer;
 import org.springframework.web.servlet.view.groovy.GroovyMarkupViewResolver;
 import org.springframework.web.servlet.view.script.ScriptTemplateConfigurer;
 import org.springframework.web.servlet.view.script.ScriptTemplateViewResolver;
+import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
+import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
 
 /**
  * Assist with the configuration of a chain of
@@ -53,10 +55,10 @@ import org.springframework.web.servlet.view.script.ScriptTemplateViewResolver;
 public class ViewResolverRegistry {
 
 	@Nullable
-	private final ContentNegotiationManager contentNegotiationManager;
+	private ContentNegotiationManager contentNegotiationManager;
 
 	@Nullable
-	private final ApplicationContext applicationContext;
+	private ApplicationContext applicationContext;
 
 	@Nullable
 	private ContentNegotiatingViewResolver contentNegotiatingResolver;
@@ -161,6 +163,22 @@ public class ViewResolverRegistry {
 		resolver.setSuffix(suffix);
 		this.viewResolvers.add(resolver);
 		return new UrlBasedViewResolverRegistration(resolver);
+	}
+
+	/**
+	 * Register Tiles 3.x view resolver.
+	 * <p><strong>Note</strong> that you must also configure Tiles by adding a
+	 * {@link org.springframework.web.servlet.view.tiles3.TilesConfigurer} bean.
+	 */
+	public UrlBasedViewResolverRegistration tiles() {
+		if (!checkBeanOfType(TilesConfigurer.class)) {
+			throw new BeanInitializationException("In addition to a Tiles view resolver " +
+					"there must also be a single TilesConfigurer bean in this web application context " +
+					"(or its parent).");
+		}
+		TilesRegistration registration = new TilesRegistration();
+		this.viewResolvers.add(registration.getViewResolver());
+		return registration;
 	}
 
 	/**
@@ -273,6 +291,13 @@ public class ViewResolverRegistry {
 		}
 	}
 
+
+	private static class TilesRegistration extends UrlBasedViewResolverRegistration {
+
+		public TilesRegistration() {
+			super(new TilesViewResolver());
+		}
+	}
 
 	private static class FreeMarkerRegistration extends UrlBasedViewResolverRegistration {
 

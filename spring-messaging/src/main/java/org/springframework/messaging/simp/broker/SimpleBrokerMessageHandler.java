@@ -17,7 +17,6 @@
 package org.springframework.messaging.simp.broker;
 
 import java.security.Principal;
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -255,8 +254,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	public void startInternal() {
 		publishBrokerAvailableEvent();
 		if (this.taskScheduler != null) {
-			Duration interval = initHeartbeatTaskDelay();
-			if (interval.toMillis() > 0) {
+			long interval = initHeartbeatTaskDelay();
+			if (interval > 0) {
 				this.heartbeatFuture = this.taskScheduler.scheduleWithFixedDelay(new HeartbeatTask(), interval);
 			}
 		}
@@ -267,15 +266,15 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		}
 	}
 
-	private Duration initHeartbeatTaskDelay() {
+	private long initHeartbeatTaskDelay() {
 		if (getHeartbeatValue() == null) {
-			return Duration.ZERO;
+			return 0;
 		}
 		else if (getHeartbeatValue()[0] > 0 && getHeartbeatValue()[1] > 0) {
-			return Duration.ofMillis(Math.min(getHeartbeatValue()[0], getHeartbeatValue()[1]));
+			return Math.min(getHeartbeatValue()[0], getHeartbeatValue()[1]);
 		}
 		else {
-			return Duration.ofMillis(getHeartbeatValue()[0] > 0 ? getHeartbeatValue()[0] : getHeartbeatValue()[1]);
+			return (getHeartbeatValue()[0] > 0 ? getHeartbeatValue()[0] : getHeartbeatValue()[1]);
 		}
 	}
 

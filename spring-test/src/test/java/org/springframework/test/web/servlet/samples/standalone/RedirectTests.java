@@ -16,7 +16,8 @@
 
 package org.springframework.test.web.servlet.samples.standalone;
 
-import jakarta.validation.Valid;
+import javax.validation.Valid;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

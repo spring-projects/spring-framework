@@ -72,7 +72,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	 * the {@code application/json} MIME type with {@code UTF-8} character set.
 	 */
 	public MappingJackson2MessageConverter() {
-		super(new MimeType("application", "json"), new MimeType("application", "*+json"));
+		super(new MimeType("application", "json"));
 		this.objectMapper = initObjectMapper();
 	}
 
@@ -285,7 +285,8 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	 */
 	@Nullable
 	protected Class<?> getSerializationView(@Nullable Object conversionHint) {
-		if (conversionHint instanceof MethodParameter param) {
+		if (conversionHint instanceof MethodParameter) {
+			MethodParameter param = (MethodParameter) conversionHint;
 			JsonView annotation = (param.getParameterIndex() >= 0 ?
 					param.getParameterAnnotation(JsonView.class) : param.getMethodAnnotation(JsonView.class));
 			if (annotation != null) {

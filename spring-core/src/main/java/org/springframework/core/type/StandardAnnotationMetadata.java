@@ -143,24 +143,26 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationName) {
-		Set<MethodMetadata> result = new LinkedHashSet<>(4);
+		Set<MethodMetadata> annotatedMethods = null;
 		if (AnnotationUtils.isCandidateClass(getIntrospectedClass(), annotationName)) {
-			ReflectionUtils.doWithLocalMethods(getIntrospectedClass(), method -> {
-				if (isAnnotatedMethod(method, annotationName)) {
-					result.add(new StandardMethodMetadata(method, this.nestedAnnotationsAsMap));
+			try {
+				Method[] methods = ReflectionUtils.getDeclaredMethods(getIntrospectedClass());
+				for (Method method : methods) {
+					if (isAnnotatedMethod(method, annotationName)) {
+						if (annotatedMethods == null) {
+							annotatedMethods = new LinkedHashSet<>(4);
+						}
+						annotatedMethods.add(new StandardMethodMetadata(method, this.nestedAnnotationsAsMap));
+					}
 				}
-			});
+			}
+			catch (Throwable ex) {
+				throw new IllegalStateException("Failed to introspect annotated methods on " + getIntrospectedClass(), ex);
+			}
 		}
-		return result;
-	}
-
-	@Override
-	public Set<MethodMetadata> getDeclaredMethods() {
-		Set<MethodMetadata> result = new LinkedHashSet<>(16);
-		ReflectionUtils.doWithLocalMethods(getIntrospectedClass(), method ->
-				result.add(new StandardMethodMetadata(method, this.nestedAnnotationsAsMap)));
-		return result;
+		return (annotatedMethods != null ? annotatedMethods : Collections.emptySet());
 	}
 
 

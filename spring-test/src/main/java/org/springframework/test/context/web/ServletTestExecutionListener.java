@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 package org.springframework.test.context.web;
 
-import jakarta.servlet.ServletContext;
+import javax.servlet.ServletContext;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -188,7 +189,8 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 
 		ApplicationContext context = testContext.getApplicationContext();
 
-		if (context instanceof WebApplicationContext wac) {
+		if (context instanceof WebApplicationContext) {
+			WebApplicationContext wac = (WebApplicationContext) context;
 			ServletContext servletContext = wac.getServletContext();
 			Assert.state(servletContext instanceof MockServletContext, () -> String.format(
 						"The WebApplicationContext for test context %s must be configured with a MockServletContext.",
@@ -210,7 +212,9 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 			testContext.setAttribute(POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
 			testContext.setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
 
-			if (wac instanceof ConfigurableApplicationContext configurableApplicationContext) {
+			if (wac instanceof ConfigurableApplicationContext) {
+				@SuppressWarnings("resource")
+				ConfigurableApplicationContext configurableApplicationContext = (ConfigurableApplicationContext) wac;
 				ConfigurableListableBeanFactory bf = configurableApplicationContext.getBeanFactory();
 				bf.registerResolvableDependency(MockHttpServletResponse.class, response);
 				bf.registerResolvableDependency(ServletWebRequest.class, servletWebRequest);

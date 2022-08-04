@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import jakarta.servlet.ServletRequest;
+import javax.servlet.ServletRequest;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpAsyncRequestControl;

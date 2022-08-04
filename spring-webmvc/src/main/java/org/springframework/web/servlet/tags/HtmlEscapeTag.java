@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.tags;
 
-import jakarta.servlet.jsp.JspException;
+import javax.servlet.jsp.JspException;
 
 /**
  * The {@code <htmlEscape>} tag sets default HTML escape value for the current

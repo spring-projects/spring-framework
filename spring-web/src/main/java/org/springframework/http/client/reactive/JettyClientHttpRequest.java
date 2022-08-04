@@ -54,6 +54,7 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 	private final ReactiveRequest.Builder builder;
 
 
+
 	public JettyClientHttpRequest(Request jettyRequest, DataBufferFactory bufferFactory) {
 		this.jettyRequest = jettyRequest;
 		this.bufferFactory = bufferFactory;
@@ -135,12 +136,10 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 	@Override
 	protected void applyHeaders() {
 		HttpHeaders headers = getHeaders();
-		this.jettyRequest.headers(fields -> {
-			headers.forEach((key, value) -> value.forEach(v -> fields.add(key, v)));
-			if (!headers.containsKey(HttpHeaders.ACCEPT)) {
-				fields.add(HttpHeaders.ACCEPT, "*/*");
-			}
-		});
+		headers.forEach((key, value) -> value.forEach(v -> this.jettyRequest.header(key, v)));
+		if (!headers.containsKey(HttpHeaders.ACCEPT)) {
+			this.jettyRequest.header(HttpHeaders.ACCEPT, "*/*");
+		}
 	}
 
 	@Override

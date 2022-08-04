@@ -24,7 +24,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 /**
@@ -40,9 +39,6 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  * registering a {@link ScheduledAnnotationBeanPostProcessor}. This can be
  * done manually or, more conveniently, through the {@code <task:annotation-driven/>}
  * XML element or {@link EnableScheduling @EnableScheduling} annotation.
- *
- * <p>This annotation can be used as a <em>{@linkplain Repeatable repeatable}</em>
- * annotation.
  *
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em> with attribute overrides.
@@ -62,7 +58,6 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Repeatable(Schedules.class)
-@Reflective
 public @interface Scheduled {
 
 	/**

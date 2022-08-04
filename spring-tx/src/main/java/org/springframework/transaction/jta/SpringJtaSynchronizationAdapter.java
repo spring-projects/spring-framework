@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 package org.springframework.transaction.jta;
 
-import jakarta.transaction.Status;
-import jakarta.transaction.Synchronization;
-import jakarta.transaction.TransactionManager;
-import jakarta.transaction.UserTransaction;
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
+import javax.transaction.TransactionManager;
+import javax.transaction.UserTransaction;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -29,7 +30,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.Assert;
 
 /**
- * Adapter that implements the JTA {@link jakarta.transaction.Synchronization}
+ * Adapter that implements the JTA {@link javax.transaction.Synchronization}
  * interface delegating to an underlying Spring
  * {@link org.springframework.transaction.support.TransactionSynchronization}.
  *
@@ -39,7 +40,7 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see jakarta.transaction.Transaction#registerSynchronization
+ * @see javax.transaction.Transaction#registerSynchronization
  * @see org.springframework.transaction.support.TransactionSynchronization
  */
 public class SpringJtaSynchronizationAdapter implements Synchronization {
@@ -81,7 +82,9 @@ public class SpringJtaSynchronizationAdapter implements Synchronization {
 			@Nullable UserTransaction jtaUserTransaction) {
 
 		this(springSynchronization);
-		this.jtaTransaction = jtaUserTransaction;
+		if (jtaUserTransaction != null && !jtaUserTransaction.getClass().getName().startsWith("weblogic.")) {
+			this.jtaTransaction = jtaUserTransaction;
+		}
 	}
 
 	/**
@@ -101,7 +104,9 @@ public class SpringJtaSynchronizationAdapter implements Synchronization {
 			TransactionSynchronization springSynchronization, @Nullable TransactionManager jtaTransactionManager) {
 
 		this(springSynchronization);
-		this.jtaTransaction = new UserTransactionAdapter(jtaTransactionManager);
+		if (jtaTransactionManager != null && !jtaTransactionManager.getClass().getName().startsWith("weblogic.")) {
+			this.jtaTransaction = new UserTransactionAdapter(jtaTransactionManager);
+		}
 	}
 
 
@@ -171,11 +176,13 @@ public class SpringJtaSynchronizationAdapter implements Synchronization {
 		}
 		// Call afterCompletion with the appropriate status indication.
 		switch (status) {
-			case Status.STATUS_COMMITTED ->
+			case Status.STATUS_COMMITTED:
 				this.springSynchronization.afterCompletion(TransactionSynchronization.STATUS_COMMITTED);
-			case Status.STATUS_ROLLEDBACK ->
+				break;
+			case Status.STATUS_ROLLEDBACK:
 				this.springSynchronization.afterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK);
-			default ->
+				break;
+			default:
 				this.springSynchronization.afterCompletion(TransactionSynchronization.STATUS_UNKNOWN);
 		}
 	}

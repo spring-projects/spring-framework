@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.google.protobuf.Message;
-import jakarta.xml.bind.annotation.XmlRootElement;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
@@ -110,7 +111,7 @@ public class WebFluxConfigurationSupportTests {
 		PathPatternParser patternParser = mapping.getPathPatternParser();
 		assertThat(patternParser).isNotNull();
 		boolean matchOptionalTrailingSlash = (boolean) ReflectionUtils.getField(field, patternParser);
-		assertThat(matchOptionalTrailingSlash).isFalse();
+		assertThat(matchOptionalTrailingSlash).isTrue();
 
 		name = "webFluxContentTypeResolver";
 		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
@@ -124,10 +125,17 @@ public class WebFluxConfigurationSupportTests {
 	@Test
 	public void customPathMatchConfig() {
 		ApplicationContext context = loadConfig(CustomPatchMatchConfig.class);
+		final Field field = ReflectionUtils.findField(PathPatternParser.class, "matchOptionalTrailingSeparator");
+		ReflectionUtils.makeAccessible(field);
 
 		String name = "requestMappingHandlerMapping";
 		RequestMappingHandlerMapping mapping = context.getBean(name, RequestMappingHandlerMapping.class);
 		assertThat(mapping).isNotNull();
+
+		PathPatternParser patternParser = mapping.getPathPatternParser();
+		assertThat(patternParser).isNotNull();
+		boolean matchOptionalTrailingSlash = (boolean) ReflectionUtils.getField(field, patternParser);
+		assertThat(matchOptionalTrailingSlash).isFalse();
 
 		Map<RequestMappingInfo, HandlerMethod> map = mapping.getHandlerMethods();
 		assertThat(map.size()).isEqualTo(1);
@@ -144,7 +152,7 @@ public class WebFluxConfigurationSupportTests {
 		assertThat(adapter).isNotNull();
 
 		List<HttpMessageReader<?>> readers = adapter.getMessageReaders();
-		assertThat(readers.size()).isEqualTo(15);
+		assertThat(readers.size()).isEqualTo(14);
 
 		ResolvableType multiValueMapType = forClassWithGenerics(MultiValueMap.class, String.class, String.class);
 
@@ -316,6 +324,7 @@ public class WebFluxConfigurationSupportTests {
 
 		@Override
 		public void configurePathMatching(PathMatchConfigurer configurer) {
+			configurer.setUseTrailingSlashMatch(false);
 			configurer.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController.class));
 		}
 

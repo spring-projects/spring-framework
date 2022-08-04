@@ -1099,9 +1099,10 @@ class DefaultConversionServiceTests {
 
 		@Override
 		public boolean equals(Object o) {
-			if (!(o instanceof SSN ssn)) {
+			if (!(o instanceof SSN)) {
 				return false;
 			}
+			SSN ssn = (SSN) o;
 			return this.value.equals(ssn.value);
 		}
 
@@ -1139,9 +1140,10 @@ class DefaultConversionServiceTests {
 
 		@Override
 		public boolean equals(Object o) {
-			if (!(o instanceof ISBN isbn)) {
+			if (!(o instanceof ISBN)) {
 				return false;
 			}
+			ISBN isbn = (ISBN) o;
 			return this.value.equals(isbn.value);
 		}
 

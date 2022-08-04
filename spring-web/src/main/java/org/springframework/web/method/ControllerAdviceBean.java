@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,15 +176,16 @@ public class ControllerAdviceBean implements Ordered {
 				resolvedBean = resolveBean();
 			}
 
-			if (resolvedBean instanceof Ordered ordered) {
-				this.order = ordered.getOrder();
+			if (resolvedBean instanceof Ordered) {
+				this.order = ((Ordered) resolvedBean).getOrder();
 			}
 			else {
-				if (beanName != null && this.beanFactory instanceof ConfigurableBeanFactory cbf) {
+				if (beanName != null && this.beanFactory instanceof ConfigurableBeanFactory) {
+					ConfigurableBeanFactory cbf = (ConfigurableBeanFactory) this.beanFactory;
 					try {
 						BeanDefinition bd = cbf.getMergedBeanDefinition(beanName);
-						if (bd instanceof RootBeanDefinition rbd) {
-							Method factoryMethod = rbd.getResolvedFactoryMethod();
+						if (bd instanceof RootBeanDefinition) {
+							Method factoryMethod = ((RootBeanDefinition) bd).getResolvedFactoryMethod();
 							if (factoryMethod != null) {
 								this.order = OrderUtils.getOrder(factoryMethod);
 							}
@@ -260,9 +261,10 @@ public class ControllerAdviceBean implements Ordered {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof ControllerAdviceBean otherAdvice)) {
+		if (!(other instanceof ControllerAdviceBean)) {
 			return false;
 		}
+		ControllerAdviceBean otherAdvice = (ControllerAdviceBean) other;
 		return (this.beanOrName.equals(otherAdvice.beanOrName) && this.beanFactory == otherAdvice.beanFactory);
 	}
 
@@ -289,9 +291,9 @@ public class ControllerAdviceBean implements Ordered {
 	 */
 	public static List<ControllerAdviceBean> findAnnotatedBeans(ApplicationContext context) {
 		ListableBeanFactory beanFactory = context;
-		if (context instanceof ConfigurableApplicationContext cac) {
+		if (context instanceof ConfigurableApplicationContext) {
 			// Use internal BeanFactory for potential downcast to ConfigurableBeanFactory above
-			beanFactory = cac.getBeanFactory();
+			beanFactory = ((ConfigurableApplicationContext) context).getBeanFactory();
 		}
 		List<ControllerAdviceBean> adviceBeans = new ArrayList<>();
 		for (String name : BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, Object.class)) {

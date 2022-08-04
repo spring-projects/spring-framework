@@ -34,6 +34,9 @@ import org.springframework.http.MockHttpOutputMessage;
 
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Arjen Poutsma
@@ -56,7 +59,7 @@ public class RssChannelHttpMessageConverterTests {
 
 	@Test
 	public void read() throws IOException {
-		InputStream inputStream = getClass().getResourceAsStream("rss.xml");
+		InputStream inputStream = spy(getClass().getResourceAsStream("rss.xml"));
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(inputStream);
 		inputMessage.getHeaders().setContentType(RSS_XML_UTF8);
 		Channel result = converter.read(Channel.class, inputMessage);
@@ -72,6 +75,7 @@ public class RssChannelHttpMessageConverterTests {
 
 		Item item2 = (Item) items.get(1);
 		assertThat(item2.getTitle()).isEqualTo("title2");
+		verify(inputStream, never()).close();
 	}
 
 	@Test
@@ -105,6 +109,7 @@ public class RssChannelHttpMessageConverterTests {
 				"</channel></rss>";
 		assertThat(XmlContent.of(outputMessage.getBodyAsString(StandardCharsets.UTF_8)))
 				.isSimilarToIgnoringWhitespace(expected);
+		verify(outputMessage.getBody(), never()).close();
 	}
 
 	@Test

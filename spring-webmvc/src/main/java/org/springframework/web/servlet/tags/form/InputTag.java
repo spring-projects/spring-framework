@@ -18,7 +18,7 @@ package org.springframework.web.servlet.tags.form;
 
 import java.util.Map;
 
-import jakarta.servlet.jsp.JspException;
+import javax.servlet.jsp.JspException;
 
 import org.springframework.lang.Nullable;
 

@@ -67,15 +67,18 @@ public interface ServerRequest {
 
 	/**
 	 * Get the HTTP method.
+	 * @return the HTTP method as an HttpMethod enum value, or {@code null}
+	 * if not resolvable (e.g. in case of a non-standard HTTP method)
 	 */
-	HttpMethod method();
+	@Nullable
+	default HttpMethod method() {
+		return HttpMethod.resolve(methodName());
+	}
 
 	/**
 	 * Get the name of the HTTP method.
 	 * @return the HTTP method as a String
-	 * @deprecated as of 6.0, in favor of {@link #method()}
 	 */
-	@Deprecated
 	String methodName();
 
 	/**
@@ -350,14 +353,13 @@ public interface ServerRequest {
 	 * also with conditional POST/PUT/DELETE requests.
 	 * <p><strong>Note:</strong> you can use either
 	 * this {@link #checkNotModified(Instant)} method; or
-	 * {@code #checkNotModified(String)}. If you want to enforce both
+	 * {@code #checkNotModified(String)}. If you want enforce both
 	 * a strong entity tag and a Last-Modified value,
 	 * as recommended by the HTTP specification,
 	 * then you should use {@link #checkNotModified(Instant, String)}.
 	 * @param etag the entity tag that the application determined
 	 * for the underlying resource. This parameter will be padded
-	 * with quotes (") if necessary. Use an empty string {@code ""}
-	 * for no value.
+	 * with quotes (") if necessary.
 	 * @return a corresponding response if the request qualifies as not
 	 * modified, or an empty result otherwise
 	 * @since 5.2.5
@@ -390,8 +392,7 @@ public interface ServerRequest {
 	 * application determined for the underlying resource
 	 * @param etag the entity tag that the application determined
 	 * for the underlying resource. This parameter will be padded
-	 * with quotes (") if necessary. Use an empty string {@code ""}
-	 * for no value.
+	 * with quotes (") if necessary.
 	 * @return a corresponding response if the request qualifies as not
 	 * modified, or an empty result otherwise.
 	 * @since 5.2.5

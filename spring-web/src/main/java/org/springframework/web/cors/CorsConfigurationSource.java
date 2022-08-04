@@ -16,7 +16,7 @@
 
 package org.springframework.web.cors;
 
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
 

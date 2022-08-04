@@ -16,8 +16,9 @@
 
 package org.springframework.jms.annotation;
 
-import jakarta.jms.JMSException;
-import jakarta.jms.MessageListener;
+import javax.jms.JMSException;
+import javax.jms.MessageListener;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;

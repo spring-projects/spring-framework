@@ -168,7 +168,8 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		NotificationListenerBean listenerBean = new NotificationListenerBean();
 		listenerBean.setNotificationListener(listener);
 		listenerBean.setNotificationFilter(notification -> {
-			if (notification instanceof AttributeChangeNotification changeNotification) {
+			if (notification instanceof AttributeChangeNotification) {
+				AttributeChangeNotification changeNotification = (AttributeChangeNotification) notification;
 				return "Name".equals(changeNotification.getAttributeName());
 			}
 			else {
@@ -449,7 +450,8 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 
 		@Override
 		public void handleNotification(Notification notification, Object handback) {
-			if (notification instanceof AttributeChangeNotification attNotification) {
+			if (notification instanceof AttributeChangeNotification) {
+				AttributeChangeNotification attNotification = (AttributeChangeNotification) notification;
 				String attributeName = attNotification.getAttributeName();
 
 				Integer currentCount = (Integer) this.attributeCounts.get(attributeName);

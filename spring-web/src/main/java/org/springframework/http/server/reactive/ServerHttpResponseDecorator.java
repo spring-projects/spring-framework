@@ -24,7 +24,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -56,12 +56,12 @@ public class ServerHttpResponseDecorator implements ServerHttpResponse {
 	// ServerHttpResponse delegation methods...
 
 	@Override
-	public boolean setStatusCode(@Nullable HttpStatusCode status) {
+	public boolean setStatusCode(@Nullable HttpStatus status) {
 		return getDelegate().setStatusCode(status);
 	}
 
 	@Override
-	public HttpStatusCode getStatusCode() {
+	public HttpStatus getStatusCode() {
 		return getDelegate().getStatusCode();
 	}
 
@@ -71,7 +71,6 @@ public class ServerHttpResponseDecorator implements ServerHttpResponse {
 	}
 
 	@Override
-	@Deprecated
 	public Integer getRawStatusCode() {
 		return getDelegate().getRawStatusCode();
 	}

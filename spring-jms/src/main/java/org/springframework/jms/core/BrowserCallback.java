@@ -16,9 +16,9 @@
 
 package org.springframework.jms.core;
 
-import jakarta.jms.JMSException;
-import jakarta.jms.QueueBrowser;
-import jakarta.jms.Session;
+import javax.jms.JMSException;
+import javax.jms.QueueBrowser;
+import javax.jms.Session;
 
 import org.springframework.lang.Nullable;
 
@@ -39,13 +39,13 @@ import org.springframework.lang.Nullable;
 public interface BrowserCallback<T> {
 
 	/**
-	 * Perform operations on the given {@link jakarta.jms.Session} and
-	 * {@link jakarta.jms.QueueBrowser}.
+	 * Perform operations on the given {@link javax.jms.Session} and
+	 * {@link javax.jms.QueueBrowser}.
 	 * @param session the JMS {@code Session} object to use
 	 * @param browser the JMS {@code QueueBrowser} object to use
 	 * @return a result object from working with the {@code Session}, if any
 	 * (or {@code null} if none)
-	 * @throws jakarta.jms.JMSException if thrown by JMS API methods
+	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 */
 	@Nullable
 	T doInJms(Session session, QueueBrowser browser) throws JMSException;

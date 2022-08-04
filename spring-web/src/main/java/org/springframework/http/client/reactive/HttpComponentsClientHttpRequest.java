@@ -39,12 +39,13 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
+import static org.springframework.http.MediaType.ALL_VALUE;
 
 /**
  * {@link ClientHttpRequest} implementation for the Apache HttpComponents HttpClient 5.x.
- *
  * @author Martin Tarjányi
  * @author Arjen Poutsma
  * @since 5.3
@@ -75,7 +76,9 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.httpRequest.getMethod());
+		HttpMethod method = HttpMethod.resolve(this.httpRequest.getMethod());
+		Assert.state(method != null, "Method must not be null");
+		return method;
 	}
 
 	@Override
@@ -127,7 +130,7 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 				.forEach(entry -> entry.getValue().forEach(v -> this.httpRequest.addHeader(entry.getKey(), v)));
 
 		if (!this.httpRequest.containsHeader(HttpHeaders.ACCEPT)) {
-			this.httpRequest.addHeader(HttpHeaders.ACCEPT, MediaType.ALL_VALUE);
+			this.httpRequest.addHeader(HttpHeaders.ACCEPT, ALL_VALUE);
 		}
 
 		this.contentLength = headers.getContentLength();

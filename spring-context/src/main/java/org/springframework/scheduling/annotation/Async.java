@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import java.lang.annotation.Target;
  * {@code Future} that can be used to track the result of the asynchronous method
  * execution. However, since the target method needs to implement the same signature,
  * it will have to return a temporary {@code Future} handle that just passes a value
- * through: for example, Spring's {@link AsyncResult}, EJB 3.1's {@link jakarta.ejb.AsyncResult},
+ * through: e.g. Spring's {@link AsyncResult}, EJB 3.1's {@link javax.ejb.AsyncResult},
  * or {@link java.util.concurrent.CompletableFuture#completedFuture(Object)}.
  *
  * @author Juergen Hoeller
@@ -63,13 +63,9 @@ public @interface Async {
 	 * name) of a specific {@link java.util.concurrent.Executor Executor} or
 	 * {@link org.springframework.core.task.TaskExecutor TaskExecutor}
 	 * bean definition.
-	 * <p>When specified in a class-level {@code @Async} annotation, indicates that the
+	 * <p>When specified on a class-level {@code @Async} annotation, indicates that the
 	 * given executor should be used for all methods within the class. Method-level use
-	 * of {@code Async#value} always overrides any qualifier value configured at
-	 * the class level.
-	 * <p>The qualifier value will be resolved dynamically if supplied as a SpEL
-	 * expression (for example, {@code "#{environment['myExecutor']}"}) or a
-	 * property placeholder (for example, {@code "${my.app.myExecutor}"}).
+	 * of {@code Async#value} always overrides any value set at the class level.
 	 * @since 3.1.2
 	 */
 	String value() default "";

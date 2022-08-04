@@ -19,8 +19,9 @@ package org.springframework.web.socket;
 import java.io.File;
 import java.io.IOException;
 
-import jakarta.servlet.Filter;
-import jakarta.servlet.ServletContext;
+import javax.servlet.Filter;
+import javax.servlet.ServletContext;
+
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;

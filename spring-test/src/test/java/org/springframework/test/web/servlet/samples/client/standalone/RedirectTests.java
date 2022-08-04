@@ -16,7 +16,8 @@
 
 package org.springframework.test.web.servlet.samples.client.standalone;
 
-import jakarta.validation.Valid;
+import javax.validation.Valid;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.stereotype.Controller;

@@ -21,12 +21,12 @@ package org.springframework.jms;
  *
  * @author Mark Pollack
  * @since 1.1
- * @see jakarta.jms.TransactionInProgressException
+ * @see javax.jms.TransactionInProgressException
  */
 @SuppressWarnings("serial")
 public class TransactionInProgressException extends JmsException {
 
-	public TransactionInProgressException(jakarta.jms.TransactionInProgressException cause) {
+	public TransactionInProgressException(javax.jms.TransactionInProgressException cause) {
 		super(cause);
 	}
 

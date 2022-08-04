@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  */
-class InterceptingClientHttpRequestFactoryTests {
+public class InterceptingClientHttpRequestFactoryTests {
 
 	private RequestFactoryMock requestFactoryMock = new RequestFactoryMock();
 
@@ -52,7 +52,7 @@ class InterceptingClientHttpRequestFactoryTests {
 
 
 	@Test
-	void basic() throws Exception {
+	public void basic() throws Exception {
 		List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
 		interceptors.add(new NoOpInterceptor());
 		interceptors.add(new NoOpInterceptor());
@@ -70,7 +70,7 @@ class InterceptingClientHttpRequestFactoryTests {
 	}
 
 	@Test
-	void noExecution() throws Exception {
+	public void noExecution() throws Exception {
 		List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
 		interceptors.add((request, body, execution) -> responseMock);
 
@@ -86,7 +86,7 @@ class InterceptingClientHttpRequestFactoryTests {
 	}
 
 	@Test
-	void changeHeaders() throws Exception {
+	public void changeHeaders() throws Exception {
 		final String headerName = "Foo";
 		final String headerValue = "Bar";
 		final String otherValue = "Baz";
@@ -116,7 +116,7 @@ class InterceptingClientHttpRequestFactoryTests {
 	}
 
 	@Test
-	void changeURI() throws Exception {
+	public void changeURI() throws Exception {
 		final URI changedUri = new URI("https://example.com/2");
 
 		ClientHttpRequestInterceptor interceptor = (request, body, execution) -> execution.execute(new HttpRequestWrapper(request) {
@@ -142,7 +142,7 @@ class InterceptingClientHttpRequestFactoryTests {
 	}
 
 	@Test
-	void changeMethod() throws Exception {
+	public void changeMethod() throws Exception {
 		final HttpMethod changedMethod = HttpMethod.POST;
 
 		ClientHttpRequestInterceptor interceptor = (request, body, execution) -> execution.execute(new HttpRequestWrapper(request) {
@@ -168,7 +168,7 @@ class InterceptingClientHttpRequestFactoryTests {
 	}
 
 	@Test
-	void changeBody() throws Exception {
+	public void changeBody() throws Exception {
 		final byte[] changedBody = "Foo".getBytes();
 
 		ClientHttpRequestInterceptor interceptor = (request, body, execution) -> execution.execute(request, changedBody);
@@ -236,7 +236,6 @@ class InterceptingClientHttpRequestFactoryTests {
 		}
 
 		@Override
-		@Deprecated
 		public String getMethodValue() {
 			return method.name();
 		}
@@ -277,7 +276,6 @@ class InterceptingClientHttpRequestFactoryTests {
 		}
 
 		@Override
-		@SuppressWarnings("deprecation")
 		public int getRawStatusCode() throws IOException {
 			return statusCode.value();
 		}

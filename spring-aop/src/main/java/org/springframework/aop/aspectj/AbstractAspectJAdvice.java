@@ -78,9 +78,10 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 */
 	public static JoinPoint currentJoinPoint() {
 		MethodInvocation mi = ExposeInvocationInterceptor.currentInvocation();
-		if (!(mi instanceof ProxyMethodInvocation pmi)) {
+		if (!(mi instanceof ProxyMethodInvocation)) {
 			throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
 		}
+		ProxyMethodInvocation pmi = (ProxyMethodInvocation) mi;
 		JoinPoint jp = (JoinPoint) pmi.getUserAttribute(JOIN_POINT_KEY);
 		if (jp == null) {
 			jp = new MethodInvocationProceedingJoinPoint(pmi);
@@ -261,7 +262,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	public void setArgumentNamesFromStringArray(String... args) {
 		this.argumentNames = new String[args.length];
 		for (int i = 0; i < args.length; i++) {
-			this.argumentNames[i] = args[i].strip();
+			this.argumentNames[i] = StringUtils.trimWhitespace(args[i]);
 			if (!isVariableName(this.argumentNames[i])) {
 				throw new IllegalArgumentException(
 						"'argumentNames' property of AbstractAspectJAdvice contains an argument name '" +
@@ -713,9 +714,10 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof AdviceExcludingMethodMatcher otherMm)) {
+			if (!(other instanceof AdviceExcludingMethodMatcher)) {
 				return false;
 			}
+			AdviceExcludingMethodMatcher otherMm = (AdviceExcludingMethodMatcher) other;
 			return this.adviceMethod.equals(otherMm.adviceMethod);
 		}
 

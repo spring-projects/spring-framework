@@ -16,7 +16,8 @@
 
 package org.springframework.context.annotation;
 
-import jakarta.annotation.PreDestroy;
+import javax.annotation.PreDestroy;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

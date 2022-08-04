@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,7 +129,9 @@ public abstract class CollectionUtils {
 	@SuppressWarnings("unchecked")
 	public static <E> void mergeArrayIntoCollection(@Nullable Object array, Collection<E> collection) {
 		Object[] arr = ObjectUtils.toObjectArray(array);
-		Collections.addAll(collection, (E[])arr);
+		for (Object elem : arr) {
+			collection.add((E) elem);
+		}
 	}
 
 	/**
@@ -231,14 +233,15 @@ public abstract class CollectionUtils {
 	 * @param candidates the candidates to search for
 	 * @return the first present object, or {@code null} if not found
 	 */
+	@SuppressWarnings("unchecked")
 	@Nullable
 	public static <E> E findFirstMatch(Collection<?> source, Collection<E> candidates) {
 		if (isEmpty(source) || isEmpty(candidates)) {
 			return null;
 		}
-		for (E candidate : candidates) {
+		for (Object candidate : candidates) {
 			if (source.contains(candidate)) {
-				return candidate;
+				return (E) candidate;
 			}
 		}
 		return null;
@@ -444,7 +447,7 @@ public abstract class CollectionUtils {
 	 * @return the adapted {@code Iterator}
 	 */
 	public static <E> Iterator<E> toIterator(@Nullable Enumeration<E> enumeration) {
-		return (enumeration != null ? enumeration.asIterator() : Collections.emptyIterator());
+		return (enumeration != null ? new EnumerationIterator<>(enumeration) : Collections.emptyIterator());
 	}
 
 	/**
@@ -468,10 +471,41 @@ public abstract class CollectionUtils {
 			MultiValueMap<? extends K, ? extends V> targetMap) {
 
 		Assert.notNull(targetMap, "'targetMap' must not be null");
-		if (targetMap instanceof UnmodifiableMultiValueMap) {
-			return (MultiValueMap<K, V>) targetMap;
+		Map<K, List<V>> result = newLinkedHashMap(targetMap.size());
+		targetMap.forEach((key, value) -> {
+			List<? extends V> values = Collections.unmodifiableList(value);
+			result.put(key, (List<V>) values);
+		});
+		Map<K, List<V>> unmodifiableMap = Collections.unmodifiableMap(result);
+		return toMultiValueMap(unmodifiableMap);
+	}
+
+
+	/**
+	 * Iterator wrapping an Enumeration.
+	 */
+	private static class EnumerationIterator<E> implements Iterator<E> {
+
+		private final Enumeration<E> enumeration;
+
+		public EnumerationIterator(Enumeration<E> enumeration) {
+			this.enumeration = enumeration;
 		}
-		return new UnmodifiableMultiValueMap<>(targetMap);
+
+		@Override
+		public boolean hasNext() {
+			return this.enumeration.hasMoreElements();
+		}
+
+		@Override
+		public E next() {
+			return this.enumeration.nextElement();
+		}
+
+		@Override
+		public void remove() throws UnsupportedOperationException {
+			throw new UnsupportedOperationException("Not supported");
+		}
 	}
 
 

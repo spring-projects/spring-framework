@@ -45,7 +45,7 @@ public final class MockMvcBuilders {
 	 * <p>The {@link org.springframework.web.servlet.DispatcherServlet DispatcherServlet}
 	 * will use the context to discover Spring MVC infrastructure and application
 	 * controllers in it. The context must have been configured with a
-	 * {@link jakarta.servlet.ServletContext ServletContext}.
+	 * {@link javax.servlet.ServletContext ServletContext}.
 	 */
 	public static DefaultMockMvcBuilder webAppContextSetup(WebApplicationContext context) {
 		return new DefaultMockMvcBuilder(context);

@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.StreamUtils;
@@ -51,13 +50,13 @@ public class DefaultResponseErrorHandlerTests {
 
 	@Test
 	public void hasErrorTrue() throws Exception {
-		given(response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
+		given(response.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
 		assertThat(handler.hasError(response)).isTrue();
 	}
 
 	@Test
 	public void hasErrorFalse() throws Exception {
-		given(response.getStatusCode()).willReturn(HttpStatus.OK);
+		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
 		assertThat(handler.hasError(response)).isFalse();
 	}
 
@@ -66,7 +65,7 @@ public class DefaultResponseErrorHandlerTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
-		given(response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
+		given(response.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
 		given(response.getStatusText()).willReturn("Not Found");
 		given(response.getHeaders()).willReturn(headers);
 		given(response.getBody()).willReturn(new ByteArrayInputStream("Hello World".getBytes(StandardCharsets.UTF_8)));
@@ -82,7 +81,7 @@ public class DefaultResponseErrorHandlerTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
-		given(response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
+		given(response.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
 		given(response.getStatusText()).willReturn("Not Found");
 		given(response.getHeaders()).willReturn(headers);
 		given(response.getBody()).willThrow(new IOException());
@@ -95,7 +94,7 @@ public class DefaultResponseErrorHandlerTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
-		given(response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
+		given(response.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
 		given(response.getStatusText()).willReturn("Not Found");
 		given(response.getHeaders()).willReturn(headers);
 
@@ -108,7 +107,7 @@ public class DefaultResponseErrorHandlerTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
-		given(response.getStatusCode()).willReturn(HttpStatusCode.valueOf(999));
+		given(response.getRawStatusCode()).willReturn(999);
 		given(response.getStatusText()).willReturn("Custom status code");
 		given(response.getHeaders()).willReturn(headers);
 
@@ -120,7 +119,7 @@ public class DefaultResponseErrorHandlerTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
-		given(response.getStatusCode()).willReturn(HttpStatusCode.valueOf(999));
+		given(response.getRawStatusCode()).willReturn(999);
 		given(response.getStatusText()).willReturn("Custom status code");
 		given(response.getHeaders()).willReturn(headers);
 
@@ -133,7 +132,7 @@ public class DefaultResponseErrorHandlerTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
-		given(response.getStatusCode()).willReturn(HttpStatusCode.valueOf(499));
+		given(response.getRawStatusCode()).willReturn(499);
 		given(response.getStatusText()).willReturn("Custom status code");
 		given(response.getHeaders()).willReturn(headers);
 
@@ -142,7 +141,7 @@ public class DefaultResponseErrorHandlerTests {
 
 	@Test
 	public void handleErrorForCustomClientError() throws Exception {
-		HttpStatusCode statusCode = HttpStatusCode.valueOf(499);
+		int statusCode = 499;
 		String statusText = "Custom status code";
 
 		HttpHeaders headers = new HttpHeaders();
@@ -151,7 +150,7 @@ public class DefaultResponseErrorHandlerTests {
 		String responseBody = "Hello World";
 		TestByteArrayInputStream body = new TestByteArrayInputStream(responseBody.getBytes(StandardCharsets.UTF_8));
 
-		given(response.getStatusCode()).willReturn(statusCode);
+		given(response.getRawStatusCode()).willReturn(statusCode);
 		given(response.getStatusText()).willReturn(statusText);
 		given(response.getHeaders()).willReturn(headers);
 		given(response.getBody()).willReturn(body);
@@ -159,13 +158,13 @@ public class DefaultResponseErrorHandlerTests {
 		Throwable throwable = catchThrowable(() -> handler.handleError(response));
 
 		// validate exception
-		assertThat(throwable).isInstanceOf(HttpClientErrorException.class);
-		HttpClientErrorException actualHttpClientErrorException = (HttpClientErrorException) throwable;
-		assertThat(actualHttpClientErrorException.getStatusCode()).isEqualTo(statusCode);
-		assertThat(actualHttpClientErrorException.getStatusText()).isEqualTo(statusText);
-		assertThat(actualHttpClientErrorException.getResponseHeaders()).isEqualTo(headers);
-		assertThat(actualHttpClientErrorException.getMessage()).contains(responseBody);
-		assertThat(actualHttpClientErrorException.getResponseBodyAsString()).isEqualTo(responseBody);
+		assertThat(throwable).isInstanceOf(UnknownHttpStatusCodeException.class);
+		UnknownHttpStatusCodeException actualUnknownHttpStatusCodeException = (UnknownHttpStatusCodeException) throwable;
+		assertThat(actualUnknownHttpStatusCodeException.getRawStatusCode()).isEqualTo(statusCode);
+		assertThat(actualUnknownHttpStatusCodeException.getStatusText()).isEqualTo(statusText);
+		assertThat(actualUnknownHttpStatusCodeException.getResponseHeaders()).isEqualTo(headers);
+		assertThat(actualUnknownHttpStatusCodeException.getMessage()).contains(responseBody);
+		assertThat(actualUnknownHttpStatusCodeException.getResponseBodyAsString()).isEqualTo(responseBody);
 	}
 
 	@Test  // SPR-17461
@@ -173,7 +172,7 @@ public class DefaultResponseErrorHandlerTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
-		given(response.getStatusCode()).willReturn(HttpStatusCode.valueOf(599));
+		given(response.getRawStatusCode()).willReturn(599);
 		given(response.getStatusText()).willReturn("Custom status code");
 		given(response.getHeaders()).willReturn(headers);
 
@@ -182,7 +181,7 @@ public class DefaultResponseErrorHandlerTests {
 
 	@Test
 	public void handleErrorForCustomServerError() throws Exception {
-		HttpStatusCode statusCode = HttpStatusCode.valueOf(599);
+		int statusCode = 599;
 		String statusText = "Custom status code";
 
 		HttpHeaders headers = new HttpHeaders();
@@ -191,7 +190,7 @@ public class DefaultResponseErrorHandlerTests {
 		String responseBody = "Hello World";
 		TestByteArrayInputStream body = new TestByteArrayInputStream(responseBody.getBytes(StandardCharsets.UTF_8));
 
-		given(response.getStatusCode()).willReturn(statusCode);
+		given(response.getRawStatusCode()).willReturn(statusCode);
 		given(response.getStatusText()).willReturn(statusText);
 		given(response.getHeaders()).willReturn(headers);
 		given(response.getBody()).willReturn(body);
@@ -199,13 +198,13 @@ public class DefaultResponseErrorHandlerTests {
 		Throwable throwable = catchThrowable(() -> handler.handleError(response));
 
 		// validate exception
-		assertThat(throwable).isInstanceOf(HttpServerErrorException.class);
-		HttpServerErrorException actualHttpServerErrorException = (HttpServerErrorException) throwable;
-		assertThat(actualHttpServerErrorException.getStatusCode()).isEqualTo(statusCode);
-		assertThat(actualHttpServerErrorException.getStatusText()).isEqualTo(statusText);
-		assertThat(actualHttpServerErrorException.getResponseHeaders()).isEqualTo(headers);
-		assertThat(actualHttpServerErrorException.getMessage()).contains(responseBody);
-		assertThat(actualHttpServerErrorException.getResponseBodyAsString()).isEqualTo(responseBody);
+		assertThat(throwable).isInstanceOf(UnknownHttpStatusCodeException.class);
+		UnknownHttpStatusCodeException actualUnknownHttpStatusCodeException = (UnknownHttpStatusCodeException) throwable;
+		assertThat(actualUnknownHttpStatusCodeException.getRawStatusCode()).isEqualTo(statusCode);
+		assertThat(actualUnknownHttpStatusCodeException.getStatusText()).isEqualTo(statusText);
+		assertThat(actualUnknownHttpStatusCodeException.getResponseHeaders()).isEqualTo(headers);
+		assertThat(actualUnknownHttpStatusCodeException.getMessage()).contains(responseBody);
+		assertThat(actualUnknownHttpStatusCodeException.getResponseBodyAsString()).isEqualTo(responseBody);
 	}
 
 	@Test  // SPR-16604
@@ -214,7 +213,7 @@ public class DefaultResponseErrorHandlerTests {
 		headers.setContentType(MediaType.TEXT_PLAIN);
 		TestByteArrayInputStream body = new TestByteArrayInputStream("Hello World".getBytes(StandardCharsets.UTF_8));
 
-		given(response.getStatusCode()).willReturn(HttpStatusCode.valueOf(999));
+		given(response.getRawStatusCode()).willReturn(999);
 		given(response.getStatusText()).willReturn("Custom status code");
 		given(response.getHeaders()).willReturn(headers);
 		given(response.getBody()).willReturn(body);

@@ -1,2 +1,0 @@
-org.springframework.aot.hint.RuntimeHintsRegistrar= \
-org.springframework.mail.javamail.JavaMailMimeTypesRuntimeHints

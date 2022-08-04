@@ -18,8 +18,8 @@ package org.springframework.jms.support.converter;
 
 /**
  * Constants that indicate a target message type to convert to: a
- * {@link jakarta.jms.TextMessage}, a {@link jakarta.jms.BytesMessage},
- * a {@link jakarta.jms.MapMessage} or an {@link jakarta.jms.ObjectMessage}.
+ * {@link javax.jms.TextMessage}, a {@link javax.jms.BytesMessage},
+ * a {@link javax.jms.MapMessage} or an {@link javax.jms.ObjectMessage}.
  *
  * @author Juergen Hoeller
  * @since 3.0
@@ -28,22 +28,22 @@ package org.springframework.jms.support.converter;
 public enum MessageType {
 
 	/**
-	 * A {@link jakarta.jms.TextMessage}.
+	 * A {@link javax.jms.TextMessage}.
 	 */
 	TEXT,
 
 	/**
-	 * A {@link jakarta.jms.BytesMessage}.
+	 * A {@link javax.jms.BytesMessage}.
 	 */
 	BYTES,
 
 	/**
-	 * A {@link jakarta.jms.MapMessage}.
+	 * A {@link javax.jms.MapMessage}.
 	 */
 	MAP,
 
 	/**
-	 * A {@link jakarta.jms.ObjectMessage}.
+	 * A {@link javax.jms.ObjectMessage}.
 	 */
 	OBJECT
 

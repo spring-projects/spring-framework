@@ -16,9 +16,10 @@
 
 package org.springframework.orm.jpa;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.OptimisticLockException;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.OptimisticLockException;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.transaction.TransactionDefinition;

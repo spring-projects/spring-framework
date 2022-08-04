@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.mock.http.MockHttpInputMessage;
 import org.springframework.util.Assert;
@@ -33,65 +32,62 @@ import org.springframework.util.Assert;
  */
 public class MockClientHttpResponse extends MockHttpInputMessage implements ClientHttpResponse {
 
-	private final HttpStatusCode statusCode;
+	private final int statusCode;
 
 
 	/**
 	 * Constructor with response body as a byte array.
 	 */
-	public MockClientHttpResponse(byte[] body, HttpStatusCode statusCode) {
+	public MockClientHttpResponse(byte[] body, HttpStatus statusCode) {
 		super(body);
-		Assert.notNull(statusCode, "HttpStatusCode is required");
-		this.statusCode = statusCode;
+		Assert.notNull(statusCode, "HttpStatus is required");
+		this.statusCode = statusCode.value();
 	}
 
 	/**
-	 * Variant of {@link #MockClientHttpResponse(byte[], HttpStatusCode)} with a
+	 * Variant of {@link #MockClientHttpResponse(byte[], HttpStatus)} with a
 	 * custom HTTP status code.
 	 * @since 5.3.17
 	 */
 	public MockClientHttpResponse(byte[] body, int statusCode) {
-		this(body, HttpStatusCode.valueOf(statusCode));
+		super(body);
+		this.statusCode = statusCode;
 	}
 
 	/**
 	 * Constructor with response body as InputStream.
 	 */
-	public MockClientHttpResponse(InputStream body, HttpStatusCode statusCode) {
+	public MockClientHttpResponse(InputStream body, HttpStatus statusCode) {
 		super(body);
 		Assert.notNull(statusCode, "HttpStatus is required");
-		this.statusCode = statusCode;
+		this.statusCode = statusCode.value();
 	}
 
 	/**
-	 * Variant of {@link #MockClientHttpResponse(InputStream, HttpStatusCode)} with a
+	 * Variant of {@link #MockClientHttpResponse(InputStream, HttpStatus)} with a
 	 * custom HTTP status code.
 	 * @since 5.3.17
 	 */
 	public MockClientHttpResponse(InputStream body, int statusCode) {
-		this(body, HttpStatusCode.valueOf(statusCode));
+		super(body);
+		this.statusCode = statusCode;
 	}
 
 
 	@Override
-	public HttpStatusCode getStatusCode() {
+	public HttpStatus getStatusCode() {
+		return HttpStatus.valueOf(this.statusCode);
+	}
+
+	@Override
+	public int getRawStatusCode() {
 		return this.statusCode;
 	}
 
 	@Override
-	@Deprecated
-	public int getRawStatusCode() {
-		return this.statusCode.value();
-	}
-
-	@Override
 	public String getStatusText() {
-		if (this.statusCode instanceof HttpStatus status) {
-			return status.getReasonPhrase();
-		}
-		else {
-			return "";
-		}
+		HttpStatus status = HttpStatus.resolve(this.statusCode);
+		return (status != null ? status.getReasonPhrase() : "");
 	}
 
 	@Override

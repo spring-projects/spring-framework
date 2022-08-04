@@ -16,7 +16,9 @@
 
 package org.springframework.http.converter.json;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -47,6 +49,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.entry;
 import static org.assertj.core.api.Assertions.within;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 /**
  * Jackson 2.x converter tests.
@@ -132,7 +137,8 @@ public class MappingJackson2HttpMessageConverterTests {
 				"\"string\":\"Foo\"," +
 				"\"bool\":true," +
 				"\"fraction\":42.0}";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
+		InputStream inputStream = spy(new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(inputStream);
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 		MyBean result = (MyBean) converter.read(MyBean.class, inputMessage);
 		assertThat(result.getString()).isEqualTo("Foo");
@@ -141,6 +147,7 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertThat(result.getArray()).isEqualTo(new String[] {"Foo", "Bar"});
 		assertThat(result.isBool()).isTrue();
 		assertThat(result.getBytes()).isEqualTo(new byte[] {0x1, 0x2});
+		verify(inputStream, never()).close();
 	}
 
 	@Test
@@ -187,6 +194,7 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertThat(result.contains("\"bytes\":\"AQI=\"")).isTrue();
 		assertThat(outputMessage.getHeaders().getContentType())
 				.as("Invalid content-type").isEqualTo(MediaType.APPLICATION_JSON);
+		verify(outputMessage.getBody(), never()).close();
 	}
 
 	@Test
@@ -281,7 +289,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void readAndWriteParameterizedType() throws Exception {
-		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<>() {};
+		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<List<MyBean>>() {};
 
 		String body = "[{" +
 				"\"bytes\":\"AQI=\"," +
@@ -312,8 +320,8 @@ public class MappingJackson2HttpMessageConverterTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void writeParameterizedBaseType() throws Exception {
-		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<>() {};
-		ParameterizedTypeReference<List<MyBase>> baseList = new ParameterizedTypeReference<>() {};
+		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<List<MyBean>>() {};
+		ParameterizedTypeReference<List<MyBase>> baseList = new ParameterizedTypeReference<List<MyBase>>() {};
 
 		String body = "[{" +
 				"\"bytes\":\"AQI=\"," +
@@ -468,7 +476,7 @@ public class MappingJackson2HttpMessageConverterTests {
 		bar.setNumber(123);
 		beans.add(bar);
 		ParameterizedTypeReference<List<MyInterface>> typeReference =
-				new ParameterizedTypeReference<>() {};
+				new ParameterizedTypeReference<List<MyInterface>>() {};
 
 		this.converter.writeInternal(beans, typeReference.getType(), outputMessage);
 

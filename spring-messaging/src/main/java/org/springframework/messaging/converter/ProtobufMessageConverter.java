@@ -183,7 +183,7 @@ public class ProtobufMessageConverter extends AbstractMessageConverter {
 			else if (this.protobufFormatSupport != null) {
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 				this.protobufFormatSupport.print(message, outputStream, contentType, charset);
-				payload = outputStream.toString(charset);
+				payload = outputStream.toString(charset.name());
 			}
 		}
 		catch (IOException ex) {

@@ -60,13 +60,13 @@ public class ExtractingResponseErrorHandlerTests {
 
 	@Test
 	public void hasError() throws Exception {
-		given(this.response.getStatusCode()).willReturn(HttpStatus.I_AM_A_TEAPOT);
+		given(this.response.getRawStatusCode()).willReturn(HttpStatus.I_AM_A_TEAPOT.value());
 		assertThat(this.errorHandler.hasError(this.response)).isTrue();
 
-		given(this.response.getStatusCode()).willReturn(HttpStatus.INTERNAL_SERVER_ERROR);
+		given(this.response.getRawStatusCode()).willReturn(HttpStatus.INTERNAL_SERVER_ERROR.value());
 		assertThat(this.errorHandler.hasError(this.response)).isTrue();
 
-		given(this.response.getStatusCode()).willReturn(HttpStatus.OK);
+		given(this.response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
 		assertThat(this.errorHandler.hasError(this.response)).isFalse();
 	}
 
@@ -75,19 +75,19 @@ public class ExtractingResponseErrorHandlerTests {
 		this.errorHandler.setSeriesMapping(Collections
 				.singletonMap(HttpStatus.Series.CLIENT_ERROR, null));
 
-		given(this.response.getStatusCode()).willReturn(HttpStatus.I_AM_A_TEAPOT);
+		given(this.response.getRawStatusCode()).willReturn(HttpStatus.I_AM_A_TEAPOT.value());
 		assertThat(this.errorHandler.hasError(this.response)).isTrue();
 
-		given(this.response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
+		given(this.response.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
 		assertThat(this.errorHandler.hasError(this.response)).isFalse();
 
-		given(this.response.getStatusCode()).willReturn(HttpStatus.OK);
+		given(this.response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
 		assertThat(this.errorHandler.hasError(this.response)).isFalse();
 	}
 
 	@Test
 	public void handleErrorStatusMatch() throws Exception {
-		given(this.response.getStatusCode()).willReturn(HttpStatus.I_AM_A_TEAPOT);
+		given(this.response.getRawStatusCode()).willReturn(HttpStatus.I_AM_A_TEAPOT.value());
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(MediaType.APPLICATION_JSON);
 		given(this.response.getHeaders()).willReturn(responseHeaders);
@@ -103,7 +103,7 @@ public class ExtractingResponseErrorHandlerTests {
 
 	@Test
 	public void handleErrorSeriesMatch() throws Exception {
-		given(this.response.getStatusCode()).willReturn(HttpStatus.INTERNAL_SERVER_ERROR);
+		given(this.response.getRawStatusCode()).willReturn(HttpStatus.INTERNAL_SERVER_ERROR.value());
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(MediaType.APPLICATION_JSON);
 		given(this.response.getHeaders()).willReturn(responseHeaders);
@@ -119,7 +119,7 @@ public class ExtractingResponseErrorHandlerTests {
 
 	@Test
 	public void handleNoMatch() throws Exception {
-		given(this.response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
+		given(this.response.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(MediaType.APPLICATION_JSON);
 		given(this.response.getHeaders()).willReturn(responseHeaders);
@@ -141,7 +141,7 @@ public class ExtractingResponseErrorHandlerTests {
 		this.errorHandler.setSeriesMapping(Collections
 				.singletonMap(HttpStatus.Series.CLIENT_ERROR, null));
 
-		given(this.response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
+		given(this.response.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(MediaType.APPLICATION_JSON);
 		given(this.response.getHeaders()).willReturn(responseHeaders);

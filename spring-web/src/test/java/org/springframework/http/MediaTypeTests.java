@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
-import org.springframework.util.MimeTypeUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -242,44 +241,6 @@ public class MediaTypeTests {
 	}
 
 	@Test
-	void isMoreSpecific() {
-		MediaType audio = new MediaType("audio");
-		MediaType audioBasic = new MediaType("audio", "basic");
-		MediaType audioBasic07 = new MediaType("audio", "basic", 0.7);
-		MediaType audioBasic03 = new MediaType("audio", "basic", 0.3);
-
-		assertThat(audioBasic.isMoreSpecific(audio)).isTrue();
-		assertThat(audio.isMoreSpecific(audioBasic)).isFalse();
-
-		assertThat(audio.isMoreSpecific(audioBasic07)).isTrue();
-		assertThat(audioBasic07.isMoreSpecific(audio)).isFalse();
-
-		assertThat(audioBasic07.isMoreSpecific(audioBasic03)).isTrue();
-		assertThat(audioBasic03.isMoreSpecific(audioBasic07)).isFalse();
-
-		assertThat(audioBasic.isMoreSpecific(MediaType.TEXT_HTML)).isFalse();
-	}
-
-	@Test
-	void isLessSpecific() {
-		MediaType audio = new MediaType("audio");
-		MediaType audioBasic = new MediaType("audio", "basic");
-		MediaType audioBasic07 = new MediaType("audio", "basic", 0.7);
-		MediaType audioBasic03 = new MediaType("audio", "basic", 0.3);
-
-		assertThat(audioBasic.isLessSpecific(audio)).isFalse();
-		assertThat(audio.isLessSpecific(audioBasic)).isTrue();
-
-		assertThat(audio.isLessSpecific(audioBasic07)).isFalse();
-		assertThat(audioBasic07.isLessSpecific(audio)).isTrue();
-
-		assertThat(audioBasic07.isLessSpecific(audioBasic03)).isFalse();
-		assertThat(audioBasic03.isLessSpecific(audioBasic07)).isTrue();
-
-		assertThat(audioBasic.isLessSpecific(MediaType.TEXT_HTML)).isFalse();
-	}
-
-	@Test
 	public void specificityComparator() throws Exception {
 		MediaType audioBasic = new MediaType("audio", "basic");
 		MediaType audioWave = new MediaType("audio", "wave");
@@ -291,7 +252,6 @@ public class MediaTypeTests {
 		MediaType allXml = new MediaType("application", "*+xml");
 		MediaType all = MediaType.ALL;
 
-		@SuppressWarnings("deprecation")
 		Comparator<MediaType> comp = MediaType.SPECIFICITY_COMPARATOR;
 
 		// equal
@@ -335,7 +295,6 @@ public class MediaTypeTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	public void sortBySpecificityRelated() {
 		MediaType audioBasic = new MediaType("audio", "basic");
 		MediaType audio = new MediaType("audio");
@@ -366,7 +325,6 @@ public class MediaTypeTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	public void sortBySpecificityUnrelated() {
 		MediaType audioBasic = new MediaType("audio", "basic");
 		MediaType audioWave = new MediaType("audio", "wave");
@@ -398,7 +356,6 @@ public class MediaTypeTests {
 		MediaType allXml = new MediaType("application", "*+xml");
 		MediaType all = MediaType.ALL;
 
-		@SuppressWarnings("deprecation")
 		Comparator<MediaType> comp = MediaType.QUALITY_VALUE_COMPARATOR;
 
 		// equal
@@ -442,7 +399,6 @@ public class MediaTypeTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	public void sortByQualityRelated() {
 		MediaType audioBasic = new MediaType("audio", "basic");
 		MediaType audio = new MediaType("audio");
@@ -473,7 +429,6 @@ public class MediaTypeTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	public void sortByQualityUnrelated() {
 		MediaType audioBasic = new MediaType("audio", "basic");
 		MediaType audioWave = new MediaType("audio", "wave");
@@ -513,35 +468,6 @@ public class MediaTypeTests {
 		MediaType deserialized = SerializationTestUtils.serializeAndDeserialize(original);
 		assertThat(deserialized).isEqualTo(original);
 		assertThat(original).isEqualTo(deserialized);
-	}
-
-	@Test
-	public void sortBySpecificity() {
-		MediaType audioBasic = new MediaType("audio", "basic");
-		MediaType audio = new MediaType("audio");
-		MediaType audio03 = new MediaType("audio", "*", 0.3);
-		MediaType audio07 = new MediaType("audio", "*", 0.7);
-		MediaType audioBasicLevel = new MediaType("audio", "basic", Collections.singletonMap("level", "1"));
-		MediaType all = MediaType.ALL;
-
-		List<MediaType> expected = new ArrayList<>();
-		expected.add(audioBasicLevel);
-		expected.add(audioBasic);
-		expected.add(audio);
-		expected.add(all);
-		expected.add(audio07);
-		expected.add(audio03);
-
-		List<MediaType> result = new ArrayList<>(expected);
-		Random rnd = new Random();
-		// shuffle & sort 10 times
-		for (int i = 0; i < 10; i++) {
-			Collections.shuffle(result, rnd);
-			MimeTypeUtils.sortBySpecificity(result);
-
-			assertThat(result).containsExactlyElementsOf(expected);
-
-		}
 	}
 
 }

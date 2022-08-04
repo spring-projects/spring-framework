@@ -16,8 +16,8 @@
 
 package org.springframework.test.web;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.xml.bind.annotation.XmlRootElement;
+import javax.validation.constraints.NotNull;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import org.springframework.util.ObjectUtils;
 
@@ -70,9 +70,10 @@ public class Person {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof Person otherPerson)) {
+		if (!(other instanceof Person)) {
 			return false;
 		}
+		Person otherPerson = (Person) other;
 		return (ObjectUtils.nullSafeEquals(this.name, otherPerson.name) &&
 				ObjectUtils.nullSafeEquals(this.someDouble, otherPerson.someDouble) &&
 				ObjectUtils.nullSafeEquals(this.someBoolean, otherPerson.someBoolean));

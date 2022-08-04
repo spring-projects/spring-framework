@@ -29,8 +29,8 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link TypeMappedAnnotation}. See also {@link MergedAnnotationsTests}
- * for a much more extensive collection of tests.
+ * Tests for {@link TypeMappedAnnotation}. See also
+ * {@link MergedAnnotationsTests} for a much more extensive collection of tests.
  *
  * @author Phillip Webb
  */
@@ -182,7 +182,8 @@ class TypeMappedAnnotationTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@interface ConventionAliasMetaAnnotationTarget {
+	@ConventionAliasMetaAnnotationTarget
+	@interface ConventionAliasToMetaAnnotation {
 
 		String value() default "";
 
@@ -190,13 +191,10 @@ class TypeMappedAnnotationTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@ConventionAliasMetaAnnotationTarget
-	@interface ConventionAliasToMetaAnnotation {
+	@interface ConventionAliasMetaAnnotationTarget {
 
 		String value() default "";
 
-		// Do NOT use @AliasFor here until Spring 6.1
-		// @AliasFor(annotation = ConventionAliasMetaAnnotationTarget.class)
 		String convention() default "";
 	}
 
