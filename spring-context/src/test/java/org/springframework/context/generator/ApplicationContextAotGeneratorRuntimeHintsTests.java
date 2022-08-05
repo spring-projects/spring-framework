@@ -109,7 +109,7 @@ class ApplicationContextAotGeneratorRuntimeHintsTests {
 	private void compile(GenericApplicationContext applicationContext, BiConsumer<RuntimeHints, RuntimeHintsInvocations> initializationResult) {
 		ApplicationContextAotGenerator generator = new ApplicationContextAotGenerator();
 		TestGenerationContext generationContext = new TestGenerationContext();
-		generator.generateApplicationContext(applicationContext, generationContext);
+		generator.processAheadOfTime(applicationContext, generationContext);
 		generationContext.writeGeneratedContent();
 		TestCompiler.forSystem().withFiles(generationContext.getGeneratedFiles()).compile(compiled -> {
 			ApplicationContextInitializer instance = compiled.getInstance(ApplicationContextInitializer.class);
