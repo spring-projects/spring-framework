@@ -55,7 +55,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ApplicationContextAotGeneratorTests {
 
 	@Test
-	void generateApplicationContextWhenHasSimpleBean() {
+	void processAheadOfTimeWhenHasSimpleBean() {
 		GenericApplicationContext applicationContext = new GenericApplicationContext();
 		applicationContext.registerBeanDefinition("test", new RootBeanDefinition(SimpleComponent.class));
 		testCompiledResult(applicationContext, (initializer, compiled) -> {
@@ -66,7 +66,7 @@ class ApplicationContextAotGeneratorTests {
 	}
 
 	@Test
-	void generateApplicationContextWhenHasAutowiring() {
+	void processAheadOfTimeWhenHasAutowiring() {
 		GenericApplicationContext applicationContext = new GenericApplicationContext();
 		applicationContext.registerBeanDefinition(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME,
 				BeanDefinitionBuilder
@@ -87,7 +87,7 @@ class ApplicationContextAotGeneratorTests {
 	}
 
 	@Test
-	void generateApplicationContextWhenHasInitDestroyMethods() {
+	void processAheadOfTimeWhenHasInitDestroyMethods() {
 		GenericApplicationContext applicationContext = new GenericApplicationContext();
 		applicationContext.registerBeanDefinition(
 				AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME,
@@ -107,7 +107,7 @@ class ApplicationContextAotGeneratorTests {
 	}
 
 	@Test
-	void generateApplicationContextWhenHasMultipleInitDestroyMethods() {
+	void processAheadOfTimeWhenHasMultipleInitDestroyMethods() {
 		GenericApplicationContext applicationContext = new GenericApplicationContext();
 		applicationContext.registerBeanDefinition(
 				AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME,
@@ -129,7 +129,7 @@ class ApplicationContextAotGeneratorTests {
 	}
 
 	@Test
-	void generateApplicationContextWhenHasNoAotContributions() {
+	void processAheadOfTimeWhenHasNoAotContributions() {
 		GenericApplicationContext applicationContext = new GenericApplicationContext();
 		testCompiledResult(applicationContext, (initializer, compiled) -> {
 			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
@@ -140,7 +140,7 @@ class ApplicationContextAotGeneratorTests {
 	}
 
 	@Test
-	void generateApplicationContextWhenHasBeanFactoryInitializationAotProcessorExcludesProcessor() {
+	void processAheadOfTimeWhenHasBeanFactoryInitializationAotProcessorExcludesProcessor() {
 		GenericApplicationContext applicationContext = new GenericApplicationContext();
 		applicationContext.registerBeanDefinition("test",
 				new RootBeanDefinition(NoOpBeanFactoryInitializationAotProcessor.class));
@@ -151,7 +151,7 @@ class ApplicationContextAotGeneratorTests {
 	}
 
 	@Test
-	void generateApplicationContextWhenHasBeanRegistrationAotProcessorExcludesProcessor() {
+	void processAheadOfTimeWhenHasBeanRegistrationAotProcessorExcludesProcessor() {
 		GenericApplicationContext applicationContext = new GenericApplicationContext();
 		applicationContext.registerBeanDefinition("test",
 				new RootBeanDefinition(NoOpBeanRegistrationAotProcessor.class));
