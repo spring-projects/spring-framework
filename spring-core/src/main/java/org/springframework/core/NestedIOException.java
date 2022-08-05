@@ -37,7 +37,9 @@ import org.springframework.lang.Nullable;
  * @see #printStackTrace
  * @see org.springframework.core.NestedCheckedException
  * @see org.springframework.core.NestedRuntimeException
+ * @deprecated as of 5.3.23, in favor of using {@link IOException} directly
  */
+@Deprecated
 @SuppressWarnings("serial")
 public class NestedIOException extends IOException {
 

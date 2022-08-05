@@ -29,7 +29,6 @@ import java.nio.channels.ReadableByteChannel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.NestedIOException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ResourceUtils;
 
@@ -119,13 +118,14 @@ public abstract class AbstractResource implements Resource {
 	 * by {@link #getURL()}.
 	 */
 	@Override
+	@SuppressWarnings("deprecation")
 	public URI getURI() throws IOException {
 		URL url = getURL();
 		try {
 			return ResourceUtils.toURI(url);
 		}
 		catch (URISyntaxException ex) {
-			throw new NestedIOException("Invalid URI [" + url + "]", ex);
+			throw new org.springframework.core.NestedIOException("Invalid URI [" + url + "]", ex);
 		}
 	}
 

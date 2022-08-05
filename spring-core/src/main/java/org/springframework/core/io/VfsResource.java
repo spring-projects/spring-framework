@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 
-import org.springframework.core.NestedIOException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -72,22 +71,24 @@ public class VfsResource extends AbstractResource {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public URL getURL() throws IOException {
 		try {
 			return VfsUtils.getURL(this.resource);
 		}
 		catch (Exception ex) {
-			throw new NestedIOException("Failed to obtain URL for file " + this.resource, ex);
+			throw new org.springframework.core.NestedIOException("Failed to obtain URL for file " + this.resource, ex);
 		}
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public URI getURI() throws IOException {
 		try {
 			return VfsUtils.getURI(this.resource);
 		}
 		catch (Exception ex) {
-			throw new NestedIOException("Failed to obtain URI for " + this.resource, ex);
+			throw new org.springframework.core.NestedIOException("Failed to obtain URI for " + this.resource, ex);
 		}
 	}
 
