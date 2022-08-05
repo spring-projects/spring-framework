@@ -36,13 +36,12 @@ import org.springframework.javapoet.ParameterizedTypeName;
 import org.springframework.javapoet.TypeSpec;
 
 /**
- * Internal code generator to create the application context initializer.
+ * Internal code generator to create the {@link ApplicationContextInitializer}.
  *
  * @author Phillip Webb
  * @since 6.0
  */
-class ApplicationContextInitializationCodeGenerator
-		implements BeanFactoryInitializationCode {
+class ApplicationContextInitializationCodeGenerator implements BeanFactoryInitializationCode {
 
 	private static final String INITIALIZE_METHOD = "initialize";
 
@@ -70,13 +69,11 @@ class ApplicationContextInitializationCodeGenerator
 		type.addMethod(generateInitializeMethod());
 	}
 
-
 	private MethodSpec generateInitializeMethod() {
 		MethodSpec.Builder method = MethodSpec.methodBuilder(INITIALIZE_METHOD);
 		method.addAnnotation(Override.class);
 		method.addModifiers(Modifier.PUBLIC);
-		method.addParameter(GenericApplicationContext.class,
-				APPLICATION_CONTEXT_VARIABLE);
+		method.addParameter(GenericApplicationContext.class, APPLICATION_CONTEXT_VARIABLE);
 		method.addCode(generateInitializeCode());
 		return method.build();
 	}
