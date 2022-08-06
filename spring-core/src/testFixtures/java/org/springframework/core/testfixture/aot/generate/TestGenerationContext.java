@@ -16,9 +16,6 @@
 
 package org.springframework.core.testfixture.aot.generate;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-
 import org.springframework.aot.generate.ClassNameGenerator;
 import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.GenerationContext;
@@ -26,9 +23,7 @@ import org.springframework.aot.generate.InMemoryGeneratedFiles;
 
 /**
  * {@link GenerationContext} test implementation that uses
- * {@link InMemoryGeneratedFiles} by default, with a convenient override of
- * {@link #writeGeneratedContent()} that throws {@link UncheckedIOException}
- * instead of {@link IOException}.
+ * {@link InMemoryGeneratedFiles} by default.
  *
  * @author Stephane Nicoll
  * @author Sam Brannen
@@ -73,16 +68,6 @@ public class TestGenerationContext extends DefaultGenerationContext {
 	@Override
 	public InMemoryGeneratedFiles getGeneratedFiles() {
 		return (InMemoryGeneratedFiles) super.getGeneratedFiles();
-	}
-
-	@Override
-	public void writeGeneratedContent() {
-		try {
-			super.writeGeneratedContent();
-		}
-		catch (IOException ex) {
-			throw new UncheckedIOException(ex);
-		}
 	}
 
 }

@@ -16,7 +16,6 @@
 
 package org.springframework.aot.generate;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,9 +26,9 @@ import org.springframework.util.Assert;
 /**
  * Default {@link GenerationContext} implementation.
  *
- * <p>Generated classes are flushed out using {@link #writeGeneratedContent()}
- * and should be called once the generation process using this instance has
- * completed.
+ * <p>Generated classes can be flushed out using {@link #writeGeneratedContent()}
+ * which should be called only once after the generation process using this instance
+ * has completed.
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
@@ -108,7 +107,7 @@ public class DefaultGenerationContext implements GenerationContext {
 	/**
 	 * Write any generated content out to the generated files.
 	 */
-	public void writeGeneratedContent() throws IOException {
+	public void writeGeneratedContent() {
 		this.generatedClasses.writeTo(this.generatedFiles);
 	}
 

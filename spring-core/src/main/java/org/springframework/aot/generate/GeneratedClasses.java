@@ -30,8 +30,10 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * A managed collection of generated classes. This class is stateful so the
- * same instance should be used for all class generation.
+ * A managed collection of generated classes.
+ *
+ * <p>This class is stateful, so the same instance should be used for all class
+ * generation.
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
@@ -157,7 +159,7 @@ public class GeneratedClasses {
 	 * @param generatedFiles where to write the generated classes
 	 * @throws IOException on IO error
 	 */
-	void writeTo(GeneratedFiles generatedFiles) throws IOException {
+	void writeTo(GeneratedFiles generatedFiles) {
 		Assert.notNull(generatedFiles, "'generatedFiles' must not be null");
 		List<GeneratedClass> generatedClasses = new ArrayList<>(this.classes);
 		generatedClasses.sort(Comparator.comparing(GeneratedClass::getName));
@@ -172,7 +174,6 @@ public class GeneratedClasses {
 	}
 
 	private record Owner(String featureNamePrefix, String featureName, @Nullable Class<?> target) {
-
 	}
 
 }
