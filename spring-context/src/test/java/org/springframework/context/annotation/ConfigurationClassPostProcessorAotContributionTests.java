@@ -91,6 +91,7 @@ class ConfigurationClassPostProcessorAotContributionTests {
 			assertThat(freshBeanFactory.getBeanPostProcessors()).filteredOn(ImportAwareAotBeanPostProcessor.class::isInstance)
 					.singleElement().satisfies(postProcessor -> assertPostProcessorEntry(postProcessor, ImportAwareConfiguration.class,
 							ImportConfiguration.class));
+			freshContext.close();
 		});
 	}
 
@@ -110,6 +111,7 @@ class ConfigurationClassPostProcessorAotContributionTests {
 			assertThat(bean.instances.get(0)).isEqualTo(freshContext);
 			assertThat(bean.instances.get(1)).isInstanceOfSatisfying(AnnotationMetadata.class, metadata ->
 					assertThat(metadata.getClassName()).isEqualTo(TestAwareCallbackConfiguration.class.getName()));
+			freshContext.close();
 		});
 	}
 
@@ -131,6 +133,7 @@ class ConfigurationClassPostProcessorAotContributionTests {
 			assertThat(freshContext.getBean("testProcessing")).isInstanceOfSatisfying(AnnotationMetadata.class, metadata ->
 					assertThat(metadata.getClassName()).isEqualTo(TestImportAwareBeanPostProcessorConfiguration.class.getName())
 			);
+			freshContext.close();
 		});
 	}
 
