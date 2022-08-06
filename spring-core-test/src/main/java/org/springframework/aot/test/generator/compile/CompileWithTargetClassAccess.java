@@ -25,11 +25,21 @@ import java.lang.annotation.Target;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
- * Annotation that can be used on tests that need a {@link TestCompiler} with
- * non-public access to target classes. Allows the compiler to define classes
- * without polluting the test {@link ClassLoader}.
+ * Annotation that registers a JUnit Jupiter extension for test classes or test
+ * methods that need a {@link TestCompiler} with non-public access to target
+ * classes.
+ *
+ * <p>The extension allows the compiler to define classes without polluting the
+ * test {@link ClassLoader}.
+ *
+ * <p>NOTE: this annotation cannot be used in conjunction with
+ * {@link org.junit.jupiter.api.TestTemplate @TestTemplate} methods.
+ * Consequently, {@link org.junit.jupiter.api.RepeatedTest @RepeatedTest} and
+ * {@link org.junit.jupiter.params.ParameterizedTest @ParameterizedTest} methods
+ * are not supported.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 6.0
  */
 @Retention(RetentionPolicy.RUNTIME)
