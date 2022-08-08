@@ -27,6 +27,7 @@ import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.framework.autoproxy.AbstractBeanFactoryAwareAdvisingPostProcessor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
+import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.beans.factory.InitializingBean;
@@ -137,6 +138,8 @@ public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvis
 		@Override
 		public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 			hints.proxies().registerJdkProxy(AopProxyUtils.completeJdkProxyInterfaces(Validator.class));
+			hints.reflection().registerType(OptionalValidatorFactoryBean.class,
+					hint -> hint.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
 		}
 
 	}
