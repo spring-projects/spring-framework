@@ -41,7 +41,9 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -158,18 +160,28 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 
 	@Override
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
-		RootBeanDefinition beanDefinition = registeredBean.getMergedBeanDefinition();
-		beanDefinition.resolveDestroyMethodIfNecessary();
-		LifecycleMetadata metadata = findInjectionMetadata(beanDefinition, registeredBean.getBeanClass());
-		if (!CollectionUtils.isEmpty(metadata.initMethods)) {
-			String[] initMethodNames = safeMerge(beanDefinition.getInitMethodNames(), metadata.initMethods);
-			beanDefinition.setInitMethodNames(initMethodNames);
-		}
-		if (!CollectionUtils.isEmpty(metadata.destroyMethods)) {
-			String[] destroyMethodNames = safeMerge(beanDefinition.getDestroyMethodNames(), metadata.destroyMethods);
-			beanDefinition.setDestroyMethodNames(destroyMethodNames);
+		AbstractBeanDefinition beanDefinition = getOriginalBeanDefinition(registeredBean);
+		if (beanDefinition != null) {
+			RootBeanDefinition mergedBeanDefinition = registeredBean.getMergedBeanDefinition();
+			beanDefinition.resolveDestroyMethodIfNecessary();
+			LifecycleMetadata metadata = findInjectionMetadata(mergedBeanDefinition, registeredBean.getBeanClass());
+			if (!CollectionUtils.isEmpty(metadata.initMethods)) {
+				String[] initMethodNames = safeMerge(beanDefinition.getInitMethodNames(), metadata.initMethods);
+				beanDefinition.setInitMethodNames(initMethodNames);
+			}
+			if (!CollectionUtils.isEmpty(metadata.destroyMethods)) {
+				String[] destroyMethodNames = safeMerge(beanDefinition.getDestroyMethodNames(), metadata.destroyMethods);
+				beanDefinition.setDestroyMethodNames(destroyMethodNames);
+			}
+			registeredBean.getBeanFactory().clearMetadataCache();
 		}
 		return null;
+	}
+
+	@Nullable
+	private AbstractBeanDefinition getOriginalBeanDefinition(RegisteredBean registeredBean) {
+		BeanDefinition beanDefinition = registeredBean.getBeanFactory().getBeanDefinition(registeredBean.getBeanName());
+		return (beanDefinition instanceof AbstractBeanDefinition abd ? abd : null);
 	}
 
 	private LifecycleMetadata findInjectionMetadata(RootBeanDefinition beanDefinition, Class<?> beanType) {

@@ -344,13 +344,14 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * interfaces, reflectively calling the "close" method on implementing beans as well.
 	 */
 	@Nullable
-	static String[] inferDestroyMethodsIfNecessary(Class<?> target, RootBeanDefinition beanDefinition) {
+	static String[] inferDestroyMethodsIfNecessary(Class<?> target, AbstractBeanDefinition beanDefinition) {
 		String[] destroyMethodNames = beanDefinition.getDestroyMethodNames();
 		if (destroyMethodNames != null && destroyMethodNames.length > 1) {
 			return destroyMethodNames;
 		}
 
-		String destroyMethodName = beanDefinition.resolvedDestroyMethodName;
+		String destroyMethodName = (beanDefinition instanceof RootBeanDefinition rbd
+				? rbd.resolvedDestroyMethodName : null);
 		if (destroyMethodName == null) {
 			destroyMethodName = beanDefinition.getDestroyMethodName();
 			boolean autoCloseable = (AutoCloseable.class.isAssignableFrom(target));
@@ -378,7 +379,9 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 					}
 				}
 			}
-			beanDefinition.resolvedDestroyMethodName = (destroyMethodName != null ? destroyMethodName : "");
+			if (beanDefinition instanceof RootBeanDefinition rbd) {
+				rbd.resolvedDestroyMethodName = (destroyMethodName != null ? destroyMethodName : "");
+			}
 		}
 		return (StringUtils.hasLength(destroyMethodName) ? new String[] {destroyMethodName} : null);
 	}
