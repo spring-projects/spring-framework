@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
@@ -71,6 +70,7 @@ import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
+import org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean;
 
 /**
  * Provides essential configuration for handling messages with simple messaging
@@ -550,15 +550,12 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 				validator = this.applicationContext.getBean(MVC_VALIDATOR_NAME, Validator.class);
 			}
 			else if (ClassUtils.isPresent("jakarta.validation.Validator", getClass().getClassLoader())) {
-				Class<?> clazz;
 				try {
-					String className = "org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean";
-					clazz = ClassUtils.forName(className, AbstractMessageBrokerConfiguration.class.getClassLoader());
+					validator = new OptionalValidatorFactoryBean();
 				}
 				catch (Throwable ex) {
-					throw new BeanInitializationException("Could not find default validator class", ex);
+					throw new BeanInitializationException("Failed to create default validator", ex);
 				}
-				validator = (Validator) BeanUtils.instantiateClass(clazz);
 			}
 			else {
 				validator = new Validator() {
