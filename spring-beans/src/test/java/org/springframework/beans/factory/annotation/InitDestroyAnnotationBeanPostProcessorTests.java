@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class InitDestroyAnnotationBeanPostProcessorTests {
 
-	private DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
 	@Test
 	void processAheadOfTimeWhenNoCallbackDoesNotMutateRootBeanDefinition() {
@@ -117,8 +117,7 @@ class InitDestroyAnnotationBeanPostProcessorTests {
 	private RegisteredBean registerBean(RootBeanDefinition beanDefinition) {
 		String beanName = "test";
 		this.beanFactory.registerBeanDefinition(beanName, beanDefinition);
-		RegisteredBean registeredBean = RegisteredBean.of(this.beanFactory, beanName);
-		return registeredBean;
+		return RegisteredBean.of(this.beanFactory, beanName);
 	}
 
 	private RootBeanDefinition getMergedBeanDefinition() {
