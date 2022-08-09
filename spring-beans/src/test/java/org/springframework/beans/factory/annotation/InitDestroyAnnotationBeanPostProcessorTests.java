@@ -91,19 +91,6 @@ class InitDestroyAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	void processAheadOfTimeWhenHasInferredDestroyMethodIsRetainedIfMergedBeanDefinitionIsStale() {
-		RootBeanDefinition beanDefinition = new RootBeanDefinition(InferredDestroyBean.class);
-		beanDefinition.setDestroyMethodNames(AbstractBeanDefinition.INFER_METHOD);
-		processAheadOfTime(beanDefinition);
-		RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition();
-		assertThat(mergedBeanDefinition.getInitMethodNames()).isNull();
-		assertThat(mergedBeanDefinition.getDestroyMethodNames()).containsExactly("close");
-		RootBeanDefinition originalBeanDefinition = (RootBeanDefinition) this.beanFactory.getBeanDefinition("test");
-		assertThat(originalBeanDefinition.getInitMethodNames()).isNull();
-		assertThat(originalBeanDefinition.getDestroyMethodNames()).containsExactly("close");
-	}
-
-	@Test
 	void processAheadOfTimeWhenHasInferredDestroyMethodAndNoCandidateDoesNotMutateRootBeanDefinition() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(NoInitDestroyBean.class);
 		beanDefinition.setDestroyMethodNames(AbstractBeanDefinition.INFER_METHOD);

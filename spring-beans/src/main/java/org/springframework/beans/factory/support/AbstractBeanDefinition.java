@@ -1186,14 +1186,6 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		}
 	}
 
-	/**
-	 * Resolve the inferred destroy method if necessary.
-	 * @since 6.0
-	 */
-	public void resolveDestroyMethodIfNecessary() {
-		setDestroyMethodNames(DisposableBeanAdapter
-				.inferDestroyMethodsIfNecessary(getResolvableType().toClass(), this));
-	}
 
 	/**
 	 * Public declaration of Object's {@code clone()} method.
