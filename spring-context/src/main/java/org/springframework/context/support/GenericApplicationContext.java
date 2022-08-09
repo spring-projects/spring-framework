@@ -406,6 +406,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 		prepareBeanFactory(this.beanFactory);
 		postProcessBeanFactory(this.beanFactory);
 		invokeBeanFactoryPostProcessors(this.beanFactory);
+		this.beanFactory.freezeConfiguration();
 		PostProcessorRegistrationDelegate.invokeMergedBeanDefinitionPostProcessors(this.beanFactory);
 	}
 
