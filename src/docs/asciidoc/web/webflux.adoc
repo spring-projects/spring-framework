@@ -1851,8 +1851,8 @@ and others) and is equivalent to `required=false`.
 | For access to name-value pairs in URI path segments. See <<webflux-ann-matrix-variables>>.
 
 | `@RequestParam`
-| For access to Servlet request parameters. Parameter values are converted to the declared
-  method argument type. See <<webflux-ann-requestparam>>.
+| For access to query parameters. Parameter values are converted to the declared method argument
+  type. See <<webflux-ann-requestparam>>.
 
   Note that use of `@RequestParam` is optional -- for example, to set its attributes.
   See "`Any other argument`" later in this table.
