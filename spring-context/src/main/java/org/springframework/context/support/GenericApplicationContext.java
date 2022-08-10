@@ -18,6 +18,7 @@ package org.springframework.context.support;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -29,6 +30,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -408,7 +410,28 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 		invokeBeanFactoryPostProcessors(this.beanFactory);
 		this.beanFactory.freezeConfiguration();
 		PostProcessorRegistrationDelegate.invokeMergedBeanDefinitionPostProcessors(this.beanFactory);
+		preDetermineBeanTypes();
 	}
+
+	/**
+	 * Pre-determine bean types in order to trigger early proxy class creation.
+	 * @see org.springframework.beans.factory.BeanFactory#getType
+	 * @see SmartInstantiationAwareBeanPostProcessor#determineBeanType
+	 */
+	private void preDetermineBeanTypes() {
+		List<SmartInstantiationAwareBeanPostProcessor> bpps =
+				PostProcessorRegistrationDelegate.loadBeanPostProcessors(
+						this.beanFactory, SmartInstantiationAwareBeanPostProcessor.class);
+		for (String beanName : this.beanFactory.getBeanDefinitionNames()) {
+			Class<?> beanType = this.beanFactory.getType(beanName);
+			if (beanType != null) {
+				for (SmartInstantiationAwareBeanPostProcessor bpp : bpps) {
+					beanType = bpp.determineBeanType(beanType, beanName);
+				}
+			}
+		}
+	}
+
 
 	//---------------------------------------------------------------------
 	// Convenient methods for registering individual beans

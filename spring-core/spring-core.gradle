@@ -135,6 +135,7 @@ jar {
 		exclude "org/springframework/cglib/core/AsmApi*.class"
 		exclude "org/springframework/cglib/core/KeyFactory.class"
 		exclude "org/springframework/cglib/core/KeyFactory\$*.class"
+		exclude "org/springframework/cglib/core/MethodWrapper*.class"
 		exclude "org/springframework/cglib/core/ReflectUtils*.class"
 		exclude "org/springframework/cglib/proxy/Enhancer*.class"
 		exclude "org/springframework/cglib/proxy/MethodProxy*.class"

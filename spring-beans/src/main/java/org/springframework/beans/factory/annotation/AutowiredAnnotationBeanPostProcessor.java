@@ -69,6 +69,7 @@ import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
+import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RegisteredBean;
@@ -312,43 +313,25 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	}
 
 	@Override
+	public Class<?> determineBeanType(Class<?> beanClass, String beanName) throws BeanCreationException {
+		checkLookupMethods(beanClass, beanName);
+
+		// Pick up subclass with fresh lookup method override from above
+		if (this.beanFactory instanceof AbstractAutowireCapableBeanFactory aacbf) {
+			RootBeanDefinition mbd = (RootBeanDefinition) this.beanFactory.getMergedBeanDefinition(beanName);
+			if (mbd.getFactoryMethodName() == null && mbd.hasBeanClass()) {
+				return aacbf.getInstantiationStrategy().getActualBeanClass(mbd, beanName, this.beanFactory);
+			}
+		}
+		return beanClass;
+	}
+
+	@Override
 	@Nullable
 	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, final String beanName)
 			throws BeanCreationException {
 
-		// Let's check for lookup methods here...
-		if (!this.lookupMethodsChecked.contains(beanName)) {
-			if (AnnotationUtils.isCandidateClass(beanClass, Lookup.class)) {
-				try {
-					Class<?> targetClass = beanClass;
-					do {
-						ReflectionUtils.doWithLocalMethods(targetClass, method -> {
-							Lookup lookup = method.getAnnotation(Lookup.class);
-							if (lookup != null) {
-								Assert.state(this.beanFactory != null, "No BeanFactory available");
-								LookupOverride override = new LookupOverride(method, lookup.value());
-								try {
-									RootBeanDefinition mbd = (RootBeanDefinition)
-											this.beanFactory.getMergedBeanDefinition(beanName);
-									mbd.getMethodOverrides().addOverride(override);
-								}
-								catch (NoSuchBeanDefinitionException ex) {
-									throw new BeanCreationException(beanName,
-											"Cannot apply @Lookup to beans without corresponding bean definition");
-								}
-							}
-						});
-						targetClass = targetClass.getSuperclass();
-					}
-					while (targetClass != null && targetClass != Object.class);
-
-				}
-				catch (IllegalStateException ex) {
-					throw new BeanCreationException(beanName, "Lookup method resolution failed", ex);
-				}
-			}
-			this.lookupMethodsChecked.add(beanName);
-		}
+		checkLookupMethods(beanClass, beanName);
 
 		// Quick check on the concurrent map first, with minimal locking.
 		Constructor<?>[] candidateConstructors = this.candidateConstructorsCache.get(beanClass);
@@ -448,6 +431,41 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			}
 		}
 		return (candidateConstructors.length > 0 ? candidateConstructors : null);
+	}
+
+	private void checkLookupMethods(Class<?> beanClass, final String beanName) throws BeanCreationException {
+		if (!this.lookupMethodsChecked.contains(beanName)) {
+			if (AnnotationUtils.isCandidateClass(beanClass, Lookup.class)) {
+				try {
+					Class<?> targetClass = beanClass;
+					do {
+						ReflectionUtils.doWithLocalMethods(targetClass, method -> {
+							Lookup lookup = method.getAnnotation(Lookup.class);
+							if (lookup != null) {
+								Assert.state(this.beanFactory != null, "No BeanFactory available");
+								LookupOverride override = new LookupOverride(method, lookup.value());
+								try {
+									RootBeanDefinition mbd = (RootBeanDefinition)
+											this.beanFactory.getMergedBeanDefinition(beanName);
+									mbd.getMethodOverrides().addOverride(override);
+								}
+								catch (NoSuchBeanDefinitionException ex) {
+									throw new BeanCreationException(beanName,
+											"Cannot apply @Lookup to beans without corresponding bean definition");
+								}
+							}
+						});
+						targetClass = targetClass.getSuperclass();
+					}
+					while (targetClass != null && targetClass != Object.class);
+
+				}
+				catch (IllegalStateException ex) {
+					throw new BeanCreationException(beanName, "Lookup method resolution failed", ex);
+				}
+			}
+			this.lookupMethodsChecked.add(beanName);
+		}
 	}
 
 	@Override
