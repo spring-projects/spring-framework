@@ -815,13 +815,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 
 		BeanFactory parent = getParentBeanFactory();
-		if (parent instanceof DefaultListableBeanFactory dlfb) {
+		if (parent instanceof DefaultListableBeanFactory dlbf) {
 			// No bean definition found in this factory -> delegate to parent.
-			return dlfb.isAutowireCandidate(beanName, descriptor, resolver);
+			return dlbf.isAutowireCandidate(beanName, descriptor, resolver);
 		}
-		else if (parent instanceof ConfigurableListableBeanFactory clfb) {
+		else if (parent instanceof ConfigurableListableBeanFactory clbf) {
 			// If no DefaultListableBeanFactory, can't pass the resolver along.
-			return clfb.isAutowireCandidate(beanName, descriptor);
+			return clbf.isAutowireCandidate(beanName, descriptor);
 		}
 		else {
 			return true;

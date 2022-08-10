@@ -129,11 +129,11 @@ class TestClassScanner {
 		if (logger.isInfoEnabled()) {
 			if (packageNames.length > 0) {
 				logger.info("Scanning for Spring test classes in packages %s in classpath roots %s"
-					.formatted(Arrays.toString(packageNames), this.classpathRoots));
+						.formatted(Arrays.toString(packageNames), this.classpathRoots));
 			}
 			else {
 				logger.info("Scanning for Spring test classes in all packages in classpath roots %s"
-					.formatted(this.classpathRoots));
+						.formatted(this.classpathRoots));
 			}
 		}
 

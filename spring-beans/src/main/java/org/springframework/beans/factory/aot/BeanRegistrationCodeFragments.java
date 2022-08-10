@@ -103,9 +103,8 @@ public abstract class BeanRegistrationCodeFragments {
 	 * @return the generated code
 	 */
 	public CodeBlock generateSetBeanDefinitionPropertiesCode(
-			GenerationContext generationContext,
-			BeanRegistrationCode beanRegistrationCode, RootBeanDefinition beanDefinition,
-			Predicate<String> attributeFilter) {
+			GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode,
+			RootBeanDefinition beanDefinition, Predicate<String> attributeFilter) {
 
 		return this.codeFragments.generateSetBeanDefinitionPropertiesCode(
 				generationContext, beanRegistrationCode, beanDefinition, attributeFilter);
@@ -122,9 +121,8 @@ public abstract class BeanRegistrationCodeFragments {
 	 * @see #generateInstanceSupplierCode
 	 */
 	public CodeBlock generateSetBeanInstanceSupplierCode(
-			GenerationContext generationContext,
-			BeanRegistrationCode beanRegistrationCode, CodeBlock instanceSupplierCode,
-			List<MethodReference> postProcessors) {
+			GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode,
+			CodeBlock instanceSupplierCode, List<MethodReference> postProcessors) {
 
 		return this.codeFragments.generateSetBeanInstanceSupplierCode(generationContext,
 				beanRegistrationCode, instanceSupplierCode, postProcessors);
@@ -140,13 +138,12 @@ public abstract class BeanRegistrationCodeFragments {
 	 * than always needing an {@link InstanceSupplier}
 	 * @return the generated code
 	 */
-	public CodeBlock generateInstanceSupplierCode(GenerationContext generationContext,
-			BeanRegistrationCode beanRegistrationCode,
+	public CodeBlock generateInstanceSupplierCode(
+			GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode,
 			Executable constructorOrFactoryMethod, boolean allowDirectSupplierShortcut) {
 
 		return this.codeFragments.generateInstanceSupplierCode(generationContext,
-				beanRegistrationCode, constructorOrFactoryMethod,
-				allowDirectSupplierShortcut);
+				beanRegistrationCode, constructorOrFactoryMethod, allowDirectSupplierShortcut);
 	}
 
 	/**
@@ -155,11 +152,10 @@ public abstract class BeanRegistrationCodeFragments {
 	 * @param beanRegistrationCode the bean registration code
 	 * @return the generated code
 	 */
-	public CodeBlock generateReturnCode(GenerationContext generationContext,
-			BeanRegistrationCode beanRegistrationCode) {
+	public CodeBlock generateReturnCode(
+			GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {
 
-		return this.codeFragments.generateReturnCode(generationContext,
-				beanRegistrationCode);
+		return this.codeFragments.generateReturnCode(generationContext, beanRegistrationCode);
 	}
 
 }

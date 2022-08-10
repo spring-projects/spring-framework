@@ -55,7 +55,6 @@ public interface BeanFactoryInitializationAotProcessor {
 	 * @return a {@link BeanFactoryInitializationAotContribution} or {@code null}
 	 */
 	@Nullable
-	BeanFactoryInitializationAotContribution processAheadOfTime(
-			ConfigurableListableBeanFactory beanFactory);
+	BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory);
 
 }
