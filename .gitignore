@@ -43,6 +43,7 @@ out
 test-output
 atlassian-ide-plugin.xml
 .gradletasknamecache
+.gradletasknamecache
 .java-version
 
 # VS Code
