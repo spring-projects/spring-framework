@@ -16,10 +16,15 @@
 
 package org.springframework.context.aot;
 
+import java.io.IOException;
 import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.generate.GeneratedFiles.Kind;
+import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.TypeReference;
+import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.aot.test.generator.compile.Compiled;
 import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.beans.BeansException;
@@ -36,11 +41,13 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.CommonAnnotationBeanPostProcessor;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.testfixture.context.generator.SimpleComponent;
 import org.springframework.context.testfixture.context.generator.annotation.AutowiredComponent;
+import org.springframework.context.testfixture.context.generator.annotation.CglibConfiguration;
 import org.springframework.context.testfixture.context.generator.annotation.InitDestroyComponent;
 import org.springframework.core.testfixture.aot.generate.TestGenerationContext;
 
@@ -161,13 +168,30 @@ class ApplicationContextAotGeneratorTests {
 		});
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void testCompiledResult(GenericApplicationContext applicationContext,
-			BiConsumer<ApplicationContextInitializer<GenericApplicationContext>, Compiled> result) {
+	@Test
+	void processAheadOfTimeWhenHasCglibProxyWriteProxyAndGenerateReflectionHints() throws IOException {
+		GenericApplicationContext applicationContext = new AnnotationConfigApplicationContext();
+		applicationContext.registerBean(CglibConfiguration.class);
+		TestGenerationContext context = processAheadOfTime(applicationContext);
+		String proxyClassName = CglibConfiguration.class.getName() + "$$SpringCGLIB$$0";
+		assertThat(context.getGeneratedFiles()
+				.getGeneratedFileContent(Kind.CLASS, proxyClassName.replace('.', '/') + ".class")).isNotNull();
+		assertThat(RuntimeHintsPredicates.reflection().onType(TypeReference.of(proxyClassName))
+				.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(context.getRuntimeHints());
+	}
+
+	private static TestGenerationContext processAheadOfTime(GenericApplicationContext applicationContext) {
 		ApplicationContextAotGenerator generator = new ApplicationContextAotGenerator();
 		TestGenerationContext generationContext = new TestGenerationContext();
 		generator.processAheadOfTime(applicationContext, generationContext);
 		generationContext.writeGeneratedContent();
+		return generationContext;
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void testCompiledResult(GenericApplicationContext applicationContext,
+			BiConsumer<ApplicationContextInitializer<GenericApplicationContext>, Compiled> result) {
+		TestGenerationContext generationContext = processAheadOfTime(applicationContext);
 		TestCompiler.forSystem().withFiles(generationContext.getGeneratedFiles()).compile(compiled ->
 				result.accept(compiled.getInstance(ApplicationContextInitializer.class), compiled));
 	}

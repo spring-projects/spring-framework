@@ -22,8 +22,7 @@ package org.springframework.cglib.core;
  * and using a plain counter suffix instead of a hash code suffix (as of 6.0).
  *
  * <p>This allows for reliably discovering pre-generated Spring proxy classes
- * in the classpath (as written at runtime when the "cglib.generatedClasses"
- * system property points to a specific directory to store the proxy classes).
+ * in the classpath.
  *
  * @author Juergen Hoeller
  * @since 3.2.8 / 6.0

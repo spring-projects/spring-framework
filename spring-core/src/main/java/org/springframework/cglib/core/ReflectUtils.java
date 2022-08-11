@@ -20,16 +20,12 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.io.ByteArrayInputStream;
-import java.io.OutputStream;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 import org.springframework.asm.Type;
 
@@ -63,6 +60,8 @@ public class ReflectUtils {
 	private static final ProtectionDomain PROTECTION_DOMAIN;
 
 	private static final List<Method> OBJECT_METHODS = new ArrayList<Method>();
+
+	private static BiConsumer<String, byte[]> generatedClassHandler;
 
 	// SPRING PATCH BEGIN
 	static {
@@ -441,6 +440,10 @@ public class ReflectUtils {
 		return defineClass(className, b, loader, protectionDomain, null);
 	}
 
+	public static void setGeneratedClassHandler(BiConsumer<String, byte[]> handler) {
+		generatedClassHandler = handler;
+	}
+
 	@SuppressWarnings({"deprecation", "serial"})
 	public static Class defineClass(String className, byte[] b, ClassLoader loader,
 			ProtectionDomain protectionDomain, Class<?> contextClass) throws Exception {
@@ -448,13 +451,9 @@ public class ReflectUtils {
 		Class c = null;
 		Throwable t = THROWABLE;
 
-		String generatedClasses = System.getProperty("cglib.generatedClasses");
-		if (generatedClasses != null) {
-			Path path = Path.of(generatedClasses + "/" + className.replace(".", "/") + ".class");
-			Files.createDirectories(path.getParent());
-			try (OutputStream os = Files.newOutputStream(path)) {
-				new ByteArrayInputStream(b).transferTo(os);
-			}
+		BiConsumer<String, byte[]> handlerToUse = generatedClassHandler;
+		if (handlerToUse != null) {
+			handlerToUse.accept(className, b);
 		}
 
 		// Preferred option: JDK 9+ Lookup.defineClass API if ClassLoader matches
