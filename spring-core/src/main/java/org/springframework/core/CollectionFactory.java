@@ -191,7 +191,8 @@ public final class CollectionFactory {
 		else if (LinkedList.class == collectionType) {
 			return new LinkedList<>();
 		}
-		else if (SortedSet.class == collectionType || NavigableSet.class == collectionType) {
+		else if (TreeSet.class == collectionType || NavigableSet.class == collectionType
+				|| SortedSet.class == collectionType) {
 			return new TreeSet<>();
 		}
 		else if (EnumSet.class.isAssignableFrom(collectionType)) {
