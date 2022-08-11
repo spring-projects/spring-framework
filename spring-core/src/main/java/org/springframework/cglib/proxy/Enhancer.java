@@ -42,7 +42,6 @@ import org.springframework.cglib.core.CollectionUtils;
 import org.springframework.cglib.core.Constants;
 import org.springframework.cglib.core.DuplicatesPredicate;
 import org.springframework.cglib.core.EmitUtils;
-import org.springframework.cglib.core.KeyFactory;
 import org.springframework.cglib.core.Local;
 import org.springframework.cglib.core.MethodInfo;
 import org.springframework.cglib.core.MethodInfoTransformer;
@@ -556,9 +555,9 @@ public class Enhancer extends AbstractClassGenerator {
 	private Object createHelper() {
 		preValidate();
 		// SPRING PATCH BEGIN
-		Object key = new EnhancerKey((superclass != null) ? superclass.getName() : null,
-				(interfaces != null ? Arrays.asList(ReflectUtils.getNames(interfaces)) :null),
-				filter == ALL_ZERO ? null : new WeakCacheKey<CallbackFilter>(filter),
+		Object key = new EnhancerKey((superclass != null ? superclass.getName() : null),
+				(interfaces != null ? Arrays.asList(ReflectUtils.getNames(interfaces)) : null),
+				(filter == ALL_ZERO ? null : new WeakCacheKey<CallbackFilter>(filter)),
 				Arrays.asList(callbackTypes),
 				useFactory,
 				interceptDuringConstruction,
