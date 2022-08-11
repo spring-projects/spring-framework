@@ -100,8 +100,7 @@ public abstract class RuntimeHintsUtils {
 				Class<?> annotationAttribute = aliasFor.annotation();
 				Class<?> targetAnnotation = (annotationAttribute != Annotation.class
 						? annotationAttribute : annotationType);
-				if (!types.contains(targetAnnotation)) {
-					types.add(targetAnnotation);
+				if (types.add(targetAnnotation)) {
 					if (!targetAnnotation.equals(annotationType)) {
 						collectAliasedAnnotations(seen, types, targetAnnotation);
 					}
