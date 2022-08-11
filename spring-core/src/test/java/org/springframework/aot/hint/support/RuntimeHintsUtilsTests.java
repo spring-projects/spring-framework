@@ -37,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link RuntimeHintsUtils}.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 class RuntimeHintsUtilsTests {
 
@@ -78,6 +79,14 @@ class RuntimeHintsUtilsTests {
 				.anySatisfy(annotationProxy(RetryInvoker.class))
 				.anySatisfy(annotationProxy(SampleInvoker.class))
 				.hasSize(2);
+	}
+
+	@Test  // gh-28953
+	void registerAnnotationForAliasForShouldNotRegisterSynthesizedAnnotationProxy() {
+		RuntimeHintsUtils.registerAnnotation(this.hints, AliasFor.class);
+		assertThat(this.hints.reflection().typeHints()).singleElement()
+				.satisfies(annotationHint(AliasFor.class));
+		assertThat(this.hints.proxies().jdkProxies()).isEmpty();
 	}
 
 	@Test

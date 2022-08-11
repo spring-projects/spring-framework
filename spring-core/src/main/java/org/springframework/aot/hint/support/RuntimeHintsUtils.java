@@ -35,6 +35,7 @@ import org.springframework.core.annotation.SynthesizedAnnotation;
  * Utility methods for runtime hints support code.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.0
  */
 public abstract class RuntimeHintsUtils {
@@ -88,7 +89,8 @@ public abstract class RuntimeHintsUtils {
 	}
 
 	private static void collectAliasedAnnotations(Set<Class<?>> seen, Set<Class<?>> types, Class<?> annotationType) {
-		if (seen.contains(annotationType) || Reflective.class.equals(annotationType)) {
+		if (seen.contains(annotationType) || AliasFor.class.equals(annotationType) ||
+				Reflective.class.equals(annotationType)) {
 			return;
 		}
 		seen.add(annotationType);
