@@ -82,6 +82,7 @@ import org.springframework.util.ReflectionUtils;
  * @see AdvisedSupport#setProxyTargetClass
  * @see DefaultAopProxyFactory
  */
+@SuppressWarnings("serial")
 class CglibAopProxy implements AopProxy, Serializable {
 
 	// Constants for CGLIB callback array indices
