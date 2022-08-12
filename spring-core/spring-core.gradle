@@ -5,41 +5,13 @@ description = "Spring Core"
 
 apply plugin: "kotlin"
 
-// spring-core includes asm, javapoet and repackages cglib, inlining all into the
-// spring-core jar. cglib itself depends on asm and is therefore further transformed by
-// the ShadowJar task to depend on org.springframework.asm; this avoids including two
-// different copies of asm.
-def cglibVersion = "3.3.0"
 def javapoetVersion = "1.13.0"
 def objenesisVersion = "3.2"
 
 configurations {
-	cglib
 	javapoet
 	objenesis
 	graalvm
-}
-
-task cglibRepackJar(type: ShadowJar) {
-	archiveBaseName = 'spring-cglib-repack'
-	archiveVersion = cglibVersion
-	configurations = [project.configurations.cglib]
-	relocate('net.sf.cglib', 'org.springframework.cglib')
-	relocate('org.objectweb.asm', 'org.springframework.asm')
-}
-
-task cglibSource(type: ShadowSource) {
-	configurations = [project.configurations.cglib]
-	relocate('net.sf.cglib', 'org.springframework.cglib')
-	relocate('org.objectweb.asm', 'org.springframework.asm')
-	outputDirectory = file("build/shadow-source/cglib")
-}
-
-task cglibSourceJar(type: Jar) {
-	archiveBaseName = 'spring-cglib-repack'
-	archiveVersion = cglibVersion
-	archiveClassifier = 'sources'
-	from cglibSource
 }
 
 task javapoetRepackJar(type: ShadowJar) {
@@ -83,11 +55,9 @@ task objenesisSourceJar(type: Jar) {
 }
 
 dependencies {
-	cglib("cglib:cglib:${cglibVersion}@jar")
 	javapoet("com.squareup:javapoet:${javapoetVersion}@jar")
 	objenesis("org.objenesis:objenesis:${objenesisVersion}@jar")
 	graalvm(project(path: ":graalvm-feature", configuration: 'classesOnlyElements'))
-	api(files(cglibRepackJar))
 	api(files(javapoetRepackJar))
 	api(files(objenesisRepackJar))
 	api(project(":spring-jcl"))
@@ -126,21 +96,6 @@ jar {
 	preserveFileTimestamps = false  // maybe not necessary here, but good for reproducibility
 	manifest.attributes["Dependencies"] = "jdk.unsupported"  // for WildFly (-> Objenesis 3.2)
 
-	// Inline repackaged cglib classes directly into spring-core jar
-	dependsOn cglibRepackJar
-	from(zipTree(cglibRepackJar.archivePath)) {
-		include "org/springframework/cglib/**"
-		exclude "org/springframework/cglib/beans/**"
-		exclude "org/springframework/cglib/core/AbstractClassGenerator*.class"
-		exclude "org/springframework/cglib/core/AsmApi*.class"
-		exclude "org/springframework/cglib/core/KeyFactory.class"
-		exclude "org/springframework/cglib/core/KeyFactory\$*.class"
-		exclude "org/springframework/cglib/core/MethodWrapper*.class"
-		exclude "org/springframework/cglib/core/ReflectUtils*.class"
-		exclude "org/springframework/cglib/proxy/Enhancer*.class"
-		exclude "org/springframework/cglib/proxy/MethodProxy*.class"
-	}
-
 	dependsOn javapoetRepackJar
 	from(zipTree(javapoetRepackJar.archivePath)) {
 		include "org/springframework/javapoet/**"
@@ -167,16 +122,14 @@ test {
 }
 
 sourcesJar {
-	dependsOn cglibSourceJar
 	dependsOn javapoetSourceJar
 	dependsOn objenesisSourceJar
-	from cglibSource
 	from javapoetSource
 	from objenesisSource
 }
 
 eclipse {
-	synchronizationTasks cglibSourceJar, javapoetSourceJar, objenesisSourceJar
+	synchronizationTasks javapoetSourceJar, objenesisSourceJar
 	classpath {
 		file {
 			whenMerged {

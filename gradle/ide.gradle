@@ -30,7 +30,7 @@ eclipse.classpath.file.whenMerged { classpath ->
 	}
 
 	// Remove any remaining direct depencencies on JARs in the build/libs folder
-	// except Spring's spring-cglib-repack and spring-objenesis-repack JARs.
+	// except the repack JARs.
 	classpath.entries.removeAll { entry -> (entry.path =~ /(?!.*?repack.*\.jar).*?\/([^\/]+)\/build\/libs\/[^\/]+\.jar/) }
 }
 
