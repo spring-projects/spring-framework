@@ -54,7 +54,8 @@ class GeneratedClassHandlerTests {
 		String className = "com.example.Test$$Proxy$$1";
 		this.handler.accept(className, TEST_CONTENT);
 		assertThat(RuntimeHintsPredicates.reflection().onType(TypeReference.of(className))
-				.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS))
+				.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+						MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.DECLARED_FIELDS))
 				.accepts(this.generationContext.getRuntimeHints());
 	}
 

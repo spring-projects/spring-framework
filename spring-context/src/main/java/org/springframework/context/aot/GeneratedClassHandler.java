@@ -39,7 +39,9 @@ import org.springframework.core.io.ByteArrayResource;
 class GeneratedClassHandler implements BiConsumer<String, byte[]> {
 
 	private static final Consumer<Builder> asCglibProxy = hint ->
-			hint.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+			hint.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+					MemberCategory.INVOKE_DECLARED_METHODS,
+					MemberCategory.DECLARED_FIELDS);
 
 	private final RuntimeHints runtimeHints;
 
