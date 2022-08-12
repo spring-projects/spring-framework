@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleHome" value="D:/YUAN/gradle" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/buildSrc" />
+            <option value="$PROJECT_DIR$/framework-bom" />
+            <option value="$PROJECT_DIR$/integration-tests" />
+            <option value="$PROJECT_DIR$/spring-aop" />
+            <option value="$PROJECT_DIR$/spring-aspects" />
+            <option value="$PROJECT_DIR$/spring-beans" />
+            <option value="$PROJECT_DIR$/spring-context" />
+            <option value="$PROJECT_DIR$/spring-context-indexer" />
+            <option value="$PROJECT_DIR$/spring-context-support" />
+            <option value="$PROJECT_DIR$/spring-core" />
+            <option value="$PROJECT_DIR$/spring-expression" />
+            <option value="$PROJECT_DIR$/spring-instrument" />
+            <option value="$PROJECT_DIR$/spring-jcl" />
+            <option value="$PROJECT_DIR$/spring-jdbc" />
+            <option value="$PROJECT_DIR$/spring-jms" />
+            <option value="$PROJECT_DIR$/spring-messaging" />
+            <option value="$PROJECT_DIR$/spring-orm" />
+            <option value="$PROJECT_DIR$/spring-oxm" />
+            <option value="$PROJECT_DIR$/spring-r2dbc" />
+            <option value="$PROJECT_DIR$/spring-test" />
+            <option value="$PROJECT_DIR$/spring-tx" />
+            <option value="$PROJECT_DIR$/spring-web" />
+            <option value="$PROJECT_DIR$/spring-webflux" />
+            <option value="$PROJECT_DIR$/spring-webmvc" />
+            <option value="$PROJECT_DIR$/spring-websocket" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		https://www.springframework.org/schema/beans/spring-beans-3.1.xsd"
+		default-autowire-candidates="foo*">
+
+	<bean id="fooRepository" class="java.lang.Object"/>
+	<bean id="fooService" class="java.lang.Object"/>
+	<bean id="other" class="java.lang.Object"/>
+
+	<beans default-autowire-candidates="*Service">
+		<bean id="barService" class="java.lang.Object"/>
+		<bean id="fooController" class="java.lang.Object"/>
+
+		<beans default-autowire-candidates="*Repository">
+			<bean id="bizRepository" class="java.lang.Object"/>
+			<bean id="bizService" class="java.lang.Object"/>
+		</beans>
+
+		<beans> <!-- should inherit enclosing beans' defaults -->
+			<bean id="bazService" class="java.lang.Object"/>
+			<bean id="random" class="java.lang.Object"/>
+			<bean id="fooComponent" class="java.lang.Object"/>
+			<bean id="fRepository" class="java.lang.Object"/>
+		</beans>
+
+		<beans default-autowire-candidates="*Component">
+			<bean id="aComponent" class="java.lang.Object"/>
+			<bean id="someService" class="java.lang.Object"/>
+		</beans>
+	</beans>
+</beans>

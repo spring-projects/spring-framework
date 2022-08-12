@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<bean id="default" class="org.springframework.beans.testfixture.beans.FactoryMethods"
+			factory-method="defaultInstance">
+		<!-- No constructor-arg elements -->
+		<property name="stringValue"><value>setterString</value></property>
+	</bean>
+
+	<bean id="defaultTestBean" factory-bean="default" factory-method="getTestBean"
+			init-method="haveBirthday" destroy-method="destroy"/>
+		
+	<bean id="defaultTestBeanWithInvalidDestroyMethod" factory-bean="default" factory-method="getTestBean"
+			init-method="haveBirthday" destroy-method="xxx" lazy-init="true"/>
+
+	<bean id="defaultTestBean.protected" factory-bean="default" factory-method="protectedGetTestBean"
+			init-method="haveBirthday" destroy-method="destroy"/>
+		
+	<bean id="defaultTestBean.private" factory-bean="default" factory-method="privateGetTestBean"
+			init-method="haveBirthday" destroy-method="destroy"/>
+
+	<bean id="testBeanOnly" class="org.springframework.beans.testfixture.beans.FactoryMethods"
+			factory-method="newInstance">
+		<constructor-arg><ref bean="juergen"/></constructor-arg>
+	</bean>
+
+	<bean id="null" class="org.springframework.beans.testfixture.beans.FactoryMethods"
+			factory-method="nullInstance" init-method="getName"/>
+
+	<bean id="nullWithProperty" class="org.springframework.beans.testfixture.beans.FactoryMethods"
+			factory-method="nullInstance" init-method="getName" scope="prototype">
+		<property name="stringValue"><value>setterString</value></property>
+	</bean>
+
+	<bean id="full" class="org.springframework.beans.testfixture.beans.FactoryMethods"
+			factory-method="newInstance">
+		<constructor-arg index="0"><ref bean="juergen"/></constructor-arg>
+		<constructor-arg index="1"><value>27</value></constructor-arg>
+		<constructor-arg index="2"><value>gotcha</value></constructor-arg>
+	</bean>
+
+	<bean id="fullWithNull" class="org.springframework.beans.testfixture.beans.FactoryMethods"
+			factory-method="newInstance" lazy-init="true">
+		<constructor-arg index="2" type="java.lang.Integer"><null/></constructor-arg>
+		<constructor-arg index="0"><ref bean="juergen"/></constructor-arg>
+		<constructor-arg index="1"><value>27</value></constructor-arg>
+	</bean>
+
+	<bean id="fullWithGenericNull" class="org.springframework.beans.testfixture.beans.FactoryMethods"
+			factory-method="newInstance" lazy-init="true">
+		<constructor-arg type="java.lang.Integer"><null/></constructor-arg>
+		<constructor-arg><ref bean="juergen"/></constructor-arg>
+		<constructor-arg type="int"><value>27</value></constructor-arg>
+	</bean>
+
+	<bean id="fullWithNamedNull" class="org.springframework.beans.testfixture.beans.FactoryMethods"
+			factory-method="newInstance" lazy-init="true">
+		<constructor-arg name="something"><null/></constructor-arg>
+		<constructor-arg name="tb"><ref bean="juergen"/></constructor-arg>
+		<constructor-arg name="num"><value>27</value></constructor-arg>
+	</bean>
+
+	<bean id="fullWithAutowire" class="org.springframework.beans.testfixture.beans.FactoryMethods"
+			factory-method="newInstance" autowire="constructor">
+		<constructor-arg index="0" ref="juergen"/>
+		<constructor-arg index="1" value="27"/>
+	</bean>
+
+	<bean id="stringToBeAutowired" class="java.lang.String">
+		<constructor-arg value="gotchaAutowired"/>
+	</bean>
+
+	<bean id="defaultPrototype" class="org.springframework.beans.testfixture.beans.FactoryMethods"
+			scope="prototype" factory-method="defaultInstance">
+		<!-- No constructor-arg elements -->
+		<property name="stringValue"><value>setterString</value></property>
+	</bean>
+
+	<bean id="testBeanOnlyPrototype" class="org.springframework.beans.testfixture.beans.FactoryMethods"
+			factory-method="newInstance" scope="prototype">
+		<constructor-arg><ref bean="juergen"/></constructor-arg>
+		<property name="stringValue"><value>testBeanOnlyPrototypeDISetterString</value></property>
+	</bean>
+
+	<bean id="invalidPrototype" class="org.springframework.beans.testfixture.beans.FactoryMethods"
+		  factory-method="nonExisting" scope="prototype">
+		<constructor-arg><ref bean="juergen"/></constructor-arg>
+	</bean>
+
+	<bean id="fullPrototype" class="org.springframework.beans.testfixture.beans.FactoryMethods"
+			factory-method="newInstance" scope="prototype">
+		<constructor-arg type="int"><value>27</value></constructor-arg>
+		<constructor-arg><value>gotcha</value></constructor-arg>
+		<constructor-arg><ref bean="juergen"/></constructor-arg>
+	</bean>
+
+	<bean id="noMatchPrototype" class="org.springframework.beans.testfixture.beans.FactoryMethods"
+			factory-method="newInstance" scope="prototype">
+		<constructor-arg index="0"><ref bean="juergen"/></constructor-arg>
+		<constructor-arg index="1"><value>27</value></constructor-arg>
+		<constructor-arg index="2"><value>gotcha</value></constructor-arg>
+		<constructor-arg index="3"><value>bogus</value></constructor-arg>
+	</bean>
+
+	<bean id="listInstance" class="org.springframework.beans.testfixture.beans.FactoryMethods"
+		  factory-method="listInstance"/>
+
+	<bean id="juergen" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="name"><value>Juergen</value></property>
+	</bean>
+
+	<!--
+		The class is the factory class, not the created class.
+	-->
+	<bean id="externalFactoryMethodWithoutArgs"
+			class="org.springframework.beans.factory.xml.TestBeanCreator"
+			factory-method="createTestBean">
+	</bean>
+
+	<bean id="externalFactoryMethodWithArgs" class="org.springframework.beans.factory.xml.TestBeanCreator"
+			factory-method="createTestBean">
+		<constructor-arg index="0"><value>Rod</value></constructor-arg>
+		<constructor-arg><value type="java.lang.Integer">33</value></constructor-arg>
+	</bean>
+
+	<bean id="instanceFactoryMethodWithoutArgs" factory-bean="instanceFactory" factory-method="defaultInstance"/>
+
+	<!-- Unnamed bean with factory-bean declaration -->
+	<bean factory-bean="instanceFactory" factory-method="defaultInstance"/>
+
+	<bean id="testBeanWithInnerFactoryMethod" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="friends">
+			<list>
+				<!-- Unnamed bean with factory-bean declaration -->
+				<bean factory-bean="instanceFactory" factory-method="defaultInstance"/>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="instanceFactory" class="org.springframework.beans.factory.xml.InstanceFactory" scope="singleton">
+		<property name="factoryBeanProperty"><value>instanceFactory</value></property>
+	</bean>
+
+	<bean name="javaMailSession" class="org.springframework.beans.factory.xml.MailSession"
+		  factory-method="getDefaultInstance">
+		<constructor-arg>
+			<props>
+				<prop key="mail.smtp.auth">true</prop>
+				<prop key="mail.smtp.host"></prop>
+				<prop key="mail.smtp.port"></prop>
+				<prop key="mail.smtp.user">someuser</prop>
+				<prop key="mail.smtp.password">somepw</prop>
+			</props>
+		</constructor-arg>
+	</bean>
+
+</beans>

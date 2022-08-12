@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.springframework.beans.factory.xml.XmlBeanDefinitionReaderTests" tests="1" skipped="0" failures="0" errors="0" timestamp="2022-08-12T22:56:42" hostname="YUAN" time="0.697">
+  <properties/>
+  <testcase name="withFreshInputStream()" classname="org.springframework.beans.factory.xml.XmlBeanDefinitionReaderTests" time="0.697"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

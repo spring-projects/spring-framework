@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="validEmptyWithDescription" class="org.springframework.beans.testfixture.beans.TestBean">
+		<description>
+			I have no properties and I'm happy without them.
+		</description>
+	</bean>
+
+	<!--
+		Check automatic creation of alias, to allow for names that are illegal as XML ids.
+	-->
+	<bean id="aliased" class="  org.springframework.beans.testfixture.beans.TestBean  " name="myalias">
+		<property name="name"><value>aliased</value></property>
+	</bean>
+
+	<alias name="aliased" alias="youralias"/>
+
+	<alias name="multiAliased" alias="alias3"/>
+
+	<bean id="multiAliased" class="org.springframework.beans.testfixture.beans.TestBean" name="alias1,alias2">
+		<property name="name"><value>aliased</value></property>
+	</bean>
+
+	<alias name="multiAliased" alias="alias4"/>
+
+	<bean class="org.springframework.beans.testfixture.beans.TestBean" name="aliasWithoutId1,aliasWithoutId2,aliasWithoutId3">
+		<property name="name"><value>aliased</value></property>
+	</bean>
+
+	<bean class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="name"><null/></property>
+	</bean>
+
+	<bean class="org.springframework.beans.factory.xml.DummyReferencer"/>
+
+	<bean class="org.springframework.beans.factory.xml.DummyReferencer"/>
+
+	<bean class="org.springframework.beans.factory.xml.DummyReferencer"/>
+
+	<bean id="rod" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="name"><value><!-- a comment -->Rod</value></property>
+		<property name="age"><value>31</value></property>
+		<property name="spouse"><ref bean="father"/></property>
+		<property name="touchy"><value/></property>
+	</bean>
+
+	<bean id="roderick" parent="rod">
+		<property name="name"><value>Roderick<!-- a comment --></value></property>
+		<!-- Should inherit age -->
+	</bean>
+
+	<bean id="kerry" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="name"><value>Ker<!-- a comment -->ry</value></property>
+		<property name="age"><value>34</value></property>
+		<property name="spouse"><ref bean="rod"/></property>
+		<property name="touchy"><value></value></property>
+	</bean>
+
+	<bean id="kathy" class="org.springframework.beans.testfixture.beans.TestBean" scope="prototype">
+		<property name="name"><value>Kathy</value></property>
+		<property name="age"><value>28</value></property>
+		<property name="spouse"><ref bean="father"/></property>
+	</bean>
+
+	<bean id="typeMismatch" class="org.springframework.beans.testfixture.beans.TestBean" scope="prototype">
+		<property name="name"><value>typeMismatch</value></property>
+		<property name="age"><value>34x</value></property>
+		<property name="spouse"><ref bean="rod"/></property>
+	</bean>
+
+	<!-- Test of lifecycle callbacks -->
+	<bean id="mustBeInitialized" class="org.springframework.beans.testfixture.beans.MustBeInitialized"/>
+
+	<bean id="lifecycle" class="org.springframework.beans.testfixture.beans.LifecycleBean"
+		  init-method="declaredInitMethod">
+		<property name="initMethodDeclared"><value>true</value></property>
+	</bean>
+
+	<bean id="protectedLifecycle" class="org.springframework.beans.factory.xml.ProtectedLifecycleBean"
+		  init-method="declaredInitMethod">
+		<property name="initMethodDeclared"><value>true</value></property>
+	</bean>
+
+	<!-- Factory beans are automatically treated differently -->
+	<bean id="singletonFactory"	class="org.springframework.beans.testfixture.beans.factory.DummyFactory">
+	</bean>
+
+	<bean id="prototypeFactory"	class="org.springframework.beans.testfixture.beans.factory.DummyFactory">
+		<property name="singleton"><value>false</value></property>
+	</bean>
+
+	<!-- Check that the circular reference resolution mechanism doesn't break
+	     repeated references to the same FactoryBean -->
+	<bean id="factoryReferencer" class="org.springframework.beans.factory.xml.DummyReferencer">
+		<property name="testBean1"><ref bean="singletonFactory"/></property>
+		<property name="testBean2"><ref bean="singletonFactory"/></property>
+		<property name="dummyFactory"><ref bean="&amp;singletonFactory"/></property>
+	</bean>
+
+	<bean id="factoryReferencerWithConstructor" class="org.springframework.beans.factory.xml.DummyReferencer">
+		<constructor-arg><ref bean="&amp;singletonFactory"/></constructor-arg>
+		<property name="testBean1"><ref bean="singletonFactory"/></property>
+		<property name="testBean2"><ref bean="singletonFactory"/></property>
+	</bean>
+
+	<!-- Check that the circular reference resolution mechanism doesn't break
+	     prototype instantiation -->
+	<bean id="prototypeReferencer" class="org.springframework.beans.factory.xml.DummyReferencer" scope="prototype">
+		<property name="testBean1"><ref bean="kathy"/></property>
+		<property name="testBean2"><ref bean="kathy"/></property>
+	</bean>
+
+	<bean id="listenerVeto" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="name"><value>listenerVeto</value></property>
+		<property name="age"><value>66</value></property>
+	</bean>
+
+	<bean id="validEmpty" class="org.springframework.beans.testfixture.beans.TestBean"/>
+
+	<bean id="commentsInValue" class="org.springframework.beans.testfixture.beans.TestBean">
+	  <property name="name"><value>this is<!-- don't mind me --> a <![CDATA[<!--comment-->]]></value></property>
+	</bean>
+
+</beans>

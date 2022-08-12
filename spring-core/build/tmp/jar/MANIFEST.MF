@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Implementation-Title: spring-core
+Automatic-Module-Name: spring.core
+Implementation-Version: 5.3.23-SNAPSHOT
+Created-By: 1.8.0_251 (Oracle Corporation)
+Dependencies: jdk.unsupported
+
