@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,13 @@
 
 package org.springframework.orm.hibernate5;
 
+import org.hibernate.HibernateException;
 import org.hibernate.UnresolvableObjectException;
 import org.hibernate.WrongClassException;
 
+import org.springframework.lang.Nullable;
 import org.springframework.orm.ObjectRetrievalFailureException;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Hibernate-specific subclass of ObjectRetrievalFailureException.
@@ -33,11 +36,24 @@ import org.springframework.orm.ObjectRetrievalFailureException;
 public class HibernateObjectRetrievalFailureException extends ObjectRetrievalFailureException {
 
 	public HibernateObjectRetrievalFailureException(UnresolvableObjectException ex) {
-		super(ex.getEntityName(), ex.getIdentifier(), ex.getMessage(), ex);
+		super(ex.getEntityName(), getIdentifier(ex), ex.getMessage(), ex);
 	}
 
 	public HibernateObjectRetrievalFailureException(WrongClassException ex) {
-		super(ex.getEntityName(), ex.getIdentifier(), ex.getMessage(), ex);
+		super(ex.getEntityName(), getIdentifier(ex), ex.getMessage(), ex);
+	}
+
+
+	@Nullable
+	static Object getIdentifier(HibernateException hibEx) {
+		try {
+			// getIdentifier declares Serializable return value on 5.x but Object on 6.x
+			// -> not binary compatible, let's invoke it reflectively for the time being
+			return ReflectionUtils.invokeMethod(hibEx.getClass().getMethod("getIdentifier"), hibEx);
+		}
+		catch (NoSuchMethodException ex) {
+			return null;
+		}
 	}
 
 }

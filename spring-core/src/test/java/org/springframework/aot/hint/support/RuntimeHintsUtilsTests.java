@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.hint.JdkProxyHint;
 import org.springframework.aot.hint.MemberCategory;
-import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeHint;
 import org.springframework.aot.hint.TypeReference;
@@ -37,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link RuntimeHintsUtils}.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 class RuntimeHintsUtilsTests {
 
@@ -73,18 +73,26 @@ class RuntimeHintsUtilsTests {
 		RuntimeHintsUtils.registerAnnotation(this.hints, RetryInvoker.class);
 		assertThat(this.hints.reflection().typeHints())
 				.anySatisfy(annotationHint(RetryInvoker.class))
-				.anySatisfy(annotationHint(SampleInvoker.class));
+				.anySatisfy(annotationHint(SampleInvoker.class))
+				.hasSize(2);
 		assertThat(this.hints.proxies().jdkProxies())
 				.anySatisfy(annotationProxy(RetryInvoker.class))
 				.anySatisfy(annotationProxy(SampleInvoker.class))
 				.hasSize(2);
 	}
 
+	@Test  // gh-28953
+	void registerAnnotationForAliasForShouldNotRegisterSynthesizedAnnotationProxy() {
+		RuntimeHintsUtils.registerAnnotation(this.hints, AliasFor.class);
+		assertThat(this.hints.reflection().typeHints()).singleElement()
+				.satisfies(annotationHint(AliasFor.class));
+		assertThat(this.hints.proxies().jdkProxies()).isEmpty();
+	}
+
 	@Test
 	void registerAnnotationTypeWhereUsedAsAMetaAnnotationRegistersHierarchy() {
 		RuntimeHintsUtils.registerAnnotation(this.hints, RetryWithEnabledFlagInvoker.class);
-		ReflectionHints reflection = this.hints.reflection();
-		assertThat(reflection.typeHints())
+		assertThat(this.hints.reflection().typeHints())
 				.anySatisfy(annotationHint(RetryWithEnabledFlagInvoker.class))
 				.anySatisfy(annotationHint(RetryInvoker.class))
 				.anySatisfy(annotationHint(SampleInvoker.class))
@@ -108,8 +116,7 @@ class RuntimeHintsUtilsTests {
 
 	private Consumer<JdkProxyHint> annotationProxy(Class<?> type) {
 		return jdkProxyHint -> assertThat(jdkProxyHint.getProxiedInterfaces())
-				.containsExactly(TypeReference.of(type),
-						TypeReference.of(SynthesizedAnnotation.class));
+				.containsExactly(TypeReference.of(type), TypeReference.of(SynthesizedAnnotation.class));
 	}
 
 
@@ -145,7 +152,7 @@ class RuntimeHintsUtilsTests {
 	@RetryInvoker
 	@interface RetryWithEnabledFlagInvoker {
 
-		@AliasFor(attribute = "value", annotation = RetryInvoker.class)
+		@AliasFor(annotation = RetryInvoker.class)
 		int value() default 5;
 
 		boolean enabled() default true;

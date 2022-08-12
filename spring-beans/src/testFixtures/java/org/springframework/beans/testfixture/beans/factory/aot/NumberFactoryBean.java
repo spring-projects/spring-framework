@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.aot;
+package org.springframework.beans.testfixture.beans.factory.aot;
 
 /**
- * An empty test bean used by code generation.
+ * A {@link GenericFactoryBean} that has a bound for the target type.
  *
  * @author Stephane Nicoll
  */
-public class SimpleBean {
+public class NumberFactoryBean<T extends Number> extends GenericFactoryBean<T> {
+
+	public NumberFactoryBean(Class<T> beanType) {
+		super(beanType);
+	}
+
 }

@@ -61,6 +61,7 @@ import org.springframework.beans.factory.config.AutowiredPropertyMarker;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
@@ -69,7 +70,6 @@ import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.NamedThreadLocal;
-import org.springframework.core.NativeDetector;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.ResolvableType;
@@ -173,12 +173,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		ignoreDependencyInterface(BeanNameAware.class);
 		ignoreDependencyInterface(BeanFactoryAware.class);
 		ignoreDependencyInterface(BeanClassLoaderAware.class);
-		if (NativeDetector.inNativeImage()) {
-			this.instantiationStrategy = new SimpleInstantiationStrategy();
-		}
-		else {
-			this.instantiationStrategy = new CglibSubclassingInstantiationStrategy();
-		}
+		this.instantiationStrategy = new CglibSubclassingInstantiationStrategy();
 	}
 
 	/**
@@ -203,7 +198,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	/**
 	 * Return the instantiation strategy to use for creating bean instances.
 	 */
-	protected InstantiationStrategy getInstantiationStrategy() {
+	public InstantiationStrategy getInstantiationStrategy() {
 		return this.instantiationStrategy;
 	}
 
@@ -221,7 +216,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * names if needed.
 	 */
 	@Nullable
-	protected ParameterNameDiscoverer getParameterNameDiscoverer() {
+	public ParameterNameDiscoverer getParameterNameDiscoverer() {
 		return this.parameterNameDiscoverer;
 	}
 
@@ -682,9 +677,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected Class<?> determineTargetType(String beanName, RootBeanDefinition mbd, Class<?>... typesToMatch) {
 		Class<?> targetType = mbd.getTargetType();
 		if (targetType == null) {
-			targetType = (mbd.getFactoryMethodName() != null ?
-					getTypeForFactoryMethod(beanName, mbd, typesToMatch) :
-					resolveBeanClass(mbd, beanName, typesToMatch));
+			if (mbd.getFactoryMethodName() != null) {
+				targetType = getTypeForFactoryMethod(beanName, mbd, typesToMatch);
+			}
+			else {
+				targetType = resolveBeanClass(mbd, beanName, typesToMatch);
+				if (mbd.hasBeanClass()) {
+					targetType = getInstantiationStrategy().getActualBeanClass(mbd, beanName, this);
+				}
+			}
 			if (ObjectUtils.isEmpty(typesToMatch) || getTempClassLoader() == null) {
 				mbd.resolvedTargetType = targetType;
 			}
@@ -1221,7 +1222,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		this.currentlyCreatedBean.set(beanName);
 		try {
 			if (supplier instanceof InstanceSupplier<?> instanceSupplier) {
-				return instanceSupplier.get(RegisteredBean.of(this, beanName));
+				return instanceSupplier.get(RegisteredBean.of((ConfigurableListableBeanFactory) this, beanName));
 			}
 			if (supplier instanceof ThrowingSupplier<?> throwableSupplier) {
 				return throwableSupplier.getWithException();

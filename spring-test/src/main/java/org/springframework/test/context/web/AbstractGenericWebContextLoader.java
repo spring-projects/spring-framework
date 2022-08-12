@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	// SmartContextLoader
 
 	/**
-	 * Load a Spring {@link WebApplicationContext} from the supplied
+	 * Load a {@link GenericWebApplicationContext} for the supplied
 	 * {@link MergedContextConfiguration}.
 	 * <p>Implementation details:
 	 * <ul>
@@ -94,17 +94,61 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	 * <li>{@link ConfigurableApplicationContext#refresh Refreshes} the
 	 * context and registers a JVM shutdown hook for it.</li>
 	 * </ul>
+	 * @param mergedConfig the merged context configuration to use to load the
+	 * application context
 	 * @return a new web application context
 	 * @see org.springframework.test.context.SmartContextLoader#loadContext(MergedContextConfiguration)
 	 * @see GenericWebApplicationContext
 	 */
 	@Override
-	public final ConfigurableApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
-		Assert.isTrue(mergedConfig instanceof WebMergedContextConfiguration,
-				() -> String.format("Cannot load WebApplicationContext from non-web merged context configuration %s. " +
-						"Consider annotating your test class with @WebAppConfiguration.", mergedConfig));
+	public final ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
+		return loadContext(mergedConfig, true);
+	}
 
-		WebMergedContextConfiguration webMergedConfig = (WebMergedContextConfiguration) mergedConfig;
+	/**
+	 * Load a {@link GenericWebApplicationContext} for the supplied
+	 * {@link MergedContextConfiguration}.
+	 * <p>In contrast to {@link #loadContext(MergedContextConfiguration)}, this
+	 * method does not
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#refresh()
+	 * refresh} the {@code ApplicationContext} or
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#registerShutdownHook()
+	 * register a JVM shutdown hook} for it. Otherwise, this method implements
+	 * behavior identical to {@link #loadContext(MergedContextConfiguration)}.
+	 * @param mergedConfig the merged context configuration to use to load the
+	 * application context
+	 * @return a new web application context
+	 * @since 6.0
+	 * @see org.springframework.test.context.SmartContextLoader#loadContextForAotProcessing(MergedContextConfiguration)
+	 * @see GenericWebApplicationContext
+	 */
+	@Override
+	public final ApplicationContext loadContextForAotProcessing(
+			MergedContextConfiguration mergedConfig) throws Exception {
+
+		return loadContext(mergedConfig, false);
+	}
+
+	/**
+	 * Load a {@link GenericWebApplicationContext} for the supplied
+	 * {@link MergedContextConfiguration}.
+	 * @param mergedConfig the merged context configuration to use to load the
+	 * application context
+	 * @param refresh whether to refresh the {@code ApplicationContext} and register
+	 * a JVM shutdown hook for it
+	 * @return a new web application context
+	 * @see org.springframework.test.context.SmartContextLoader#loadContext(MergedContextConfiguration)
+	 * @see org.springframework.test.context.SmartContextLoader#loadContextForAotProcessing(MergedContextConfiguration)
+	 */
+	private final GenericWebApplicationContext loadContext(
+			MergedContextConfiguration mergedConfig, boolean refresh) throws Exception {
+
+		if (!(mergedConfig instanceof WebMergedContextConfiguration webMergedConfig)) {
+			throw new IllegalArgumentException("""
+					Cannot load WebApplicationContext from non-web merged context configuration %s. \
+					Consider annotating your test class with @WebAppConfiguration."""
+						.formatted(mergedConfig));
+		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Loading WebApplicationContext for merged context configuration %s.",
@@ -125,8 +169,12 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 		loadBeanDefinitions(context, webMergedConfig);
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		customizeContext(context, webMergedConfig);
-		context.refresh();
-		context.registerShutdownHook();
+
+		if (refresh) {
+			context.refresh();
+			context.registerShutdownHook();
+		}
+
 		return context;
 	}
 
@@ -192,8 +240,9 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 			ServletContext servletContext = null;
 			// Find the root WebApplicationContext
 			while (parent != null) {
-				if (parent instanceof WebApplicationContext && !(parent.getParent() instanceof WebApplicationContext)) {
-					servletContext = ((WebApplicationContext) parent).getServletContext();
+				if (parent instanceof WebApplicationContext parentWac &&
+						!(parent.getParent() instanceof WebApplicationContext)) {
+					servletContext = parentWac.getServletContext();
 					break;
 				}
 				parent = parent.getParent();
@@ -263,6 +312,7 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	 * @see org.springframework.test.context.ContextLoader#loadContext(java.lang.String[])
 	 */
 	@Override
+	@SuppressWarnings("deprecation")
 	public final ApplicationContext loadContext(String... locations) throws Exception {
 		throw new UnsupportedOperationException(
 				"AbstractGenericWebContextLoader does not support the loadContext(String... locations) method");

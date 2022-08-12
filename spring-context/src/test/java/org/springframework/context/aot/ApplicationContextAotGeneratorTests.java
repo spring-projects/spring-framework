@@ -55,63 +55,51 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ApplicationContextAotGeneratorTests {
 
 	@Test
-	void generateApplicationContextWhenHasSimpleBean() {
+	void processAheadOfTimeWhenHasSimpleBean() {
 		GenericApplicationContext applicationContext = new GenericApplicationContext();
-		applicationContext.registerBeanDefinition("test",
-				new RootBeanDefinition(SimpleComponent.class));
+		applicationContext.registerBeanDefinition("test", new RootBeanDefinition(SimpleComponent.class));
 		testCompiledResult(applicationContext, (initializer, compiled) -> {
-			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(
-					initializer);
-			assertThat(freshApplicationContext.getBeanDefinitionNames())
-					.containsOnly("test");
-			assertThat(freshApplicationContext.getBean("test"))
-					.isInstanceOf(SimpleComponent.class);
+			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+			assertThat(freshApplicationContext.getBeanDefinitionNames()).containsOnly("test");
+			assertThat(freshApplicationContext.getBean("test")).isInstanceOf(SimpleComponent.class);
 		});
 	}
 
 	@Test
-	void generateApplicationContextWhenHasAutowiring() {
+	void processAheadOfTimeWhenHasAutowiring() {
 		GenericApplicationContext applicationContext = new GenericApplicationContext();
-		applicationContext.registerBeanDefinition(
-				AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME,
+		applicationContext.registerBeanDefinition(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME,
 				BeanDefinitionBuilder
-						.rootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class)
-						.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
-		applicationContext.registerBeanDefinition("autowiredComponent",
-				new RootBeanDefinition(AutowiredComponent.class));
+					.rootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class)
+					.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
+		applicationContext.registerBeanDefinition("autowiredComponent", new RootBeanDefinition(AutowiredComponent.class));
 		applicationContext.registerBeanDefinition("number",
-				BeanDefinitionBuilder.rootBeanDefinition(Integer.class, "valueOf")
-						.addConstructorArgValue("42").getBeanDefinition());
+				BeanDefinitionBuilder
+					.rootBeanDefinition(Integer.class, "valueOf")
+					.addConstructorArgValue("42").getBeanDefinition());
 		testCompiledResult(applicationContext, (initializer, compiled) -> {
-			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(
-					initializer);
-			assertThat(freshApplicationContext.getBeanDefinitionNames())
-					.containsOnly("autowiredComponent", "number");
-			AutowiredComponent bean = freshApplicationContext
-					.getBean(AutowiredComponent.class);
-			assertThat(bean.getEnvironment())
-					.isSameAs(freshApplicationContext.getEnvironment());
+			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+			assertThat(freshApplicationContext.getBeanDefinitionNames()).containsOnly("autowiredComponent", "number");
+			AutowiredComponent bean = freshApplicationContext.getBean(AutowiredComponent.class);
+			assertThat(bean.getEnvironment()).isSameAs(freshApplicationContext.getEnvironment());
 			assertThat(bean.getCounter()).isEqualTo(42);
 		});
 	}
 
 	@Test
-	void generateApplicationContextWhenHasInitDestroyMethods() {
+	void processAheadOfTimeWhenHasInitDestroyMethods() {
 		GenericApplicationContext applicationContext = new GenericApplicationContext();
 		applicationContext.registerBeanDefinition(
 				AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME,
 				BeanDefinitionBuilder
-						.rootBeanDefinition(CommonAnnotationBeanPostProcessor.class)
-						.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
+					.rootBeanDefinition(CommonAnnotationBeanPostProcessor.class)
+					.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
 		applicationContext.registerBeanDefinition("initDestroyComponent",
 				new RootBeanDefinition(InitDestroyComponent.class));
 		testCompiledResult(applicationContext, (initializer, compiled) -> {
-			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(
-					initializer);
-			assertThat(freshApplicationContext.getBeanDefinitionNames())
-					.containsOnly("initDestroyComponent");
-			InitDestroyComponent bean = freshApplicationContext
-					.getBean(InitDestroyComponent.class);
+			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+			assertThat(freshApplicationContext.getBeanDefinitionNames()).containsOnly("initDestroyComponent");
+			InitDestroyComponent bean = freshApplicationContext.getBean(InitDestroyComponent.class);
 			assertThat(bean.events).containsExactly("init");
 			freshApplicationContext.close();
 			assertThat(bean.events).containsExactly("init", "destroy");
@@ -119,38 +107,32 @@ class ApplicationContextAotGeneratorTests {
 	}
 
 	@Test
-	void generateApplicationContextWhenHasMultipleInitDestroyMethods() {
+	void processAheadOfTimeWhenHasMultipleInitDestroyMethods() {
 		GenericApplicationContext applicationContext = new GenericApplicationContext();
 		applicationContext.registerBeanDefinition(
 				AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME,
 				BeanDefinitionBuilder
-						.rootBeanDefinition(CommonAnnotationBeanPostProcessor.class)
-						.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
-		RootBeanDefinition beanDefinition = new RootBeanDefinition(
-				InitDestroyComponent.class);
+					.rootBeanDefinition(CommonAnnotationBeanPostProcessor.class)
+					.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(InitDestroyComponent.class);
 		beanDefinition.setInitMethodName("customInit");
 		beanDefinition.setDestroyMethodName("customDestroy");
 		applicationContext.registerBeanDefinition("initDestroyComponent", beanDefinition);
 		testCompiledResult(applicationContext, (initializer, compiled) -> {
-			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(
-					initializer);
-			assertThat(freshApplicationContext.getBeanDefinitionNames())
-					.containsOnly("initDestroyComponent");
-			InitDestroyComponent bean = freshApplicationContext
-					.getBean(InitDestroyComponent.class);
+			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+			assertThat(freshApplicationContext.getBeanDefinitionNames()).containsOnly("initDestroyComponent");
+			InitDestroyComponent bean = freshApplicationContext.getBean(InitDestroyComponent.class);
 			assertThat(bean.events).containsExactly("customInit", "init");
 			freshApplicationContext.close();
-			assertThat(bean.events).containsExactly("customInit", "init", "customDestroy",
-					"destroy");
+			assertThat(bean.events).containsExactly("customInit", "init", "customDestroy", "destroy");
 		});
 	}
 
 	@Test
-	void generateApplicationContextWhenHasNoAotContributions() {
+	void processAheadOfTimeWhenHasNoAotContributions() {
 		GenericApplicationContext applicationContext = new GenericApplicationContext();
 		testCompiledResult(applicationContext, (initializer, compiled) -> {
-			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(
-					initializer);
+			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
 			assertThat(freshApplicationContext.getBeanDefinitionNames()).isEmpty();
 			assertThat(compiled.getSourceFile()).contains(
 					"beanFactory.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver())");
@@ -158,25 +140,23 @@ class ApplicationContextAotGeneratorTests {
 	}
 
 	@Test
-	void generateApplicationContextWhenHasBeanFactoryInitializationAotProcessorExcludesProcessor() {
+	void processAheadOfTimeWhenHasBeanFactoryInitializationAotProcessorExcludesProcessor() {
 		GenericApplicationContext applicationContext = new GenericApplicationContext();
 		applicationContext.registerBeanDefinition("test",
 				new RootBeanDefinition(NoOpBeanFactoryInitializationAotProcessor.class));
 		testCompiledResult(applicationContext, (initializer, compiled) -> {
-			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(
-					initializer);
+			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
 			assertThat(freshApplicationContext.getBeanDefinitionNames()).isEmpty();
 		});
 	}
 
 	@Test
-	void generateApplicationContextWhenHasBeanRegistrationAotProcessorExcludesProcessor() {
+	void processAheadOfTimeWhenHasBeanRegistrationAotProcessorExcludesProcessor() {
 		GenericApplicationContext applicationContext = new GenericApplicationContext();
 		applicationContext.registerBeanDefinition("test",
 				new RootBeanDefinition(NoOpBeanRegistrationAotProcessor.class));
 		testCompiledResult(applicationContext, (initializer, compiled) -> {
-			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(
-					initializer);
+			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
 			assertThat(freshApplicationContext.getBeanDefinitionNames()).isEmpty();
 		});
 	}
@@ -186,7 +166,7 @@ class ApplicationContextAotGeneratorTests {
 			BiConsumer<ApplicationContextInitializer<GenericApplicationContext>, Compiled> result) {
 		ApplicationContextAotGenerator generator = new ApplicationContextAotGenerator();
 		TestGenerationContext generationContext = new TestGenerationContext();
-		generator.generateApplicationContext(applicationContext, generationContext);
+		generator.processAheadOfTime(applicationContext, generationContext);
 		generationContext.writeGeneratedContent();
 		TestCompiler.forSystem().withFiles(generationContext.getGeneratedFiles()).compile(compiled ->
 				result.accept(compiled.getInstance(ApplicationContextInitializer.class), compiled));
@@ -205,13 +185,11 @@ class ApplicationContextAotGeneratorTests {
 			implements BeanFactoryPostProcessor, BeanFactoryInitializationAotProcessor {
 
 		@Override
-		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
-				throws BeansException {
+		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		}
 
 		@Override
-		public BeanFactoryInitializationAotContribution processAheadOfTime(
-				ConfigurableListableBeanFactory beanFactory) {
+		public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
 			return null;
 		}
 
@@ -222,8 +200,7 @@ class ApplicationContextAotGeneratorTests {
 			implements BeanPostProcessor, BeanRegistrationAotProcessor {
 
 		@Override
-		public BeanRegistrationAotContribution processAheadOfTime(
-				RegisteredBean registeredBean) {
+		public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 			return null;
 		}
 

@@ -27,10 +27,10 @@ import org.springframework.aot.hint.SerializationHints;
  *
  * <p>A generation context provides:
  * <ul>
- * <li>Management of all {@link #getGeneratedClasses()} generated classes},
+ * <li>Management of all {@linkplain #getGeneratedClasses() generated classes},
  * including naming convention support.</li>
- * <li>Central management of all {@link #getGeneratedFiles() generated files}.</li>
- * <li>Support for the recording of {@link #getRuntimeHints() runtime hints}.</li>
+ * <li>Central management of all {@linkplain #getGeneratedFiles() generated files}.</li>
+ * <li>Support for recording {@linkplain #getRuntimeHints() runtime hints}.</li>
  * </ul>
  *
  * <p>If a dedicated round of code generation is required while processing, it
@@ -43,32 +43,34 @@ import org.springframework.aot.hint.SerializationHints;
 public interface GenerationContext {
 
 	/**
-	 * Return the {@link GeneratedClasses} being used by the context. All
-	 * generated classes are written at the end of AOT processing.
+	 * Get the {@link GeneratedClasses} used by the context.
+	 * <p>All generated classes are written at the end of AOT processing.
 	 * @return the generated classes
 	 */
 	GeneratedClasses getGeneratedClasses();
 
 	/**
-	 * Return the {@link GeneratedFiles} being used by the context. Used to
-	 * write resource, java source or class bytecode files.
+	 * Get the {@link GeneratedFiles} used by the context.
+	 * <p>Used to write resource, java source, or class bytecode files.
 	 * @return the generated files
 	 */
 	GeneratedFiles getGeneratedFiles();
 
 	/**
-	 * Return the {@link RuntimeHints} being used by the context. Used to record
-	 * {@link ReflectionHints reflection}, {@link ResourceHints resource},
-	 * {@link SerializationHints serialization} and {@link ProxyHints proxy}
-	 * hints so that the application can run as a native image.
+	 * Get the {@link RuntimeHints} used by the context.
+	 * <p>Used to record {@linkplain ReflectionHints reflection},
+	 * {@linkplain ResourceHints resource}, {@linkplain SerializationHints
+	 * serialization}, and {@linkplain ProxyHints proxy} hints so that the
+	 * application can run as a native image.
 	 * @return the runtime hints
 	 */
 	RuntimeHints getRuntimeHints();
 
 	/**
-	 * Return a new {@link GenerationContext} instance using the specified
+	 * Create a new {@link GenerationContext} instance using the specified
 	 * name to qualify generated assets for a dedicated round of code
-	 * generation. If this name is already in use, a unique sequence is added
+	 * generation.
+	 * <p>If the specified name is already in use, a unique sequence is added
 	 * to ensure the name is unique.
 	 * @param name the name to use
 	 * @return a specialized {@link GenerationContext} for the specified name

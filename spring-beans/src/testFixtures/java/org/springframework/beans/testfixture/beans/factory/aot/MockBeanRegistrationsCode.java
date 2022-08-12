@@ -41,11 +41,7 @@ public class MockBeanRegistrationsCode implements BeanRegistrationsCode {
 
 
 	public DeferredTypeBuilder getTypeBuilder() {
-		return typeBuilder;
-	}
-
-	public GeneratedClass getGeneratedClass() {
-		return this.generatedClass;
+		return this.typeBuilder;
 	}
 
 	@Override

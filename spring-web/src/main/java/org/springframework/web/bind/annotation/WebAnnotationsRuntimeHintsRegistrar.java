@@ -25,8 +25,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 
 /**
- * {@link RuntimeHintsRegistrar} implementation that make web binding
- * annotations at runtime.
+ * {@link RuntimeHintsRegistrar} implementation that makes web binding
+ * annotations available at runtime.
  *
  * @author Stephane Nicoll
  * @since 6.0

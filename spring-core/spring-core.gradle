@@ -111,6 +111,7 @@ dependencies {
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("io.projectreactor.tools:blockhound")
 	testImplementation("org.skyscreamer:jsonassert")
+	testImplementation("com.squareup.okhttp3:mockwebserver")
 	testFixturesImplementation("com.google.code.findbugs:jsr305")
 	testFixturesImplementation("org.junit.platform:junit-platform-launcher")
 	testFixturesImplementation("org.junit.jupiter:junit-jupiter-api")
@@ -134,6 +135,7 @@ jar {
 		exclude "org/springframework/cglib/core/AsmApi*.class"
 		exclude "org/springframework/cglib/core/KeyFactory.class"
 		exclude "org/springframework/cglib/core/KeyFactory\$*.class"
+		exclude "org/springframework/cglib/core/MethodWrapper*.class"
 		exclude "org/springframework/cglib/core/ReflectUtils*.class"
 		exclude "org/springframework/cglib/proxy/Enhancer*.class"
 		exclude "org/springframework/cglib/proxy/MethodProxy*.class"

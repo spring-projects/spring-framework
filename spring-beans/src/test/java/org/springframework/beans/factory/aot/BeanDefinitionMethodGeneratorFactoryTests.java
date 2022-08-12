@@ -166,6 +166,7 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 		return RegisteredBean.of(beanFactory, "test");
 	}
 
+
 	static class MockBeanRegistrationExcludeFilter implements
 			BeanRegistrationAotProcessor, BeanRegistrationExcludeFilter, Ordered {
 
@@ -182,8 +183,7 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 		}
 
 		@Override
-		public BeanRegistrationAotContribution processAheadOfTime(
-				RegisteredBean registeredBean) {
+		public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 			return null;
 		}
 

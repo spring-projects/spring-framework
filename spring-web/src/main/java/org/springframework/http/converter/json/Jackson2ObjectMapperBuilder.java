@@ -552,7 +552,7 @@ public class Jackson2ObjectMapperBuilder {
 	/**
 	 * Variant of {@link #modules(Module...)} with a {@link Consumer} for full
 	 * control over the underlying list of modules.
-	 * @since 6.0
+	 * @since 5.3.22
 	 * @see #modules(Module...)
 	 * @see #modules(List)
 	 * @see com.fasterxml.jackson.databind.Module
@@ -588,7 +588,7 @@ public class Jackson2ObjectMapperBuilder {
 	/**
 	 * Variant of {@link #modulesToInstall(Module...)} with a {@link Consumer}
 	 * for full control over the underlying list of modules.
-	 * @since 6.0
+	 * @since 5.3.22
 	 * @see #modulesToInstall(Module...)
 	 * @see #modulesToInstall(Class...)
 	 * @see com.fasterxml.jackson.databind.Module

@@ -45,6 +45,7 @@ class TransactionBeanRegistrationAotProcessor implements BeanRegistrationAotProc
 
 	private final static String JAKARTA_TRANSACTIONAL_CLASS_NAME = "jakarta.transaction.Transactional";
 
+
 	@Override
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		Class<?> beanClass = registeredBean.getBeanClass();
@@ -68,6 +69,7 @@ class TransactionBeanRegistrationAotProcessor implements BeanRegistrationAotProc
 		});
 	}
 
+
 	private static class TransactionBeanRegistrationAotContribution implements BeanRegistrationAotContribution {
 
 		private final Class<?> beanClass;
@@ -84,7 +86,8 @@ class TransactionBeanRegistrationAotProcessor implements BeanRegistrationAotProc
 				return;
 			}
 			for (Class<?> proxyInterface : proxyInterfaces) {
-				runtimeHints.reflection().registerType(proxyInterface, builder -> builder.withMembers(MemberCategory.INVOKE_DECLARED_METHODS));
+				runtimeHints.reflection().registerType(proxyInterface,
+						builder -> builder.withMembers(MemberCategory.INVOKE_DECLARED_METHODS));
 			}
 			runtimeHints.proxies().registerJdkProxy(AopProxyUtils.completeJdkProxyInterfaces(proxyInterfaces));
 		}

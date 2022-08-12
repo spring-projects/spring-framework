@@ -36,14 +36,16 @@ import org.springframework.javapoet.ClassName;
 public class ApplicationContextAotGenerator {
 
 	/**
-	 * Refresh the specified {@link GenericApplicationContext} and generate the
-	 * necessary code to restore the state of its {@link BeanFactory}, using the
-	 * specified {@link GenerationContext}.
-	 * @param applicationContext the application context to handle
+	 * Process the specified {@link GenericApplicationContext} ahead-of-time using
+	 * the specified {@link GenerationContext}.
+	 * <p>Return the {@link ClassName} of the {@link ApplicationContextInitializer}
+	 * to use to restore an optimized state of the application context.
+	 * @param applicationContext the non-refreshed application context to process
 	 * @param generationContext the generation context to use
-	 * @return the class name of the {@link ApplicationContextInitializer} entry point
+	 * @return the {@code ClassName} of the {@code ApplicationContextInitializer}
+	 * entry point
 	 */
-	public ClassName generateApplicationContext(GenericApplicationContext applicationContext,
+	public ClassName processAheadOfTime(GenericApplicationContext applicationContext,
 			GenerationContext generationContext) {
 		applicationContext.refreshForAotProcessing();
 		DefaultListableBeanFactory beanFactory = applicationContext.getDefaultListableBeanFactory();

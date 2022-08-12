@@ -16,8 +16,6 @@
 
 package org.springframework.test.aot.generate;
 
-import java.io.IOException;
-
 import org.springframework.aot.generate.ClassNameGenerator;
 import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.GenerationContext;
@@ -25,21 +23,13 @@ import org.springframework.aot.generate.InMemoryGeneratedFiles;
 
 /**
  * {@link GenerationContext} test implementation that uses
- * {@link InMemoryGeneratedFiles} by default, with a convenient override of
- * {@link #writeGeneratedContent()} that does not throw {@link IOException}.
+ * {@link InMemoryGeneratedFiles} by default.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.0
  */
 public class TestGenerationContext extends DefaultGenerationContext {
-
-	/**
-	 * Create an instance using the specified {@link ClassNameGenerator}.
-	 * @param classNameGenerator the class name generator to use.
-	 */
-	public TestGenerationContext(ClassNameGenerator classNameGenerator) {
-		super(classNameGenerator, new InMemoryGeneratedFiles());
-	}
 
 	/**
 	 * Create an instance using the specified {@code target}.
@@ -49,19 +39,28 @@ public class TestGenerationContext extends DefaultGenerationContext {
 		this(new ClassNameGenerator(target));
 	}
 
-	@Override
-	public InMemoryGeneratedFiles getGeneratedFiles() {
-		return (InMemoryGeneratedFiles) super.getGeneratedFiles();
+	/**
+	 * Create an instance using the specified {@link ClassNameGenerator}.
+	 * @param classNameGenerator the class name generator to use
+	 */
+	public TestGenerationContext(ClassNameGenerator classNameGenerator) {
+		this(classNameGenerator, new InMemoryGeneratedFiles());
+	}
+
+	/**
+	 * Create an instance using the specified {@link ClassNameGenerator} and
+	 * {@link InMemoryGeneratedFiles}.
+	 * @param classNameGenerator the class name generator to use
+	 * @param generatedFiles the generated files
+	 */
+	public TestGenerationContext(ClassNameGenerator classNameGenerator,
+			InMemoryGeneratedFiles generatedFiles) {
+		super(classNameGenerator, generatedFiles);
 	}
 
 	@Override
-	public void writeGeneratedContent() {
-		try {
-			super.writeGeneratedContent();
-		}
-		catch (IOException ex) {
-			throw new IllegalStateException(ex);
-		}
+	public InMemoryGeneratedFiles getGeneratedFiles() {
+		return (InMemoryGeneratedFiles) super.getGeneratedFiles();
 	}
 
 }

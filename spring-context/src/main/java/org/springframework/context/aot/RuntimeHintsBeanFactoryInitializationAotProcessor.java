@@ -46,16 +46,13 @@ import org.springframework.lang.Nullable;
  *
  * @author Brian Clozel
  */
-class RuntimeHintsBeanFactoryInitializationAotProcessor
-		implements BeanFactoryInitializationAotProcessor {
+class RuntimeHintsBeanFactoryInitializationAotProcessor implements BeanFactoryInitializationAotProcessor {
 
-	private static final Log logger = LogFactory
-			.getLog(RuntimeHintsBeanFactoryInitializationAotProcessor.class);
+	private static final Log logger = LogFactory.getLog(RuntimeHintsBeanFactoryInitializationAotProcessor.class);
 
 
 	@Override
-	public BeanFactoryInitializationAotContribution processAheadOfTime(
-			ConfigurableListableBeanFactory beanFactory) {
+	public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
 		Map<Class<? extends RuntimeHintsRegistrar>, RuntimeHintsRegistrar> registrars = AotServices
 				.factories(beanFactory.getBeanClassLoader()).load(RuntimeHintsRegistrar.class).stream()
 				.collect(LinkedHashMap::new, (map, item) -> map.put(item.getClass(), item), Map::putAll);

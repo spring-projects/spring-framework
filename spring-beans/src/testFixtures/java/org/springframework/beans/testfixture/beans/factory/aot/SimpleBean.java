@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.aot;
+package org.springframework.beans.testfixture.beans.factory.aot;
 
 /**
+ * An empty test bean used by code generation.
  *
  * @author Stephane Nicoll
  */
-public class SimpleBeanConfiguration {
-
-	public SimpleBean simpleBean() {
-		return new SimpleBean();
-	}
-
+public class SimpleBean {
 }

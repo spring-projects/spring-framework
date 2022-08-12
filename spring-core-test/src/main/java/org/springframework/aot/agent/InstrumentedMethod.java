@@ -63,8 +63,8 @@ enum InstrumentedMethod {
 	 */
 	CLASS_GETCLASSES(Class.class, "getClasses", HintType.REFLECTION,
 			invocation -> {
-				TypeReference thisType = invocation.getInstanceTypeReference();
-				return RuntimeHintsPredicates.reflection().onType(thisType)
+				Class<?> thisClass = invocation.getInstance();
+				return RuntimeHintsPredicates.reflection().onType(TypeReference.of(thisClass))
 						.withAnyMemberCategory(MemberCategory.DECLARED_CLASSES, MemberCategory.PUBLIC_CLASSES);
 			}
 	),
@@ -87,8 +87,8 @@ enum InstrumentedMethod {
 	 */
 	CLASS_GETCONSTRUCTORS(Class.class, "getConstructors", HintType.REFLECTION,
 			invocation -> {
-				TypeReference thisType = invocation.getInstanceTypeReference();
-				return RuntimeHintsPredicates.reflection().onType(thisType).withAnyMemberCategory(
+				Class<?> thisClass = invocation.getInstance();
+				return RuntimeHintsPredicates.reflection().onType(TypeReference.of(thisClass)).withAnyMemberCategory(
 						MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS, MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
 						MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 			}
@@ -99,8 +99,8 @@ enum InstrumentedMethod {
 	 */
 	CLASS_GETDECLAREDCLASSES(Class.class, "getDeclaredClasses", HintType.REFLECTION,
 			invocation -> {
-				TypeReference thisType = invocation.getInstanceTypeReference();
-				return RuntimeHintsPredicates.reflection().onType(thisType).withMemberCategory(MemberCategory.DECLARED_CLASSES);
+				Class<?> thisClass = invocation.getInstance();
+				return RuntimeHintsPredicates.reflection().onType(TypeReference.of(thisClass)).withMemberCategory(MemberCategory.DECLARED_CLASSES);
 			}
 	),
 
@@ -124,8 +124,8 @@ enum InstrumentedMethod {
 	 */
 	CLASS_GETDECLAREDCONSTRUCTORS(Class.class, "getDeclaredConstructors", HintType.REFLECTION,
 			invocation -> {
-				TypeReference thisType = invocation.getInstanceTypeReference();
-				return RuntimeHintsPredicates.reflection().onType(thisType)
+				Class<?> thisClass = invocation.getInstance();
+				return RuntimeHintsPredicates.reflection().onType(TypeReference.of(thisClass))
 						.withAnyMemberCategory(MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 			}),
 
@@ -149,8 +149,8 @@ enum InstrumentedMethod {
 	 */
 	CLASS_GETDECLAREDFIELDS(Class.class, "getDeclaredFields", HintType.REFLECTION,
 			invocation -> {
-				TypeReference thisType = invocation.getInstanceTypeReference();
-				return RuntimeHintsPredicates.reflection().onType(thisType).withMemberCategory(MemberCategory.DECLARED_FIELDS);
+				Class<?> thisClass = invocation.getInstance();
+				return RuntimeHintsPredicates.reflection().onType(TypeReference.of(thisClass)).withMemberCategory(MemberCategory.DECLARED_FIELDS);
 			}
 	),
 
@@ -175,8 +175,8 @@ enum InstrumentedMethod {
 	 */
 	CLASS_GETDECLAREDMETHODS(Class.class, "getDeclaredMethods", HintType.REFLECTION,
 			invocation -> {
-				TypeReference thisType = invocation.getInstanceTypeReference();
-				return RuntimeHintsPredicates.reflection().onType(thisType)
+				Class<?> thisClass = invocation.getInstance();
+				return RuntimeHintsPredicates.reflection().onType(TypeReference.of(thisClass))
 						.withAnyMemberCategory(MemberCategory.INTROSPECT_DECLARED_METHODS, MemberCategory.INVOKE_DECLARED_METHODS);
 			}
 	),
@@ -202,8 +202,8 @@ enum InstrumentedMethod {
 	 */
 	CLASS_GETFIELDS(Class.class, "getFields", HintType.REFLECTION,
 			invocation -> {
-				TypeReference thisType = invocation.getInstanceTypeReference();
-				return RuntimeHintsPredicates.reflection().onType(thisType)
+				Class<?> thisClass = invocation.getInstance();
+				return RuntimeHintsPredicates.reflection().onType(TypeReference.of(thisClass))
 						.withAnyMemberCategory(MemberCategory.PUBLIC_FIELDS, MemberCategory.DECLARED_FIELDS);
 			}
 	),
@@ -231,8 +231,8 @@ enum InstrumentedMethod {
 	 */
 	CLASS_GETMETHODS(Class.class, "getMethods", HintType.REFLECTION,
 			invocation -> {
-				TypeReference thisType = invocation.getInstanceTypeReference();
-				return RuntimeHintsPredicates.reflection().onType(thisType).withAnyMemberCategory(
+				Class<?> thisClass = invocation.getInstance();
+				return RuntimeHintsPredicates.reflection().onType(TypeReference.of(thisClass)).withAnyMemberCategory(
 						MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS,
 						MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS);
 			}
@@ -297,9 +297,9 @@ enum InstrumentedMethod {
 	 */
 	CLASS_GETRESOURCE(Class.class, "getResource", HintType.RESOURCE_PATTERN,
 			invocation -> {
-				TypeReference thisType = invocation.getInstanceTypeReference();
+				Class<?> thisClass = invocation.getInstance();
 				String resourceName = invocation.getArgument(0);
-				return RuntimeHintsPredicates.resource().forResource(thisType, resourceName);
+				return RuntimeHintsPredicates.resource().forResource(TypeReference.of(thisClass), resourceName);
 			}),
 
 	/**
