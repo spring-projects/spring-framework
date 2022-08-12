@@ -1,5 +1,2 @@
-org.springframework.aot.hint.RuntimeHintsRegistrar= \
-org.springframework.scheduling.annotation.SchedulingRuntimeHints
-
 org.springframework.beans.factory.aot.BeanRegistrationAotProcessor= \
 org.springframework.context.aot.ReflectiveProcessorBeanRegistrationAotProcessor
