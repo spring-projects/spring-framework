@@ -82,7 +82,6 @@ import org.springframework.util.ReflectionUtils;
  * @see AdvisedSupport#setProxyTargetClass
  * @see DefaultAopProxyFactory
  */
-@SuppressWarnings("serial")
 class CglibAopProxy implements AopProxy, Serializable {
 
 	// Constants for CGLIB callback array indices
@@ -333,7 +332,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			for (int x = 0; x < methodsCount; x++) {
 				Method method = methods[x];
 				//do not create advices for non-overridden methods of java.lang.Object
-				if (notOverridenOfObject(method)) {
+				if (notOverriddenOfObject(method)) {
 					advicedMethodCount--;
 					continue;
 				}
@@ -356,15 +355,13 @@ class CglibAopProxy implements AopProxy, Serializable {
 	}
 
 	/**
-	 * Returns true if param is inherited from {@link Object} and not overriden in declaring class.
-	 *
+	 * Returns true if param is inherited from {@link Object} and not overridden in declaring class.
 	 * We use this to detect {@link Object#notify()}, {@link Object#notifyAll()}, {@link Object#getClass()} etc.
 	 * to skip creation of useless advices for them.
-	 *
 	 * @param method to be checked
 	 * @return true in case {@code method} belongs to {@link Object}
 	 */
-	private static boolean notOverridenOfObject(Method method) {
+	private static boolean notOverriddenOfObject(Method method) {
 		return method.getDeclaringClass() == Object.class;
 	}
 
