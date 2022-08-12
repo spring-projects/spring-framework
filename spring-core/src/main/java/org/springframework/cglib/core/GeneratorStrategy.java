@@ -16,7 +16,7 @@
 package org.springframework.cglib.core;
 
 /**
- * The <code>GeneratorStrategy</code. is responsible for taking a
+ * The <code>GeneratorStrategy</code> is responsible for taking a
  * {@link ClassGenerator} and producing a byte array containing the
  * data for the generated <code>Class</code>.  By providing your
  * own strategy you may examine or modify the generated class before
