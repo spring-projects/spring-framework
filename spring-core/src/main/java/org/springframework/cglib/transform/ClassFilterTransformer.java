@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cglib.transform;
 
-import org.springframework.asm.*;
+package org.springframework.cglib.transform;
 
 public class ClassFilterTransformer extends AbstractClassFilterTransformer {
     private ClassFilter filter;
@@ -25,6 +24,7 @@ public class ClassFilterTransformer extends AbstractClassFilterTransformer {
         this.filter = filter;
     }
 
+    @Override
     protected boolean accept(int version, int access, String name, String signature, String superName, String[] interfaces) {
         return filter.accept(name.replace('/', '.'));
     }

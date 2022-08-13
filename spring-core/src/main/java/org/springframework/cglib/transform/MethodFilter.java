@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cglib.transform;
 
-import org.springframework.asm.Attribute;
+package org.springframework.cglib.transform;
 
 public interface MethodFilter {
     // TODO: pass class name too?

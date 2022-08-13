@@ -13,14 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cglib.transform.impl;
 
-import org.springframework.cglib.transform.*;
-import java.lang.reflect.*;
-import java.util.*;
-import org.springframework.cglib.core.*;
-import org.springframework.asm.Attribute;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.CodeEmitter;
+import org.springframework.cglib.core.CodeGenerationException;
+import org.springframework.cglib.core.Constants;
+import org.springframework.cglib.core.ReflectUtils;
+import org.springframework.cglib.core.Signature;
+import org.springframework.cglib.core.TypeUtils;
+import org.springframework.cglib.transform.ClassEmitterTransformer;
 
 /**
  * @author Juozas Baliuka
@@ -30,11 +36,11 @@ public class AddDelegateTransformer extends ClassEmitterTransformer {
     private static final String DELEGATE = "$CGLIB_DELEGATE";
     private static final Signature CSTRUCT_OBJECT =
       TypeUtils.parseSignature("void <init>(Object)");
-    
+
     private Class[] delegateIf;
     private Class delegateImpl;
     private Type delegateType;
-    
+
     /** Creates a new instance of AddDelegateTransformer */
     public AddDelegateTransformer(Class delegateIf[], Class delegateImpl) {
         try {
@@ -46,14 +52,15 @@ public class AddDelegateTransformer extends ClassEmitterTransformer {
             throw new CodeGenerationException(e);
         }
     }
-    
+
+    @Override
     public void begin_class(int version, int access, String className, Type superType, Type[] interfaces, String sourceFile) {
-        
+
         if(!TypeUtils.isInterface(access)){
-            
+
         Type[] all = TypeUtils.add(interfaces, TypeUtils.getTypes(delegateIf));
         super.begin_class(version, access, className, superType, all, sourceFile);
-        
+
         declare_field(Constants.ACC_PRIVATE | Constants.ACC_TRANSIENT,
                       DELEGATE,
                       delegateType,
@@ -71,11 +78,13 @@ public class AddDelegateTransformer extends ClassEmitterTransformer {
         }
     }
 
+    @Override
     public CodeEmitter begin_method(int access, Signature sig, Type[] exceptions) {
         final CodeEmitter e = super.begin_method(access, sig, exceptions);
         if (sig.getName().equals(Constants.CONSTRUCTOR_NAME)) {
             return new CodeEmitter(e) {
                 private boolean transformInit = true;
+                @Override
                 public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
                     super.visitMethodInsn(opcode, owner, name, desc, itf);
                     if (transformInit && opcode == Constants.INVOKESPECIAL) {
@@ -115,6 +124,3 @@ public class AddDelegateTransformer extends ClassEmitterTransformer {
         e.end_method();
     }
 }
-
-
-

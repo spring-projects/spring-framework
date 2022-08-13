@@ -13,10 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cglib.core;
 
-import java.util.*;
-import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Chris Nokleberg
@@ -73,5 +79,4 @@ public class CollectionUtils {
         }
         return indexes;
     }
-}    
-    
+}

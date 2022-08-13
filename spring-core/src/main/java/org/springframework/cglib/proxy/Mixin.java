@@ -13,16 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cglib.proxy;
 
 import java.security.ProtectionDomain;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
-import java.util.*;
-import org.springframework.cglib.core.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.springframework.asm.ClassVisitor;
-
-
+import org.springframework.cglib.core.AbstractClassGenerator;
+import org.springframework.cglib.core.ClassesKey;
+import org.springframework.cglib.core.KeyFactory;
+import org.springframework.cglib.core.ReflectUtils;
 
 /**
  * <code>Mixin</code> allows
@@ -73,11 +78,11 @@ abstract public class Mixin {
         return gen.create();
     }
 
-    
+
     public static Mixin createBean(Object[] beans) {
-    
+
         return createBean(null, beans);
-    
+
     }
     /**
      * Helper method to create a bean mixin. For finer control over the
@@ -92,26 +97,28 @@ abstract public class Mixin {
         gen.setClassLoader(loader);
         return gen.create();
     }
-    
+
     public static class Generator extends AbstractClassGenerator {
         private static final Source SOURCE = new Source(Mixin.class.getName());
 
         private Class[] classes;
         private Object[] delegates;
         private int style = STYLE_INTERFACES;
-        
+
         private int[] route;
 
         public Generator() {
             super(SOURCE);
         }
 
+        @Override
         protected ClassLoader getDefaultClassLoader() {
             return classes[0].getClassLoader(); // is this right?
         }
 
+        @Override
         protected ProtectionDomain getProtectionDomain() {
-        	return ReflectUtils.getProtectionDomain(classes[0]);
+            return ReflectUtils.getProtectionDomain(classes[0]);
         }
 
         public void setStyle(int style) {
@@ -166,10 +173,11 @@ abstract public class Mixin {
                 }
             }
             setNamePrefix(classes[ReflectUtils.findPackageProtected(classes)].getName());
-            
+
             return (Mixin)super.create(KEY_FACTORY.newInstance(style, ReflectUtils.getNames( classes ), route));
         }
 
+        @Override
         public void generateClass(ClassVisitor v) {
             switch (style) {
             case STYLE_INTERFACES:
@@ -184,10 +192,12 @@ abstract public class Mixin {
             }
         }
 
+        @Override
         protected Object firstInstance(Class type) {
             return ((Mixin)ReflectUtils.newInstance(type)).newInstance(delegates);
         }
 
+        @Override
         protected Object nextInstance(Object instance) {
             return ((Mixin)instance).newInstance(delegates);
         }
@@ -200,7 +210,7 @@ abstract public class Mixin {
 //     public static int[] getRoute(Object[] delegates) {
 //         return (int[])route(delegates).route.clone();
 //     }
-        
+
     private static Route route(Object[] delegates) {
         Object key = ClassesKey.create(delegates);
         Route route = (Route)ROUTE_CACHE.get(key);

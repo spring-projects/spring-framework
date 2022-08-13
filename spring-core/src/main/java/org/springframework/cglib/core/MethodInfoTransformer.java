@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cglib.core;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
 public class MethodInfoTransformer implements Transformer
 {
@@ -24,12 +26,13 @@ public class MethodInfoTransformer implements Transformer
     public static MethodInfoTransformer getInstance() {
         return INSTANCE;
     }
-    
+
+    @Override
     public Object transform(Object value) {
-        if (value instanceof Method) {
-            return ReflectUtils.getMethodInfo((Method)value);
-        } else if (value instanceof Constructor) {
-            return ReflectUtils.getMethodInfo((Constructor)value);
+        if (value instanceof Method method) {
+            return ReflectUtils.getMethodInfo(method);
+        } else if (value instanceof Constructor<?> constructor) {
+            return ReflectUtils.getMethodInfo(constructor);
         } else {
             throw new IllegalArgumentException("cannot get method info for " + value);
         }

@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cglib.core;
 
-import java.util.Set;
+package org.springframework.cglib.core;
 
 /**
  * The default policy used by {@link AbstractClassGenerator}.
@@ -34,7 +33,8 @@ public class DefaultNamingPolicy implements NamingPolicy {
      * This allows to test collisions of {@code key.hashCode()}.
      */
     private final static boolean STRESS_HASH_CODE = Boolean.getBoolean("org.springframework.cglib.test.stressHashCodes");
-    
+
+    @Override
     public String getClassName(String prefix, String source, Object key, Predicate names) {
         if (prefix == null) {
             prefix = "org.springframework.cglib.empty.Object";
@@ -42,7 +42,7 @@ public class DefaultNamingPolicy implements NamingPolicy {
             prefix = "$" + prefix;
         }
         String base =
-            prefix + "$$" + 
+            prefix + "$$" +
             source.substring(source.lastIndexOf('.') + 1) +
             getTag() + "$$" +
             Integer.toHexString(STRESS_HASH_CODE ? 0 : key.hashCode());
@@ -61,11 +61,14 @@ public class DefaultNamingPolicy implements NamingPolicy {
         return "ByCGLIB";
     }
 
-  public int hashCode() {
-    return getTag().hashCode();
-  }
+    @Override
+    public int hashCode() {
+        return getTag().hashCode();
+    }
 
-  public boolean equals(Object o) {
-    return (o instanceof DefaultNamingPolicy) && ((DefaultNamingPolicy) o).getTag().equals(getTag());
-  }
+    @Override
+    public boolean equals(Object o) {
+        return (o instanceof DefaultNamingPolicy defaultNamingPolicy) &&
+                defaultNamingPolicy.getTag().equals(getTag());
+    }
 }

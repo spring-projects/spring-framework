@@ -13,21 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cglib.transform;
 
-import org.springframework.cglib.core.ClassGenerator;
-import org.springframework.cglib.core.Transformer;
 import org.springframework.asm.ClassVisitor;
+import org.springframework.cglib.core.ClassGenerator;
 
 public class TransformingClassGenerator implements ClassGenerator {
-    private ClassGenerator gen;
-    private ClassTransformer t;
-    
+    private final ClassGenerator gen;
+    private final ClassTransformer t;
+
     public TransformingClassGenerator(ClassGenerator gen, ClassTransformer t) {
         this.gen = gen;
         this.t = t;
     }
-    
+
+    @Override
     public void generateClass(ClassVisitor v) throws Exception {
         t.setTarget(v);
         gen.generateClass(t);

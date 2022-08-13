@@ -13,27 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cglib.core;
 
-import org.springframework.asm.ClassWriter;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
+
 import org.springframework.asm.ClassReader;
 import org.springframework.asm.ClassVisitor;
-import org.springframework.asm.Opcodes;
-
-import java.io.*;
-import java.lang.reflect.Constructor;
+import org.springframework.asm.ClassWriter;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class DebuggingClassWriter extends ClassVisitor {
-    
+
     public static final String DEBUG_LOCATION_PROPERTY = "cglib.debugLocation";
-    
+
     private static String debugLocation;
     private static Constructor traceCtor;
-    
+
     private String className;
     private String superName;
-    
+
     static {
         debugLocation = System.getProperty(DEBUG_LOCATION_PROPERTY);
         if (debugLocation != null) {
@@ -45,11 +50,12 @@ public class DebuggingClassWriter extends ClassVisitor {
             }
         }
     }
-    
+
     public DebuggingClassWriter(int flags) {
-	super(Constants.ASM_API, new ClassWriter(flags));
+        super(Constants.ASM_API, new ClassWriter(flags));
     }
 
+    @Override
     public void visit(int version,
                       int access,
                       String name,
@@ -60,17 +66,17 @@ public class DebuggingClassWriter extends ClassVisitor {
         this.superName = superName.replace('/', '.');
         super.visit(version, access, name, signature, superName, interfaces);
     }
-    
+
     public String getClassName() {
         return className;
     }
-    
+
     public String getSuperName() {
         return superName;
     }
-    
+
     public byte[] toByteArray() {
-        
+
 		byte[] b = ((ClassWriter) DebuggingClassWriter.super.cv).toByteArray();
 		if (debugLocation != null) {
 			String dirs = className.replace('.', File.separatorChar);

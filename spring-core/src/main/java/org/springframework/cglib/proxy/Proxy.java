@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cglib.proxy;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.lang.reflect.Member;
+
 import org.springframework.cglib.core.CodeGenerationException;
 
 /**
@@ -40,6 +41,7 @@ public class Proxy implements Serializable {
     protected InvocationHandler h;
 
     private static final CallbackFilter BAD_OBJECT_METHOD_FILTER = new CallbackFilter() {
+        @Override
         public int accept(Method method) {
             if (method.getDeclaringClass().getName().equals("java.lang.Object")) {
                 String name = method.getName();

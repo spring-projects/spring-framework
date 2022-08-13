@@ -13,16 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cglib.util;
 
-import java.util.*;
-import org.springframework.cglib.core.*;
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.Label;
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.AbstractClassGenerator;
+import org.springframework.cglib.core.ClassEmitter;
+import org.springframework.cglib.core.CodeEmitter;
+import org.springframework.cglib.core.Constants;
+import org.springframework.cglib.core.EmitUtils;
+import org.springframework.cglib.core.KeyFactory;
+import org.springframework.cglib.core.ObjectSwitchCallback;
+import org.springframework.cglib.core.ReflectUtils;
+import org.springframework.cglib.core.Signature;
+import org.springframework.cglib.core.TypeUtils;
 
 /**
- * This class implements a simple String->int mapping for a fixed set of keys.
+ * This class implements a simple String &rarr; int mapping for a fixed set of keys.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 abstract public class StringSwitcher {
@@ -72,7 +84,7 @@ abstract public class StringSwitcher {
         private String[] strings;
         private int[] ints;
         private boolean fixedInput;
-        
+
         public Generator() {
             super(SOURCE);
         }
@@ -104,6 +116,7 @@ abstract public class StringSwitcher {
             this.fixedInput = fixedInput;
         }
 
+        @Override
         protected ClassLoader getDefaultClassLoader() {
             return getClass().getClassLoader();
         }
@@ -117,6 +130,7 @@ abstract public class StringSwitcher {
             return (StringSwitcher)super.create(key);
         }
 
+        @Override
         public void generateClass(ClassVisitor v) throws Exception {
             ClassEmitter ce = new ClassEmitter(v);
             ce.begin_class(Constants.V1_8,
@@ -131,10 +145,12 @@ abstract public class StringSwitcher {
             final List stringList = Arrays.asList(strings);
             int style = fixedInput ? Constants.SWITCH_STYLE_HASHONLY : Constants.SWITCH_STYLE_HASH;
             EmitUtils.string_switch(e, strings, style, new ObjectSwitchCallback() {
+                @Override
                 public void processCase(Object key, Label end) {
                     e.push(ints[stringList.indexOf(key)]);
                     e.return_value();
                 }
+                @Override
                 public void processDefault() {
                     e.push(-1);
                     e.return_value();
@@ -144,10 +160,12 @@ abstract public class StringSwitcher {
             ce.end_class();
         }
 
+        @Override
         protected Object firstInstance(Class type) {
-            return (StringSwitcher)ReflectUtils.newInstance(type);
+            return ReflectUtils.newInstance(type);
         }
 
+        @Override
         protected Object nextInstance(Object instance) {
             return instance;
         }

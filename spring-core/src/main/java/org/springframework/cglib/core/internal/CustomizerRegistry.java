@@ -1,10 +1,13 @@
 package org.springframework.cglib.core.internal;
 
-import org.springframework.cglib.core.Customizer;
-import org.springframework.cglib.core.FieldTypeCustomizer;
-import org.springframework.cglib.core.KeyFactoryCustomizer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import java.util.*;
+import org.springframework.cglib.core.Customizer;
+import org.springframework.cglib.core.KeyFactoryCustomizer;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class CustomizerRegistry {
@@ -35,7 +38,7 @@ public class CustomizerRegistry {
         }
         return (List<T>) list;
     }
-    
+
     /**
      * @deprecated Only to keep backward compatibility.
      */

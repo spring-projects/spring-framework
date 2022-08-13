@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cglib.core;
 
-import org.springframework.asm.Attribute;
 import org.springframework.asm.Type;
 
 abstract public class ClassInfo {
@@ -28,6 +28,7 @@ abstract public class ClassInfo {
     abstract public Type[] getInterfaces();
     abstract public int getModifiers();
 
+    @Override
     public boolean equals(Object o) {
         if (o == null)
             return false;
@@ -36,10 +37,12 @@ abstract public class ClassInfo {
         return getType().equals(((ClassInfo)o).getType());
     }
 
+    @Override
     public int hashCode() {
         return getType().hashCode();
     }
 
+    @Override
     public String toString() {
         // TODO: include modifiers, superType, interfaces
         return getType().getClassName();

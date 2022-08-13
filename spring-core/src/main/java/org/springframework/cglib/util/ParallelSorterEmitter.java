@@ -13,13 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cglib.util;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import org.springframework.cglib.core.*;
 import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.ClassEmitter;
+import org.springframework.cglib.core.CodeEmitter;
+import org.springframework.cglib.core.Constants;
+import org.springframework.cglib.core.EmitUtils;
+import org.springframework.cglib.core.Local;
+import org.springframework.cglib.core.Signature;
+import org.springframework.cglib.core.TypeUtils;
 
 class ParallelSorterEmitter extends ClassEmitter {
     private static final Type PARALLEL_SORTER =
@@ -83,7 +88,7 @@ class ParallelSorterEmitter extends ClassEmitter {
             e.load_local(T);
             e.load_arg(1);
             e.array_load(component);
-                
+
             e.load_local(T);
             e.load_arg(1);
 

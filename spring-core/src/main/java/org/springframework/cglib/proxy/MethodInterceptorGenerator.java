@@ -13,12 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cglib.proxy;
 
-import java.util.*;
-import org.springframework.cglib.core.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.asm.Label;
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.ClassEmitter;
+import org.springframework.cglib.core.ClassInfo;
+import org.springframework.cglib.core.CodeEmitter;
+import org.springframework.cglib.core.CollectionUtils;
+import org.springframework.cglib.core.Constants;
+import org.springframework.cglib.core.EmitUtils;
+import org.springframework.cglib.core.Local;
+import org.springframework.cglib.core.MethodInfo;
+import org.springframework.cglib.core.ObjectSwitchCallback;
+import org.springframework.cglib.core.Signature;
+import org.springframework.cglib.core.Transformer;
+import org.springframework.cglib.core.TypeUtils;
 
 @SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 class MethodInterceptorGenerator
@@ -42,8 +58,6 @@ implements CallbackGenerator
       TypeUtils.parseType("org.springframework.cglib.proxy.MethodInterceptor");
     private static final Signature GET_DECLARED_METHODS =
       TypeUtils.parseSignature("java.lang.reflect.Method[] getDeclaredMethods()");
-    private static final Signature GET_DECLARING_CLASS =
-      TypeUtils.parseSignature("Class getDeclaringClass()");
     private static final Signature FIND_METHODS =
       TypeUtils.parseSignature("java.lang.reflect.Method[] findMethods(String[], java.lang.reflect.Method[])");
     private static final Signature MAKE_PROXY =
@@ -66,12 +80,11 @@ implements CallbackGenerator
     private static final Signature TO_STRING =
       TypeUtils.parseSignature("String toString()");
     private static final Transformer METHOD_TO_CLASS = new Transformer(){
+        @Override
         public Object transform(Object value) {
             return ((MethodInfo)value).getClassInfo();
         }
     };
-    private static final Signature CSTRUCT_SIGNATURE =
-        TypeUtils.parseConstructor("String, String");
 
     private String getMethodField(Signature impl) {
         return impl.getName() + "$Method";
@@ -80,6 +93,7 @@ implements CallbackGenerator
         return impl.getName() + "$Proxy";
     }
 
+    @Override
     public void generate(ClassEmitter ce, Context context, List methods) {
         Map sigMap = new HashMap();
         for (Iterator it = methods.iterator(); it.hasNext();) {
@@ -113,13 +127,13 @@ implements CallbackGenerator
 
             e.load_this();
             e.getfield(methodField);
-            
+
             if (sig.getArgumentTypes().length == 0) {
                 e.getfield(EMPTY_ARGS_NAME);
             } else {
                 e.create_arg_array();
             }
-            
+
             e.getfield(methodProxyField);
             e.invoke_interface(METHOD_INTERCEPTOR, INTERCEPT);
             e.unbox_or_zero(sig.getReturnType());
@@ -143,6 +157,7 @@ implements CallbackGenerator
         }
     }
 
+    @Override
     public void generateStatic(CodeEmitter e, Context context, List methods) throws Exception {
         /* generates:
            static {
@@ -165,7 +180,7 @@ implements CallbackGenerator
         Local declaringclass = e.make_local();
         EmitUtils.load_class_this(e);
         e.store_local(thisclass);
-        
+
         Map methodsByClass = CollectionUtils.bucket(methods, METHOD_TO_CLASS);
         for (Iterator i = methodsByClass.keySet().iterator(); i.hasNext();) {
             ClassInfo classInfo = (ClassInfo)i.next();
@@ -185,7 +200,7 @@ implements CallbackGenerator
                 e.push(sig.getDescriptor());
                 e.aastore();
             }
-            
+
             EmitUtils.load_class(e, classInfo.getType());
             e.dup();
             e.store_local(declaringclass);
@@ -220,10 +235,12 @@ implements CallbackGenerator
         e.load_arg(0);
         e.invoke_virtual(Constants.TYPE_OBJECT, TO_STRING);
         ObjectSwitchCallback callback = new ObjectSwitchCallback() {
+            @Override
             public void processCase(Object key, Label end) {
                 e.getfield((String)sigMap.get(key));
                 e.return_value();
             }
+            @Override
             public void processDefault() {
                 e.aconst_null();
                 e.return_value();

@@ -13,14 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cglib.reflect;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Method;
 import java.security.ProtectionDomain;
-import org.springframework.cglib.*;
-import org.springframework.cglib.core.*;
+
 import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.AbstractClassGenerator;
+import org.springframework.cglib.core.ClassEmitter;
+import org.springframework.cglib.core.CodeEmitter;
+import org.springframework.cglib.core.Constants;
+import org.springframework.cglib.core.EmitUtils;
+import org.springframework.cglib.core.KeyFactory;
+import org.springframework.cglib.core.MethodInfo;
+import org.springframework.cglib.core.ReflectUtils;
+import org.springframework.cglib.core.Signature;
+import org.springframework.cglib.core.TypeUtils;
 
 // TODO: don't require exact match for return type
 
@@ -133,11 +143,13 @@ abstract public class MethodDelegate {
         return gen.create();
     }
 
+    @Override
     public boolean equals(Object obj) {
         MethodDelegate other = (MethodDelegate)obj;
         return (other != null && target == other.target) && eqMethod.equals(other.eqMethod);
     }
 
+    @Override
     public int hashCode() {
         return target.hashCode() ^ eqMethod.hashCode();
     }
@@ -181,12 +193,14 @@ abstract public class MethodDelegate {
             this.iface = iface;
         }
 
+        @Override
         protected ClassLoader getDefaultClassLoader() {
             return targetClass.getClassLoader();
         }
 
+        @Override
         protected ProtectionDomain getProtectionDomain() {
-        	return ReflectUtils.getProtectionDomain(targetClass);
+            return ReflectUtils.getProtectionDomain(targetClass);
         }
 
         public MethodDelegate create() {
@@ -195,14 +209,17 @@ abstract public class MethodDelegate {
             return (MethodDelegate)super.create(key);
         }
 
+        @Override
         protected Object firstInstance(Class type) {
             return ((MethodDelegate)ReflectUtils.newInstance(type)).newInstance(target);
         }
 
+        @Override
         protected Object nextInstance(Object instance) {
             return ((MethodDelegate)instance).newInstance(target);
         }
 
+        @Override
         public void generateClass(ClassVisitor v) throws NoSuchMethodException {
             Method proxy = ReflectUtils.findInterfaceMethod(iface);
             final Method method = targetClass.getMethod(methodName, proxy.getParameterTypes());

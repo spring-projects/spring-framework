@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cglib.core;
 
-import java.util.Set;
+package org.springframework.cglib.core;
 
 /**
  * Customize the generated class name for {@link AbstractClassGenerator}-based utilities.
@@ -39,5 +38,6 @@ public interface NamingPolicy {
      * correctly implement <code>equals</code> and <code>hashCode</code>
      * to avoid generating too many classes.
      */
+    @Override
     boolean equals(Object o);
 }

@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cglib.transform.impl;
 
-import org.springframework.cglib.transform.*;
-import org.springframework.cglib.core.*;
-import org.springframework.asm.ClassVisitor;
-import org.springframework.asm.MethodVisitor;
-import org.springframework.asm.Attribute;
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.CodeEmitter;
+import org.springframework.cglib.core.Constants;
+import org.springframework.cglib.core.Signature;
+import org.springframework.cglib.core.TypeUtils;
+import org.springframework.cglib.transform.ClassEmitterTransformer;
 
 public class AccessFieldTransformer extends ClassEmitterTransformer {
     private Callback callback;
@@ -33,6 +34,7 @@ public class AccessFieldTransformer extends ClassEmitterTransformer {
         String getPropertyName(Type owner, String fieldName);
     }
 
+    @Override
     public void declare_field(int access, final String name, Type type, Object value) {
         super.declare_field(access, name, type, value);
 

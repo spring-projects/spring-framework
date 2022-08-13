@@ -13,18 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cglib.transform.impl;
 
 import java.lang.reflect.Constructor;
-import org.springframework.cglib.core.*;
-import org.springframework.cglib.transform.*;
-import org.springframework.asm.Attribute;
+
 import org.springframework.asm.Type;
-import org.springframework.asm.ClassVisitor;
+import org.springframework.cglib.core.Block;
+import org.springframework.cglib.core.CodeEmitter;
+import org.springframework.cglib.core.Constants;
+import org.springframework.cglib.core.EmitUtils;
+import org.springframework.cglib.core.Signature;
+import org.springframework.cglib.core.TypeUtils;
+import org.springframework.cglib.transform.ClassEmitterTransformer;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class UndeclaredThrowableTransformer extends ClassEmitterTransformer {
-    private Type wrapper;
+
+    private final Type wrapper;
 
     public UndeclaredThrowableTransformer(Class wrapper) {
         this.wrapper = Type.getType(wrapper);
@@ -41,6 +47,7 @@ public class UndeclaredThrowableTransformer extends ClassEmitterTransformer {
             throw new IllegalArgumentException(wrapper + " does not have a single-arg constructor that takes a Throwable");
     }
 
+    @Override
     public CodeEmitter begin_method(int access, final Signature sig, final Type[] exceptions) {
         CodeEmitter e = super.begin_method(access, sig, exceptions);
         if (TypeUtils.isAbstract(access) || sig.equals(Constants.SIG_STATIC)) {
@@ -51,6 +58,7 @@ public class UndeclaredThrowableTransformer extends ClassEmitterTransformer {
             /* init */ {
                 handler = begin_block();
             }
+            @Override
             public void visitMaxs(int maxStack, int maxLocals) {
                 handler.end();
                 EmitUtils.wrap_undeclared_throwable(this, handler, exceptions, wrapper);

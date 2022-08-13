@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cglib.util;
 
-import java.lang.reflect.*;
 import java.util.Comparator;
-import org.springframework.cglib.core.*;
+
 import org.springframework.asm.ClassVisitor;
+import org.springframework.cglib.core.AbstractClassGenerator;
+import org.springframework.cglib.core.ClassesKey;
+import org.springframework.cglib.core.ReflectUtils;
 
 /**
  * For the efficient sorting of multiple arrays in parallel.
@@ -49,7 +52,7 @@ import org.springframework.asm.ClassVisitor;
 abstract public class ParallelSorter extends SorterTemplate {
     protected Object[] a;
     private Comparer comparer;
-    
+
     protected ParallelSorter() {
     }
 
@@ -150,7 +153,7 @@ abstract public class ParallelSorter extends SorterTemplate {
         chooseComparer(index, cmp);
         super.mergeSort(lo, hi - 1);
     }
-    
+
     private void chooseComparer(int index, Comparator cmp) {
         Object array = a[index];
         Class type = array.getClass().getComponentType();
@@ -170,9 +173,10 @@ abstract public class ParallelSorter extends SorterTemplate {
             comparer = new ComparatorComparer((Object[])array, cmp);
         } else {
             comparer = new ObjectComparer((Object[])array);
-        } 
+        }
     }
 
+    @Override
     protected int compare(int i, int j) {
         return comparer.compare(i, j);
     }
@@ -190,14 +194,16 @@ abstract public class ParallelSorter extends SorterTemplate {
             this.cmp = cmp;
         }
 
+        @Override
         public int compare(int i, int j) {
             return cmp.compare(a[i], a[j]);
         }
     }
-    
+
     static class ObjectComparer implements Comparer {
         private Object[] a;
         public ObjectComparer(Object[] a) { this.a = a; }
+        @Override
         public int compare(int i, int j) {
             return ((Comparable)a[i]).compareTo(a[j]);
         }
@@ -206,12 +212,14 @@ abstract public class ParallelSorter extends SorterTemplate {
     static class IntComparer implements Comparer {
         private int[] a;
         public IntComparer(int[] a) { this.a = a; }
+        @Override
         public int compare(int i, int j) { return a[i] - a[j]; }
     }
 
     static class LongComparer implements Comparer {
         private long[] a;
         public LongComparer(long[] a) { this.a = a; }
+        @Override
         public int compare(int i, int j) {
             long vi = a[i];
             long vj = a[j];
@@ -222,16 +230,18 @@ abstract public class ParallelSorter extends SorterTemplate {
     static class FloatComparer implements Comparer {
         private float[] a;
         public FloatComparer(float[] a) { this.a = a; }
+        @Override
         public int compare(int i, int j) {
             float vi = a[i];
             float vj = a[j];
             return (vi == vj) ? 0 : (vi > vj) ? 1 : -1;
         }
     }
-    
+
     static class DoubleComparer implements Comparer {
         private double[] a;
         public DoubleComparer(double[] a) { this.a = a; }
+        @Override
         public int compare(int i, int j) {
             double vi = a[i];
             double vj = a[j];
@@ -242,12 +252,14 @@ abstract public class ParallelSorter extends SorterTemplate {
     static class ShortComparer implements Comparer {
         private short[] a;
         public ShortComparer(short[] a) { this.a = a; }
+        @Override
         public int compare(int i, int j) { return a[i] - a[j]; }
     }
 
     static class ByteComparer implements Comparer {
         private byte[] a;
         public ByteComparer(byte[] a) { this.a = a; }
+        @Override
         public int compare(int i, int j) { return a[i] - a[j]; }
     }
 
@@ -260,6 +272,7 @@ abstract public class ParallelSorter extends SorterTemplate {
             super(SOURCE);
         }
 
+        @Override
         protected ClassLoader getDefaultClassLoader() {
             return null; // TODO
         }
@@ -272,6 +285,7 @@ abstract public class ParallelSorter extends SorterTemplate {
             return (ParallelSorter)super.create(ClassesKey.create(arrays));
         }
 
+        @Override
         public void generateClass(ClassVisitor v) throws Exception {
             if (arrays.length == 0) {
                 throw new IllegalArgumentException("No arrays specified to sort");
@@ -283,11 +297,13 @@ abstract public class ParallelSorter extends SorterTemplate {
             }
             new ParallelSorterEmitter(v, getClassName(), arrays);
         }
-        
+
+        @Override
         protected Object firstInstance(Class type) {
             return ((ParallelSorter)ReflectUtils.newInstance(type)).newInstance(arrays);
         }
 
+        @Override
         protected Object nextInstance(Object instance) {
             return ((ParallelSorter)instance).newInstance(arrays);
         }

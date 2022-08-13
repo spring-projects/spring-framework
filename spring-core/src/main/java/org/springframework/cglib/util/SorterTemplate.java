@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cglib.util;
 
-import java.util.*;
+package org.springframework.cglib.util;
 
 abstract class SorterTemplate {
     private static final int MERGESORT_THRESHOLD = 12;
@@ -71,7 +70,7 @@ abstract class SorterTemplate {
             }
         }
     }
-    
+
     private void insertionSort(int lo, int hi) {
         for (int i = lo + 1 ; i <= hi; i++) {
             for (int j = i; j > lo; j--) {

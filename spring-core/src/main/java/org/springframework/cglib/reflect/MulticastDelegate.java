@@ -13,15 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cglib.reflect;
 
-import java.lang.reflect.*;
 import java.security.ProtectionDomain;
-import java.util.*;
-import org.springframework.cglib.core.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.asm.ClassVisitor;
-import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.AbstractClassGenerator;
+import org.springframework.cglib.core.ClassEmitter;
+import org.springframework.cglib.core.CodeEmitter;
+import org.springframework.cglib.core.Constants;
+import org.springframework.cglib.core.EmitUtils;
+import org.springframework.cglib.core.Local;
+import org.springframework.cglib.core.MethodInfo;
+import org.springframework.cglib.core.ProcessArrayCallback;
+import org.springframework.cglib.core.ReflectUtils;
+import org.springframework.cglib.core.Signature;
+import org.springframework.cglib.core.TypeUtils;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 abstract public class MulticastDelegate implements Cloneable {
@@ -82,12 +94,14 @@ abstract public class MulticastDelegate implements Cloneable {
             super(SOURCE);
         }
 
+        @Override
         protected ClassLoader getDefaultClassLoader() {
             return iface.getClassLoader();
         }
 
+        @Override
         protected ProtectionDomain getProtectionDomain() {
-        	return ReflectUtils.getProtectionDomain(iface);
+            return ReflectUtils.getProtectionDomain(iface);
         }
 
         public void setInterface(Class iface) {
@@ -99,6 +113,7 @@ abstract public class MulticastDelegate implements Cloneable {
             return (MulticastDelegate)super.create(iface.getName());
         }
 
+        @Override
         public void generateClass(ClassVisitor cv) {
             final MethodInfo method = ReflectUtils.getMethodInfo(ReflectUtils.findInterfaceMethod(iface));
 
@@ -152,6 +167,7 @@ abstract public class MulticastDelegate implements Cloneable {
             e.super_getfield("targets", Constants.TYPE_OBJECT_ARRAY);
             final Local result2 = result;
             EmitUtils.process_array(e, Constants.TYPE_OBJECT_ARRAY, new ProcessArrayCallback() {
+                @Override
                 public void processElement(Type type) {
                     e.checkcast(Type.getType(iface));
                     e.load_args();
@@ -168,11 +184,13 @@ abstract public class MulticastDelegate implements Cloneable {
             e.end_method();
         }
 
+        @Override
         protected Object firstInstance(Class type) {
             // make a new instance in case first object is used with a long list of targets
             return ((MulticastDelegate)ReflectUtils.newInstance(type)).newInstance();
         }
 
+        @Override
         protected Object nextInstance(Object instance) {
             return ((MulticastDelegate)instance).newInstance();
         }

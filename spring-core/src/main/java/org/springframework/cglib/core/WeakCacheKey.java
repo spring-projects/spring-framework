@@ -21,11 +21,11 @@ public class WeakCacheKey<T> extends WeakReference<T> {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof WeakCacheKey)) {
+        if (!(obj instanceof WeakCacheKey<?> weakCacheKey)) {
             return false;
         }
         Object ours = get();
-        Object theirs = ((WeakCacheKey) obj).get();
+        Object theirs = weakCacheKey.get();
         return ours != null && theirs != null && ours.equals(theirs);
     }
 

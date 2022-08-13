@@ -13,15 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cglib.core;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.springframework.cglib.core.internal.CustomizerRegistry;
 import org.springframework.asm.Label;
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.internal.CustomizerRegistry;
 
 @SuppressWarnings({"rawtypes", "unchecked", "static", "fallthrough", "deprecation"})
 public class EmitUtils {
@@ -68,8 +77,8 @@ public class EmitUtils {
       TypeUtils.parseSignature("void setLength(int)");
     private static final Signature GET_DECLARED_METHOD =
       TypeUtils.parseSignature("java.lang.reflect.Method getDeclaredMethod(String, Class[])");
-     
-    
+
+
 
     public static final ArrayDelimiters DEFAULT_DELIMITERS = new ArrayDelimiters("{", ", ", "}");
 
@@ -93,7 +102,7 @@ public class EmitUtils {
         e.return_value();
         e.end_method();
     }
-    
+
     /**
      * Process an array on the stack. Assumes the top item on the stack
      * is an array of the specified type. For each element in the array,
@@ -111,21 +120,21 @@ public class EmitUtils {
         e.push(0);
         e.store_local(loopvar);
         e.goTo(checkloop);
-        
+
         e.mark(loopbody);
         e.load_local(array);
         e.load_local(loopvar);
         e.array_load(componentType);
         callback.processElement(componentType);
         e.iinc(loopvar, 1);
-        
+
         e.mark(checkloop);
         e.load_local(loopvar);
         e.load_local(array);
         e.arraylength();
-        e.if_icmp(e.LT, loopbody);
+        e.if_icmp(CodeEmitter.LT, loopbody);
     }
-    
+
     /**
      * Process two arrays on the stack in parallel. Assumes the top two items on the stack
      * are arrays of the specified class. The arrays must be the same length. For each pair
@@ -145,7 +154,7 @@ public class EmitUtils {
         e.push(0);
         e.store_local(loopvar);
         e.goTo(checkloop);
-        
+
         e.mark(loopbody);
         e.load_local(array1);
         e.load_local(loopvar);
@@ -155,14 +164,14 @@ public class EmitUtils {
         e.array_load(componentType);
         callback.processElement(componentType);
         e.iinc(loopvar, 1);
-        
+
         e.mark(checkloop);
         e.load_local(loopvar);
         e.load_local(array1);
         e.arraylength();
-        e.if_icmp(e.LT, loopbody);
+        e.if_icmp(CodeEmitter.LT, loopbody);
     }
-    
+
     public static void string_switch(CodeEmitter e, String[] strings, int switchStyle, ObjectSwitchCallback callback) {
         try {
             switch (switchStyle) {
@@ -193,6 +202,7 @@ public class EmitUtils {
         final Label def = e.make_label();
         final Label end = e.make_label();
         final Map buckets = CollectionUtils.bucket(Arrays.asList(strings), new Transformer() {
+            @Override
             public Object transform(Object value) {
                 return ((String)value).length();
             }
@@ -200,10 +210,12 @@ public class EmitUtils {
         e.dup();
         e.invoke_virtual(Constants.TYPE_STRING, STRING_LENGTH);
         e.process_switch(getSwitchKeys(buckets), new ProcessSwitchCallback() {
+                @Override
                 public void processCase(int key, Label ignore_end) throws Exception {
                     List bucket = (List)buckets.get(key);
                     stringSwitchHelper(e, bucket, callback, def, end, 0);
                 }
+                @Override
                 public void processDefault() {
                     e.goTo(def);
                 }
@@ -222,6 +234,7 @@ public class EmitUtils {
                                            final int index) throws Exception {
         final int len = ((String)strings.get(0)).length();
         final Map buckets = CollectionUtils.bucket(strings, new Transformer() {
+            @Override
             public Object transform(Object value) {
                 return ((String)value).charAt(index);
             }
@@ -230,6 +243,7 @@ public class EmitUtils {
         e.push(index);
         e.invoke_virtual(Constants.TYPE_STRING, STRING_CHAR_AT);
         e.process_switch(getSwitchKeys(buckets), new ProcessSwitchCallback() {
+                @Override
                 public void processCase(int key, Label ignore_end) throws Exception {
                     List bucket = (List)buckets.get(key);
                     if (index + 1 == len) {
@@ -239,11 +253,12 @@ public class EmitUtils {
                         stringSwitchHelper(e, bucket, callback, def, end, index + 1);
                     }
                 }
+                @Override
                 public void processDefault() {
                     e.goTo(def);
                 }
             });
-    }        
+    }
 
     static int[] getSwitchKeys(Map buckets) {
         int[] keys = new int[buckets.size()];
@@ -260,6 +275,7 @@ public class EmitUtils {
                                            final ObjectSwitchCallback callback,
                                            final boolean skipEquals) throws Exception {
         final Map buckets = CollectionUtils.bucket(Arrays.asList(strings), new Transformer() {
+            @Override
             public Object transform(Object value) {
                 return value.hashCode();
             }
@@ -269,13 +285,14 @@ public class EmitUtils {
         e.dup();
         e.invoke_virtual(Constants.TYPE_OBJECT, HASH_CODE);
         e.process_switch(getSwitchKeys(buckets), new ProcessSwitchCallback() {
+            @Override
             public void processCase(int key, Label ignore_end) throws Exception {
                 List bucket = (List)buckets.get(key);
                 Label next = null;
                 if (skipEquals && bucket.size() == 1) {
                     if (skipEquals)
                         e.pop();
-                    callback.processCase((String)bucket.get(0), end);
+                    callback.processCase(bucket.get(0), end);
                 } else {
                     for (Iterator it = bucket.iterator(); it.hasNext();) {
                         String string = (String)it.next();
@@ -288,15 +305,16 @@ public class EmitUtils {
                         e.push(string);
                         e.invoke_virtual(Constants.TYPE_OBJECT, EQUALS);
                         if (it.hasNext()) {
-                            e.if_jump(e.EQ, next = e.make_label());
+                            e.if_jump(CodeEmitter.EQ, next = e.make_label());
                             e.pop();
                         } else {
-                            e.if_jump(e.EQ, def);
+                            e.if_jump(CodeEmitter.EQ, def);
                         }
                         callback.processCase(string, end);
                     }
                 }
             }
+            @Override
             public void processDefault() {
                 e.pop();
             }
@@ -309,7 +327,7 @@ public class EmitUtils {
     public static void load_class_this(CodeEmitter e) {
         load_class_helper(e, e.getClassEmitter().getClassType());
     }
-    
+
     public static void load_class(CodeEmitter e, Type type) {
         if (TypeUtils.isPrimitive(type)) {
             if (type == Type.VOID_TYPE) {
@@ -359,7 +377,7 @@ public class EmitUtils {
             return Class.class;
         return componentType;
     }
-    
+
     public static void push_object(CodeEmitter e, Object obj) {
         if (obj == null) {
             e.aconst_null();
@@ -394,23 +412,23 @@ public class EmitUtils {
      */
     @Deprecated
     public static void hash_code(CodeEmitter e, Type type, int multiplier, final Customizer customizer) {
-    	hash_code(e, type, multiplier, CustomizerRegistry.singleton(customizer));
+        hash_code(e, type, multiplier, CustomizerRegistry.singleton(customizer));
     }
-    
+
     public static void hash_code(CodeEmitter e, Type type, int multiplier, final CustomizerRegistry registry) {
         if (TypeUtils.isArray(type)) {
             hash_array(e, type, multiplier, registry);
         } else {
             e.swap(Type.INT_TYPE, type);
             e.push(multiplier);
-            e.math(e.MUL, Type.INT_TYPE);
+            e.math(CodeEmitter.MUL, Type.INT_TYPE);
             e.swap(type, Type.INT_TYPE);
             if (TypeUtils.isPrimitive(type)) {
                 hash_primitive(e, type);
             } else {
                 hash_object(e, type, registry);
             }
-            e.math(e.ADD, Type.INT_TYPE);
+            e.math(CodeEmitter.ADD, Type.INT_TYPE);
         }
     }
 
@@ -420,6 +438,7 @@ public class EmitUtils {
         e.dup();
         e.ifnull(skip);
         EmitUtils.process_array(e, type, new ProcessArrayCallback() {
+            @Override
             public void processElement(Type type) {
                 hash_code(e, type, multiplier, registry);
             }
@@ -461,7 +480,7 @@ public class EmitUtils {
         case Type.BOOLEAN:
             // f ? 0 : 1
             e.push(1);
-            e.math(e.XOR, Type.INT_TYPE);
+            e.math(CodeEmitter.XOR, Type.INT_TYPE);
             break;
         case Type.FLOAT:
             // Float.floatToIntBits(f)
@@ -480,23 +499,23 @@ public class EmitUtils {
         // (int)(f ^ (f >>> 32))
         e.dup2();
         e.push(32);
-        e.math(e.USHR, Type.LONG_TYPE);
-        e.math(e.XOR, Type.LONG_TYPE);
+        e.math(CodeEmitter.USHR, Type.LONG_TYPE);
+        e.math(CodeEmitter.XOR, Type.LONG_TYPE);
         e.cast_numeric(Type.LONG_TYPE, Type.INT_TYPE);
     }
 
 //     public static void not_equals(CodeEmitter e, Type type, Label notEquals) {
 //         not_equals(e, type, notEquals, null);
 //     }
-    
+
     /**
      * @deprecated use {@link #not_equals(CodeEmitter, Type, Label, CustomizerRegistry)} instead
      */
     @Deprecated
     public static void not_equals(CodeEmitter e, Type type, final Label notEquals, final Customizer customizer) {
-    	not_equals(e, type, notEquals, CustomizerRegistry.singleton(customizer));
+        not_equals(e, type, notEquals, CustomizerRegistry.singleton(customizer));
     }
-    
+
     /**
      * Branches to the specified label if the top two items on the stack
      * are not equal. The items must both be of the specified
@@ -506,19 +525,20 @@ public class EmitUtils {
      */
     public static void not_equals(final CodeEmitter e, Type type, final Label notEquals, final CustomizerRegistry registry) {
         (new ProcessArrayCallback() {
+            @Override
             public void processElement(Type type) {
                 not_equals_helper(e, type, notEquals, registry, this);
             }
         }).processElement(type);
     }
-    
+
     private static void not_equals_helper(CodeEmitter e,
                                           Type type,
                                           Label notEquals,
                                           CustomizerRegistry registry,
                                           ProcessArrayCallback callback) {
         if (TypeUtils.isPrimitive(type)) {
-            e.if_cmp(type, e.NE, notEquals);
+            e.if_cmp(type, CodeEmitter.NE, notEquals);
         } else {
             Label end = e.make_label();
             nullcmp(e, notEquals, end);
@@ -528,7 +548,7 @@ public class EmitUtils {
                 e.arraylength();
                 e.swap();
                 e.arraylength();
-                e.if_icmp(e.EQ, checkContents);
+                e.if_icmp(CodeEmitter.EQ, checkContents);
                 e.pop2();
                 e.goTo(notEquals);
                 e.mark(checkContents);
@@ -545,7 +565,7 @@ public class EmitUtils {
                     }
                 }
                 e.invoke_virtual(Constants.TYPE_OBJECT, EQUALS);
-                e.if_jump(e.EQ, notEquals);
+                e.if_jump(CodeEmitter.EQ, notEquals);
             }
             e.mark(end);
         }
@@ -567,15 +587,15 @@ public class EmitUtils {
         e.ifnonnull(oneNullHelper);
         e.pop2();
         e.goTo(bothNull);
-        
+
         e.mark(nonNull);
         e.ifnull(oneNullHelper);
         e.goTo(end);
-        
+
         e.mark(oneNullHelper);
         e.pop2();
         e.goTo(oneNull);
-        
+
         e.mark(end);
     }
 
@@ -610,6 +630,7 @@ public class EmitUtils {
                                      final CustomizerRegistry registry) {
         final ArrayDelimiters d = (delims != null) ? delims : DEFAULT_DELIMITERS;
         ProcessArrayCallback callback = new ProcessArrayCallback() {
+            @Override
             public void processElement(Type type) {
                 append_string_helper(e, type, d, registry, this);
                 e.push(d.inside);
@@ -686,7 +707,7 @@ public class EmitUtils {
         e.dup();
         e.invoke_virtual(Constants.TYPE_STRING_BUFFER, LENGTH);
         e.push(amt);
-        e.math(e.SUB, Type.INT_TYPE);
+        e.math(CodeEmitter.SUB, Type.INT_TYPE);
         e.invoke_virtual(Constants.TYPE_STRING_BUFFER, SET_LENGTH);
     }
 
@@ -694,7 +715,7 @@ public class EmitUtils {
         private String before;
         private String inside;
         private String after;
-            
+
         public ArrayDelimiters(String before, String inside, String after) {
             this.before = before;
             this.inside = inside;
@@ -732,6 +753,7 @@ public class EmitUtils {
         try {
             final Map cache = new HashMap();
             final ParameterTyper cached = new ParameterTyper() {
+                    @Override
                     public Type[] getParameterTypes(MethodInfo member) {
                         Type[] types = (Type[])cache.get(member);
                         if (types == null) {
@@ -745,15 +767,18 @@ public class EmitUtils {
             if (useName) {
                 e.swap();
                 final Map buckets = CollectionUtils.bucket(members, new Transformer() {
+                        @Override
                         public Object transform(Object value) {
                             return ((MethodInfo)value).getSignature().getName();
                         }
                     });
                 String[] names = (String[])buckets.keySet().toArray(new String[buckets.size()]);
                 EmitUtils.string_switch(e, names, Constants.SWITCH_STYLE_HASH, new ObjectSwitchCallback() {
+                        @Override
                         public void processCase(Object key, Label dontUseEnd) throws Exception {
                             member_helper_size(e, (List)buckets.get(key), callback, cached, def, end);
                         }
+                        @Override
                         public void processDefault() throws Exception {
                             e.goTo(def);
                         }
@@ -781,6 +806,7 @@ public class EmitUtils {
                                            final Label def,
                                            final Label end) throws Exception {
         final Map buckets = CollectionUtils.bucket(members, new Transformer() {
+            @Override
             public Object transform(Object value) {
                 return typer.getParameterTypes((MethodInfo)value).length;
             }
@@ -788,10 +814,12 @@ public class EmitUtils {
         e.dup();
         e.arraylength();
         e.process_switch(EmitUtils.getSwitchKeys(buckets), new ProcessSwitchCallback() {
+            @Override
             public void processCase(int key, Label dontUseEnd) throws Exception {
                 List bucket = (List)buckets.get(key);
                 member_helper_type(e, bucket, callback, typer, def, end, new BitSet());
             }
+            @Override
             public void processDefault() throws Exception {
                 e.goTo(def);
             }
@@ -816,7 +844,7 @@ public class EmitUtils {
                     e.invoke_virtual(Constants.TYPE_CLASS, GET_NAME);
                     e.push(TypeUtils.emulateClassGetName(types[i]));
                     e.invoke_virtual(Constants.TYPE_OBJECT, EQUALS);
-                    e.if_jump(e.EQ, def);
+                    e.if_jump(CodeEmitter.EQ, def);
                 }
             }
             e.pop();
@@ -829,6 +857,7 @@ public class EmitUtils {
             for (int i = 0; i < example.length; i++) {
                 final int j = i;
                 Map test = CollectionUtils.bucket(members, new Transformer() {
+                    @Override
                     public Object transform(Object value) {
                         return TypeUtils.emulateClassGetName(typer.getParameterTypes((MethodInfo)value)[j]);
                     }
@@ -852,9 +881,11 @@ public class EmitUtils {
                 final Map fbuckets = buckets;
                 String[] names = (String[])buckets.keySet().toArray(new String[buckets.size()]);
                 EmitUtils.string_switch(e, names, Constants.SWITCH_STYLE_HASH, new ObjectSwitchCallback() {
+                    @Override
                     public void processCase(Object key, Label dontUseEnd) throws Exception {
                         member_helper_type(e, (List)fbuckets.get(key), callback, typer, def, end, checked);
                     }
+                    @Override
                     public void processDefault() throws Exception {
                         e.goTo(def);
                     }
