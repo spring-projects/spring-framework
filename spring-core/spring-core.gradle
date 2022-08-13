@@ -144,3 +144,5 @@ eclipse {
 		}
 	}
 }
+
+tasks['eclipse'].dependsOn(javapoetRepackJar, javapoetSourceJar, objenesisRepackJar, objenesisSourceJar)
