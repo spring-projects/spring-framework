@@ -16,7 +16,6 @@
 
 package org.springframework.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FilterInputStream;
 import java.io.FilterOutputStream;
@@ -62,7 +61,7 @@ public abstract class StreamUtils {
 	 */
 	public static byte[] copyToByteArray(@Nullable InputStream in) throws IOException {
 		if (in == null) {
-			return new byte[0];
+			return EMPTY_CONTENT;
 		}
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream(BUFFER_SIZE);
@@ -215,22 +214,15 @@ public abstract class StreamUtils {
 	 */
 	public static int drain(InputStream in) throws IOException {
 		Assert.notNull(in, "No InputStream specified");
-		byte[] buffer = new byte[BUFFER_SIZE];
-		int bytesRead = -1;
-		int byteCount = 0;
-		while ((bytesRead = in.read(buffer)) != -1) {
-			byteCount += bytesRead;
-		}
-		return byteCount;
+		return (int) in.transferTo(OutputStream.nullOutputStream());
 	}
-
 	/**
 	 * Return an efficient empty {@link InputStream}.
-	 * @return a {@link ByteArrayInputStream} based on an empty byte array
+	 * @return an InputStream which contains no bytes
 	 * @since 4.2.2
 	 */
 	public static InputStream emptyInput() {
-		return new ByteArrayInputStream(EMPTY_CONTENT);
+		return InputStream.nullInputStream();
 	}
 
 	/**
