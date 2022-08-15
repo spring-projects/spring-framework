@@ -4,9 +4,11 @@ import org.springframework.build.shadow.ShadowSource
 description = "Spring Core"
 
 apply plugin: "kotlin"
+apply plugin: "io.github.reyerizo.gradle.jcstress"
 
 def javapoetVersion = "1.13.0"
 def objenesisVersion = "3.2"
+def jcstressVersion = "0.15"
 
 configurations {
 	javapoet
@@ -146,3 +148,9 @@ eclipse {
 }
 
 tasks['eclipse'].dependsOn(javapoetRepackJar, javapoetSourceJar, objenesisRepackJar, objenesisSourceJar)
+
+jcstress {
+	jcstressDependency "org.openjdk.jcstress:jcstress-core:${jcstressVersion}"
+	verbose = true
+	timeMillis = "200"
+}
