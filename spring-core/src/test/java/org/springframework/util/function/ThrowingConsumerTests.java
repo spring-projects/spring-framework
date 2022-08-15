@@ -69,7 +69,7 @@ class ThrowingConsumerTests {
 	}
 
 	@Test
-	void ofModifiesThrowException() {
+	void ofModifiesThrownException() {
 		ThrowingConsumer<Object> consumer = ThrowingConsumer.of(this::throwIOException,
 				IllegalStateException::new);
 		assertThatIllegalStateException().isThrownBy(

@@ -91,9 +91,9 @@ public interface ThrowingSupplier<T> extends Supplier<T> {
 	}
 
 	/**
-	 * Lambda friendly convenience method that can be used to create
-	 * {@link ThrowingSupplier} where the {@link #get()} method wraps any
-	 * thrown checked exceptions.
+	 * Lambda friendly convenience method that can be used to create a
+	 * {@link ThrowingSupplier} where the {@link #get()} method wraps any checked
+	 * exception thrown by the supplied lambda expression or method reference.
 	 * @param <T> the type of results supplied by this supplier
 	 * @param supplier the source supplier
 	 * @return a new {@link ThrowingSupplier} instance

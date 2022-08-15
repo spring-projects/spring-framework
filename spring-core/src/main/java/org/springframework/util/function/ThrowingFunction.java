@@ -95,9 +95,10 @@ public interface ThrowingFunction<T, R> extends Function<T, R> {
 	}
 
 	/**
-	 * Lambda friendly convenience method that can be used to create
+	 * Lambda friendly convenience method that can be used to create a
 	 * {@link ThrowingFunction} where the {@link #apply(Object)} method wraps
-	 * any thrown checked exceptions using the given {@code exceptionWrapper}.
+	 * any checked exception thrown by the supplied lambda expression or method
+	 * reference.
 	 * @param <T> the type of the input to the function
 	 * @param <R> the type of the result of the function
 	 * @param function the source function
@@ -108,7 +109,7 @@ public interface ThrowingFunction<T, R> extends Function<T, R> {
 	}
 
 	/**
-	 * Lambda friendly convenience method that can be used to create
+	 * Lambda friendly convenience method that can be used to create a
 	 * {@link ThrowingFunction} where the {@link #apply(Object)} method wraps
 	 * any thrown checked exceptions using the given {@code exceptionWrapper}.
 	 * @param <T> the type of the input to the function

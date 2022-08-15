@@ -16,7 +16,6 @@
 
 package org.springframework.aot.generate;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -157,7 +156,6 @@ public class GeneratedClasses {
 	 * Write the {@link GeneratedClass generated classes} using the given
 	 * {@link GeneratedFiles} instance.
 	 * @param generatedFiles where to write the generated classes
-	 * @throws IOException on IO error
 	 */
 	void writeTo(GeneratedFiles generatedFiles) {
 		Assert.notNull(generatedFiles, "'generatedFiles' must not be null");
