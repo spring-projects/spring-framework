@@ -66,8 +66,8 @@ class DefaultGenerationContextTests {
 	@Test
 	void createWhenGeneratedClassesIsNullThrowsException() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> new DefaultGenerationContext(null, this.generatedFiles,
-						this.runtimeHints))
+				.isThrownBy(() -> new DefaultGenerationContext((GeneratedClasses) null,
+						this.generatedFiles, this.runtimeHints))
 				.withMessage("'generatedClasses' must not be null");
 	}
 

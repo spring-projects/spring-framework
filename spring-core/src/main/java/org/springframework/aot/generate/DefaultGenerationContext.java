@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.0
  */
 public class DefaultGenerationContext implements GenerationContext {
@@ -53,7 +54,21 @@ public class DefaultGenerationContext implements GenerationContext {
 	 * @param generatedFiles the generated files
 	 */
 	public DefaultGenerationContext(ClassNameGenerator classNameGenerator, GeneratedFiles generatedFiles) {
-		this(new GeneratedClasses(classNameGenerator), generatedFiles, new RuntimeHints());
+		this(classNameGenerator, generatedFiles, new RuntimeHints());
+	}
+
+	/**
+	 * Create a new {@link DefaultGenerationContext} instance backed by the
+	 * specified {@link ClassNameGenerator}, {@link GeneratedFiles}, and
+	 * {@link RuntimeHints}.
+	 * @param classNameGenerator the naming convention to use for generated
+	 * class names
+	 * @param generatedFiles the generated files
+	 * @param runtimeHints the runtime hints
+	 */
+	public DefaultGenerationContext(ClassNameGenerator classNameGenerator, GeneratedFiles generatedFiles,
+			RuntimeHints runtimeHints) {
+		this(new GeneratedClasses(classNameGenerator), generatedFiles, runtimeHints);
 	}
 
 	/**
