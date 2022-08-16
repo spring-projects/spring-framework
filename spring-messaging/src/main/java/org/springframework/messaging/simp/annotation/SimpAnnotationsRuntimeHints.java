@@ -16,8 +16,6 @@
 
 package org.springframework.messaging.simp.annotation;
 
-import java.util.stream.Stream;
-
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.support.RuntimeHintsUtils;
@@ -33,7 +31,6 @@ public class SimpAnnotationsRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
-		Stream.of(SendToUser.class, SubscribeMapping.class).forEach(
-				annotationType -> RuntimeHintsUtils.registerAnnotation(hints, annotationType));
+		RuntimeHintsUtils.registerSynthesizedAnnotation(hints, SendToUser.class);
 	}
 }

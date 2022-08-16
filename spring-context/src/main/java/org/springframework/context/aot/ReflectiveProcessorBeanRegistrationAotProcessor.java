@@ -142,9 +142,11 @@ class ReflectiveProcessorBeanRegistrationAotProcessor implements BeanRegistratio
 		}
 
 		private void registerAnnotationIfNecessary(RuntimeHints hints, AnnotatedElement element) {
-			MergedAnnotation<Reflective> reflectiveAnnotation = MergedAnnotations.from(element).get(Reflective.class);
-			if (reflectiveAnnotation.getDistance() > 0) {
-				RuntimeHintsUtils.registerAnnotation(hints, reflectiveAnnotation.getRoot().getType());
+			MergedAnnotation<Reflective> reflectiveAnnotation = MergedAnnotations.from(element)
+					.get(Reflective.class);
+			MergedAnnotation<?> metaSource = reflectiveAnnotation.getMetaSource();
+			if (metaSource != null) {
+				RuntimeHintsUtils.registerAnnotationIfNecessary(hints, metaSource);
 			}
 		}
 

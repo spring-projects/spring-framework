@@ -25,14 +25,9 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.framework.autoproxy.AbstractBeanFactoryAwareAdvisingPostProcessor;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
-import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.RuntimeHintsRegistrar;
-import org.springframework.aot.hint.support.RuntimeHintsUtils;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.lang.Nullable;
-import org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor.AsyncAnnotationRuntimeHints;
 import org.springframework.util.Assert;
 import org.springframework.util.function.SingletonSupplier;
 
@@ -67,7 +62,6 @@ import org.springframework.util.function.SingletonSupplier;
  * @see ScheduledAnnotationBeanPostProcessor
  */
 @SuppressWarnings("serial")
-@ImportRuntimeHints(AsyncAnnotationRuntimeHints.class)
 public class AsyncAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAdvisingPostProcessor {
 
 	/**
@@ -158,15 +152,6 @@ public class AsyncAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAd
 		}
 		advisor.setBeanFactory(beanFactory);
 		this.advisor = advisor;
-	}
-
-	static class AsyncAnnotationRuntimeHints implements RuntimeHintsRegistrar {
-
-		@Override
-		public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
-			RuntimeHintsUtils.registerAnnotation(hints, Async.class);
-		}
-
 	}
 
 }

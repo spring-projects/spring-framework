@@ -25,7 +25,6 @@ import java.lang.annotation.Target;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.aot.hint.annotation.Reflective;
@@ -93,19 +92,18 @@ class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 	}
 
 	@Test
-	void shouldRegisterAnnotation() {
+	void shouldNotRegisterAnnotationProxyIfNotNeeded() {
 		process(SampleMethodMetaAnnotatedBean.class);
 		RuntimeHints runtimeHints = this.generationContext.getRuntimeHints();
-		assertThat(RuntimeHintsPredicates.reflection().onType(SampleInvoker.class).withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(runtimeHints);
 		assertThat(runtimeHints.proxies().jdkProxies()).isEmpty();
 	}
 
 	@Test
-	void shouldRegisterAnnotationAndProxyWithAliasFor() {
+	void shouldRegisterAnnotationProxy() {
 		process(SampleMethodMetaAnnotatedBeanWithAlias.class);
 		RuntimeHints runtimeHints = this.generationContext.getRuntimeHints();
-		assertThat(RuntimeHintsPredicates.reflection().onType(RetryInvoker.class).withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(runtimeHints);
-		assertThat(RuntimeHintsPredicates.proxies().forInterfaces(RetryInvoker.class, SynthesizedAnnotation.class)).accepts(runtimeHints);
+		assertThat(RuntimeHintsPredicates.proxies().forInterfaces(
+				SampleInvoker.class, SynthesizedAnnotation.class)).accepts(runtimeHints);
 	}
 
 	@Test
@@ -236,7 +234,7 @@ class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 
 	}
 
-	@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+	@Target({ ElementType.METHOD, ElementType.ANNOTATION_TYPE })
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
 	@Reflective
@@ -246,7 +244,7 @@ class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 
 	}
 
-	@Target({ElementType.METHOD})
+	@Target({ ElementType.METHOD })
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
 	@SampleInvoker

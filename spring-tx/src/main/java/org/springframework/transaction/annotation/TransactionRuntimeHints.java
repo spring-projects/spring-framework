@@ -37,7 +37,7 @@ class TransactionRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
-		RuntimeHintsUtils.registerAnnotation(hints, Transactional.class);
+		RuntimeHintsUtils.registerSynthesizedAnnotation(hints, Transactional.class);
 		hints.reflection()
 				.registerTypes(List.of(
 								TypeReference.of(Isolation.class),
