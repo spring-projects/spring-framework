@@ -23,7 +23,7 @@ import org.springframework.aot.generate.InMemoryGeneratedFiles;
 
 /**
  * {@link GenerationContext} test implementation that uses
- * {@link InMemoryGeneratedFiles} by default.
+ * {@link InMemoryGeneratedFiles}.
  *
  * @author Stephane Nicoll
  * @author Sam Brannen
@@ -44,19 +44,9 @@ public class TestGenerationContext extends DefaultGenerationContext {
 	 * @param classNameGenerator the class name generator to use
 	 */
 	public TestGenerationContext(ClassNameGenerator classNameGenerator) {
-		this(classNameGenerator, new InMemoryGeneratedFiles());
+		super(classNameGenerator, new InMemoryGeneratedFiles());
 	}
 
-	/**
-	 * Create an instance using the specified {@link ClassNameGenerator} and
-	 * {@link InMemoryGeneratedFiles}.
-	 * @param classNameGenerator the class name generator to use
-	 * @param generatedFiles the generated files
-	 */
-	public TestGenerationContext(ClassNameGenerator classNameGenerator,
-			InMemoryGeneratedFiles generatedFiles) {
-		super(classNameGenerator, generatedFiles);
-	}
 
 	@Override
 	public InMemoryGeneratedFiles getGeneratedFiles() {

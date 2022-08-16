@@ -20,6 +20,7 @@ package org.springframework.core.testfixture.aot.generate;
  * A <em>default target class</em> used by tests of code generation.
  *
  * @author Stephane Nicoll
+ * @since 6.0
  */
 public class TestTarget {
 }
