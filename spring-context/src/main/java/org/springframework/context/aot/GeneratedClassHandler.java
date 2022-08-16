@@ -43,6 +43,10 @@ class GeneratedClassHandler implements BiConsumer<String, byte[]> {
 					MemberCategory.INVOKE_DECLARED_METHODS,
 					MemberCategory.DECLARED_FIELDS);
 
+	private static final Consumer<Builder> asCglibProxyTargetType = hint ->
+			hint.withMembers(MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
+					MemberCategory.INVOKE_DECLARED_METHODS);
+
 	private final RuntimeHints runtimeHints;
 
 	private final GeneratedFiles generatedFiles;
@@ -54,9 +58,18 @@ class GeneratedClassHandler implements BiConsumer<String, byte[]> {
 
 	@Override
 	public void accept(String className, byte[] content) {
-		this.runtimeHints.reflection().registerType(TypeReference.of(className), asCglibProxy);
+		this.runtimeHints.reflection().registerType(TypeReference.of(className), asCglibProxy)
+				.registerType(TypeReference.of(getTargetTypeClassName(className)), asCglibProxyTargetType);
 		String path = className.replace(".", "/") + ".class";
 		this.generatedFiles.addFile(Kind.CLASS, path, new ByteArrayResource(content));
+	}
+
+	private String getTargetTypeClassName(String proxyClassName) {
+		int index = proxyClassName.indexOf("$$SpringCGLIB$$");
+		if (index == -1) {
+			throw new IllegalArgumentException("Failed to extract target type from " + proxyClassName);
+		}
+		return proxyClassName.substring(0, index);
 	}
 
 }

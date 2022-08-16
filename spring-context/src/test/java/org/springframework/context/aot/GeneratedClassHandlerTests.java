@@ -30,6 +30,7 @@ import org.springframework.core.io.InputStreamSource;
 import org.springframework.core.testfixture.aot.generate.TestGenerationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Tests for {@link GeneratedClassHandler}.
@@ -50,8 +51,8 @@ class GeneratedClassHandlerTests {
 	}
 
 	@Test
-	void handlerGenerateRuntimeHints() {
-		String className = "com.example.Test$$Proxy$$1";
+	void handlerGenerateRuntimeHintsForProxy() {
+		String className = "com.example.Test$$SpringCGLIB$$0";
 		this.handler.accept(className, TEST_CONTENT);
 		assertThat(RuntimeHintsPredicates.reflection().onType(TypeReference.of(className))
 				.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
@@ -60,13 +61,30 @@ class GeneratedClassHandlerTests {
 	}
 
 	@Test
+	void handlerGenerateRuntimeHintsForTargetType() {
+		String className = "com.example.Test$$SpringCGLIB$$0";
+		this.handler.accept(className, TEST_CONTENT);
+		assertThat(RuntimeHintsPredicates.reflection().onType(TypeReference.of("com.example.Test"))
+				.withMemberCategories(MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
+						MemberCategory.INVOKE_DECLARED_METHODS))
+				.accepts(this.generationContext.getRuntimeHints());
+	}
+
+	@Test
+	void handlerFailsWithInvalidProxyClassName() {
+		String className = "com.example.Test$$AnotherProxy$$0";
+		assertThatIllegalArgumentException().isThrownBy(() -> this.handler.accept(className, TEST_CONTENT))
+				.withMessageContaining("Failed to extract target type");
+	}
+
+	@Test
 	void handlerRegisterGeneratedClass() throws IOException {
-		String className = "com.example.Test$$Proxy$$1";
+		String className = "com.example.Test$$SpringCGLIB$$0";
 		this.handler.accept(className, TEST_CONTENT);
 		InMemoryGeneratedFiles generatedFiles = this.generationContext.getGeneratedFiles();
 		assertThat(generatedFiles.getGeneratedFiles(Kind.SOURCE)).isEmpty();
 		assertThat(generatedFiles.getGeneratedFiles(Kind.RESOURCE)).isEmpty();
-		String expectedPath = "com/example/Test$$Proxy$$1.class";
+		String expectedPath = "com/example/Test$$SpringCGLIB$$0.class";
 		assertThat(generatedFiles.getGeneratedFiles(Kind.CLASS)).containsOnlyKeys(expectedPath);
 		assertContent(generatedFiles.getGeneratedFiles(Kind.CLASS).get(expectedPath), TEST_CONTENT);
 	}
