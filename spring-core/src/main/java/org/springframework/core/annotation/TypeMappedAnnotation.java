@@ -320,6 +320,17 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	}
 
 	@Override
+	public boolean isSynthesizable() {
+		// Is this a mapped annotation for a composed annotation, and are there
+		// annotation attributes (mirrors) that need to be merged?
+		if (getDistance() > 0 && this.resolvedMirrors.length > 0) {
+			return true;
+		}
+		// Is the mapped annotation itself synthesizable?
+		return this.mapping.isSynthesizable();
+	}
+
+	@Override
 	@SuppressWarnings("unchecked")
 	protected A createSynthesizedAnnotation() {
 		// Check root annotation
@@ -347,22 +358,15 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	 * Determine if the supplied annotation has not already been synthesized
 	 * <strong>and</strong> whether the mapped annotation is a composed annotation
 	 * that needs to have its attributes merged or the mapped annotation is
-	 * {@linkplain AnnotationTypeMapping#isSynthesizable() synthesizable} in general.
+	 * {@linkplain #isSynthesizable() synthesizable} in general.
 	 * @param annotation the annotation to check
 	 * @since 5.3.22
 	 */
 	private boolean isSynthesizable(Annotation annotation) {
-		// Already synthesized?
 		if (annotation instanceof SynthesizedAnnotation) {
 			return false;
 		}
-		// Is this a mapped annotation for a composed annotation, and are there
-		// annotation attributes (mirrors) that need to be merged?
-		if (getDistance() > 0 && this.resolvedMirrors.length > 0) {
-			return true;
-		}
-		// Is the mapped annotation itself synthesizable?
-		return this.mapping.isSynthesizable();
+		return isSynthesizable();
 	}
 
 	@Override

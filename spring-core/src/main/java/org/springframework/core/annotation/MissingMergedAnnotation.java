@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,6 +132,11 @@ final class MissingMergedAnnotation<A extends Annotation> extends AbstractMerged
 	@Override
 	public <T extends Map<String, Object>> T asMap(Function<MergedAnnotation<?>, T> factory, Adapt... adaptations) {
 		return factory.apply(this);
+	}
+
+	@Override
+	public boolean isSynthesizable() {
+		return false;
 	}
 
 	@Override

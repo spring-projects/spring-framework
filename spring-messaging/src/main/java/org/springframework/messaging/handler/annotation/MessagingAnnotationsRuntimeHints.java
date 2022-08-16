@@ -35,8 +35,7 @@ public class MessagingAnnotationsRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
 	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
-		Stream.of(Controller.class, DestinationVariable.class, Header.class, Headers.class,
-				MessageExceptionHandler.class, MessageMapping.class, Payload.class, SendTo.class).forEach(
-				annotationType -> RuntimeHintsUtils.registerAnnotation(hints, annotationType));
+		Stream.of(Controller.class, Header.class, Headers.class, Payload.class).forEach(annotationType ->
+				RuntimeHintsUtils.registerSynthesizedAnnotation(hints, annotationType));
 	}
 }

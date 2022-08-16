@@ -1,7 +1,3 @@
-plugins {
-	id 'org.springframework.build.runtimehints-agent'
-}
-
 description = "Spring Context"
 
 apply plugin: "kotlin"

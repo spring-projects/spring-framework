@@ -1505,6 +1505,13 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
+	void isSynthesizableWithoutAttributeAliases() throws Exception {
+		Component component = WebController.class.getAnnotation(Component.class);
+		assertThat(component).isNotNull();
+		assertThat(MergedAnnotation.from(component).isSynthesizable()).isFalse();
+	}
+
+	@Test
 	void synthesizeAlreadySynthesized() throws Exception {
 		Method method = WebController.class.getMethod("handleMappedWithValueAttribute");
 		RequestMapping webMapping = method.getAnnotation(RequestMapping.class);
@@ -1567,10 +1574,16 @@ class MergedAnnotationsTests {
 	void synthesizeShouldNotSynthesizeNonsynthesizableAnnotationsWhenUsingMergedAnnotationsFromApi() {
 		MergedAnnotations mergedAnnotations = MergedAnnotations.from(SecurityConfig.class);
 
-		EnableWebSecurity enableWebSecurity = mergedAnnotations.get(EnableWebSecurity.class).synthesize();
+		MergedAnnotation<EnableWebSecurity> enableWebSecurityAnnotation =
+				mergedAnnotations.get(EnableWebSecurity.class);
+		assertThat(enableWebSecurityAnnotation.isSynthesizable()).isFalse();
+		EnableWebSecurity enableWebSecurity = enableWebSecurityAnnotation.synthesize();
 		assertThat(enableWebSecurity).isNotInstanceOf(SynthesizedAnnotation.class);
 
-		EnableGlobalAuthentication enableGlobalAuthentication = mergedAnnotations.get(EnableGlobalAuthentication.class).synthesize();
+		MergedAnnotation<EnableGlobalAuthentication> enableGlobalAuthenticationMergedAnnotation =
+				mergedAnnotations.get(EnableGlobalAuthentication.class);
+		assertThat(enableGlobalAuthenticationMergedAnnotation.isSynthesizable()).isFalse();
+		EnableGlobalAuthentication enableGlobalAuthentication = enableGlobalAuthenticationMergedAnnotation.synthesize();
 		assertThat(enableGlobalAuthentication).isNotInstanceOf(SynthesizedAnnotation.class);
 	}
 
@@ -1718,8 +1731,9 @@ class MergedAnnotationsTests {
 		ImplicitAliasesTestConfiguration config = clazz.getAnnotation(
 				ImplicitAliasesTestConfiguration.class);
 		assertThat(config).isNotNull();
-		ImplicitAliasesTestConfiguration synthesized = MergedAnnotation.from(
-				config).synthesize();
+		MergedAnnotation<ImplicitAliasesTestConfiguration> mergedAnnotation = MergedAnnotation.from(config);
+		assertThat(mergedAnnotation.isSynthesizable()).isTrue();
+		ImplicitAliasesTestConfiguration synthesized = mergedAnnotation.synthesize();
 		assertThat(synthesized).isInstanceOf(SynthesizedAnnotation.class);
 		assertThat(synthesized.value()).isEqualTo(expected);
 		assertThat(synthesized.location1()).isEqualTo(expected);
@@ -1746,8 +1760,11 @@ class MergedAnnotationsTests {
 		ImplicitAliasesWithImpliedAliasNamesOmittedTestConfiguration config = clazz.getAnnotation(
 				ImplicitAliasesWithImpliedAliasNamesOmittedTestConfiguration.class);
 		assertThat(config).isNotNull();
+		MergedAnnotation<ImplicitAliasesWithImpliedAliasNamesOmittedTestConfiguration> mergedAnnotation =
+				MergedAnnotation.from(config);
+		assertThat(mergedAnnotation.isSynthesizable()).isTrue();
 		ImplicitAliasesWithImpliedAliasNamesOmittedTestConfiguration synthesized =
-				MergedAnnotation.from(config).synthesize();
+				mergedAnnotation.synthesize();
 		assertThat(synthesized).isInstanceOf(SynthesizedAnnotation.class);
 		assertThat(synthesized.value()).isEqualTo(expected);
 		assertThat(synthesized.location()).isEqualTo(expected);

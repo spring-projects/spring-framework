@@ -478,6 +478,15 @@ public interface MergedAnnotation<A extends Annotation> {
 	<T extends Map<String, Object>> T asMap(Function<MergedAnnotation<?>, T> factory, Adapt... adaptations);
 
 	/**
+	 * Determine if this merged annotation is <em>synthesizable</em>.
+	 * <p>Consult the documentation for {@link #synthesize()} for an explanation
+	 * of what is considered synthesizable.
+	 * @return {@code true} if the mapped annotation is synthesizable
+	 * @since 6.0
+	 */
+	boolean isSynthesizable();
+
+	/**
 	 * Create a type-safe synthesized version of this merged annotation that can
 	 * be used directly in code.
 	 * <p>The result is synthesized using a JDK {@link java.lang.reflect.Proxy Proxy}
