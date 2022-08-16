@@ -63,7 +63,7 @@ public class DefaultGenerationContext implements GenerationContext {
 	 * @param generatedFiles the generated files
 	 * @param runtimeHints the runtime hints
 	 */
-	public DefaultGenerationContext(GeneratedClasses generatedClasses,
+	DefaultGenerationContext(GeneratedClasses generatedClasses,
 			GeneratedFiles generatedFiles, RuntimeHints runtimeHints) {
 		Assert.notNull(generatedClasses, "'generatedClasses' must not be null");
 		Assert.notNull(generatedFiles, "'generatedFiles' must not be null");
