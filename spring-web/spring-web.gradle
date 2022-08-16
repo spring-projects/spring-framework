@@ -77,7 +77,7 @@ dependencies {
 	testFixturesApi("org.junit.jupiter:junit-jupiter-params")
 	testFixturesImplementation("io.projectreactor:reactor-test")
 	testFixturesImplementation("org.assertj:assertj-core")
-	testFixturesImplementation("org.bouncycastle:bcpkix-jdk15on") {
+	testFixturesImplementation("org.bouncycastle:bcpkix-jdk18on") {
 		because("needed by Netty's SelfSignedCertificate on JDK 15+")
 	}
 	testFixturesImplementation("org.eclipse.jetty.websocket:websocket-jetty-server")

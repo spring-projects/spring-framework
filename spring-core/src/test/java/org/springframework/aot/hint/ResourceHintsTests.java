@@ -26,6 +26,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aot.hint.ResourceHintsTests.Nested.Inner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Tests for {@link ResourceHints}.
@@ -84,11 +86,28 @@ class ResourceHintsTests {
 
 	@Test
 	void registerPatternWithIncludesAndExcludes() {
-		this.resourceHints.registerPattern("com/example/*.properties",
-				resourceHint -> resourceHint.excludes("com/example/to-ignore.properties"));
+		this.resourceHints.registerPattern(resourceHint ->
+				resourceHint.includes("com/example/*.properties").excludes("com/example/to-ignore.properties"));
 		assertThat(this.resourceHints.resourcePatterns()).singleElement().satisfies(patternOf(
 				List.of("com/example/*.properties"),
 				List.of("com/example/to-ignore.properties")));
+	}
+
+	@Test
+	void registerIfPresentRegisterExistingLocation() {
+		this.resourceHints.registerPatternIfPresent(null, "META-INF/",
+				resourceHint -> resourceHint.includes("com/example/*.properties"));
+		assertThat(this.resourceHints.resourcePatterns()).singleElement().satisfies(
+				patternOf("com/example/*.properties"));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void registerIfPresentIgnoreMissingLocation() {
+		Consumer<ResourcePatternHints.Builder> hintBuilder = mock(Consumer.class);
+		this.resourceHints.registerPatternIfPresent(null, "location/does-not-exist/", hintBuilder);
+		assertThat(this.resourceHints.resourcePatterns()).isEmpty();
+		verifyNoInteractions(hintBuilder);
 	}
 
 	@Test
@@ -107,7 +126,7 @@ class ResourceHintsTests {
 	}
 
 
-	private Consumer<ResourcePatternHint> patternOf(String... includes) {
+	private Consumer<ResourcePatternHints> patternOf(String... includes) {
 		return patternOf(Arrays.asList(includes), Collections.emptyList());
 	}
 
@@ -115,10 +134,10 @@ class ResourceHintsTests {
 		return resourceBundleHint -> assertThat(resourceBundleHint.getBaseName()).isEqualTo(baseName);
 	}
 
-	private Consumer<ResourcePatternHint> patternOf(List<String> includes, List<String> excludes) {
+	private Consumer<ResourcePatternHints> patternOf(List<String> includes, List<String> excludes) {
 		return pattern -> {
-			assertThat(pattern.getIncludes()).containsExactlyElementsOf(includes);
-			assertThat(pattern.getExcludes()).containsExactlyElementsOf(excludes);
+			assertThat(pattern.getIncludes()).map(ResourcePatternHint::getPattern).containsExactlyElementsOf(includes);
+			assertThat(pattern.getExcludes()).map(ResourcePatternHint::getPattern).containsExactlyElementsOf(excludes);
 		};
 	}
 

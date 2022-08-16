@@ -226,7 +226,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 
 		/**
-		 * Whether there any partial matches.
+		 * Whether there are any partial matches.
 		 */
 		public boolean isEmpty() {
 			return this.partialMatches.isEmpty();

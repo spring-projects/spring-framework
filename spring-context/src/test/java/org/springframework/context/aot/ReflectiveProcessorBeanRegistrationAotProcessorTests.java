@@ -24,13 +24,12 @@ import java.lang.annotation.Target;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.aot.hint.annotation.Reflective;
+import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -38,6 +37,7 @@ import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.SynthesizedAnnotation;
+import org.springframework.core.testfixture.aot.generate.TestGenerationContext;
 import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,13 +47,13 @@ import static org.mockito.Mockito.mock;
  * Tests for {@link ReflectiveProcessorBeanRegistrationAotProcessor}.
  *
  * @author Stephane Nicoll
+ * @author Sebastien Deleuze
  */
 class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 
 	private final ReflectiveProcessorBeanRegistrationAotProcessor processor = new ReflectiveProcessorBeanRegistrationAotProcessor();
 
-	private final GenerationContext generationContext = new DefaultGenerationContext(
-			new InMemoryGeneratedFiles());
+	private final GenerationContext generationContext = new TestGenerationContext();
 
 	@Test
 	void shouldIgnoreNonAnnotatedType() {
@@ -96,8 +96,7 @@ class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 	void shouldRegisterAnnotation() {
 		process(SampleMethodMetaAnnotatedBean.class);
 		RuntimeHints runtimeHints = this.generationContext.getRuntimeHints();
-		assertThat(runtimeHints.reflection().getTypeHint(SampleInvoker.class)).satisfies(typeHint ->
-				assertThat(typeHint.getMemberCategories()).containsOnly(MemberCategory.INVOKE_DECLARED_METHODS));
+		assertThat(RuntimeHintsPredicates.reflection().onType(SampleInvoker.class).withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(runtimeHints);
 		assertThat(runtimeHints.proxies().jdkProxies()).isEmpty();
 	}
 
@@ -105,11 +104,30 @@ class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 	void shouldRegisterAnnotationAndProxyWithAliasFor() {
 		process(SampleMethodMetaAnnotatedBeanWithAlias.class);
 		RuntimeHints runtimeHints = this.generationContext.getRuntimeHints();
-		assertThat(runtimeHints.reflection().getTypeHint(RetryInvoker.class)).satisfies(typeHint ->
-				assertThat(typeHint.getMemberCategories()).containsOnly(MemberCategory.INVOKE_DECLARED_METHODS));
-		assertThat(runtimeHints.proxies().jdkProxies()).anySatisfy(jdkProxyHint ->
-				assertThat(jdkProxyHint.getProxiedInterfaces()).containsExactly(
-						TypeReference.of(RetryInvoker.class), TypeReference.of(SynthesizedAnnotation.class)));
+		assertThat(RuntimeHintsPredicates.reflection().onType(RetryInvoker.class).withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(runtimeHints);
+		assertThat(RuntimeHintsPredicates.proxies().forInterfaces(RetryInvoker.class, SynthesizedAnnotation.class)).accepts(runtimeHints);
+	}
+
+	@Test
+	void shouldProcessAnnotationOnInterface() {
+		process(SampleMethodAnnotatedBeanWithInterface.class);
+		assertThat(this.generationContext.getRuntimeHints().reflection().getTypeHint(SampleInterface.class))
+				.satisfies(typeHint -> assertThat(typeHint.methods()).singleElement()
+						.satisfies(methodHint -> assertThat(methodHint.getName()).isEqualTo("managed")));
+		assertThat(this.generationContext.getRuntimeHints().reflection().getTypeHint(SampleMethodAnnotatedBeanWithInterface.class))
+				.satisfies(typeHint -> assertThat(typeHint.methods()).singleElement()
+						.satisfies(methodHint -> assertThat(methodHint.getName()).isEqualTo("managed")));
+	}
+
+	@Test
+	void shouldProcessAnnotationOnInheritedClass() {
+		process(SampleMethodAnnotatedBeanWithInheritance.class);
+		assertThat(this.generationContext.getRuntimeHints().reflection().getTypeHint(SampleInheritedClass.class))
+				.satisfies(typeHint -> assertThat(typeHint.methods()).singleElement()
+						.satisfies(methodHint -> assertThat(methodHint.getName()).isEqualTo("managed")));
+		assertThat(this.generationContext.getRuntimeHints().reflection().getTypeHint(SampleMethodAnnotatedBeanWithInheritance.class))
+				.satisfies(typeHint -> assertThat(typeHint.methods()).singleElement()
+						.satisfies(methodHint -> assertThat(methodHint.getName()).isEqualTo("managed")));
 	}
 
 	@Nullable
@@ -196,7 +214,29 @@ class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 
 	}
 
-	@Target({ ElementType.METHOD, ElementType.ANNOTATION_TYPE })
+	static class SampleMethodAnnotatedBeanWithInterface implements SampleInterface {
+
+		@Override
+		public void managed() {
+		}
+
+		public void notManaged() {
+		}
+
+	}
+
+	static class SampleMethodAnnotatedBeanWithInheritance extends SampleInheritedClass {
+
+		@Override
+		public void managed() {
+		}
+
+		public void notManaged() {
+		}
+
+	}
+
+	@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
 	@Reflective
@@ -206,7 +246,7 @@ class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 
 	}
 
-	@Target({ ElementType.METHOD })
+	@Target({ElementType.METHOD})
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
 	@SampleInvoker
@@ -215,6 +255,19 @@ class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 		@AliasFor(attribute = "retries", annotation = SampleInvoker.class)
 		int value() default 1;
 
+	}
+
+	interface SampleInterface {
+
+		@Reflective
+		void managed();
+	}
+
+	static class SampleInheritedClass {
+
+		@Reflective
+		void managed() {
+		}
 	}
 
 }

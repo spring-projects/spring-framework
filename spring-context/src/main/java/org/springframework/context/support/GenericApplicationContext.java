@@ -18,6 +18,7 @@ package org.springframework.context.support;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -29,12 +30,14 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.ProtocolResolver;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -93,6 +96,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 1.1.2
  * @see #registerBeanDefinition
  * @see #refresh()
@@ -223,13 +227,23 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	//---------------------------------------------------------------------
 
 	/**
-	 * This implementation delegates to this context's ResourceLoader if set,
-	 * falling back to the default superclass behavior else.
-	 * @see #setResourceLoader
+	 * This implementation delegates to this context's {@code ResourceLoader} if set,
+	 * falling back to the default superclass behavior otherwise.
+	 * <p>As of Spring Framework 5.3.22, this method also honors registered
+	 * {@linkplain #getProtocolResolvers() protocol resolvers} when a custom
+	 * {@code ResourceLoader} has been set.
+	 * @see #setResourceLoader(ResourceLoader)
+	 * @see #addProtocolResolver(ProtocolResolver)
 	 */
 	@Override
 	public Resource getResource(String location) {
 		if (this.resourceLoader != null) {
+			for (ProtocolResolver protocolResolver : getProtocolResolvers()) {
+				Resource resource = protocolResolver.resolve(location, this);
+				if (resource != null) {
+					return resource;
+				}
+			}
 			return this.resourceLoader.getResource(location);
 		}
 		return super.getResource(location);
@@ -238,7 +252,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	/**
 	 * This implementation delegates to this context's ResourceLoader if it
 	 * implements the ResourcePatternResolver interface, falling back to the
-	 * default superclass behavior else.
+	 * default superclass behavior otherwise.
 	 * @see #setResourceLoader
 	 */
 	@Override
@@ -376,8 +390,8 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * Load or refresh the persistent representation of the configuration up to
 	 * a point where the underlying bean factory is ready to create bean
 	 * instances.
-	 * <p>This variant of {@link #refresh()} is used by Ahead of Time processing
-	 * that optimizes the application context, typically at build-time.
+	 * <p>This variant of {@link #refresh()} is used by Ahead of Time (AOT)
+	 * processing that optimizes the application context, typically at build time.
 	 * <p>In this mode, only {@link BeanDefinitionRegistryPostProcessor} and
 	 * {@link MergedBeanDefinitionPostProcessor} are invoked.
 	 * @throws BeansException if the bean factory could not be initialized
@@ -394,8 +408,30 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 		prepareBeanFactory(this.beanFactory);
 		postProcessBeanFactory(this.beanFactory);
 		invokeBeanFactoryPostProcessors(this.beanFactory);
+		this.beanFactory.freezeConfiguration();
 		PostProcessorRegistrationDelegate.invokeMergedBeanDefinitionPostProcessors(this.beanFactory);
+		preDetermineBeanTypes();
 	}
+
+	/**
+	 * Pre-determine bean types in order to trigger early proxy class creation.
+	 * @see org.springframework.beans.factory.BeanFactory#getType
+	 * @see SmartInstantiationAwareBeanPostProcessor#determineBeanType
+	 */
+	private void preDetermineBeanTypes() {
+		List<SmartInstantiationAwareBeanPostProcessor> bpps =
+				PostProcessorRegistrationDelegate.loadBeanPostProcessors(
+						this.beanFactory, SmartInstantiationAwareBeanPostProcessor.class);
+		for (String beanName : this.beanFactory.getBeanDefinitionNames()) {
+			Class<?> beanType = this.beanFactory.getType(beanName);
+			if (beanType != null) {
+				for (SmartInstantiationAwareBeanPostProcessor bpp : bpps) {
+					beanType = bpp.determineBeanType(beanType, beanName);
+				}
+			}
+		}
+	}
+
 
 	//---------------------------------------------------------------------
 	// Convenient methods for registering individual beans

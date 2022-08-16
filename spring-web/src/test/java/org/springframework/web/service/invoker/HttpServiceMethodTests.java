@@ -100,6 +100,8 @@ public class HttpServiceMethodTests {
 		Mono<ResponseEntity<Flux<String>>> fluxEntity= service.getFluxEntity();
 		StepVerifier.create(fluxEntity.flatMapMany(HttpEntity::getBody)).expectNext("request", "To", "Entity", "Flux").verifyComplete();
 		verifyClientInvocation("requestToEntityFlux", BODY_TYPE);
+
+		assertThat(service.getDefaultMethodValue()).isEqualTo("default value");
 	}
 
 	@Test
@@ -130,7 +132,6 @@ public class HttpServiceMethodTests {
 
 	@Test
 	void blockingService() {
-
 		BlockingService service = this.proxyFactory.createClient(BlockingService.class);
 
 		service.execute();
@@ -142,7 +143,7 @@ public class HttpServiceMethodTests {
 		assertThat(body).isEqualTo("requestToBody");
 
 		Optional<String> optional = service.getBodyOptional();
-		assertThat(optional).isEqualTo(Optional.of("requestToBody"));
+		assertThat(optional).contains("requestToBody");
 
 		ResponseEntity<String> entity = service.getEntity();
 		assertThat(entity.getBody()).isEqualTo("requestToEntity");
@@ -153,7 +154,6 @@ public class HttpServiceMethodTests {
 
 	@Test
 	void methodAnnotatedService() {
-
 		MethodLevelAnnotatedService service = this.proxyFactory.createClient(MethodLevelAnnotatedService.class);
 
 		service.performGet();
@@ -175,7 +175,6 @@ public class HttpServiceMethodTests {
 
 	@Test
 	void typeAndMethodAnnotatedService() throws Exception {
-
 		HttpServiceProxyFactory proxyFactory = new HttpServiceProxyFactory(this.client);
 		proxyFactory.setEmbeddedValueResolver(value -> (value.equals("${baseUrl}") ? "/base" : value));
 		proxyFactory.afterPropertiesSet();
@@ -200,7 +199,7 @@ public class HttpServiceMethodTests {
 	}
 
 	private void verifyClientInvocation(String methodName, @Nullable ParameterizedTypeReference<?> expectedBodyType) {
-		assertThat((this.client.getInvokedMethodName())).isEqualTo(methodName);
+		assertThat(this.client.getInvokedMethodName()).isEqualTo(methodName);
 		assertThat(this.client.getBodyType()).isEqualTo(expectedBodyType);
 	}
 
@@ -228,6 +227,10 @@ public class HttpServiceMethodTests {
 
 		@GetExchange
 		Mono<ResponseEntity<Flux<String>>> getFluxEntity();
+
+		default String getDefaultMethodValue() {
+			return "default value";
+		}
 	}
 
 

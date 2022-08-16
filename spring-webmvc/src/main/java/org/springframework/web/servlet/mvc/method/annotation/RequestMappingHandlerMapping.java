@@ -76,11 +76,13 @@ import org.springframework.web.util.pattern.PathPatternParser;
 public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMapping
 		implements MatchableHandlerMapping, EmbeddedValueResolverAware {
 
+	private boolean defaultPatternParser = true;
+
 	private boolean useSuffixPatternMatch = false;
 
 	private boolean useRegisteredSuffixPatternMatch = false;
 
-	private boolean useTrailingSlashMatch = true;
+	private boolean useTrailingSlashMatch = false;
 
 	private Map<String, Predicate<Class<?>>> pathPrefixes = Collections.emptyMap();
 
@@ -91,6 +93,14 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	private RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
 
+
+	@Override
+	public void setPatternParser(@Nullable PathPatternParser patternParser) {
+		if (patternParser != null) {
+			this.defaultPatternParser = false;
+		}
+		super.setPatternParser(patternParser);
+	}
 
 	/**
 	 * Whether to use suffix pattern match (".*") when matching patterns to
@@ -130,8 +140,12 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	/**
 	 * Whether to match to URLs irrespective of the presence of a trailing slash.
 	 * If enabled a method mapped to "/users" also matches to "/users/".
-	 * <p>The default value is {@code true}.
+	 * <p>The default was changed in 6.0 from {@code true} to {@code false} in
+	 * order to support the deprecation of the property.
+	 * @deprecated as of 6.0, see
+	 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
 	 */
+	@Deprecated
 	public void setUseTrailingSlashMatch(boolean useTrailingSlashMatch) {
 		this.useTrailingSlashMatch = useTrailingSlashMatch;
 		if (getPatternParser() != null) {
@@ -190,6 +204,12 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		this.config = new RequestMappingInfo.BuilderConfiguration();
 		this.config.setTrailingSlashMatch(useTrailingSlashMatch());
 		this.config.setContentNegotiationManager(getContentNegotiationManager());
+
+		if (getPatternParser() != null && this.defaultPatternParser &&
+				(this.useSuffixPatternMatch || this.useRegisteredSuffixPatternMatch)) {
+
+			setPatternParser(null);
+		}
 
 		if (getPatternParser() != null) {
 			this.config.setPatternParser(getPatternParser());

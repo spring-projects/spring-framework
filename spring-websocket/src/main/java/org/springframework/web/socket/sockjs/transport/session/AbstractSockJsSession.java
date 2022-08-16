@@ -17,9 +17,10 @@
 package org.springframework.web.socket.sockjs.transport.session;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,7 +61,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	 * Log category to use on network IO exceptions after a client has gone away.
 	 * <p>Servlet containers don't expose a client disconnected callback; see
 	 * <a href="https://github.com/eclipse-ee4j/servlet-api/issues/44">eclipse-ee4j/servlet-api#44</a>.
-	 * Therefore network IO failures may occur simply because a client has gone away,
+	 * Therefore, network IO failures may occur simply because a client has gone away,
 	 * and that can fill the logs with unnecessary stack traces.
 	 * <p>We make a best effort to identify such network failures, on a per-server
 	 * basis, and log them under a separate log category. A simple one-line message
@@ -270,7 +271,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 			if (!isActive()) {
 				return;
 			}
-			Date time = new Date(System.currentTimeMillis() + this.config.getHeartbeatTime());
+			Instant time = Instant.now().plus(this.config.getHeartbeatTime(), ChronoUnit.MILLIS);
 			this.heartbeatTask = new HeartbeatTask();
 			this.heartbeatFuture = this.config.getTaskScheduler().schedule(this.heartbeatTask, time);
 			if (logger.isTraceEnabled()) {

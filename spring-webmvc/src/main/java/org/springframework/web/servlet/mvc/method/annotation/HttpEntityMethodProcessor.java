@@ -185,7 +185,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			httpEntity = new ResponseEntity<>(response.getBody(), response.getHeaders(), response.getStatusCode());
 		}
 		else if (returnValue instanceof ProblemDetail detail) {
-			httpEntity = new ResponseEntity<>(returnValue, HttpHeaders.EMPTY, detail.getStatus());
+			httpEntity = ResponseEntity.of(detail).build();
 		}
 		else {
 			Assert.isInstanceOf(HttpEntity.class, returnValue);

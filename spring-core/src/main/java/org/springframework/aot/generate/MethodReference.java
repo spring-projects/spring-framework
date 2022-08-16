@@ -144,15 +144,14 @@ public final class MethodReference {
 	 */
 	public CodeBlock toCodeBlock(@Nullable String instanceVariable) {
 		return switch (this.kind) {
-		case INSTANCE -> toCodeBlockForInstance(instanceVariable);
-		case STATIC -> toCodeBlockForStatic(instanceVariable);
+			case INSTANCE -> toCodeBlockForInstance(instanceVariable);
+			case STATIC -> toCodeBlockForStatic(instanceVariable);
 		};
 	}
 
 	private CodeBlock toCodeBlockForInstance(@Nullable String instanceVariable) {
 		instanceVariable = (instanceVariable != null) ? instanceVariable : "this";
 		return CodeBlock.of("$L::$L", instanceVariable, this.methodName);
-
 	}
 
 	private CodeBlock toCodeBlockForStatic(@Nullable String instanceVariable) {
@@ -180,8 +179,8 @@ public final class MethodReference {
 			CodeBlock... arguments) {
 
 		return switch (this.kind) {
-		case INSTANCE -> toInvokeCodeBlockForInstance(instanceVariable, arguments);
-		case STATIC -> toInvokeCodeBlockForStatic(instanceVariable, arguments);
+			case INSTANCE -> toInvokeCodeBlockForInstance(instanceVariable, arguments);
+			case STATIC -> toInvokeCodeBlockForStatic(instanceVariable, arguments);
 		};
 	}
 
@@ -225,9 +224,9 @@ public final class MethodReference {
 	@Override
 	public String toString() {
 		return switch (this.kind) {
-		case INSTANCE -> ((this.declaringClass != null) ? "<" + this.declaringClass + ">"
-				: "<instance>") + "::" + this.methodName;
-		case STATIC -> this.declaringClass + "::" + this.methodName;
+			case INSTANCE -> ((this.declaringClass != null) ? "<" + this.declaringClass + ">"
+					: "<instance>") + "::" + this.methodName;
+			case STATIC -> this.declaringClass + "::" + this.methodName;
 		};
 	}
 

@@ -186,7 +186,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements SyncHa
 
 	/**
 	 * Invoked when a value is required, but {@link #resolveArgumentInternal}
-	 * returned {@code null} and there is no default value. Sub-classes can
+	 * returned {@code null} and there is no default value. Subclasses can
 	 * throw an appropriate exception for this case.
 	 * @param name the name for the value
 	 * @param parameter the target method parameter

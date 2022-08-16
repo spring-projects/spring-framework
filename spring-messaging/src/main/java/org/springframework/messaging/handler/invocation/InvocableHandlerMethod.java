@@ -78,7 +78,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 
 	/**
-	 * Set {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers} to use to use for resolving method argument values.
+	 * Set {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers} to use for resolving method argument values.
 	 */
 	public void setMessageMethodArgumentResolvers(HandlerMethodArgumentResolverComposite argumentResolvers) {
 		this.resolvers = argumentResolvers;

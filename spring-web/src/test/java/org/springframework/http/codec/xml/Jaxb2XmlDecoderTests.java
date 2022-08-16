@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.http.codec.xml.jaxb.XmlRootElementWithNameAndNamespac
 import org.springframework.http.codec.xml.jaxb.XmlType;
 import org.springframework.http.codec.xml.jaxb.XmlTypeWithName;
 import org.springframework.http.codec.xml.jaxb.XmlTypeWithNameAndNamespace;
+import org.springframework.util.MimeType;
 import org.springframework.web.testfixture.xml.Pojo;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -226,6 +227,28 @@ public class Jaxb2XmlDecoderTests extends AbstractLeakCheckingTests {
 
 		StepVerifier.create(result).verifyErrorSatisfies(ex ->
 				assertThat(Exceptions.unwrap(ex)).isInstanceOf(DecodingException.class));
+	}
+
+	@Test
+	public void decodeNonUtf8() {
+		String xml = "<pojo>" +
+				"<foo>føø</foo>" +
+				"<bar>bär</bar>" +
+				"</pojo>";
+		Mono<DataBuffer> source = Mono.fromCallable(() -> {
+			byte[] bytes = xml.getBytes(StandardCharsets.ISO_8859_1);
+			DataBuffer buffer = this.bufferFactory.allocateBuffer(bytes.length);
+			buffer.write(bytes);
+			return buffer;
+		});
+		MimeType mimeType = new MimeType(MediaType.APPLICATION_XML, StandardCharsets.ISO_8859_1);
+		Mono<Object> output = this.decoder.decodeToMono(source, ResolvableType.forClass(TypePojo.class), mimeType,
+				HINTS);
+
+		StepVerifier.create(output)
+				.expectNext(new TypePojo("føø", "bär"))
+				.expectComplete()
+				.verify();
 	}
 
 	@Test

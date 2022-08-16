@@ -1,6 +1,6 @@
 /**
  * Spring's repackaging of the
- * <a href="http://cglib.sourceforge.net">CGLIB</a> proxy package
+ * <a href="https://github.com/cglib/cglib">CGLIB</a> proxy package
  * (for internal use only).
  *
  * <p>As this repackaging happens at the class file level, sources

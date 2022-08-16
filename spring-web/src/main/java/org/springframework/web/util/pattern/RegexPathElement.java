@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,12 +108,8 @@ class RegexPathElement extends PathElement {
 		}
 
 		patternBuilder.append(quote(text, end, text.length()));
-		if (this.caseSensitive) {
-			return Pattern.compile(patternBuilder.toString());
-		}
-		else {
-			return Pattern.compile(patternBuilder.toString(), Pattern.CASE_INSENSITIVE);
-		}
+		return Pattern.compile(patternBuilder.toString(),
+				Pattern.DOTALL | (this.caseSensitive ? 0 : Pattern.CASE_INSENSITIVE));
 	}
 
 	public List<String> getVariableNames() {

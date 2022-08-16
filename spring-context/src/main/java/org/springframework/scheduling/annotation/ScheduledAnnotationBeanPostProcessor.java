@@ -37,6 +37,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.aot.hint.support.RuntimeHintsUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
@@ -55,6 +58,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.EmbeddedValueResolverAware;
+import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.Ordered;
@@ -64,6 +68,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor.ScheduledAnnotationsRuntimeHints;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.FixedDelayTask;
 import org.springframework.scheduling.config.FixedRateTask;
@@ -106,6 +111,7 @@ import org.springframework.util.StringValueResolver;
  * @see org.springframework.scheduling.config.ScheduledTaskRegistrar
  * @see AsyncAnnotationBeanPostProcessor
  */
+@ImportRuntimeHints(ScheduledAnnotationsRuntimeHints.class)
 public class ScheduledAnnotationBeanPostProcessor
 		implements ScheduledTaskHolder, MergedBeanDefinitionPostProcessor, DestructionAwareBeanPostProcessor,
 		Ordered, EmbeddedValueResolverAware, BeanNameAware, BeanFactoryAware, ApplicationContextAware,
@@ -403,16 +409,16 @@ public class ScheduledAnnotationBeanPostProcessor
 			Set<ScheduledTask> tasks = new LinkedHashSet<>(4);
 
 			// Determine initial delay
-			long initialDelay = convertToMillis(scheduled.initialDelay(), scheduled.timeUnit());
+			Duration initialDelay = toDuration(scheduled.initialDelay(), scheduled.timeUnit());
 			String initialDelayString = scheduled.initialDelayString();
 			if (StringUtils.hasText(initialDelayString)) {
-				Assert.isTrue(initialDelay < 0, "Specify 'initialDelay' or 'initialDelayString', not both");
+				Assert.isTrue(initialDelay.isNegative(), "Specify 'initialDelay' or 'initialDelayString', not both");
 				if (this.embeddedValueResolver != null) {
 					initialDelayString = this.embeddedValueResolver.resolveStringValue(initialDelayString);
 				}
 				if (StringUtils.hasLength(initialDelayString)) {
 					try {
-						initialDelay = convertToMillis(initialDelayString, scheduled.timeUnit());
+						initialDelay = toDuration(initialDelayString, scheduled.timeUnit());
 					}
 					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
@@ -430,7 +436,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					zone = this.embeddedValueResolver.resolveStringValue(zone);
 				}
 				if (StringUtils.hasLength(cron)) {
-					Assert.isTrue(initialDelay == -1, "'initialDelay' not supported for cron triggers");
+					Assert.isTrue(initialDelay.isNegative(), "'initialDelay' not supported for cron triggers");
 					processedSchedule = true;
 					if (!Scheduled.CRON_DISABLED.equals(cron)) {
 						TimeZone timeZone;
@@ -446,13 +452,13 @@ public class ScheduledAnnotationBeanPostProcessor
 			}
 
 			// At this point we don't need to differentiate between initial delay set or not anymore
-			if (initialDelay < 0) {
-				initialDelay = 0;
+			if (initialDelay.isNegative()) {
+				initialDelay = Duration.ZERO;
 			}
 
 			// Check fixed delay
-			long fixedDelay = convertToMillis(scheduled.fixedDelay(), scheduled.timeUnit());
-			if (fixedDelay >= 0) {
+			Duration fixedDelay = toDuration(scheduled.fixedDelay(), scheduled.timeUnit());
+			if (!fixedDelay.isNegative()) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
 				tasks.add(this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, initialDelay)));
@@ -467,7 +473,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					Assert.isTrue(!processedSchedule, errorMessage);
 					processedSchedule = true;
 					try {
-						fixedDelay = convertToMillis(fixedDelayString, scheduled.timeUnit());
+						fixedDelay = toDuration(fixedDelayString, scheduled.timeUnit());
 					}
 					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
@@ -478,8 +484,8 @@ public class ScheduledAnnotationBeanPostProcessor
 			}
 
 			// Check fixed rate
-			long fixedRate = convertToMillis(scheduled.fixedRate(), scheduled.timeUnit());
-			if (fixedRate >= 0) {
+			Duration fixedRate = toDuration(scheduled.fixedRate(), scheduled.timeUnit());
+			if (!fixedRate.isNegative()) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
 				tasks.add(this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, initialDelay)));
@@ -493,7 +499,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					Assert.isTrue(!processedSchedule, errorMessage);
 					processedSchedule = true;
 					try {
-						fixedRate = convertToMillis(fixedRateString, scheduled.timeUnit());
+						fixedRate = toDuration(fixedRateString, scheduled.timeUnit());
 					}
 					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
@@ -533,15 +539,15 @@ public class ScheduledAnnotationBeanPostProcessor
 		return new ScheduledMethodRunnable(target, invocableMethod);
 	}
 
-	private static long convertToMillis(long value, TimeUnit timeUnit) {
-		return TimeUnit.MILLISECONDS.convert(value, timeUnit);
+	private static Duration toDuration(long value, TimeUnit timeUnit) {
+		return Duration.of(value, timeUnit.toChronoUnit());
 	}
 
-	private static long convertToMillis(String value, TimeUnit timeUnit) {
+	private static Duration toDuration(String value, TimeUnit timeUnit) {
 		if (isDurationString(value)) {
-			return Duration.parse(value).toMillis();
+			return Duration.parse(value);
 		}
-		return convertToMillis(Long.parseLong(value), timeUnit);
+		return toDuration(Long.parseLong(value), timeUnit);
 	}
 
 	private static boolean isDurationString(String value) {
@@ -603,6 +609,16 @@ public class ScheduledAnnotationBeanPostProcessor
 			this.scheduledTasks.clear();
 		}
 		this.registrar.destroy();
+	}
+
+	static class ScheduledAnnotationsRuntimeHints implements RuntimeHintsRegistrar {
+
+		@Override
+		public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+			RuntimeHintsUtils.registerAnnotation(hints, Scheduled.class);
+			RuntimeHintsUtils.registerAnnotation(hints, Schedules.class);
+		}
+
 	}
 
 }

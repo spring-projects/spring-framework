@@ -478,7 +478,7 @@ public class CallMetaDataContext {
 	 */
 	public Map<String, Object> matchInParameterValuesWithCallParameters(SqlParameterSource parameterSource) {
 		// For parameter source lookups we need to provide case-insensitive lookup support
-		// since the database meta-data is not necessarily providing case sensitive parameter names.
+		// since the database meta-data is not necessarily providing case-sensitive parameter names.
 		Map<String, String> caseInsensitiveParameterNames =
 				SqlParameterSourceUtils.extractCaseInsensitiveParameterNames(parameterSource);
 

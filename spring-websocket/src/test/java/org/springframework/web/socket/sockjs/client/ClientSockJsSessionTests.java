@@ -20,11 +20,11 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketExtension;
@@ -56,7 +56,7 @@ public class ClientSockJsSessionTests {
 
 	private WebSocketHandler handler;
 
-	private SettableListenableFuture<WebSocketSession> connectFuture;
+	private CompletableFuture<WebSocketSession> connectFuture;
 
 
 	@BeforeEach
@@ -65,7 +65,7 @@ public class ClientSockJsSessionTests {
 		Transport transport = mock(Transport.class);
 		TransportRequest request = new DefaultTransportRequest(urlInfo, null, null, transport, TransportType.XHR, CODEC);
 		this.handler = mock(WebSocketHandler.class);
-		this.connectFuture = new SettableListenableFuture<>();
+		this.connectFuture = new CompletableFuture<>();
 		this.session = new TestClientSockJsSession(request, this.handler, this.connectFuture);
 	}
 
@@ -223,7 +223,7 @@ public class ClientSockJsSessionTests {
 
 
 		protected TestClientSockJsSession(TransportRequest request, WebSocketHandler handler,
-				SettableListenableFuture<WebSocketSession> connectFuture) {
+				CompletableFuture<WebSocketSession> connectFuture) {
 			super(request, handler, connectFuture);
 		}
 

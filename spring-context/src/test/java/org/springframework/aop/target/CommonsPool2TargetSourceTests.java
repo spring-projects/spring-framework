@@ -153,7 +153,7 @@ class CommonsPool2TargetSourceTests {
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(
 				targetSource::getTarget);
 
-		// lets now release an object and try to acquire a new one
+		// let's now release an object and try to acquire a new one
 		targetSource.releaseTarget(pooledInstances[9]);
 		pooledInstances[9] = targetSource.getTarget();
 
@@ -181,7 +181,7 @@ class CommonsPool2TargetSourceTests {
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(
 				targetSource::getTarget);
 
-		// lets now release an object and try to acquire a new one
+		// let's now release an object and try to acquire a new one
 		targetSource.releaseTarget(pooledInstances[9]);
 		pooledInstances[9] = targetSource.getTarget();
 

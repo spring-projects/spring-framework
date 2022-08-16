@@ -119,10 +119,6 @@ public class RequestMappingInfoHandlerMappingTests {
 		ServerWebExchange exchange = MockServerWebExchange.from(get(""));
 		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
 		assertThat(hm.getMethod()).isEqualTo(expected);
-
-		exchange = MockServerWebExchange.from(get("/"));
-		hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
-		assertThat(hm.getMethod()).isEqualTo(expected);
 	}
 
 	@Test
@@ -157,7 +153,6 @@ public class RequestMappingInfoHandlerMappingTests {
 	@Test  // SPR-8462
 	public void getHandlerMediaTypeNotSupported() {
 		testHttpMediaTypeNotSupportedException("/person/1");
-		testHttpMediaTypeNotSupportedException("/person/1/");
 		testHttpMediaTypeNotSupportedException("/person/1.json");
 	}
 
@@ -175,7 +170,6 @@ public class RequestMappingInfoHandlerMappingTests {
 	@Test  // SPR-8462
 	public void getHandlerTestMediaTypeNotAcceptable() {
 		testMediaTypeNotAcceptable("/persons");
-		testMediaTypeNotAcceptable("/persons/");
 	}
 
 	@Test  // SPR-12854

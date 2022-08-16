@@ -88,7 +88,7 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 	/**
 	 * Set the order for this result handler relative to others.
 	 * <p>By default set to {@link Ordered#LOWEST_PRECEDENCE}, however see
-	 * Javadoc of sub-classes which may change this default.
+	 * Javadoc of subclasses which may change this default.
 	 * @param order the order
 	 */
 	public void setOrder(int order) {

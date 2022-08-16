@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import org.junit.Test;
 import org.junit.runners.model.FrameworkMethod;
 
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.TestContextManager;
 
@@ -87,13 +88,14 @@ public class SpringJUnit4ClassRunnerTests {
 
 	@Timed(millis = 10)
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface MetaTimed {
+	private @interface MetaTimed {
 	}
 
 	@Timed(millis = 1000)
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface MetaTimedWithOverride {
+	private @interface MetaTimedWithOverride {
 
+		@AliasFor(annotation = Timed.class)
 		long millis() default 1000;
 	}
 

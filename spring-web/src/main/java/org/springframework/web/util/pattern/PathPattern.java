@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,7 +113,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	/** If this pattern has no trailing slash, allow candidates to include one and still match successfully. */
 	private final boolean matchOptionalTrailingSeparator;
 
-	/** Will this match candidates in a case sensitive way? (case sensitivity  at parse time). */
+	/** Will this match candidates in a case-sensitive way? (case sensitivity  at parse time). */
 	private final boolean caseSensitive;
 
 	/** First path element in the parsed chain of path elements for this pattern. */
@@ -150,6 +150,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	private boolean catchAll = false;
 
 
+	@SuppressWarnings("deprecation")
 	PathPattern(String patternText, PathPatternParser parser, @Nullable PathElement head) {
 		this.patternString = patternText;
 		this.parser = parser;

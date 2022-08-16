@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@
 
 package org.springframework.test.context.support;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.test.context.MergedContextConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,19 +41,21 @@ class CustomizedGenericXmlContextLoaderTests {
 
 	@Test
 	void customizeContext() throws Exception {
-		StringBuilder builder = new StringBuilder();
-		String expectedContents = "customizeContext() was called";
+		AtomicBoolean customizeInvoked = new AtomicBoolean(false);
 
-		new GenericXmlContextLoader() {
-
+		GenericXmlContextLoader customLoader = new GenericXmlContextLoader() {
 			@Override
 			protected void customizeContext(GenericApplicationContext context) {
 				assertThat(context.isActive()).as("The context should not yet have been refreshed.").isFalse();
-				builder.append(expectedContents);
+				customizeInvoked.set(true);
 			}
-		}.loadContext("classpath:/org/springframework/test/context/support/CustomizedGenericXmlContextLoaderTests-context.xml");
+		};
 
-		assertThat(builder.toString()).as("customizeContext() should have been called.").isEqualTo(expectedContents);
+		MergedContextConfiguration mergedConfig =
+				new MergedContextConfiguration(getClass(), null, null, null, null);
+		customLoader.loadContext(mergedConfig);
+
+		assertThat(customizeInvoked).as("customizeContext() should have been invoked").isTrue();
 	}
 
 }

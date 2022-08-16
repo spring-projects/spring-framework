@@ -45,7 +45,7 @@ class AutowiredFieldValueResolverTests {
 
 	@Test
 	void forFieldWhenFieldNameIsEmptyThrowsException() {
-		String message = "FieldName must not be empty";
+		String message = "'fieldName' must not be empty";
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> AutowiredFieldValueResolver.forField(null))
 				.withMessage(message);
@@ -62,9 +62,9 @@ class AutowiredFieldValueResolverTests {
 
 	@Test
 	void resolveWhenRegisteredBeanIsNullThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(
-				() -> AutowiredFieldValueResolver.forField("string").resolve(null))
-				.withMessage("RegisteredBean must not be null");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+						AutowiredFieldValueResolver.forField("string").resolve(null))
+				.withMessage("'registeredBean' must not be null");
 	}
 
 	@Test
@@ -122,7 +122,7 @@ class AutowiredFieldValueResolverTests {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> AutowiredFieldValueResolver.forField("string")
 						.resolveAndSet(registeredBean, null))
-				.withMessage("Instance must not be null");
+				.withMessage("'instance' must not be null");
 	}
 
 	@Test
@@ -141,7 +141,7 @@ class AutowiredFieldValueResolverTests {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> AutowiredFieldValueResolver.forField("string")
 						.resolve(registeredBean, (ThrowingConsumer<Object>) null))
-				.withMessage("Action must not be null");
+				.withMessage("'action' must not be null");
 	}
 
 	@Test

@@ -16,26 +16,33 @@
 
 package org.springframework.aot.generate;
 
-import org.springframework.aot.generate.ClassGenerator.JavaFileGenerator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.JavaFile;
+import org.springframework.javapoet.TypeSpec;
 import org.springframework.util.Assert;
 
 /**
- * A generated class.
+ * A single generated class.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 6.0
  * @see GeneratedClasses
- * @see ClassGenerator
  */
 public final class GeneratedClass {
-
-	private final JavaFileGenerator JavaFileGenerator;
 
 	private final ClassName name;
 
 	private final GeneratedMethods methods;
+
+	private final Consumer<TypeSpec.Builder> type;
+
+	private final Map<MethodName, AtomicInteger> methodNameSequenceGenerator = new ConcurrentHashMap<>();
 
 
 	/**
@@ -43,15 +50,34 @@ public final class GeneratedClass {
 	 * constructor is package-private since names should only be generated via a
 	 * {@link GeneratedClasses}.
 	 * @param name the generated name
+	 * @param type a {@link Consumer} used to build the type
 	 */
-	GeneratedClass(JavaFileGenerator javaFileGenerator, ClassName name) {
-		MethodNameGenerator methodNameGenerator = new MethodNameGenerator(
-				javaFileGenerator.getReservedMethodNames());
-		this.JavaFileGenerator = javaFileGenerator;
+	GeneratedClass(ClassName name, Consumer<TypeSpec.Builder> type) {
 		this.name = name;
-		this.methods = new GeneratedMethods(methodNameGenerator);
+		this.type = type;
+		this.methods = new GeneratedMethods(this::generateSequencedMethodName);
 	}
 
+
+	/**
+	 * Update this instance with a set of reserved method names that should not
+	 * be used for generated methods. Reserved names are often needed when a
+	 * generated class implements a specific interface.
+	 * @param reservedMethodNames the reserved method names
+	 */
+	public void reserveMethodNames(String... reservedMethodNames) {
+		for (String reservedMethodName : reservedMethodNames) {
+			String generatedName = generateSequencedMethodName(MethodName.of(reservedMethodNames));
+			Assert.state(generatedName.equals(reservedMethodName),
+					() -> String.format("Unable to reserve method name '%s'", reservedMethodName));
+		}
+	}
+
+	private String generateSequencedMethodName(MethodName name) {
+		int sequence = this.methodNameSequenceGenerator
+				.computeIfAbsent(name, key -> new AtomicInteger()).getAndIncrement();
+		return (sequence > 0) ? name.toString() + sequence : name.toString();
+	}
 
 	/**
 	 * Return the name of the generated class.
@@ -62,23 +88,28 @@ public final class GeneratedClass {
 	}
 
 	/**
-	 * Return the method generator that can be used for this generated class.
-	 * @return the method generator
+	 * Return generated methods for this instance.
+	 * @return the generated methods
 	 */
-	public MethodGenerator getMethodGenerator() {
+	public GeneratedMethods getMethods() {
 		return this.methods;
 	}
 
 	JavaFile generateJavaFile() {
-		JavaFile javaFile = this.JavaFileGenerator.generateJavaFile(this.name,
-				this.methods);
-		Assert.state(this.name.packageName().equals(javaFile.packageName),
-				() -> "Generated JavaFile should be in package '"
-						+ this.name.packageName() + "'");
-		Assert.state(this.name.simpleName().equals(javaFile.typeSpec.name),
-				() -> "Generated JavaFile should be named '" + this.name.simpleName()
-						+ "'");
-		return javaFile;
+		TypeSpec.Builder type = getBuilder(this.type);
+		this.methods.doWithMethodSpecs(type::addMethod);
+		return JavaFile.builder(this.name.packageName(), type.build()).build();
+	}
+
+	private TypeSpec.Builder getBuilder(Consumer<TypeSpec.Builder> type) {
+		TypeSpec.Builder builder = TypeSpec.classBuilder(this.name);
+		type.accept(builder);
+		return builder;
+	}
+
+	void assertSameType(Consumer<TypeSpec.Builder> type) {
+		Assert.state(type == this.type || getBuilder(this.type).build().equals(getBuilder(type).build()),
+				"'type' consumer generated different result");
 	}
 
 }

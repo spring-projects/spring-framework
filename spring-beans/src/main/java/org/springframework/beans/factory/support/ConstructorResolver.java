@@ -303,8 +303,7 @@ class ConstructorResolver {
 			return strategy.instantiate(mbd, beanName, this.beanFactory, constructorToUse, argsToUse);
 		}
 		catch (Throwable ex) {
-			throw new BeanCreationException(mbd.getResourceDescription(), beanName,
-					"Bean instantiation via constructor failed", ex);
+			throw new BeanCreationException(mbd.getResourceDescription(), beanName, ex.getMessage(), ex);
 		}
 	}
 
@@ -631,8 +630,7 @@ class ConstructorResolver {
 					mbd, beanName, this.beanFactory, factoryBean, factoryMethod, args);
 		}
 		catch (Throwable ex) {
-			throw new BeanCreationException(mbd.getResourceDescription(), beanName,
-					"Bean instantiation via factory method failed", ex);
+			throw new BeanCreationException(mbd.getResourceDescription(), beanName, ex.getMessage(), ex);
 		}
 	}
 

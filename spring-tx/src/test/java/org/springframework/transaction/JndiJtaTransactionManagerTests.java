@@ -214,7 +214,7 @@ public class JndiJtaTransactionManagerTests {
 	}
 
 	/**
-	 * Prevent any side-effects due to this test modifying ThreadLocals that might
+	 * Prevent any side effects due to this test modifying ThreadLocals that might
 	 * affect subsequent tests when all tests are run in the same JVM, as with Eclipse.
 	 */
 	@AfterEach

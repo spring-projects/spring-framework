@@ -36,7 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
  *
  * <p><strong>WARNING</strong>: Data binding can lead to security issues by exposing
  * parts of the object graph that are not meant to be accessed or modified by
- * external clients. Therefore the design and use of data binding should be considered
+ * external clients. Therefore, the design and use of data binding should be considered
  * carefully with regard to security. For more details, please refer to the dedicated
  * sections on data binding for
  * <a href="https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-ann-initbinder-model-design">Spring Web MVC</a> and
@@ -48,7 +48,7 @@ import org.springframework.web.multipart.MultipartFile;
  * the form, but did not generate a request parameter because it was empty.
  * A field marker allows to detect that state and reset the corresponding
  * bean property accordingly. Default values, for parameters that are otherwise
- * not present, can specify a value for the field other then empty.
+ * not present, can specify a value for the field other than empty.
  *
  * @author Juergen Hoeller
  * @author Scott Andrews

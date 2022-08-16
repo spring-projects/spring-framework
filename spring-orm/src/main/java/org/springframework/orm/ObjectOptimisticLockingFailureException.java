@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public class ObjectOptimisticLockingFailureException extends OptimisticLockingFa
 	 * @param cause the source exception
 	 */
 	public ObjectOptimisticLockingFailureException(
-			Class<?> persistentClass, Object identifier, String msg, @Nullable Throwable cause) {
+			Class<?> persistentClass, @Nullable Object identifier, String msg, @Nullable Throwable cause) {
 
 		super(msg, cause);
 		this.persistentClass = persistentClass;
@@ -123,7 +123,7 @@ public class ObjectOptimisticLockingFailureException extends OptimisticLockingFa
 	 * @param cause the source exception
 	 */
 	public ObjectOptimisticLockingFailureException(
-			String persistentClassName, Object identifier, String msg, @Nullable Throwable cause) {
+			String persistentClassName, @Nullable Object identifier, String msg, @Nullable Throwable cause) {
 
 		super(msg, cause);
 		this.persistentClass = persistentClassName;

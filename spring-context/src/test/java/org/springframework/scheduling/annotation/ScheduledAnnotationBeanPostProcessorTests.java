@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
@@ -118,8 +119,8 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		Method targetMethod = runnable.getMethod();
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("fixedDelay");
-		assertThat(task.getInitialDelay()).isEqualTo(0L);
-		assertThat(task.getInterval()).isEqualTo(expectedInterval);
+		assertThat(task.getInitialDelayDuration()).isZero();
+		assertThat(task.getIntervalDuration()).isEqualTo(Duration.ofMillis(expectedInterval));
 	}
 
 	@ParameterizedTest
@@ -152,8 +153,8 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("fixedRate");
 		assertSoftly(softly -> {
-			softly.assertThat(task.getInitialDelay()).as("initial delay").isEqualTo(0);
-			softly.assertThat(task.getInterval()).as("interval").isEqualTo(expectedInterval);
+			softly.assertThat(task.getInitialDelayDuration()).as("initial delay").isZero();
+			softly.assertThat(task.getIntervalDuration()).as("interval").isEqualTo(Duration.ofMillis(expectedInterval));
 		});
 	}
 
@@ -187,8 +188,8 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("fixedRate");
 		assertSoftly(softly -> {
-			softly.assertThat(task.getInitialDelay()).as("initial delay").isEqualTo(expectedInitialDelay);
-			softly.assertThat(task.getInterval()).as("interval").isEqualTo(expectedInterval);
+			softly.assertThat(task.getInitialDelayDuration()).as("initial delay").isEqualTo(Duration.ofMillis(expectedInitialDelay));
+			softly.assertThat(task.getIntervalDuration()).as("interval").isEqualTo(Duration.ofMillis(expectedInterval));
 		});
 	}
 
@@ -251,16 +252,16 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		Method targetMethod = runnable1.getMethod();
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("fixedRate");
-		assertThat(task1.getInitialDelay()).isEqualTo(0);
-		assertThat(task1.getInterval()).isEqualTo(4_000L);
+		assertThat(task1.getInitialDelayDuration()).isZero();
+		assertThat(task1.getIntervalDuration()).isEqualTo(Duration.ofMillis(4_000L));
 		IntervalTask task2 = fixedRateTasks.get(1);
 		ScheduledMethodRunnable runnable2 = (ScheduledMethodRunnable) task2.getRunnable();
 		targetObject = runnable2.getTarget();
 		targetMethod = runnable2.getMethod();
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("fixedRate");
-		assertThat(task2.getInitialDelay()).isEqualTo(2_000L);
-		assertThat(task2.getInterval()).isEqualTo(4_000L);
+		assertThat(task2.getInitialDelayDuration()).isEqualTo(Duration.ofMillis(2_000L));
+		assertThat(task2.getIntervalDuration()).isEqualTo(Duration.ofMillis(4_000L));
 	}
 
 	@Test
@@ -320,20 +321,20 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		boolean condition = trigger instanceof CronTrigger;
 		assertThat(condition).isTrue();
 		CronTrigger cronTrigger = (CronTrigger) trigger;
-		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+10"));
-		cal.clear();
-		cal.set(2013, 3, 15, 4, 0);  // 15-04-2013 4:00 GMT+10
-		Date lastScheduledExecutionTime = cal.getTime();
-		Date lastActualExecutionTime = cal.getTime();
-		cal.add(Calendar.MINUTE, 30);  // 4:30
-		Date lastCompletionTime = cal.getTime();
+		ZonedDateTime dateTime = ZonedDateTime.of(2013, 4, 15, 4, 0, 0, 0, ZoneId.of("GMT+10"));
+//		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+10"));
+//		cal.clear();
+//		cal.set(2013, 3, 15, 4, 0);  // 15-04-2013 4:00 GMT+10;
+		Instant lastScheduledExecution = dateTime.toInstant();
+		Instant lastActualExecution = dateTime.toInstant();
+		dateTime = dateTime.plusMinutes(30);
+		Instant lastCompletion = dateTime.toInstant();
 		TriggerContext triggerContext = new SimpleTriggerContext(
-				lastScheduledExecutionTime, lastActualExecutionTime, lastCompletionTime);
-		cal.add(Calendar.MINUTE, 30);
-		cal.add(Calendar.HOUR_OF_DAY, 1);  // 6:00
-		Date nextExecutionTime = cronTrigger.nextExecutionTime(triggerContext);
+				lastScheduledExecution, lastActualExecution, lastCompletion);
+		dateTime = dateTime.plusMinutes(90); // 6:00
+		Instant nextExecutionTime = cronTrigger.nextExecution(triggerContext);
 		// assert that 6:00 is next execution time
-		assertThat(nextExecutionTime).isEqualTo(cal.getTime());
+		assertThat(nextExecutionTime).isEqualTo(dateTime.toInstant());
 	}
 
 	@Test
@@ -407,7 +408,7 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		Method targetMethod = runnable.getMethod();
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("checkForUpdates");
-		assertThat(task.getInterval()).isEqualTo(5_000L);
+		assertThat(task.getIntervalDuration()).isEqualTo(Duration.ofMillis(5_000L));
 	}
 
 	@Test
@@ -434,8 +435,8 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		Method targetMethod = runnable.getMethod();
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("checkForUpdates");
-		assertThat(task.getInterval()).isEqualTo(5_000L);
-		assertThat(task.getInitialDelay()).isEqualTo(1_000L);
+		assertThat(task.getIntervalDuration()).isEqualTo(Duration.ofMillis(5_000L));
+		assertThat(task.getInitialDelayDuration()).isEqualTo(Duration.ofMillis(1_000L));
 	}
 
 	@Test
@@ -555,8 +556,8 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("fixedDelay");
 		assertSoftly(softly -> {
-			softly.assertThat(task.getInitialDelay()).as("initial delay").isEqualTo(expectedInitialDelay);
-			softly.assertThat(task.getInterval()).as("interval").isEqualTo(expectedInterval);
+			softly.assertThat(task.getInitialDelayDuration()).as("initial delay").isEqualTo(Duration.ofMillis(expectedInitialDelay));
+			softly.assertThat(task.getIntervalDuration()).as("interval").isEqualTo(Duration.ofMillis(expectedInterval));
 		});
 	}
 
@@ -599,8 +600,8 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("fixedRate");
 		assertSoftly(softly -> {
-			softly.assertThat(task.getInitialDelay()).as("initial delay").isEqualTo(expectedInitialDelay);
-			softly.assertThat(task.getInterval()).as("interval").isEqualTo(expectedInterval);
+			softly.assertThat(task.getInitialDelayDuration()).as("initial delay").isEqualTo(Duration.ofMillis(expectedInitialDelay));
+			softly.assertThat(task.getIntervalDuration()).as("interval").isEqualTo(Duration.ofMillis(expectedInterval));
 		});
 	}
 

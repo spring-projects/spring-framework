@@ -27,7 +27,6 @@ import java.util.Set;
 import java.util.function.IntFunction;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -111,7 +110,6 @@ public enum AccessVisibility {
 		return forResolvableType(resolvableType, new HashSet<>());
 	}
 
-	@Nullable
 	private static AccessVisibility forResolvableType(ResolvableType resolvableType,
 			Set<ResolvableType> seen) {
 		if (!seen.add(resolvableType)) {

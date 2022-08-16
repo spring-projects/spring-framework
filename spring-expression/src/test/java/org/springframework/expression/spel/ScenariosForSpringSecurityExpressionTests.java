@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,7 +123,7 @@ public class ScenariosForSpringSecurityExpressionTests extends AbstractExpressio
 		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 
-		ctx.setRootObject(new Supervisor("Ben")); // so non-qualified references 'hasRole()' 'hasIpAddress()' are invoked against it);
+		ctx.setRootObject(new Supervisor("Ben")); // so non-qualified references 'hasRole()' 'hasIpAddress()' are invoked against it;
 
 		ctx.addMethodResolver(new MyMethodResolver()); // NEEDS TO OVERRIDE THE REFLECTION ONE - SHOW REORDERING MECHANISM
 		// Might be better with a as a variable although it would work as a property too...
@@ -153,11 +153,15 @@ public class ScenariosForSpringSecurityExpressionTests extends AbstractExpressio
 		public String[] getRoles() { return new String[]{"NONE"}; }
 
 		public boolean hasAnyRole(String... roles) {
-			if (roles == null) return true;
+			if (roles == null) {
+				return true;
+			}
 			String[] myRoles = getRoles();
-			for (int i = 0; i < myRoles.length; i++) {
-				for (int j = 0; j < roles.length; j++) {
-					if (myRoles[i].equals(roles[j])) return true;
+			for (String myRole : myRoles) {
+				for (String role : roles) {
+					if (myRole.equals(role)) {
+						return true;
+					}
 				}
 			}
 			return false;

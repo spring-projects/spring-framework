@@ -18,10 +18,13 @@ package org.springframework.aot.test.generator.compile;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
+import javax.annotation.processing.Processor;
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticListener;
 import javax.tools.JavaCompiler;
@@ -43,6 +46,7 @@ import org.springframework.lang.Nullable;
  * Utility that can be used to dynamically compile and test Java source code.
  *
  * @author Phillip Webb
+ * @author Scott Frederick
  * @since 6.0
  * @see #forSystem()
  */
@@ -57,112 +61,138 @@ public final class TestCompiler {
 
 	private final ResourceFiles resourceFiles;
 
+	private final List<Processor> processors;
+
 
 	private TestCompiler(@Nullable ClassLoader classLoader, JavaCompiler compiler,
-			SourceFiles sourceFiles, ResourceFiles resourceFiles) {
+			SourceFiles sourceFiles, ResourceFiles resourceFiles,
+			List<Processor> processors) {
+
 		this.classLoader = classLoader;
 		this.compiler = compiler;
 		this.sourceFiles = sourceFiles;
 		this.resourceFiles = resourceFiles;
+		this.processors = processors;
 	}
 
 
 	/**
-	 * Return a new {@link TestCompiler} backed by the system java compiler.
-	 * @return a new {@link TestCompiler} instance
+	 * Create a new {@code TestCompiler} backed by the system java compiler.
+	 * @return a new {@code TestCompiler} instance
 	 */
 	public static TestCompiler forSystem() {
 		return forCompiler(ToolProvider.getSystemJavaCompiler());
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} backed by the given
-	 * {@link JavaCompiler}.
+	 * Create a new {@code TestCompiler} backed by the given {@link JavaCompiler}.
 	 * @param javaCompiler the java compiler to use
-	 * @return a new {@link TestCompiler} instance
+	 * @return a new {@code TestCompiler} instance
 	 */
 	public static TestCompiler forCompiler(JavaCompiler javaCompiler) {
 		return new TestCompiler(null, javaCompiler, SourceFiles.none(),
-				ResourceFiles.none());
+				ResourceFiles.none(), Collections.emptyList());
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with additional generated
+	 * Create a new {@code TestCompiler} instance with additional generated
 	 * source and resource files.
 	 * @param generatedFiles the generated files to add
-	 * @return a new {@link TestCompiler} instance
+	 * @return a new {@code TestCompiler} instance
 	 */
 	public TestCompiler withFiles(InMemoryGeneratedFiles generatedFiles) {
 		List<SourceFile> sourceFiles = new ArrayList<>();
-		generatedFiles.getGeneratedFiles(Kind.SOURCE).forEach((path,
-				inputStreamSource) -> sourceFiles.add(SourceFile.of(inputStreamSource)));
+		generatedFiles.getGeneratedFiles(Kind.SOURCE).forEach(
+				(path, inputStreamSource) -> sourceFiles.add(SourceFile.of(inputStreamSource)));
 		List<ResourceFile> resourceFiles = new ArrayList<>();
-		generatedFiles.getGeneratedFiles(Kind.RESOURCE)
-				.forEach((path, inputStreamSource) -> resourceFiles
-						.add(ResourceFile.of(path, inputStreamSource)));
+		generatedFiles.getGeneratedFiles(Kind.RESOURCE).forEach(
+				(path, inputStreamSource) -> resourceFiles.add(ResourceFile.of(path, inputStreamSource)));
 		return withSources(sourceFiles).withResources(resourceFiles);
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with addition source files.
+	 * Create a new {@code TestCompiler} instance with additional source files.
 	 * @param sourceFiles the additional source files
-	 * @return a new {@link TestCompiler} instance
+	 * @return a new {@code TestCompiler} instance
 	 */
 	public TestCompiler withSources(SourceFile... sourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler,
-				this.sourceFiles.and(sourceFiles), this.resourceFiles);
+				this.sourceFiles.and(sourceFiles), this.resourceFiles, this.processors);
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with addition source files.
+	 * Create a new {@code TestCompiler} instance with additional source files.
 	 * @param sourceFiles the additional source files
-	 * @return a new {@link TestCompiler} instance
+	 * @return a new {@code TestCompiler} instance
 	 */
 	public TestCompiler withSources(Iterable<SourceFile> sourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler,
-				this.sourceFiles.and(sourceFiles), this.resourceFiles);
+				this.sourceFiles.and(sourceFiles), this.resourceFiles, this.processors);
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with addition source files.
+	 * Create a new {@code TestCompiler} instance with additional source files.
 	 * @param sourceFiles the additional source files
-	 * @return a new {@link TestCompiler} instance
+	 * @return a new {@code TestCompiler} instance
 	 */
 	public TestCompiler withSources(SourceFiles sourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler,
-				this.sourceFiles.and(sourceFiles), this.resourceFiles);
+				this.sourceFiles.and(sourceFiles), this.resourceFiles, this.processors);
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with addition resource files.
+	 * Create a new {@code TestCompiler} instance with additional resource files.
 	 * @param resourceFiles the additional resource files
-	 * @return a new {@link TestCompiler} instance
+	 * @return a new {@code TestCompiler} instance
 	 */
 	public TestCompiler withResources(ResourceFile... resourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler, this.sourceFiles,
-				this.resourceFiles.and(resourceFiles));
+				this.resourceFiles.and(resourceFiles), this.processors);
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with addition source files.
+	 * Create a new {@code TestCompiler} instance with additional source files.
 	 * @param resourceFiles the additional source files
-	 * @return a new {@link TestCompiler} instance
+	 * @return a new {@code TestCompiler} instance
 	 */
 	public TestCompiler withResources(Iterable<ResourceFile> resourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler, this.sourceFiles,
-				this.resourceFiles.and(resourceFiles));
+				this.resourceFiles.and(resourceFiles), this.processors);
 	}
 
 	/**
-	 * Return a new {@link TestCompiler} instance with addition resource files.
+	 * Create a new {@code TestCompiler} instance with additional resource files.
 	 * @param resourceFiles the additional resource files
-	 * @return a new {@link TestCompiler} instance
+	 * @return a new {@code TestCompiler} instance
 	 */
 	public TestCompiler withResources(ResourceFiles resourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler, this.sourceFiles,
-				this.resourceFiles.and(resourceFiles));
+				this.resourceFiles.and(resourceFiles), this.processors);
 	}
 
+	/**
+	 * Create a new {@code TestCompiler} instance with additional annotation processors.
+	 * @param processors the additional annotation processors
+	 * @return a new {@code TestCompiler} instance
+	 */
+	public TestCompiler withProcessors(Processor... processors) {
+		List<Processor> mergedProcessors = new ArrayList<>(this.processors);
+		mergedProcessors.addAll(Arrays.asList(processors));
+		return new TestCompiler(this.classLoader, this.compiler, this.sourceFiles,
+				this.resourceFiles, mergedProcessors);
+	}
+
+	/**
+	 * Create a new {@code TestCompiler} instance with additional annotation processors.
+	 * @param processors the additional annotation processors
+	 * @return a new {@code TestCompiler} instance
+	 */
+	public TestCompiler withProcessors(Iterable<Processor> processors) {
+		List<Processor> mergedProcessors = new ArrayList<>(this.processors);
+		processors.forEach(mergedProcessors::add);
+		return new TestCompiler(this.classLoader, this.compiler, this.sourceFiles,
+				this.resourceFiles, mergedProcessors);
+	}
 
 	/**
 	 * Compile content from this instance along with the additional provided
@@ -202,7 +232,7 @@ public final class TestCompiler {
 	 * source and resource files.
 	 * @param sourceFiles the additional source files to compile
 	 * @param resourceFiles the additional resource files to include
-	 * @param compiled a consumed used to further assert the compiled code
+	 * @param compiled a {@code Consumer} used to further assert the compiled code
 	 * @throws CompilationException if source cannot be compiled
 	 */
 	public void compile(SourceFiles sourceFiles, ResourceFiles resourceFiles,
@@ -212,7 +242,7 @@ public final class TestCompiler {
 
 	/**
 	 * Compile content from this instance.
-	 * @param compiled a consumed used to further assert the compiled code
+	 * @param compiled a {@code Consumer} used to further assert the compiled code
 	 * @throws CompilationException if source cannot be compiled
 	 */
 	public void compile(Consumer<Compiled> compiled) throws CompilationException {
@@ -224,7 +254,7 @@ public final class TestCompiler {
 		}
 		catch (IllegalAccessError ex) {
 			throw new IllegalAccessError(ex.getMessage() + ". " +
-					"For non-public access ensure annotate your tests with @CompileWithTargetClassAccess");
+					"For non-public access ensure you annotate your test class or test method with @CompileWithTargetClassAccess");
 		}
 		finally {
 			Thread.currentThread().setContextClassLoader(previousClassLoader);
@@ -244,6 +274,9 @@ public final class TestCompiler {
 			Errors errors = new Errors();
 			CompilationTask task = this.compiler.getTask(null, fileManager, errors, null,
 					null, compilationUnits);
+			if (!this.processors.isEmpty()) {
+				task.setProcessors(this.processors);
+			}
 			boolean result = task.call();
 			if (!result || errors.hasReportedErrors()) {
 				throw new CompilationException(errors.toString(), this.sourceFiles, this.resourceFiles);
@@ -283,12 +316,12 @@ public final class TestCompiler {
 		@Override
 		public void report(Diagnostic<? extends JavaFileObject> diagnostic) {
 			if (diagnostic.getKind() == Diagnostic.Kind.ERROR) {
-				this.message.append("\n");
+				this.message.append('\n');
 				this.message.append(diagnostic.getMessage(Locale.getDefault()));
-				this.message.append(" ");
+				this.message.append(' ');
 				this.message.append(diagnostic.getSource().getName());
-				this.message.append(" ");
-				this.message.append(diagnostic.getLineNumber()).append(":")
+				this.message.append(' ');
+				this.message.append(diagnostic.getLineNumber()).append(':')
 						.append(diagnostic.getColumnNumber());
 			}
 		}

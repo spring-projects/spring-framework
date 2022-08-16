@@ -72,6 +72,7 @@ class DefaultDatabaseClientUnitTests {
 
 	private DatabaseClient.Builder databaseClientBuilder;
 
+
 	@BeforeEach
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	void before() {
@@ -83,6 +84,7 @@ class DefaultDatabaseClientUnitTests {
 		databaseClientBuilder = DatabaseClient.builder().connectionFactory(
 				connectionFactory).bindMarkers(BindMarkersFactory.indexed("$", 1));
 	}
+
 
 	@Test
 	void connectionFactoryIsExposed() {
@@ -96,7 +98,6 @@ class DefaultDatabaseClientUnitTests {
 	@Test
 	void shouldCloseConnectionOnlyOnce() {
 		DefaultDatabaseClient databaseClient = (DefaultDatabaseClient) databaseClientBuilder.build();
-
 		Flux<Object> flux = databaseClient.inConnectionMany(connection -> Flux.empty());
 
 		flux.subscribe(new CoreSubscriber<Object>() {
@@ -147,7 +148,6 @@ class DefaultDatabaseClientUnitTests {
 	@SuppressWarnings("deprecation")
 	void executeShouldBindSettableValues() {
 		Statement statement = mockStatementFor("SELECT * FROM table WHERE key = $1");
-
 		DatabaseClient databaseClient = databaseClientBuilder.namedParameters(false).build();
 
 		databaseClient.sql("SELECT * FROM table WHERE key = $1").bind(0,
@@ -165,7 +165,6 @@ class DefaultDatabaseClientUnitTests {
 
 	@Test
 	void executeShouldBindNamedNullValues() {
-
 		Statement statement = mockStatementFor("SELECT * FROM table WHERE key = $1");
 		DatabaseClient databaseClient = databaseClientBuilder.build();
 
@@ -198,7 +197,6 @@ class DefaultDatabaseClientUnitTests {
 	@SuppressWarnings("deprecation")
 	void executeShouldBindValues() {
 		Statement statement = mockStatementFor("SELECT * FROM table WHERE key = $1");
-
 		DatabaseClient databaseClient = databaseClientBuilder.build();
 
 		databaseClient.sql("SELECT * FROM table WHERE key = $1").bind(0,
@@ -214,7 +212,6 @@ class DefaultDatabaseClientUnitTests {
 
 	@Test
 	void executeShouldBindNamedValuesByIndex() {
-
 		Statement statement = mockStatementFor("SELECT * FROM table WHERE key = $1");
 		DatabaseClient databaseClient = databaseClientBuilder.build();
 
@@ -227,9 +224,8 @@ class DefaultDatabaseClientUnitTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	void rowsUpdatedShouldEmitSingleValue() {
-
 		Result result = mock(Result.class);
-		when(result.getRowsUpdated()).thenReturn(Mono.empty(), Mono.just(2), Flux.just(1, 2, 3));
+		when(result.getRowsUpdated()).thenReturn(Mono.empty(), Mono.just(2L), Flux.just(1L, 2L, 3L));
 		mockStatementFor("DROP TABLE tab;", result);
 
 		DatabaseClient databaseClient = databaseClientBuilder.build();
@@ -355,9 +351,7 @@ class DefaultDatabaseClientUnitTests {
 	@Test
 	void shouldApplyStatementFilterFunctions() {
 		MockResult result = MockResult.builder().build();
-
 		Statement statement = mockStatement(result);
-
 		DatabaseClient databaseClient = databaseClientBuilder.build();
 
 		databaseClient.sql("SELECT").filter(
@@ -376,9 +370,7 @@ class DefaultDatabaseClientUnitTests {
 	@Test
 	void shouldApplySimpleStatementFilterFunctions() {
 		MockResult result = mockSingleColumnEmptyResult();
-
 		Statement statement = mockStatement(result);
-
 		DatabaseClient databaseClient = databaseClientBuilder.build();
 
 		databaseClient.sql("SELECT").filter(
@@ -392,6 +384,7 @@ class DefaultDatabaseClientUnitTests {
 		inOrder.verify(statement).execute();
 		inOrder.verifyNoMoreInteractions();
 	}
+
 
 	private Statement mockStatement() {
 		return mockStatementFor(null, null);
@@ -407,14 +400,10 @@ class DefaultDatabaseClientUnitTests {
 
 	private Statement mockStatementFor(@Nullable String sql, @Nullable Result result) {
 		Statement statement = mock(Statement.class);
-		when(connection.createStatement(sql == null ? anyString() : eq(sql))).thenReturn(
-				statement);
+		when(connection.createStatement(sql == null ? anyString() : eq(sql))).thenReturn(statement);
 		when(statement.returnGeneratedValues(anyString())).thenReturn(statement);
 		when(statement.returnGeneratedValues()).thenReturn(statement);
-
-		doReturn(result == null ? Mono.empty() : Flux.just(result)).when(
-				statement).execute();
-
+		doReturn(result == null ? Mono.empty() : Flux.just(result)).when(statement).execute();
 		return statement;
 	}
 
@@ -423,7 +412,7 @@ class DefaultDatabaseClientUnitTests {
 	}
 
 	/**
-	 * Mocks a {@link Result} with a single column "name" and a single row if a non null
+	 * Mocks a {@link Result} with a single column "name" and a single row if a non-null
 	 * row is provided.
 	 */
 	private MockResult mockSingleColumnResult(@Nullable MockRow.Builder row) {

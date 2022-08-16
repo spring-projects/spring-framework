@@ -16,7 +16,6 @@
 
 package org.springframework.web.server;
 
-import org.springframework.core.NestedExceptionUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
@@ -112,8 +111,7 @@ public class ResponseStatusException extends ErrorResponseException {
 
 	@Override
 	public String getMessage() {
-		String msg = getStatusCode() + (this.reason != null ? " \"" + this.reason + "\"" : "");
-		return NestedExceptionUtils.buildMessage(msg, getCause());
+		return getStatusCode() + (this.reason != null ? " \"" + this.reason + "\"" : "");
 	}
 
 }

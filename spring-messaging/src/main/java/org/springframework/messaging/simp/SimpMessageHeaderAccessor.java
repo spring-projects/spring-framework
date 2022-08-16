@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,9 @@ import org.springframework.util.CollectionUtils;
  * A base class for working with message headers in simple messaging protocols that
  * support basic messaging patterns. Provides uniform access to specific values common
  * across protocols such as a destination, message type (e.g. publish, subscribe, etc),
- * session id, and others.
+ * session ID, and others.
  *
- * <p>Use one of the static factory method in this class, then call getters and setters,
+ * <p>Use one of the static factory methods in this class, then call getters and setters,
  * and at the end if necessary call {@link #toMap()} to obtain the updated headers.
  *
  * @author Rossen Stoyanchev
@@ -91,7 +91,8 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 	/**
 	 * A constructor for creating new message headers.
-	 * This constructor is protected. See factory methods in this and sub-classes.
+	 * <p>This constructor is protected. See factory methods in this class
+	 * and subclasses.
 	 */
 	protected SimpMessageHeaderAccessor(SimpMessageType messageType,
 			@Nullable Map<String, List<String>> externalSourceHeaders) {
@@ -103,8 +104,9 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	}
 
 	/**
-	 * A constructor for accessing and modifying existing message headers. This
-	 * constructor is protected. See factory methods in this and sub-classes.
+	 * A constructor for accessing and modifying existing message headers.
+	 * <p>This constructor is protected. See factory methods in this class
+	 * and subclasses.
 	 */
 	protected SimpMessageHeaderAccessor(Message<?> message) {
 		super(message);

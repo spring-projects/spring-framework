@@ -48,7 +48,7 @@ public interface StatementFilterFunction {
 	/**
 	 * Apply this filter to the given {@link Statement} and {@link ExecuteFunction}.
 	 * <p>The given {@link ExecuteFunction} represents the next entity in the chain,
-	 * to be invoked via {@link ExecuteFunction#execute(Statement)} invoked} in
+	 * to be invoked via {@link ExecuteFunction#execute(Statement)} in
 	 * order to proceed with the execution, or not invoked to shortcut the chain.
 	 * @param statement the current {@link Statement}
 	 * @param next the next execute function in the chain

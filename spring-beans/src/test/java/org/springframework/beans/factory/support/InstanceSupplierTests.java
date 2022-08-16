@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.support;
 
+import java.lang.reflect.Method;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.util.function.ThrowingBiFunction;
@@ -55,7 +57,7 @@ class InstanceSupplierTests {
 	}
 
 	@Test
-	void andThenWithBiFunctionWhenFunctionIsNullThrowsException() {
+	void andThenWhenFunctionIsNullThrowsException() {
 		InstanceSupplier<String> supplier = registeredBean -> "test";
 		ThrowingBiFunction<RegisteredBean, String, String> after = null;
 		assertThatIllegalArgumentException().isThrownBy(() -> supplier.andThen(after))
@@ -63,11 +65,21 @@ class InstanceSupplierTests {
 	}
 
 	@Test
-	void andThenWithBiFunctionAppliesFunctionToObtainResult() throws Exception {
+	void andThenAppliesFunctionToObtainResult() throws Exception {
 		InstanceSupplier<String> supplier = registeredBean -> "bean";
 		supplier = supplier.andThen(
 				(registeredBean, string) -> registeredBean.getBeanName() + "-" + string);
 		assertThat(supplier.get(this.registeredBean)).isEqualTo("test-bean");
+	}
+
+	@Test
+	void andThenWhenInstanceSupplierHasFactoryMethod() throws Exception {
+		Method factoryMethod = getClass().getDeclaredMethod("andThenWhenInstanceSupplierHasFactoryMethod");
+		InstanceSupplier<String> supplier = InstanceSupplier.using(factoryMethod, () -> "bean");
+		supplier = supplier.andThen(
+				(registeredBean, string) -> registeredBean.getBeanName() + "-" + string);
+		assertThat(supplier.get(this.registeredBean)).isEqualTo("test-bean");
+		assertThat(supplier.getFactoryMethod()).isSameAs(factoryMethod);
 	}
 
 	@Test

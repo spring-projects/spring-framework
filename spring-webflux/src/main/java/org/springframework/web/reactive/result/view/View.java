@@ -64,7 +64,7 @@ public interface View {
 	}
 
 	/**
-	 * Whether this View does rendering by performing a redirect.
+	 * Whether this View does render by performing a redirect.
 	 */
 	default boolean isRedirectView() {
 		return false;

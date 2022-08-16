@@ -289,7 +289,7 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 	public enum OverflowStrategy {
 
 		/**
-		 * Throw {@link SessionLimitExceededException} that would will result
+		 * Throw {@link SessionLimitExceededException} that will result
 		 * in the session being terminated.
 		 */
 		TERMINATE,

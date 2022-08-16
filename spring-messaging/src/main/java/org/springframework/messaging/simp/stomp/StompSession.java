@@ -82,7 +82,7 @@ public interface StompSession {
 	/**
 	 * An overloaded version of {@link #subscribe(String, StompFrameHandler)}
 	 * with full {@link StompHeaders} instead of just a destination.
-	 * @param headers the headers for the subscribe message frame
+	 * @param headers the headers for the subscribed message frame
 	 * @param handler the handler for received messages
 	 * @return a handle to use to unsubscribe and/or track receipts
 	 */

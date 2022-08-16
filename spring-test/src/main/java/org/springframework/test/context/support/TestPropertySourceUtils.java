@@ -85,7 +85,7 @@ public abstract class TestPropertySourceUtils {
 		for (List<MergedAnnotation<TestPropertySource>> aggregatedAnnotations :
 				findRepeatableAnnotations(testClass, TestPropertySource.class)) {
 
-			// Convert all of the merged annotations for the current aggregate
+			// Convert all the merged annotations for the current aggregate
 			// level to a list of TestPropertySourceAttributes.
 			List<TestPropertySourceAttributes> aggregatedAttributesList =
 					aggregatedAnnotations.stream().map(TestPropertySourceAttributes::new).collect(Collectors.toList());
@@ -200,7 +200,7 @@ public abstract class TestPropertySourceUtils {
 	 * against the {@code Environment}.
 	 * <p>Each properties file will be converted to a {@link ResourcePropertySource}
 	 * that will be added to the {@link PropertySources} of the environment with
-	 * highest precedence.
+	 * the highest precedence.
 	 * @param environment the environment to update; never {@code null}
 	 * @param resourceLoader the {@code ResourceLoader} to use to load each resource;
 	 * never {@code null}

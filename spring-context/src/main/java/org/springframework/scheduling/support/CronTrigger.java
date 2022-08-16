@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package org.springframework.scheduling.support;
 
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.TimeZone;
 
 import org.springframework.lang.Nullable;
@@ -93,23 +93,23 @@ public class CronTrigger implements Trigger {
 	 * previous execution; therefore, overlapping executions won't occur.
 	 */
 	@Override
-	public Date nextExecutionTime(TriggerContext triggerContext) {
-		Date date = triggerContext.lastCompletionTime();
-		if (date != null) {
-			Date scheduled = triggerContext.lastScheduledExecutionTime();
-			if (scheduled != null && date.before(scheduled)) {
+	public Instant nextExecution(TriggerContext triggerContext) {
+		Instant instant = triggerContext.lastCompletion();
+		if (instant != null) {
+			Instant scheduled = triggerContext.lastScheduledExecution();
+			if (scheduled != null && instant.isBefore(scheduled)) {
 				// Previous task apparently executed too early...
 				// Let's simply use the last calculated execution time then,
 				// in order to prevent accidental re-fires in the same second.
-				date = scheduled;
+				instant = scheduled;
 			}
 		}
 		else {
-			date = new Date(triggerContext.getClock().millis());
+			instant = triggerContext.getClock().instant();
 		}
-		ZonedDateTime dateTime = ZonedDateTime.ofInstant(date.toInstant(), this.zoneId);
+		ZonedDateTime dateTime = ZonedDateTime.ofInstant(instant, this.zoneId);
 		ZonedDateTime next = this.expression.next(dateTime);
-		return (next != null ? Date.from(next.toInstant()) : null);
+		return (next != null ? next.toInstant() : null);
 	}
 
 

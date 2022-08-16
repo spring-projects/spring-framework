@@ -16,11 +16,12 @@
 
 package org.springframework.web.bind;
 
+import jakarta.servlet.ServletException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.ErrorResponse;
-import org.springframework.web.util.NestedServletException;
 
 /**
  * Fatal binding exception, thrown when we want to
@@ -34,7 +35,7 @@ import org.springframework.web.util.NestedServletException;
  * @author Juergen Hoeller
  */
 @SuppressWarnings("serial")
-public class ServletRequestBindingException extends NestedServletException implements ErrorResponse {
+public class ServletRequestBindingException extends ServletException implements ErrorResponse {
 
 	private final ProblemDetail body = ProblemDetail.forStatus(getStatusCode());
 

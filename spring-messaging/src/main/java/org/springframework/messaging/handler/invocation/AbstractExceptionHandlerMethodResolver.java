@@ -67,8 +67,8 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 
 	/**
 	 * Extract the exceptions this method handles. This implementation looks for
-	 * sub-classes of Throwable in the method signature.
-	 * <p>The method is static to ensure safe use from sub-class constructors.
+	 * subclasses of Throwable in the method signature.
+	 * <p>The method is static to ensure safe use from subclass constructors.
 	 */
 	@SuppressWarnings("unchecked")
 	protected static List<Class<? extends Throwable>> getExceptionsFromMethodSignature(Method method) {

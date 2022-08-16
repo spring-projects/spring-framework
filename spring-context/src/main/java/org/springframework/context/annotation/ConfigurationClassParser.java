@@ -606,7 +606,7 @@ class ConfigurationClassParser {
 			catch (Throwable ex) {
 				throw new BeanDefinitionStoreException(
 						"Failed to process import candidates for configuration class [" +
-						configClass.getMetadata().getClassName() + "]", ex);
+						configClass.getMetadata().getClassName() + "]: " + ex.getMessage(), ex);
 			}
 			finally {
 				this.importStack.pop();

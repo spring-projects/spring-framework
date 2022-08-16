@@ -1,35 +1,43 @@
+# Miscellaneous
 *.java.hsp
 *.sonarj
 *.sw*
 .DS_Store
-.settings
-.springBeans
-bin
 build.sh
 integration-repo
 ivy-cache
+argfile*
+activemq-data/
+classes/
+
+# Log files
 jxl.log
 jmx.log
 derby.log
-spring-test/test-output/
-.gradle
-argfile*
-pom.xml
-activemq-data/
 
-classes/
+# Gradle artifacts
+.gradle
+.gradletasknamecache
 /build
 buildSrc/build
 /spring-*/build
+/spring-core/graalvm/build
 /spring-core/kotlin-coroutines/build
 /framework-bom/build
 /integration-tests/build
 /src/asciidoc/build
+spring-test/test-output/
+
+# Maven artifacts
+pom.xml
 target/
 
 # Eclipse artifacts, including WTP generated manifests
+bin
 .classpath
 .project
+.settings
+.springBeans
 spring-*/src/main/java/META-INF/MANIFEST.MF
 
 # IDEA artifacts and output dirs
@@ -40,7 +48,6 @@ spring-*/src/main/java/META-INF/MANIFEST.MF
 out
 test-output
 atlassian-ide-plugin.xml
-.gradletasknamecache
 
 # VS Code
 .vscode/

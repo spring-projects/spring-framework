@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -193,7 +193,7 @@ public final class ResponseCookie extends HttpCookie {
 	/**
 	 * Factory method to obtain a builder for a server-defined cookie. Unlike
 	 * {@link #from(String, String)} this option assumes input from a remote
-	 * server, which can be handled more leniently, e.g. ignoring a empty domain
+	 * server, which can be handled more leniently, e.g. ignoring an empty domain
 	 * name with double quotes.
 	 * @param name the cookie name
 	 * @param value the cookie value
@@ -237,13 +237,13 @@ public final class ResponseCookie extends HttpCookie {
 			}
 
 			@Override
-			public ResponseCookieBuilder domain(String domain) {
+			public ResponseCookieBuilder domain(@Nullable String domain) {
 				this.domain = initDomain(domain);
 				return this;
 			}
 
 			@Nullable
-			private String initDomain(String domain) {
+			private String initDomain(@Nullable String domain) {
 				if (lenient && StringUtils.hasLength(domain)) {
 					String str = domain.trim();
 					if (str.startsWith("\"") && str.endsWith("\"")) {
@@ -256,7 +256,7 @@ public final class ResponseCookie extends HttpCookie {
 			}
 
 			@Override
-			public ResponseCookieBuilder path(String path) {
+			public ResponseCookieBuilder path(@Nullable String path) {
 				this.path = path;
 				return this;
 			}
@@ -311,12 +311,12 @@ public final class ResponseCookie extends HttpCookie {
 		/**
 		 * Set the cookie "Path" attribute.
 		 */
-		ResponseCookieBuilder path(String path);
+		ResponseCookieBuilder path(@Nullable String path);
 
 		/**
 		 * Set the cookie "Domain" attribute.
 		 */
-		ResponseCookieBuilder domain(String domain);
+		ResponseCookieBuilder domain(@Nullable String domain);
 
 		/**
 		 * Add the "Secure" attribute to the cookie.

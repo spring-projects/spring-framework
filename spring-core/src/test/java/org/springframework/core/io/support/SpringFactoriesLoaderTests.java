@@ -69,6 +69,7 @@ class SpringFactoriesLoaderTests {
 
 
 	@Test
+	@Deprecated
 	void loadFactoryNames() {
 		List<String> factoryNames = SpringFactoriesLoader.loadFactoryNames(DummyFactory.class, null);
 		assertThat(factoryNames).containsExactlyInAnyOrder(MyDummyFactory1.class.getName(), MyDummyFactory2.class.getName());

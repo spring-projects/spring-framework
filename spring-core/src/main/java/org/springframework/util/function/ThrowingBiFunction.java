@@ -100,10 +100,10 @@ public interface ThrowingBiFunction<T, U, R> extends BiFunction<T, U, R> {
 	}
 
 	/**
-	 * Lambda friendly convenience method that can be used to create
+	 * Lambda friendly convenience method that can be used to create a
 	 * {@link ThrowingBiFunction} where the {@link #apply(Object, Object)}
-	 * method wraps any thrown checked exceptions using the given
-	 * {@code exceptionWrapper}.
+	 * method wraps any checked exception thrown by the supplied lambda expression
+	 * or method reference.
 	 * @param <T> the type of the first argument to the function
 	 * @param <U> the type of the second argument to the function
 	 * @param <R> the type of the result of the function
@@ -115,7 +115,7 @@ public interface ThrowingBiFunction<T, U, R> extends BiFunction<T, U, R> {
 	}
 
 	/**
-	 * Lambda friendly convenience method that can be used to create
+	 * Lambda friendly convenience method that can be used to create a
 	 * {@link ThrowingBiFunction} where the {@link #apply(Object, Object)}
 	 * method wraps any thrown checked exceptions using the given
 	 * {@code exceptionWrapper}.

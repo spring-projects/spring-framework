@@ -60,7 +60,7 @@ public interface MethodMatcher {
 	 * will be made.
 	 * @param method the candidate method
 	 * @param targetClass the target class
-	 * @return whether or not this method matches statically
+	 * @return whether this method matches statically
 	 */
 	boolean matches(Method method, Class<?> targetClass);
 
@@ -70,7 +70,7 @@ public interface MethodMatcher {
 	 * runtime even if the 2-arg matches method returns {@code true}?
 	 * <p>Can be invoked when an AOP proxy is created, and need not be invoked
 	 * again before each method invocation,
-	 * @return whether or not a runtime match via the 3-arg
+	 * @return whether a runtime match via the 3-arg
 	 * {@link #matches(java.lang.reflect.Method, Class, Object[])} method
 	 * is required if static matching passed
 	 */

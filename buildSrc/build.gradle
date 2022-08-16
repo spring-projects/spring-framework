@@ -25,5 +25,9 @@ gradlePlugin {
 			id = "org.springframework.build.optional-dependencies"
 			implementationClass = "org.springframework.build.optional.OptionalDependenciesPlugin"
 		}
+		runtimeHintsAgentPlugin {
+			id = "org.springframework.build.runtimehints-agent"
+			implementationClass = "org.springframework.build.hint.RuntimeHintsAgentPlugin"
+		}
 	}
 }

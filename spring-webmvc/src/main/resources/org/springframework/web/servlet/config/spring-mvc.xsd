@@ -52,7 +52,9 @@
 								<xsd:documentation><![CDATA[
 	Whether to match to URLs irrespective of the presence of a trailing slash.
 	If enabled a method mapped to "/users" also matches to "/users/".
-	The default value is true.
+
+	The default was changed in 6.0 from true to false in order to support the
+	deprecation of the property.
 										]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>

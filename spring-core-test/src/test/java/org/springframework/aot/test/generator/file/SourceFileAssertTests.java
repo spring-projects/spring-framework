@@ -16,8 +16,6 @@
 
 package org.springframework.aot.test.generator.file;
 
-import java.util.concurrent.Callable;
-
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -75,54 +73,6 @@ class SourceFileAssertTests {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(
 				() -> assertThat(this.sourceFile).isEqualTo("no")).withMessageContaining(
 						"expected", "but was");
-	}
-
-	@Test
-	void implementsInterfaceWhenImplementsInterface() {
-		assertThat(this.sourceFile).implementsInterface(Runnable.class);
-	}
-
-	@Test
-	void implementsInterfaceWhenDoesNotImplementInterfaceThrowsException() {
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(
-				() -> assertThat(this.sourceFile).implementsInterface(
-						Callable.class)).withMessageContaining("to contain:");
-	}
-
-	@Test
-	void hasMethodNamedWhenHasName() {
-		MethodAssert methodAssert = assertThat(this.sourceFile).hasMethodNamed("main");
-		assertThat(methodAssert).isNotNull();
-	}
-
-	@Test
-	void hasMethodNameWhenDoesNotHaveMethodThrowsException() {
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(
-				() -> assertThat(this.sourceFile).hasMethodNamed(
-						"missing")).withMessageContaining("to contain method");
-	}
-
-	@Test
-	void hasMethodNameWhenHasMultipleMethodsWithNameThrowsException() {
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(
-				() -> assertThat(this.sourceFile).hasMethodNamed(
-						"run")).withMessageContaining("to contain unique method");
-	}
-
-	@Test
-	void hasMethodWhenHasMethod() {
-		MethodAssert methodAssert = assertThat(this.sourceFile).hasMethod("run",
-				String.class);
-		assertThat(methodAssert).isNotNull();
-	}
-
-	@Test
-	void hasMethodWhenDoesNotHaveMethod() {
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(
-				() -> assertThat(this.sourceFile).hasMethod("run",
-						Integer.class)).withMessageContaining(
-								"to contain").withMessageContaining(
-										"run(java.lang.Integer");
 	}
 
 }

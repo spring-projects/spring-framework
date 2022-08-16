@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.test.context.MergedContextConfiguration;
  * initialization is complex. Although the initialization of a Spring context
  * itself is typically very quick, some beans in a context &mdash; for example,
  * an embedded database or a {@code LocalContainerEntityManagerFactoryBean} for
- * working with JPA &mdash; may take several seconds to initialize. Hence it
+ * working with JPA &mdash; may take several seconds to initialize. Hence, it
  * often makes sense to perform that initialization only once per test suite or
  * JVM process.
  *
@@ -155,7 +155,8 @@ public interface ContextCache {
 	void clear();
 
 	/**
-	 * Clear hit and miss count statistics for the cache (i.e., reset counters to zero).
+	 * Clear {@linkplain #getHitCount() hit count} and {@linkplain #getMissCount()
+	 * miss count} statistics for the cache (i.e., reset counters to zero).
 	 */
 	void clearStatistics();
 

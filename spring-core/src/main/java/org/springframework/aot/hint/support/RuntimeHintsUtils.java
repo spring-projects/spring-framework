@@ -29,13 +29,13 @@ import org.springframework.aot.hint.TypeHint;
 import org.springframework.aot.hint.TypeHint.Builder;
 import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.core.annotation.AliasFor;
-import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.SynthesizedAnnotation;
 
 /**
  * Utility methods for runtime hints support code.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.0
  */
 public abstract class RuntimeHintsUtils {
@@ -49,36 +49,58 @@ public abstract class RuntimeHintsUtils {
 
 	/**
 	 * Register the necessary hints so that the specified annotation is visible
-	 * at runtime. If an annotation attributes aliases an attribute of another
-	 * annotation, it is registered as well and a JDK proxy hints is defined
+	 * at runtime.
+	 * <p>If an annotation attribute aliases an attribute of another annotation,
+	 * the other annotation is registered as well and a JDK proxy hint is defined
 	 * so that the synthesized annotation can be resolved.
-	 * @param hints the {@link RuntimeHints} instance ot use
+	 * @param hints the {@link RuntimeHints} instance to use
 	 * @param annotationType the annotation type
 	 * @see SynthesizedAnnotation
 	 */
 	public static void registerAnnotation(RuntimeHints hints, Class<?> annotationType) {
+		registerAnnotation(hints, annotationType, false);
+	}
+
+	/**
+	 * Register the necessary hints so that the specified <em>composable</em>
+	 * annotation is visible at runtime. Use this method rather than the regular
+	 * {@link #registerAnnotation(RuntimeHints, Class)} when the specified
+	 * annotation is meta-annotated, but the meta-annotated annotations do not
+	 * need to be visible.
+	 * @param hints the {@link RuntimeHints} instance to use
+	 * @param annotationType the composable annotation type
+	 * @see #registerAnnotation(RuntimeHints, Class)
+	 */
+	public static void registerComposableAnnotation(RuntimeHints hints, Class<?> annotationType) {
+		registerAnnotation(hints, annotationType, true);
+	}
+
+	private static void registerAnnotation(RuntimeHints hints, Class<?> annotationType, boolean withProxy) {
 		hints.reflection().registerType(annotationType, ANNOTATION_HINT);
 		Set<Class<?>> allAnnotations = new LinkedHashSet<>();
 		collectAliasedAnnotations(new HashSet<>(), allAnnotations, annotationType);
-		allAnnotations.forEach(annotation -> hints.reflection().registerType(annotation, ANNOTATION_HINT));
-		if (allAnnotations.size() > 0) {
+		allAnnotations.forEach(annotation -> {
+			hints.reflection().registerType(annotation, ANNOTATION_HINT);
+			hints.proxies().registerJdkProxy(annotation, SynthesizedAnnotation.class);
+		});
+		if (!allAnnotations.isEmpty() || withProxy) {
 			hints.proxies().registerJdkProxy(annotationType, SynthesizedAnnotation.class);
 		}
 	}
 
 	private static void collectAliasedAnnotations(Set<Class<?>> seen, Set<Class<?>> types, Class<?> annotationType) {
-		if (seen.contains(annotationType) || Reflective.class.equals(annotationType)) {
+		if (seen.contains(annotationType) || AliasFor.class.equals(annotationType) ||
+				Reflective.class.equals(annotationType)) {
 			return;
 		}
 		seen.add(annotationType);
 		for (Method method : annotationType.getDeclaredMethods()) {
-			MergedAnnotations methodAnnotations = MergedAnnotations.from(method);
-			if (methodAnnotations.isPresent(AliasFor.class)) {
-				Class<?> annotationAttribute = methodAnnotations.get(AliasFor.class).getClass("annotation");
+			AliasFor aliasFor = method.getAnnotation(AliasFor.class);
+			if (aliasFor != null) {
+				Class<?> annotationAttribute = aliasFor.annotation();
 				Class<?> targetAnnotation = (annotationAttribute != Annotation.class
 						? annotationAttribute : annotationType);
-				if (!types.contains(targetAnnotation)) {
-					types.add(targetAnnotation);
+				if (types.add(targetAnnotation)) {
 					if (!targetAnnotation.equals(annotationType)) {
 						collectAliasedAnnotations(seen, types, targetAnnotation);
 					}

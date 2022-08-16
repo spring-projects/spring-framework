@@ -16,27 +16,33 @@
 
 package org.springframework.aot.generate;
 
+import java.io.IOException;
+import java.util.function.Consumer;
+
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aot.generate.ClassGenerator.JavaFileGenerator;
-import org.springframework.javapoet.ClassName;
-import org.springframework.javapoet.JavaFile;
+import org.springframework.aot.generate.GeneratedFiles.Kind;
 import org.springframework.javapoet.TypeSpec;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Tests for {@link GeneratedClasses}.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
 class GeneratedClassesTests {
 
-	private GeneratedClasses generatedClasses = new GeneratedClasses(
-			new ClassNameGenerator());
+	private static final Consumer<TypeSpec.Builder> emptyTypeCustomizer = type -> {};
 
-	private static final JavaFileGenerator JAVA_FILE_GENERATOR = GeneratedClassesTests::generateJavaFile;
+	private final GeneratedClasses generatedClasses = new GeneratedClasses(
+			new ClassNameGenerator(Object.class));
 
 	@Test
 	void createWhenClassNameGeneratorIsNullThrowsException() {
@@ -45,85 +51,131 @@ class GeneratedClassesTests {
 	}
 
 	@Test
-	void getOrGenerateWithClassTargetWhenJavaFileGeneratorIsNullThrowsException() {
+	void addForFeatureComponentWhenFeatureNameIsEmptyThrowsException() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> this.generatedClasses.getOrGenerateClass(null,
-						TestTarget.class, "test"))
-				.withMessage("'javaFileGenerator' must not be null");
-	}
-
-	@Test
-	void getOrGenerateWithClassTargetWhenTargetIsNullThrowsException() {
-		assertThatIllegalArgumentException()
-				.isThrownBy(() -> this.generatedClasses
-						.getOrGenerateClass(JAVA_FILE_GENERATOR, (Class<?>) null, "test"))
-				.withMessage("'target' must not be null");
-	}
-
-	@Test
-	void getOrGenerateWithClassTargetWhenFeatureIsNullThrowsException() {
-		assertThatIllegalArgumentException()
-				.isThrownBy(() -> this.generatedClasses
-						.getOrGenerateClass(JAVA_FILE_GENERATOR, TestTarget.class, null))
+				.isThrownBy(() -> this.generatedClasses.addForFeatureComponent("",
+						TestComponent.class, emptyTypeCustomizer))
 				.withMessage("'featureName' must not be empty");
 	}
 
 	@Test
-	void getOrGenerateWithStringTargetWhenJavaFileGeneratorIsNullThrowsException() {
+	void addForFeatureWhenFeatureNameIsEmptyThrowsException() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> this.generatedClasses.getOrGenerateClass(null,
-						TestTarget.class.getName(), "test"))
-				.withMessage("'javaFileGenerator' must not be null");
-	}
-
-	@Test
-	void getOrGenerateWithStringTargetWhenTargetIsNullThrowsException() {
-		assertThatIllegalArgumentException()
-				.isThrownBy(() -> this.generatedClasses
-						.getOrGenerateClass(JAVA_FILE_GENERATOR, (String) null, "test"))
-				.withMessage("'target' must not be empty");
-	}
-
-	@Test
-	void getOrGenerateWithStringTargetWhenFeatureIsNullThrowsException() {
-		assertThatIllegalArgumentException()
-				.isThrownBy(() -> this.generatedClasses.getOrGenerateClass(
-						JAVA_FILE_GENERATOR, TestTarget.class.getName(), null))
+				.isThrownBy(() -> this.generatedClasses.addForFeature("", emptyTypeCustomizer))
 				.withMessage("'featureName' must not be empty");
 	}
 
 	@Test
-	void getOrGenerateWhenNewReturnsGeneratedMethod() {
+	void addForFeatureComponentWhenTypeSpecCustomizerIsNullThrowsException() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> this.generatedClasses
+						.addForFeatureComponent("test", TestComponent.class, null))
+				.withMessage("'type' must not be null");
+	}
+
+	@Test
+	void addForFeatureUsesDefaultTarget() {
+		GeneratedClass generatedClass = this.generatedClasses.addForFeature("Test", emptyTypeCustomizer);
+		assertThat(generatedClass.getName()).hasToString("java.lang.Object__Test");
+	}
+
+	@Test
+	void addForFeatureComponentUsesTarget() {
+		GeneratedClass generatedClass = this.generatedClasses
+				.addForFeatureComponent("Test", TestComponent.class, emptyTypeCustomizer);
+		assertThat(generatedClass.getName().toString()).endsWith("TestComponent__Test");
+	}
+
+	@Test
+	void addForFeatureComponentWithSameNameReturnsDifferentInstances() {
 		GeneratedClass generatedClass1 = this.generatedClasses
-				.getOrGenerateClass(JAVA_FILE_GENERATOR, TestTarget.class, "one");
-		GeneratedClass generatedClass2 = this.generatedClasses.getOrGenerateClass(
-				JAVA_FILE_GENERATOR, TestTarget.class.getName(), "two");
+				.addForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
+		GeneratedClass generatedClass2 = this.generatedClasses
+				.addForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
+		assertThat(generatedClass1).isNotSameAs(generatedClass2);
+		assertThat(generatedClass1.getName().simpleName()).endsWith("__One");
+		assertThat(generatedClass2.getName().simpleName()).endsWith("__One1");
+	}
+
+	@Test
+	void getOrAddForFeatureComponentWhenNewReturnsGeneratedMethod() {
+		GeneratedClass generatedClass1 = this.generatedClasses
+				.getOrAddForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
+		GeneratedClass generatedClass2 = this.generatedClasses
+				.getOrAddForFeatureComponent("two", TestComponent.class, emptyTypeCustomizer);
 		assertThat(generatedClass1).isNotNull().isNotEqualTo(generatedClass2);
 		assertThat(generatedClass2).isNotNull();
 	}
 
 	@Test
-	void getOrGenerateWhenRepeatReturnsSameGeneratedMethod() {
-		GeneratedClasses generated = this.generatedClasses;
-		GeneratedClass generatedClass1 = generated.getOrGenerateClass(JAVA_FILE_GENERATOR,
-				TestTarget.class, "one");
-		GeneratedClass generatedClass2 = generated.getOrGenerateClass(JAVA_FILE_GENERATOR,
-				TestTarget.class, "one");
-		GeneratedClass generatedClass3 = generated.getOrGenerateClass(JAVA_FILE_GENERATOR,
-				TestTarget.class.getName(), "one");
-		GeneratedClass generatedClass4 = generated.getOrGenerateClass(JAVA_FILE_GENERATOR,
-				TestTarget.class, "two");
+	void getOrAddForFeatureWhenNewReturnsGeneratedMethod() {
+		GeneratedClass generatedClass1 = this.generatedClasses
+				.getOrAddForFeature("one", emptyTypeCustomizer);
+		GeneratedClass generatedClass2 = this.generatedClasses
+				.getOrAddForFeature("two", emptyTypeCustomizer);
+		assertThat(generatedClass1).isNotNull().isNotEqualTo(generatedClass2);
+		assertThat(generatedClass2).isNotNull();
+	}
+
+	@Test
+	void getOrAddForFeatureComponentWhenRepeatReturnsSameGeneratedMethod() {
+		GeneratedClass generatedClass1 = this.generatedClasses
+				.getOrAddForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
+		GeneratedClass generatedClass2 = this.generatedClasses
+				.getOrAddForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
+		GeneratedClass generatedClass3 = this.generatedClasses
+				.getOrAddForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
 		assertThat(generatedClass1).isNotNull().isSameAs(generatedClass2)
-				.isSameAs(generatedClass3).isNotSameAs(generatedClass4);
+				.isSameAs(generatedClass3);
 	}
 
-	static JavaFile generateJavaFile(ClassName className,
-			GeneratedMethods generatedMethods) {
-		TypeSpec typeSpec = TypeSpec.classBuilder(className).addJavadoc("Test").build();
-		return JavaFile.builder(className.packageName(), typeSpec).build();
+	@Test
+	void getOrAddForFeatureWhenRepeatReturnsSameGeneratedMethod() {
+		GeneratedClass generatedClass1 = this.generatedClasses
+				.getOrAddForFeature("one", emptyTypeCustomizer);
+		GeneratedClass generatedClass2 = this.generatedClasses
+				.getOrAddForFeature("one", emptyTypeCustomizer);
+		GeneratedClass generatedClass3 = this.generatedClasses
+				.getOrAddForFeature("one", emptyTypeCustomizer);
+		assertThat(generatedClass1).isNotNull().isSameAs(generatedClass2)
+				.isSameAs(generatedClass3);
 	}
 
-	private static class TestTarget {
+	@Test
+	void getOrAddForFeatureComponentWhenHasFeatureNamePrefix() {
+		GeneratedClasses prefixed = this.generatedClasses.withFeatureNamePrefix("prefix");
+		GeneratedClass generatedClass1 = this.generatedClasses.getOrAddForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
+		GeneratedClass generatedClass2 = this.generatedClasses.getOrAddForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
+		GeneratedClass generatedClass3 = prefixed.getOrAddForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
+		GeneratedClass generatedClass4 = prefixed.getOrAddForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
+		assertThat(generatedClass1).isSameAs(generatedClass2).isNotSameAs(generatedClass3);
+		assertThat(generatedClass3).isSameAs(generatedClass4);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void writeToInvokeTypeSpecCustomizer() throws IOException {
+		Consumer<TypeSpec.Builder> typeSpecCustomizer = mock(Consumer.class);
+		this.generatedClasses.addForFeatureComponent("one", TestComponent.class, typeSpecCustomizer);
+		verifyNoInteractions(typeSpecCustomizer);
+		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
+		this.generatedClasses.writeTo(generatedFiles);
+		verify(typeSpecCustomizer).accept(any());
+		assertThat(generatedFiles.getGeneratedFiles(Kind.SOURCE)).hasSize(1);
+	}
+
+	@Test
+	void withNameUpdatesNamingConventions() {
+		GeneratedClass generatedClass1 = this.generatedClasses
+				.addForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
+		GeneratedClass generatedClass2 = this.generatedClasses.withFeatureNamePrefix("Another")
+				.addForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
+		assertThat(generatedClass1.getName().toString()).endsWith("TestComponent__One");
+		assertThat(generatedClass2.getName().toString()).endsWith("TestComponent__AnotherOne");
+	}
+
+
+	private static class TestComponent {
 
 	}
 

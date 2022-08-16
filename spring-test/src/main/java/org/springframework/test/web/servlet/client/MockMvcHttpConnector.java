@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,7 +151,7 @@ public class MockMvcHttpConnector implements ClientHttpConnector {
 		}
 
 		// Parse the multipart request in order to adapt to Servlet Part's
-		MockMultipartHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.multipart(uri);
+		MockMultipartHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.multipart(httpMethod, uri);
 
 		Assert.notNull(bytes, "No multipart content");
 		ReactiveHttpInputMessage inputMessage = MockServerHttpRequest.post(uri.toString())

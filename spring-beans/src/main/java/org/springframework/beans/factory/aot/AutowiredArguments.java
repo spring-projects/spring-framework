@@ -18,6 +18,7 @@ package org.springframework.beans.factory.aot;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Resolved arguments to be autowired.
@@ -25,7 +26,7 @@ import org.springframework.util.Assert;
  * @author Phillip Webb
  * @author Stephane Nicoll
  * @since 6.0
- * @see AutowiredInstantiationArgumentsResolver
+ * @see BeanInstanceSupplier
  * @see AutowiredMethodArgumentsResolver
  */
 @FunctionalInterface
@@ -38,11 +39,14 @@ public interface AutowiredArguments {
 	 * @param requiredType the required argument type
 	 * @return the argument
 	 */
-	@Nullable
 	@SuppressWarnings("unchecked")
+	@Nullable
 	default <T> T get(int index, Class<T> requiredType) {
-		Object value = get(index);
-		Assert.isInstanceOf(requiredType, value);
+		Object value = getObject(index);
+		if (!ClassUtils.isAssignableValue(requiredType, value)) {
+			throw new IllegalArgumentException("Argument type mismatch: expected '" +
+					ClassUtils.getQualifiedName(requiredType) + "' for value [" + value + "]");
+		}
 		return (T) value;
 	}
 
@@ -52,10 +56,10 @@ public interface AutowiredArguments {
 	 * @param index the argument index
 	 * @return the argument
 	 */
-	@Nullable
 	@SuppressWarnings("unchecked")
+	@Nullable
 	default <T> T get(int index) {
-		return (T) toArray()[index];
+		return (T) getObject(index);
 	}
 
 	/**
@@ -63,6 +67,7 @@ public interface AutowiredArguments {
 	 * @param index the argument index
 	 * @return the argument
 	 */
+	@Nullable
 	default Object getObject(int index) {
 		return toArray()[index];
 	}
@@ -80,7 +85,7 @@ public interface AutowiredArguments {
 	 * @return a new {@link AutowiredArguments} instance
 	 */
 	static AutowiredArguments of(Object[] arguments) {
-		Assert.notNull(arguments, "Arguments must not be null");
+		Assert.notNull(arguments, "'arguments' must not be null");
 		return () -> arguments;
 	}
 

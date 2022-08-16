@@ -278,7 +278,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	/**
-	 * Return the dependency comparator for this BeanFactory (may be {@code null}.
+	 * Return the dependency comparator for this BeanFactory (may be {@code null}).
 	 * @since 4.0
 	 */
 	@Nullable
@@ -574,7 +574,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 							if (!matchFound) {
 								// In case of FactoryBean, try to match FactoryBean instance itself next.
 								beanName = FACTORY_BEAN_PREFIX + beanName;
-								matchFound = isTypeMatch(beanName, type, allowFactoryBeanInit);
+								if (includeNonSingletons || isSingleton(beanName, mbd, dbd)) {
+									matchFound = isTypeMatch(beanName, type, allowFactoryBeanInit);
+								}
 							}
 						}
 						if (matchFound) {
@@ -745,7 +747,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (containsBeanDefinition(beanName)) {
 			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
 			// Check raw bean class, e.g. in case of a proxy.
-			if (bd.hasBeanClass()) {
+			if (bd.hasBeanClass() && bd.getFactoryMethodName() == null) {
 				Class<?> beanClass = bd.getBeanClass();
 				if (beanClass != beanType) {
 					MergedAnnotation<A> annotation =
@@ -813,13 +815,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 
 		BeanFactory parent = getParentBeanFactory();
-		if (parent instanceof DefaultListableBeanFactory dlfb) {
+		if (parent instanceof DefaultListableBeanFactory dlbf) {
 			// No bean definition found in this factory -> delegate to parent.
-			return dlfb.isAutowireCandidate(beanName, descriptor, resolver);
+			return dlbf.isAutowireCandidate(beanName, descriptor, resolver);
 		}
-		else if (parent instanceof ConfigurableListableBeanFactory clfb) {
+		else if (parent instanceof ConfigurableListableBeanFactory clbf) {
 			// If no DefaultListableBeanFactory, can't pass the resolver along.
-			return clfb.isAutowireCandidate(beanName, descriptor);
+			return clbf.isAutowireCandidate(beanName, descriptor);
 		}
 		else {
 			return true;

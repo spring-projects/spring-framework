@@ -16,10 +16,12 @@
 
 package org.springframework.aot.generate;
 
+import java.util.function.Consumer;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.javapoet.ClassName;
-import org.springframework.javapoet.JavaFile;
+import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.TypeSpec;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,64 +31,53 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * Tests for {@link GeneratedClass}.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
 class GeneratedClassTests {
+
+	private static final Consumer<TypeSpec.Builder> emptyTypeCustomizer = type -> {};
+
+	private static final Consumer<MethodSpec.Builder> emptyMethodCustomizer = method -> {};
 
 	@Test
 	void getNameReturnsName() {
 		ClassName name = ClassName.bestGuess("com.example.Test");
-		GeneratedClass generatedClass = new GeneratedClass(this::generateJavaFile, name);
+		GeneratedClass generatedClass = new GeneratedClass(name, emptyTypeCustomizer);
 		assertThat(generatedClass.getName()).isSameAs(name);
 	}
 
 	@Test
-	void generateJavaFileSuppliesGeneratedMethods() {
+	void reserveMethodNamesWhenNameUsedThrowsException() {
 		ClassName name = ClassName.bestGuess("com.example.Test");
-		GeneratedClass generatedClass = new GeneratedClass(this::generateJavaFile, name);
-		MethodGenerator methodGenerator = generatedClass.getMethodGenerator();
-		methodGenerator.generateMethod("test")
-				.using(builder -> builder.addJavadoc("Test Method"));
+		GeneratedClass generatedClass = new GeneratedClass(name, emptyTypeCustomizer);
+		generatedClass.getMethods().add("apply", emptyMethodCustomizer);
+		assertThatIllegalStateException()
+				.isThrownBy(() -> generatedClass.reserveMethodNames("apply"));
+	}
+
+	@Test
+	void reserveMethodNamesReservesNames() {
+		ClassName name = ClassName.bestGuess("com.example.Test");
+		GeneratedClass generatedClass = new GeneratedClass(name, emptyTypeCustomizer);
+		generatedClass.reserveMethodNames("apply");
+		GeneratedMethod generatedMethod = generatedClass.getMethods().add("apply", emptyMethodCustomizer);
+		assertThat(generatedMethod.getName()).isEqualTo("apply1");
+	}
+
+	@Test
+	void generateMethodNameWhenAllEmptyPartsGeneratesSetName() {
+		ClassName name = ClassName.bestGuess("com.example.Test");
+		GeneratedClass generatedClass = new GeneratedClass(name, emptyTypeCustomizer);
+		GeneratedMethod generatedMethod = generatedClass.getMethods().add("123", emptyMethodCustomizer);
+		assertThat(generatedMethod.getName()).isEqualTo("$$aot");
+	}
+
+	@Test
+	void generateJavaFileIncludesGeneratedMethods() {
+		ClassName name = ClassName.bestGuess("com.example.Test");
+		GeneratedClass generatedClass = new GeneratedClass(name, emptyTypeCustomizer);
+		generatedClass.getMethods().add("test", method -> method.addJavadoc("Test Method"));
 		assertThat(generatedClass.generateJavaFile().toString()).contains("Test Method");
-	}
-
-	@Test
-	void generateJavaFileWhenHasBadPackageThrowsException() {
-		ClassName name = ClassName.bestGuess("com.example.Test");
-		GeneratedClass generatedClass = new GeneratedClass(
-				this::generateBadPackageJavaFile, name);
-		assertThatIllegalStateException()
-				.isThrownBy(
-						() -> assertThat(generatedClass.generateJavaFile().toString()))
-				.withMessageContaining("should be in package");
-	}
-
-	@Test
-	void generateJavaFileWhenHasBadNameThrowsException() {
-		ClassName name = ClassName.bestGuess("com.example.Test");
-		GeneratedClass generatedClass = new GeneratedClass(this::generateBadNameJavaFile,
-				name);
-		assertThatIllegalStateException()
-				.isThrownBy(
-						() -> assertThat(generatedClass.generateJavaFile().toString()))
-				.withMessageContaining("should be named");
-	}
-
-	private JavaFile generateJavaFile(ClassName className, GeneratedMethods methods) {
-		TypeSpec.Builder classBuilder = TypeSpec.classBuilder(className);
-		methods.doWithMethodSpecs(classBuilder::addMethod);
-		return JavaFile.builder(className.packageName(), classBuilder.build()).build();
-	}
-
-	private JavaFile generateBadPackageJavaFile(ClassName className,
-			GeneratedMethods methods) {
-		TypeSpec.Builder classBuilder = TypeSpec.classBuilder(className);
-		return JavaFile.builder("naughty", classBuilder.build()).build();
-	}
-
-	private JavaFile generateBadNameJavaFile(ClassName className,
-			GeneratedMethods methods) {
-		TypeSpec.Builder classBuilder = TypeSpec.classBuilder("Naughty");
-		return JavaFile.builder(className.packageName(), classBuilder.build()).build();
 	}
 
 }

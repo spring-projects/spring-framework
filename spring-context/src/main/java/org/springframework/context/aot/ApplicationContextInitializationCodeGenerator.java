@@ -21,69 +21,61 @@ import java.util.List;
 
 import javax.lang.model.element.Modifier;
 
+import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.generate.GeneratedMethods;
-import org.springframework.aot.generate.MethodGenerator;
+import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.annotation.ContextAnnotationAutowireCandidateResolver;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
-import org.springframework.javapoet.JavaFile;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
 import org.springframework.javapoet.TypeSpec;
 
 /**
- * Internal code generator to create the application context initializer.
+ * Internal code generator to create the {@link ApplicationContextInitializer}.
  *
  * @author Phillip Webb
  * @since 6.0
  */
-class ApplicationContextInitializationCodeGenerator
-		implements BeanFactoryInitializationCode {
+class ApplicationContextInitializationCodeGenerator implements BeanFactoryInitializationCode {
+
+	private static final String INITIALIZE_METHOD = "initialize";
 
 	private static final String APPLICATION_CONTEXT_VARIABLE = "applicationContext";
 
-
-	private final GeneratedMethods generatedMethods = new GeneratedMethods();
-
 	private final List<MethodReference> initializers = new ArrayList<>();
 
+	private final GeneratedClass generatedClass;
 
-	@Override
-	public MethodGenerator getMethodGenerator() {
-		return this.generatedMethods;
+
+	ApplicationContextInitializationCodeGenerator(GenerationContext generationContext) {
+		this.generatedClass = generationContext.getGeneratedClasses()
+				.addForFeature("ApplicationContextInitializer", this::generateType);
+		this.generatedClass.reserveMethodNames(INITIALIZE_METHOD);
 	}
 
-	@Override
-	public void addInitializer(MethodReference methodReference) {
-		this.initializers.add(methodReference);
-	}
 
-	JavaFile generateJavaFile(ClassName className) {
-		TypeSpec.Builder builder = TypeSpec.classBuilder(className);
-		builder.addJavadoc(
+	private void generateType(TypeSpec.Builder type) {
+		type.addJavadoc(
 				"{@link $T} to restore an application context based on previous AOT processing.",
 				ApplicationContextInitializer.class);
-		builder.addModifiers(Modifier.PUBLIC);
-		builder.addSuperinterface(ParameterizedTypeName.get(
+		type.addModifiers(Modifier.PUBLIC);
+		type.addSuperinterface(ParameterizedTypeName.get(
 				ApplicationContextInitializer.class, GenericApplicationContext.class));
-		builder.addMethod(generateInitializeMethod());
-		this.generatedMethods.doWithMethodSpecs(builder::addMethod);
-		return JavaFile.builder(className.packageName(), builder.build()).build();
+		type.addMethod(generateInitializeMethod());
 	}
 
 	private MethodSpec generateInitializeMethod() {
-		MethodSpec.Builder builder = MethodSpec.methodBuilder("initialize");
-		builder.addAnnotation(Override.class);
-		builder.addModifiers(Modifier.PUBLIC);
-		builder.addParameter(GenericApplicationContext.class,
-				APPLICATION_CONTEXT_VARIABLE);
-		builder.addCode(generateInitializeCode());
-		return builder.build();
+		MethodSpec.Builder method = MethodSpec.methodBuilder(INITIALIZE_METHOD);
+		method.addAnnotation(Override.class);
+		method.addModifiers(Modifier.PUBLIC);
+		method.addParameter(GenericApplicationContext.class, APPLICATION_CONTEXT_VARIABLE);
+		method.addCode(generateInitializeCode());
+		return method.build();
 	}
 
 	private CodeBlock generateInitializeCode() {
@@ -94,10 +86,23 @@ class ApplicationContextInitializationCodeGenerator
 		builder.addStatement("$L.setAutowireCandidateResolver(new $T())",
 				BEAN_FACTORY_VARIABLE, ContextAnnotationAutowireCandidateResolver.class);
 		for (MethodReference initializer : this.initializers) {
-			builder.addStatement(
-					initializer.toInvokeCodeBlock(CodeBlock.of(BEAN_FACTORY_VARIABLE)));
+			builder.addStatement(initializer.toInvokeCodeBlock(CodeBlock.of(BEAN_FACTORY_VARIABLE)));
 		}
 		return builder.build();
+	}
+
+	GeneratedClass getGeneratedClass() {
+		return this.generatedClass;
+	}
+
+	@Override
+	public GeneratedMethods getMethods() {
+		return this.generatedClass.getMethods();
+	}
+
+	@Override
+	public void addInitializer(MethodReference methodReference) {
+		this.initializers.add(methodReference);
 	}
 
 }

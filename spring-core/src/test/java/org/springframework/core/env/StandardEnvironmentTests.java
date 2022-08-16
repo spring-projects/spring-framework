@@ -239,7 +239,7 @@ public class StandardEnvironmentTests {
 	}
 
 	@Test
-	void getActiveProfiles_fromSystemProperties_withMulitpleProfiles_withWhitespace() {
+	void getActiveProfiles_fromSystemProperties_withMultipleProfiles_withWhitespace() {
 		System.setProperty(ACTIVE_PROFILES_PROPERTY_NAME, " bar , baz "); // notice whitespace
 		assertThat(environment.getActiveProfiles()).contains("bar", "baz");
 		System.clearProperty(ACTIVE_PROFILES_PROPERTY_NAME);

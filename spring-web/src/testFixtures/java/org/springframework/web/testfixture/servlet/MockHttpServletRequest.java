@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpUpgradeHandler;
+import jakarta.servlet.http.MappingMatch;
 import jakarta.servlet.http.Part;
 
 import org.springframework.http.HttpHeaders;
@@ -70,6 +71,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Mock implementation of the {@link jakarta.servlet.http.HttpServletRequest} interface.
@@ -275,7 +277,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private final MultiValueMap<String, Part> parts = new LinkedMultiValueMap<>();
 
-	private HttpServletMapping httpServletMapping = new MockHttpServletMapping("", "", "", null);
+	@Nullable
+	private HttpServletMapping httpServletMapping;
 
 
 	// ---------------------------------------------------------------------
@@ -1392,13 +1395,31 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return result;
 	}
 
-	public void setHttpServletMapping(HttpServletMapping httpServletMapping) {
+	public void setHttpServletMapping(@Nullable HttpServletMapping httpServletMapping) {
 		this.httpServletMapping = httpServletMapping;
 	}
 
 	@Override
 	public HttpServletMapping getHttpServletMapping() {
-		return this.httpServletMapping;
+		return (this.httpServletMapping == null ?
+				new MockHttpServletMapping("", "", "", determineMappingMatch()) :
+				this.httpServletMapping);
+	}
+
+	/**
+	 * Best effort to detect a Servlet path mapping, e.g. {@code "/foo/*"}, by
+	 * checking whether the length of requestURI > contextPath + servletPath.
+	 * This helps {@link org.springframework.web.util.ServletRequestPathUtils}
+	 * to take into account the Servlet path when parsing the requestURI.
+	 */
+	@Nullable
+	private MappingMatch determineMappingMatch() {
+		if (StringUtils.hasText(this.requestURI) && StringUtils.hasText(this.servletPath)) {
+			String path = UrlPathHelper.defaultInstance.getRequestUri(this);
+			String prefix = this.contextPath + this.servletPath;
+			return (path.startsWith(prefix) && (path.length() > prefix.length()) ? MappingMatch.PATH : null);
+		}
+		return null;
 	}
 
 	@Override

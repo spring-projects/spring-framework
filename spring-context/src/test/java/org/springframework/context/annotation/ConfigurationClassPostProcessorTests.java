@@ -56,6 +56,7 @@ import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
@@ -1471,6 +1472,7 @@ class ConfigurationClassPostProcessorTests {
 	@Scope(scopeName = "prototype")
 	public @interface PrototypeScoped {
 
+		@AliasFor(annotation = Scope.class)
 		ScopedProxyMode proxyMode() default ScopedProxyMode.TARGET_CLASS;
 	}
 
@@ -1628,8 +1630,10 @@ class ConfigurationClassPostProcessorTests {
 	@Target(ElementType.TYPE)
 	public @interface ComposedConfigurationWithAttributeOverrides {
 
+		@AliasFor(annotation = ComponentScan.class)
 		String[] basePackages() default {};
 
+		@AliasFor(annotation = ComponentScan.class)
 		ComponentScan.Filter[] excludeFilters() default {};
 	}
 
@@ -1656,6 +1660,7 @@ class ConfigurationClassPostProcessorTests {
 	@Target(ElementType.TYPE)
 	public @interface ComposedComposedConfigurationWithAttributeOverrides {
 
+		@AliasFor(annotation = ComposedConfigurationWithAttributeOverrides.class)
 		String[] basePackages() default {};
 	}
 
@@ -1675,6 +1680,7 @@ class ConfigurationClassPostProcessorTests {
 	@Target(ElementType.TYPE)
 	public @interface MetaComponentScanConfigurationWithAttributeOverrides {
 
+		@AliasFor(annotation = ComponentScan.class)
 		String[] basePackages() default {};
 	}
 

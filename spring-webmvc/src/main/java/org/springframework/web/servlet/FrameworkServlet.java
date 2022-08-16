@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,6 @@ import org.springframework.web.context.support.ServletRequestHandledEvent;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.cors.CorsUtils;
-import org.springframework.web.util.NestedServletException;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -639,7 +638,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * {@link org.springframework.web.context.ConfigurableWebApplicationContext}
 	 * interface. Can be overridden in subclasses.
 	 * <p>Do not forget to register this servlet instance as application listener on the
-	 * created context (for triggering its {@link #onRefresh callback}, and to call
+	 * created context (for triggering its {@link #onRefresh callback}), and to call
 	 * {@link org.springframework.context.ConfigurableApplicationContext#refresh()}
 	 * before returning the context instance.
 	 * @param parent the parent ApplicationContext to use, or {@code null} if none
@@ -1009,7 +1008,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		}
 		catch (Throwable ex) {
 			failureCause = ex;
-			throw new NestedServletException("Request processing failed", ex);
+			throw new ServletException("Request processing failed: " + ex, ex);
 		}
 
 		finally {

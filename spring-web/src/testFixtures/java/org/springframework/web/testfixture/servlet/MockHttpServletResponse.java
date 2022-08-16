@@ -452,6 +452,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 				buf.append("; SameSite=").append(mockCookie.getSameSite());
 			}
 		}
+		if (StringUtils.hasText(cookie.getComment())) {
+			buf.append("; Comment=").append(cookie.getComment());
+		}
 		return buf.toString();
 	}
 

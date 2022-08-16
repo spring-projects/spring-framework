@@ -37,12 +37,12 @@ import org.springframework.context.testfixture.cache.beans.CacheableService;
 import org.springframework.context.testfixture.cache.beans.DefaultCacheableService;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatRuntimeException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * @author Stephane Nicoll
  */
-public class CustomInterceptorTests {
+class CustomInterceptorTests {
 
 	protected ConfigurableApplicationContext ctx;
 
@@ -60,25 +60,25 @@ public class CustomInterceptorTests {
 	}
 
 	@Test
-	public void onlyOneInterceptorIsAvailable() {
+	void onlyOneInterceptorIsAvailable() {
 		Map<String, CacheInterceptor> interceptors = this.ctx.getBeansOfType(CacheInterceptor.class);
-		assertThat(interceptors.size()).as("Only one interceptor should be defined").isEqualTo(1);
+		assertThat(interceptors).as("Only one interceptor should be defined").hasSize(1);
 		CacheInterceptor interceptor = interceptors.values().iterator().next();
-		assertThat(interceptor.getClass()).as("Custom interceptor not defined").isEqualTo(TestCacheInterceptor.class);
+		assertThat(interceptor).as("Custom interceptor not defined").isInstanceOf(TestCacheInterceptor.class);
 	}
 
 	@Test
-	public void customInterceptorAppliesWithRuntimeException() {
+	void customInterceptorAppliesWithRuntimeException() {
 		Object o = this.cs.throwUnchecked(0L);
 		// See TestCacheInterceptor
 		assertThat(o).isEqualTo(55L);
 	}
 
 	@Test
-	public void customInterceptorAppliesWithCheckedException() {
-		assertThatRuntimeException()
-			.isThrownBy(() -> this.cs.throwChecked(0L))
-			.withCauseExactlyInstanceOf(IOException.class);
+	void customInterceptorAppliesWithCheckedException() {
+		assertThatThrownBy(() -> this.cs.throwChecked(0L))
+				.isInstanceOf(RuntimeException.class)
+				.hasCauseExactlyInstanceOf(IOException.class);
 	}
 
 

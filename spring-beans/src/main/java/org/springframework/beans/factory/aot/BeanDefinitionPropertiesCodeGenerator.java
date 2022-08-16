@@ -32,7 +32,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import org.springframework.aot.generate.MethodGenerator;
+import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.hint.ExecutableHint;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.RuntimeHints;
@@ -40,6 +40,7 @@ import org.springframework.beans.BeanInfoFactory;
 import org.springframework.beans.ExtendedBeanInfoFactory;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
@@ -82,7 +83,7 @@ class BeanDefinitionPropertiesCodeGenerator {
 
 	private static final String BEAN_DEFINITION_VARIABLE = BeanRegistrationCodeFragments.BEAN_DEFINITION_VARIABLE;
 
-	private static final	Consumer<ExecutableHint.Builder> INVOKE_HINT = hint -> hint.withMode(ExecutableMode.INVOKE);
+	private static final Consumer<ExecutableHint.Builder> INVOKE_HINT = hint -> hint.withMode(ExecutableMode.INVOKE);
 
 	private static final BeanInfoFactory beanInfoFactory = new ExtendedBeanInfoFactory();
 
@@ -96,18 +97,18 @@ class BeanDefinitionPropertiesCodeGenerator {
 
 
 	BeanDefinitionPropertiesCodeGenerator(RuntimeHints hints,
-			Predicate<String> attributeFilter, MethodGenerator methodGenerator,
+			Predicate<String> attributeFilter, GeneratedMethods generatedMethods,
 			BiFunction<String, Object, CodeBlock> customValueCodeGenerator) {
 
 		this.hints = hints;
 		this.attributeFilter = attributeFilter;
 		this.customValueCodeGenerator = customValueCodeGenerator;
 		this.valueCodeGenerator = new BeanDefinitionPropertyValueCodeGenerator(
-				methodGenerator);
+				generatedMethods);
 	}
 
 
-	CodeBlock generateCode(BeanDefinition beanDefinition) {
+	CodeBlock generateCode(RootBeanDefinition beanDefinition) {
 		CodeBlock.Builder builder = CodeBlock.builder();
 		addStatementForValue(builder, beanDefinition, BeanDefinition::isPrimary,
 				"$L.setPrimary($L)");
@@ -119,18 +120,14 @@ class BeanDefinitionPropertiesCodeGenerator {
 				"$L.setAutowireCandidate($L)");
 		addStatementForValue(builder, beanDefinition, BeanDefinition::getRole,
 				this::hasRole, "$L.setRole($L)", this::toRole);
-		if (beanDefinition instanceof AbstractBeanDefinition abstractBeanDefinition) {
-			addStatementForValue(builder, beanDefinition,
-					AbstractBeanDefinition::getLazyInit, "$L.setLazyInit($L)");
-			addStatementForValue(builder, beanDefinition,
-					AbstractBeanDefinition::isSynthetic, "$L.setSynthetic($L)");
-			addInitDestroyMethods(builder, abstractBeanDefinition,
-					abstractBeanDefinition.getInitMethodNames(),
-					"$L.setInitMethodNames($L)");
-			addInitDestroyMethods(builder, abstractBeanDefinition,
-					abstractBeanDefinition.getDestroyMethodNames(),
-					"$L.setDestroyMethodNames($L)");
-		}
+		addStatementForValue(builder, beanDefinition, AbstractBeanDefinition::getLazyInit,
+				"$L.setLazyInit($L)");
+		addStatementForValue(builder, beanDefinition, AbstractBeanDefinition::isSynthetic,
+				"$L.setSynthetic($L)");
+		addInitDestroyMethods(builder, beanDefinition, beanDefinition.getInitMethodNames(),
+				"$L.setInitMethodNames($L)");
+		addInitDestroyMethods(builder, beanDefinition, beanDefinition.getDestroyMethodNames(),
+				"$L.setDestroyMethodNames($L)");
 		addConstructorArgumentValues(builder, beanDefinition);
 		addPropertyValues(builder, beanDefinition);
 		addAttributes(builder, beanDefinition);
@@ -138,20 +135,14 @@ class BeanDefinitionPropertiesCodeGenerator {
 	}
 
 	private void addInitDestroyMethods(Builder builder,
-			AbstractBeanDefinition beanDefinition, String[] methodNames, String format) {
-
+			AbstractBeanDefinition beanDefinition, @Nullable String[] methodNames, String format) {
 		if (!ObjectUtils.isEmpty(methodNames)) {
-			Class<?> beanType = ClassUtils
-					.getUserClass(beanDefinition.getResolvableType().toClass());
-			Builder arguments = CodeBlock.builder();
-			for (int i = 0; i < methodNames.length; i++) {
-				String methodName = methodNames[i];
-				if (!AbstractBeanDefinition.INFER_METHOD.equals(methodName)) {
-					arguments.add((i != 0) ? ", $S" : "$S", methodName);
-					addInitDestroyHint(beanType, methodName);
-				}
-			}
-			builder.addStatement(format, BEAN_DEFINITION_VARIABLE, arguments.build());
+			Class<?> beanType = ClassUtils.getUserClass(beanDefinition.getResolvableType().toClass());
+			Arrays.stream(methodNames).forEach(methodName -> addInitDestroyHint(beanType, methodName));
+			CodeBlock arguments = Arrays.stream(methodNames)
+					.map(name -> CodeBlock.of("$S", name))
+					.collect(CodeBlock.joining(", "));
+			builder.addStatement(format, BEAN_DEFINITION_VARIABLE, arguments);
 		}
 	}
 
@@ -183,7 +174,7 @@ class BeanDefinitionPropertiesCodeGenerator {
 	}
 
 	private void addPropertyValues(CodeBlock.Builder builder,
-			BeanDefinition beanDefinition) {
+			RootBeanDefinition beanDefinition) {
 
 		MutablePropertyValues propertyValues = beanDefinition.getPropertyValues();
 		if (!propertyValues.isEmpty()) {
@@ -197,9 +188,8 @@ class BeanDefinitionPropertiesCodeGenerator {
 				builder.addStatement("$L.getPropertyValues().addPropertyValue($S, $L)",
 						BEAN_DEFINITION_VARIABLE, propertyValue.getName(), code);
 			}
-			Class<?> beanType = ClassUtils
-					.getUserClass(beanDefinition.getResolvableType().toClass());
-			BeanInfo beanInfo = (beanType != Object.class) ? getBeanInfo(beanType) : null;
+			Class<?> infrastructureType = getInfrastructureType(beanDefinition);
+			BeanInfo beanInfo = (infrastructureType != Object.class) ? getBeanInfo(infrastructureType) : null;
 			if (beanInfo != null) {
 				Map<String, Method> writeMethods = getWriteMethods(beanInfo);
 				for (PropertyValue propertyValue : propertyValues) {
@@ -210,6 +200,16 @@ class BeanDefinitionPropertiesCodeGenerator {
 				}
 			}
 		}
+	}
+
+	private Class<?> getInfrastructureType(RootBeanDefinition beanDefinition) {
+		if (beanDefinition.hasBeanClass()) {
+			Class<?> beanClass = beanDefinition.getBeanClass();
+			if (FactoryBean.class.isAssignableFrom(beanClass)) {
+				return beanClass;
+			}
+		}
+		return ClassUtils.getUserClass(beanDefinition.getResolvableType().toClass());
 	}
 
 	@Nullable
@@ -234,15 +234,6 @@ class BeanDefinitionPropertiesCodeGenerator {
 		}
 		return Collections.unmodifiableMap(writeMethods);
 	}
-
-	@Nullable
-	private Method findWriteMethod(BeanInfo beanInfo, String propertyName) {
-		return Arrays.stream(beanInfo.getPropertyDescriptors())
-				.filter(pd -> propertyName.equals(pd.getName()))
-				.map(java.beans.PropertyDescriptor::getWriteMethod)
-				.filter(Objects::nonNull).findFirst().orElse(null);
-	}
-
 
 	private void addAttributes(CodeBlock.Builder builder, BeanDefinition beanDefinition) {
 		String[] attributeNames = beanDefinition.attributeNames();
@@ -272,21 +263,17 @@ class BeanDefinitionPropertiesCodeGenerator {
 	}
 
 	private CodeBlock toStringVarArgs(String[] strings) {
-		CodeBlock.Builder builder = CodeBlock.builder();
-		for (int i = 0; i < strings.length; i++) {
-			builder.add((i != 0) ? ", " : "");
-			builder.add("$S", strings[i]);
-		}
-		return builder.build();
+		return Arrays.stream(strings).map(string -> CodeBlock.of("$S", string))
+				.collect(CodeBlock.joining(","));
 	}
 
 	private Object toRole(int value) {
 		return switch (value) {
-		case BeanDefinition.ROLE_INFRASTRUCTURE -> CodeBlock.builder()
-				.add("$T.ROLE_INFRASTRUCTURE", BeanDefinition.class).build();
-		case BeanDefinition.ROLE_SUPPORT -> CodeBlock.builder()
-				.add("$T.ROLE_SUPPORT", BeanDefinition.class).build();
-		default -> value;
+			case BeanDefinition.ROLE_INFRASTRUCTURE -> CodeBlock.builder()
+					.add("$T.ROLE_INFRASTRUCTURE", BeanDefinition.class).build();
+			case BeanDefinition.ROLE_SUPPORT -> CodeBlock.builder()
+					.add("$T.ROLE_SUPPORT", BeanDefinition.class).build();
+			default -> value;
 		};
 	}
 

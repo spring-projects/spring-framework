@@ -85,7 +85,7 @@ public class ArgumentTypePreparedStatementSetter implements PreparedStatementSet
 
 	/**
 	 * Set the value for the prepared statement's specified parameter position using the passed in
-	 * value and type. This method can be overridden by sub-classes if needed.
+	 * value and type. This method can be overridden by subclasses if needed.
 	 * @param ps the PreparedStatement
 	 * @param parameterPosition index of the parameter position
 	 * @param argType the argument type

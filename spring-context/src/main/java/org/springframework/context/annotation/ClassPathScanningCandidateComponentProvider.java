@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -422,6 +422,11 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 			boolean traceEnabled = logger.isTraceEnabled();
 			boolean debugEnabled = logger.isDebugEnabled();
 			for (Resource resource : resources) {
+				String filename = resource.getFilename();
+				if (filename != null && filename.contains(ClassUtils.CGLIB_CLASS_SEPARATOR)) {
+					// Ignore CGLIB-generated classes in the classpath
+					continue;
+				}
 				if (traceEnabled) {
 					logger.trace("Scanning " + resource);
 				}

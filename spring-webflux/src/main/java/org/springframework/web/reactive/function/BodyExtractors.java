@@ -230,7 +230,7 @@ public abstract class BodyExtractors {
 
 		Flux<T> result;
 		if (message.getHeaders().getContentType() == null) {
-			// Maybe it's okay there is no content type, if there is no content..
+			// Maybe it's okay there is no content type, if there is no content.
 			result = message.getBody().map(buffer -> {
 				DataBufferUtils.release(buffer);
 				throw ex;

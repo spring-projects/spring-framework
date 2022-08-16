@@ -944,6 +944,8 @@ public class JdbcTemplateTests {
 		mockDatabaseMetaData(false);
 		given(this.connection.createStatement()).willReturn(this.preparedStatement);
 
+		this.template.setExceptionTranslator(new SQLErrorCodeSQLExceptionTranslator(this.dataSource));
+
 		assertThatExceptionOfType(BadSqlGrammarException.class).isThrownBy(() ->
 				this.template.query(sql, (RowCallbackHandler) rs -> {
 					throw sqlException;
@@ -955,20 +957,17 @@ public class JdbcTemplateTests {
 	}
 
 	@Test
-	public void testSQLErrorCodeTranslationWithSpecifiedDbName() throws Exception {
+	public void testSQLErrorCodeTranslationWithSpecifiedDatabaseName() throws Exception {
 		final SQLException sqlException = new SQLException("I have a known problem", "99999", 1054);
 		final String sql = "SELECT ID FROM CUSTOMER";
 
 		given(this.resultSet.next()).willReturn(true);
 		given(this.connection.createStatement()).willReturn(this.preparedStatement);
 
-		JdbcTemplate template = new JdbcTemplate();
-		template.setDataSource(this.dataSource);
-		template.setDatabaseProductName("MySQL");
-		template.afterPropertiesSet();
+		this.template.setExceptionTranslator(new SQLErrorCodeSQLExceptionTranslator("MySQL"));
 
 		assertThatExceptionOfType(BadSqlGrammarException.class).isThrownBy(() ->
-				template.query(sql, (RowCallbackHandler) rs -> {
+				this.template.query(sql, (RowCallbackHandler) rs -> {
 					throw sqlException;
 				}))
 			.withCause(sqlException);
@@ -983,7 +982,7 @@ public class JdbcTemplateTests {
 	 * to get the metadata
 	 */
 	@Test
-	public void testUseCustomSQLErrorCodeTranslator() throws Exception {
+	public void testUseCustomExceptionTranslator() throws Exception {
 		// Bad SQL state
 		final SQLException sqlException = new SQLException("I have a known problem", "07000", 1054);
 		final String sql = "SELECT ID FROM CUSTOMER";

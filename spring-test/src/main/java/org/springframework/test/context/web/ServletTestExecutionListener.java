@@ -67,7 +67,7 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 
 	/**
 	 * Attribute name for a {@link TestContext} attribute which indicates
-	 * whether or not the {@code ServletTestExecutionListener} should {@linkplain
+	 * whether the {@code ServletTestExecutionListener} should {@linkplain
 	 * RequestContextHolder#resetRequestAttributes() reset} Spring Web's
 	 * {@code RequestContextHolder} in {@link #afterTestMethod(TestContext)}.
 	 * <p>Permissible values include {@link Boolean#TRUE} and {@link Boolean#FALSE}.

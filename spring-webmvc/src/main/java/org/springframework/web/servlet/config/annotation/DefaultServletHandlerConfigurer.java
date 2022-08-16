@@ -90,7 +90,7 @@ public class DefaultServletHandlerConfigurer {
 	 * Return a handler mapping instance ordered at {@link Ordered#LOWEST_PRECEDENCE}
 	 * containing the {@link DefaultServletHttpRequestHandler} instance mapped
 	 * to {@code "/**"}; or {@code null} if default servlet handling was not
-	 * been enabled.
+	 * enabled.
 	 * @since 4.3.12
 	 */
 	@Nullable

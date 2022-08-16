@@ -24,6 +24,7 @@ dependencies {
 	optional("jakarta.websocket:jakarta.websocket-api")
 	optional("junit:junit")
 	optional("org.apache.tomcat.embed:tomcat-embed-core")
+	optional("org.junit.platform:junit-platform-launcher") // for AOT processing
 	optional("org.junit.jupiter:junit-jupiter-api")
 	optional("org.testng:testng")
 	optional("org.aspectj:aspectjweaver")

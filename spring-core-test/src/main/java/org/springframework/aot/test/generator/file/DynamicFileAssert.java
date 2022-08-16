@@ -49,6 +49,7 @@ public class DynamicFileAssert<A extends DynamicFileAssert<A, F>, F extends Dyna
 		return this.myself;
 	}
 
+	@Override
 	public A isEqualTo(@Nullable Object expected) {
 		if (expected instanceof DynamicFile) {
 			return super.isEqualTo(expected);

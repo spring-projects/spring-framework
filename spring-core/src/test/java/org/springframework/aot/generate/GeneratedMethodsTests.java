@@ -17,8 +17,9 @@
 package org.springframework.aot.generate;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +27,6 @@ import org.springframework.javapoet.MethodSpec;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Tests for {@link GeneratedMethods}.
@@ -35,7 +35,9 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  */
 class GeneratedMethodsTests {
 
-	private final GeneratedMethods methods = new GeneratedMethods();
+	private static final Consumer<MethodSpec.Builder> methodSpecCustomizer = method -> {};
+
+	private final GeneratedMethods methods = new GeneratedMethods(MethodName::toString);
 
 	@Test
 	void createWhenMethodNameGeneratorIsNullThrowsException() {
@@ -45,56 +47,68 @@ class GeneratedMethodsTests {
 
 	@Test
 	void createWithExistingGeneratorUsesGenerator() {
-		MethodNameGenerator generator = new MethodNameGenerator();
-		generator.generateMethodName("test");
+		Function<MethodName, String> generator = name -> "__" + name.toString();
 		GeneratedMethods methods = new GeneratedMethods(generator);
-		assertThat(methods.add("test").getName()).hasToString("test1");
+		assertThat(methods.add("test", methodSpecCustomizer).getName()).hasToString("__test");
+	}
+
+	@Test
+	void addWithStringNameWhenSuggestedMethodIsNullThrowsException() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.methods.add((String) null, methodSpecCustomizer))
+		.withMessage("'suggestedName' must not be null");
+	}
+
+	@Test
+	void addWithStringNameWhenMethodIsNullThrowsException() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.methods.add("test", null))
+		.withMessage("'method' must not be null");
 	}
 
 	@Test
 	void addAddsMethod() {
-		this.methods.add("spring", "beans").using(this::build);
-		this.methods.add("spring", "context").using(this::build);
-		assertThat(
-				this.methods.stream().map(GeneratedMethod::getName).map(Object::toString))
+		this.methods.add("springBeans", methodSpecCustomizer);
+		this.methods.add("springContext", methodSpecCustomizer);
+		assertThat(this.methods.stream().map(GeneratedMethod::getName).map(Object::toString))
 						.containsExactly("springBeans", "springContext");
 	}
 
 	@Test
+	void withPrefixWhenGeneratingGetMethodUsesPrefix() {
+		GeneratedMethod generateMethod = this.methods.withPrefix("myBean")
+				.add("getTest", methodSpecCustomizer);
+		assertThat(generateMethod.getName()).hasToString("getMyBeanTest");
+	}
+
+	@Test
+	void withPrefixWhenGeneratingSetMethodUsesPrefix() {
+		GeneratedMethod generateMethod = this.methods.withPrefix("myBean")
+				.add("setTest", methodSpecCustomizer);
+		assertThat(generateMethod.getName()).hasToString("setMyBeanTest");
+	}
+
+	@Test
+	void withPrefixWhenGeneratingIsMethodUsesPrefix() {
+		GeneratedMethod generateMethod = this.methods.withPrefix("myBean")
+				.add("isTest", methodSpecCustomizer);
+		assertThat(generateMethod.getName()).hasToString("isMyBeanTest");
+	}
+
+	@Test
+	void withPrefixWhenGeneratingOtherMethodUsesPrefix() {
+		GeneratedMethod generateMethod = this.methods.withPrefix("myBean")
+				.add("test", methodSpecCustomizer);
+		assertThat(generateMethod.getName()).hasToString("myBeanTest");
+	}
+
+	@Test
 	void doWithMethodSpecsAcceptsMethodSpecs() {
-		this.methods.add("spring", "beans").using(this::build);
-		this.methods.add("spring", "context").using(this::build);
+		this.methods.add("springBeans", methodSpecCustomizer);
+		this.methods.add("springContext", methodSpecCustomizer);
 		List<String> names = new ArrayList<>();
-		this.methods.doWithMethodSpecs(spec -> names.add(spec.name));
+		this.methods.doWithMethodSpecs(methodSpec -> names.add(methodSpec.name));
 		assertThat(names).containsExactly("springBeans", "springContext");
-	}
-
-	@Test
-	void doWithMethodSpecsWhenMethodHasNotHadSpecDefinedThrowsException() {
-		this.methods.add("spring");
-		assertThatIllegalStateException()
-				.isThrownBy(() -> this.methods.doWithMethodSpecs(spec -> {
-				})).withMessage("Method 'spring' has no method spec defined");
-	}
-
-	@Test
-	void iteratorIteratesMethods() {
-		this.methods.add("spring", "beans").using(this::build);
-		this.methods.add("spring", "context").using(this::build);
-		Iterator<GeneratedMethod> iterator = this.methods.iterator();
-		assertThat(iterator.next().getName()).hasToString("springBeans");
-		assertThat(iterator.next().getName()).hasToString("springContext");
-		assertThat(iterator.hasNext()).isFalse();
-	}
-
-	@Test
-	void streamStreamsMethods() {
-		this.methods.add("spring", "beans").using(this::build);
-		this.methods.add("spring", "context").using(this::build);
-		assertThat(this.methods.stream()).hasSize(2);
-	}
-
-	private void build(MethodSpec.Builder builder) {
 	}
 
 }

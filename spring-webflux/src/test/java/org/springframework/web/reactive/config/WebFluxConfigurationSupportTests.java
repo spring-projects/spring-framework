@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ public class WebFluxConfigurationSupportTests {
 		PathPatternParser patternParser = mapping.getPathPatternParser();
 		assertThat(patternParser).isNotNull();
 		boolean matchOptionalTrailingSlash = (boolean) ReflectionUtils.getField(field, patternParser);
-		assertThat(matchOptionalTrailingSlash).isTrue();
+		assertThat(matchOptionalTrailingSlash).isFalse();
 
 		name = "webFluxContentTypeResolver";
 		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
@@ -124,17 +124,10 @@ public class WebFluxConfigurationSupportTests {
 	@Test
 	public void customPathMatchConfig() {
 		ApplicationContext context = loadConfig(CustomPatchMatchConfig.class);
-		final Field field = ReflectionUtils.findField(PathPatternParser.class, "matchOptionalTrailingSeparator");
-		ReflectionUtils.makeAccessible(field);
 
 		String name = "requestMappingHandlerMapping";
 		RequestMappingHandlerMapping mapping = context.getBean(name, RequestMappingHandlerMapping.class);
 		assertThat(mapping).isNotNull();
-
-		PathPatternParser patternParser = mapping.getPathPatternParser();
-		assertThat(patternParser).isNotNull();
-		boolean matchOptionalTrailingSlash = (boolean) ReflectionUtils.getField(field, patternParser);
-		assertThat(matchOptionalTrailingSlash).isFalse();
 
 		Map<RequestMappingInfo, HandlerMethod> map = mapping.getHandlerMethods();
 		assertThat(map.size()).isEqualTo(1);
@@ -323,7 +316,6 @@ public class WebFluxConfigurationSupportTests {
 
 		@Override
 		public void configurePathMatching(PathMatchConfigurer configurer) {
-			configurer.setUseTrailingSlashMatch(false);
 			configurer.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController.class));
 		}
 

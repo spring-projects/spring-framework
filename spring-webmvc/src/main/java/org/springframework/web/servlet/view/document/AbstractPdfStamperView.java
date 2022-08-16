@@ -99,7 +99,7 @@ public abstract class AbstractPdfStamperView extends AbstractUrlBasedView {
 	 *
 	 * // set some values on the form
 	 * form.setField("field1", "value1");
-	 * form.setField("field2", "Vvlue2");
+	 * form.setField("field2", "value2");
 	 *
 	 * // set the disposition and filename
 	 * response.setHeader("Content-disposition", "attachment; FILENAME=someName.pdf");</pre>
