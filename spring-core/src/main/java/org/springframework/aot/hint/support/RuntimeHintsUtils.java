@@ -16,7 +16,12 @@
 
 package org.springframework.aot.hint.support;
 
+import java.util.function.Consumer;
+
+import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.TypeHint;
+import org.springframework.aot.hint.TypeHint.Builder;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.SynthesizedAnnotation;
@@ -29,6 +34,15 @@ import org.springframework.core.annotation.SynthesizedAnnotation;
  * @since 6.0
  */
 public abstract class RuntimeHintsUtils {
+
+	/**
+	 * A {@link TypeHint} customizer suitable for an annotation. Make sure
+	 * that its attributes are visible.
+	 * @deprecated as annotation attributes are visible without additional hints
+	 */
+	@Deprecated
+	public static final Consumer<Builder> ANNOTATION_HINT = hint ->
+			hint.withMembers(MemberCategory.INVOKE_DECLARED_METHODS);
 
 	/**
 	 * Register the necessary hints so that the specified annotation is visible
