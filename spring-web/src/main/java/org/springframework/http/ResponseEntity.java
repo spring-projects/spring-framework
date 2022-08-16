@@ -404,7 +404,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		 * @return this builder
 		 * @see HttpHeaders#setETag(String)
 		 */
-		B eTag(String etag);
+		B eTag(@Nullable String etag);
 
 		/**
 		 * Set the time the resource was last changed, as specified by the
@@ -562,12 +562,14 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		}
 
 		@Override
-		public BodyBuilder eTag(String etag) {
-			if (!etag.startsWith("\"") && !etag.startsWith("W/\"")) {
-				etag = "\"" + etag;
-			}
-			if (!etag.endsWith("\"")) {
-				etag = etag + "\"";
+		public BodyBuilder eTag(@Nullable String etag) {
+			if (etag != null) {
+				if (!etag.startsWith("\"") && !etag.startsWith("W/\"")) {
+					etag = "\"" + etag;
+				}
+				if (!etag.endsWith("\"")) {
+					etag = etag + "\"";
+				}
 			}
 			this.headers.setETag(etag);
 			return this;
