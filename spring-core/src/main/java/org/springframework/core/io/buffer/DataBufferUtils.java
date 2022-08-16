@@ -366,7 +366,8 @@ public abstract class DataBufferUtils {
 				sink.onDispose(() -> closeChannel(channel));
 				write(source, channel).subscribe(DataBufferUtils::release,
 						sink::error,
-						sink::success);
+						sink::success,
+						Context.of(sink.contextView()));
 			}
 			catch (IOException ex) {
 				sink.error(ex);
