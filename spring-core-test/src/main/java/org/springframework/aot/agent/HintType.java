@@ -17,7 +17,6 @@
 package org.springframework.aot.agent;
 
 
-import org.springframework.aot.hint.ClassProxyHint;
 import org.springframework.aot.hint.JavaSerializationHint;
 import org.springframework.aot.hint.JdkProxyHint;
 import org.springframework.aot.hint.ReflectionHints;
@@ -26,7 +25,8 @@ import org.springframework.aot.hint.ResourcePatternHint;
 
 /**
  * Main types of {@link org.springframework.aot.hint.RuntimeHints}.
- * <p>This allows to sort {@link RecordedInvocation recorded invocations}
+ *
+ * <p>This allows to sort {@linkplain RecordedInvocation recorded invocations}
  * into hint categories.
  *
  * @author Brian Clozel
@@ -57,12 +57,8 @@ public enum HintType {
 	/**
 	 * JDK proxies hint, as described by {@link org.springframework.aot.hint.ProxyHints#jdkProxies()}.
 	 */
-	JDK_PROXIES(JdkProxyHint.class),
+	JDK_PROXIES(JdkProxyHint.class);
 
-	/**
-	 * Class proxies hint, as described by {@link org.springframework.aot.hint.ProxyHints#classProxies()}.
-	 */
-	CLASS_PROXIES(ClassProxyHint.class);
 
 	private final Class<?> hintClass;
 
@@ -73,4 +69,5 @@ public enum HintType {
 	public String hintClassName() {
 		return this.hintClass.getSimpleName();
 	}
+
 }
