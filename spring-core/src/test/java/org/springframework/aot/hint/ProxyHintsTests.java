@@ -16,9 +16,7 @@
 
 package org.springframework.aot.hint;
 
-import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -82,33 +80,6 @@ class ProxyHintsTests {
 		assertThat(this.proxyHints.jdkProxies()).singleElement().satisfies(proxiedInterfaces(Function.class));
 	}
 
-	@Test
-	void registerClassProxyWithTargetClassName() {
-		this.proxyHints.registerClassProxy(TypeReference.of(Properties.class.getName()), classProxyHint ->
-				classProxyHint.proxiedInterfaces(Serializable.class));
-		assertThat(this.proxyHints.classProxies()).singleElement().satisfies(classProxyHint -> {
-			assertThat(classProxyHint.getTargetClass()).isEqualTo(TypeReference.of(Properties.class));
-			assertThat(classProxyHint.getProxiedInterfaces()).containsOnly(TypeReference.of(Serializable.class));
-		});
-	}
-
-	@Test
-	void registerClassProxyWithTargetClass() {
-		this.proxyHints.registerClassProxy(Properties.class, classProxyHint ->
-				classProxyHint.proxiedInterfaces(Serializable.class));
-		assertThat(this.proxyHints.classProxies()).singleElement().satisfies(classProxyHint -> {
-			assertThat(classProxyHint.getTargetClass()).isEqualTo(TypeReference.of(Properties.class));
-			assertThat(classProxyHint.getProxiedInterfaces()).containsOnly(TypeReference.of(Serializable.class));
-		});
-	}
-
-	@Test
-	void registerClassProxyWithTargetInterface() {
-		assertThatIllegalArgumentException()
-			.isThrownBy(() -> this.proxyHints.registerClassProxy(Serializable.class, classProxyHint -> {}))
-			.withMessageContaining(Serializable.class.getName());
-	}
-
 
 	private static Consumer<JdkProxyHint.Builder> springProxy(String proxiedInterface) {
 		return builder -> builder.proxiedInterfaces(toTypeReferences(
@@ -140,6 +111,7 @@ class ProxyHintsTests {
 	sealed interface SealedInterface {
 	}
 
+	@SuppressWarnings("unused")
 	static final class SealedClass implements SealedInterface {
 	}
 

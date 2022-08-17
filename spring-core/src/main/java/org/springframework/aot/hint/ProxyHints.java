@@ -21,8 +21,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import org.springframework.aot.hint.ClassProxyHint.Builder;
-
 /**
  * Gather the need for using proxies at runtime.
  *
@@ -33,8 +31,6 @@ public class ProxyHints {
 
 	private final Set<JdkProxyHint> jdkProxies = new LinkedHashSet<>();
 
-	private final Set<ClassProxyHint> classProxies = new LinkedHashSet<>();
-
 
 	/**
 	 * Return the interface-based proxies that are required.
@@ -42,14 +38,6 @@ public class ProxyHints {
 	 */
 	public Stream<JdkProxyHint> jdkProxies() {
 		return this.jdkProxies.stream();
-	}
-
-	/**
-	 * Return the class-based proxies that are required.
-	 * @return a stream of {@link ClassProxyHint}
-	 */
-	public Stream<ClassProxyHint> classProxies() {
-		return this.classProxies.stream();
 	}
 
 	/**
@@ -88,33 +76,6 @@ public class ProxyHints {
 	public ProxyHints registerJdkProxy(Class<?>... proxiedInterfaces) {
 		return registerJdkProxy(jdkProxyHint ->
 				jdkProxyHint.proxiedInterfaces(proxiedInterfaces));
-	}
-
-	/**
-	 * Register that a class proxy is required for the class defined by the
-	 * specified {@link TypeReference}.
-	 * @param typeReference the type reference for the target class of the proxy
-	 * @param classProxyHint a builder to further customize the hint for that proxy
-	 * @return {@code this}, to facilitate method chaining
-	 */
-	public ProxyHints registerClassProxy(TypeReference typeReference, Consumer<Builder> classProxyHint) {
-		return addClassProxyHint(ClassProxyHint.of(typeReference), classProxyHint);
-	}
-
-	/**
-	 * Register that a class proxy is required for the specified class.
-	 * @param targetClass the target class of the proxy
-	 * @param classProxyHint a builder to further customize the hint for that proxy
-	 * @return {@code this}, to facilitate method chaining
-	 */
-	public ProxyHints registerClassProxy(Class<?> targetClass, Consumer<Builder> classProxyHint) {
-		return addClassProxyHint(ClassProxyHint.of(targetClass), classProxyHint);
-	}
-
-	private ProxyHints addClassProxyHint(ClassProxyHint.Builder builder, Consumer<ClassProxyHint.Builder> classProxyHint) {
-		classProxyHint.accept(builder);
-		this.classProxies.add(builder.build());
-		return this;
 	}
 
 }
