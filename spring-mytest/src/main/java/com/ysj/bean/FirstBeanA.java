@@ -3,8 +3,7 @@ package com.ysj.bean;
 import org.springframework.stereotype.Component;
 
 @Component
-public interface FirstBean {
+public class FirstBeanA{
 
-	public void setFirstBeanB(FirstBeanB beanB);
 
 }

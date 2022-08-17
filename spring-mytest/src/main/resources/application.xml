@@ -7,11 +7,10 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 default-autowire="byType"
 >
 
-	<bean id="a" class="com.ysj.autowireTest.A">
+	<bean id="firstBeanAwareTest" class="com.ysj.bean.FirstBeanAwareTest">
 	</bean>
-	<bean id="c" class="com.ysj.autowireTest.C"><property name="name" value="zhangsan"></property>
+	<bean id="firstBeanA" class="com.ysj.bean.FirstBeanA">
 	</bean>
-	<bean id="all" class="com.ysj.autowireTest.All">
+	<bean id="firstBeanB" class="com.ysj.bean.FirstBeanB">
 	</bean>
-	<bean id="ignoreDependencyTest" class="com.ysj.autowireTest.IgnoreDependencyTest"/>
 </beans>

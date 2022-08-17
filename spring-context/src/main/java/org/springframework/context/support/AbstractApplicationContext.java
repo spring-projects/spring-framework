@@ -713,9 +713,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
 
 		// Configure the bean factory with context callbacks.
-		//在bean的后置处理中，手动去set注入各种aware
+		//在bean的后置处理中（ApplicationContextAwareProcessor），手动去set注入各种aware
+		//todo 至于为什么  待研究
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
-		//忽略各种aware接口的自动注入
+		// 下面几行的意思就是，如果某个 bean 依赖于以下几个接口的实现类，在自动装配的时候忽略它们，
+		// Spring 会通过其他方式来处理这些依赖。
 		beanFactory.ignoreDependencyInterface(EnvironmentAware.class);
 		beanFactory.ignoreDependencyInterface(EmbeddedValueResolverAware.class);
 		beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
@@ -727,8 +729,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// BeanFactory interface not registered as resolvable type in a plain factory.
 		// MessageSource registered (and found for autowiring) as a bean.
 		/**
-		 * 	当有其他类要注入 BeanFactory的时候，就给他注入这里的beanFactory
-		 * 	ResourceLoader --> this
+		 * 下面几行就是为特殊的几个 bean 赋值，如果有 bean 依赖了以下几个，会注入这边相应的值，
+		 * 之前我们说过，"当前 ApplicationContext 持有一个 BeanFactory"，这里解释了第一行
+		 * ApplicationContext 还继承了 ResourceLoader、ApplicationEventPublisher、MessageSource
+		 * 所以对于这几个依赖，可以赋值为 this，注意 this 是一个 ApplicationContext
+		 * 那这里怎么没看到为 MessageSource 赋值呢？那是因为 MessageSource 被注册成为了一个普通的 bean
 		 */
 		beanFactory.registerResolvableDependency(BeanFactory.class, beanFactory);
 		beanFactory.registerResolvableDependency(ResourceLoader.class, this);
