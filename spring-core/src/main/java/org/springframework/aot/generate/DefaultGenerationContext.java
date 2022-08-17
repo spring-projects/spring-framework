@@ -115,7 +115,7 @@ public class DefaultGenerationContext implements GenerationContext {
 	}
 
 	@Override
-	public GenerationContext withName(String name) {
+	public DefaultGenerationContext withName(String name) {
 		return new DefaultGenerationContext(this, name);
 	}
 
