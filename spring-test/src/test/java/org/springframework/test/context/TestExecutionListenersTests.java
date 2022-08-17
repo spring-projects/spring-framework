@@ -200,7 +200,7 @@ class TestExecutionListenersTests {
 	}
 
 	private List<String> names(List<Class<?>> classes) {
-		return classes.stream().map(Class::getSimpleName).collect(toList());
+		return classes.stream().map(Class::getSimpleName).toList();
 	}
 
 	private void assertRegisteredListeners(Class<?> testClass, List<Class<?>> expected) {
