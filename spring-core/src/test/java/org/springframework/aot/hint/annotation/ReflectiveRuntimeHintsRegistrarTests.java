@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.aot;
+package org.springframework.aot.hint.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -24,52 +24,45 @@ import java.lang.annotation.Target;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
-import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
-import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
-import org.springframework.beans.factory.aot.BeanRegistrationCode;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.RegisteredBean;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.SynthesizedAnnotation;
-import org.springframework.core.testfixture.aot.generate.TestGenerationContext;
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
- * Tests for {@link ReflectiveProcessorBeanRegistrationAotProcessor}.
+ * Tests for {@link ReflectiveRuntimeHintsRegistrar}.
  *
  * @author Stephane Nicoll
- * @author Sebastien Deleuze
  */
-class ReflectiveProcessorBeanRegistrationAotProcessorTests {
+class ReflectiveRuntimeHintsRegistrarTests {
 
-	private final ReflectiveProcessorBeanRegistrationAotProcessor processor = new ReflectiveProcessorBeanRegistrationAotProcessor();
+	private final ReflectiveRuntimeHintsRegistrar registrar = new ReflectiveRuntimeHintsRegistrar();
 
-	private final GenerationContext generationContext = new TestGenerationContext();
+	private final RuntimeHints runtimeHints = new RuntimeHints();
 
 	@Test
 	void shouldIgnoreNonAnnotatedType() {
-		assertThat(createContribution(String.class)).isNull();
+		RuntimeHints mock = mock(RuntimeHints.class);
+		this.registrar.registerRuntimeHints(mock, String.class);
+		verifyNoInteractions(mock);
 	}
 
 	@Test
 	void shouldProcessAnnotationOnType() {
 		process(SampleTypeAnnotatedBean.class);
-		assertThat(this.generationContext.getRuntimeHints().reflection().getTypeHint(SampleTypeAnnotatedBean.class))
+		assertThat(this.runtimeHints.reflection().getTypeHint(SampleTypeAnnotatedBean.class))
 				.isNotNull();
 	}
 
 	@Test
 	void shouldProcessAnnotationOnConstructor() {
 		process(SampleConstructorAnnotatedBean.class);
-		assertThat(this.generationContext.getRuntimeHints().reflection().getTypeHint(SampleConstructorAnnotatedBean.class))
+		assertThat(this.runtimeHints.reflection().getTypeHint(SampleConstructorAnnotatedBean.class))
 				.satisfies(typeHint -> assertThat(typeHint.constructors()).singleElement()
 						.satisfies(constructorHint -> assertThat(constructorHint.getParameterTypes())
 								.containsExactly(TypeReference.of(String.class))));
@@ -78,7 +71,7 @@ class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 	@Test
 	void shouldProcessAnnotationOnField() {
 		process(SampleFieldAnnotatedBean.class);
-		assertThat(this.generationContext.getRuntimeHints().reflection().getTypeHint(SampleFieldAnnotatedBean.class))
+		assertThat(this.runtimeHints.reflection().getTypeHint(SampleFieldAnnotatedBean.class))
 				.satisfies(typeHint -> assertThat(typeHint.fields()).singleElement()
 						.satisfies(fieldHint -> assertThat(fieldHint.getName()).isEqualTo("managed")));
 	}
@@ -86,7 +79,7 @@ class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 	@Test
 	void shouldProcessAnnotationOnMethod() {
 		process(SampleMethodAnnotatedBean.class);
-		assertThat(this.generationContext.getRuntimeHints().reflection().getTypeHint(SampleMethodAnnotatedBean.class))
+		assertThat(this.runtimeHints.reflection().getTypeHint(SampleMethodAnnotatedBean.class))
 				.satisfies(typeHint -> assertThat(typeHint.methods()).singleElement()
 						.satisfies(methodHint -> assertThat(methodHint.getName()).isEqualTo("managed")));
 	}
@@ -94,14 +87,14 @@ class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 	@Test
 	void shouldNotRegisterAnnotationProxyIfNotNeeded() {
 		process(SampleMethodMetaAnnotatedBean.class);
-		RuntimeHints runtimeHints = this.generationContext.getRuntimeHints();
+		RuntimeHints runtimeHints = this.runtimeHints;
 		assertThat(runtimeHints.proxies().jdkProxies()).isEmpty();
 	}
 
 	@Test
 	void shouldRegisterAnnotationProxy() {
 		process(SampleMethodMetaAnnotatedBeanWithAlias.class);
-		RuntimeHints runtimeHints = this.generationContext.getRuntimeHints();
+		RuntimeHints runtimeHints = this.runtimeHints;
 		assertThat(RuntimeHintsPredicates.proxies().forInterfaces(
 				SampleInvoker.class, SynthesizedAnnotation.class)).accepts(runtimeHints);
 	}
@@ -109,10 +102,10 @@ class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 	@Test
 	void shouldProcessAnnotationOnInterface() {
 		process(SampleMethodAnnotatedBeanWithInterface.class);
-		assertThat(this.generationContext.getRuntimeHints().reflection().getTypeHint(SampleInterface.class))
+		assertThat(this.runtimeHints.reflection().getTypeHint(SampleInterface.class))
 				.satisfies(typeHint -> assertThat(typeHint.methods()).singleElement()
 						.satisfies(methodHint -> assertThat(methodHint.getName()).isEqualTo("managed")));
-		assertThat(this.generationContext.getRuntimeHints().reflection().getTypeHint(SampleMethodAnnotatedBeanWithInterface.class))
+		assertThat(this.runtimeHints.reflection().getTypeHint(SampleMethodAnnotatedBeanWithInterface.class))
 				.satisfies(typeHint -> assertThat(typeHint.methods()).singleElement()
 						.satisfies(methodHint -> assertThat(methodHint.getName()).isEqualTo("managed")));
 	}
@@ -120,25 +113,16 @@ class ReflectiveProcessorBeanRegistrationAotProcessorTests {
 	@Test
 	void shouldProcessAnnotationOnInheritedClass() {
 		process(SampleMethodAnnotatedBeanWithInheritance.class);
-		assertThat(this.generationContext.getRuntimeHints().reflection().getTypeHint(SampleInheritedClass.class))
+		assertThat(this.runtimeHints.reflection().getTypeHint(SampleInheritedClass.class))
 				.satisfies(typeHint -> assertThat(typeHint.methods()).singleElement()
 						.satisfies(methodHint -> assertThat(methodHint.getName()).isEqualTo("managed")));
-		assertThat(this.generationContext.getRuntimeHints().reflection().getTypeHint(SampleMethodAnnotatedBeanWithInheritance.class))
+		assertThat(this.runtimeHints.reflection().getTypeHint(SampleMethodAnnotatedBeanWithInheritance.class))
 				.satisfies(typeHint -> assertThat(typeHint.methods()).singleElement()
 						.satisfies(methodHint -> assertThat(methodHint.getName()).isEqualTo("managed")));
-	}
-
-	@Nullable
-	private BeanRegistrationAotContribution createContribution(Class<?> beanClass) {
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		beanFactory.registerBeanDefinition(beanClass.getName(), new RootBeanDefinition(beanClass));
-		return this.processor.processAheadOfTime(RegisteredBean.of(beanFactory, beanClass.getName()));
 	}
 
 	private void process(Class<?> beanClass) {
-		BeanRegistrationAotContribution contribution = createContribution(beanClass);
-		assertThat(contribution).isNotNull();
-		contribution.applyTo(this.generationContext, mock(BeanRegistrationCode.class));
+		this.registrar.registerRuntimeHints(this.runtimeHints, beanClass);
 	}
 
 	@Reflective
