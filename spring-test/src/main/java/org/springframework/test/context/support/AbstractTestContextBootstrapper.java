@@ -25,7 +25,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -201,36 +200,13 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * @see SpringFactoriesLoader#load(Class, FailureHandler)
 	 */
 	protected List<TestExecutionListener> getDefaultTestExecutionListeners() {
-		FailureHandler failureHandler = (factoryType, factoryImplementationName, failure) -> {
-			Throwable ex = (failure instanceof InvocationTargetException ite ?
-					ite.getTargetException() : failure);
-			if (ex instanceof LinkageError || ex instanceof ClassNotFoundException) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Could not load default TestExecutionListener [" + factoryImplementationName +
-							"]. Specify custom listener classes or make the default listener classes available.", ex);
-				}
-			}
-			else {
-				if (ex instanceof RuntimeException runtimeException) {
-					throw runtimeException;
-				}
-				if (ex instanceof Error error) {
-					throw error;
-				}
-				throw new IllegalStateException("Failed to load default TestExecutionListener [" +
-						factoryImplementationName + "].", ex);
-			}
-		};
-
 		List<TestExecutionListener> listeners = SpringFactoriesLoader.forDefaultResourceLocation()
-				.load(TestExecutionListener.class, failureHandler);
+				.load(TestExecutionListener.class, this::handleListenerInstantiationFailure);
 
 		if (logger.isInfoEnabled()) {
-			List<String> classNames = listeners.stream()
-					.map(listener -> listener.getClass().getName())
-					.collect(Collectors.toList());
-			logger.info(String.format("Loaded default TestExecutionListener implementations from location [%s]: %s",
-					SpringFactoriesLoader.FACTORIES_RESOURCE_LOCATION, classNames));
+			List<String> classNames = listeners.stream().map(Object::getClass).map(Class::getName).toList();
+			logger.info("Loaded default TestExecutionListener implementations from location [%s]: %s"
+					.formatted(SpringFactoriesLoader.FACTORIES_RESOURCE_LOCATION, classNames));
 		}
 
 		return Collections.unmodifiableList(listeners);
@@ -244,15 +220,8 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				listeners.add(BeanUtils.instantiateClass(listenerClass));
 			}
 			catch (BeanInstantiationException ex) {
-				if (ex.getCause() instanceof NoClassDefFoundError) {
-					// TestExecutionListener not applicable due to a missing dependency
-					if (logger.isDebugEnabled()) {
-						logger.debug(String.format(
-								"Skipping candidate TestExecutionListener [%s] due to a missing dependency. " +
-								"Specify custom listener classes or make the default listener classes " +
-								"and their required dependencies available. Offending class: [%s]",
-								listenerClass.getName(), ex.getCause().getMessage()));
-					}
+				if (ex.getCause() instanceof NoClassDefFoundError noClassDefFoundError) {
+					handleNoClassDefFoundError(listenerClass.getName(), noClassDefFoundError);
 				}
 				else {
 					throw ex;
@@ -260,6 +229,45 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			}
 		}
 		return listeners;
+	}
+
+	private void handleListenerInstantiationFailure(
+			Class<?> factoryType, String listenerClassName, Throwable failure) {
+
+		Throwable ex = (failure instanceof InvocationTargetException ite ?
+				ite.getTargetException() : failure);
+		if (ex instanceof LinkageError || ex instanceof ClassNotFoundException) {
+			if (ex instanceof NoClassDefFoundError noClassDefFoundError) {
+				handleNoClassDefFoundError(listenerClassName, noClassDefFoundError);
+			}
+			else if (logger.isDebugEnabled()) {
+				logger.debug("""
+						Could not load default TestExecutionListener [%s]. Specify custom \
+						listener classes or make the default listener classes available."""
+							.formatted(listenerClassName), ex);
+			}
+		}
+		else {
+			if (ex instanceof RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			if (ex instanceof Error error) {
+				throw error;
+			}
+			throw new IllegalStateException(
+				"Failed to load default TestExecutionListener [%s].".formatted(listenerClassName), ex);
+		}
+	}
+
+	private void handleNoClassDefFoundError(String listenerClassName, NoClassDefFoundError error) {
+		// TestExecutionListener not applicable due to a missing dependency
+		if (logger.isDebugEnabled()) {
+			logger.debug("""
+					Skipping candidate TestExecutionListener [%s] due to a missing dependency. \
+					Specify custom listener classes or make the default listener classes \
+					and their required dependencies available. Offending class: [%s]"""
+						.formatted(listenerClassName, error.getMessage()));
+		}
 	}
 
 	/**
