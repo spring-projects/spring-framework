@@ -63,7 +63,7 @@ public class ReflectionHintsWriterTests {
 						fieldBuilder.allowWrite(true);
 						fieldBuilder.allowUnsafeAccess(true);
 					})
-					.withConstructor(List.of(TypeReference.of(List.class), TypeReference.of(boolean.class), TypeReference.of(MimeType.class)), constructorHint ->
+					.withConstructor(TypeReference.listOf(List.class, boolean.class, MimeType.class), constructorHint ->
 							constructorHint.withMode(ExecutableMode.INTROSPECT))
 					.withMethod("setDefaultCharset", List.of(TypeReference.of(Charset.class)), ctorBuilder -> {})
 					.withMethod("getDefaultCharset", Collections.emptyList(), constructorHint ->
@@ -119,8 +119,8 @@ public class ReflectionHintsWriterTests {
 	@Test
 	void queriedMethods() throws JSONException {
 		ReflectionHints hints = new ReflectionHints();
-		hints.registerType(Integer.class, builder -> builder.withMethod("parseInt", List.of(TypeReference.of(String.class)),
-				b -> b.withMode(ExecutableMode.INTROSPECT)));
+		hints.registerType(Integer.class, builder -> builder.withMethod("parseInt",
+				TypeReference.listOf(String.class), b -> b.withMode(ExecutableMode.INTROSPECT)));
 
 		assertEquals("""
 				[
@@ -140,8 +140,8 @@ public class ReflectionHintsWriterTests {
 	@Test
 	void methods() throws JSONException {
 		ReflectionHints hints = new ReflectionHints();
-		hints.registerType(Integer.class, builder -> builder.withMethod("parseInt", List.of(TypeReference.of(String.class)),
-				b -> b.withMode(ExecutableMode.INVOKE)));
+		hints.registerType(Integer.class, builder -> builder.withMethod("parseInt",
+				TypeReference.listOf(String.class), b -> b.withMode(ExecutableMode.INVOKE)));
 
 		assertEquals("""
 				[
@@ -161,8 +161,8 @@ public class ReflectionHintsWriterTests {
 	@Test
 	void methodWithInnerClassParameter() throws JSONException {
 		ReflectionHints hints = new ReflectionHints();
-		hints.registerType(Integer.class, builder -> builder.withMethod("test", List.of(TypeReference.of(Inner.class)),
-				b -> b.withMode(ExecutableMode.INVOKE)));
+		hints.registerType(Integer.class, builder -> builder.withMethod("test",
+				TypeReference.listOf(Inner.class), b -> b.withMode(ExecutableMode.INVOKE)));
 
 		assertEquals("""
 				[
@@ -182,10 +182,10 @@ public class ReflectionHintsWriterTests {
 	@Test
 	void methodAndQueriedMethods() throws JSONException {
 		ReflectionHints hints = new ReflectionHints();
-		hints.registerType(Integer.class, builder -> builder.withMethod("parseInt", List.of(TypeReference.of(String.class)),
-				b -> b.withMode(ExecutableMode.INVOKE)));
-		hints.registerType(Integer.class, builder -> builder.withMethod("parseInt", List.of(TypeReference.of(String.class)),
-				b -> b.withMode(ExecutableMode.INTROSPECT)));
+		hints.registerType(Integer.class, builder -> builder.withMethod("parseInt",
+				TypeReference.listOf(String.class), b -> b.withMode(ExecutableMode.INVOKE)));
+		hints.registerType(Integer.class, builder -> builder.withMethod("parseInt",
+				TypeReference.listOf(String.class), b -> b.withMode(ExecutableMode.INTROSPECT)));
 
 		assertEquals("""
 				[

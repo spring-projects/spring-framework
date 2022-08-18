@@ -16,8 +16,6 @@
 
 package org.springframework.transaction.annotation;
 
-import java.util.List;
-
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
@@ -38,11 +36,8 @@ class TransactionRuntimeHints implements RuntimeHintsRegistrar {
 	@Override
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
 		RuntimeHintsUtils.registerSynthesizedAnnotation(hints, Transactional.class);
-		hints.reflection()
-				.registerTypes(List.of(
-								TypeReference.of(Isolation.class),
-								TypeReference.of(Propagation.class),
-								TypeReference.of(TransactionDefinition.class)),
-						builder -> builder.withMembers(MemberCategory.DECLARED_FIELDS));
+		hints.reflection().registerTypes(TypeReference.listOf(
+						Isolation.class, Propagation.class, TransactionDefinition.class),
+				builder -> builder.withMembers(MemberCategory.DECLARED_FIELDS));
 	}
 }

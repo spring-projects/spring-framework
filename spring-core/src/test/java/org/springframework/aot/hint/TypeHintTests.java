@@ -82,7 +82,7 @@ class TypeHintTests {
 
 	@Test
 	void createWithConstructor() {
-		List<TypeReference> parameterTypes = List.of(TypeReference.of(byte[].class), TypeReference.of(int.class));
+		List<TypeReference> parameterTypes = TypeReference.listOf(byte[].class, int.class);
 		TypeHint hint = TypeHint.of(TypeReference.of(String.class)).withConstructor(parameterTypes,
 				constructorHint -> constructorHint.withMode(ExecutableMode.INVOKE)).build();
 		assertThat(hint.constructors()).singleElement().satisfies(constructorHint -> {
@@ -93,7 +93,7 @@ class TypeHintTests {
 
 	@Test
 	void createConstructorReuseBuilder() {
-		List<TypeReference> parameterTypes = List.of(TypeReference.of(byte[].class), TypeReference.of(int.class));
+		List<TypeReference> parameterTypes = TypeReference.listOf(byte[].class, int.class);
 		Builder builder = TypeHint.of(TypeReference.of(String.class)).withConstructor(parameterTypes,
 				constructorHint -> constructorHint.withMode(ExecutableMode.INVOKE));
 		TypeHint hint = builder.withConstructor(parameterTypes, constructorHint ->
@@ -118,7 +118,7 @@ class TypeHintTests {
 
 	@Test
 	void createWithMethodReuseBuilder() {
-		List<TypeReference> parameterTypes = List.of(TypeReference.of(char[].class));
+		List<TypeReference> parameterTypes = TypeReference.listOf(char[].class);
 		Builder builder = TypeHint.of(TypeReference.of(String.class)).withMethod("valueOf", parameterTypes,
 				methodHint -> methodHint.withMode(ExecutableMode.INVOKE));
 		TypeHint hint = builder.withMethod("valueOf", parameterTypes,

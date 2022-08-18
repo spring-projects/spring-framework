@@ -16,12 +16,14 @@
 
 package org.springframework.scheduling.quartz;
 
-import java.util.List;
+import java.util.function.Consumer;
 
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.aot.hint.TypeHint.Builder;
 import org.springframework.aot.hint.TypeReference;
+import org.springframework.aot.hint.annotation.ReflectiveRuntimeHintsRegistrar;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -29,36 +31,29 @@ import org.springframework.util.ClassUtils;
  * reflection entries are registered.
  *
  * @author Sebastien Deleuze
+ * @author Stephane Nicoll
  * @since 6.0
  */
-public class SchedulerFactoryBeanRuntimeHints implements RuntimeHintsRegistrar {
+class SchedulerFactoryBeanRuntimeHints implements RuntimeHintsRegistrar {
 
-	private static String SCHEDULER_FACTORY_CLASS_NAME = "org.quartz.impl.StdSchedulerFactory";
+	private static final String SCHEDULER_FACTORY_CLASS_NAME = "org.quartz.impl.StdSchedulerFactory";
 
-	private static TypeReference FACTORY_BEAN_TYPE_REFERENCE = TypeReference.of(SchedulerFactoryBean.class);
+	private static final TypeReference FACTORY_BEAN_TYPE_REFERENCE = TypeReference.of(SchedulerFactoryBean.class);
+
+	private final ReflectiveRuntimeHintsRegistrar reflectiveRegistrar = new ReflectiveRuntimeHintsRegistrar();
 
 	@Override
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
-		if (ClassUtils.isPresent(SCHEDULER_FACTORY_CLASS_NAME, classLoader)) {
-			hints.reflection().registerType(TypeReference.of(SCHEDULER_FACTORY_CLASS_NAME),
-					builder -> builder
-							.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)
-							.onReachableType(FACTORY_BEAN_TYPE_REFERENCE));
-			hints.reflection().registerType(ResourceLoaderClassLoadHelper.class,
-					builder -> builder
-							.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)
-							.onReachableType(FACTORY_BEAN_TYPE_REFERENCE));
-			hints.reflection().registerType(LocalTaskExecutorThreadPool.class,
-					builder -> builder
-							.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)
-							.withMethod("setInstanceId", List.of(TypeReference.of(String.class)), b -> {})
-							.withMethod("setInstanceName", List.of(TypeReference.of(String.class)), b -> {})
-							.onReachableType(FACTORY_BEAN_TYPE_REFERENCE));
-			hints.reflection().registerType(LocalDataSourceJobStore.class,
-					builder -> builder
-							.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)
-							.onReachableType(FACTORY_BEAN_TYPE_REFERENCE));
-
+		if (!ClassUtils.isPresent(SCHEDULER_FACTORY_CLASS_NAME, classLoader)) {
+			return;
 		}
+		Consumer<Builder> typeHint = type -> type
+				.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)
+				.onReachableType(FACTORY_BEAN_TYPE_REFERENCE);
+		hints.reflection()
+				.registerType(TypeReference.of(SCHEDULER_FACTORY_CLASS_NAME), typeHint)
+				.registerTypes(TypeReference.listOf(ResourceLoaderClassLoadHelper.class,
+						LocalTaskExecutorThreadPool.class, LocalDataSourceJobStore.class), typeHint);
+		this.reflectiveRegistrar.registerRuntimeHints(hints, LocalTaskExecutorThreadPool.class);
 	}
 }

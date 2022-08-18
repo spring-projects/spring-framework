@@ -16,9 +16,12 @@
 
 package org.springframework.http.codec;
 
+import java.util.function.Consumer;
+
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.aot.hint.TypeHint.Builder;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.http.codec.support.DefaultClientCodecConfigurer;
 import org.springframework.http.codec.support.DefaultServerCodecConfigurer;
@@ -29,20 +32,21 @@ import org.springframework.lang.Nullable;
  * implementations listed in {@code CodecConfigurer.properties}.
  *
  * @author Sebastien Deleuze
+ * @author Stephane Nicoll
  * @since 6.0
  */
 class CodecConfigurerRuntimeHints implements RuntimeHintsRegistrar {
 
+	private static final Consumer<Builder> CODEC_HINT = type -> type
+			.onReachableType(TypeReference.of(CodecConfigurerFactory.class))
+			.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
+
 	@Override
 	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 		hints.resources().registerPattern("org/springframework/http/codec/CodecConfigurer.properties");
-		registerType(hints, DefaultClientCodecConfigurer.class);
-		registerType(hints, DefaultServerCodecConfigurer.class);
+		hints.reflection().registerTypes(TypeReference.listOf(
+						DefaultClientCodecConfigurer.class, DefaultServerCodecConfigurer.class),
+				CODEC_HINT);
 	}
 
-	private void registerType(RuntimeHints hints, Class<?> type) {
-		hints.reflection().registerType(type, builder ->
-				builder.onReachableType(TypeReference.of(CodecConfigurerFactory.class))
-						.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
-	}
 }

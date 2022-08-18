@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.quartz.SchedulerConfigException;
 import org.quartz.spi.ThreadPool;
 
+import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -45,10 +46,12 @@ public class LocalTaskExecutorThreadPool implements ThreadPool {
 
 
 	@Override
+	@Reflective
 	public void setInstanceId(String schedInstId) {
 	}
 
 	@Override
+	@Reflective
 	public void setInstanceName(String schedName) {
 	}
 

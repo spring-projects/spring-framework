@@ -121,7 +121,7 @@ class InstrumentedMethodTests {
 			this.stringGetConstructor = RecordedInvocation.of(InstrumentedMethod.CLASS_GETCONSTRUCTOR)
 					.onInstance(String.class).withArgument(new Class[0]).returnValue(String.class.getConstructor()).build();
 			this.stringGetDeclaredConstructor = RecordedInvocation.of(InstrumentedMethod.CLASS_GETDECLAREDCONSTRUCTOR)
-					.onInstance(String.class).withArgument(new Class[] {byte[].class, byte.class})
+					.onInstance(String.class).withArgument(new Class[] { byte[].class, byte.class })
 					.returnValue(String.class.getDeclaredConstructor(byte[].class, byte.class)).build();
 		}
 
@@ -201,15 +201,15 @@ class InstrumentedMethodTests {
 
 		@Test
 		void classGetDeclaredConstructorShouldMatchInstrospectConstructorHint() {
-			List<TypeReference> parameterTypes = List.of(TypeReference.of(byte[].class), TypeReference.of(byte.class));
-			hints.reflection().registerType(String.class, typeHint -> typeHint.withConstructor(parameterTypes, constructorHint -> constructorHint.setModes(ExecutableMode.INTROSPECT)));
+			hints.reflection().registerType(String.class, typeHint -> typeHint.withConstructor(TypeReference.listOf(byte[].class, byte.class),
+					constructorHint -> constructorHint.setModes(ExecutableMode.INTROSPECT)));
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETDECLAREDCONSTRUCTOR, this.stringGetDeclaredConstructor);
 		}
 
 		@Test
 		void classGetDeclaredConstructorShouldMatchInvokeConstructorHint() {
-			List<TypeReference> parameterTypes = List.of(TypeReference.of(byte[].class), TypeReference.of(byte.class));
-			hints.reflection().registerType(String.class, typeHint -> typeHint.withConstructor(parameterTypes, constructorHint -> constructorHint.setModes(ExecutableMode.INVOKE)));
+			hints.reflection().registerType(String.class, typeHint -> typeHint.withConstructor(TypeReference.listOf(byte[].class, byte.class),
+					constructorHint -> constructorHint.setModes(ExecutableMode.INVOKE)));
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETDECLAREDCONSTRUCTOR, this.stringGetDeclaredConstructor);
 		}
 
@@ -265,33 +265,33 @@ class InstrumentedMethodTests {
 					.onInstance(String.class).withArguments("toString", new Class[0])
 					.returnValue(String.class.getMethod("toString")).build();
 			this.stringGetScaleMethod = RecordedInvocation.of(InstrumentedMethod.CLASS_GETDECLAREDMETHOD)
-					.onInstance(String.class).withArguments("scale", new Class[] {int.class, float.class})
+					.onInstance(String.class).withArguments("scale", new Class[] { int.class, float.class })
 					.returnValue(String.class.getDeclaredMethod("scale", int.class, float.class)).build();
 		}
 
 		@Test
-		void classGetDeclaredMethodShouldMatchIntrospectDeclaredMethodsHint() throws NoSuchMethodException {
+		void classGetDeclaredMethodShouldMatchIntrospectDeclaredMethodsHint() {
 			hints.reflection().registerType(String.class, typeHint -> typeHint.withMembers(MemberCategory.INTROSPECT_DECLARED_METHODS));
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETDECLAREDMETHOD, this.stringGetScaleMethod);
 		}
 
 		@Test
-		void classGetDeclaredMethodShouldNotMatchIntrospectPublicMethodsHint() throws NoSuchMethodException {
+		void classGetDeclaredMethodShouldNotMatchIntrospectPublicMethodsHint() {
 			hints.reflection().registerType(String.class, typeHint -> typeHint.withMembers(MemberCategory.INTROSPECT_PUBLIC_METHODS));
 			assertThatInvocationDoesNotMatch(InstrumentedMethod.CLASS_GETDECLAREDMETHOD, this.stringGetScaleMethod);
 		}
 
 		@Test
-		void classGetDeclaredMethodShouldMatchIntrospectMethodHint() throws NoSuchMethodException {
-			List<TypeReference> parameterTypes = List.of(TypeReference.of(int.class), TypeReference.of(float.class));
+		void classGetDeclaredMethodShouldMatchIntrospectMethodHint() {
+			List<TypeReference> parameterTypes = TypeReference.listOf(int.class, float.class);
 			hints.reflection().registerType(String.class, typeHint ->
 					typeHint.withMethod("scale", parameterTypes, methodHint -> methodHint.withMode(ExecutableMode.INTROSPECT)));
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETDECLAREDMETHOD, this.stringGetScaleMethod);
 		}
 
 		@Test
-		void classGetDeclaredMethodShouldMatchInvokeMethodHint() throws NoSuchMethodException {
-			List<TypeReference> parameterTypes = List.of(TypeReference.of(int.class), TypeReference.of(float.class));
+		void classGetDeclaredMethodShouldMatchInvokeMethodHint() {
+			List<TypeReference> parameterTypes = TypeReference.listOf(int.class, float.class);
 			hints.reflection().registerType(String.class, typeHint ->
 					typeHint.withMethod("scale", parameterTypes, methodHint -> methodHint.withMode(ExecutableMode.INVOKE)));
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETDECLAREDMETHOD, this.stringGetScaleMethod);
@@ -383,7 +383,7 @@ class InstrumentedMethodTests {
 		}
 
 		@Test
-		void classGetMethodShouldMatchInvokeMethodHint() throws Exception {
+		void classGetMethodShouldMatchInvokeMethodHint() {
 			hints.reflection().registerType(String.class, typeHint ->
 					typeHint.withMethod("toString", Collections.emptyList(), methodHint -> methodHint.setModes(ExecutableMode.INVOKE)));
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETMETHOD, this.stringGetToStringMethod);
@@ -410,9 +410,9 @@ class InstrumentedMethodTests {
 		@Test
 		void methodInvokeShouldMatchInvokeHintOnMethod() throws NoSuchMethodException {
 			RecordedInvocation invocation = RecordedInvocation.of(InstrumentedMethod.METHOD_INVOKE)
-					.onInstance(String.class.getMethod("startsWith", String.class)).withArguments("testString", new Object[] {"test"}).build();
+					.onInstance(String.class.getMethod("startsWith", String.class)).withArguments("testString", new Object[] { "test" }).build();
 			hints.reflection().registerType(String.class, typeHint -> typeHint.withMethod("startsWith",
-					List.of(TypeReference.of(String.class)), methodHint -> methodHint.withMode(ExecutableMode.INVOKE)));
+					TypeReference.listOf(String.class), methodHint -> methodHint.withMode(ExecutableMode.INVOKE)));
 			assertThatInvocationMatches(InstrumentedMethod.METHOD_INVOKE, invocation);
 		}
 
@@ -600,8 +600,8 @@ class InstrumentedMethodTests {
 		@BeforeEach
 		void setup() {
 			this.newProxyInstance = RecordedInvocation.of(InstrumentedMethod.PROXY_NEWPROXYINSTANCE)
-					.withArguments(ClassLoader.getSystemClassLoader(), new Class[] {AutoCloseable.class, Comparator.class}, null)
-					.returnValue(Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(), new Class[] {AutoCloseable.class, Comparator.class}, (proxy, method, args) -> null))
+					.withArguments(ClassLoader.getSystemClassLoader(), new Class[] { AutoCloseable.class, Comparator.class }, null)
+					.returnValue(Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(), new Class[] { AutoCloseable.class, Comparator.class }, (proxy, method, args) -> null))
 					.build();
 		}
 
