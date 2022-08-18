@@ -22,10 +22,12 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.MergedContextConfiguration;
+import org.springframework.test.context.aot.AotContextLoader;
 import org.springframework.util.StringUtils;
 
 /**
@@ -56,7 +58,7 @@ import org.springframework.util.StringUtils;
  * @since 2.5
  * @see #loadContext(MergedContextConfiguration)
  */
-public abstract class AbstractGenericContextLoader extends AbstractContextLoader {
+public abstract class AbstractGenericContextLoader extends AbstractContextLoader implements AotContextLoader {
 
 	protected static final Log logger = LogFactory.getLog(AbstractGenericContextLoader.class);
 
@@ -126,6 +128,27 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 			MergedContextConfiguration mergedConfig) throws Exception {
 
 		return loadContext(mergedConfig, false);
+	}
+
+	@Override
+	public final ApplicationContext loadContextForAotRuntime(MergedContextConfiguration mergedConfig,
+			ApplicationContextInitializer<ConfigurableApplicationContext> initializer) throws Exception {
+
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("Loading ApplicationContext for AOT runtime for merged context configuration [%s].",
+					mergedConfig));
+		}
+
+		validateMergedContextConfiguration(mergedConfig);
+
+		GenericApplicationContext context = createContext();
+		prepareContext(context);
+		prepareContext(context, mergedConfig);
+		initializer.initialize(context);
+		customizeContext(context);
+		customizeContext(context, mergedConfig);
+		context.refresh();
+		return context;
 	}
 
 	/**

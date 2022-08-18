@@ -138,32 +138,6 @@ public interface SmartContextLoader extends ContextLoader {
 	ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception;
 
 	/**
-	 * Load a new {@linkplain ApplicationContext} based on the supplied
-	 * {@link MergedContextConfiguration}, configure the context, and return the
-	 * context.
-	 * <p>In contrast to {@link #loadContext(MergedContextConfiguration)}, this
-	 * method must <strong>not</strong>
-	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#refresh()
-	 * refresh} the {@code ApplicationContext} or
-	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#registerShutdownHook()
-	 * register a JVM shutdown hook} for it. Otherwise, this method should implement
-	 * behavior identical to {@link #loadContext(MergedContextConfiguration)}.
-	 * <p>The default implementation throws an {@link UnsupportedOperationException}.
-	 * Concrete implementations must therefore override this method in order to
-	 * support AOT (ahead of time) processing.
-	 * @param mergedConfig the merged context configuration to use to load the
-	 * application context
-	 * @return a new application context
-	 * @throws Exception if context loading failed
-	 * @since 6.0
-	 */
-	default ApplicationContext loadContextForAotProcessing(MergedContextConfiguration mergedConfig) throws Exception {
-		throw new UnsupportedOperationException(
-				"%s does not support loadContextForAotProcessing(MergedContextConfiguration)"
-					.formatted(getClass().getName()));
-	}
-
-	/**
 	 * {@code SmartContextLoader} does not support deprecated {@link ContextLoader} methods.
 	 * Call {@link #processContextConfiguration(ContextConfigurationAttributes)} instead.
 	 * @throws UnsupportedOperationException in this implementation

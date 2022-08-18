@@ -20,11 +20,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
+import org.springframework.test.context.aot.AotContextLoader;
 import org.springframework.util.Assert;
 
 /**
@@ -68,7 +71,7 @@ import org.springframework.util.Assert;
  * @since 3.2
  * @see SmartContextLoader
  */
-public abstract class AbstractDelegatingSmartContextLoader implements SmartContextLoader {
+public abstract class AbstractDelegatingSmartContextLoader implements AotContextLoader {
 
 	private static final Log logger = LogFactory.getLog(AbstractDelegatingSmartContextLoader.class);
 
@@ -224,8 +227,14 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	 * @since 6.0
 	 */
 	@Override
-	public ApplicationContext loadContextForAotProcessing(MergedContextConfiguration mergedConfig) throws Exception {
+	public final ApplicationContext loadContextForAotProcessing(MergedContextConfiguration mergedConfig) throws Exception {
 		return loadContext(mergedConfig, false);
+	}
+
+	@Override
+	public final ApplicationContext loadContextForAotRuntime(MergedContextConfiguration mergedConfig,
+			ApplicationContextInitializer<ConfigurableApplicationContext> initializer) throws Exception {
+		return getAotContextLoader(mergedConfig, "load").loadContextForAotRuntime(mergedConfig, initializer);
 	}
 
 	/**
@@ -240,12 +249,7 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	 * {@code ApplicationContext} from the supplied merged context configuration
 	 */
 	private ApplicationContext loadContext(MergedContextConfiguration mergedConfig, boolean refresh) throws Exception {
-		Assert.notNull(mergedConfig, "MergedContextConfiguration must not be null");
-
-		Assert.state(!(mergedConfig.hasLocations() && mergedConfig.hasClasses()), () -> String.format(
-				"Neither %s nor %s supports loading an ApplicationContext from %s: " +
-				"declare either 'locations' or 'classes' but not both.", name(getXmlLoader()),
-				name(getAnnotationConfigLoader()), mergedConfig));
+		assertPreconditions(mergedConfig, "load");
 
 		SmartContextLoader[] candidates = {getXmlLoader(), getAnnotationConfigLoader()};
 		for (SmartContextLoader loader : candidates) {
@@ -265,7 +269,7 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 
 		// else...
 		throw new IllegalStateException(String.format(
-				"Neither %s nor %s was able to load an ApplicationContext from %s.",
+				"Neither %s nor %s is able to load an ApplicationContext for %s.",
 				name(getXmlLoader()), name(getAnnotationConfigLoader()), mergedConfig));
 	}
 
@@ -282,9 +286,53 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 			throws Exception {
 
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Delegating to %s to load context from %s.", name(loader), mergedConfig));
+			logger.debug(String.format("Delegating to %s to load context for %s.", name(loader), mergedConfig));
 		}
-		return (refresh ? loader.loadContext(mergedConfig) : loader.loadContextForAotProcessing(mergedConfig));
+		if (refresh) {
+			return loader.loadContext(mergedConfig);
+		}
+		else {
+			if (loader instanceof AotContextLoader aotContextLoader) {
+				return aotContextLoader.loadContextForAotProcessing(mergedConfig);
+			}
+			throw new IllegalStateException(
+					"%s must implement AotContextLoader to load the ApplicationContext for %s."
+						.formatted(name(loader), mergedConfig));
+		}
+	}
+
+	private AotContextLoader getAotContextLoader(MergedContextConfiguration mergedConfig, String action) {
+		assertPreconditions(mergedConfig, action);
+
+		SmartContextLoader[] candidates = {getXmlLoader(), getAnnotationConfigLoader()};
+		for (SmartContextLoader loader : candidates) {
+			// Determine if each loader can load a context from the mergedConfig. If it
+			// can, let it; otherwise, keep iterating.
+			if (loader instanceof AotContextLoader aotContextLoader && supports(loader, mergedConfig)) {
+				return aotContextLoader;
+			}
+		}
+
+		// If neither of the candidates supports the mergedConfig based on resources but
+		// ACIs or customizers were declared, then delegate to the annotation config
+		// loader.
+		if (getAnnotationConfigLoader() instanceof AotContextLoader aotContextLoader &&
+				(!mergedConfig.getContextInitializerClasses().isEmpty() ||
+						!mergedConfig.getContextCustomizers().isEmpty())) {
+			return aotContextLoader;
+		}
+
+		throw new IllegalStateException(
+				"Neither %s nor %s is able to %s the ApplicationContext for %s.".formatted(
+					name(getXmlLoader()), name(getAnnotationConfigLoader()), action, mergedConfig));
+	}
+
+	private void assertPreconditions(MergedContextConfiguration mergedConfig, String action) {
+		Assert.notNull(mergedConfig, "MergedContextConfiguration must not be null");
+		Assert.state(!(mergedConfig.hasLocations() && mergedConfig.hasClasses()), () -> """
+				Neither %s nor %s is able to %s an ApplicationContext for %s: \
+				declare either 'locations' or 'classes' but not both.""".formatted(
+						name(getXmlLoader()), name(getAnnotationConfigLoader()), action, mergedConfig));
 	}
 
 	private boolean supports(SmartContextLoader loader, MergedContextConfiguration mergedConfig) {

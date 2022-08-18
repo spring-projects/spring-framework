@@ -110,7 +110,7 @@ class DelegatingSmartContextLoaderTests {
 			assertThatIllegalStateException()
 			.isThrownBy(() -> loader.loadContext(mergedConfig))
 				.withMessageStartingWith("Neither")
-				.withMessageContaining("was able to load an ApplicationContext from");
+				.withMessageContaining("is able to load an ApplicationContext for");
 		}
 
 		/**

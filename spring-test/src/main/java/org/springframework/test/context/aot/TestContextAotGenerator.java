@@ -166,9 +166,9 @@ class TestContextAotGenerator {
 				Consider annotating test class [%s] with @ContextConfiguration or \
 				@ContextHierarchy.""".formatted(testClass.getCanonicalName()));
 
-		if (contextLoader instanceof SmartContextLoader smartContextLoader) {
+		if (contextLoader instanceof AotContextLoader aotContextLoader) {
 			try {
-				ApplicationContext context = smartContextLoader.loadContextForAotProcessing(mergedConfig);
+				ApplicationContext context = aotContextLoader.loadContextForAotProcessing(mergedConfig);
 				if (context instanceof GenericApplicationContext gac) {
 					return gac;
 				}
@@ -181,7 +181,7 @@ class TestContextAotGenerator {
 		}
 		throw new TestContextAotException("""
 				Cannot generate AOT artifacts for test class [%s]. The configured \
-				ContextLoader [%s] must be a SmartContextLoader and must create a \
+				ContextLoader [%s] must be an AotContextLoader and must create a \
 				GenericApplicationContext.""".formatted(testClass.getCanonicalName(),
 					contextLoader.getClass().getName()));
 	}
