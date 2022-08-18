@@ -113,7 +113,9 @@ public class ReflectiveRuntimeHintsRegistrar {
 
 	private ReflectiveProcessor instantiateClass(Class<? extends ReflectiveProcessor> type) {
 		try {
-			return type.getDeclaredConstructor().newInstance();
+			Constructor<? extends ReflectiveProcessor> constructor = type.getDeclaredConstructor();
+			ReflectionUtils.makeAccessible(constructor);
+			return constructor.newInstance();
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException("Failed to instantiate " + type, ex);

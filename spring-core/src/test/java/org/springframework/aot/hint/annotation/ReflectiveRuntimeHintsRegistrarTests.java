@@ -21,9 +21,12 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
@@ -119,6 +122,16 @@ class ReflectiveRuntimeHintsRegistrarTests {
 		assertThat(this.runtimeHints.reflection().getTypeHint(SampleMethodAnnotatedBeanWithInheritance.class))
 				.satisfies(typeHint -> assertThat(typeHint.methods()).singleElement()
 						.satisfies(methodHint -> assertThat(methodHint.getName()).isEqualTo("managed")));
+	}
+
+	@Test
+	void shouldInvokeCustomProcessor() {
+		process(SampleCustomProcessor.class);
+		assertThat(RuntimeHintsPredicates.reflection()
+				.onMethod(SampleCustomProcessor.class, "managed")).accepts(this.runtimeHints);
+		assertThat(RuntimeHintsPredicates.reflection().onType(String.class)
+				.withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(this.runtimeHints);
+
 	}
 
 	private void process(Class<?> beanClass) {
@@ -250,6 +263,26 @@ class ReflectiveRuntimeHintsRegistrarTests {
 		@Reflective
 		void managed() {
 		}
+	}
+
+	static class SampleCustomProcessor {
+
+		@Reflective(TestReflectiveProcessor.class)
+		public String managed() {
+			return "test";
+		}
+
+	}
+
+	private static class TestReflectiveProcessor extends SimpleReflectiveProcessor {
+
+		@Override
+		protected void registerMethodHint(ReflectionHints hints, Method method) {
+			super.registerMethodHint(hints, method);
+			hints.registerType(method.getReturnType(), type ->
+					type.withMembers(MemberCategory.INVOKE_DECLARED_METHODS));
+		}
+
 	}
 
 }
