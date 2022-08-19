@@ -56,9 +56,11 @@ import org.springframework.web.servlet.DispatcherServlet;
  * MockMvc mockMvc = webAppContextSetup(wac).build();
  *
  * mockMvc.perform(get("/form"))
- *     .andExpect(status().isOk())
- *     .andExpect(content().contentType("text/html"))
- *     .andExpect(forwardedUrl("/WEB-INF/layouts/main.jsp"));
+ *     .andExpectAll(
+ *         status().isOk(),
+ *         content().contentType("text/html"),
+ *         forwardedUrl("/WEB-INF/layouts/main.jsp")
+ *     );
  * </pre>
  *
  * @author Rossen Stoyanchev
