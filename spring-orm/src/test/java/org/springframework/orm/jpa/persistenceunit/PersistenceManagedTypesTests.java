@@ -27,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * Tests for {@link PersistenceManagedTypes}.
  *
  * @author Stephane Nicoll
+ * @since 6.0
  */
 class PersistenceManagedTypesTests {
 
@@ -42,7 +43,7 @@ class PersistenceManagedTypesTests {
 
 	@Test
 	void createWithNullManagedClasses() {
-		assertThatIllegalArgumentException().isThrownBy(() -> PersistenceManagedTypes.of(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> PersistenceManagedTypes.of((String[]) null));
 	}
 
 	@Test
