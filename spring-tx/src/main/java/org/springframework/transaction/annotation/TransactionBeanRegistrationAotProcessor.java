@@ -20,7 +20,6 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
@@ -35,7 +34,7 @@ import org.springframework.util.ReflectionUtils;
 /**
  * AOT {@code BeanRegistrationAotProcessor} that detects the presence of
  * {@link Transactional @Transactional} on annotated elements and creates
- * the required proxy and reflection hints.
+ * the required reflection hints.
  *
  * @author Sebastien Deleuze
  * @since 6.0
@@ -89,7 +88,6 @@ class TransactionBeanRegistrationAotProcessor implements BeanRegistrationAotProc
 				runtimeHints.reflection().registerType(proxyInterface,
 						builder -> builder.withMembers(MemberCategory.INVOKE_DECLARED_METHODS));
 			}
-			runtimeHints.proxies().registerJdkProxy(AopProxyUtils.completeJdkProxyInterfaces(proxyInterfaces));
 		}
 	}
 
