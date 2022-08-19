@@ -51,7 +51,7 @@ public class ApplicationContextAotGenerator {
 	public ClassName processAheadOfTime(GenericApplicationContext applicationContext,
 			GenerationContext generationContext) {
 		return withGeneratedClassHandler(new GeneratedClassHandler(generationContext), () -> {
-			applicationContext.refreshForAotProcessing();
+			applicationContext.refreshForAotProcessing(generationContext.getRuntimeHints());
 			DefaultListableBeanFactory beanFactory = applicationContext.getDefaultListableBeanFactory();
 			ApplicationContextInitializationCodeGenerator codeGenerator =
 					new ApplicationContextInitializationCodeGenerator(generationContext);

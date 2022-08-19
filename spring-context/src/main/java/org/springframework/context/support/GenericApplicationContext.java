@@ -18,10 +18,12 @@ package org.springframework.context.support;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -394,12 +396,13 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * processing that optimizes the application context, typically at build time.
 	 * <p>In this mode, only {@link BeanDefinitionRegistryPostProcessor} and
 	 * {@link MergedBeanDefinitionPostProcessor} are invoked.
+	 * @param runtimeHints the runtime hints
 	 * @throws BeansException if the bean factory could not be initialized
 	 * @throws IllegalStateException if already initialized and multiple refresh
 	 * attempts are not supported
 	 * @since 6.0
 	 */
-	public void refreshForAotProcessing() {
+	public void refreshForAotProcessing(RuntimeHints runtimeHints) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Preparing bean factory for AOT processing");
 		}
@@ -410,7 +413,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 		invokeBeanFactoryPostProcessors(this.beanFactory);
 		this.beanFactory.freezeConfiguration();
 		PostProcessorRegistrationDelegate.invokeMergedBeanDefinitionPostProcessors(this.beanFactory);
-		preDetermineBeanTypes();
+		preDetermineBeanTypes(runtimeHints);
 	}
 
 	/**
@@ -418,7 +421,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @see org.springframework.beans.factory.BeanFactory#getType
 	 * @see SmartInstantiationAwareBeanPostProcessor#determineBeanType
 	 */
-	private void preDetermineBeanTypes() {
+	private void preDetermineBeanTypes(RuntimeHints runtimeHints) {
 		List<SmartInstantiationAwareBeanPostProcessor> bpps =
 				PostProcessorRegistrationDelegate.loadBeanPostProcessors(
 						this.beanFactory, SmartInstantiationAwareBeanPostProcessor.class);
@@ -427,6 +430,9 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 			if (beanType != null) {
 				for (SmartInstantiationAwareBeanPostProcessor bpp : bpps) {
 					beanType = bpp.determineBeanType(beanType, beanName);
+					if (Proxy.isProxyClass(beanType)) {
+						runtimeHints.proxies().registerJdkProxy(beanType.getInterfaces());
+					}
 				}
 			}
 		}
