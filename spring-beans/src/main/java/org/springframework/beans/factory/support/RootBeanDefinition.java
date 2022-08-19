@@ -440,6 +440,17 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
+	 * Mark this bean definition as post-processed,
+	 * i.e. processed by {@link MergedBeanDefinitionPostProcessor}.
+	 * @since 6.0
+	 */
+	public void markAsPostProcessed() {
+		synchronized (this.postProcessingLock) {
+			this.postProcessed = true;
+		}
+	}
+
+	/**
 	 * Register an externally managed configuration method or field.
 	 */
 	public void registerExternallyManagedConfigMember(Member configMember) {

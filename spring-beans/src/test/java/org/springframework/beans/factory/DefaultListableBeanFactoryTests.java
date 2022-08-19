@@ -773,6 +773,29 @@ class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	void mergedBeanDefinitionChangesRetainedAfterFreezeConfiguration() {
+		RootBeanDefinition parentDefinition = new RootBeanDefinition(Object.class);
+		ChildBeanDefinition childDefinition = new ChildBeanDefinition("parent");
+
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerBeanDefinition("parent", parentDefinition);
+		factory.registerBeanDefinition("child", childDefinition);
+
+		assertThat(factory.getType("parent")).isEqualTo(Object.class);
+		assertThat(factory.getType("child")).isEqualTo(Object.class);
+		((RootBeanDefinition) factory.getBeanDefinition("parent")).setBeanClass(TestBean.class);
+
+		factory.freezeConfiguration();
+
+		assertThat(factory.getType("parent")).isEqualTo(TestBean.class);
+		assertThat(factory.getType("child")).isEqualTo(TestBean.class);
+		((RootBeanDefinition) factory.getMergedBeanDefinition("child")).setBeanClass(DerivedTestBean.class);
+
+		assertThat(factory.getBean("parent")).isInstanceOf(TestBean.class);
+		assertThat(factory.getBean("child")).isInstanceOf(DerivedTestBean.class);
+	}
+
+	@Test
 	void nameAlreadyBound() {
 		Properties p = new Properties();
 		p.setProperty("kerry.(class)", TestBean.class.getName());
