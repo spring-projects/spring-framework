@@ -28,6 +28,8 @@ import java.util.stream.Stream;
 abstract class AbstractAotTests {
 
 	static final String[] expectedSourceFilesForBasicSpringTests = {
+			// Global
+			"org/springframework/test/context/aot/AotTestMappings__Generated.java",
 			// BasicSpringJupiterSharedConfigTests
 			"org/springframework/context/event/DefaultEventListenerFactory__TestContext001_BeanDefinitions.java",
 			"org/springframework/context/event/EventListenerMethodProcessor__TestContext001_BeanDefinitions.java",

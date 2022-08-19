@@ -24,13 +24,17 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aot.generate.ClassNameGenerator;
 import org.springframework.aot.generate.DefaultGenerationContext;
+import org.springframework.aot.generate.GeneratedClasses;
 import org.springframework.aot.generate.GeneratedFiles;
 import org.springframework.aot.generate.GenerationContext;
+import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.TypeReference;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.aot.ApplicationContextAotGenerator;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.log.LogMessage;
 import org.springframework.javapoet.ClassName;
 import org.springframework.test.context.BootstrapUtils;
 import org.springframework.test.context.ContextLoader;
@@ -51,7 +55,7 @@ import org.springframework.util.MultiValueMap;
  */
 class TestContextAotGenerator {
 
-	private static final Log logger = LogFactory.getLog(TestClassScanner.class);
+	private static final Log logger = LogFactory.getLog(TestContextAotGenerator.class);
 
 	private final ApplicationContextAotGenerator aotGenerator = new ApplicationContextAotGenerator();
 
@@ -97,30 +101,33 @@ class TestContextAotGenerator {
 	 * @throws TestContextAotException if an error occurs during AOT processing
 	 */
 	public void processAheadOfTime(Stream<Class<?>> testClasses) throws TestContextAotException {
-		MultiValueMap<MergedContextConfiguration, Class<?>> map = new LinkedMultiValueMap<>();
-		testClasses.forEach(testClass -> map.add(buildMergedContextConfiguration(testClass), testClass));
+		MultiValueMap<MergedContextConfiguration, Class<?>> mergedConfigMappings = new LinkedMultiValueMap<>();
+		testClasses.forEach(testClass -> mergedConfigMappings.add(buildMergedContextConfiguration(testClass), testClass));
+		processAheadOfTime(mergedConfigMappings);
+	}
 
-		map.forEach((mergedConfig, classes) -> {
-			// System.err.println(mergedConfig + " -> " + classes);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Generating AOT artifacts for test classes [%s]"
-						.formatted(classes.stream().map(Class::getCanonicalName).toList()));
-			}
+	private void processAheadOfTime(MultiValueMap<MergedContextConfiguration, Class<?>> mergedConfigMappings) {
+		MultiValueMap<ClassName, Class<?>> initializerClassMappings = new LinkedMultiValueMap<>();
+		mergedConfigMappings.forEach((mergedConfig, testClasses) -> {
+			logger.debug(LogMessage.format("Generating AOT artifacts for test classes %s",
+					testClasses.stream().map(Class::getName).toList()));
 			try {
 				// Use first test class discovered for a given unique MergedContextConfiguration.
-				Class<?> testClass = classes.get(0);
+				Class<?> testClass = testClasses.get(0);
 				DefaultGenerationContext generationContext = createGenerationContext(testClass);
-				ClassName className = processAheadOfTime(mergedConfig, generationContext);
-				// TODO Store ClassName in a map analogous to TestContextAotProcessor in Spring Native.
+				ClassName initializer = processAheadOfTime(mergedConfig, generationContext);
+				Assert.state(!initializerClassMappings.containsKey(initializer),
+						() -> "ClassName [%s] already encountered".formatted(initializer.reflectionName()));
+				initializerClassMappings.addAll(initializer, testClasses);
 				generationContext.writeGeneratedContent();
 			}
 			catch (Exception ex) {
-				if (logger.isWarnEnabled()) {
-					logger.warn("Failed to generate AOT artifacts for test classes [%s]"
-							.formatted(classes.stream().map(Class::getCanonicalName).toList()), ex);
-				}
+				logger.warn(LogMessage.format("Failed to generate AOT artifacts for test classes [%s]",
+						testClasses.stream().map(Class::getName).toList()), ex);
 			}
 		});
+
+		generateAotTestMappings(initializerClassMappings);
 	}
 
 	/**
@@ -143,7 +150,7 @@ class TestContextAotGenerator {
 		}
 		catch (Throwable ex) {
 			throw new TestContextAotException("Failed to process test class [%s] for AOT"
-					.formatted(mergedConfig.getTestClass().getCanonicalName()), ex);
+					.formatted(mergedConfig.getTestClass().getName()), ex);
 		}
 	}
 
@@ -154,7 +161,7 @@ class TestContextAotGenerator {
 	 * create {@link GenericApplicationContext GenericApplicationContexts}.
 	 * @throws TestContextAotException if an error occurs while loading the application
 	 * context or if one of the prerequisites is not met
-	 * @see SmartContextLoader#loadContextForAotProcessing(MergedContextConfiguration)
+	 * @see AotContextLoader#loadContextForAotProcessing(MergedContextConfiguration)
 	 */
 	private GenericApplicationContext loadContextForAotProcessing(
 			MergedContextConfiguration mergedConfig) throws TestContextAotException {
@@ -164,7 +171,7 @@ class TestContextAotGenerator {
 		Assert.notNull(contextLoader, """
 				Cannot load an ApplicationContext with a NULL 'contextLoader'. \
 				Consider annotating test class [%s] with @ContextConfiguration or \
-				@ContextHierarchy.""".formatted(testClass.getCanonicalName()));
+				@ContextHierarchy.""".formatted(testClass.getName()));
 
 		if (contextLoader instanceof AotContextLoader aotContextLoader) {
 			try {
@@ -176,13 +183,13 @@ class TestContextAotGenerator {
 			catch (Exception ex) {
 				throw new TestContextAotException(
 						"Failed to load ApplicationContext for AOT processing for test class [%s]"
-							.formatted(testClass.getCanonicalName()), ex);
+							.formatted(testClass.getName()), ex);
 			}
 		}
 		throw new TestContextAotException("""
 				Cannot generate AOT artifacts for test class [%s]. The configured \
 				ContextLoader [%s] must be an AotContextLoader and must create a \
-				GenericApplicationContext.""".formatted(testClass.getCanonicalName(),
+				GenericApplicationContext.""".formatted(testClass.getName(),
 					contextLoader.getClass().getName()));
 	}
 
@@ -201,6 +208,20 @@ class TestContextAotGenerator {
 
 	private String nextTestContextId() {
 		return "TestContext%03d_".formatted(this.sequence.incrementAndGet());
+	}
+
+	private void generateAotTestMappings(MultiValueMap<ClassName, Class<?>> initializerClassMappings) {
+		ClassNameGenerator classNameGenerator = new ClassNameGenerator(AotTestMappings.class);
+		DefaultGenerationContext generationContext =
+				new DefaultGenerationContext(classNameGenerator, this.generatedFiles, this.runtimeHints);
+		GeneratedClasses generatedClasses = generationContext.getGeneratedClasses();
+
+		AotTestMappingsCodeGenerator codeGenerator =
+				new AotTestMappingsCodeGenerator(initializerClassMappings, generatedClasses);
+		generationContext.writeGeneratedContent();
+		String className = codeGenerator.getGeneratedClass().getName().reflectionName();
+		this.runtimeHints.reflection().registerType(TypeReference.of(className),
+				builder -> builder.withMembers(MemberCategory.INVOKE_PUBLIC_METHODS));
 	}
 
 }

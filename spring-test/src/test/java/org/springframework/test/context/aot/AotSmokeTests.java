@@ -49,9 +49,11 @@ class AotSmokeTests extends AbstractAotTests {
 		List<String> sourceFiles = generatedFiles.getGeneratedFiles(Kind.SOURCE).keySet().stream().toList();
 		assertThat(sourceFiles).containsExactlyInAnyOrder(expectedSourceFilesForBasicSpringTests);
 
-		TestCompiler.forSystem().withFiles(generatedFiles).compile(compiled -> {
-			// just make sure compilation completes without errors
-		});
+		TestCompiler.forSystem().withFiles(generatedFiles)
+			// .printFiles(System.out)
+			.compile(compiled -> {
+				// just make sure compilation completes without errors
+			});
 	}
 
 }
