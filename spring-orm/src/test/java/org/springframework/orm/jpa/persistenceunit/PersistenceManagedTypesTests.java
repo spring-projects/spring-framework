@@ -27,7 +27,6 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * Tests for {@link PersistenceManagedTypes}.
  *
  * @author Stephane Nicoll
- * @since 6.0
  */
 class PersistenceManagedTypesTests {
 
