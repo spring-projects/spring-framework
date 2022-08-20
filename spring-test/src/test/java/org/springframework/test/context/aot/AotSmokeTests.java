@@ -16,16 +16,34 @@
 
 package org.springframework.test.context.aot;
 
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.platform.launcher.LauncherDiscoveryRequest;
+import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
+import org.junit.platform.launcher.core.LauncherFactory;
+import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
+import org.junit.platform.launcher.listeners.TestExecutionSummary;
+import org.junit.platform.launcher.listeners.TestExecutionSummary.Failure;
+import org.opentest4j.MultipleFailuresError;
 
+import org.springframework.aot.AotDetector;
 import org.springframework.aot.generate.GeneratedFiles.Kind;
 import org.springframework.aot.generate.InMemoryGeneratedFiles;
+import org.springframework.aot.test.generator.compile.CompileWithTargetClassAccess;
 import org.springframework.aot.test.generator.compile.TestCompiler;
+import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterSharedConfigTests;
+import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
+import static org.junit.platform.launcher.EngineFilter.includeEngines;
 
 /**
  * Smoke tests for AOT support in the TestContext framework.
@@ -33,27 +51,104 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 6.0
  */
+@CompileWithTargetClassAccess
 class AotSmokeTests extends AbstractAotTests {
 
+	private static final String CLASSPATH_ROOT = "AotSmokeTests.classpath_root";
+
+	// We have to determine the classpath root and store it in a system property
+	// since @CompileWithTargetClassAccess uses a custom ClassLoader that does
+	// not support CodeSource.
+	//
+	// The system property will only be set when this class is loaded by the
+	// original ClassLoader used to launch the JUnit Platform. The attempt to
+	// access the CodeSource will fail when the tests are executed in the
+	// nested JUnit Platform launched by the CompileWithTargetClassAccessExtension.
+	static {
+		try {
+			Path classpathRoot = Paths.get(AotSmokeTests.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+			System.setProperty(CLASSPATH_ROOT, classpathRoot.toFile().getCanonicalPath());
+		}
+		catch (Exception ex) {
+			// ignore
+		}
+	}
+
+
 	@Test
-	// Using @CompileWithTargetClassAccess results in the following exception in classpathRoots():
-	// java.lang.NullPointerException: Cannot invoke "java.net.URL.toURI()" because the return
-	// value of "java.security.CodeSource.getLocation()" is null
-	void scanClassPathThenGenerateSourceFilesAndCompileThem() {
-		Stream<Class<?>> testClasses = scan("org.springframework.test.context.aot.samples.basic");
+	void endToEndTests() {
+		// AOT BUILD-TIME: CLASSPATH SCANNING
+		Stream<Class<?>> testClasses = createTestClassScanner()
+				.scan("org.springframework.test.context.aot.samples.basic")
+				// This test focuses solely on JUnit Jupiter tests
+				.filter(sourceFile -> sourceFile.getName().contains("Jupiter"));
+
+		// AOT BUILD-TIME: PROCESSING
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
 		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
-
 		generator.processAheadOfTime(testClasses);
 
 		List<String> sourceFiles = generatedFiles.getGeneratedFiles(Kind.SOURCE).keySet().stream().toList();
-		assertThat(sourceFiles).containsExactlyInAnyOrder(expectedSourceFilesForBasicSpringTests);
+		assertThat(sourceFiles).containsExactlyInAnyOrder(expectedSourceFilesForBasicSpringJupiterTests);
 
+		// AOT BUILD-TIME: COMPILATION
 		TestCompiler.forSystem().withFiles(generatedFiles)
 			// .printFiles(System.out)
-			.compile(compiled -> {
-				// just make sure compilation completes without errors
-			});
+			.compile(compiled ->
+				// AOT RUN-TIME: EXECUTION
+				runTestsInAotMode(BasicSpringJupiterTests.class, BasicSpringJupiterSharedConfigTests.class));
 	}
+
+
+	private static void runTestsInAotMode(Class<?>... testClasses) {
+		try {
+			System.setProperty(AotDetector.AOT_ENABLED, "true");
+
+			LauncherDiscoveryRequestBuilder builder = LauncherDiscoveryRequestBuilder.request()
+					.filters(includeEngines("junit-jupiter"));
+			Arrays.stream(testClasses).forEach(testClass -> builder.selectors(selectClass(testClass)));
+			LauncherDiscoveryRequest request = builder.build();
+			SummaryGeneratingListener listener = new SummaryGeneratingListener();
+			LauncherFactory.create().execute(request, listener);
+			TestExecutionSummary summary = listener.getSummary();
+			if (summary.getTotalFailureCount() > 0) {
+				List<Throwable> exceptions = summary.getFailures().stream().map(Failure::getException).toList();
+				throw new MultipleFailuresError("Test execution failures", exceptions);
+			}
+		}
+		finally {
+			System.clearProperty(AotDetector.AOT_ENABLED);
+		}
+	}
+
+	private static TestClassScanner createTestClassScanner() {
+		String classpathRoot = System.getProperty(CLASSPATH_ROOT);
+		assertThat(classpathRoot).as(CLASSPATH_ROOT).isNotNull();
+		Set<Path> classpathRoots = Set.of(Paths.get(classpathRoot));
+		return new TestClassScanner(classpathRoots);
+	}
+
+	private static final String[] expectedSourceFilesForBasicSpringJupiterTests = {
+		// Global
+		"org/springframework/test/context/aot/AotTestMappings__Generated.java",
+		// BasicSpringJupiterSharedConfigTests
+		"org/springframework/context/event/DefaultEventListenerFactory__TestContext001_BeanDefinitions.java",
+		"org/springframework/context/event/EventListenerMethodProcessor__TestContext001_BeanDefinitions.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterSharedConfigTests__TestContext001_ApplicationContextInitializer.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterSharedConfigTests__TestContext001_BeanFactoryRegistrations.java",
+		"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext001_BeanDefinitions.java",
+		// BasicSpringJupiterTests -- not generated b/c already generated for BasicSpringJupiterSharedConfigTests.
+		// "org/springframework/context/event/DefaultEventListenerFactory__TestContext00?_BeanDefinitions.java",
+		// "org/springframework/context/event/EventListenerMethodProcessor__TestContext00?_BeanDefinitions.java",
+		// "org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests__TestContext00?_ApplicationContextInitializer.java",
+		// "org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests__TestContext00?_BeanFactoryRegistrations.java",
+		// "org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext00?_BeanDefinitions.java",
+		// BasicSpringJupiterTests.NestedTests
+		"org/springframework/context/event/DefaultEventListenerFactory__TestContext002_BeanDefinitions.java",
+		"org/springframework/context/event/EventListenerMethodProcessor__TestContext002_BeanDefinitions.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests_NestedTests__TestContext002_ApplicationContextInitializer.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests_NestedTests__TestContext002_BeanFactoryRegistrations.java",
+		"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext002_BeanDefinitions.java",
+	};
 
 }

@@ -19,13 +19,21 @@ package org.springframework.test.context.cache;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aot.AotDetector;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.log.LogMessage;
 import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
+import org.springframework.test.context.aot.AotContextLoader;
+import org.springframework.test.context.aot.AotTestMappings;
+import org.springframework.test.context.aot.TestContextAotException;
 import org.springframework.util.Assert;
 
 /**
@@ -47,6 +55,8 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	 * Default static cache of Spring application contexts.
 	 */
 	static final ContextCache defaultContextCache = new DefaultContextCache();
+
+	private final AotTestMappings aotTestMappings = getAotTestMappings();
 
 	private final ContextCache contextCache;
 
@@ -87,7 +97,12 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 			ApplicationContext context = this.contextCache.get(mergedContextConfiguration);
 			if (context == null) {
 				try {
-					context = loadContextInternal(mergedContextConfiguration);
+					if (runningInAotMode(mergedContextConfiguration.getTestClass())) {
+						context = loadContextInAotMode(mergedContextConfiguration);
+					}
+					else {
+						context = loadContextInternal(mergedContextConfiguration);
+					}
 					if (logger.isDebugEnabled()) {
 						logger.debug(String.format("Storing ApplicationContext [%s] in cache under key [%s]",
 								System.identityHashCode(context), mergedContextConfiguration));
@@ -147,6 +162,47 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 					"Consider annotating your test class with @ContextConfiguration or @ContextHierarchy.");
 			return contextLoader.loadContext(locations);
 		}
+	}
+
+	protected ApplicationContext loadContextInAotMode(MergedContextConfiguration mergedConfig) throws Exception {
+		Class<?> testClass = mergedConfig.getTestClass();
+		ApplicationContextInitializer<ConfigurableApplicationContext> contextInitializer =
+				this.aotTestMappings.getContextInitializer(testClass);
+		Assert.state(contextInitializer != null,
+				() -> "Failed to load AOT ApplicationContextInitializer for test class [%s]"
+						.formatted(testClass.getName()));
+		logger.info(LogMessage.format("Loading ApplicationContext in AOT mode for %s", mergedConfig));
+		ContextLoader contextLoader = mergedConfig.getContextLoader();
+		if (!((contextLoader instanceof AotContextLoader aotContextLoader) &&
+				(aotContextLoader.loadContextForAotRuntime(mergedConfig, contextInitializer)
+						instanceof GenericApplicationContext gac))) {
+			throw new TestContextAotException("""
+					Cannot load ApplicationContext for AOT runtime for %s. The configured \
+					ContextLoader [%s] must be an AotContextLoader and must create a \
+					GenericApplicationContext."""
+						.formatted(mergedConfig, contextLoader.getClass().getName()));
+		}
+		gac.registerShutdownHook();
+		return gac;
+	}
+
+	/**
+	 * Determine if we are running in AOT mode for the supplied test class.
+	 */
+	private boolean runningInAotMode(Class<?> testClass) {
+		return (this.aotTestMappings != null && this.aotTestMappings.isSupportedTestClass(testClass));
+	}
+
+	private static AotTestMappings getAotTestMappings() {
+		if (AotDetector.useGeneratedArtifacts()) {
+			try {
+				return new AotTestMappings();
+			}
+			catch (Exception ex) {
+				throw new IllegalStateException("Failed to instantiate AotTestMappings", ex);
+			}
+		}
+		return null;
 	}
 
 }
