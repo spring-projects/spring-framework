@@ -109,10 +109,8 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 	 */
 	private static boolean hasMatchingIntroductions(Advisor[] advisors, Class<?> actualClass) {
 		for (Advisor advisor : advisors) {
-			if (advisor instanceof IntroductionAdvisor ia) {
-				if (ia.getClassFilter().matches(actualClass)) {
-					return true;
-				}
+			if (advisor instanceof IntroductionAdvisor ia && ia.getClassFilter().matches(actualClass)) {
+				return true;
 			}
 		}
 		return false;

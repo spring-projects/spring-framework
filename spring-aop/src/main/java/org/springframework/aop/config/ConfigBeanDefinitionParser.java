@@ -108,14 +108,10 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		List<Element> childElts = DomUtils.getChildElements(element);
 		for (Element elt: childElts) {
 			String localName = parserContext.getDelegate().getLocalName(elt);
-			if (POINTCUT.equals(localName)) {
-				parsePointcut(elt, parserContext);
-			}
-			else if (ADVISOR.equals(localName)) {
-				parseAdvisor(elt, parserContext);
-			}
-			else if (ASPECT.equals(localName)) {
-				parseAspect(elt, parserContext);
+			switch (localName) {
+				case POINTCUT -> parsePointcut(elt, parserContext);
+				case ADVISOR -> parseAdvisor(elt, parserContext);
+				case ASPECT -> parseAspect(elt, parserContext);
 			}
 		}
 
