@@ -58,6 +58,10 @@ import org.springframework.beans.BeansException;
  * @since 06.07.2003
  * @see BeanPostProcessor
  * @see PropertyResourceConfigurer
+ *
+ * BeanFactoryPostProcessor的作用:
+ * 1.可以在容器中的内部BeanFactory在进行标准初始化之后对其进行修改。此时所有的BeanDefintion已经全部加载完毕，但是Bean还没有开始实例化
+ * 2.在所有的BeanDefintion加载完毕之后，Bean进行实例化之前，对BeanDefintion做一些定制化操作，比如说修改某个Bean的BeanDefintion
  */
 @FunctionalInterface
 public interface BeanFactoryPostProcessor {
