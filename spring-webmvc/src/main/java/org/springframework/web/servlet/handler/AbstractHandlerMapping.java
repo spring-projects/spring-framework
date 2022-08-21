@@ -461,7 +461,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * or {@code null} if none
 	 */
 	@Nullable
-	protected final HandlerInterceptor[] getAdaptedInterceptors() {
+	public final HandlerInterceptor[] getAdaptedInterceptors() {
 		return (!this.adaptedInterceptors.isEmpty() ?
 				this.adaptedInterceptors.toArray(new HandlerInterceptor[0]) : null);
 	}
@@ -471,7 +471,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @return the array of {@link MappedInterceptor}s, or {@code null} if none
 	 */
 	@Nullable
-	protected final MappedInterceptor[] getMappedInterceptors() {
+	public final MappedInterceptor[] getMappedInterceptors() {
 		List<MappedInterceptor> mappedInterceptors = new ArrayList<>(this.adaptedInterceptors.size());
 		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
 			if (interceptor instanceof MappedInterceptor mappedInterceptor) {
