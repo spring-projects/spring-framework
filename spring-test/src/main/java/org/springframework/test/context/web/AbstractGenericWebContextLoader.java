@@ -157,7 +157,7 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 
 		validateMergedContextConfiguration(webMergedConfig);
 
-		GenericWebApplicationContext context = new GenericWebApplicationContext();
+		GenericWebApplicationContext context = createContext();
 
 		ApplicationContext parent = mergedConfig.getParentApplicationContext();
 		if (parent != null) {
@@ -190,6 +190,21 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	 */
 	protected void validateMergedContextConfiguration(WebMergedContextConfiguration mergedConfig) {
 		// no-op
+	}
+
+	/**
+	 * Factory method for creating the {@link GenericWebApplicationContext} used
+	 * by this {@code ContextLoader}.
+	 * <p>The default implementation creates a {@code GenericWebApplicationContext}
+	 * using the default constructor. This method may be overridden &mdash; for
+	 * example, to use a custom context subclass or to create a
+	 * {@code GenericWebApplicationContext} with a custom
+	 * {@link DefaultListableBeanFactory} implementation.
+	 * @return a newly instantiated {@code GenericWebApplicationContext}
+	 * @since 5.2.23
+	 */
+	protected GenericWebApplicationContext createContext() {
+		return new GenericWebApplicationContext();
 	}
 
 	/**

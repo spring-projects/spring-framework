@@ -73,40 +73,6 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 		this.contextCache = contextCache;
 	}
 
-	/**
-	 * Get the {@link ContextCache} used by this context loader delegate.
-	 */
-	protected ContextCache getContextCache() {
-		return this.contextCache;
-	}
-
-	/**
-	 * Load the {@code ApplicationContext} for the supplied merged context configuration.
-	 * <p>Supports both the {@link SmartContextLoader} and {@link ContextLoader} SPIs.
-	 * @throws Exception if an error occurs while loading the application context
-	 */
-	@SuppressWarnings("deprecation")
-	protected ApplicationContext loadContextInternal(MergedContextConfiguration mergedContextConfiguration)
-			throws Exception {
-
-		ContextLoader contextLoader = mergedContextConfiguration.getContextLoader();
-		Assert.notNull(contextLoader, "Cannot load an ApplicationContext with a NULL 'contextLoader'. " +
-				"Consider annotating your test class with @ContextConfiguration or @ContextHierarchy.");
-
-		ApplicationContext applicationContext;
-
-		if (contextLoader instanceof SmartContextLoader smartContextLoader) {
-			applicationContext = smartContextLoader.loadContext(mergedContextConfiguration);
-		}
-		else {
-			String[] locations = mergedContextConfiguration.getLocations();
-			Assert.notNull(locations, "Cannot load an ApplicationContext with a NULL 'locations' array. " +
-					"Consider annotating your test class with @ContextConfiguration or @ContextHierarchy.");
-			applicationContext = contextLoader.loadContext(locations);
-		}
-
-		return applicationContext;
-	}
 
 	@Override
 	public boolean isContextLoaded(MergedContextConfiguration mergedContextConfiguration) {
@@ -149,6 +115,37 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	public void closeContext(MergedContextConfiguration mergedContextConfiguration, @Nullable HierarchyMode hierarchyMode) {
 		synchronized (this.contextCache) {
 			this.contextCache.remove(mergedContextConfiguration, hierarchyMode);
+		}
+	}
+
+	/**
+	 * Get the {@link ContextCache} used by this context loader delegate.
+	 */
+	protected ContextCache getContextCache() {
+		return this.contextCache;
+	}
+
+	/**
+	 * Load the {@code ApplicationContext} for the supplied merged context configuration.
+	 * <p>Supports both the {@link SmartContextLoader} and {@link ContextLoader} SPIs.
+	 * @throws Exception if an error occurs while loading the application context
+	 */
+	@SuppressWarnings("deprecation")
+	protected ApplicationContext loadContextInternal(MergedContextConfiguration mergedContextConfiguration)
+			throws Exception {
+
+		ContextLoader contextLoader = mergedContextConfiguration.getContextLoader();
+		Assert.notNull(contextLoader, "Cannot load an ApplicationContext with a NULL 'contextLoader'. " +
+				"Consider annotating your test class with @ContextConfiguration or @ContextHierarchy.");
+
+		if (contextLoader instanceof SmartContextLoader smartContextLoader) {
+			return smartContextLoader.loadContext(mergedContextConfiguration);
+		}
+		else {
+			String[] locations = mergedContextConfiguration.getLocations();
+			Assert.notNull(locations, "Cannot load an ApplicationContext with a NULL 'locations' array. " +
+					"Consider annotating your test class with @ContextConfiguration or @ContextHierarchy.");
+			return contextLoader.loadContext(locations);
 		}
 	}
 
