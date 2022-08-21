@@ -94,8 +94,8 @@ public abstract class MethodMatchers {
 	 */
 	public static boolean matches(MethodMatcher mm, Method method, Class<?> targetClass, boolean hasIntroductions) {
 		Assert.notNull(mm, "MethodMatcher must not be null");
-		return (mm instanceof IntroductionAwareMethodMatcher ?
-				((IntroductionAwareMethodMatcher) mm).matches(method, targetClass, hasIntroductions) :
+		return (mm instanceof IntroductionAwareMethodMatcher introductionAwareMethodMatcher ?
+				introductionAwareMethodMatcher.matches(method, targetClass, hasIntroductions) :
 				mm.matches(method, targetClass));
 	}
 

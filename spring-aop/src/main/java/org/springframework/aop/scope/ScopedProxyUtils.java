@@ -110,16 +110,20 @@ public abstract class ScopedProxyUtils {
 	 * Get the original bean name for the provided {@linkplain #getTargetBeanName
 	 * target bean name}.
 	 * @param targetBeanName the target bean name for the scoped proxy
-	 * @return the original bean name
+	 * @return the original bean name. Null if <code>targetBeanName</code> is null.
 	 * @throws IllegalArgumentException if the supplied bean name does not refer
 	 * to the target of a scoped proxy
 	 * @since 5.1.10
 	 * @see #getTargetBeanName(String)
 	 * @see #isScopedTarget(String)
 	 */
+	@Nullable
 	public static String getOriginalBeanName(@Nullable String targetBeanName) {
 		Assert.isTrue(isScopedTarget(targetBeanName), () -> "bean name '" +
 				targetBeanName + "' does not refer to the target of a scoped proxy");
+		if (targetBeanName == null) {
+			return null;
+		}
 		return targetBeanName.substring(TARGET_NAME_PREFIX_LENGTH);
 	}
 

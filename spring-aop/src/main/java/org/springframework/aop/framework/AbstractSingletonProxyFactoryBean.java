@@ -194,8 +194,8 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 	 * @return a TargetSource for this object
 	 */
 	protected TargetSource createTargetSource(Object target) {
-		if (target instanceof TargetSource) {
-			return (TargetSource) target;
+		if (target instanceof TargetSource targetSource) {
+			return targetSource;
 		}
 		else {
 			return new SingletonTargetSource(target);
@@ -229,8 +229,8 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 		if (this.proxyInterfaces != null && this.proxyInterfaces.length == 1) {
 			return this.proxyInterfaces[0];
 		}
-		if (this.target instanceof TargetSource) {
-			return ((TargetSource) this.target).getTargetClass();
+		if (this.target instanceof TargetSource targetSource) {
+			return targetSource.getTargetClass();
 		}
 		if (this.target != null) {
 			return this.target.getClass();

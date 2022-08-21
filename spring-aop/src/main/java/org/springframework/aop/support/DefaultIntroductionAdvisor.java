@@ -56,7 +56,7 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 	 * @see #addInterface
 	 */
 	public DefaultIntroductionAdvisor(Advice advice) {
-		this(advice, (advice instanceof IntroductionInfo ? (IntroductionInfo) advice : null));
+		this(advice, (advice instanceof IntroductionInfo introductionInfo ? introductionInfo : null));
 	}
 
 	/**
@@ -112,8 +112,8 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 	@Override
 	public void validateInterfaces() throws IllegalArgumentException {
 		for (Class<?> ifc : this.interfaces) {
-			if (this.advice instanceof DynamicIntroductionAdvice &&
-					!((DynamicIntroductionAdvice) this.advice).implementsInterface(ifc)) {
+			if (this.advice instanceof DynamicIntroductionAdvice dynamicIntroductionAdvice &&
+					!dynamicIntroductionAdvice.implementsInterface(ifc)) {
 				throw new IllegalArgumentException("DynamicIntroductionAdvice [" + this.advice + "] " +
 						"does not implement interface [" + ifc.getName() + "] specified for introduction");
 			}

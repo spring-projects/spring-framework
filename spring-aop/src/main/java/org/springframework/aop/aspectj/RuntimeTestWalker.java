@@ -202,8 +202,8 @@ class RuntimeTestWalker {
 			}
 			Class<?> typeClass = null;
 			ResolvedType type = (ResolvedType) i.getType();
-			if (type instanceof ReferenceType) {
-				ReferenceTypeDelegate delegate = ((ReferenceType) type).getDelegate();
+			if (type instanceof ReferenceType referenceType) {
+				ReferenceTypeDelegate delegate = referenceType.getDelegate();
 				if (delegate instanceof ReflectionBasedReferenceTypeDelegate) {
 					try {
 						ReflectionUtils.makeAccessible(myClassField);

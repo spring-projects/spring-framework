@@ -244,31 +244,18 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 			int algorithmicStep = STEP_JOIN_POINT_BINDING;
 			while ((this.numberOfRemainingUnboundArguments > 0) && algorithmicStep < STEP_FINISHED) {
 				switch (algorithmicStep++) {
-					case STEP_JOIN_POINT_BINDING:
+					case STEP_JOIN_POINT_BINDING -> {
 						if (!maybeBindThisJoinPoint()) {
 							maybeBindThisJoinPointStaticPart();
 						}
-						break;
-					case STEP_THROWING_BINDING:
-						maybeBindThrowingVariable();
-						break;
-					case STEP_ANNOTATION_BINDING:
-						maybeBindAnnotationsFromPointcutExpression();
-						break;
-					case STEP_RETURNING_BINDING:
-						maybeBindReturningVariable();
-						break;
-					case STEP_PRIMITIVE_ARGS_BINDING:
-						maybeBindPrimitiveArgsFromPointcutExpression();
-						break;
-					case STEP_THIS_TARGET_ARGS_BINDING:
-						maybeBindThisOrTargetOrArgsFromPointcutExpression();
-						break;
-					case STEP_REFERENCE_PCUT_BINDING:
-						maybeBindReferencePointcutParameter();
-						break;
-					default:
-						throw new IllegalStateException("Unknown algorithmic step: " + (algorithmicStep - 1));
+					}
+					case STEP_THROWING_BINDING -> maybeBindThrowingVariable();
+					case STEP_ANNOTATION_BINDING -> maybeBindAnnotationsFromPointcutExpression();
+					case STEP_RETURNING_BINDING -> maybeBindReturningVariable();
+					case STEP_PRIMITIVE_ARGS_BINDING -> maybeBindPrimitiveArgsFromPointcutExpression();
+					case STEP_THIS_TARGET_ARGS_BINDING -> maybeBindThisOrTargetOrArgsFromPointcutExpression();
+					case STEP_REFERENCE_PCUT_BINDING -> maybeBindReferencePointcutParameter();
+					default -> throw new IllegalStateException("Unknown algorithmic step: " + (algorithmicStep - 1));
 				}
 			}
 		}

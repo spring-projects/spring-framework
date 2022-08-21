@@ -77,8 +77,8 @@ public abstract class AbstractPrototypeBasedTargetSource extends AbstractBeanFac
 		if (logger.isDebugEnabled()) {
 			logger.debug("Destroying instance of bean '" + getTargetBeanName() + "'");
 		}
-		if (getBeanFactory() instanceof ConfigurableBeanFactory) {
-			((ConfigurableBeanFactory) getBeanFactory()).destroyBean(getTargetBeanName(), target);
+		if (getBeanFactory() instanceof ConfigurableBeanFactory configurableBeanFactory) {
+			configurableBeanFactory.destroyBean(getTargetBeanName(), target);
 		}
 		else if (target instanceof DisposableBean) {
 			try {

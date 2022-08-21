@@ -69,8 +69,8 @@ public class SingletonAspectInstanceFactory implements AspectInstanceFactory, Se
 	 */
 	@Override
 	public int getOrder() {
-		if (this.aspectInstance instanceof Ordered) {
-			return ((Ordered) this.aspectInstance).getOrder();
+		if (this.aspectInstance instanceof Ordered orderedAspectInstance) {
+			return orderedAspectInstance.getOrder();
 		}
 		return getOrderForAspectClass(this.aspectInstance.getClass());
 	}

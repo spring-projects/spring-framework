@@ -61,12 +61,12 @@ public abstract class AspectJAopUtils {
 	 */
 	@Nullable
 	public static AspectJPrecedenceInformation getAspectJPrecedenceInformationFor(Advisor anAdvisor) {
-		if (anAdvisor instanceof AspectJPrecedenceInformation) {
-			return (AspectJPrecedenceInformation) anAdvisor;
+		if (anAdvisor instanceof AspectJPrecedenceInformation precedenceInformationAdvisor) {
+			return precedenceInformationAdvisor;
 		}
 		Advice advice = anAdvisor.getAdvice();
-		if (advice instanceof AspectJPrecedenceInformation) {
-			return (AspectJPrecedenceInformation) advice;
+		if (advice instanceof AspectJPrecedenceInformation precedenceInformationAdvice) {
+			return precedenceInformationAdvice;
 		}
 		return null;
 	}

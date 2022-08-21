@@ -98,8 +98,8 @@ public class DelegatePerTargetObjectIntroductionInterceptor extends Introduction
 
 			// Massage return value if possible: if the delegate returned itself,
 			// we really want to return the proxy.
-			if (retVal == delegate && mi instanceof ProxyMethodInvocation) {
-				retVal = ((ProxyMethodInvocation) mi).getProxy();
+			if (retVal == delegate && mi instanceof ProxyMethodInvocation proxyMethodInvocation) {
+				retVal = proxyMethodInvocation.getProxy();
 			}
 			return retVal;
 		}

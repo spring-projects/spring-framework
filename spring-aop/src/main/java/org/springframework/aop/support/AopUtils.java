@@ -234,8 +234,8 @@ public abstract class AopUtils {
 		}
 
 		IntroductionAwareMethodMatcher introductionAwareMethodMatcher = null;
-		if (methodMatcher instanceof IntroductionAwareMethodMatcher) {
-			introductionAwareMethodMatcher = (IntroductionAwareMethodMatcher) methodMatcher;
+		if (methodMatcher instanceof IntroductionAwareMethodMatcher introductionAwareMethodMatcher1) {
+			introductionAwareMethodMatcher = introductionAwareMethodMatcher1;
 		}
 
 		Set<Class<?>> classes = new LinkedHashSet<>();
@@ -281,8 +281,8 @@ public abstract class AopUtils {
 	 * @return whether the pointcut can apply on any method
 	 */
 	public static boolean canApply(Advisor advisor, Class<?> targetClass, boolean hasIntroductions) {
-		if (advisor instanceof IntroductionAdvisor) {
-			return ((IntroductionAdvisor) advisor).getClassFilter().matches(targetClass);
+		if (advisor instanceof IntroductionAdvisor introductionAdvisor) {
+			return introductionAdvisor.getClassFilter().matches(targetClass);
 		}
 		else if (advisor instanceof PointcutAdvisor pca) {
 			return canApply(pca.getPointcut(), targetClass, hasIntroductions);

@@ -409,8 +409,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 	private RuntimeTestWalker getRuntimeTestWalker(ShadowMatch shadowMatch) {
-		if (shadowMatch instanceof DefensiveShadowMatch) {
-			return new RuntimeTestWalker(((DefensiveShadowMatch) shadowMatch).primary);
+		if (shadowMatch instanceof DefensiveShadowMatch defensiveShadowMatch) {
+			return new RuntimeTestWalker(defensiveShadowMatch.primary);
 		}
 		return new RuntimeTestWalker(shadowMatch);
 	}

@@ -55,8 +55,8 @@ public class AdvisorAdapterRegistrationManager implements BeanPostProcessor {
 
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-		if (bean instanceof AdvisorAdapter){
-			this.advisorAdapterRegistry.registerAdvisorAdapter((AdvisorAdapter) bean);
+		if (bean instanceof AdvisorAdapter advisorAdapter){
+			this.advisorAdapterRegistry.registerAdvisorAdapter(advisorAdapter);
 		}
 		return bean;
 	}

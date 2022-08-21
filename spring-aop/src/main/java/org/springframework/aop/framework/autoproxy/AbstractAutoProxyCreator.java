@@ -511,8 +511,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 		// Use original ClassLoader if bean class not locally loaded in overriding class loader
 		ClassLoader classLoader = getProxyClassLoader();
-		if (classLoader instanceof SmartClassLoader && classLoader != beanClass.getClassLoader()) {
-			classLoader = ((SmartClassLoader) classLoader).getOriginalClassLoader();
+		if (classLoader instanceof SmartClassLoader smartClassLoader && classLoader != beanClass.getClassLoader()) {
+			classLoader = smartClassLoader.getOriginalClassLoader();
 		}
 		return (classOnly ? proxyFactory.getProxyClass(classLoader) : proxyFactory.getProxy(classLoader));
 	}

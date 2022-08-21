@@ -110,8 +110,8 @@ public abstract class ClassFilters {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			return (this == other || (other instanceof UnionClassFilter &&
-					ObjectUtils.nullSafeEquals(this.filters, ((UnionClassFilter) other).filters)));
+			return (this == other || (other instanceof UnionClassFilter unionClassFilter &&
+					ObjectUtils.nullSafeEquals(this.filters, unionClassFilter.filters)));
 		}
 
 		@Override
@@ -151,8 +151,8 @@ public abstract class ClassFilters {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			return (this == other || (other instanceof IntersectionClassFilter &&
-					ObjectUtils.nullSafeEquals(this.filters, ((IntersectionClassFilter) other).filters)));
+			return (this == other || (other instanceof IntersectionClassFilter intersectionClassFilter &&
+					ObjectUtils.nullSafeEquals(this.filters, intersectionClassFilter.filters)));
 		}
 
 		@Override
