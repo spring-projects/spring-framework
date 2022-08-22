@@ -22,6 +22,7 @@ import java.time.Duration;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.test.web.client.MockRestServiceServer.MockRestServiceServerBuilder;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -42,6 +43,19 @@ public class MockRestServiceServerTests {
 
 	private final RestTemplate restTemplate = new RestTemplate();
 
+	/**
+	 * Test to demonstrate andPerformRequest() that simulates real client-side Rest Call <br>
+	 *
+	 * @author Edmond Daher
+	 */
+	@Test
+	public void callRealEndpoint() {
+		MockRestServiceServer server = MockRestServiceServer.createServer(this.restTemplate);
+		server.expect(requestTo("http://localhost:8080/foo")).andPerformRequest();
+
+		assertThatExceptionOfType(ResourceAccessException.class)
+				.isThrownBy(() -> restTemplate.getForObject("http://localhost:8080/foo", String.class));
+	}
 
 	@Test
 	public void buildMultipleTimes() {

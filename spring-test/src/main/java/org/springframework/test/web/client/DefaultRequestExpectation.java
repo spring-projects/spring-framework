@@ -16,12 +16,14 @@
 
 package org.springframework.test.web.client;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -79,6 +81,11 @@ public class DefaultRequestExpectation implements RequestExpectation {
 	public void andRespond(ResponseCreator responseCreator) {
 		Assert.notNull(responseCreator, "ResponseCreator is required");
 		this.responseCreator = responseCreator;
+	}
+
+	@Override
+	public void andPerformRequest() {
+		this.responseCreator = new ActualResponse();
 	}
 
 	@Override
@@ -155,4 +162,18 @@ public class DefaultRequestExpectation implements RequestExpectation {
 		}
 	}
 
+	static class ActualResponse implements ResponseCreator {
+
+		private static final SimpleClientHttpRequestFactory simpleClientHttpRequestFactory = new SimpleClientHttpRequestFactory();
+
+		@Override
+		public ClientHttpResponse createResponse(@Nullable ClientHttpRequest request) throws IOException {
+			Assert.notNull(request, "'request' should not be null");
+			ClientHttpRequest actualRequest = simpleClientHttpRequestFactory.createRequest(request.getURI(), request.getMethod());
+			actualRequest.getHeaders().addAll(request.getHeaders());
+			ByteArrayOutputStream baos = (ByteArrayOutputStream) request.getBody();
+			actualRequest.getBody().write(baos.toByteArray());
+			return actualRequest.execute();
+		}
+	}
 }

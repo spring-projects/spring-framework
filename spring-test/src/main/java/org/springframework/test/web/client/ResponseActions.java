@@ -37,4 +37,9 @@ public interface ResponseActions {
 	 */
 	void andRespond(ResponseCreator responseCreator);
 
+	/**
+	 * Keep default httpClient implementation.
+	 */
+	void andPerformRequest();
+
 }
