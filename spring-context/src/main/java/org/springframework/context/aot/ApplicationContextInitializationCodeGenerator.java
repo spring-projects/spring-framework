@@ -30,6 +30,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.annotation.ContextAnnotationAutowireCandidateResolver;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
@@ -85,6 +86,8 @@ class ApplicationContextInitializationCodeGenerator implements BeanFactoryInitia
 				APPLICATION_CONTEXT_VARIABLE);
 		builder.addStatement("$L.setAutowireCandidateResolver(new $T())",
 				BEAN_FACTORY_VARIABLE, ContextAnnotationAutowireCandidateResolver.class);
+		builder.addStatement("$L.setDependencyComparator($T.INSTANCE)",
+				BEAN_FACTORY_VARIABLE, AnnotationAwareOrderComparator.class);
 		for (MethodReference initializer : this.initializers) {
 			builder.addStatement(initializer.toInvokeCodeBlock(CodeBlock.of(BEAN_FACTORY_VARIABLE)));
 		}

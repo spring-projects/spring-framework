@@ -141,8 +141,9 @@ class ApplicationContextAotGeneratorTests {
 		testCompiledResult(applicationContext, (initializer, compiled) -> {
 			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
 			assertThat(freshApplicationContext.getBeanDefinitionNames()).isEmpty();
-			assertThat(compiled.getSourceFile()).contains(
-					"beanFactory.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver())");
+			assertThat(compiled.getSourceFile())
+					.contains("beanFactory.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver())")
+					.contains("beanFactory.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE)");
 		});
 	}
 
