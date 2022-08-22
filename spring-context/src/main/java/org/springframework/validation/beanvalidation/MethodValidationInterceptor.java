@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.reflect.Method;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -35,6 +36,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.function.SingletonSupplier;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -60,14 +62,14 @@ import org.springframework.validation.annotation.Validated;
  */
 public class MethodValidationInterceptor implements MethodInterceptor {
 
-	private final Validator validator;
+	private final Supplier<Validator> validator;
 
 
 	/**
 	 * Create a new MethodValidationInterceptor using a default JSR-303 validator underneath.
 	 */
 	public MethodValidationInterceptor() {
-		this(Validation.buildDefaultValidatorFactory());
+		this.validator = SingletonSupplier.of(() -> Validation.buildDefaultValidatorFactory().getValidator());
 	}
 
 	/**
@@ -75,7 +77,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	 * @param validatorFactory the JSR-303 ValidatorFactory to use
 	 */
 	public MethodValidationInterceptor(ValidatorFactory validatorFactory) {
-		this(validatorFactory.getValidator());
+		this.validator = SingletonSupplier.of(validatorFactory::getValidator);
 	}
 
 	/**
@@ -83,6 +85,16 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	 * @param validator the JSR-303 Validator to use
 	 */
 	public MethodValidationInterceptor(Validator validator) {
+		this.validator = () -> validator;
+	}
+
+	/**
+	 * Create a new MethodValidationInterceptor for the supplied
+	 * (potentially lazily initialized) Validator.
+	 * @param validator a Supplier for the Validator to use
+	 * @since 6.0
+	 */
+	public MethodValidationInterceptor(Supplier<Validator> validator) {
 		this.validator = validator;
 	}
 
@@ -98,7 +110,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 		Class<?>[] groups = determineValidationGroups(invocation);
 
 		// Standard Bean Validation 1.1 API
-		ExecutableValidator execVal = this.validator.forExecutables();
+		ExecutableValidator execVal = this.validator.get().forExecutables();
 		Method methodToValidate = invocation.getMethod();
 		Set<ConstraintViolation<Object>> result;
 
