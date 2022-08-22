@@ -551,20 +551,20 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		private CodeBlock generateAddPostProcessorCode(Map<String, String> mappings) {
-			CodeBlock.Builder builder = CodeBlock.builder();
-			builder.addStatement("$T $L = new $T<>()", STRING_STRING_MAP,
+			CodeBlock.Builder code = CodeBlock.builder();
+			code.addStatement("$T $L = new $T<>()", STRING_STRING_MAP,
 					MAPPINGS_VARIABLE, HashMap.class);
-			mappings.forEach((type, from) -> builder.addStatement("$L.put($S, $S)",
+			mappings.forEach((type, from) -> code.addStatement("$L.put($S, $S)",
 					MAPPINGS_VARIABLE, type, from));
-			builder.addStatement("$T $L = new $T($T.class)", RootBeanDefinition.class,
+			code.addStatement("$T $L = new $T($T.class)", RootBeanDefinition.class,
 					BEAN_DEFINITION_VARIABLE, RootBeanDefinition.class, ImportAwareAotBeanPostProcessor.class);
-			builder.addStatement("$L.setRole($T.ROLE_INFRASTRUCTURE)",
+			code.addStatement("$L.setRole($T.ROLE_INFRASTRUCTURE)",
 					BEAN_DEFINITION_VARIABLE, BeanDefinition.class);
-			builder.addStatement("$L.setInstanceSupplier(() -> new $T($L))",
+			code.addStatement("$L.setInstanceSupplier(() -> new $T($L))",
 					BEAN_DEFINITION_VARIABLE, ImportAwareAotBeanPostProcessor.class, MAPPINGS_VARIABLE);
-			builder.addStatement("$L.registerBeanDefinition($S, $L)",
+			code.addStatement("$L.registerBeanDefinition($S, $L)",
 					BEAN_FACTORY_VARIABLE, BEAN_NAME, BEAN_DEFINITION_VARIABLE);
-			return builder.build();
+			return code.build();
 		}
 
 		private Map<String, String> buildImportAwareMappings() {

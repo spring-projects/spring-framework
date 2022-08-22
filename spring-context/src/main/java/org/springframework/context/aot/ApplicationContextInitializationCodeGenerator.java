@@ -80,18 +80,18 @@ class ApplicationContextInitializationCodeGenerator implements BeanFactoryInitia
 	}
 
 	private CodeBlock generateInitializeCode() {
-		CodeBlock.Builder builder = CodeBlock.builder();
-		builder.addStatement("$T $L = $L.getDefaultListableBeanFactory()",
+		CodeBlock.Builder code = CodeBlock.builder();
+		code.addStatement("$T $L = $L.getDefaultListableBeanFactory()",
 				DefaultListableBeanFactory.class, BEAN_FACTORY_VARIABLE,
 				APPLICATION_CONTEXT_VARIABLE);
-		builder.addStatement("$L.setAutowireCandidateResolver(new $T())",
+		code.addStatement("$L.setAutowireCandidateResolver(new $T())",
 				BEAN_FACTORY_VARIABLE, ContextAnnotationAutowireCandidateResolver.class);
-		builder.addStatement("$L.setDependencyComparator($T.INSTANCE)",
+		code.addStatement("$L.setDependencyComparator($T.INSTANCE)",
 				BEAN_FACTORY_VARIABLE, AnnotationAwareOrderComparator.class);
 		for (MethodReference initializer : this.initializers) {
-			builder.addStatement(initializer.toInvokeCodeBlock(CodeBlock.of(BEAN_FACTORY_VARIABLE)));
+			code.addStatement(initializer.toInvokeCodeBlock(CodeBlock.of(BEAN_FACTORY_VARIABLE)));
 		}
-		return builder.build();
+		return code.build();
 	}
 
 	GeneratedClass getGeneratedClass() {

@@ -187,16 +187,16 @@ public final class MethodReference {
 	private CodeBlock toInvokeCodeBlockForInstance(@Nullable String instanceVariable,
 			CodeBlock[] arguments) {
 
-		CodeBlock.Builder builder = CodeBlock.builder();
+		CodeBlock.Builder code = CodeBlock.builder();
 		if (instanceVariable != null) {
-			builder.add("$L.", instanceVariable);
+			code.add("$L.", instanceVariable);
 		}
 		else if (this.declaringClass != null) {
-			builder.add("new $T().", this.declaringClass);
+			code.add("new $T().", this.declaringClass);
 		}
-		builder.add("$L", this.methodName);
-		addArguments(builder, arguments);
-		return builder.build();
+		code.add("$L", this.methodName);
+		addArguments(code, arguments);
+		return code.build();
 	}
 
 	private CodeBlock toInvokeCodeBlockForStatic(@Nullable String instanceVariable,
@@ -204,21 +204,21 @@ public final class MethodReference {
 
 		Assert.isTrue(instanceVariable == null,
 				"'instanceVariable' must be null for static method references");
-		CodeBlock.Builder builder = CodeBlock.builder();
-		builder.add("$T.$L", this.declaringClass, this.methodName);
-		addArguments(builder, arguments);
-		return builder.build();
+		CodeBlock.Builder code = CodeBlock.builder();
+		code.add("$T.$L", this.declaringClass, this.methodName);
+		addArguments(code, arguments);
+		return code.build();
 	}
 
-	private void addArguments(CodeBlock.Builder builder, CodeBlock[] arguments) {
-		builder.add("(");
+	private void addArguments(CodeBlock.Builder code, CodeBlock[] arguments) {
+		code.add("(");
 		for (int i = 0; i < arguments.length; i++) {
 			if (i != 0) {
-				builder.add(", ");
+				code.add(", ");
 			}
-			builder.add(arguments[i]);
+			code.add(arguments[i]);
 		}
-		builder.add(")");
+		code.add(")");
 	}
 
 	@Override

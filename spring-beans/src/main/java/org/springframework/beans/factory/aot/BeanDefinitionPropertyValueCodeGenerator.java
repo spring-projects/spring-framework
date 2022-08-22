@@ -251,11 +251,11 @@ class BeanDefinitionPropertyValueCodeGenerator {
 				ResolvableType componentType = type.getComponentType();
 				Stream<CodeBlock> elements = Arrays.stream(ObjectUtils.toObjectArray(value)).map(component ->
 						BeanDefinitionPropertyValueCodeGenerator.this.generateCode(component, componentType));
-				CodeBlock.Builder builder = CodeBlock.builder();
-				builder.add("new $T {", type.toClass());
-				builder.add(elements.collect(CodeBlock.joining(", ")));
-				builder.add("}");
-				return builder.build();
+				CodeBlock.Builder code = CodeBlock.builder();
+				code.add("new $T {", type.toClass());
+				code.add(elements.collect(CodeBlock.joining(", ")));
+				code.add("}");
+				return code.build();
 			}
 			return null;
 		}
@@ -298,19 +298,19 @@ class BeanDefinitionPropertyValueCodeGenerator {
 
 		protected final CodeBlock generateCollectionOf(Collection<?> collection,
 				Class<?> collectionType, ResolvableType elementType) {
-			Builder builder = CodeBlock.builder();
-			builder.add("$T.of(", collectionType);
+			Builder code = CodeBlock.builder();
+			code.add("$T.of(", collectionType);
 			Iterator<?> iterator = collection.iterator();
 			while (iterator.hasNext()) {
 				Object element = iterator.next();
-				builder.add("$L", BeanDefinitionPropertyValueCodeGenerator.this
+				code.add("$L", BeanDefinitionPropertyValueCodeGenerator.this
 						.generateCode(element, elementType));
 				if (iterator.hasNext()) {
-					builder.add(", ");
+					code.add(", ");
 				}
 			}
-			builder.add(")");
-			return builder.build();
+			code.add(")");
+			return code.build();
 		}
 
 	}
@@ -364,22 +364,22 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			}
 			ResolvableType keyType = type.as(Map.class).getGeneric(0);
 			ResolvableType valueType = type.as(Map.class).getGeneric(1);
-			CodeBlock.Builder builder = CodeBlock.builder();
-			builder.add("$T.ofEntries(", ManagedMap.class);
+			CodeBlock.Builder code = CodeBlock.builder();
+			code.add("$T.ofEntries(", ManagedMap.class);
 			Iterator<Map.Entry<K, V>> iterator = managedMap.entrySet().iterator();
 			while (iterator.hasNext()) {
 				Entry<?, ?> entry = iterator.next();
-				builder.add("$T.entry($L,$L)", Map.class,
+				code.add("$T.entry($L,$L)", Map.class,
 						BeanDefinitionPropertyValueCodeGenerator.this
 								.generateCode(entry.getKey(), keyType),
 						BeanDefinitionPropertyValueCodeGenerator.this
 								.generateCode(entry.getValue(), valueType));
 				if (iterator.hasNext()) {
-					builder.add(", ");
+					code.add(", ");
 				}
 			}
-			builder.add(")");
-			return builder.build();
+			code.add(")");
+			return code.build();
 		}
 
 	}
@@ -451,8 +451,8 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			}
 			map = orderForCodeConsistency(map);
 			boolean useOfEntries = map.size() > 10;
-			CodeBlock.Builder builder = CodeBlock.builder();
-			builder.add("$T" + ((!useOfEntries) ? ".of(" : ".ofEntries("), Map.class);
+			CodeBlock.Builder code = CodeBlock.builder();
+			code.add("$T" + ((!useOfEntries) ? ".of(" : ".ofEntries("), Map.class);
 			Iterator<Map.Entry<K, V>> iterator = map.entrySet().iterator();
 			while (iterator.hasNext()) {
 				Entry<K, V> entry = iterator.next();
@@ -461,17 +461,17 @@ class BeanDefinitionPropertyValueCodeGenerator {
 				CodeBlock valueCode = BeanDefinitionPropertyValueCodeGenerator.this
 						.generateCode(entry.getValue(), valueType);
 				if (!useOfEntries) {
-					builder.add("$L, $L", keyCode, valueCode);
+					code.add("$L, $L", keyCode, valueCode);
 				}
 				else {
-					builder.add("$T.entry($L,$L)", Map.class, keyCode, valueCode);
+					code.add("$T.entry($L,$L)", Map.class, keyCode, valueCode);
 				}
 				if (iterator.hasNext()) {
-					builder.add(", ");
+					code.add(", ");
 				}
 			}
-			builder.add(")");
-			return builder.build();
+			code.add(")");
+			return code.build();
 		}
 
 		private <K, V> Map<K, V> orderForCodeConsistency(Map<K, V> map) {

@@ -115,11 +115,11 @@ class DefaultBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments
 	public CodeBlock generateNewBeanDefinitionCode(GenerationContext generationContext,
 			ResolvableType beanType, BeanRegistrationCode beanRegistrationCode) {
 
-		CodeBlock.Builder builder = CodeBlock.builder();
-		builder.addStatement(generateBeanTypeCode(beanType));
-		builder.addStatement("$T $L = new $T($L)", RootBeanDefinition.class,
+		CodeBlock.Builder code = CodeBlock.builder();
+		code.addStatement(generateBeanTypeCode(beanType));
+		code.addStatement("$T $L = new $T($L)", RootBeanDefinition.class,
 				BEAN_DEFINITION_VARIABLE, RootBeanDefinition.class, BEAN_TYPE_VARIABLE);
-		return builder.build();
+		return code.build();
 	}
 
 	private CodeBlock generateBeanTypeCode(ResolvableType beanType) {
@@ -178,23 +178,23 @@ class DefaultBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments
 			BeanRegistrationCode beanRegistrationCode, CodeBlock instanceSupplierCode,
 			List<MethodReference> postProcessors) {
 
-		CodeBlock.Builder builder = CodeBlock.builder();
+		CodeBlock.Builder code = CodeBlock.builder();
 		if (postProcessors.isEmpty()) {
-			builder.addStatement("$L.setInstanceSupplier($L)", BEAN_DEFINITION_VARIABLE,
+			code.addStatement("$L.setInstanceSupplier($L)", BEAN_DEFINITION_VARIABLE,
 					instanceSupplierCode);
-			return builder.build();
+			return code.build();
 		}
-		builder.addStatement("$T $L = $L",
+		code.addStatement("$T $L = $L",
 				ParameterizedTypeName.get(InstanceSupplier.class,
 						this.registeredBean.getBeanClass()),
 				INSTANCE_SUPPLIER_VARIABLE, instanceSupplierCode);
 		for (MethodReference postProcessor : postProcessors) {
-			builder.addStatement("$L = $L.andThen($L)", INSTANCE_SUPPLIER_VARIABLE,
+			code.addStatement("$L = $L.andThen($L)", INSTANCE_SUPPLIER_VARIABLE,
 					INSTANCE_SUPPLIER_VARIABLE, postProcessor.toCodeBlock());
 		}
-		builder.addStatement("$L.setInstanceSupplier($L)", BEAN_DEFINITION_VARIABLE,
+		code.addStatement("$L.setInstanceSupplier($L)", BEAN_DEFINITION_VARIABLE,
 				INSTANCE_SUPPLIER_VARIABLE);
-		return builder.build();
+		return code.build();
 	}
 
 	@Override
@@ -212,9 +212,9 @@ class DefaultBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments
 	public CodeBlock generateReturnCode(GenerationContext generationContext,
 			BeanRegistrationCode beanRegistrationCode) {
 
-		CodeBlock.Builder builder = CodeBlock.builder();
-		builder.addStatement("return $L", BEAN_DEFINITION_VARIABLE);
-		return builder.build();
+		CodeBlock.Builder code = CodeBlock.builder();
+		code.addStatement("return $L", BEAN_DEFINITION_VARIABLE);
+		return code.build();
 	}
 
 }

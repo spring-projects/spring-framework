@@ -219,10 +219,10 @@ class BeanDefinitionMethodGeneratorTests {
 					GenerationContext generationContext,
 					ResolvableType beanType,
 					BeanRegistrationCode beanRegistrationCode) {
-				CodeBlock.Builder builder = CodeBlock.builder();
-				builder.addStatement("// I am custom");
-				builder.add(super.generateNewBeanDefinitionCode(generationContext, beanType, beanRegistrationCode));
-				return builder.build();
+				CodeBlock.Builder code = CodeBlock.builder();
+				code.addStatement("// I am custom");
+				code.add(super.generateNewBeanDefinitionCode(generationContext, beanType, beanRegistrationCode));
+				return code.build();
 			}
 
 		};

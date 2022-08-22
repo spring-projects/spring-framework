@@ -80,19 +80,19 @@ class BeanRegistrationCodeGenerator implements BeanRegistrationCode {
 	}
 
 	CodeBlock generateCode(GenerationContext generationContext) {
-		CodeBlock.Builder builder = CodeBlock.builder();
-		builder.add(this.codeFragments.generateNewBeanDefinitionCode(generationContext,
+		CodeBlock.Builder code = CodeBlock.builder();
+		code.add(this.codeFragments.generateNewBeanDefinitionCode(generationContext,
 				this.registeredBean.getBeanType(), this));
-		builder.add(this.codeFragments.generateSetBeanDefinitionPropertiesCode(
+		code.add(this.codeFragments.generateSetBeanDefinitionPropertiesCode(
 				generationContext, this, this.registeredBean.getMergedBeanDefinition(),
 				REJECT_ALL_ATTRIBUTES_FILTER));
 		CodeBlock instanceSupplierCode = this.codeFragments.generateInstanceSupplierCode(
 				generationContext, this, this.constructorOrFactoryMethod,
 				this.instancePostProcessors.isEmpty());
-		builder.add(this.codeFragments.generateSetBeanInstanceSupplierCode(generationContext,
+		code.add(this.codeFragments.generateSetBeanInstanceSupplierCode(generationContext,
 				this, instanceSupplierCode, this.instancePostProcessors));
-		builder.add(this.codeFragments.generateReturnCode(generationContext, this));
-		return builder.build();
+		code.add(this.codeFragments.generateReturnCode(generationContext, this));
+		return code.build();
 	}
 
 }
