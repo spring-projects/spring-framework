@@ -21,7 +21,6 @@ import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeReference;
-import org.springframework.util.ClassUtils;
 
 /**
  * {@link RuntimeHintsRegistrar} implementation that registers reflection entries
