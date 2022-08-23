@@ -21,6 +21,7 @@ import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeReference;
+import org.springframework.util.ClassUtils;
 
 /**
  * {@link RuntimeHintsRegistrar} implementation that registers reflection entries
@@ -34,14 +35,16 @@ class JacksonModulesRuntimeHints implements RuntimeHintsRegistrar {
 	@Override
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
 		ReflectionHints reflectionHints = hints.reflection();
-		registerType(reflectionHints, "com.fasterxml.jackson.datatype.jdk8.Jdk8Module");
-		registerType(reflectionHints, "com.fasterxml.jackson.datatype.jsr310.JavaTimeModule");
-		registerType(reflectionHints, "com.fasterxml.jackson.module.kotlin.KotlinModule");
+		registerType(reflectionHints, "com.fasterxml.jackson.datatype.jdk8.Jdk8Module", classLoader);
+		registerType(reflectionHints, "com.fasterxml.jackson.datatype.jsr310.JavaTimeModule", classLoader);
+		registerType(reflectionHints, "com.fasterxml.jackson.module.kotlin.KotlinModule", classLoader);
 	}
 
-	private void registerType(ReflectionHints reflectionHints, String className) {
-		reflectionHints.registerType(TypeReference.of(className),
-				builder -> builder.onReachableType(TypeReference.of(Jackson2ObjectMapperBuilder.class))
-						.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
+	private void registerType(ReflectionHints reflectionHints, String className, ClassLoader classLoader) {
+		if (ClassUtils.isPresent(className, classLoader)) {
+			reflectionHints.registerType(TypeReference.of(className),
+					builder -> builder.onReachableType(TypeReference.of(Jackson2ObjectMapperBuilder.class))
+							.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
+		}
 	}
 }
