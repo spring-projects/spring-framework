@@ -17,6 +17,7 @@
 package org.springframework.test.context.aot;
 
 import java.lang.annotation.Annotation;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -103,9 +104,7 @@ class TestClassScanner {
 	 * @param classpathRoots the classpath roots to scan
 	 */
 	TestClassScanner(Set<Path> classpathRoots) {
-		Assert.notEmpty(classpathRoots, "'classpathRoots' must not be null or empty");
-		Assert.noNullElements(classpathRoots, "'classpathRoots' must not contain null elements");
-		this.classpathRoots = classpathRoots;
+		this.classpathRoots = assertPreconditions(classpathRoots);
 	}
 
 
@@ -205,6 +204,15 @@ class TestClassScanner {
 		MergedAnnotations mergedAnnotations = MergedAnnotations.from(clazz, TYPE_HIERARCHY);
 		return (mergedAnnotations.isPresent(ContextConfiguration.class) ||
 				mergedAnnotations.isPresent(BootstrapWith.class));
+	}
+
+
+	private static Set<Path> assertPreconditions(Set<Path> classpathRoots) {
+		Assert.notEmpty(classpathRoots, "'classpathRoots' must not be null or empty");
+		Assert.noNullElements(classpathRoots, "'classpathRoots' must not contain null elements");
+		classpathRoots.forEach(classpathRoot -> Assert.isTrue(Files.exists(classpathRoot),
+				() -> "Classpath root [%s] does not exist".formatted(classpathRoot)));
+		return classpathRoots;
 	}
 
 }
