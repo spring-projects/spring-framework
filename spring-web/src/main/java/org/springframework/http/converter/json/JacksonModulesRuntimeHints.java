@@ -16,10 +16,12 @@
 
 package org.springframework.http.converter.json;
 
+import java.util.function.Consumer;
+
 import org.springframework.aot.hint.MemberCategory;
-import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.aot.hint.TypeHint.Builder;
 import org.springframework.aot.hint.TypeReference;
 
 /**
@@ -27,21 +29,24 @@ import org.springframework.aot.hint.TypeReference;
  * for {@link Jackson2ObjectMapperBuilder} well-known modules.
  *
  * @author Sebastien Deleuze
+ * @author Stephane Nicoll
  * @since 6.0
  */
 class JacksonModulesRuntimeHints implements RuntimeHintsRegistrar {
 
+	private static final Consumer<Builder> asJacksonModule = builder ->
+			builder.onReachableType(TypeReference.of(Jackson2ObjectMapperBuilder.class))
+					.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+
 	@Override
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
-		ReflectionHints reflectionHints = hints.reflection();
-		registerType(reflectionHints, "com.fasterxml.jackson.datatype.jdk8.Jdk8Module", classLoader);
-		registerType(reflectionHints, "com.fasterxml.jackson.datatype.jsr310.JavaTimeModule", classLoader);
-		registerType(reflectionHints, "com.fasterxml.jackson.module.kotlin.KotlinModule", classLoader);
+		hints.reflection()
+				.registerTypeIfPresent(classLoader,
+						"com.fasterxml.jackson.datatype.jdk8.Jdk8Module", asJacksonModule)
+				.registerTypeIfPresent(classLoader,
+						"com.fasterxml.jackson.datatype.jsr310.JavaTimeModule", asJacksonModule)
+				.registerTypeIfPresent(classLoader,
+						"com.fasterxml.jackson.module.kotlin.KotlinModule", asJacksonModule);
 	}
 
-	private void registerType(ReflectionHints reflectionHints, String className, ClassLoader classLoader) {
-		reflectionHints.registerTypeIfPresent(classLoader, className,
-				builder -> builder.onReachableType(TypeReference.of(Jackson2ObjectMapperBuilder.class))
-						.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
-	}
 }
