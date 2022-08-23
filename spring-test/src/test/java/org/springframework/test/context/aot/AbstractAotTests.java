@@ -72,7 +72,16 @@ abstract class AbstractAotTests {
 
 	Set<Path> classpathRoots() {
 		try {
-			return Set.of(Paths.get(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()));
+			return Set.of(classpathRoot());
+		}
+		catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+
+	Path classpathRoot() {
+		try {
+			return Paths.get(getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
 		}
 		catch (Exception ex) {
 			throw new RuntimeException(ex);

@@ -93,6 +93,7 @@ configure(allprojects) { project ->
 			dependency "com.github.librepdf:openpdf:1.3.29"
 			dependency "com.rometools:rome:1.18.0"
 			dependency "commons-io:commons-io:2.11.0"
+			dependency "info.picocli:picocli:4.6.3"	
 			dependency "io.vavr:vavr:0.10.4"
 			dependency "net.sf.jopt-simple:jopt-simple:5.0.4"
 			dependencySet(group: 'org.apache.activemq', version: '5.16.2') {

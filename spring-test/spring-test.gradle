@@ -14,6 +14,7 @@ dependencies {
 	optional(project(":spring-webflux"))
 	optional(project(":spring-webmvc"))
 	optional(project(":spring-websocket"))
+	optional('info.picocli:picocli')	
 	optional("jakarta.activation:jakarta.activation-api")
 	optional("jakarta.el:jakarta.el-api")
 	optional("jakarta.inject:jakarta.inject-api")
