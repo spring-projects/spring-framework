@@ -41,6 +41,7 @@ class JacksonModulesRuntimeHints implements RuntimeHintsRegistrar {
 
 	private void registerType(ReflectionHints reflectionHints, String className) {
 		reflectionHints.registerType(TypeReference.of(className),
-				builder -> builder.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
+				builder -> builder.onReachableType(TypeReference.of(Jackson2ObjectMapperBuilder.class))
+						.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
 	}
 }
