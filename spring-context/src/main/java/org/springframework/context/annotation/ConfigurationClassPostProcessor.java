@@ -16,6 +16,8 @@
 
 package org.springframework.context.annotation;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +26,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import javax.lang.model.element.Modifier;
 
@@ -65,10 +68,13 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ConfigurationClassEnhancer.EnhancedConfiguration;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.PropertySourceDescriptor;
+import org.springframework.core.io.support.PropertySourceProcessor;
 import org.springframework.core.metrics.ApplicationStartup;
 import org.springframework.core.metrics.StartupStep;
 import org.springframework.core.type.AnnotationMetadata;
@@ -76,11 +82,13 @@ import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.javapoet.CodeBlock;
+import org.springframework.javapoet.CodeBlock.Builder;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 
 /**
  * {@link BeanFactoryPostProcessor} used for bootstrapping processing of
@@ -155,6 +163,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	private BeanNameGenerator importBeanNameGenerator = IMPORT_BEAN_NAME_GENERATOR;
 
 	private ApplicationStartup applicationStartup = ApplicationStartup.DEFAULT;
+
+	@Nullable
+	private List<PropertySourceDescriptor> propertySourceDescriptors;
 
 
 	@Override
@@ -285,7 +296,19 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	@Override
 	public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
-		return (beanFactory.containsBean(IMPORT_REGISTRY_BEAN_NAME) ? new AotContribution(beanFactory) : null);
+		boolean hasPropertySourceDescriptors = !CollectionUtils.isEmpty(this.propertySourceDescriptors);
+		boolean hasImportRegistry = beanFactory.containsBean(IMPORT_REGISTRY_BEAN_NAME);
+		if (hasPropertySourceDescriptors || hasImportRegistry) {
+			return (generationContext, code) -> {
+				if (hasPropertySourceDescriptors) {
+					new PropertySourcesAotContribution(this.propertySourceDescriptors).applyTo(generationContext, code);
+				}
+				if (hasImportRegistry) {
+					new ImportAwareAotContribution(beanFactory).applyTo(generationContext, code);
+				}
+			};
+		}
+		return null;
 	}
 
 	/**
@@ -389,6 +412,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		if (sbr != null && !sbr.containsSingleton(IMPORT_REGISTRY_BEAN_NAME)) {
 			sbr.registerSingleton(IMPORT_REGISTRY_BEAN_NAME, parser.getImportRegistry());
 		}
+
+		// Store the PropertySourceDescriptors to contribute them Ahead-of-time if necessary
+		this.propertySourceDescriptors = parser.getPropertySourceDescriptors();
 
 		if (this.metadataReaderFactory instanceof CachingMetadataReaderFactory cachingMetadataReaderFactory) {
 			// Clear cache in externally provided MetadataReaderFactory; this is a no-op
@@ -505,7 +531,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	}
 
 
-	private static class AotContribution implements BeanFactoryInitializationAotContribution {
+	private static class ImportAwareAotContribution implements BeanFactoryInitializationAotContribution {
 
 		private static final String BEAN_FACTORY_VARIABLE = BeanFactoryInitializationCode.BEAN_FACTORY_VARIABLE;
 
@@ -520,7 +546,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 		private final ConfigurableListableBeanFactory beanFactory;
 
-		public AotContribution(ConfigurableListableBeanFactory beanFactory) {
+		public ImportAwareAotContribution(ConfigurableListableBeanFactory beanFactory) {
 			this.beanFactory = beanFactory;
 		}
 
@@ -581,6 +607,87 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				}
 			}
 			return mappings;
+		}
+
+	}
+
+	private static class PropertySourcesAotContribution implements BeanFactoryInitializationAotContribution {
+
+		private static final String ENVIRONMENT_VARIABLE = "environment";
+
+		private static final String RESOURCE_LOADER_VARIABLE = "resourceLoader";
+
+		private final List<PropertySourceDescriptor> descriptors;
+
+		PropertySourcesAotContribution(List<PropertySourceDescriptor> descriptors) {
+			this.descriptors = descriptors;
+		}
+
+		@Override
+		public void applyTo(GenerationContext generationContext, BeanFactoryInitializationCode beanFactoryInitializationCode) {
+			GeneratedMethod generatedMethod = beanFactoryInitializationCode
+					.getMethods()
+					.add("processPropertySources", this::generateAddPropertySourceProcessorMethod);
+			beanFactoryInitializationCode
+					.addInitializer(generatedMethod.toMethodReference());
+		}
+
+		private void generateAddPropertySourceProcessorMethod(MethodSpec.Builder method) {
+			method.addJavadoc("Apply known @PropertySources to the environment.");
+			method.addModifiers(Modifier.PRIVATE);
+			method.addParameter(ConfigurableEnvironment.class, ENVIRONMENT_VARIABLE);
+			method.addParameter(ResourceLoader.class, RESOURCE_LOADER_VARIABLE);
+			method.addCode(generateAddPropertySourceProcessorCode());
+		}
+
+		private CodeBlock generateAddPropertySourceProcessorCode() {
+			Builder code = CodeBlock.builder();
+			String processorVariable = "processor";
+			code.addStatement("$T $L = new $T($L, $L)", PropertySourceProcessor.class,
+					processorVariable, PropertySourceProcessor.class, ENVIRONMENT_VARIABLE,
+					RESOURCE_LOADER_VARIABLE);
+			code.beginControlFlow("try");
+			for (PropertySourceDescriptor descriptor : this.descriptors) {
+				code.addStatement("$L.processPropertySource($L)", processorVariable,
+						generatePropertySourceDescriptorCode(descriptor));
+			}
+			code.nextControlFlow("catch ($T ex)", IOException.class);
+			code.addStatement("throw new $T(ex)", UncheckedIOException.class);
+			code.endControlFlow();
+			return code.build();
+		}
+
+		private CodeBlock generatePropertySourceDescriptorCode(PropertySourceDescriptor descriptor) {
+			CodeBlock.Builder code = CodeBlock.builder();
+			code.add("new $T(", PropertySourceDescriptor.class);
+			CodeBlock values = descriptor.locations().stream()
+					.map(value -> CodeBlock.of("$S", value)).collect(CodeBlock.joining(", "));
+			if (descriptor.name() == null && descriptor.propertySourceFactory() == null
+					&& descriptor.encoding() == null && !descriptor.ignoreResourceNotFound()) {
+				code.add("$L)", values);
+			}
+			else {
+				List<CodeBlock> arguments = new ArrayList<>();
+				arguments.add(CodeBlock.of("$T.of($L)", List.class, values));
+				arguments.add(CodeBlock.of("$L", descriptor.ignoreResourceNotFound()));
+				arguments.add(handleNull(descriptor.name(), () -> CodeBlock.of("$S", descriptor.name())));
+				arguments.add(handleNull(descriptor.propertySourceFactory(),
+						() -> CodeBlock.of("$T.class", descriptor.propertySourceFactory())));
+				arguments.add(handleNull(descriptor.encoding(),
+						() -> CodeBlock.of("$S", descriptor.encoding())));
+				code.add(CodeBlock.join(arguments, ", "));
+				code.add(")");
+			}
+			return code.build();
+		}
+
+		private CodeBlock handleNull(@Nullable Object value, Supplier<CodeBlock> nonNull) {
+			if (value == null) {
+				return CodeBlock.of("null");
+			}
+			else {
+				return nonNull.get();
+			}
 		}
 
 	}
