@@ -174,6 +174,16 @@ public final class TypeHint implements ConditionalHint {
 		}
 
 		/**
+		 * Register the need for reflection on the field with the specified name,
+		 * enabling write access.
+		 * @param name the name of the field
+		 * @return {@code this}, to facilitate method chaining
+		 */
+		public Builder withField(String name) {
+			return withField(name, fieldHint -> {});
+		}
+
+		/**
 		 * Register the need for reflection on the constructor with the specified
 		 * parameter types.
 		 * @param parameterTypes the parameter types of the constructor
@@ -190,6 +200,27 @@ public final class TypeHint implements ConditionalHint {
 		}
 
 		/**
+		 * Register the need for reflection on the constructor with the specified
+		 * parameter types, using the specified {@link ExecutableMode}.
+		 * @param parameterTypes the parameter types of the constructor
+		 * @param mode the requested mode
+		 * @return {@code this}, to facilitate method chaining
+		 */
+		public Builder withConstructor(List<TypeReference> parameterTypes, ExecutableMode mode) {
+			return withConstructor(parameterTypes, constructorHint -> constructorHint.withMode(mode));
+		}
+
+		/**
+		 * Register the need for reflection on the constructor with the specified
+		 * parameter types, enabling {@link ExecutableMode#INVOKE}.
+		 * @param parameterTypes the parameter types of the constructor
+		 * @return {@code this}, to facilitate method chaining
+		 */
+		public Builder withConstructor(List<TypeReference> parameterTypes) {
+			return withConstructor(parameterTypes, ExecutableMode.INVOKE);
+		}
+
+		/**
 		 * Register the need for reflection on the method with the specified name
 		 * and parameter types.
 		 * @param name the name of the method
@@ -203,6 +234,29 @@ public final class TypeHint implements ConditionalHint {
 					k -> ExecutableHint.ofMethod(name, parameterTypes));
 			methodHint.accept(builder);
 			return this;
+		}
+
+		/**
+		 * Register the need for reflection on the method with the specified name
+		 * and parameter types, using the specified {@link ExecutableMode}.
+		 * @param name the name of the method
+		 * @param parameterTypes the parameter types of the constructor
+		 * @param mode the requested mode
+		 * @return {@code this}, to facilitate method chaining
+		 */
+		public Builder withMethod(String name, List<TypeReference> parameterTypes, ExecutableMode mode) {
+			return withMethod(name, parameterTypes, methodHint -> methodHint.withMode(mode));
+		}
+
+		/**
+		 * Register the need for reflection on the method with the specified name
+		 * and parameter types, enabling {@link ExecutableMode#INVOKE}.
+		 * @param name the name of the method
+		 * @param parameterTypes the parameter types of the constructor
+		 * @return {@code this}, to facilitate method chaining
+		 */
+		public Builder withMethod(String name, List<TypeReference> parameterTypes) {
+			return withMethod(name, parameterTypes, ExecutableMode.INVOKE);
 		}
 
 		/**

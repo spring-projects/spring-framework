@@ -111,11 +111,9 @@ public class FileNativeConfigurationWriterTests {
 						fieldBuilder.allowWrite(true);
 						fieldBuilder.allowUnsafeAccess(true);
 					})
-					.withConstructor(TypeReference.listOf(List.class, boolean.class, MimeType.class), constructorHint ->
-							constructorHint.withMode(ExecutableMode.INTROSPECT))
-					.withMethod("setDefaultCharset", TypeReference.listOf(Charset.class), ctorBuilder -> {})
-					.withMethod("getDefaultCharset", Collections.emptyList(), constructorHint ->
-							constructorHint.withMode(ExecutableMode.INTROSPECT));
+					.withConstructor(TypeReference.listOf(List.class, boolean.class, MimeType.class), ExecutableMode.INTROSPECT)
+					.withMethod("setDefaultCharset", TypeReference.listOf(Charset.class))
+					.withMethod("getDefaultCharset", Collections.emptyList(), ExecutableMode.INTROSPECT);
 		});
 		generator.write(hints);
 		assertEquals("""
