@@ -63,13 +63,13 @@ class RequestMappingReflectiveProcessor implements ReflectiveProcessor {
 	}
 
 	protected void registerMethodHints(ReflectionHints hints, Method method) {
-		hints.registerMethod(method, hint -> hint.setModes(ExecutableMode.INVOKE));
+		hints.registerMethod(method, ExecutableMode.INVOKE);
 		registerParameterHints(hints, method);
 		registerReturnValueHints(hints, method);
 	}
 
 	protected void registerParameterHints(ReflectionHints hints, Method method) {
-		hints.registerMethod(method, hint -> hint.setModes(ExecutableMode.INVOKE));
+		hints.registerMethod(method, ExecutableMode.INVOKE);
 		for (Parameter parameter : method.getParameters()) {
 			MethodParameter methodParameter = MethodParameter.forParameter(parameter);
 			if (methodParameter.hasParameterAnnotation(RequestBody.class) ||

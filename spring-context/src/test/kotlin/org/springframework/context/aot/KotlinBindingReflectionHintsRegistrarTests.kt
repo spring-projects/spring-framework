@@ -48,8 +48,7 @@ class KotlinBindingReflectionHintsRegistrarTests {
 				assertThat(typeHint.methods()).singleElement()
 					.satisfies(ThrowingConsumer { methodHint: ExecutableHint ->
 						assertThat(methodHint.name).isEqualTo("getName")
-						assertThat(methodHint.modes)
-							.containsOnly(ExecutableMode.INVOKE)
+						assertThat(methodHint.mode).isEqualTo(ExecutableMode.INVOKE)
 					})
 			},
 			ThrowingConsumer { typeHint: TypeHint ->
@@ -57,7 +56,7 @@ class KotlinBindingReflectionHintsRegistrarTests {
 				assertThat(typeHint.methods()).singleElement()
 					.satisfies(ThrowingConsumer { methodHint: ExecutableHint ->
 						assertThat(methodHint.name).isEqualTo("serializer")
-						assertThat(methodHint.modes).containsOnly(ExecutableMode.INVOKE)
+						assertThat(methodHint.mode).isEqualTo(ExecutableMode.INVOKE)
 					})
 			})
 	}

@@ -49,26 +49,22 @@ public class ReflectionHintsWriterTests {
 	@Test
 	void one() throws JSONException {
 		ReflectionHints hints = new ReflectionHints();
-		hints.registerType(StringDecoder.class, builder -> {
-			builder
-					.onReachableType(TypeReference.of(String.class))
-					.withMembers(MemberCategory.PUBLIC_FIELDS, MemberCategory.DECLARED_FIELDS,
-							MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS, MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
-							MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-							MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS,
-							MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS,
-							MemberCategory.PUBLIC_CLASSES, MemberCategory.DECLARED_CLASSES)
-					.withField("DEFAULT_CHARSET", fieldBuilder -> {})
-					.withField("defaultCharset", fieldBuilder -> {
-						fieldBuilder.allowWrite(true);
-						fieldBuilder.allowUnsafeAccess(true);
-					})
-					.withConstructor(TypeReference.listOf(List.class, boolean.class, MimeType.class), constructorHint ->
-							constructorHint.withMode(ExecutableMode.INTROSPECT))
-					.withMethod("setDefaultCharset", List.of(TypeReference.of(Charset.class)), ctorBuilder -> {})
-					.withMethod("getDefaultCharset", Collections.emptyList(), constructorHint ->
-							constructorHint.withMode(ExecutableMode.INTROSPECT));
-		});
+		hints.registerType(StringDecoder.class, builder -> builder
+				.onReachableType(TypeReference.of(String.class))
+				.withMembers(MemberCategory.PUBLIC_FIELDS, MemberCategory.DECLARED_FIELDS,
+						MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS, MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
+						MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+						MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS,
+						MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS,
+						MemberCategory.PUBLIC_CLASSES, MemberCategory.DECLARED_CLASSES)
+				.withField("DEFAULT_CHARSET", fieldBuilder -> fieldBuilder.allowWrite(false))
+				.withField("defaultCharset", fieldBuilder -> {
+					fieldBuilder.allowWrite(true);
+					fieldBuilder.allowUnsafeAccess(true);
+				})
+				.withConstructor(TypeReference.listOf(List.class, boolean.class, MimeType.class), ExecutableMode.INTROSPECT)
+				.withMethod("setDefaultCharset", List.of(TypeReference.of(Charset.class)))
+				.withMethod("getDefaultCharset", Collections.emptyList(), ExecutableMode.INTROSPECT));
 		assertEquals("""
 				[
 					{
@@ -120,7 +116,7 @@ public class ReflectionHintsWriterTests {
 	void queriedMethods() throws JSONException {
 		ReflectionHints hints = new ReflectionHints();
 		hints.registerType(Integer.class, builder -> builder.withMethod("parseInt",
-				TypeReference.listOf(String.class), b -> b.withMode(ExecutableMode.INTROSPECT)));
+				TypeReference.listOf(String.class), ExecutableMode.INTROSPECT));
 
 		assertEquals("""
 				[
@@ -141,7 +137,7 @@ public class ReflectionHintsWriterTests {
 	void methods() throws JSONException {
 		ReflectionHints hints = new ReflectionHints();
 		hints.registerType(Integer.class, builder -> builder.withMethod("parseInt",
-				TypeReference.listOf(String.class), b -> b.withMode(ExecutableMode.INVOKE)));
+				TypeReference.listOf(String.class), ExecutableMode.INVOKE));
 
 		assertEquals("""
 				[
@@ -162,7 +158,7 @@ public class ReflectionHintsWriterTests {
 	void methodWithInnerClassParameter() throws JSONException {
 		ReflectionHints hints = new ReflectionHints();
 		hints.registerType(Integer.class, builder -> builder.withMethod("test",
-				TypeReference.listOf(Inner.class), b -> b.withMode(ExecutableMode.INVOKE)));
+				TypeReference.listOf(Inner.class), ExecutableMode.INVOKE));
 
 		assertEquals("""
 				[
@@ -183,9 +179,9 @@ public class ReflectionHintsWriterTests {
 	void methodAndQueriedMethods() throws JSONException {
 		ReflectionHints hints = new ReflectionHints();
 		hints.registerType(Integer.class, builder -> builder.withMethod("parseInt",
-				TypeReference.listOf(String.class), b -> b.withMode(ExecutableMode.INVOKE)));
+				TypeReference.listOf(String.class), ExecutableMode.INVOKE));
 		hints.registerType(Integer.class, builder -> builder.withMethod("parseInt",
-				TypeReference.listOf(String.class), b -> b.withMode(ExecutableMode.INTROSPECT)));
+				TypeReference.listOf(String.class, int.class), ExecutableMode.INTROSPECT));
 
 		assertEquals("""
 				[
@@ -194,7 +190,7 @@ public class ReflectionHintsWriterTests {
 						"queriedMethods": [
 							{
 								"name": "parseInt",
-								"parameterTypes": ["java.lang.String"]
+								"parameterTypes": ["java.lang.String", "int"]
 							}
 						],
 						"methods": [

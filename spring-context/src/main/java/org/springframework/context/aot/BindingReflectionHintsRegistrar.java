@@ -25,12 +25,10 @@ import java.lang.reflect.RecordComponent;
 import java.lang.reflect.Type;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.aot.hint.ExecutableHint;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
@@ -53,9 +51,6 @@ import org.springframework.util.ClassUtils;
 public class BindingReflectionHintsRegistrar {
 
 	private static final Log logger = LogFactory.getLog(BindingReflectionHintsRegistrar.class);
-
-	private static final Consumer<ExecutableHint.Builder> INVOKE = builder -> builder
-			.withMode(ExecutableMode.INVOKE);
 
 	private static final String KOTLIN_COMPANION_SUFFIX = "$Companion";
 
@@ -127,7 +122,7 @@ public class BindingReflectionHintsRegistrar {
 	}
 
 	private void registerRecordHints(ReflectionHints hints, Set<Type> seen, Method method) {
-		hints.registerMethod(method, INVOKE);
+		hints.registerMethod(method, ExecutableMode.INVOKE);
 		MethodParameter methodParameter = MethodParameter.forExecutable(method, -1);
 		Type methodParameterType = methodParameter.getGenericParameterType();
 		if (!seen.contains(methodParameterType)) {
@@ -138,7 +133,7 @@ public class BindingReflectionHintsRegistrar {
 	private void registerPropertyHints(ReflectionHints hints, Set<Type> seen, @Nullable Method method, int parameterIndex) {
 		if (method != null && method.getDeclaringClass() != Object.class
 				&& method.getDeclaringClass() != Enum.class) {
-			hints.registerMethod(method, INVOKE);
+			hints.registerMethod(method, ExecutableMode.INVOKE);
 			MethodParameter methodParameter = MethodParameter.forExecutable(method, parameterIndex);
 			Type methodParameterType = methodParameter.getGenericParameterType();
 			if (!seen.contains(methodParameterType)) {

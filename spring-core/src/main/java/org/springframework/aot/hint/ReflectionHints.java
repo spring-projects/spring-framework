@@ -160,13 +160,23 @@ public class ReflectionHints {
 
 	/**
 	 * Register the need for reflection on the specified {@link Constructor},
+	 * using the specified {@link ExecutableMode}.
+	 * @param constructor the constructor that requires reflection
+	 * @param mode the requested mode
+	 * @return {@code this}, to facilitate method chaining
+	 */
+	public ReflectionHints registerConstructor(Constructor<?> constructor, ExecutableMode mode) {
+		return registerConstructor(constructor, constructorHint -> constructorHint.withMode(mode));
+	}
+
+	/**
+	 * Register the need for reflection on the specified {@link Constructor},
 	 * enabling {@link ExecutableMode#INVOKE}.
 	 * @param constructor the constructor that requires reflection
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public ReflectionHints registerConstructor(Constructor<?> constructor) {
-		return registerConstructor(constructor, constructorHint ->
-				constructorHint.withMode(ExecutableMode.INVOKE));
+		return registerConstructor(constructor, ExecutableMode.INVOKE);
 	}
 
 	/**
@@ -182,12 +192,23 @@ public class ReflectionHints {
 
 	/**
 	 * Register the need for reflection on the specified {@link Method},
+	 * using the specified {@link ExecutableMode}.
+	 * @param method the method that requires reflection
+	 * @param mode the requested mode
+	 * @return {@code this}, to facilitate method chaining
+	 */
+	public ReflectionHints registerMethod(Method method, ExecutableMode mode) {
+		return registerMethod(method, methodHint -> methodHint.withMode(mode));
+	}
+
+	/**
+	 * Register the need for reflection on the specified {@link Method},
 	 * enabling {@link ExecutableMode#INVOKE}.
 	 * @param method the method that requires reflection
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public ReflectionHints registerMethod(Method method) {
-		return registerMethod(method, methodHint -> methodHint.withMode(ExecutableMode.INVOKE));
+		return registerMethod(method, ExecutableMode.INVOKE);
 	}
 
 	private List<TypeReference> mapParameters(Executable executable) {

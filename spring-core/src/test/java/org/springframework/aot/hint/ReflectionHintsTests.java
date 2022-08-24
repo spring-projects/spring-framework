@@ -121,14 +121,46 @@ class ReflectionHintsTests {
 	}
 
 	@Test
-	void registerField() {
+	void registerFieldAllowsWriteByDefault() {
 		Field field = ReflectionUtils.findField(TestType.class, "field");
 		assertThat(field).isNotNull();
 		this.reflectionHints.registerField(field);
+		assertTestTypeFieldHint(fieldHint -> {
+			assertThat(fieldHint.getName()).isEqualTo("field");
+			assertThat(fieldHint.isAllowWrite()).isTrue();
+			assertThat(fieldHint.isAllowUnsafeAccess()).isFalse();
+		});
+	}
+
+	@Test
+	void registerFieldWithEmptyCustomizerAppliesConsistentDefault() {
+		Field field = ReflectionUtils.findField(TestType.class, "field");
+		assertThat(field).isNotNull();
+		this.reflectionHints.registerField(field, fieldHint -> {});
+		assertTestTypeFieldHint(fieldHint -> {
+			assertThat(fieldHint.getName()).isEqualTo("field");
+			assertThat(fieldHint.isAllowWrite()).isTrue();
+			assertThat(fieldHint.isAllowUnsafeAccess()).isFalse();
+		});
+	}
+
+	@Test
+	void registerFieldWithCustomizerAppliesCustomization() {
+		Field field = ReflectionUtils.findField(TestType.class, "field");
+		assertThat(field).isNotNull();
+		this.reflectionHints.registerField(field, fieldHint ->
+				fieldHint.allowWrite(false).allowUnsafeAccess(true));
+		assertTestTypeFieldHint(fieldHint -> {
+			assertThat(fieldHint.getName()).isEqualTo("field");
+			assertThat(fieldHint.isAllowWrite()).isFalse();
+			assertThat(fieldHint.isAllowUnsafeAccess()).isTrue();
+		});
+	}
+
+	private void assertTestTypeFieldHint(Consumer<FieldHint> fieldHint) {
 		assertThat(this.reflectionHints.typeHints()).singleElement().satisfies(typeHint -> {
 			assertThat(typeHint.getType().getCanonicalName()).isEqualTo(TestType.class.getCanonicalName());
-			assertThat(typeHint.fields()).singleElement().satisfies(fieldHint ->
-					assertThat(fieldHint.getName()).isEqualTo("field"));
+			assertThat(typeHint.fields()).singleElement().satisfies(fieldHint);
 			assertThat(typeHint.constructors()).isEmpty();
 			assertThat(typeHint.methods()).isEmpty();
 			assertThat(typeHint.getMemberCategories()).isEmpty();
@@ -138,14 +170,48 @@ class ReflectionHintsTests {
 	@Test
 	void registerConstructor() {
 		this.reflectionHints.registerConstructor(TestType.class.getDeclaredConstructors()[0]);
+		assertTestTypeConstructorHint(constructorHint -> {
+			assertThat(constructorHint.getParameterTypes()).isEmpty();
+			assertThat(constructorHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
+		});
+	}
+
+	@Test
+	void registerConstructorWithMode() {
+		this.reflectionHints.registerConstructor(
+				TestType.class.getDeclaredConstructors()[0], ExecutableMode.INTROSPECT);
+		assertTestTypeConstructorHint(constructorHint -> {
+			assertThat(constructorHint.getParameterTypes()).isEmpty();
+			assertThat(constructorHint.getMode()).isEqualTo(ExecutableMode.INTROSPECT);
+		});
+	}
+
+	@Test
+	void registerConstructorWithEmptyCustomizerAppliesConsistentDefault() {
+		this.reflectionHints.registerConstructor(TestType.class.getDeclaredConstructors()[0],
+				constructorHint -> {});
+		assertTestTypeConstructorHint(constructorHint -> {
+			assertThat(constructorHint.getParameterTypes()).isEmpty();
+			assertThat(constructorHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
+		});
+	}
+
+	@Test
+	void registerConstructorWithCustomizerAppliesCustomization() {
+		this.reflectionHints.registerConstructor(TestType.class.getDeclaredConstructors()[0],
+				constructorHint -> constructorHint.withMode(ExecutableMode.INTROSPECT));
+		assertTestTypeConstructorHint(constructorHint -> {
+			assertThat(constructorHint.getParameterTypes()).isEmpty();
+			assertThat(constructorHint.getMode()).isEqualTo(ExecutableMode.INTROSPECT);
+		});
+	}
+
+	private void assertTestTypeConstructorHint(Consumer<ExecutableHint> constructorHint) {
 		assertThat(this.reflectionHints.typeHints()).singleElement().satisfies(typeHint -> {
 			assertThat(typeHint.getMemberCategories()).isEmpty();
 			assertThat(typeHint.getType().getCanonicalName()).isEqualTo(TestType.class.getCanonicalName());
 			assertThat(typeHint.fields()).isEmpty();
-			assertThat(typeHint.constructors()).singleElement().satisfies(constructorHint -> {
-				assertThat(constructorHint.getParameterTypes()).isEmpty();
-				assertThat(constructorHint.getModes()).containsOnly(ExecutableMode.INVOKE);
-			});
+			assertThat(typeHint.constructors()).singleElement().satisfies(constructorHint);
 			assertThat(typeHint.methods()).isEmpty();
 			assertThat(typeHint.getMemberCategories()).isEmpty();
 		});
@@ -156,15 +222,56 @@ class ReflectionHintsTests {
 		Method method = ReflectionUtils.findMethod(TestType.class, "setName", String.class);
 		assertThat(method).isNotNull();
 		this.reflectionHints.registerMethod(method);
+		assertTestTypeMethodHints(methodHint -> {
+			assertThat(methodHint.getName()).isEqualTo("setName");
+			assertThat(methodHint.getParameterTypes()).containsOnly(TypeReference.of(String.class));
+			assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
+		});
+	}
+
+	@Test
+	void registerMethodWithMode() {
+		Method method = ReflectionUtils.findMethod(TestType.class, "setName", String.class);
+		assertThat(method).isNotNull();
+		this.reflectionHints.registerMethod(method, ExecutableMode.INTROSPECT);
+		assertTestTypeMethodHints(methodHint -> {
+			assertThat(methodHint.getName()).isEqualTo("setName");
+			assertThat(methodHint.getParameterTypes()).containsOnly(TypeReference.of(String.class));
+			assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INTROSPECT);
+		});
+	}
+
+	@Test
+	void registerMethodWithEmptyCustomizerAppliesConsistentDefault() {
+		Method method = ReflectionUtils.findMethod(TestType.class, "setName", String.class);
+		assertThat(method).isNotNull();
+		this.reflectionHints.registerMethod(method, methodHint -> {});
+		assertTestTypeMethodHints(methodHint -> {
+			assertThat(methodHint.getName()).isEqualTo("setName");
+			assertThat(methodHint.getParameterTypes()).containsOnly(TypeReference.of(String.class));
+			assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
+		});
+	}
+
+	@Test
+	void registerMethodWithCustomizerAppliesCustomization() {
+		Method method = ReflectionUtils.findMethod(TestType.class, "setName", String.class);
+		assertThat(method).isNotNull();
+		this.reflectionHints.registerMethod(method, methodHint ->
+				methodHint.withMode(ExecutableMode.INTROSPECT));
+		assertTestTypeMethodHints(methodHint -> {
+			assertThat(methodHint.getName()).isEqualTo("setName");
+			assertThat(methodHint.getParameterTypes()).containsOnly(TypeReference.of(String.class));
+			assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INTROSPECT);
+		});
+	}
+
+	private void assertTestTypeMethodHints(Consumer<ExecutableHint> methodHint) {
 		assertThat(this.reflectionHints.typeHints()).singleElement().satisfies(typeHint -> {
 			assertThat(typeHint.getType().getCanonicalName()).isEqualTo(TestType.class.getCanonicalName());
 			assertThat(typeHint.fields()).isEmpty();
 			assertThat(typeHint.constructors()).isEmpty();
-			assertThat(typeHint.methods()).singleElement().satisfies(methodHint -> {
-				assertThat(methodHint.getName()).isEqualTo("setName");
-				assertThat(methodHint.getParameterTypes()).containsOnly(TypeReference.of(String.class));
-				assertThat(methodHint.getModes()).containsOnly(ExecutableMode.INVOKE);
-			});
+			assertThat(typeHint.methods()).singleElement().satisfies(methodHint);
 		});
 	}
 

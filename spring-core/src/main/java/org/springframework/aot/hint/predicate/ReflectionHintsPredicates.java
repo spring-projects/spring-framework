@@ -263,11 +263,11 @@ public class ReflectionHintsPredicates {
 		 * and the configured {@code ExecutableMode} is compatibe
 		 */
 		static boolean includes(ExecutableHint hint, String name,
-				List<TypeReference> parameterTypes, List<ExecutableMode> executableModes) {
+				List<TypeReference> parameterTypes, ExecutableMode executableModes) {
 			return hint.getName().equals(name)
 					&& hint.getParameterTypes().equals(parameterTypes)
-					&& (hint.getModes().contains(ExecutableMode.INVOKE)
-					|| !executableModes.contains(ExecutableMode.INVOKE));
+					&& (hint.getMode().equals(ExecutableMode.INVOKE)
+					|| !executableModes.equals(ExecutableMode.INVOKE));
 		}
 	}
 
@@ -302,7 +302,7 @@ public class ReflectionHintsPredicates {
 						List<TypeReference> parameters = Arrays.stream(this.executable.getParameterTypes())
 								.map(TypeReference::of).toList();
 						return includes(executableHint, "<init>",
-								parameters, List.of(this.executableMode));
+								parameters, this.executableMode);
 					});
 		}
 
@@ -341,7 +341,7 @@ public class ReflectionHintsPredicates {
 						List<TypeReference> parameters = Arrays.stream(this.executable.getParameterTypes())
 								.map(TypeReference::of).toList();
 						return includes(executableHint, this.executable.getName(),
-								parameters, List.of(this.executableMode));
+								parameters, this.executableMode);
 					});
 		}
 

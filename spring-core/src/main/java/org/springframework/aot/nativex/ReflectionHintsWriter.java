@@ -85,10 +85,10 @@ class ReflectionHintsWriter {
 
 	private void handleExecutables(Map<String, Object> attributes, List<ExecutableHint> hints) {
 		addIfNotEmpty(attributes, "methods", hints.stream()
-				.filter(h -> h.getModes().contains(ExecutableMode.INVOKE) || h.getModes().isEmpty())
+				.filter(h -> h.getMode().equals(ExecutableMode.INVOKE))
 				.map(this::toAttributes).toList());
 		addIfNotEmpty(attributes, "queriedMethods", hints.stream()
-				.filter(h -> h.getModes().contains(ExecutableMode.INTROSPECT))
+				.filter(h -> h.getMode().equals(ExecutableMode.INTROSPECT))
 				.map(this::toAttributes).toList());
 	}
 

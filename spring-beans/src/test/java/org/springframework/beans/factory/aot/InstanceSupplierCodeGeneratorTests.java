@@ -283,7 +283,7 @@ class InstanceSupplierCodeGeneratorTests {
 	}
 
 	private ThrowingConsumer<ExecutableHint> hasMode(ExecutableMode mode) {
-		return hint -> assertThat(hint.getModes()).containsExactly(mode);
+		return hint -> assertThat(hint.getMode()).isEqualTo(mode);
 	}
 
 	@SuppressWarnings("unchecked")

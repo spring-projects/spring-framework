@@ -17,6 +17,7 @@
 package org.springframework.aot.hint;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
@@ -54,13 +55,35 @@ class TypeHintTests {
 	}
 
 	@Test
-	void createWithField() {
-		TypeHint hint = TypeHint.of(TypeReference.of(String.class))
-				.withField("value", fieldHint -> fieldHint.allowWrite(true)).build();
-		assertThat(hint.fields()).singleElement().satisfies(fieldHint -> {
+	void createWithFieldAllowsWriteByDefault() {
+		assertFieldHint(TypeHint.of(TypeReference.of(String.class))
+				.withField("value"), fieldHint -> {
 			assertThat(fieldHint.getName()).isEqualTo("value");
 			assertThat(fieldHint.isAllowWrite()).isTrue();
 			assertThat(fieldHint.isAllowUnsafeAccess()).isFalse();
+		});
+	}
+
+	@Test
+	void createWithFieldAndEmptyCustomizerAppliesConsistentDefault() {
+		assertFieldHint(TypeHint.of(TypeReference.of(String.class))
+				.withField("value", fieldHint -> {}), fieldHint -> {
+			assertThat(fieldHint.getName()).isEqualTo("value");
+			assertThat(fieldHint.isAllowWrite()).isTrue();
+			assertThat(fieldHint.isAllowUnsafeAccess()).isFalse();
+		});
+	}
+
+	@Test
+	void createWithFieldAndCustomizerAppliesCustomization() {
+		assertFieldHint(TypeHint.of(TypeReference.of(String.class))
+				.withField("value", fieldHint -> {
+					fieldHint.allowWrite(false);
+					fieldHint.allowUnsafeAccess(true);
+				}), fieldHint -> {
+			assertThat(fieldHint.getName()).isEqualTo("value");
+			assertThat(fieldHint.isAllowWrite()).isFalse();
+			assertThat(fieldHint.isAllowUnsafeAccess()).isTrue();
 		});
 	}
 
@@ -72,63 +95,174 @@ class TypeHintTests {
 			fieldHint.allowWrite(true);
 			fieldHint.allowUnsafeAccess(false);
 		});
-		TypeHint hint = builder.build();
-		assertThat(hint.fields()).singleElement().satisfies(fieldHint -> {
+		assertFieldHint(builder, fieldHint -> {
 			assertThat(fieldHint.getName()).isEqualTo("value");
 			assertThat(fieldHint.isAllowWrite()).isTrue();
 			assertThat(fieldHint.isAllowUnsafeAccess()).isFalse();
 		});
 	}
 
+	void assertFieldHint(Builder builder, Consumer<FieldHint> fieldHint) {
+		TypeHint hint = builder.build();
+		assertThat(hint.fields()).singleElement().satisfies(fieldHint);
+		assertThat(hint.constructors()).isEmpty();
+		assertThat(hint.methods()).isEmpty();
+		assertThat(hint.getMemberCategories()).isEmpty();
+	}
+
 	@Test
 	void createWithConstructor() {
 		List<TypeReference> parameterTypes = TypeReference.listOf(byte[].class, int.class);
-		TypeHint hint = TypeHint.of(TypeReference.of(String.class)).withConstructor(parameterTypes,
-				constructorHint -> constructorHint.withMode(ExecutableMode.INVOKE)).build();
-		assertThat(hint.constructors()).singleElement().satisfies(constructorHint -> {
+		assertConstructorHint(TypeHint.of(TypeReference.of(String.class))
+				.withConstructor(parameterTypes), constructorHint -> {
 			assertThat(constructorHint.getParameterTypes()).containsOnlyOnceElementsOf(parameterTypes);
-			assertThat(constructorHint.getModes()).containsOnly(ExecutableMode.INVOKE);
+			assertThat(constructorHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
+		});
+	}
+
+	@Test
+	void createWithConstructorAndMode() {
+		List<TypeReference> parameterTypes = TypeReference.listOf(byte[].class, int.class);
+		assertConstructorHint(TypeHint.of(TypeReference.of(String.class))
+				.withConstructor(parameterTypes, ExecutableMode.INTROSPECT), constructorHint -> {
+			assertThat(constructorHint.getParameterTypes()).containsOnlyOnceElementsOf(parameterTypes);
+			assertThat(constructorHint.getMode()).isEqualTo(ExecutableMode.INTROSPECT);
+		});
+	}
+
+	@Test
+	void createWithConstructorAndEmptyCustomizerAppliesConsistentDefault() {
+		List<TypeReference> parameterTypes = TypeReference.listOf(byte[].class, int.class);
+		assertConstructorHint(TypeHint.of(TypeReference.of(String.class))
+				.withConstructor(parameterTypes, constructorHint -> {}), constructorHint -> {
+			assertThat(constructorHint.getParameterTypes()).containsOnlyOnceElementsOf(parameterTypes);
+			assertThat(constructorHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
+		});
+	}
+
+	@Test
+	void createWithConstructorAndCustomizerAppliesCustomization() {
+		List<TypeReference> parameterTypes = TypeReference.listOf(byte[].class, int.class);
+		assertConstructorHint(TypeHint.of(TypeReference.of(String.class))
+				.withConstructor(parameterTypes, constructorHint ->
+						constructorHint.withMode(ExecutableMode.INTROSPECT)), constructorHint -> {
+			assertThat(constructorHint.getParameterTypes()).containsOnlyOnceElementsOf(parameterTypes);
+			assertThat(constructorHint.getMode()).isEqualTo(ExecutableMode.INTROSPECT);
 		});
 	}
 
 	@Test
 	void createConstructorReuseBuilder() {
 		List<TypeReference> parameterTypes = TypeReference.listOf(byte[].class, int.class);
+		Builder builder = TypeHint.of(TypeReference.of(String.class))
+				.withConstructor(parameterTypes, ExecutableMode.INTROSPECT);
+		assertConstructorHint(builder.withConstructor(parameterTypes, constructorHint ->
+				constructorHint.withMode(ExecutableMode.INVOKE)), constructorHint -> {
+			assertThat(constructorHint.getParameterTypes()).containsExactlyElementsOf(parameterTypes);
+			assertThat(constructorHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
+		});
+	}
+
+	@Test
+	void createConstructorReuseBuilderAndApplyExecutableModePrecedence() {
+		List<TypeReference> parameterTypes = TypeReference.listOf(byte[].class, int.class);
 		Builder builder = TypeHint.of(TypeReference.of(String.class)).withConstructor(parameterTypes,
 				constructorHint -> constructorHint.withMode(ExecutableMode.INVOKE));
-		TypeHint hint = builder.withConstructor(parameterTypes, constructorHint ->
-				constructorHint.withMode(ExecutableMode.INTROSPECT)).build();
-		assertThat(hint.constructors()).singleElement().satisfies(constructorHint -> {
+		assertConstructorHint(builder.withConstructor(parameterTypes, constructorHint ->
+				constructorHint.withMode(ExecutableMode.INTROSPECT)), constructorHint -> {
 			assertThat(constructorHint.getParameterTypes()).containsExactlyElementsOf(parameterTypes);
-			assertThat(constructorHint.getModes()).containsOnly(ExecutableMode.INVOKE, ExecutableMode.INTROSPECT);
+			assertThat(constructorHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
 		});
+	}
+
+	void assertConstructorHint(Builder builder, Consumer<ExecutableHint> constructorHint) {
+		TypeHint hint = builder.build();
+		assertThat(hint.fields()).isEmpty();
+		assertThat(hint.constructors()).singleElement().satisfies(constructorHint);
+		assertThat(hint.methods()).isEmpty();
+		assertThat(hint.getMemberCategories()).isEmpty();
 	}
 
 	@Test
 	void createWithMethod() {
 		List<TypeReference> parameterTypes = List.of(TypeReference.of(char[].class));
-		TypeHint hint = TypeHint.of(TypeReference.of(String.class)).withMethod("valueOf", parameterTypes,
-				methodHint -> methodHint.withMode(ExecutableMode.INVOKE)).build();
-		assertThat(hint.methods()).singleElement().satisfies(methodHint -> {
+		assertMethodHint(TypeHint.of(TypeReference.of(String.class))
+				.withMethod("valueOf", parameterTypes), methodHint -> {
 			assertThat(methodHint.getName()).isEqualTo("valueOf");
 			assertThat(methodHint.getParameterTypes()).containsExactlyElementsOf(parameterTypes);
-			assertThat(methodHint.getModes()).containsOnly(ExecutableMode.INVOKE);
+			assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
 		});
 	}
 
 	@Test
-	void createWithMethodReuseBuilder() {
-		List<TypeReference> parameterTypes = TypeReference.listOf(char[].class);
-		Builder builder = TypeHint.of(TypeReference.of(String.class)).withMethod("valueOf", parameterTypes,
-				methodHint -> methodHint.withMode(ExecutableMode.INVOKE));
-		TypeHint hint = builder.withMethod("valueOf", parameterTypes,
-				methodHint -> methodHint.setModes(ExecutableMode.INTROSPECT)).build();
-		assertThat(hint.methods()).singleElement().satisfies(methodHint -> {
+	void createWithMethodAndMode() {
+		List<TypeReference> parameterTypes = List.of(TypeReference.of(char[].class));
+		assertMethodHint(TypeHint.of(TypeReference.of(String.class))
+				.withMethod("valueOf", parameterTypes, ExecutableMode.INTROSPECT), methodHint -> {
 			assertThat(methodHint.getName()).isEqualTo("valueOf");
 			assertThat(methodHint.getParameterTypes()).containsExactlyElementsOf(parameterTypes);
-			assertThat(methodHint.getModes()).containsOnly(ExecutableMode.INTROSPECT);
+			assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INTROSPECT);
 		});
 	}
+
+	@Test
+	void createWithMethodAndEmptyCustomizerAppliesConsistentDefault() {
+		List<TypeReference> parameterTypes = List.of(TypeReference.of(char[].class));
+		assertMethodHint(TypeHint.of(TypeReference.of(String.class))
+				.withMethod("valueOf", parameterTypes, methodHint -> {}), methodHint -> {
+			assertThat(methodHint.getName()).isEqualTo("valueOf");
+			assertThat(methodHint.getParameterTypes()).containsExactlyElementsOf(parameterTypes);
+			assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
+		});
+	}
+
+	@Test
+	void createWithMethodAndCustomizerAppliesCustomization() {
+		List<TypeReference> parameterTypes = List.of(TypeReference.of(char[].class));
+		assertMethodHint(TypeHint.of(TypeReference.of(String.class))
+				.withMethod("valueOf", parameterTypes, methodHint ->
+						methodHint.withMode(ExecutableMode.INTROSPECT)), methodHint -> {
+			assertThat(methodHint.getName()).isEqualTo("valueOf");
+			assertThat(methodHint.getParameterTypes()).containsExactlyElementsOf(parameterTypes);
+			assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INTROSPECT);
+		});
+	}
+
+
+	@Test
+	void createWithMethodReuseBuilder() {
+		List<TypeReference> parameterTypes = TypeReference.listOf(char[].class);
+		Builder builder = TypeHint.of(TypeReference.of(String.class))
+				.withMethod("valueOf", parameterTypes, ExecutableMode.INTROSPECT);
+		assertMethodHint(builder.withMethod("valueOf", parameterTypes,
+				methodHint -> methodHint.withMode(ExecutableMode.INVOKE)), methodHint -> {
+			assertThat(methodHint.getName()).isEqualTo("valueOf");
+			assertThat(methodHint.getParameterTypes()).containsExactlyElementsOf(parameterTypes);
+			assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
+		});
+	}
+
+	@Test
+	void createWithMethodReuseBuilderAndApplyExecutableModePrecedence() {
+		List<TypeReference> parameterTypes = TypeReference.listOf(char[].class);
+		Builder builder = TypeHint.of(TypeReference.of(String.class))
+				.withMethod("valueOf", parameterTypes, ExecutableMode.INVOKE);
+		assertMethodHint(builder.withMethod("valueOf", parameterTypes,
+				methodHint -> methodHint.withMode(ExecutableMode.INTROSPECT)), methodHint -> {
+			assertThat(methodHint.getName()).isEqualTo("valueOf");
+			assertThat(methodHint.getParameterTypes()).containsExactlyElementsOf(parameterTypes);
+			assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
+		});
+	}
+
+	void assertMethodHint(Builder builder, Consumer<ExecutableHint> methodHint) {
+		TypeHint hint = builder.build();
+		assertThat(hint.fields()).isEmpty();
+		assertThat(hint.constructors()).isEmpty();
+		assertThat(hint.methods()).singleElement().satisfies(methodHint);
+		assertThat(hint.getMemberCategories()).isEmpty();
+	}
+
 
 	@Test
 	void createWithMemberCategory() {
