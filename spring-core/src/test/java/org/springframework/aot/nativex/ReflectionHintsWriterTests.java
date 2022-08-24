@@ -60,7 +60,7 @@ public class ReflectionHintsWriterTests {
 				.withField("DEFAULT_CHARSET")
 				.withField("defaultCharset")
 				.withConstructor(TypeReference.listOf(List.class, boolean.class, MimeType.class), ExecutableMode.INTROSPECT)
-				.withMethod("setDefaultCharset", List.of(TypeReference.of(Charset.class)))
+				.withMethod("setDefaultCharset", List.of(TypeReference.of(Charset.class)), ExecutableMode.INVOKE)
 				.withMethod("getDefaultCharset", Collections.emptyList(), ExecutableMode.INTROSPECT));
 		assertEquals("""
 				[

@@ -1007,7 +1007,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			AccessVisibility visibility = AccessVisibility.forMember(method);
 			if (visibility == AccessVisibility.PRIVATE
 					|| visibility == AccessVisibility.PROTECTED) {
-				hints.reflection().registerMethod(method);
+				hints.reflection().registerMethod(method, ExecutableMode.INVOKE);
 				code.add(".resolveAndInvoke($L, $L)", REGISTERED_BEAN_PARAMETER,
 						INSTANCE_PARAMETER);
 			}

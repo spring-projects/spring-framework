@@ -16,6 +16,7 @@
 
 package org.springframework.aot.hint;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.function.Consumer;
@@ -48,8 +49,7 @@ class ReflectionHintsTests {
 
 	@Test
 	void registerTypeIfPresentRegistersExistingClass() {
-		this.reflectionHints.registerTypeIfPresent(null, String.class.getName(),
-				hint -> hint.withMembers(MemberCategory.DECLARED_FIELDS));
+		this.reflectionHints.registerTypeIfPresent(null, String.class.getName(), MemberCategory.DECLARED_FIELDS);
 		assertThat(this.reflectionHints.typeHints()).singleElement().satisfies(
 				typeWithMemberCategories(String.class, MemberCategory.DECLARED_FIELDS));
 	}
@@ -144,15 +144,6 @@ class ReflectionHintsTests {
 
 	@Test
 	void registerConstructor() {
-		this.reflectionHints.registerConstructor(TestType.class.getDeclaredConstructors()[0]);
-		assertTestTypeConstructorHint(constructorHint -> {
-			assertThat(constructorHint.getParameterTypes()).isEmpty();
-			assertThat(constructorHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
-		});
-	}
-
-	@Test
-	void registerConstructorWithMode() {
 		this.reflectionHints.registerConstructor(
 				TestType.class.getDeclaredConstructors()[0], ExecutableMode.INTROSPECT);
 		assertTestTypeConstructorHint(constructorHint -> {
@@ -162,22 +153,13 @@ class ReflectionHintsTests {
 	}
 
 	@Test
-	void registerConstructorWithEmptyCustomizerAppliesConsistentDefault() {
-		this.reflectionHints.registerConstructor(TestType.class.getDeclaredConstructors()[0],
-				constructorHint -> {});
+	void registerConstructorTwiceUpdatesExistingEntry() {
+		Constructor<?> constructor = TestType.class.getDeclaredConstructors()[0];
+		this.reflectionHints.registerConstructor(constructor, ExecutableMode.INTROSPECT);
+		this.reflectionHints.registerConstructor(constructor, ExecutableMode.INVOKE);
 		assertTestTypeConstructorHint(constructorHint -> {
 			assertThat(constructorHint.getParameterTypes()).isEmpty();
 			assertThat(constructorHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
-		});
-	}
-
-	@Test
-	void registerConstructorWithCustomizerAppliesCustomization() {
-		this.reflectionHints.registerConstructor(TestType.class.getDeclaredConstructors()[0],
-				constructorHint -> constructorHint.withMode(ExecutableMode.INTROSPECT));
-		assertTestTypeConstructorHint(constructorHint -> {
-			assertThat(constructorHint.getParameterTypes()).isEmpty();
-			assertThat(constructorHint.getMode()).isEqualTo(ExecutableMode.INTROSPECT);
 		});
 	}
 
@@ -196,18 +178,6 @@ class ReflectionHintsTests {
 	void registerMethod() {
 		Method method = ReflectionUtils.findMethod(TestType.class, "setName", String.class);
 		assertThat(method).isNotNull();
-		this.reflectionHints.registerMethod(method);
-		assertTestTypeMethodHints(methodHint -> {
-			assertThat(methodHint.getName()).isEqualTo("setName");
-			assertThat(methodHint.getParameterTypes()).containsOnly(TypeReference.of(String.class));
-			assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
-		});
-	}
-
-	@Test
-	void registerMethodWithMode() {
-		Method method = ReflectionUtils.findMethod(TestType.class, "setName", String.class);
-		assertThat(method).isNotNull();
 		this.reflectionHints.registerMethod(method, ExecutableMode.INTROSPECT);
 		assertTestTypeMethodHints(methodHint -> {
 			assertThat(methodHint.getName()).isEqualTo("setName");
@@ -217,26 +187,15 @@ class ReflectionHintsTests {
 	}
 
 	@Test
-	void registerMethodWithEmptyCustomizerAppliesConsistentDefault() {
+	void registerMethodTwiceUpdatesExistingEntry() {
 		Method method = ReflectionUtils.findMethod(TestType.class, "setName", String.class);
 		assertThat(method).isNotNull();
-		this.reflectionHints.registerMethod(method, methodHint -> {});
+		this.reflectionHints.registerMethod(method, ExecutableMode.INTROSPECT);
+		this.reflectionHints.registerMethod(method, ExecutableMode.INVOKE);
 		assertTestTypeMethodHints(methodHint -> {
 			assertThat(methodHint.getName()).isEqualTo("setName");
 			assertThat(methodHint.getParameterTypes()).containsOnly(TypeReference.of(String.class));
 			assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
-		});
-	}
-
-	@Test
-	void registerMethodWithCustomizerAppliesCustomization() {
-		Method method = ReflectionUtils.findMethod(TestType.class, "setName", String.class);
-		assertThat(method).isNotNull();
-		this.reflectionHints.registerMethod(method, methodHint -> methodHint.withMode(ExecutableMode.INTROSPECT));
-		assertTestTypeMethodHints(methodHint -> {
-			assertThat(methodHint.getName()).isEqualTo("setName");
-			assertThat(methodHint.getParameterTypes()).containsOnly(TypeReference.of(String.class));
-			assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INTROSPECT);
 		});
 	}
 

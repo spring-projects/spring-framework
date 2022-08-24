@@ -145,7 +145,7 @@ public class BindingReflectionHintsRegistrar {
 			Class<?> companionClass = ClassUtils.resolveClassName(companionClassName, null);
 			Method serializerMethod = ClassUtils.getMethodIfAvailable(companionClass, "serializer");
 			if (serializerMethod != null) {
-				hints.registerMethod(serializerMethod);
+				hints.registerMethod(serializerMethod, ExecutableMode.INVOKE);
 			}
 		}
 	}

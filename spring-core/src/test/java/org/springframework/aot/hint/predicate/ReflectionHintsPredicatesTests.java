@@ -303,7 +303,7 @@ class ReflectionHintsPredicatesTests {
 
 		@Test
 		void reflectionOnAnyConstructorMatchesConstructorReflection() {
-			runtimeHints.reflection().registerConstructor(publicConstructor);
+			runtimeHints.reflection().registerConstructor(publicConstructor, ExecutableMode.INVOKE);
 			assertPredicateMatches(reflection.onType(SampleClass.class).withAnyConstructor());
 		}
 
@@ -458,7 +458,7 @@ class ReflectionHintsPredicatesTests {
 
 		@Test
 		void reflectionOnAnyMethodMatchesMethodReflection() {
-			runtimeHints.reflection().registerMethod(publicMethod);
+			runtimeHints.reflection().registerMethod(publicMethod, ExecutableMode.INVOKE);
 			assertPredicateMatches(reflection.onType(SampleClass.class).withAnyMethod());
 		}
 

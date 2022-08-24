@@ -109,7 +109,7 @@ public class FileNativeConfigurationWriterTests {
 				.withField("DEFAULT_CHARSET")
 				.withField("defaultCharset")
 				.withConstructor(TypeReference.listOf(List.class, boolean.class, MimeType.class), ExecutableMode.INTROSPECT)
-				.withMethod("setDefaultCharset", TypeReference.listOf(Charset.class))
+				.withMethod("setDefaultCharset", TypeReference.listOf(Charset.class), ExecutableMode.INVOKE)
 				.withMethod("getDefaultCharset", Collections.emptyList(), ExecutableMode.INTROSPECT));
 		generator.write(hints);
 		assertEquals("""

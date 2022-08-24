@@ -194,7 +194,7 @@ class InstrumentedMethodTests {
 
 		@Test
 		void classGetConstructorsShouldMatchConstructorReflectionHint() throws Exception {
-			hints.reflection().registerConstructor(String.class.getConstructor());
+			hints.reflection().registerConstructor(String.class.getConstructor(), ExecutableMode.INVOKE);
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETCONSTRUCTORS, this.stringGetConstructors);
 		}
 
@@ -250,7 +250,7 @@ class InstrumentedMethodTests {
 
 		@Test
 		void classGetDeclaredConstructorsShouldMatchConstructorReflectionHint() throws Exception {
-			hints.reflection().registerConstructor(String.class.getConstructor());
+			hints.reflection().registerConstructor(String.class.getConstructor(), ExecutableMode.INVOKE);
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETDECLAREDCONSTRUCTORS, this.stringGetDeclaredConstructors);
 		}
 
@@ -350,7 +350,7 @@ class InstrumentedMethodTests {
 
 		@Test
 		void classGetDeclaredMethodsShouldMatchMethodReflectionHint() throws Exception {
-			hints.reflection().registerMethod(String.class.getMethod("toString"));
+			hints.reflection().registerMethod(String.class.getMethod("toString"), ExecutableMode.INVOKE);
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETDECLAREDMETHODS, this.stringGetScaleMethod);
 		}
 
@@ -392,7 +392,7 @@ class InstrumentedMethodTests {
 
 		@Test
 		void classGetMethodsShouldMatchMethodReflectionHint() throws Exception {
-			hints.reflection().registerMethod(String.class.getMethod("toString"));
+			hints.reflection().registerMethod(String.class.getMethod("toString"), ExecutableMode.INVOKE);
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETMETHODS, this.stringGetMethods);
 		}
 

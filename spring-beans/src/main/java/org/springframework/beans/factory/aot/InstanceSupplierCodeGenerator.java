@@ -147,7 +147,7 @@ class InstanceSupplierCodeGenerator {
 			Class<?> beanClass, Constructor<?> constructor, boolean dependsOnBean) {
 
 		this.generationContext.getRuntimeHints().reflection()
-				.registerConstructor(constructor);
+				.registerConstructor(constructor, ExecutableMode.INVOKE);
 		GeneratedMethod generatedMethod = generateGetInstanceSupplierMethod(method -> {
 			method.addJavadoc("Get the bean instance supplier for '$L'.", beanName);
 			method.addModifiers(PRIVATE_STATIC);
@@ -240,7 +240,7 @@ class InstanceSupplierCodeGenerator {
 			Method factoryMethod, Class<?> declaringClass) {
 
 		this.generationContext.getRuntimeHints().reflection()
-				.registerMethod(factoryMethod);
+				.registerMethod(factoryMethod, ExecutableMode.INVOKE);
 		GeneratedMethod getInstanceMethod = generateGetInstanceSupplierMethod(method -> {
 			method.addJavadoc("Get the bean instance supplier for '$L'.", beanName);
 			method.addModifiers(PRIVATE_STATIC);

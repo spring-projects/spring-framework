@@ -145,7 +145,7 @@ class BeanDefinitionPropertiesCodeGenerator {
 	private void addInitDestroyHint(Class<?> beanUserClass, String methodName) {
 		Method method = ReflectionUtils.findMethod(beanUserClass, methodName);
 		if (method != null) {
-			this.hints.reflection().registerMethod(method);
+			this.hints.reflection().registerMethod(method, ExecutableMode.INVOKE);
 		}
 	}
 

@@ -21,6 +21,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 
 import org.springframework.aot.generate.AccessVisibility;
+import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.util.Assert;
@@ -97,7 +98,7 @@ class InjectionCodeGenerator {
 		AccessVisibility visibility = AccessVisibility.forMember(method);
 		if (visibility == AccessVisibility.PRIVATE
 				|| visibility == AccessVisibility.PROTECTED) {
-			this.hints.reflection().registerMethod(method);
+			this.hints.reflection().registerMethod(method, ExecutableMode.INVOKE);
 			code.addStatement("$T method = $T.findMethod($T.class, $S, $T.class)",
 					Method.class, ReflectionUtils.class, method.getDeclaringClass(),
 					method.getName(), method.getParameterTypes()[0]);
