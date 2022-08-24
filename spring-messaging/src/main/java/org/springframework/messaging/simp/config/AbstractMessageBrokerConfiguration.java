@@ -461,6 +461,9 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (registerDefaults) {
 			converters.add(new StringMessageConverter());
 			converters.add(new ByteArrayMessageConverter());
+			if (kotlinSerializationJsonPresent) {
+				converters.add(new KotlinSerializationJsonMessageConverter());
+			}
 			if (jackson2Present) {
 				converters.add(createJacksonConverter());
 			}
@@ -469,9 +472,6 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 			}
 			else if (jsonbPresent) {
 				converters.add(new JsonbMessageConverter());
-			}
-			else if (kotlinSerializationJsonPresent) {
-				converters.add(new KotlinSerializationJsonMessageConverter());
 			}
 		}
 		return new CompositeMessageConverter(converters);

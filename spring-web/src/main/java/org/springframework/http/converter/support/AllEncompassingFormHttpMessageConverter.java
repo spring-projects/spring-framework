@@ -87,6 +87,9 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 			}
 		}
 
+		if (kotlinSerializationJsonPresent) {
+			addPartConverter(new KotlinSerializationJsonHttpMessageConverter());
+		}
 		if (jackson2Present) {
 			addPartConverter(new MappingJackson2HttpMessageConverter());
 		}
@@ -95,9 +98,6 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 		}
 		else if (jsonbPresent) {
 			addPartConverter(new JsonbHttpMessageConverter());
-		}
-		else if (kotlinSerializationJsonPresent) {
-			addPartConverter(new KotlinSerializationJsonHttpMessageConverter());
 		}
 
 		if (jackson2XmlPresent && !shouldIgnoreXml) {
