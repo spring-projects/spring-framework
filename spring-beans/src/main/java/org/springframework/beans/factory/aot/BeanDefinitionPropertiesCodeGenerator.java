@@ -28,12 +28,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.springframework.aot.generate.GeneratedMethods;
-import org.springframework.aot.hint.ExecutableHint;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.beans.BeanInfoFactory;
@@ -82,8 +80,6 @@ class BeanDefinitionPropertiesCodeGenerator {
 	private static final RootBeanDefinition DEFAULT_BEAN_DEFINITION = new RootBeanDefinition();
 
 	private static final String BEAN_DEFINITION_VARIABLE = BeanRegistrationCodeFragments.BEAN_DEFINITION_VARIABLE;
-
-	private static final Consumer<ExecutableHint.Builder> INVOKE_HINT = hint -> hint.withMode(ExecutableMode.INVOKE);
 
 	private static final BeanInfoFactory beanInfoFactory = new ExtendedBeanInfoFactory();
 
@@ -195,7 +191,7 @@ class BeanDefinitionPropertiesCodeGenerator {
 				for (PropertyValue propertyValue : propertyValues) {
 					Method writeMethod = writeMethods.get(propertyValue.getName());
 					if (writeMethod != null) {
-						this.hints.reflection().registerMethod(writeMethod, INVOKE_HINT);
+						this.hints.reflection().registerMethod(writeMethod, ExecutableMode.INVOKE);
 					}
 				}
 			}

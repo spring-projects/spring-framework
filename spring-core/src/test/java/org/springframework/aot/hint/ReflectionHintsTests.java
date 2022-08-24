@@ -177,6 +177,16 @@ class ReflectionHintsTests {
 	}
 
 	@Test
+	void registerConstructorWithMode() {
+		this.reflectionHints.registerConstructor(
+				TestType.class.getDeclaredConstructors()[0], ExecutableMode.INTROSPECT);
+		assertTestTypeConstructorHint(constructorHint -> {
+			assertThat(constructorHint.getParameterTypes()).isEmpty();
+			assertThat(constructorHint.getMode()).isEqualTo(ExecutableMode.INTROSPECT);
+		});
+	}
+
+	@Test
 	void registerConstructorWithEmptyCustomizerAppliesConsistentDefault() {
 		this.reflectionHints.registerConstructor(TestType.class.getDeclaredConstructors()[0],
 				constructorHint -> {});
@@ -216,6 +226,18 @@ class ReflectionHintsTests {
 			assertThat(methodHint.getName()).isEqualTo("setName");
 			assertThat(methodHint.getParameterTypes()).containsOnly(TypeReference.of(String.class));
 			assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
+		});
+	}
+
+	@Test
+	void registerMethodWithMode() {
+		Method method = ReflectionUtils.findMethod(TestType.class, "setName", String.class);
+		assertThat(method).isNotNull();
+		this.reflectionHints.registerMethod(method, ExecutableMode.INTROSPECT);
+		assertTestTypeMethodHints(methodHint -> {
+			assertThat(methodHint.getName()).isEqualTo("setName");
+			assertThat(methodHint.getParameterTypes()).containsOnly(TypeReference.of(String.class));
+			assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INTROSPECT);
 		});
 	}
 

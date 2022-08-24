@@ -28,7 +28,6 @@ import org.springframework.aot.generate.AccessVisibility;
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.hint.ExecutableHint;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.beans.factory.support.InstanceSupplier;
 import org.springframework.beans.factory.support.RegisteredBean;
@@ -68,9 +67,6 @@ class InstanceSupplierCodeGenerator {
 			javax.lang.model.element.Modifier.STATIC };
 
 	private static final CodeBlock NO_ARGS = CodeBlock.of("");
-
-	private static final Consumer<ExecutableHint.Builder> INTROSPECT = hint -> hint
-			.withMode(ExecutableMode.INTROSPECT);
 
 
 	private final GenerationContext generationContext;
@@ -128,7 +124,7 @@ class InstanceSupplierCodeGenerator {
 			Constructor<?> constructor, boolean dependsOnBean, Class<?> declaringClass) {
 
 		this.generationContext.getRuntimeHints().reflection()
-				.registerConstructor(constructor, INTROSPECT);
+				.registerConstructor(constructor, ExecutableMode.INTROSPECT);
 		if (!dependsOnBean && constructor.getParameterCount() == 0) {
 			if (!this.allowDirectSupplierShortcut) {
 				return CodeBlock.of("$T.using($T::new)", InstanceSupplier.class,
@@ -225,7 +221,7 @@ class InstanceSupplierCodeGenerator {
 			Class<?> beanClass, Method factoryMethod, Class<?> declaringClass, boolean dependsOnBean) {
 
 		this.generationContext.getRuntimeHints().reflection()
-				.registerMethod(factoryMethod, INTROSPECT);
+				.registerMethod(factoryMethod, ExecutableMode.INTROSPECT);
 		if (!dependsOnBean && factoryMethod.getParameterCount() == 0) {
 			CodeBlock.Builder code = CodeBlock.builder();
 			code.add("$T.<$T>forFactoryMethod($T.class, $S)", BeanInstanceSupplier.class,

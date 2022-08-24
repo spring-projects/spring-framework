@@ -46,7 +46,6 @@ import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
-import org.springframework.aot.hint.ExecutableHint;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.FieldHint;
 import org.springframework.aot.hint.RuntimeHints;
@@ -914,9 +913,6 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 		private static final String INSTANCE_PARAMETER = "instance";
 
-		private static final Consumer<ExecutableHint.Builder> INTROSPECT = builder -> builder
-				.withMode(ExecutableMode.INTROSPECT);
-
 		private static final Consumer<FieldHint.Builder> ALLOW_WRITE = builder -> builder
 				.allowWrite(true);
 
@@ -1024,7 +1020,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 						INSTANCE_PARAMETER);
 			}
 			else {
-				hints.reflection().registerMethod(method, INTROSPECT);
+				hints.reflection().registerMethod(method, ExecutableMode.INTROSPECT);
 				CodeBlock arguments = new AutowiredArgumentsCodeGenerator(this.target,
 						method).generateCode(method.getParameterTypes());
 				CodeBlock injectionCode = CodeBlock.of("args -> $L.$L($L)",
