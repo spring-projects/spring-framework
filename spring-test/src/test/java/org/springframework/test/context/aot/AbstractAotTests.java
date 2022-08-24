@@ -88,4 +88,13 @@ abstract class AbstractAotTests {
 		}
 	}
 
+	Path classpathRoot(Class<?> clazz) {
+		try {
+			return Paths.get(clazz.getProtectionDomain().getCodeSource().getLocation().toURI());
+		}
+		catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+
 }
