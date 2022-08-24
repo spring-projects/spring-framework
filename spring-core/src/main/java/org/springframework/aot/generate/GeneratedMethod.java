@@ -18,8 +18,6 @@ package org.springframework.aot.generate;
 
 import java.util.function.Consumer;
 
-import javax.lang.model.element.Modifier;
-
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.util.Assert;
@@ -73,9 +71,7 @@ public final class GeneratedMethod {
 	 * @return a method reference
 	 */
 	public MethodReference toMethodReference() {
-		return (this.methodSpec.modifiers.contains(Modifier.STATIC)
-				? MethodReference.ofStatic(this.className, this.name)
-				: MethodReference.of(this.className, this.name));
+		return new DefaultMethodReference(this.methodSpec, this.className);
 	}
 
 	/**

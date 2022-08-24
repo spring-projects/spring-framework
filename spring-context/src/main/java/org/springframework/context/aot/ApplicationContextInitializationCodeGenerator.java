@@ -25,6 +25,7 @@ import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
+import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContextInitializer;
@@ -88,10 +89,15 @@ class ApplicationContextInitializationCodeGenerator implements BeanFactoryInitia
 				BEAN_FACTORY_VARIABLE, ContextAnnotationAutowireCandidateResolver.class);
 		code.addStatement("$L.setDependencyComparator($T.INSTANCE)",
 				BEAN_FACTORY_VARIABLE, AnnotationAwareOrderComparator.class);
+		ArgumentCodeGenerator argCodeGenerator = createInitializerMethodsArgumentCodeGenerator();
 		for (MethodReference initializer : this.initializers) {
-			code.addStatement(initializer.toInvokeCodeBlock(CodeBlock.of(BEAN_FACTORY_VARIABLE)));
+			code.addStatement(initializer.toInvokeCodeBlock(argCodeGenerator, this.generatedClass.getName()));
 		}
 		return code.build();
+	}
+
+	private ArgumentCodeGenerator createInitializerMethodsArgumentCodeGenerator() {
+		return ArgumentCodeGenerator.of(DefaultListableBeanFactory.class, BEAN_FACTORY_VARIABLE);
 	}
 
 	GeneratedClass getGeneratedClass() {

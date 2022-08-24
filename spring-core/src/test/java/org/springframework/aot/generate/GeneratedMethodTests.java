@@ -22,6 +22,7 @@ import javax.lang.model.element.Modifier;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
@@ -67,8 +68,8 @@ class GeneratedMethodTests {
 		GeneratedMethod generatedMethod = create(emptyMethod);
 		MethodReference methodReference = generatedMethod.toMethodReference();
 		assertThat(methodReference).isNotNull();
-		assertThat(methodReference.toInvokeCodeBlock("test"))
-				.isEqualTo(CodeBlock.of("test.spring()"));
+		assertThat(methodReference.toInvokeCodeBlock(ArgumentCodeGenerator.none(), TEST_CLASS_NAME))
+				.isEqualTo(CodeBlock.of("spring()"));
 	}
 
 	@Test
@@ -76,7 +77,8 @@ class GeneratedMethodTests {
 		GeneratedMethod generatedMethod = create(method -> method.addModifiers(Modifier.STATIC));
 		MethodReference methodReference = generatedMethod.toMethodReference();
 		assertThat(methodReference).isNotNull();
-		assertThat(methodReference.toInvokeCodeBlock())
+		ClassName anotherDeclaringClass = ClassName.get("com.example", "Another");
+		assertThat(methodReference.toInvokeCodeBlock(ArgumentCodeGenerator.none(), anotherDeclaringClass))
 				.isEqualTo(CodeBlock.of("com.example.Test.spring()"));
 	}
 

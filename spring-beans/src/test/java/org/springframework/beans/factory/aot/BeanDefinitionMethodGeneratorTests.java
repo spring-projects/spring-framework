@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
+import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.aot.test.generate.compile.CompileWithTargetClassAccess;
 import org.springframework.aot.test.generate.compile.Compiled;
@@ -414,12 +415,14 @@ class BeanDefinitionMethodGeneratorTests {
 	private void compile(MethodReference method,
 			BiConsumer<RootBeanDefinition, Compiled> result) {
 		this.beanRegistrationsCode.getTypeBuilder().set(type -> {
+			CodeBlock methodInvocation = method.toInvokeCodeBlock(ArgumentCodeGenerator.none(),
+					this.beanRegistrationsCode.getClassName());
 			type.addModifiers(Modifier.PUBLIC);
 			type.addSuperinterface(ParameterizedTypeName.get(Supplier.class, BeanDefinition.class));
 			type.addMethod(MethodSpec.methodBuilder("get")
 					.addModifiers(Modifier.PUBLIC)
 					.returns(BeanDefinition.class)
-					.addCode("return $L;", method.toInvokeCodeBlock()).build());
+					.addCode("return $L;", methodInvocation).build());
 		});
 		this.generationContext.writeGeneratedContent();
 		TestCompiler.forSystem().withFiles(this.generationContext.getGeneratedFiles()).compile(compiled ->

@@ -24,6 +24,7 @@ import java.util.function.Predicate;
 import org.springframework.aot.generate.AccessVisibility;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
+import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -156,7 +157,7 @@ class DefaultBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments
 			MethodReference generatedMethod = methodGenerator
 					.generateBeanDefinitionMethod(generationContext,
 							this.beanRegistrationsCode);
-			return generatedMethod.toInvokeCodeBlock();
+			return generatedMethod.toInvokeCodeBlock(ArgumentCodeGenerator.none());
 		}
 		return null;
 	}

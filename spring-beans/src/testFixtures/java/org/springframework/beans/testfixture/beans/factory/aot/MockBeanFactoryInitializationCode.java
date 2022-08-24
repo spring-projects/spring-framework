@@ -25,6 +25,7 @@ import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
+import org.springframework.javapoet.ClassName;
 
 /**
  * Mock {@link BeanFactoryInitializationCode} implementation.
@@ -46,6 +47,9 @@ public class MockBeanFactoryInitializationCode implements BeanFactoryInitializat
 				.addForFeature("TestCode", this.typeBuilder);
 	}
 
+	public ClassName getClassName() {
+		return this.generatedClass.getName();
+	}
 
 	public DeferredTypeBuilder getTypeBuilder() {
 		return this.typeBuilder;

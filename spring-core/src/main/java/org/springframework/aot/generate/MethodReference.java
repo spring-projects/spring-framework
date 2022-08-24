@@ -16,223 +16,124 @@
 
 package org.springframework.aot.generate;
 
+import java.util.function.Function;
+
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
+import org.springframework.javapoet.TypeName;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
- * A reference to a static or instance method.
+ * A reference to a method with convenient code generation for
+ * referencing, or invoking it.
  *
+ * @author Stephane Nicoll
  * @author Phillip Webb
  * @since 6.0
  */
-public final class MethodReference {
-
-	private final Kind kind;
-
-	@Nullable
-	private final ClassName declaringClass;
-
-	private final String methodName;
-
-
-	private MethodReference(Kind kind, @Nullable ClassName declaringClass,
-			String methodName) {
-		this.kind = kind;
-		this.declaringClass = declaringClass;
-		this.methodName = methodName;
-	}
-
-
-	/**
-	 * Create a new method reference that refers to the given instance method.
-	 * @param methodName the method name
-	 * @return a new {@link MethodReference} instance
-	 */
-	public static MethodReference of(String methodName) {
-		Assert.hasLength(methodName, "'methodName' must not be empty");
-		return new MethodReference(Kind.INSTANCE, null, methodName);
-	}
-
-	/**
-	 * Create a new method reference that refers to the given instance method.
-	 * @param declaringClass the declaring class
-	 * @param methodName the method name
-	 * @return a new {@link MethodReference} instance
-	 */
-	public static MethodReference of(Class<?> declaringClass, String methodName) {
-		Assert.notNull(declaringClass, "'declaringClass' must not be null");
-		Assert.hasLength(methodName, "'methodName' must not be empty");
-		return new MethodReference(Kind.INSTANCE, ClassName.get(declaringClass),
-				methodName);
-	}
-
-	/**
-	 * Create a new method reference that refers to the given instance method.
-	 * @param declaringClass the declaring class
-	 * @param methodName the method name
-	 * @return a new {@link MethodReference} instance
-	 */
-	public static MethodReference of(ClassName declaringClass, String methodName) {
-		Assert.notNull(declaringClass, "'declaringClass' must not be null");
-		Assert.hasLength(methodName, "'methodName' must not be empty");
-		return new MethodReference(Kind.INSTANCE, declaringClass, methodName);
-	}
-
-	/**
-	 * Create a new method reference that refers to the given static method.
-	 * @param declaringClass the declaring class
-	 * @param methodName the method name
-	 * @return a new {@link MethodReference} instance
-	 */
-	public static MethodReference ofStatic(Class<?> declaringClass, String methodName) {
-		Assert.notNull(declaringClass, "'declaringClass' must not be null");
-		Assert.hasLength(methodName, "'methodName' must not be empty");
-		return new MethodReference(Kind.STATIC, ClassName.get(declaringClass),
-				methodName);
-	}
-
-	/**
-	 * Create a new method reference that refers to the given static method.
-	 * @param declaringClass the declaring class
-	 * @param methodName the method name
-	 * @return a new {@link MethodReference} instance
-	 */
-	public static MethodReference ofStatic(ClassName declaringClass, String methodName) {
-		Assert.notNull(declaringClass, "'declaringClass' must not be null");
-		Assert.hasLength(methodName, "'methodName' must not be empty");
-		return new MethodReference(Kind.STATIC, declaringClass, methodName);
-	}
-
-
-	/**
-	 * Return the referenced declaring class.
-	 * @return the declaring class
-	 */
-	@Nullable
-	public ClassName getDeclaringClass() {
-		return this.declaringClass;
-	}
-
-	/**
-	 * Return the referenced method name.
-	 * @return the method name
-	 */
-	public String getMethodName() {
-		return this.methodName;
-	}
+public interface MethodReference {
 
 	/**
 	 * Return this method reference as a {@link CodeBlock}. If the reference is
 	 * to an instance method then {@code this::<method name>} will be returned.
 	 * @return a code block for the method reference.
-	 * @see #toCodeBlock(String)
 	 */
-	public CodeBlock toCodeBlock() {
-		return toCodeBlock(null);
+	CodeBlock toCodeBlock();
+
+	/**
+	 * Return this method reference as a {@link CodeBlock} using the specified
+	 * {@link ArgumentCodeGenerator}.
+	 * @param argumentCodeGenerator the argument code generator to use
+	 * @return a code block to invoke the method
+	 */
+	default CodeBlock toInvokeCodeBlock(ArgumentCodeGenerator argumentCodeGenerator) {
+		return toInvokeCodeBlock(argumentCodeGenerator, null);
 	}
 
 	/**
-	 * Return this method reference as a {@link CodeBlock}. If the reference is
-	 * to an instance method and {@code instanceVariable} is {@code null} then
-	 * {@code this::<method name>} will be returned. No {@code instanceVariable}
-	 * can be specified for static method references.
-	 * @param instanceVariable the instance variable or {@code null}
-	 * @return a code block for the method reference.
-	 * @see #toCodeBlock(String)
+	 * Return this method reference as a {@link CodeBlock} using the specified
+	 * {@link ArgumentCodeGenerator}. The {@code targetClassName} defines the
+	 * context in which the method invocation is added.
+	 * <p>If the caller has an instance of the type in which this method is
+	 * defined, it can hint that by specifying the type as a target class.
+	 * @param argumentCodeGenerator the argument code generator to use
+	 * @param targetClassName the target class name
+	 * @return a code block to invoke the method
 	 */
-	public CodeBlock toCodeBlock(@Nullable String instanceVariable) {
-		return switch (this.kind) {
-			case INSTANCE -> toCodeBlockForInstance(instanceVariable);
-			case STATIC -> toCodeBlockForStatic(instanceVariable);
-		};
-	}
+	CodeBlock toInvokeCodeBlock(ArgumentCodeGenerator argumentCodeGenerator, @Nullable ClassName targetClassName);
 
-	private CodeBlock toCodeBlockForInstance(@Nullable String instanceVariable) {
-		instanceVariable = (instanceVariable != null) ? instanceVariable : "this";
-		return CodeBlock.of("$L::$L", instanceVariable, this.methodName);
-	}
-
-	private CodeBlock toCodeBlockForStatic(@Nullable String instanceVariable) {
-		Assert.isTrue(instanceVariable == null,
-				"'instanceVariable' must be null for static method references");
-		return CodeBlock.of("$T::$L", this.declaringClass, this.methodName);
-	}
 
 	/**
-	 * Return this method reference as an invocation {@link CodeBlock}.
-	 * @param arguments the method arguments
-	 * @return a code back to invoke the method
+	 * Strategy for generating code for arguments based on their type.
 	 */
-	public CodeBlock toInvokeCodeBlock(CodeBlock... arguments) {
-		return toInvokeCodeBlock(null, arguments);
-	}
+	interface ArgumentCodeGenerator {
 
-	/**
-	 * Return this method reference as an invocation {@link CodeBlock}.
-	 * @param instanceVariable the instance variable or {@code null}
-	 * @param arguments the method arguments
-	 * @return a code back to invoke the method
-	 */
-	public CodeBlock toInvokeCodeBlock(@Nullable String instanceVariable,
-			CodeBlock... arguments) {
+		/**
+		 * Generate the code for the given argument type. If this type is
+		 * not supported, return {@code null}.
+		 * @param argumentType the argument type
+		 * @return the code for this argument, or {@code null}
+		 */
+		@Nullable
+		CodeBlock generateCode(TypeName argumentType);
 
-		return switch (this.kind) {
-			case INSTANCE -> toInvokeCodeBlockForInstance(instanceVariable, arguments);
-			case STATIC -> toInvokeCodeBlockForStatic(instanceVariable, arguments);
-		};
-	}
-
-	private CodeBlock toInvokeCodeBlockForInstance(@Nullable String instanceVariable,
-			CodeBlock[] arguments) {
-
-		CodeBlock.Builder code = CodeBlock.builder();
-		if (instanceVariable != null) {
-			code.add("$L.", instanceVariable);
+		/**
+		 * Factory method that returns an {@link ArgumentCodeGenerator} that
+		 * always returns {@code null}.
+		 * @return a new {@link ArgumentCodeGenerator} instance
+		 */
+		static ArgumentCodeGenerator none() {
+			return from(type -> null);
 		}
-		else if (this.declaringClass != null) {
-			code.add("new $T().", this.declaringClass);
+
+		/**
+		 * Factory method that can be used to create an {@link ArgumentCodeGenerator}
+		 * that support only the given argument type.
+		 * @param argumentType the argument type
+		 * @param argumentCode the code for an argument of that type
+		 * @return a new {@link ArgumentCodeGenerator} instance
+		 */
+		static ArgumentCodeGenerator of(Class<?> argumentType, String argumentCode) {
+			return from(candidateType -> (candidateType.equals(ClassName.get(argumentType))
+					? CodeBlock.of(argumentCode) : null));
 		}
-		code.add("$L", this.methodName);
-		addArguments(code, arguments);
-		return code.build();
-	}
 
-	private CodeBlock toInvokeCodeBlockForStatic(@Nullable String instanceVariable,
-			CodeBlock[] arguments) {
-
-		Assert.isTrue(instanceVariable == null,
-				"'instanceVariable' must be null for static method references");
-		CodeBlock.Builder code = CodeBlock.builder();
-		code.add("$T.$L", this.declaringClass, this.methodName);
-		addArguments(code, arguments);
-		return code.build();
-	}
-
-	private void addArguments(CodeBlock.Builder code, CodeBlock[] arguments) {
-		code.add("(");
-		for (int i = 0; i < arguments.length; i++) {
-			if (i != 0) {
-				code.add(", ");
-			}
-			code.add(arguments[i]);
+		/**
+		 * Factory method that creates a new {@link ArgumentCodeGenerator} from
+		 * a lambda friendly function. The given function is provided with the
+		 * argument type and must provide the code to use or {@code null} if
+		 * the type is not supported.
+		 * @param function the resolver function
+		 * @return a new {@link ArgumentCodeGenerator} instance backed by the function
+		 */
+		static ArgumentCodeGenerator from(Function<TypeName, CodeBlock> function) {
+			return function::apply;
 		}
-		code.add(")");
-	}
 
-	@Override
-	public String toString() {
-		return switch (this.kind) {
-			case INSTANCE -> ((this.declaringClass != null) ? "<" + this.declaringClass + ">"
-					: "<instance>") + "::" + this.methodName;
-			case STATIC -> this.declaringClass + "::" + this.methodName;
-		};
-	}
+		/**
+		 * Create a new composed {@link ArgumentCodeGenerator} by combining this
+		 * generator with supporting the given argument type.
+		 * @param argumentType the argument type
+		 * @param argumentCode the code for an argument of that type
+		 * @return a new composite {@link ArgumentCodeGenerator} instance
+		 */
+		default ArgumentCodeGenerator and(Class<?> argumentType, String argumentCode) {
+			return and(ArgumentCodeGenerator.of(argumentType, argumentCode));
+		}
 
+		/**
+		 * Create a new composed {@link ArgumentCodeGenerator} by combining this
+		 * generator with the given generator.
+		 * @param argumentCodeGenerator the argument generator to add
+		 * @return a new composite {@link ArgumentCodeGenerator} instance
+		 */
+		default ArgumentCodeGenerator and(ArgumentCodeGenerator argumentCodeGenerator) {
+			return from(type -> {
+				CodeBlock code = generateCode(type);
+				return (code != null ? code : argumentCodeGenerator.generateCode(type));
+			});
+		}
 
-	private enum Kind {
-		INSTANCE, STATIC
 	}
 
 }

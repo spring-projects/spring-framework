@@ -24,6 +24,7 @@ import javax.lang.model.element.Modifier;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.MethodReference;
+import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.aot.test.generate.compile.CompileWithTargetClassAccess;
@@ -161,13 +162,16 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 		Class<?> target = registeredBean.getBeanClass();
 		MethodReference methodReference = this.beanRegistrationCode.getInstancePostProcessors().get(0);
 		this.beanRegistrationCode.getTypeBuilder().set(type -> {
+			CodeBlock methodInvocation = methodReference.toInvokeCodeBlock(
+					ArgumentCodeGenerator.of(RegisteredBean.class, "registeredBean").and(target, "instance"),
+					this.beanRegistrationCode.getClassName());
 			type.addModifiers(Modifier.PUBLIC);
 			type.addSuperinterface(ParameterizedTypeName.get(BiFunction.class, RegisteredBean.class, target, target));
 			type.addMethod(MethodSpec.methodBuilder("apply")
 					.addModifiers(Modifier.PUBLIC)
 					.addParameter(RegisteredBean.class, "registeredBean")
 					.addParameter(target, "instance").returns(target)
-					.addStatement("return $L", methodReference.toInvokeCodeBlock(CodeBlock.of("registeredBean"), CodeBlock.of("instance")))
+					.addStatement("return $L", methodInvocation)
 					.build());
 
 		});

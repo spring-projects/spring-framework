@@ -25,6 +25,7 @@ import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
+import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
@@ -81,9 +82,11 @@ class BeanRegistrationsAotContribution
 			MethodReference beanDefinitionMethod = beanDefinitionMethodGenerator
 					.generateBeanDefinitionMethod(generationContext,
 							beanRegistrationsCode);
+			CodeBlock methodInvocation = beanDefinitionMethod.toInvokeCodeBlock(
+					ArgumentCodeGenerator.none(), beanRegistrationsCode.getClassName());
 			code.addStatement("$L.registerBeanDefinition($S, $L)",
 					BEAN_FACTORY_PARAMETER_NAME, beanName,
-					beanDefinitionMethod.toInvokeCodeBlock());
+					methodInvocation);
 		});
 		method.addCode(code.build());
 	}
