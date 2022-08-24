@@ -99,7 +99,7 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 								List.class, toCodeBlock(persistenceManagedTypes.getManagedPackages()));
 						method.addStatement("return $T.of($L, $L)", beanType, "managedClassNames", "managedPackages");
 					});
-			return CodeBlock.of("() -> $T.$L()", beanRegistrationCode.getClassName(), generatedMethod.getName());
+			return generatedMethod.toMethodReference().toCodeBlock();
 		}
 
 		private CodeBlock toCodeBlock(List<String> values) {

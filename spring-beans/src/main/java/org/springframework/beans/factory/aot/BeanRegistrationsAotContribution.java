@@ -65,8 +65,7 @@ class BeanRegistrationsAotContribution
 		BeanRegistrationsCodeGenerator codeGenerator = new BeanRegistrationsCodeGenerator(generatedClass);
 		GeneratedMethod generatedMethod = codeGenerator.getMethods().add("registerBeanDefinitions", method ->
 				generateRegisterMethod(method, generationContext, codeGenerator));
-		beanFactoryInitializationCode.addInitializer(
-				MethodReference.of(generatedClass.getName(), generatedMethod.getName()));
+		beanFactoryInitializationCode.addInitializer(generatedMethod.toMethodReference());
 	}
 
 	private void generateRegisterMethod(MethodSpec.Builder method,

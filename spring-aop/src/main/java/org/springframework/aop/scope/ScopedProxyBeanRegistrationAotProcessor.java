@@ -163,8 +163,8 @@ class ScopedProxyBeanRegistrationAotProcessor implements BeanRegistrationAotProc
 						method.addStatement("return ($T) factory.getObject()",
 								beanClass);
 					});
-			return CodeBlock.of("$T.of($T::$L)", InstanceSupplier.class,
-					beanRegistrationCode.getClassName(), generatedMethod.getName());
+			return CodeBlock.of("$T.of($L)", InstanceSupplier.class,
+					generatedMethod.toMethodReference().toCodeBlock());
 		}
 
 	}

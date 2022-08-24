@@ -22,6 +22,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.MethodSpec.Builder;
 import org.springframework.util.Assert;
@@ -30,10 +31,13 @@ import org.springframework.util.Assert;
  * A managed collection of generated methods.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 6.0
  * @see GeneratedMethod
  */
 public class GeneratedMethods {
+
+	private final ClassName className;
 
 	private final Function<MethodName, String> methodNameGenerator;
 
@@ -44,18 +48,22 @@ public class GeneratedMethods {
 	/**
 	 * Create a new {@link GeneratedMethods} using the specified method name
 	 * generator.
+	 * @param className the declaring class name
 	 * @param methodNameGenerator the method name generator
 	 */
-	GeneratedMethods(Function<MethodName, String> methodNameGenerator) {
+	GeneratedMethods(ClassName className, Function<MethodName, String> methodNameGenerator) {
+		Assert.notNull(className, "'className' must not be null");
 		Assert.notNull(methodNameGenerator, "'methodNameGenerator' must not be null");
+		this.className = className;
 		this.methodNameGenerator = methodNameGenerator;
 		this.prefix = MethodName.NONE;
 		this.generatedMethods = new ArrayList<>();
 	}
 
-	private GeneratedMethods(Function<MethodName, String> methodNameGenerator,
+	private GeneratedMethods(ClassName className, Function<MethodName, String> methodNameGenerator,
 			MethodName prefix, List<GeneratedMethod> generatedMethods) {
 
+		this.className = className;
 		this.methodNameGenerator = methodNameGenerator;
 		this.prefix = prefix;
 		this.generatedMethods = generatedMethods;
@@ -82,7 +90,7 @@ public class GeneratedMethods {
 		Assert.notNull(suggestedNameParts, "'suggestedNameParts' must not be null");
 		Assert.notNull(method, "'method' must not be null");
 		String generatedName = this.methodNameGenerator.apply(this.prefix.and(suggestedNameParts));
-		GeneratedMethod generatedMethod = new GeneratedMethod(generatedName, method);
+		GeneratedMethod generatedMethod = new GeneratedMethod(this.className, generatedName, method);
 		this.generatedMethods.add(generatedMethod);
 		return generatedMethod;
 	}
@@ -90,7 +98,8 @@ public class GeneratedMethods {
 
 	public GeneratedMethods withPrefix(String prefix) {
 		Assert.notNull(prefix, "'prefix' must not be null");
-		return new GeneratedMethods(this.methodNameGenerator, this.prefix.and(prefix), this.generatedMethods);
+		return new GeneratedMethods(this.className, this.methodNameGenerator,
+				this.prefix.and(prefix), this.generatedMethods);
 	}
 
 	/**

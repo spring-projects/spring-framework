@@ -129,8 +129,7 @@ class BeanDefinitionMethodGeneratorTests {
 							.addParameter(RegisteredBean.class, "registeredBean")
 							.addParameter(TestBean.class, "testBean")
 							.returns(TestBean.class).addCode("return new $T($S);", TestBean.class, "postprocessed"));
-			beanRegistrationCode.addInstancePostProcessor(MethodReference.ofStatic(
-					beanRegistrationCode.getClassName(), generatedMethod.getName()));
+			beanRegistrationCode.addInstancePostProcessor(generatedMethod.toMethodReference());
 		};
 		List<BeanRegistrationAotContribution> aotContributions = Collections
 				.singletonList(aotContribution);
@@ -167,8 +166,7 @@ class BeanDefinitionMethodGeneratorTests {
 							.addParameter(RegisteredBean.class, "registeredBean")
 							.addParameter(TestBean.class, "testBean")
 							.returns(TestBean.class).addCode("return new $T($S);", TestBean.class, "postprocessed"));
-			beanRegistrationCode.addInstancePostProcessor(MethodReference.ofStatic(
-					beanRegistrationCode.getClassName(), generatedMethod.getName()));
+			beanRegistrationCode.addInstancePostProcessor(generatedMethod.toMethodReference());
 		};
 		List<BeanRegistrationAotContribution> aotContributions = Collections
 				.singletonList(aotContribution);

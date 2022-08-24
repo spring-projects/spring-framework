@@ -296,8 +296,8 @@ class InstanceSupplierCodeGenerator {
 				REGISTERED_BEAN_PARAMETER_NAME, declaringClass, factoryMethodName, args);
 	}
 
-	private CodeBlock generateReturnStatement(GeneratedMethod getInstanceMethod) {
-		return CodeBlock.of("$T.$L()", this.className, getInstanceMethod.getName());
+	private CodeBlock generateReturnStatement(GeneratedMethod generatedMethod) {
+		return generatedMethod.toMethodReference().toInvokeCodeBlock();
 	}
 
 	private CodeBlock generateWithGeneratorCode(boolean hasArguments, CodeBlock newInstance) {

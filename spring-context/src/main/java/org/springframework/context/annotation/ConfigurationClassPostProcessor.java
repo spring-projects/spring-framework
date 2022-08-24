@@ -33,7 +33,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.framework.autoproxy.AutoProxyUtils;
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.hint.ResourceHints;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.beans.PropertyValues;
@@ -536,7 +535,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 						.add("addImportAwareBeanPostProcessors", method ->
 								generateAddPostProcessorMethod(method, mappings));
 				beanFactoryInitializationCode
-						.addInitializer(MethodReference.of(generatedMethod.getName()));
+						.addInitializer(generatedMethod.toMethodReference());
 				ResourceHints hints = generationContext.getRuntimeHints().resources();
 				mappings.forEach(
 						(target, from) -> hints.registerType(TypeReference.of(from)));

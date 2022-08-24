@@ -43,7 +43,6 @@ import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.PropertyValues;
@@ -797,8 +796,7 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 				method.returns(this.target);
 				method.addCode(generateMethodCode(generationContext.getRuntimeHints(), generatedClass.getMethods()));
 			});
-			beanRegistrationCode.addInstancePostProcessor(MethodReference
-					.ofStatic(generatedClass.getName(), generatedMethod.getName()));
+			beanRegistrationCode.addInstancePostProcessor(generatedMethod.toMethodReference());
 		}
 
 		private CodeBlock generateMethodCode(RuntimeHints hints, GeneratedMethods generatedMethods) {

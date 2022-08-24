@@ -55,7 +55,7 @@ public final class GeneratedClass {
 	GeneratedClass(ClassName name, Consumer<TypeSpec.Builder> type) {
 		this.name = name;
 		this.type = type;
-		this.methods = new GeneratedMethods(this::generateSequencedMethodName);
+		this.methods = new GeneratedMethods(name, this::generateSequencedMethodName);
 	}
 
 
