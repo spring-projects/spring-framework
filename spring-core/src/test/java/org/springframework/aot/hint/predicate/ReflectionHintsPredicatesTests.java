@@ -192,7 +192,8 @@ class ReflectionHintsPredicatesTests {
 		@Test
 		void constructorInvocationDoesNotMatchConstructorHint() {
 			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.
-					withConstructor(Collections.emptyList(), constructorHint -> {}));
+					withConstructor(Collections.emptyList(), constructorHint ->
+							constructorHint.withMode(ExecutableMode.INTROSPECT)));
 			assertPredicateDoesNotMatch(reflection.onConstructor(publicConstructor).invoke());
 		}
 
@@ -270,7 +271,8 @@ class ReflectionHintsPredicatesTests {
 		@Test
 		void privateConstructorInvocationDoesNotMatchConstructorHint() {
 			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
-					typeHint.withConstructor(TypeReference.listOf(String.class), constructorHint -> {}));
+					typeHint.withConstructor(TypeReference.listOf(String.class), constructorHint ->
+							constructorHint.withMode(ExecutableMode.INTROSPECT)));
 			assertPredicateDoesNotMatch(reflection.onConstructor(privateConstructor).invoke());
 		}
 
@@ -348,14 +350,15 @@ class ReflectionHintsPredicatesTests {
 
 		@Test
 		void methodInvocationDoesNotMatchMethodHint() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMethod("publicMethod", Collections.emptyList(), methodHint -> {
-			}));
+			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMethod("publicMethod", Collections.emptyList(),
+					methodHint -> methodHint.withMode(ExecutableMode.INTROSPECT)));
 			assertPredicateDoesNotMatch(reflection.onMethod(SampleClass.class, "publicMethod").invoke());
 		}
 
 		@Test
 		void methodInvocationMatchesMethodInvocationHint() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMethod("publicMethod", Collections.emptyList(), methodHint -> methodHint.withMode(ExecutableMode.INVOKE)));
+			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMethod("publicMethod", Collections.emptyList(),
+					methodHint -> methodHint.withMode(ExecutableMode.INVOKE)));
 			assertPredicateMatches(reflection.onMethod(SampleClass.class, "publicMethod").invoke());
 		}
 
@@ -416,8 +419,8 @@ class ReflectionHintsPredicatesTests {
 
 		@Test
 		void privateMethodInvocationDoesNotMatchMethodHint() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMethod("privateMethod", Collections.emptyList(), methodHint -> {
-			}));
+			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMethod("privateMethod", Collections.emptyList(),
+					methodHint -> methodHint.withMode(ExecutableMode.INTROSPECT)));
 			assertPredicateDoesNotMatch(reflection.onMethod(SampleClass.class, "privateMethod").invoke());
 		}
 
@@ -470,8 +473,8 @@ class ReflectionHintsPredicatesTests {
 
 		@Test
 		void fieldWriteReflectionDoesNotMatchFieldHint() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withField("publicField", fieldHint -> {
-			}));
+			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withField("publicField",
+					fieldHint -> fieldHint.allowWrite(false)));
 			assertPredicateDoesNotMatch(reflection.onField(SampleClass.class, "publicField").allowWrite());
 		}
 

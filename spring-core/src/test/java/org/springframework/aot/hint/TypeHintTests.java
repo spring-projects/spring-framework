@@ -87,7 +87,7 @@ class TypeHintTests {
 				constructorHint -> constructorHint.withMode(ExecutableMode.INVOKE)).build();
 		assertThat(hint.constructors()).singleElement().satisfies(constructorHint -> {
 			assertThat(constructorHint.getParameterTypes()).containsOnlyOnceElementsOf(parameterTypes);
-			assertThat(constructorHint.getModes()).containsOnly(ExecutableMode.INVOKE);
+			assertThat(constructorHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
 		});
 	}
 
@@ -95,12 +95,25 @@ class TypeHintTests {
 	void createConstructorReuseBuilder() {
 		List<TypeReference> parameterTypes = TypeReference.listOf(byte[].class, int.class);
 		Builder builder = TypeHint.of(TypeReference.of(String.class)).withConstructor(parameterTypes,
+				constructorHint -> constructorHint.withMode(ExecutableMode.INTROSPECT));
+		TypeHint hint = builder.withConstructor(parameterTypes, constructorHint ->
+				constructorHint.withMode(ExecutableMode.INVOKE)).build();
+		assertThat(hint.constructors()).singleElement().satisfies(constructorHint -> {
+			assertThat(constructorHint.getParameterTypes()).containsExactlyElementsOf(parameterTypes);
+			assertThat(constructorHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
+		});
+	}
+
+	@Test
+	void createConstructorReuseBuilderAndApplyExecutableModePrecedence() {
+		List<TypeReference> parameterTypes = TypeReference.listOf(byte[].class, int.class);
+		Builder builder = TypeHint.of(TypeReference.of(String.class)).withConstructor(parameterTypes,
 				constructorHint -> constructorHint.withMode(ExecutableMode.INVOKE));
 		TypeHint hint = builder.withConstructor(parameterTypes, constructorHint ->
 				constructorHint.withMode(ExecutableMode.INTROSPECT)).build();
 		assertThat(hint.constructors()).singleElement().satisfies(constructorHint -> {
 			assertThat(constructorHint.getParameterTypes()).containsExactlyElementsOf(parameterTypes);
-			assertThat(constructorHint.getModes()).containsOnly(ExecutableMode.INVOKE, ExecutableMode.INTROSPECT);
+			assertThat(constructorHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
 		});
 	}
 
@@ -112,7 +125,7 @@ class TypeHintTests {
 		assertThat(hint.methods()).singleElement().satisfies(methodHint -> {
 			assertThat(methodHint.getName()).isEqualTo("valueOf");
 			assertThat(methodHint.getParameterTypes()).containsExactlyElementsOf(parameterTypes);
-			assertThat(methodHint.getModes()).containsOnly(ExecutableMode.INVOKE);
+			assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
 		});
 	}
 
@@ -120,13 +133,27 @@ class TypeHintTests {
 	void createWithMethodReuseBuilder() {
 		List<TypeReference> parameterTypes = TypeReference.listOf(char[].class);
 		Builder builder = TypeHint.of(TypeReference.of(String.class)).withMethod("valueOf", parameterTypes,
-				methodHint -> methodHint.withMode(ExecutableMode.INVOKE));
+				methodHint -> methodHint.withMode(ExecutableMode.INTROSPECT));
 		TypeHint hint = builder.withMethod("valueOf", parameterTypes,
-				methodHint -> methodHint.setModes(ExecutableMode.INTROSPECT)).build();
+				methodHint -> methodHint.withMode(ExecutableMode.INVOKE)).build();
 		assertThat(hint.methods()).singleElement().satisfies(methodHint -> {
 			assertThat(methodHint.getName()).isEqualTo("valueOf");
 			assertThat(methodHint.getParameterTypes()).containsExactlyElementsOf(parameterTypes);
-			assertThat(methodHint.getModes()).containsOnly(ExecutableMode.INTROSPECT);
+			assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
+		});
+	}
+
+	@Test
+	void createWithMethodReuseBuilderAndApplyExecutableModePrecedence() {
+		List<TypeReference> parameterTypes = TypeReference.listOf(char[].class);
+		Builder builder = TypeHint.of(TypeReference.of(String.class)).withMethod("valueOf", parameterTypes,
+				methodHint -> methodHint.withMode(ExecutableMode.INVOKE));
+		TypeHint hint = builder.withMethod("valueOf", parameterTypes,
+				methodHint -> methodHint.withMode(ExecutableMode.INTROSPECT)).build();
+		assertThat(hint.methods()).singleElement().satisfies(methodHint -> {
+			assertThat(methodHint.getName()).isEqualTo("valueOf");
+			assertThat(methodHint.getParameterTypes()).containsExactlyElementsOf(parameterTypes);
+			assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
 		});
 	}
 

@@ -152,14 +152,14 @@ class InstrumentedMethodTests {
 		@Test
 		void classGetConstructorShouldMatchInstrospectConstructorHint() {
 			hints.reflection().registerType(String.class, typeHint -> typeHint.withConstructor(Collections.emptyList(),
-					constructorHint -> constructorHint.setModes(ExecutableMode.INTROSPECT)));
+					constructorHint -> constructorHint.withMode(ExecutableMode.INTROSPECT)));
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETCONSTRUCTOR, this.stringGetConstructor);
 		}
 
 		@Test
 		void classGetConstructorShouldMatchInvokeConstructorHint() {
 			hints.reflection().registerType(String.class, typeHint -> typeHint.withConstructor(Collections.emptyList(),
-					constructorHint -> constructorHint.setModes(ExecutableMode.INVOKE)));
+					constructorHint -> constructorHint.withMode(ExecutableMode.INVOKE)));
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETCONSTRUCTOR, this.stringGetConstructor);
 		}
 
@@ -202,14 +202,14 @@ class InstrumentedMethodTests {
 		@Test
 		void classGetDeclaredConstructorShouldMatchInstrospectConstructorHint() {
 			hints.reflection().registerType(String.class, typeHint -> typeHint.withConstructor(TypeReference.listOf(byte[].class, byte.class),
-					constructorHint -> constructorHint.setModes(ExecutableMode.INTROSPECT)));
+					constructorHint -> constructorHint.withMode(ExecutableMode.INTROSPECT)));
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETDECLAREDCONSTRUCTOR, this.stringGetDeclaredConstructor);
 		}
 
 		@Test
 		void classGetDeclaredConstructorShouldMatchInvokeConstructorHint() {
 			hints.reflection().registerType(String.class, typeHint -> typeHint.withConstructor(TypeReference.listOf(byte[].class, byte.class),
-					constructorHint -> constructorHint.setModes(ExecutableMode.INVOKE)));
+					constructorHint -> constructorHint.withMode(ExecutableMode.INVOKE)));
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETDECLAREDCONSTRUCTOR, this.stringGetDeclaredConstructor);
 		}
 
@@ -378,14 +378,14 @@ class InstrumentedMethodTests {
 		@Test
 		void classGetMethodShouldMatchIntrospectMethodHint() {
 			hints.reflection().registerType(String.class, typeHint ->
-					typeHint.withMethod("toString", Collections.emptyList(), methodHint -> methodHint.setModes(ExecutableMode.INTROSPECT)));
+					typeHint.withMethod("toString", Collections.emptyList(), methodHint -> methodHint.withMode(ExecutableMode.INTROSPECT)));
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETMETHOD, this.stringGetToStringMethod);
 		}
 
 		@Test
 		void classGetMethodShouldMatchInvokeMethodHint() {
 			hints.reflection().registerType(String.class, typeHint ->
-					typeHint.withMethod("toString", Collections.emptyList(), methodHint -> methodHint.setModes(ExecutableMode.INVOKE)));
+					typeHint.withMethod("toString", Collections.emptyList(), methodHint -> methodHint.withMode(ExecutableMode.INVOKE)));
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETMETHOD, this.stringGetToStringMethod);
 		}
 

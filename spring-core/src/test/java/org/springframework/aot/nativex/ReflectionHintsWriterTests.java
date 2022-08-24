@@ -58,7 +58,7 @@ public class ReflectionHintsWriterTests {
 							MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS,
 							MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS,
 							MemberCategory.PUBLIC_CLASSES, MemberCategory.DECLARED_CLASSES)
-					.withField("DEFAULT_CHARSET", fieldBuilder -> {})
+					.withField("DEFAULT_CHARSET", fieldBuilder -> fieldBuilder.allowWrite(false))
 					.withField("defaultCharset", fieldBuilder -> {
 						fieldBuilder.allowWrite(true);
 						fieldBuilder.allowUnsafeAccess(true);
@@ -185,7 +185,7 @@ public class ReflectionHintsWriterTests {
 		hints.registerType(Integer.class, builder -> builder.withMethod("parseInt",
 				TypeReference.listOf(String.class), b -> b.withMode(ExecutableMode.INVOKE)));
 		hints.registerType(Integer.class, builder -> builder.withMethod("parseInt",
-				TypeReference.listOf(String.class), b -> b.withMode(ExecutableMode.INTROSPECT)));
+				TypeReference.listOf(String.class, int.class), b -> b.withMode(ExecutableMode.INTROSPECT)));
 
 		assertEquals("""
 				[
@@ -194,7 +194,7 @@ public class ReflectionHintsWriterTests {
 						"queriedMethods": [
 							{
 								"name": "parseInt",
-								"parameterTypes": ["java.lang.String"]
+								"parameterTypes": ["java.lang.String", "int"]
 							}
 						],
 						"methods": [

@@ -106,7 +106,7 @@ public class FileNativeConfigurationWriterTests {
 							MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS,
 							MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS,
 							MemberCategory.PUBLIC_CLASSES, MemberCategory.DECLARED_CLASSES)
-					.withField("DEFAULT_CHARSET", fieldBuilder -> {})
+					.withField("DEFAULT_CHARSET", fieldBuilder -> fieldBuilder.allowWrite(false))
 					.withField("defaultCharset", fieldBuilder -> {
 						fieldBuilder.allowWrite(true);
 						fieldBuilder.allowUnsafeAccess(true);

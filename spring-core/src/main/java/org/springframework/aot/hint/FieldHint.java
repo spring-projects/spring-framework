@@ -18,6 +18,8 @@ package org.springframework.aot.hint;
 
 import java.lang.reflect.Field;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A hint that describes the need of reflection on a {@link Field}.
  *
@@ -33,7 +35,7 @@ public final class FieldHint extends MemberHint {
 
 	private FieldHint(Builder builder) {
 		super(builder.name);
-		this.allowWrite = builder.allowWrite;
+		this.allowWrite = (builder.allowWrite != null) ? builder.allowWrite : true;
 		this.allowUnsafeAccess = builder.allowUnsafeAccess;
 	}
 
@@ -61,7 +63,8 @@ public final class FieldHint extends MemberHint {
 
 		private final String name;
 
-		private boolean allowWrite;
+		@Nullable
+		private Boolean allowWrite;
 
 		private boolean allowUnsafeAccess;
 

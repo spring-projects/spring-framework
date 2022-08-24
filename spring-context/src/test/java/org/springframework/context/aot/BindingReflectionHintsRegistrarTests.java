@@ -77,7 +77,7 @@ public class BindingReflectionHintsRegistrarTests {
 					assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleClassWithGetter.class));
 					assertThat(typeHint.methods()).singleElement().satisfies(methodHint -> {
 						assertThat(methodHint.getName()).isEqualTo("getName");
-						assertThat(methodHint.getModes()).containsOnly(ExecutableMode.INVOKE);
+						assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
 					});
 				});
 	}
@@ -97,7 +97,7 @@ public class BindingReflectionHintsRegistrarTests {
 					assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleClassWithSetter.class));
 					assertThat(typeHint.methods()).singleElement().satisfies(methodHint -> {
 						assertThat(methodHint.getName()).isEqualTo("setName");
-						assertThat(methodHint.getModes()).containsOnly(ExecutableMode.INVOKE);
+						assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
 					});
 				});
 	}
@@ -125,11 +125,11 @@ public class BindingReflectionHintsRegistrarTests {
 					assertThat(typeHint.methods()).satisfiesExactlyInAnyOrder(
 							methodHint -> {
 								assertThat(methodHint.getName()).isEqualTo("setNames");
-								assertThat(methodHint.getModes()).containsOnly(ExecutableMode.INVOKE);
+								assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
 							},
 							methodHint -> {
 								assertThat(methodHint.getName()).isEqualTo("getNames");
-								assertThat(methodHint.getModes()).containsOnly(ExecutableMode.INVOKE);
+								assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
 							});
 				});
 	}
@@ -180,7 +180,7 @@ public class BindingReflectionHintsRegistrarTests {
 					assertThat(typeHint.methods()).singleElement().satisfies(
 							methodHint -> {
 								assertThat(methodHint.getName()).isEqualTo("getResolvableType");
-								assertThat(methodHint.getModes()).containsOnly(ExecutableMode.INVOKE);
+								assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
 							});
 				});
 	}
@@ -218,7 +218,7 @@ public class BindingReflectionHintsRegistrarTests {
 					assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleRecord.class));
 					assertThat(typeHint.methods()).singleElement().satisfies(methodHint -> {
 						assertThat(methodHint.getName()).isEqualTo("name");
-						assertThat(methodHint.getModes()).containsOnly(ExecutableMode.INVOKE);
+						assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
 					});
 				});
 	}

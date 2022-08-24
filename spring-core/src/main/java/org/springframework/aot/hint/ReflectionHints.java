@@ -165,8 +165,7 @@ public class ReflectionHints {
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public ReflectionHints registerConstructor(Constructor<?> constructor) {
-		return registerConstructor(constructor, constructorHint ->
-				constructorHint.withMode(ExecutableMode.INVOKE));
+		return registerConstructor(constructor, constructorHint -> constructorHint.withMode(ExecutableMode.INVOKE));
 	}
 
 	/**
