@@ -53,7 +53,7 @@ import org.springframework.util.MultiValueMap;
  * @since 6.0
  * @see ApplicationContextAotGenerator
  */
-class TestContextAotGenerator {
+public class TestContextAotGenerator {
 
 	private static final Log logger = LogFactory.getLog(TestContextAotGenerator.class);
 
