@@ -807,14 +807,14 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 
 		DataBuffer buffer2 = createDataBuffer(1);
 		buffer2.write(new byte[]{'a'});
-		split = buffer2.split(1);
+		DataBuffer split2 = buffer2.split(1);
 
-		assertThat(split.readPosition()).isEqualTo(0);
-		assertThat(split.writePosition()).isEqualTo(1);
-		assertThat(split.capacity()).isEqualTo(1);
-		assertThat(split.readableByteCount()).isEqualTo(1);
+		assertThat(split2.readPosition()).isEqualTo(0);
+		assertThat(split2.writePosition()).isEqualTo(1);
+		assertThat(split2.capacity()).isEqualTo(1);
+		assertThat(split2.readableByteCount()).isEqualTo(1);
 		bytes = new byte[1];
-		split.read(bytes);
+		split2.read(bytes);
 		assertThat(bytes).containsExactly('a');
 
 		assertThat(buffer2.readPosition()).isEqualTo(0);
@@ -822,7 +822,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 		assertThat(buffer2.capacity()).isEqualTo(0);
 		assertThat(buffer.readableByteCount()).isEqualTo(0);
 
-		release(buffer, buffer2);
+		release(buffer, buffer2, split, split2);
 	}
 
 	@ParameterizedDataBufferAllocatingTest
