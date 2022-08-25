@@ -306,7 +306,7 @@ to serialize only a subset of the object properties, as the following example sh
 ----
 
 [[rest-template-multipart]]
-===== Multipart
+==== Multipart
 
 To send multipart data, you need to provide a `MultiValueMap<String, Object>` whose values
 may be an `Object` for part content, a `Resource` for a file part, or an `HttpEntity` for
