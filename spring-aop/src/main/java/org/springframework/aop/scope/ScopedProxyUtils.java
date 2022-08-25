@@ -121,9 +121,6 @@ public abstract class ScopedProxyUtils {
 	public static String getOriginalBeanName(@Nullable String targetBeanName) {
 		Assert.isTrue(isScopedTarget(targetBeanName), () -> "bean name '" +
 				targetBeanName + "' does not refer to the target of a scoped proxy");
-		if (targetBeanName == null) {
-			return null;
-		}
 		return targetBeanName.substring(TARGET_NAME_PREFIX_LENGTH);
 	}
 
