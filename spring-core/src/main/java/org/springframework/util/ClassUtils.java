@@ -145,8 +145,6 @@ public abstract class ClassUtils {
 			primitiveTypeNameMap.put(primitiveType.getName(), primitiveType);
 		}
 
-		registerCommonClasses(Boolean[].class, Byte[].class, Character[].class, Double[].class,
-				Float[].class, Integer[].class, Long[].class, Short[].class);
 		registerCommonClasses(Number.class, Number[].class, String.class, String[].class,
 				Class.class, Class[].class, Object.class, Object[].class);
 		registerCommonClasses(Throwable.class, Exception.class, RuntimeException.class,
