@@ -22,6 +22,7 @@ import java.util.function.Supplier;
 
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -82,6 +83,7 @@ public class AotTestMappings {
 	 * initializer for the specified test class
 	 * @see #isSupportedTestClass(Class)
 	 */
+	@Nullable
 	public ApplicationContextInitializer<ConfigurableApplicationContext> getContextInitializer(Class<?> testClass) {
 		Supplier<ApplicationContextInitializer<ConfigurableApplicationContext>> supplier =
 				this.contextInitializers.get(testClass.getName());
