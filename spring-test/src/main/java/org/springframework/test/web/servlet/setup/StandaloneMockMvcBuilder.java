@@ -155,7 +155,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	private static List<Object> instantiateIfNecessary(Object[] specified) {
 		List<Object> instances = new ArrayList<>(specified.length);
 		for (Object obj : specified) {
-			instances.add(obj instanceof Class ? BeanUtils.instantiateClass((Class<?>) obj) : obj);
+			instances.add(obj instanceof Class<?> clazz ? BeanUtils.instantiateClass(clazz) : obj);
 		}
 		return instances;
 	}
@@ -445,8 +445,8 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 		this.viewResolvers = (this.viewResolvers != null ? this.viewResolvers :
 				Collections.singletonList(new InternalResourceViewResolver()));
 		for (Object viewResolver : this.viewResolvers) {
-			if (viewResolver instanceof WebApplicationObjectSupport) {
-				((WebApplicationObjectSupport) viewResolver).setApplicationContext(wac);
+			if (viewResolver instanceof WebApplicationObjectSupport support) {
+				support.setApplicationContext(wac);
 			}
 		}
 		return this.viewResolvers;
@@ -538,9 +538,9 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 		@Override
 		public Validator mvcValidator() {
 			Validator mvcValidator = (validator != null) ? validator : super.mvcValidator();
-			if (mvcValidator instanceof InitializingBean) {
+			if (mvcValidator instanceof InitializingBean initializingBean) {
 				try {
-					((InitializingBean) mvcValidator).afterPropertiesSet();
+					initializingBean.afterPropertiesSet();
 				}
 				catch (Exception ex) {
 					throw new BeanInitializationException("Failed to initialize Validator", ex);
@@ -555,15 +555,15 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 				return;
 			}
 			for (HandlerExceptionResolver resolver : handlerExceptionResolvers) {
-				if (resolver instanceof ApplicationContextAware) {
+				if (resolver instanceof ApplicationContextAware applicationContextAware) {
 					ApplicationContext applicationContext = getApplicationContext();
 					if (applicationContext != null) {
-						((ApplicationContextAware) resolver).setApplicationContext(applicationContext);
+						applicationContextAware.setApplicationContext(applicationContext);
 					}
 				}
-				if (resolver instanceof InitializingBean) {
+				if (resolver instanceof InitializingBean initializingBean) {
 					try {
-						((InitializingBean) resolver).afterPropertiesSet();
+						initializingBean.afterPropertiesSet();
 					}
 					catch (Exception ex) {
 						throw new IllegalStateException("Failure from afterPropertiesSet", ex);
