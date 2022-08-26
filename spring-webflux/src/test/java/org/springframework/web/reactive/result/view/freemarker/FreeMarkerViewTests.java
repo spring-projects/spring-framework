@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,16 +79,16 @@ public class FreeMarkerViewTests {
 		FreeMarkerView view = new FreeMarkerView();
 		view.setApplicationContext(this.context);
 		view.setUrl("anythingButNull");
-		assertThatExceptionOfType(ApplicationContextException.class).isThrownBy(
-				view::afterPropertiesSet)
+		assertThatExceptionOfType(ApplicationContextException.class)
+			.isThrownBy(view::afterPropertiesSet)
 			.withMessageContaining("Must define a single FreeMarkerConfig bean");
 	}
 
 	@Test
 	public void noTemplateName() throws Exception {
 		FreeMarkerView freeMarkerView = new FreeMarkerView();
-		assertThatIllegalArgumentException().isThrownBy(
-				freeMarkerView::afterPropertiesSet)
+		assertThatIllegalArgumentException()
+			.isThrownBy(freeMarkerView::afterPropertiesSet)
 			.withMessageContaining("Property 'url' is required");
 	}
 
@@ -141,7 +141,7 @@ public class FreeMarkerViewTests {
 
 
 	private static String asString(DataBuffer dataBuffer) {
-		ByteBuffer byteBuffer = dataBuffer.asByteBuffer();
+		ByteBuffer byteBuffer = dataBuffer.toByteBuffer();
 		final byte[] bytes = new byte[byteBuffer.remaining()];
 		byteBuffer.get(bytes);
 		return new String(bytes, StandardCharsets.UTF_8);

@@ -42,8 +42,8 @@ class Netty5BufferEncoderTests extends AbstractEncoderTests<Netty5BufferEncoder>
 		super(new Netty5BufferEncoder());
 	}
 
-	@Override
 	@Test
+	@Override
 	public void canEncode() {
 		assertThat(this.encoder.canEncode(ResolvableType.forClass(Buffer.class),
 				MimeTypeUtils.TEXT_PLAIN)).isTrue();
@@ -56,8 +56,9 @@ class Netty5BufferEncoderTests extends AbstractEncoderTests<Netty5BufferEncoder>
 		assertThat(this.encoder.canEncode(ResolvableType.NONE, null)).isFalse();
 	}
 
-	@Override
 	@Test
+	@Override
+	@SuppressWarnings("resource")
 	public void encode() {
 		Flux<Buffer> input = Flux.just(this.fooBytes, this.barBytes)
 				.map(DefaultBufferAllocators.preferredAllocator()::copyOf);
@@ -67,4 +68,5 @@ class Netty5BufferEncoderTests extends AbstractEncoderTests<Netty5BufferEncoder>
 				.consumeNextWith(expectBytes(this.barBytes))
 				.verifyComplete());
 	}
+
 }

@@ -165,6 +165,7 @@ public class MultipartWriterSupport extends LoggingCodecSupport {
 
 	protected Mono<DataBuffer> generatePartHeaders(HttpHeaders headers, DataBufferFactory bufferFactory) {
 		return Mono.fromCallable(() -> {
+			@SuppressWarnings("resource")
 			FastByteArrayOutputStream bos = new FastByteArrayOutputStream();
 			for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
 				byte[] headerName = entry.getKey().getBytes(getCharset());

@@ -389,6 +389,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
+	@SuppressWarnings("deprecation")
 	void increaseCapacity(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
@@ -402,6 +403,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
+	@SuppressWarnings("deprecation")
 	void decreaseCapacityLowReadPosition(DataBufferFactory bufferFactory) {
 		assumeFalse(bufferFactory instanceof Netty5DataBufferFactory,
 				"Netty 5 does not support decreasing the capacity");
@@ -417,6 +419,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
+	@SuppressWarnings("deprecation")
 	void decreaseCapacityHighReadPosition(DataBufferFactory bufferFactory) {
 		assumeFalse(bufferFactory instanceof Netty5DataBufferFactory,
 				"Netty 5 does not support decreasing the capacity");
@@ -433,13 +436,13 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
+	@SuppressWarnings("deprecation")
 	void capacityLessThanZero(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(1);
 		try {
-			assertThatIllegalArgumentException().isThrownBy(() ->
-					buffer.capacity(-1));
+			assertThatIllegalArgumentException().isThrownBy(() -> buffer.capacity(-1));
 		}
 		finally {
 			release(buffer);
@@ -754,6 +757,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
+	@SuppressWarnings("deprecation")
 	void spr16351(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 

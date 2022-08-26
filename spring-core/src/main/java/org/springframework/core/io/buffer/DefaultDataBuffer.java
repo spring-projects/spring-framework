@@ -506,6 +506,7 @@ public class DefaultDataBuffer implements DataBuffer {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public DefaultDataBuffer capacity(int newCapacity) {
 			throw new UnsupportedOperationException("Changing the capacity of a sliced buffer is not supported");
 		}
