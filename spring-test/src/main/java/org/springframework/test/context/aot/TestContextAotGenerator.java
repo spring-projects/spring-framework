@@ -122,7 +122,7 @@ public class TestContextAotGenerator {
 				generationContext.writeGeneratedContent();
 			}
 			catch (Exception ex) {
-				logger.warn(LogMessage.format("Failed to generate AOT artifacts for test classes [%s]",
+				logger.warn(LogMessage.format("Failed to generate AOT artifacts for test classes %s",
 						testClasses.stream().map(Class::getName).toList()), ex);
 			}
 		});

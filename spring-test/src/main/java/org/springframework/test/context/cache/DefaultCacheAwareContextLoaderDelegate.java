@@ -105,18 +105,19 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 						context = loadContextInternal(mergedContextConfiguration);
 					}
 					if (logger.isDebugEnabled()) {
-						logger.debug(String.format("Storing ApplicationContext [%s] in cache under key [%s]",
+						logger.debug("Storing ApplicationContext [%s] in cache under key %s".formatted(
 								System.identityHashCode(context), mergedContextConfiguration));
 					}
 					this.contextCache.put(mergedContextConfiguration, context);
 				}
 				catch (Exception ex) {
-					throw new IllegalStateException("Failed to load ApplicationContext", ex);
+					throw new IllegalStateException(
+						"Failed to load ApplicationContext for " + mergedContextConfiguration, ex);
 				}
 			}
 			else {
 				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("Retrieved ApplicationContext [%s] from cache with key [%s]",
+					logger.debug("Retrieved ApplicationContext [%s] from cache with key %s".formatted(
 							System.identityHashCode(context), mergedContextConfiguration));
 				}
 			}
@@ -150,17 +151,16 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	protected ApplicationContext loadContextInternal(MergedContextConfiguration mergedContextConfiguration)
 			throws Exception {
 
-		ContextLoader contextLoader = mergedContextConfiguration.getContextLoader();
-		Assert.notNull(contextLoader, "Cannot load an ApplicationContext with a NULL 'contextLoader'. " +
-				"Consider annotating your test class with @ContextConfiguration or @ContextHierarchy.");
-
+		ContextLoader contextLoader = getContextLoader(mergedContextConfiguration);
 		if (contextLoader instanceof SmartContextLoader smartContextLoader) {
 			return smartContextLoader.loadContext(mergedContextConfiguration);
 		}
 		else {
 			String[] locations = mergedContextConfiguration.getLocations();
-			Assert.notNull(locations, "Cannot load an ApplicationContext with a NULL 'locations' array. " +
-					"Consider annotating your test class with @ContextConfiguration or @ContextHierarchy.");
+			Assert.notNull(locations, """
+					Cannot load an ApplicationContext with a NULL 'locations' array. \
+					Consider annotating test class [%s] with @ContextConfiguration or \
+					@ContextHierarchy.""".formatted(mergedContextConfiguration.getTestClass().getName()));
 			return contextLoader.loadContext(locations);
 		}
 	}
@@ -172,8 +172,8 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 		Assert.state(contextInitializer != null,
 				() -> "Failed to load AOT ApplicationContextInitializer for test class [%s]"
 						.formatted(testClass.getName()));
+		ContextLoader contextLoader = getContextLoader(mergedConfig);
 		logger.info(LogMessage.format("Loading ApplicationContext in AOT mode for %s", mergedConfig));
-		ContextLoader contextLoader = mergedConfig.getContextLoader();
 		if (!((contextLoader instanceof AotContextLoader aotContextLoader) &&
 				(aotContextLoader.loadContextForAotRuntime(mergedConfig, contextInitializer)
 						instanceof GenericApplicationContext gac))) {
@@ -185,6 +185,15 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 		}
 		gac.registerShutdownHook();
 		return gac;
+	}
+
+	private ContextLoader getContextLoader(MergedContextConfiguration mergedConfig) {
+		ContextLoader contextLoader = mergedConfig.getContextLoader();
+		Assert.notNull(contextLoader, """
+				Cannot load an ApplicationContext with a NULL 'contextLoader'. \
+				Consider annotating test class [%s] with @ContextConfiguration or \
+				@ContextHierarchy.""".formatted(mergedConfig.getTestClass().getName()));
+		return contextLoader;
 	}
 
 	/**

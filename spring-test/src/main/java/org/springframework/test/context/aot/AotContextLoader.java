@@ -28,6 +28,10 @@ import org.springframework.test.context.SmartContextLoader;
  * {@linkplain #loadContextForAotRuntime AOT execution} for an integration test
  * managed by the Spring TestContext Framework.
  *
+ * <p>{@code AotContextLoader} is an extension of the {@link SmartContextLoader}
+ * SPI that allows a context loader to optionally provide ahead-of-time (AOT)
+ * support.
+ *
  * <p>As of Spring Framework 6.0, AOT infrastructure requires that an {@code AotContextLoader}
  * create a {@link org.springframework.context.support.GenericApplicationContext
  * GenericApplicationContext} for both build-time processing and run-time execution.
@@ -47,7 +51,7 @@ public interface AotContextLoader extends SmartContextLoader {
 	 * refresh} the {@code ApplicationContext} or
 	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#registerShutdownHook()
 	 * register a JVM shutdown hook} for it. Otherwise, this method should implement
-	 * behavior identical to {@link #loadContext(MergedContextConfiguration)}.
+	 * behavior identical to {@code loadContext(MergedContextConfiguration)}.
 	 * @param mergedConfig the merged context configuration to use to load the
 	 * application context
 	 * @return a new {@code GenericApplicationContext}

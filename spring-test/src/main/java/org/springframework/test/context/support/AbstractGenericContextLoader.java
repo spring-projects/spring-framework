@@ -16,6 +16,8 @@
 
 package org.springframework.test.context.support;
 
+import java.util.Arrays;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -28,7 +30,7 @@ import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.aot.AotContextLoader;
-import org.springframework.util.StringUtils;
+import org.springframework.util.Assert;
 
 /**
  * Abstract, generic extension of {@link AbstractContextLoader} that loads a
@@ -104,12 +106,12 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 */
 	@Override
 	public final ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
-		return loadContext(mergedConfig, true);
+		return loadContext(mergedConfig, false);
 	}
 
 	/**
-	 * Load a {@link GenericApplicationContext} for the supplied
-	 * {@link MergedContextConfiguration}.
+	 * Load a {@link GenericApplicationContext} for AOT build-time processing based
+	 * on the supplied {@link MergedContextConfiguration}.
 	 * <p>In contrast to {@link #loadContext(MergedContextConfiguration)}, this
 	 * method does not
 	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#refresh()
@@ -120,23 +122,38 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * @param mergedConfig the merged context configuration to use to load the
 	 * application context
 	 * @return a new application context
+	 * @throws Exception if context loading failed
 	 * @since 6.0
-	 * @see org.springframework.test.context.SmartContextLoader#loadContextForAotProcessing(MergedContextConfiguration)
+	 * @see AotContextLoader#loadContextForAotProcessing(MergedContextConfiguration)
 	 */
 	@Override
-	public final ApplicationContext loadContextForAotProcessing(
-			MergedContextConfiguration mergedConfig) throws Exception {
-
-		return loadContext(mergedConfig, false);
+	public final GenericApplicationContext loadContextForAotProcessing(MergedContextConfiguration mergedConfig)
+			throws Exception {
+		return loadContext(mergedConfig, true);
 	}
 
+	/**
+	 * Load a {@link GenericApplicationContext} for AOT run-time execution based on
+	 * the supplied {@link MergedContextConfiguration} and
+	 * {@link ApplicationContextInitializer}.
+	 * @param mergedConfig the merged context configuration to use to load the
+	 * application context
+	 * @param initializer the {@code ApplicationContextInitializer} that should
+	 * be applied to the context in order to recreate bean definitions
+	 * @return a new application context
+	 * @throws Exception if context loading failed
+	 * @since 6.0
+	 * @see AotContextLoader#loadContextForAotRuntime(MergedContextConfiguration, ApplicationContextInitializer)
+	 */
 	@Override
-	public final ApplicationContext loadContextForAotRuntime(MergedContextConfiguration mergedConfig,
+	public final GenericApplicationContext loadContextForAotRuntime(MergedContextConfiguration mergedConfig,
 			ApplicationContextInitializer<ConfigurableApplicationContext> initializer) throws Exception {
 
+		Assert.notNull(mergedConfig, "MergedContextConfiguration must not be null");
+		Assert.notNull(initializer, "ApplicationContextInitializer must not be null");
+
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Loading ApplicationContext for AOT runtime for merged context configuration [%s].",
-					mergedConfig));
+			logger.debug("Loading ApplicationContext for AOT runtime for merged context configuration " + mergedConfig);
 		}
 
 		validateMergedContextConfiguration(mergedConfig);
@@ -156,16 +173,17 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * {@link MergedContextConfiguration}.
 	 * @param mergedConfig the merged context configuration to use to load the
 	 * application context
-	 * @param refresh whether to refresh the {@code ApplicationContext} and register
-	 * a JVM shutdown hook for it
+	 * @param forAotProcessing {@code true} if the context is being loaded for
+	 * AOT processing, meaning not to refresh the {@code ApplicationContext} or
+	 * register a JVM shutdown hook for it
 	 * @return a new application context
 	 */
 	private final GenericApplicationContext loadContext(
-			MergedContextConfiguration mergedConfig, boolean refresh) throws Exception {
+			MergedContextConfiguration mergedConfig, boolean forAotProcessing) throws Exception {
 
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Loading ApplicationContext for merged context configuration [%s].",
-					mergedConfig));
+			logger.debug("Loading ApplicationContext %sfor merged context configuration %s"
+					.formatted((forAotProcessing ? "for AOT processing " : ""), mergedConfig));
 		}
 
 		validateMergedContextConfiguration(mergedConfig);
@@ -184,7 +202,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 		customizeContext(context);
 		customizeContext(context, mergedConfig);
 
-		if (refresh) {
+		if (!forAotProcessing) {
 			context.refresh();
 			context.registerShutdownHook();
 		}
@@ -236,14 +254,13 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * @see org.springframework.test.context.ContextLoader#loadContext
 	 * @see GenericApplicationContext
 	 * @see #loadContext(MergedContextConfiguration)
-	 * @deprecated as of Spring Framework 6.0, in favor of {@link #loadContextForAotProcessing(MergedContextConfiguration)}
+	 * @deprecated as of Spring Framework 6.0, in favor of {@link #loadContext(MergedContextConfiguration)}
 	 */
 	@Deprecated
 	@Override
 	public final ConfigurableApplicationContext loadContext(String... locations) throws Exception {
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Loading ApplicationContext for locations [%s].",
-					StringUtils.arrayToCommaDelimitedString(locations)));
+			logger.debug("Loading ApplicationContext for locations " + Arrays.toString(locations));
 		}
 
 		GenericApplicationContext context = createContext();
