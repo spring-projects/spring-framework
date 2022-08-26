@@ -151,7 +151,7 @@ public final class TypeHint implements ConditionalHint {
 
 		/**
 		 * Make this hint conditional on the fact that the specified type
-		 * can be resolved.
+		 * is in a reachable code path from a static analysis point of view.
 		 * @param reachableType the type that should be reachable for this
 		 * hint to apply
 		 * @return {@code this}, to facilitate method chaining
@@ -163,7 +163,7 @@ public final class TypeHint implements ConditionalHint {
 
 		/**
 		 * Make this hint conditional on the fact that the specified type
-		 * can be resolved.
+		 * is in a reachable code path from a static analysis point of view.
 		 * @param reachableType the type that should be reachable for this
 		 * hint to apply
 		 * @return {@code this}, to facilitate method chaining
