@@ -56,6 +56,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	 */
 	static final ContextCache defaultContextCache = new DefaultContextCache();
 
+	@Nullable
 	private final AotTestMappings aotTestMappings = getAotTestMappings();
 
 	private final ContextCache contextCache;
@@ -193,6 +194,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 		return (this.aotTestMappings != null && this.aotTestMappings.isSupportedTestClass(testClass));
 	}
 
+	@Nullable
 	private static AotTestMappings getAotTestMappings() {
 		if (AotDetector.useGeneratedArtifacts()) {
 			try {

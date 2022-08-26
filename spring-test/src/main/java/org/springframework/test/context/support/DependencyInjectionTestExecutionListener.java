@@ -26,6 +26,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.Conventions;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.aot.AotTestMappings;
 
@@ -59,6 +60,7 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 
 	private static final Log logger = LogFactory.getLog(DependencyInjectionTestExecutionListener.class);
 
+	@Nullable
 	private final AotTestMappings aotTestMappings = getAotTestMappings();
 
 
@@ -163,6 +165,7 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 		return (this.aotTestMappings != null && this.aotTestMappings.isSupportedTestClass(testClass));
 	}
 
+	@Nullable
 	private static AotTestMappings getAotTestMappings() {
 		if (AotDetector.useGeneratedArtifacts()) {
 			try {
