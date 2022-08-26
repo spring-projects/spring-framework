@@ -162,6 +162,18 @@ public final class TypeHint implements ConditionalHint {
 		}
 
 		/**
+		 * Make this hint conditional on the fact that the specified type
+		 * can be resolved.
+		 * @param reachableType the type that should be reachable for this
+		 * hint to apply
+		 * @return {@code this}, to facilitate method chaining
+		 */
+		public Builder onReachableType(Class<?> reachableType) {
+			this.reachableType = TypeReference.of(reachableType);
+			return this;
+		}
+
+		/**
 		 * Register the need for reflection on the field with the specified name.
 		 * @param name the name of the field
 		 * @param fieldHint a builder to further customize the hints of this field

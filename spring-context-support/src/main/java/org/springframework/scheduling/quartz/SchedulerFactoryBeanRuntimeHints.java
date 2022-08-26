@@ -38,8 +38,6 @@ class SchedulerFactoryBeanRuntimeHints implements RuntimeHintsRegistrar {
 
 	private static final String SCHEDULER_FACTORY_CLASS_NAME = "org.quartz.impl.StdSchedulerFactory";
 
-	private static final TypeReference FACTORY_BEAN_TYPE_REFERENCE = TypeReference.of(SchedulerFactoryBean.class);
-
 	private final ReflectiveRuntimeHintsRegistrar reflectiveRegistrar = new ReflectiveRuntimeHintsRegistrar();
 
 	@Override
@@ -49,7 +47,7 @@ class SchedulerFactoryBeanRuntimeHints implements RuntimeHintsRegistrar {
 		}
 		Consumer<Builder> typeHint = type -> type
 				.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)
-				.onReachableType(FACTORY_BEAN_TYPE_REFERENCE);
+				.onReachableType(SchedulerFactoryBean.class);
 		hints.reflection()
 				.registerType(TypeReference.of(SCHEDULER_FACTORY_CLASS_NAME), typeHint)
 				.registerTypes(TypeReference.listOf(ResourceLoaderClassLoadHelper.class,

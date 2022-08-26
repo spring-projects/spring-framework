@@ -38,7 +38,7 @@ import org.springframework.lang.Nullable;
 class CodecConfigurerRuntimeHints implements RuntimeHintsRegistrar {
 
 	private static final Consumer<Builder> CODEC_HINT = type -> type
-			.onReachableType(TypeReference.of(CodecConfigurerFactory.class))
+			.onReachableType(CodecConfigurerFactory.class)
 			.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
 
 	@Override
