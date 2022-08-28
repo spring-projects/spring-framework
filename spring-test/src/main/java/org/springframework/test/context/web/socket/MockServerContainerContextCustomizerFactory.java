@@ -18,25 +18,24 @@ package org.springframework.test.context.web.socket;
 
 import java.util.List;
 
-import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextCustomizerFactory;
+import org.springframework.test.context.TestContextAnnotationUtils;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.util.ClassUtils;
 
 /**
  * {@link ContextCustomizerFactory} which creates a {@link MockServerContainerContextCustomizer}
- * if WebSocket support is present in the classpath and the test class is annotated
- * with {@code @WebAppConfiguration}.
+ * if WebSocket support is present in the classpath and the test class or one of
+ * its enclosing classes is annotated or meta-annotated with
+ * {@link WebAppConfiguration @WebAppConfiguration}.
  *
  * @author Sam Brannen
  * @since 4.3.1
  */
 class MockServerContainerContextCustomizerFactory implements ContextCustomizerFactory {
-
-	private static final String WEB_APP_CONFIGURATION_ANNOTATION_CLASS_NAME =
-			"org.springframework.test.context.web.WebAppConfiguration";
 
 	private static final boolean webSocketPresent = ClassUtils.isPresent("jakarta.websocket.server.ServerContainer",
 			MockServerContainerContextCustomizerFactory.class.getClassLoader());
@@ -55,8 +54,7 @@ class MockServerContainerContextCustomizerFactory implements ContextCustomizerFa
 	}
 
 	private static boolean isAnnotatedWithWebAppConfiguration(Class<?> testClass) {
-		return (AnnotatedElementUtils.findMergedAnnotationAttributes(testClass,
-				WEB_APP_CONFIGURATION_ANNOTATION_CLASS_NAME, false, false) != null);
+		return TestContextAnnotationUtils.hasAnnotation(testClass, WebAppConfiguration.class);
 	}
 
 }
