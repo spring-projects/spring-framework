@@ -217,8 +217,9 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				listeners.add(BeanUtils.instantiateClass(listenerClass));
 			}
 			catch (BeanInstantiationException ex) {
-				if (ex.getCause() instanceof NoClassDefFoundError noClassDefFoundError) {
-					handleNoClassDefFoundError(listenerClass.getName(), noClassDefFoundError);
+				Throwable cause = ex.getCause();
+				if (cause instanceof ClassNotFoundException || cause instanceof NoClassDefFoundError) {
+					logSkippedListener(listenerClass.getName(), cause);
 				}
 				else {
 					throw ex;
@@ -233,11 +234,12 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 
 		Throwable ex = (failure instanceof InvocationTargetException ite ?
 				ite.getTargetException() : failure);
-		if (ex instanceof LinkageError || ex instanceof ClassNotFoundException) {
-			if (ex instanceof NoClassDefFoundError noClassDefFoundError) {
-				handleNoClassDefFoundError(listenerClassName, noClassDefFoundError);
-			}
-			else if (logger.isDebugEnabled()) {
+
+		if (ex instanceof ClassNotFoundException || ex instanceof NoClassDefFoundError) {
+			logSkippedListener(listenerClassName, ex);
+		}
+		else if (ex instanceof LinkageError) {
+			if (logger.isDebugEnabled()) {
 				logger.debug("""
 						Could not load default TestExecutionListener [%s]. Specify custom \
 						listener classes or make the default listener classes available."""
@@ -256,14 +258,14 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		}
 	}
 
-	private void handleNoClassDefFoundError(String listenerClassName, NoClassDefFoundError error) {
+	private void logSkippedListener(String listenerClassName, Throwable ex) {
 		// TestExecutionListener not applicable due to a missing dependency
 		if (logger.isDebugEnabled()) {
 			logger.debug("""
 					Skipping candidate TestExecutionListener [%s] due to a missing dependency. \
 					Specify custom listener classes or make the default listener classes \
 					and their required dependencies available. Offending class: [%s]"""
-						.formatted(listenerClassName, error.getMessage()));
+						.formatted(listenerClassName, ex.getMessage()));
 		}
 	}
 
