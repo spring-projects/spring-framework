@@ -202,13 +202,10 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	protected List<TestExecutionListener> getDefaultTestExecutionListeners() {
 		List<TestExecutionListener> listeners = SpringFactoriesLoader.forDefaultResourceLocation()
 				.load(TestExecutionListener.class, this::handleListenerInstantiationFailure);
-
-		if (logger.isInfoEnabled()) {
-			List<String> classNames = listeners.stream().map(Object::getClass).map(Class::getName).toList();
-			logger.info("Loaded default TestExecutionListener implementations from location [%s]: %s"
-					.formatted(SpringFactoriesLoader.FACTORIES_RESOURCE_LOCATION, classNames));
+		if (logger.isDebugEnabled()) {
+			logger.debug("Loaded default TestExecutionListener implementations from location [%s]: %s"
+					.formatted(SpringFactoriesLoader.FACTORIES_RESOURCE_LOCATION, classNames(listeners)));
 		}
-
 		return Collections.unmodifiableList(listeners);
 	}
 
@@ -426,6 +423,9 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				customizers.add(customizer);
 			}
 		}
+		if (logger.isInfoEnabled()) {
+			logger.info("Using ContextCustomizers: " + customizers);
+		}
 		return customizers;
 	}
 
@@ -438,7 +438,13 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * @see SpringFactoriesLoader#loadFactories
 	 */
 	protected List<ContextCustomizerFactory> getContextCustomizerFactories() {
-		return SpringFactoriesLoader.loadFactories(ContextCustomizerFactory.class, getClass().getClassLoader());
+		List<ContextCustomizerFactory> factories =
+				SpringFactoriesLoader.loadFactories(ContextCustomizerFactory.class, getClass().getClassLoader());
+		if (logger.isDebugEnabled()) {
+			logger.debug("Loaded ContextCustomizerFactory implementations from location [%s]: %s"
+					.formatted(SpringFactoriesLoader.FACTORIES_RESOURCE_LOCATION, classNames(factories)));
+		}
+		return factories;
 	}
 
 	/**
@@ -561,6 +567,10 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		return mergedConfig;
 	}
 
+
+	private static List<String> classNames(List<?> components) {
+		return components.stream().map(Object::getClass).map(Class::getName).toList();
+	}
 
 	private static boolean areAllEmpty(Collection<?>... collections) {
 		return Arrays.stream(collections).allMatch(Collection::isEmpty);
