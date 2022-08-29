@@ -34,10 +34,12 @@ import org.springframework.transaction.TransactionDefinition;
 class TransactionRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
 		RuntimeHintsUtils.registerSynthesizedAnnotation(hints, Transactional.class);
 		hints.reflection().registerTypes(TypeReference.listOf(
 						Isolation.class, Propagation.class, TransactionDefinition.class),
 				builder -> builder.withMembers(MemberCategory.DECLARED_FIELDS));
 	}
+
 }

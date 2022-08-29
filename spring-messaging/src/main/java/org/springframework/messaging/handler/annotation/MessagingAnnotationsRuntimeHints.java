@@ -34,8 +34,10 @@ import org.springframework.stereotype.Controller;
 public class MessagingAnnotationsRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 		Stream.of(Controller.class, Header.class, Headers.class, Payload.class).forEach(annotationType ->
 				RuntimeHintsUtils.registerSynthesizedAnnotation(hints, annotationType));
 	}
+
 }

@@ -23,6 +23,8 @@ package org.springframework.core.annotation;
  *
  * @author Sam Brannen
  * @since 4.2
+ * @deprecated For removal in Spring Framework 6.0
  */
+@Deprecated
 public interface SynthesizedAnnotation {
 }

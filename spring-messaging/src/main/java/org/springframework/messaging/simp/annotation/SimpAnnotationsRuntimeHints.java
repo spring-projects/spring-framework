@@ -30,7 +30,9 @@ import org.springframework.aot.hint.support.RuntimeHintsUtils;
 public class SimpAnnotationsRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
 		RuntimeHintsUtils.registerSynthesizedAnnotation(hints, SendToUser.class);
 	}
+
 }

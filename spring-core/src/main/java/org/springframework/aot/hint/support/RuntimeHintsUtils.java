@@ -71,7 +71,9 @@ public abstract class RuntimeHintsUtils {
 	 * @param hints the {@link RuntimeHints} instance to use
 	 * @param annotationType the annotation type
 	 * @see SynthesizedAnnotation
+	 * @deprecated For removal in Spring Framework 6.0
 	 */
+	@Deprecated
 	public static void registerSynthesizedAnnotation(RuntimeHints hints, Class<?> annotationType) {
 		hints.proxies().registerJdkProxy(annotationType, SynthesizedAnnotation.class);
 	}
