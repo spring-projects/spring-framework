@@ -300,27 +300,13 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 	static <A extends Annotation> A createProxy(MergedAnnotation<A> annotation, Class<A> type) {
 		ClassLoader classLoader = type.getClassLoader();
 		InvocationHandler handler = new SynthesizedMergedAnnotationInvocationHandler<>(annotation, type);
-		Class<?>[] interfaces = isVisible(classLoader, SynthesizedAnnotation.class) ?
-				new Class<?>[] {type, SynthesizedAnnotation.class} : new Class<?>[] {type};
+		Class<?>[] interfaces = new Class<?>[] {type};
 		return (A) Proxy.newProxyInstance(classLoader, interfaces, handler);
 	}
 
 	private static String getName(Class<?> clazz) {
 		String canonicalName = clazz.getCanonicalName();
 		return (canonicalName != null ? canonicalName : clazz.getName());
-	}
-
-
-	private static boolean isVisible(ClassLoader classLoader, Class<?> interfaceClass) {
-		if (classLoader == interfaceClass.getClassLoader()) {
-			return true;
-		}
-		try {
-			return Class.forName(interfaceClass.getName(), false, classLoader) == interfaceClass;
-		}
-		catch (ClassNotFoundException ex) {
-			return false;
-		}
 	}
 
 }
