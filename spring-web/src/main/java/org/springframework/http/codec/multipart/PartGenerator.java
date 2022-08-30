@@ -688,15 +688,13 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 		@Override
 		public void onComplete() {
 			this.completed = true;
-		public void partComplete(boolean finalPart) {
 			State state = PartGenerator.this.state.get();
 			// writeComplete might have changed our state to IdleFileState
 			if (state != this) {
-				state.partComplete(finalPart);
+				state.onComplete();
 			}
 			else {
 				this.completed = true;
-				this.finalPart = finalPart;
 			}
 		}
 
@@ -726,7 +724,7 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 			}
 			else if (changeState(this, newState)) {
 				if (this.completed) {
-					newState.partComplete(this.finalPart);
+					newState.onComplete();
 				}
 				else {
 					requestToken();
