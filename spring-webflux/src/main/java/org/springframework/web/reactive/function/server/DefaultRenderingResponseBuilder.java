@@ -205,11 +205,10 @@ final class DefaultRenderingResponseBuilder implements RenderingResponse.Builder
 		}
 
 		private void setStatus(View view) {
-			if (view instanceof RedirectView) {
-				HttpStatus httpStatus = HttpStatus.resolve(rawStatusCode());
-				if (httpStatus != null && httpStatus.is3xxRedirection()) {
-					RedirectView redirectView = (RedirectView) view;
-					redirectView.setStatusCode(httpStatus);
+			if (view instanceof RedirectView redirectView) {
+				HttpStatusCode statusCode = statusCode();
+				if (statusCode.is3xxRedirection()) {
+					redirectView.setStatusCode(statusCode);
 				}
 			}
 		}
