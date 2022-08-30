@@ -37,6 +37,7 @@ include "spring-webflux"
 include "spring-webmvc"
 include "spring-websocket"
 include "framework-bom"
+include "framework-platform"
 include "integration-tests"
 
 rootProject.name = "spring"

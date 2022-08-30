@@ -16,13 +16,18 @@ dependencies {
 	optional("com.fasterxml.jackson.core:jackson-databind")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile")
 	optional("io.projectreactor.netty:reactor-netty-http")
-	optional("org.apache.tomcat:tomcat-websocket")
+	optional("org.apache.tomcat:tomcat-websocket") {
+		exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"
+		exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
+	}
 	optional("org.eclipse.jetty.websocket:websocket-jetty-server") {
 		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
 	}
 	optional("org.eclipse.jetty.websocket:websocket-jetty-client")
 	optional("io.undertow:undertow-websockets-jsr-jakarta")
-	optional("org.apache.httpcomponents:httpclient")
+	optional("org.apache.httpcomponents:httpclient") {
+		exclude group: "commons-logging", module: "commons-logging"
+	}
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("com.google.protobuf:protobuf-java-util")
