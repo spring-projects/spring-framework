@@ -39,6 +39,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.result.view.RedirectView;
+import org.springframework.web.reactive.result.view.View;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -195,11 +197,22 @@ final class DefaultRenderingResponseBuilder implements RenderingResponse.Builder
 					.switchIfEmpty(Mono.error(() ->
 							new IllegalArgumentException("Could not resolve view with name '" + name() + "'")))
 					.flatMap(view -> {
+						setStatus(view);
 						List<MediaType> mediaTypes = view.getSupportedMediaTypes();
 						return view.render(model(),
 								contentType == null && !mediaTypes.isEmpty() ? mediaTypes.get(0) : contentType,
 								exchange);
 					});
+		}
+
+		private void setStatus(View view) {
+			if (view instanceof RedirectView) {
+				HttpStatus httpStatus = HttpStatus.resolve(rawStatusCode());
+				if (httpStatus != null && httpStatus.is3xxRedirection()) {
+					RedirectView redirectView = (RedirectView) view;
+					redirectView.setStatusCode(httpStatus);
+				}
+			}
 		}
 
 	}
