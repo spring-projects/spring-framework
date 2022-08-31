@@ -478,15 +478,15 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 
 	static class PropertyValuesFactoryBean implements FactoryBean<String> {
 
-		private Class<?> prefix;
+		private String prefix;
 
 		private String name;
 
-		public Class<?> getPrefix() {
+		public String getPrefix() {
 			return this.prefix;
 		}
 
-		public void setPrefix(Class<?> prefix) {
+		public void setPrefix(String prefix) {
 			this.prefix = prefix;
 		}
 

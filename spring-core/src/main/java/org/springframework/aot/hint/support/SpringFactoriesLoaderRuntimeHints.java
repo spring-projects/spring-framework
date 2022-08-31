@@ -107,7 +107,7 @@ class SpringFactoriesLoaderRuntimeHints implements RuntimeHintsRegistrar {
 
 	private static class ExtendedSpringFactoriesLoader extends SpringFactoriesLoader {
 
-		public ExtendedSpringFactoriesLoader(@Nullable ClassLoader classLoader, Map<String, List<String>> factories) {
+		ExtendedSpringFactoriesLoader(@Nullable ClassLoader classLoader, Map<String, List<String>> factories) {
 			super(classLoader, factories);
 		}
 

@@ -65,7 +65,7 @@ public class FilePatternResourceHintsRegistrar {
 	}
 
 	private static List<String> validateLocations(List<String> locations) {
-		Assert.notEmpty(locations, () -> "At least one location should be specified");
+		Assert.notEmpty(locations, "At least one location should be specified");
 		List<String> parsedLocations = new ArrayList<>();
 		for (String location : locations) {
 			if (location.startsWith(ResourceUtils.CLASSPATH_URL_PREFIX)) {
