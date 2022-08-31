@@ -10,7 +10,9 @@ dependencies {
 	api(project(":spring-expression"))
 	api(project(":spring-web"))
 	compileOnly("jakarta.servlet:jakarta.servlet-api")
-	compileOnly("com.google.code.findbugs:findbugs")  // for groovy-templates
+	compileOnly("com.google.code.findbugs:findbugs") {  // for groovy-templates
+		exclude group: "dom4j", module: "dom4j"
+	}
 	optional(project(":spring-context-support"))  // for FreeMarker support
 	optional(project(":spring-oxm"))
 	optional("jakarta.servlet.jsp:jakarta.servlet.jsp-api")
