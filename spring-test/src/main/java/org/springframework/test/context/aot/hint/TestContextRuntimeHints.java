@@ -99,6 +99,15 @@ class TestContextRuntimeHints implements RuntimeHintsRegistrar {
 			// Application Events
 			org.springframework.test.context.event.RecordApplicationEvents.class,
 
+			// Test execution events
+			org.springframework.test.context.event.annotation.AfterTestClass.class,
+			org.springframework.test.context.event.annotation.AfterTestExecution.class,
+			org.springframework.test.context.event.annotation.AfterTestMethod.class,
+			org.springframework.test.context.event.annotation.BeforeTestClass.class,
+			org.springframework.test.context.event.annotation.BeforeTestExecution.class,
+			org.springframework.test.context.event.annotation.BeforeTestMethod.class,
+			org.springframework.test.context.event.annotation.PrepareTestInstance.class,
+
 			// JUnit Jupiter
 			org.springframework.test.context.junit.jupiter.EnabledIf.class,
 			org.springframework.test.context.junit.jupiter.DisabledIf.class,
