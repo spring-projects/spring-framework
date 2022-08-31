@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -254,6 +254,20 @@ public interface WebClient {
 		 * @since 5.1
 		 */
 		Builder defaultRequest(Consumer<RequestHeadersSpec<?>> defaultRequest);
+
+		/**
+		 * Register a default
+		 * {@link ResponseSpec#onStatus(Predicate, Function) status handler} to
+		 * apply to every response. Such default handlers are applied in the
+		 * order in which they are registered, and after any others that are
+		 * registered for a specific response.
+		 * @param statusPredicate to match responses with
+		 * @param exceptionFunction to map the response to an error signal
+		 * @return this builder
+		 * @since 6.0
+		 */
+		Builder defaultStatusHandler(Predicate<HttpStatusCode> statusPredicate,
+				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction);
 
 		/**
 		 * Add the given filter to the end of the filter chain.

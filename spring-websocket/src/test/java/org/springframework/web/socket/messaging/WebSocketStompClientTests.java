@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.web.socket.messaging;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledFuture;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +40,6 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.MimeTypeUtils;
-import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.PongMessage;
@@ -81,7 +82,7 @@ public class WebSocketStompClientTests {
 
 	private ArgumentCaptor<WebSocketHandler> webSocketHandlerCaptor;
 
-	private SettableListenableFuture<WebSocketSession> handshakeFuture;
+	private CompletableFuture<WebSocketSession> handshakeFuture;
 
 
 	@BeforeEach
@@ -92,8 +93,8 @@ public class WebSocketStompClientTests {
 		this.stompClient.setStompSession(this.stompSession);
 
 		this.webSocketHandlerCaptor = ArgumentCaptor.forClass(WebSocketHandler.class);
-		this.handshakeFuture = new SettableListenableFuture<>();
-		given(webSocketClient.doHandshake(this.webSocketHandlerCaptor.capture(), any(), any(URI.class)))
+		this.handshakeFuture = new CompletableFuture<>();
+		given(webSocketClient.execute(this.webSocketHandlerCaptor.capture(), any(), any(URI.class)))
 				.willReturn(this.handshakeFuture);
 	}
 
@@ -103,7 +104,7 @@ public class WebSocketStompClientTests {
 		connect();
 
 		IllegalStateException handshakeFailure = new IllegalStateException("simulated exception");
-		this.handshakeFuture.setException(handshakeFailure);
+		this.handshakeFuture.completeExceptionally(handshakeFailure);
 
 		verify(this.stompSession).afterConnectFailure(same(handshakeFailure));
 	}
@@ -201,7 +202,7 @@ public class WebSocketStompClientTests {
 		accessor.setDestination("/topic/foo");
 		byte[] payload = "payload".getBytes(StandardCharsets.UTF_8);
 
-		getTcpConnection().send(MessageBuilder.createMessage(payload, accessor.getMessageHeaders()));
+		getTcpConnection().sendAsync(MessageBuilder.createMessage(payload, accessor.getMessageHeaders()));
 
 		ArgumentCaptor<TextMessage> textMessageCaptor = ArgumentCaptor.forClass(TextMessage.class);
 		verify(this.webSocketSession).sendMessage(textMessageCaptor.capture());
@@ -217,7 +218,7 @@ public class WebSocketStompClientTests {
 		accessor.setContentType(MimeTypeUtils.APPLICATION_OCTET_STREAM);
 		byte[] payload = "payload".getBytes(StandardCharsets.UTF_8);
 
-		getTcpConnection().send(MessageBuilder.createMessage(payload, accessor.getMessageHeaders()));
+		getTcpConnection().sendAsync(MessageBuilder.createMessage(payload, accessor.getMessageHeaders()));
 
 		ArgumentCaptor<BinaryMessage> binaryMessageCaptor = ArgumentCaptor.forClass(BinaryMessage.class);
 		verify(this.webSocketSession).sendMessage(binaryMessageCaptor.capture());
@@ -295,7 +296,7 @@ public class WebSocketStompClientTests {
 		TcpConnection<byte[]> tcpConnection = getTcpConnection();
 
 		ScheduledFuture future = mock(ScheduledFuture.class);
-		given(this.taskScheduler.scheduleWithFixedDelay(any(), eq(1L))).willReturn(future);
+		given(this.taskScheduler.scheduleWithFixedDelay(any(), eq(Duration.ofMillis(1)))).willReturn(future);
 
 		tcpConnection.onReadInactivity(mock(Runnable.class), 2L);
 		tcpConnection.onWriteInactivity(mock(Runnable.class), 2L);
@@ -308,9 +309,9 @@ public class WebSocketStompClientTests {
 
 
 	private WebSocketHandler connect() {
-		this.stompClient.connect("/foo", mock(StompSessionHandler.class));
+		this.stompClient.connectAsync("/foo", mock(StompSessionHandler.class));
 
-		verify(this.stompSession).getSessionFuture();
+		verify(this.stompSession).getSession();
 		verifyNoMoreInteractions(this.stompSession);
 
 		WebSocketHandler webSocketHandler = this.webSocketHandlerCaptor.getValue();
@@ -332,7 +333,7 @@ public class WebSocketStompClientTests {
 			throws InterruptedException {
 
 		ArgumentCaptor<Runnable> inactivityTaskCaptor = ArgumentCaptor.forClass(Runnable.class);
-		verify(this.taskScheduler).scheduleWithFixedDelay(inactivityTaskCaptor.capture(), eq(delay/2));
+		verify(this.taskScheduler).scheduleWithFixedDelay(inactivityTaskCaptor.capture(), eq(Duration.ofMillis(delay/2)));
 		verifyNoMoreInteractions(this.taskScheduler);
 
 		if (sleepTime > 0) {

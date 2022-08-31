@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,9 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -98,6 +101,9 @@ public abstract class StatementCreatorUtils {
 		javaTypeToSqlTypeMap.put(double.class, Types.DOUBLE);
 		javaTypeToSqlTypeMap.put(Double.class, Types.DOUBLE);
 		javaTypeToSqlTypeMap.put(BigDecimal.class, Types.DECIMAL);
+		javaTypeToSqlTypeMap.put(LocalDate.class, Types.DATE);
+		javaTypeToSqlTypeMap.put(LocalTime.class, Types.TIME);
+		javaTypeToSqlTypeMap.put(LocalDateTime.class, Types.TIMESTAMP);
 		javaTypeToSqlTypeMap.put(java.sql.Date.class, Types.DATE);
 		javaTypeToSqlTypeMap.put(java.sql.Time.class, Types.TIME);
 		javaTypeToSqlTypeMap.put(java.sql.Timestamp.class, Types.TIMESTAMP);

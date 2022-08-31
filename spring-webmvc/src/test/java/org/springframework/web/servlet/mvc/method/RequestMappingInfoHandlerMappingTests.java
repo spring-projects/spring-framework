@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,6 @@ import org.springframework.web.servlet.handler.PathPatternsParameterizedTest;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UrlPathHelper;
-import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -75,10 +74,12 @@ class RequestMappingInfoHandlerMappingTests {
 		TestController controller = new TestController();
 
 		TestRequestMappingInfoHandlerMapping mapping1 = new TestRequestMappingInfoHandlerMapping();
-		mapping1.setPatternParser(new PathPatternParser());
+
+		UrlPathHelper pathHelper = new UrlPathHelper();
+		pathHelper.setRemoveSemicolonContent(false);
 
 		TestRequestMappingInfoHandlerMapping mapping2 = new TestRequestMappingInfoHandlerMapping();
-		mapping2.setRemoveSemicolonContent(false);
+		mapping2.setUrlPathHelper(pathHelper);
 
 		return Stream.of(mapping1, mapping2).peek(mapping -> {
 			mapping.setApplicationContext(new StaticWebApplicationContext());
@@ -137,11 +138,6 @@ class RequestMappingInfoHandlerMappingTests {
 		HandlerMethod handlerMethod = getHandler(mapping, request);
 
 		assertThat(handlerMethod.getMethod()).isEqualTo(this.emptyMethod.getMethod());
-
-		request = new MockHttpServletRequest("GET", "/");
-		handlerMethod = getHandler(mapping, request);
-
-		assertThat(handlerMethod.getMethod()).isEqualTo(this.emptyMethod.getMethod());
 	}
 
 	@PathPatternsParameterizedTest
@@ -173,7 +169,6 @@ class RequestMappingInfoHandlerMappingTests {
 	@PathPatternsParameterizedTest // SPR-8462
 	void getHandlerMediaTypeNotSupported(TestRequestMappingInfoHandlerMapping mapping) {
 		testHttpMediaTypeNotSupportedException(mapping, "/person/1");
-		testHttpMediaTypeNotSupportedException(mapping, "/person/1/");
 		testHttpMediaTypeNotSupportedException(mapping, "/person/1.json");
 	}
 
@@ -198,7 +193,6 @@ class RequestMappingInfoHandlerMappingTests {
 	@PathPatternsParameterizedTest // SPR-8462
 	void getHandlerMediaTypeNotAccepted(TestRequestMappingInfoHandlerMapping mapping) {
 		testHttpMediaTypeNotAcceptableException(mapping, "/persons");
-		testHttpMediaTypeNotAcceptableException(mapping, "/persons/");
 		if (mapping.getPatternParser() == null) {
 			testHttpMediaTypeNotAcceptableException(mapping, "/persons.json");
 		}
@@ -320,7 +314,7 @@ class RequestMappingInfoHandlerMappingTests {
 		assertThat(matrixVariables.getFirst("year")).isEqualTo("2012");
 		assertThat(uriVariables.get("cars")).isEqualTo("cars");
 
-		// URI var with regex for path variable, and URI var for matrix params..
+		// URI var with regex for path variable, and URI var for matrix params.
 		request = new MockHttpServletRequest("GET", "/cars;colors=red,blue,green;year=2012");
 		handleMatch(mapping, request, "/{cars:[^;]+}{params}", request.getRequestURI());
 
@@ -335,7 +329,7 @@ class RequestMappingInfoHandlerMappingTests {
 			assertThat(uriVariables.get("params")).isEqualTo(";colors=red,blue,green;year=2012");
 		}
 
-		// URI var with regex for path variable, and (empty) URI var for matrix params..
+		// URI var with regex for path variable, and (empty) URI var for matrix params.
 		request = new MockHttpServletRequest("GET", "/cars");
 		handleMatch(mapping, request, "/{cars:[^;]+}{params}", request.getRequestURI());
 

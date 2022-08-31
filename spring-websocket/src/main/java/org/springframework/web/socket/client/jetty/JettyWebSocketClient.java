@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -29,13 +30,11 @@ import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 
 import org.springframework.context.Lifecycle;
-import org.springframework.core.task.AsyncListenableTaskExecutor;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureTask;
+import org.springframework.util.concurrent.FutureUtils;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
@@ -43,8 +42,6 @@ import org.springframework.web.socket.adapter.jetty.JettyWebSocketHandlerAdapter
 import org.springframework.web.socket.adapter.jetty.JettyWebSocketSession;
 import org.springframework.web.socket.adapter.jetty.WebSocketToJettyExtensionConfigAdapter;
 import org.springframework.web.socket.client.AbstractWebSocketClient;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Initiates WebSocket requests to a WebSocket server programmatically
@@ -64,7 +61,7 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 	private final org.eclipse.jetty.websocket.client.WebSocketClient client;
 
 	@Nullable
-	private AsyncListenableTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
+	private AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
 
 
 	/**
@@ -85,20 +82,20 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 
 
 	/**
-	 * Set an {@link AsyncListenableTaskExecutor} to use when opening connections.
-	 * If this property is set to {@code null}, calls to any of the
+	 * Set an {@link AsyncTaskExecutor} to use when opening connections.
+	 * <p>If this property is set to {@code null}, calls to any of the
 	 * {@code doHandshake} methods will block until the connection is established.
 	 * <p>By default an instance of {@code SimpleAsyncTaskExecutor} is used.
 	 */
-	public void setTaskExecutor(@Nullable AsyncListenableTaskExecutor taskExecutor) {
+	public void setTaskExecutor(@Nullable AsyncTaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
 	}
 
 	/**
-	 * Return the configured {@link TaskExecutor}.
+	 * Return the configured {@link AsyncTaskExecutor}.
 	 */
 	@Nullable
-	public AsyncListenableTaskExecutor getTaskExecutor() {
+	public AsyncTaskExecutor getTaskExecutor() {
 		return this.taskExecutor;
 	}
 
@@ -130,15 +127,7 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 
 
 	@Override
-	public ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
-			String uriTemplate, Object... uriVars) {
-
-		UriComponents uriComponents = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVars).encode();
-		return doHandshake(webSocketHandler, null, uriComponents.toUri());
-	}
-
-	@Override
-	public ListenableFuture<WebSocketSession> doHandshakeInternal(WebSocketHandler wsHandler,
+	public CompletableFuture<WebSocketSession> executeInternal(WebSocketHandler wsHandler,
 			HttpHeaders headers, final URI uri, List<String> protocols,
 			List<WebSocketExtension> extensions,  Map<String, Object> attributes) {
 
@@ -162,18 +151,16 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 		};
 
 		if (this.taskExecutor != null) {
-			return this.taskExecutor.submitListenable(connectTask);
+			return FutureUtils.callAsync(connectTask, this.taskExecutor);
 		}
 		else {
-			ListenableFutureTask<WebSocketSession> task = new ListenableFutureTask<>(connectTask);
-			task.run();
-			return task;
+			return FutureUtils.callAsync(connectTask);
 		}
 	}
 
 	/**
 	 * Return the user to make available through {@link WebSocketSession#getPrincipal()}.
-	 * By default this method returns {@code null}
+	 * By default, this method returns {@code null}
 	 */
 	@Nullable
 	protected Principal getUser() {

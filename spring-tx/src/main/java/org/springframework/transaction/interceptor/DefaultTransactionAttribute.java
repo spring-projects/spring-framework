@@ -170,7 +170,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 
 	/**
 	 * The default behavior is as with EJB: rollback on unchecked exception
-	 * ({@link RuntimeException}), assuming an unexpected outcome outside of any
+	 * ({@link RuntimeException}), assuming an unexpected outcome outside any
 	 * business rules. Additionally, we also attempt to rollback on {@link Error} which
 	 * is clearly an unexpected outcome as well. By contrast, a checked exception is
 	 * considered a business exception and therefore a regular expected outcome of the

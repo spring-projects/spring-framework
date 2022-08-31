@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,6 +135,11 @@ final class MissingMergedAnnotation<A extends Annotation> extends AbstractMerged
 	}
 
 	@Override
+	public boolean isSynthesizable() {
+		return false;
+	}
+
+	@Override
 	public String toString() {
 		return "(missing)";
 	}
@@ -162,7 +167,7 @@ final class MissingMergedAnnotation<A extends Annotation> extends AbstractMerged
 	}
 
 	@Override
-	protected A createSynthesized() {
+	protected A createSynthesizedAnnotation() {
 		throw new NoSuchElementException("Unable to synthesize missing annotation");
 	}
 

@@ -64,7 +64,16 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 	 * @param uriVariables zero or more URI variables
 	 */
 	MockMultipartHttpServletRequestBuilder(String urlTemplate, Object... uriVariables) {
-		super(HttpMethod.POST, urlTemplate, uriVariables);
+		this(HttpMethod.POST, urlTemplate, uriVariables);
+	}
+
+	/**
+	 * Variant of {@link #MockMultipartHttpServletRequestBuilder(String, Object...)}
+	 * that also accepts an {@link HttpMethod}.
+	 * @since 5.3.22
+	 */
+	MockMultipartHttpServletRequestBuilder(HttpMethod httpMethod, String urlTemplate, Object... uriVariables) {
+		super(httpMethod, urlTemplate, uriVariables);
 		super.contentType(MediaType.MULTIPART_FORM_DATA);
 	}
 
@@ -74,8 +83,7 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 	 * @since 4.0.3
 	 */
 	MockMultipartHttpServletRequestBuilder(URI uri) {
-		super(HttpMethod.POST, uri);
-		super.contentType(MediaType.MULTIPART_FORM_DATA);
+		this(HttpMethod.POST, uri);
 	}
 
 	/**

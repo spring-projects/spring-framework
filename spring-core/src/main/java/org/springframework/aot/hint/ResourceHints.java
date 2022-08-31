@@ -66,6 +66,24 @@ public class ResourceHints {
 	}
 
 	/**
+	 * Register a pattern if the given {@code location} is available on the
+	 * classpath. This delegates to {@link ClassLoader#getResource(String)}
+	 * which validates directories as well. The location is not included in
+	 * the hint.
+	 * @param classLoader the classloader to use
+	 * @param location a '/'-separated path name that should exist
+	 * @param resourceHint a builder to customize the resource pattern
+	 * @return {@code this}, to facilitate method chaining
+	 */
+	public ResourceHints registerPatternIfPresent(@Nullable ClassLoader classLoader, String location, Consumer<ResourcePatternHints.Builder> resourceHint) {
+		ClassLoader classLoaderToUse = (classLoader != null) ? classLoader : getClass().getClassLoader();
+		if (classLoaderToUse.getResource(location) != null) {
+			registerPattern(resourceHint);
+		}
+		return this;
+	}
+
+	/**
 	 * Register that the resources matching the specified pattern should be
 	 * made available at runtime.
 	 * @param resourceHint a builder to further customize the resource pattern
@@ -83,7 +101,7 @@ public class ResourceHints {
 	/**
 	 * Register that the resources matching the specified pattern should be
 	 * made available at runtime.
-	 * @param include a pattern of the resources to include
+	 * @param include a pattern of the resources to include (see {@link ResourcePatternHint} documentation)
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public ResourceHints registerPattern(String include) {
@@ -119,7 +137,7 @@ public class ResourceHints {
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public ResourceHints registerResourceBundle(String baseName, @Nullable Consumer<ResourceBundleHint.Builder> resourceHint) {
-		ResourceBundleHint.Builder builder = new ResourceBundleHint.Builder().baseName(baseName);
+		ResourceBundleHint.Builder builder = new ResourceBundleHint.Builder(baseName);
 		if (resourceHint != null) {
 			resourceHint.accept(builder);
 		}

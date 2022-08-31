@@ -493,7 +493,7 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 
 	/**
 	 * Abstract template method for marshalling the given object graph to a DOM {@code Node}.
-	 * <p>In practice, node is be a {@code Document} node, a {@code DocumentFragment} node,
+	 * <p>In practice, {@code node} is a {@code Document} node, a {@code DocumentFragment} node,
 	 * or a {@code Element} node. In other words, a node that accepts children.
 	 * @param graph the root of the object graph to marshal
 	 * @param node the DOM node that will contain the result tree

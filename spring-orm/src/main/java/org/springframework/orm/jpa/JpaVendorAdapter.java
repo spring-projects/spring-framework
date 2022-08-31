@@ -66,7 +66,7 @@ public interface JpaVendorAdapter {
 	 * to unit-specific characteristics such as the transaction type.
 	 * <p><b>NOTE:</b> This variant will only be invoked in case of Jakarta EE style
 	 * container bootstrapping where a {@link PersistenceUnitInfo} is present
-	 * (i.e. {@link LocalContainerEntityManagerFactoryBean}. In case of simple
+	 * (i.e. {@link LocalContainerEntityManagerFactoryBean}). In case of simple
 	 * Java SE style bootstrapping via {@link jakarta.persistence.Persistence}
 	 * (i.e. {@link LocalEntityManagerFactoryBean}), the parameter-less
 	 * {@link #getJpaPropertyMap()} variant will be called directly.

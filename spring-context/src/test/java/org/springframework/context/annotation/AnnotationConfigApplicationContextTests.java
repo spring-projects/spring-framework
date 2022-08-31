@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -426,9 +427,27 @@ class AnnotationConfigApplicationContextTests {
 	void refreshForAotProcessingWithConfiguration() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(Config.class);
-		context.refreshForAotProcessing();
+		context.refreshForAotProcessing(new RuntimeHints());
 		assertThat(context.getBeanFactory().getBeanDefinitionNames()).contains(
 				"annotationConfigApplicationContextTests.Config", "testBean");
+	}
+
+	@Test
+	void refreshForAotCanInstantiateBeanWithAutowiredApplicationContext() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(BeanD.class);
+		context.refreshForAotProcessing(new RuntimeHints());
+		BeanD bean = context.getBean(BeanD.class);
+		assertThat(bean.applicationContext).isSameAs(context);
+	}
+
+	@Test
+	void refreshForAotCanInstantiateBeanWithFieldAutowiredApplicationContext() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(BeanB.class);
+		context.refreshForAotProcessing(new RuntimeHints());
+		BeanB bean = context.getBean(BeanB.class);
+		assertThat(bean.applicationContext).isSameAs(context);
 	}
 
 
@@ -505,6 +524,16 @@ class AnnotationConfigApplicationContextTests {
 	}
 
 	static class BeanC {}
+
+	static class BeanD {
+
+		private final ApplicationContext applicationContext;
+
+		public BeanD(ApplicationContext applicationContext) {
+			this.applicationContext = applicationContext;
+		}
+
+	}
 
 	static class NonInstantiatedFactoryBean implements FactoryBean<String> {
 

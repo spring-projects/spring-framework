@@ -30,7 +30,7 @@ import org.springframework.web.server.ServerWebExchange;
  * Resolver for a controller method argument of type {@link Model} that can
  * also be resolved as a {@link java.util.Map}.
  *
- * <p>A Map return value can be interpreted in more than one ways depending
+ * <p>A Map return value can be interpreted in more than one way depending
  * on the presence of annotations like {@code @ModelAttribute} or
  * {@code @ResponseBody}. As of 5.2 this resolver returns false if a
  * parameter of type {@code Map} is also annotated.

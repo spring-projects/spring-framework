@@ -16,13 +16,10 @@
 
 package org.springframework.aot.nativex;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.aot.hint.ConditionalHint;
@@ -77,12 +74,8 @@ class ResourceHintsWriter {
 	private Map<String, Object> toAttributes(ResourcePatternHint hint) {
 		Map<String, Object> attributes = new LinkedHashMap<>();
 		handleCondition(attributes, hint);
-		attributes.put("pattern", patternToRegexp(hint.getPattern()));
+		attributes.put("pattern", hint.toRegex().toString());
 		return attributes;
-	}
-
-	private String patternToRegexp(String pattern) {
-		return Arrays.stream(pattern.split("\\*")).map(Pattern::quote).collect(Collectors.joining(".*"));
 	}
 
 	private void addIfNotEmpty(Map<String, Object> attributes, String name, @Nullable Object value) {

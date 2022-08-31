@@ -69,7 +69,7 @@ public final class TypeHint implements ConditionalHint {
 	 * @return a builder
 	 */
 	public static Builder of(TypeReference type) {
-		Assert.notNull(type, "Type must not be null");
+		Assert.notNull(type, "'type' must not be null");
 		return new Builder(type);
 	}
 
@@ -151,13 +151,25 @@ public final class TypeHint implements ConditionalHint {
 
 		/**
 		 * Make this hint conditional on the fact that the specified type
-		 * can be resolved.
+		 * is in a reachable code path from a static analysis point of view.
 		 * @param reachableType the type that should be reachable for this
 		 * hint to apply
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder onReachableType(TypeReference reachableType) {
 			this.reachableType = reachableType;
+			return this;
+		}
+
+		/**
+		 * Make this hint conditional on the fact that the specified type
+		 * is in a reachable code path from a static analysis point of view.
+		 * @param reachableType the type that should be reachable for this
+		 * hint to apply
+		 * @return {@code this}, to facilitate method chaining
+		 */
+		public Builder onReachableType(Class<?> reachableType) {
+			this.reachableType = TypeReference.of(reachableType);
 			return this;
 		}
 
@@ -171,6 +183,16 @@ public final class TypeHint implements ConditionalHint {
 			FieldHint.Builder builder = this.fields.computeIfAbsent(name, FieldHint.Builder::new);
 			fieldHint.accept(builder);
 			return this;
+		}
+
+		/**
+		 * Register the need for reflection on the field with the specified name,
+		 * enabling write access.
+		 * @param name the name of the field
+		 * @return {@code this}, to facilitate method chaining
+		 */
+		public Builder withField(String name) {
+			return withField(name, fieldHint -> {});
 		}
 
 		/**
@@ -190,6 +212,27 @@ public final class TypeHint implements ConditionalHint {
 		}
 
 		/**
+		 * Register the need for reflection on the constructor with the specified
+		 * parameter types, using the specified {@link ExecutableMode}.
+		 * @param parameterTypes the parameter types of the constructor
+		 * @param mode the requested mode
+		 * @return {@code this}, to facilitate method chaining
+		 */
+		public Builder withConstructor(List<TypeReference> parameterTypes, ExecutableMode mode) {
+			return withConstructor(parameterTypes, constructorHint -> constructorHint.withMode(mode));
+		}
+
+		/**
+		 * Register the need for reflection on the constructor with the specified
+		 * parameter types, enabling {@link ExecutableMode#INVOKE}.
+		 * @param parameterTypes the parameter types of the constructor
+		 * @return {@code this}, to facilitate method chaining
+		 */
+		public Builder withConstructor(List<TypeReference> parameterTypes) {
+			return withConstructor(parameterTypes, ExecutableMode.INVOKE);
+		}
+
+		/**
 		 * Register the need for reflection on the method with the specified name
 		 * and parameter types.
 		 * @param name the name of the method
@@ -203,6 +246,29 @@ public final class TypeHint implements ConditionalHint {
 					k -> ExecutableHint.ofMethod(name, parameterTypes));
 			methodHint.accept(builder);
 			return this;
+		}
+
+		/**
+		 * Register the need for reflection on the method with the specified name
+		 * and parameter types, using the specified {@link ExecutableMode}.
+		 * @param name the name of the method
+		 * @param parameterTypes the parameter types of the constructor
+		 * @param mode the requested mode
+		 * @return {@code this}, to facilitate method chaining
+		 */
+		public Builder withMethod(String name, List<TypeReference> parameterTypes, ExecutableMode mode) {
+			return withMethod(name, parameterTypes, methodHint -> methodHint.withMode(mode));
+		}
+
+		/**
+		 * Register the need for reflection on the method with the specified name
+		 * and parameter types, enabling {@link ExecutableMode#INVOKE}.
+		 * @param name the name of the method
+		 * @param parameterTypes the parameter types of the constructor
+		 * @return {@code this}, to facilitate method chaining
+		 */
+		public Builder withMethod(String name, List<TypeReference> parameterTypes) {
+			return withMethod(name, parameterTypes, ExecutableMode.INVOKE);
 		}
 
 		/**

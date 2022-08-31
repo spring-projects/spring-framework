@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,6 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompEncoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
@@ -124,6 +122,7 @@ public class RestTemplateXhrTransportTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void connectFailure() throws Exception {
 		final HttpServerErrorException expected = new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
 		RestOperations restTemplate = mock(RestOperations.class);
@@ -131,7 +130,7 @@ public class RestTemplateXhrTransportTests {
 
 		final CountDownLatch latch = new CountDownLatch(1);
 		connect(restTemplate).addCallback(
-				new ListenableFutureCallback<WebSocketSession>() {
+				new org.springframework.util.concurrent.ListenableFutureCallback<WebSocketSession>() {
 					@Override
 					public void onSuccess(WebSocketSession result) {
 					}
@@ -168,12 +167,15 @@ public class RestTemplateXhrTransportTests {
 		verify(response).close();
 	}
 
-	private ListenableFuture<WebSocketSession> connect(ClientHttpResponse... responses) throws Exception {
+	@SuppressWarnings("deprecation")
+	private org.springframework.util.concurrent.ListenableFuture<WebSocketSession> connect(
+			ClientHttpResponse... responses) throws Exception {
 		return connect(new TestRestTemplate(responses));
 	}
 
-	private ListenableFuture<WebSocketSession> connect(RestOperations restTemplate, ClientHttpResponse... responses)
-			throws Exception {
+	@SuppressWarnings("deprecation")
+	private org.springframework.util.concurrent.ListenableFuture<WebSocketSession> connect(
+			RestOperations restTemplate, ClientHttpResponse... responses) throws Exception {
 
 		RestTemplateXhrTransport transport = new RestTemplateXhrTransport(restTemplate);
 		transport.setTaskExecutor(new SyncTaskExecutor());
@@ -201,7 +203,6 @@ public class RestTemplateXhrTransportTests {
 	}
 
 
-
 	private static class TestRestTemplate extends RestTemplate {
 
 		private Queue<ClientHttpResponse> responses = new LinkedBlockingDeque<>();
@@ -224,6 +225,5 @@ public class RestTemplateXhrTransportTests {
 			return null;
 		}
 	}
-
 
 }

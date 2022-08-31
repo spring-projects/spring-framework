@@ -247,7 +247,7 @@ public class UrlBasedViewResolver extends ViewResolverSupport
 	}
 
 	/**
-	 * Indicates whether or not this {@link ViewResolver} can handle the supplied
+	 * Indicates whether this {@link ViewResolver} can handle the supplied
 	 * view name. If not, an empty result is returned. The default implementation
 	 * checks against the configured {@link #setViewNames view names}.
 	 * @param viewName the name of the view to retrieve

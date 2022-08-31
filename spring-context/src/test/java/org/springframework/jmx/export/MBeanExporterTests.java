@@ -724,7 +724,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 
-	public static interface PersonMBean {
+	public interface PersonMBean {
 
 		String getName();
 	}

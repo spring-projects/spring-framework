@@ -16,26 +16,21 @@
 
 package org.springframework.aot.hint.support;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeHint;
 import org.springframework.aot.hint.TypeHint.Builder;
-import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.core.annotation.AliasFor;
-import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.SynthesizedAnnotation;
 
 /**
  * Utility methods for runtime hints support code.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.0
  */
 public abstract class RuntimeHintsUtils {
@@ -43,47 +38,54 @@ public abstract class RuntimeHintsUtils {
 	/**
 	 * A {@link TypeHint} customizer suitable for an annotation. Make sure
 	 * that its attributes are visible.
+	 * @deprecated as annotation attributes are visible without additional hints
 	 */
+	@Deprecated
 	public static final Consumer<Builder> ANNOTATION_HINT = hint ->
 			hint.withMembers(MemberCategory.INVOKE_DECLARED_METHODS);
 
 	/**
 	 * Register the necessary hints so that the specified annotation is visible
-	 * at runtime. If an annotation attributes aliases an attribute of another
-	 * annotation, it is registered as well and a JDK proxy hints is defined
-	 * so that the synthesized annotation can be resolved.
-	 * @param hints the {@link RuntimeHints} instance ot use
+	 * at runtime.
+	 * @param hints the {@link RuntimeHints} instance to use
+	 * @param annotationType the annotation type
+	 * @see SynthesizedAnnotation
+	 * @deprecated as annotation attributes are visible without additional hints
+	 */
+	@Deprecated
+	public static void registerAnnotation(RuntimeHints hints, Class<?> annotationType) {
+		registerSynthesizedAnnotation(hints, annotationType);
+	}
+
+	/**
+	 * Register the necessary hints so that the specified annotation can be
+	 * synthesized at runtime if necessary. Such hints are usually required
+	 * if any of the following apply:
+	 * <ul>
+	 * <li>Use {@link AliasFor} for local aliases</li>
+	 * <li>Has a meta-annotation that uses {@link AliasFor} for attribute overrides</li>
+	 * <li>Has nested annotations or arrays of annotations that are synthesizable</li>
+	 * </ul>
+	 * Consider using {@link #registerAnnotationIfNecessary(RuntimeHints, MergedAnnotation)}
+	 * that determines if the hints are required.
+	 * @param hints the {@link RuntimeHints} instance to use
 	 * @param annotationType the annotation type
 	 * @see SynthesizedAnnotation
 	 */
-	public static void registerAnnotation(RuntimeHints hints, Class<?> annotationType) {
-		hints.reflection().registerType(annotationType, ANNOTATION_HINT);
-		Set<Class<?>> allAnnotations = new LinkedHashSet<>();
-		collectAliasedAnnotations(new HashSet<>(), allAnnotations, annotationType);
-		allAnnotations.forEach(annotation -> hints.reflection().registerType(annotation, ANNOTATION_HINT));
-		if (allAnnotations.size() > 0) {
-			hints.proxies().registerJdkProxy(annotationType, SynthesizedAnnotation.class);
-		}
+	public static void registerSynthesizedAnnotation(RuntimeHints hints, Class<?> annotationType) {
+		hints.proxies().registerJdkProxy(annotationType, SynthesizedAnnotation.class);
 	}
 
-	private static void collectAliasedAnnotations(Set<Class<?>> seen, Set<Class<?>> types, Class<?> annotationType) {
-		if (seen.contains(annotationType) || Reflective.class.equals(annotationType)) {
-			return;
-		}
-		seen.add(annotationType);
-		for (Method method : annotationType.getDeclaredMethods()) {
-			MergedAnnotations methodAnnotations = MergedAnnotations.from(method);
-			if (methodAnnotations.isPresent(AliasFor.class)) {
-				Class<?> annotationAttribute = methodAnnotations.get(AliasFor.class).getClass("annotation");
-				Class<?> targetAnnotation = (annotationAttribute != Annotation.class
-						? annotationAttribute : annotationType);
-				if (!types.contains(targetAnnotation)) {
-					types.add(targetAnnotation);
-					if (!targetAnnotation.equals(annotationType)) {
-						collectAliasedAnnotations(seen, types, targetAnnotation);
-					}
-				}
-			}
+	/**
+	 * Determine if the specified annotation can be synthesized at runtime, and
+	 * register the necessary hints accordingly.
+	 * @param hints the {@link RuntimeHints} instance to use
+	 * @param annotation the annotation
+	 * @see #registerSynthesizedAnnotation(RuntimeHints, Class)
+	 */
+	public static void registerAnnotationIfNecessary(RuntimeHints hints, MergedAnnotation<?> annotation) {
+		if (annotation.isSynthesizable()) {
+			registerSynthesizedAnnotation(hints, annotation.getType());
 		}
 	}
 

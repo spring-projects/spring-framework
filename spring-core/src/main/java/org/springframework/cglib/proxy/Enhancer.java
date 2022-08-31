@@ -42,7 +42,6 @@ import org.springframework.cglib.core.CollectionUtils;
 import org.springframework.cglib.core.Constants;
 import org.springframework.cglib.core.DuplicatesPredicate;
 import org.springframework.cglib.core.EmitUtils;
-import org.springframework.cglib.core.KeyFactory;
 import org.springframework.cglib.core.Local;
 import org.springframework.cglib.core.MethodInfo;
 import org.springframework.cglib.core.MethodInfoTransformer;
@@ -99,9 +98,6 @@ public class Enhancer extends AbstractClassGenerator {
 	};
 
 	private static final Source SOURCE = new Source(Enhancer.class.getName());
-
-	private static final EnhancerKey KEY_FACTORY =
-			(EnhancerKey) KeyFactory.create(EnhancerKey.class, KeyFactory.HASH_ASM_TYPE, null);
 
 	private static final String BOUND_FIELD = "CGLIB$BOUND";
 
@@ -197,19 +193,16 @@ public class Enhancer extends AbstractClassGenerator {
 	private Object currentKey;
 
 
-	/**
-	 * Internal interface, only public due to ClassLoader issues.
-	 */
-	public interface EnhancerKey {
-
-		public Object newInstance(String type,
-				String[] interfaces,
+	// SPRING PATCH BEGIN
+	private record EnhancerKey(String type,
+				List<String> interfaces,
 				WeakCacheKey<CallbackFilter> filter,
-				Type[] callbackTypes,
+				List<Type> callbackTypes,
 				boolean useFactory,
 				boolean interceptDuringConstruction,
-				Long serialVersionUID);
+				Long serialVersionUID) {
 	}
+	// SPRING PATCH END
 
 
 	private Class[] interfaces;
@@ -561,13 +554,15 @@ public class Enhancer extends AbstractClassGenerator {
 
 	private Object createHelper() {
 		preValidate();
-		Object key = KEY_FACTORY.newInstance((superclass != null) ? superclass.getName() : null,
-				ReflectUtils.getNames(interfaces),
-				filter == ALL_ZERO ? null : new WeakCacheKey<CallbackFilter>(filter),
-				callbackTypes,
+		// SPRING PATCH BEGIN
+		Object key = new EnhancerKey((superclass != null ? superclass.getName() : null),
+				(interfaces != null ? Arrays.asList(ReflectUtils.getNames(interfaces)) : null),
+				(filter == ALL_ZERO ? null : new WeakCacheKey<CallbackFilter>(filter)),
+				Arrays.asList(callbackTypes),
 				useFactory,
 				interceptDuringConstruction,
 				serialVersionUID);
+		// SPRING PATCH END
 		this.currentKey = key;
 		Object result = super.create(key);
 		return result;
@@ -1247,7 +1242,6 @@ public class Enhancer extends AbstractClassGenerator {
 		se.invoke_constructor(THREAD_LOCAL, CSTRUCT_NULL);
 		se.putfield(THREAD_CALLBACKS_FIELD);
 
-		final Object[] state = new Object[1];
 		CallbackGenerator.Context context = new CallbackGenerator.Context() {
 			public ClassLoader getClassLoader() {
 				return Enhancer.this.getClassLoader();

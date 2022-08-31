@@ -48,7 +48,7 @@ public interface SchedulingTaskExecutor extends AsyncTaskExecutor {
 	 * individual subtasks which submit a follow-up task afterwards (if feasible).
 	 * <p>This should be considered a hint. Of course {@code TaskExecutor} clients
 	 * are free to ignore this flag and hence the {@code SchedulingTaskExecutor}
-	 * interface overall. However, thread pools will usually indicated a preference
+	 * interface overall. However, thread pools will usually indicate a preference
 	 * for short-lived tasks, allowing for more fine-grained scheduling.
 	 * @return {@code true} if this executor prefers short-lived tasks (the default),
 	 * {@code false} otherwise (for treatment like a regular {@code TaskExecutor})

@@ -16,25 +16,29 @@
 
 package org.springframework.beans.factory.aot;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.List;
 
 import javax.lang.model.element.Modifier;
 
-import org.springframework.aot.generate.ClassGenerator.JavaFileGenerator;
 import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.generate.MethodGenerator;
-import org.springframework.aot.generate.MethodNameGenerator;
 import org.springframework.aot.generate.MethodReference;
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.DependencyDescriptor;
+import org.springframework.beans.factory.support.AutowireCandidateResolver;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
+import org.springframework.core.MethodParameter;
 import org.springframework.javapoet.ClassName;
-import org.springframework.javapoet.JavaFile;
-import org.springframework.javapoet.TypeSpec;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 /**
  * Generates a method that returns a {@link BeanDefinition} to be registered.
@@ -81,45 +85,45 @@ class BeanDefinitionMethodGenerator {
 	 * Generate the method that returns the {@link BeanDefinition} to be
 	 * registered.
 	 * @param generationContext the generation context
-	 * @param featureNamePrefix the prefix to use for the feature name
 	 * @param beanRegistrationsCode the bean registrations code
 	 * @return a reference to the generated method.
 	 */
 	MethodReference generateBeanDefinitionMethod(GenerationContext generationContext,
-			String featureNamePrefix, BeanRegistrationsCode beanRegistrationsCode) {
+			BeanRegistrationsCode beanRegistrationsCode) {
 
+		registerRuntimeHintsIfNecessary(generationContext.getRuntimeHints());
 		BeanRegistrationCodeFragments codeFragments = getCodeFragments(generationContext,
-				beanRegistrationsCode, featureNamePrefix);
+				beanRegistrationsCode);
 		Class<?> target = codeFragments.getTarget(this.registeredBean,
 				this.constructorOrFactoryMethod);
 		if (!target.getName().startsWith("java.")) {
-			String featureName = featureNamePrefix + "BeanDefinitions";
-			GeneratedClass generatedClass = generationContext.getClassGenerator()
-					.getOrGenerateClass(new BeanDefinitionsJavaFileGenerator(target),
-							target, featureName);
-			MethodGenerator methodGenerator = generatedClass.getMethodGenerator()
-					.withName(getName());
+			GeneratedClass generatedClass = generationContext.getGeneratedClasses()
+					.getOrAddForFeatureComponent("BeanDefinitions", target, type -> {
+						type.addJavadoc("Bean definitions for {@link $T}", target);
+						type.addModifiers(Modifier.PUBLIC);
+					});
+			GeneratedMethods generatedMethods = generatedClass.getMethods()
+					.withPrefix(getName());
 			GeneratedMethod generatedMethod = generateBeanDefinitionMethod(
-					generationContext, generatedClass.getName(), methodGenerator,
+					generationContext, generatedClass.getName(), generatedMethods,
 					codeFragments, Modifier.PUBLIC);
 			return MethodReference.ofStatic(generatedClass.getName(),
 					generatedMethod.getName());
 		}
-		MethodGenerator methodGenerator = beanRegistrationsCode.getMethodGenerator()
-				.withName(getName());
+		GeneratedMethods generatedMethods = beanRegistrationsCode.getMethods()
+				.withPrefix(getName());
 		GeneratedMethod generatedMethod = generateBeanDefinitionMethod(generationContext,
-				beanRegistrationsCode.getClassName(), methodGenerator, codeFragments,
+				beanRegistrationsCode.getClassName(), generatedMethods, codeFragments,
 				Modifier.PRIVATE);
 		return MethodReference.ofStatic(beanRegistrationsCode.getClassName(),
-				generatedMethod.getName().toString());
+				generatedMethod.getName());
 	}
 
 	private BeanRegistrationCodeFragments getCodeFragments(GenerationContext generationContext,
-			BeanRegistrationsCode beanRegistrationsCode, String featureNamePrefix) {
+			BeanRegistrationsCode beanRegistrationsCode) {
 
 		BeanRegistrationCodeFragments codeFragments = new DefaultBeanRegistrationCodeFragments(
-				beanRegistrationsCode, this.registeredBean, this.methodGeneratorFactory,
-				featureNamePrefix);
+				beanRegistrationsCode, this.registeredBean, this.methodGeneratorFactory);
 		for (BeanRegistrationAotContribution aotContribution : this.aotContributions) {
 			codeFragments = aotContribution.customizeBeanRegistrationCodeFragments(generationContext, codeFragments);
 		}
@@ -128,22 +132,21 @@ class BeanDefinitionMethodGenerator {
 
 	private GeneratedMethod generateBeanDefinitionMethod(
 			GenerationContext generationContext, ClassName className,
-			MethodGenerator methodGenerator, BeanRegistrationCodeFragments codeFragments,
+			GeneratedMethods generatedMethods, BeanRegistrationCodeFragments codeFragments,
 			Modifier modifier) {
 
 		BeanRegistrationCodeGenerator codeGenerator = new BeanRegistrationCodeGenerator(
-				className, methodGenerator, this.registeredBean,
+				className, generatedMethods, this.registeredBean,
 				this.constructorOrFactoryMethod, codeFragments);
-		GeneratedMethod method = methodGenerator.generateMethod("get", "bean", "definition");
 		this.aotContributions.forEach(aotContribution -> aotContribution
 				.applyTo(generationContext, codeGenerator));
-		return method.using(builder -> {
-			builder.addJavadoc("Get the $L definition for '$L'",
+		return generatedMethods.add("getBeanDefinition", method -> {
+			method.addJavadoc("Get the $L definition for '$L'",
 					(!this.registeredBean.isInnerBean()) ? "bean" : "inner-bean",
 					getName());
-			builder.addModifiers(modifier, Modifier.STATIC);
-			builder.returns(BeanDefinition.class);
-			builder.addCode(codeGenerator.generateCode(generationContext));
+			method.addModifiers(modifier, Modifier.STATIC);
+			method.returns(BeanDefinition.class);
+			method.addCode(codeGenerator.generateCode(generationContext));
 		});
 	}
 
@@ -158,10 +161,10 @@ class BeanDefinitionMethodGenerator {
 		while (nonGeneratedParent != null && nonGeneratedParent.isGeneratedBeanName()) {
 			nonGeneratedParent = nonGeneratedParent.getParent();
 		}
-		return (nonGeneratedParent != null)
-				? MethodNameGenerator.join(
-						getSimpleBeanName(nonGeneratedParent.getBeanName()), "innerBean")
-				: "innerBean";
+		if (nonGeneratedParent != null) {
+			return getSimpleBeanName(nonGeneratedParent.getBeanName()) + "InnerBean";
+		}
+		return "innerBean";
 	}
 
 	private String getSimpleBeanName(String beanName) {
@@ -169,42 +172,55 @@ class BeanDefinitionMethodGenerator {
 		beanName = (lastDot != -1) ? beanName.substring(lastDot + 1) : beanName;
 		int lastDollar = beanName.lastIndexOf('$');
 		beanName = (lastDollar != -1) ? beanName.substring(lastDollar + 1) : beanName;
-		return beanName;
+		return StringUtils.uncapitalize(beanName);
 	}
 
+	private void registerRuntimeHintsIfNecessary(RuntimeHints runtimeHints) {
+		if (this.registeredBean.getBeanFactory() instanceof DefaultListableBeanFactory dlbf) {
+			ProxyRuntimeHintsRegistrar registrar = new ProxyRuntimeHintsRegistrar(dlbf.getAutowireCandidateResolver());
+			if (this.constructorOrFactoryMethod instanceof Method method) {
+				registrar.registerRuntimeHints(runtimeHints, method);
+			}
+			else if (this.constructorOrFactoryMethod instanceof Constructor<?> constructor) {
+				registrar.registerRuntimeHints(runtimeHints, constructor);
+			}
+		}
+	}
 
-	/**
-	 * {@link BeanDefinitionsJavaFileGenerator} to create the
-	 * {@code BeanDefinitions} file.
-	 */
-	private static class BeanDefinitionsJavaFileGenerator implements JavaFileGenerator {
+	private static class ProxyRuntimeHintsRegistrar {
 
-		private final Class<?> target;
+		private final AutowireCandidateResolver candidateResolver;
 
-
-		BeanDefinitionsJavaFileGenerator(Class<?> target) {
-			this.target = target;
+		public ProxyRuntimeHintsRegistrar(AutowireCandidateResolver candidateResolver) {
+			this.candidateResolver = candidateResolver;
 		}
 
-
-		@Override
-		public JavaFile generateJavaFile(ClassName className, GeneratedMethods methods) {
-			TypeSpec.Builder classBuilder = TypeSpec.classBuilder(className);
-			classBuilder.addJavadoc("Bean definitions for {@link $T}", this.target);
-			classBuilder.addModifiers(Modifier.PUBLIC);
-			methods.doWithMethodSpecs(classBuilder::addMethod);
-			return JavaFile.builder(className.packageName(), classBuilder.build())
-					.build();
+		public void registerRuntimeHints(RuntimeHints runtimeHints, Method method) {
+			Class<?>[] parameterTypes = method.getParameterTypes();
+			for (int i = 0; i < parameterTypes.length; i++) {
+				MethodParameter methodParam = new MethodParameter(method, i);
+				DependencyDescriptor dependencyDescriptor = new DependencyDescriptor(
+						methodParam, true);
+				registerProxyIfNecessary(runtimeHints, dependencyDescriptor);
+			}
 		}
 
-		@Override
-		public int hashCode() {
-			return getClass().hashCode();
+		public void registerRuntimeHints(RuntimeHints runtimeHints, Constructor<?> constructor) {
+			Class<?>[] parameterTypes = constructor.getParameterTypes();
+			for (int i = 0; i < parameterTypes.length; i++) {
+				MethodParameter methodParam = new MethodParameter(constructor, i);
+				DependencyDescriptor dependencyDescriptor = new DependencyDescriptor(
+						methodParam, true);
+				registerProxyIfNecessary(runtimeHints, dependencyDescriptor);
+			}
 		}
 
-		@Override
-		public boolean equals(Object obj) {
-			return getClass() == obj.getClass();
+		private void registerProxyIfNecessary(RuntimeHints runtimeHints, DependencyDescriptor dependencyDescriptor) {
+			Class<?> proxyType = this.candidateResolver
+					.getLazyResolutionProxyClass(dependencyDescriptor, null);
+			if (proxyType != null && Proxy.isProxyClass(proxyType)) {
+				runtimeHints.proxies().registerJdkProxy(proxyType.getInterfaces());
+			}
 		}
 
 	}

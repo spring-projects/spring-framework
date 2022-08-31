@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,7 +152,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 					"Cannot access factory method '" + factoryMethod.getName() + "'; is it public?", ex);
 		}
 		catch (InvocationTargetException ex) {
-			String msg = "Factory method '" + factoryMethod.getName() + "' threw exception";
+			String msg = ex.getTargetException().getMessage();
 			if (bd.getFactoryBeanName() != null && owner instanceof ConfigurableBeanFactory &&
 					((ConfigurableBeanFactory) owner).isCurrentlyInCreation(bd.getFactoryBeanName())) {
 				msg = "Circular reference involving containing bean '" + bd.getFactoryBeanName() + "' - consider " +

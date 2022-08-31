@@ -70,22 +70,22 @@ class InjectionCodeGenerator {
 	private CodeBlock generateFieldInjectionCode(Field field, String instanceVariable,
 			CodeBlock resourceToInject) {
 
-		CodeBlock.Builder builder = CodeBlock.builder();
+		CodeBlock.Builder code = CodeBlock.builder();
 		AccessVisibility visibility = AccessVisibility.forMember(field);
 		if (visibility == AccessVisibility.PRIVATE
 				|| visibility == AccessVisibility.PROTECTED) {
 			this.hints.reflection().registerField(field);
-			builder.addStatement("$T field = $T.findField($T.class, $S)", Field.class,
+			code.addStatement("$T field = $T.findField($T.class, $S)", Field.class,
 					ReflectionUtils.class, field.getDeclaringClass(), field.getName());
-			builder.addStatement("$T.makeAccessible($L)", ReflectionUtils.class, "field");
-			builder.addStatement("$T.setField($L, $L, $L)", ReflectionUtils.class,
+			code.addStatement("$T.makeAccessible($L)", ReflectionUtils.class, "field");
+			code.addStatement("$T.setField($L, $L, $L)", ReflectionUtils.class,
 					"field", instanceVariable, resourceToInject);
 		}
 		else {
-			builder.addStatement("$L.$L = $L", instanceVariable, field.getName(),
+			code.addStatement("$L.$L = $L", instanceVariable, field.getName(),
 					resourceToInject);
 		}
-		return builder.build();
+		return code.build();
 	}
 
 	private CodeBlock generateMethodInjectionCode(Method method, String instanceVariable,
@@ -93,24 +93,24 @@ class InjectionCodeGenerator {
 
 		Assert.isTrue(method.getParameterCount() == 1,
 				"Method '" + method.getName() + "' must declare a single parameter");
-		CodeBlock.Builder builder = CodeBlock.builder();
+		CodeBlock.Builder code = CodeBlock.builder();
 		AccessVisibility visibility = AccessVisibility.forMember(method);
 		if (visibility == AccessVisibility.PRIVATE
 				|| visibility == AccessVisibility.PROTECTED) {
 			this.hints.reflection().registerMethod(method);
-			builder.addStatement("$T method = $T.findMethod($T.class, $S, $T.class)",
+			code.addStatement("$T method = $T.findMethod($T.class, $S, $T.class)",
 					Method.class, ReflectionUtils.class, method.getDeclaringClass(),
 					method.getName(), method.getParameterTypes()[0]);
-			builder.addStatement("$T.makeAccessible($L)", ReflectionUtils.class,
+			code.addStatement("$T.makeAccessible($L)", ReflectionUtils.class,
 					"method");
-			builder.addStatement("$T.invokeMethod($L, $L, $L)", ReflectionUtils.class,
+			code.addStatement("$T.invokeMethod($L, $L, $L)", ReflectionUtils.class,
 					"method", instanceVariable, resourceToInject);
 		}
 		else {
-			builder.addStatement("$L.$L($L)", instanceVariable, method.getName(),
+			code.addStatement("$L.$L($L)", instanceVariable, method.getName(),
 					resourceToInject);
 		}
-		return builder.build();
+		return code.build();
 	}
 
 }

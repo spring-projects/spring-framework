@@ -208,7 +208,7 @@ public class EmbeddedDatabaseFactory {
 	}
 
 	/**
-	 * Hook to shutdown the embedded database. Subclasses may call this method
+	 * Hook to shut down the embedded database. Subclasses may call this method
 	 * to force shutdown.
 	 * <p>After calling, {@link #getDataSource()} returns {@code null}.
 	 * <p>Does nothing if no embedded database has been initialized.

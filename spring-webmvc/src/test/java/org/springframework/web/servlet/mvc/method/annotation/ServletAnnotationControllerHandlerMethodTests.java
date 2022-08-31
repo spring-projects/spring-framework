@@ -178,7 +178,15 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 	@PathPatternsParameterizedTest
 	void emptyValueMapping(boolean usePathPatterns) throws Exception {
-		initDispatcherServlet(ControllerWithEmptyValueMapping.class, usePathPatterns);
+		initDispatcherServlet(ControllerWithEmptyValueMapping.class, usePathPatterns, wac -> {
+			if (!usePathPatterns) {
+				// UrlPathHelper returns "/" for "",
+				// so either the mapping has to be "/" or trailingSlashMatch must be on
+				RootBeanDefinition mappingDef = new RootBeanDefinition(RequestMappingHandlerMapping.class);
+				mappingDef.getPropertyValues().add("useTrailingSlashMatch", true);
+				wac.registerBeanDefinition("handlerMapping", mappingDef);
+			}
+		});
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 		request.setContextPath("/foo");
@@ -190,7 +198,15 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 	@PathPatternsParameterizedTest
 	void errorThrownFromHandlerMethod(boolean usePathPatterns) throws Exception {
-		initDispatcherServlet(ControllerWithErrorThrown.class, usePathPatterns);
+		initDispatcherServlet(ControllerWithErrorThrown.class, usePathPatterns, wac -> {
+			if (!usePathPatterns) {
+				// UrlPathHelper returns "/" for "",
+				// so either the mapping has to be "/" or trailingSlashMatch must be on
+				RootBeanDefinition mappingDef = new RootBeanDefinition(RequestMappingHandlerMapping.class);
+				mappingDef.getPropertyValues().add("useTrailingSlashMatch", true);
+				wac.registerBeanDefinition("handlerMapping", mappingDef);
+			}
+		});
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 		request.setContextPath("/foo");
@@ -3849,7 +3865,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	@Controller
 	static class HttpHeadersResponseController {
 
-		@RequestMapping(value = "", method = RequestMethod.POST)
+		@RequestMapping(value = "/", method = RequestMethod.POST)
 		@ResponseStatus(HttpStatus.CREATED)
 		public HttpHeaders create() throws URISyntaxException {
 			HttpHeaders headers = new HttpHeaders();

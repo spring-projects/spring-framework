@@ -285,7 +285,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	private String size;
 
 	/**
-	 * Indicates whether or not the '{@code select}' tag allows
+	 * Indicates whether the '{@code select}' tag allows
 	 * multiple-selections.
 	 */
 	@Nullable

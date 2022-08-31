@@ -21,25 +21,24 @@ import java.lang.reflect.Method;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.InvocationInterceptor;
 import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
-import org.junit.platform.engine.discovery.DiscoverySelectors;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
-import org.junit.platform.launcher.TestPlan;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 import org.junit.platform.launcher.listeners.TestExecutionSummary;
 
-import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ReflectionUtils;
+import static org.junit.platform.commons.util.ReflectionUtils.getFullyQualifiedMethodName;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
+import static org.junit.platform.launcher.EngineFilter.includeEngines;
 
 /**
- * JUnit {@link InvocationInterceptor} to support
+ * JUnit Jupiter {@link InvocationInterceptor} to support
  * {@link CompileWithTargetClassAccess @CompileWithTargetClassAccess}.
  *
  * @author Christoph Dreis
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 6.0
  */
 class CompileWithTargetClassAccessExtension implements InvocationInterceptor {
@@ -120,51 +119,32 @@ class CompileWithTargetClassAccessExtension implements InvocationInterceptor {
 				testClass.getClassLoader());
 		Thread.currentThread().setContextClassLoader(forkedClassPathClassLoader);
 		try {
-			runTest(forkedClassPathClassLoader, testClass.getName(), testMethod.getName());
+			runTest(testClass, testMethod);
 		}
 		finally {
 			Thread.currentThread().setContextClassLoader(originalClassLoader);
 		}
 	}
 
-	private void runTest(ClassLoader classLoader, String testClassName,
-			String testMethodName) throws Throwable {
-
-		Class<?> testClass = classLoader.loadClass(testClassName);
-		Method testMethod = findMethod(testClass, testMethodName);
+	private void runTest(Class<?> testClass, Method testMethod) throws Throwable {
 		LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
-				.selectors(DiscoverySelectors.selectMethod(testClass, testMethod))
+				.selectors(selectMethod(getFullyQualifiedMethodName(testClass, testMethod)))
+				.filters(includeEngines("junit-jupiter"))
 				.build();
-		Launcher launcher = LauncherFactory.create();
-		TestPlan testPlan = launcher.discover(request);
 		SummaryGeneratingListener listener = new SummaryGeneratingListener();
-		launcher.registerTestExecutionListeners(listener);
-		launcher.execute(testPlan);
+		Launcher launcher = LauncherFactory.create();
+		launcher.execute(request, listener);
 		TestExecutionSummary summary = listener.getSummary();
-		if (!CollectionUtils.isEmpty(summary.getFailures())) {
+		if (summary.getTotalFailureCount() > 0) {
 			throw summary.getFailures().get(0).getException();
 		}
 	}
 
-	private Method findMethod(Class<?> testClass, String testMethodName) {
-		Method method = ReflectionUtils.findMethod(testClass, testMethodName);
-		if (method == null) {
-			Method[] methods = ReflectionUtils.getUniqueDeclaredMethods(testClass);
-			for (Method candidate : methods) {
-				if (candidate.getName().equals(testMethodName)) {
-					return candidate;
-				}
-			}
-		}
-		Assert.state(method != null, () -> "Unable to find " + testClass + "." + testMethodName);
-		return method;
-	}
 
-
+	@FunctionalInterface
 	interface Action {
 
-		static Action NONE = () -> {
-		};
+		Action NONE = () -> {};
 
 
 		void run() throws Throwable;

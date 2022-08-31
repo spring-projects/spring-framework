@@ -18,10 +18,12 @@ package org.springframework.beans.factory.annotation;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.factory.generator.lifecycle.Destroy;
+import org.springframework.beans.testfixture.beans.factory.generator.lifecycle.InferredDestroyBean;
 import org.springframework.beans.testfixture.beans.factory.generator.lifecycle.Init;
 import org.springframework.beans.testfixture.beans.factory.generator.lifecycle.InitDestroyBean;
 import org.springframework.beans.testfixture.beans.factory.generator.lifecycle.MultiInitDestroyBean;
@@ -36,11 +38,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class InitDestroyAnnotationBeanPostProcessorTests {
 
-	private DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
 	@Test
 	void processAheadOfTimeWhenNoCallbackDoesNotMutateRootBeanDefinition() {
-		RootBeanDefinition beanDefinition = new RootBeanDefinition(String.class);
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(NoInitDestroyBean.class);
 		processAheadOfTime(beanDefinition);
 		RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition();
 		assertThat(mergedBeanDefinition.getInitMethodNames()).isNull();
@@ -79,6 +81,26 @@ class InitDestroyAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	void processAheadOfTimeWhenHasInferredDestroyMethodAddsDestroyMethodName() {
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(InferredDestroyBean.class);
+		beanDefinition.setDestroyMethodNames(AbstractBeanDefinition.INFER_METHOD);
+		processAheadOfTime(beanDefinition);
+		RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition();
+		assertThat(mergedBeanDefinition.getInitMethodNames()).isNull();
+		assertThat(mergedBeanDefinition.getDestroyMethodNames()).containsExactly("close");
+	}
+
+	@Test
+	void processAheadOfTimeWhenHasInferredDestroyMethodAndNoCandidateDoesNotMutateRootBeanDefinition() {
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(NoInitDestroyBean.class);
+		beanDefinition.setDestroyMethodNames(AbstractBeanDefinition.INFER_METHOD);
+		processAheadOfTime(beanDefinition);
+		RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition();
+		assertThat(mergedBeanDefinition.getInitMethodNames()).isNull();
+		assertThat(mergedBeanDefinition.getDestroyMethodNames()).isNull();
+	}
+
+	@Test
 	void processAheadOfTimeWhenHasMultipleInitDestroyAnnotationsAddsAllMethodNames() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(MultiInitDestroyBean.class);
 		processAheadOfTime(beanDefinition);
@@ -95,8 +117,7 @@ class InitDestroyAnnotationBeanPostProcessorTests {
 	private RegisteredBean registerBean(RootBeanDefinition beanDefinition) {
 		String beanName = "test";
 		this.beanFactory.registerBeanDefinition(beanName, beanDefinition);
-		RegisteredBean registeredBean = RegisteredBean.of(this.beanFactory, beanName);
-		return registeredBean;
+		return RegisteredBean.of(this.beanFactory, beanName);
 	}
 
 	private RootBeanDefinition getMergedBeanDefinition() {
@@ -109,5 +130,7 @@ class InitDestroyAnnotationBeanPostProcessorTests {
 		beanPostProcessor.setDestroyAnnotationType(Destroy.class);
 		return beanPostProcessor;
 	}
+
+	static class NoInitDestroyBean {}
 
 }

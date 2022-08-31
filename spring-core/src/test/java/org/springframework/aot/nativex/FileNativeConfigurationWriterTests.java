@@ -99,23 +99,21 @@ public class FileNativeConfigurationWriterTests {
 		ReflectionHints reflectionHints = hints.reflection();
 		reflectionHints.registerType(StringDecoder.class, builder -> {
 			builder
-					.onReachableType(TypeReference.of(String.class))
+					.onReachableType(String.class)
 					.withMembers(MemberCategory.PUBLIC_FIELDS, MemberCategory.DECLARED_FIELDS,
 							MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS, MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
 							MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
 							MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS,
 							MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS,
 							MemberCategory.PUBLIC_CLASSES, MemberCategory.DECLARED_CLASSES)
-					.withField("DEFAULT_CHARSET", fieldBuilder -> {})
+					.withField("DEFAULT_CHARSET", fieldBuilder -> fieldBuilder.allowWrite(false))
 					.withField("defaultCharset", fieldBuilder -> {
 						fieldBuilder.allowWrite(true);
 						fieldBuilder.allowUnsafeAccess(true);
 					})
-					.withConstructor(List.of(TypeReference.of(List.class), TypeReference.of(boolean.class), TypeReference.of(MimeType.class)), constructorHint ->
-							constructorHint.withMode(ExecutableMode.INTROSPECT))
-					.withMethod("setDefaultCharset", List.of(TypeReference.of(Charset.class)), ctorBuilder -> {})
-					.withMethod("getDefaultCharset", Collections.emptyList(), constructorHint ->
-							constructorHint.withMode(ExecutableMode.INTROSPECT));
+					.withConstructor(TypeReference.listOf(List.class, boolean.class, MimeType.class), ExecutableMode.INTROSPECT)
+					.withMethod("setDefaultCharset", TypeReference.listOf(Charset.class))
+					.withMethod("getDefaultCharset", Collections.emptyList(), ExecutableMode.INTROSPECT);
 		});
 		generator.write(hints);
 		assertEquals("""

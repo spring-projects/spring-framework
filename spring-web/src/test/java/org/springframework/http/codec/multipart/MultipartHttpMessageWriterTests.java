@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -240,12 +241,13 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 
 	@Test // SPR-16402
 	public void singleSubscriberWithStrings() {
-		@SuppressWarnings("deprecation")
-		reactor.core.publisher.UnicastProcessor<String> processor = reactor.core.publisher.UnicastProcessor.create();
-		Flux.just("foo", "bar", "baz").subscribe(processor);
+		AtomicBoolean subscribed = new AtomicBoolean();
+		Flux<String> publisher = Flux.just("foo", "bar", "baz")
+				.doOnSubscribe(subscription ->
+						assertThat(subscribed.compareAndSet(false, true)).isTrue());
 
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
-		bodyBuilder.asyncPart("name", processor, String.class);
+		bodyBuilder.asyncPart("name", publisher, String.class);
 
 		Mono<MultiValueMap<String, HttpEntity<?>>> result = Mono.just(bodyBuilder.build());
 

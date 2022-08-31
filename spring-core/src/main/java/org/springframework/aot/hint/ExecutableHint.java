@@ -19,12 +19,9 @@ package org.springframework.aot.hint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
-import org.springframework.util.ObjectUtils;
+import org.springframework.lang.Nullable;
 
 /**
  * A hint that describes the need for reflection on a {@link Method} or
@@ -37,13 +34,13 @@ public final class ExecutableHint extends MemberHint {
 
 	private final List<TypeReference> parameterTypes;
 
-	private final List<ExecutableMode> modes;
+	private final ExecutableMode mode;
 
 
 	private ExecutableHint(Builder builder) {
 		super(builder.name);
 		this.parameterTypes = List.copyOf(builder.parameterTypes);
-		this.modes = List.copyOf(builder.modes);
+		this.mode = (builder.mode != null ? builder.mode : ExecutableMode.INVOKE);
 	}
 
 	/**
@@ -75,11 +72,11 @@ public final class ExecutableHint extends MemberHint {
 	}
 
 	/**
-	 * Return the {@linkplain ExecutableMode modes} that apply to this hint.
+	 * Return the {@linkplain ExecutableMode mode} that apply to this hint.
 	 * @return the modes
 	 */
-	public List<ExecutableMode> getModes() {
-		return this.modes;
+	public ExecutableMode getMode() {
+		return this.mode;
 	}
 
 
@@ -92,7 +89,8 @@ public final class ExecutableHint extends MemberHint {
 
 		private final List<TypeReference> parameterTypes;
 
-		private final Set<ExecutableMode> modes = new LinkedHashSet<>();
+		@Nullable
+		private ExecutableMode mode;
 
 
 		Builder(String name, List<TypeReference> parameterTypes) {
@@ -101,12 +99,14 @@ public final class ExecutableHint extends MemberHint {
 		}
 
 		/**
-		 * Add the specified {@linkplain ExecutableMode mode} if necessary.
-		 * @param mode the mode to add
+		 * Specify that the {@linkplain ExecutableMode mode} is required.
+		 * @param mode the required mode
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder withMode(ExecutableMode mode) {
-			this.modes.add(mode);
+			if (this.mode == null || !this.mode.includes(mode)) {
+				this.mode = mode;
+			}
 			return this;
 		}
 
@@ -114,11 +114,15 @@ public final class ExecutableHint extends MemberHint {
 		 * Set the {@linkplain ExecutableMode modes} to use.
 		 * @param modes the mode to use
 		 * @return {@code this}, to facilitate method chaining
+		 * @deprecated only a single mode can be set, use {@link #withMode(ExecutableMode)} instead
 		 */
+		@Deprecated
 		public Builder setModes(ExecutableMode... modes) {
-			this.modes.clear();
-			if (!ObjectUtils.isEmpty(modes)) {
-				this.modes.addAll(Arrays.asList(modes));
+			if (modes.length > 1) {
+				throw new UnsupportedOperationException();
+			}
+			if (modes.length == 1) {
+				withMode(modes[0]);
 			}
 			return this;
 		}

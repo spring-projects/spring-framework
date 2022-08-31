@@ -50,7 +50,7 @@ import org.springframework.util.StringUtils;
  * the bean that will be considered as a parameter.
  *
  * <b>Note</b>: This implementation supports only named parameters - there is no
- * support for indexes or types. Further more, the names are used as hints by
+ * support for indexes or types. Furthermore, the names are used as hints by
  * the container which, by default, does type introspection.
  *
  * @author Costin Leau

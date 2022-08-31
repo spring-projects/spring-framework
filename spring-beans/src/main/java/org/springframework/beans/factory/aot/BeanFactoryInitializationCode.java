@@ -16,9 +16,8 @@
 
 package org.springframework.beans.factory.aot;
 
-import org.springframework.aot.generate.MethodGenerator;
+import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.MethodReference;
-import org.springframework.lang.Nullable;
 
 /**
  * Interface that can be used to configure the code that will be generated to
@@ -31,34 +30,15 @@ import org.springframework.lang.Nullable;
 public interface BeanFactoryInitializationCode {
 
 	/**
-	 * The recommended variable name to used referring to the bean factory.
+	 * The recommended variable name to use to refer to the bean factory.
 	 */
 	String BEAN_FACTORY_VARIABLE = "beanFactory";
 
 	/**
-	 * Return the target class for this bean factory or {@code null} if there is
-	 * no target.
-	 * @return the target
+	 * Get the {@link GeneratedMethods} used by the initializing code.
+	 * @return the generated methods
 	 */
-	@Nullable
-	default Class<?> getTarget() {
-		return null;
-	}
-
-	/**
-	 * Return the name of the bean factory or and empty string if no ID is available.
-	 * @return the bean factory name
-	 */
-	default String getName() {
-		return "";
-	}
-
-	/**
-	 * Return a {@link MethodGenerator} that can be used to add more methods to
-	 * the Initializing code.
-	 * @return the method generator
-	 */
-	MethodGenerator getMethodGenerator();
+	GeneratedMethods getMethods();
 
 	/**
 	 * Add an initializer method call.

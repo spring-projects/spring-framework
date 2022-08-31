@@ -576,7 +576,7 @@ public final class ContentDisposition {
 			}
 			escaped = (!escaped && c == '\\');
 		}
-		// Remove backslash at the end..
+		// Remove backslash at the end.
 		if (escaped) {
 			sb.deleteCharAt(sb.length() - 1);
 		}

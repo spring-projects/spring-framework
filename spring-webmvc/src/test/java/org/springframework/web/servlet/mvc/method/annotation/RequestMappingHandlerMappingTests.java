@@ -69,11 +69,12 @@ public class RequestMappingHandlerMappingTests {
 	static Stream<Arguments> pathPatternsArguments() {
 		RequestMappingHandlerMapping mapping1 = new RequestMappingHandlerMapping();
 		StaticWebApplicationContext wac1 = new StaticWebApplicationContext();
-		mapping1.setPatternParser(new PathPatternParser());
 		mapping1.setApplicationContext(wac1);
 
-		RequestMappingHandlerMapping mapping2 = new RequestMappingHandlerMapping();
 		StaticWebApplicationContext wac2 = new StaticWebApplicationContext();
+
+		RequestMappingHandlerMapping mapping2 = new RequestMappingHandlerMapping();
+		mapping2.setPatternParser(null);
 		mapping2.setApplicationContext(wac2);
 
 		return Stream.of(Arguments.of(mapping1, wac1), Arguments.of(mapping2, wac2));

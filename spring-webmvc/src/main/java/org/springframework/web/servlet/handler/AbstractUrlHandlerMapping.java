@@ -75,7 +75,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 
 
 	@Override
-	public void setPatternParser(PathPatternParser patternParser) {
+	public void setPatternParser(@Nullable PathPatternParser patternParser) {
 		Assert.state(this.handlerMap.isEmpty(),
 				"PathPatternParser must be set before the initialization of " +
 						"the handler map via ApplicationContextAware#setApplicationContext.");
@@ -104,7 +104,10 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * Whether to match to URLs irrespective of the presence of a trailing slash.
 	 * If enabled a URL pattern such as "/users" also matches to "/users/".
 	 * <p>The default value is {@code false}.
+	 * @deprecated as of 6.0, see
+	 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
 	 */
+	@Deprecated
 	public void setUseTrailingSlashMatch(boolean useTrailingSlashMatch) {
 		this.useTrailingSlashMatch = useTrailingSlashMatch;
 		if (getPatternParser() != null) {

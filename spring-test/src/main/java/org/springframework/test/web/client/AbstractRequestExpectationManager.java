@@ -42,7 +42,7 @@ import org.springframework.util.Assert;
  * expectations at the end.
  *
  * <p>Subclasses are responsible for validating each request by matching it to
- * to expectations following the order of declaration or not.
+ * expectations following the order of declaration or not.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -183,7 +183,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 	}
 
 	/**
-	 * Return an {@code AssertionError} that a sub-class can raise for an
+	 * Return an {@code AssertionError} that a subclass can raise for an
 	 * unexpected request.
 	 */
 	protected AssertionError createUnexpectedRequestError(ClientHttpRequest request) {
@@ -227,7 +227,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 					return expectation;
 				}
 				catch (AssertionError error) {
-					// We're looking to find a match or return null..
+					// We're looking to find a match or return null.
 				}
 			}
 			return null;

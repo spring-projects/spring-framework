@@ -87,7 +87,7 @@ public class ListenerWriteProcessorTests {
 	@Test // SPR-17410
 	public void onNextWithoutDemand() {
 
-		// Disable writing: next item will be cached..
+		// Disable writing: next item will be cached.
 		this.processor.setWritePossible(false);
 		DataBuffer buffer1 = mock(DataBuffer.class);
 		this.processor.onNext(buffer1);

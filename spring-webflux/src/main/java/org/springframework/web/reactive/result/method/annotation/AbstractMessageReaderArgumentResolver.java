@@ -199,7 +199,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 			}
 		}
 
-		// No compatible reader but body may be empty..
+		// No compatible reader but body may be empty.
 
 		HttpMethod method = request.getMethod();
 		if (contentType == null && SUPPORTED_METHODS.contains(method)) {

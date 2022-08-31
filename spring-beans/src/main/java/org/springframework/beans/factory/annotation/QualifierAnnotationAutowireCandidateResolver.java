@@ -137,7 +137,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	 * as a <em>qualifier</em>, the bean must 'match' against the annotation as
 	 * well as any attributes it may contain. The bean definition must contain
 	 * the same qualifier or match by meta attributes. A "value" attribute will
-	 * fallback to match against the bean name or an alias if a qualifier or
+	 * fall back to match against the bean name or an alias if a qualifier or
 	 * attribute does not match.
 	 * @see Qualifier
 	 */
@@ -186,7 +186,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 					if (isQualifier(metaType)) {
 						foundMeta = true;
 						// Only accept fallback match if @Qualifier annotation has a value...
-						// Otherwise it is just a marker for a custom qualifier annotation.
+						// Otherwise, it is just a marker for a custom qualifier annotation.
 						if ((fallbackToMeta && ObjectUtils.isEmpty(AnnotationUtils.getValue(metaAnn))) ||
 								!checkQualifier(bdHolder, metaAnn, typeConverter)) {
 							return false;

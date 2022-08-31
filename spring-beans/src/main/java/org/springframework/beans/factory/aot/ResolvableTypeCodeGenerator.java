@@ -57,13 +57,13 @@ final class ResolvableTypeCodeGenerator {
 	private static CodeBlock generateCodeWithGenerics(ResolvableType target, Class<?> type) {
 		ResolvableType[] generics = target.getGenerics();
 		boolean hasNoNestedGenerics = Arrays.stream(generics).noneMatch(ResolvableType::hasGenerics);
-		CodeBlock.Builder builder = CodeBlock.builder();
-		builder.add("$T.forClassWithGenerics($T.class", ResolvableType.class, type);
+		CodeBlock.Builder code = CodeBlock.builder();
+		code.add("$T.forClassWithGenerics($T.class", ResolvableType.class, type);
 		for (ResolvableType generic : generics) {
-			builder.add(", $L", generateCode(generic, hasNoNestedGenerics));
+			code.add(", $L", generateCode(generic, hasNoNestedGenerics));
 		}
-		builder.add(")");
-		return builder.build();
+		code.add(")");
+		return code.build();
 	}
 
 }

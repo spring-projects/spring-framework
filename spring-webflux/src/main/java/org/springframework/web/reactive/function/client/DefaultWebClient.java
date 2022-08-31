@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -84,20 +86,34 @@ class DefaultWebClient implements WebClient {
 	@Nullable
 	private final Consumer<RequestHeadersSpec<?>> defaultRequest;
 
+	private final List<DefaultResponseSpec.StatusHandler> defaultStatusHandlers;
+
 	private final DefaultWebClientBuilder builder;
 
 
 	DefaultWebClient(ExchangeFunction exchangeFunction, UriBuilderFactory uriBuilderFactory,
 			@Nullable HttpHeaders defaultHeaders, @Nullable MultiValueMap<String, String> defaultCookies,
-			@Nullable Consumer<RequestHeadersSpec<?>> defaultRequest, DefaultWebClientBuilder builder) {
+			@Nullable Consumer<RequestHeadersSpec<?>> defaultRequest,
+			@Nullable Map<Predicate<HttpStatusCode>, Function<ClientResponse, Mono<? extends Throwable>>> statusHandlerMap,
+			DefaultWebClientBuilder builder) {
 
 		this.exchangeFunction = exchangeFunction;
 		this.uriBuilderFactory = uriBuilderFactory;
 		this.defaultHeaders = defaultHeaders;
 		this.defaultCookies = defaultCookies;
 		this.defaultRequest = defaultRequest;
+		this.defaultStatusHandlers = initStatusHandlers(statusHandlerMap);
 		this.builder = builder;
 	}
+
+	private static List<DefaultResponseSpec.StatusHandler> initStatusHandlers(
+			@Nullable Map<Predicate<HttpStatusCode>, Function<ClientResponse, Mono<? extends Throwable>>> handlerMap) {
+
+		return (CollectionUtils.isEmpty(handlerMap) ? Collections.emptyList() :
+				handlerMap.entrySet().stream()
+						.map(entry -> new DefaultResponseSpec.StatusHandler(entry.getKey(), entry.getValue()))
+						.collect(Collectors.toList()));
+	};
 
 
 	@Override
@@ -365,7 +381,8 @@ class DefaultWebClient implements WebClient {
 
 		@Override
 		public ResponseSpec retrieve() {
-			return new DefaultResponseSpec(exchange(), this::createRequest);
+			return new DefaultResponseSpec(
+					exchange(), this::createRequest, DefaultWebClient.this.defaultStatusHandlers);
 		}
 
 		private HttpRequest createRequest() {
@@ -502,11 +519,18 @@ class DefaultWebClient implements WebClient {
 
 		private final List<StatusHandler> statusHandlers = new ArrayList<>(1);
 
+		private final int defaultStatusHandlerCount;
 
-		DefaultResponseSpec(Mono<ClientResponse> responseMono, Supplier<HttpRequest> requestSupplier) {
+
+		DefaultResponseSpec(
+				Mono<ClientResponse> responseMono, Supplier<HttpRequest> requestSupplier,
+				List<StatusHandler> defaultStatusHandlers) {
+
 			this.responseMono = responseMono;
 			this.requestSupplier = requestSupplier;
+			this.statusHandlers.addAll(defaultStatusHandlers);
 			this.statusHandlers.add(DEFAULT_STATUS_HANDLER);
+			this.defaultStatusHandlerCount = this.statusHandlers.size();
 		}
 
 
@@ -516,10 +540,9 @@ class DefaultWebClient implements WebClient {
 
 			Assert.notNull(statusCodePredicate, "StatusCodePredicate must not be null");
 			Assert.notNull(exceptionFunction, "Function must not be null");
-			int index = this.statusHandlers.size() - 1;  // Default handler always last
+			int index = this.statusHandlers.size() - this.defaultStatusHandlerCount;  // Default handlers always last
 			this.statusHandlers.add(index, new StatusHandler(statusCodePredicate, exceptionFunction));
 			return this;
-
 		}
 
 		@Override

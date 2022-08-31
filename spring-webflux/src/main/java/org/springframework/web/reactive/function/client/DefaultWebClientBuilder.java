@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
+import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.HttpComponentsClientHttpConnector;
 import org.springframework.http.client.reactive.JdkClientHttpConnector;
@@ -83,6 +88,9 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	private Consumer<WebClient.RequestHeadersSpec<?>> defaultRequest;
 
 	@Nullable
+	private Map<Predicate<HttpStatusCode>, Function<ClientResponse, Mono<? extends Throwable>>> statusHandlers;
+
+	@Nullable
 	private List<ExchangeFilterFunction> filters;
 
 	@Nullable
@@ -120,6 +128,7 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		this.defaultCookies = (other.defaultCookies != null ?
 				new LinkedMultiValueMap<>(other.defaultCookies) : null);
 		this.defaultRequest = other.defaultRequest;
+		this.statusHandlers = (other.statusHandlers != null ? new LinkedHashMap<>(other.statusHandlers) : null);
 		this.filters = (other.filters != null ? new ArrayList<>(other.filters) : null);
 
 		this.connector = other.connector;
@@ -190,6 +199,15 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	public WebClient.Builder defaultRequest(Consumer<WebClient.RequestHeadersSpec<?>> defaultRequest) {
 		this.defaultRequest = this.defaultRequest != null ?
 				this.defaultRequest.andThen(defaultRequest) : defaultRequest;
+		return this;
+	}
+
+	@Override
+	public WebClient.Builder defaultStatusHandler(Predicate<HttpStatusCode> statusPredicate,
+			Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
+
+		this.statusHandlers = (this.statusHandlers != null ? this.statusHandlers : new LinkedHashMap<>());
+		this.statusHandlers.put(statusPredicate, exceptionFunction);
 		return this;
 	}
 
@@ -282,7 +300,9 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		return new DefaultWebClient(filteredExchange, initUriBuilderFactory(),
 				defaultHeaders,
 				defaultCookies,
-				this.defaultRequest, new DefaultWebClientBuilder(this));
+				this.defaultRequest,
+				this.statusHandlers,
+				new DefaultWebClientBuilder(this));
 	}
 
 	private ClientHttpConnector initConnector() {

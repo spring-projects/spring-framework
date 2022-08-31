@@ -16,66 +16,162 @@
 
 package org.springframework.aot.generate;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
+import org.springframework.javapoet.ClassName;
+import org.springframework.javapoet.TypeSpec;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
  * A managed collection of generated classes.
  *
+ * <p>This class is stateful, so the same instance should be used for all class
+ * generation.
+ *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 6.0
  * @see GeneratedClass
  */
-public class GeneratedClasses implements ClassGenerator {
+public class GeneratedClasses {
 
 	private final ClassNameGenerator classNameGenerator;
 
-	private final Map<Owner, GeneratedClass> classes = new ConcurrentHashMap<>();
+	private final List<GeneratedClass> classes;
+
+	private final Map<Owner, GeneratedClass> classesByOwner;
 
 
-	public GeneratedClasses(ClassNameGenerator classNameGenerator) {
+	/**
+	 * Create a new instance using the specified naming conventions.
+	 * @param classNameGenerator the class name generator to use
+	 */
+	GeneratedClasses(ClassNameGenerator classNameGenerator) {
+		this(classNameGenerator, new ArrayList<>(), new ConcurrentHashMap<>());
+	}
+
+	private GeneratedClasses(ClassNameGenerator classNameGenerator,
+			List<GeneratedClass> classes, Map<Owner, GeneratedClass> classesByOwner) {
 		Assert.notNull(classNameGenerator, "'classNameGenerator' must not be null");
 		this.classNameGenerator = classNameGenerator;
+		this.classes = classes;
+		this.classesByOwner = classesByOwner;
 	}
 
 
-	@Override
-	public GeneratedClass getOrGenerateClass(JavaFileGenerator javaFileGenerator,
-			Class<?> target, String featureName) {
+	/**
+	 * Get or add a generated class for the specified {@code featureName} and no
+	 * particular component. If this method has previously been called with the
+	 * given {@code featureName} the existing class will be returned, otherwise
+	 * a new class will be generated.
+	 * @param featureName the name of the feature to associate with the
+	 * generated class
+	 * @param type a {@link Consumer} used to build the type
+	 * @return an existing or newly generated class
+	 */
+	public GeneratedClass getOrAddForFeature(String featureName,
+			Consumer<TypeSpec.Builder> type) {
 
-		Assert.notNull(javaFileGenerator, "'javaFileGenerator' must not be null");
-		Assert.notNull(target, "'target' must not be null");
 		Assert.hasLength(featureName, "'featureName' must not be empty");
-		Owner owner = new Owner(javaFileGenerator, target.getName(), featureName);
-		return this.classes.computeIfAbsent(owner,
-				key -> new GeneratedClass(javaFileGenerator,
-						this.classNameGenerator.generateClassName(target, featureName)));
+		Assert.notNull(type, "'type' must not be null");
+		Owner owner = new Owner(this.classNameGenerator.getFeatureNamePrefix(), featureName, null);
+		GeneratedClass generatedClass = this.classesByOwner.computeIfAbsent(owner, key -> createAndAddGeneratedClass(featureName, null, type));
+		generatedClass.assertSameType(type);
+		return generatedClass;
 	}
 
 	/**
-	 * Write generated Spring {@code .factories} files to the given
-	 * {@link GeneratedFiles} instance.
-	 * @param generatedFiles where to write the generated files
-	 * @throws IOException on IO error
+	 * Get or add a generated class for the specified {@code featureName}
+	 * targeting the specified {@code component}. If this method has previously
+	 * been called with the given {@code featureName}/{@code target} the
+	 * existing class will be returned, otherwise a new class will be generated,
+	 * otherwise a new class will be generated.
+	 * @param featureName the name of the feature to associate with the
+	 * generated class
+	 * @param targetComponent the target component
+	 * @param type a {@link Consumer} used to build the type
+	 * @return an existing or newly generated class
 	 */
-	public void writeTo(GeneratedFiles generatedFiles) throws IOException {
+	public GeneratedClass getOrAddForFeatureComponent(String featureName,
+			Class<?> targetComponent, Consumer<TypeSpec.Builder> type) {
+
+		Assert.hasLength(featureName, "'featureName' must not be empty");
+		Assert.notNull(targetComponent, "'targetComponent' must not be null");
+		Assert.notNull(type, "'type' must not be null");
+		Owner owner = new Owner(this.classNameGenerator.getFeatureNamePrefix(), featureName, targetComponent);
+		GeneratedClass generatedClass = this.classesByOwner.computeIfAbsent(owner, key ->
+				createAndAddGeneratedClass(featureName, targetComponent, type));
+		generatedClass.assertSameType(type);
+		return generatedClass;
+	}
+
+	/**
+	 * Add a new generated class for the specified {@code featureName} and no
+	 * particular component.
+	 * @param featureName the name of the feature to associate with the
+	 * generated class
+	 * @param type a {@link Consumer} used to build the type
+	 * @return the newly generated class
+	 */
+	public GeneratedClass addForFeature(String featureName, Consumer<TypeSpec.Builder> type) {
+		Assert.hasLength(featureName, "'featureName' must not be empty");
+		Assert.notNull(type, "'type' must not be null");
+		return createAndAddGeneratedClass(featureName, null, type);
+	}
+
+	/**
+	 * Add a new generated class for the specified {@code featureName} targeting
+	 * the specified {@code component}.
+	 * @param featureName the name of the feature to associate with the
+	 * generated class
+	 * @param targetComponent the target component
+	 * @param type a {@link Consumer} used to build the type
+	 * @return the newly generated class
+	 */
+	public GeneratedClass addForFeatureComponent(String featureName,
+			Class<?> targetComponent, Consumer<TypeSpec.Builder> type) {
+
+		Assert.hasLength(featureName, "'featureName' must not be empty");
+		Assert.notNull(targetComponent, "'targetComponent' must not be null");
+		Assert.notNull(type, "'type' must not be null");
+		return createAndAddGeneratedClass(featureName, targetComponent, type);
+	}
+
+	private GeneratedClass createAndAddGeneratedClass(String featureName,
+			@Nullable Class<?> targetComponent, Consumer<TypeSpec.Builder> type) {
+
+		ClassName className = this.classNameGenerator.generateClassName(featureName, targetComponent);
+		GeneratedClass generatedClass = new GeneratedClass(className, type);
+		this.classes.add(generatedClass);
+		return generatedClass;
+	}
+
+	/**
+	 * Write the {@link GeneratedClass generated classes} using the given
+	 * {@link GeneratedFiles} instance.
+	 * @param generatedFiles where to write the generated classes
+	 */
+	void writeTo(GeneratedFiles generatedFiles) {
 		Assert.notNull(generatedFiles, "'generatedFiles' must not be null");
-		List<GeneratedClass> generatedClasses = new ArrayList<>(this.classes.values());
+		List<GeneratedClass> generatedClasses = new ArrayList<>(this.classes);
 		generatedClasses.sort(Comparator.comparing(GeneratedClass::getName));
 		for (GeneratedClass generatedClass : generatedClasses) {
 			generatedFiles.addSourceFile(generatedClass.generateJavaFile());
 		}
 	}
 
-	private record Owner(JavaFileGenerator javaFileGenerator, String target,
-			String featureName) {
+	GeneratedClasses withFeatureNamePrefix(String name) {
+		return new GeneratedClasses(this.classNameGenerator.withFeatureNamePrefix(name),
+				this.classes, this.classesByOwner);
+	}
 
+	private record Owner(String featureNamePrefix, String featureName, @Nullable Class<?> target) {
 	}
 
 }

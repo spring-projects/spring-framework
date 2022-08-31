@@ -84,8 +84,8 @@ public class WebExchangeDataBinder extends WebDataBinder {
 	}
 
 	/**
-	 * Protected method to obtain the values for data binding. By default this
-	 * method delegates to {@link #extractValuesToBind(ServerWebExchange)}.
+	 * Obtain the values for data binding. By default, this delegates to
+	 * {@link #extractValuesToBind(ServerWebExchange)}.
 	 * @param exchange the current exchange
 	 * @return a map of bind values
 	 * @since 5.3

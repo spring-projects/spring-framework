@@ -91,9 +91,9 @@ public class StompDecoder {
 	 * Decodes one or more STOMP frames from the given {@code buffer} and returns
 	 * a list of {@link Message Messages}.
 	 * <p>If the given ByteBuffer contains only partial STOMP frame content and no
-	 * complete STOMP frames, an empty list is returned, and the buffer is reset to
+	 * complete STOMP frames, an empty list is returned, and the buffer is reset
 	 * to where it was.
-	 * <p>If the buffer contains one ore more STOMP frames, those are returned and
+	 * <p>If the buffer contains one or more STOMP frames, those are returned and
 	 * the buffer reset to point to the beginning of the unused partial content.
 	 * <p>The output partialMessageHeaders map is used to store successfully parsed
 	 * headers in case of partial content. The caller can then check if a

@@ -50,6 +50,7 @@ import org.springframework.web.service.annotation.HttpExchange;
  *
  * @author Rossen Stoyanchev
  * @since 6.0
+ * @see org.springframework.web.reactive.function.client.support.WebClientAdapter
  */
 public final class HttpServiceProxyFactory implements InitializingBean, EmbeddedValueResolverAware {
 
@@ -75,6 +76,7 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 	/**
 	 * Create an instance with the underlying HTTP client to use.
 	 * @param clientAdapter an adapter for the client
+	 * @see org.springframework.web.reactive.function.client.support.WebClientAdapter#createHttpServiceProxyFactory(org.springframework.web.reactive.function.client.WebClient)
 	 */
 	public HttpServiceProxyFactory(HttpClientAdapter clientAdapter) {
 		Assert.notNull(clientAdapter, "HttpClientAdapter is required");

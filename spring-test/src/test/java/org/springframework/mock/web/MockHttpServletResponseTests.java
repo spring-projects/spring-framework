@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.web.util.WebUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.InstanceOfAssertFactories.type;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.springframework.http.HttpHeaders.CONTENT_LANGUAGE;
 import static org.springframework.http.HttpHeaders.CONTENT_LENGTH;
@@ -257,7 +258,7 @@ class MockHttpServletResponseTests {
 
 	@Test
 	void cookies() {
-		Cookie cookie = new Cookie("foo", "bar");
+		Cookie cookie = new MockCookie("foo", "bar");
 		cookie.setPath("/path");
 		cookie.setDomain("example.com");
 		cookie.setMaxAge(0);
@@ -473,6 +474,23 @@ class MockHttpServletResponseTests {
 		assertThat(header).startsWith("SESSION=123; Path=/; Max-Age=100; Expires=");
 	}
 
+	/**
+	 * @since 5.3.22
+	 */
+	@Test
+	void setCookieHeaderWithComment() {
+		response.setHeader(SET_COOKIE, "SESSION=123;Comment=Test Comment;Path=/");
+
+		assertThat(response.getHeader(SET_COOKIE)).isEqualTo(("SESSION=123; Path=/; Comment=Test Comment"));
+
+		assertNumCookies(1);
+		assertThat(response.getCookies()[0]).isInstanceOf(MockCookie.class).satisfies(mockCookie -> {
+			assertThat(mockCookie.getName()).isEqualTo("SESSION");
+			assertThat(mockCookie.getPath()).isEqualTo("/");
+			assertThat(mockCookie.getComment()).isEqualTo("Test Comment");
+		});
+	}
+
 	@Test
 	void addCookieHeader() {
 		response.addHeader(SET_COOKIE, "SESSION=123; Path=/; Secure; HttpOnly; SameSite=Lax");
@@ -484,6 +502,26 @@ class MockHttpServletResponseTests {
 		assertNumCookies(2);
 		assertPrimarySessionCookie("123");
 		assertCookieValues("123", "999");
+	}
+
+	@Test
+	void addCookieHeaderWithComment() {
+		response.addHeader(SET_COOKIE, "SESSION=123; Path=/; Secure; HttpOnly; SameSite=Lax");
+		assertNumCookies(1);
+		assertPrimarySessionCookie("123");
+
+		// Adding a 2nd cookie header should result in 2 cookies.
+		response.addHeader(SET_COOKIE, "SESSION=999; Comment=Test Comment; Path=/; Secure; HttpOnly; SameSite=Lax");
+		assertNumCookies(2);
+		assertPrimarySessionCookie("123");
+		assertThat(response.getCookies()[1]).isInstanceOf(MockCookie.class).satisfies(mockCookie -> {
+			assertThat(mockCookie.getName()).isEqualTo("SESSION");
+			assertThat(mockCookie.getValue()).isEqualTo("999");
+			assertThat(mockCookie.getComment()).isEqualTo("Test Comment");
+			assertThat(mockCookie.getPath()).isEqualTo("/");
+			assertThat(mockCookie.getSecure()).isTrue();
+			assertThat(mockCookie.isHttpOnly()).isTrue();
+		});
 	}
 
 	/**
@@ -569,13 +607,16 @@ class MockHttpServletResponseTests {
 
 	private void assertPrimarySessionCookie(String expectedValue) {
 		Cookie cookie = this.response.getCookie("SESSION");
-		assertThat(cookie).isInstanceOf(MockCookie.class);
-		assertThat(cookie.getName()).isEqualTo("SESSION");
-		assertThat(cookie.getValue()).isEqualTo(expectedValue);
-		assertThat(cookie.getPath()).isEqualTo("/");
-		assertThat(cookie.getSecure()).isTrue();
-		assertThat(cookie.isHttpOnly()).isTrue();
-		assertThat(((MockCookie) cookie).getSameSite()).isEqualTo("Lax");
+		assertThat(cookie).asInstanceOf(type(MockCookie.class)).satisfies(mockCookie -> {
+			assertThat(mockCookie.getName()).isEqualTo("SESSION");
+			assertThat(mockCookie.getValue()).isEqualTo(expectedValue);
+			assertThat(mockCookie.getPath()).isEqualTo("/");
+			assertThat(mockCookie.getSecure()).isTrue();
+			assertThat(mockCookie.isHttpOnly()).isTrue();
+			assertThat(mockCookie.getComment()).isNull();
+			assertThat(mockCookie.getExpires()).isNull();
+			assertThat(mockCookie.getSameSite()).isEqualTo("Lax");
+		});
 	}
 
 	@Test  // gh-25501

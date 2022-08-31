@@ -55,7 +55,7 @@ public interface ThrowingConsumer<T> extends Consumer<T> {
 	 * @param exceptionWrapper {@link BiFunction} that wraps the given message
 	 * and checked exception into a runtime exception
 	 */
-	default void accept(T t,BiFunction<String, Exception, RuntimeException> exceptionWrapper) {
+	default void accept(T t, BiFunction<String, Exception, RuntimeException> exceptionWrapper) {
 		try {
 			acceptWithException(t);
 		}
@@ -92,9 +92,10 @@ public interface ThrowingConsumer<T> extends Consumer<T> {
 	}
 
 	/**
-	 * Lambda friendly convenience method that can be used to create
+	 * Lambda friendly convenience method that can be used to create a
 	 * {@link ThrowingConsumer} where the {@link #accept(Object)} method wraps
-	 * any thrown checked exceptions using the given {@code exceptionWrapper}.
+	 * any checked exception thrown by the supplied lambda expression or method
+	 * reference.
 	 * @param <T> the type of the input to the operation
 	 * @param consumer the source consumer
 	 * @return a new {@link ThrowingConsumer} instance
@@ -104,7 +105,7 @@ public interface ThrowingConsumer<T> extends Consumer<T> {
 	}
 
 	/**
-	 * Lambda friendly convenience method that can be used to create
+	 * Lambda friendly convenience method that can be used to create a
 	 * {@link ThrowingConsumer} where the {@link #accept(Object)} method wraps
 	 * any thrown checked exceptions using the given {@code exceptionWrapper}.
 	 * @param <T> the type of the input to the operation

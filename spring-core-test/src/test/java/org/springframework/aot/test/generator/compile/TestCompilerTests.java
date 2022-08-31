@@ -42,6 +42,8 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link TestCompiler}.
+ *
+ * @since 6.0
  * @author Phillip Webb
  * @author Andy Wilkinson
  * @author Scott Frederick
@@ -88,6 +90,7 @@ class TestCompilerTests {
 
 			}
 			""";
+
 
 	@Test
 	@SuppressWarnings("unchecked")

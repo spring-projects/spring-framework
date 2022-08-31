@@ -23,8 +23,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.task.AsyncListenableTaskExecutor;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -43,7 +41,8 @@ class ThreadPoolTaskExecutorTests extends AbstractSchedulingTaskExecutorTests {
 
 
 	@Override
-	protected AsyncListenableTaskExecutor buildExecutor() {
+	@SuppressWarnings("deprecation")
+	protected org.springframework.core.task.AsyncListenableTaskExecutor buildExecutor() {
 		executor.setThreadNamePrefix(this.threadNamePrefix);
 		executor.setMaxPoolSize(1);
 		executor.afterPropertiesSet();

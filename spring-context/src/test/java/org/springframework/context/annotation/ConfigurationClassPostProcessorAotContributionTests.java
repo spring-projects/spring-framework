@@ -26,27 +26,31 @@ import javax.lang.model.element.Modifier;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aot.generate.DefaultGenerationContext;
-import org.springframework.aot.generate.GeneratedMethods;
-import org.springframework.aot.generate.InMemoryGeneratedFiles;
-import org.springframework.aot.generate.MethodGenerator;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.hint.ResourcePatternHint;
 import org.springframework.aot.test.generator.compile.Compiled;
 import org.springframework.aot.test.generator.compile.TestCompiler;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
-import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.factory.aot.MockBeanFactoryInitializationCode;
 import org.springframework.beans.testfixture.beans.factory.generator.SimpleConfiguration;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.testfixture.context.generator.annotation.ImportAwareConfiguration;
 import org.springframework.context.testfixture.context.generator.annotation.ImportConfiguration;
+import org.springframework.core.Ordered;
+import org.springframework.core.testfixture.aot.generate.TestGenerationContext;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.javapoet.CodeBlock;
-import org.springframework.javapoet.JavaFile;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
-import org.springframework.javapoet.TypeSpec;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
@@ -59,105 +63,171 @@ import static org.assertj.core.api.Assertions.entry;
  */
 class ConfigurationClassPostProcessorAotContributionTests {
 
-	private DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+	private final TestGenerationContext generationContext = new TestGenerationContext();
 
-	private InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
+	private final MockBeanFactoryInitializationCode beanFactoryInitializationCode =
+			new MockBeanFactoryInitializationCode(this.generationContext);
 
-	private DefaultGenerationContext generationContext = new DefaultGenerationContext(
-			this.generatedFiles);
-
-	private MockBeanFactoryInitializationCode beanFactoryInitializationCode = new MockBeanFactoryInitializationCode();
-
-	@Test
-	void applyToWhenHasImportAwareConfigurationRegistersBeanPostProcessorWithMapEntry() {
-		BeanFactoryInitializationAotContribution contribution = getContribution(
-				ImportConfiguration.class);
-		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
-		testCompiledResult((initializer, compiled) -> {
-			DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory();
-			initializer.accept(freshBeanFactory);
-			ImportAwareAotBeanPostProcessor postProcessor = (ImportAwareAotBeanPostProcessor) freshBeanFactory
-					.getBeanPostProcessors().get(0);
-			assertPostProcessorEntry(postProcessor, ImportAwareConfiguration.class,
-					ImportConfiguration.class);
-		});
-	}
-
-	@Test
-	void applyToWhenHasImportAwareConfigurationRegistersHints() {
-		BeanFactoryInitializationAotContribution contribution = getContribution(
-				ImportConfiguration.class);
-		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
-		assertThat(generationContext.getRuntimeHints().resources().resourcePatterns())
-				.singleElement()
-				.satisfies(resourceHint -> assertThat(resourceHint.getIncludes())
-						.map(ResourcePatternHint::getPattern)
-						.containsOnly(
-								"org/springframework/context/testfixture/context/generator/annotation/ImportConfiguration.class"));
-	}
 
 	@Test
 	void processAheadOfTimeWhenNoImportAwareConfigurationReturnsNull() {
 		assertThat(getContribution(SimpleConfiguration.class)).isNull();
 	}
 
+	@Test
+	void applyToWhenHasImportAwareConfigurationRegistersBeanPostProcessorWithMapEntry() {
+		BeanFactoryInitializationAotContribution contribution = getContribution(ImportConfiguration.class);
+		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
+		compile((initializer, compiled) -> {
+			GenericApplicationContext freshContext = new GenericApplicationContext();
+			DefaultListableBeanFactory freshBeanFactory = freshContext.getDefaultListableBeanFactory();
+			initializer.accept(freshBeanFactory);
+			freshContext.refresh();
+			assertThat(freshBeanFactory.getBeanPostProcessors()).filteredOn(ImportAwareAotBeanPostProcessor.class::isInstance)
+					.singleElement().satisfies(postProcessor -> assertPostProcessorEntry(postProcessor, ImportAwareConfiguration.class,
+							ImportConfiguration.class));
+			freshContext.close();
+		});
+	}
+
+	@Test
+	void applyToWhenHasImportAwareConfigurationRegistersBeanPostProcessorAfterApplicationContextAwareProcessor() {
+		BeanFactoryInitializationAotContribution contribution = getContribution(TestAwareCallbackConfiguration.class);
+		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
+		compile((initializer, compiled) -> {
+			GenericApplicationContext freshContext = new GenericApplicationContext();
+			DefaultListableBeanFactory freshBeanFactory = freshContext.getDefaultListableBeanFactory();
+			initializer.accept(freshBeanFactory);
+			freshContext.registerBean(TestAwareCallbackBean.class);
+			freshContext.refresh();
+			TestAwareCallbackBean bean = freshContext.getBean(TestAwareCallbackBean.class);
+			assertThat(bean.instances).hasSize(2);
+			assertThat(bean.instances.get(0)).isEqualTo(freshContext);
+			assertThat(bean.instances.get(1)).isInstanceOfSatisfying(AnnotationMetadata.class, metadata ->
+					assertThat(metadata.getClassName()).isEqualTo(TestAwareCallbackConfiguration.class.getName()));
+			freshContext.close();
+		});
+	}
+
+	@Test
+	void applyToWhenHasImportAwareConfigurationRegistersBeanPostProcessorBeforeRegularBeanPostProcessor() {
+		BeanFactoryInitializationAotContribution contribution = getContribution(
+				TestImportAwareBeanPostProcessorConfiguration.class);
+		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
+		compile((initializer, compiled) -> {
+			GenericApplicationContext freshContext = new GenericApplicationContext();
+			DefaultListableBeanFactory freshBeanFactory = freshContext.getDefaultListableBeanFactory();
+			initializer.accept(freshBeanFactory);
+			freshBeanFactory.registerBeanDefinition(TestImportAwareBeanPostProcessor.class.getName(),
+					new RootBeanDefinition(TestImportAwareBeanPostProcessor.class));
+			RootBeanDefinition bd = new RootBeanDefinition(String.class);
+			bd.setInstanceSupplier(() -> "test");
+			freshBeanFactory.registerBeanDefinition("testProcessing", bd);
+			freshContext.refresh();
+			assertThat(freshContext.getBean("testProcessing")).isInstanceOfSatisfying(AnnotationMetadata.class, metadata ->
+					assertThat(metadata.getClassName()).isEqualTo(TestImportAwareBeanPostProcessorConfiguration.class.getName())
+			);
+			freshContext.close();
+		});
+	}
+
+	@Test
+	void applyToWhenHasImportAwareConfigurationRegistersHints() {
+		BeanFactoryInitializationAotContribution contribution = getContribution(ImportConfiguration.class);
+		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
+		assertThat(generationContext.getRuntimeHints().resources().resourcePatterns())
+				.singleElement()
+				.satisfies(resourceHint -> assertThat(resourceHint.getIncludes())
+						.map(ResourcePatternHint::getPattern)
+						.containsOnly("org/springframework/context/testfixture/context/generator/annotation/"
+								+ "ImportConfiguration.class"));
+	}
+
 	@Nullable
 	private BeanFactoryInitializationAotContribution getContribution(Class<?> type) {
-		this.beanFactory.registerBeanDefinition("configuration",
-				new RootBeanDefinition(type));
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.registerBeanDefinition("configuration", new RootBeanDefinition(type));
 		ConfigurationClassPostProcessor postProcessor = new ConfigurationClassPostProcessor();
-		postProcessor.postProcessBeanFactory(this.beanFactory);
-		return postProcessor.processAheadOfTime(this.beanFactory);
+		postProcessor.postProcessBeanFactory(beanFactory);
+		return postProcessor.processAheadOfTime(beanFactory);
 	}
 
-	@SuppressWarnings("unchecked")
-	private void testCompiledResult(
-			BiConsumer<Consumer<DefaultListableBeanFactory>, Compiled> result) {
-		JavaFile javaFile = createJavaFile();
-		this.generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(this.generatedFiles).compile(javaFile::writeTo,
-				compiled -> result.accept(compiled.getInstance(Consumer.class),
-						compiled));
-	}
-
-	private JavaFile createJavaFile() {
-		MethodReference methodReference = this.beanFactoryInitializationCode.initializers
-				.get(0);
-		TypeSpec.Builder builder = TypeSpec.classBuilder("TestConsumer");
-		builder.addModifiers(Modifier.PUBLIC);
-		builder.addSuperinterface(ParameterizedTypeName.get(Consumer.class,
-				DefaultListableBeanFactory.class));
-		builder.addMethod(MethodSpec.methodBuilder("accept").addModifiers(Modifier.PUBLIC)
-				.addParameter(DefaultListableBeanFactory.class, "beanFactory")
-				.addStatement(
-						methodReference.toInvokeCodeBlock(CodeBlock.of("beanFactory")))
-				.build());
-		this.beanFactoryInitializationCode.generatedMethods
-				.doWithMethodSpecs(builder::addMethod);
-		return JavaFile.builder("__", builder.build()).build();
-	}
-
-	private void assertPostProcessorEntry(ImportAwareAotBeanPostProcessor postProcessor,
-			Class<?> key, Class<?> value) {
+	private void assertPostProcessorEntry(BeanPostProcessor postProcessor, Class<?> key, Class<?> value) {
 		assertThat(postProcessor).extracting("importsMapping")
 				.asInstanceOf(InstanceOfAssertFactories.MAP)
 				.containsExactly(entry(key.getName(), value.getName()));
 	}
 
-	class MockBeanFactoryInitializationCode implements BeanFactoryInitializationCode {
+	@SuppressWarnings("unchecked")
+	private void compile(BiConsumer<Consumer<DefaultListableBeanFactory>, Compiled> result) {
+		MethodReference methodReference = this.beanFactoryInitializationCode.getInitializers().get(0);
+		this.beanFactoryInitializationCode.getTypeBuilder().set(type -> {
+			type.addModifiers(Modifier.PUBLIC);
+			type.addSuperinterface(ParameterizedTypeName.get(Consumer.class, DefaultListableBeanFactory.class));
+			type.addMethod(MethodSpec.methodBuilder("accept").addModifiers(Modifier.PUBLIC)
+					.addParameter(DefaultListableBeanFactory.class, "beanFactory")
+					.addStatement(methodReference.toInvokeCodeBlock(CodeBlock.of("beanFactory")))
+					.build());
+		});
+		this.generationContext.writeGeneratedContent();
+		TestCompiler.forSystem().withFiles(this.generationContext.getGeneratedFiles()).compile(compiled ->
+				result.accept(compiled.getInstance(Consumer.class), compiled));
+	}
 
-		private final GeneratedMethods generatedMethods = new GeneratedMethods();
 
-		private final List<MethodReference> initializers = new ArrayList<>();
+	@Configuration(proxyBeanMethods = false)
+	@Import(TestAwareCallbackBean.class)
+	static class TestAwareCallbackConfiguration {
+	}
+
+	static class TestAwareCallbackBean implements ImportAware, ApplicationContextAware {
+
+		private final List<Object> instances = new ArrayList<>();
 
 		@Override
-		public MethodGenerator getMethodGenerator() {
-			return this.generatedMethods;
+		public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+			this.instances.add(applicationContext);
 		}
 
 		@Override
-		public void addInitializer(MethodReference methodReference) {
-			this.initializers.add(methodReference);
+		public void setImportMetadata(AnnotationMetadata importMetadata) {
+			this.instances.add(importMetadata);
+		}
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@Import(TestImportAwareBeanPostProcessor.class)
+	static class TestImportAwareBeanPostProcessorConfiguration {
+	}
+
+	static class TestImportAwareBeanPostProcessor implements BeanPostProcessor, ImportAware,
+			Ordered, InitializingBean {
+
+		private AnnotationMetadata metadata;
+
+		@Override
+		public void setImportMetadata(AnnotationMetadata importMetadata) {
+			this.metadata = importMetadata;
+		}
+
+		@Nullable
+		@Override
+		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+			if (beanName.equals("testProcessing")) {
+				return this.metadata;
+			}
+			return bean;
+		}
+
+		@Override
+		public int getOrder() {
+			return Ordered.HIGHEST_PRECEDENCE;
+		}
+
+		@Override
+		public void afterPropertiesSet() throws Exception {
+			Assert.notNull(this.metadata, "Metadata was not injected");
 		}
 
 	}

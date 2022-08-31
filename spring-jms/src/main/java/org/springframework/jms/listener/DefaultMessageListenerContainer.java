@@ -870,7 +870,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
-	 * This implementations proceeds even after an exception thrown from
+	 * This implementation proceeds even after an exception thrown from
 	 * {@code Connection.start()}, relying on listeners to perform
 	 * appropriate recovery.
 	 */
@@ -885,7 +885,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
-	 * This implementations proceeds even after an exception thrown from
+	 * This implementation proceeds even after an exception thrown from
 	 * {@code Connection.stop()}, relying on listeners to perform
 	 * appropriate recovery after a restart.
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Ben Blinebury
  */
 public abstract class JdbcUtils {
 
@@ -455,9 +456,6 @@ public abstract class JdbcUtils {
 		if (source != null && source.startsWith("DB2")) {
 			name = "DB2";
 		}
-		else if ("MariaDB".equals(source)) {
-			name = "MySQL";
-		}
 		else if ("Sybase SQL Server".equals(source) ||
 				"Adaptive Server Enterprise".equals(source) ||
 				"ASE".equals(source) ||
@@ -499,7 +497,7 @@ public abstract class JdbcUtils {
 	 * <p><i>columnLabel - the label for the column specified with the SQL AS clause.
 	 * If the SQL AS clause was not specified, then the label is the name of the column</i>.
 	 * @param resultSetMetaData the current meta-data to use
-	 * @param columnIndex the index of the column for the look up
+	 * @param columnIndex the index of the column for the lookup
 	 * @return the column name to use
 	 * @throws SQLException in case of lookup failure
 	 */

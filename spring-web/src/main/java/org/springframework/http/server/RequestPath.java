@@ -21,7 +21,7 @@ import java.net.URI;
 import org.springframework.lang.Nullable;
 
 /**
- * Specialization of {@link PathContainer} that sub-divides the path into a
+ * Specialization of {@link PathContainer} that subdivides the path into a
  * {@link #contextPath()} and the remaining {@link #pathWithinApplication()}.
  * The latter is typically used for request mapping within the application
  * while the former is useful when preparing external links that point back to

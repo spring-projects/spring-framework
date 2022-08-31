@@ -1,0 +1,36 @@
+description = "Spring Core GraalVM feature"
+
+configurations {
+	classesOnlyElements {
+		canBeConsumed = true
+		canBeResolved = false
+	}
+}
+
+artifacts {
+	classesOnlyElements(compileJava.destinationDirectory)
+	classesOnlyElements(sourceSets.main.resources.srcDirs)
+}
+
+tasks.withType(JavaCompile) {
+	options.compilerArgs += [
+		"--add-modules",
+		"jdk.internal.vm.ci",
+		"--add-exports",
+		"jdk.internal.vm.ci/jdk.vm.ci.meta=ALL-UNNAMED"
+	]
+}
+
+eclipse.classpath.file {
+	whenMerged {
+		entries.find{ it.path ==~ '.*JRE_CONTAINER.*' }.each {
+			it.entryAttributes['module'] = true
+			it.entryAttributes['add-exports'] = 'jdk.internal.vm.ci/jdk.vm.ci.meta=ALL-UNNAMED'
+			it.entryAttributes['limit-modules'] = 'java.se,jdk.accessibility,jdk.attach,jdk.compiler,jdk.httpserver,jdk.jartool,jdk.jconsole,jdk.jdi,jdk.management,jdk.sctp,jdk.security.auth,jdk.security.jgss,jdk.unsupported,jdk.dynalink,jdk.incubator.foreign,jdk.incubator.vector,jdk.javadoc,jdk.jfr,jdk.jshell,jdk.management.jfr,jdk.net,jdk.nio.mapmode,jdk.unsupported.desktop,jdk.jsobject,jdk.xml.dom,jdk.internal.vm.ci'
+		}
+	}
+}
+
+dependencies {
+	compileOnly("org.graalvm.nativeimage:svm")
+}

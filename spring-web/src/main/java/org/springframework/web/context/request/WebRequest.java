@@ -55,7 +55,7 @@ public interface WebRequest extends RequestAttributes {
 	String[] getHeaderValues(String headerName);
 
 	/**
-	 * Return a Iterator over request header names.
+	 * Return an Iterator over request header names.
 	 * @since 3.0
 	 * @see jakarta.servlet.http.HttpServletRequest#getHeaderNames()
 	 */
@@ -79,14 +79,14 @@ public interface WebRequest extends RequestAttributes {
 	String[] getParameterValues(String paramName);
 
 	/**
-	 * Return a Iterator over request parameter names.
+	 * Return an Iterator over request parameter names.
 	 * @since 3.0
 	 * @see jakarta.servlet.http.HttpServletRequest#getParameterNames()
 	 */
 	Iterator<String> getParameterNames();
 
 	/**
-	 * Return a immutable Map of the request parameters, with parameter names as map keys
+	 * Return an immutable Map of the request parameters, with parameter names as map keys
 	 * and parameter values as map values. The map values will be of type String array.
 	 * <p>A single-value parameter will be exposed as an array with a single element.
 	 * @see jakarta.servlet.http.HttpServletRequest#getParameterMap()
@@ -154,7 +154,7 @@ public interface WebRequest extends RequestAttributes {
 	 * also with conditional POST/PUT/DELETE requests.
 	 * <p><strong>Note:</strong> you can use either
 	 * this {@code #checkNotModified(long)} method; or
-	 * {@link #checkNotModified(String)}. If you want enforce both
+	 * {@link #checkNotModified(String)}. If you want to enforce both
 	 * a strong entity tag and a Last-Modified value,
 	 * as recommended by the HTTP specification,
 	 * then you should use {@link #checkNotModified(String, long)}.
@@ -189,7 +189,7 @@ public interface WebRequest extends RequestAttributes {
 	 * }</pre>
 	 * <p><strong>Note:</strong> you can use either
 	 * this {@code #checkNotModified(String)} method; or
-	 * {@link #checkNotModified(long)}. If you want enforce both
+	 * {@link #checkNotModified(long)}. If you want to enforce both
 	 * a strong entity tag and a Last-Modified value,
 	 * as recommended by the HTTP specification,
 	 * then you should use {@link #checkNotModified(String, long)}.

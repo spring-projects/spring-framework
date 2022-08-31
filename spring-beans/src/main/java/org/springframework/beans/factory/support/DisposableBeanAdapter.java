@@ -105,7 +105,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		this.invokeDisposableBean = (bean instanceof DisposableBean &&
 				!beanDefinition.hasAnyExternallyManagedDestroyMethod(DESTROY_METHOD_NAME));
 
-		String[] destroyMethodNames = inferDestroyMethodsIfNecessary(bean, beanDefinition);
+		String[] destroyMethodNames = inferDestroyMethodsIfNecessary(bean.getClass(), beanDefinition);
 		if (!ObjectUtils.isEmpty(destroyMethodNames) &&
 				!(this.invokeDisposableBean && DESTROY_METHOD_NAME.equals(destroyMethodNames[0])) &&
 				!beanDefinition.hasAnyExternallyManagedDestroyMethod(destroyMethodNames[0])) {
@@ -325,7 +325,8 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * @param beanDefinition the corresponding bean definition
 	 */
 	public static boolean hasDestroyMethod(Object bean, RootBeanDefinition beanDefinition) {
-		return (bean instanceof DisposableBean || inferDestroyMethodsIfNecessary(bean, beanDefinition) != null);
+		return (bean instanceof DisposableBean
+				|| inferDestroyMethodsIfNecessary(bean.getClass(), beanDefinition) != null);
 	}
 
 
@@ -343,7 +344,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * interfaces, reflectively calling the "close" method on implementing beans as well.
 	 */
 	@Nullable
-	private static String[] inferDestroyMethodsIfNecessary(Object bean, RootBeanDefinition beanDefinition) {
+	static String[] inferDestroyMethodsIfNecessary(Class<?> target, RootBeanDefinition beanDefinition) {
 		String[] destroyMethodNames = beanDefinition.getDestroyMethodNames();
 		if (destroyMethodNames != null && destroyMethodNames.length > 1) {
 			return destroyMethodNames;
@@ -352,23 +353,23 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		String destroyMethodName = beanDefinition.resolvedDestroyMethodName;
 		if (destroyMethodName == null) {
 			destroyMethodName = beanDefinition.getDestroyMethodName();
-			boolean autoCloseable = (bean instanceof AutoCloseable);
+			boolean autoCloseable = (AutoCloseable.class.isAssignableFrom(target));
 			if (AbstractBeanDefinition.INFER_METHOD.equals(destroyMethodName) ||
 					(destroyMethodName == null && autoCloseable)) {
 				// Only perform destroy method inference in case of the bean
 				// not explicitly implementing the DisposableBean interface
 				destroyMethodName = null;
-				if (!(bean instanceof DisposableBean)) {
+				if (!(DisposableBean.class.isAssignableFrom(target))) {
 					if (autoCloseable) {
 						destroyMethodName = CLOSE_METHOD_NAME;
 					}
 					else {
 						try {
-							destroyMethodName = bean.getClass().getMethod(CLOSE_METHOD_NAME).getName();
+							destroyMethodName = target.getMethod(CLOSE_METHOD_NAME).getName();
 						}
 						catch (NoSuchMethodException ex) {
 							try {
-								destroyMethodName = bean.getClass().getMethod(SHUTDOWN_METHOD_NAME).getName();
+								destroyMethodName = target.getMethod(SHUTDOWN_METHOD_NAME).getName();
 							}
 							catch (NoSuchMethodException ex2) {
 								// no candidate destroy method found

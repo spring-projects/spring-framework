@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.function.server.HandlerFunction;
@@ -64,6 +65,23 @@ class RouterFunctionMappingTests {
 		RouterFunction<ServerResponse> routerFunction = request -> Mono.empty();
 		RouterFunctionMapping mapping = new RouterFunctionMapping(routerFunction);
 		mapping.setMessageReaders(this.codecConfigurer.getReaders());
+
+		Mono<Object> result = mapping.getHandler(createExchange("https://example.com/match"));
+
+		StepVerifier.create(result)
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	void empty() throws Exception {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.refresh();
+
+		RouterFunctionMapping mapping = new RouterFunctionMapping();
+		mapping.setMessageReaders(this.codecConfigurer.getReaders());
+		mapping.setApplicationContext(context);
+		mapping.afterPropertiesSet();
 
 		Mono<Object> result = mapping.getHandler(createExchange("https://example.com/match"));
 

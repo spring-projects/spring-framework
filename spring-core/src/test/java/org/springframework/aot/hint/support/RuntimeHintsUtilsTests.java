@@ -16,22 +16,18 @@
 
 package org.springframework.aot.hint.support;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.hint.JdkProxyHint;
-import org.springframework.aot.hint.MemberCategory;
-import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.TypeHint;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.core.annotation.AliasFor;
+import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.SynthesizedAnnotation;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,86 +36,77 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link RuntimeHintsUtils}.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 class RuntimeHintsUtilsTests {
 
 	private final RuntimeHints hints = new RuntimeHints();
 
 	@Test
-	void registerAnnotationType() {
-		RuntimeHintsUtils.registerAnnotation(this.hints, SampleInvoker.class);
-		assertThat(this.hints.reflection().typeHints()).singleElement()
-				.satisfies(annotationHint(SampleInvoker.class));
+	void registerSynthesizedAnnotation() {
+		RuntimeHintsUtils.registerSynthesizedAnnotation(this.hints, SampleInvoker.class);
+		assertThat(this.hints.proxies().jdkProxies()).singleElement()
+				.satisfies(annotationProxy(SampleInvoker.class));
+	}
+
+	@Test
+	void registerAnnotationIfNecessaryWithNonSynthesizedAnnotation() throws NoSuchFieldException {
+		MergedAnnotation<SampleInvoker> annotation = MergedAnnotations
+				.from(TestBean.class.getField("sampleInvoker")).get(SampleInvoker.class);
+		RuntimeHintsUtils.registerAnnotationIfNecessary(this.hints, annotation);
 		assertThat(this.hints.proxies().jdkProxies()).isEmpty();
 	}
 
 	@Test
-	void registerAnnotationTypeWithLocalUseOfAliasForRegistersProxy() {
-		RuntimeHintsUtils.registerAnnotation(this.hints, LocalMapping.class);
-		assertThat(this.hints.reflection().typeHints()).singleElement()
-				.satisfies(annotationHint(LocalMapping.class));
+	void registerAnnotationIfNecessaryWithLocalAliases() throws NoSuchFieldException {
+		MergedAnnotation<LocalMapping> annotation = MergedAnnotations
+				.from(TestBean.class.getField("localMapping")).get(LocalMapping.class);
+		RuntimeHintsUtils.registerAnnotationIfNecessary(this.hints, annotation);
 		assertThat(this.hints.proxies().jdkProxies()).singleElement()
 				.satisfies(annotationProxy(LocalMapping.class));
 	}
 
 	@Test
-	void registerAnnotationTypeProxyRegistersJdkProxy() {
-		RuntimeHintsUtils.registerAnnotation(this.hints, RetryInvoker.class);
-		assertThat(this.hints.reflection().typeHints())
-				.anySatisfy(annotationHint(RetryInvoker.class))
-				.anySatisfy(annotationHint(SampleInvoker.class));
+	void registerAnnotationIfNecessaryWithMetaAttributeOverride() throws NoSuchFieldException {
+		MergedAnnotation<SampleInvoker> annotation = MergedAnnotations
+				.from(TestBean.class.getField("retryInvoker")).get(SampleInvoker.class);
+		RuntimeHintsUtils.registerAnnotationIfNecessary(this.hints, annotation);
 		assertThat(this.hints.proxies().jdkProxies()).singleElement()
-				.satisfies(annotationProxy(RetryInvoker.class));
+				.satisfies(annotationProxy(SampleInvoker.class));
 	}
 
 	@Test
-	void registerAnnotationTypeWhereUsedAsAMetaAnnotationRegistersHierarchy() {
-		RuntimeHintsUtils.registerAnnotation(this.hints, RetryWithEnabledFlagInvoker.class);
-		ReflectionHints reflection = this.hints.reflection();
-		assertThat(reflection.typeHints())
-				.anySatisfy(annotationHint(RetryWithEnabledFlagInvoker.class))
-				.anySatisfy(annotationHint(RetryInvoker.class))
-				.anySatisfy(annotationHint(SampleInvoker.class))
-				.hasSize(3);
+	void registerAnnotationIfNecessaryWithSynthesizedAttribute() throws NoSuchFieldException {
+		MergedAnnotation<RetryContainer> annotation = MergedAnnotations
+				.from(TestBean.class.getField("retryContainer")).get(RetryContainer.class);
+		RuntimeHintsUtils.registerAnnotationIfNecessary(this.hints, annotation);
 		assertThat(this.hints.proxies().jdkProxies()).singleElement()
-				.satisfies(annotationProxy(RetryWithEnabledFlagInvoker.class));
-	}
-
-	private Consumer<TypeHint> annotationHint(Class<?> type) {
-		return typeHint -> {
-			assertThat(typeHint.getType()).isEqualTo(TypeReference.of(type));
-			assertThat(typeHint.constructors()).isEmpty();
-			assertThat(typeHint.fields()).isEmpty();
-			assertThat(typeHint.methods()).isEmpty();
-			assertThat(typeHint.getMemberCategories()).containsOnly(MemberCategory.INVOKE_DECLARED_METHODS);
-		};
+				.satisfies(annotationProxy(RetryContainer.class));
 	}
 
 	private Consumer<JdkProxyHint> annotationProxy(Class<?> type) {
 		return jdkProxyHint -> assertThat(jdkProxyHint.getProxiedInterfaces())
-				.containsExactly(TypeReference.of(type),
-						TypeReference.of(SynthesizedAnnotation.class));
+				.containsExactly(TypeReference.of(type), TypeReference.of(SynthesizedAnnotation.class));
 	}
 
 
-	@SampleInvoker
-	static class SampleInvokerClass {
+	static class TestBean {
+
+		@SampleInvoker
+		public String sampleInvoker;
+
+		@LocalMapping
+		public String localMapping;
+
+		@RetryInvoker
+		public String retryInvoker;
+
+		@RetryContainer(retry = @RetryInvoker(3))
+		public String retryContainer;
 
 	}
 
-	@RetryInvoker
-	static class RetryInvokerClass {
-
-	}
-
-	@RetryWithEnabledFlagInvoker
-	static class RetryWithEnabledFlagInvokerClass {
-
-	}
-
-	@Target({ ElementType.TYPE, ElementType.ANNOTATION_TYPE })
 	@Retention(RetentionPolicy.RUNTIME)
-	@Documented
 	@interface LocalMapping {
 
 		@AliasFor("retries")
@@ -131,18 +118,14 @@ class RuntimeHintsUtilsTests {
 	}
 
 
-	@Target({ ElementType.TYPE, ElementType.ANNOTATION_TYPE })
 	@Retention(RetentionPolicy.RUNTIME)
-	@Documented
 	@interface SampleInvoker {
 
 		int retries() default 0;
 
 	}
 
-	@Target({ ElementType.TYPE })
 	@Retention(RetentionPolicy.RUNTIME)
-	@Documented
 	@SampleInvoker
 	@interface RetryInvoker {
 
@@ -151,16 +134,10 @@ class RuntimeHintsUtilsTests {
 
 	}
 
-	@Target({ ElementType.TYPE })
 	@Retention(RetentionPolicy.RUNTIME)
-	@Documented
-	@RetryInvoker
-	@interface RetryWithEnabledFlagInvoker {
+	@interface RetryContainer {
 
-		@AliasFor(attribute = "value", annotation = RetryInvoker.class)
-		int value() default 5;
-
-		boolean enabled() default true;
+		RetryInvoker retry();
 
 	}
 

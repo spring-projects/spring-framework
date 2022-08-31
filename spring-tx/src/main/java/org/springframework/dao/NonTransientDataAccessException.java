@@ -41,7 +41,7 @@ public abstract class NonTransientDataAccessException extends DataAccessExceptio
 	/**
 	 * Constructor for NonTransientDataAccessException.
 	 * @param msg the detail message
-	 * @param cause the root cause (usually from using a underlying
+	 * @param cause the root cause (usually from using an underlying
 	 * data access API such as JDBC)
 	 */
 	public NonTransientDataAccessException(@Nullable String msg, @Nullable Throwable cause) {

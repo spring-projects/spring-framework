@@ -80,6 +80,7 @@ import org.springframework.util.Assert;
  * transaction definitions for vendor-specific attributes.
  *
  * @author Mark Paluch
+ * @author Juergen Hoeller
  * @since 5.3
  * @see ConnectionFactoryUtils#getConnection(ConnectionFactory)
  * @see ConnectionFactoryUtils#releaseConnection
@@ -114,7 +115,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 	/**
 	 * Set the R2DBC {@link ConnectionFactory} that this instance should manage transactions for.
-	 * <p>This will typically be a locally defined {@code ConnectionFactory}, for example an connection pool.
+	 * <p>This will typically be a locally defined {@code ConnectionFactory}, for example a connection pool.
 	 * <p><b>The {@code ConnectionFactory} passed in here needs to return independent {@link Connection}s.</b>
 	 * The {@code Connection}s may come from a pool (the typical case), but the {@code ConnectionFactory}
 	 * must not return scoped {@code Connection}s or the like.
@@ -145,11 +146,11 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 	/**
 	 * Specify whether to enforce the read-only nature of a transaction (as indicated by
-	 * {@link TransactionDefinition#isReadOnly()} through an explicit statement on the
+	 * {@link TransactionDefinition#isReadOnly()}) through an explicit statement on the
 	 * transactional connection: "SET TRANSACTION READ ONLY" as understood by Oracle,
 	 * MySQL and Postgres.
 	 * <p>The exact treatment, including any SQL statement executed on the connection,
-	 * can be customized through through {@link #prepareTransactionalConnection}.
+	 * can be customized through {@link #prepareTransactionalConnection}.
 	 * @see #prepareTransactionalConnection
 	 */
 	public void setEnforceReadOnly(boolean enforceReadOnly) {
@@ -209,8 +210,9 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 				connectionMono = Mono.just(txObject.getConnectionHolder().getConnection());
 			}
 
-			return connectionMono.flatMap(con -> prepareTransactionalConnection(con, definition, transaction)
+			return connectionMono.flatMap(con -> switchAutoCommitIfNecessary(con, transaction)
 					.then(Mono.from(doBegin(definition, con)))
+					.then(prepareTransactionalConnection(con, definition))
 					.doOnSuccess(v -> {
 						txObject.getConnectionHolder().setTransactionActive(true);
 						Duration timeout = determineTimeout(definition);
@@ -375,31 +377,9 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 		});
 	}
 
-	/**
-	 * Prepare the transactional {@link Connection} right after transaction begin.
-	 * <p>The default implementation executes a "SET TRANSACTION READ ONLY" statement if the
-	 * {@link #setEnforceReadOnly "enforceReadOnly"} flag is set to {@code true} and the
-	 * transaction definition indicates a read-only transaction.
-	 * <p>The "SET TRANSACTION READ ONLY" is understood by Oracle, MySQL and Postgres
-	 * and may work with other databases as well. If you'd like to adapt this treatment,
-	 * override this method accordingly.
-	 * @param con the transactional R2DBC Connection
-	 * @param definition the current transaction definition
-	 * @param transaction the transaction object
-	 * @see #setEnforceReadOnly
-	 */
-	protected Mono<Void> prepareTransactionalConnection(
-			Connection con, TransactionDefinition definition, Object transaction) {
-
+	private Mono<Void> switchAutoCommitIfNecessary(Connection con, Object transaction) {
 		ConnectionFactoryTransactionObject txObject = (ConnectionFactoryTransactionObject) transaction;
-
 		Mono<Void> prepare = Mono.empty();
-
-		if (isEnforceReadOnly() && definition.isReadOnly()) {
-			prepare = Mono.from(con.createStatement("SET TRANSACTION READ ONLY").execute())
-					.flatMapMany(Result::getRowsUpdated)
-					.then();
-		}
 
 		// Switch to manual commit if necessary. This is very expensive in some R2DBC drivers,
 		// so we don't want to do it unnecessarily (for example if we've explicitly
@@ -412,6 +392,29 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 			prepare = prepare.then(Mono.from(con.setAutoCommit(false)));
 		}
 
+		return prepare;
+	}
+
+	/**
+	 * Prepare the transactional {@link Connection} right after transaction begin.
+	 * <p>The default implementation executes a "SET TRANSACTION READ ONLY" statement if the
+	 * {@link #setEnforceReadOnly "enforceReadOnly"} flag is set to {@code true} and the
+	 * transaction definition indicates a read-only transaction.
+	 * <p>The "SET TRANSACTION READ ONLY" is understood by Oracle, MySQL and Postgres
+	 * and may work with other databases as well. If you'd like to adapt this treatment,
+	 * override this method accordingly.
+	 * @param con the transactional R2DBC Connection
+	 * @param definition the current transaction definition
+	 * @since 5.3.22
+	 * @see #setEnforceReadOnly
+	 */
+	protected Mono<Void> prepareTransactionalConnection(Connection con, TransactionDefinition definition) {
+		Mono<Void> prepare = Mono.empty();
+		if (isEnforceReadOnly() && definition.isReadOnly()) {
+			prepare = Mono.from(con.createStatement("SET TRANSACTION READ ONLY").execute())
+					.flatMapMany(Result::getRowsUpdated)
+					.then();
+		}
 		return prepare;
 	}
 
@@ -452,21 +455,20 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 	 * to R2DBC drivers when starting a transaction.
 	 */
 	private record ExtendedTransactionDefinition(@Nullable String transactionName,
-												boolean readOnly,
-												@Nullable IsolationLevel isolationLevel,
-												Duration lockWaitTimeout) implements io.r2dbc.spi.TransactionDefinition {
+			boolean readOnly, @Nullable IsolationLevel isolationLevel, Duration lockWaitTimeout)
+			implements io.r2dbc.spi.TransactionDefinition {
 
 		private ExtendedTransactionDefinition(@Nullable String transactionName, boolean readOnly,
 				@Nullable IsolationLevel isolationLevel, Duration lockWaitTimeout) {
+
 			this.transactionName = transactionName;
 			this.readOnly = readOnly;
 			this.isolationLevel = isolationLevel;
 			this.lockWaitTimeout = lockWaitTimeout;
 		}
 
-
-		@Override
 		@SuppressWarnings("unchecked")
+		@Override
 		public <T> T getAttribute(Option<T> option) {
 			return (T) doGetValue(option);
 		}

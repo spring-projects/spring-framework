@@ -65,7 +65,7 @@ import org.springframework.web.util.WebUtils;
  * <p>Can be instantiated manually, or automatically exposed to views as model attribute via AbstractView's
  * "requestContextAttribute" property.
  *
- * <p>Will also work outside of DispatcherServlet requests, accessing the root WebApplicationContext
+ * <p>Will also work outside DispatcherServlet requests, accessing the root WebApplicationContext
  * and using an appropriate fallback for the locale (the HttpServletRequest's primary locale).
  *
  * @author Juergen Hoeller
@@ -134,7 +134,7 @@ public class RequestContext {
 	 * <p>This only works with InternalResourceViews, as Errors instances are part of the model and not
 	 * normally exposed as request attributes. It will typically be used within JSPs or custom tags.
 	 * <p><b>Will only work within a DispatcherServlet request.</b>
-	 * Pass in a ServletContext to be able to fallback to the root WebApplicationContext.
+	 * Pass in a ServletContext to be able to fall back to the root WebApplicationContext.
 	 * @param request current HTTP request
 	 * @see org.springframework.web.servlet.DispatcherServlet
 	 * @see #RequestContext(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.ServletContext)
@@ -148,7 +148,7 @@ public class RequestContext {
 	 * <p>This only works with InternalResourceViews, as Errors instances are part of the model and not
 	 * normally exposed as request attributes. It will typically be used within JSPs or custom tags.
 	 * <p><b>Will only work within a DispatcherServlet request.</b>
-	 * Pass in a ServletContext to be able to fallback to the root WebApplicationContext.
+	 * Pass in a ServletContext to be able to fall back to the root WebApplicationContext.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @see org.springframework.web.servlet.DispatcherServlet
@@ -178,7 +178,7 @@ public class RequestContext {
 	 * Create a new RequestContext for the given request, using the given model attributes for Errors retrieval.
 	 * <p>This works with all View implementations. It will typically be used by View implementations.
 	 * <p><b>Will only work within a DispatcherServlet request.</b>
-	 * Pass in a ServletContext to be able to fallback to the root WebApplicationContext.
+	 * Pass in a ServletContext to be able to fall back to the root WebApplicationContext.
 	 * @param request current HTTP request
 	 * @param model the model attributes for the current view (can be {@code null},
 	 * using the request attributes for Errors retrieval)

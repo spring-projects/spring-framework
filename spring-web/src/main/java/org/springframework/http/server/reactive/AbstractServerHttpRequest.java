@@ -175,7 +175,7 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	 * an {@link HttpCookie} map. The return value is turned into an immutable
 	 * map and cached.
 	 * <p>Note that this method is invoked lazily on access to
-	 * {@link #getCookies()}. Sub-classes should synchronize cookie
+	 * {@link #getCookies()}. Subclasses should synchronize cookie
 	 * initialization if the underlying "native" request does not provide
 	 * thread-safe access to cookie data.
 	 */

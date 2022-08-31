@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -206,79 +206,67 @@ class RepeatableContainersTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface NonRepeatable {
+	@interface NonRepeatable {
 
 		String value() default "";
-
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Repeatable(StandardContainer.class)
-	static @interface StandardRepeatable {
+	@interface StandardRepeatable {
 
 		String value() default "";
-
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface StandardContainer {
+	@interface StandardContainer {
 
 		StandardRepeatable[] value();
-
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface ExplicitRepeatable {
+	@interface ExplicitRepeatable {
 
 		String value() default "";
-
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface ExplicitContainer {
+	@interface ExplicitContainer {
 
 		ExplicitRepeatable[] value();
-
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface InvalidNoValue {
-
+	@interface InvalidNoValue {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface InvalidNotArray {
+	@interface InvalidNotArray {
 
 		int value();
-
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface InvalidWrongArrayType {
+	@interface InvalidWrongArrayType {
 
 		StandardRepeatable[] value();
-
 	}
 
 	@NonRepeatable("a")
 	static class WithNonRepeatable {
-
 	}
 
 	@StandardRepeatable("a")
 	static class WithSingleStandardRepeatable {
-
 	}
 
 	@StandardRepeatable("a")
 	@StandardRepeatable("b")
 	static class WithStandardRepeatables {
-
 	}
 
 	@ExplicitContainer({ @ExplicitRepeatable("a"), @ExplicitRepeatable("b") })
 	static class WithExplicitRepeatables {
-
 	}
 
 }

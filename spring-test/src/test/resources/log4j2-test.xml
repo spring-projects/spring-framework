@@ -14,7 +14,9 @@
 		<Logger name="org.springframework.test.context.TestContext" level="warn" />
 		<Logger name="org.springframework.test.context.TestContextManager" level="warn" />
 		<Logger name="org.springframework.test.context.ContextLoaderUtils" level="warn" />
+		<Logger name="org.springframework.test.context.aot" level="debug" />
 		<Logger name="org.springframework.test.context.cache" level="warn" />
+		<Logger name="org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate" level="info" />
 		<Logger name="org.springframework.test.context.junit4.rules" level="warn" />
 		<Logger name="org.springframework.test.context.transaction.TransactionalTestExecutionListener" level="warn" />
 		<Logger name="org.springframework.test.context.web" level="warn" />

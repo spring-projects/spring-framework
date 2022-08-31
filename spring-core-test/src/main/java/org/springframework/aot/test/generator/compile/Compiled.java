@@ -36,7 +36,6 @@ import org.springframework.util.Assert;
  */
 public class Compiled {
 
-
 	private final ClassLoader classLoader;
 
 	private final SourceFiles sourceFiles;
@@ -47,8 +46,7 @@ public class Compiled {
 	private List<Class<?>> compiledClasses;
 
 
-	Compiled(ClassLoader classLoader, SourceFiles sourceFiles,
-			ResourceFiles resourceFiles) {
+	Compiled(ClassLoader classLoader, SourceFiles sourceFiles, ResourceFiles resourceFiles) {
 		this.classLoader = classLoader;
 		this.sourceFiles = sourceFiles;
 		this.resourceFiles = resourceFiles;

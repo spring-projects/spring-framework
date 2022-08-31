@@ -598,8 +598,7 @@ class RestTemplateTests {
 
 		assertThatExceptionOfType(ResourceAccessException.class).isThrownBy(() ->
 				template.getForObject(url, String.class))
-			.withMessage("I/O error on GET request for \"https://example.com/resource\": " +
-							"Socket failure; nested exception is java.io.IOException: Socket failure");
+			.withMessage("I/O error on GET request for \"https://example.com/resource\": Socket failure");
 	}
 
 	@Test  // SPR-15900
@@ -615,8 +614,7 @@ class RestTemplateTests {
 
 		assertThatExceptionOfType(ResourceAccessException.class).isThrownBy(() ->
 				template.getForObject(uri, String.class))
-			.withMessage("I/O error on GET request for \"https://example.com/resource\": " +
-					"Socket failure; nested exception is java.io.IOException: Socket failure");
+			.withMessage("I/O error on GET request for \"https://example.com/resource\": Socket failure");
 	}
 
 	@Test

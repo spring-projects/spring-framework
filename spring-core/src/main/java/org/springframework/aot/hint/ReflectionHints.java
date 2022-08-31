@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 
 import org.springframework.aot.hint.TypeHint.Builder;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 
 /**
  * Gather the need for reflection at runtime.
@@ -96,6 +97,22 @@ public class ReflectionHints {
 	}
 
 	/**
+	 * Register or customize reflection hints for the specified type if it
+	 * is available using the specified {@link ClassLoader}.
+	 * @param classLoader the classloader to use to check if the type is present
+	 * @param typeName the type to customize
+	 * @param typeHint a builder to further customize hints for that type
+	 * @return {@code this}, to facilitate method chaining
+	 */
+	public ReflectionHints registerTypeIfPresent(@Nullable ClassLoader classLoader,
+			String typeName, Consumer<TypeHint.Builder> typeHint) {
+		if (ClassUtils.isPresent(typeName, classLoader)) {
+			registerType(TypeReference.of(typeName), typeHint);
+		}
+		return this;
+	}
+
+	/**
 	 * Register or customize reflection hints for the types defined by the
 	 * specified list of {@link TypeReference type references}. The specified
 	 * {@code typeHint} consumer is invoked for each type.
@@ -143,13 +160,23 @@ public class ReflectionHints {
 
 	/**
 	 * Register the need for reflection on the specified {@link Constructor},
+	 * using the specified {@link ExecutableMode}.
+	 * @param constructor the constructor that requires reflection
+	 * @param mode the requested mode
+	 * @return {@code this}, to facilitate method chaining
+	 */
+	public ReflectionHints registerConstructor(Constructor<?> constructor, ExecutableMode mode) {
+		return registerConstructor(constructor, constructorHint -> constructorHint.withMode(mode));
+	}
+
+	/**
+	 * Register the need for reflection on the specified {@link Constructor},
 	 * enabling {@link ExecutableMode#INVOKE}.
 	 * @param constructor the constructor that requires reflection
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public ReflectionHints registerConstructor(Constructor<?> constructor) {
-		return registerConstructor(constructor, constructorHint ->
-				constructorHint.withMode(ExecutableMode.INVOKE));
+		return registerConstructor(constructor, ExecutableMode.INVOKE);
 	}
 
 	/**
@@ -165,12 +192,23 @@ public class ReflectionHints {
 
 	/**
 	 * Register the need for reflection on the specified {@link Method},
+	 * using the specified {@link ExecutableMode}.
+	 * @param method the method that requires reflection
+	 * @param mode the requested mode
+	 * @return {@code this}, to facilitate method chaining
+	 */
+	public ReflectionHints registerMethod(Method method, ExecutableMode mode) {
+		return registerMethod(method, methodHint -> methodHint.withMode(mode));
+	}
+
+	/**
+	 * Register the need for reflection on the specified {@link Method},
 	 * enabling {@link ExecutableMode#INVOKE}.
 	 * @param method the method that requires reflection
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public ReflectionHints registerMethod(Method method) {
-		return registerMethod(method, methodHint -> methodHint.withMode(ExecutableMode.INVOKE));
+		return registerMethod(method, ExecutableMode.INVOKE);
 	}
 
 	private List<TypeReference> mapParameters(Executable executable) {

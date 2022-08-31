@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 
 
 	/**
-	 * Checks whether all of the data buffers allocated by this factory have also been released.
+	 * Checks whether all the data buffers allocated by this factory have also been released.
 	 * If not, then an {@link AssertionError} is thrown. Typically used from a JUnit <em>after</em>
 	 * method.
 	 */
@@ -99,7 +99,7 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 			List<AssertionError> errors = this.created.stream()
 					.filter(LeakAwareDataBuffer::isAllocated)
 					.map(LeakAwareDataBuffer::leakError)
-					.collect(Collectors.toList());
+					.toList();
 
 			errors.forEach(it -> logger.error("Leaked error: ", it));
 			throw new AssertionError(errors.size() + " buffer leaks detected (see logs above)");
@@ -107,6 +107,7 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 	}
 
 	@Override
+	@Deprecated
 	public DataBuffer allocateBuffer() {
 		return createLeakAwareDataBuffer(this.delegate.allocateBuffer());
 	}
@@ -141,6 +142,11 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 				.map(o -> o instanceof LeakAwareDataBuffer ? ((LeakAwareDataBuffer) o).dataBuffer() : o)
 				.collect(Collectors.toList());
 		return new LeakAwareDataBuffer(this.delegate.join(dataBuffers), this);
+	}
+
+	@Override
+	public boolean isDirect() {
+		return this.delegate.isDirect();
 	}
 
 }

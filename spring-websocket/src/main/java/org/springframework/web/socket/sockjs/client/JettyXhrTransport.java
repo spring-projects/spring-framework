@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Enumeration;
+import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
@@ -36,7 +37,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
-import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -110,7 +110,7 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 	@Override
 	protected void connectInternal(TransportRequest transportRequest, WebSocketHandler handler,
 			URI url, HttpHeaders handshakeHeaders, XhrClientSockJsSession session,
-			SettableListenableFuture<WebSocketSession> connectFuture) {
+			CompletableFuture<WebSocketSession> connectFuture) {
 
 		HttpHeaders httpHeaders = transportRequest.getHttpRequestHeaders();
 		SockJsResponseListener listener = new SockJsResponseListener(url, httpHeaders, session, connectFuture);
@@ -197,12 +197,12 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 
 		private final XhrClientSockJsSession sockJsSession;
 
-		private final SettableListenableFuture<WebSocketSession> connectFuture;
+		private final CompletableFuture<WebSocketSession> connectFuture;
 
 		private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
 		public SockJsResponseListener(URI url, HttpHeaders headers,	XhrClientSockJsSession sockJsSession,
-				SettableListenableFuture<WebSocketSession> connectFuture) {
+				CompletableFuture<WebSocketSession> connectFuture) {
 
 			this.transportUrl = url;
 			this.receiveHeaders = headers;
@@ -273,7 +273,7 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 
 		@Override
 		public void onFailure(Response response, Throwable failure) {
-			if (this.connectFuture.setException(failure)) {
+			if (this.connectFuture.completeExceptionally(failure)) {
 				return;
 			}
 			if (this.sockJsSession.isDisconnected()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,6 @@ import org.apache.coyote.Response;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -136,29 +135,20 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 				// It's possible InputStream can be wrapped, preventing use of CoyoteInputStream
 				return super.readFromInputStream();
 			}
-			boolean release = true;
-			int capacity = this.bufferSize;
-			DataBuffer dataBuffer = this.factory.allocateBuffer(capacity);
-			try {
-				ByteBuffer byteBuffer = dataBuffer.asByteBuffer(0, capacity);
-				int read = coyoteInputStream.read(byteBuffer);
-				logBytesRead(read);
-				if (read > 0) {
-					dataBuffer.writePosition(read);
-					release = false;
-					return dataBuffer;
-				}
-				else if (read == -1) {
-					return EOF_BUFFER;
-				}
-				else {
-					return AbstractListenerReadPublisher.EMPTY_BUFFER;
-				}
+			ByteBuffer byteBuffer = this.factory.isDirect() ?
+					ByteBuffer.allocateDirect(this.bufferSize) :
+					ByteBuffer.allocate(this.bufferSize);
+
+			int read = coyoteInputStream.read(byteBuffer);
+			logBytesRead(read);
+			if (read > 0) {
+				return this.factory.wrap(byteBuffer);
 			}
-			finally {
-				if (release) {
-					DataBufferUtils.release(dataBuffer);
-				}
+			else if (read == -1) {
+				return EOF_BUFFER;
+			}
+			else {
+				return AbstractListenerReadPublisher.EMPTY_BUFFER;
 			}
 		}
 	}
@@ -233,7 +223,7 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		@Override
 		protected int writeToOutputStream(DataBuffer dataBuffer) throws IOException {
-			ByteBuffer input = dataBuffer.asByteBuffer();
+			ByteBuffer input = dataBuffer.toByteBuffer();
 			int len = input.remaining();
 			ServletResponse response = getNativeResponse();
 			((CoyoteOutputStream) response.getOutputStream()).write(input);
