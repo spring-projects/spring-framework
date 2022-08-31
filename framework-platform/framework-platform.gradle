@@ -10,7 +10,7 @@ dependencies {
 	api(platform("com.fasterxml.jackson:jackson-bom:2.13.3"))
 	api(platform("io.netty:netty-bom:4.1.80.Final"))
 	api(platform("io.netty:netty5-bom:5.0.0.Alpha4"))
-	api(platform("io.projectreactor:reactor-bom:2022.0.0-M4"))
+	api(platform("io.projectreactor:reactor-bom:2022.0.0-M5"))
 	api(platform("io.rsocket:rsocket-bom:1.1.2"))
 	api(platform("org.apache.groovy:groovy-bom:4.0.4"))
 	api(platform("org.apache.logging.log4j:log4j-bom:2.18.0"))
