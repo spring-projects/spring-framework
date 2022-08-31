@@ -1,2 +1,2 @@
 org.springframework.aot.hint.RuntimeHintsRegistrar=\
-org.springframework.test.context.aot.TestContextRuntimeHints
+org.springframework.test.context.aot.hint.TestContextRuntimeHints

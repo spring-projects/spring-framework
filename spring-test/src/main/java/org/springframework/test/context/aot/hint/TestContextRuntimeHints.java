@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.aot;
+package org.springframework.test.context.aot.hint;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
@@ -35,7 +35,7 @@ import org.springframework.util.ClassUtils;
  * @author Sam Brannen
  * @since 6.0
  */
-public class TestContextRuntimeHints implements RuntimeHintsRegistrar {
+class TestContextRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
 	public void registerHints(RuntimeHints runtimeHints, ClassLoader classLoader) {
