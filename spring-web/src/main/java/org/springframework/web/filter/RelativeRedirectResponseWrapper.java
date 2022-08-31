@@ -16,6 +16,8 @@
 
 package org.springframework.web.filter;
 
+import java.io.IOException;
+
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
 
@@ -44,9 +46,10 @@ final class RelativeRedirectResponseWrapper extends HttpServletResponseWrapper {
 
 
 	@Override
-	public void sendRedirect(String location) {
+	public void sendRedirect(String location) throws IOException {
 		setStatus(this.redirectStatus.value());
 		setHeader(HttpHeaders.LOCATION, location);
+		flushBuffer();
 	}
 
 
