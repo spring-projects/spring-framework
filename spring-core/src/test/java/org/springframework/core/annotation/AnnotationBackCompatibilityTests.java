@@ -45,7 +45,7 @@ class AnnotationBackCompatibilityTests {
 	@Test
 	void defaultValue() {
 		DefaultValueAnnotation synthesized = MergedAnnotations.from(WithDefaultValue.class).get(DefaultValueAnnotation.class).synthesize();
-		assertThat(synthesized).isInstanceOf(SynthesizedAnnotation.class);
+		assertThat(AnnotationUtils.isSynthesizedAnnotation(synthesized)).as("synthesized annotation").isTrue();
 		Object defaultValue = AnnotationUtils.getDefaultValue(synthesized, "enumValue");
 		assertThat(defaultValue).isEqualTo(TestEnum.ONE);
 	}
