@@ -126,6 +126,16 @@ public class ReflectionHints {
 	}
 
 	/**
+	 * Register the need for reflection on the specified {@link Field},
+	 * enabling write access.
+	 * @param field the field that requires reflection
+	 * @return {@code this}, to facilitate method chaining
+	 */
+	public ReflectionHints registerField(Field field) {
+		return registerField(field, fieldHint -> fieldHint.allowWrite(true));
+	}
+
+	/**
 	 * Register the need for reflection on the specified {@link Field}.
 	 * @param field the field that requires reflection
 	 * @param fieldHint a builder to further customize the hints of this field
@@ -136,14 +146,26 @@ public class ReflectionHints {
 				typeHint -> typeHint.withField(field.getName(), fieldHint));
 	}
 
+
 	/**
-	 * Register the need for reflection on the specified {@link Field},
-	 * enabling write access.
-	 * @param field the field that requires reflection
+	 * Register the need for reflection on the specified {@link Constructor},
+	 * enabling {@link ExecutableMode#INVOKE}.
+	 * @param constructor the constructor that requires reflection
 	 * @return {@code this}, to facilitate method chaining
 	 */
-	public ReflectionHints registerField(Field field) {
-		return registerField(field, fieldHint -> fieldHint.allowWrite(true));
+	public ReflectionHints registerConstructor(Constructor<?> constructor) {
+		return registerConstructor(constructor, ExecutableMode.INVOKE);
+	}
+
+	/**
+	 * Register the need for reflection on the specified {@link Constructor},
+	 * using the specified {@link ExecutableMode}.
+	 * @param constructor the constructor that requires reflection
+	 * @param mode the requested mode
+	 * @return {@code this}, to facilitate method chaining
+	 */
+	public ReflectionHints registerConstructor(Constructor<?> constructor, ExecutableMode mode) {
+		return registerConstructor(constructor, constructorHint -> constructorHint.withMode(mode));
 	}
 
 	/**
@@ -159,35 +181,13 @@ public class ReflectionHints {
 	}
 
 	/**
-	 * Register the need for reflection on the specified {@link Constructor},
-	 * using the specified {@link ExecutableMode}.
-	 * @param constructor the constructor that requires reflection
-	 * @param mode the requested mode
-	 * @return {@code this}, to facilitate method chaining
-	 */
-	public ReflectionHints registerConstructor(Constructor<?> constructor, ExecutableMode mode) {
-		return registerConstructor(constructor, constructorHint -> constructorHint.withMode(mode));
-	}
-
-	/**
-	 * Register the need for reflection on the specified {@link Constructor},
+	 * Register the need for reflection on the specified {@link Method},
 	 * enabling {@link ExecutableMode#INVOKE}.
-	 * @param constructor the constructor that requires reflection
-	 * @return {@code this}, to facilitate method chaining
-	 */
-	public ReflectionHints registerConstructor(Constructor<?> constructor) {
-		return registerConstructor(constructor, ExecutableMode.INVOKE);
-	}
-
-	/**
-	 * Register the need for reflection on the specified {@link Method}.
 	 * @param method the method that requires reflection
-	 * @param methodHint a builder to further customize the hints of this method
 	 * @return {@code this}, to facilitate method chaining
 	 */
-	public ReflectionHints registerMethod(Method method, Consumer<ExecutableHint.Builder> methodHint) {
-		return registerType(TypeReference.of(method.getDeclaringClass()),
-				typeHint -> typeHint.withMethod(method.getName(), mapParameters(method), methodHint));
+	public ReflectionHints registerMethod(Method method) {
+		return registerMethod(method, ExecutableMode.INVOKE);
 	}
 
 	/**
@@ -202,13 +202,14 @@ public class ReflectionHints {
 	}
 
 	/**
-	 * Register the need for reflection on the specified {@link Method},
-	 * enabling {@link ExecutableMode#INVOKE}.
+	 * Register the need for reflection on the specified {@link Method}.
 	 * @param method the method that requires reflection
+	 * @param methodHint a builder to further customize the hints of this method
 	 * @return {@code this}, to facilitate method chaining
 	 */
-	public ReflectionHints registerMethod(Method method) {
-		return registerMethod(method, ExecutableMode.INVOKE);
+	public ReflectionHints registerMethod(Method method, Consumer<ExecutableHint.Builder> methodHint) {
+		return registerType(TypeReference.of(method.getDeclaringClass()),
+				typeHint -> typeHint.withMethod(method.getName(), mapParameters(method), methodHint));
 	}
 
 	private List<TypeReference> mapParameters(Executable executable) {
