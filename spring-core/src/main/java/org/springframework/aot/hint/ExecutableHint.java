@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * A hint that describes the need for reflection on a {@link Method} or
@@ -73,7 +74,7 @@ public final class ExecutableHint extends MemberHint {
 
 	/**
 	 * Return the {@linkplain ExecutableMode mode} that apply to this hint.
-	 * @return the modes
+	 * @return the mode
 	 */
 	public ExecutableMode getMode() {
 		return this.mode;
@@ -104,7 +105,8 @@ public final class ExecutableHint extends MemberHint {
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder withMode(ExecutableMode mode) {
-			if (this.mode == null || !this.mode.includes(mode)) {
+			Assert.notNull(mode, "'mode' must not be null");
+			if ((this.mode == null || !this.mode.includes(mode))) {
 				this.mode = mode;
 			}
 			return this;
