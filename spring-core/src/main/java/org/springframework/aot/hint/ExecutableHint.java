@@ -20,6 +20,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -80,6 +81,15 @@ public final class ExecutableHint extends MemberHint {
 		return this.mode;
 	}
 
+	/**
+	 * Return a {@link Consumer} that applies the given {@link ExecutableMode}
+	 * to the accepted {@link Builder}.
+	 * @param mode the mode to apply
+	 * @return a consumer to apply the mode
+	 */
+	public static Consumer<Builder> builtWith(ExecutableMode mode) {
+		return builder -> builder.withMode(mode);
+	}
 
 	/**
 	 * Builder for {@link ExecutableHint}.

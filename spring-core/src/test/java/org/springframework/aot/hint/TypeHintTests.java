@@ -102,6 +102,17 @@ class TypeHintTests {
 		});
 	}
 
+	@Test
+	void createFieldWithFieldMode() {
+		Builder builder = TypeHint.of(TypeReference.of(String.class));
+		builder.withField("value", FieldMode.READ);
+		assertFieldHint(builder, fieldHint -> {
+			assertThat(fieldHint.getName()).isEqualTo("value");
+			assertThat(fieldHint.getMode()).isEqualTo(FieldMode.READ);
+			assertThat(fieldHint.isAllowUnsafeAccess()).isFalse();
+		});
+	}
+
 	void assertFieldHint(Builder builder, Consumer<FieldHint> fieldHint) {
 		TypeHint hint = builder.build();
 		assertThat(hint.fields()).singleElement().satisfies(fieldHint);
@@ -275,6 +286,15 @@ class TypeHintTests {
 	void typeHintHasAppropriateToString() {
 		TypeHint hint = TypeHint.of(TypeReference.of(String.class)).build();
 		assertThat(hint).hasToString("TypeHint[type=java.lang.String]");
+	}
+
+	@Test
+	void builtWithAppliesMemberCategories() {
+		TypeHint.Builder builder = new TypeHint.Builder(TypeReference.of(String.class));
+		assertThat(builder.build().getMemberCategories()).isEmpty();
+		TypeHint.builtWith(MemberCategory.DECLARED_CLASSES, MemberCategory.DECLARED_FIELDS).accept(builder);
+		assertThat(builder.build().getMemberCategories()).containsExactlyInAnyOrder(MemberCategory.DECLARED_CLASSES,
+				MemberCategory.DECLARED_FIELDS);
 	}
 
 }

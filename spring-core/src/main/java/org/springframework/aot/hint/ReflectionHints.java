@@ -87,6 +87,28 @@ public class ReflectionHints {
 	}
 
 	/**
+	 * Register or customize reflection hints for the specified type
+	 * using the specified {@link MemberCategory MemberCategories}.
+	 * @param type the type to customize
+	 * @param memberCategories the member categories to apply
+	 * @return {@code this}, to facilitate method chaining
+	 */
+	public ReflectionHints registerType(Class<?> type, MemberCategory... memberCategories) {
+		return registerType(TypeReference.of(type), memberCategories);
+	}
+
+	/**
+	 * Register or customize reflection hints for the specified type
+	 * using the specified {@link MemberCategory MemberCategories}.
+	 * @param type the type to customize
+	 * @param memberCategories the member categories to apply
+	 * @return {@code this}, to facilitate method chaining
+	 */
+	public ReflectionHints registerType(TypeReference type , MemberCategory... memberCategories) {
+		return registerType(type, TypeHint.builtWith(memberCategories));
+	}
+
+	/**
 	 * Register or customize reflection hints for the specified type.
 	 * @param type the type to customize
 	 * @param typeHint a builder to further customize hints for that type
@@ -132,7 +154,17 @@ public class ReflectionHints {
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public ReflectionHints registerField(Field field) {
-		return registerField(field, fieldHint -> fieldHint.withMode(FieldMode.WRITE));
+		return registerField(field, FieldMode.WRITE);
+	}
+
+	/**
+	 * Register the need for reflection on the specified {@link Field}
+	 * using the specified {@link FieldMode}.
+	 * @param field the field that requires reflection
+	 * @return {@code this}, to facilitate method chaining
+	 */
+	public ReflectionHints registerField(Field field, FieldMode mode) {
+		return registerField(field, FieldHint.builtWith(mode));
 	}
 
 	/**
@@ -164,7 +196,7 @@ public class ReflectionHints {
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public ReflectionHints registerConstructor(Constructor<?> constructor, ExecutableMode mode) {
-		return registerConstructor(constructor, constructorHint -> constructorHint.withMode(mode));
+		return registerConstructor(constructor, ExecutableHint.builtWith(mode));
 	}
 
 	/**
@@ -197,7 +229,7 @@ public class ReflectionHints {
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public ReflectionHints registerMethod(Method method, ExecutableMode mode) {
-		return registerMethod(method, methodHint -> methodHint.withMode(mode));
+		return registerMethod(method, ExecutableHint.builtWith(mode));
 	}
 
 	/**

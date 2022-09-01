@@ -17,6 +17,7 @@
 package org.springframework.aot.hint;
 
 import java.lang.reflect.Field;
+import java.util.function.Consumer;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -64,6 +65,16 @@ public final class FieldHint extends MemberHint {
 	 */
 	public boolean isAllowUnsafeAccess() {
 		return this.allowUnsafeAccess;
+	}
+
+	/**
+	 * Return a {@link Consumer} that applies the given {@link FieldMode}
+	 * to the accepted {@link Builder}.
+	 * @param mode the mode to apply
+	 * @return a consumer to apply the mode
+	 */
+	public static Consumer<Builder> builtWith(FieldMode mode) {
+		return builder -> builder.withMode(mode);
 	}
 
 

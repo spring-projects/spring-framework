@@ -107,6 +107,14 @@ class ReflectionHintsTests {
 	}
 
 	@Test
+	void registerClassWitCustomizer() {
+		this.reflectionHints.registerType(Integer.class,
+				typeHint -> typeHint.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
+		assertThat(this.reflectionHints.typeHints()).singleElement().satisfies(
+				typeWithMemberCategories(Integer.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
+	}
+
+	@Test
 	void registerTypesApplyTheSameHints() {
 		this.reflectionHints.registerTypes(TypeReference.listOf(Integer.class, String.class, Double.class),
 				hint -> hint.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
@@ -154,6 +162,17 @@ class ReflectionHintsTests {
 			assertThat(fieldHint.getName()).isEqualTo("field");
 			assertThat(fieldHint.getMode()).isEqualTo(FieldMode.READ);
 			assertThat(fieldHint.isAllowUnsafeAccess()).isTrue();
+		});
+	}
+
+	@Test
+	void registerFieldWithMode() {
+		Field field = ReflectionUtils.findField(TestType.class, "field");
+		assertThat(field).isNotNull();
+		this.reflectionHints.registerField(field, FieldMode.READ);
+		assertTestTypeFieldHint(fieldHint -> {
+			assertThat(fieldHint.getName()).isEqualTo("field");
+			assertThat(fieldHint.getMode()).isEqualTo(FieldMode.READ);
 		});
 	}
 

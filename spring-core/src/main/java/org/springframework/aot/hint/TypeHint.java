@@ -127,6 +127,17 @@ public final class TypeHint implements ConditionalHint {
 	}
 
 	/**
+	 * Return a {@link Consumer} that applies the given {@link MemberCategory
+	 * MemberCategories} to the accepted {@link Builder}.
+	 * @param memberCategories the memberCategories to apply
+	 * @return a consumer to apply the member categories
+	 */
+	public static Consumer<Builder> builtWith(MemberCategory... memberCategories) {
+		return builder -> builder.withMembers(memberCategories);
+	}
+
+
+	/**
 	 * Builder for {@link TypeHint}.
 	 */
 	public static class Builder {
@@ -180,7 +191,18 @@ public final class TypeHint implements ConditionalHint {
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder withField(String name) {
-			return withField(name, fieldHint -> {});
+			return withField(name, FieldMode.WRITE);
+		}
+
+		/**
+		 * Register the need for reflection on the field with the specified name
+		 * using the specified {@link FieldMode}.
+		 * @param name the name of the field
+		 * @param mode the requested mode
+		 * @return {@code this}, to facilitate method chaining
+		 */
+		public Builder withField(String name, FieldMode mode) {
+			return withField(name, FieldHint.builtWith(mode));
 		}
 
 		/**
@@ -213,7 +235,7 @@ public final class TypeHint implements ConditionalHint {
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder withConstructor(List<TypeReference> parameterTypes, ExecutableMode mode) {
-			return withConstructor(parameterTypes, constructorHint -> constructorHint.withMode(mode));
+			return withConstructor(parameterTypes, ExecutableHint.builtWith(mode));
 		}
 
 		/**
@@ -252,7 +274,7 @@ public final class TypeHint implements ConditionalHint {
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder withMethod(String name, List<TypeReference> parameterTypes, ExecutableMode mode) {
-			return withMethod(name, parameterTypes, methodHint -> methodHint.withMode(mode));
+			return withMethod(name, parameterTypes, ExecutableHint.builtWith(mode));
 		}
 
 		/**
