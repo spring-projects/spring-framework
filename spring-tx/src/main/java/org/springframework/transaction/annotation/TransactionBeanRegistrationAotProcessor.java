@@ -85,8 +85,7 @@ class TransactionBeanRegistrationAotProcessor implements BeanRegistrationAotProc
 				return;
 			}
 			for (Class<?> proxyInterface : proxyInterfaces) {
-				runtimeHints.reflection().registerType(proxyInterface,
-						builder -> builder.withMembers(MemberCategory.INVOKE_DECLARED_METHODS));
+				runtimeHints.reflection().registerType(proxyInterface, MemberCategory.INVOKE_DECLARED_METHODS);
 			}
 		}
 	}

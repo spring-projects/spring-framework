@@ -55,7 +55,7 @@ public class SimpleReflectiveProcessor implements ReflectiveProcessor {
 	 * @param type the class to process
 	 */
 	protected void registerTypeHint(ReflectionHints hints, Class<?> type) {
-		hints.registerType(type, hint -> {});
+		hints.registerType(type);
 	}
 
 	/**

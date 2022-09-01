@@ -66,81 +66,77 @@ class ReflectionHintsPredicatesTests {
 
 		@Test
 		void reflectionOnClassShouldMatchIntrospection() {
-			runtimeHints.reflection().registerType(SampleClass.class, builder -> {});
+			runtimeHints.reflection().registerType(SampleClass.class);
 			assertPredicateMatches(reflection.onType(SampleClass.class));
 		}
 
 		@Test
 		void reflectionOnTypeReferenceShouldMatchIntrospection() {
-			runtimeHints.reflection().registerType(SampleClass.class, builder -> {});
+			runtimeHints.reflection().registerType(SampleClass.class);
 			assertPredicateMatches(reflection.onType(TypeReference.of(SampleClass.class)));
 		}
 
 		@Test
 		void reflectionOnDifferentClassShouldNotMatchIntrospection() {
-			runtimeHints.reflection().registerType(Integer.class, builder -> {});
+			runtimeHints.reflection().registerType(Integer.class);
 			assertPredicateDoesNotMatch(reflection.onType(TypeReference.of(SampleClass.class)));
 		}
 
 		@Test
 		void typeWithMemberCategoryFailsWithNullCategory() {
-			runtimeHints.reflection().registerType(SampleClass.class, builder ->
-					builder.withMembers(MemberCategory.INTROSPECT_PUBLIC_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_PUBLIC_METHODS);
 			assertThatIllegalArgumentException().isThrownBy(() ->
 					reflection.onType(SampleClass.class).withMemberCategory(null));
 		}
 
 		@Test
 		void typeWithMemberCategoryMatchesCategory() {
-			runtimeHints.reflection().registerType(SampleClass.class,
-					builder -> builder.withMembers(MemberCategory.INTROSPECT_PUBLIC_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_PUBLIC_METHODS);
 			assertPredicateMatches(reflection.onType(SampleClass.class)
 					.withMemberCategory(MemberCategory.INTROSPECT_PUBLIC_METHODS));
 		}
 
 		@Test
 		void typeWithMemberCategoryDoesNotMatchOtherCategory() {
-			runtimeHints.reflection().registerType(SampleClass.class,
-					builder -> builder.withMembers(MemberCategory.INTROSPECT_PUBLIC_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_PUBLIC_METHODS);
 			assertPredicateDoesNotMatch(reflection.onType(SampleClass.class)
 					.withMemberCategory(MemberCategory.INVOKE_PUBLIC_METHODS));
 		}
 
 		@Test
 		void typeWithMemberCategoriesMatchesCategories() {
-			runtimeHints.reflection().registerType(SampleClass.class, builder ->
-					builder.withMembers(MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS, MemberCategory.INTROSPECT_PUBLIC_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS,
+					MemberCategory.INTROSPECT_PUBLIC_METHODS);
 			assertPredicateMatches(reflection.onType(SampleClass.class)
 					.withMemberCategories(MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS, MemberCategory.INTROSPECT_PUBLIC_METHODS));
 		}
 
 		@Test
 		void typeWithMemberCategoriesDoesNotMatchMissingCategory() {
-			runtimeHints.reflection().registerType(SampleClass.class, builder -> builder.withMembers(MemberCategory.INTROSPECT_PUBLIC_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_PUBLIC_METHODS);
 			assertPredicateDoesNotMatch(reflection.onType(SampleClass.class)
 					.withMemberCategories(MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS, MemberCategory.INTROSPECT_PUBLIC_METHODS));
 		}
 
 		@Test
 		void typeWithAnyMemberCategoryFailsWithNullCategories() {
-			runtimeHints.reflection().registerType(SampleClass.class, builder ->
-					builder.withMembers(MemberCategory.INTROSPECT_PUBLIC_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_PUBLIC_METHODS);
 			assertThatIllegalArgumentException().isThrownBy(() ->
 					reflection.onType(SampleClass.class).withAnyMemberCategory(new MemberCategory[0]));
 		}
 
 		@Test
 		void typeWithAnyMemberCategoryMatchesCategory() {
-			runtimeHints.reflection().registerType(SampleClass.class,
-					builder -> builder.withMembers(MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INVOKE_PUBLIC_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_PUBLIC_METHODS,
+					MemberCategory.INVOKE_PUBLIC_METHODS);
 			assertPredicateMatches(reflection.onType(SampleClass.class)
 					.withAnyMemberCategory(MemberCategory.INTROSPECT_PUBLIC_METHODS));
 		}
 
 		@Test
 		void typeWithAnyMemberCategoryDoesNotMatchOtherCategory() {
-			runtimeHints.reflection().registerType(SampleClass.class,
-					builder -> builder.withMembers(MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INVOKE_PUBLIC_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_PUBLIC_METHODS,
+					MemberCategory.INVOKE_PUBLIC_METHODS);
 			assertPredicateDoesNotMatch(reflection.onType(SampleClass.class)
 					.withAnyMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS));
 		}
@@ -164,29 +160,25 @@ class ReflectionHintsPredicatesTests {
 
 		@Test
 		void constructorIntrospectionMatchesIntrospectPublicConstructors() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
-					typeHint.withMembers(MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS);
 			assertPredicateMatches(reflection.onConstructor(publicConstructor).introspect());
 		}
 
 		@Test
 		void constructorIntrospectionMatchesInvokePublicConstructors() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
-					typeHint.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
 			assertPredicateMatches(reflection.onConstructor(publicConstructor).introspect());
 		}
 
 		@Test
 		void constructorIntrospectionMatchesIntrospectDeclaredConstructors() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
-					typeHint.withMembers(MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS);
 			assertPredicateMatches(reflection.onConstructor(publicConstructor).introspect());
 		}
 
 		@Test
 		void constructorIntrospectionMatchesInvokeDeclaredConstructors() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
-					typeHint.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 			assertPredicateMatches(reflection.onConstructor(publicConstructor).introspect());
 		}
 
@@ -206,29 +198,25 @@ class ReflectionHintsPredicatesTests {
 
 		@Test
 		void constructorInvocationDoesNotMatchIntrospectPublicConstructors() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
-					typeHint.withMembers(MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS);
 			assertPredicateDoesNotMatch(reflection.onConstructor(publicConstructor).invoke());
 		}
 
 		@Test
 		void constructorInvocationMatchesInvokePublicConstructors() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
-					typeHint.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
 			assertPredicateMatches(reflection.onConstructor(publicConstructor).invoke());
 		}
 
 		@Test
 		void constructorInvocationDoesNotMatchIntrospectDeclaredConstructors() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
-					typeHint.withMembers(MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS);
 			assertPredicateDoesNotMatch(reflection.onConstructor(publicConstructor).invoke());
 		}
 
 		@Test
 		void constructorInvocationMatchesInvokeDeclaredConstructors() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
-					typeHint.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 			assertPredicateMatches(reflection.onConstructor(publicConstructor).invoke());
 		}
 
@@ -241,29 +229,25 @@ class ReflectionHintsPredicatesTests {
 
 		@Test
 		void privateConstructorIntrospectionDoesNotMatchIntrospectPublicConstructors() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
-					typeHint.withMembers(MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS);
 			assertPredicateDoesNotMatch(reflection.onConstructor(privateConstructor).introspect());
 		}
 
 		@Test
 		void privateConstructorIntrospectionDoesNotMatchInvokePublicConstructors() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
-					typeHint.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
 			assertPredicateDoesNotMatch(reflection.onConstructor(privateConstructor).introspect());
 		}
 
 		@Test
 		void privateConstructorIntrospectionMatchesIntrospectDeclaredConstructors() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
-					typeHint.withMembers(MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS);
 			assertPredicateMatches(reflection.onConstructor(privateConstructor).introspect());
 		}
 
 		@Test
 		void privateConstructorIntrospectionMatchesInvokeDeclaredConstructors() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
-					typeHint.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 			assertPredicateMatches(reflection.onConstructor(privateConstructor).introspect());
 		}
 
@@ -283,29 +267,25 @@ class ReflectionHintsPredicatesTests {
 
 		@Test
 		void privateConstructorInvocationDoesNotMatchIntrospectPublicConstructors() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
-					typeHint.withMembers(MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS);
 			assertPredicateDoesNotMatch(reflection.onConstructor(privateConstructor).invoke());
 		}
 
 		@Test
 		void privateConstructorInvocationDoesNotMatchInvokePublicConstructors() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
-					typeHint.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
 			assertPredicateDoesNotMatch(reflection.onConstructor(privateConstructor).invoke());
 		}
 
 		@Test
 		void privateConstructorInvocationDoesNotMatchIntrospectDeclaredConstructors() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
-					typeHint.withMembers(MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS);
 			assertPredicateDoesNotMatch(reflection.onConstructor(privateConstructor).invoke());
 		}
 
 		@Test
 		void privateConstructorInvocationMatchesInvokeDeclaredConstructors() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
-					typeHint.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 			assertPredicateMatches(reflection.onConstructor(privateConstructor).invoke());
 		}
 
@@ -323,25 +303,25 @@ class ReflectionHintsPredicatesTests {
 
 		@Test
 		void methodIntrospectionMatchesIntrospectPublicMethods() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMembers(MemberCategory.INTROSPECT_PUBLIC_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_PUBLIC_METHODS);
 			assertPredicateMatches(reflection.onMethod(SampleClass.class, "publicMethod").introspect());
 		}
 
 		@Test
 		void methodIntrospectionMatchesInvokePublicMethods() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMembers(MemberCategory.INVOKE_PUBLIC_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_PUBLIC_METHODS);
 			assertPredicateMatches(reflection.onMethod(SampleClass.class, "publicMethod").introspect());
 		}
 
 		@Test
 		void methodIntrospectionMatchesIntrospectDeclaredMethods() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMembers(MemberCategory.INTROSPECT_DECLARED_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_DECLARED_METHODS);
 			assertPredicateMatches(reflection.onMethod(SampleClass.class, "publicMethod").introspect());
 		}
 
 		@Test
 		void methodIntrospectionMatchesInvokeDeclaredMethods() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMembers(MemberCategory.INVOKE_DECLARED_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_DECLARED_METHODS);
 			assertPredicateMatches(reflection.onMethod(SampleClass.class, "publicMethod").introspect());
 		}
 
@@ -361,25 +341,25 @@ class ReflectionHintsPredicatesTests {
 
 		@Test
 		void methodInvocationDoesNotMatchIntrospectPublicMethods() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMembers(MemberCategory.INTROSPECT_PUBLIC_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_PUBLIC_METHODS);
 			assertPredicateDoesNotMatch(reflection.onMethod(SampleClass.class, "publicMethod").invoke());
 		}
 
 		@Test
 		void methodInvocationMatchesInvokePublicMethods() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMembers(MemberCategory.INVOKE_PUBLIC_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_PUBLIC_METHODS);
 			assertPredicateMatches(reflection.onMethod(SampleClass.class, "publicMethod").invoke());
 		}
 
 		@Test
 		void methodInvocationDoesNotMatchIntrospectDeclaredMethods() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMembers(MemberCategory.INTROSPECT_DECLARED_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_DECLARED_METHODS);
 			assertPredicateDoesNotMatch(reflection.onMethod(SampleClass.class, "publicMethod").invoke());
 		}
 
 		@Test
 		void methodInvocationMatchesInvokeDeclaredMethods() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMembers(MemberCategory.INVOKE_DECLARED_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_DECLARED_METHODS);
 			assertPredicateMatches(reflection.onMethod(SampleClass.class, "publicMethod").invoke());
 		}
 
@@ -392,25 +372,25 @@ class ReflectionHintsPredicatesTests {
 
 		@Test
 		void privateMethodIntrospectionDoesNotMatchIntrospectPublicMethods() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMembers(MemberCategory.INTROSPECT_PUBLIC_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_PUBLIC_METHODS);
 			assertPredicateDoesNotMatch(reflection.onMethod(SampleClass.class, "privateMethod").introspect());
 		}
 
 		@Test
 		void privateMethodIntrospectionDoesNotMatchInvokePublicMethods() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMembers(MemberCategory.INVOKE_PUBLIC_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_PUBLIC_METHODS);
 			assertPredicateDoesNotMatch(reflection.onMethod(SampleClass.class, "privateMethod").introspect());
 		}
 
 		@Test
 		void privateMethodIntrospectionMatchesIntrospectDeclaredMethods() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMembers(MemberCategory.INTROSPECT_DECLARED_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_DECLARED_METHODS);
 			assertPredicateMatches(reflection.onMethod(SampleClass.class, "privateMethod").introspect());
 		}
 
 		@Test
 		void privateMethodIntrospectionMatchesInvokeDeclaredMethods() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMembers(MemberCategory.INVOKE_DECLARED_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_DECLARED_METHODS);
 			assertPredicateMatches(reflection.onMethod(SampleClass.class, "privateMethod").introspect());
 		}
 
@@ -430,25 +410,25 @@ class ReflectionHintsPredicatesTests {
 
 		@Test
 		void privateMethodInvocationDoesNotMatchIntrospectPublicMethods() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMembers(MemberCategory.INTROSPECT_PUBLIC_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_PUBLIC_METHODS);
 			assertPredicateDoesNotMatch(reflection.onMethod(SampleClass.class, "privateMethod").invoke());
 		}
 
 		@Test
 		void privateMethodInvocationDoesNotMatchInvokePublicMethods() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMembers(MemberCategory.INVOKE_PUBLIC_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_PUBLIC_METHODS);
 			assertPredicateDoesNotMatch(reflection.onMethod(SampleClass.class, "privateMethod").invoke());
 		}
 
 		@Test
 		void privateMethodInvocationDoesNotMatchIntrospectDeclaredMethods() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMembers(MemberCategory.INTROSPECT_DECLARED_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_DECLARED_METHODS);
 			assertPredicateDoesNotMatch(reflection.onMethod(SampleClass.class, "privateMethod").invoke());
 		}
 
 		@Test
 		void privateMethodInvocationMatchesInvokeDeclaredMethods() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMembers(MemberCategory.INVOKE_DECLARED_METHODS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_DECLARED_METHODS);
 			assertPredicateMatches(reflection.onMethod(SampleClass.class, "privateMethod").invoke());
 		}
 
@@ -464,29 +444,27 @@ class ReflectionHintsPredicatesTests {
 
 		@Test
 		void fieldReflectionMatchesFieldHint() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withField("publicField", fieldHint -> {
-			}));
+			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withField("publicField"));
 			assertPredicateMatches(reflection.onField(SampleClass.class, "publicField"));
 		}
 
 		@Test
 		void fieldWriteReflectionDoesNotMatchFieldHint() {
 			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withField("publicField",
-					fieldHint -> fieldHint.withMode(FieldMode.WRITE)));
+					FieldMode.READ));
 			assertPredicateDoesNotMatch(reflection.onField(SampleClass.class, "publicField").allowWrite());
 		}
 
 		@Test
 		void fieldUnsafeReflectionDoesNotMatchFieldHint() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withField("publicField", fieldHint -> {
-			}));
+			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withField("publicField"));
 			assertPredicateDoesNotMatch(reflection.onField(SampleClass.class, "publicField").allowUnsafeAccess());
 		}
 
 		@Test
 		void fieldWriteReflectionMatchesFieldHintWithWrite() {
 			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
-					typeHint.withField("publicField", fieldHint -> fieldHint.withMode(FieldMode.WRITE)));
+					typeHint.withField("publicField", FieldMode.WRITE));
 			assertPredicateMatches(reflection.onField(SampleClass.class, "publicField").allowWrite());
 		}
 
@@ -499,32 +477,31 @@ class ReflectionHintsPredicatesTests {
 
 		@Test
 		void fieldReflectionMatchesPublicFieldsHint() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMembers(MemberCategory.PUBLIC_FIELDS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.PUBLIC_FIELDS);
 			assertPredicateMatches(reflection.onField(SampleClass.class, "publicField"));
 		}
 
 		@Test
 		void fieldReflectionMatchesDeclaredFieldsHint() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMembers(MemberCategory.DECLARED_FIELDS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.DECLARED_FIELDS);
 			assertPredicateMatches(reflection.onField(SampleClass.class, "publicField"));
 		}
 
 		@Test
 		void privateFieldReflectionMatchesFieldHint() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withField("privateField", fieldHint -> {
-			}));
+			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withField("privateField"));
 			assertPredicateMatches(reflection.onField(SampleClass.class, "privateField"));
 		}
 
 		@Test
 		void privateFieldReflectionDoesNotMatchPublicFieldsHint() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMembers(MemberCategory.PUBLIC_FIELDS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.PUBLIC_FIELDS);
 			assertPredicateDoesNotMatch(reflection.onField(SampleClass.class, "privateField"));
 		}
 
 		@Test
 		void privateFieldReflectionMatchesDeclaredFieldsHint() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withMembers(MemberCategory.DECLARED_FIELDS));
+			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.DECLARED_FIELDS);
 			assertPredicateMatches(reflection.onField(SampleClass.class, "privateField"));
 		}
 

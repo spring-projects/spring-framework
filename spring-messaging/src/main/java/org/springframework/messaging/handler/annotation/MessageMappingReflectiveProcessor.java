@@ -60,7 +60,7 @@ class MessageMappingReflectiveProcessor implements ReflectiveProcessor {
 	}
 
 	protected void registerTypeHints(ReflectionHints hints, Class<?> type) {
-		hints.registerType(type, hint -> {});
+		hints.registerType(type);
 	}
 
 	protected void registerMethodHints(ReflectionHints hints, Method method) {

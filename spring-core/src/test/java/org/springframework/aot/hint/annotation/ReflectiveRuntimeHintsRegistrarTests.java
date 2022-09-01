@@ -279,8 +279,7 @@ class ReflectiveRuntimeHintsRegistrarTests {
 		@Override
 		protected void registerMethodHint(ReflectionHints hints, Method method) {
 			super.registerMethodHint(hints, method);
-			hints.registerType(method.getReturnType(), type ->
-					type.withMembers(MemberCategory.INVOKE_DECLARED_METHODS));
+			hints.registerType(method.getReturnType(), MemberCategory.INVOKE_DECLARED_METHODS);
 		}
 
 	}

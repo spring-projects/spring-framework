@@ -16,8 +16,6 @@
 
 package org.springframework.scheduling.quartz;
 
-import java.util.function.Consumer;
-
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
@@ -45,13 +43,14 @@ class SchedulerFactoryBeanRuntimeHints implements RuntimeHintsRegistrar {
 		if (!ClassUtils.isPresent(SCHEDULER_FACTORY_CLASS_NAME, classLoader)) {
 			return;
 		}
-		Consumer<Builder> typeHint = type -> type
-				.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)
-				.onReachableType(SchedulerFactoryBean.class);
 		hints.reflection()
-				.registerType(TypeReference.of(SCHEDULER_FACTORY_CLASS_NAME), typeHint)
+				.registerType(TypeReference.of(SCHEDULER_FACTORY_CLASS_NAME), this::typeHint)
 				.registerTypes(TypeReference.listOf(ResourceLoaderClassLoadHelper.class,
-						LocalTaskExecutorThreadPool.class, LocalDataSourceJobStore.class), typeHint);
+						LocalTaskExecutorThreadPool.class, LocalDataSourceJobStore.class), this::typeHint);
 		this.reflectiveRegistrar.registerRuntimeHints(hints, LocalTaskExecutorThreadPool.class);
+	}
+
+	private void typeHint(Builder typeHint) {
+		typeHint.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS).onReachableType(SchedulerFactoryBean.class);
 	}
 }

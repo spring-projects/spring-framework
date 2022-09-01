@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,7 @@ class RuntimeHintsTests {
 
 	@Test
 	void reflectionHintWithClass() {
-		this.hints.reflection().registerType(String.class,
-				hint -> hint.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
+		this.hints.reflection().registerType(String.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
 		assertThat(this.hints.reflection().typeHints()).singleElement().satisfies(typeHint -> {
 			assertThat(typeHint.getType().getCanonicalName()).isEqualTo(String.class.getCanonicalName());
 			assertThat(typeHint.fields()).isEmpty();

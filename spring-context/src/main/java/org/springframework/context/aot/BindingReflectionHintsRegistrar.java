@@ -80,20 +80,20 @@ public class BindingReflectionHintsRegistrar {
 			if (clazz.isPrimitive() || clazz == Object.class) {
 				return;
 			}
-			hints.registerType(clazz, builder -> {
+			hints.registerType(clazz, typeHint -> {
 				if (seen.contains(type)) {
 					return;
 				}
 				seen.add(type);
 				if (shouldRegisterMembers(clazz)) {
 					if (clazz.isRecord()) {
-						builder.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+						typeHint.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 						for (RecordComponent recordComponent : clazz.getRecordComponents()) {
 							registerRecordHints(hints, seen, recordComponent.getAccessor());
 						}
 					}
 					else {
-						builder.withMembers(
+						typeHint.withMembers(
 								MemberCategory.DECLARED_FIELDS,
 								MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 						try {

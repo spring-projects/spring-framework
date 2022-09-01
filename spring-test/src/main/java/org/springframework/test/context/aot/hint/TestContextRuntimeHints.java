@@ -24,6 +24,7 @@ import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.aot.hint.TypeHint;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.aot.hint.support.RuntimeHintsUtils;
 import org.springframework.util.ClassUtils;
@@ -148,8 +149,7 @@ class TestContextRuntimeHints implements RuntimeHintsRegistrar {
 	}
 
 	private static void registerPublicConstructors(ReflectionHints reflectionHints, Iterable<TypeReference> types) {
-		reflectionHints.registerTypes(types,
-				builder -> builder.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
+		reflectionHints.registerTypes(types, TypeHint.builtWith(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
 	}
 
 	private static void registerDeclaredConstructors(ReflectionHints reflectionHints, Class<?>... types) {
@@ -161,8 +161,7 @@ class TestContextRuntimeHints implements RuntimeHintsRegistrar {
 	}
 
 	private static void registerDeclaredConstructors(ReflectionHints reflectionHints, Iterable<TypeReference> types) {
-		reflectionHints.registerTypes(types,
-				builder -> builder.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
+		reflectionHints.registerTypes(types, TypeHint.builtWith(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
 	}
 
 	private static List<TypeReference> listOf(String... classNames) {
@@ -179,8 +178,7 @@ class TestContextRuntimeHints implements RuntimeHintsRegistrar {
 	}
 
 	private static void registerAnnotation(ReflectionHints reflectionHints, Class<? extends Annotation> annotationType) {
-		reflectionHints.registerType(annotationType,
-				builder -> builder.withMembers(MemberCategory.INVOKE_DECLARED_METHODS));
+		reflectionHints.registerType(annotationType, MemberCategory.INVOKE_DECLARED_METHODS);
 	}
 
 }

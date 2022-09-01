@@ -73,8 +73,7 @@ class ReflectionHintsTests {
 
 	@Test
 	void getTypeUsingTypeReference() {
-		this.reflectionHints.registerType(String.class,
-				hint -> hint.withMembers(MemberCategory.DECLARED_FIELDS));
+		this.reflectionHints.registerType(String.class, MemberCategory.DECLARED_FIELDS);
 		assertThat(this.reflectionHints.getTypeHint(TypeReference.of(String.class))).satisfies(
 				typeWithMemberCategories(String.class, MemberCategory.DECLARED_FIELDS));
 	}
@@ -87,7 +86,7 @@ class ReflectionHintsTests {
 	@Test
 	void registerTypeReuseBuilder() {
 		this.reflectionHints.registerType(TypeReference.of(String.class),
-				typeHint -> typeHint.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
+				MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 		Field field = ReflectionUtils.findField(String.class, "value");
 		assertThat(field).isNotNull();
 		this.reflectionHints.registerField(field);
@@ -100,8 +99,7 @@ class ReflectionHintsTests {
 
 	@Test
 	void registerClass() {
-		this.reflectionHints.registerType(Integer.class,
-				hint -> hint.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
+		this.reflectionHints.registerType(Integer.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
 		assertThat(this.reflectionHints.typeHints()).singleElement().satisfies(
 				typeWithMemberCategories(Integer.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
 	}
@@ -117,7 +115,7 @@ class ReflectionHintsTests {
 	@Test
 	void registerTypesApplyTheSameHints() {
 		this.reflectionHints.registerTypes(TypeReference.listOf(Integer.class, String.class, Double.class),
-				hint -> hint.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
+				TypeHint.builtWith(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
 		assertThat(this.reflectionHints.typeHints())
 				.anySatisfy(
 						typeWithMemberCategories(Integer.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS))
@@ -180,8 +178,8 @@ class ReflectionHintsTests {
 	void registerFieldWithCustomizersCannotDowngradeWrite() {
 		Field field = ReflectionUtils.findField(TestType.class, "field");
 		assertThat(field).isNotNull();
-		this.reflectionHints.registerField(field, fieldHint -> fieldHint.withMode(FieldMode.WRITE));
-		this.reflectionHints.registerField(field, fieldHint -> fieldHint.withMode(FieldMode.READ));
+		this.reflectionHints.registerField(field, FieldMode.WRITE);
+		this.reflectionHints.registerField(field, FieldMode.READ);
 		assertTestTypeFieldHint(fieldHint -> {
 			assertThat(fieldHint.getName()).isEqualTo("field");
 			assertThat(fieldHint.getMode()).isEqualTo(FieldMode.WRITE);
