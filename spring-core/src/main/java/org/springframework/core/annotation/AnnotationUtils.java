@@ -1185,7 +1185,7 @@ public abstract class AnnotationUtils {
 	public static <A extends Annotation> A synthesizeAnnotation(
 			A annotation, @Nullable AnnotatedElement annotatedElement) {
 
-		if (annotation instanceof SynthesizedAnnotation || AnnotationFilter.PLAIN.matches(annotation)) {
+		if (isSynthesizedAnnotation(annotation) || AnnotationFilter.PLAIN.matches(annotation)) {
 			return annotation;
 		}
 		return MergedAnnotation.from(annotatedElement, annotation).synthesize();
@@ -1277,6 +1277,18 @@ public abstract class AnnotationUtils {
 			synthesized[i] = synthesizeAnnotation(annotations[i], annotatedElement);
 		}
 		return synthesized;
+	}
+
+	/**
+	 * Determine if the supplied {@link Annotation} has been <em>synthesized</em>
+	 * by Spring (i.e. wrapped in a dynamic proxy) with additional functionality
+	 * such as attribute alias handling.
+	 * @param annotation the annotation to check
+	 * @return {@code true} if the supplied annotation is a synthesized annotation
+	 * @since 5.3.23
+	 */
+	public static boolean isSynthesizedAnnotation(@Nullable Annotation annotation) {
+		return (annotation instanceof SynthesizedAnnotation);
 	}
 
 	/**
