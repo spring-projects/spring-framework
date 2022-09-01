@@ -48,7 +48,7 @@ public final class ExecutableHint extends MemberHint {
 	 * @param parameterTypes the parameter types of the constructor
 	 * @return a builder
 	 */
-	public static Builder ofConstructor(List<TypeReference> parameterTypes) {
+	static Builder ofConstructor(List<TypeReference> parameterTypes) {
 		return new Builder("<init>", parameterTypes);
 	}
 
@@ -58,7 +58,7 @@ public final class ExecutableHint extends MemberHint {
 	 * @param parameterTypes the parameter types of the method
 	 * @return a builder
 	 */
-	public static Builder ofMethod(String name, List<TypeReference> parameterTypes) {
+	static Builder ofMethod(String name, List<TypeReference> parameterTypes) {
 		return new Builder(name, parameterTypes);
 	}
 

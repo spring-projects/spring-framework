@@ -68,7 +68,7 @@ public final class TypeHint implements ConditionalHint {
 	 * @param type the type to use
 	 * @return a builder
 	 */
-	public static Builder of(TypeReference type) {
+	static Builder of(TypeReference type) {
 		Assert.notNull(type, "'type' must not be null");
 		return new Builder(type);
 	}
@@ -145,7 +145,7 @@ public final class TypeHint implements ConditionalHint {
 		private final Set<MemberCategory> memberCategories = new HashSet<>();
 
 
-		public Builder(TypeReference type) {
+		Builder(TypeReference type) {
 			this.type = type;
 		}
 
