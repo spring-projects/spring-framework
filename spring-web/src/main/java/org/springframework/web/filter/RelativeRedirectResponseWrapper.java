@@ -47,6 +47,7 @@ final class RelativeRedirectResponseWrapper extends HttpServletResponseWrapper {
 
 	@Override
 	public void sendRedirect(String location) throws IOException {
+		resetBuffer();
 		setStatus(this.redirectStatus.value());
 		setHeader(HttpHeaders.LOCATION, location);
 		flushBuffer();
