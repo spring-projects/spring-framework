@@ -316,7 +316,7 @@ public abstract class InstrumentedBridgeMethods {
 				.onInstance(constructor).withArguments(arguments);
 		try {
 			if (!Modifier.isPublic(constructor.getModifiers()) ||
-					!Modifier.isPublic(constructor.getDeclaringClass().getModifiers()) || !constructor.canAccess(null)) {
+					!Modifier.isPublic(constructor.getDeclaringClass().getModifiers())) {
 				constructor.setAccessible(true);
 				accessibilityChanged = true;
 			}
@@ -339,7 +339,8 @@ public abstract class InstrumentedBridgeMethods {
 		Object result = null;
 		boolean accessibilityChanged = false;
 		try {
-			if (!Modifier.isPublic(method.getModifiers())) {
+			if (!Modifier.isPublic(method.getModifiers())
+				|| !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
 				method.setAccessible(true);
 				accessibilityChanged = true;
 			}
