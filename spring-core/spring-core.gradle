@@ -4,6 +4,7 @@ import org.springframework.build.shadow.ShadowSource
 description = "Spring Core"
 
 apply plugin: "kotlin"
+apply plugin: "kotlinx-serialization"
 
 def javapoetVersion = "1.13.0"
 def objenesisVersion = "3.2"
@@ -90,6 +91,7 @@ dependencies {
 	testFixturesImplementation("org.assertj:assertj-core")
 	testFixturesImplementation("org.xmlunit:xmlunit-assertj")
 	testFixturesImplementation("io.projectreactor:reactor-test")
+	testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
 }
 
 jar {

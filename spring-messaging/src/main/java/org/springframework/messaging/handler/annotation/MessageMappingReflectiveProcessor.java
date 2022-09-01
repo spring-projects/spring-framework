@@ -24,8 +24,8 @@ import java.security.Principal;
 
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.ReflectionHints;
+import org.springframework.aot.hint.annotation.BindingReflectionHintsRegistrar;
 import org.springframework.aot.hint.annotation.ReflectiveProcessor;
-import org.springframework.context.aot.BindingReflectionHintsRegistrar;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;

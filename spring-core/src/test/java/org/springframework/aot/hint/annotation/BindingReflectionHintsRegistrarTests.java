@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.aot;
+package org.springframework.aot.hint.annotation;
 
 import java.lang.reflect.Type;
 import java.util.List;
