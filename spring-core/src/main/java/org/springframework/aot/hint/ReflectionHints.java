@@ -127,12 +127,12 @@ public class ReflectionHints {
 
 	/**
 	 * Register the need for reflection on the specified {@link Field},
-	 * enabling write access.
+	 * enabling {@link FieldMode#WRITE}.
 	 * @param field the field that requires reflection
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public ReflectionHints registerField(Field field) {
-		return registerField(field, fieldHint -> fieldHint.allowWrite(true));
+		return registerField(field, fieldHint -> fieldHint.withMode(FieldMode.WRITE));
 	}
 
 	/**
@@ -145,7 +145,6 @@ public class ReflectionHints {
 		return registerType(TypeReference.of(field.getDeclaringClass()),
 				typeHint -> typeHint.withField(field.getName(), fieldHint));
 	}
-
 
 	/**
 	 * Register the need for reflection on the specified {@link Constructor},

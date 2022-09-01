@@ -29,6 +29,7 @@ import java.util.function.Predicate;
 import org.springframework.aot.hint.ExecutableHint;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.FieldHint;
+import org.springframework.aot.hint.FieldMode;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
@@ -401,7 +402,7 @@ public class ReflectionHintsPredicates {
 		private boolean exactMatch(TypeHint typeHint) {
 			return typeHint.fields().anyMatch(fieldHint ->
 					this.field.getName().equals(fieldHint.getName())
-							&& (!this.allowWrite || this.allowWrite == fieldHint.isAllowWrite())
+							&& (!this.allowWrite || fieldHint.getMode() == FieldMode.WRITE)
 							&& (!this.allowUnsafeAccess || this.allowUnsafeAccess == fieldHint.isAllowUnsafeAccess()));
 		}
 	}

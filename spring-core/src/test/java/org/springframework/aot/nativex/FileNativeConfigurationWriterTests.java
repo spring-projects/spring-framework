@@ -32,6 +32,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import org.springframework.aot.hint.ExecutableMode;
+import org.springframework.aot.hint.FieldMode;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ProxyHints;
 import org.springframework.aot.hint.ReflectionHints;
@@ -106,9 +107,9 @@ public class FileNativeConfigurationWriterTests {
 							MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS,
 							MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS,
 							MemberCategory.PUBLIC_CLASSES, MemberCategory.DECLARED_CLASSES)
-					.withField("DEFAULT_CHARSET", fieldBuilder -> fieldBuilder.allowWrite(false))
+					.withField("DEFAULT_CHARSET", fieldBuilder -> fieldBuilder.withMode(FieldMode.READ))
 					.withField("defaultCharset", fieldBuilder -> {
-						fieldBuilder.allowWrite(true);
+						fieldBuilder.withMode(FieldMode.WRITE);
 						fieldBuilder.allowUnsafeAccess(true);
 					})
 					.withConstructor(TypeReference.listOf(List.class, boolean.class, MimeType.class), ExecutableMode.INTROSPECT)

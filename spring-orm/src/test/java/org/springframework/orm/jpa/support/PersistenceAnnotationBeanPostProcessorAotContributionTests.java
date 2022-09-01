@@ -32,6 +32,7 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.hint.FieldMode;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.aot.test.generator.compile.CompileWithTargetClassAccess;
 import org.springframework.aot.test.generator.compile.Compiled;
@@ -132,7 +133,7 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 								.satisfies(fieldHint -> {
 									assertThat(fieldHint.getName())
 											.isEqualTo("entityManager");
-									assertThat(fieldHint.isAllowWrite()).isTrue();
+									assertThat(fieldHint.getMode()).isEqualTo(FieldMode.WRITE);
 									assertThat(fieldHint.isAllowUnsafeAccess()).isFalse();
 								});
 					});

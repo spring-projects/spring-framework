@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.hint.ExecutableMode;
+import org.springframework.aot.hint.FieldMode;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
@@ -471,7 +472,7 @@ class ReflectionHintsPredicatesTests {
 		@Test
 		void fieldWriteReflectionDoesNotMatchFieldHint() {
 			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withField("publicField",
-					fieldHint -> fieldHint.allowWrite(false)));
+					fieldHint -> fieldHint.withMode(FieldMode.WRITE)));
 			assertPredicateDoesNotMatch(reflection.onField(SampleClass.class, "publicField").allowWrite());
 		}
 
@@ -485,7 +486,7 @@ class ReflectionHintsPredicatesTests {
 		@Test
 		void fieldWriteReflectionMatchesFieldHintWithWrite() {
 			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
-					typeHint.withField("publicField", fieldHint -> fieldHint.allowWrite(true)));
+					typeHint.withField("publicField", fieldHint -> fieldHint.withMode(FieldMode.WRITE)));
 			assertPredicateMatches(reflection.onField(SampleClass.class, "publicField").allowWrite());
 		}
 

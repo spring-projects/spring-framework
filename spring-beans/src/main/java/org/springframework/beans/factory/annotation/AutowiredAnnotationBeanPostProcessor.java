@@ -48,6 +48,7 @@ import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.FieldHint;
+import org.springframework.aot.hint.FieldMode;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
@@ -914,7 +915,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		private static final String INSTANCE_PARAMETER = "instance";
 
 		private static final Consumer<FieldHint.Builder> ALLOW_WRITE = builder -> builder
-				.allowWrite(true);
+				.withMode(FieldMode.WRITE);
 
 
 		private final Class<?> target;

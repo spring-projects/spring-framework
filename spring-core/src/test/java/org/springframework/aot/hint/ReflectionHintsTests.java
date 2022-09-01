@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,7 +127,7 @@ class ReflectionHintsTests {
 		this.reflectionHints.registerField(field);
 		assertTestTypeFieldHint(fieldHint -> {
 			assertThat(fieldHint.getName()).isEqualTo("field");
-			assertThat(fieldHint.isAllowWrite()).isTrue();
+			assertThat(fieldHint.getMode()).isEqualTo(FieldMode.WRITE);
 			assertThat(fieldHint.isAllowUnsafeAccess()).isFalse();
 		});
 	}
@@ -139,7 +139,7 @@ class ReflectionHintsTests {
 		this.reflectionHints.registerField(field, fieldHint -> {});
 		assertTestTypeFieldHint(fieldHint -> {
 			assertThat(fieldHint.getName()).isEqualTo("field");
-			assertThat(fieldHint.isAllowWrite()).isTrue();
+			assertThat(fieldHint.getMode()).isEqualTo(FieldMode.WRITE);
 			assertThat(fieldHint.isAllowUnsafeAccess()).isFalse();
 		});
 	}
@@ -149,11 +149,23 @@ class ReflectionHintsTests {
 		Field field = ReflectionUtils.findField(TestType.class, "field");
 		assertThat(field).isNotNull();
 		this.reflectionHints.registerField(field, fieldHint ->
-				fieldHint.allowWrite(false).allowUnsafeAccess(true));
+				fieldHint.withMode(FieldMode.READ).allowUnsafeAccess(true));
 		assertTestTypeFieldHint(fieldHint -> {
 			assertThat(fieldHint.getName()).isEqualTo("field");
-			assertThat(fieldHint.isAllowWrite()).isFalse();
+			assertThat(fieldHint.getMode()).isEqualTo(FieldMode.READ);
 			assertThat(fieldHint.isAllowUnsafeAccess()).isTrue();
+		});
+	}
+
+	@Test // gh-29055
+	void registerFieldWithCustomizersCannotDowngradeWrite() {
+		Field field = ReflectionUtils.findField(TestType.class, "field");
+		assertThat(field).isNotNull();
+		this.reflectionHints.registerField(field, fieldHint -> fieldHint.withMode(FieldMode.WRITE));
+		this.reflectionHints.registerField(field, fieldHint -> fieldHint.withMode(FieldMode.READ));
+		assertTestTypeFieldHint(fieldHint -> {
+			assertThat(fieldHint.getName()).isEqualTo("field");
+			assertThat(fieldHint.getMode()).isEqualTo(FieldMode.WRITE);
 		});
 	}
 

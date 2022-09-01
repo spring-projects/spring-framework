@@ -19,6 +19,7 @@ package org.springframework.aot.hint;
 import java.lang.reflect.Field;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * A hint that describes the need of reflection on a {@link Field}.
@@ -28,23 +29,33 @@ import org.springframework.lang.Nullable;
  */
 public final class FieldHint extends MemberHint {
 
-	private final boolean allowWrite;
+	private final FieldMode mode;
 
 	private final boolean allowUnsafeAccess;
 
 
 	private FieldHint(Builder builder) {
 		super(builder.name);
-		this.allowWrite = (builder.allowWrite != null) ? builder.allowWrite : true;
+		this.mode = (builder.mode != null ? builder.mode : FieldMode.WRITE);
 		this.allowUnsafeAccess = builder.allowUnsafeAccess;
 	}
 
 	/**
 	 * Return whether setting the value of the field should be allowed.
 	 * @return {@code true} to allow {@link Field#set(Object, Object)}.
+	 * @deprecated in favor of {@link #getMode()}
 	 */
+	@Deprecated
 	public boolean isAllowWrite() {
-		return this.allowWrite;
+		return this.mode == FieldMode.WRITE;
+	}
+
+	/**
+	 * Return the {@linkplain FieldMode mode} that apply to this hint.
+	 * @return the mode
+	 */
+	public FieldMode getMode() {
+		return this.mode;
 	}
 
 	/**
@@ -64,7 +75,7 @@ public final class FieldHint extends MemberHint {
 		private final String name;
 
 		@Nullable
-		private Boolean allowWrite;
+		private FieldMode mode;
 
 		private boolean allowUnsafeAccess;
 
@@ -77,9 +88,26 @@ public final class FieldHint extends MemberHint {
 		 * Specify if setting the value of the field should be allowed.
 		 * @param allowWrite {@code true} to allow {@link Field#set(Object, Object)}
 		 * @return {@code this}, to facilitate method chaining
+		 * @deprecated in favor of {@link #withMode(FieldMode)}
 		 */
+		@Deprecated
 		public Builder allowWrite(boolean allowWrite) {
-			this.allowWrite = allowWrite;
+			if (allowWrite) {
+				return withMode(FieldMode.WRITE);
+			}
+			return this;
+		}
+
+		/**
+		 * Specify that the {@linkplain FieldMode mode} is required.
+		 * @param mode the required mode
+		 * @return {@code this}, to facilitate method chaining
+		 */
+		public Builder withMode(FieldMode mode) {
+			Assert.notNull(mode, "'mode' must not be null");
+			if ((this.mode == null || !this.mode.includes(mode))) {
+				this.mode = mode;
+			}
 			return this;
 		}
 
