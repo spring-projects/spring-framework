@@ -287,6 +287,7 @@ public class RuntimeHintsAgentTests {
 
 	private static class PrivateClass {
 
+		@SuppressWarnings("unused")
 		private String greet() {
 			return "hello";
 		}
