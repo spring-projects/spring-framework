@@ -47,7 +47,7 @@ class ReflectionHintsTests {
 	}
 
 	@Test
-	void registerTypeIfPresentRegisterExistingClass() {
+	void registerTypeIfPresentRegistersExistingClass() {
 		this.reflectionHints.registerTypeIfPresent(null, String.class.getName(),
 				hint -> hint.withMembers(MemberCategory.DECLARED_FIELDS));
 		assertThat(this.reflectionHints.typeHints()).singleElement().satisfies(
@@ -56,7 +56,7 @@ class ReflectionHintsTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	void registerTypeIfPresentIgnoreMissingClass() {
+	void registerTypeIfPresentIgnoresMissingClass() {
 		Consumer<TypeHint.Builder> hintBuilder = mock(Consumer.class);
 		this.reflectionHints.registerTypeIfPresent(null, "com.example.DoesNotExist", hintBuilder);
 		assertThat(this.reflectionHints.typeHints()).isEmpty();
@@ -84,7 +84,7 @@ class ReflectionHintsTests {
 	}
 
 	@Test
-	void registerTypeReuseBuilder() {
+	void registerTypeReusesBuilder() {
 		this.reflectionHints.registerType(TypeReference.of(String.class),
 				MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 		Field field = ReflectionUtils.findField(String.class, "value");
@@ -105,7 +105,7 @@ class ReflectionHintsTests {
 	}
 
 	@Test
-	void registerClassWitCustomizer() {
+	void registerClassWithCustomizer() {
 		this.reflectionHints.registerType(Integer.class,
 				typeHint -> typeHint.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
 		assertThat(this.reflectionHints.typeHints()).singleElement().satisfies(
@@ -113,16 +113,13 @@ class ReflectionHintsTests {
 	}
 
 	@Test
-	void registerTypesApplyTheSameHints() {
+	void registerTypesAppliesTheSameHints() {
 		this.reflectionHints.registerTypes(TypeReference.listOf(Integer.class, String.class, Double.class),
 				TypeHint.builtWith(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
 		assertThat(this.reflectionHints.typeHints())
-				.anySatisfy(
-						typeWithMemberCategories(Integer.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS))
-				.anySatisfy(
-						typeWithMemberCategories(String.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS))
-				.anySatisfy(
-						typeWithMemberCategories(Double.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS))
+				.anySatisfy(typeWithMemberCategories(Integer.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS))
+				.anySatisfy(typeWithMemberCategories(String.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS))
+				.anySatisfy(typeWithMemberCategories(Double.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS))
 				.hasSize(3);
 	}
 
@@ -286,8 +283,7 @@ class ReflectionHintsTests {
 	void registerMethodWithCustomizerAppliesCustomization() {
 		Method method = ReflectionUtils.findMethod(TestType.class, "setName", String.class);
 		assertThat(method).isNotNull();
-		this.reflectionHints.registerMethod(method, methodHint ->
-				methodHint.withMode(ExecutableMode.INTROSPECT));
+		this.reflectionHints.registerMethod(method, methodHint -> methodHint.withMode(ExecutableMode.INTROSPECT));
 		assertTestTypeMethodHints(methodHint -> {
 			assertThat(methodHint.getName()).isEqualTo("setName");
 			assertThat(methodHint.getParameterTypes()).containsOnly(TypeReference.of(String.class));

@@ -220,8 +220,8 @@ public class TestContextAotGenerator {
 				new AotTestMappingsCodeGenerator(initializerClassMappings, generatedClasses);
 		generationContext.writeGeneratedContent();
 		String className = codeGenerator.getGeneratedClass().getName().reflectionName();
-		this.runtimeHints.reflection().registerType(TypeReference.of(className),
-				builder -> builder.withMembers(MemberCategory.INVOKE_PUBLIC_METHODS));
+		this.runtimeHints.reflection()
+				.registerType(TypeReference.of(className), MemberCategory.INVOKE_PUBLIC_METHODS);
 	}
 
 }

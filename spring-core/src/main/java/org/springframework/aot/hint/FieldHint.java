@@ -23,7 +23,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * A hint that describes the need of reflection on a {@link Field}.
+ * A hint that describes the need for reflection on a {@link Field}.
  *
  * @author Stephane Nicoll
  * @since 6.0
@@ -52,7 +52,7 @@ public final class FieldHint extends MemberHint {
 	}
 
 	/**
-	 * Return the {@linkplain FieldMode mode} that apply to this hint.
+	 * Return the {@linkplain FieldMode mode} that applies to this hint.
 	 * @return the mode
 	 */
 	public FieldMode getMode() {
@@ -60,7 +60,7 @@ public final class FieldHint extends MemberHint {
 	}
 
 	/**
-	 * Return whether if using {@code Unsafe} on the field should be allowed.
+	 * Return whether using {@code Unsafe} on the field should be allowed.
 	 * @return {@code true} to allow unsafe access
 	 */
 	public boolean isAllowUnsafeAccess() {
@@ -123,7 +123,7 @@ public final class FieldHint extends MemberHint {
 		}
 
 		/**
-		 * Specify if using {@code Unsafe} on the field should be allowed.
+		 * Specify whether using {@code Unsafe} on the field should be allowed.
 		 * @param allowUnsafeAccess {@code true} to allow unsafe access
 		 * @return {@code this}, to facilitate method chaining
 		 */

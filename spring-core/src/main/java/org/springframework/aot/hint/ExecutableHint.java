@@ -55,7 +55,7 @@ public final class ExecutableHint extends MemberHint {
 	}
 
 	/**
-	 * Initialize a builder with the name and parameters types of a method.
+	 * Initialize a builder with the name and parameter types of a method.
 	 * @param name the name of the method
 	 * @param parameterTypes the parameter types of the method
 	 * @return a builder
@@ -74,7 +74,7 @@ public final class ExecutableHint extends MemberHint {
 	}
 
 	/**
-	 * Return the {@linkplain ExecutableMode mode} that apply to this hint.
+	 * Return the {@linkplain ExecutableMode mode} that applies to this hint.
 	 * @return the mode
 	 */
 	public ExecutableMode getMode() {
@@ -116,7 +116,7 @@ public final class ExecutableHint extends MemberHint {
 		 */
 		public Builder withMode(ExecutableMode mode) {
 			Assert.notNull(mode, "'mode' must not be null");
-			if ((this.mode == null || !this.mode.includes(mode))) {
+			if ((this.mode == null) || !this.mode.includes(mode)) {
 				this.mode = mode;
 			}
 			return this;
