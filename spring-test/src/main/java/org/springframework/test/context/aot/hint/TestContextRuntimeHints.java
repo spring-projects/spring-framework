@@ -26,7 +26,6 @@ import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeHint;
 import org.springframework.aot.hint.TypeReference;
-import org.springframework.aot.hint.support.RuntimeHintsUtils;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -42,9 +41,6 @@ class TestContextRuntimeHints implements RuntimeHintsRegistrar {
 	public void registerHints(RuntimeHints runtimeHints, ClassLoader classLoader) {
 		boolean servletPresent = ClassUtils.isPresent("jakarta.servlet.Servlet", classLoader);
 		boolean groovyPresent = ClassUtils.isPresent("groovy.lang.Closure", classLoader);
-		boolean txPresent = ClassUtils.isPresent("org.springframework.transaction.annotation.Transactional", classLoader);
-		boolean junit4Present = ClassUtils.isPresent("org.junit.Test", classLoader);
-		boolean junitJupiterPresent = ClassUtils.isPresent("org.junit.jupiter.api.Test", classLoader);
 
 		ReflectionHints reflectionHints = runtimeHints.reflection();
 
@@ -78,66 +74,9 @@ class TestContextRuntimeHints implements RuntimeHintsRegistrar {
 			}
 		}
 
-		registerSynthesizedAnnotations(runtimeHints,
-			// Core TestContext framework
-			org.springframework.test.annotation.DirtiesContext.class,
-			org.springframework.test.context.ActiveProfiles.class,
-			org.springframework.test.context.BootstrapWith.class,
-			org.springframework.test.context.ContextConfiguration.class,
-			org.springframework.test.context.ContextHierarchy.class,
-			org.springframework.test.context.DynamicPropertySource.class,
-			org.springframework.test.context.NestedTestConfiguration.class,
-			org.springframework.test.context.TestConstructor.class,
-			org.springframework.test.context.TestExecutionListeners.class,
-			org.springframework.test.context.TestPropertySource.class,
-			org.springframework.test.context.TestPropertySources.class,
-
-			// Application Events
-			org.springframework.test.context.event.RecordApplicationEvents.class,
-
-			// Test execution events
-			org.springframework.test.context.event.annotation.AfterTestClass.class,
-			org.springframework.test.context.event.annotation.AfterTestExecution.class,
-			org.springframework.test.context.event.annotation.AfterTestMethod.class,
-			org.springframework.test.context.event.annotation.BeforeTestClass.class,
-			org.springframework.test.context.event.annotation.BeforeTestExecution.class,
-			org.springframework.test.context.event.annotation.BeforeTestMethod.class,
-			org.springframework.test.context.event.annotation.PrepareTestInstance.class,
-
-			// Web
+		registerAnnotation(runtimeHints.reflection(),
 			org.springframework.test.context.web.WebAppConfiguration.class
 		);
-
-		if (junit4Present) {
-			registerSynthesizedAnnotations(runtimeHints,
-				org.springframework.test.annotation.IfProfileValue.class,
-				org.springframework.test.annotation.ProfileValueSourceConfiguration.class,
-				org.springframework.test.annotation.Repeat.class,
-				org.springframework.test.annotation.Timed.class
-			);
-		}
-
-		if (junitJupiterPresent) {
-			registerSynthesizedAnnotations(runtimeHints,
-				org.springframework.test.context.junit.jupiter.EnabledIf.class,
-				org.springframework.test.context.junit.jupiter.DisabledIf.class,
-				org.springframework.test.context.junit.jupiter.SpringJUnitConfig.class,
-				org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig.class
-			);
-		}
-
-		if (txPresent) {
-			registerSynthesizedAnnotations(runtimeHints,
-				org.springframework.test.annotation.Commit.class,
-				org.springframework.test.annotation.Rollback.class,
-				org.springframework.test.context.jdbc.Sql.class,
-				org.springframework.test.context.jdbc.SqlConfig.class,
-				org.springframework.test.context.jdbc.SqlGroup.class,
-				org.springframework.test.context.jdbc.SqlMergeMode.class,
-				org.springframework.test.context.transaction.AfterTransaction.class,
-				org.springframework.test.context.transaction.BeforeTransaction.class
-			);
-		}
 	}
 
 	private static void registerPublicConstructors(ReflectionHints reflectionHints, Class<?>... types) {
@@ -166,15 +105,6 @@ class TestContextRuntimeHints implements RuntimeHintsRegistrar {
 
 	private static List<TypeReference> listOf(String... classNames) {
 		return Arrays.stream(classNames).map(TypeReference::of).toList();
-	}
-
-	@SafeVarargs
-	@SuppressWarnings({ "unchecked", "deprecation" })
-	private static void registerSynthesizedAnnotations(RuntimeHints runtimeHints, Class<? extends Annotation>... annotationTypes) {
-		for (Class<? extends Annotation> annotationType : annotationTypes) {
-			registerAnnotation(runtimeHints.reflection(), annotationType);
-			RuntimeHintsUtils.registerSynthesizedAnnotation(runtimeHints, annotationType);
-		}
 	}
 
 	private static void registerAnnotation(ReflectionHints reflectionHints, Class<? extends Annotation> annotationType) {
