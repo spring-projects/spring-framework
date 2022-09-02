@@ -45,36 +45,45 @@ class TestContextRuntimeHints implements RuntimeHintsRegistrar {
 		ReflectionHints reflectionHints = runtimeHints.reflection();
 
 		registerPublicConstructors(reflectionHints,
+			// Loaded reflectively in BootstrapUtils
 			org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.class,
+			// Loaded reflectively in BootstrapUtils
 			org.springframework.test.context.support.DefaultBootstrapContext.class,
+			// Loaded reflectively in AbstractTestContextBootstrapper#resolveContextLoader()
 			org.springframework.test.context.support.DelegatingSmartContextLoader.class
 		);
 
 		registerDeclaredConstructors(reflectionHints,
+			// Loaded reflectively in BootstrapUtils
 			org.springframework.test.context.support.DefaultTestContextBootstrapper.class
 		);
 
 		if (servletPresent) {
 			registerPublicConstructors(reflectionHints,
+				// Loaded reflectively in AbstractTestContextBootstrapper#resolveContextLoader()
 				"org.springframework.test.context.web.WebDelegatingSmartContextLoader"
 			);
 			registerDeclaredConstructors(reflectionHints,
+				// Loaded reflectively in BootstrapUtils
 				"org.springframework.test.context.web.WebTestContextBootstrapper"
 			);
 		}
 
 		if (groovyPresent) {
 			registerDeclaredConstructors(reflectionHints,
+				// Loaded reflectively in DelegatingSmartContextLoader
 				"org.springframework.test.context.support.GenericGroovyXmlContextLoader"
 			);
 			if (servletPresent) {
 				registerDeclaredConstructors(reflectionHints,
+					// Loaded reflectively in WebDelegatingSmartContextLoader
 					"org.springframework.test.context.web.GenericGroovyXmlWebContextLoader"
 				);
 			}
 		}
 
 		registerAnnotation(runtimeHints.reflection(),
+			// Loaded reflectively in BootstrapUtils
 			org.springframework.test.context.web.WebAppConfiguration.class
 		);
 	}
