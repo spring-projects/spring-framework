@@ -49,7 +49,6 @@ public abstract class RuntimeHintsUtils {
 	 * at runtime.
 	 * @param hints the {@link RuntimeHints} instance to use
 	 * @param annotationType the annotation type
-	 * @see SynthesizedAnnotation
 	 * @deprecated as annotation attributes are visible without additional hints
 	 */
 	@Deprecated
@@ -70,7 +69,6 @@ public abstract class RuntimeHintsUtils {
 	 * that determines if the hints are required.
 	 * @param hints the {@link RuntimeHints} instance to use
 	 * @param annotationType the annotation type
-	 * @see SynthesizedAnnotation
 	 */
 	public static void registerSynthesizedAnnotation(RuntimeHints hints, Class<?> annotationType) {
 		hints.proxies().registerJdkProxy(annotationType, SynthesizedAnnotation.class);

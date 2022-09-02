@@ -363,7 +363,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	 * @since 5.3.22
 	 */
 	private boolean isSynthesizable(Annotation annotation) {
-		if (annotation instanceof SynthesizedAnnotation) {
+		if (AnnotationUtils.isSynthesizedAnnotation(annotation)) {
 			return false;
 		}
 		return isSynthesizable();
