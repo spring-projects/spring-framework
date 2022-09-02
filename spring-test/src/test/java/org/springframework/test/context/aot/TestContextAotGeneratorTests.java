@@ -82,7 +82,8 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 				BasicSpringJupiterTests.class,
 				BasicSpringJupiterTests.NestedTests.class,
 				BasicSpringTestNGTests.class,
-				BasicSpringVintageTests.class);
+				BasicSpringVintageTests.class,
+				WebSpringJupiterTests.class);
 
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
 		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
@@ -92,7 +93,7 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		assertRuntimeHints(generator.getRuntimeHints());
 
 		List<String> sourceFiles = generatedFiles.getGeneratedFiles(Kind.SOURCE).keySet().stream().toList();
-		assertThat(sourceFiles).containsExactlyInAnyOrder(expectedSourceFilesForBasicSpringTests);
+		assertThat(sourceFiles).containsExactlyInAnyOrder(expectedSourceFiles);
 
 		TestCompiler.forSystem().withFiles(generatedFiles).compile(ThrowingConsumer.of(compiled -> {
 			AotTestMappings aotTestMappings = new AotTestMappings();
@@ -103,7 +104,12 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 				assertThat(contextInitializer).isNotNull();
 				ApplicationContext context = ((AotContextLoader) mergedConfig.getContextLoader())
 						.loadContextForAotRuntime(mergedConfig, contextInitializer);
-				assertContextForBasicTests(context);
+				if (context instanceof WebApplicationContext wac) {
+					assertContextForBasicWebTests(wac);
+				}
+				else {
+					assertContextForBasicTests(context);
+				}
 			}
 		}));
 	}
@@ -113,16 +119,17 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 
 		Set.of(
 			org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.class,
-			org.springframework.test.context.support.DefaultBootstrapContext.class,
-			org.springframework.test.context.support.DelegatingSmartContextLoader.class,
-			org.springframework.test.context.web.WebDelegatingSmartContextLoader.class
+			org.springframework.test.context.support.DefaultBootstrapContext.class
 		).forEach(type -> assertReflectionRegistered(runtimeHints, type, INVOKE_PUBLIC_CONSTRUCTORS));
 
 		Set.of(
+			org.springframework.test.context.support.AnnotationConfigContextLoader.class,
 			org.springframework.test.context.support.DefaultTestContextBootstrapper.class,
-			org.springframework.test.context.web.WebTestContextBootstrapper.class,
+			org.springframework.test.context.support.DelegatingSmartContextLoader.class,
 			org.springframework.test.context.support.GenericGroovyXmlContextLoader.class,
-			org.springframework.test.context.web.GenericGroovyXmlWebContextLoader.class
+			org.springframework.test.context.web.GenericGroovyXmlWebContextLoader.class,
+			org.springframework.test.context.web.WebDelegatingSmartContextLoader.class,
+			org.springframework.test.context.web.WebTestContextBootstrapper.class
 		).forEach(type -> assertReflectionRegistered(runtimeHints, type, INVOKE_DECLARED_CONSTRUCTORS));
 
 		Set.of(
@@ -184,6 +191,13 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 
 		MessageService messageService = context.getBean(MessageService.class);
 		assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
+	}
+
+	private void assertContextForBasicWebTests(WebApplicationContext wac) throws Exception {
+		assertThat(wac.getEnvironment().getProperty("test.engine")).as("Environment").isNotNull();
+
+		MockMvc mockMvc = webAppContextSetup(wac).build();
+		mockMvc.perform(get("/hello")).andExpectAll(status().isOk(), content().string("Hello, AOT!"));
 	}
 
 	@Test
@@ -257,5 +271,44 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 
 	record Mapping(MergedContextConfiguration mergedConfig, ClassName className) {
 	}
+
+	private static final String[] expectedSourceFiles = {
+			// Global
+			"org/springframework/test/context/aot/AotTestMappings__Generated.java",
+			// BasicSpringJupiterSharedConfigTests
+			"org/springframework/context/event/DefaultEventListenerFactory__TestContext001_BeanDefinitions.java",
+			"org/springframework/context/event/EventListenerMethodProcessor__TestContext001_BeanDefinitions.java",
+			"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterSharedConfigTests__TestContext001_ApplicationContextInitializer.java",
+			"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterSharedConfigTests__TestContext001_BeanFactoryRegistrations.java",
+			"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext001_BeanDefinitions.java",
+			// BasicSpringJupiterTests -- not generated b/c already generated for BasicSpringJupiterSharedConfigTests.
+			// BasicSpringJupiterTests.NestedTests
+			"org/springframework/context/event/DefaultEventListenerFactory__TestContext002_BeanDefinitions.java",
+			"org/springframework/context/event/EventListenerMethodProcessor__TestContext002_BeanDefinitions.java",
+			"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests_NestedTests__TestContext002_ApplicationContextInitializer.java",
+			"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests_NestedTests__TestContext002_BeanFactoryRegistrations.java",
+			"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext002_BeanDefinitions.java",
+			// BasicSpringTestNGTests
+			"org/springframework/context/event/DefaultEventListenerFactory__TestContext003_BeanDefinitions.java",
+			"org/springframework/context/event/EventListenerMethodProcessor__TestContext003_BeanDefinitions.java",
+			"org/springframework/test/context/aot/samples/basic/BasicSpringTestNGTests__TestContext003_ApplicationContextInitializer.java",
+			"org/springframework/test/context/aot/samples/basic/BasicSpringTestNGTests__TestContext003_BeanFactoryRegistrations.java",
+			"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext003_BeanDefinitions.java",
+			// BasicSpringVintageTests
+			"org/springframework/context/event/DefaultEventListenerFactory__TestContext004_BeanDefinitions.java",
+			"org/springframework/context/event/EventListenerMethodProcessor__TestContext004_BeanDefinitions.java",
+			"org/springframework/test/context/aot/samples/basic/BasicSpringVintageTests__TestContext004_ApplicationContextInitializer.java",
+			"org/springframework/test/context/aot/samples/basic/BasicSpringVintageTests__TestContext004_BeanFactoryRegistrations.java",
+			"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext004_BeanDefinitions.java",
+			// WebSpringJupiterTests
+			"org/springframework/context/event/DefaultEventListenerFactory__TestContext005_BeanDefinitions.java",
+			"org/springframework/context/event/EventListenerMethodProcessor__TestContext005_BeanDefinitions.java",
+			"org/springframework/test/context/aot/samples/web/WebSpringJupiterTests__TestContext005_ApplicationContextInitializer.java",
+			"org/springframework/test/context/aot/samples/web/WebSpringJupiterTests__TestContext005_BeanFactoryRegistrations.java",
+			"org/springframework/test/context/aot/samples/web/WebTestConfiguration__TestContext005_BeanDefinitions.java",
+			"org/springframework/web/reactive/config/DelegatingWebFluxConfiguration__TestContext005_Autowiring.java",
+			"org/springframework/web/reactive/config/DelegatingWebFluxConfiguration__TestContext005_BeanDefinitions.java",
+			"org/springframework/web/reactive/config/WebFluxConfigurationSupport__TestContext005_BeanDefinitions.java"
+		};
 
 }

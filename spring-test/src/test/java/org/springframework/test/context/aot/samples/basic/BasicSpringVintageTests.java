@@ -25,6 +25,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.aot.samples.common.MessageService;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 6.0
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = BasicTestConfiguration.class)
+@ContextConfiguration(classes = BasicTestConfiguration.class, loader = AnnotationConfigContextLoader.class)
 @TestPropertySource(properties = "test.engine = vintage")
 public class BasicSpringVintageTests {
 

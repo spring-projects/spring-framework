@@ -28,6 +28,7 @@ import org.springframework.aot.generate.GeneratedClasses;
 import org.springframework.aot.generate.GeneratedFiles;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.context.ApplicationContext;
@@ -173,6 +174,8 @@ public class TestContextAotGenerator {
 				Consider annotating test class [%s] with @ContextConfiguration or \
 				@ContextHierarchy.""".formatted(testClass.getName()));
 
+		registerDeclaredConstructors(contextLoader.getClass());
+
 		if (contextLoader instanceof AotContextLoader aotContextLoader) {
 			try {
 				ApplicationContext context = aotContextLoader.loadContextForAotProcessing(mergedConfig);
@@ -222,6 +225,11 @@ public class TestContextAotGenerator {
 		String className = codeGenerator.getGeneratedClass().getName().reflectionName();
 		this.runtimeHints.reflection()
 				.registerType(TypeReference.of(className), MemberCategory.INVOKE_PUBLIC_METHODS);
+	}
+
+	private void registerDeclaredConstructors(Class<?> type) {
+		ReflectionHints reflectionHints = this.runtimeHints.reflection();
+		reflectionHints.registerType(type, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 	}
 
 }
