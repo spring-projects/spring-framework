@@ -21,12 +21,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
-import org.springframework.dao.ConcurrencyFailureException;
-import org.springframework.transaction.TransactionCommitException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.transaction.TransactionCommitException;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import static org.assertj.core.api.Assertions.assertThat;

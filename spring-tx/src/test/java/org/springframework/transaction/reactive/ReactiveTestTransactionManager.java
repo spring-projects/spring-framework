@@ -16,9 +16,10 @@
 
 package org.springframework.transaction.reactive;
 
-import org.springframework.lang.Nullable;
+
 import reactor.core.publisher.Mono;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.ReactiveTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -91,7 +92,8 @@ class ReactiveTestTransactionManager extends AbstractReactiveTransactionManager 
 		Mono<Void> result = Mono.fromRunnable(() -> this.commit = true);
 		if (throwOnCommit != null) {
 			return result.then(Mono.error(throwOnCommit));
-		} else {
+		}
+		else {
 			return result;
 		}
 	}

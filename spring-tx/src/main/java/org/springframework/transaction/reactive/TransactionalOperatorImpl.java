@@ -24,9 +24,9 @@ import reactor.core.publisher.Mono;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.ReactiveTransaction;
 import org.springframework.transaction.ReactiveTransactionManager;
+import org.springframework.transaction.TransactionCommitException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
-import org.springframework.transaction.TransactionCommitException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.util.Assert;
 
@@ -123,7 +123,7 @@ final class TransactionalOperatorImpl implements TransactionalOperator {
 	private Mono<Void> commitWithErrorHandling(ReactiveTransaction reactiveTransaction) {
 		return this.transactionManager
 				.commit(reactiveTransaction)
-				.onErrorResume((ex) -> Mono.error(new TransactionCommitException("Transaction commit failed", ex)));
+				.onErrorResume(ex -> Mono.error(new TransactionCommitException("Transaction commit failed", ex)));
 	}
 
 	/**
