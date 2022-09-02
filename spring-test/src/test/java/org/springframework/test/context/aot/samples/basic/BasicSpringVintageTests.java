@@ -21,11 +21,16 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.aot.samples.basic.BasicSpringVintageTests.CustomXmlBootstrapper;
 import org.springframework.test.context.aot.samples.common.MessageService;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.test.context.support.DefaultTestContextBootstrapper;
+import org.springframework.test.context.support.GenericXmlContextLoader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,7 +38,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 6.0
  */
+@BootstrapWith(CustomXmlBootstrapper.class)
 @RunWith(SpringRunner.class)
+// Override the default loader configured by the CustomXmlBootstrapper
 @ContextConfiguration(classes = BasicTestConfiguration.class, loader = AnnotationConfigContextLoader.class)
 @TestPropertySource(properties = "test.engine = vintage")
 public class BasicSpringVintageTests {
@@ -53,6 +60,13 @@ public class BasicSpringVintageTests {
 		assertThat(testEngine).isEqualTo("vintage");
 		assertThat(context.getEnvironment().getProperty("test.engine"))
 			.as("@TestPropertySource").isEqualTo("vintage");
+	}
+
+	public static class CustomXmlBootstrapper extends DefaultTestContextBootstrapper {
+		@Override
+		protected Class<? extends ContextLoader> getDefaultContextLoaderClass(Class<?> testClass) {
+			return GenericXmlContextLoader.class;
+		}
 	}
 
 }

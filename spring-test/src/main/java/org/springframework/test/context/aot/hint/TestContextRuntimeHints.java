@@ -44,24 +44,11 @@ class TestContextRuntimeHints implements RuntimeHintsRegistrar {
 
 		ReflectionHints reflectionHints = runtimeHints.reflection();
 
+		// Loaded reflectively in BootstrapUtils
 		registerPublicConstructors(reflectionHints,
-			// Loaded reflectively in BootstrapUtils
 			org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.class,
-			// Loaded reflectively in BootstrapUtils
 			org.springframework.test.context.support.DefaultBootstrapContext.class
 		);
-
-		registerDeclaredConstructors(reflectionHints,
-			// Loaded reflectively in BootstrapUtils
-			org.springframework.test.context.support.DefaultTestContextBootstrapper.class
-		);
-
-		if (servletPresent) {
-			registerDeclaredConstructors(reflectionHints,
-				// Loaded reflectively in BootstrapUtils
-				"org.springframework.test.context.web.WebTestContextBootstrapper"
-			);
-		}
 
 		if (groovyPresent) {
 			registerDeclaredConstructors(reflectionHints,
@@ -88,10 +75,6 @@ class TestContextRuntimeHints implements RuntimeHintsRegistrar {
 
 	private static void registerPublicConstructors(ReflectionHints reflectionHints, Iterable<TypeReference> types) {
 		reflectionHints.registerTypes(types, TypeHint.builtWith(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
-	}
-
-	private static void registerDeclaredConstructors(ReflectionHints reflectionHints, Class<?>... types) {
-		registerDeclaredConstructors(reflectionHints, TypeReference.listOf(types));
 	}
 
 	private static void registerDeclaredConstructors(ReflectionHints reflectionHints, String... classNames) {

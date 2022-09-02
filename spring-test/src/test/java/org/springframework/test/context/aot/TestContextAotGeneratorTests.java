@@ -124,6 +124,7 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		).forEach(type -> assertReflectionRegistered(runtimeHints, type, INVOKE_PUBLIC_CONSTRUCTORS));
 
 		Stream.of(
+			org.springframework.test.context.aot.samples.basic.BasicSpringVintageTests.CustomXmlBootstrapper.class,
 			org.springframework.test.context.aot.samples.basic.BasicSpringTestNGTests.CustomInitializer.class,
 			org.springframework.test.context.support.AnnotationConfigContextLoader.class,
 			org.springframework.test.context.support.DefaultTestContextBootstrapper.class,
