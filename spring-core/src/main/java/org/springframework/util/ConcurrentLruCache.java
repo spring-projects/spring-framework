@@ -110,7 +110,7 @@ public final class ConcurrentLruCache<K, V> {
 		Assert.notNull(value, "value should not be null");
 		final CacheEntry<V> cacheEntry = new CacheEntry<>(value, CacheEntryState.ACTIVE);
 		final Node<K, V> node = new Node<>(key, cacheEntry);
-		final Node<K, V> prior = this.cache.put(node.key, node);
+		final Node<K, V> prior = this.cache.putIfAbsent(node.key, node);
 		if (prior == null) {
 			processWrite(new AddTask(node));
 		}
