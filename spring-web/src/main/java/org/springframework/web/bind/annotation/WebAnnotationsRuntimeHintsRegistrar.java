@@ -34,6 +34,7 @@ import org.springframework.stereotype.Controller;
 public final class WebAnnotationsRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 		Stream.of(Controller.class, ControllerAdvice.class, CookieValue.class,
 						CrossOrigin.class, MatrixVariable.class, ModelAttribute.class,

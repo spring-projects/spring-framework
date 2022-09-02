@@ -66,6 +66,7 @@ public class ReflectiveRuntimeHintsRegistrar {
 		});
 	}
 
+	@SuppressWarnings("deprecation")
 	private void registerAnnotationIfNecessary(RuntimeHints hints, AnnotatedElement element) {
 		MergedAnnotation<Reflective> reflectiveAnnotation = MergedAnnotations.from(element)
 				.get(Reflective.class);

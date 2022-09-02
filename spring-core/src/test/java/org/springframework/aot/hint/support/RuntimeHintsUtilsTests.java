@@ -28,7 +28,6 @@ import org.springframework.aot.hint.TypeReference;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
-import org.springframework.core.annotation.SynthesizedAnnotation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -43,6 +42,7 @@ class RuntimeHintsUtilsTests {
 	private final RuntimeHints hints = new RuntimeHints();
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void registerSynthesizedAnnotation() {
 		RuntimeHintsUtils.registerSynthesizedAnnotation(this.hints, SampleInvoker.class);
 		assertThat(this.hints.proxies().jdkProxies()).singleElement()
@@ -50,6 +50,7 @@ class RuntimeHintsUtilsTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void registerAnnotationIfNecessaryWithNonSynthesizedAnnotation() throws NoSuchFieldException {
 		MergedAnnotation<SampleInvoker> annotation = MergedAnnotations
 				.from(TestBean.class.getField("sampleInvoker")).get(SampleInvoker.class);
@@ -58,6 +59,7 @@ class RuntimeHintsUtilsTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void registerAnnotationIfNecessaryWithLocalAliases() throws NoSuchFieldException {
 		MergedAnnotation<LocalMapping> annotation = MergedAnnotations
 				.from(TestBean.class.getField("localMapping")).get(LocalMapping.class);
@@ -67,6 +69,7 @@ class RuntimeHintsUtilsTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void registerAnnotationIfNecessaryWithMetaAttributeOverride() throws NoSuchFieldException {
 		MergedAnnotation<SampleInvoker> annotation = MergedAnnotations
 				.from(TestBean.class.getField("retryInvoker")).get(SampleInvoker.class);
@@ -76,6 +79,7 @@ class RuntimeHintsUtilsTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void registerAnnotationIfNecessaryWithSynthesizedAttribute() throws NoSuchFieldException {
 		MergedAnnotation<RetryContainer> annotation = MergedAnnotations
 				.from(TestBean.class.getField("retryContainer")).get(RetryContainer.class);
@@ -84,9 +88,11 @@ class RuntimeHintsUtilsTests {
 				.satisfies(annotationProxy(RetryContainer.class));
 	}
 
+	@SuppressWarnings("deprecation")
 	private Consumer<JdkProxyHint> annotationProxy(Class<?> type) {
 		return jdkProxyHint -> assertThat(jdkProxyHint.getProxiedInterfaces())
-				.containsExactly(TypeReference.of(type), TypeReference.of(SynthesizedAnnotation.class));
+				.containsExactly(TypeReference.of(type),
+						TypeReference.of(org.springframework.core.annotation.SynthesizedAnnotation.class));
 	}
 
 

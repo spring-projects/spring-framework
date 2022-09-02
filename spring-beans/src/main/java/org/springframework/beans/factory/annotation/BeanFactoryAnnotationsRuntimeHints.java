@@ -30,6 +30,7 @@ import org.springframework.lang.Nullable;
 class BeanFactoryAnnotationsRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 		RuntimeHintsUtils.registerSynthesizedAnnotation(hints, Qualifier.class);
 	}

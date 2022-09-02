@@ -36,7 +36,6 @@ import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.annotation.SynthesizedAnnotation;
 import org.springframework.javapoet.ClassName;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterSharedConfigTests;
@@ -210,9 +209,11 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 			.anySatisfy(annotationProxy(annotationType));
 	}
 
+	@SuppressWarnings("deprecation")
 	private static Consumer<JdkProxyHint> annotationProxy(Class<? extends Annotation> type) {
 		return jdkProxyHint -> assertThat(jdkProxyHint.getProxiedInterfaces())
-				.containsExactly(TypeReference.of(type), TypeReference.of(SynthesizedAnnotation.class));
+				.containsExactly(TypeReference.of(type),
+						TypeReference.of(org.springframework.core.annotation.SynthesizedAnnotation.class));
 	}
 
 	@Test

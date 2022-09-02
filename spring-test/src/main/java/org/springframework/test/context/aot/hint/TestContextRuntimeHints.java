@@ -169,7 +169,7 @@ class TestContextRuntimeHints implements RuntimeHintsRegistrar {
 	}
 
 	@SafeVarargs
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "deprecation" })
 	private static void registerSynthesizedAnnotations(RuntimeHints runtimeHints, Class<? extends Annotation>... annotationTypes) {
 		for (Class<? extends Annotation> annotationType : annotationTypes) {
 			registerAnnotation(runtimeHints.reflection(), annotationType);
