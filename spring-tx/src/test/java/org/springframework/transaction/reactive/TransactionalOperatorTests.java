@@ -16,9 +16,13 @@
 
 package org.springframework.transaction.reactive;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.transaction.TransactionCommitException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -34,8 +38,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class TransactionalOperatorTests {
 
+	private final ConcurrencyFailureException onCommitException = new ConcurrencyFailureException("could not serialize access due to read/write dependencies among transactions");
+
 	ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(false, true);
 
+	ReactiveTestTransactionManager throwingTm = new ReactiveTestTransactionManager(false, true, onCommitException);
 
 	@Test
 	public void commitWithMono() {
@@ -118,6 +125,31 @@ public class TransactionalOperatorTests {
 				.verifyError(IllegalStateException.class);
 		assertThat(tm.commit).isFalse();
 		assertThat(tm.rollback).isTrue();
+	}
+
+	@Test
+	public void throwIfCommitFailsAndDontRollbackMono() {
+		TransactionalOperator operator = TransactionalOperator.create(throwingTm, new DefaultTransactionDefinition());
+		Mono.just(1)
+				.as(operator::transactional)
+				.as(StepVerifier::create)
+				.thenAwait()
+				.verifyError(TransactionCommitException.class);
+		assertThat(throwingTm.commit).isTrue();
+		assertThat(throwingTm.rollback).isFalse();
+	}
+
+	@Test
+	public void throwIfCommitFailsAndDontRollbackFlux() {
+		TransactionalOperator operator = TransactionalOperator.create(throwingTm, new DefaultTransactionDefinition());
+		List<Integer> testData = Lists.newArrayList(1, 2, 3, 4);
+		Flux.just(testData)
+				.as(operator::transactional)
+				.as(StepVerifier::create)
+				.expectNext(testData)
+				.verifyError(TransactionCommitException.class);
+		assertThat(throwingTm.commit).isTrue();
+		assertThat(throwingTm.rollback).isFalse();
 	}
 
 }

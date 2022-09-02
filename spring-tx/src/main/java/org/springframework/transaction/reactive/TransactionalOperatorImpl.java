@@ -26,6 +26,7 @@ import org.springframework.transaction.ReactiveTransaction;
 import org.springframework.transaction.ReactiveTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
+import org.springframework.transaction.TransactionCommitException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.util.Assert;
 
@@ -78,8 +79,14 @@ final class TransactionalOperatorImpl implements TransactionalOperator {
 			// This will normally result in a target object being invoked.
 			// Need re-wrapping of ReactiveTransaction until we get hold of the exception
 			// through usingWhen.
-			return status.flatMap(it -> Mono.usingWhen(Mono.just(it), ignore -> mono,
-					this.transactionManager::commit, (res, err) -> Mono.empty(), this.transactionManager::rollback)
+			return status.flatMap(it -> Mono
+					.usingWhen(
+							Mono.just(it),
+							ignore -> mono,
+							this::commitWithErrorHandling,
+							(res, err) -> Mono.empty(),
+							this.transactionManager::rollback
+					)
 					.onErrorResume(ex -> rollbackOnException(it, ex).then(Mono.error(ex))));
 		})
 		.contextWrite(TransactionContextManager.getOrCreateContext())
@@ -98,7 +105,7 @@ final class TransactionalOperatorImpl implements TransactionalOperator {
 					.usingWhen(
 							Mono.just(it),
 							action::doInTransaction,
-							this.transactionManager::commit,
+							this::commitWithErrorHandling,
 							(tx, ex) -> Mono.empty(),
 							this.transactionManager::rollback)
 					.onErrorResume(ex ->
@@ -109,6 +116,17 @@ final class TransactionalOperatorImpl implements TransactionalOperator {
 	}
 
 	/**
+	 * Perform a commit and wrapping any exceptions into TransactionCommitException.
+	 * @param reactiveTransaction object representing the transaction
+	 * @throws TransactionCommitException in case of a commit error
+	 */
+	private Mono<Void> commitWithErrorHandling(ReactiveTransaction reactiveTransaction) {
+		return this.transactionManager
+				.commit(reactiveTransaction)
+				.onErrorResume((ex) -> Mono.error(new TransactionCommitException("Transaction commit failed", ex)));
+	}
+
+	/**
 	 * Perform a rollback, handling rollback exceptions properly.
 	 * @param status object representing the transaction
 	 * @param ex the thrown application exception or error
@@ -116,6 +134,19 @@ final class TransactionalOperatorImpl implements TransactionalOperator {
 	 */
 	private Mono<Void> rollbackOnException(ReactiveTransaction status, Throwable ex) throws TransactionException {
 		logger.debug("Initiating transaction rollback on application exception", ex);
+
+		/*
+		 * Documentation of transactionManager.rollback(status) states that if commit failed with exception
+		 * then we should not call transactionManager.rollback(status)
+		 * Instead we should simply mark the transaction as rollback only and return the original error upstream
+		 * To do so, we unwrap the usingWhen RuntimeException and check for the Exception in the commit phase
+		 */
+		if (ex.getCause() instanceof TransactionCommitException) {
+			logger.trace("Not calling transactionManager.rollback(status), because commit failed with exception", ex);
+			status.setRollbackOnly();
+			return Mono.error(ex.getCause());
+		}
+
 		return this.transactionManager.rollback(status).onErrorMap(ex2 -> {
 					logger.error("Application exception overridden by rollback exception", ex);
 					if (ex2 instanceof TransactionSystemException) {

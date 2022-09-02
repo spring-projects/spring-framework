@@ -16,6 +16,7 @@
 
 package org.springframework.transaction.reactive;
 
+import org.springframework.lang.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.transaction.CannotCreateTransactionException;
@@ -46,12 +47,19 @@ class ReactiveTestTransactionManager extends AbstractReactiveTransactionManager 
 
 	protected boolean cleanup = false;
 
+	@Nullable
+	protected RuntimeException throwOnCommit = null;
 
 	ReactiveTestTransactionManager(boolean existingTransaction, boolean canCreateTransaction) {
 		this.existingTransaction = existingTransaction;
 		this.canCreateTransaction = canCreateTransaction;
 	}
 
+	public ReactiveTestTransactionManager(boolean existingTransaction, boolean canCreateTransaction, RuntimeException throwOnCommit) {
+		this.existingTransaction = existingTransaction;
+		this.canCreateTransaction = canCreateTransaction;
+		this.throwOnCommit = throwOnCommit;
+	}
 
 	@Override
 	protected Object doGetTransaction(TransactionSynchronizationManager synchronizationManager) {
@@ -79,7 +87,13 @@ class ReactiveTestTransactionManager extends AbstractReactiveTransactionManager 
 		if (!TRANSACTION.equals(status.getTransaction())) {
 			return Mono.error(new IllegalArgumentException("Not the same transaction object"));
 		}
-		return Mono.fromRunnable(() -> this.commit = true);
+
+		Mono<Void> result = Mono.fromRunnable(() -> this.commit = true);
+		if (throwOnCommit != null) {
+			return result.then(Mono.error(throwOnCommit));
+		} else {
+			return result;
+		}
 	}
 
 	@Override
