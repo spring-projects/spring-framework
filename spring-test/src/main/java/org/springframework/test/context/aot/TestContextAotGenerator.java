@@ -112,6 +112,7 @@ public class TestContextAotGenerator {
 		mergedConfigMappings.forEach((mergedConfig, testClasses) -> {
 			logger.debug(LogMessage.format("Generating AOT artifacts for test classes %s",
 					testClasses.stream().map(Class::getName).toList()));
+			registerHintsForMergedConfig(mergedConfig);
 			try {
 				// Use first test class discovered for a given unique MergedContextConfiguration.
 				Class<?> testClass = testClasses.get(0);
@@ -174,8 +175,6 @@ public class TestContextAotGenerator {
 				Consider annotating test class [%s] with @ContextConfiguration or \
 				@ContextHierarchy.""".formatted(testClass.getName()));
 
-		registerDeclaredConstructors(contextLoader.getClass());
-
 		if (contextLoader instanceof AotContextLoader aotContextLoader) {
 			try {
 				ApplicationContext context = aotContextLoader.loadContextForAotProcessing(mergedConfig);
@@ -225,6 +224,14 @@ public class TestContextAotGenerator {
 		String className = codeGenerator.getGeneratedClass().getName().reflectionName();
 		this.runtimeHints.reflection()
 				.registerType(TypeReference.of(className), MemberCategory.INVOKE_PUBLIC_METHODS);
+	}
+
+	private void registerHintsForMergedConfig(MergedContextConfiguration mergedConfig) {
+		ContextLoader contextLoader = mergedConfig.getContextLoader();
+		if (contextLoader != null) {
+			registerDeclaredConstructors(contextLoader.getClass());
+		}
+		mergedConfig.getContextInitializerClasses().forEach(this::registerDeclaredConstructors);
 	}
 
 	private void registerDeclaredConstructors(Class<?> type) {
