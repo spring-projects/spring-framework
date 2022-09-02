@@ -37,6 +37,7 @@
 	<suppress files="SocketUtils" checks="HideUtilityClassConstructor"/>
 	<suppress files="ResolvableType" checks="FinalClass"/>
 	<suppress files="[\\/]src[\\/]testFixtures[\\/]java[\\/].+" checks="IllegalImport" id="bannedJUnitJupiterImports"/>
+	<suppress files="Target_ClassFinder" checks="HideUtilityClassConstructor"/>
 
 	<!-- spring-core-test -->
 	<suppress files="CompileWithTargetClassAccess" checks="IllegalImport" id="bannedJUnitJupiterImports" />
