@@ -115,7 +115,7 @@ class ApplicationContextExpressionTests {
 		ac.registerBeanDefinition("tb1", bd1);
 
 		GenericBeanDefinition bd2 = new GenericBeanDefinition();
-		bd2.setBeanClassName("#{tb1.class.name}");
+		bd2.setBeanClassName("#{tb1.class}");
 		bd2.setScope("myScope");
 		bd2.getPropertyValues().add("name", "{ XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ }");
 		bd2.getPropertyValues().add("age", "#{mySpecialAttr}");
