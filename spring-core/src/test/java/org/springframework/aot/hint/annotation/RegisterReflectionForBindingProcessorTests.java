@@ -67,9 +67,6 @@ public class RegisterReflectionForBindingProcessorTests {
 			return null;
 		}
 
-		public BindingReflectionHintsRegistrarTests.SampleEmptyClass unmanaged() {
-			return null;
-		}
 	}
 
 }

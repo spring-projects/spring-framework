@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.aot.hint.annotation;
+package org.springframework.aot.hint;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -29,9 +29,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.aot.hint.ExecutableMode;
-import org.springframework.aot.hint.MemberCategory;
-import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;

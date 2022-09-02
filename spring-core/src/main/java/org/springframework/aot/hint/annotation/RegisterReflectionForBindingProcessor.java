@@ -18,6 +18,7 @@ package org.springframework.aot.hint.annotation;
 
 import java.lang.reflect.AnnotatedElement;
 
+import org.springframework.aot.hint.BindingReflectionHintsRegistrar;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.core.annotation.AnnotationUtils;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.aot.hint.annotation;
+package org.springframework.aot.hint;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -22,10 +22,6 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aot.hint.ExecutableMode;
-import org.springframework.aot.hint.MemberCategory;
-import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.TypeReference;
 import org.springframework.core.ResolvableType;
 
 import static org.assertj.core.api.Assertions.assertThat;

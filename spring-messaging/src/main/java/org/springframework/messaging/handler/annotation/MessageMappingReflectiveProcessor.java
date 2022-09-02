@@ -22,9 +22,9 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.security.Principal;
 
+import org.springframework.aot.hint.BindingReflectionHintsRegistrar;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.ReflectionHints;
-import org.springframework.aot.hint.annotation.BindingReflectionHintsRegistrar;
 import org.springframework.aot.hint.annotation.ReflectiveProcessor;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
