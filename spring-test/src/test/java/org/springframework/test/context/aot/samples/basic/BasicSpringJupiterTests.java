@@ -23,11 +23,16 @@ import org.junit.jupiter.api.extension.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests.DummyExtension;
+import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests.DummyTestExecutionListener;
 import org.springframework.test.context.aot.samples.common.MessageService;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.context.TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS;
 
 /**
  * @author Sam Brannen
@@ -37,6 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 // for repeated annotations.
 @ExtendWith(DummyExtension.class)
 @SpringJUnitConfig(BasicTestConfiguration.class)
+@TestExecutionListeners(listeners = DummyTestExecutionListener.class, mergeMode = MERGE_WITH_DEFAULTS)
 @TestPropertySource(properties = "test.engine = jupiter")
 public class BasicSpringJupiterTests {
 
@@ -65,7 +71,11 @@ public class BasicSpringJupiterTests {
 
 	}
 
+	static class DummyExtension implements Extension {
+	}
+
+	public static class DummyTestExecutionListener extends AbstractTestExecutionListener {
+	}
+
 }
 
-class DummyExtension implements Extension {
-}

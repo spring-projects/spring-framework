@@ -141,6 +141,7 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 
 		// TestExecutionListener
 		Stream.of(
+			org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests.DummyTestExecutionListener.class,
 			org.springframework.test.context.event.ApplicationEventsTestExecutionListener.class,
 			org.springframework.test.context.event.EventPublishingTestExecutionListener.class,
 			org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener.class,

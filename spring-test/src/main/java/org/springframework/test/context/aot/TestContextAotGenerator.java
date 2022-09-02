@@ -199,6 +199,9 @@ public class TestContextAotGenerator {
 		TestContextBootstrapper testContextBootstrapper =
 				BootstrapUtils.resolveTestContextBootstrapper(testClass);
 		registerDeclaredConstructors(testContextBootstrapper.getClass());
+		testContextBootstrapper.getTestExecutionListeners().stream()
+				.map(Object::getClass)
+				.forEach(this::registerDeclaredConstructors);
 		return testContextBootstrapper.buildMergedContextConfiguration();
 	}
 
