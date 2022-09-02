@@ -44,7 +44,7 @@ public enum FieldMode {
 	 * @param other the other mode to check
 	 * @return {@code true} if this mode includes the other mode
 	 */
-	boolean includes(@Nullable FieldMode other) {
+	public boolean includes(@Nullable FieldMode other) {
 		return (other == null || this.ordinal() >= other.ordinal());
 	}
 

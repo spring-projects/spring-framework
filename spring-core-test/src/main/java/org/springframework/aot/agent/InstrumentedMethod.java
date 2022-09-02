@@ -272,7 +272,7 @@ enum InstrumentedMethod {
 	 * {@link Field#set(Object, Object)}.
 	 */
 	FIELD_SET(Field.class, "set", HintType.REFLECTION,
-			invocation -> RuntimeHintsPredicates.reflection().onField(invocation.getInstance()).allowWrite()),
+			invocation -> RuntimeHintsPredicates.reflection().onField(invocation.getInstance()).withWriteMode()),
 
 
 	/*

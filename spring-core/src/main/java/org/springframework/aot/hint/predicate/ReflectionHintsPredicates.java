@@ -352,7 +352,7 @@ public class ReflectionHintsPredicates {
 
 		private final Field field;
 
-		private boolean allowWrite;
+		private FieldMode mode = FieldMode.READ;
 
 		private boolean allowUnsafeAccess;
 
@@ -364,11 +364,34 @@ public class ReflectionHintsPredicates {
 		 * Refine the current predicate to match if write access is allowed on the field.
 		 * @return the refined {@link RuntimeHints} predicate
 		 * @see FieldHint#isAllowWrite()
+		 * @deprecated in favor of {@link #withReadMode()} or {@link #withWriteMode()}
 		 */
+		@Deprecated
 		public FieldHintPredicate allowWrite() {
-			this.allowWrite = true;
+			this.mode = FieldMode.WRITE;
 			return this;
 		}
+
+		/**
+		 * Refine the current predicate to match if read access is allowed on the field.
+		 * @return the refined {@link RuntimeHints} predicate
+		 * @see FieldHint#getMode()
+		 */
+		public FieldHintPredicate withReadMode() {
+			// FieldMode.READ is already the default and should not override a writeMode() call.
+			return this;
+		}
+
+		/**
+		 * Refine the current predicate to match if write access is allowed on the field.
+		 * @return the refined {@link RuntimeHints} predicate
+		 * @see FieldHint#getMode()
+		 */
+		public FieldHintPredicate withWriteMode() {
+			this.mode = FieldMode.WRITE;
+			return this;
+		}
+
 
 		/**
 		 * Refine the current predicate to match if unsafe access is allowed on the field.
@@ -402,7 +425,7 @@ public class ReflectionHintsPredicates {
 		private boolean exactMatch(TypeHint typeHint) {
 			return typeHint.fields().anyMatch(fieldHint ->
 					this.field.getName().equals(fieldHint.getName())
-							&& (!this.allowWrite || fieldHint.getMode() == FieldMode.WRITE)
+							&& (fieldHint.getMode().includes(this.mode))
 							&& (!this.allowUnsafeAccess || this.allowUnsafeAccess == fieldHint.isAllowUnsafeAccess()));
 		}
 	}

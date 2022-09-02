@@ -452,7 +452,7 @@ class ReflectionHintsPredicatesTests {
 		void fieldWriteReflectionDoesNotMatchFieldHint() {
 			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withField("publicField",
 					FieldMode.READ));
-			assertPredicateDoesNotMatch(reflection.onField(SampleClass.class, "publicField").allowWrite());
+			assertPredicateDoesNotMatch(reflection.onField(SampleClass.class, "publicField").withWriteMode());
 		}
 
 		@Test
@@ -465,7 +465,7 @@ class ReflectionHintsPredicatesTests {
 		void fieldWriteReflectionMatchesFieldHintWithWrite() {
 			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
 					typeHint.withField("publicField", FieldMode.WRITE));
-			assertPredicateMatches(reflection.onField(SampleClass.class, "publicField").allowWrite());
+			assertPredicateMatches(reflection.onField(SampleClass.class, "publicField").withWriteMode());
 		}
 
 		@Test
