@@ -27,6 +27,7 @@ import io.r2dbc.spi.Statement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.transaction.TransactionCommitException;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -262,7 +263,7 @@ class R2dbcTransactionManagerUnitTests {
 				.doOnNext(connection -> connection.createStatement("foo")).then()
 				.as(operator::transactional)
 				.as(StepVerifier::create)
-				.verifyError(IllegalTransactionStateException.class);
+				.verifyError(TransactionCommitException.class);
 
 		verify(connectionMock).isAutoCommit();
 		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
@@ -315,7 +316,7 @@ class R2dbcTransactionManagerUnitTests {
 			return ConnectionFactoryUtils.getConnection(connectionFactoryMock)
 					.doOnNext(connection -> connection.createStatement("foo")).then();
 		}).as(StepVerifier::create)
-				.verifyError(IllegalTransactionStateException.class);
+				.verifyError(TransactionCommitException.class);
 
 		verify(connectionMock).isAutoCommit();
 		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
