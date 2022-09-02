@@ -20,14 +20,12 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.GeneratedFiles.Kind;
 import org.springframework.aot.generate.InMemoryGeneratedFiles;
-import org.springframework.aot.hint.JdkProxyHint;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
@@ -128,46 +126,6 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		).forEach(type -> assertReflectionRegistered(runtimeHints, type, INVOKE_DECLARED_CONSTRUCTORS));
 
 		Set.of(
-			// Legacy and JUnit 4
-			org.springframework.test.annotation.Commit.class,
-			org.springframework.test.annotation.DirtiesContext.class,
-			org.springframework.test.annotation.IfProfileValue.class,
-			org.springframework.test.annotation.ProfileValueSourceConfiguration.class,
-			org.springframework.test.annotation.Repeat.class,
-			org.springframework.test.annotation.Rollback.class,
-			org.springframework.test.annotation.Timed.class,
-
-			// Core TestContext framework
-			org.springframework.test.context.ActiveProfiles.class,
-			org.springframework.test.context.BootstrapWith.class,
-			org.springframework.test.context.ContextConfiguration.class,
-			org.springframework.test.context.ContextHierarchy.class,
-			org.springframework.test.context.DynamicPropertySource.class,
-			org.springframework.test.context.NestedTestConfiguration.class,
-			org.springframework.test.context.TestConstructor.class,
-			org.springframework.test.context.TestExecutionListeners.class,
-			org.springframework.test.context.TestPropertySource.class,
-			org.springframework.test.context.TestPropertySources.class,
-
-			// Application Events
-			org.springframework.test.context.event.RecordApplicationEvents.class,
-
-			// Test execution events
-			org.springframework.test.context.event.annotation.AfterTestClass.class,
-			org.springframework.test.context.event.annotation.AfterTestExecution.class,
-			org.springframework.test.context.event.annotation.AfterTestMethod.class,
-			org.springframework.test.context.event.annotation.BeforeTestClass.class,
-			org.springframework.test.context.event.annotation.BeforeTestExecution.class,
-			org.springframework.test.context.event.annotation.BeforeTestMethod.class,
-			org.springframework.test.context.event.annotation.PrepareTestInstance.class,
-
-			// JUnit Jupiter
-			org.springframework.test.context.junit.jupiter.EnabledIf.class,
-			org.springframework.test.context.junit.jupiter.DisabledIf.class,
-			org.springframework.test.context.junit.jupiter.SpringJUnitConfig.class,
-			org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig.class,
-
-			// Web
 			org.springframework.test.context.web.WebAppConfiguration.class
 		).forEach(type -> assertAnnotationRegistered(runtimeHints, type));
 
@@ -204,17 +162,8 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 
 	private static void assertAnnotationRegistered(RuntimeHints runtimeHints, Class<? extends Annotation> annotationType) {
 		assertReflectionRegistered(runtimeHints, annotationType, INVOKE_DECLARED_METHODS);
-		assertThat(runtimeHints.proxies().jdkProxies())
-			.as("Proxy hint for annotation @%s", annotationType.getSimpleName())
-			.anySatisfy(annotationProxy(annotationType));
 	}
 
-	@SuppressWarnings("deprecation")
-	private static Consumer<JdkProxyHint> annotationProxy(Class<? extends Annotation> type) {
-		return jdkProxyHint -> assertThat(jdkProxyHint.getProxiedInterfaces())
-				.containsExactly(TypeReference.of(type),
-						TypeReference.of(org.springframework.core.annotation.SynthesizedAnnotation.class));
-	}
 
 	@Test
 	void processAheadOfTimeWithBasicTests() {
