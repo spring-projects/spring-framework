@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
@@ -117,12 +118,12 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 	private static void assertRuntimeHints(RuntimeHints runtimeHints) {
 		assertReflectionRegistered(runtimeHints, AotTestMappings.GENERATED_MAPPINGS_CLASS_NAME, INVOKE_PUBLIC_METHODS);
 
-		Set.of(
+		Stream.of(
 			org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.class,
 			org.springframework.test.context.support.DefaultBootstrapContext.class
 		).forEach(type -> assertReflectionRegistered(runtimeHints, type, INVOKE_PUBLIC_CONSTRUCTORS));
 
-		Set.of(
+		Stream.of(
 			org.springframework.test.context.aot.samples.basic.BasicSpringTestNGTests.CustomInitializer.class,
 			org.springframework.test.context.support.AnnotationConfigContextLoader.class,
 			org.springframework.test.context.support.DefaultTestContextBootstrapper.class,
@@ -133,12 +134,12 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 			org.springframework.test.context.web.WebTestContextBootstrapper.class
 		).forEach(type -> assertReflectionRegistered(runtimeHints, type, INVOKE_DECLARED_CONSTRUCTORS));
 
-		Set.of(
+		Stream.of(
 			org.springframework.test.context.web.WebAppConfiguration.class
 		).forEach(type -> assertAnnotationRegistered(runtimeHints, type));
 
 		// TestExecutionListener
-		Set.of(
+		Stream.of(
 			org.springframework.test.context.event.ApplicationEventsTestExecutionListener.class,
 			org.springframework.test.context.event.EventPublishingTestExecutionListener.class,
 			org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener.class,
@@ -150,7 +151,7 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		).forEach(type -> assertReflectionRegistered(runtimeHints, type, INVOKE_DECLARED_CONSTRUCTORS));
 
 		// ContextCustomizerFactory
-		Set.of(
+		Stream.of(
 			"org.springframework.test.context.support.DynamicPropertiesContextCustomizerFactory",
 			"org.springframework.test.context.web.socket.MockServerContainerContextCustomizerFactory"
 		).forEach(type -> assertReflectionRegistered(runtimeHints, type, INVOKE_DECLARED_CONSTRUCTORS));
