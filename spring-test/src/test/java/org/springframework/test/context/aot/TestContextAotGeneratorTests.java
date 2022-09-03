@@ -65,7 +65,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 /**
- * Tests for {@link TestContextAotGenerator}.
+ * Tests for {@link TestContextAotGenerator}, {@link AotTestMappings},
+ * {@link AotContextLoader}, and run-time hints.
  *
  * @author Sam Brannen
  * @since 6.0
@@ -74,7 +75,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 class TestContextAotGeneratorTests extends AbstractAotTests {
 
 	/**
-	 * @see AotSmokeTests#scanClassPathThenGenerateSourceFilesAndCompileThem()
+	 * @see AotIntegrationTests#endToEndTests()
 	 */
 	@Test
 	void processAheadOfTimeAndGenerateAotTestMappings() {

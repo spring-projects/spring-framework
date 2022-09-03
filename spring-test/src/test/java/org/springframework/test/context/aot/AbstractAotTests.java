@@ -22,6 +22,8 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 /**
+ * Abstract base class for AOT tests.
+ *
  * @author Sam Brannen
  * @since 6.0
  */

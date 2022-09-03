@@ -46,13 +46,13 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass
 import static org.junit.platform.launcher.EngineFilter.includeEngines;
 
 /**
- * Smoke tests for AOT support in the TestContext framework.
+ * End-to-end integration tests for AOT support in the TestContext framework.
  *
  * @author Sam Brannen
  * @since 6.0
  */
 @CompileWithTargetClassAccess
-class AotSmokeTests extends AbstractAotTests {
+class AotIntegrationTests extends AbstractAotTests {
 
 	private static final String CLASSPATH_ROOT = "AotSmokeTests.classpath_root";
 
@@ -66,7 +66,7 @@ class AotSmokeTests extends AbstractAotTests {
 	// nested JUnit Platform launched by the CompileWithTargetClassAccessExtension.
 	static {
 		try {
-			Path classpathRoot = Paths.get(AotSmokeTests.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+			Path classpathRoot = Paths.get(AotIntegrationTests.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 			System.setProperty(CLASSPATH_ROOT, classpathRoot.toFile().getCanonicalPath());
 		}
 		catch (Exception ex) {
