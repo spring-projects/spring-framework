@@ -27,7 +27,6 @@ import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.GeneratedClasses;
 import org.springframework.aot.generate.GeneratedFiles;
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
@@ -46,6 +45,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import static org.springframework.aot.hint.MemberCategory.INVOKE_DECLARED_CONSTRUCTORS;
+import static org.springframework.aot.hint.MemberCategory.INVOKE_PUBLIC_METHODS;
 /**
  * {@code TestContextAotGenerator} generates AOT artifacts for integration tests
  * that depend on support from the <em>Spring TestContext Framework</em>.
@@ -198,7 +199,9 @@ public class TestContextAotGenerator {
 	MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass) {
 		TestContextBootstrapper testContextBootstrapper =
 				BootstrapUtils.resolveTestContextBootstrapper(testClass);
+		// @BootstrapWith
 		registerDeclaredConstructors(testContextBootstrapper.getClass());
+		// @TestExecutionListeners
 		testContextBootstrapper.getTestExecutionListeners().stream()
 				.map(Object::getClass)
 				.forEach(this::registerDeclaredConstructors);
@@ -227,20 +230,23 @@ public class TestContextAotGenerator {
 		generationContext.writeGeneratedContent();
 		String className = codeGenerator.getGeneratedClass().getName().reflectionName();
 		this.runtimeHints.reflection()
-				.registerType(TypeReference.of(className), MemberCategory.INVOKE_PUBLIC_METHODS);
+				.registerType(TypeReference.of(className), INVOKE_PUBLIC_METHODS);
 	}
 
 	private void registerHintsForMergedConfig(MergedContextConfiguration mergedConfig) {
+		// @ContextConfiguration(loader = ...)
 		ContextLoader contextLoader = mergedConfig.getContextLoader();
 		if (contextLoader != null) {
 			registerDeclaredConstructors(contextLoader.getClass());
 		}
+
+		// @ContextConfiguration(initializers = ...)
 		mergedConfig.getContextInitializerClasses().forEach(this::registerDeclaredConstructors);
 	}
 
 	private void registerDeclaredConstructors(Class<?> type) {
 		ReflectionHints reflectionHints = this.runtimeHints.reflection();
-		reflectionHints.registerType(type, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+		reflectionHints.registerType(type, INVOKE_DECLARED_CONSTRUCTORS);
 	}
 
 }

@@ -125,9 +125,6 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		).forEach(type -> assertReflectionRegistered(runtimeHints, type, INVOKE_PUBLIC_CONSTRUCTORS));
 
 		Stream.of(
-			org.springframework.test.context.aot.samples.basic.BasicSpringVintageTests.CustomXmlBootstrapper.class,
-			org.springframework.test.context.aot.samples.basic.BasicSpringTestNGTests.CustomInitializer.class,
-			org.springframework.test.context.support.AnnotationConfigContextLoader.class,
 			org.springframework.test.context.support.DefaultTestContextBootstrapper.class,
 			org.springframework.test.context.support.DelegatingSmartContextLoader.class,
 			org.springframework.test.context.support.GenericGroovyXmlContextLoader.class,
@@ -142,6 +139,7 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 
 		// TestExecutionListener
 		Stream.of(
+			// @TestExecutionListeners
 			org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests.DummyTestExecutionListener.class,
 			org.springframework.test.context.event.ApplicationEventsTestExecutionListener.class,
 			org.springframework.test.context.event.EventPublishingTestExecutionListener.class,
@@ -157,6 +155,15 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		Stream.of(
 			"org.springframework.test.context.support.DynamicPropertiesContextCustomizerFactory",
 			"org.springframework.test.context.web.socket.MockServerContainerContextCustomizerFactory"
+		).forEach(type -> assertReflectionRegistered(runtimeHints, type, INVOKE_DECLARED_CONSTRUCTORS));
+
+		Stream.of(
+			// @BootstrapWith
+			org.springframework.test.context.aot.samples.basic.BasicSpringVintageTests.CustomXmlBootstrapper.class,
+			// @ContextConfiguration(initializers=...)
+			org.springframework.test.context.aot.samples.basic.BasicSpringTestNGTests.CustomInitializer.class,
+			// @ContextConfiguration(loader=...)
+			org.springframework.test.context.support.AnnotationConfigContextLoader.class
 		).forEach(type -> assertReflectionRegistered(runtimeHints, type, INVOKE_DECLARED_CONSTRUCTORS));
 	}
 
