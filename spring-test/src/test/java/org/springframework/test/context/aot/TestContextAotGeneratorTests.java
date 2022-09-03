@@ -59,6 +59,7 @@ import static org.springframework.aot.hint.MemberCategory.INVOKE_DECLARED_METHOD
 import static org.springframework.aot.hint.MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS;
 import static org.springframework.aot.hint.MemberCategory.INVOKE_PUBLIC_METHODS;
 import static org.springframework.aot.hint.predicate.RuntimeHintsPredicates.reflection;
+import static org.springframework.aot.hint.predicate.RuntimeHintsPredicates.resource;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -85,6 +86,7 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 				BasicSpringJupiterTests.NestedTests.class,
 				BasicSpringTestNGTests.class,
 				BasicSpringVintageTests.class,
+				XmlSpringJupiterTests.class,
 				WebSpringJupiterTests.class);
 
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
@@ -165,6 +167,10 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 			// @ContextConfiguration(loader=...)
 			org.springframework.test.context.support.AnnotationConfigContextLoader.class
 		).forEach(type -> assertReflectionRegistered(runtimeHints, type, INVOKE_DECLARED_CONSTRUCTORS));
+
+		// @ContextConfiguration(locations=...)
+		assertThat(resource().forResource("/org/springframework/test/context/aot/samples/xml/test-config.xml"))
+			.accepts(runtimeHints);
 	}
 
 	private static void assertReflectionRegistered(RuntimeHints runtimeHints, String type, MemberCategory memberCategory) {
@@ -320,7 +326,13 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 			"org/springframework/test/context/aot/samples/web/WebTestConfiguration__TestContext005_BeanDefinitions.java",
 			"org/springframework/web/reactive/config/DelegatingWebFluxConfiguration__TestContext005_Autowiring.java",
 			"org/springframework/web/reactive/config/DelegatingWebFluxConfiguration__TestContext005_BeanDefinitions.java",
-			"org/springframework/web/reactive/config/WebFluxConfigurationSupport__TestContext005_BeanDefinitions.java"
+			"org/springframework/web/reactive/config/WebFluxConfigurationSupport__TestContext005_BeanDefinitions.java",
+			// XmlSpringJupiterTests
+			"org/springframework/context/event/DefaultEventListenerFactory__TestContext006_BeanDefinitions.java",
+			"org/springframework/context/event/EventListenerMethodProcessor__TestContext006_BeanDefinitions.java",
+			"org/springframework/test/context/aot/samples/common/DefaultMessageService__TestContext006_BeanDefinitions.java",
+			"org/springframework/test/context/aot/samples/xml/XmlSpringJupiterTests__TestContext006_ApplicationContextInitializer.java",
+			"org/springframework/test/context/aot/samples/xml/XmlSpringJupiterTests__TestContext006_BeanFactoryRegistrations.java"
 		};
 
 }

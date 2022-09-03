@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.aot;
 
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -47,6 +48,8 @@ import org.springframework.util.MultiValueMap;
 
 import static org.springframework.aot.hint.MemberCategory.INVOKE_DECLARED_CONSTRUCTORS;
 import static org.springframework.aot.hint.MemberCategory.INVOKE_PUBLIC_METHODS;
+import static org.springframework.util.ResourceUtils.CLASSPATH_URL_PREFIX;
+
 /**
  * {@code TestContextAotGenerator} generates AOT artifacts for integration tests
  * that depend on support from the <em>Spring TestContext Framework</em>.
@@ -242,6 +245,16 @@ public class TestContextAotGenerator {
 
 		// @ContextConfiguration(initializers = ...)
 		mergedConfig.getContextInitializerClasses().forEach(this::registerDeclaredConstructors);
+
+		// @ContextConfiguration(locations = ...)
+		registerHintsForClasspathResources(mergedConfig.getLocations());
+	}
+
+	private void registerHintsForClasspathResources(String... locations) {
+		Arrays.stream(locations)
+				.filter(location -> location.startsWith(CLASSPATH_URL_PREFIX))
+				.map(location -> location.substring(CLASSPATH_URL_PREFIX.length()))
+				.forEach(this.runtimeHints.resources()::registerPattern);
 	}
 
 	private void registerDeclaredConstructors(Class<?> type) {
