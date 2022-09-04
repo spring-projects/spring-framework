@@ -64,26 +64,20 @@ class TestContextRuntimeHints implements RuntimeHintsRegistrar {
 			}
 		}
 
+		// Loaded reflectively in BootstrapUtils
 		registerAnnotation(runtimeHints.reflection(),
-			// Loaded reflectively in BootstrapUtils
 			org.springframework.test.context.web.WebAppConfiguration.class
 		);
 	}
 
 	private static void registerPublicConstructors(ReflectionHints reflectionHints, Class<?>... types) {
-		registerPublicConstructors(reflectionHints, TypeReference.listOf(types));
-	}
-
-	private static void registerPublicConstructors(ReflectionHints reflectionHints, Iterable<TypeReference> types) {
-		reflectionHints.registerTypes(types, TypeHint.builtWith(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
+		reflectionHints.registerTypes(TypeReference.listOf(types),
+				TypeHint.builtWith(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
 	}
 
 	private static void registerDeclaredConstructors(ReflectionHints reflectionHints, String... classNames) {
-		registerDeclaredConstructors(reflectionHints, listOf(classNames));
-	}
-
-	private static void registerDeclaredConstructors(ReflectionHints reflectionHints, Iterable<TypeReference> types) {
-		reflectionHints.registerTypes(types, TypeHint.builtWith(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
+		reflectionHints.registerTypes(listOf(classNames),
+				TypeHint.builtWith(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
 	}
 
 	private static List<TypeReference> listOf(String... classNames) {
