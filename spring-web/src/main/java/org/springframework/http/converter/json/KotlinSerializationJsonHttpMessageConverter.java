@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.http.converter.AbstractGenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StreamUtils;
 
@@ -85,49 +86,33 @@ public class KotlinSerializationJsonHttpMessageConverter extends AbstractGeneric
 
 	@Override
 	protected boolean supports(Class<?> clazz) {
-		try {
-			serializer(clazz);
-			return true;
-		}
-		catch (Exception ex) {
-			return false;
-		}
+		return serializer(clazz) != null;
 	}
 
 	@Override
 	public boolean canRead(Type type, @Nullable Class<?> contextClass, @Nullable MediaType mediaType) {
-		try {
-			serializer(GenericTypeResolver.resolveType(type, contextClass));
-			return canRead(mediaType);
-		}
-		catch (Exception ex) {
-			return false;
-		}
+		return serializer(GenericTypeResolver.resolveType(type, contextClass)) != null && canRead(mediaType);
 	}
 
 	@Override
 	public boolean canWrite(@Nullable Type type, Class<?> clazz, @Nullable MediaType mediaType) {
-		try {
-			serializer(type != null ? GenericTypeResolver.resolveType(type, clazz) : clazz);
-			return canWrite(mediaType);
-		}
-		catch (Exception ex) {
-			return false;
-		}
+		return serializer(type != null ? GenericTypeResolver.resolveType(type, clazz) : clazz) != null && canWrite(mediaType);
 	}
 
 	@Override
 	public final Object read(Type type, @Nullable Class<?> contextClass, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
-
-		return decode(serializer(GenericTypeResolver.resolveType(type, contextClass)), inputMessage);
+		KSerializer<Object> serializer = serializer(GenericTypeResolver.resolveType(type, contextClass));
+		Assert.notNull(serializer, "The serializer should not be null");
+		return decode(serializer, inputMessage);
 	}
 
 	@Override
 	protected final Object readInternal(Class<?> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
-
-		return decode(serializer(clazz), inputMessage);
+		KSerializer<Object> serializer = serializer(clazz);
+		Assert.notNull(serializer, "The serializer should not be null");
+		return decode(serializer, inputMessage);
 	}
 
 	private Object decode(KSerializer<Object> serializer, HttpInputMessage inputMessage)
@@ -147,8 +132,9 @@ public class KotlinSerializationJsonHttpMessageConverter extends AbstractGeneric
 	@Override
 	protected final void writeInternal(Object object, @Nullable Type type, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
-
-		encode(object, serializer(type != null ? type : object.getClass()), outputMessage);
+		KSerializer<Object> serializer =  serializer(type != null ? type : object.getClass());
+		Assert.notNull(serializer, "The serializer should not be null");
+		encode(object, serializer, outputMessage);
 	}
 
 	private void encode(Object object, KSerializer<Object> serializer, HttpOutputMessage outputMessage)
@@ -179,17 +165,17 @@ public class KotlinSerializationJsonHttpMessageConverter extends AbstractGeneric
 	 * Tries to find a serializer that can marshall or unmarshall instances of the given type
 	 * using kotlinx.serialization. If no serializer can be found, an exception is thrown.
 	 * <p>Resolved serializers are cached and cached results are returned on successive calls.
-	 * TODO Avoid relying on throwing exception when https://github.com/Kotlin/kotlinx.serialization/pull/1164 is fixed
 	 * @param type the type to find a serializer for
-	 * @return a resolved serializer for the given type
-	 * @throws RuntimeException if no serializer supporting the given type can be found
+	 * @return a resolved serializer for the given type or {@code null} if no serializer
+	 * supporting the given type can be found
 	 */
+	@Nullable
 	private KSerializer<Object> serializer(Type type) {
 		KSerializer<Object> serializer = serializerCache.get(type);
 		if (serializer == null) {
-			serializer = SerializersKt.serializer(type);
-			if (hasPolymorphism(serializer.getDescriptor(), new HashSet<>())) {
-				throw new UnsupportedOperationException("Open polymorphic serialization is not supported yet");
+			serializer = SerializersKt.serializerOrNull(type);
+			if (serializer == null || hasPolymorphism(serializer.getDescriptor(), new HashSet<>())) {
+				return null;
 			}
 			serializerCache.put(type, serializer);
 		}
