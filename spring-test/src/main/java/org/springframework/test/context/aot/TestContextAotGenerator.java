@@ -17,6 +17,7 @@
 package org.springframework.test.context.aot;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -31,6 +32,7 @@ import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
+import org.springframework.beans.factory.aot.AotServices;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.aot.ApplicationContextAotGenerator;
@@ -67,6 +69,8 @@ public class TestContextAotGenerator {
 
 	private final ApplicationContextAotGenerator aotGenerator = new ApplicationContextAotGenerator();
 
+	private final AotServices<TestRuntimeHintsRegistrar> testRuntimeHintsRegistrars;
+
 	private final AtomicInteger sequence = new AtomicInteger();
 
 	private final GeneratedFiles generatedFiles;
@@ -90,6 +94,7 @@ public class TestContextAotGenerator {
 	 * @param runtimeHints the {@code RuntimeHints} to use
 	 */
 	public TestContextAotGenerator(GeneratedFiles generatedFiles, RuntimeHints runtimeHints) {
+		this.testRuntimeHintsRegistrars = AotServices.factories().load(TestRuntimeHintsRegistrar.class);
 		this.generatedFiles = generatedFiles;
 		this.runtimeHints = runtimeHints;
 	}
@@ -121,6 +126,9 @@ public class TestContextAotGenerator {
 					testClasses.stream().map(Class::getName).toList()));
 			registerHintsForMergedConfig(mergedConfig);
 			try {
+				this.testRuntimeHintsRegistrars.forEach(registrar -> registrar.registerHints(this.runtimeHints,
+						mergedConfig, Collections.unmodifiableList(testClasses), getClass().getClassLoader()));
+
 				// Use first test class discovered for a given unique MergedContextConfiguration.
 				Class<?> testClass = testClasses.get(0);
 				DefaultGenerationContext generationContext = createGenerationContext(testClass);
