@@ -172,9 +172,13 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		assertThat(resource().forResource("/org/springframework/test/context/aot/samples/xml/test-config.xml"))
 			.accepts(runtimeHints);
 
-		// @TestPropertySource(locations = ... )
+		// @TestPropertySource(locations = ...)
 		assertThat(resource().forResource("/org/springframework/test/context/aot/samples/basic/BasicSpringVintageTests.properties"))
 			.accepts(runtimeHints);
+
+		// @WebAppConfiguration(value = ...)
+		assertThat(resource().forResource("/META-INF/web-resources/resources/Spring.js")).accepts(runtimeHints);
+		assertThat(resource().forResource("/META-INF/web-resources/WEB-INF/views/home.jsp")).accepts(runtimeHints);
 	}
 
 	private static void assertReflectionRegistered(RuntimeHints runtimeHints, String type, MemberCategory memberCategory) {
@@ -328,9 +332,9 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 			"org/springframework/test/context/aot/samples/web/WebSpringJupiterTests__TestContext005_ApplicationContextInitializer.java",
 			"org/springframework/test/context/aot/samples/web/WebSpringJupiterTests__TestContext005_BeanFactoryRegistrations.java",
 			"org/springframework/test/context/aot/samples/web/WebTestConfiguration__TestContext005_BeanDefinitions.java",
-			"org/springframework/web/reactive/config/DelegatingWebFluxConfiguration__TestContext005_Autowiring.java",
-			"org/springframework/web/reactive/config/DelegatingWebFluxConfiguration__TestContext005_BeanDefinitions.java",
-			"org/springframework/web/reactive/config/WebFluxConfigurationSupport__TestContext005_BeanDefinitions.java",
+			"org/springframework/web/servlet/config/annotation/DelegatingWebMvcConfiguration__TestContext005_Autowiring.java",
+			"org/springframework/web/servlet/config/annotation/DelegatingWebMvcConfiguration__TestContext005_BeanDefinitions.java",
+			"org/springframework/web/servlet/config/annotation/WebMvcConfigurationSupport__TestContext005_BeanDefinitions.java",
 			// XmlSpringJupiterTests
 			"org/springframework/context/event/DefaultEventListenerFactory__TestContext006_BeanDefinitions.java",
 			"org/springframework/context/event/EventListenerMethodProcessor__TestContext006_BeanDefinitions.java",

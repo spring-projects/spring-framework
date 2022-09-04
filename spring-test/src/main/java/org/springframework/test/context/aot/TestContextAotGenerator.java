@@ -42,6 +42,7 @@ import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
 import org.springframework.test.context.TestContextBootstrapper;
+import org.springframework.test.context.web.WebMergedContextConfiguration;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -59,6 +60,8 @@ import static org.springframework.util.ResourceUtils.CLASSPATH_URL_PREFIX;
  * @see ApplicationContextAotGenerator
  */
 public class TestContextAotGenerator {
+
+	private static final String SLASH = "/";
 
 	private static final Log logger = LogFactory.getLog(TestContextAotGenerator.class);
 
@@ -251,6 +254,21 @@ public class TestContextAotGenerator {
 
 		// @TestPropertySource(locations = ... )
 		registerHintsForClasspathResources(mergedConfig.getPropertySourceLocations());
+
+		if (mergedConfig instanceof WebMergedContextConfiguration webMergedConfig) {
+			String resourceBasePath = webMergedConfig.getResourceBasePath();
+			if (resourceBasePath.startsWith(CLASSPATH_URL_PREFIX)) {
+				String pattern = resourceBasePath.substring(CLASSPATH_URL_PREFIX.length());
+				if (!pattern.startsWith(SLASH)) {
+					pattern = SLASH + pattern;
+				}
+				if (!pattern.endsWith(SLASH)) {
+					pattern += SLASH;
+				}
+				pattern += "*";
+				this.runtimeHints.resources().registerPattern(pattern);
+			}
+		}
 	}
 
 	private void registerHintsForClasspathResources(String... locations) {
@@ -258,8 +276,8 @@ public class TestContextAotGenerator {
 				.filter(location -> location.startsWith(CLASSPATH_URL_PREFIX))
 				.map(location -> {
 					location = location.substring(CLASSPATH_URL_PREFIX.length());
-					if (!location.startsWith("/")) {
-						location = "/" + location;
+					if (!location.startsWith(SLASH)) {
+						location = SLASH + location;
 					}
 					return location;
 				})

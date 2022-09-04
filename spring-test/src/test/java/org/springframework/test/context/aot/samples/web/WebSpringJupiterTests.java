@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -33,7 +34,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
  * @author Sam Brannen
  * @since 6.0
  */
-@SpringJUnitWebConfig(WebTestConfiguration.class)
+@SpringJUnitWebConfig(classes = WebTestConfiguration.class, resourcePath = "classpath:META-INF/web-resources")
 @TestPropertySource(properties = "test.engine = jupiter")
 public class WebSpringJupiterTests {
 
@@ -49,7 +50,7 @@ public class WebSpringJupiterTests {
 	}
 
 	@org.junit.jupiter.api.Test
-	void test(@Value("${test.engine}") String testEngine) throws Exception {
+	void controller(@Value("${test.engine}") String testEngine) throws Exception {
 		assertThat(testEngine)
 			.as("@Value").isEqualTo("jupiter");
 		assertThat(wac.getEnvironment().getProperty("test.engine"))
@@ -57,6 +58,15 @@ public class WebSpringJupiterTests {
 
 		mockMvc.perform(get("/hello"))
 			.andExpectAll(status().isOk(), content().string("Hello, AOT!"));
+	}
+
+	@org.junit.jupiter.api.Test
+	void resources() throws Exception {
+		this.mockMvc.perform(get("/resources/Spring.js"))
+			.andExpectAll(
+				content().contentType("application/javascript"),
+				content().string(containsString("Spring={};"))
+			);
 	}
 
 }
