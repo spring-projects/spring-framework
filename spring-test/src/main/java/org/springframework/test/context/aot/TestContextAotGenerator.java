@@ -16,7 +16,6 @@
 
 package org.springframework.test.context.aot;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -44,14 +43,12 @@ import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
 import org.springframework.test.context.TestContextBootstrapper;
-import org.springframework.test.context.web.WebMergedContextConfiguration;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import static org.springframework.aot.hint.MemberCategory.INVOKE_DECLARED_CONSTRUCTORS;
 import static org.springframework.aot.hint.MemberCategory.INVOKE_PUBLIC_METHODS;
-import static org.springframework.util.ResourceUtils.CLASSPATH_URL_PREFIX;
 
 /**
  * {@code TestContextAotGenerator} generates AOT artifacts for integration tests
@@ -62,8 +59,6 @@ import static org.springframework.util.ResourceUtils.CLASSPATH_URL_PREFIX;
  * @see ApplicationContextAotGenerator
  */
 public class TestContextAotGenerator {
-
-	private static final String SLASH = "/";
 
 	private static final Log logger = LogFactory.getLog(TestContextAotGenerator.class);
 
@@ -124,7 +119,6 @@ public class TestContextAotGenerator {
 		mergedConfigMappings.forEach((mergedConfig, testClasses) -> {
 			logger.debug(LogMessage.format("Generating AOT artifacts for test classes %s",
 					testClasses.stream().map(Class::getName).toList()));
-			registerHintsForMergedConfig(mergedConfig);
 			try {
 				this.testRuntimeHintsRegistrars.forEach(registrar -> registrar.registerHints(this.runtimeHints,
 						mergedConfig, Collections.unmodifiableList(testClasses), getClass().getClassLoader()));
@@ -245,51 +239,6 @@ public class TestContextAotGenerator {
 		String className = codeGenerator.getGeneratedClass().getName().reflectionName();
 		this.runtimeHints.reflection()
 				.registerType(TypeReference.of(className), INVOKE_PUBLIC_METHODS);
-	}
-
-	private void registerHintsForMergedConfig(MergedContextConfiguration mergedConfig) {
-		// @ContextConfiguration(loader = ...)
-		ContextLoader contextLoader = mergedConfig.getContextLoader();
-		if (contextLoader != null) {
-			registerDeclaredConstructors(contextLoader.getClass());
-		}
-
-		// @ContextConfiguration(initializers = ...)
-		mergedConfig.getContextInitializerClasses().forEach(this::registerDeclaredConstructors);
-
-		// @ContextConfiguration(locations = ...)
-		registerHintsForClasspathResources(mergedConfig.getLocations());
-
-		// @TestPropertySource(locations = ... )
-		registerHintsForClasspathResources(mergedConfig.getPropertySourceLocations());
-
-		if (mergedConfig instanceof WebMergedContextConfiguration webMergedConfig) {
-			String resourceBasePath = webMergedConfig.getResourceBasePath();
-			if (resourceBasePath.startsWith(CLASSPATH_URL_PREFIX)) {
-				String pattern = resourceBasePath.substring(CLASSPATH_URL_PREFIX.length());
-				if (!pattern.startsWith(SLASH)) {
-					pattern = SLASH + pattern;
-				}
-				if (!pattern.endsWith(SLASH)) {
-					pattern += SLASH;
-				}
-				pattern += "*";
-				this.runtimeHints.resources().registerPattern(pattern);
-			}
-		}
-	}
-
-	private void registerHintsForClasspathResources(String... locations) {
-		Arrays.stream(locations)
-				.filter(location -> location.startsWith(CLASSPATH_URL_PREFIX))
-				.map(location -> {
-					location = location.substring(CLASSPATH_URL_PREFIX.length());
-					if (!location.startsWith(SLASH)) {
-						location = SLASH + location;
-					}
-					return location;
-				})
-				.forEach(this.runtimeHints.resources()::registerPattern);
 	}
 
 	private void registerDeclaredConstructors(Class<?> type) {

@@ -34,6 +34,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Sam Brannen
  * @since 6.0
+ * @see StandardTestRuntimeHints
  */
 class TestContextRuntimeHints implements RuntimeHintsRegistrar {
 
