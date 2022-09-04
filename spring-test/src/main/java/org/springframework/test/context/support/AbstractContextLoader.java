@@ -67,6 +67,8 @@ import org.springframework.util.ResourceUtils;
  */
 public abstract class AbstractContextLoader implements SmartContextLoader {
 
+	private static final String SLASH = "/";
+
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
 	private static final Log logger = LogFactory.getLog(AbstractContextLoader.class);
@@ -252,7 +254,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 			String resourcePath = ClassUtils.convertClassNameToResourcePath(clazz.getName()) + suffix;
 			ClassPathResource classPathResource = new ClassPathResource(resourcePath);
 			if (classPathResource.exists()) {
-				String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + resourcePath;
+				String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + SLASH + resourcePath;
 				if (logger.isInfoEnabled()) {
 					logger.info(String.format("Detected default resource location \"%s\" for test class [%s]",
 							prefixedResourcePath, clazz.getName()));

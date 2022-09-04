@@ -73,7 +73,7 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 		assertMergedConfig(
 			mergedConfig,
 			testClass,
-			array("classpath:org/springframework/test/context/support/AbstractContextConfigurationUtilsTests$BareAnnotations-context.xml"),
+			array("classpath:/org/springframework/test/context/support/AbstractContextConfigurationUtilsTests$BareAnnotations-context.xml"),
 			EMPTY_CLASS_ARRAY, DelegatingSmartContextLoader.class);
 	}
 

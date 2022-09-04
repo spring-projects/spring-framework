@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,6 +97,8 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.jdbc.datasource.init.ScriptUtils
  */
 public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListener {
+
+	private static final String SLASH = "/";
 
 	private static final Log logger = LogFactory.getLog(SqlScriptsTestExecutionListener.class);
 
@@ -343,7 +345,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		}
 		resourcePath += ".sql";
 
-		String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + resourcePath;
+		String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + SLASH + resourcePath;
 		ClassPathResource classPathResource = new ClassPathResource(resourcePath);
 
 		if (classPathResource.exists()) {

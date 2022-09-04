@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,8 @@ import org.springframework.util.StringUtils;
  * @see MergedTestPropertySources
  */
 class TestPropertySourceAttributes {
+
+	private static final String SLASH = "/";
 
 	private static final Log logger = LogFactory.getLog(TestPropertySourceAttributes.class);
 
@@ -156,7 +158,7 @@ class TestPropertySourceAttributes {
 			logger.error(msg);
 			throw new IllegalStateException(msg);
 		}
-		String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + resourcePath;
+		String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + SLASH + resourcePath;
 		if (logger.isInfoEnabled()) {
 			logger.info(String.format("Detected default properties file \"%s\" for test class [%s]",
 					prefixedResourcePath, testClass.getName()));

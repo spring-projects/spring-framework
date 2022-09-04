@@ -78,7 +78,7 @@ class GenericXmlContextLoaderResourceLocationsTests {
 			args(ClasspathNonExistentDefaultLocationsTestCase.class, array()),
 
 			args(ClasspathExistentDefaultLocationsTestCase.class, array(
-				"classpath:org/springframework/test/context/support/GenericXmlContextLoaderResourceLocationsTests$ClasspathExistentDefaultLocationsTestCase-context.xml")),
+				"classpath:/org/springframework/test/context/support/GenericXmlContextLoaderResourceLocationsTests$ClasspathExistentDefaultLocationsTestCase-context.xml")),
 
 			args(ImplicitClasspathLocationsTestCase.class,
 				array("classpath:/org/springframework/test/context/support/context1.xml",
