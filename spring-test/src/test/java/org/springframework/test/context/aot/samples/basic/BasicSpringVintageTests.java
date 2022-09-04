@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 // Override the default loader configured by the CustomXmlBootstrapper
 @ContextConfiguration(classes = BasicTestConfiguration.class, loader = AnnotationConfigContextLoader.class)
-@TestPropertySource(properties = "test.engine = vintage")
+@TestPropertySource
 public class BasicSpringVintageTests {
 
 	@Autowired

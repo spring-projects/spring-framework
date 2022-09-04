@@ -171,6 +171,10 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		// @ContextConfiguration(locations=...)
 		assertThat(resource().forResource("/org/springframework/test/context/aot/samples/xml/test-config.xml"))
 			.accepts(runtimeHints);
+
+		// @TestPropertySource(locations = ... )
+		assertThat(resource().forResource("/org/springframework/test/context/aot/samples/basic/BasicSpringVintageTests.properties"))
+			.accepts(runtimeHints);
 	}
 
 	private static void assertReflectionRegistered(RuntimeHints runtimeHints, String type, MemberCategory memberCategory) {

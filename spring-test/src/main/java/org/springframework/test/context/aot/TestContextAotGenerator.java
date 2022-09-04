@@ -248,12 +248,21 @@ public class TestContextAotGenerator {
 
 		// @ContextConfiguration(locations = ...)
 		registerHintsForClasspathResources(mergedConfig.getLocations());
+
+		// @TestPropertySource(locations = ... )
+		registerHintsForClasspathResources(mergedConfig.getPropertySourceLocations());
 	}
 
 	private void registerHintsForClasspathResources(String... locations) {
 		Arrays.stream(locations)
 				.filter(location -> location.startsWith(CLASSPATH_URL_PREFIX))
-				.map(location -> location.substring(CLASSPATH_URL_PREFIX.length()))
+				.map(location -> {
+					location = location.substring(CLASSPATH_URL_PREFIX.length());
+					if (!location.startsWith("/")) {
+						location = "/" + location;
+					}
+					return location;
+				})
 				.forEach(this.runtimeHints.resources()::registerPattern);
 	}
 
