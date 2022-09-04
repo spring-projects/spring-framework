@@ -20,12 +20,17 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ActiveProfilesResolver;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
+import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.aot.TestRuntimeHintsRegistrar;
 import org.springframework.test.context.web.WebMergedContextConfiguration;
 
 import static org.springframework.aot.hint.MemberCategory.INVOKE_DECLARED_CONSTRUCTORS;
+import static org.springframework.core.annotation.MergedAnnotations.SearchStrategy.TYPE_HIERARCHY;
 import static org.springframework.util.ResourceUtils.CLASSPATH_URL_PREFIX;
 
 /**
@@ -46,6 +51,7 @@ class StandardTestRuntimeHints implements TestRuntimeHintsRegistrar {
 			List<Class<?>> testClasses, ClassLoader classLoader) {
 
 		registerHintsForMergedContextConfiguration(runtimeHints, mergedConfig);
+		testClasses.forEach(testClass -> registerHintsForActiveProfilesResolvers(runtimeHints, testClass));
 	}
 
 	private void registerHintsForMergedContextConfiguration(
@@ -71,6 +77,17 @@ class StandardTestRuntimeHints implements TestRuntimeHintsRegistrar {
 		if (mergedConfig instanceof WebMergedContextConfiguration webConfig) {
 			registerClasspathResourceDirectoryStructure(runtimeHints, webConfig.getResourceBasePath());
 		}
+	}
+
+	private void registerHintsForActiveProfilesResolvers(RuntimeHints runtimeHints, Class<?> testClass) {
+		// @ActiveProfiles(resolver = ...)
+		MergedAnnotations.search(TYPE_HIERARCHY)
+				.withEnclosingClasses(TestContextAnnotationUtils::searchEnclosingClass)
+				.from(testClass)
+				.stream(ActiveProfiles.class)
+				.map(mergedAnnotation -> mergedAnnotation.getClass("resolver"))
+				.filter(type -> type != ActiveProfilesResolver.class)
+				.forEach(resolverClass -> registerDeclaredConstructors(runtimeHints, resolverClass));
 	}
 
 	private void registerDeclaredConstructors(RuntimeHints runtimeHints, Class<?> type) {

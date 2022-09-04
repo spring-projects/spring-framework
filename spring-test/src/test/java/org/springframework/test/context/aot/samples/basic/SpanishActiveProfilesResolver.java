@@ -16,30 +16,17 @@
 
 package org.springframework.test.context.aot.samples.basic;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.test.context.aot.samples.common.DefaultMessageService;
-import org.springframework.test.context.aot.samples.common.MessageService;
-import org.springframework.test.context.aot.samples.common.SpanishMessageService;
+import org.springframework.test.context.ActiveProfilesResolver;
 
 /**
  * @author Sam Brannen
  * @since 6.0
  */
-@Configuration(proxyBeanMethods = false)
-class BasicTestConfiguration {
+public class SpanishActiveProfilesResolver implements ActiveProfilesResolver {
 
-	@Bean
-	@Profile("default")
-	MessageService defaultMessageService() {
-		return new DefaultMessageService();
-	}
-
-	@Bean
-	@Profile("spanish")
-	MessageService spanishMessageService() {
-		return new SpanishMessageService();
+	@Override
+	public String[] resolve(Class<?> testClass) {
+		return new String[] { "spanish" };
 	}
 
 }

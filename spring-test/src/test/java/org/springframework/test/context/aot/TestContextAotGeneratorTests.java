@@ -35,6 +35,7 @@ import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.env.Profiles;
 import org.springframework.javapoet.ClassName;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterSharedConfigTests;
@@ -162,13 +163,15 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		Stream.of(
 			// @BootstrapWith
 			org.springframework.test.context.aot.samples.basic.BasicSpringVintageTests.CustomXmlBootstrapper.class,
-			// @ContextConfiguration(initializers=...)
+			// @ContextConfiguration(initializers = ...)
 			org.springframework.test.context.aot.samples.basic.BasicSpringTestNGTests.CustomInitializer.class,
-			// @ContextConfiguration(loader=...)
-			org.springframework.test.context.support.AnnotationConfigContextLoader.class
+			// @ContextConfiguration(loader = ...)
+			org.springframework.test.context.support.AnnotationConfigContextLoader.class,
+			// @ActiveProfiles(resolver = ...)
+			org.springframework.test.context.aot.samples.basic.SpanishActiveProfilesResolver.class
 		).forEach(type -> assertReflectionRegistered(runtimeHints, type, INVOKE_DECLARED_CONSTRUCTORS));
 
-		// @ContextConfiguration(locations=...)
+		// @ContextConfiguration(locations = ...)
 		assertThat(resource().forResource("/org/springframework/test/context/aot/samples/xml/test-config.xml"))
 			.accepts(runtimeHints);
 
@@ -216,7 +219,10 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		assertThat(context.getEnvironment().getProperty("test.engine")).as("Environment").isNotNull();
 
 		MessageService messageService = context.getBean(MessageService.class);
-		assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
+		ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
+		String expectedMessage = cac.getEnvironment().acceptsProfiles(Profiles.of("spanish")) ?
+				"¡Hola, AOT!" : "Hello, AOT!";
+		assertThat(messageService.generateMessage()).isEqualTo(expectedMessage);
 	}
 
 	private void assertContextForBasicWebTests(WebApplicationContext wac) throws Exception {
