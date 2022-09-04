@@ -282,6 +282,16 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_XML_VALUE = "application/xml";
 
 	/**
+	 * Public constant media type for {@code application/zip}.
+	 */
+	public static final MediaType APPLICATION_ZIP;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_ZIP}.
+	 */
+	public static final String APPLICATION_ZIP_VALUE = "application/zip";
+
+	/**
 	 * Public constant media type for {@code image/gif}.
 	 */
 	public static final MediaType IMAGE_GIF;
@@ -422,6 +432,7 @@ public class MediaType extends MimeType implements Serializable {
 		APPLICATION_STREAM_JSON = new MediaType("application", "stream+json");
 		APPLICATION_XHTML_XML = new MediaType("application", "xhtml+xml");
 		APPLICATION_XML = new MediaType("application", "xml");
+		APPLICATION_ZIP = new MediaType("application", "zip");
 		IMAGE_GIF = new MediaType("image", "gif");
 		IMAGE_JPEG = new MediaType("image", "jpeg");
 		IMAGE_PNG = new MediaType("image", "png");
