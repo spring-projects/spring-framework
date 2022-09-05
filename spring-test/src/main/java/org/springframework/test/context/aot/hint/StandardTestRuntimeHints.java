@@ -20,7 +20,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.support.RuntimeHintsUtils;
 import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ActiveProfilesResolver;
 import org.springframework.test.context.ContextLoader;
@@ -50,12 +52,12 @@ class StandardTestRuntimeHints implements TestRuntimeHintsRegistrar {
 	public void registerHints(MergedContextConfiguration mergedConfig, List<Class<?>> testClasses,
 			RuntimeHints runtimeHints, ClassLoader classLoader) {
 
-		registerHintsForMergedContextConfiguration(runtimeHints, mergedConfig);
+		registerHintsForMergedContextConfiguration(runtimeHints, classLoader, mergedConfig);
 		testClasses.forEach(testClass -> registerHintsForActiveProfilesResolvers(runtimeHints, testClass));
 	}
 
 	private void registerHintsForMergedContextConfiguration(
-			RuntimeHints runtimeHints, MergedContextConfiguration mergedConfig) {
+			RuntimeHints runtimeHints, ClassLoader classLoader, MergedContextConfiguration mergedConfig) {
 
 		// @ContextConfiguration(loader = ...)
 		ContextLoader contextLoader = mergedConfig.getContextLoader();
@@ -68,10 +70,10 @@ class StandardTestRuntimeHints implements TestRuntimeHintsRegistrar {
 				.forEach(clazz -> registerDeclaredConstructors(runtimeHints, clazz));
 
 		// @ContextConfiguration(locations = ...)
-		registerClasspathResources(runtimeHints, mergedConfig.getLocations());
+		registerClasspathResources(runtimeHints, classLoader, mergedConfig.getLocations());
 
 		// @TestPropertySource(locations = ... )
-		registerClasspathResources(runtimeHints, mergedConfig.getPropertySourceLocations());
+		registerClasspathResources(runtimeHints, classLoader, mergedConfig.getPropertySourceLocations());
 
 		// @WebAppConfiguration(value = ...)
 		if (mergedConfig instanceof WebMergedContextConfiguration webConfig) {
@@ -94,11 +96,14 @@ class StandardTestRuntimeHints implements TestRuntimeHintsRegistrar {
 		runtimeHints.reflection().registerType(type, INVOKE_DECLARED_CONSTRUCTORS);
 	}
 
-	private void registerClasspathResources(RuntimeHints runtimeHints, String... locations) {
+	private void registerClasspathResources(RuntimeHints runtimeHints, ClassLoader classLoader, String... locations) {
+		DefaultResourceLoader resourceLoader = new DefaultResourceLoader(classLoader);
 		Arrays.stream(locations)
+				// For the sake of efficiency, we still filter out locations that are not classpath: resources,
+				// even though the current implementation of RuntimeHintsUtils#registerResource handles that.
 				.filter(location -> location.startsWith(CLASSPATH_URL_PREFIX))
-				.map(this::cleanClasspathResource)
-				.forEach(runtimeHints.resources()::registerPattern);
+				.map(resourceLoader::getResource)
+				.forEach(resource -> RuntimeHintsUtils.registerResource(runtimeHints, resource));
 	}
 
 	private void registerClasspathResourceDirectoryStructure(RuntimeHints runtimeHints, String directory) {

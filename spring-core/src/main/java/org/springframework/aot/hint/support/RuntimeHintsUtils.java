@@ -16,14 +16,19 @@
 
 package org.springframework.aot.hint.support;
 
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.ResourceHints;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeHint;
 import org.springframework.aot.hint.TypeHint.Builder;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.util.Assert;
 
 /**
  * Utility methods for runtime hints support code.
@@ -90,6 +95,27 @@ public abstract class RuntimeHintsUtils {
 		if (annotation.isSynthesizable()) {
 			registerSynthesizedAnnotation(hints, annotation.getType());
 		}
+	}
+
+	/**
+	 * Register that the supplied resource should be made available at runtime.
+	 * <p>If the supplied resource is not a {@link ClassPathResource}, it will
+	 * not be registered.
+	 * @param hints the {@link RuntimeHints} instance to use
+	 * @param resource the resource to register
+	 * @throws IllegalArgumentException if the supplied resource does not
+	 * {@linkplain Resource#exists() exist}
+	 * @see ResourceHints#registerPattern(String)
+	 */
+	public static void registerResource(RuntimeHints hints, Resource resource) {
+		if (resource instanceof ClassPathResource classPathResource) {
+			Assert.isTrue(resource.exists(), () -> "Resource does not exist: " + resource);
+			hints.resources().registerPattern(classPathResource.getPath());
+		}
+	}
+
+	public static void registerResources(RuntimeHints hints, Resource... resources) {
+		Arrays.stream(resources).forEach(resource -> registerResource(hints, resource));
 	}
 
 }

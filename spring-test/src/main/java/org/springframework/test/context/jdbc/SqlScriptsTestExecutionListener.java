@@ -28,10 +28,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.support.RuntimeHintsUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.lang.NonNull;
@@ -148,10 +150,10 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	@Override
 	public void processAheadOfTime(Class<?> testClass, RuntimeHints runtimeHints, ClassLoader classLoader) {
 		getSqlAnnotationsFor(testClass).forEach(sql ->
-			registerClasspathResources(runtimeHints, getScripts(sql, testClass, null, true)));
+			registerClasspathResources(runtimeHints, classLoader, getScripts(sql, testClass, null, true)));
 		getSqlMethods(testClass).forEach(testMethod ->
 			getSqlAnnotationsFor(testMethod).forEach(sql ->
-				registerClasspathResources(runtimeHints, getScripts(sql, testClass, testMethod, false))));
+				registerClasspathResources(runtimeHints, classLoader, getScripts(sql, testClass, testMethod, false))));
 	}
 
 	/**
@@ -390,19 +392,10 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		return Arrays.stream(ReflectionUtils.getUniqueDeclaredMethods(testClass, sqlMethodFilter));
 	}
 
-	private void registerClasspathResources(RuntimeHints runtimeHints, String... locations) {
-		Arrays.stream(locations)
-				.filter(location -> location.startsWith(CLASSPATH_URL_PREFIX))
-				.map(this::cleanClasspathResource)
-				.forEach(runtimeHints.resources()::registerPattern);
-	}
-
-	private String cleanClasspathResource(String location) {
-		location = location.substring(CLASSPATH_URL_PREFIX.length());
-		if (!location.startsWith(SLASH)) {
-			location = SLASH + location;
-		}
-		return location;
+	private void registerClasspathResources(RuntimeHints runtimeHints, ClassLoader classLoader, String... locations) {
+		DefaultResourceLoader resourceLoader = new DefaultResourceLoader(classLoader);
+		RuntimeHintsUtils.registerResources(runtimeHints,
+			TestContextResourceUtils.convertToResources(resourceLoader, locations));
 	}
 
 }
