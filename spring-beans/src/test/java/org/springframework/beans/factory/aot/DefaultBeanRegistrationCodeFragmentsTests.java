@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.InjectAnnotationBeanPostProcessorTests.StringFactoryBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -33,7 +34,6 @@ import org.springframework.beans.testfixture.beans.factory.aot.SimpleBean;
 import org.springframework.beans.testfixture.beans.factory.aot.SimpleBeanConfiguration;
 import org.springframework.beans.testfixture.beans.factory.aot.SimpleBeanFactoryBean;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.testfixture.aot.generate.TestGenerationContext;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;

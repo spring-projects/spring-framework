@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.testfixture.aot.generate;
+package org.springframework.aot.test.generate;
 
 import org.springframework.aot.generate.ClassNameGenerator;
 import org.springframework.aot.generate.DefaultGenerationContext;
@@ -23,8 +23,7 @@ import org.springframework.aot.generate.InMemoryGeneratedFiles;
 
 /**
  * {@link GenerationContext} test implementation that uses
- * {@link InMemoryGeneratedFiles} and provides a convenient
- * {@link TestTarget} by default.
+ * {@link InMemoryGeneratedFiles}.
  *
  * @author Stephane Nicoll
  * @author Sam Brannen
@@ -33,18 +32,26 @@ import org.springframework.aot.generate.InMemoryGeneratedFiles;
 public class TestGenerationContext extends DefaultGenerationContext {
 
 	/**
-	 * Create an instance using {@link TestTarget} as the default target class.
-	 */
-	public TestGenerationContext() {
-		this(new ClassNameGenerator(TestTarget.class));
-	}
-
-	/**
 	 * Create an instance using the specified {@link ClassNameGenerator}.
 	 * @param classNameGenerator the class name generator to use
 	 */
 	public TestGenerationContext(ClassNameGenerator classNameGenerator) {
 		super(classNameGenerator, new InMemoryGeneratedFiles());
+	}
+
+	/**
+	 * Create an instance using the specified {@code target}.
+	 * @param target the default target class to use
+	 */
+	public TestGenerationContext(Class<?> target) {
+		this(new ClassNameGenerator(target));
+	}
+
+	/**
+	 * Create an instance using {@link TestTarget} as the {@code target}.
+	 */
+	public TestGenerationContext() {
+		this(TestTarget.class);
 	}
 
 

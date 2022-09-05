@@ -27,6 +27,7 @@ import org.springframework.aot.hint.TypeReference;
 import org.springframework.aot.test.agent.EnabledIfRuntimeHintsAgent;
 import org.springframework.aot.test.agent.RuntimeHintsInvocations;
 import org.springframework.aot.test.agent.RuntimeHintsRecorder;
+import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -37,7 +38,6 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.testfixture.context.generator.SimpleComponent;
 import org.springframework.context.testfixture.context.generator.annotation.AutowiredComponent;
 import org.springframework.context.testfixture.context.generator.annotation.InitDestroyComponent;
-import org.springframework.core.testfixture.aot.generate.TestGenerationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

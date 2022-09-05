@@ -3,7 +3,7 @@
  */
 @NonNullApi
 @NonNullFields
-package org.springframework.test.aot.generate;
+package org.springframework.aot.test.generate;
 
 import org.springframework.lang.NonNullApi;
 import org.springframework.lang.NonNullFields;

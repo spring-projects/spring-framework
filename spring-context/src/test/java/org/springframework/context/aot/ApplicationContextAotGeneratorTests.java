@@ -31,6 +31,7 @@ import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
+import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.aot.test.generator.compile.Compiled;
 import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.beans.BeansException;
@@ -62,7 +63,6 @@ import org.springframework.context.testfixture.context.generator.annotation.Lazy
 import org.springframework.context.testfixture.context.generator.annotation.LazyFactoryMethodArgumentComponent;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.testfixture.aot.generate.TestGenerationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

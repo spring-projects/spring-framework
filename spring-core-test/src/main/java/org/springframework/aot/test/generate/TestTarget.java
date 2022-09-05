@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.testfixture.aot.generate;
+package org.springframework.aot.test.generate;
 
 /**
  * A <em>default target class</em> used by tests of code generation.
