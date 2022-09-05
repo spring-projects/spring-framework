@@ -14,31 +14,32 @@
  * limitations under the License.
  */
 
-package org.springframework.web.service.invoker;
-
-import org.reactivestreams.Publisher;
+package org.springframework.messaging.rsocket.service;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.lang.Nullable;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.RequestBody;
 
 /**
- * {@link HttpServiceArgumentResolver} for {@link RequestBody @RequestBody}
+ * {@link RSocketServiceArgumentResolver} for {@link Payload @Payload}
  * annotated arguments.
  *
  * @author Rossen Stoyanchev
  * @since 6.0
  */
-public class RequestBodyArgumentResolver implements HttpServiceArgumentResolver {
+public class PayloadArgumentResolver implements RSocketServiceArgumentResolver {
 
 	private final ReactiveAdapterRegistry reactiveAdapterRegistry;
 
+	private final boolean useDefaultResolution;
 
-	public RequestBodyArgumentResolver(ReactiveAdapterRegistry reactiveAdapterRegistry) {
+
+	public PayloadArgumentResolver(ReactiveAdapterRegistry reactiveAdapterRegistry, boolean useDefaultResolution) {
+		this.useDefaultResolution = useDefaultResolution;
 		Assert.notNull(reactiveAdapterRegistry, "ReactiveAdapterRegistry is required");
 		this.reactiveAdapterRegistry = reactiveAdapterRegistry;
 	}
@@ -46,26 +47,26 @@ public class RequestBodyArgumentResolver implements HttpServiceArgumentResolver 
 
 	@Override
 	public boolean resolve(
-			@Nullable Object argument, MethodParameter parameter, HttpRequestValues.Builder requestValues) {
+			@Nullable Object argument, MethodParameter parameter, RSocketRequestValues.Builder requestValues) {
 
-		RequestBody annot = parameter.getParameterAnnotation(RequestBody.class);
-		if (annot == null) {
+		Payload annot = parameter.getParameterAnnotation(Payload.class);
+		if (annot == null && !this.useDefaultResolution) {
 			return false;
 		}
 
 		if (argument != null) {
 			ReactiveAdapter reactiveAdapter = this.reactiveAdapterRegistry.getAdapter(parameter.getParameterType());
 			if (reactiveAdapter == null) {
-				requestValues.setBodyValue(argument);
+				requestValues.setPayloadValue(argument);
 			}
 			else {
 				MethodParameter nestedParameter = parameter.nested();
 
-				String message = "Async type for @RequestBody should produce value(s)";
-				Assert.isTrue(!reactiveAdapter.isNoValue(), message);
+				String message = "Async type for @Payload should produce value(s)";
 				Assert.isTrue(nestedParameter.getNestedParameterType() != Void.class, message);
+				Assert.isTrue(!reactiveAdapter.isNoValue(), message);
 
-				requestValues.setBody(
+				requestValues.setPayload(
 						reactiveAdapter.toPublisher(argument),
 						ParameterizedTypeReference.forType(nestedParameter.getNestedGenericParameterType()));
 			}
