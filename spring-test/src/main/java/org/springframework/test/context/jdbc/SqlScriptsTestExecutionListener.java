@@ -399,8 +399,8 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 
 	private String cleanClasspathResource(String location) {
 		location = location.substring(CLASSPATH_URL_PREFIX.length());
-		if (!location.startsWith(SLASH)) {
-			location = SLASH + location;
+		if (location.startsWith(SLASH)) {
+			location = location.substring(1);
 		}
 		return location;
 	}

@@ -181,21 +181,21 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		).forEach(type -> assertReflectionRegistered(runtimeHints, type, INVOKE_DECLARED_CONSTRUCTORS));
 
 		// @ContextConfiguration(locations = ...)
-		assertThat(resource().forResource("/org/springframework/test/context/aot/samples/xml/test-config.xml"))
+		assertThat(resource().forResource("org/springframework/test/context/aot/samples/xml/test-config.xml"))
 			.accepts(runtimeHints);
 
 		// @TestPropertySource(locations = ...)
-		assertThat(resource().forResource("/org/springframework/test/context/aot/samples/basic/BasicSpringVintageTests.properties"))
+		assertThat(resource().forResource("org/springframework/test/context/aot/samples/basic/BasicSpringVintageTests.properties"))
 			.accepts(runtimeHints);
 
 		// @WebAppConfiguration(value = ...)
-		assertThat(resource().forResource("/META-INF/web-resources/resources/Spring.js")).accepts(runtimeHints);
-		assertThat(resource().forResource("/META-INF/web-resources/WEB-INF/views/home.jsp")).accepts(runtimeHints);
+		assertThat(resource().forResource("META-INF/web-resources/resources/Spring.js")).accepts(runtimeHints);
+		assertThat(resource().forResource("META-INF/web-resources/WEB-INF/views/home.jsp")).accepts(runtimeHints);
 
 		// @Sql(scripts = ...)
-		assertThat(resource().forResource("/org/springframework/test/context/jdbc/schema.sql"))
+		assertThat(resource().forResource("org/springframework/test/context/jdbc/schema.sql"))
 			.accepts(runtimeHints);
-		assertThat(resource().forResource("/org/springframework/test/context/aot/samples/jdbc/SqlScriptsSpringJupiterTests.test.sql"))
+		assertThat(resource().forResource("org/springframework/test/context/aot/samples/jdbc/SqlScriptsSpringJupiterTests.test.sql"))
 			.accepts(runtimeHints);
 	}
 
