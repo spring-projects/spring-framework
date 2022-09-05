@@ -37,7 +37,9 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.Profiles;
 import org.springframework.javapoet.ClassName;
+import org.springframework.test.context.BootstrapUtils;
 import org.springframework.test.context.MergedContextConfiguration;
+import org.springframework.test.context.TestContextBootstrapper;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterSharedConfigTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringTestNGTests;
@@ -103,7 +105,7 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		TestCompiler.forSystem().withFiles(generatedFiles).compile(ThrowingConsumer.of(compiled -> {
 			AotTestMappings aotTestMappings = new AotTestMappings();
 			for (Class<?> testClass : testClasses) {
-				MergedContextConfiguration mergedConfig = generator.buildMergedContextConfiguration(testClass);
+				MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 				ApplicationContextInitializer<ConfigurableApplicationContext> contextInitializer =
 						aotTestMappings.getContextInitializer(testClass);
 				assertThat(contextInitializer).isNotNull();
@@ -291,7 +293,7 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		List<Mapping> mappings = new ArrayList<>();
 		testClasses.forEach(testClass -> {
 			DefaultGenerationContext generationContext = generator.createGenerationContext(testClass);
-			MergedContextConfiguration mergedConfig = generator.buildMergedContextConfiguration(testClass);
+			MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 			ClassName className = generator.processAheadOfTime(mergedConfig, generationContext);
 			assertThat(className).isNotNull();
 			mappings.add(new Mapping(mergedConfig, className));
@@ -300,6 +302,11 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		return mappings;
 	}
 
+
+	private static MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass) {
+		TestContextBootstrapper testContextBootstrapper = BootstrapUtils.resolveTestContextBootstrapper(testClass);
+		return testContextBootstrapper.buildMergedContextConfiguration();
+	}
 
 	record Mapping(MergedContextConfiguration mergedConfig, ClassName className) {
 	}

@@ -204,7 +204,7 @@ public class TestContextAotGenerator {
 					contextLoader.getClass().getName()));
 	}
 
-	MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass) {
+	private MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass) {
 		TestContextBootstrapper testContextBootstrapper =
 				BootstrapUtils.resolveTestContextBootstrapper(testClass);
 		// @BootstrapWith
