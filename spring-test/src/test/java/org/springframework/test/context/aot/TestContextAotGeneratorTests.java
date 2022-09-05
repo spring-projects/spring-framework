@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import javax.sql.DataSource;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.DefaultGenerationContext;
@@ -45,6 +47,7 @@ import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTest
 import org.springframework.test.context.aot.samples.basic.BasicSpringTestNGTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringVintageTests;
 import org.springframework.test.context.aot.samples.common.MessageService;
+import org.springframework.test.context.aot.samples.jdbc.SqlScriptsSpringJupiterTests;
 import org.springframework.test.context.aot.samples.web.WebSpringJupiterTests;
 import org.springframework.test.context.aot.samples.web.WebSpringTestNGTests;
 import org.springframework.test.context.aot.samples.web.WebSpringVintageTests;
@@ -89,6 +92,7 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 				BasicSpringJupiterTests.NestedTests.class,
 				BasicSpringTestNGTests.class,
 				BasicSpringVintageTests.class,
+				SqlScriptsSpringJupiterTests.class,
 				XmlSpringJupiterTests.class,
 				WebSpringJupiterTests.class);
 
@@ -112,7 +116,10 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 				ApplicationContext context = ((AotContextLoader) mergedConfig.getContextLoader())
 						.loadContextForAotRuntime(mergedConfig, contextInitializer);
 				if (context instanceof WebApplicationContext wac) {
-					assertContextForBasicWebTests(wac);
+					assertContextForWebTests(wac);
+				}
+				else if (testClass.getPackageName().contains("jdbc")) {
+					assertContextForJdbcTests(context);
 				}
 				else {
 					assertContextForBasicTests(context);
@@ -227,7 +234,12 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		assertThat(messageService.generateMessage()).isEqualTo(expectedMessage);
 	}
 
-	private void assertContextForBasicWebTests(WebApplicationContext wac) throws Exception {
+	private void assertContextForJdbcTests(ApplicationContext context) throws Exception {
+		assertThat(context.getEnvironment().getProperty("test.engine")).as("Environment").isNotNull();
+		assertThat(context.getBean(DataSource.class)).as("DataSource").isNotNull();
+	}
+
+	private void assertContextForWebTests(WebApplicationContext wac) throws Exception {
 		assertThat(wac.getEnvironment().getProperty("test.engine")).as("Environment").isNotNull();
 
 		MockMvc mockMvc = webAppContextSetup(wac).build();
@@ -339,21 +351,27 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 			"org/springframework/test/context/aot/samples/basic/BasicSpringVintageTests__TestContext004_ApplicationContextInitializer.java",
 			"org/springframework/test/context/aot/samples/basic/BasicSpringVintageTests__TestContext004_BeanFactoryRegistrations.java",
 			"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext004_BeanDefinitions.java",
-			// WebSpringJupiterTests
+			// SqlScriptsSpringJupiterTests
 			"org/springframework/context/event/DefaultEventListenerFactory__TestContext005_BeanDefinitions.java",
 			"org/springframework/context/event/EventListenerMethodProcessor__TestContext005_BeanDefinitions.java",
-			"org/springframework/test/context/aot/samples/web/WebSpringJupiterTests__TestContext005_ApplicationContextInitializer.java",
-			"org/springframework/test/context/aot/samples/web/WebSpringJupiterTests__TestContext005_BeanFactoryRegistrations.java",
-			"org/springframework/test/context/aot/samples/web/WebTestConfiguration__TestContext005_BeanDefinitions.java",
-			"org/springframework/web/servlet/config/annotation/DelegatingWebMvcConfiguration__TestContext005_Autowiring.java",
-			"org/springframework/web/servlet/config/annotation/DelegatingWebMvcConfiguration__TestContext005_BeanDefinitions.java",
-			"org/springframework/web/servlet/config/annotation/WebMvcConfigurationSupport__TestContext005_BeanDefinitions.java",
-			// XmlSpringJupiterTests
+			"org/springframework/test/context/aot/samples/jdbc/SqlScriptsSpringJupiterTests__TestContext005_ApplicationContextInitializer.java",
+			"org/springframework/test/context/aot/samples/jdbc/SqlScriptsSpringJupiterTests__TestContext005_BeanFactoryRegistrations.java",
+			"org/springframework/test/context/jdbc/EmptyDatabaseConfig__TestContext005_BeanDefinitions.java",
+			// WebSpringJupiterTests
 			"org/springframework/context/event/DefaultEventListenerFactory__TestContext006_BeanDefinitions.java",
 			"org/springframework/context/event/EventListenerMethodProcessor__TestContext006_BeanDefinitions.java",
-			"org/springframework/test/context/aot/samples/common/DefaultMessageService__TestContext006_BeanDefinitions.java",
-			"org/springframework/test/context/aot/samples/xml/XmlSpringJupiterTests__TestContext006_ApplicationContextInitializer.java",
-			"org/springframework/test/context/aot/samples/xml/XmlSpringJupiterTests__TestContext006_BeanFactoryRegistrations.java"
+			"org/springframework/test/context/aot/samples/web/WebSpringJupiterTests__TestContext006_ApplicationContextInitializer.java",
+			"org/springframework/test/context/aot/samples/web/WebSpringJupiterTests__TestContext006_BeanFactoryRegistrations.java",
+			"org/springframework/test/context/aot/samples/web/WebTestConfiguration__TestContext006_BeanDefinitions.java",
+			"org/springframework/web/servlet/config/annotation/DelegatingWebMvcConfiguration__TestContext006_Autowiring.java",
+			"org/springframework/web/servlet/config/annotation/DelegatingWebMvcConfiguration__TestContext006_BeanDefinitions.java",
+			"org/springframework/web/servlet/config/annotation/WebMvcConfigurationSupport__TestContext006_BeanDefinitions.java",
+			// XmlSpringJupiterTests
+			"org/springframework/context/event/DefaultEventListenerFactory__TestContext007_BeanDefinitions.java",
+			"org/springframework/context/event/EventListenerMethodProcessor__TestContext007_BeanDefinitions.java",
+			"org/springframework/test/context/aot/samples/common/DefaultMessageService__TestContext007_BeanDefinitions.java",
+			"org/springframework/test/context/aot/samples/xml/XmlSpringJupiterTests__TestContext007_ApplicationContextInitializer.java",
+			"org/springframework/test/context/aot/samples/xml/XmlSpringJupiterTests__TestContext007_BeanFactoryRegistrations.java"
 		};
 
 }
