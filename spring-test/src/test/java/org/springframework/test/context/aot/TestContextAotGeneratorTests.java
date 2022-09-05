@@ -191,6 +191,12 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		// @WebAppConfiguration(value = ...)
 		assertThat(resource().forResource("/META-INF/web-resources/resources/Spring.js")).accepts(runtimeHints);
 		assertThat(resource().forResource("/META-INF/web-resources/WEB-INF/views/home.jsp")).accepts(runtimeHints);
+
+		// @Sql(scripts = ...)
+		assertThat(resource().forResource("/org/springframework/test/context/jdbc/schema.sql"))
+			.accepts(runtimeHints);
+		assertThat(resource().forResource("/org/springframework/test/context/aot/samples/jdbc/SqlScriptsSpringJupiterTests.test.sql"))
+			.accepts(runtimeHints);
 	}
 
 	private static void assertReflectionRegistered(RuntimeHints runtimeHints, String type, MemberCategory memberCategory) {
