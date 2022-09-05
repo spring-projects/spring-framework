@@ -112,6 +112,16 @@ public abstract class MimeTypeUtils {
 	public static final String APPLICATION_XML_VALUE = "application/xml";
 
 	/**
+	 * Public constant mime type for {@code application/zip}.
+	 */
+	public static final MimeType APPLICATION_ZIP;
+
+	/**
+	 * A String equivalent of {@link MimeTypeUtils#APPLICATION_ZIP}.
+	 */
+	public static final String APPLICATION_ZIP_VALUE = "application/zip";
+
+	/**
 	 * Public constant mime type for {@code image/gif}.
 	 */
 	public static final MimeType IMAGE_GIF;
@@ -185,6 +195,7 @@ public abstract class MimeTypeUtils {
 		APPLICATION_JSON = new MimeType("application", "json");
 		APPLICATION_OCTET_STREAM = new MimeType("application", "octet-stream");
 		APPLICATION_XML = new MimeType("application", "xml");
+		APPLICATION_ZIP = new MimeType("application", "zip");
 		IMAGE_GIF = new MimeType("image", "gif");
 		IMAGE_JPEG = new MimeType("image", "jpeg");
 		IMAGE_PNG = new MimeType("image", "png");
