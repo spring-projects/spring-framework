@@ -20,6 +20,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.function.Consumer;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.hint.JdkProxyHint;
@@ -28,8 +29,11 @@ import org.springframework.aot.hint.TypeReference;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.DescriptiveResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.aot.hint.predicate.RuntimeHintsPredicates.resource;
 
 /**
  * Tests for {@link RuntimeHintsUtils}.
@@ -40,6 +44,39 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RuntimeHintsUtilsTests {
 
 	private final RuntimeHints hints = new RuntimeHints();
+
+	@Test
+	void registerResourceIfNecessaryWithUnsupportedResourceType() {
+		DescriptiveResource resource = new DescriptiveResource("bogus");
+		RuntimeHintsUtils.registerResourceIfNecessary(this.hints, resource);
+		assertThat(this.hints.resources().resourcePatterns()).isEmpty();
+	}
+
+	@Test
+	void registerResourceIfNecessaryWithNonexistentClassPathResource() {
+		ClassPathResource resource = new ClassPathResource("bogus", getClass());
+		RuntimeHintsUtils.registerResourceIfNecessary(this.hints, resource);
+		assertThat(this.hints.resources().resourcePatterns()).isEmpty();
+	}
+
+	@Test
+	void registerResourceIfNecessaryWithExistingClassPathResource() {
+		String path = "org/springframework/aot/hint/support";
+		ClassPathResource resource = new ClassPathResource(path);
+		RuntimeHintsUtils.registerResourceIfNecessary(this.hints, resource);
+		assertThat(resource().forResource(path)).accepts(this.hints);
+	}
+
+	@Disabled("Disabled since ClassPathResource.getPath() does not honor its contract for relative resources")
+	@Test
+	void registerResourceIfNecessaryWithExistingRelativeClassPathResource() {
+		String path = "org/springframework/aot/hint/support";
+		ClassPathResource resource = new ClassPathResource("support", RuntimeHints.class);
+		RuntimeHintsUtils.registerResourceIfNecessary(this.hints, resource);
+		// This unfortunately fails since ClassPathResource.getPath() returns
+		// "support" instead of "org/springframework/aot/hint/support".
+		assertThat(resource().forResource(path)).accepts(this.hints);
+	}
 
 	@Test
 	@SuppressWarnings("deprecation")

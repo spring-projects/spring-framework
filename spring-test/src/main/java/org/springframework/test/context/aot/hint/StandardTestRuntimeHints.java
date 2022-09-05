@@ -20,7 +20,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.support.RuntimeHintsUtils;
 import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ActiveProfilesResolver;
 import org.springframework.test.context.ContextLoader;
@@ -50,12 +52,12 @@ class StandardTestRuntimeHints implements TestRuntimeHintsRegistrar {
 	public void registerHints(MergedContextConfiguration mergedConfig, List<Class<?>> testClasses,
 			RuntimeHints runtimeHints, ClassLoader classLoader) {
 
-		registerHintsForMergedContextConfiguration(runtimeHints, mergedConfig);
+		registerHintsForMergedContextConfiguration(runtimeHints, classLoader, mergedConfig);
 		testClasses.forEach(testClass -> registerHintsForActiveProfilesResolvers(runtimeHints, testClass));
 	}
 
 	private void registerHintsForMergedContextConfiguration(
-			RuntimeHints runtimeHints, MergedContextConfiguration mergedConfig) {
+			RuntimeHints runtimeHints, ClassLoader classLoader, MergedContextConfiguration mergedConfig) {
 
 		// @ContextConfiguration(loader = ...)
 		ContextLoader contextLoader = mergedConfig.getContextLoader();
@@ -68,14 +70,14 @@ class StandardTestRuntimeHints implements TestRuntimeHintsRegistrar {
 				.forEach(clazz -> registerDeclaredConstructors(runtimeHints, clazz));
 
 		// @ContextConfiguration(locations = ...)
-		registerClasspathResources(runtimeHints, mergedConfig.getLocations());
+		registerClasspathResources(mergedConfig.getLocations(), runtimeHints, classLoader);
 
 		// @TestPropertySource(locations = ... )
-		registerClasspathResources(runtimeHints, mergedConfig.getPropertySourceLocations());
+		registerClasspathResources(mergedConfig.getPropertySourceLocations(), runtimeHints, classLoader);
 
 		// @WebAppConfiguration(value = ...)
 		if (mergedConfig instanceof WebMergedContextConfiguration webConfig) {
-			registerClasspathResourceDirectoryStructure(runtimeHints, webConfig.getResourceBasePath());
+			registerClasspathResourceDirectoryStructure(webConfig.getResourceBasePath(), runtimeHints);
 		}
 	}
 
@@ -94,30 +96,26 @@ class StandardTestRuntimeHints implements TestRuntimeHintsRegistrar {
 		runtimeHints.reflection().registerType(type, INVOKE_DECLARED_CONSTRUCTORS);
 	}
 
-	private void registerClasspathResources(RuntimeHints runtimeHints, String... locations) {
-		Arrays.stream(locations)
-				.filter(location -> location.startsWith(CLASSPATH_URL_PREFIX))
-				.map(this::cleanClasspathResource)
-				.forEach(runtimeHints.resources()::registerPattern);
+	private void registerClasspathResources(String[] paths, RuntimeHints runtimeHints, ClassLoader classLoader) {
+		DefaultResourceLoader resourceLoader = new DefaultResourceLoader(classLoader);
+		Arrays.stream(paths)
+				.filter(path -> path.startsWith(CLASSPATH_URL_PREFIX))
+				.map(resourceLoader::getResource)
+				.forEach(resource -> RuntimeHintsUtils.registerResourceIfNecessary(runtimeHints, resource));
 	}
 
-	private void registerClasspathResourceDirectoryStructure(RuntimeHints runtimeHints, String directory) {
+	private void registerClasspathResourceDirectoryStructure(String directory, RuntimeHints runtimeHints) {
 		if (directory.startsWith(CLASSPATH_URL_PREFIX)) {
-			String pattern = cleanClasspathResource(directory);
+			String pattern = directory.substring(CLASSPATH_URL_PREFIX.length());
+			if (pattern.startsWith(SLASH)) {
+				pattern = pattern.substring(1);
+			}
 			if (!pattern.endsWith(SLASH)) {
 				pattern += SLASH;
 			}
 			pattern += "*";
 			runtimeHints.resources().registerPattern(pattern);
 		}
-	}
-
-	private String cleanClasspathResource(String location) {
-		location = location.substring(CLASSPATH_URL_PREFIX.length());
-		if (location.startsWith(SLASH)) {
-			location = location.substring(1);
-		}
-		return location;
 	}
 
 }
