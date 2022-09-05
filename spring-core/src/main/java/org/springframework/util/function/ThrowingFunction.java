@@ -99,6 +99,12 @@ public interface ThrowingFunction<T, R> extends Function<T, R> {
 	 * {@link ThrowingFunction} where the {@link #apply(Object)} method wraps
 	 * any checked exception thrown by the supplied lambda expression or method
 	 * reference.
+	 * <p>Usage examples are: <br>
+	 * <pre class="code">
+     * T t = ThrowingFunction.of(lambdaExpression).apply(argument);
+     * or
+     * myList.stream().map(ThrowingFunction.of(lambdaExpression));
+     * </pre>
 	 * @param <T> the type of the input to the function
 	 * @param <R> the type of the result of the function
 	 * @param function the source function
