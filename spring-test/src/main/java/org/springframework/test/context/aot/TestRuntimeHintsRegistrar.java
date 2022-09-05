@@ -45,13 +45,13 @@ public interface TestRuntimeHintsRegistrar {
 
 	/**
 	 * Contribute hints to the given {@link RuntimeHints} instance.
-	 * @param runtimeHints the {@code RuntimeHints} to use
 	 * @param mergedConfig the merged context configuration to process
 	 * @param testClasses the test classes that share the supplied merged context
 	 * configuration
+	 * @param runtimeHints the {@code RuntimeHints} to use
 	 * @param classLoader the classloader to use
 	 */
-	void registerHints(RuntimeHints runtimeHints, MergedContextConfiguration mergedConfig,
-			List<Class<?>> testClasses, ClassLoader classLoader);
+	void registerHints(MergedContextConfiguration mergedConfig, List<Class<?>> testClasses,
+			RuntimeHints runtimeHints, ClassLoader classLoader);
 
 }

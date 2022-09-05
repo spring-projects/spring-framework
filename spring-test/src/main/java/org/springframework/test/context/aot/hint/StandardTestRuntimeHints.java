@@ -47,8 +47,8 @@ class StandardTestRuntimeHints implements TestRuntimeHintsRegistrar {
 
 
 	@Override
-	public void registerHints(RuntimeHints runtimeHints, MergedContextConfiguration mergedConfig,
-			List<Class<?>> testClasses, ClassLoader classLoader) {
+	public void registerHints(MergedContextConfiguration mergedConfig, List<Class<?>> testClasses,
+			RuntimeHints runtimeHints, ClassLoader classLoader) {
 
 		registerHintsForMergedContextConfiguration(runtimeHints, mergedConfig);
 		testClasses.forEach(testClass -> registerHintsForActiveProfilesResolvers(runtimeHints, testClass));

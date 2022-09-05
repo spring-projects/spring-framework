@@ -120,8 +120,8 @@ public class TestContextAotGenerator {
 			logger.debug(LogMessage.format("Generating AOT artifacts for test classes %s",
 					testClasses.stream().map(Class::getName).toList()));
 			try {
-				this.testRuntimeHintsRegistrars.forEach(registrar -> registrar.registerHints(this.runtimeHints,
-						mergedConfig, Collections.unmodifiableList(testClasses), getClass().getClassLoader()));
+				this.testRuntimeHintsRegistrars.forEach(registrar -> registrar.registerHints(mergedConfig,
+						Collections.unmodifiableList(testClasses), this.runtimeHints, getClass().getClassLoader()));
 
 				// Use first test class discovered for a given unique MergedContextConfiguration.
 				Class<?> testClass = testClasses.get(0);
