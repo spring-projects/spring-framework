@@ -28,13 +28,10 @@ import org.springframework.aot.test.agent.EnabledIfRuntimeHintsAgent;
 import org.springframework.aot.test.agent.RuntimeHintsInvocations;
 import org.springframework.aot.test.agent.RuntimeHintsRecorder;
 import org.springframework.aot.test.generator.compile.TestCompiler;
-import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.annotation.AnnotationConfigUtils;
-import org.springframework.context.annotation.CommonAnnotationBeanPostProcessor;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.aot.ApplicationContextAotGenerator;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.testfixture.context.generator.SimpleComponent;
@@ -45,7 +42,7 @@ import org.springframework.core.testfixture.aot.generate.TestGenerationContext;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests the {@link org.springframework.aot.hint.RuntimeHints} generation in {@link ApplicationContextAotGenerator}.
+ * Tests the {@link RuntimeHints} generation in {@link ApplicationContextAotGenerator}.
  *
  * @author Brian Clozel
  * @author Stephane Nicoll
@@ -55,17 +52,14 @@ class ApplicationContextAotGeneratorRuntimeHintsTests {
 
 	@Test
 	void generateApplicationContextWithSimpleBean() {
-		GenericApplicationContext context = new GenericApplicationContext();
+		GenericApplicationContext context = new AnnotationConfigApplicationContext();
 		context.registerBeanDefinition("test", new RootBeanDefinition(SimpleComponent.class));
 		compile(context, (hints, invocations) -> assertThat(invocations).match(hints));
 	}
 
 	@Test
 	void generateApplicationContextWithAutowiring() {
-		GenericApplicationContext context = new GenericApplicationContext();
-		context.registerBeanDefinition(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME,
-				BeanDefinitionBuilder.rootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class)
-						.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
+		GenericApplicationContext context = new AnnotationConfigApplicationContext();
 		context.registerBeanDefinition("autowiredComponent", new RootBeanDefinition(AutowiredComponent.class));
 		context.registerBeanDefinition("number", BeanDefinitionBuilder.rootBeanDefinition(Integer.class, "valueOf")
 				.addConstructorArgValue("42").getBeanDefinition());
@@ -74,28 +68,23 @@ class ApplicationContextAotGeneratorRuntimeHintsTests {
 
 	@Test
 	void generateApplicationContextWithInitDestroyMethods() {
-		GenericApplicationContext context = new GenericApplicationContext();
-		context.registerBeanDefinition(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME,
-				BeanDefinitionBuilder.rootBeanDefinition(CommonAnnotationBeanPostProcessor.class)
-						.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
+		GenericApplicationContext context = new AnnotationConfigApplicationContext();
 		context.registerBeanDefinition("initDestroyComponent", new RootBeanDefinition(InitDestroyComponent.class));
-		compile(context, (hints, invocations) -> assertThat(invocations).withRegistrar(new InitDestroyIssueRegistrar()).match(hints));
+		compile(context, (hints, invocations) -> assertThat(invocations).match(hints));
 	}
 
 	@Test
 	void generateApplicationContextWithMultipleInitDestroyMethods() {
-		GenericApplicationContext context = new GenericApplicationContext();
-		context.registerBeanDefinition(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME,
-				BeanDefinitionBuilder.rootBeanDefinition(CommonAnnotationBeanPostProcessor.class)
-						.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
+		GenericApplicationContext context = new AnnotationConfigApplicationContext();
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(InitDestroyComponent.class);
 		beanDefinition.setInitMethodName("customInit");
 		beanDefinition.setDestroyMethodName("customDestroy");
 		context.registerBeanDefinition("initDestroyComponent", beanDefinition);
-		compile(context, (hints, invocations) -> assertThat(invocations).withRegistrar(new InitDestroyIssueRegistrar()).match(hints));
+		compile(context, (hints, invocations) -> assertThat(invocations)
+				.withRegistrar(new InitDestroyIssueRegistrar()).match(hints));
 	}
 
-	// TODO: Remove once https://github.com/spring-projects/spring-framework/issues/28215 is fixed
+	// TODO: Remove once https://github.com/spring-projects/spring-framework/issues/29077 is fixed
 	static class InitDestroyIssueRegistrar implements RuntimeHintsRegistrar {
 		@Override
 		public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
@@ -105,7 +94,7 @@ class ApplicationContextAotGeneratorRuntimeHintsTests {
 		}
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void compile(GenericApplicationContext applicationContext, BiConsumer<RuntimeHints, RuntimeHintsInvocations> initializationResult) {
 		ApplicationContextAotGenerator generator = new ApplicationContextAotGenerator();
 		TestGenerationContext generationContext = new TestGenerationContext();
