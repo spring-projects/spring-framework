@@ -29,6 +29,7 @@ import org.springframework.aot.hint.SerializationHints;
  *
  * @author Sebastien Deleuze
  * @author Stephane Nicoll
+ * @author Janne Valkealahti
  * @since 6.0
  * @see <a href="https://www.graalvm.org/22.1/reference-manual/native-image/BuildConfiguration/">Native Image Build Configuration</a>
  */
@@ -51,6 +52,9 @@ public abstract class NativeConfigurationWriter {
 		if (hints.resources().resourcePatterns().findAny().isPresent() ||
 				hints.resources().resourceBundles().findAny().isPresent()) {
 			writeResourceHints(hints.resources());
+		}
+		if (hints.jni().typeHints().findAny().isPresent()) {
+			writeJniHints(hints.jni());
 		}
 	}
 
@@ -80,6 +84,11 @@ public abstract class NativeConfigurationWriter {
 	private void writeResourceHints(ResourceHints hints) {
 		writeTo("resource-config.json", writer ->
 				ResourceHintsWriter.INSTANCE.write(writer, hints));
+	}
+
+	private void writeJniHints(ReflectionHints hints) {
+		writeTo("jni-config.json", writer ->
+				ReflectionHintsWriter.INSTANCE.write(writer, hints));
 	}
 
 }
