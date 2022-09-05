@@ -35,8 +35,8 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.test.generate.TestGenerationContext;
-import org.springframework.aot.test.generator.compile.Compiled;
-import org.springframework.aot.test.generator.compile.TestCompiler;
+import org.springframework.aot.test.generate.compile.Compiled;
+import org.springframework.aot.test.generate.compile.TestCompiler;
 import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.RuntimeBeanNameReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
