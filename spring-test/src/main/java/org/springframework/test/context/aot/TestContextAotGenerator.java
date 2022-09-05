@@ -210,9 +210,12 @@ public class TestContextAotGenerator {
 		// @BootstrapWith
 		registerDeclaredConstructors(testContextBootstrapper.getClass());
 		// @TestExecutionListeners
-		testContextBootstrapper.getTestExecutionListeners().stream()
-				.map(Object::getClass)
-				.forEach(this::registerDeclaredConstructors);
+		testContextBootstrapper.getTestExecutionListeners().forEach(listener -> {
+			registerDeclaredConstructors(listener.getClass());
+			if (listener instanceof AotTestExecutionListener aotListener) {
+				aotListener.processAheadOfTime(testClass, this.runtimeHints, getClass().getClassLoader());
+			}
+		});
 		return testContextBootstrapper.buildMergedContextConfiguration();
 	}
 
