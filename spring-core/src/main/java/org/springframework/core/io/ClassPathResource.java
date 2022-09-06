@@ -46,10 +46,10 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	private final String path;
 
 	@Nullable
-	private ClassLoader classLoader;
+	private final ClassLoader classLoader;
 
 	@Nullable
-	private Class<?> clazz;
+	private final Class<?> clazz;
 
 
 	/**
@@ -83,6 +83,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 		}
 		this.path = pathToUse;
 		this.classLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
+		this.clazz = null;
 	}
 
 	/**
@@ -96,6 +97,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	public ClassPathResource(String path, @Nullable Class<?> clazz) {
 		Assert.notNull(path, "Path must not be null");
 		this.path = StringUtils.cleanPath(path);
+		this.classLoader = null;
 		this.clazz = clazz;
 	}
 
