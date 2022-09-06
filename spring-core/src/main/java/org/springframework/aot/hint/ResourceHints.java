@@ -118,6 +118,7 @@ public class ResourceHints {
 	 * availability accordingly.
 	 * @param resource the resource to register
 	 * @see #registerPattern(String)
+	 * @see ClassPathResource#getAbsolutePath()
 	 */
 	public void registerResourceIfNecessary(Resource resource) {
 		if (resource instanceof ClassPathResource classPathResource && classPathResource.exists()) {
