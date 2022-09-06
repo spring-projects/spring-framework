@@ -16,6 +16,7 @@
 
 package org.springframework.aot.agent;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.Comparator;
@@ -186,6 +187,18 @@ class InstrumentedMethodTests {
 		}
 
 		@Test
+		void classGetConstructorsShouldNotMatchTypeReflectionHint() {
+			hints.reflection().registerType(String.class);
+			assertThatInvocationDoesNotMatch(InstrumentedMethod.CLASS_GETCONSTRUCTORS, this.stringGetConstructors);
+		}
+
+		@Test
+		void classGetConstructorsShouldMatchConstructorReflectionHint() throws Exception {
+			hints.reflection().registerConstructor(String.class.getConstructor());
+			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETCONSTRUCTORS, this.stringGetConstructors);
+		}
+
+		@Test
 		void classGetDeclaredConstructorShouldMatchIntrospectDeclaredConstructorsHint() {
 			hints.reflection().registerType(String.class, MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS);
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETDECLAREDCONSTRUCTOR, this.stringGetDeclaredConstructor);
@@ -229,6 +242,17 @@ class InstrumentedMethodTests {
 			assertThatInvocationDoesNotMatch(InstrumentedMethod.CLASS_GETDECLAREDCONSTRUCTORS, this.stringGetDeclaredConstructors);
 		}
 
+		@Test
+		void classGetDeclaredConstructorsShouldNotMatchTypeReflectionHint() {
+			hints.reflection().registerType(String.class);
+			assertThatInvocationDoesNotMatch(InstrumentedMethod.CLASS_GETDECLAREDCONSTRUCTORS, this.stringGetDeclaredConstructors);
+		}
+
+		@Test
+		void classGetDeclaredConstructorsShouldMatchConstructorReflectionHint() throws Exception {
+			hints.reflection().registerConstructor(String.class.getConstructor());
+			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETDECLAREDCONSTRUCTORS, this.stringGetDeclaredConstructors);
+		}
 
 		@Test
 		void constructorNewInstanceShouldMatchInvokeHintOnConstructor() throws NoSuchMethodException {
@@ -257,6 +281,8 @@ class InstrumentedMethodTests {
 
 		RecordedInvocation stringGetScaleMethod;
 
+		RecordedInvocation stringGetMethods;
+
 		@BeforeEach
 		void setup() throws Exception {
 			this.stringGetToStringMethod = RecordedInvocation.of(InstrumentedMethod.CLASS_GETMETHOD)
@@ -265,6 +291,8 @@ class InstrumentedMethodTests {
 			this.stringGetScaleMethod = RecordedInvocation.of(InstrumentedMethod.CLASS_GETDECLAREDMETHOD)
 					.onInstance(String.class).withArguments("scale", new Class[] { int.class, float.class })
 					.returnValue(String.class.getDeclaredMethod("scale", int.class, float.class)).build();
+			this.stringGetMethods = RecordedInvocation.of(InstrumentedMethod.CLASS_GETMETHODS)
+					.onInstance(String.class).returnValue(String.class.getMethods()).build();
 		}
 
 		@Test
@@ -309,60 +337,79 @@ class InstrumentedMethodTests {
 		}
 
 		@Test
-		void classGetDeclaredMethodsShouldMatchIntrospectPublicMethodsHint() {
+		void classGetDeclaredMethodsShouldNotMatchIntrospectPublicMethodsHint() {
 			hints.reflection().registerType(String.class, MemberCategory.INTROSPECT_PUBLIC_METHODS);
 			assertThatInvocationDoesNotMatch(InstrumentedMethod.CLASS_GETDECLAREDMETHODS, this.stringGetScaleMethod);
 		}
 
 		@Test
+		void classGetDeclaredMethodsShouldNotMatchTypeReflectionHint() {
+			hints.reflection().registerType(String.class);
+			assertThatInvocationDoesNotMatch(InstrumentedMethod.CLASS_GETDECLAREDMETHODS, this.stringGetScaleMethod);
+		}
+
+		@Test
+		void classGetDeclaredMethodsShouldMatchMethodReflectionHint() throws Exception {
+			hints.reflection().registerMethod(String.class.getMethod("toString"));
+			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETDECLAREDMETHODS, this.stringGetScaleMethod);
+		}
+
+		@Test
 		void classGetMethodsShouldMatchInstrospectDeclaredMethodsHint() {
-			RecordedInvocation invocation = RecordedInvocation.of(InstrumentedMethod.CLASS_GETMETHODS).onInstance(String.class).build();
 			hints.reflection().registerType(String.class, MemberCategory.INTROSPECT_DECLARED_METHODS);
-			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETMETHODS, invocation);
+			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETMETHODS, this.stringGetMethods);
 		}
 
 		@Test
 		void classGetMethodsShouldMatchInstrospectPublicMethodsHint() {
-			RecordedInvocation invocation = RecordedInvocation.of(InstrumentedMethod.CLASS_GETMETHODS).onInstance(String.class).build();
 			hints.reflection().registerType(String.class, MemberCategory.INTROSPECT_PUBLIC_METHODS);
-			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETMETHODS, invocation);
+			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETMETHODS, this.stringGetMethods);
 		}
 
 		@Test
 		void classGetMethodsShouldMatchInvokeDeclaredMethodsHint() {
-			RecordedInvocation invocation = RecordedInvocation.of(InstrumentedMethod.CLASS_GETMETHODS).onInstance(String.class).build();
 			hints.reflection().registerType(String.class, MemberCategory.INVOKE_DECLARED_METHODS);
-			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETMETHODS, invocation);
+			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETMETHODS, this.stringGetMethods);
 		}
 
 		@Test
 		void classGetMethodsShouldMatchInvokePublicMethodsHint() {
-			RecordedInvocation invocation = RecordedInvocation.of(InstrumentedMethod.CLASS_GETMETHODS).onInstance(String.class).build();
 			hints.reflection().registerType(String.class, MemberCategory.INVOKE_PUBLIC_METHODS);
-			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETMETHODS, invocation);
+			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETMETHODS, this.stringGetMethods);
 		}
 
 		@Test
 		void classGetMethodsShouldNotMatchForWrongType() {
-			RecordedInvocation invocation = RecordedInvocation.of(InstrumentedMethod.CLASS_GETMETHODS).onInstance(String.class).build();
 			hints.reflection().registerType(Integer.class, MemberCategory.INTROSPECT_PUBLIC_METHODS);
-			assertThatInvocationDoesNotMatch(InstrumentedMethod.CLASS_GETMETHODS, invocation);
+			assertThatInvocationDoesNotMatch(InstrumentedMethod.CLASS_GETMETHODS, this.stringGetMethods);
 		}
 
 		@Test
-		void classGetMethodShouldMatchInstrospectPublicMethodsHint() throws NoSuchMethodException {
+		void classGetMethodsShouldNotMatchTypeReflectionHint() {
+			hints.reflection().registerType(String.class);
+			assertThatInvocationDoesNotMatch(InstrumentedMethod.CLASS_GETMETHODS, this.stringGetMethods);
+		}
+
+		@Test
+		void classGetMethodsShouldMatchMethodReflectionHint() throws Exception {
+			hints.reflection().registerMethod(String.class.getMethod("toString"));
+			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETMETHODS, this.stringGetMethods);
+		}
+
+		@Test
+		void classGetMethodShouldMatchInstrospectPublicMethodsHint() {
 			hints.reflection().registerType(String.class, MemberCategory.INTROSPECT_PUBLIC_METHODS);
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETMETHOD, this.stringGetToStringMethod);
 		}
 
 		@Test
-		void classGetMethodShouldMatchInvokePublicMethodsHint() throws NoSuchMethodException {
+		void classGetMethodShouldMatchInvokePublicMethodsHint() {
 			hints.reflection().registerType(String.class, MemberCategory.INVOKE_PUBLIC_METHODS);
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETMETHOD, this.stringGetToStringMethod);
 		}
 
 		@Test
-		void classGetMethodShouldMatchInstrospectDeclaredMethodsHint() throws NoSuchMethodException {
+		void classGetMethodShouldMatchIntrospectDeclaredMethodsHint() {
 			hints.reflection().registerType(String.class, MemberCategory.INTROSPECT_DECLARED_METHODS);
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETMETHOD, this.stringGetToStringMethod);
 		}
@@ -406,6 +453,28 @@ class InstrumentedMethodTests {
 		}
 
 		@Test
+		void methodGetAnnotationsShouldMatchIntrospectHintOnMethod() throws NoSuchMethodException {
+			Method toString = String.class.getMethod("toString");
+			RecordedInvocation invocation = RecordedInvocation.of(InstrumentedMethod.METHOD_GETANNOTATIONS)
+					.onInstance(toString).withArguments("testString")
+					.returnValue(toString.getAnnotations()).build();
+			hints.reflection().registerType(String.class, typeHint -> typeHint.withMethod("toString",
+					Collections.emptyList(), ExecutableMode.INTROSPECT));
+			assertThatInvocationMatches(InstrumentedMethod.METHOD_GETANNOTATIONS, invocation);
+		}
+
+		@Test
+		void methodGetParameterTypesShouldMatchIntrospectHintOnMethod() throws NoSuchMethodException {
+			Method toString = String.class.getMethod("toString");
+			RecordedInvocation invocation = RecordedInvocation.of(InstrumentedMethod.METHOD_GETPARAMETERTYPES)
+					.onInstance(toString).withArguments("testString")
+					.returnValue(toString.getParameterTypes()).build();
+			hints.reflection().registerType(String.class, typeHint -> typeHint.withMethod("toString",
+					Collections.emptyList(), ExecutableMode.INTROSPECT));
+			assertThatInvocationMatches(InstrumentedMethod.METHOD_GETPARAMETERTYPES, invocation);
+		}
+
+		@Test
 		void methodInvokeShouldMatchInvokeHintOnMethod() throws NoSuchMethodException {
 			RecordedInvocation invocation = RecordedInvocation.of(InstrumentedMethod.METHOD_INVOKE)
 					.onInstance(String.class.getMethod("startsWith", String.class)).withArguments("testString", new Object[] { "test" }).build();
@@ -432,6 +501,10 @@ class InstrumentedMethodTests {
 
 		RecordedInvocation stringGetDeclaredField;
 
+		RecordedInvocation stringGetDeclaredFields;
+
+		RecordedInvocation stringGetFields;
+
 		@BeforeEach
 		void setup() throws Exception {
 			this.getPublicField = RecordedInvocation.of(InstrumentedMethod.CLASS_GETFIELD)
@@ -439,6 +512,10 @@ class InstrumentedMethodTests {
 					.returnValue(PublicField.class.getField("field")).build();
 			this.stringGetDeclaredField = RecordedInvocation.of(InstrumentedMethod.CLASS_GETDECLAREDFIELD)
 					.onInstance(String.class).withArgument("value").returnValue(String.class.getDeclaredField("value")).build();
+			this.stringGetDeclaredFields = RecordedInvocation.of(InstrumentedMethod.CLASS_GETDECLAREDFIELDS)
+					.onInstance(String.class).returnValue(String.class.getDeclaredFields()).build();
+			this.stringGetFields = RecordedInvocation.of(InstrumentedMethod.CLASS_GETFIELDS)
+					.onInstance(String.class).returnValue(String.class.getFields()).build();
 		}
 
 		@Test
@@ -461,16 +538,26 @@ class InstrumentedMethodTests {
 
 		@Test
 		void classGetDeclaredFieldsShouldMatchDeclaredFieldsHint() {
-			RecordedInvocation invocation = RecordedInvocation.of(InstrumentedMethod.CLASS_GETDECLAREDFIELDS).onInstance(String.class).build();
 			hints.reflection().registerType(String.class, MemberCategory.DECLARED_FIELDS);
-			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETDECLAREDFIELDS, invocation);
+			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETDECLAREDFIELDS, this.stringGetDeclaredFields);
 		}
 
 		@Test
 		void classGetDeclaredFieldsShouldNotMatchPublicFieldsHint() {
-			RecordedInvocation invocation = RecordedInvocation.of(InstrumentedMethod.CLASS_GETDECLAREDFIELDS).onInstance(String.class).build();
 			hints.reflection().registerType(String.class, MemberCategory.PUBLIC_FIELDS);
-			assertThatInvocationDoesNotMatch(InstrumentedMethod.CLASS_GETDECLAREDFIELDS, invocation);
+			assertThatInvocationDoesNotMatch(InstrumentedMethod.CLASS_GETDECLAREDFIELDS, this.stringGetDeclaredFields);
+		}
+
+		@Test
+		void classGetDeclaredFieldsShouldNotMatchTypeHint() {
+			hints.reflection().registerType(String.class);
+			assertThatInvocationDoesNotMatch(InstrumentedMethod.CLASS_GETDECLAREDFIELDS, this.stringGetDeclaredFields);
+		}
+
+		@Test
+		void classGetDeclaredFieldsShouldMatchFieldHint() throws Exception {
+			hints.reflection().registerField(String.class.getDeclaredField("value"));
+			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETDECLAREDFIELDS, this.stringGetDeclaredFields);
 		}
 
 		@Test
@@ -529,6 +616,19 @@ class InstrumentedMethodTests {
 					.onInstance(PublicField.class).build();
 			hints.reflection().registerType(PublicField.class, MemberCategory.DECLARED_FIELDS);
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETFIELDS, invocation);
+		}
+
+
+		@Test
+		void classGetFieldsShouldNotMatchTypeHint() {
+			hints.reflection().registerType(String.class);
+			assertThatInvocationDoesNotMatch(InstrumentedMethod.CLASS_GETFIELDS, this.stringGetFields);
+		}
+
+		@Test
+		void classGetFieldsShouldMatchFieldHint() throws Exception {
+			hints.reflection().registerField(String.class.getDeclaredField("value"));
+			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETFIELDS, this.stringGetFields);
 		}
 
 	}

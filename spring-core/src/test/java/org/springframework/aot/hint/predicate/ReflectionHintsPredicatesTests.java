@@ -18,6 +18,8 @@ package org.springframework.aot.hint.predicate;
 
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.function.Predicate;
 
@@ -45,6 +47,14 @@ class ReflectionHintsPredicatesTests {
 
 	private static Constructor<?> publicConstructor;
 
+	private static Method privateMethod;
+
+	private static Method publicMethod;
+
+	private static Field privateField;
+
+	private static Field publicField;
+
 	private final ReflectionHintsPredicates reflection = new ReflectionHintsPredicates();
 
 	private final RuntimeHints runtimeHints = new RuntimeHints();
@@ -54,6 +64,10 @@ class ReflectionHintsPredicatesTests {
 	static void setupAll() throws Exception {
 		privateConstructor = SampleClass.class.getDeclaredConstructor(String.class);
 		publicConstructor = SampleClass.class.getConstructor();
+		privateMethod = SampleClass.class.getDeclaredMethod("privateMethod");
+		publicMethod = SampleClass.class.getMethod("publicMethod");
+		privateField = SampleClass.class.getDeclaredField("privateField");
+		publicField = SampleClass.class.getField("publicField");
 	}
 
 	@Nested
@@ -289,6 +303,18 @@ class ReflectionHintsPredicatesTests {
 			assertPredicateMatches(reflection.onConstructor(privateConstructor).invoke());
 		}
 
+		@Test
+		void reflectionOnAnyConstructorDoesNotMatchTypeReflection() {
+			runtimeHints.reflection().registerType(SampleClass.class);
+			assertPredicateDoesNotMatch(reflection.onType(SampleClass.class).withAnyConstructor());
+		}
+
+		@Test
+		void reflectionOnAnyConstructorMatchesConstructorReflection() {
+			runtimeHints.reflection().registerConstructor(publicConstructor);
+			assertPredicateMatches(reflection.onType(SampleClass.class).withAnyConstructor());
+		}
+
 	}
 
 	@Nested
@@ -432,6 +458,18 @@ class ReflectionHintsPredicatesTests {
 			assertPredicateMatches(reflection.onMethod(SampleClass.class, "privateMethod").invoke());
 		}
 
+		@Test
+		void reflectionOnAnyMethodDoesNotMatchTypeReflection() {
+			runtimeHints.reflection().registerType(SampleClass.class);
+			assertPredicateDoesNotMatch(reflection.onType(SampleClass.class).withAnyMethod());
+		}
+
+		@Test
+		void reflectionOnAnyMethodMatchesMethodReflection() {
+			runtimeHints.reflection().registerMethod(publicMethod);
+			assertPredicateMatches(reflection.onType(SampleClass.class).withAnyMethod());
+		}
+
 	}
 
 	@Nested
@@ -503,6 +541,18 @@ class ReflectionHintsPredicatesTests {
 		void privateFieldReflectionMatchesDeclaredFieldsHint() {
 			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.DECLARED_FIELDS);
 			assertPredicateMatches(reflection.onField(SampleClass.class, "privateField"));
+		}
+
+		@Test
+		void reflectionOnAnyFieldDoesNotMatchTypeReflection() {
+			runtimeHints.reflection().registerType(SampleClass.class);
+			assertPredicateDoesNotMatch(reflection.onType(SampleClass.class).withAnyField());
+		}
+
+		@Test
+		void reflectionOnAnyFieldMatchesFieldReflection() {
+			runtimeHints.reflection().registerField(publicField);
+			assertPredicateMatches(reflection.onType(SampleClass.class).withAnyField());
 		}
 
 	}
