@@ -47,6 +47,8 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 
 	private final String path;
 
+	private final String absolutePath;
+
 	@Nullable
 	private final ClassLoader classLoader;
 
@@ -83,6 +85,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 			pathToUse = pathToUse.substring(1);
 		}
 		this.path = pathToUse;
+		this.absolutePath = pathToUse;
 		this.classLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
 		this.clazz = null;
 	}
@@ -100,6 +103,16 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	public ClassPathResource(String path, @Nullable Class<?> clazz) {
 		Assert.notNull(path, "Path must not be null");
 		this.path = StringUtils.cleanPath(path);
+
+		String absolutePath = this.path;
+		if (clazz != null && !absolutePath.startsWith("/")) {
+			absolutePath = ClassUtils.classPackageAsResourcePath(clazz) + "/" + absolutePath;
+		}
+		else if (absolutePath.startsWith("/")) {
+			absolutePath = absolutePath.substring(1);
+		}
+		this.absolutePath = absolutePath;
+
 		this.classLoader = null;
 		this.clazz = clazz;
 	}
@@ -117,9 +130,22 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 * {@link ClassPathResource#ClassPathResource(String, Class)}, the
 	 * returned path is a {@linkplain StringUtils#cleanPath(String) cleaned}
 	 * version of the <em>relative path</em> supplied to the constructor.
+	 * <p>If you need the <em>absolute path</em>, use {@link #getAbsolutePath()}
+	 * instead.
+	 * @see #getAbsolutePath()
 	 */
 	public final String getPath() {
 		return this.path;
+	}
+
+	/**
+	 * Return the <em>absolute path</em> for this resource, as a resource path
+	 * within the class path.
+	 * @since 6.0
+	 * @see #getPath()
+	 */
+	public final String getAbsolutePath() {
+		return this.absolutePath;
 	}
 
 	/**
@@ -245,18 +271,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 */
 	@Override
 	public String getDescription() {
-		StringBuilder builder = new StringBuilder("class path resource [");
-		String pathToUse = this.path;
-		if (this.clazz != null && !pathToUse.startsWith("/")) {
-			builder.append(ClassUtils.classPackageAsResourcePath(this.clazz));
-			builder.append('/');
-		}
-		if (pathToUse.startsWith("/")) {
-			pathToUse = pathToUse.substring(1);
-		}
-		builder.append(pathToUse);
-		builder.append(']');
-		return builder.toString();
+		return "class path resource [" + this.absolutePath + ']';
 	}
 
 

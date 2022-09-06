@@ -121,7 +121,7 @@ public class ResourceHints {
 	 */
 	public void registerResourceIfNecessary(Resource resource) {
 		if (resource instanceof ClassPathResource classPathResource && classPathResource.exists()) {
-			registerPattern(classPathResource.getPath());
+			registerPattern(classPathResource.getAbsolutePath());
 		}
 	}
 

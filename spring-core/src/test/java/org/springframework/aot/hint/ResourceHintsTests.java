@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.hint.ResourceHintsTests.Nested.Inner;
@@ -136,14 +135,11 @@ class ResourceHintsTests {
 		assertThat(this.resourceHints.resourcePatterns()).singleElement().satisfies(patternOf(path));
 	}
 
-	@Disabled("Disabled since ClassPathResource.getPath() does not honor its contract for relative resources")
 	@Test
 	void registerResourceIfNecessaryWithExistingRelativeClassPathResource() {
 		String path = "org/springframework/aot/hint/support";
 		ClassPathResource resource = new ClassPathResource("support", RuntimeHints.class);
 		this.resourceHints.registerResourceIfNecessary(resource);
-		// This unfortunately fails since ClassPathResource.getPath() returns
-		// "support" instead of "org/springframework/aot/hint/support".
 		assertThat(this.resourceHints.resourcePatterns()).singleElement().satisfies(patternOf(path));
 	}
 
