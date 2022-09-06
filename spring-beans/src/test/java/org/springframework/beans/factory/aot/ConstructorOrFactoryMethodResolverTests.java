@@ -200,8 +200,9 @@ class ConstructorOrFactoryMethodResolverTests {
 		BeanDefinition beanDefinition = BeanDefinitionBuilder
 				.rootBeanDefinition(MultiConstructorSample.class)
 				.addConstructorArgValue(Locale.ENGLISH).getBeanDefinition();
-		Executable executable = resolve(new DefaultListableBeanFactory(), beanDefinition);
-		assertThat(executable).isNull();
+		assertThatIllegalStateException().isThrownBy(() -> resolve(new DefaultListableBeanFactory(), beanDefinition))
+				.withMessageContaining(MultiConstructorSample.class.getName())
+				.withMessageContaining("and argument types [java.util.Locale]");
 	}
 
 	@Test
@@ -212,8 +213,9 @@ class ConstructorOrFactoryMethodResolverTests {
 						.rootBeanDefinition(Locale.class, "getDefault")
 						.getBeanDefinition())
 				.getBeanDefinition();
-		Executable executable = resolve(new DefaultListableBeanFactory(), beanDefinition);
-		assertThat(executable).isNull();
+		assertThatIllegalStateException().isThrownBy(() -> resolve(new DefaultListableBeanFactory(), beanDefinition))
+				.withMessageContaining(MultiConstructorSample.class.getName())
+				.withMessageContaining("and argument types [java.util.Locale]");
 	}
 
 	@Test
@@ -338,7 +340,6 @@ class ConstructorOrFactoryMethodResolverTests {
 	}
 
 
-	@Nullable
 	private Executable resolve(DefaultListableBeanFactory beanFactory, BeanDefinition beanDefinition) {
 		return new ConstructorOrFactoryMethodResolver(beanFactory).resolve(beanDefinition);
 	}

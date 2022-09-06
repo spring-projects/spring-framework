@@ -18,7 +18,6 @@ package org.springframework.beans.factory.aot;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -74,7 +73,6 @@ class ConstructorOrFactoryMethodResolver {
 	}
 
 
-	@Nullable
 	Executable resolve(BeanDefinition beanDefinition) {
 		Supplier<ResolvableType> beanType = () -> getBeanType(beanDefinition);
 		List<ResolvableType> valueTypes = (beanDefinition.hasConstructorArgumentValues() ?
@@ -93,7 +91,13 @@ class ConstructorOrFactoryMethodResolver {
 			Assert.state(isCompatible, () -> String.format(
 					"Incompatible target type '%s' for factory bean '%s'",
 					resolvableType.toClass().getName(), factoryBeanClass.getName()));
-			return resolveConstructor(() -> ResolvableType.forClass(factoryBeanClass), valueTypes);
+			Executable executable = resolveConstructor(() -> ResolvableType.forClass(factoryBeanClass), valueTypes);
+			if (executable != null) {
+				return executable;
+			}
+			throw new IllegalStateException("No suitable FactoryBean constructor found for "
+					+ beanDefinition + " and argument types " + valueTypes);
+
 		}
 
 		Executable resolvedConstructor = resolveConstructor(beanType, valueTypes);
@@ -101,13 +105,8 @@ class ConstructorOrFactoryMethodResolver {
 			return resolvedConstructor;
 		}
 
-		Field field = ReflectionUtils.findField(RootBeanDefinition.class, "resolvedConstructorOrFactoryMethod");
-		if (field != null) {
-			ReflectionUtils.makeAccessible(field);
-			return (Executable) ReflectionUtils.getField(field, beanDefinition);
-		}
-
-		return null;
+		throw new IllegalStateException("No constructor or factory method candidate found for "
+				+ beanDefinition + " and argument types " + valueTypes);
 	}
 
 	private List<ResolvableType> determineParameterValueTypes(
@@ -390,7 +389,6 @@ class ConstructorOrFactoryMethodResolver {
 		}
 	}
 
-	@Nullable
 	static Executable resolve(RegisteredBean registeredBean) {
 		return new ConstructorOrFactoryMethodResolver(registeredBean.getBeanFactory())
 				.resolve(registeredBean.getMergedBeanDefinition());
