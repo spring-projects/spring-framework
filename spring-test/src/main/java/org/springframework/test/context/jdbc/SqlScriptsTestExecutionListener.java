@@ -28,7 +28,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.support.RuntimeHintsUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.io.ByteArrayResource;
@@ -397,7 +396,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		Arrays.stream(paths)
 				.filter(path -> path.startsWith(CLASSPATH_URL_PREFIX))
 				.map(resourceLoader::getResource)
-				.forEach(resource -> RuntimeHintsUtils.registerResourceIfNecessary(runtimeHints, resource));
+				.forEach(runtimeHints.resources()::registerResourceIfNecessary);
 	}
 
 }

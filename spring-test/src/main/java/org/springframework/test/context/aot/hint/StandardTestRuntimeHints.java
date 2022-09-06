@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.support.RuntimeHintsUtils;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.test.context.ActiveProfiles;
@@ -101,7 +100,7 @@ class StandardTestRuntimeHints implements TestRuntimeHintsRegistrar {
 		Arrays.stream(paths)
 				.filter(path -> path.startsWith(CLASSPATH_URL_PREFIX))
 				.map(resourceLoader::getResource)
-				.forEach(resource -> RuntimeHintsUtils.registerResourceIfNecessary(runtimeHints, resource));
+				.forEach(runtimeHints.resources()::registerResourceIfNecessary);
 	}
 
 	private void registerClasspathResourceDirectoryStructure(String directory, RuntimeHints runtimeHints) {

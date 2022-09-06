@@ -24,12 +24,15 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 
 /**
  * Gather the need for resources available at runtime.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.0
  */
 public class ResourceHints {
@@ -75,7 +78,8 @@ public class ResourceHints {
 	 * @param resourceHint a builder to customize the resource pattern
 	 * @return {@code this}, to facilitate method chaining
 	 */
-	public ResourceHints registerPatternIfPresent(@Nullable ClassLoader classLoader, String location, Consumer<ResourcePatternHints.Builder> resourceHint) {
+	public ResourceHints registerPatternIfPresent(@Nullable ClassLoader classLoader, String location,
+			Consumer<ResourcePatternHints.Builder> resourceHint) {
 		ClassLoader classLoaderToUse = (classLoader != null) ? classLoader : getClass().getClassLoader();
 		if (classLoaderToUse.getResource(location) != null) {
 			registerPattern(resourceHint);
@@ -106,6 +110,19 @@ public class ResourceHints {
 	 */
 	public ResourceHints registerPattern(String include) {
 		return registerPattern(builder -> builder.includes(include));
+	}
+
+	/**
+	 * Determine if the supplied resource is a {@link ClassPathResource} that
+	 * {@linkplain Resource#exists() exists} and register the resource for run-time
+	 * availability accordingly.
+	 * @param resource the resource to register
+	 * @see #registerPattern(String)
+	 */
+	public void registerResourceIfNecessary(Resource resource) {
+		if (resource instanceof ClassPathResource classPathResource && classPathResource.exists()) {
+			registerPattern(classPathResource.getPath());
+		}
 	}
 
 	/**
