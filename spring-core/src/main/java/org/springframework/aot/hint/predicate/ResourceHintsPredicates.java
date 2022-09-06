@@ -34,6 +34,7 @@ import org.springframework.util.ConcurrentLruCache;
  *
  * @author Brian Clozel
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.0
  */
 public class ResourceHintsPredicates {
@@ -58,7 +59,11 @@ public class ResourceHintsPredicates {
 	 * Return a predicate that checks whether a resource hint is registered for the given
 	 * resource name, located in the given type's package.
 	 * <p>For example, {@code forResource(org.example.MyClass, "myResource.txt")}
-	 * will match for {@code "/org/example/myResource.txt"}.
+	 * will match against {@code "org/example/myResource.txt"}.
+	 * <p>If the given resource name is an absolute path (i.e., starts with a
+	 * leading slash), the supplied type will be ignored. For example,
+	 * {@code forResource(org.example.MyClass, "/myResource.txt")} will match against
+	 * {@code "myResource.txt"}.
 	 * @param type the type's package where to look for the resource
 	 * @param resourceName the resource name
 	 * @return the {@link RuntimeHints} predicate
@@ -69,32 +74,39 @@ public class ResourceHintsPredicates {
 	}
 
 	private String resolveAbsoluteResourceName(TypeReference type, String resourceName) {
+		// absolute path
 		if (resourceName.startsWith("/")) {
+			return resourceName.substring(1);
+		}
+		// default package
+		else if (type.getPackageName().isEmpty()) {
 			return resourceName;
 		}
+		// relative path
 		else {
-			return "/" + type.getPackageName().replace('.', '/')
-					+ "/" + resourceName;
+			return type.getPackageName().replace('.', '/') + "/" + resourceName;
 		}
 	}
 
 	/**
 	 * Return a predicate that checks whether a resource hint is registered for
 	 * the given resource name.
-	 * @param resourceName the full resource name
+	 * <p>A leading slash will be removed.
+	 * @param resourceName the absolute resource name
 	 * @return the {@link RuntimeHints} predicate
 	 */
 	public Predicate<RuntimeHints> forResource(String resourceName) {
+		String resourceNameToUse = (resourceName.startsWith("/") ? resourceName.substring(1) : resourceName);
 		return hints -> {
 			AggregatedResourcePatternHints aggregatedResourcePatternHints = AggregatedResourcePatternHints.of(
 					hints.resources());
 			boolean isExcluded = aggregatedResourcePatternHints.excludes().stream().anyMatch(excluded ->
-					CACHED_RESOURCE_PATTERNS.get(excluded).matcher(resourceName).matches());
+					CACHED_RESOURCE_PATTERNS.get(excluded).matcher(resourceNameToUse).matches());
 			if (isExcluded) {
 				return false;
 			}
 			return aggregatedResourcePatternHints.includes().stream().anyMatch(included ->
-					CACHED_RESOURCE_PATTERNS.get(included).matcher(resourceName).matches());
+					CACHED_RESOURCE_PATTERNS.get(included).matcher(resourceNameToUse).matches());
 		};
 	}
 

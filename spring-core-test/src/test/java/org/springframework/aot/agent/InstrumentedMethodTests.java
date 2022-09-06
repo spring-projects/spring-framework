@@ -36,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link InstrumentedMethod}.
  *
  * @author Brian Clozel
+ * @author Sam Brannen
  */
 class InstrumentedMethodTests {
 
@@ -556,7 +557,7 @@ class InstrumentedMethodTests {
 		void classGetResourceShouldMatchResourcePatternWhenAbsolute() {
 			RecordedInvocation invocation = RecordedInvocation.of(InstrumentedMethod.CLASS_GETRESOURCE)
 					.onInstance(InstrumentedMethodTests.class).withArgument("/some/path/resource.txt").build();
-			hints.resources().registerPattern("/some/*");
+			hints.resources().registerPattern("some/*");
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETRESOURCE, invocation);
 		}
 
@@ -564,7 +565,7 @@ class InstrumentedMethodTests {
 		void classGetResourceShouldMatchResourcePatternWhenRelative() {
 			RecordedInvocation invocation = RecordedInvocation.of(InstrumentedMethod.CLASS_GETRESOURCE)
 					.onInstance(InstrumentedMethodTests.class).withArgument("resource.txt").build();
-			hints.resources().registerPattern("/org/springframework/aot/agent/*");
+			hints.resources().registerPattern("org/springframework/aot/agent/*");
 			assertThatInvocationMatches(InstrumentedMethod.CLASS_GETRESOURCE, invocation);
 		}
 
@@ -572,7 +573,7 @@ class InstrumentedMethodTests {
 		void classGetResourceShouldNotMatchResourcePatternWhenInvalid() {
 			RecordedInvocation invocation = RecordedInvocation.of(InstrumentedMethod.CLASS_GETRESOURCE)
 					.onInstance(InstrumentedMethodTests.class).withArgument("/some/path/resource.txt").build();
-			hints.resources().registerPattern("/other/*");
+			hints.resources().registerPattern("other/*");
 			assertThatInvocationDoesNotMatch(InstrumentedMethod.CLASS_GETRESOURCE, invocation);
 		}
 
@@ -580,7 +581,7 @@ class InstrumentedMethodTests {
 		void classGetResourceShouldNotMatchResourcePatternWhenExcluded() {
 			RecordedInvocation invocation = RecordedInvocation.of(InstrumentedMethod.CLASS_GETRESOURCE)
 					.onInstance(InstrumentedMethodTests.class).withArgument("/some/path/resource.txt").build();
-			hints.resources().registerPattern(resourceHint -> resourceHint.includes("/some/*").excludes("/some/path/*"));
+			hints.resources().registerPattern(resourceHint -> resourceHint.includes("some/*").excludes("some/path/*"));
 			assertThatInvocationDoesNotMatch(InstrumentedMethod.CLASS_GETRESOURCE, invocation);
 		}
 
