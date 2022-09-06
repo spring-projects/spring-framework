@@ -120,18 +120,21 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 
 	/**
 	 * Return the path for this resource.
-	 * <p>If this {@code ClassPathResource} was created using
-	 * {@link ClassPathResource#ClassPathResource(String) ClassPathResource(String)} or
+	 * <p>If this resource was created using
+	 * {@link ClassPathResource#ClassPathResource(String) ClassPathResource(String)},
 	 * {@link ClassPathResource#ClassPathResource(String, ClassLoader)
-	 * ClassPathResource(String, ClassLoader)}, the returned path is a
-	 * {@linkplain StringUtils#cleanPath(String) cleaned} version of the
+	 * ClassPathResource(String, ClassLoader)}, or
+	 * {@link ClassPathResource#ClassPathResource(String, Class)
+	 * ClassPathResource(String, Class)} with an absolute path, the returned path
+	 * is a {@linkplain StringUtils#cleanPath(String) cleaned} version of the
 	 * <em>absolute path</em> supplied to the constructor.
-	 * <p>If this {@code ClassPathResource} was created using
-	 * {@link ClassPathResource#ClassPathResource(String, Class)}, the
-	 * returned path is a {@linkplain StringUtils#cleanPath(String) cleaned}
-	 * version of the <em>relative path</em> supplied to the constructor.
-	 * <p>If you need the <em>absolute path</em>, use {@link #getAbsolutePath()}
-	 * instead.
+	 * <p>If this resource was created using
+	 * {@link ClassPathResource#ClassPathResource(String, Class)
+	 * ClassPathResource(String, Class)} with a relative path, the returned path
+	 * is a {@linkplain StringUtils#cleanPath(String) cleaned} version of the
+	 * <em>relative path</em> supplied to the constructor.
+	 * <p>If you consistently need the <em>absolute path</em>, use
+	 * {@link #getAbsolutePath()} instead.
 	 * @see #getAbsolutePath()
 	 */
 	public final String getPath() {
