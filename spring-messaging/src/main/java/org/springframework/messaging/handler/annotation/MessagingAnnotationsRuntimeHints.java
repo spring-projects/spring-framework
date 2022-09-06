@@ -14,33 +14,30 @@
  * limitations under the License.
  */
 
-package org.springframework.transaction.annotation;
+package org.springframework.messaging.handler.annotation;
 
-import org.springframework.aot.hint.MemberCategory;
+import java.util.stream.Stream;
+
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
-import org.springframework.aot.hint.TypeHint;
-import org.springframework.aot.hint.TypeReference;
 import org.springframework.aot.hint.support.RuntimeHintsUtils;
-import org.springframework.transaction.TransactionDefinition;
+import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Controller;
 
 /**
- * {@link RuntimeHintsRegistrar} implementation that registers runtime hints for
- * transaction management.
+ * {@link RuntimeHintsRegistrar} implementation that makes messaging
+ * annotations available at runtime.
  *
  * @author Sebastien Deleuze
  * @since 6.0
- * @see TransactionBeanRegistrationAotProcessor
  */
-class TransactionRuntimeHints implements RuntimeHintsRegistrar {
+public class MessagingAnnotationsRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
 	@SuppressWarnings("deprecation")
-	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
-		RuntimeHintsUtils.registerSynthesizedAnnotation(hints, Transactional.class);
-		hints.reflection().registerTypes(TypeReference.listOf(
-					Isolation.class, Propagation.class, TransactionDefinition.class),
-				TypeHint.builtWith(MemberCategory.DECLARED_FIELDS));
+	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
+		Stream.of(Controller.class, Header.class, Headers.class, Payload.class).forEach(annotationType ->
+				RuntimeHintsUtils.registerSynthesizedAnnotation(hints, annotationType));
 	}
 
 }

@@ -28,6 +28,8 @@ import java.util.function.Consumer;
 
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.support.RuntimeHintsUtils;
+import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -60,7 +62,18 @@ public class ReflectiveRuntimeHintsRegistrar {
 		entries.forEach(entry -> {
 			AnnotatedElement element = entry.element();
 			entry.processor().registerReflectionHints(runtimeHints.reflection(), element);
+			registerAnnotationIfNecessary(runtimeHints, element);
 		});
+	}
+
+	@SuppressWarnings("deprecation")
+	private void registerAnnotationIfNecessary(RuntimeHints hints, AnnotatedElement element) {
+		MergedAnnotation<Reflective> reflectiveAnnotation = MergedAnnotations.from(element)
+				.get(Reflective.class);
+		MergedAnnotation<?> metaSource = reflectiveAnnotation.getMetaSource();
+		if (metaSource != null) {
+			RuntimeHintsUtils.registerAnnotationIfNecessary(hints, metaSource);
+		}
 	}
 
 	private void processType(Set<Entry> entries, Class<?> typeToProcess) {
