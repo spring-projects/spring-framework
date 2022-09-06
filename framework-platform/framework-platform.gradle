@@ -83,7 +83,7 @@ dependencies {
 		api("jaxen:jaxen:1.2.0")
 		api("junit:junit:4.13.2")
 		api("net.sf.jopt-simple:jopt-simple:5.0.4")
-		api("net.sourceforge.htmlunit:htmlunit:2.63.0")
+		api("net.sourceforge.htmlunit:htmlunit:2.64.0")
 		api("org.apache-extras.beanshell:bsh:2.0b6")
 		api("org.apache.activemq:activemq-broker:5.16.2")
 		api("org.apache.activemq:activemq-kahadb-store:5.16.2")
