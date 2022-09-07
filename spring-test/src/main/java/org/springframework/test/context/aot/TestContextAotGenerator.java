@@ -17,6 +17,7 @@
 package org.springframework.test.context.aot;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -108,10 +109,21 @@ public class TestContextAotGenerator {
 	 * @throws TestContextAotException if an error occurs during AOT processing
 	 */
 	public void processAheadOfTime(Stream<Class<?>> testClasses) throws TestContextAotException {
-		MultiValueMap<MergedContextConfiguration, Class<?>> mergedConfigMappings = new LinkedMultiValueMap<>();
-		testClasses.forEach(testClass -> mergedConfigMappings.add(buildMergedContextConfiguration(testClass), testClass));
-		MultiValueMap<ClassName, Class<?>> initializerClassMappings = processAheadOfTime(mergedConfigMappings);
-		generateTestAotMappings(initializerClassMappings);
+		try {
+			// Make sure AOT attributes are cleared before processing
+			AotTestAttributesFactory.reset();
+
+			MultiValueMap<MergedContextConfiguration, Class<?>> mergedConfigMappings = new LinkedMultiValueMap<>();
+			testClasses.forEach(testClass -> mergedConfigMappings.add(buildMergedContextConfiguration(testClass), testClass));
+			MultiValueMap<ClassName, Class<?>> initializerClassMappings = processAheadOfTime(mergedConfigMappings);
+
+			generateTestAotMappings(initializerClassMappings);
+			generateAotTestAttributes();
+		}
+		finally {
+			// Clear AOT attributes after processing
+			AotTestAttributesFactory.reset();
+		}
 	}
 
 	private MultiValueMap<ClassName, Class<?>> processAheadOfTime(MultiValueMap<MergedContextConfiguration, Class<?>> mergedConfigMappings) {
@@ -235,6 +247,20 @@ public class TestContextAotGenerator {
 
 		TestAotMappingsCodeGenerator codeGenerator =
 				new TestAotMappingsCodeGenerator(initializerClassMappings, generatedClasses);
+		generationContext.writeGeneratedContent();
+		String className = codeGenerator.getGeneratedClass().getName().reflectionName();
+		registerPublicMethods(className);
+	}
+
+	private void generateAotTestAttributes() {
+		ClassNameGenerator classNameGenerator = new ClassNameGenerator(AotTestAttributes.class);
+		DefaultGenerationContext generationContext =
+				new DefaultGenerationContext(classNameGenerator, this.generatedFiles, this.runtimeHints);
+		GeneratedClasses generatedClasses = generationContext.getGeneratedClasses();
+
+		Map<String, String> attributes = AotTestAttributesFactory.getAttributes();
+		AotTestAttributesCodeGenerator codeGenerator =
+				new AotTestAttributesCodeGenerator(attributes, generatedClasses);
 		generationContext.writeGeneratedContent();
 		String className = codeGenerator.getGeneratedClass().getName().reflectionName();
 		registerPublicMethods(className);
