@@ -111,7 +111,7 @@ class ResourceWebHandlerTests {
 		assertThat(headers.containsKey("Last-Modified")).isTrue();
 		assertThat(resourceLastModifiedDate("test/foo.css") / 1000).isEqualTo(headers.getLastModified() / 1000);
 		assertThat(headers.getFirst("Accept-Ranges")).isEqualTo("bytes");
-		assertThat(headers.get("Accept-Ranges").size()).isEqualTo(1);
+		assertThat(headers.get("Accept-Ranges")).hasSize(1);
 		assertResponseBody(exchange, "h1 { color:red; }");
 	}
 
@@ -157,14 +157,14 @@ class ResourceWebHandlerTests {
 		assertThat(response.getHeaders().containsKey("Last-Modified")).isTrue();
 		assertThat(resourceLastModifiedDate("test/foo.css") / 1000).isEqualTo(response.getHeaders().getLastModified() / 1000);
 		assertThat(response.getHeaders().getFirst("Accept-Ranges")).isEqualTo("bytes");
-		assertThat(response.getHeaders().get("Accept-Ranges").size()).isEqualTo(1);
+		assertThat(response.getHeaders().get("Accept-Ranges")).hasSize(1);
 	}
 
 	@Test
 	void getVersionedResource() throws Exception {
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.addFixedVersionStrategy("versionString", "/**");
-		this.handler.setResourceResolvers(Arrays.asList(versionResolver, new PathResourceResolver()));
+		this.handler.setResourceResolvers(List.of(versionResolver, new PathResourceResolver()));
 		this.handler.afterPropertiesSet();
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
@@ -173,7 +173,7 @@ class ResourceWebHandlerTests {
 
 		assertThat(exchange.getResponse().getHeaders().getETag()).isEqualTo("W/\"versionString\"");
 		assertThat(exchange.getResponse().getHeaders().getFirst("Accept-Ranges")).isEqualTo("bytes");
-		assertThat(exchange.getResponse().getHeaders().get("Accept-Ranges").size()).isEqualTo(1);
+		assertThat(exchange.getResponse().getHeaders().get("Accept-Ranges")).hasSize(1);
 	}
 
 	@Test
@@ -188,7 +188,7 @@ class ResourceWebHandlerTests {
 		assertThat(headers.containsKey("Last-Modified")).isTrue();
 		assertThat(resourceLastModifiedDate("test/foo.html") / 1000).isEqualTo(headers.getLastModified() / 1000);
 		assertThat(headers.getFirst("Accept-Ranges")).isEqualTo("bytes");
-		assertThat(headers.get("Accept-Ranges").size()).isEqualTo(1);
+		assertThat(headers.get("Accept-Ranges")).hasSize(1);
 	}
 
 	@Test
@@ -204,7 +204,7 @@ class ResourceWebHandlerTests {
 		assertThat(headers.containsKey("Last-Modified")).isTrue();
 		assertThat(resourceLastModifiedDate("testalternatepath/baz.css") / 1000).isEqualTo(headers.getLastModified() / 1000);
 		assertThat(headers.getFirst("Accept-Ranges")).isEqualTo("bytes");
-		assertThat(headers.get("Accept-Ranges").size()).isEqualTo(1);
+		assertThat(headers.get("Accept-Ranges")).hasSize(1);
 		assertResponseBody(exchange, "h1 { color:red; }");
 	}
 
@@ -268,7 +268,7 @@ class ResourceWebHandlerTests {
 
 	@Test  // gh-27538, gh-27624
 	void filterNonExistingLocations() throws Exception {
-		List<Resource> inputLocations = Arrays.asList(
+		List<Resource> inputLocations = List.of(
 				new ClassPathResource("test/", getClass()),
 				new ClassPathResource("testalternatepath/", getClass()),
 				new ClassPathResource("nosuchpath/", getClass()));
@@ -437,7 +437,7 @@ class ResourceWebHandlerTests {
 
 		ResourceWebHandler handler = new ResourceWebHandler();
 		handler.setResourceResolvers(List.of(pathResolver));
-		handler.setLocations(Arrays.asList(location1, location2));
+		handler.setLocations(List.of(location1, location2));
 		handler.afterPropertiesSet();
 
 		assertThat(pathResolver.getAllowedLocations()).containsExactly(location1);
@@ -545,7 +545,7 @@ class ResourceWebHandlerTests {
 		assertThat(exchange.getResponse().getHeaders().getContentLength()).isEqualTo(2);
 		assertThat(exchange.getResponse().getHeaders().getFirst("Content-Range")).isEqualTo("bytes 0-1/10");
 		assertThat(exchange.getResponse().getHeaders().getFirst("Accept-Ranges")).isEqualTo("bytes");
-		assertThat(exchange.getResponse().getHeaders().get("Accept-Ranges").size()).isEqualTo(1);
+		assertThat(exchange.getResponse().getHeaders().get("Accept-Ranges")).hasSize(1);
 		assertResponseBody(exchange, "So");
 	}
 
@@ -561,7 +561,7 @@ class ResourceWebHandlerTests {
 		assertThat(exchange.getResponse().getHeaders().getContentLength()).isEqualTo(1);
 		assertThat(exchange.getResponse().getHeaders().getFirst("Content-Range")).isEqualTo("bytes 9-9/10");
 		assertThat(exchange.getResponse().getHeaders().getFirst("Accept-Ranges")).isEqualTo("bytes");
-		assertThat(exchange.getResponse().getHeaders().get("Accept-Ranges").size()).isEqualTo(1);
+		assertThat(exchange.getResponse().getHeaders().get("Accept-Ranges")).hasSize(1);
 		assertResponseBody(exchange, ".");
 	}
 
@@ -577,7 +577,7 @@ class ResourceWebHandlerTests {
 		assertThat(exchange.getResponse().getHeaders().getContentLength()).isEqualTo(1);
 		assertThat(exchange.getResponse().getHeaders().getFirst("Content-Range")).isEqualTo("bytes 9-9/10");
 		assertThat(exchange.getResponse().getHeaders().getFirst("Accept-Ranges")).isEqualTo("bytes");
-		assertThat(exchange.getResponse().getHeaders().get("Accept-Ranges").size()).isEqualTo(1);
+		assertThat(exchange.getResponse().getHeaders().get("Accept-Ranges")).hasSize(1);
 		assertResponseBody(exchange, ".");
 	}
 
@@ -593,7 +593,7 @@ class ResourceWebHandlerTests {
 		assertThat(exchange.getResponse().getHeaders().getContentLength()).isEqualTo(1);
 		assertThat(exchange.getResponse().getHeaders().getFirst("Content-Range")).isEqualTo("bytes 9-9/10");
 		assertThat(exchange.getResponse().getHeaders().getFirst("Accept-Ranges")).isEqualTo("bytes");
-		assertThat(exchange.getResponse().getHeaders().get("Accept-Ranges").size()).isEqualTo(1);
+		assertThat(exchange.getResponse().getHeaders().get("Accept-Ranges")).hasSize(1);
 		assertResponseBody(exchange, ".");
 	}
 
@@ -609,7 +609,7 @@ class ResourceWebHandlerTests {
 		assertThat(exchange.getResponse().getHeaders().getContentLength()).isEqualTo(10);
 		assertThat(exchange.getResponse().getHeaders().getFirst("Content-Range")).isEqualTo("bytes 0-9/10");
 		assertThat(exchange.getResponse().getHeaders().getFirst("Accept-Ranges")).isEqualTo("bytes");
-		assertThat(exchange.getResponse().getHeaders().get("Accept-Ranges").size()).isEqualTo(1);
+		assertThat(exchange.getResponse().getHeaders().get("Accept-Ranges")).hasSize(1);
 		assertResponseBody(exchange, "Some text.");
 	}
 
