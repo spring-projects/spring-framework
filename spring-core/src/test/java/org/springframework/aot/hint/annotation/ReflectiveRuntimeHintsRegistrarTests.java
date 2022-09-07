@@ -87,23 +87,6 @@ class ReflectiveRuntimeHintsRegistrarTests {
 	}
 
 	@Test
-	void shouldNotRegisterAnnotationProxyIfNotNeeded() {
-		process(SampleMethodMetaAnnotatedBean.class);
-		RuntimeHints runtimeHints = this.runtimeHints;
-		assertThat(runtimeHints.proxies().jdkProxies()).isEmpty();
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	void shouldRegisterAnnotationProxy() {
-		process(SampleMethodMetaAnnotatedBeanWithAlias.class);
-		RuntimeHints runtimeHints = this.runtimeHints;
-		assertThat(RuntimeHintsPredicates.proxies()
-				.forInterfaces(SampleInvoker.class, org.springframework.core.annotation.SynthesizedAnnotation.class))
-					.accepts(runtimeHints);
-	}
-
-	@Test
 	void shouldProcessAnnotationOnInterface() {
 		process(SampleMethodAnnotatedBeanWithInterface.class);
 		assertThat(this.runtimeHints.reflection().getTypeHint(SampleInterface.class))

@@ -32,7 +32,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.SpringProperties;
 import org.springframework.core.convert.converter.Converter;
@@ -71,7 +70,6 @@ import org.springframework.validation.beanvalidation.OptionalValidatorFactoryBea
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.WebAnnotationsRuntimeHintsRegistrar;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.cors.CorsConfiguration;
@@ -190,7 +188,6 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * @see EnableWebMvc
  * @see WebMvcConfigurer
  */
-@ImportRuntimeHints(WebAnnotationsRuntimeHintsRegistrar.class)
 public class WebMvcConfigurationSupport implements ApplicationContextAware, ServletContextAware {
 
 	/**
