@@ -77,15 +77,19 @@ class ResourceWebHandlerTests {
 
 	private static final Duration TIMEOUT = Duration.ofSeconds(1);
 
+	private final ClassPathResource testResource = new ClassPathResource("test/", getClass());
+	private final ClassPathResource testAlternatePathResource = new ClassPathResource("testalternatepath/", getClass());
+	private final ClassPathResource webjarsResource = new ClassPathResource("META-INF/resources/webjars/");
+
 	private ResourceWebHandler handler;
 
 
 	@BeforeEach
 	void setup() throws Exception {
 		List<Resource> locations = List.of(
-				new ClassPathResource("test/", getClass()),
-				new ClassPathResource("testalternatepath/", getClass()),
-				new ClassPathResource("META-INF/resources/webjars/"));
+				this.testResource,
+				this.testAlternatePathResource,
+				this.webjarsResource);
 
 		this.handler = new ResourceWebHandler();
 		this.handler.setLocations(locations);
@@ -420,10 +424,7 @@ class ResourceWebHandlerTests {
 		PathResourceResolver resolver = (PathResourceResolver) this.handler.getResourceResolvers().get(0);
 		Resource[] locations = resolver.getAllowedLocations();
 
-		assertThat(locations.length).isEqualTo(3);
-		assertThat(((ClassPathResource) locations[0]).getPath()).isEqualTo("test/");
-		assertThat(((ClassPathResource) locations[1]).getPath()).isEqualTo("testalternatepath/");
-		assertThat(((ClassPathResource) locations[2]).getPath()).isEqualTo("META-INF/resources/webjars/");
+		assertThat(locations).containsExactly(this.testResource, this.testAlternatePathResource, this.webjarsResource);
 	}
 
 	@Test
@@ -439,9 +440,7 @@ class ResourceWebHandlerTests {
 		handler.setLocations(Arrays.asList(location1, location2));
 		handler.afterPropertiesSet();
 
-		Resource[] locations = pathResolver.getAllowedLocations();
-		assertThat(locations.length).isEqualTo(1);
-		assertThat(((ClassPathResource) locations[0]).getPath()).isEqualTo("test/");
+		assertThat(pathResolver.getAllowedLocations()).containsExactly(location1);
 	}
 
 	@Test
