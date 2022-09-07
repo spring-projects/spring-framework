@@ -22,6 +22,8 @@ import org.springframework.context.testfixture.index.CandidateComponentsTestClas
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.orm.jpa.domain.DriversLicense;
+import org.springframework.orm.jpa.domain.Employee;
+import org.springframework.orm.jpa.domain.EmployeeLocationConverter;
 import org.springframework.orm.jpa.domain.Person;
 import org.springframework.orm.jpa.domain2.entity.User;
 
@@ -40,7 +42,8 @@ class PersistenceManagedTypesScannerTests {
 	void scanPackageWithOnlyEntities() {
 		PersistenceManagedTypes managedTypes = this.scanner.scan("org.springframework.orm.jpa.domain");
 		assertThat(managedTypes.getManagedClassNames()).containsExactlyInAnyOrder(
-				Person.class.getName(), DriversLicense.class.getName());
+				Person.class.getName(), DriversLicense.class.getName(), Employee.class.getName(),
+				EmployeeLocationConverter.class.getName());
 		assertThat(managedTypes.getManagedPackages()).isEmpty();
 	}
 

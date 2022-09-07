@@ -21,16 +21,25 @@ import java.util.List;
 
 import javax.lang.model.element.Modifier;
 
+import jakarta.persistence.Converter;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.IdClass;
+
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GenerationContext;
+import org.springframework.aot.hint.BindingReflectionHintsRegistrar;
+import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.aot.BeanRegistrationCodeFragments;
 import org.springframework.beans.factory.support.RegisteredBean;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.ParameterizedTypeName;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 
 /**
  * {@link BeanRegistrationAotProcessor} implementations for persistence managed
@@ -40,6 +49,7 @@ import org.springframework.lang.Nullable;
  * and replaced by a hard-coded list of managed class names and packages.
  *
  * @author Stephane Nicoll
+ * @author Sebastien Deleuze
  * @since 6.0
  */
 class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
@@ -60,6 +70,8 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 
 		private final RegisteredBean registeredBean;
 
+		private final BindingReflectionHintsRegistrar bindingRegistrar = new BindingReflectionHintsRegistrar();
+
 		public JpaManagedTypesBeanRegistrationCodeFragments(BeanRegistrationCodeFragments codeFragments,
 				RegisteredBean registeredBean) {
 			super(codeFragments);
@@ -73,6 +85,7 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 				boolean allowDirectSupplierShortcut) {
 			PersistenceManagedTypes persistenceManagedTypes = this.registeredBean.getBeanFactory()
 					.getBean(this.registeredBean.getBeanName(), PersistenceManagedTypes.class);
+			contributeHints(generationContext.getRuntimeHints(), persistenceManagedTypes.getManagedClassNames());
 			GeneratedMethod generatedMethod = beanRegistrationCode.getMethods()
 					.add("getInstance", method -> {
 						Class<?> beanType = PersistenceManagedTypes.class;
@@ -91,6 +104,44 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 
 		private CodeBlock toCodeBlock(List<String> values) {
 			return CodeBlock.join(values.stream().map(value -> CodeBlock.of("$S", value)).toList(), ", ");
+		}
+
+		private void contributeHints(RuntimeHints hints, List<String> managedClassNames) {
+			for (String managedClassName : managedClassNames) {
+				try {
+					Class<?> managedClass = ClassUtils.forName(managedClassName, null);
+					this.bindingRegistrar.registerReflectionHints(hints.reflection(), managedClass);
+					contributeEntityListenersHints(hints, managedClass);
+					contributeIdClassHints(hints, managedClass);
+					contributeConverterHints(hints, managedClass);
+				}
+				catch (ClassNotFoundException ex) {
+					throw new IllegalArgumentException("Failed to instantiate the managed class: " + managedClassName, ex);
+				}
+			}
+		}
+
+		private void contributeEntityListenersHints(RuntimeHints hints, Class<?> managedClass) {
+			EntityListeners entityListeners = AnnotationUtils.findAnnotation(managedClass, EntityListeners.class);
+			if (entityListeners != null) {
+				for (Class<?> entityListener : entityListeners.value()) {
+					hints.reflection().registerType(entityListener, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_PUBLIC_METHODS);
+				}
+			}
+		}
+
+		private void contributeIdClassHints(RuntimeHints hints, Class<?> managedClass) {
+			IdClass idClass = AnnotationUtils.findAnnotation(managedClass, IdClass.class);
+			if (idClass != null) {
+				this.bindingRegistrar.registerReflectionHints(hints.reflection(), idClass.value());
+			}
+		}
+
+		private void contributeConverterHints(RuntimeHints hints, Class<?> managedClass) {
+			Converter converter = AnnotationUtils.findAnnotation(managedClass, Converter.class);
+			if (converter != null) {
+				hints.reflection().registerType(managedClass, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_PUBLIC_METHODS);
+			}
 		}
 
 	}
