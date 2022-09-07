@@ -121,18 +121,25 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	/**
 	 * Return the path for this resource.
 	 * <p>If this resource was created using
-	 * {@link ClassPathResource#ClassPathResource(String) ClassPathResource(String)},
-	 * {@link ClassPathResource#ClassPathResource(String, ClassLoader)
-	 * ClassPathResource(String, ClassLoader)}, or
+	 * {@link ClassPathResource#ClassPathResource(String) ClassPathResource(String)}
+	 * or {@link ClassPathResource#ClassPathResource(String, ClassLoader)
+	 * ClassPathResource(String, ClassLoader)}, the returned path is a
+	 * {@linkplain StringUtils#cleanPath(String) cleaned} version of the
+	 * <em>absolute path</em> supplied to the constructor, <strong>without</strong>
+	 * a leading slash.
+	 * <p>If this resource was created using
 	 * {@link ClassPathResource#ClassPathResource(String, Class)
 	 * ClassPathResource(String, Class)} with an absolute path, the returned path
 	 * is a {@linkplain StringUtils#cleanPath(String) cleaned} version of the
-	 * <em>absolute path</em> supplied to the constructor.
+	 * <em>absolute path</em> supplied to the constructor, <strong>with</strong>
+	 * a leading slash.
 	 * <p>If this resource was created using
 	 * {@link ClassPathResource#ClassPathResource(String, Class)
 	 * ClassPathResource(String, Class)} with a relative path, the returned path
 	 * is a {@linkplain StringUtils#cleanPath(String) cleaned} version of the
 	 * <em>relative path</em> supplied to the constructor.
+	 * <p>The path returned by this method cannot be reliably used with
+	 * {@link ClassLoader#getResource(String)}.
 	 * <p>If you consistently need the <em>absolute path</em>, use
 	 * {@link #getAbsolutePath()} instead.
 	 * @see #getAbsolutePath()
@@ -143,7 +150,9 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 
 	/**
 	 * Return the <em>absolute path</em> for this resource, as a resource path
-	 * within the class path.
+	 * within the class path without a leading slash.
+	 * <p>The path returned by this method is suitable for use with
+	 * {@link ClassLoader#getResource(String)}.
 	 * @since 6.0
 	 * @see #getPath()
 	 */
