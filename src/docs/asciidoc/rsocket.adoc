@@ -964,7 +964,7 @@ method parameters:
 
 | `Object`, if followed by `MimeType`
 | The value for a metadata entry in the input payload. This can be any `Object` as long
-  as the next argument is the metadata entry `MimeType`. The value can be can a concrete
+  as the next argument is the metadata entry `MimeType`. The value can be a concrete
   value or any producer of a single value that can be adapted to a Reactive Streams
   `Publisher` via `ReactiveAdapterRegistry`.
 
@@ -981,5 +981,3 @@ method parameters:
 Annotated, RSocket exchange methods support return values that are concrete value(s), or
 any producer of value(s) that can be adapted to a Reactive Streams `Publisher` via
 `ReactiveAdapterRegistry`.
-
-

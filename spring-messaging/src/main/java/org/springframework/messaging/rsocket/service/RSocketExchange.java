@@ -24,11 +24,11 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation to declare a method on an RSocket service interface as an RSocket
- * endpoint. The endpoint route is defined statically through the annotation
- * attributes, and through the input method argument types.
+ * endpoint. The endpoint route is determined through the annotation attribute,
+ * and through the method arguments.
  *
- * <p>Supported at the type level to express common attributes, to be inherited
- * by all methods, such as a base route.
+ * <p>The annotation is supported at the type level to express a common route,
+ * to be inherited by all methods.
  *
  * <p>Supported method arguments:
  * <table border="1">
@@ -48,13 +48,13 @@ import java.lang.annotation.Target;
  * <td>{@link PayloadArgumentResolver}</td>
  * </tr>
  * <tr>
- * <td>{@link Object} argument followed by {@link org.springframework.util.MimeType} argument</td>
+ * <td>{@link Object}, if followed by {@link org.springframework.util.MimeType}</td>
  * <td>Add a metadata value</td>
  * <td>{@link MetadataArgumentResolver}</td>
  * </tr>
  * <tr>
- * <td>{@link org.springframework.util.MimeType} argument preceded by {@link Object} argument</td>
- * <td>Specify the mime type for the preceding metadata value</td>
+ * <td>{@link org.springframework.util.MimeType}</td>
+ * <td>Set the MIME type for the metadata value in the preceding argument</td>
  * <td>{@link MetadataArgumentResolver}</td>
  * </tr>
  * </table>
@@ -71,8 +71,9 @@ public @interface RSocketExchange {
 	 * Destination-based mapping expressed by this annotation. This is either
 	 * {@link org.springframework.util.AntPathMatcher AntPathMatcher} or
 	 * {@link org.springframework.web.util.pattern.PathPattern PathPattern}
-	 * based pattern, depending on which is configured, matched to the route of
-	 * the stream request.
+	 * based pattern, depending on which is configured via
+	 * {@link org.springframework.messaging.rsocket.RSocketStrategies} in
+	 * {@link org.springframework.messaging.rsocket.RSocketRequester}.
 	 */
 	String value() default "";
 
