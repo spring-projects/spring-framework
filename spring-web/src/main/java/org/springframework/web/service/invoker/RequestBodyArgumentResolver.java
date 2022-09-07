@@ -16,8 +16,6 @@
 
 package org.springframework.web.service.invoker;
 
-import org.reactivestreams.Publisher;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapter;
