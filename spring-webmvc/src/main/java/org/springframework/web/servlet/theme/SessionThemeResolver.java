@@ -36,7 +36,9 @@ import org.springframework.web.util.WebUtils;
  * @author Juergen Hoeller
  * @since 17.06.2003
  * @see #setThemeName
+ * @deprecated as of 6.0, with no concrete replacement
  */
+@Deprecated
 public class SessionThemeResolver extends AbstractThemeResolver {
 
 	/**

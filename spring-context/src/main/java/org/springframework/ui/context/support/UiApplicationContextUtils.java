@@ -31,7 +31,9 @@ import org.springframework.ui.context.ThemeSource;
  * @author Jean-Pierre Pawlak
  * @author Juergen Hoeller
  * @since 17.06.2003
+ * @deprecated as of 6.0, with no direct replacement
  */
+@Deprecated
 public abstract class UiApplicationContextUtils {
 
 	/**

@@ -36,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Alef Arendsen
  */
+@SuppressWarnings("deprecation")
 class ThemeTagTests extends AbstractTagTests {
 
 	@Test

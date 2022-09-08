@@ -31,7 +31,9 @@ import org.springframework.ui.context.ThemeSource;
  * @author Juergen Hoeller
  * @since 1.2.4
  * @see UiApplicationContextUtils
+ * @deprecated as of 6.0, with no direct replacement
  */
+@Deprecated
 public class DelegatingThemeSource implements HierarchicalThemeSource {
 
 	@Nullable
