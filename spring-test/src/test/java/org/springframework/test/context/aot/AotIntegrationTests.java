@@ -130,7 +130,7 @@ class AotIntegrationTests extends AbstractAotTests {
 
 	private static final String[] expectedSourceFilesForBasicSpringJupiterTests = {
 		// Global
-		"org/springframework/test/context/aot/AotTestMappings__Generated.java",
+		"org/springframework/test/context/aot/TestAotMappings__Generated.java",
 		// BasicSpringJupiterSharedConfigTests
 		"org/springframework/context/event/DefaultEventListenerFactory__TestContext001_BeanDefinitions.java",
 		"org/springframework/context/event/EventListenerMethodProcessor__TestContext001_BeanDefinitions.java",

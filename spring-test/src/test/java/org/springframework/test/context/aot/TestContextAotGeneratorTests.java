@@ -72,7 +72,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 /**
- * Tests for {@link TestContextAotGenerator}, {@link AotTestMappings},
+ * Tests for {@link TestContextAotGenerator}, {@link TestAotMappings},
  * {@link AotContextLoader}, and run-time hints.
  *
  * @author Sam Brannen
@@ -85,7 +85,7 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 	 * @see AotIntegrationTests#endToEndTests()
 	 */
 	@Test
-	void processAheadOfTimeAndGenerateAotTestMappings() {
+	void processAheadOfTimeAndGenerateTestAotMappings() {
 		Set<Class<?>> testClasses = Set.of(
 				BasicSpringJupiterSharedConfigTests.class,
 				BasicSpringJupiterTests.class,
@@ -107,7 +107,7 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		assertThat(sourceFiles).containsExactlyInAnyOrder(expectedSourceFiles);
 
 		TestCompiler.forSystem().withFiles(generatedFiles).compile(ThrowingConsumer.of(compiled -> {
-			AotTestMappings aotTestMappings = new AotTestMappings();
+			TestAotMappings aotTestMappings = new TestAotMappings();
 			for (Class<?> testClass : testClasses) {
 				MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 				ApplicationContextInitializer<ConfigurableApplicationContext> contextInitializer =
@@ -129,7 +129,7 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 	}
 
 	private static void assertRuntimeHints(RuntimeHints runtimeHints) {
-		assertReflectionRegistered(runtimeHints, AotTestMappings.GENERATED_MAPPINGS_CLASS_NAME, INVOKE_PUBLIC_METHODS);
+		assertReflectionRegistered(runtimeHints, TestAotMappings.GENERATED_MAPPINGS_CLASS_NAME, INVOKE_PUBLIC_METHODS);
 
 		Stream.of(
 			org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.class,
@@ -331,7 +331,7 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 
 	private static final String[] expectedSourceFiles = {
 			// Global
-			"org/springframework/test/context/aot/AotTestMappings__Generated.java",
+			"org/springframework/test/context/aot/TestAotMappings__Generated.java",
 			// BasicSpringJupiterSharedConfigTests
 			"org/springframework/context/event/DefaultEventListenerFactory__TestContext001_BeanDefinitions.java",
 			"org/springframework/context/event/EventListenerMethodProcessor__TestContext001_BeanDefinitions.java",

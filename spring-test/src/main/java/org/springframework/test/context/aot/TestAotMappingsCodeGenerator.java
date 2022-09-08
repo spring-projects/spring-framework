@@ -41,14 +41,14 @@ import org.springframework.javapoet.WildcardTypeName;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Internal code generator for mappings used by {@link AotTestMappings}.
+ * Internal code generator for mappings used by {@link TestAotMappings}.
  *
  * @author Sam Brannen
  * @since 6.0
  */
-class AotTestMappingsCodeGenerator {
+class TestAotMappingsCodeGenerator {
 
-	private static final Log logger = LogFactory.getLog(AotTestMappingsCodeGenerator.class);
+	private static final Log logger = LogFactory.getLog(TestAotMappingsCodeGenerator.class);
 
 	private static final ParameterizedTypeName CONTEXT_INITIALIZER = ParameterizedTypeName.get(
 			ClassName.get(ApplicationContextInitializer.class),
@@ -67,7 +67,7 @@ class AotTestMappingsCodeGenerator {
 	private final GeneratedClass generatedClass;
 
 
-	AotTestMappingsCodeGenerator(MultiValueMap<ClassName, Class<?>> initializerClassMappings,
+	TestAotMappingsCodeGenerator(MultiValueMap<ClassName, Class<?>> initializerClassMappings,
 			GeneratedClasses generatedClasses) {
 
 		this.initializerClassMappings = initializerClassMappings;
@@ -82,13 +82,13 @@ class AotTestMappingsCodeGenerator {
 	private void generateType(TypeSpec.Builder type) {
 		logger.debug(LogMessage.format("Generating AOT test mappings in %s",
 				this.generatedClass.getName().reflectionName()));
-		type.addJavadoc("Generated mappings for {@link $T}.", AotTestMappings.class);
+		type.addJavadoc("Generated mappings for {@link $T}.", TestAotMappings.class);
 		type.addModifiers(Modifier.PUBLIC);
 		type.addMethod(generateMappingMethod());
 	}
 
 	private MethodSpec generateMappingMethod() {
-		MethodSpec.Builder method = MethodSpec.methodBuilder(AotTestMappings.GENERATED_MAPPINGS_METHOD_NAME);
+		MethodSpec.Builder method = MethodSpec.methodBuilder(TestAotMappings.GENERATED_MAPPINGS_METHOD_NAME);
 		method.addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 		method.returns(CONTEXT_SUPPLIER_MAP);
 		method.addCode(generateMappingCode());

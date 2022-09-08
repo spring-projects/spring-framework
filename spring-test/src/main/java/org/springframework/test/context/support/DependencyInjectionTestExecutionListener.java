@@ -28,7 +28,7 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.Conventions;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContext;
-import org.springframework.test.context.aot.AotTestMappings;
+import org.springframework.test.context.aot.TestAotMappings;
 
 /**
  * {@code TestExecutionListener} which provides support for dependency
@@ -61,7 +61,7 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	private static final Log logger = LogFactory.getLog(DependencyInjectionTestExecutionListener.class);
 
 	@Nullable
-	private final AotTestMappings aotTestMappings = getAotTestMappings();
+	private final TestAotMappings testAotMappings = getTestAotMappings();
 
 
 	/**
@@ -162,17 +162,17 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	 * Determine if we are running in AOT mode for the supplied test class.
 	 */
 	private boolean runningInAotMode(Class<?> testClass) {
-		return (this.aotTestMappings != null && this.aotTestMappings.isSupportedTestClass(testClass));
+		return (this.testAotMappings != null && this.testAotMappings.isSupportedTestClass(testClass));
 	}
 
 	@Nullable
-	private static AotTestMappings getAotTestMappings() {
+	private static TestAotMappings getTestAotMappings() {
 		if (AotDetector.useGeneratedArtifacts()) {
 			try {
-				return new AotTestMappings();
+				return new TestAotMappings();
 			}
 			catch (Exception ex) {
-				throw new IllegalStateException("Failed to instantiate AotTestMappings", ex);
+				throw new IllegalStateException("Failed to instantiate TestAotMappings", ex);
 			}
 		}
 		return null;

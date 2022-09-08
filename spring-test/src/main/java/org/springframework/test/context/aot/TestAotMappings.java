@@ -28,7 +28,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * {@code AotTestMappings} provides mappings from test classes to AOT-optimized
+ * {@code TestAotMappings} provides mappings from test classes to AOT-optimized
  * context initializers.
  *
  * <p>If a test class is not {@linkplain #isSupportedTestClass(Class) supported} in
@@ -42,27 +42,27 @@ import org.springframework.util.ReflectionUtils;
  * @author Stephane Nicoll
  * @since 6.0
  */
-public class AotTestMappings {
+public class TestAotMappings {
 
 	// TODO Add support in ClassNameGenerator for supplying a predefined class name.
 	// There is a similar issue in Spring Boot where code relies on a generated name.
-	// Ideally we would generate a class named: org.springframework.test.context.aot.GeneratedAotTestMappings
-	static final String GENERATED_MAPPINGS_CLASS_NAME = AotTestMappings.class.getName() + "__Generated";
+	// Ideally we would generate a class named: org.springframework.test.context.aot.GeneratedTestAotMappings
+	static final String GENERATED_MAPPINGS_CLASS_NAME = TestAotMappings.class.getName() + "__Generated";
 
 	static final String GENERATED_MAPPINGS_METHOD_NAME = "getContextInitializers";
 
 	private final Map<String, Supplier<ApplicationContextInitializer<ConfigurableApplicationContext>>> contextInitializers;
 
 
-	public AotTestMappings() {
+	public TestAotMappings() {
 		this(GENERATED_MAPPINGS_CLASS_NAME);
 	}
 
-	AotTestMappings(String initializerClassName) {
+	TestAotMappings(String initializerClassName) {
 		this(loadContextInitializersMap(initializerClassName));
 	}
 
-	AotTestMappings(Map<String, Supplier<ApplicationContextInitializer<ConfigurableApplicationContext>>> contextInitializers) {
+	TestAotMappings(Map<String, Supplier<ApplicationContextInitializer<ConfigurableApplicationContext>>> contextInitializers) {
 		this.contextInitializers = contextInitializers;
 	}
 

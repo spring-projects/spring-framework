@@ -138,7 +138,7 @@ public class TestContextAotGenerator {
 			}
 		});
 
-		generateAotTestMappings(initializerClassMappings);
+		generateTestAotMappings(initializerClassMappings);
 	}
 
 	/**
@@ -230,14 +230,14 @@ public class TestContextAotGenerator {
 		return "TestContext%03d_".formatted(this.sequence.incrementAndGet());
 	}
 
-	private void generateAotTestMappings(MultiValueMap<ClassName, Class<?>> initializerClassMappings) {
-		ClassNameGenerator classNameGenerator = new ClassNameGenerator(AotTestMappings.class);
+	private void generateTestAotMappings(MultiValueMap<ClassName, Class<?>> initializerClassMappings) {
+		ClassNameGenerator classNameGenerator = new ClassNameGenerator(TestAotMappings.class);
 		DefaultGenerationContext generationContext =
 				new DefaultGenerationContext(classNameGenerator, this.generatedFiles, this.runtimeHints);
 		GeneratedClasses generatedClasses = generationContext.getGeneratedClasses();
 
-		AotTestMappingsCodeGenerator codeGenerator =
-				new AotTestMappingsCodeGenerator(initializerClassMappings, generatedClasses);
+		TestAotMappingsCodeGenerator codeGenerator =
+				new TestAotMappingsCodeGenerator(initializerClassMappings, generatedClasses);
 		generationContext.writeGeneratedContent();
 		String className = codeGenerator.getGeneratedClass().getName().reflectionName();
 		this.runtimeHints.reflection()
