@@ -92,6 +92,7 @@ class TestAotProcessorTests extends AbstractAotTests {
 				.map(Path::toAbsolutePath)
 				.map(Path::toString)
 				.map(path -> path.substring(prefixLength))
+				.map(path -> path.replace('\\', '/')) // convert Windows path
 				.toList();
 	}
 
