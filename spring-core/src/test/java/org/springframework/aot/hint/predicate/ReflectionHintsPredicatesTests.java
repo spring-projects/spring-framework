@@ -16,7 +16,6 @@
 
 package org.springframework.aot.hint.predicate;
 
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -47,11 +46,7 @@ class ReflectionHintsPredicatesTests {
 
 	private static Constructor<?> publicConstructor;
 
-	private static Method privateMethod;
-
 	private static Method publicMethod;
-
-	private static Field privateField;
 
 	private static Field publicField;
 
@@ -64,9 +59,7 @@ class ReflectionHintsPredicatesTests {
 	static void setupAll() throws Exception {
 		privateConstructor = SampleClass.class.getDeclaredConstructor(String.class);
 		publicConstructor = SampleClass.class.getConstructor();
-		privateMethod = SampleClass.class.getDeclaredMethod("privateMethod");
 		publicMethod = SampleClass.class.getMethod("publicMethod");
-		privateField = SampleClass.class.getDeclaredField("privateField");
 		publicField = SampleClass.class.getField("publicField");
 	}
 
