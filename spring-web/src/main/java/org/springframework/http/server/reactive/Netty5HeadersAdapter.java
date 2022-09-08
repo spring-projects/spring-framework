@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import io.netty.handler.codec.http.HttpHeaders;
+import io.netty5.handler.codec.http.HttpHeaders;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
@@ -33,17 +33,17 @@ import org.springframework.util.MultiValueMap;
 /**
  * {@code MultiValueMap} implementation for wrapping Netty HTTP headers.
  *
- * <p>There is a duplicate of this class in the client package!
+ * <p>This class is based on {@link NettyHeadersAdapter}.
  *
- * @author Brian Clozel
- * @since 5.1.1
+ * @author Violeta Georgieva
+ * @since 6.0
  */
-final class NettyHeadersAdapter implements MultiValueMap<String, String> {
+final class Netty5HeadersAdapter implements MultiValueMap<String, String> {
 
 	private final HttpHeaders headers;
 
 
-	NettyHeadersAdapter(HttpHeaders headers) {
+	Netty5HeadersAdapter(HttpHeaders headers) {
 		this.headers = headers;
 	}
 

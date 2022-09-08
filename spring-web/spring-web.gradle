@@ -20,10 +20,14 @@ dependencies {
 	optional("io.reactivex.rxjava3:rxjava")
 	optional("io.netty:netty-buffer")
 	optional("io.netty:netty-handler")
-	optional("io.netty:netty-codec-http") // Until Netty4ClientHttpRequest is removed
-	optional("io.netty:netty-transport")  // Until Netty4ClientHttpRequest is removed
+	optional("io.netty:netty-codec-http")
+	optional("io.netty:netty-transport")
 	optional("io.projectreactor.netty:reactor-netty-http")
 	optional("io.netty:netty5-buffer")
+	optional("io.netty:netty5-handler")
+	optional("io.netty:netty5-codec-http")
+	optional("io.netty:netty5-transport")
+	optional("io.projectreactor.netty:reactor-netty5-http:2.0.0-M1")
 	optional("io.undertow:undertow-core")
 	optional("org.apache.tomcat.embed:tomcat-embed-core")
 	optional("org.eclipse.jetty:jetty-server") {
