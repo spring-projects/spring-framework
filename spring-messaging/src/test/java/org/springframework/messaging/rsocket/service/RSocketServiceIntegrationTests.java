@@ -46,7 +46,7 @@ import org.springframework.util.MimeTypeUtils;
  *
  * @author Rossen Stoyanchev
  */
-public class RSocketServiceIntegrationTests {
+class RSocketServiceIntegrationTests {
 
 	private static CloseableChannel server;
 
@@ -57,7 +57,7 @@ public class RSocketServiceIntegrationTests {
 
 	@BeforeAll
 	@SuppressWarnings("ConstantConditions")
-	public static void setupOnce() throws Exception {
+	static void setupOnce() throws Exception {
 
 		MimeType metadataMimeType = MimeTypeUtils.parseMimeType(
 				WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA.getString());
@@ -79,17 +79,22 @@ public class RSocketServiceIntegrationTests {
 		proxyFactory.afterPropertiesSet();
 
 		serviceProxy = proxyFactory.createClient(Service.class);
+
+		context.close();
 	}
 
 	@AfterAll
-	public static void tearDownOnce() {
+	static void tearDownOnce() {
 		requester.rsocketClient().dispose();
 		server.dispose();
+		server = null;
+		requester = null;
+		serviceProxy = null;
 	}
 
 
 	@Test
-	public void echoAsync() {
+	void echoAsync() {
 		Flux<String> result = Flux.range(1, 3).concatMap(i -> serviceProxy.echoAsync("Hello " + i));
 
 		StepVerifier.create(result)
@@ -99,7 +104,7 @@ public class RSocketServiceIntegrationTests {
 	}
 
 	@Test
-	public void echoStream() {
+	void echoStream() {
 		Flux<String> result = serviceProxy.echoStream("Hello");
 
 		StepVerifier.create(result)
@@ -141,19 +146,19 @@ public class RSocketServiceIntegrationTests {
 	static class ServerConfig {
 
 		@Bean
-		public ServerController controller() {
+		ServerController controller() {
 			return new ServerController();
 		}
 
 		@Bean
-		public RSocketMessageHandler messageHandler(RSocketStrategies rsocketStrategies) {
+		RSocketMessageHandler messageHandler(RSocketStrategies rsocketStrategies) {
 			RSocketMessageHandler handler = new RSocketMessageHandler();
 			handler.setRSocketStrategies(rsocketStrategies);
 			return handler;
 		}
 
 		@Bean
-		public RSocketStrategies rsocketStrategies() {
+		RSocketStrategies rsocketStrategies() {
 			return RSocketStrategies.create();
 		}
 
