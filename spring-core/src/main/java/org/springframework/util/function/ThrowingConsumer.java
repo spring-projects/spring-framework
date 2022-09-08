@@ -96,6 +96,12 @@ public interface ThrowingConsumer<T> extends Consumer<T> {
 	 * {@link ThrowingConsumer} where the {@link #accept(Object)} method wraps
 	 * any checked exception thrown by the supplied lambda expression or method
 	 * reference.
+     * <p>Usage examples are:
+     * <pre class="code">
+     * ThrowingConsumer.of(lambdaExpression).accept(argument);
+     * or
+     * myList.forEach(ThrowingConsumer.of(lambdaExpression));
+     * </pre>
 	 * @param <T> the type of the input to the operation
 	 * @param consumer the source consumer
 	 * @return a new {@link ThrowingConsumer} instance

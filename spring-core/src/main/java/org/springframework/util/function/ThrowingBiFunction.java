@@ -104,6 +104,12 @@ public interface ThrowingBiFunction<T, U, R> extends BiFunction<T, U, R> {
 	 * {@link ThrowingBiFunction} where the {@link #apply(Object, Object)}
 	 * method wraps any checked exception thrown by the supplied lambda expression
 	 * or method reference.
+	 * <p>Usage examples are:
+     * <pre class="code">
+     * T t = ThrowingBiFunction.of(lambdaExpression).apply(arg1, arg2);
+     * or
+     * myList.stream().reduce(identity, ThrowingBiFunction.of(lambdaExpression));
+     * </pre>
 	 * @param <T> the type of the first argument to the function
 	 * @param <U> the type of the second argument to the function
 	 * @param <R> the type of the result of the function
