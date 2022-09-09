@@ -104,6 +104,13 @@ public interface ThrowingBiFunction<T, U, R> extends BiFunction<T, U, R> {
 	 * {@link ThrowingBiFunction} where the {@link #apply(Object, Object)}
 	 * method wraps any checked exception thrown by the supplied lambda expression
 	 * or method reference.
+	 * <p>This method can be especially useful when working with method references.
+	 * It allows you to easily convert a method that throws a checked exception
+	 * into an instance compatible with a regular {@link BiFunction}.
+	 * <p>For example:
+	 * <pre class="code">
+	 * map.replaceAll(ThrowingBiFunction.of(Example::methodThatCanThrowCheckedException));
+	 * </pre>
 	 * @param <T> the type of the first argument to the function
 	 * @param <U> the type of the second argument to the function
 	 * @param <R> the type of the result of the function
@@ -119,6 +126,13 @@ public interface ThrowingBiFunction<T, U, R> extends BiFunction<T, U, R> {
 	 * {@link ThrowingBiFunction} where the {@link #apply(Object, Object)}
 	 * method wraps any thrown checked exceptions using the given
 	 * {@code exceptionWrapper}.
+	 * <p>This method can be especially useful when working with method references.
+	 * It allows you to easily convert a method that throws a checked exception
+	 * into an instance compatible with a regular {@link BiFunction}.
+	 * <p>For example:
+	 * <pre class="code">
+	 * map.replaceAll(ThrowingBiFunction.of(Example::methodThatCanThrowCheckedException, IllegalStateException::new));
+	 * </pre>
 	 * @param <T> the type of the first argument to the function
 	 * @param <U> the type of the second argument to the function
 	 * @param <R> the type of the result of the function

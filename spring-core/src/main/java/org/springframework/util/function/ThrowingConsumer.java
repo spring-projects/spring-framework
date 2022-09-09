@@ -96,6 +96,13 @@ public interface ThrowingConsumer<T> extends Consumer<T> {
 	 * {@link ThrowingConsumer} where the {@link #accept(Object)} method wraps
 	 * any checked exception thrown by the supplied lambda expression or method
 	 * reference.
+	 * <p>This method can be especially useful when working with method references.
+	 * It allows you to easily convert a method that throws a checked exception
+	 * into an instance compatible with a regular {@link Consumer}.
+	 * <p>For example:
+	 * <pre class="code">
+	 * list.forEach(ThrowingConsumer.of(Example::methodThatCanThrowCheckedException));
+	 * </pre>
 	 * @param <T> the type of the input to the operation
 	 * @param consumer the source consumer
 	 * @return a new {@link ThrowingConsumer} instance
@@ -108,6 +115,13 @@ public interface ThrowingConsumer<T> extends Consumer<T> {
 	 * Lambda friendly convenience method that can be used to create a
 	 * {@link ThrowingConsumer} where the {@link #accept(Object)} method wraps
 	 * any thrown checked exceptions using the given {@code exceptionWrapper}.
+	 * <p>This method can be especially useful when working with method references.
+	 * It allows you to easily convert a method that throws a checked exception
+	 * into an instance compatible with a regular {@link Consumer}.
+	 * <p>For example:
+	 * <pre class="code">
+	 * list.forEach(ThrowingConsumer.of(Example::methodThatCanThrowCheckedException, IllegalStateException::new));
+	 * </pre>
 	 * @param <T> the type of the input to the operation
 	 * @param consumer the source consumer
 	 * @param exceptionWrapper the exception wrapper to use
