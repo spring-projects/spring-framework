@@ -19,7 +19,6 @@ package org.springframework.test.context.aot;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -97,12 +96,11 @@ class AotIntegrationTests extends AbstractAotTests {
 			// .printFiles(System.out)
 			.compile(compiled ->
 				// AOT RUN-TIME: EXECUTION
-				runTestsInAotMode(5,
+				runTestsInAotMode(5, List.of(
 					BasicSpringJupiterSharedConfigTests.class,
 					BasicSpringJupiterTests.class, // NestedTests get executed automatically
 					BasicSpringTestNGTests.class,
-					BasicSpringVintageTests.class
-				));
+					BasicSpringVintageTests.class)));
 	}
 
 	@Disabled("Uncomment to run all Spring integration tests in `spring-test`")
@@ -125,21 +123,21 @@ class AotIntegrationTests extends AbstractAotTests {
 			// .printFiles(System.out)
 			.compile(compiled ->
 				// AOT RUN-TIME: EXECUTION
-				runTestsInAotMode(testClasses.toArray(Class<?>[]::new)));
+				runTestsInAotMode(testClasses));
 	}
 
-	private static void runTestsInAotMode(Class<?>... testClasses) {
+	private static void runTestsInAotMode(List<Class<?>> testClasses) {
 		runTestsInAotMode(-1, testClasses);
 	}
 
-	private static void runTestsInAotMode(long expectedNumTests, Class<?>... testClasses) {
+	private static void runTestsInAotMode(long expectedNumTests, List<Class<?>> testClasses) {
 		try {
 			System.setProperty(AotDetector.AOT_ENABLED, "true");
 
 			LauncherDiscoveryRequestBuilder builder = LauncherDiscoveryRequestBuilder.request()
 					.filters(ClassNameFilter.includeClassNamePatterns(".*Tests?$"))
 					.filters(excludeTags("failing-test-case"));
-			Arrays.stream(testClasses).forEach(testClass -> builder.selectors(selectClass(testClass)));
+			testClasses.forEach(testClass -> builder.selectors(selectClass(testClass)));
 			LauncherDiscoveryRequest request = builder.build();
 			SummaryGeneratingListener listener = new SummaryGeneratingListener();
 			LauncherFactory.create().execute(request, listener);
