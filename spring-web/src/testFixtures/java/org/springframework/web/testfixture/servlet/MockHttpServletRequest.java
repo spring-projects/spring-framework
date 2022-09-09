@@ -69,7 +69,6 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -102,7 +101,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
 
 	private static final ServletInputStream EMPTY_SERVLET_INPUT_STREAM =
-			new DelegatingServletInputStream(StreamUtils.emptyInput());
+			new DelegatingServletInputStream(InputStream.nullInputStream());
 
 	private static final BufferedReader EMPTY_BUFFERED_READER =
 			new BufferedReader(new StringReader(""));

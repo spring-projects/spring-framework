@@ -73,7 +73,7 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 			(publicId, systemId) -> new InputSource(new StringReader(""));
 
 	private static final XMLResolver NO_OP_XML_RESOLVER =
-			(publicID, systemID, base, ns) -> StreamUtils.emptyInput();
+			(publicID, systemID, base, ns) -> InputStream.nullInputStream();
 
 	private static final Set<Class<?>> SUPPORTED_CLASSES = new HashSet<>(8);
 

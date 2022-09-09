@@ -17,12 +17,12 @@
 package org.springframework.scripting.support;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -60,7 +60,7 @@ public class ResourceScriptSourceTests {
 		// does not support File-based reading; delegates to InputStream-style reading...
 		//resource.getFile();
 		//mock.setThrowable(new FileNotFoundException());
-		given(resource.getInputStream()).willReturn(StreamUtils.emptyInput());
+		given(resource.getInputStream()).willReturn(InputStream.nullInputStream());
 
 		ResourceScriptSource scriptSource = new ResourceScriptSource(resource);
 		assertThat(scriptSource.isModified()).as("ResourceScriptSource must start off in the 'isModified' state (it obviously isn't).").isTrue();

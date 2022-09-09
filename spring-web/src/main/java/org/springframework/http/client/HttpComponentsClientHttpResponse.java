@@ -28,7 +28,6 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
-import org.springframework.util.StreamUtils;
 
 /**
  * {@link ClientHttpResponse} implementation based on
@@ -84,7 +83,7 @@ final class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public InputStream getBody() throws IOException {
 		HttpEntity entity = this.httpResponse.getEntity();
-		return (entity != null ? entity.getContent() : StreamUtils.emptyInput());
+		return (entity != null ? entity.getContent() : InputStream.nullInputStream());
 	}
 
 	@Override
