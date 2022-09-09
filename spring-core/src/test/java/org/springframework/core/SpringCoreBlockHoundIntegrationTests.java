@@ -22,6 +22,8 @@ import java.util.concurrent.CompletableFuture;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.JRE;
 import reactor.blockhound.BlockHound;
 import reactor.core.scheduler.ReactorBlockHoundIntegration;
 import reactor.core.scheduler.Schedulers;
@@ -47,6 +49,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Sam Brannen
  * @since 5.2.4
  */
+@DisabledOnJre(JRE.JAVA_18) // BlockHound is not compatible with JDK 18 yet
 class SpringCoreBlockHoundIntegrationTests {
 
 
