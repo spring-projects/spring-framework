@@ -51,22 +51,22 @@ class StandardTestRuntimeHints implements TestRuntimeHintsRegistrar {
 	public void registerHints(MergedContextConfiguration mergedConfig, List<Class<?>> testClasses,
 			RuntimeHints runtimeHints, ClassLoader classLoader) {
 
-		registerHintsForMergedContextConfiguration(runtimeHints, classLoader, mergedConfig);
-		testClasses.forEach(testClass -> registerHintsForActiveProfilesResolvers(runtimeHints, testClass));
+		registerHintsForMergedContextConfiguration(mergedConfig, runtimeHints, classLoader);
+		testClasses.forEach(testClass -> registerHintsForActiveProfilesResolvers(testClass, runtimeHints));
 	}
 
 	private void registerHintsForMergedContextConfiguration(
-			RuntimeHints runtimeHints, ClassLoader classLoader, MergedContextConfiguration mergedConfig) {
+			MergedContextConfiguration mergedConfig, RuntimeHints runtimeHints, ClassLoader classLoader) {
 
 		// @ContextConfiguration(loader = ...)
 		ContextLoader contextLoader = mergedConfig.getContextLoader();
 		if (contextLoader != null) {
-			registerDeclaredConstructors(runtimeHints, contextLoader.getClass());
+			registerDeclaredConstructors(contextLoader.getClass(), runtimeHints);
 		}
 
 		// @ContextConfiguration(initializers = ...)
 		mergedConfig.getContextInitializerClasses()
-				.forEach(clazz -> registerDeclaredConstructors(runtimeHints, clazz));
+				.forEach(clazz -> registerDeclaredConstructors(clazz, runtimeHints));
 
 		// @ContextConfiguration(locations = ...)
 		registerClasspathResources(mergedConfig.getLocations(), runtimeHints, classLoader);
@@ -80,7 +80,7 @@ class StandardTestRuntimeHints implements TestRuntimeHintsRegistrar {
 		}
 	}
 
-	private void registerHintsForActiveProfilesResolvers(RuntimeHints runtimeHints, Class<?> testClass) {
+	private void registerHintsForActiveProfilesResolvers(Class<?> testClass, RuntimeHints runtimeHints) {
 		// @ActiveProfiles(resolver = ...)
 		MergedAnnotations.search(TYPE_HIERARCHY)
 				.withEnclosingClasses(TestContextAnnotationUtils::searchEnclosingClass)
@@ -88,10 +88,10 @@ class StandardTestRuntimeHints implements TestRuntimeHintsRegistrar {
 				.stream(ActiveProfiles.class)
 				.map(mergedAnnotation -> mergedAnnotation.getClass("resolver"))
 				.filter(type -> type != ActiveProfilesResolver.class)
-				.forEach(resolverClass -> registerDeclaredConstructors(runtimeHints, resolverClass));
+				.forEach(resolverClass -> registerDeclaredConstructors(resolverClass, runtimeHints));
 	}
 
-	private void registerDeclaredConstructors(RuntimeHints runtimeHints, Class<?> type) {
+	private void registerDeclaredConstructors(Class<?> type, RuntimeHints runtimeHints) {
 		runtimeHints.reflection().registerType(type, INVOKE_DECLARED_CONSTRUCTORS);
 	}
 

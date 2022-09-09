@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -65,12 +64,11 @@ class TestAotProcessorTests extends AbstractAotTests {
 		TestAotProcessor processor = new TestAotProcessor(classpathRoots, sourceOutput, resourceOutput, classOutput, groupId, artifactId);
 		processor.process();
 
-		assertThat(findFiles(sourceOutput)).containsExactlyInAnyOrder(
-				expectedSourceFilesForBasicSpringTests);
+		assertThat(findFiles(sourceOutput)).containsExactlyInAnyOrder(expectedSourceFiles);
 
-		assertThat(findFiles(resourceOutput)).contains(
-				"META-INF/native-image/org.example/app-tests/reflect-config.json",
-				"META-INF/native-image/org.example/app-tests/resource-config.json");
+		assertThat(findFiles(resourceOutput.resolve("META-INF/native-image"))).contains(
+				"org.example/app-tests/reflect-config.json",
+				"org.example/app-tests/resource-config.json");
 	}
 
 	private void copy(Class<?> testClass, Path destination) {
@@ -86,14 +84,41 @@ class TestAotProcessorTests extends AbstractAotTests {
 		}
 	}
 
-	private static List<String> findFiles(Path outputPath) throws IOException {
-		int prefixLength = outputPath.toFile().getAbsolutePath().length() + 1;
-		return Files.find(outputPath, Integer.MAX_VALUE, (path, attributes) -> attributes.isRegularFile())
-				.map(Path::toAbsolutePath)
-				.map(Path::toString)
-				.map(path -> path.substring(prefixLength))
-				.map(path -> path.replace('\\', '/')) // convert Windows path
-				.toList();
+	private static Stream<String> findFiles(Path directory) throws IOException {
+		return Files.walk(directory).filter(Files::isRegularFile)
+				.map(path -> path.subpath(directory.getNameCount(), path.getNameCount()))
+				// Convert Windows path to UNIX path since the expectedSourceFiles array is hard coded
+				.map(path -> path.toString().replace('\\', '/'));
 	}
+
+	private static final String[] expectedSourceFiles = {
+		// Global
+		"org/springframework/test/context/aot/TestAotMappings__Generated.java",
+		// BasicSpringJupiterSharedConfigTests
+		"org/springframework/context/event/DefaultEventListenerFactory__TestContext001_BeanDefinitions.java",
+		"org/springframework/context/event/EventListenerMethodProcessor__TestContext001_BeanDefinitions.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterSharedConfigTests__TestContext001_ApplicationContextInitializer.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterSharedConfigTests__TestContext001_BeanFactoryRegistrations.java",
+		"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext001_BeanDefinitions.java",
+		// BasicSpringJupiterTests -- not generated b/c already generated for BasicSpringJupiterSharedConfigTests.
+		// BasicSpringJupiterTests.NestedTests
+		"org/springframework/context/event/DefaultEventListenerFactory__TestContext002_BeanDefinitions.java",
+		"org/springframework/context/event/EventListenerMethodProcessor__TestContext002_BeanDefinitions.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests_NestedTests__TestContext002_ApplicationContextInitializer.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests_NestedTests__TestContext002_BeanFactoryRegistrations.java",
+		"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext002_BeanDefinitions.java",
+		// BasicSpringTestNGTests
+		"org/springframework/context/event/DefaultEventListenerFactory__TestContext003_BeanDefinitions.java",
+		"org/springframework/context/event/EventListenerMethodProcessor__TestContext003_BeanDefinitions.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringTestNGTests__TestContext003_ApplicationContextInitializer.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringTestNGTests__TestContext003_BeanFactoryRegistrations.java",
+		"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext003_BeanDefinitions.java",
+		// BasicSpringVintageTests
+		"org/springframework/context/event/DefaultEventListenerFactory__TestContext004_BeanDefinitions.java",
+		"org/springframework/context/event/EventListenerMethodProcessor__TestContext004_BeanDefinitions.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringVintageTests__TestContext004_ApplicationContextInitializer.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringVintageTests__TestContext004_BeanFactoryRegistrations.java",
+		"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext004_BeanDefinitions.java"
+	};
 
 }

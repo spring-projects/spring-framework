@@ -65,7 +65,7 @@ class TestContextRuntimeHints implements RuntimeHintsRegistrar {
 		}
 
 		// Loaded reflectively in BootstrapUtils
-		registerAnnotation(runtimeHints.reflection(),
+		registerAnnotation(reflectionHints,
 			org.springframework.test.context.web.WebAppConfiguration.class
 		);
 	}
