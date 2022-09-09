@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
@@ -45,6 +46,7 @@ import org.springframework.test.context.aot.samples.basic.BasicSpringVintageTest
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
+import static org.junit.platform.launcher.TagFilter.excludeTags;
 
 /**
  * End-to-end integration tests for AOT support in the TestContext framework.
@@ -103,12 +105,39 @@ class AotIntegrationTests extends AbstractAotTests {
 				));
 	}
 
+	@Disabled("Uncomment to run all Spring integration tests in `spring-test`")
+	@Test
+	void endToEndTestsForEntireSpringTestModule() {
+		// AOT BUILD-TIME: CLASSPATH SCANNING
+		List<Class<?>> testClasses = createTestClassScanner()
+				.scan()
+				// FYI: you can limit execution to a particular package as follows.
+				// .scan("org.springframework.test.context.junit.jupiter")
+				.toList();
+
+		// AOT BUILD-TIME: PROCESSING
+		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
+		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
+		generator.processAheadOfTime(testClasses.stream());
+
+		// AOT BUILD-TIME: COMPILATION
+		TestCompiler.forSystem().withFiles(generatedFiles)
+			// .printFiles(System.out)
+			.compile(compiled ->
+				// AOT RUN-TIME: EXECUTION
+				runTestsInAotMode(testClasses.toArray(Class<?>[]::new)));
+	}
+
+	private static void runTestsInAotMode(Class<?>... testClasses) {
+		runTestsInAotMode(-1, testClasses);
+	}
 
 	private static void runTestsInAotMode(long expectedNumTests, Class<?>... testClasses) {
 		try {
 			System.setProperty(AotDetector.AOT_ENABLED, "true");
 
-			LauncherDiscoveryRequestBuilder builder = LauncherDiscoveryRequestBuilder.request();
+			LauncherDiscoveryRequestBuilder builder = LauncherDiscoveryRequestBuilder.request()
+					.filters(excludeTags("failing-test-case"));
 			Arrays.stream(testClasses).forEach(testClass -> builder.selectors(selectClass(testClass)));
 			LauncherDiscoveryRequest request = builder.build();
 			SummaryGeneratingListener listener = new SummaryGeneratingListener();
@@ -118,7 +147,9 @@ class AotIntegrationTests extends AbstractAotTests {
 				List<Throwable> exceptions = summary.getFailures().stream().map(Failure::getException).toList();
 				throw new MultipleFailuresError("Test execution failures", exceptions);
 			}
-			assertThat(summary.getTestsSucceededCount()).isEqualTo(expectedNumTests);
+			if (expectedNumTests >= 0) {
+				assertThat(summary.getTestsSucceededCount()).isEqualTo(expectedNumTests);
+			}
 		}
 		finally {
 			System.clearProperty(AotDetector.AOT_ENABLED);
