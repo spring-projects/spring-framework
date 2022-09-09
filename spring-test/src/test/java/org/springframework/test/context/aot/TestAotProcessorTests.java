@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -64,11 +66,11 @@ class TestAotProcessorTests extends AbstractAotTests {
 		TestAotProcessor processor = new TestAotProcessor(classpathRoots, sourceOutput, resourceOutput, classOutput, groupId, artifactId);
 		processor.process();
 
-		assertThat(findFiles(sourceOutput)).containsExactlyInAnyOrder(expectedSourceFiles);
+		assertThat(findFiles(sourceOutput)).containsExactlyInAnyOrderElementsOf(expectedSourceFiles());
 
 		assertThat(findFiles(resourceOutput.resolve("META-INF/native-image"))).contains(
-				"org.example/app-tests/reflect-config.json",
-				"org.example/app-tests/resource-config.json");
+				Path.of(groupId, artifactId, "reflect-config.json"),
+				Path.of(groupId, artifactId, "resource-config.json"));
 	}
 
 	private void copy(Class<?> testClass, Path destination) {
@@ -84,11 +86,13 @@ class TestAotProcessorTests extends AbstractAotTests {
 		}
 	}
 
-	private static Stream<String> findFiles(Path directory) throws IOException {
+	private static Stream<Path> findFiles(Path directory) throws IOException {
 		return Files.walk(directory).filter(Files::isRegularFile)
-				.map(path -> path.subpath(directory.getNameCount(), path.getNameCount()))
-				// Convert Windows path to UNIX path since the expectedSourceFiles array is hard coded
-				.map(path -> path.toString().replace('\\', '/'));
+				.map(path -> path.subpath(directory.getNameCount(), path.getNameCount()));
+	}
+
+	private static List<Path> expectedSourceFiles() {
+		return Arrays.stream(expectedSourceFiles).map(Path::of).toList();
 	}
 
 	private static final String[] expectedSourceFiles = {
