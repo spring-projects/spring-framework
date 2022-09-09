@@ -69,7 +69,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
-import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
@@ -85,7 +84,6 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
-import org.springframework.web.servlet.theme.FixedThemeResolver;
 import org.springframework.web.servlet.view.BeanNameViewResolver;
 import org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
@@ -335,12 +333,14 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void defaultThemeResolverConfiguration() {
 		ApplicationContext context = initContext(WebConfig.class);
-		ThemeResolver themeResolver = context.getBean(THEME_RESOLVER_BEAN_NAME, ThemeResolver.class);
+		org.springframework.web.servlet.ThemeResolver themeResolver =
+				context.getBean(THEME_RESOLVER_BEAN_NAME, org.springframework.web.servlet.ThemeResolver.class);
 
 		assertThat(themeResolver).isNotNull();
-		assertThat(themeResolver).isInstanceOf(FixedThemeResolver.class);
+		assertThat(themeResolver).isInstanceOf(org.springframework.web.servlet.theme.FixedThemeResolver.class);
 	}
 
 	@Test

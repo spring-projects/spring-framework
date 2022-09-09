@@ -122,8 +122,10 @@ import org.springframework.context.NoSuchMessageException;
  * @see HtmlEscapeTag#setDefaultHtmlEscape
  * @see org.springframework.web.util.WebUtils#HTML_ESCAPE_CONTEXT_PARAM
  * @see ArgumentTag
+ * @deprecated as of 6.0, with no direct replacement
  */
 @SuppressWarnings("serial")
+@Deprecated
 public class ThemeTag extends MessageTag {
 
 	/**

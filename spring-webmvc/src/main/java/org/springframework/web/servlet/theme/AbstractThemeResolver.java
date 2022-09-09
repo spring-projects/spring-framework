@@ -25,7 +25,9 @@ import org.springframework.web.servlet.ThemeResolver;
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
  * @since 17.06.2003
+ * @deprecated as of 6.0, with no concrete replacement
  */
+@Deprecated
 public abstract class AbstractThemeResolver implements ThemeResolver {
 
 	/**

@@ -45,7 +45,9 @@ import org.springframework.lang.Nullable;
  * @since 17.06.2003
  * @see org.springframework.ui.context.Theme
  * @see org.springframework.ui.context.ThemeSource
+ * @deprecated as of 6.0, with no direct replacement
  */
+@Deprecated
 public interface ThemeResolver {
 
 	/**
