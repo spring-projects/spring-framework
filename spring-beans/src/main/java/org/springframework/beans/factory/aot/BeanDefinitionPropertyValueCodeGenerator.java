@@ -85,7 +85,30 @@ class BeanDefinitionPropertyValueCodeGenerator {
 	CodeBlock generateCode(@Nullable Object value) {
 		ResolvableType type = (value != null) ? ResolvableType.forInstance(value)
 				: ResolvableType.NONE;
-		return generateCode(value, type);
+		try {
+			return generateCode(value, type);
+		}
+		catch (Exception ex) {
+			throw new IllegalArgumentException(buildErrorMessage(value, type), ex);
+		}
+	}
+
+	private CodeBlock generateCodeForElement(@Nullable Object value, ResolvableType type) {
+		try {
+			return generateCode(value, type);
+		}
+		catch (Exception ex) {
+			throw new IllegalArgumentException(buildErrorMessage(value, type), ex);
+		}
+	}
+
+	private static String buildErrorMessage(@Nullable Object value, ResolvableType type) {
+		StringBuilder message = new StringBuilder("Failed to generate code for '");
+		message.append(value).append("'");
+		if (type != ResolvableType.NONE) {
+			message.append(" with type ").append(type);
+		}
+		return message.toString();
 	}
 
 	private CodeBlock generateCode(@Nullable Object value, ResolvableType type) {
@@ -98,8 +121,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 				return code;
 			}
 		}
-		throw new IllegalArgumentException(
-				"'type' " + type + " must be supported for instance code generation");
+		throw new IllegalArgumentException("Code generation does not support " + type);
 	}
 
 
@@ -304,7 +326,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			while (iterator.hasNext()) {
 				Object element = iterator.next();
 				code.add("$L", BeanDefinitionPropertyValueCodeGenerator.this
-						.generateCode(element, elementType));
+						.generateCodeForElement(element, elementType));
 				if (iterator.hasNext()) {
 					code.add(", ");
 				}
@@ -371,9 +393,9 @@ class BeanDefinitionPropertyValueCodeGenerator {
 				Entry<?, ?> entry = iterator.next();
 				code.add("$T.entry($L,$L)", Map.class,
 						BeanDefinitionPropertyValueCodeGenerator.this
-								.generateCode(entry.getKey(), keyType),
+								.generateCodeForElement(entry.getKey(), keyType),
 						BeanDefinitionPropertyValueCodeGenerator.this
-								.generateCode(entry.getValue(), valueType));
+								.generateCodeForElement(entry.getValue(), valueType));
 				if (iterator.hasNext()) {
 					code.add(", ");
 				}
@@ -457,9 +479,9 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			while (iterator.hasNext()) {
 				Entry<K, V> entry = iterator.next();
 				CodeBlock keyCode = BeanDefinitionPropertyValueCodeGenerator.this
-						.generateCode(entry.getKey(), keyType);
+						.generateCodeForElement(entry.getKey(), keyType);
 				CodeBlock valueCode = BeanDefinitionPropertyValueCodeGenerator.this
-						.generateCode(entry.getValue(), valueType);
+						.generateCodeForElement(entry.getValue(), valueType);
 				if (!useOfEntries) {
 					code.add("$L, $L", keyCode, valueCode);
 				}
@@ -490,9 +512,9 @@ class BeanDefinitionPropertyValueCodeGenerator {
 						LinkedHashMap.class, map.size());
 				map.forEach((key, value) -> method.addStatement("map.put($L, $L)",
 						BeanDefinitionPropertyValueCodeGenerator.this
-								.generateCode(key, keyType),
+								.generateCodeForElement(key, keyType),
 						BeanDefinitionPropertyValueCodeGenerator.this
-								.generateCode(value, valueType)));
+								.generateCodeForElement(value, valueType)));
 				method.addStatement("return map");
 			});
 			return CodeBlock.of("$L()", generatedMethod.getName());

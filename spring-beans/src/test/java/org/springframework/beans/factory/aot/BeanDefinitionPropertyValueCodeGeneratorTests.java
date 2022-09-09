@@ -50,6 +50,7 @@ import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Tests for {@link BeanDefinitionPropertyValueCodeGenerator}.
@@ -489,6 +490,50 @@ class BeanDefinitionPropertyValueCodeGeneratorTests {
 				assertThat(actual.getBeanType()).isEqualTo(String.class);
 			});
 		}
+
+	}
+
+	@Nested
+	static class ExceptionTests {
+
+		@Test
+		void generateWhenUnsupportedDataTypeThrowsException() {
+			SampleValue sampleValue = new SampleValue("one");
+			assertThatIllegalArgumentException().isThrownBy(() -> generateCode(sampleValue))
+					.withMessageContaining("Failed to generate code for")
+					.withMessageContaining(sampleValue.toString())
+					.withMessageContaining(SampleValue.class.getName())
+					.havingCause()
+					.withMessageContaining("Code generation does not support")
+					.withMessageContaining(SampleValue.class.getName());
+		}
+
+		@Test
+		void generateWhenListOfUnsupportedElement() {
+			SampleValue one = new SampleValue("one");
+			SampleValue two = new SampleValue("two");
+			List<SampleValue> list = List.of(one, two);
+			assertThatIllegalArgumentException().isThrownBy(() -> generateCode(list))
+					.withMessageContaining("Failed to generate code for")
+					.withMessageContaining(list.toString())
+					.withMessageContaining(list.getClass().getName())
+					.havingCause()
+					.withMessageContaining("Failed to generate code for")
+					.withMessageContaining(one.toString())
+					.withMessageContaining("?")
+					.havingCause()
+					.withMessageContaining("Code generation does not support ?");
+		}
+
+		private void generateCode(Object value) {
+			TestGenerationContext context = new TestGenerationContext();
+			GeneratedClass generatedClass = context.getGeneratedClasses()
+					.addForFeature("Test", type -> {});
+			new BeanDefinitionPropertyValueCodeGenerator(generatedClass.getMethods())
+					.generateCode(value);
+		}
+
+		record SampleValue(String name) {}
 
 	}
 
