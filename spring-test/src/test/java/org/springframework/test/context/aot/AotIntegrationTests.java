@@ -40,10 +40,11 @@ import org.springframework.aot.test.generate.compile.CompileWithTargetClassAcces
 import org.springframework.aot.test.generate.compile.TestCompiler;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterSharedConfigTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests;
+import org.springframework.test.context.aot.samples.basic.BasicSpringTestNGTests;
+import org.springframework.test.context.aot.samples.basic.BasicSpringVintageTests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
-import static org.junit.platform.launcher.EngineFilter.includeEngines;
 
 /**
  * End-to-end integration tests for AOT support in the TestContext framework.
@@ -78,10 +79,7 @@ class AotIntegrationTests extends AbstractAotTests {
 	@Test
 	void endToEndTests() {
 		// AOT BUILD-TIME: CLASSPATH SCANNING
-		Stream<Class<?>> testClasses = createTestClassScanner()
-				.scan("org.springframework.test.context.aot.samples.basic")
-				// This test focuses solely on JUnit Jupiter tests
-				.filter(sourceFile -> sourceFile.getName().contains("Jupiter"));
+		Stream<Class<?>> testClasses = createTestClassScanner().scan("org.springframework.test.context.aot.samples.basic");
 
 		// AOT BUILD-TIME: PROCESSING
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
@@ -89,23 +87,28 @@ class AotIntegrationTests extends AbstractAotTests {
 		generator.processAheadOfTime(testClasses);
 
 		List<String> sourceFiles = generatedFiles.getGeneratedFiles(Kind.SOURCE).keySet().stream().toList();
-		assertThat(sourceFiles).containsExactlyInAnyOrder(expectedSourceFilesForBasicSpringJupiterTests);
+		assertThat(sourceFiles).containsExactlyInAnyOrder(expectedSourceFilesForBasicSpringTests);
 
 		// AOT BUILD-TIME: COMPILATION
 		TestCompiler.forSystem().withFiles(generatedFiles)
 			// .printFiles(System.out)
 			.compile(compiled ->
 				// AOT RUN-TIME: EXECUTION
-				runTestsInAotMode(BasicSpringJupiterTests.class, BasicSpringJupiterSharedConfigTests.class));
+				runTestsInAotMode(5,
+					BasicSpringJupiterSharedConfigTests.class,
+					BasicSpringJupiterTests.class,
+					BasicSpringJupiterTests.NestedTests.class,
+					BasicSpringTestNGTests.class,
+					BasicSpringVintageTests.class
+				));
 	}
 
 
-	private static void runTestsInAotMode(Class<?>... testClasses) {
+	private static void runTestsInAotMode(long expectedNumTests, Class<?>... testClasses) {
 		try {
 			System.setProperty(AotDetector.AOT_ENABLED, "true");
 
-			LauncherDiscoveryRequestBuilder builder = LauncherDiscoveryRequestBuilder.request()
-					.filters(includeEngines("junit-jupiter"));
+			LauncherDiscoveryRequestBuilder builder = LauncherDiscoveryRequestBuilder.request();
 			Arrays.stream(testClasses).forEach(testClass -> builder.selectors(selectClass(testClass)));
 			LauncherDiscoveryRequest request = builder.build();
 			SummaryGeneratingListener listener = new SummaryGeneratingListener();
@@ -115,6 +118,7 @@ class AotIntegrationTests extends AbstractAotTests {
 				List<Throwable> exceptions = summary.getFailures().stream().map(Failure::getException).toList();
 				throw new MultipleFailuresError("Test execution failures", exceptions);
 			}
+			assertThat(summary.getTestsSucceededCount()).isEqualTo(expectedNumTests);
 		}
 		finally {
 			System.clearProperty(AotDetector.AOT_ENABLED);
@@ -127,28 +131,5 @@ class AotIntegrationTests extends AbstractAotTests {
 		Set<Path> classpathRoots = Set.of(Paths.get(classpathRoot));
 		return new TestClassScanner(classpathRoots);
 	}
-
-	private static final String[] expectedSourceFilesForBasicSpringJupiterTests = {
-		// Global
-		"org/springframework/test/context/aot/TestAotMappings__Generated.java",
-		// BasicSpringJupiterSharedConfigTests
-		"org/springframework/context/event/DefaultEventListenerFactory__TestContext001_BeanDefinitions.java",
-		"org/springframework/context/event/EventListenerMethodProcessor__TestContext001_BeanDefinitions.java",
-		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterSharedConfigTests__TestContext001_ApplicationContextInitializer.java",
-		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterSharedConfigTests__TestContext001_BeanFactoryRegistrations.java",
-		"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext001_BeanDefinitions.java",
-		// BasicSpringJupiterTests -- not generated b/c already generated for BasicSpringJupiterSharedConfigTests.
-		// "org/springframework/context/event/DefaultEventListenerFactory__TestContext00?_BeanDefinitions.java",
-		// "org/springframework/context/event/EventListenerMethodProcessor__TestContext00?_BeanDefinitions.java",
-		// "org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests__TestContext00?_ApplicationContextInitializer.java",
-		// "org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests__TestContext00?_BeanFactoryRegistrations.java",
-		// "org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext00?_BeanDefinitions.java",
-		// BasicSpringJupiterTests.NestedTests
-		"org/springframework/context/event/DefaultEventListenerFactory__TestContext002_BeanDefinitions.java",
-		"org/springframework/context/event/EventListenerMethodProcessor__TestContext002_BeanDefinitions.java",
-		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests_NestedTests__TestContext002_ApplicationContextInitializer.java",
-		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests_NestedTests__TestContext002_BeanFactoryRegistrations.java",
-		"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext002_BeanDefinitions.java",
-	};
 
 }
