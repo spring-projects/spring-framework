@@ -122,7 +122,7 @@ dependencies {
 		api("org.hamcrest:hamcrest:2.2")
 		api("org.hibernate:hibernate-core-jakarta:5.6.10.Final")
 		api("org.hibernate:hibernate-validator:7.0.4.Final")
-		api("org.hsqldb:hsqldb:2.5.2")
+		api("org.hsqldb:hsqldb:2.7.0")
 		api("org.javamoney:moneta:1.4.2")
 		api("org.jruby:jruby:9.3.4.0")
 		api("org.junit.support:testng-engine:1.0.4")
