@@ -96,7 +96,6 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 
 	/** the ThemeSource for this ApplicationContext. */
 	@Nullable
-	@Deprecated
 	private ThemeSource themeSource;
 
 
@@ -199,7 +198,6 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	 * Initialize the theme capability.
 	 */
 	@Override
-	@Deprecated
 	protected void onRefresh() {
 		this.themeSource = UiApplicationContextUtils.initThemeSource(this);
 	}

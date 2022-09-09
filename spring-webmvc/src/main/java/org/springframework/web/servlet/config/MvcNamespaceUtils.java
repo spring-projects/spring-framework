@@ -235,7 +235,7 @@ public abstract class MvcNamespaceUtils {
 	 * Registers an {@link FixedThemeResolver} under a well-known name
 	 * unless already registered.
 	 */
-	@Deprecated
+	@SuppressWarnings("deprecation")
 	private static void registerThemeResolver(ParserContext context, @Nullable Object source) {
 		if (!containsBeanInHierarchy(context, DispatcherServlet.THEME_RESOLVER_BEAN_NAME)) {
 			RootBeanDefinition beanDef = new RootBeanDefinition(org.springframework.web.servlet.theme.FixedThemeResolver.class);

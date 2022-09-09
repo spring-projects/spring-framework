@@ -86,7 +86,6 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	private ServletContext servletContext;
 
 	@Nullable
-	@Deprecated
 	private ThemeSource themeSource;
 
 
@@ -198,7 +197,6 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	 * Initialize the theme capability.
 	 */
 	@Override
-	@Deprecated
 	protected void onRefresh() {
 		this.themeSource = UiApplicationContextUtils.initThemeSource(this);
 	}

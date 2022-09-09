@@ -70,7 +70,6 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	private String namespace;
 
 	@Nullable
-	@Deprecated
 	private ThemeSource themeSource;
 
 
@@ -189,7 +188,6 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	 * Initialize the theme capability.
 	 */
 	@Override
-	@Deprecated
 	protected void onRefresh() {
 		this.themeSource = UiApplicationContextUtils.initThemeSource(this);
 	}

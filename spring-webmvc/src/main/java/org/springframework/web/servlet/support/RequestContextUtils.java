@@ -182,6 +182,7 @@ public abstract class RequestContextUtils {
 	 * DispatcherServlet.
 	 * @param request current HTTP request
 	 * @return the current ThemeResolver, or {@code null} if not found
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Nullable
 	@Deprecated
@@ -194,6 +195,7 @@ public abstract class RequestContextUtils {
 	 * DispatcherServlet.
 	 * @param request current HTTP request
 	 * @return the current ThemeSource
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Nullable
 	@Deprecated
@@ -207,6 +209,7 @@ public abstract class RequestContextUtils {
 	 * @param request current HTTP request
 	 * @return the current theme, or {@code null} if not found
 	 * @see #getThemeResolver
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Nullable
 	@Deprecated

@@ -129,7 +129,7 @@ import org.springframework.web.util.WebUtils;
  * Implementations for a fixed theme and for cookie and session storage are included.
  * The ThemeResolver bean name is "themeResolver"; default is
  * {@link org.springframework.web.servlet.theme.FixedThemeResolver}.
- * Theme support is deprecated as of 6.0
+ * Theme support is deprecated as of 6.0 with no direct replacement.
  * </ul>
  *
  * <p><b>NOTE: The {@code @RequestMapping} annotation will only be processed if a
