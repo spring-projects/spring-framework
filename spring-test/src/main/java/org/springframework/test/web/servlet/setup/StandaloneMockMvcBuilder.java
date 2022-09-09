@@ -64,7 +64,6 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
-import org.springframework.web.servlet.theme.FixedThemeResolver;
 import org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.UrlPathHelper;
@@ -394,6 +393,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 		return wac;
 	}
 
+	@SuppressWarnings("deprecation")
 	private void registerMvcSingletons(StubWebApplicationContext wac) {
 		StandaloneConfiguration config = new StandaloneConfiguration();
 		config.setApplicationContext(wac);
@@ -432,8 +432,10 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 		wac.addBeans(initViewResolvers(wac));
 		wac.addBean(DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME, this.localeResolver);
-		wac.addBean(DispatcherServlet.THEME_RESOLVER_BEAN_NAME, new FixedThemeResolver());
-		wac.addBean(DispatcherServlet.REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME, new DefaultRequestToViewNameTranslator());
+		wac.addBean(DispatcherServlet.THEME_RESOLVER_BEAN_NAME,
+				new org.springframework.web.servlet.theme.FixedThemeResolver());
+		wac.addBean(DispatcherServlet.REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME,
+				new DefaultRequestToViewNameTranslator());
 
 		this.flashMapManager = new SessionFlashMapManager();
 		wac.addBean(DispatcherServlet.FLASH_MAP_MANAGER_BEAN_NAME, this.flashMapManager);

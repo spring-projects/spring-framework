@@ -42,7 +42,9 @@ import org.springframework.ui.context.ThemeSource;
  * @see #setBasenamePrefix
  * @see java.util.ResourceBundle
  * @see org.springframework.context.support.ResourceBundleMessageSource
+ * @deprecated as of 6.0, with no direct replacement
  */
+@Deprecated
 public class ResourceBundleThemeSource implements HierarchicalThemeSource, BeanClassLoaderAware {
 
 	protected final Log logger = LogFactory.getLog(getClass());

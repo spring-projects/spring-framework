@@ -82,7 +82,6 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
-import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.function.support.HandlerFunctionAdapter;
 import org.springframework.web.servlet.function.support.RouterFunctionMapping;
@@ -105,7 +104,6 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
-import org.springframework.web.servlet.theme.FixedThemeResolver;
 import org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.ViewResolverComposite;
@@ -1165,8 +1163,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	@Bean
-	public ThemeResolver themeResolver() {
-		return new FixedThemeResolver();
+	@Deprecated
+	public org.springframework.web.servlet.ThemeResolver themeResolver() {
+		return new org.springframework.web.servlet.theme.FixedThemeResolver();
 	}
 
 	@Bean
