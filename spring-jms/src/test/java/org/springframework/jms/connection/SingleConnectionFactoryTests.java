@@ -16,6 +16,9 @@
 
 package org.springframework.jms.connection;
 
+import java.lang.reflect.Field;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.ExceptionListener;
@@ -29,7 +32,10 @@ import jakarta.jms.TopicConnectionFactory;
 import jakarta.jms.TopicSession;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.util.ReflectionUtils;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -339,6 +345,76 @@ public class SingleConnectionFactoryTests {
 		assertThat(con.getStartCount()).isEqualTo(2);
 		assertThat(con.getCloseCount()).isEqualTo(2);
 		assertThat(listener.getCount()).isEqualTo(1);
+	}
+
+	@Test
+	public void testWithConnectionFactoryAndExceptionListenerAndReconnectOnExceptionWithJMSException() throws Exception {
+		// Throws JMSException on setExceptionListener() method, but only at the first time
+		class FailingTestConnection extends TestConnection {
+			private int setExceptionListenerInvocationCounter;
+
+			@Override
+			public void setExceptionListener(ExceptionListener exceptionListener) throws JMSException {
+				setExceptionListenerInvocationCounter++;
+				// Throw JMSException on first invocation
+				if (setExceptionListenerInvocationCounter == 1) {
+					throw new JMSException("Test JMSException (setExceptionListener())");
+				}
+				super.setExceptionListener(exceptionListener);
+			}
+		}
+
+		// Prepare base JMS ConnectionFactory
+		// - createConnection(1st) -> TestConnection,
+		// - createConnection(2nd and next) -> FailingTestConnection
+		TestConnection testCon = new TestConnection();
+		FailingTestConnection failingCon = new FailingTestConnection();
+		AtomicInteger createConnectionMethodCounter = new AtomicInteger();
+		ConnectionFactory cf = mock(ConnectionFactory.class);
+		given(cf.createConnection()).willAnswer(invocation -> {
+			int methodInvocationCounter = createConnectionMethodCounter.incrementAndGet();
+			return methodInvocationCounter == 1 ? testCon : failingCon;
+		});
+
+		// Prepare SingleConnectionFactory (setReconnectOnException())
+		// - internal connection exception listener should be registered
+		SingleConnectionFactory scf = new SingleConnectionFactory(cf);
+		scf.setReconnectOnException(true);
+		Field conField = ReflectionUtils.findField(SingleConnectionFactory.class, "connection");
+		conField.setAccessible(true);
+
+		// Get connection (1st)
+		Connection con1 = scf.getConnection();
+		assertThat(createConnectionMethodCounter.get()).isEqualTo(1);
+		assertThat(con1).isNotNull();
+		assertThat(con1.getExceptionListener()).isNotNull();
+		assertThat(con1).isSameAs(testCon);
+		// Get connection again, the same should be returned (shared connection till some problem)
+		Connection con2 = scf.getConnection();
+		assertThat(createConnectionMethodCounter.get()).isEqualTo(1);
+		assertThat(con2.getExceptionListener()).isNotNull();
+		assertThat(con2).isSameAs(con1);
+
+		// Invoke reset connection to simulate problem with connection
+		// - SCF exception listener should be invoked -> connection should be set to null
+		// - next attempt to invoke getConnection() must create new connection
+		scf.resetConnection();
+		assertThat(conField.get(scf)).isNull();
+
+		// Attempt to get connection again
+		// - JMSException should be returned from FailingTestConnection
+		// - connection should be still null (no new connection without exception listener like before fix)
+		assertThatExceptionOfType(JMSException.class).isThrownBy(() -> scf.getConnection());
+		assertThat(createConnectionMethodCounter.get()).isEqualTo(2);
+		assertThat(conField.get(scf)).isNull();
+
+		// Attempt to get connection again -> FailingTestConnection should be returned
+		//  - no JMSException is thrown, exception listener should be present
+		Connection con3 = scf.getConnection();
+		assertThat(createConnectionMethodCounter.get()).isEqualTo(3);
+		assertThat(con3).isNotNull();
+		assertThat(con3).isSameAs(failingCon);
+		assertThat(con3.getExceptionListener()).isNotNull();
 	}
 
 	@Test
