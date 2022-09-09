@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,23 @@
 
 package org.springframework.scheduling.concurrent;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.task.AsyncListenableTaskExecutor;
-
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.InstanceOfAssertFactories.type;
 
 /**
+ * Unit tests for {@link ThreadPoolTaskExecutor}.
+ *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 5.0.5
  */
 class ThreadPoolTaskExecutorTests extends AbstractSchedulingTaskExecutorTests {
@@ -35,7 +41,8 @@ class ThreadPoolTaskExecutorTests extends AbstractSchedulingTaskExecutorTests {
 
 
 	@Override
-	protected AsyncListenableTaskExecutor buildExecutor() {
+	@SuppressWarnings("deprecation")
+	protected org.springframework.core.task.AsyncListenableTaskExecutor buildExecutor() {
 		executor.setThreadNamePrefix(this.threadNamePrefix);
 		executor.setMaxPoolSize(1);
 		executor.afterPropertiesSet();
@@ -50,8 +57,8 @@ class ThreadPoolTaskExecutorTests extends AbstractSchedulingTaskExecutorTests {
 
 		executor.setCorePoolSize(0);
 
-		assertThat(executor.getCorePoolSize()).isEqualTo(0);
-		assertThat(executor.getThreadPoolExecutor().getCorePoolSize()).isEqualTo(0);
+		assertThat(executor.getCorePoolSize()).isZero();
+		assertThat(executor.getThreadPoolExecutor().getCorePoolSize()).isZero();
 	}
 
 	@Test
@@ -110,6 +117,39 @@ class ThreadPoolTaskExecutorTests extends AbstractSchedulingTaskExecutorTests {
 
 		assertThat(executor.getKeepAliveSeconds()).isEqualTo(60);
 		assertThat(executor.getThreadPoolExecutor().getKeepAliveTime(TimeUnit.SECONDS)).isEqualTo(60);
+	}
+
+	@Test
+	void queueCapacityDefault() {
+		assertThat(executor.getQueueCapacity()).isEqualTo(Integer.MAX_VALUE);
+		assertThat(executor.getThreadPoolExecutor().getQueue())
+			.asInstanceOf(type(LinkedBlockingQueue.class))
+			.extracting(BlockingQueue::remainingCapacity).isEqualTo(Integer.MAX_VALUE);
+	}
+
+	@Test
+	void queueCapacityZero() {
+		executor.setQueueCapacity(0);
+		executor.afterPropertiesSet();
+
+		assertThat(executor.getQueueCapacity()).isZero();
+		assertThat(executor.getThreadPoolExecutor().getQueue())
+			.asInstanceOf(type(SynchronousQueue.class))
+			.extracting(BlockingQueue::remainingCapacity).isEqualTo(0);
+	}
+
+	@Test
+	void queueSize() {
+		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+		assertThatIllegalStateException().isThrownBy(executor::getThreadPoolExecutor);
+		assertThat(executor.getQueueSize()).isZero();
+
+		executor.afterPropertiesSet();
+
+		assertThat(executor.getThreadPoolExecutor()).isNotNull();
+		assertThat(executor.getThreadPoolExecutor().getQueue()).isEmpty();
+		assertThat(executor.getQueueSize()).isZero();
 	}
 
 }

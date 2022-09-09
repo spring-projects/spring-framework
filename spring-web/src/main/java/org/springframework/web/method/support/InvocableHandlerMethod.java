@@ -73,7 +73,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	/**
 	 * Variant of {@link #InvocableHandlerMethod(Object, Method)} that
-	 * also accepts a {@link MessageSource}, for use in sub-classes.
+	 * also accepts a {@link MessageSource}, for use in subclasses.
 	 * @since 5.3.10
 	 */
 	protected InvocableHandlerMethod(Object bean, Method method, @Nullable MessageSource messageSource) {

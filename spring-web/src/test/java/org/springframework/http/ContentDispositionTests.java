@@ -149,26 +149,24 @@ class ContentDispositionTests {
 				.isThrownBy(() -> parse("form-data; name=\"name\"; filename*=UTF-8''%A.txt"));
 	}
 
-	@Test // gh-23077
-	@SuppressWarnings("deprecation")
-	void parseWithEscapedQuote() {
-		BiConsumer<String, String> tester = (description, filename) ->
-			assertThat(parse("form-data; name=\"file\"; filename=\"" + filename + "\"; size=123"))
-					.as(description)
-					.isEqualTo(ContentDisposition.formData().name("file").filename(filename).size(123L).build());
-
-		tester.accept("Escaped quotes should be ignored",
-				"\\\"The Twilight Zone\\\".txt");
-
-		tester.accept("Escaped quotes preceded by escaped backslashes should be ignored",
-				"\\\\\\\"The Twilight Zone\\\\\\\".txt");
-
-		tester.accept("Escaped backslashes should not suppress quote",
-				"The Twilight Zone \\\\");
-
-		tester.accept("Escaped backslashes should not suppress quote",
-				"The Twilight Zone \\\\\\\\");
+	@Test
+	void parseBackslash() {
+		String s = "form-data; name=\"foo\"; filename=\"foo\\\\bar \\\"baz\\\" qux \\\\\\\" quux.txt\"";
+		ContentDisposition cd = ContentDisposition.parse(
+				s);
+		assertThat(cd.getName()).isEqualTo("foo");
+		assertThat(cd.getFilename()).isEqualTo("foo\\bar \"baz\" qux \\\" quux.txt");
+		assertThat(cd.toString()).isEqualTo(s);
 	}
+
+	@Test
+	void parseBackslashInLastPosition() {
+		ContentDisposition cd = ContentDisposition.parse("form-data; name=\"foo\"; filename=\"bar\\\"");
+		assertThat(cd.getName()).isEqualTo("foo");
+		assertThat(cd.getFilename()).isEqualTo("bar\\");
+		assertThat(cd.toString()).isEqualTo("form-data; name=\"foo\"; filename=\"bar\\\\\"");
+	}
+
 
 	@Test
 	@SuppressWarnings("deprecation")
@@ -281,26 +279,26 @@ class ContentDispositionTests {
 		};
 
 		String filename = "\"foo.txt";
-		tester.accept(filename, "\\" + filename);
+		tester.accept(filename, "\\\"foo.txt");
 
 		filename = "\\\"foo.txt";
-		tester.accept(filename, filename);
+		tester.accept(filename, "\\\\\\\"foo.txt");
 
 		filename = "\\\\\"foo.txt";
-		tester.accept(filename, "\\" + filename);
+		tester.accept(filename, "\\\\\\\\\\\"foo.txt");
 
 		filename = "\\\\\\\"foo.txt";
-		tester.accept(filename, filename);
+		tester.accept(filename, "\\\\\\\\\\\\\\\"foo.txt");
 
 		filename = "\\\\\\\\\"foo.txt";
-		tester.accept(filename, "\\" + filename);
+		tester.accept(filename, "\\\\\\\\\\\\\\\\\\\"foo.txt");
 
 		tester.accept("\"\"foo.txt", "\\\"\\\"foo.txt");
 		tester.accept("\"\"\"foo.txt", "\\\"\\\"\\\"foo.txt");
 
-		tester.accept("foo.txt\\", "foo.txt");
-		tester.accept("foo.txt\\\\", "foo.txt\\\\");
-		tester.accept("foo.txt\\\\\\", "foo.txt\\\\");
+		tester.accept("foo.txt\\", "foo.txt\\\\");
+		tester.accept("foo.txt\\\\", "foo.txt\\\\\\\\");
+		tester.accept("foo.txt\\\\\\", "foo.txt\\\\\\\\\\\\");
 	}
 
 	@Test
@@ -311,6 +309,16 @@ class ContentDispositionTests {
 						.filename("test.txt", StandardCharsets.UTF_16)
 						.build()
 						.toString());
+	}
+
+	@Test
+	void parseFormatted() {
+		ContentDisposition cd = ContentDisposition.builder("form-data")
+				.name("foo")
+				.filename("foo\\bar \"baz\" qux \\\" quux.txt").build();
+		ContentDisposition parsed = ContentDisposition.parse(cd.toString());
+		assertThat(parsed).isEqualTo(cd);
+		assertThat(parsed.toString()).isEqualTo(cd.toString());
 	}
 
 }

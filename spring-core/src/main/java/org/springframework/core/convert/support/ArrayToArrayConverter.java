@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,11 +62,10 @@ final class ArrayToArrayConverter implements ConditionalGenericConverter {
 	@Override
 	@Nullable
 	public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (this.conversionService instanceof GenericConversionService) {
+		if (this.conversionService instanceof GenericConversionService genericConversionService) {
 			TypeDescriptor targetElement = targetType.getElementTypeDescriptor();
-			if (targetElement != null &&
-					((GenericConversionService) this.conversionService).canBypassConvert(
-							sourceType.getElementTypeDescriptor(), targetElement)) {
+			if (targetElement != null && genericConversionService.canBypassConvert(
+					sourceType.getElementTypeDescriptor(), targetElement)) {
 				return source;
 			}
 		}

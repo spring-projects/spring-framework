@@ -364,14 +364,14 @@ If necessary the `Content-Type` may also be set explicitly.
 
 
 [[rest-http-interface]]
-=== HTTP Interface
+  === HTTP Interface
 
 The Spring Framework lets you define an HTTP service as a Java interface with annotated
 methods for HTTP exchanges. You can then generate a proxy that implements this interface
 and performs the exchanges. This helps to simplify HTTP remote access which often
 involves a facade that wraps the details of using the underlying HTTP client.
 
-To start, declare an interface with annotated, HTTP exchange methods:
+One, declare an interface with `@HttpExchange` methods:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -385,22 +385,18 @@ To start, declare an interface with annotated, HTTP exchange methods:
 	}
 ----
 
-Now you create a proxy for the interface that performs the declared exchanges through
-the `WebClient`:
+Two, create a proxy that will perform the declared HTTP exchanges:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	WebClient client = WebClient.builder()
-			.baseUrl("https://api.github.com/")
-			.build();
+	WebClient client = WebClient.builder().baseUrl("https://api.github.com/").build();
+	HttpServiceProxyFactory factory = WebClientAdapter.createHttpServiceProxyFactory(client);
+	factory.afterPropertiesSet();
 
-	HttpServiceProxyFactory proxyFactory = 
-			HttpServiceProxyFactory.builder(new WebClientAdapter(client)).build();
-
-	RepositoryService service = proxyFactory.createClient(RepositoryService.class);
+	RepositoryService service = factory.createClient(RepositoryService.class);
 ----
 
-An HTTP service interface can declare common attributes at the type level:
+`@HttpExchange` is supported at the type level where it applies to all methods:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -426,7 +422,7 @@ method parameters:
 
 [cols="1,2", options="header"]
 |===
-| Controller method argument | Description
+| Method argument | Description
 
 | `URI`
 | Dynamically set the URL for the request, overriding the annotation's `url` attribute.
@@ -473,7 +469,7 @@ Annotated, HTTP exchange methods support the following return values:
 
 [cols="1,2", options="header"]
 |===
-| Controller method return value | Description
+| Method return value | Description
 
 | `void`, `Mono<Void>`
 | Perform the given request, and release the response content, if any.
@@ -506,6 +502,27 @@ Annotated, HTTP exchange methods support the following return values:
 
 TIP: You can also use any other async or reactive types registered in the
 `ReactiveAdapterRegistry`.
+
+
+[[rest-http-interface-exceptions]]
+==== Exception Handling
+
+By default, `WebClient` raises `WebClientResponseException` for 4xx and 5xx HTTP status
+codes. To customize this, you can register a response status handler that applies to all
+responses performed through the client:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	WebClient webClient = WebClient.builder()
+			.defaultStatusHandler(HttpStatusCode::isError, resp -> ...)
+			.build();
+
+	HttpServiceProxyFactory proxyFactory =
+			WebClientAdapter.createHttpServiceProxyFactory(webClient);
+----
+
+For more details and options, such as suppressing error status codes, see the Javadoc of
+`defaultStatusHandler` in `WebClient.Builder`.
 
 
 
@@ -672,16 +689,25 @@ takes a reference to a standard `ConnectionFactory` that would typically come fr
 ===== Using `CachingConnectionFactory`
 
 The `CachingConnectionFactory` extends the functionality of `SingleConnectionFactory`
-and adds the caching of `Session`, `MessageProducer`, and `MessageConsumer` instances. The initial
-cache size is set to `1`. You can use the `sessionCacheSize` property to increase the number of
-cached sessions. Note that the number of actual cached sessions is more than that
-number, as sessions are cached based on their acknowledgment mode, so there can be up to
-four cached session instances (one for each
-acknowledgment mode) when `sessionCacheSize` is set to one. `MessageProducer` and `MessageConsumer` instances are cached within their
-owning session and also take into account the unique properties of the producers and
-consumers when caching. MessageProducers are cached based on their destination.
-MessageConsumers are cached based on a key composed of the destination, selector,
+and adds the caching of `Session`, `MessageProducer`, and `MessageConsumer` instances.
+The initial cache size is set to `1`. You can use the `sessionCacheSize` property to
+increase the number of cached sessions. Note that the number of actual cached sessions
+is more than that number, as sessions are cached based on their acknowledgment mode,
+so there can be up to four cached session instances (one for each acknowledgment mode)
+when `sessionCacheSize` is set to one. `MessageProducer` and `MessageConsumer` instances
+are cached within their owning session and also take into account the unique properties
+of the producers and consumers when caching. MessageProducers are cached based on their
+destination. MessageConsumers are cached based on a key composed of the destination, selector,
 noLocal delivery flag, and the durable subscription name (if creating durable consumers).
+
+[NOTE]
+====
+MessageProducers and MessageConsumers for temporary queues and topics
+(TemporaryQueue/TemporaryTopic) will never be cached. Unfortunately, WebLogic JMS happens
+to implement the temporary queue/topic interfaces on its regular destination implementation,
+mis-indicating that none of its destinations can be cached. Please use a different connection
+pool/cache on WebLogic, or customize `CachingConnectionFactory` for WebLogic purposes.
+====
 
 
 [[jms-destinations]]
@@ -3810,27 +3836,17 @@ The following listing shows the `TaskScheduler` interface definition:
 
 		ScheduledFuture schedule(Runnable task, Instant startTime);
 
-		ScheduledFuture schedule(Runnable task, Date startTime);
-
 		ScheduledFuture scheduleAtFixedRate(Runnable task, Instant startTime, Duration period);
-
-		ScheduledFuture scheduleAtFixedRate(Runnable task, Date startTime, long period);
 
 		ScheduledFuture scheduleAtFixedRate(Runnable task, Duration period);
 
-		ScheduledFuture scheduleAtFixedRate(Runnable task, long period);
-
 		ScheduledFuture scheduleWithFixedDelay(Runnable task, Instant startTime, Duration delay);
-
-		ScheduledFuture scheduleWithFixedDelay(Runnable task, Date startTime, long delay);
 
 		ScheduledFuture scheduleWithFixedDelay(Runnable task, Duration delay);
 
-		ScheduledFuture scheduleWithFixedDelay(Runnable task, long delay);
-	}
 ----
 
-The simplest method is the one named `schedule` that takes only a `Runnable` and a `Date`.
+The simplest method is the one named `schedule` that takes only a `Runnable` and an `Instant`.
 That causes the task to run once after the specified time. All of the other methods
 are capable of scheduling tasks to run repeatedly. The fixed-rate and fixed-delay
 methods are for simple, periodic execution, but the method that accepts a `Trigger` is

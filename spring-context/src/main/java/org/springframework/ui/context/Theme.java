@@ -19,7 +19,7 @@ package org.springframework.ui.context;
 import org.springframework.context.MessageSource;
 
 /**
- * A Theme can resolve theme-specific messages, codes, file paths, etcetera
+ * A Theme can resolve theme-specific messages, codes, file paths, etc.
  * (e&#46;g&#46; CSS and image files in a web environment).
  * The exposed {@link org.springframework.context.MessageSource} supports
  * theme-specific parameterization and internationalization.
@@ -28,7 +28,9 @@ import org.springframework.context.MessageSource;
  * @since 17.06.2003
  * @see ThemeSource
  * @see org.springframework.web.servlet.ThemeResolver
+ * @deprecated as of 6.0, with no direct replacement
  */
+@Deprecated
 public interface Theme {
 
 	/**

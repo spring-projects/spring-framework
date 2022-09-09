@@ -22,19 +22,23 @@ import org.springframework.lang.Nullable;
  * A {@link TypeReference} based on a {@link Class}.
  *
  * @author Stephane Nicoll
+ * @since 6.0
  */
 final class ReflectionTypeReference extends AbstractTypeReference {
 
 	private final Class<?> type;
 
 	private ReflectionTypeReference(Class<?> type) {
-		super(type.getPackageName(), type.getSimpleName(), safeCreate(type.getEnclosingClass()));
+		super(type.getPackageName(), type.getSimpleName(), getEnclosingClass(type));
 		this.type = type;
 	}
 
 	@Nullable
-	private static ReflectionTypeReference safeCreate(@Nullable Class<?> type) {
-		return (type != null ? new ReflectionTypeReference(type) : null);
+	private static TypeReference getEnclosingClass(Class<?> type) {
+		Class<?> candidate = (type.isArray()
+				? type.getComponentType().getEnclosingClass()
+				: type.getEnclosingClass());
+		return (candidate != null ? new ReflectionTypeReference(candidate) : null);
 	}
 
 	static ReflectionTypeReference of(Class<?> type) {

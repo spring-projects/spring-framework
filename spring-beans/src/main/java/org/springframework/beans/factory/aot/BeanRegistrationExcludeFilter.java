@@ -35,6 +35,6 @@ public interface BeanRegistrationExcludeFilter {
 	 * @param registeredBean the registered bean
 	 * @return if the registered bean should be excluded
 	 */
-	boolean isExcluded(RegisteredBean registeredBean);
+	boolean isExcludedFromAotProcessing(RegisteredBean registeredBean);
 
 }

@@ -32,7 +32,6 @@ public enum EnumWithClassBody {
 	 * With class body.
 	 */
 	TWO {
-
 		@Override
 		public String toString() {
 			return "2";

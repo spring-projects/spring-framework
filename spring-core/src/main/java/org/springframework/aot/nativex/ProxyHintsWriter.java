@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.springframework.aot.hint.JdkProxyHint;
 import org.springframework.aot.hint.ProxyHints;
-import org.springframework.aot.hint.TypeReference;
 
 /**
  * Write {@link JdkProxyHint}s contained in a {@link ProxyHints} to the JSON
@@ -30,9 +29,10 @@ import org.springframework.aot.hint.TypeReference;
  *
  * @author Sebastien Deleuze
  * @author Stephane Nicoll
+ * @author Brian Clozel
  * @since 6.0
- * @see <a href="https://www.graalvm.org/22.0/reference-manual/native-image/DynamicProxy/">Dynamic Proxy in Native Image</a>
- * @see <a href="https://www.graalvm.org/22.0/reference-manual/native-image/BuildConfiguration/">Native Image Build Configuration</a>
+ * @see <a href="https://www.graalvm.org/22.1/reference-manual/native-image/DynamicProxy/">Dynamic Proxy in Native Image</a>
+ * @see <a href="https://www.graalvm.org/22.1/reference-manual/native-image/BuildConfiguration/">Native Image Build Configuration</a>
  */
 class ProxyHintsWriter {
 
@@ -44,9 +44,17 @@ class ProxyHintsWriter {
 
 	private Map<String, Object> toAttributes(JdkProxyHint hint) {
 		Map<String, Object> attributes = new LinkedHashMap<>();
-		attributes.put("interfaces", hint.getProxiedInterfaces().stream()
-				.map(TypeReference::getCanonicalName).toList());
+		handleCondition(attributes, hint);
+		attributes.put("interfaces", hint.getProxiedInterfaces());
 		return attributes;
+	}
+
+	private void handleCondition(Map<String, Object> attributes, JdkProxyHint hint) {
+		if (hint.getReachableType() != null) {
+			Map<String, Object> conditionAttributes = new LinkedHashMap<>();
+			conditionAttributes.put("typeReachable", hint.getReachableType());
+			attributes.put("condition", conditionAttributes);
+		}
 	}
 
 }

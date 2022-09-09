@@ -144,15 +144,14 @@ public final class MethodReference {
 	 */
 	public CodeBlock toCodeBlock(@Nullable String instanceVariable) {
 		return switch (this.kind) {
-		case INSTANCE -> toCodeBlockForInstance(instanceVariable);
-		case STATIC -> toCodeBlockForStatic(instanceVariable);
+			case INSTANCE -> toCodeBlockForInstance(instanceVariable);
+			case STATIC -> toCodeBlockForStatic(instanceVariable);
 		};
 	}
 
 	private CodeBlock toCodeBlockForInstance(@Nullable String instanceVariable) {
 		instanceVariable = (instanceVariable != null) ? instanceVariable : "this";
 		return CodeBlock.of("$L::$L", instanceVariable, this.methodName);
-
 	}
 
 	private CodeBlock toCodeBlockForStatic(@Nullable String instanceVariable) {
@@ -180,24 +179,24 @@ public final class MethodReference {
 			CodeBlock... arguments) {
 
 		return switch (this.kind) {
-		case INSTANCE -> toInvokeCodeBlockForInstance(instanceVariable, arguments);
-		case STATIC -> toInvokeCodeBlockForStatic(instanceVariable, arguments);
+			case INSTANCE -> toInvokeCodeBlockForInstance(instanceVariable, arguments);
+			case STATIC -> toInvokeCodeBlockForStatic(instanceVariable, arguments);
 		};
 	}
 
 	private CodeBlock toInvokeCodeBlockForInstance(@Nullable String instanceVariable,
 			CodeBlock[] arguments) {
 
-		CodeBlock.Builder builder = CodeBlock.builder();
+		CodeBlock.Builder code = CodeBlock.builder();
 		if (instanceVariable != null) {
-			builder.add("$L.", instanceVariable);
+			code.add("$L.", instanceVariable);
 		}
 		else if (this.declaringClass != null) {
-			builder.add("new $T().", this.declaringClass);
+			code.add("new $T().", this.declaringClass);
 		}
-		builder.add("$L", this.methodName);
-		addArguments(builder, arguments);
-		return builder.build();
+		code.add("$L", this.methodName);
+		addArguments(code, arguments);
+		return code.build();
 	}
 
 	private CodeBlock toInvokeCodeBlockForStatic(@Nullable String instanceVariable,
@@ -205,29 +204,29 @@ public final class MethodReference {
 
 		Assert.isTrue(instanceVariable == null,
 				"'instanceVariable' must be null for static method references");
-		CodeBlock.Builder builder = CodeBlock.builder();
-		builder.add("$T.$L", this.declaringClass, this.methodName);
-		addArguments(builder, arguments);
-		return builder.build();
+		CodeBlock.Builder code = CodeBlock.builder();
+		code.add("$T.$L", this.declaringClass, this.methodName);
+		addArguments(code, arguments);
+		return code.build();
 	}
 
-	private void addArguments(CodeBlock.Builder builder, CodeBlock[] arguments) {
-		builder.add("(");
+	private void addArguments(CodeBlock.Builder code, CodeBlock[] arguments) {
+		code.add("(");
 		for (int i = 0; i < arguments.length; i++) {
 			if (i != 0) {
-				builder.add(", ");
+				code.add(", ");
 			}
-			builder.add(arguments[i]);
+			code.add(arguments[i]);
 		}
-		builder.add(")");
+		code.add(")");
 	}
 
 	@Override
 	public String toString() {
 		return switch (this.kind) {
-		case INSTANCE -> ((this.declaringClass != null) ? "<" + this.declaringClass + ">"
-				: "<instance>") + "::" + this.methodName;
-		case STATIC -> this.declaringClass + "::" + this.methodName;
+			case INSTANCE -> ((this.declaringClass != null) ? "<" + this.declaringClass + ">"
+					: "<instance>") + "::" + this.methodName;
+			case STATIC -> this.declaringClass + "::" + this.methodName;
 		};
 	}
 

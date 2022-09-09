@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 
 package org.springframework.web.servlet.view.freemarker;
 
-import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,7 +27,6 @@ import freemarker.template.Configuration;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +34,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
@@ -48,6 +48,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockServletContext;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -56,38 +57,38 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 25.01.2005
  */
+@SuppressWarnings("deprecation")
 public class FreeMarkerMacroTests {
 
 	private static final String TEMPLATE_FILE = "test.ftl";
 
-	private StaticWebApplicationContext wac;
+	private final StaticWebApplicationContext wac = new StaticWebApplicationContext();
 
-	private MockHttpServletRequest request;
+	private final MockServletContext servletContext = new MockServletContext();
 
-	private MockHttpServletResponse response;
+	private final MockHttpServletRequest request = new MockHttpServletRequest();
 
-	private FreeMarkerConfigurer fc;
+	private final MockHttpServletResponse response = new MockHttpServletResponse();
+
+	private final FreeMarkerConfigurer fc = new FreeMarkerConfigurer();
+
+	private Path templateLoaderPath;
 
 
 	@BeforeEach
-	public void setup() throws Exception {
-		ServletContext sc = new MockServletContext();
-		wac = new StaticWebApplicationContext();
-		wac.setServletContext(sc);
+	public void setUp() throws Exception {
+		this.templateLoaderPath = Files.createTempDirectory("servlet-").toAbsolutePath();
 
-		// final Template expectedTemplate = new Template();
-		fc = new FreeMarkerConfigurer();
-		fc.setTemplateLoaderPaths("classpath:/", "file://" + System.getProperty("java.io.tmpdir"));
+		fc.setTemplateLoaderPaths("classpath:/", "file://" + this.templateLoaderPath);
 		fc.afterPropertiesSet();
 
+		wac.setServletContext(servletContext);
 		wac.getDefaultListableBeanFactory().registerSingleton("freeMarkerConfigurer", fc);
 		wac.refresh();
 
-		request = new MockHttpServletRequest();
 		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 		request.setAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE, new FixedThemeResolver());
-		response = new MockHttpServletResponse();
 	}
 
 
@@ -201,12 +202,12 @@ public class FreeMarkerMacroTests {
 
 	@Test
 	public void testForm1() throws Exception {
-		assertThat(getMacroOutput("FORM1")).isEqualTo("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\"     >");
+		assertThat(getMacroOutput("FORM1")).isEqualTo("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\" >");
 	}
 
 	@Test
 	public void testForm2() throws Exception {
-		assertThat(getMacroOutput("FORM2")).isEqualTo("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\" class=\"myCssClass\"    >");
+		assertThat(getMacroOutput("FORM2")).isEqualTo("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\" class=\"myCssClass\" >");
 	}
 
 	@Test
@@ -223,27 +224,27 @@ public class FreeMarkerMacroTests {
 
 	@Test
 	public void testForm9() throws Exception {
-		assertThat(getMacroOutput("FORM9")).isEqualTo("<input type=\"password\" id=\"name\" name=\"name\" value=\"\"     >");
+		assertThat(getMacroOutput("FORM9")).isEqualTo("<input type=\"password\" id=\"name\" name=\"name\" value=\"\" >");
 	}
 
 	@Test
 	public void testForm10() throws Exception {
-		assertThat(getMacroOutput("FORM10")).isEqualTo("<input type=\"hidden\" id=\"name\" name=\"name\" value=\"Darren\"     >");
+		assertThat(getMacroOutput("FORM10")).isEqualTo("<input type=\"hidden\" id=\"name\" name=\"name\" value=\"Darren\" >");
 	}
 
 	@Test
 	public void testForm11() throws Exception {
-		assertThat(getMacroOutput("FORM11")).isEqualTo("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\"     >");
+		assertThat(getMacroOutput("FORM11")).isEqualTo("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\" >");
 	}
 
 	@Test
 	public void testForm12() throws Exception {
-		assertThat(getMacroOutput("FORM12")).isEqualTo("<input type=\"hidden\" id=\"name\" name=\"name\" value=\"Darren\"     >");
+		assertThat(getMacroOutput("FORM12")).isEqualTo("<input type=\"hidden\" id=\"name\" name=\"name\" value=\"Darren\" >");
 	}
 
 	@Test
 	public void testForm13() throws Exception {
-		assertThat(getMacroOutput("FORM13")).isEqualTo("<input type=\"password\" id=\"name\" name=\"name\" value=\"\"     >");
+		assertThat(getMacroOutput("FORM13")).isEqualTo("<input type=\"password\" id=\"name\" name=\"name\" value=\"\" >");
 	}
 
 	@Test
@@ -264,7 +265,7 @@ public class FreeMarkerMacroTests {
 
 	@Test
 	public void testForm17() throws Exception {
-		assertThat(getMacroOutput("FORM17")).isEqualTo("<input type=\"text\" id=\"spouses0.name\" name=\"spouses[0].name\" value=\"Fred\"     >");
+		assertThat(getMacroOutput("FORM17")).isEqualTo("<input type=\"text\" id=\"spouses0.name\" name=\"spouses[0].name\" value=\"Fred\" >");
 	}
 
 	@Test
@@ -280,9 +281,7 @@ public class FreeMarkerMacroTests {
 	private String getMacroOutput(String name) throws Exception {
 		String macro = fetchMacro(name);
 		assertThat(macro).isNotNull();
-
-		FileSystemResource resource = new FileSystemResource(System.getProperty("java.io.tmpdir") + "/tmp.ftl");
-		FileCopyUtils.copy("<#import \"spring.ftl\" as spring />\n" + macro, new FileWriter(resource.getPath()));
+		storeTemplateInTempDir(macro);
 
 		DummyMacroRequestContext rc = new DummyMacroRequestContext(request);
 		Map<String, String> msgMap = new HashMap<>();
@@ -322,28 +321,39 @@ public class FreeMarkerMacroTests {
 		view.setUrl("tmp.ftl");
 		view.setExposeSpringMacroHelpers(false);
 		view.setConfiguration(config);
-		view.setServletContext(new MockServletContext());
+		view.setServletContext(servletContext);
 
 		view.render(model, request, response);
 
-		// tokenize output and ignore whitespace
-		String output = response.getContentAsString();
-		output = output.replace("\r\n", "\n");
-		return output.trim();
+		return getOutput();
 	}
 
-	private String fetchMacro(String name) throws Exception {
-		ClassPathResource resource = new ClassPathResource("test.ftl", getClass());
-		assertThat(resource.exists()).isTrue();
-		String all = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
-		all = all.replace("\r\n", "\n");
-		String[] macros = StringUtils.delimitedListToStringArray(all, "\n\n");
-		for (String macro : macros) {
+	private static String fetchMacro(String name) throws Exception {
+		for (String macro : loadMacros()) {
 			if (macro.startsWith(name)) {
 				return macro.substring(macro.indexOf("\n")).trim();
 			}
 		}
 		return null;
+	}
+
+	private static String[] loadMacros() throws IOException {
+		ClassPathResource resource = new ClassPathResource("test.ftl", FreeMarkerMacroTests.class);
+		assertThat(resource.exists()).isTrue();
+		String all = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
+		all = all.replace("\r\n", "\n");
+		return StringUtils.delimitedListToStringArray(all, "\n\n");
+	}
+
+	private void storeTemplateInTempDir(String macro) throws IOException {
+		Files.write(this.templateLoaderPath.resolve("tmp.ftl"),
+				("<#import \"spring.ftl\" as spring />\n" + macro).getBytes(UTF_8));
+	}
+
+	private String getOutput() throws IOException {
+		String output = response.getContentAsString();
+		output = output.replace("\r\n", "\n").replaceAll(" +"," ");
+		return output.trim();
 	}
 
 }

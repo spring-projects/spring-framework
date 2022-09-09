@@ -118,28 +118,28 @@ class ThisAndTargetSelectionOnlyPointcutsAtAspectJTests {
 		assertThat(counter.atAnnotationMethodAnnotationCounter).isEqualTo(1);
 	}
 
-	public static interface TestInterface {
+	interface TestInterface {
 		public void doIt();
 	}
 
-	public static class TestImpl implements TestInterface {
+	static class TestImpl implements TestInterface {
 		@Override
 		public void doIt() {
 		}
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface TestAnnotation {
+	@interface TestAnnotation {
 	}
 
 	@TestAnnotation
-	public static class AnnotatedClassTestImpl implements TestInterface {
+	static class AnnotatedClassTestImpl implements TestInterface {
 		@Override
 		public void doIt() {
 		}
 	}
 
-	public static class AnnotatedMethodTestImpl implements TestInterface {
+	static class AnnotatedMethodTestImpl implements TestInterface {
 		@Override
 		@TestAnnotation
 		public void doIt() {
@@ -147,7 +147,7 @@ class ThisAndTargetSelectionOnlyPointcutsAtAspectJTests {
 	}
 
 	@Aspect
-	public static class Counter {
+	static class Counter {
 		int thisAsClassCounter;
 		int thisAsInterfaceCounter;
 		int targetAsClassCounter;

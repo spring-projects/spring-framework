@@ -109,7 +109,7 @@ abstract class AbstractXMLReader implements XMLReader {
 
 	/**
 	 * This implementation throws a {@code SAXNotRecognizedException} exception
-	 * for any feature outside of the "http://xml.org/sax/features/" namespace
+	 * for any feature outside the "http://xml.org/sax/features/" namespace
 	 * and returns {@code false} for any feature within.
 	 */
 	@Override
@@ -124,7 +124,7 @@ abstract class AbstractXMLReader implements XMLReader {
 
 	/**
 	 * This implementation throws a {@code SAXNotRecognizedException} exception
-	 * for any feature outside of the "http://xml.org/sax/features/" namespace
+	 * for any feature outside the "http://xml.org/sax/features/" namespace
 	 * and accepts a {@code false} value for any feature within.
 	 */
 	@Override

@@ -39,11 +39,10 @@ import jakarta.persistence.PersistenceProperty;
 import jakarta.persistence.PersistenceUnit;
 import jakarta.persistence.SynchronizationType;
 
+import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.generate.MethodGenerator;
-import org.springframework.aot.generate.MethodNameGenerator;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.beans.BeanUtils;
@@ -70,11 +69,8 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
-import org.springframework.javapoet.JavaFile;
 import org.springframework.javapoet.MethodSpec;
-import org.springframework.javapoet.TypeSpec;
 import org.springframework.jndi.JndiLocatorDelegate;
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.lang.Nullable;
@@ -768,8 +764,6 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 
 	private static class AotContribution implements BeanRegistrationAotContribution {
 
-		private static final String APPLY_METHOD = "apply";
-
 		private static final String REGISTERED_BEAN_PARAMETER = "registeredBean";
 
 		private static final String INSTANCE_PARAMETER = "instance";
@@ -789,53 +783,39 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 		@Override
 		public void applyTo(GenerationContext generationContext,
 				BeanRegistrationCode beanRegistrationCode) {
-			ClassName className = generationContext.getClassNameGenerator()
-					.generateClassName(this.target, "PersistenceInjection");
-			TypeSpec.Builder classBuilder = TypeSpec.classBuilder(className);
-			classBuilder.addJavadoc("Persistence injection for {@link $T}.", this.target);
-			classBuilder.addModifiers(javax.lang.model.element.Modifier.PUBLIC);
-			GeneratedMethods methods = new GeneratedMethods(
-					new MethodNameGenerator(APPLY_METHOD));
-			classBuilder.addMethod(generateMethod(generationContext.getRuntimeHints(),
-					className, methods));
-			methods.doWithMethodSpecs(classBuilder::addMethod);
-			JavaFile javaFile = JavaFile
-					.builder(className.packageName(), classBuilder.build()).build();
-			generationContext.getGeneratedFiles().addSourceFile(javaFile);
-			beanRegistrationCode.addInstancePostProcessor(
-					MethodReference.ofStatic(className, APPLY_METHOD));
+			GeneratedClass generatedClass = generationContext.getGeneratedClasses()
+					.addForFeatureComponent("PersistenceInjection", this.target, type -> {
+						type.addJavadoc("Persistence injection for {@link $T}.", this.target);
+						type.addModifiers(javax.lang.model.element.Modifier.PUBLIC);
+					});
+			GeneratedMethod generatedMethod = generatedClass.getMethods().add("apply", method -> {
+				method.addJavadoc("Apply the persistence injection.");
+				method.addModifiers(javax.lang.model.element.Modifier.PUBLIC,
+						javax.lang.model.element.Modifier.STATIC);
+				method.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER);
+				method.addParameter(this.target, INSTANCE_PARAMETER);
+				method.returns(this.target);
+				method.addCode(generateMethodCode(generationContext.getRuntimeHints(), generatedClass.getMethods()));
+			});
+			beanRegistrationCode.addInstancePostProcessor(MethodReference
+					.ofStatic(generatedClass.getName(), generatedMethod.getName()));
 		}
 
-		private MethodSpec generateMethod(RuntimeHints hints, ClassName className,
-				MethodGenerator methodGenerator) {
-			MethodSpec.Builder builder = MethodSpec.methodBuilder(APPLY_METHOD);
-			builder.addJavadoc("Apply the persistence injection.");
-			builder.addModifiers(javax.lang.model.element.Modifier.PUBLIC,
-					javax.lang.model.element.Modifier.STATIC);
-			builder.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER);
-			builder.addParameter(this.target, INSTANCE_PARAMETER);
-			builder.returns(this.target);
-			builder.addCode(generateMethodCode(hints, methodGenerator));
-			return builder.build();
-		}
-
-		private CodeBlock generateMethodCode(RuntimeHints hints,
-				MethodGenerator methodGenerator) {
-			CodeBlock.Builder builder = CodeBlock.builder();
-			InjectionCodeGenerator injectionCodeGenerator = new InjectionCodeGenerator(
-					hints);
+		private CodeBlock generateMethodCode(RuntimeHints hints, GeneratedMethods generatedMethods) {
+			CodeBlock.Builder code = CodeBlock.builder();
+			InjectionCodeGenerator injectionCodeGenerator = new InjectionCodeGenerator(hints);
 			for (InjectedElement injectedElement : this.injectedElements) {
-				CodeBlock resourceToInject = getResourceToInject(methodGenerator,
+				CodeBlock resourceToInject = generateResourceToInjectCode(generatedMethods,
 						(PersistenceElement) injectedElement);
-				builder.add(injectionCodeGenerator.generateInjectionCode(
+				code.add(injectionCodeGenerator.generateInjectionCode(
 						injectedElement.getMember(), INSTANCE_PARAMETER,
 						resourceToInject));
 			}
-			builder.addStatement("return $L", INSTANCE_PARAMETER);
-			return builder.build();
+			code.addStatement("return $L", INSTANCE_PARAMETER);
+			return code.build();
 		}
 
-		private CodeBlock getResourceToInject(MethodGenerator methodGenerator,
+		private CodeBlock generateResourceToInjectCode(GeneratedMethods generatedMethods,
 				PersistenceElement injectedElement) {
 			String unitName = injectedElement.unitName;
 			boolean requireEntityManager = (injectedElement.type != null);
@@ -845,40 +825,38 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 						EntityManagerFactoryUtils.class, ListableBeanFactory.class,
 						REGISTERED_BEAN_PARAMETER, unitName);
 			}
-			GeneratedMethod getEntityManagerMethod = methodGenerator
-					.generateMethod("get", unitName, "EntityManager")
-					.using(builder -> buildGetEntityManagerMethod(builder,
-							injectedElement));
-			return CodeBlock.of("$L($L)", getEntityManagerMethod.getName(),
-					REGISTERED_BEAN_PARAMETER);
+			String[] methodNameParts = { "get" , unitName, "EntityManager" };
+			GeneratedMethod generatedMethod = generatedMethods.add(methodNameParts, method ->
+							generateGetEntityManagerMethod(method, injectedElement));
+			return CodeBlock.of("$L($L)", generatedMethod.getName(), REGISTERED_BEAN_PARAMETER);
 		}
 
-		private void buildGetEntityManagerMethod(MethodSpec.Builder builder,
+		private void generateGetEntityManagerMethod(MethodSpec.Builder method,
 				PersistenceElement injectedElement) {
 			String unitName = injectedElement.unitName;
 			Properties properties = injectedElement.properties;
-			builder.addJavadoc("Get the '$L' {@link $T}",
+			method.addJavadoc("Get the '$L' {@link $T}",
 					(StringUtils.hasLength(unitName)) ? unitName : "default",
 					EntityManager.class);
-			builder.addModifiers(javax.lang.model.element.Modifier.PUBLIC,
+			method.addModifiers(javax.lang.model.element.Modifier.PUBLIC,
 					javax.lang.model.element.Modifier.STATIC);
-			builder.returns(EntityManager.class);
-			builder.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER);
-			builder.addStatement(
+			method.returns(EntityManager.class);
+			method.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER);
+			method.addStatement(
 					"$T entityManagerFactory = $T.findEntityManagerFactory(($T) $L.getBeanFactory(), $S)",
 					EntityManagerFactory.class, EntityManagerFactoryUtils.class,
 					ListableBeanFactory.class, REGISTERED_BEAN_PARAMETER, unitName);
 			boolean hasProperties = !CollectionUtils.isEmpty(properties);
 			if (hasProperties) {
-				builder.addStatement("$T properties = new Properties()",
+				method.addStatement("$T properties = new Properties()",
 						Properties.class);
 				for (String propertyName : new TreeSet<>(
 						properties.stringPropertyNames())) {
-					builder.addStatement("properties.put($S, $S)", propertyName,
+					method.addStatement("properties.put($S, $S)", propertyName,
 							properties.getProperty(propertyName));
 				}
 			}
-			builder.addStatement(
+			method.addStatement(
 					"return $T.createSharedEntityManager(entityManagerFactory, $L, $L)",
 					SharedEntityManagerCreator.class,
 					(hasProperties) ? "properties" : null,

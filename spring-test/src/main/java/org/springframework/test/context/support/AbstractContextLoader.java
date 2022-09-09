@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,8 @@ import org.springframework.util.ResourceUtils;
  */
 public abstract class AbstractContextLoader implements SmartContextLoader {
 
+	private static final String SLASH = "/";
+
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
 	private static final Log logger = LogFactory.getLog(AbstractContextLoader.class);
@@ -75,13 +77,13 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	// SmartContextLoader
 
 	/**
-	 * For backwards compatibility with the {@link ContextLoader} SPI, the
-	 * default implementation simply delegates to {@link #processLocations(Class, String...)},
-	 * passing it the {@link ContextConfigurationAttributes#getDeclaringClass()
-	 * declaring class} and {@link ContextConfigurationAttributes#getLocations()
+	 * The default implementation processes locations analogous to
+	 * {@link #processLocations(Class, String...)}, using the
+	 * {@link ContextConfigurationAttributes#getDeclaringClass() declaring class}
+	 * as the test class and the {@link ContextConfigurationAttributes#getLocations()
 	 * resource locations} retrieved from the supplied
-	 * {@link ContextConfigurationAttributes configuration attributes}. The
-	 * processed locations are then
+	 * {@link ContextConfigurationAttributes configuration attributes} as the
+	 * locations to process. The processed locations are then
 	 * {@link ContextConfigurationAttributes#setLocations(String[]) set} in
 	 * the supplied configuration attributes.
 	 * <p>Can be overridden in subclasses &mdash; for example, to process
@@ -92,7 +94,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	@Override
 	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
 		String[] processedLocations =
-				processLocations(configAttributes.getDeclaringClass(), configAttributes.getLocations());
+				processLocationsInternal(configAttributes.getDeclaringClass(), configAttributes.getLocations());
 		configAttributes.setLocations(processedLocations);
 	}
 
@@ -212,7 +214,12 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * @see #processContextConfiguration(ContextConfigurationAttributes)
 	 */
 	@Override
+	@SuppressWarnings("deprecation")
 	public final String[] processLocations(Class<?> clazz, String... locations) {
+		return processLocationsInternal(clazz, locations);
+	}
+
+	private String[] processLocationsInternal(Class<?> clazz, String... locations) {
 		return (ObjectUtils.isEmpty(locations) && isGenerateDefaultLocations()) ?
 				generateDefaultLocations(clazz) : modifyLocations(clazz, locations);
 	}
@@ -247,7 +254,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 			String resourcePath = ClassUtils.convertClassNameToResourcePath(clazz.getName()) + suffix;
 			ClassPathResource classPathResource = new ClassPathResource(resourcePath);
 			if (classPathResource.exists()) {
-				String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + resourcePath;
+				String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + SLASH + resourcePath;
 				if (logger.isInfoEnabled()) {
 					logger.info(String.format("Detected default resource location \"%s\" for test class [%s]",
 							prefixedResourcePath, clazz.getName()));
@@ -284,13 +291,13 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	}
 
 	/**
-	 * Determine whether or not <em>default</em> resource locations should be
+	 * Determine whether <em>default</em> resource locations should be
 	 * generated if the {@code locations} provided to
 	 * {@link #processLocations(Class, String...)} are {@code null} or empty.
 	 * <p>As of Spring 3.1, the semantics of this method have been overloaded
 	 * to include detection of either default resource locations or default
 	 * configuration classes. Consequently, this method can also be used to
-	 * determine whether or not <em>default</em> configuration classes should be
+	 * determine whether <em>default</em> configuration classes should be
 	 * detected if the {@code classes} present in the
 	 * {@link ContextConfigurationAttributes configuration attributes} supplied
 	 * to {@link #processContextConfiguration(ContextConfigurationAttributes)}
@@ -321,7 +328,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * Get the suffix to append to {@link ApplicationContext} resource locations
 	 * when detecting default locations.
 	 * <p>Subclasses must provide an implementation of this method that returns
-	 * a single suffix. Alternatively subclasses may provide a  <em>no-op</em>
+	 * a single suffix. Alternatively subclasses may provide a <em>no-op</em>
 	 * implementation of this method and override {@link #getResourceSuffixes()}
 	 * in order to provide multiple custom suffixes.
 	 * @return the resource suffix; never {@code null} or empty

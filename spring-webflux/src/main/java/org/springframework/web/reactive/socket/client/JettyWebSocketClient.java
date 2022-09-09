@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -164,7 +164,7 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 
 	private HandshakeInfo createHandshakeInfo(URI url, Session jettySession) {
 		HttpHeaders headers = new HttpHeaders();
-		jettySession.getUpgradeResponse().getHeaders().forEach(headers::put);
+		headers.putAll(jettySession.getUpgradeResponse().getHeaders());
 		String protocol = headers.getFirst("Sec-WebSocket-Protocol");
 		return new HandshakeInfo(url, headers, Mono.empty(), protocol);
 	}

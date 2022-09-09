@@ -1,0 +1,3 @@
+org.springframework.aot.hint.RuntimeHintsRegistrar= \
+org.springframework.context.aot.RuntimeHintsBeanFactoryInitializationAotProcessorTests.IncrementalRuntimeHintsRegistrar, \
+org.springframework.context.aot.RuntimeHintsBeanFactoryInitializationAotProcessorTests.SampleRuntimeHintsRegistrar

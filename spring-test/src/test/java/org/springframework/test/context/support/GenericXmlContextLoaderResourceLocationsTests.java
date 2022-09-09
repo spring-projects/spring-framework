@@ -24,9 +24,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.ContextLoader;
+import org.springframework.test.context.ContextConfigurationAttributes;
+import org.springframework.test.context.SmartContextLoader;
 import org.springframework.util.ObjectUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,7 +35,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
  * Unit test which verifies proper
- * {@link ContextLoader#processLocations(Class, String...) processing} of
+ * {@linkplain SmartContextLoader#processContextConfiguration processing} of
  * {@code resource locations} by a {@link GenericXmlContextLoader}
  * configured via {@link ContextConfiguration @ContextConfiguration}.
  * Specifically, this test addresses the issues raised in <a
@@ -55,9 +55,12 @@ class GenericXmlContextLoaderResourceLocationsTests {
 	@MethodSource("contextConfigurationLocationsData")
 	void assertContextConfigurationLocations(Class<?> testClass, String[] expectedLocations) throws Exception {
 		ContextConfiguration contextConfig = testClass.getAnnotation(ContextConfiguration.class);
-		ContextLoader contextLoader = new GenericXmlContextLoader();
-		String[] configuredLocations = (String[]) AnnotationUtils.getValue(contextConfig);
-		String[] processedLocations = contextLoader.processLocations(testClass, configuredLocations);
+		String[] configuredLocations = contextConfig.value();
+		ContextConfigurationAttributes configAttributes =
+				new ContextConfigurationAttributes(testClass, configuredLocations, null, false, null, false, GenericXmlContextLoader.class);
+		GenericXmlContextLoader contextLoader = new GenericXmlContextLoader();
+		contextLoader.processContextConfiguration(configAttributes);
+		String[] processedLocations = configAttributes.getLocations();
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("----------------------------------------------------------------------");
@@ -66,7 +69,8 @@ class GenericXmlContextLoaderResourceLocationsTests {
 			logger.debug("Processed  locations: " + ObjectUtils.nullSafeToString(processedLocations));
 		}
 
-		assertThat(processedLocations).as("Verifying locations for test [" + testClass + "].").isEqualTo(expectedLocations);
+		assertThat(processedLocations).as("locations for test class [" + testClass.getName() + "]")
+			.isEqualTo(expectedLocations);
 	}
 
 	static Stream<Arguments> contextConfigurationLocationsData() {
@@ -74,7 +78,7 @@ class GenericXmlContextLoaderResourceLocationsTests {
 			args(ClasspathNonExistentDefaultLocationsTestCase.class, array()),
 
 			args(ClasspathExistentDefaultLocationsTestCase.class, array(
-				"classpath:org/springframework/test/context/support/GenericXmlContextLoaderResourceLocationsTests$ClasspathExistentDefaultLocationsTestCase-context.xml")),
+				"classpath:/org/springframework/test/context/support/GenericXmlContextLoaderResourceLocationsTests$ClasspathExistentDefaultLocationsTestCase-context.xml")),
 
 			args(ImplicitClasspathLocationsTestCase.class,
 				array("classpath:/org/springframework/test/context/support/context1.xml",

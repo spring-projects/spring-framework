@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,16 +29,18 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * {@code WebMergedContextConfiguration} encapsulates the <em>merged</em>
- * context configuration declared on a test class and all of its superclasses
- * via {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration},
- * {@link WebAppConfiguration @WebAppConfiguration}, and
- * {@link org.springframework.test.context.ActiveProfiles @ActiveProfiles}.
+ * {@code WebMergedContextConfiguration} encapsulates the <em>merged</em> context
+ * configuration declared on a test class and all of its superclasses and
+ * enclosing classes via
+ * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration},
+ * {@link WebAppConfiguration @WebAppConfiguration},
+ * {@link org.springframework.test.context.ActiveProfiles @ActiveProfiles}, and
+ * {@link org.springframework.test.context.TestPropertySource @TestPropertySource}.
  *
  * <p>{@code WebMergedContextConfiguration} extends the contract of
- * {@link MergedContextConfiguration} by adding support for the {@link
+ * {@link MergedContextConfiguration} by adding support for the {@linkplain
  * #getResourceBasePath() resource base path} configured via {@code @WebAppConfiguration}.
- * This allows the {@link org.springframework.test.context.TestContext TestContext}
+ * This allows the {@link org.springframework.test.context.cache.ContextCache ContextCache}
  * to properly cache the corresponding {@link
  * org.springframework.web.context.WebApplicationContext WebApplicationContext}
  * that was loaded using properties of this {@code WebMergedContextConfiguration}.
@@ -69,7 +71,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 */
 	public WebMergedContextConfiguration(MergedContextConfiguration mergedConfig, String resourceBasePath) {
 		super(mergedConfig);
-		this.resourceBasePath = !StringUtils.hasText(resourceBasePath) ? "" : resourceBasePath;
+		this.resourceBasePath = (StringUtils.hasText(resourceBasePath) ? resourceBasePath : "");
 	}
 
 	/**

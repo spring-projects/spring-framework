@@ -181,7 +181,7 @@ public class DateFormatter implements Formatter<Date> {
 	}
 
 	/**
-	 * Specify whether or not parsing is to be lenient. Default is false.
+	 * Specify whether parsing is to be lenient. Default is {@code false}.
 	 * <p>With lenient parsing, the parser may allow inputs that do not precisely match the format.
 	 * With strict parsing, inputs must match the format exactly.
 	 */

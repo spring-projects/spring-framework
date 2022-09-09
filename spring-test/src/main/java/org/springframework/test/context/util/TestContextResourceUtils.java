@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -135,13 +136,13 @@ public abstract class TestContextResourceUtils {
 	 * the given {@link ResourceLoader}.
 	 * @param resourceLoader the {@code ResourceLoader} to use to convert the paths
 	 * @param paths the paths to be converted
-	 * @return a new list of resources
+	 * @return a new, mutable list of resources
 	 * @since 4.2
 	 * @see #convertToResources(ResourceLoader, String...)
 	 * @see #convertToClasspathResourcePaths
 	 */
 	public static List<Resource> convertToResourceList(ResourceLoader resourceLoader, String... paths) {
-		return stream(resourceLoader, paths).collect(Collectors.toList());
+		return stream(resourceLoader, paths).collect(Collectors.toCollection(ArrayList::new));
 	}
 
 	private static Stream<Resource> stream(ResourceLoader resourceLoader, String... paths) {

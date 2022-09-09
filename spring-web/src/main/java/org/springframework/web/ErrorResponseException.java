@@ -18,13 +18,11 @@ package org.springframework.web;
 
 import java.net.URI;
 
-import org.springframework.core.NestedExceptionUtils;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.lang.Nullable;
-
 
 /**
  * {@link RuntimeException} that implements {@link ErrorResponse} to expose
@@ -34,7 +32,7 @@ import org.springframework.lang.Nullable;
  * <p>The exception can be used as is, or it can be extended as a more specific
  * exception that populates the {@link ProblemDetail#setType(URI) type} or
  * {@link ProblemDetail#setDetail(String) detail} fields, or potentially adds
- * other non-standard fields.
+ * other non-standard properties.
  *
  * @author Rossen Stoyanchev
  * @since 6.0
@@ -137,8 +135,7 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 
 	@Override
 	public String getMessage() {
-		String message = this.status + (!this.headers.isEmpty() ? ", headers=" + this.headers : "") + ", " + this.body;
-		return NestedExceptionUtils.buildMessage(message, getCause());
+		return this.status + (!this.headers.isEmpty() ? ", headers=" + this.headers : "") + ", " + this.body;
 	}
 
 }

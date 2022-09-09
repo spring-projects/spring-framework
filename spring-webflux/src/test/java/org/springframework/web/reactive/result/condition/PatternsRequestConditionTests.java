@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,10 +107,14 @@ public class PatternsRequestConditionTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void matchTrailingSlash() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/foo/"));
 
-		PatternsRequestCondition condition = createPatternsCondition("/foo");
+		PathPatternParser patternParser = new PathPatternParser();
+		patternParser.setMatchOptionalTrailingSeparator(true);
+
+		PatternsRequestCondition condition = new PatternsRequestCondition(patternParser.parse("/foo"));
 		PatternsRequestCondition match = condition.getMatchingCondition(exchange);
 
 		assertThat(match).isNotNull();
@@ -118,7 +122,7 @@ public class PatternsRequestConditionTests {
 				.as("Should match by default")
 				.isEqualTo("/foo");
 
-		condition = createPatternsCondition("/foo");
+		condition = new PatternsRequestCondition(patternParser.parse("/foo"));
 		match = condition.getMatchingCondition(exchange);
 
 		assertThat(match).isNotNull();

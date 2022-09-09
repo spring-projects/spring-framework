@@ -24,6 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 /**
@@ -61,6 +62,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Repeatable(Schedules.class)
+@Reflective
 public @interface Scheduled {
 
 	/**

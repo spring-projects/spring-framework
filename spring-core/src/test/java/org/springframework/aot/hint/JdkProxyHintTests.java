@@ -33,13 +33,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 class JdkProxyHintTests {
 
 	@Test
-	void equalsWithWithSameInstanceIsTrue() {
+	void equalsWithSameInstanceIsTrue() {
 		JdkProxyHint hint = new Builder().proxiedInterfaces(Function.class, Consumer.class).build();
 		assertThat(hint).isEqualTo(hint);
 	}
 
 	@Test
-	void equalsWithWithSameProxiedInterfacesIsTrue() {
+	void equalsWithSameProxiedInterfacesIsTrue() {
 		JdkProxyHint first = new Builder().proxiedInterfaces(Function.class, Consumer.class).build();
 		JdkProxyHint second = new Builder().proxiedInterfaces(TypeReference.of(Function.class.getName()),
 				TypeReference.of(Consumer.class)).build();
@@ -47,7 +47,16 @@ class JdkProxyHintTests {
 	}
 
 	@Test
-	void equalsWithWithSameProxiedInterfacesDifferentOrderIsFalse() {
+	void equalsWithSameProxiedInterfacesAndDifferentConditionIsFalse() {
+		JdkProxyHint first = new Builder().proxiedInterfaces(Function.class, Consumer.class)
+				.onReachableType(TypeReference.of(String.class)).build();
+		JdkProxyHint second = new Builder().proxiedInterfaces(TypeReference.of(Function.class.getName()),
+				TypeReference.of(Consumer.class)).onReachableType(TypeReference.of(Function.class)).build();
+		assertThat(first).isNotEqualTo(second);
+	}
+
+	@Test
+	void equalsWithSameProxiedInterfacesDifferentOrderIsFalse() {
 		JdkProxyHint first = new Builder().proxiedInterfaces(Function.class, Consumer.class).build();
 		JdkProxyHint second = new Builder().proxiedInterfaces(TypeReference.of(Consumer.class),
 				TypeReference.of(Function.class.getName())).build();
@@ -55,7 +64,7 @@ class JdkProxyHintTests {
 	}
 
 	@Test
-	void equalsWithWithDifferentProxiedInterfacesIsFalse() {
+	void equalsWithDifferentProxiedInterfacesIsFalse() {
 		JdkProxyHint first = new Builder().proxiedInterfaces(Function.class).build();
 		JdkProxyHint second = new Builder().proxiedInterfaces(TypeReference.of(Function.class.getName()),
 				TypeReference.of(Consumer.class)).build();

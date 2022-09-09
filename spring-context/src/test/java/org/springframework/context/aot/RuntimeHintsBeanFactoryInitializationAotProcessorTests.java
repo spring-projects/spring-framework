@@ -19,17 +19,17 @@ package org.springframework.context.aot;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.hint.ResourceBundleHint;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigUtils;
@@ -37,7 +37,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.javapoet.ClassName;
+import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -49,17 +49,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 class RuntimeHintsBeanFactoryInitializationAotProcessorTests {
 
-	private static final ClassName MAIN_GENERATED_TYPE = ClassName.get("__",
-			"TestInitializer");
-
 	private GenerationContext generationContext;
 
 	private ApplicationContextAotGenerator generator;
 
 	@BeforeEach
 	void setup() {
-		this.generationContext = new DefaultGenerationContext(
-				new InMemoryGeneratedFiles());
+		this.generationContext = new TestGenerationContext();
 		this.generator = new ApplicationContextAotGenerator();
 	}
 
@@ -67,8 +63,8 @@ class RuntimeHintsBeanFactoryInitializationAotProcessorTests {
 	void shouldProcessRegistrarOnConfiguration() {
 		GenericApplicationContext applicationContext = createApplicationContext(
 				ConfigurationWithHints.class);
-		this.generator.generateApplicationContext(applicationContext,
-				this.generationContext, MAIN_GENERATED_TYPE);
+		this.generator.processAheadOfTime(applicationContext,
+				this.generationContext);
 		assertThatSampleRegistrarContributed();
 	}
 
@@ -76,8 +72,8 @@ class RuntimeHintsBeanFactoryInitializationAotProcessorTests {
 	void shouldProcessRegistrarOnBeanMethod() {
 		GenericApplicationContext applicationContext = createApplicationContext(
 				ConfigurationWithBeanDeclaringHints.class);
-		this.generator.generateApplicationContext(applicationContext,
-				this.generationContext, MAIN_GENERATED_TYPE);
+		this.generator.processAheadOfTime(applicationContext,
+				this.generationContext);
 		assertThatSampleRegistrarContributed();
 	}
 
@@ -86,18 +82,36 @@ class RuntimeHintsBeanFactoryInitializationAotProcessorTests {
 		GenericApplicationContext applicationContext = createApplicationContext();
 		applicationContext.setClassLoader(
 				new TestSpringFactoriesClassLoader("test-runtime-hints-aot.factories"));
-		this.generator.generateApplicationContext(applicationContext,
-				this.generationContext, MAIN_GENERATED_TYPE);
+		this.generator.processAheadOfTime(applicationContext,
+				this.generationContext);
 		assertThatSampleRegistrarContributed();
+	}
+
+	@Test
+	void shouldProcessDuplicatedRegistrarsOnlyOnce() {
+		GenericApplicationContext applicationContext = createApplicationContext();
+		applicationContext.registerBeanDefinition("incremental1",
+				new RootBeanDefinition(ConfigurationWithIncrementalHints.class));
+		applicationContext.registerBeanDefinition("incremental2",
+				new RootBeanDefinition(ConfigurationWithIncrementalHints.class));
+		applicationContext.setClassLoader(
+				new TestSpringFactoriesClassLoader("test-duplicated-runtime-hints-aot.factories"));
+		IncrementalRuntimeHintsRegistrar.counter.set(0);
+		this.generator.processAheadOfTime(applicationContext,
+				this.generationContext);
+		RuntimeHints runtimeHints = this.generationContext.getRuntimeHints();
+		assertThat(runtimeHints.resources().resourceBundles().map(ResourceBundleHint::getBaseName))
+				.containsOnly("com.example.example0", "sample");
+		assertThat(IncrementalRuntimeHintsRegistrar.counter.get()).isEqualTo(1);
 	}
 
 	@Test
 	void shouldRejectRuntimeHintsRegistrarWithoutDefaultConstructor() {
 		GenericApplicationContext applicationContext = createApplicationContext(
 				ConfigurationWithIllegalRegistrar.class);
-		assertThatThrownBy(() -> this.generator.generateApplicationContext(
-				applicationContext, this.generationContext, MAIN_GENERATED_TYPE))
-						.isInstanceOf(BeanInstantiationException.class);
+		assertThatThrownBy(() -> this.generator.processAheadOfTime(
+				applicationContext, this.generationContext))
+				.isInstanceOf(BeanInstantiationException.class);
 	}
 
 	private void assertThatSampleRegistrarContributed() {
@@ -119,10 +133,9 @@ class RuntimeHintsBeanFactoryInitializationAotProcessorTests {
 	}
 
 
-	@ImportRuntimeHints(SampleRuntimeHintsRegistrar.class)
 	@Configuration(proxyBeanMethods = false)
+	@ImportRuntimeHints(SampleRuntimeHintsRegistrar.class)
 	static class ConfigurationWithHints {
-
 	}
 
 
@@ -137,7 +150,6 @@ class RuntimeHintsBeanFactoryInitializationAotProcessorTests {
 
 	}
 
-
 	public static class SampleRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
 
 		@Override
@@ -147,18 +159,30 @@ class RuntimeHintsBeanFactoryInitializationAotProcessorTests {
 
 	}
 
+	@Configuration(proxyBeanMethods = false)
+	@ImportRuntimeHints(IncrementalRuntimeHintsRegistrar.class)
+	static class ConfigurationWithIncrementalHints {
+	}
+
+	static class IncrementalRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
+
+		static final AtomicInteger counter = new AtomicInteger();
+
+		@Override
+		public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
+			hints.resources().registerResourceBundle("com.example.example" + counter.getAndIncrement());
+		}
+	}
 
 	static class SampleBean {
 
 	}
 
-
-	@ImportRuntimeHints(IllegalRuntimeHintsRegistrar.class)
 	@Configuration(proxyBeanMethods = false)
+	@ImportRuntimeHints(IllegalRuntimeHintsRegistrar.class)
 	static class ConfigurationWithIllegalRegistrar {
 
 	}
-
 
 	public static class IllegalRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
 
@@ -172,7 +196,6 @@ class RuntimeHintsBeanFactoryInitializationAotProcessorTests {
 		}
 
 	}
-
 
 	static class TestSpringFactoriesClassLoader extends ClassLoader {
 

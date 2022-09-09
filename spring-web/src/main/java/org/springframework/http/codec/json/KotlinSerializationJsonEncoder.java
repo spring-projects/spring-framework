@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,14 +77,10 @@ public class KotlinSerializationJsonEncoder extends AbstractEncoder<Object> {
 
 	@Override
 	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		try {
-			serializer(elementType.getType());
-			return (super.canEncode(elementType, mimeType) && !String.class.isAssignableFrom(elementType.toClass()) &&
-					!ServerSentEvent.class.isAssignableFrom(elementType.toClass()));
-		}
-		catch (Exception ex) {
-			return false;
-		}
+		return (serializer(elementType.getType()) != null &&
+				super.canEncode(elementType, mimeType) &&
+				!String.class.isAssignableFrom(elementType.toClass()) &&
+				!ServerSentEvent.class.isAssignableFrom(elementType.toClass()));
 	}
 
 	@Override
@@ -117,17 +113,17 @@ public class KotlinSerializationJsonEncoder extends AbstractEncoder<Object> {
 	 * Tries to find a serializer that can marshall or unmarshall instances of the given type
 	 * using kotlinx.serialization. If no serializer can be found, an exception is thrown.
 	 * <p>Resolved serializers are cached and cached results are returned on successive calls.
-	 * TODO Avoid relying on throwing exception when https://github.com/Kotlin/kotlinx.serialization/pull/1164 is fixed
 	 * @param type the type to find a serializer for
-	 * @return a resolved serializer for the given type
-	 * @throws RuntimeException if no serializer supporting the given type can be found
+	 * @return a resolved serializer for the given type or {@code null} if no serializer
+	 * supporting the given type can be found
 	 */
+	@Nullable
 	private KSerializer<Object> serializer(Type type) {
 		KSerializer<Object> serializer = serializerCache.get(type);
 		if (serializer == null) {
-			serializer = SerializersKt.serializer(type);
-			if (hasPolymorphism(serializer.getDescriptor(), new HashSet<>())) {
-				throw new UnsupportedOperationException("Open polymorphic serialization is not supported yet");
+			serializer = SerializersKt.serializerOrNull(type);
+			if (serializer == null || hasPolymorphism(serializer.getDescriptor(), new HashSet<>())) {
+				return null;
 			}
 			serializerCache.put(type, serializer);
 		}

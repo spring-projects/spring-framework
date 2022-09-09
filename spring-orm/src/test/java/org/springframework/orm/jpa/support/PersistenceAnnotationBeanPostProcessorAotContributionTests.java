@@ -32,12 +32,12 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aot.generate.DefaultGenerationContext;
-import org.springframework.aot.generate.InMemoryGeneratedFiles;
+import org.springframework.aot.hint.FieldMode;
 import org.springframework.aot.hint.TypeReference;
-import org.springframework.aot.test.generator.compile.CompileWithTargetClassAccess;
-import org.springframework.aot.test.generator.compile.Compiled;
-import org.springframework.aot.test.generator.compile.TestCompiler;
+import org.springframework.aot.test.generate.TestGenerationContext;
+import org.springframework.aot.test.generate.compile.CompileWithTargetClassAccess;
+import org.springframework.aot.test.generate.compile.Compiled;
+import org.springframework.aot.test.generate.compile.TestCompiler;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -59,15 +59,12 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 
 	private DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
-	private InMemoryGeneratedFiles generatedFiles;
-
-	private DefaultGenerationContext generationContext;
+	private TestGenerationContext generationContext;
 
 	@BeforeEach
 	void setup() {
 		this.beanFactory = new DefaultListableBeanFactory();
-		this.generatedFiles = new InMemoryGeneratedFiles();
-		this.generationContext = new DefaultGenerationContext(generatedFiles);
+		this.generationContext = new TestGenerationContext();
 	}
 
 	@Test
@@ -136,7 +133,7 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 								.satisfies(fieldHint -> {
 									assertThat(fieldHint.getName())
 											.isEqualTo("entityManager");
-									assertThat(fieldHint.isAllowWrite()).isTrue();
+									assertThat(fieldHint.getMode()).isEqualTo(FieldMode.WRITE);
 									assertThat(fieldHint.isAllowUnsafeAccess()).isFalse();
 								});
 					});
@@ -183,7 +180,8 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 				.processAheadOfTime(registeredBean);
 		BeanRegistrationCode beanRegistrationCode = mock(BeanRegistrationCode.class);
 		contribution.applyTo(generationContext, beanRegistrationCode);
-		TestCompiler.forSystem().withFiles(generatedFiles)
+		generationContext.writeGeneratedContent();
+		TestCompiler.forSystem().withFiles(generationContext.getGeneratedFiles())
 				.compile(compiled -> result.accept(new Invoker(compiled), compiled));
 	}
 

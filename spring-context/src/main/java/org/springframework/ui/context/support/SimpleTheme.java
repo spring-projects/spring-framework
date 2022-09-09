@@ -26,7 +26,9 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 17.06.2003
+ * @deprecated as of 6.0, with no concrete replacement
  */
+@Deprecated
 public class SimpleTheme implements Theme {
 
 	private final String name;

@@ -36,7 +36,9 @@ import org.springframework.web.util.WebUtils;
  * @author Juergen Hoeller
  * @since 17.06.2003
  * @see #setThemeName
+ * @deprecated as of 6.0, with no concrete replacement
  */
+@Deprecated
 public class SessionThemeResolver extends AbstractThemeResolver {
 
 	/**
@@ -53,7 +55,7 @@ public class SessionThemeResolver extends AbstractThemeResolver {
 	@Override
 	public String resolveThemeName(HttpServletRequest request) {
 		String themeName = (String) WebUtils.getSessionAttribute(request, THEME_SESSION_ATTRIBUTE_NAME);
-		// A specific theme indicated, or do we need to fallback to the default?
+		// A specific theme indicated, or do we need to fall back to the default?
 		return (themeName != null ? themeName : getDefaultThemeName());
 	}
 

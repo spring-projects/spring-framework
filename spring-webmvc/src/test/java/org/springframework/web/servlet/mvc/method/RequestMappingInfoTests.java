@@ -184,7 +184,7 @@ class RequestMappingInfoTests {
 	}
 
 	@Test
-	void compareToWithImpicitVsExplicitHttpMethodDeclaration() {
+	void compareToWithImplicitVsExplicitHttpMethodDeclaration() {
 		RequestMappingInfo noMethods = RequestMappingInfo.paths().build();
 		RequestMappingInfo oneMethod = RequestMappingInfo.paths().methods(GET).build();
 		RequestMappingInfo oneMethodOneParam = RequestMappingInfo.paths().methods(GET).params("foo").build();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,8 +105,7 @@ public class ConnectionFactoryUtilsUnitTests {
 		Exception exception = ConnectionFactoryUtils.convertR2dbcException("TASK",
 				"SOME-SQL", new R2dbcTransientResourceException("MESSAGE"));
 		assertThat(exception).isInstanceOf(
-				TransientDataAccessResourceException.class).hasMessage(
-						"TASK; SQL [SOME-SQL]; MESSAGE; nested exception is io.r2dbc.spi.R2dbcTransientResourceException: MESSAGE");
+				TransientDataAccessResourceException.class).hasMessage("TASK; SQL [SOME-SQL]; MESSAGE");
 	}
 
 	@Test
@@ -114,21 +113,20 @@ public class ConnectionFactoryUtilsUnitTests {
 		Exception exception = ConnectionFactoryUtils.convertR2dbcException("TASK", null,
 				new R2dbcTransientResourceException("MESSAGE"));
 		assertThat(exception).isInstanceOf(
-				TransientDataAccessResourceException.class).hasMessage(
-						"TASK; MESSAGE; nested exception is io.r2dbc.spi.R2dbcTransientResourceException: MESSAGE");
+				TransientDataAccessResourceException.class).hasMessage("TASK; MESSAGE");
 	}
 
 	@Test
 	public void messageGenerationNullMessage() {
-
 		Exception exception = ConnectionFactoryUtils.convertR2dbcException("TASK",
 				"SOME-SQL", new R2dbcTransientResourceException());
 		assertThat(exception).isInstanceOf(
-				TransientDataAccessResourceException.class).hasMessage(
-						"TASK; SQL [SOME-SQL]; null; nested exception is io.r2dbc.spi.R2dbcTransientResourceException");
+				TransientDataAccessResourceException.class).hasMessage("TASK; SQL [SOME-SQL]; null");
 	}
+
 
 	@SuppressWarnings("serial")
 	private static class MyTransientExceptions extends R2dbcException {
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ public abstract class YamlProcessor {
 	 * </pre>
 	 */
 	public void setDocumentMatchers(DocumentMatcher... matchers) {
-		this.documentMatchers = Arrays.asList(matchers);
+		this.documentMatchers = List.of(matchers);
 	}
 
 	/**
@@ -155,7 +155,7 @@ public abstract class YamlProcessor {
 	 * resources. Each resource is parsed in turn and the documents inside checked against
 	 * the {@link #setDocumentMatchers(DocumentMatcher...) matchers}. If a document
 	 * matches it is passed into the callback, along with its representation as Properties.
-	 * Depending on the {@link #setResolutionMethod(ResolutionMethod)} not all of the
+	 * Depending on the {@link #setResolutionMethod(ResolutionMethod)} not all the
 	 * documents will be parsed.
 	 * @param callback a callback to delegate to once matching documents are found
 	 * @see #createYaml()

@@ -31,7 +31,7 @@ import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Resolver that checks a query parameter and uses it to lookup a matching
+ * Resolver that checks a query parameter and uses it to look up a matching
  * MediaType. Lookup keys can be registered or as a fallback
  * {@link MediaTypeFactory} can be used to perform a lookup.
  *

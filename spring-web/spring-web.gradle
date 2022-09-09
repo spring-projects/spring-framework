@@ -20,9 +20,14 @@ dependencies {
 	optional("io.reactivex.rxjava3:rxjava")
 	optional("io.netty:netty-buffer")
 	optional("io.netty:netty-handler")
-	optional("io.netty:netty-codec-http") // Until Netty4ClientHttpRequest is removed
-	optional("io.netty:netty-transport")  // Until Netty4ClientHttpRequest is removed
+	optional("io.netty:netty-codec-http")
+	optional("io.netty:netty-transport")
 	optional("io.projectreactor.netty:reactor-netty-http")
+	optional("io.netty:netty5-buffer")
+	optional("io.netty:netty5-handler")
+	optional("io.netty:netty5-codec-http")
+	optional("io.netty:netty5-transport")
+	optional("io.projectreactor.netty:reactor-netty5-http:2.0.0-M1")
 	optional("io.undertow:undertow-core")
 	optional("org.apache.tomcat.embed:tomcat-embed-core")
 	optional("org.eclipse.jetty:jetty-server") {
@@ -34,7 +39,9 @@ dependencies {
 	optional("org.eclipse.jetty:jetty-reactive-httpclient")
 	optional('org.apache.httpcomponents.client5:httpclient5')
 	optional('org.apache.httpcomponents.core5:httpcore5-reactive')
-	optional("org.apache.httpcomponents:httpclient")
+	optional("org.apache.httpcomponents:httpclient") {
+		exclude group: "commons-logging", module: "commons-logging"
+	}
 	optional("com.squareup.okhttp3:okhttp")
 	optional("com.fasterxml.woodstox:woodstox-core")
 	optional("com.fasterxml:aalto-xml")
@@ -77,7 +84,7 @@ dependencies {
 	testFixturesApi("org.junit.jupiter:junit-jupiter-params")
 	testFixturesImplementation("io.projectreactor:reactor-test")
 	testFixturesImplementation("org.assertj:assertj-core")
-	testFixturesImplementation("org.bouncycastle:bcpkix-jdk15on") {
+	testFixturesImplementation("org.bouncycastle:bcpkix-jdk18on") {
 		because("needed by Netty's SelfSignedCertificate on JDK 15+")
 	}
 	testFixturesImplementation("org.eclipse.jetty.websocket:websocket-jetty-server")

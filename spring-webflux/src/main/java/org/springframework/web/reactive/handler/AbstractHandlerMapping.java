@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 			LogDelegateFactory.getHiddenLog(HandlerMapping.class.getName() + ".Mappings");
 
 
-	private final PathPatternParser patternParser;
+	private final PathPatternParser patternParser = new PathPatternParser();
 
 	@Nullable
 	private CorsConfigurationSource corsConfigurationSource;
@@ -69,11 +69,6 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 
 	@Nullable
 	private String beanName;
-
-
-	public AbstractHandlerMapping() {
-		this.patternParser = new PathPatternParser();
-	}
 
 
 	/**
@@ -98,7 +93,12 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	 * <li>{@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)} --
 	 * the trailing slash option, including its default value.
 	 * </ul>
+	 * <p>The default was changed in 6.0 from {@code true} to {@code false} in
+	 * order to support the deprecation of the property.
+	 * @deprecated as of 6.0, see
+	 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
 	 */
+	@Deprecated
 	public void setUseTrailingSlashMatch(boolean trailingSlashMatch) {
 		this.patternParser.setMatchOptionalTrailingSeparator(trailingSlashMatch);
 	}
@@ -106,7 +106,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	/**
 	 * Return the {@link PathPatternParser} instance that is used for
 	 * {@link #setCorsConfigurations(Map) CORS configuration checks}.
-	 * Sub-classes can also use this pattern parser for their own request
+	 * Subclasses can also use this pattern parser for their own request
 	 * mapping purposes.
 	 */
 	public PathPatternParser getPathPatternParser() {
@@ -114,7 +114,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	}
 
 	/**
-	 * Set the "global" CORS configurations based on URL patterns. By default the
+	 * Set the "global" CORS configurations based on URL patterns. By default, the
 	 * first matching URL pattern is combined with handler-level CORS configuration if any.
 	 * @see #setCorsConfigurationSource(CorsConfigurationSource)
 	 */
@@ -131,7 +131,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	}
 
 	/**
-	 * Set the "global" CORS configuration source. By default the first matching URL
+	 * Set the "global" CORS configuration source. By default, the first matching URL
 	 * pattern is combined with the CORS configuration for the handler, if any.
 	 * @since 5.1
 	 * @see #setCorsConfigurations(Map)

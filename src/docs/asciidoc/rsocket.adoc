@@ -2,7 +2,7 @@
 = RSocket
 :gh-rsocket: https://github.com/rsocket
 :gh-rsocket-java: {gh-rsocket}/rsocket-java
-:gh-rsocket-extentions: {gh-rsocket}/rsocket/blob/master/Extensions
+:gh-rsocket-extensions: {gh-rsocket}/rsocket/blob/master/Extensions
 
 This section describes Spring Framework's support for the RSocket protocol.
 
@@ -53,7 +53,7 @@ through RSocket across the network.
 === The Protocol
 
 One of the benefits of RSocket is that it has well defined behavior on the wire and an
-easy to read https://rsocket.io/docs/Protocol[specification] along with some protocol
+easy to read https://rsocket.io/about/Protocol[specification] along with some protocol
 {gh-rsocket}/rsocket/tree/master/Extensions[extensions]. Therefore it is
 a good idea to read the spec, independent of language implementations and higher level
 framework APIs. This section provides a succinct overview to establish some context.
@@ -99,9 +99,9 @@ and therefore only included in the first message on a request, i.e. with one of 
 
 Protocol extensions define common metadata formats for use in applications:
 
-* {gh-rsocket-extentions}/CompositeMetadata.md[Composite Metadata]-- multiple,
+* {gh-rsocket-extensions}/CompositeMetadata.md[Composite Metadata]-- multiple,
   independently formatted metadata entries.
-* {gh-rsocket-extentions}/Routing.md[Routing] -- the route for a request.
+* {gh-rsocket-extensions}/Routing.md[Routing] -- the route for a request.
 
 
 
@@ -218,7 +218,7 @@ established transparently and used.
 
 For data, the default mime type is derived from the first configured `Decoder`. For
 metadata, the default mime type is
-{gh-rsocket-extentions}/CompositeMetadata.md[composite metadata] which allows multiple
+{gh-rsocket-extensions}/CompositeMetadata.md[composite metadata] which allows multiple
 metadata value and mime type pairs per request. Typically both don't need to be changed.
 
 Data and metadata in the `SETUP` frame is optional. On the server side,
@@ -291,7 +291,7 @@ infrastructure that's used on a server, but registered programmatically as follo
 ----
 <1> Use `PathPatternRouteMatcher`, if `spring-web` is present, for efficient
     route matching.
-<2> Create a responder from a class with `@MessageMaping` and/or `@ConnectMapping` methods.
+<2> Create a responder from a class with `@MessageMapping` and/or `@ConnectMapping` methods.
 <3> Register the responder.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -310,7 +310,7 @@ infrastructure that's used on a server, but registered programmatically as follo
 ----
 <1> Use `PathPatternRouteMatcher`, if `spring-web` is present, for efficient
 route matching.
-<2> Create a responder from a class with `@MessageMaping` and/or `@ConnectMapping` methods.
+<2> Create a responder from a class with `@MessageMapping` and/or `@ConnectMapping` methods.
 <3> Register the responder.
 
 Note the above is only a shortcut designed for programmatic registration of client
@@ -494,7 +494,7 @@ The `data(Object)` step is optional. Skip it for requests that don't send data:
 ----
 
 Extra metadata values can be added if using
-{gh-rsocket-extentions}/CompositeMetadata.md[composite metadata] (the default) and if the
+{gh-rsocket-extensions}/CompositeMetadata.md[composite metadata] (the default) and if the
 values are supported by a registered `Encoder`. For example:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -605,8 +605,8 @@ Then start an RSocket server through the Java RSocket API and plug the
 ----
 
 `RSocketMessageHandler` supports
-{gh-rsocket-extentions}/CompositeMetadata.md[composite] and
-{gh-rsocket-extentions}/Routing.md[routing] metadata by default. You can set its
+{gh-rsocket-extensions}/CompositeMetadata.md[composite] and
+{gh-rsocket-extensions}/Routing.md[routing] metadata by default. You can set its
 <<rsocket-metadata-extractor>> if you need to switch to a
 different mime type or register additional metadata mime types.
 
@@ -821,7 +821,7 @@ requests to the `RSocketRequester` for the connection. See
 == MetadataExtractor
 
 Responders must interpret metadata.
-{gh-rsocket-extentions}/CompositeMetadata.md[Composite metadata] allows independently
+{gh-rsocket-extensions}/CompositeMetadata.md[Composite metadata] allows independently
 formatted metadata values (e.g. for routing, security, tracing) each with its own mime
 type. Applications need a way to configure metadata mime types to support, and a way
 to access extracted values.
@@ -832,7 +832,7 @@ in annotated handler methods.
 
 `DefaultMetadataExtractor` can be given `Decoder` instances to decode metadata. Out of
 the box it has built-in support for
-{gh-rsocket-extentions}/Routing.md["message/x.rsocket.routing.v0"] which it decodes to
+{gh-rsocket-extensions}/Routing.md["message/x.rsocket.routing.v0"] which it decodes to
 `String` and saves under the "route" key. For any other mime type you'll need to provide
 a `Decoder` and register the mime type as follows:
 
@@ -904,3 +904,80 @@ simply use a callback to customize registrations as follows:
 			}
 			.build()
 ----
+
+
+
+
+[[rsocket-interface]]
+== RSocket Interface
+
+The Spring Framework lets you define an RSocket service as a Java interface with annotated
+methods for RSocket exchanges. You can then generate a proxy that implements this interface
+and performs the exchanges. This helps to simplify RSocket remote access by wrapping the
+use of the underlying <<rsocket-requester>>.
+
+One, declare an interface with `@RSocketExchange` methods:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	interface RadarService {
+
+		@RSocketExchange("radars")
+		Flux<AirportLocation> getRadars(@Payload MapRequest request);
+
+		// more RSocket exchange methods...
+
+	}
+----
+
+Two, create a proxy that will perform the declared RSocket exchanges:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	RSocketRequester requester = ... ;
+	RSocketServiceProxyFactory factory = new RSocketServiceProxyFactory(requester);
+	factory.afterPropertiesSet();
+
+	RepositoryService service = factory.createClient(RadarService.class);
+----
+
+
+[[rsocket-interface-method-parameters]]
+=== Method Parameters
+
+Annotated, RSocket exchange methods support flexible method signatures with the following
+method parameters:
+
+[cols="1,2", options="header"]
+|===
+| Method argument | Description
+
+| `@DestinationVariable`
+| Add a route variable to pass to `RSocketRequester` along with the route from the
+  `@RSocketExchange` annotation in order to expand template placeholders in the route.
+  This variable can be a String or any Object, which is then formatted via `toString()`.
+
+| `@Payload`
+| Set the input payload(s) for the request. This can be a concrete value, or any producer
+  of values that can be adapted to a Reactive Streams `Publisher` via
+  `ReactiveAdapterRegistry`
+
+| `Object`, if followed by `MimeType`
+| The value for a metadata entry in the input payload. This can be any `Object` as long
+  as the next argument is the metadata entry `MimeType`. The value can be a concrete
+  value or any producer of a single value that can be adapted to a Reactive Streams
+  `Publisher` via `ReactiveAdapterRegistry`.
+
+| `MimeType`
+| The `MimeType` for a metadata entry. The preceding method argument is expected to be
+  the metadata value.
+
+|===
+
+
+[[rsocket-interface-return-values]]
+=== Return Values
+
+Annotated, RSocket exchange methods support return values that are concrete value(s), or
+any producer of value(s) that can be adapted to a Reactive Streams `Publisher` via
+`ReactiveAdapterRegistry`.

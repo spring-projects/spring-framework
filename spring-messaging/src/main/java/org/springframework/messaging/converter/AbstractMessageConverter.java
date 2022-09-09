@@ -127,7 +127,7 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 * Whether this converter should convert messages for which no content type
 	 * could be resolved through the configured
 	 * {@link org.springframework.messaging.converter.ContentTypeResolver}.
-	 * <p>A converter can configured to be strict only when a
+	 * <p>A converter can be configured to be strict only when a
 	 * {@link #setContentTypeResolver contentTypeResolver} is configured and the
 	 * list of {@link #getSupportedMimeTypes() supportedMimeTypes} is not be empty.
 	 * <p>When this flag is set to {@code true}, {@link #supportsMimeType(MessageHeaders)}

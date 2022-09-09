@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,11 +136,11 @@ public abstract class StaxUtils {
 	 */
 	@Nullable
 	public static XMLStreamReader getXMLStreamReader(Source source) {
-		if (source instanceof StAXSource) {
-			return ((StAXSource) source).getXMLStreamReader();
+		if (source instanceof StAXSource stAXSource) {
+			return stAXSource.getXMLStreamReader();
 		}
-		else if (source instanceof StaxSource) {
-			return ((StaxSource) source).getXMLStreamReader();
+		else if (source instanceof StaxSource staxSource) {
+			return staxSource.getXMLStreamReader();
 		}
 		else {
 			throw new IllegalArgumentException("Source '" + source + "' is neither StaxSource nor StAXSource");
@@ -156,11 +156,11 @@ public abstract class StaxUtils {
 	 */
 	@Nullable
 	public static XMLEventReader getXMLEventReader(Source source) {
-		if (source instanceof StAXSource) {
-			return ((StAXSource) source).getXMLEventReader();
+		if (source instanceof StAXSource stAXSource) {
+			return stAXSource.getXMLEventReader();
 		}
-		else if (source instanceof StaxSource) {
-			return ((StaxSource) source).getXMLEventReader();
+		else if (source instanceof StaxSource staxSource) {
+			return staxSource.getXMLEventReader();
 		}
 		else {
 			throw new IllegalArgumentException("Source '" + source + "' is neither StaxSource nor StAXSource");
@@ -222,11 +222,11 @@ public abstract class StaxUtils {
 	 */
 	@Nullable
 	public static XMLStreamWriter getXMLStreamWriter(Result result) {
-		if (result instanceof StAXResult) {
-			return ((StAXResult) result).getXMLStreamWriter();
+		if (result instanceof StAXResult stAXResult) {
+			return stAXResult.getXMLStreamWriter();
 		}
-		else if (result instanceof StaxResult) {
-			return ((StaxResult) result).getXMLStreamWriter();
+		else if (result instanceof StaxResult staxResult) {
+			return staxResult.getXMLStreamWriter();
 		}
 		else {
 			throw new IllegalArgumentException("Result '" + result + "' is neither StaxResult nor StAXResult");
@@ -242,11 +242,11 @@ public abstract class StaxUtils {
 	 */
 	@Nullable
 	public static XMLEventWriter getXMLEventWriter(Result result) {
-		if (result instanceof StAXResult) {
-			return ((StAXResult) result).getXMLEventWriter();
+		if (result instanceof StAXResult stAXResult) {
+			return stAXResult.getXMLEventWriter();
 		}
-		else if (result instanceof StaxResult) {
-			return ((StaxResult) result).getXMLEventWriter();
+		else if (result instanceof StaxResult staxResult) {
+			return staxResult.getXMLEventWriter();
 		}
 		else {
 			throw new IllegalArgumentException("Result '" + result + "' is neither StaxResult nor StAXResult");

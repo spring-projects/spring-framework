@@ -193,7 +193,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * likewise when this property is set the {@code RSocketStrategies} are
 	 * mutated to change the extractor in it.
 	 * <p>By default this is set to the
-	 * {@link org.springframework.messaging.rsocket.RSocketStrategies.Builder#metadataExtractor(MetadataExtractor)} defaults}
+	 * {@link org.springframework.messaging.rsocket.RSocketStrategies.Builder#metadataExtractor(MetadataExtractor) defaults}
 	 * from {@code RSocketStrategies}.
 	 * @param extractor the extractor to use
 	 */

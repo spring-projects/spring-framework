@@ -47,7 +47,7 @@ import org.springframework.lang.Nullable;
  * Jakarta EE application's "java:comp/env/" namespace. It caches the resolved
  * types for all obtained objects, and optionally also caches shareable
  * objects (if they are explicitly marked as
- * {@link #addShareableResource shareable resource}.
+ * {@link #addShareableResource shareable resource}).
  *
  * <p>The main intent of this factory is usage in combination with Spring's
  * {@link org.springframework.context.annotation.CommonAnnotationBeanPostProcessor},

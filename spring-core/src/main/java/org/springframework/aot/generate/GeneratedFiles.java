@@ -24,7 +24,7 @@ import org.springframework.util.function.ThrowingConsumer;
 
 /**
  * Interface that can be used to add {@link Kind#SOURCE source},
- * {@link Kind#RESOURCE resource} or {@link Kind#CLASS class} files generated
+ * {@link Kind#RESOURCE resource}, or {@link Kind#CLASS class} files generated
  * during ahead-of-time processing. Source and resource files are written using
  * UTF-8 encoding.
  *
@@ -191,14 +191,14 @@ public interface GeneratedFiles {
 		SOURCE,
 
 		/**
-		 * A resource file that should be directly added to final application.
+		 * A resource file that should be directly added to the final application.
 		 * For example, a {@code .properties} file.
 		 */
 		RESOURCE,
 
 		/**
 		 * A class file containing bytecode. For example, the result of a proxy
-		 * generated using cglib.
+		 * generated using CGLIB.
 		 */
 		CLASS
 

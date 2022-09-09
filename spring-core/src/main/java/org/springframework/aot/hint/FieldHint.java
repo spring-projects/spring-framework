@@ -17,40 +17,64 @@
 package org.springframework.aot.hint;
 
 import java.lang.reflect.Field;
+import java.util.function.Consumer;
+
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
- * A hint that describes the need of reflection on a {@link Field}.
+ * A hint that describes the need for reflection on a {@link Field}.
  *
  * @author Stephane Nicoll
  * @since 6.0
  */
 public final class FieldHint extends MemberHint {
 
-	private final boolean allowWrite;
+	private final FieldMode mode;
 
 	private final boolean allowUnsafeAccess;
 
 
 	private FieldHint(Builder builder) {
 		super(builder.name);
-		this.allowWrite = builder.allowWrite;
+		this.mode = (builder.mode != null ? builder.mode : FieldMode.WRITE);
 		this.allowUnsafeAccess = builder.allowUnsafeAccess;
 	}
 
 	/**
 	 * Return whether setting the value of the field should be allowed.
 	 * @return {@code true} to allow {@link Field#set(Object, Object)}.
+	 * @deprecated in favor of {@link #getMode()}
 	 */
+	@Deprecated
 	public boolean isAllowWrite() {
-		return this.allowWrite;
+		return this.mode == FieldMode.WRITE;
 	}
 
 	/**
-	 * Return whether if using {@code Unsafe} on the field should be allowed.
+	 * Return the {@linkplain FieldMode mode} that applies to this hint.
+	 * @return the mode
+	 */
+	public FieldMode getMode() {
+		return this.mode;
+	}
+
+	/**
+	 * Return whether using {@code Unsafe} on the field should be allowed.
 	 * @return {@code true} to allow unsafe access
 	 */
 	public boolean isAllowUnsafeAccess() {
 		return this.allowUnsafeAccess;
+	}
+
+	/**
+	 * Return a {@link Consumer} that applies the given {@link FieldMode}
+	 * to the accepted {@link Builder}.
+	 * @param mode the mode to apply
+	 * @return a consumer to apply the mode
+	 */
+	public static Consumer<Builder> builtWith(FieldMode mode) {
+		return builder -> builder.withMode(mode);
 	}
 
 
@@ -61,7 +85,8 @@ public final class FieldHint extends MemberHint {
 
 		private final String name;
 
-		private boolean allowWrite;
+		@Nullable
+		private FieldMode mode;
 
 		private boolean allowUnsafeAccess;
 
@@ -74,14 +99,31 @@ public final class FieldHint extends MemberHint {
 		 * Specify if setting the value of the field should be allowed.
 		 * @param allowWrite {@code true} to allow {@link Field#set(Object, Object)}
 		 * @return {@code this}, to facilitate method chaining
+		 * @deprecated in favor of {@link #withMode(FieldMode)}
 		 */
+		@Deprecated
 		public Builder allowWrite(boolean allowWrite) {
-			this.allowWrite = allowWrite;
+			if (allowWrite) {
+				return withMode(FieldMode.WRITE);
+			}
 			return this;
 		}
 
 		/**
-		 * Specify if using {@code Unsafe} on the field should be allowed.
+		 * Specify that the {@linkplain FieldMode mode} is required.
+		 * @param mode the required mode
+		 * @return {@code this}, to facilitate method chaining
+		 */
+		public Builder withMode(FieldMode mode) {
+			Assert.notNull(mode, "'mode' must not be null");
+			if ((this.mode == null || !this.mode.includes(mode))) {
+				this.mode = mode;
+			}
+			return this;
+		}
+
+		/**
+		 * Specify whether using {@code Unsafe} on the field should be allowed.
 		 * @param allowUnsafeAccess {@code true} to allow unsafe access
 		 * @return {@code this}, to facilitate method chaining
 		 */

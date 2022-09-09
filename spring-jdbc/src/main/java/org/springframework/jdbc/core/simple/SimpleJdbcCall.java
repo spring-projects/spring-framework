@@ -28,7 +28,7 @@ import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
 /**
- * A SimpleJdbcCall is a multi-threaded, reusable object representing a call
+ * A SimpleJdbcCall is a multithreaded, reusable object representing a call
  * to a stored procedure or a stored function. It provides meta-data processing
  * to simplify the code needed to access basic stored procedures/functions.
  * All you need to provide is the name of the procedure/function and a Map

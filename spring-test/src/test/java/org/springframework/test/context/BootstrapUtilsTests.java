@@ -61,8 +61,8 @@ class BootstrapUtilsTests {
 	@Test
 	void resolveTestContextBootstrapperWithEmptyBootstrapWithAnnotation() {
 		BootstrapContext bootstrapContext = BootstrapTestUtils.buildBootstrapContext(EmptyBootstrapWithAnnotationClass.class, delegate);
-		assertThatIllegalStateException().isThrownBy(() ->
-				resolveTestContextBootstrapper(bootstrapContext))
+		assertThatIllegalStateException()
+			.isThrownBy(() -> resolveTestContextBootstrapper(bootstrapContext))
 			.withMessageContaining("Specify @BootstrapWith's 'value' attribute");
 	}
 
@@ -70,11 +70,11 @@ class BootstrapUtilsTests {
 	void resolveTestContextBootstrapperWithDoubleMetaBootstrapWithAnnotations() {
 		BootstrapContext bootstrapContext = BootstrapTestUtils.buildBootstrapContext(
 			DoubleMetaAnnotatedBootstrapWithAnnotationClass.class, delegate);
-		assertThatIllegalStateException().isThrownBy(() ->
-				resolveTestContextBootstrapper(bootstrapContext))
+		assertThatIllegalStateException()
+			.isThrownBy(() -> resolveTestContextBootstrapper(bootstrapContext))
 			.withMessageContaining("Configuration error: found multiple declarations of @BootstrapWith")
-			.withMessageContaining(FooBootstrapper.class.getCanonicalName())
-			.withMessageContaining(BarBootstrapper.class.getCanonicalName());
+			.withMessageContaining(FooBootstrapper.class.getSimpleName())
+			.withMessageContaining(BarBootstrapper.class.getSimpleName());
 	}
 
 	@Test

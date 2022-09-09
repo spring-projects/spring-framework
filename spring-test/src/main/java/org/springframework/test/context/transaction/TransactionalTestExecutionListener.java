@@ -73,10 +73,10 @@ import org.springframework.util.StringUtils;
  * to be run within a transaction that will, by default, be automatically
  * <em>rolled back</em> after completion of the test. If a test class is
  * annotated with {@code @Transactional}, each test method within that class
- * hierarchy will be run within a transaction. Test methods that are
- * <em>not</em> annotated with {@code @Transactional} (at the class or method
- * level) will not be run within a transaction. Furthermore, tests that
- * <em>are</em> annotated with {@code @Transactional} but have the
+ * hierarchy or nested class hierarchy will be run within a transaction. Test
+ * methods that are <em>not</em> annotated with {@code @Transactional} (at the
+ * class or method level) will not be run within a transaction. Furthermore,
+ * tests that <em>are</em> annotated with {@code @Transactional} but have the
  * {@link Transactional#propagation propagation} type set to
  * {@link org.springframework.transaction.annotation.Propagation#NOT_SUPPORTED NOT_SUPPORTED}
  * or {@link org.springframework.transaction.annotation.Propagation#NEVER NEVER}
@@ -97,7 +97,7 @@ import org.springframework.util.StringUtils;
  *
  * <h3>Executing Code outside of a Transaction</h3>
  * <p>When executing transactional tests, it is sometimes useful to be able to
- * execute certain <em>set up</em> or <em>tear down</em> code outside of a
+ * execute certain <em>set up</em> or <em>tear down</em> code outside a
  * transaction. {@code TransactionalTestExecutionListener} provides such
  * support for methods annotated with {@link BeforeTransaction @BeforeTransaction}
  * or {@link AfterTransaction @AfterTransaction}. As of Spring Framework 4.3,
@@ -390,7 +390,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	}
 
 	/**
-	 * Determine whether or not to rollback transactions by default for the
+	 * Determine whether to rollback transactions by default for the
 	 * supplied {@linkplain TestContext test context}.
 	 * <p>Supports {@link Rollback @Rollback} or {@link Commit @Commit} at the
 	 * class-level.
@@ -418,7 +418,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	}
 
 	/**
-	 * Determine whether or not to rollback transactions for the supplied
+	 * Determine whether to rollback transactions for the supplied
 	 * {@linkplain TestContext test context} by taking into consideration the
 	 * {@linkplain #isDefaultRollback(TestContext) default rollback} flag and a
 	 * possible method-level override via the {@link Rollback @Rollback}

@@ -52,7 +52,7 @@ class AutowiredArgumentsCodeGeneratorTests {
 	}
 
 	@Test
-	void generateCodeWhenMulitpleArguments() {
+	void generateCodeWhenMultipleArguments() {
 		Method method = ReflectionUtils.findMethod(UnambiguousMethods.class, "three",
 				String.class, Integer.class, Boolean.class);
 		AutowiredArgumentsCodeGenerator generator = new AutowiredArgumentsCodeGenerator(
@@ -62,7 +62,7 @@ class AutowiredArgumentsCodeGeneratorTests {
 	}
 
 	@Test
-	void generateCodeWhenMulitpleArgumentsWithOffset() {
+	void generateCodeWhenMultipleArgumentsWithOffset() {
 		Constructor<?> constructor = Outer.Nested.class.getDeclaredConstructors()[0];
 		AutowiredArgumentsCodeGenerator generator = new AutowiredArgumentsCodeGenerator(
 				Outer.Nested.class, constructor);

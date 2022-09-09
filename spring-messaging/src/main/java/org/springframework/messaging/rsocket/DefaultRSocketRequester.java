@@ -103,6 +103,12 @@ final class DefaultRSocketRequester implements RSocketRequester {
 	}
 
 	@Override
+	public RSocketStrategies strategies() {
+		return this.strategies;
+	}
+
+
+	@Override
 	public RequestSpec route(String route, Object... vars) {
 		return new DefaultRequestSpec(route, vars);
 	}

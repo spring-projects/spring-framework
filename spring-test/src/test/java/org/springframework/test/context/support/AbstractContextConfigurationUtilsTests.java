@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.mockito.Mockito;
 
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.BootstrapContext;
 import org.springframework.test.context.BootstrapTestUtils;
@@ -149,17 +150,19 @@ abstract class AbstractContextConfigurationUtilsTests {
 	@ActiveProfiles(profiles = "foo")
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface MetaLocationsFooConfig {
+	public @interface MetaLocationsFooConfig {
 	}
 
 	@ContextConfiguration
 	@ActiveProfiles
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface MetaLocationsFooConfigWithOverrides {
+	public @interface MetaLocationsFooConfigWithOverrides {
 
+		@AliasFor(annotation = ContextConfiguration.class)
 		String[] locations() default "/foo.xml";
 
+		@AliasFor(annotation = ActiveProfiles.class)
 		String[] profiles() default "foo";
 	}
 
@@ -167,7 +170,7 @@ abstract class AbstractContextConfigurationUtilsTests {
 	@ActiveProfiles(profiles = "bar")
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface MetaLocationsBarConfig {
+	public @interface MetaLocationsBarConfig {
 	}
 
 	@MetaLocationsFooConfig
@@ -218,20 +221,6 @@ abstract class AbstractContextConfigurationUtilsTests {
 	@ContextConfiguration(classes = BarConfig.class, inheritLocations = false, loader = AnnotationConfigContextLoader.class)
 	@ActiveProfiles("bar")
 	static class OverriddenClassesBar extends ClassesFoo {
-	}
-
-	@SuppressWarnings("deprecation")
-	@ContextConfiguration(locations = "/foo.properties", loader = org.springframework.test.context.support.GenericPropertiesContextLoader.class)
-	@ActiveProfiles("foo")
-	static class PropertiesLocationsFoo {
-	}
-
-	// Combining @Configuration classes with a Properties based loader doesn't really make
-	// sense, but that's OK for unit testing purposes.
-	@SuppressWarnings("deprecation")
-	@ContextConfiguration(classes = FooConfig.class, loader = org.springframework.test.context.support.GenericPropertiesContextLoader.class)
-	@ActiveProfiles("foo")
-	static class PropertiesClassesFoo {
 	}
 
 	@ContextConfiguration(classes = FooConfig.class, loader = AnnotationConfigContextLoader.class)

@@ -29,7 +29,6 @@ import java.net.URLConnection;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -63,6 +62,18 @@ public class UrlResource extends AbstractFileResolvingResource {
 
 
 	/**
+	 * Create a new {@code UrlResource} based on the given URL object.
+	 * @param url a URL
+	 * @see #UrlResource(URI)
+	 * @see #UrlResource(String)
+	 */
+	public UrlResource(URL url) {
+		Assert.notNull(url, "URL must not be null");
+		this.uri = null;
+		this.url = url;
+	}
+
+	/**
 	 * Create a new {@code UrlResource} based on the given URI object.
 	 * @param uri a URI
 	 * @throws MalformedURLException if the given URL path is not valid
@@ -72,16 +83,6 @@ public class UrlResource extends AbstractFileResolvingResource {
 		Assert.notNull(uri, "URI must not be null");
 		this.uri = uri;
 		this.url = uri.toURL();
-	}
-
-	/**
-	 * Create a new {@code UrlResource} based on the given URL object.
-	 * @param url a URL
-	 */
-	public UrlResource(URL url) {
-		Assert.notNull(url, "URL must not be null");
-		this.uri = null;
-		this.url = url;
 	}
 
 	/**
@@ -226,14 +227,14 @@ public class UrlResource extends AbstractFileResolvingResource {
 	@Override
 	public InputStream getInputStream() throws IOException {
 		URLConnection con = this.url.openConnection();
-		ResourceUtils.useCachesIfNecessary(con);
+		customizeConnection(con);
 		try {
 			return con.getInputStream();
 		}
 		catch (IOException ex) {
 			// Close the HTTP connection (if applicable).
-			if (con instanceof HttpURLConnection) {
-				((HttpURLConnection) con).disconnect();
+			if (con instanceof HttpURLConnection httpConn) {
+				httpConn.disconnect();
 			}
 			throw ex;
 		}
@@ -337,8 +338,8 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 */
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other || (other instanceof UrlResource &&
-				getCleanedUrl().equals(((UrlResource) other).getCleanedUrl())));
+		return (this == other || (other instanceof UrlResource resource &&
+				getCleanedUrl().equals(resource.getCleanedUrl())));
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,7 +148,7 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 		else {
 			result = new DeferredResult<>();
 		}
-		this.futureResponse.handle((value, ex) -> {
+		this.futureResponse.whenComplete((value, ex) -> {
 			if (ex != null) {
 				if (ex instanceof CompletionException && ex.getCause() != null) {
 					ex = ex.getCause();
@@ -164,7 +164,6 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 			else {
 				result.setResult(value);
 			}
-			return null;
 		});
 		return result;
 	}

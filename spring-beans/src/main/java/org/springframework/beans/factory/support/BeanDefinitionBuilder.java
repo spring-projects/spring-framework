@@ -292,7 +292,7 @@ public final class BeanDefinitionBuilder {
 	}
 
 	/**
-	 * Set whether or not this definition is abstract.
+	 * Set whether this definition is abstract.
 	 */
 	public BeanDefinitionBuilder setAbstract(boolean flag) {
 		this.beanDefinition.setAbstract(flag);

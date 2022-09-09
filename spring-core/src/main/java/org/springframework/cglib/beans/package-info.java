@@ -1,6 +1,6 @@
 /**
  * Spring's repackaging of the
- * <a href="http://cglib.sourceforge.net">CGLIB</a> beans package
+ * <a href="https://github.com/cglib/cglib">CGLIB</a> beans package
  * (for internal use only).
  *
  * <p>As this repackaging happens at the class file level, sources

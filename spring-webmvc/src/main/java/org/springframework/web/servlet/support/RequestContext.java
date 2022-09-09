@@ -35,9 +35,6 @@ import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.SimpleTimeZoneAwareLocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
 import org.springframework.lang.Nullable;
-import org.springframework.ui.context.Theme;
-import org.springframework.ui.context.ThemeSource;
-import org.springframework.ui.context.support.ResourceBundleThemeSource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -48,7 +45,6 @@ import org.springframework.web.bind.EscapedErrors;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.LocaleResolver;
-import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UrlPathHelper;
@@ -65,7 +61,7 @@ import org.springframework.web.util.WebUtils;
  * <p>Can be instantiated manually, or automatically exposed to views as model attribute via AbstractView's
  * "requestContextAttribute" property.
  *
- * <p>Will also work outside of DispatcherServlet requests, accessing the root WebApplicationContext
+ * <p>Will also work outside DispatcherServlet requests, accessing the root WebApplicationContext
  * and using an appropriate fallback for the locale (the HttpServletRequest's primary locale).
  *
  * @author Juergen Hoeller
@@ -82,7 +78,9 @@ public class RequestContext {
 	 * Only applies to non-DispatcherServlet requests.
 	 * <p>Same as AbstractThemeResolver's default, but not linked in here to avoid package interdependencies.
 	 * @see org.springframework.web.servlet.theme.AbstractThemeResolver#ORIGINAL_DEFAULT_THEME_NAME
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
+	@Deprecated
 	public static final String DEFAULT_THEME_NAME = "theme";
 
 	/**
@@ -111,8 +109,9 @@ public class RequestContext {
 	@Nullable
 	private TimeZone timeZone;
 
+	@Deprecated
 	@Nullable
-	private Theme theme;
+	private org.springframework.ui.context.Theme theme;
 
 	@Nullable
 	private Boolean defaultHtmlEscape;
@@ -134,7 +133,7 @@ public class RequestContext {
 	 * <p>This only works with InternalResourceViews, as Errors instances are part of the model and not
 	 * normally exposed as request attributes. It will typically be used within JSPs or custom tags.
 	 * <p><b>Will only work within a DispatcherServlet request.</b>
-	 * Pass in a ServletContext to be able to fallback to the root WebApplicationContext.
+	 * Pass in a ServletContext to be able to fall back to the root WebApplicationContext.
 	 * @param request current HTTP request
 	 * @see org.springframework.web.servlet.DispatcherServlet
 	 * @see #RequestContext(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.ServletContext)
@@ -148,7 +147,7 @@ public class RequestContext {
 	 * <p>This only works with InternalResourceViews, as Errors instances are part of the model and not
 	 * normally exposed as request attributes. It will typically be used within JSPs or custom tags.
 	 * <p><b>Will only work within a DispatcherServlet request.</b>
-	 * Pass in a ServletContext to be able to fallback to the root WebApplicationContext.
+	 * Pass in a ServletContext to be able to fall back to the root WebApplicationContext.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @see org.springframework.web.servlet.DispatcherServlet
@@ -178,7 +177,7 @@ public class RequestContext {
 	 * Create a new RequestContext for the given request, using the given model attributes for Errors retrieval.
 	 * <p>This works with all View implementations. It will typically be used by View implementations.
 	 * <p><b>Will only work within a DispatcherServlet request.</b>
-	 * Pass in a ServletContext to be able to fallback to the root WebApplicationContext.
+	 * Pass in a ServletContext to be able to fall back to the root WebApplicationContext.
 	 * @param request current HTTP request
 	 * @param model the model attributes for the current view (can be {@code null},
 	 * using the request attributes for Errors retrieval)
@@ -391,8 +390,10 @@ public class RequestContext {
 	/**
 	 * Return the current theme (never {@code null}).
 	 * <p>Resolved lazily for more efficiency when theme support is not being used.
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
-	public Theme getTheme() {
+	@Deprecated
+	public org.springframework.ui.context.Theme getTheme() {
 		if (this.theme == null) {
 			// Lazily determine theme to use for this RequestContext.
 			this.theme = RequestContextUtils.getTheme(this.request);
@@ -409,12 +410,13 @@ public class RequestContext {
 	 * <p>The default implementation returns the default theme (with name "theme").
 	 * @return the fallback theme (never {@code null})
 	 */
-	protected Theme getFallbackTheme() {
-		ThemeSource themeSource = RequestContextUtils.getThemeSource(getRequest());
+	@Deprecated
+	protected org.springframework.ui.context.Theme getFallbackTheme() {
+		org.springframework.ui.context.ThemeSource themeSource = RequestContextUtils.getThemeSource(getRequest());
 		if (themeSource == null) {
-			themeSource = new ResourceBundleThemeSource();
+			themeSource = new org.springframework.ui.context.support.ResourceBundleThemeSource();
 		}
-		Theme theme = themeSource.getTheme(DEFAULT_THEME_NAME);
+		org.springframework.ui.context.Theme theme = themeSource.getTheme(DEFAULT_THEME_NAME);
 		if (theme == null) {
 			throw new IllegalStateException("No theme defined and no fallback theme found");
 		}
@@ -426,9 +428,11 @@ public class RequestContext {
 	 * storing the new theme name through the configured {@link ThemeResolver}.
 	 * @param theme the new theme
 	 * @see ThemeResolver#setThemeName
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
-	public void changeTheme(@Nullable Theme theme) {
-		ThemeResolver themeResolver = RequestContextUtils.getThemeResolver(this.request);
+	@Deprecated
+	public void changeTheme(@Nullable org.springframework.ui.context.Theme theme) {
+		org.springframework.web.servlet.ThemeResolver themeResolver = RequestContextUtils.getThemeResolver(this.request);
 		if (themeResolver == null) {
 			throw new IllegalStateException("Cannot change theme if no ThemeResolver configured");
 		}
@@ -442,8 +446,9 @@ public class RequestContext {
 	 * @param themeName the name of the new theme
 	 * @see ThemeResolver#setThemeName
 	 */
+	@Deprecated
 	public void changeTheme(String themeName) {
-		ThemeResolver themeResolver = RequestContextUtils.getThemeResolver(this.request);
+		org.springframework.web.servlet.ThemeResolver themeResolver = RequestContextUtils.getThemeResolver(this.request);
 		if (themeResolver == null) {
 			throw new IllegalStateException("Cannot change theme if no ThemeResolver configured");
 		}
@@ -734,6 +739,7 @@ public class RequestContext {
 	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
 	 */
+	@Deprecated
 	public String getThemeMessage(String code, String defaultMessage) {
 		String msg = getTheme().getMessageSource().getMessage(code, null, defaultMessage, getLocale());
 		return (msg != null ? msg : "");
@@ -748,6 +754,7 @@ public class RequestContext {
 	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
 	 */
+	@Deprecated
 	public String getThemeMessage(String code, @Nullable Object[] args, String defaultMessage) {
 		String msg = getTheme().getMessageSource().getMessage(code, args, defaultMessage, getLocale());
 		return (msg != null ? msg : "");
@@ -762,6 +769,7 @@ public class RequestContext {
 	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
 	 */
+	@Deprecated
 	public String getThemeMessage(String code, @Nullable List<?> args, String defaultMessage) {
 		String msg = getTheme().getMessageSource().getMessage(code, (args != null ? args.toArray() : null),
 				defaultMessage, getLocale());
@@ -776,6 +784,7 @@ public class RequestContext {
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
+	@Deprecated
 	public String getThemeMessage(String code) throws NoSuchMessageException {
 		return getTheme().getMessageSource().getMessage(code, null, getLocale());
 	}
@@ -789,6 +798,7 @@ public class RequestContext {
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
+	@Deprecated
 	public String getThemeMessage(String code, @Nullable Object[] args) throws NoSuchMessageException {
 		return getTheme().getMessageSource().getMessage(code, args, getLocale());
 	}
@@ -802,6 +812,7 @@ public class RequestContext {
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
+	@Deprecated
 	public String getThemeMessage(String code, @Nullable List<?> args) throws NoSuchMessageException {
 		return getTheme().getMessageSource().getMessage(code, (args != null ? args.toArray() : null), getLocale());
 	}
@@ -814,6 +825,7 @@ public class RequestContext {
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
+	@Deprecated
 	public String getThemeMessage(MessageSourceResolvable resolvable) throws NoSuchMessageException {
 		return getTheme().getMessageSource().getMessage(resolvable, getLocale());
 	}

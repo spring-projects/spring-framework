@@ -66,21 +66,21 @@ public class AutowiredArgumentsCodeGenerator {
 	public CodeBlock generateCode(Class<?>[] parameterTypes, int startIndex,
 			String variableName) {
 
-		Assert.notNull(parameterTypes, "ParameterTypes must not be null");
-		Assert.notNull(variableName, "VariableName must not be null");
+		Assert.notNull(parameterTypes, "'parameterTypes' must not be null");
+		Assert.notNull(variableName, "'variableName' must not be null");
 		boolean ambiguous = isAmbiguous();
-		CodeBlock.Builder builder = CodeBlock.builder();
+		CodeBlock.Builder code = CodeBlock.builder();
 		for (int i = startIndex; i < parameterTypes.length; i++) {
-			builder.add((i != startIndex) ? ", " : "");
+			code.add((i != startIndex) ? ", " : "");
 			if (!ambiguous) {
-				builder.add("$L.get($L)", variableName, i - startIndex);
+				code.add("$L.get($L)", variableName, i - startIndex);
 			}
 			else {
-				builder.add("$L.get($L, $T.class)", variableName, i - startIndex,
+				code.add("$L.get($L, $T.class)", variableName, i - startIndex,
 						parameterTypes[i]);
 			}
 		}
-		return builder.build();
+		return code.build();
 	}
 
 	private boolean isAmbiguous() {

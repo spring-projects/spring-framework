@@ -42,10 +42,10 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  * @author Juergen Hoeller
  * @since 21.05.2003
  */
+@SuppressWarnings("deprecation")
 public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public void refresh() throws BeansException {
 		registerSingleton("/locale.do", LocaleChecker.class);
 
@@ -67,7 +67,6 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 	}
 
 
-	@SuppressWarnings("deprecation")
 	public static class LocaleChecker implements Controller, org.springframework.web.servlet.mvc.LastModified {
 
 		@Override

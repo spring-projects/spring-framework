@@ -59,7 +59,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * Unit tests for {@link DefaultConversionService}.
  *
  * <p>In this package for enforcing accessibility checks to non-public classes outside
- * of the {@code org.springframework.core.convert.support} implementation package.
+ * the {@code org.springframework.core.convert.support} implementation package.
  * Only in such a scenario, {@code setAccessible(true)} is actually necessary.
  *
  * @author Keith Donald
@@ -824,6 +824,9 @@ class DefaultConversionServiceTests {
 		assertThat(ISBN.toStringCount).as("toString() invocations").isEqualTo(1);
 	}
 
+	/**
+	 * @see org.springframework.core.convert.support.ObjectToObjectConverterTests
+	 */
 	@Test
 	void convertObjectToObjectUsingValueOfMethod() {
 		ISBN.reset();

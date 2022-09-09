@@ -182,7 +182,7 @@ public class JmsActivationSpecConfig {
 	 * <p>Note that JCA resource adapters generally only support auto and dups-ok
 	 * (see Spring's {@link StandardJmsActivationSpecFactory}). ActiveMQ also
 	 * supports "SESSION_TRANSACTED" in the form of RA-managed transactions
-	 * (automatically translated by Spring's {@link DefaultJmsActivationSpecFactory}.
+	 * (automatically translated by Spring's {@link DefaultJmsActivationSpecFactory}).
 	 * @param constantName the name of the {@link Session} acknowledge mode constant
 	 * @see jakarta.jms.Session#AUTO_ACKNOWLEDGE
 	 * @see jakarta.jms.Session#CLIENT_ACKNOWLEDGE

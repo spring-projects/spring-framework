@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,13 @@
 package org.springframework.core.io.buffer;
 
 /**
- * Extension of {@link DataBuffer} that allows for buffer that share
+ * Extension of {@link DataBuffer} that allows for buffers that share
  * a memory pool. Introduces methods for reference counting.
  *
  * @author Arjen Poutsma
  * @since 5.0
  */
-public interface PooledDataBuffer extends DataBuffer {
+public interface PooledDataBuffer extends TouchableDataBuffer {
 
 	/**
 	 * Return {@code true} if this buffer is allocated;
@@ -43,6 +43,7 @@ public interface PooledDataBuffer extends DataBuffer {
 	 * @return this buffer
 	 * @since 5.3.2
 	 */
+	@Override
 	PooledDataBuffer touch(Object hint);
 
 	/**

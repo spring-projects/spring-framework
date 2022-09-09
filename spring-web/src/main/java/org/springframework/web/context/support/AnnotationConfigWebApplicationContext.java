@@ -195,7 +195,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	 * and if class loading fails (i.e. a {@code ClassNotFoundException} is raised),
 	 * assume the value is a package and attempt to scan it for component classes.
 	 * <p>Enables the default set of annotation configuration post processors, such that
-	 * {@code @Autowired}, {@code @Required}, and associated annotations can be used.
+	 * {@code @Autowired} and associated annotations can be used.
 	 * <p>Configuration class bean definitions are registered with generated bean
 	 * definition names unless the {@code value} attribute is provided to the stereotype
 	 * annotation.

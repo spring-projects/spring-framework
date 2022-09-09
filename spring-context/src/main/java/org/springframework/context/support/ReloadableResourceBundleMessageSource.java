@@ -64,7 +64,7 @@ import org.springframework.util.StringUtils;
  * "WEB-INF/messages_en.xml" etc. Note that message definitions in a <i>previous</i>
  * resource bundle will override ones in a later bundle, due to sequential lookup.
 
- * <p>This MessageSource can easily be used outside of an
+ * <p>This MessageSource can easily be used outside an
  * {@link org.springframework.context.ApplicationContext}: it will use a
  * {@link org.springframework.core.io.DefaultResourceLoader} as default,
  * simply getting overridden with the ApplicationContext's resource loader
@@ -156,7 +156,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * <p>The default is a DefaultResourceLoader. Will get overridden by the
 	 * ApplicationContext if running in a context, as it implements the
 	 * ResourceLoaderAware interface. Can be manually overridden when
-	 * running outside of an ApplicationContext.
+	 * running outside an ApplicationContext.
 	 * @see org.springframework.core.io.DefaultResourceLoader
 	 * @see org.springframework.context.ResourceLoaderAware
 	 */

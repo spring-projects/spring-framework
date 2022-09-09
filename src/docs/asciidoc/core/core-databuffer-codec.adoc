@@ -125,7 +125,7 @@ release it immediately, it can do so via `DataBufferUtils.release(dataBuffer)`.
 . If a `Decoder` is using `Flux` or `Mono` operators such as `flatMap`, `reduce`, and
 others that prefetch and cache data items internally, or is using operators such as
 `filter`, `skip`, and others that leave out items, then
-`doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release)` must be added to the
+`doOnDiscard(DataBuffer.class, DataBufferUtils::release)` must be added to the
 composition chain to ensure such buffers are released prior to being discarded, possibly
 also as a result of an error or cancellation signal.
 . If a `Decoder` holds on to one or more data buffers in any other way, it must

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.testfixture.TimeStamped;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
  * Also tests AdvisedSupport and ProxyCreatorSupport superclasses.
@@ -277,7 +277,7 @@ public class ProxyFactoryTests {
 
 		assertThat(config.getAdvisors().length == oldCount).isTrue();
 
-		assertThatExceptionOfType(RuntimeException.class)
+		assertThatRuntimeException()
 				.as("Existing object won't implement this interface any more")
 				.isThrownBy(ts::getTimeStamp); // Existing reference will fail
 
