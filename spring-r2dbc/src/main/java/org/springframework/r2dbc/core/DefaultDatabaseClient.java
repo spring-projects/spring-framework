@@ -530,9 +530,9 @@ class DefaultDatabaseClient implements DatabaseClient {
 
 		private static final long serialVersionUID = -8994138383301201380L;
 
-		final Connection connection;
+		final transient Connection connection;
 
-		final Function<Connection, Publisher<Void>> closeFunction;
+		final transient Function<Connection, Publisher<Void>> closeFunction;
 
 		ConnectionCloseHolder(Connection connection,
 				Function<Connection, Publisher<Void>> closeFunction) {

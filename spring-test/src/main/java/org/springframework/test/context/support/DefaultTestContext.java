@@ -40,6 +40,7 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @since 4.0
  */
+@SuppressWarnings("serial")
 public class DefaultTestContext implements TestContext {
 
 	private static final long serialVersionUID = -5827157174866681233L;

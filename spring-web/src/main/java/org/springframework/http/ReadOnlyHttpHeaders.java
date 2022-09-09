@@ -43,6 +43,7 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 	private MediaType cachedContentType;
 
 	@Nullable
+	@SuppressWarnings("serial")
 	private List<MediaType> cachedAccept;
 
 

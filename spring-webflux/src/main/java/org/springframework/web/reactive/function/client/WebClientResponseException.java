@@ -52,6 +52,7 @@ public class WebClientResponseException extends WebClientException {
 	private final HttpHeaders headers;
 
 	@Nullable
+	@SuppressWarnings("serial")
 	private final Charset responseCharset;
 
 	@Nullable

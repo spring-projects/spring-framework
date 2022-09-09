@@ -102,6 +102,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 
 	private final String subtype;
 
+	@SuppressWarnings("serial")
 	private final Map<String, String> parameters;
 
 	@Nullable

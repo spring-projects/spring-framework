@@ -54,6 +54,7 @@ public class RestClientResponseException extends RestClientException {
 	private final String responseCharset;
 
 	@Nullable
+	@SuppressWarnings("serial")
 	private Function<ResolvableType, ?> bodyConvertFunction;
 
 

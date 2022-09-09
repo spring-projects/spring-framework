@@ -420,6 +420,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	};
 
 
+	@SuppressWarnings("serial")
 	final MultiValueMap<String, String> headers;
 
 

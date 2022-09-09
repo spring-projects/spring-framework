@@ -84,6 +84,7 @@ public class MergedContextConfiguration implements Serializable {
 
 	private final Class<?>[] classes;
 
+	@SuppressWarnings("serial")
 	private final Set<Class<? extends ApplicationContextInitializer<?>>> contextInitializerClasses;
 
 	private final String[] activeProfiles;
@@ -92,11 +93,14 @@ public class MergedContextConfiguration implements Serializable {
 
 	private final String[] propertySourceProperties;
 
+	@SuppressWarnings("serial")
 	private final Set<ContextCustomizer> contextCustomizers;
 
+	@SuppressWarnings("serial")
 	private final ContextLoader contextLoader;
 
 	@Nullable
+	@SuppressWarnings("serial")
 	private final CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate;
 
 	@Nullable
