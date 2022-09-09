@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.engine.discovery.ClassNameFilter;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
@@ -136,6 +137,7 @@ class AotIntegrationTests extends AbstractAotTests {
 			System.setProperty(AotDetector.AOT_ENABLED, "true");
 
 			LauncherDiscoveryRequestBuilder builder = LauncherDiscoveryRequestBuilder.request()
+					.filters(ClassNameFilter.includeClassNamePatterns(".*Tests?$"))
 					.filters(excludeTags("failing-test-case"));
 			Arrays.stream(testClasses).forEach(testClass -> builder.selectors(selectClass(testClass)));
 			LauncherDiscoveryRequest request = builder.build();
