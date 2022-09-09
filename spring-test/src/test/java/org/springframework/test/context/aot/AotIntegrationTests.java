@@ -98,8 +98,7 @@ class AotIntegrationTests extends AbstractAotTests {
 				// AOT RUN-TIME: EXECUTION
 				runTestsInAotMode(5,
 					BasicSpringJupiterSharedConfigTests.class,
-					BasicSpringJupiterTests.class,
-					BasicSpringJupiterTests.NestedTests.class,
+					BasicSpringJupiterTests.class, // NestedTests get executed automatically
 					BasicSpringTestNGTests.class,
 					BasicSpringVintageTests.class
 				));
