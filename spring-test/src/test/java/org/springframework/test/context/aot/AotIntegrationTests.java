@@ -107,11 +107,15 @@ class AotIntegrationTests extends AbstractAotTests {
 	@Test
 	void endToEndTestsForEntireSpringTestModule() {
 		// AOT BUILD-TIME: CLASSPATH SCANNING
-		List<Class<?>> testClasses = createTestClassScanner()
+		List<Class<?>> testClasses =
+				// FYI: you can limit execution to a particular set of test classes as follows.
+				// List.of(DirtiesContextTransactionalTestNGSpringContextTests.class, ...);
+				createTestClassScanner()
 				.scan()
-				// FYI: you can limit execution to a particular package as follows.
+				// FYI: you can limit execution to a particular package and its subpackages as follows.
 				// .scan("org.springframework.test.context.junit.jupiter")
 				.toList();
+
 
 		// AOT BUILD-TIME: PROCESSING
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
