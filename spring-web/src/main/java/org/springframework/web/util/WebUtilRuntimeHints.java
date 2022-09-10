@@ -22,7 +22,7 @@ import org.springframework.core.io.ClassPathResource;
 
 /**
  * {@link RuntimeHintsRegistrar} implementation that registers resource
- * hints for web util classes.
+ * hints for web util resources.
  *
  * @author Sebastien Deleuze
  * @since 6.0
@@ -31,7 +31,8 @@ class WebUtilRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
-		hints.resources().registerResourceIfNecessary(
+		hints.resources().registerResource(
 				new ClassPathResource("HtmlCharacterEntityReferences.properties", getClass()));
 	}
+
 }

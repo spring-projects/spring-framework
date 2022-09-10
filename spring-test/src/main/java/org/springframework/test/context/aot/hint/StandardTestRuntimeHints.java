@@ -100,7 +100,7 @@ class StandardTestRuntimeHints implements TestRuntimeHintsRegistrar {
 		Arrays.stream(paths)
 				.filter(path -> path.startsWith(CLASSPATH_URL_PREFIX))
 				.map(resourceLoader::getResource)
-				.forEach(runtimeHints.resources()::registerResourceIfNecessary);
+				.forEach(runtimeHints.resources()::registerResource);
 	}
 
 	private void registerClasspathResourceDirectoryStructure(String directory, RuntimeHints runtimeHints) {

@@ -28,6 +28,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DescriptiveResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 
@@ -114,32 +115,33 @@ class ResourceHintsTests {
 	}
 
 	@Test
-	void registerResourceIfNecessaryWithUnsupportedResourceType() {
+	void registerResourceWithUnsupportedResourceType() {
 		DescriptiveResource resource = new DescriptiveResource("bogus");
-		this.resourceHints.registerResourceIfNecessary(resource);
+		this.resourceHints.registerResource(resource);
 		assertThat(this.resourceHints.resourcePatterns()).isEmpty();
 	}
 
 	@Test
-	void registerResourceIfNecessaryWithNonexistentClassPathResource() {
+	void registerResourceWithNonexistentClassPathResource() {
 		ClassPathResource resource = new ClassPathResource("bogus", getClass());
-		this.resourceHints.registerResourceIfNecessary(resource);
-		assertThat(this.resourceHints.resourcePatterns()).isEmpty();
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> this.resourceHints.registerResource(resource))
+			.withMessage("Resource does not exist: %s", resource);
 	}
 
 	@Test
-	void registerResourceIfNecessaryWithExistingClassPathResource() {
+	void registerResourceWithExistingClassPathResource() {
 		String path = "org/springframework/aot/hint/support";
 		ClassPathResource resource = new ClassPathResource(path);
-		this.resourceHints.registerResourceIfNecessary(resource);
+		this.resourceHints.registerResource(resource);
 		assertThat(this.resourceHints.resourcePatterns()).singleElement().satisfies(patternOf(path));
 	}
 
 	@Test
-	void registerResourceIfNecessaryWithExistingRelativeClassPathResource() {
+	void registerResourceWithExistingRelativeClassPathResource() {
 		String path = "org/springframework/aot/hint/support";
 		ClassPathResource resource = new ClassPathResource("support", RuntimeHints.class);
-		this.resourceHints.registerResourceIfNecessary(resource);
+		this.resourceHints.registerResource(resource);
 		assertThat(this.resourceHints.resourcePatterns()).singleElement().satisfies(patternOf(path));
 	}
 

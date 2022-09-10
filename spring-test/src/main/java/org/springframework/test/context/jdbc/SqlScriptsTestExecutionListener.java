@@ -396,7 +396,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		Arrays.stream(paths)
 				.filter(path -> path.startsWith(CLASSPATH_URL_PREFIX))
 				.map(resourceLoader::getResource)
-				.forEach(runtimeHints.resources()::registerResourceIfNecessary);
+				.forEach(runtimeHints.resources()::registerResource);
 	}
 
 }
