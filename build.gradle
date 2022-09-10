@@ -26,6 +26,7 @@ configure(allprojects) { project ->
 		mavenCentral()
 		maven { url "https://repo.spring.io/libs-spring-framework-build" }
 		maven { url "https://repo.spring.io/milestone" } // temporarily for context-propagation via Reactor Netty
+		maven { url "https://repo.spring.io/snapshot" } // reactor
 	}
 	configurations.all {
 		resolutionStrategy {
