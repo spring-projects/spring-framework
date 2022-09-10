@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.hint.ExecutableMode;
-import org.springframework.aot.hint.FieldMode;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
@@ -261,7 +260,7 @@ class ReflectionHintsPredicatesTests {
 		@Test
 		void privateConstructorInvocationDoesNotMatchConstructorHint() {
 			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
-					typeHint.withConstructor(TypeReference.listOf(String.class),  ExecutableMode.INTROSPECT));
+					typeHint.withConstructor(TypeReference.listOf(String.class), ExecutableMode.INTROSPECT));
 			assertPredicateDoesNotMatch(reflection.onConstructor(privateConstructor).invoke());
 		}
 
@@ -480,30 +479,9 @@ class ReflectionHintsPredicatesTests {
 		}
 
 		@Test
-		void fieldWriteReflectionDoesNotMatchFieldHint() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withField("publicField",
-					FieldMode.READ));
-			assertPredicateDoesNotMatch(reflection.onField(SampleClass.class, "publicField").withWriteMode());
-		}
-
-		@Test
-		void fieldUnsafeReflectionDoesNotMatchFieldHint() {
+		void fieldReflectionDoesNotMatchNonRegisteredFielddHint() {
 			runtimeHints.reflection().registerType(SampleClass.class, typeHint -> typeHint.withField("publicField"));
-			assertPredicateDoesNotMatch(reflection.onField(SampleClass.class, "publicField").allowUnsafeAccess());
-		}
-
-		@Test
-		void fieldWriteReflectionMatchesFieldHintWithWrite() {
-			runtimeHints.reflection().registerType(SampleClass.class, typeHint ->
-					typeHint.withField("publicField", FieldMode.WRITE));
-			assertPredicateMatches(reflection.onField(SampleClass.class, "publicField").withWriteMode());
-		}
-
-		@Test
-		void fieldUnsafeReflectionMatchesFieldHintWithUnsafe() {
-			runtimeHints.reflection().registerType(SampleClass.class,
-					typeHint -> typeHint.withField("publicField", fieldHint -> fieldHint.allowUnsafeAccess(true)));
-			assertPredicateMatches(reflection.onField(SampleClass.class, "publicField").allowUnsafeAccess());
+			assertPredicateDoesNotMatch(reflection.onField(SampleClass.class, "privateField"));
 		}
 
 		@Test

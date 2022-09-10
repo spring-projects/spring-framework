@@ -27,7 +27,6 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import org.springframework.aot.hint.ExecutableMode;
-import org.springframework.aot.hint.FieldMode;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.TypeReference;
@@ -58,11 +57,8 @@ public class ReflectionHintsWriterTests {
 						MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS,
 						MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS,
 						MemberCategory.PUBLIC_CLASSES, MemberCategory.DECLARED_CLASSES)
-				.withField("DEFAULT_CHARSET", fieldBuilder -> fieldBuilder.withMode(FieldMode.READ))
-				.withField("defaultCharset", fieldBuilder -> {
-					fieldBuilder.withMode(FieldMode.WRITE);
-					fieldBuilder.allowUnsafeAccess(true);
-				})
+				.withField("DEFAULT_CHARSET")
+				.withField("defaultCharset")
 				.withConstructor(TypeReference.listOf(List.class, boolean.class, MimeType.class), ExecutableMode.INTROSPECT)
 				.withMethod("setDefaultCharset", List.of(TypeReference.of(Charset.class)))
 				.withMethod("getDefaultCharset", Collections.emptyList(), ExecutableMode.INTROSPECT));
@@ -85,7 +81,7 @@ public class ReflectionHintsWriterTests {
 						"allDeclaredClasses": true,
 						"fields": [
 							{ "name": "DEFAULT_CHARSET" },
-							{ "name": "defaultCharset", "allowWrite": true, "allowUnsafeAccess": true }
+							{ "name": "defaultCharset" }
 						],
 						"methods": [
 							{ "name": "setDefaultCharset", "parameterTypes": [ "java.nio.charset.Charset" ] }

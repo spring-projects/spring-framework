@@ -87,7 +87,7 @@ class InjectionCodeGeneratorTests {
 		TestBean bean = new TestBean();
 		Field field = ReflectionUtils.findField(bean.getClass(), "age");
 		this.generator.generateInjectionCode(field, INSTANCE_VARIABLE, CodeBlock.of("$L", 123));
-		assertThat(RuntimeHintsPredicates.reflection().onField(TestBean.class, "age").withWriteMode())
+		assertThat(RuntimeHintsPredicates.reflection().onField(TestBean.class, "age"))
 				.accepts(this.hints);
 	}
 

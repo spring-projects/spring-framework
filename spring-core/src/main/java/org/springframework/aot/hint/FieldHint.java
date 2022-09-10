@@ -18,34 +18,16 @@ package org.springframework.aot.hint;
 
 import java.lang.reflect.Field;
 
-import org.springframework.lang.Nullable;
-
 /**
- * Represents the need of reflection for a given {@link Field}.
+ * A hint that describes the need for reflection on a {@link Field}.
  *
- * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 6.0
- * @see ReflectionHints
  */
-public enum FieldMode {
+public final class FieldHint extends MemberHint {
 
-	/**
-	 * Only field read is required.
-	 */
-	READ,
-
-	/**
-	 * Full field read and write is required.
-	 */
-	WRITE;
-
-	/**
-	 * Specify if this mode already includes the specified {@code other} mode.
-	 * @param other the other mode to check
-	 * @return {@code true} if this mode includes the other mode
-	 */
-	public boolean includes(@Nullable FieldMode other) {
-		return (other == null || this.ordinal() >= other.ordinal());
+	FieldHint(String name) {
+		super(name);
 	}
 
 }

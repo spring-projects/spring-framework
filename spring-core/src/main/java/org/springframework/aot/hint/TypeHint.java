@@ -44,7 +44,7 @@ public final class TypeHint implements ConditionalHint {
 	@Nullable
 	private final TypeReference reachableType;
 
-	private final Set<String> fields;
+	private final Set<FieldHint> fields;
 
 	private final Set<ExecutableHint> constructors;
 
@@ -57,7 +57,7 @@ public final class TypeHint implements ConditionalHint {
 		this.type = builder.type;
 		this.reachableType = builder.reachableType;
 		this.memberCategories = Set.copyOf(builder.memberCategories);
-		this.fields = builder.fields;
+		this.fields = builder.fields.stream().map(FieldHint::new).collect(Collectors.toSet());
 		this.constructors = builder.constructors.values().stream().map(ExecutableHint.Builder::build).collect(Collectors.toSet());
 		this.methods = builder.methods.values().stream().map(ExecutableHint.Builder::build).collect(Collectors.toSet());
 	}
@@ -89,10 +89,10 @@ public final class TypeHint implements ConditionalHint {
 
 	/**
 	 * Return the fields that require reflection.
-	 * @return a stream of Strings
+	 * @return a stream of {@link FieldHint}
 	 */
-	public Set<String> fields() {
-		return this.fields;
+	public Stream<FieldHint> fields() {
+		return this.fields.stream();
 	}
 
 	/**
@@ -185,15 +185,14 @@ public final class TypeHint implements ConditionalHint {
 		}
 
 		/**
-		 * Register the need for reflection on the field with the specified name,
-		 * enabling write access.
+		 * Register the need for reflection on the field with the specified name.
 		 * @param name the name of the field
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder withField(String name) {
-			return withField(name);
+			this.fields.add(name);
+			return this;
 		}
-
 
 		/**
 		 * Register the need for reflection on the constructor with the specified
