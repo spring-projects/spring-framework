@@ -117,8 +117,9 @@ class ResourceHintsTests {
 	@Test
 	void registerResourceWithUnsupportedResourceType() {
 		DescriptiveResource resource = new DescriptiveResource("bogus");
-		this.resourceHints.registerResource(resource);
-		assertThat(this.resourceHints.resourcePatterns()).isEmpty();
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> this.resourceHints.registerResource(resource))
+			.withMessage("Resource must be a ClassPathResource that exists: %s", resource);
 	}
 
 	@Test
@@ -126,7 +127,7 @@ class ResourceHintsTests {
 		ClassPathResource resource = new ClassPathResource("bogus", getClass());
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> this.resourceHints.registerResource(resource))
-			.withMessage("Resource does not exist: %s", resource);
+			.withMessage("Resource must be a ClassPathResource that exists: %s", resource);
 	}
 
 	@Test

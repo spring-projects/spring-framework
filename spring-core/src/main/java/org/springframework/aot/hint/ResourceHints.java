@@ -27,7 +27,6 @@ import java.util.stream.Stream;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * Gather the need for resources available at runtime.
@@ -115,18 +114,18 @@ public class ResourceHints {
 
 	/**
 	 * Register that the supplied resource should be made available at runtime.
-	 * <p>If the supplied resource is not a {@link ClassPathResource}, it will
-	 * not be registered.
 	 * @param resource the resource to register
-	 * @throws IllegalArgumentException if the supplied class path resource does
-	 * not {@linkplain Resource#exists() exist}
+	 * @throws IllegalArgumentException if the supplied resource is not a
+	 * {@link ClassPathResource} or does not {@linkplain Resource#exists() exist}
 	 * @see #registerPattern(String)
 	 * @see ClassPathResource#getAbsolutePath()
 	 */
 	public void registerResource(Resource resource) {
-		if (resource instanceof ClassPathResource classPathResource) {
-			Assert.isTrue(classPathResource.exists(), () -> "Resource does not exist: " + classPathResource);
+		if (resource instanceof ClassPathResource classPathResource && classPathResource.exists()) {
 			registerPattern(classPathResource.getAbsolutePath());
+		}
+		else {
+			throw new IllegalArgumentException("Resource must be a ClassPathResource that exists: " + resource);
 		}
 	}
 
