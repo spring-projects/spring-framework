@@ -18,6 +18,7 @@ package org.springframework.context.aot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import javax.lang.model.element.Modifier;
 
@@ -25,16 +26,24 @@ import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
+import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.annotation.ContextAnnotationAutowireCandidateResolver;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
+import org.springframework.javapoet.TypeName;
 import org.springframework.javapoet.TypeSpec;
+import org.springframework.lang.Nullable;
 
 /**
  * Internal code generator to create the {@link ApplicationContextInitializer}.
@@ -88,10 +97,15 @@ class ApplicationContextInitializationCodeGenerator implements BeanFactoryInitia
 				BEAN_FACTORY_VARIABLE, ContextAnnotationAutowireCandidateResolver.class);
 		code.addStatement("$L.setDependencyComparator($T.INSTANCE)",
 				BEAN_FACTORY_VARIABLE, AnnotationAwareOrderComparator.class);
+		ArgumentCodeGenerator argCodeGenerator = createInitializerMethodArgumentCodeGenerator();
 		for (MethodReference initializer : this.initializers) {
-			code.addStatement(initializer.toInvokeCodeBlock(CodeBlock.of(BEAN_FACTORY_VARIABLE)));
+			code.addStatement(initializer.toInvokeCodeBlock(argCodeGenerator, this.generatedClass.getName()));
 		}
 		return code.build();
+	}
+
+	static ArgumentCodeGenerator createInitializerMethodArgumentCodeGenerator() {
+		return ArgumentCodeGenerator.from(new InitializerMethodArgumentCodeGenerator());
 	}
 
 	GeneratedClass getGeneratedClass() {
@@ -106,6 +120,32 @@ class ApplicationContextInitializationCodeGenerator implements BeanFactoryInitia
 	@Override
 	public void addInitializer(MethodReference methodReference) {
 		this.initializers.add(methodReference);
+	}
+
+	private static class InitializerMethodArgumentCodeGenerator implements Function<TypeName, CodeBlock> {
+
+		@Override
+		@Nullable
+		public CodeBlock apply(TypeName typeName) {
+			return (typeName instanceof ClassName className ? apply(className) : null);
+		}
+
+		@Nullable
+		private CodeBlock apply(ClassName className) {
+			String name = className.canonicalName();
+			if (name.equals(DefaultListableBeanFactory.class.getName())
+					|| name.equals(ConfigurableListableBeanFactory.class.getName())) {
+				return CodeBlock.of(BEAN_FACTORY_VARIABLE);
+			}
+			else if (name.equals(ConfigurableEnvironment.class.getName())
+					|| name.equals(Environment.class.getName())) {
+				return CodeBlock.of("$L.getConfigurableEnvironment()", APPLICATION_CONTEXT_VARIABLE);
+			}
+			else if (name.equals(ResourceLoader.class.getName())) {
+				return CodeBlock.of(APPLICATION_CONTEXT_VARIABLE);
+			}
+			return null;
+		}
 	}
 
 }

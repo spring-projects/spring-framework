@@ -107,16 +107,14 @@ class BeanDefinitionMethodGenerator {
 			GeneratedMethod generatedMethod = generateBeanDefinitionMethod(
 					generationContext, generatedClass.getName(), generatedMethods,
 					codeFragments, Modifier.PUBLIC);
-			return MethodReference.ofStatic(generatedClass.getName(),
-					generatedMethod.getName());
+			return generatedMethod.toMethodReference();
 		}
 		GeneratedMethods generatedMethods = beanRegistrationsCode.getMethods()
 				.withPrefix(getName());
 		GeneratedMethod generatedMethod = generateBeanDefinitionMethod(generationContext,
 				beanRegistrationsCode.getClassName(), generatedMethods, codeFragments,
 				Modifier.PRIVATE);
-		return MethodReference.ofStatic(beanRegistrationsCode.getClassName(),
-				generatedMethod.getName());
+		return generatedMethod.toMethodReference();
 	}
 
 	private BeanRegistrationCodeFragments getCodeFragments(GenerationContext generationContext,

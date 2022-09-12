@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aot.generate.MethodReference;
+import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.aot.test.generate.compile.Compiled;
 import org.springframework.aot.test.generate.compile.TestCompiler;
@@ -139,11 +140,14 @@ class ScopedProxyBeanRegistrationAotProcessorTests {
 		MethodReference methodReference = this.beanFactoryInitializationCode
 				.getInitializers().get(0);
 		this.beanFactoryInitializationCode.getTypeBuilder().set(type -> {
+			CodeBlock methodInvocation = methodReference.toInvokeCodeBlock(
+					ArgumentCodeGenerator.of(DefaultListableBeanFactory.class, "beanFactory"),
+					this.beanFactoryInitializationCode.getClassName());
 			type.addModifiers(Modifier.PUBLIC);
 			type.addSuperinterface(ParameterizedTypeName.get(Consumer.class, DefaultListableBeanFactory.class));
 			type.addMethod(MethodSpec.methodBuilder("accept").addModifiers(Modifier.PUBLIC)
 					.addParameter(DefaultListableBeanFactory.class, "beanFactory")
-					.addStatement(methodReference.toInvokeCodeBlock(CodeBlock.of("beanFactory")))
+					.addStatement(methodInvocation)
 					.build());
 		});
 		this.generationContext.writeGeneratedContent();

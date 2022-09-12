@@ -23,6 +23,7 @@ import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.MethodSpec;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,38 +33,49 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * Tests for {@link GeneratedMethods}.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
 class GeneratedMethodsTests {
 
+	private static final ClassName TEST_CLASS_NAME = ClassName.get("com.example", "Test");
+
 	private static final Consumer<MethodSpec.Builder> methodSpecCustomizer = method -> {};
 
-	private final GeneratedMethods methods = new GeneratedMethods(MethodName::toString);
+	private final GeneratedMethods methods = new GeneratedMethods(TEST_CLASS_NAME, MethodName::toString);
+
+	@Test
+	void createWhenClassNameIsNullThrowsException() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+						new GeneratedMethods(null, MethodName::toString))
+				.withMessage("'className' must not be null");
+	}
 
 	@Test
 	void createWhenMethodNameGeneratorIsNullThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(() -> new GeneratedMethods(null))
+		assertThatIllegalArgumentException().isThrownBy(() ->
+						new GeneratedMethods(TEST_CLASS_NAME, null))
 				.withMessage("'methodNameGenerator' must not be null");
 	}
 
 	@Test
 	void createWithExistingGeneratorUsesGenerator() {
 		Function<MethodName, String> generator = name -> "__" + name.toString();
-		GeneratedMethods methods = new GeneratedMethods(generator);
+		GeneratedMethods methods = new GeneratedMethods(TEST_CLASS_NAME, generator);
 		assertThat(methods.add("test", methodSpecCustomizer).getName()).hasToString("__test");
 	}
 
 	@Test
 	void addWithStringNameWhenSuggestedMethodIsNullThrowsException() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				this.methods.add((String) null, methodSpecCustomizer))
-		.withMessage("'suggestedName' must not be null");
+						this.methods.add((String) null, methodSpecCustomizer))
+				.withMessage("'suggestedName' must not be null");
 	}
 
 	@Test
 	void addWithStringNameWhenMethodIsNullThrowsException() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				this.methods.add("test", null))
-		.withMessage("'method' must not be null");
+						this.methods.add("test", null))
+				.withMessage("'method' must not be null");
 	}
 
 	@Test
@@ -71,7 +83,7 @@ class GeneratedMethodsTests {
 		this.methods.add("springBeans", methodSpecCustomizer);
 		this.methods.add("springContext", methodSpecCustomizer);
 		assertThat(this.methods.stream().map(GeneratedMethod::getName).map(Object::toString))
-						.containsExactly("springBeans", "springContext");
+				.containsExactly("springBeans", "springContext");
 	}
 
 	@Test
