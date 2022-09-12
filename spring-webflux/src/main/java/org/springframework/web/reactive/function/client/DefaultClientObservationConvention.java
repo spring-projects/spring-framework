@@ -20,13 +20,13 @@ import java.io.IOException;
 
 import io.micrometer.common.KeyValue;
 import io.micrometer.common.KeyValues;
-import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationConvention;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 
 /**
- * Default implementation for a {@code WebClient} {@link Observation.ObservationConvention},
+ * Default implementation for a {@code WebClient} {@link ObservationConvention},
  * extracting information from the {@link ClientObservationContext}.
  *
  * @author Brian Clozel
@@ -64,7 +64,7 @@ public class DefaultClientObservationConvention implements ClientObservationConv
 
 	@Override
 	public String getName() {
-		return "http.client.requests";
+		return this.name;
 	}
 
 	@Override
