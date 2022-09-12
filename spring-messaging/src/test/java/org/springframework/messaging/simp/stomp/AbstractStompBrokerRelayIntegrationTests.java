@@ -47,6 +47,7 @@ import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.broker.BrokerAvailabilityEvent;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.tcp.TcpOperations;
 import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,11 +57,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * Integration tests for {@link StompBrokerRelayMessageHandler} running against ActiveMQ.
  *
  * @author Rossen Stoyanchev
- * @author Sam Brannen
  */
-public class StompBrokerRelayMessageHandlerIntegrationTests {
+public abstract class AbstractStompBrokerRelayIntegrationTests {
 
-	private static final Log logger = LogFactory.getLog(StompBrokerRelayMessageHandlerIntegrationTests.class);
+	private static final Log logger = LogFactory.getLog(AbstractStompBrokerRelayIntegrationTests.class);
 
 	private StompBrokerRelayMessageHandler relay;
 
@@ -77,7 +77,6 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 
 	@BeforeEach
-	@SuppressWarnings("deprecation")
 	public void setup(TestInfo testInfo) throws Exception {
 		logger.debug("Setting up before '" + testInfo.getTestMethod().get().getName() + "'");
 
@@ -121,9 +120,14 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		this.relay.setSystemHeartbeatSendInterval(0);
 		this.relay.setPreservePublishOrder(true);
 
+		TcpOperations<byte[]> tcpClient = initTcpClient(this.port);
+		this.relay.setTcpClient(tcpClient);
+
 		this.relay.start();
 		this.eventPublisher.expectBrokerAvailabilityEvent(true);
 	}
+
+	protected abstract TcpOperations<byte[]> initTcpClient(int port);
 
 	@AfterEach
 	public void stop() throws Exception {
