@@ -54,9 +54,6 @@ public class ReactorNetty2WebSocketClient implements WebSocketClient {
 	private final Supplier<WebsocketClientSpec.Builder> specBuilderSupplier;
 
 	@Nullable
-	private Integer maxFramePayloadLength;
-
-	@Nullable
 	private Boolean handlePing;
 
 
@@ -114,72 +111,9 @@ public class ReactorNetty2WebSocketClient implements WebSocketClient {
 		if (StringUtils.hasText(protocols)) {
 			builder.protocols(protocols);
 		}
-		if (this.maxFramePayloadLength != null) {
-			builder.maxFramePayloadLength(this.maxFramePayloadLength);
-		}
-		if (this.handlePing != null) {
-			builder.handlePing(this.handlePing);
-		}
 		return builder.build();
 	}
 
-	/**
-	 * Configure the maximum allowable frame payload length. Setting this value
-	 * to your application's requirement may reduce denial of service attacks
-	 * using long data frames.
-	 * <p>Corresponds to the argument with the same name in the constructor of
-	 * {@link io.netty5.handler.codec.http.websocketx.WebSocketServerHandshakerFactory
-	 * WebSocketServerHandshakerFactory} in Netty.
-	 * <p>By default set to 65536 (64K).
-	 * @param maxFramePayloadLength the max length for frames.
-	 * @since 5.2
-	 * @deprecated as of 5.3 in favor of providing a supplier of
-	 * {@link WebsocketClientSpec.Builder} with a
-	 * constructor argument
-	 */
-	@Deprecated
-	public void setMaxFramePayloadLength(int maxFramePayloadLength) {
-		this.maxFramePayloadLength = maxFramePayloadLength;
-	}
-
-	/**
-	 * Return the configured {@link #setMaxFramePayloadLength(int) maxFramePayloadLength}.
-	 * @since 5.2
-	 * @deprecated as of 5.3 in favor of {@link #getWebsocketClientSpec()}
-	 */
-	@Deprecated
-	public int getMaxFramePayloadLength() {
-		return getWebsocketClientSpec().maxFramePayloadLength();
-	}
-
-	/**
-	 * Configure whether to let ping frames through to be handled by the
-	 * {@link WebSocketHandler} given to the execute method. By default, Reactor
-	 * Netty automatically replies with pong frames in response to pings. This is
-	 * useful in a proxy for allowing ping and pong frames through.
-	 * <p>By default this is set to {@code false} in which case ping frames are
-	 * handled automatically by Reactor Netty. If set to {@code true}, ping
-	 * frames will be passed through to the {@link WebSocketHandler}.
-	 * @param handlePing whether to let Ping frames through for handling
-	 * @since 5.2.4
-	 * @deprecated as of 5.3 in favor of providing a supplier of
-	 * {@link WebsocketClientSpec.Builder} with a
-	 * constructor argument
-	 */
-	@Deprecated
-	public void setHandlePing(boolean handlePing) {
-		this.handlePing = handlePing;
-	}
-
-	/**
-	 * Return the configured {@link #setHandlePing(boolean)}.
-	 * @since 5.2.4
-	 * @deprecated as of 5.3 in favor of {@link #getWebsocketClientSpec()}
-	 */
-	@Deprecated
-	public boolean getHandlePing() {
-		return getWebsocketClientSpec().handlePing();
-	}
 
 	@Override
 	public Mono<Void> execute(URI url, WebSocketHandler handler) {
@@ -189,9 +123,10 @@ public class ReactorNetty2WebSocketClient implements WebSocketClient {
 	@Override
 	public Mono<Void> execute(URI url, HttpHeaders requestHeaders, WebSocketHandler handler) {
 		String protocols = StringUtils.collectionToCommaDelimitedString(handler.getSubProtocols());
+		WebsocketClientSpec clientSpec = buildSpec(protocols);
 		return getHttpClient()
 				.headers(nettyHeaders -> setNettyHeaders(requestHeaders, nettyHeaders))
-				.websocket(buildSpec(protocols))
+				.websocket(clientSpec)
 				.uri(url.toString())
 				.handle((inbound, outbound) -> {
 					HttpHeaders responseHeaders = toHttpHeaders(inbound);
@@ -199,7 +134,7 @@ public class ReactorNetty2WebSocketClient implements WebSocketClient {
 					HandshakeInfo info = new HandshakeInfo(url, responseHeaders, Mono.empty(), protocol);
 					Netty5DataBufferFactory factory = new Netty5DataBufferFactory(outbound.alloc());
 					WebSocketSession session = new ReactorNetty2WebSocketSession(
-							inbound, outbound, info, factory, getMaxFramePayloadLength());
+							inbound, outbound, info, factory, clientSpec.maxFramePayloadLength());
 					if (logger.isDebugEnabled()) {
 						logger.debug("Started session '" + session.getId() + "' for " + url);
 					}

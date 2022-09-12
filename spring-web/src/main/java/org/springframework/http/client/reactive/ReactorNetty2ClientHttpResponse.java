@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 
-import io.netty5.buffer.api.BufferAllocator;
 import io.netty5.handler.codec.http.cookie.Cookie;
 import io.netty5.handler.codec.http.cookie.DefaultCookie;
 import org.apache.commons.logging.Log;
@@ -78,19 +77,6 @@ class ReactorNetty2ClientHttpResponse implements ClientHttpResponse {
 		this.headers = HttpHeaders.readOnlyHttpHeaders(adapter);
 		this.inbound = connection.inbound();
 		this.bufferFactory = new Netty5DataBufferFactory(connection.outbound().alloc());
-	}
-
-	/**
-	 * Constructor with inputs extracted from a {@link Connection}.
-	 * @deprecated as of 5.2.8, in favor of {@link #ReactorNetty2ClientHttpResponse(HttpClientResponse, Connection)}
-	 */
-	@Deprecated
-	public ReactorNetty2ClientHttpResponse(HttpClientResponse response, NettyInbound inbound, BufferAllocator alloc) {
-		this.response = response;
-		MultiValueMap<String, String> adapter = new Netty5HeadersAdapter(response.responseHeaders());
-		this.headers = HttpHeaders.readOnlyHttpHeaders(adapter);
-		this.inbound = inbound;
-		this.bufferFactory = new Netty5DataBufferFactory(alloc);
 	}
 
 
