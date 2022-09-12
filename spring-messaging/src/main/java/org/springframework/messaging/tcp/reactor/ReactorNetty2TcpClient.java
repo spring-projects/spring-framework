@@ -340,7 +340,7 @@ public class ReactorNetty2TcpClient<P> implements TcpOperations<P> {
 		protected void decode(ChannelHandlerContext ctx, Buffer buffer) throws Exception {
 			ByteBuffer byteBuffer = ByteBuffer.allocate(buffer.readableBytes());
 			buffer.readBytes(byteBuffer);
-			byteBuffer.position(0);
+			byteBuffer.flip();
 			List<Message<P>> messages = this.codec.decode(byteBuffer);
 			for (Message<P> message : messages) {
 				ctx.fireChannelRead(message);
