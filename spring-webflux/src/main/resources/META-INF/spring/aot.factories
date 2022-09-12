@@ -1,0 +1,2 @@
+org.springframework.aot.hint.RuntimeHintsRegistrar= \
+org.springframework.web.reactive.socket.server.upgrade.RequestUpgradeStrategyRuntimeHints
