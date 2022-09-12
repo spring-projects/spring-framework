@@ -25,6 +25,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import io.micrometer.observation.ObservationRegistry;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
@@ -109,6 +110,11 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	@Nullable
 	private ExchangeFunction exchangeFunction;
 
+	private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;
+
+	@Nullable
+	private ClientObservationConvention observationConvention;
+
 
 	public DefaultWebClientBuilder() {
 	}
@@ -140,6 +146,8 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		this.strategiesConfigurers = (other.strategiesConfigurers != null ?
 				new ArrayList<>(other.strategiesConfigurers) : null);
 		this.exchangeFunction = other.exchangeFunction;
+		this.observationRegistry = other.observationRegistry;
+		this.observationConvention = other.observationConvention;
 	}
 
 
@@ -273,6 +281,20 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	@Override
+	public WebClient.Builder observationRegistry(ObservationRegistry observationRegistry) {
+		Assert.notNull(observationRegistry, "observationRegistry must not be null");
+		this.observationRegistry = observationRegistry;
+		return this;
+	}
+
+	@Override
+	public WebClient.Builder observationConvention(ClientObservationConvention observationConvention) {
+		Assert.notNull(observationConvention, "observationConvention must not be null");
+		this.observationConvention = observationConvention;
+		return this;
+	}
+
+	@Override
 	public WebClient.Builder apply(Consumer<WebClient.Builder> builderConsumer) {
 		builderConsumer.accept(this);
 		return this;
@@ -306,6 +328,8 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 				defaultCookies,
 				this.defaultRequest,
 				this.statusHandlers,
+				this.observationRegistry,
+				this.observationConvention,
 				new DefaultWebClientBuilder(this));
 	}
 
