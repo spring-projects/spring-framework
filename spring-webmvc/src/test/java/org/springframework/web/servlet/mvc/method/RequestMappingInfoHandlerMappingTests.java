@@ -49,12 +49,15 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.observation.HttpRequestsObservationContext;
+import org.springframework.web.observation.HttpRequestsObservationFilter;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.handler.PathPatternsParameterizedTest;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -286,6 +289,18 @@ class RequestMappingInfoHandlerMappingTests {
 		mapping.handleMatch(key, "/1/2", request);
 
 		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE)).isEqualTo("/{path1}/2");
+	}
+
+	@PathPatternsParameterizedTest
+	void handleMatchBestMatchingPatternAttributeInObservationContext(TestRequestMappingInfoHandlerMapping mapping) {
+		RequestMappingInfo key = RequestMappingInfo.paths("/{path1}/2", "/**").build();
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
+		HttpRequestsObservationContext observationContext = new HttpRequestsObservationContext(request, new MockHttpServletResponse());
+		request.setAttribute(HttpRequestsObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
+		mapping.handleMatch(key, "/1/2", request);
+
+		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE)).isEqualTo("/{path1}/2");
+		assertThat(observationContext.getPathPattern()).isEqualTo("/{path1}/2");
 	}
 
 	@PathPatternsParameterizedTest // gh-22543
