@@ -103,9 +103,11 @@ class ClassPathResourceTests {
 	}
 
 	@Test
-	void preserveLeadingSlashForClassRelativeAccess() {
-		assertThat(new ClassPathResource("/test.html", getClass()).getPath()).isEqualTo("/test.html");
-		assertThat(((ClassPathResource) new ClassPathResource("", getClass()).createRelative("/test.html")).getPath()).isEqualTo("/test.html");
+	void convertToAbsolutePathForClassRelativeAccess() {
+		assertThat(new ClassPathResource("/test.html", getClass()).getPath()).isEqualTo("test.html");
+		assertThat(new ClassPathResource("", getClass()).getPath()).isEqualTo(PACKAGE_PATH + "/");
+		assertThat(((ClassPathResource) new ClassPathResource("", getClass()).createRelative("/test.html")).getPath()).isEqualTo("test.html");
+		assertThat(((ClassPathResource) new ClassPathResource("", getClass()).createRelative("test.html")).getPath()).isEqualTo(PACKAGE_PATH + "/test.html");
 	}
 
 	@Test

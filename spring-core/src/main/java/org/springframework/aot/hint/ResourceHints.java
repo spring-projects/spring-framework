@@ -118,11 +118,11 @@ public class ResourceHints {
 	 * @throws IllegalArgumentException if the supplied resource is not a
 	 * {@link ClassPathResource} or does not {@linkplain Resource#exists() exist}
 	 * @see #registerPattern(String)
-	 * @see ClassPathResource#getAbsolutePath()
+	 * @see ClassPathResource#getPath()
 	 */
 	public void registerResource(Resource resource) {
 		if (resource instanceof ClassPathResource classPathResource && classPathResource.exists()) {
-			registerPattern(classPathResource.getAbsolutePath());
+			registerPattern(classPathResource.getPath());
 		}
 		else {
 			throw new IllegalArgumentException("Resource must be a ClassPathResource that exists: " + resource);
