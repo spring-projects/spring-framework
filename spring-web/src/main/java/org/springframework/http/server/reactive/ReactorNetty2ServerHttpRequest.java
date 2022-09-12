@@ -39,7 +39,6 @@ import org.springframework.http.HttpLogging;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -52,10 +51,6 @@ import org.springframework.util.MultiValueMap;
  * @since 6.0
  */
 class ReactorNetty2ServerHttpRequest extends AbstractServerHttpRequest {
-
-	/** Reactor Netty 1.0.5+. */
-	static final boolean reactorNettyRequestChannelOperationsIdPresent = ClassUtils.isPresent(
-			"reactor.netty.ChannelOperationsId", ReactorNetty2ServerHttpRequest.class.getClassLoader());
 
 	private static final Log logger = HttpLogging.forLogName(ReactorNetty2ServerHttpRequest.class);
 
@@ -213,11 +208,9 @@ class ReactorNetty2ServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	protected String initLogPrefix() {
-		if (reactorNettyRequestChannelOperationsIdPresent) {
-			String id = (ChannelOperationsIdHelper.getId(this.request));
-			if (id != null) {
-				return id;
-			}
+		String id = (ChannelOperationsIdHelper.getId(this.request));
+		if (id != null) {
+			return id;
 		}
 		if (this.request instanceof Connection) {
 			return ((Connection) this.request).channel().id().asShortText() +

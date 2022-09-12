@@ -128,10 +128,8 @@ class ReactorNetty2ServerHttpResponse extends AbstractServerHttpResponse impleme
 	@Override
 	protected void touchDataBuffer(DataBuffer buffer) {
 		if (logger.isDebugEnabled()) {
-			if (ReactorNetty2ServerHttpRequest.reactorNettyRequestChannelOperationsIdPresent) {
-				if (ChannelOperationsIdHelper.touch(buffer, this.response)) {
-					return;
-				}
+			if (ChannelOperationsIdHelper.touch(buffer, this.response)) {
+				return;
 			}
 			this.response.withConnection(connection -> {
 				ChannelId id = connection.channel().id();

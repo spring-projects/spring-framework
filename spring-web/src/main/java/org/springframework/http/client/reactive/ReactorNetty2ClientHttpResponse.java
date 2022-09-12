@@ -37,7 +37,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -53,11 +52,6 @@ import org.springframework.util.ObjectUtils;
  * @see reactor.netty5.http.client.HttpClient
  */
 class ReactorNetty2ClientHttpResponse implements ClientHttpResponse {
-
-	/** Reactor Netty 1.0.5+. */
-	static final boolean reactorNettyRequestChannelOperationsIdPresent = ClassUtils.isPresent(
-			"reactor.netty5.ChannelOperationsId", ReactorNetty2ClientHttpResponse.class.getClassLoader());
-
 
 	private static final Log logger = LogFactory.getLog(ReactorNetty2ClientHttpResponse.class);
 
@@ -102,10 +96,7 @@ class ReactorNetty2ClientHttpResponse implements ClientHttpResponse {
 
 	@Override
 	public String getId() {
-		String id = null;
-		if (reactorNettyRequestChannelOperationsIdPresent) {
-			id = ChannelOperationsIdHelper.getId(this.response);
-		}
+		String id = ChannelOperationsIdHelper.getId(this.response);
 		if (id == null && this.response instanceof Connection connection) {
 			id = connection.channel().id().asShortText();
 		}
