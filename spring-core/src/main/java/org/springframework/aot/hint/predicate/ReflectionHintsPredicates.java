@@ -28,8 +28,6 @@ import java.util.function.Predicate;
 
 import org.springframework.aot.hint.ExecutableHint;
 import org.springframework.aot.hint.ExecutableMode;
-import org.springframework.aot.hint.FieldHint;
-import org.springframework.aot.hint.FieldMode;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
@@ -375,55 +373,8 @@ public class ReflectionHintsPredicates {
 
 		private final Field field;
 
-		private FieldMode mode = FieldMode.READ;
-
-		private boolean allowUnsafeAccess;
-
 		FieldHintPredicate(Field field) {
 			this.field = field;
-		}
-
-		/**
-		 * Refine the current predicate to match if write access is allowed on the field.
-		 * @return the refined {@link RuntimeHints} predicate
-		 * @see FieldHint#isAllowWrite()
-		 * @deprecated in favor of {@link #withReadMode()} or {@link #withWriteMode()}
-		 */
-		@Deprecated
-		public FieldHintPredicate allowWrite() {
-			this.mode = FieldMode.WRITE;
-			return this;
-		}
-
-		/**
-		 * Refine the current predicate to match if read access is allowed on the field.
-		 * @return the refined {@link RuntimeHints} predicate
-		 * @see FieldHint#getMode()
-		 */
-		public FieldHintPredicate withReadMode() {
-			// FieldMode.READ is already the default and should not override a writeMode() call.
-			return this;
-		}
-
-		/**
-		 * Refine the current predicate to match if write access is allowed on the field.
-		 * @return the refined {@link RuntimeHints} predicate
-		 * @see FieldHint#getMode()
-		 */
-		public FieldHintPredicate withWriteMode() {
-			this.mode = FieldMode.WRITE;
-			return this;
-		}
-
-
-		/**
-		 * Refine the current predicate to match if unsafe access is allowed on the field.
-		 * @return the refined {@link RuntimeHints} predicate
-		 * @see FieldHint#isAllowUnsafeAccess() ()
-		 */
-		public FieldHintPredicate allowUnsafeAccess() {
-			this.allowUnsafeAccess = true;
-			return this;
 		}
 
 		@Override
@@ -447,9 +398,7 @@ public class ReflectionHintsPredicates {
 
 		private boolean exactMatch(TypeHint typeHint) {
 			return typeHint.fields().anyMatch(fieldHint ->
-					this.field.getName().equals(fieldHint.getName())
-							&& (fieldHint.getMode().includes(this.mode))
-							&& (!this.allowUnsafeAccess || this.allowUnsafeAccess == fieldHint.isAllowUnsafeAccess()));
+					this.field.getName().equals(fieldHint.getName()));
 		}
 	}
 

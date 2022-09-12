@@ -148,34 +148,13 @@ public class ReflectionHints {
 	}
 
 	/**
-	 * Register the need for reflection on the specified {@link Field},
-	 * enabling {@link FieldMode#WRITE}.
+	 * Register the need for reflection on the specified {@link Field}.
 	 * @param field the field that requires reflection
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public ReflectionHints registerField(Field field) {
-		return registerField(field, FieldMode.WRITE);
-	}
-
-	/**
-	 * Register the need for reflection on the specified {@link Field}
-	 * using the specified {@link FieldMode}.
-	 * @param field the field that requires reflection
-	 * @return {@code this}, to facilitate method chaining
-	 */
-	public ReflectionHints registerField(Field field, FieldMode mode) {
-		return registerField(field, FieldHint.builtWith(mode));
-	}
-
-	/**
-	 * Register the need for reflection on the specified {@link Field}.
-	 * @param field the field that requires reflection
-	 * @param fieldHint a builder to further customize the hints of this field
-	 * @return {@code this}, to facilitate method chaining
-	 */
-	public ReflectionHints registerField(Field field, Consumer<FieldHint.Builder> fieldHint) {
 		return registerType(TypeReference.of(field.getDeclaringClass()),
-				typeHint -> typeHint.withField(field.getName(), fieldHint));
+				typeHint -> typeHint.withField(field.getName()));
 	}
 
 	/**

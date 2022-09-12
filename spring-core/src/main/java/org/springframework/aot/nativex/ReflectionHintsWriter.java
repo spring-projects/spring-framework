@@ -26,7 +26,6 @@ import java.util.stream.Stream;
 import org.springframework.aot.hint.ExecutableHint;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.FieldHint;
-import org.springframework.aot.hint.FieldMode;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.TypeHint;
@@ -78,12 +77,6 @@ class ReflectionHintsWriter {
 	private Map<String, Object> toAttributes(FieldHint hint) {
 		Map<String, Object> attributes = new LinkedHashMap<>();
 		attributes.put("name", hint.getName());
-		if (hint.getMode() == FieldMode.WRITE) {
-			attributes.put("allowWrite", true);
-		}
-		if (hint.isAllowUnsafeAccess()) {
-			attributes.put("allowUnsafeAccess", hint.isAllowUnsafeAccess());
-		}
 		return attributes;
 	}
 

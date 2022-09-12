@@ -55,62 +55,9 @@ class TypeHintTests {
 	}
 
 	@Test
-	void createWithFieldAllowsWriteByDefault() {
+	void createWithField() {
 		assertFieldHint(TypeHint.of(TypeReference.of(String.class))
-				.withField("value"), fieldHint -> {
-			assertThat(fieldHint.getName()).isEqualTo("value");
-			assertThat(fieldHint.getMode()).isEqualTo(FieldMode.WRITE);
-			assertThat(fieldHint.isAllowUnsafeAccess()).isFalse();
-		});
-	}
-
-	@Test
-	void createWithFieldAndEmptyCustomizerAppliesConsistentDefault() {
-		assertFieldHint(TypeHint.of(TypeReference.of(String.class))
-				.withField("value", fieldHint -> {}), fieldHint -> {
-			assertThat(fieldHint.getName()).isEqualTo("value");
-			assertThat(fieldHint.getMode()).isEqualTo(FieldMode.WRITE);
-			assertThat(fieldHint.isAllowUnsafeAccess()).isFalse();
-		});
-	}
-
-	@Test
-	void createWithFieldAndCustomizerAppliesCustomization() {
-		assertFieldHint(TypeHint.of(TypeReference.of(String.class))
-				.withField("value", fieldHint -> {
-					fieldHint.withMode(FieldMode.READ);
-					fieldHint.allowUnsafeAccess(true);
-				}), fieldHint -> {
-			assertThat(fieldHint.getName()).isEqualTo("value");
-			assertThat(fieldHint.getMode()).isEqualTo(FieldMode.READ);
-			assertThat(fieldHint.isAllowUnsafeAccess()).isTrue();
-		});
-	}
-
-	@Test
-	void createWithFieldReuseBuilder() {
-		Builder builder = TypeHint.of(TypeReference.of(String.class));
-		builder.withField("value", fieldHint -> fieldHint.allowUnsafeAccess(true));
-		builder.withField("value", fieldHint -> {
-			fieldHint.withMode(FieldMode.WRITE);
-			fieldHint.allowUnsafeAccess(false);
-		});
-		assertFieldHint(builder, fieldHint -> {
-			assertThat(fieldHint.getName()).isEqualTo("value");
-			assertThat(fieldHint.getMode()).isEqualTo(FieldMode.WRITE);
-			assertThat(fieldHint.isAllowUnsafeAccess()).isFalse();
-		});
-	}
-
-	@Test
-	void createFieldWithFieldMode() {
-		Builder builder = TypeHint.of(TypeReference.of(String.class));
-		builder.withField("value", FieldMode.READ);
-		assertFieldHint(builder, fieldHint -> {
-			assertThat(fieldHint.getName()).isEqualTo("value");
-			assertThat(fieldHint.getMode()).isEqualTo(FieldMode.READ);
-			assertThat(fieldHint.isAllowUnsafeAccess()).isFalse();
-		});
+				.withField("value"), fieldHint -> assertThat(fieldHint.getName()).isEqualTo("value"));
 	}
 
 	void assertFieldHint(Builder builder, Consumer<FieldHint> fieldHint) {

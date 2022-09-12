@@ -57,7 +57,7 @@ public final class TypeHint implements ConditionalHint {
 		this.type = builder.type;
 		this.reachableType = builder.reachableType;
 		this.memberCategories = Set.copyOf(builder.memberCategories);
-		this.fields = builder.fields.values().stream().map(FieldHint.Builder::build).collect(Collectors.toSet());
+		this.fields = builder.fields.stream().map(FieldHint::new).collect(Collectors.toSet());
 		this.constructors = builder.constructors.values().stream().map(ExecutableHint.Builder::build).collect(Collectors.toSet());
 		this.methods = builder.methods.values().stream().map(ExecutableHint.Builder::build).collect(Collectors.toSet());
 	}
@@ -147,7 +147,7 @@ public final class TypeHint implements ConditionalHint {
 		@Nullable
 		private TypeReference reachableType;
 
-		private final Map<String, FieldHint.Builder> fields = new HashMap<>();
+		private final Set<String> fields = new HashSet<>();
 
 		private final Map<ExecutableKey, ExecutableHint.Builder> constructors = new HashMap<>();
 
@@ -185,35 +185,12 @@ public final class TypeHint implements ConditionalHint {
 		}
 
 		/**
-		 * Register the need for reflection on the field with the specified name,
-		 * enabling write access.
+		 * Register the need for reflection on the field with the specified name.
 		 * @param name the name of the field
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder withField(String name) {
-			return withField(name, FieldMode.WRITE);
-		}
-
-		/**
-		 * Register the need for reflection on the field with the specified name
-		 * using the specified {@link FieldMode}.
-		 * @param name the name of the field
-		 * @param mode the requested mode
-		 * @return {@code this}, to facilitate method chaining
-		 */
-		public Builder withField(String name, FieldMode mode) {
-			return withField(name, FieldHint.builtWith(mode));
-		}
-
-		/**
-		 * Register the need for reflection on the field with the specified name.
-		 * @param name the name of the field
-		 * @param fieldHint a builder to further customize the hints of this field
-		 * @return {@code this}, to facilitate method chaining
-		 */
-		public Builder withField(String name, Consumer<FieldHint.Builder> fieldHint) {
-			FieldHint.Builder builder = this.fields.computeIfAbsent(name, FieldHint.Builder::new);
-			fieldHint.accept(builder);
+			this.fields.add(name);
 			return this;
 		}
 

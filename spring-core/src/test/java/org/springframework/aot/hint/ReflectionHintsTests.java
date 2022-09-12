@@ -124,63 +124,12 @@ class ReflectionHintsTests {
 	}
 
 	@Test
-	void registerFieldAllowsWriteByDefault() {
+	void registerField() {
 		Field field = ReflectionUtils.findField(TestType.class, "field");
 		assertThat(field).isNotNull();
 		this.reflectionHints.registerField(field);
-		assertTestTypeFieldHint(fieldHint -> {
-			assertThat(fieldHint.getName()).isEqualTo("field");
-			assertThat(fieldHint.getMode()).isEqualTo(FieldMode.WRITE);
-			assertThat(fieldHint.isAllowUnsafeAccess()).isFalse();
-		});
-	}
-
-	@Test
-	void registerFieldWithEmptyCustomizerAppliesConsistentDefault() {
-		Field field = ReflectionUtils.findField(TestType.class, "field");
-		assertThat(field).isNotNull();
-		this.reflectionHints.registerField(field, fieldHint -> {});
-		assertTestTypeFieldHint(fieldHint -> {
-			assertThat(fieldHint.getName()).isEqualTo("field");
-			assertThat(fieldHint.getMode()).isEqualTo(FieldMode.WRITE);
-			assertThat(fieldHint.isAllowUnsafeAccess()).isFalse();
-		});
-	}
-
-	@Test
-	void registerFieldWithCustomizerAppliesCustomization() {
-		Field field = ReflectionUtils.findField(TestType.class, "field");
-		assertThat(field).isNotNull();
-		this.reflectionHints.registerField(field, fieldHint ->
-				fieldHint.withMode(FieldMode.READ).allowUnsafeAccess(true));
-		assertTestTypeFieldHint(fieldHint -> {
-			assertThat(fieldHint.getName()).isEqualTo("field");
-			assertThat(fieldHint.getMode()).isEqualTo(FieldMode.READ);
-			assertThat(fieldHint.isAllowUnsafeAccess()).isTrue();
-		});
-	}
-
-	@Test
-	void registerFieldWithMode() {
-		Field field = ReflectionUtils.findField(TestType.class, "field");
-		assertThat(field).isNotNull();
-		this.reflectionHints.registerField(field, FieldMode.READ);
-		assertTestTypeFieldHint(fieldHint -> {
-			assertThat(fieldHint.getName()).isEqualTo("field");
-			assertThat(fieldHint.getMode()).isEqualTo(FieldMode.READ);
-		});
-	}
-
-	@Test // gh-29055
-	void registerFieldWithCustomizersCannotDowngradeWrite() {
-		Field field = ReflectionUtils.findField(TestType.class, "field");
-		assertThat(field).isNotNull();
-		this.reflectionHints.registerField(field, FieldMode.WRITE);
-		this.reflectionHints.registerField(field, FieldMode.READ);
-		assertTestTypeFieldHint(fieldHint -> {
-			assertThat(fieldHint.getName()).isEqualTo("field");
-			assertThat(fieldHint.getMode()).isEqualTo(FieldMode.WRITE);
-		});
+		assertTestTypeFieldHint(fieldHint ->
+				assertThat(fieldHint.getName()).isEqualTo("field"));
 	}
 
 	private void assertTestTypeFieldHint(Consumer<FieldHint> fieldHint) {

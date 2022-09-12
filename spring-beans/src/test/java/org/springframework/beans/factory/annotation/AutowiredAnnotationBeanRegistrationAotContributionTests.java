@@ -73,7 +73,7 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 		RegisteredBean registeredBean = getAndApplyContribution(
 				PrivateFieldInjectionSample.class);
 		assertThat(RuntimeHintsPredicates.reflection()
-				.onField(PrivateFieldInjectionSample.class, "environment").withWriteMode())
+				.onField(PrivateFieldInjectionSample.class, "environment"))
 				.accepts(this.generationContext.getRuntimeHints());
 		compile(registeredBean, (postProcessor, compiled) -> {
 			PrivateFieldInjectionSample instance = new PrivateFieldInjectionSample();
@@ -92,7 +92,7 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 		RegisteredBean registeredBean = getAndApplyContribution(
 				PackagePrivateFieldInjectionSample.class);
 		assertThat(RuntimeHintsPredicates.reflection()
-				.onField(PackagePrivateFieldInjectionSample.class, "environment").withWriteMode())
+				.onField(PackagePrivateFieldInjectionSample.class, "environment"))
 				.accepts(this.generationContext.getRuntimeHints());
 		compile(registeredBean, (postProcessor, compiled) -> {
 			PackagePrivateFieldInjectionSample instance = new PackagePrivateFieldInjectionSample();

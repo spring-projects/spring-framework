@@ -290,7 +290,7 @@ enum InstrumentedMethod {
 	 * {@link Field#set(Object, Object)}.
 	 */
 	FIELD_SET(Field.class, "set", HintType.REFLECTION,
-			invocation -> reflection().onField(invocation.getInstance()).withWriteMode()),
+			invocation -> reflection().onField(invocation.getInstance())),
 
 
 	/*
