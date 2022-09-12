@@ -8,6 +8,7 @@ javaPlatform {
 
 dependencies {
 	api(platform("com.fasterxml.jackson:jackson-bom:2.13.3"))
+	api(platform("io.micrometer:micrometer-bom:1.10.0-SNAPSHOT"))
 	api(platform("io.netty:netty-bom:4.1.80.Final"))
 	api(platform("io.netty:netty5-bom:5.0.0.Alpha3"))
 	api(platform("io.projectreactor:reactor-bom:2022.0.0-SNAPSHOT"))
