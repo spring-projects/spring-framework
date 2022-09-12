@@ -82,10 +82,12 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 class TestContextAotGeneratorTests extends AbstractAotTests {
 
 	/**
-	 * @see AotIntegrationTests#endToEndTests()
+	 * End-to-end tests within the scope of the {@link TestContextAotGenerator}.
+	 *
+	 * @see AotIntegrationTests
 	 */
 	@Test
-	void processAheadOfTimeAndGenerateTestAotMappings() {
+	void endToEndTests() {
 		Set<Class<?>> testClasses = Set.of(
 				BasicSpringJupiterSharedConfigTests.class,
 				BasicSpringJupiterTests.class,
