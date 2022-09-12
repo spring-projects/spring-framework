@@ -28,6 +28,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
+
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.SpringProperties;
 import org.springframework.http.HttpEntity;
@@ -40,6 +43,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.observation.ClientHttpObservation;
+import org.springframework.http.client.observation.ClientHttpObservationContext;
+import org.springframework.http.client.observation.ClientHttpObservationConvention;
+import org.springframework.http.client.observation.DefaultClientHttpObservationConvention;
 import org.springframework.http.client.support.InterceptingHttpAccessor;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.GenericHttpMessageConverter;
@@ -119,6 +126,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 	private static final boolean kotlinSerializationJsonPresent;
 
+	private static final ClientHttpObservationConvention DEFAULT_OBSERVATION_CONVENTION = new DefaultClientHttpObservationConvention();
+
 	static {
 		ClassLoader classLoader = RestTemplate.class.getClassLoader();
 		romePresent = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", classLoader);
@@ -141,6 +150,11 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	private UriTemplateHandler uriTemplateHandler;
 
 	private final ResponseExtractor<HttpHeaders> headersExtractor = new HeadersExtractor();
+
+	private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;
+
+	@Nullable
+	private ClientHttpObservationConvention observationConvention;
 
 
 	/**
@@ -323,6 +337,30 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		return this.uriTemplateHandler;
 	}
 
+	/**
+	 * Configure an {@link ObservationRegistry} for collecting spans and metrics
+	 * for request execution. By default, {@link Observation} are No-Ops.
+	 * @param observationRegistry the observation registry to use
+	 * @since 6.0
+	 */
+	public void setObservationRegistry(ObservationRegistry observationRegistry) {
+		Assert.notNull(observationRegistry, "observationRegistry must not be null");
+		this.observationRegistry = observationRegistry;
+	}
+
+	/**
+	 * Configure an {@link Observation.ObservationConvention} that sets the name of the
+	 * {@link Observation observation} as well as its {@link io.micrometer.common.KeyValues}
+	 * extracted from the {@link ClientHttpObservationContext}.
+	 * If none set, the {@link DefaultClientHttpObservationConvention default convention} will be used.
+	 * @param observationConvention the observation convention to use
+	 * @since 6.0
+	 * @see #setObservationRegistry(ObservationRegistry)
+	 */
+	public void setObservationConvention(ClientHttpObservationConvention observationConvention) {
+		Assert.notNull(observationConvention, "observationConvention must not be null");
+		this.observationConvention = observationConvention;
+	}
 
 	// GET
 
@@ -658,7 +696,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 		RequestCallback requestCallback = httpEntityCallback(entity, responseType);
 		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
-		return nonNull(doExecute(resolveUrl(entity), entity.getMethod(), requestCallback, responseExtractor));
+		return nonNull(doExecute(resolveUrl(entity), resolveUriTemplate(entity), entity.getMethod(), requestCallback, responseExtractor));
 	}
 
 	@Override
@@ -668,7 +706,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		Type type = responseType.getType();
 		RequestCallback requestCallback = httpEntityCallback(entity, type);
 		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(type);
-		return nonNull(doExecute(resolveUrl(entity), entity.getMethod(), requestCallback, responseExtractor));
+		return nonNull(doExecute(resolveUrl(entity), resolveUriTemplate(entity), entity.getMethod(), requestCallback, responseExtractor));
 	}
 
 	private URI resolveUrl(RequestEntity<?> entity) {
@@ -689,6 +727,16 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 	}
 
+	@Nullable
+	private String resolveUriTemplate(RequestEntity<?> entity) {
+		if (entity instanceof RequestEntity.UriTemplateRequestEntity<?> templated) {
+			return templated.getUriTemplate();
+		}
+		else {
+			return null;
+		}
+	}
+
 
 	// General execution
 
@@ -705,11 +753,11 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 */
 	@Override
 	@Nullable
-	public <T> T execute(String url, HttpMethod method, @Nullable RequestCallback requestCallback,
+	public <T> T execute(String uriTemplate, HttpMethod method, @Nullable RequestCallback requestCallback,
 			@Nullable ResponseExtractor<T> responseExtractor, Object... uriVariables) throws RestClientException {
 
-		URI expanded = getUriTemplateHandler().expand(url, uriVariables);
-		return doExecute(expanded, method, requestCallback, responseExtractor);
+		URI url = getUriTemplateHandler().expand(uriTemplate, uriVariables);
+		return doExecute(url, uriTemplate, method, requestCallback, responseExtractor);
 	}
 
 	/**
@@ -725,12 +773,12 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 */
 	@Override
 	@Nullable
-	public <T> T execute(String url, HttpMethod method, @Nullable RequestCallback requestCallback,
+	public <T> T execute(String uriTemplate, HttpMethod method, @Nullable RequestCallback requestCallback,
 			@Nullable ResponseExtractor<T> responseExtractor, Map<String, ?> uriVariables)
 			throws RestClientException {
 
-		URI expanded = getUriTemplateHandler().expand(url, uriVariables);
-		return doExecute(expanded, method, requestCallback, responseExtractor);
+		URI url = getUriTemplateHandler().expand(uriTemplate, uriVariables);
+		return doExecute(url, uriTemplate, method, requestCallback, responseExtractor);
 	}
 
 	/**
@@ -749,7 +797,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	public <T> T execute(URI url, HttpMethod method, @Nullable RequestCallback requestCallback,
 			@Nullable ResponseExtractor<T> responseExtractor) throws RestClientException {
 
-		return doExecute(url, method, requestCallback, responseExtractor);
+		return doExecute(url, null, method, requestCallback, responseExtractor);
 	}
 
 	/**
@@ -761,20 +809,49 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * @param requestCallback object that prepares the request (can be {@code null})
 	 * @param responseExtractor object that extracts the return value from the response (can be {@code null})
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
+	 * @deprecated in favor of {@link #doExecute(URI, String, HttpMethod, RequestCallback, ResponseExtractor)}
 	 */
 	@Nullable
+	@Deprecated
 	protected <T> T doExecute(URI url, @Nullable HttpMethod method, @Nullable RequestCallback requestCallback,
 			@Nullable ResponseExtractor<T> responseExtractor) throws RestClientException {
 
-		Assert.notNull(url, "URI is required");
+		return doExecute(url, null, method, requestCallback, responseExtractor);
+	}
+
+	/**
+	 * Execute the given method on the provided URI.
+	 * <p>The {@link ClientHttpRequest} is processed using the {@link RequestCallback};
+	 * the response with the {@link ResponseExtractor}.
+	 * @param url the fully-expanded URL to connect to
+	 * @param uriTemplate the URI template that was used for creating the expanded URL
+	 * @param method the HTTP method to execute (GET, POST, etc.)
+	 * @param requestCallback object that prepares the request (can be {@code null})
+	 * @param responseExtractor object that extracts the return value from the response (can be {@code null})
+	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
+	 */
+	@Nullable
+	@SuppressWarnings("try")
+	protected <T> T doExecute(URI url, @Nullable String uriTemplate, @Nullable HttpMethod method, @Nullable RequestCallback requestCallback,
+			@Nullable ResponseExtractor<T> responseExtractor) throws RestClientException {
+
+		Assert.notNull(url, "url is required");
 		Assert.notNull(method, "HttpMethod is required");
+		ClientHttpObservationContext observationContext = new ClientHttpObservationContext();
+		Observation observation = ClientHttpObservation.HTTP_REQUEST.observation(this.observationConvention,
+				DEFAULT_OBSERVATION_CONVENTION, observationContext, this.observationRegistry).start();
+		observationContext.setUriTemplate(uriTemplate);
 		ClientHttpResponse response = null;
 		try {
 			ClientHttpRequest request = createRequest(url, method);
+			observationContext.setCarrier(request);
 			if (requestCallback != null) {
 				requestCallback.doWithRequest(request);
 			}
-			response = request.execute();
+			try (Observation.Scope scope = observation.openScope()) {
+				response = request.execute();
+			}
+			observationContext.setResponse(response);
 			handleResponse(url, method, response);
 			return (responseExtractor != null ? responseExtractor.extractData(response) : null);
 		}
@@ -782,13 +859,20 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			String resource = url.toString();
 			String query = url.getRawQuery();
 			resource = (query != null ? resource.substring(0, resource.indexOf('?')) : resource);
-			throw new ResourceAccessException("I/O error on " + method.name() +
+			ResourceAccessException exception = new ResourceAccessException("I/O error on " + method.name() +
 					" request for \"" + resource + "\": " + ex.getMessage(), ex);
+			observation.error(exception);
+			throw exception;
+		}
+		catch (RestClientException exc) {
+			observation.error(exc);
+			throw exc;
 		}
 		finally {
 			if (response != null) {
 				response.close();
 			}
+			observation.stop();
 		}
 	}
 

@@ -6,6 +6,7 @@ apply plugin: "kotlinx-serialization"
 dependencies {
 	api(project(":spring-beans"))
 	api(project(":spring-core"))
+	api("io.micrometer:micrometer-observation")
 	compileOnly("io.projectreactor.tools:blockhound")
 	optional(project(":spring-aop"))
 	optional(project(":spring-context"))
@@ -74,6 +75,7 @@ dependencies {
 	testImplementation("org.xmlunit:xmlunit-assertj")
 	testImplementation("org.xmlunit:xmlunit-matchers")
 	testImplementation("io.projectreactor.tools:blockhound")
+	testImplementation("io.micrometer:micrometer-observation-test")
 	testRuntimeOnly("com.sun.mail:jakarta.mail")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
