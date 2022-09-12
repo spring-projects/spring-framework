@@ -61,7 +61,10 @@ import org.springframework.context.testfixture.context.generator.annotation.Lazy
 import org.springframework.context.testfixture.context.generator.annotation.LazyAutowiredMethodComponent;
 import org.springframework.context.testfixture.context.generator.annotation.LazyConstructorArgumentComponent;
 import org.springframework.context.testfixture.context.generator.annotation.LazyFactoryMethodArgumentComponent;
+import org.springframework.context.testfixture.context.generator.annotation.PropertySourceConfiguration;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ResourceLoader;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -277,6 +280,19 @@ class ApplicationContextAotGeneratorTests {
 				.getGeneratedFileContent(Kind.CLASS, proxyClassName.replace('.', '/') + ".class")).isNotNull();
 		assertThat(RuntimeHintsPredicates.reflection().onType(TypeReference.of(proxyClassName))
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(context.getRuntimeHints());
+	}
+
+	@Test
+	void processAheadOfTimeWithPropertySource() {
+		GenericApplicationContext applicationContext = new AnnotationConfigApplicationContext();
+		applicationContext.registerBean(PropertySourceConfiguration.class);
+		testCompiledResult(applicationContext, (initializer, compiled) -> {
+			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+			ConfigurableEnvironment environment = freshApplicationContext.getEnvironment();
+			PropertySource<?> propertySource = environment.getPropertySources().get("testp1");
+			assertThat(propertySource).isNotNull();
+			assertThat(propertySource.getProperty("from.p1")).isEqualTo("p1Value");
+		});
 	}
 
 	private Consumer<List<? extends JdkProxyHint>> doesNotHaveProxyFor(Class<?> target) {

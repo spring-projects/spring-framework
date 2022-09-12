@@ -65,7 +65,7 @@ class ApplicationContextInitializationCodeGeneratorTests {
 
 	static Stream<Arguments> methodArguments() {
 		String applicationContext = "applicationContext";
-		String environment = applicationContext + ".getConfigurableEnvironment()";
+		String environment = applicationContext + ".getEnvironment()";
 		return Stream.of(
 				Arguments.of(DefaultListableBeanFactory.class, "beanFactory"),
 				Arguments.of(ConfigurableListableBeanFactory.class, "beanFactory"),

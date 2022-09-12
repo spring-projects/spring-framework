@@ -139,7 +139,7 @@ class ApplicationContextInitializationCodeGenerator implements BeanFactoryInitia
 			}
 			else if (name.equals(ConfigurableEnvironment.class.getName())
 					|| name.equals(Environment.class.getName())) {
-				return CodeBlock.of("$L.getConfigurableEnvironment()", APPLICATION_CONTEXT_VARIABLE);
+				return CodeBlock.of("$L.getEnvironment()", APPLICATION_CONTEXT_VARIABLE);
 			}
 			else if (name.equals(ResourceLoader.class.getName())) {
 				return CodeBlock.of(APPLICATION_CONTEXT_VARIABLE);
