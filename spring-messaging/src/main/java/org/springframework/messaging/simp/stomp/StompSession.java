@@ -141,23 +141,27 @@ public interface StompSession {
 
 		/**
 		 * Task to invoke when a receipt is received.
+		 * @param task the task to invoke
 		 * @throws java.lang.IllegalArgumentException if the receiptId is {@code null}
 		 */
-		void addReceiptTask(Runnable runnable);
+		void addReceiptTask(Runnable task);
 
 		/**
-		 * Consumer to invoke when a receipt is received. Accepts the headers of the received RECEIPT frame.
+		 * Variant of {@link #addReceiptTask(Runnable)} with a {@link Consumer}
+		 * of the headers from the {@code RECEIPT} frame.
+		 * @param task the consumer to invoke
 		 * @throws java.lang.IllegalArgumentException if the receiptId is {@code null}
-		 * @since TBD
+		 * @since 5.3.23
 		 */
 		void addReceiptTask(Consumer<StompHeaders> task);
 
 		/**
 		 * Task to invoke when a receipt is not received in the configured time.
+		 * @param task the task to invoke
 		 * @throws java.lang.IllegalArgumentException if the receiptId is {@code null}
 		 * @see org.springframework.messaging.simp.stomp.StompClientSupport#setReceiptTimeLimit(long)
 		 */
-		void addReceiptLostTask(Runnable runnable);
+		void addReceiptLostTask(Runnable task);
 	}
 
 

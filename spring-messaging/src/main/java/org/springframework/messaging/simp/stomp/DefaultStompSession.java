@@ -18,7 +18,6 @@ package org.springframework.messaging.simp.stomp;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -549,7 +548,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 		private final List<Consumer<StompHeaders>> receiptCallbacks = new ArrayList<>(2);
 
-		private final List<Consumer<StompHeaders>> receiptLostCallbacks = new ArrayList<>(2);
+		private final List<Runnable> receiptLostCallbacks = new ArrayList<>(2);
 
 		@Nullable
 		private ScheduledFuture<?> future;
@@ -582,44 +581,34 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 		@Override
 		public void addReceiptTask(Runnable task) {
-			addTask(h -> task.run(), true);
+			addReceiptTask(headers -> task.run());
 		}
 
 		@Override
 		public void addReceiptTask(Consumer<StompHeaders> task) {
-			addTask(task, true);
-		}
-
-		@Override
-		public void addReceiptLostTask(Runnable task) {
-			addTask(h -> task.run(), false);
-		}
-
-		private void addTask(Consumer<StompHeaders> task, boolean successTask) {
-			Assert.notNull(this.receiptId,
-					"To track receipts, set autoReceiptEnabled=true or add 'receiptId' header");
+			Assert.notNull(this.receiptId, "Set autoReceiptEnabled to track receipts or add a 'receiptId' header");
 			synchronized (this) {
-				if (this.result != null && this.result == successTask) {
-					invoke(Collections.singletonList(task));
+				if (this.result != null) {
+					if (this.result) {
+						task.accept(this.receiptHeaders);
+					}
 				}
 				else {
-					if (successTask) {
-						this.receiptCallbacks.add(task);
-					}
-					else {
-						this.receiptLostCallbacks.add(task);
-					}
+					this.receiptCallbacks.add(task);
 				}
 			}
 		}
 
-		private void invoke(List<Consumer<StompHeaders>> callbacks) {
-			for (Consumer<StompHeaders> consumer : callbacks) {
-				try {
-					consumer.accept(this.receiptHeaders);
+		@Override
+		public void addReceiptLostTask(Runnable task) {
+			synchronized (this) {
+				if (this.result != null) {
+					if (!this.result) {
+						task.run();
+					}
 				}
-				catch (Throwable ex) {
-					// ignore
+				else {
+					this.receiptLostCallbacks.add(task);
 				}
 			}
 		}
@@ -639,13 +628,33 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 				}
 				this.result = result;
 				this.receiptHeaders = receiptHeaders;
-				invoke(result ? this.receiptCallbacks : this.receiptLostCallbacks);
+				if (result) {
+					this.receiptCallbacks.forEach(consumer -> {
+						try {
+							consumer.accept(this.receiptHeaders);
+						}
+						catch (Throwable ex) {
+							// ignore
+						}
+					});
+				}
+				else {
+					this.receiptLostCallbacks.forEach(task -> {
+						try {
+							task.run();
+						}
+						catch (Throwable ex) {
+							// ignore
+						}
+					});
+				}
 				DefaultStompSession.this.receiptHandlers.remove(this.receiptId);
 				if (this.future != null) {
 					this.future.cancel(true);
 				}
 			}
 		}
+
 	}
 
 
