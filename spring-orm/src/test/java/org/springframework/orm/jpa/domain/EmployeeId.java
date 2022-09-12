@@ -24,6 +24,10 @@ public class EmployeeId implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+	@SuppressWarnings("unused")
 	private String name;
+
+	@SuppressWarnings("unused")
 	private String department;
+
 }
