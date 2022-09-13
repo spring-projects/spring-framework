@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,22 +55,24 @@ public class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpReq
 	@Test
 	public void assertCustomConfig() throws Exception {
 		HttpClient httpClient = HttpClientBuilder.create().build();
-		HttpComponentsClientHttpRequestFactory hrf = new HttpComponentsClientHttpRequestFactory(httpClient);
-		hrf.setConnectTimeout(1234);
-		hrf.setConnectionRequestTimeout(4321);
-		hrf.setReadTimeout(4567);
+		HttpComponentsClientHttpRequest request;
+		try (HttpComponentsClientHttpRequestFactory hrf = new HttpComponentsClientHttpRequestFactory(httpClient)) {
+			hrf.setConnectTimeout(1234);
+			hrf.setConnectionRequestTimeout(4321);
+			hrf.setReadTimeout(4567);
 
-		URI uri = new URI(baseUrl + "/status/ok");
-		HttpComponentsClientHttpRequest request = (HttpComponentsClientHttpRequest)
-				hrf.createRequest(uri, HttpMethod.GET);
+			URI uri = new URI(baseUrl + "/status/ok");
+			request = (HttpComponentsClientHttpRequest)
+					hrf.createRequest(uri, HttpMethod.GET);
 
-		Object config = request.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG);
-		assertThat(config).as("Request config should be set").isNotNull();
-		assertThat(config).as("Wrong request config type " + config.getClass().getName()).isInstanceOf(RequestConfig.class);
-		RequestConfig requestConfig = (RequestConfig) config;
-		assertThat(requestConfig.getConnectTimeout()).as("Wrong custom connection timeout").isEqualTo(1234);
-		assertThat(requestConfig.getConnectionRequestTimeout()).as("Wrong custom connection request timeout").isEqualTo(4321);
-		assertThat(requestConfig.getSocketTimeout()).as("Wrong custom socket timeout").isEqualTo(4567);
+			Object config = request.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG);
+			assertThat(config).as("Request config should be set").isNotNull();
+			assertThat(config).as("Wrong request config type " + config.getClass().getName()).isInstanceOf(RequestConfig.class);
+			RequestConfig requestConfig = (RequestConfig) config;
+			assertThat(requestConfig.getConnectTimeout()).as("Wrong custom connection timeout").isEqualTo(1234);
+			assertThat(requestConfig.getConnectionRequestTimeout()).as("Wrong custom connection request timeout").isEqualTo(4321);
+			assertThat(requestConfig.getSocketTimeout()).as("Wrong custom socket timeout").isEqualTo(4567);
+		}
 	}
 
 	@Test
