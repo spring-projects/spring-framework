@@ -25,11 +25,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.core.SpringProperties;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContextAnnotationUtils.AnnotationDescriptor;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * {@code BootstrapUtils} is a collection of utility methods to assist with
@@ -68,12 +66,8 @@ public abstract class BootstrapUtils {
 
 	/**
 	 * Create the {@code BootstrapContext} for the specified {@linkplain Class test class}.
-	 * <p>Uses reflection to create a {@link org.springframework.test.context.support.DefaultBootstrapContext}
-	 * that uses a default {@link CacheAwareContextLoaderDelegate} &mdash; configured
-	 * via the {@link CacheAwareContextLoaderDelegate#DEFAULT_CACHE_AWARE_CONTEXT_LOADER_DELEGATE_PROPERTY_NAME}
-	 * system property or falling back to the
-	 * {@link org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate}
-	 * if the system property is not defined.
+	 * <p>Uses reflection to create a {@link org.springframework.test.context.support.DefaultBootstrapContext}.
+	 * that uses a {@link org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate}.
 	 * @param testClass the test class for which the bootstrap context should be created
 	 * @return a new {@code BootstrapContext}; never {@code null}
 	 */
@@ -98,21 +92,18 @@ public abstract class BootstrapUtils {
 
 	@SuppressWarnings("unchecked")
 	private static CacheAwareContextLoaderDelegate createCacheAwareContextLoaderDelegate() {
-		String className = SpringProperties.getProperty(
-				CacheAwareContextLoaderDelegate.DEFAULT_CACHE_AWARE_CONTEXT_LOADER_DELEGATE_PROPERTY_NAME);
-		className = (StringUtils.hasText(className) ? className.trim() :
-				DEFAULT_CACHE_AWARE_CONTEXT_LOADER_DELEGATE_CLASS_NAME);
+		Class<? extends CacheAwareContextLoaderDelegate> clazz = null;
 		try {
-			Class<? extends CacheAwareContextLoaderDelegate> clazz =
-					(Class<? extends CacheAwareContextLoaderDelegate>) ClassUtils.forName(
-						className, BootstrapUtils.class.getClassLoader());
+			clazz = (Class<? extends CacheAwareContextLoaderDelegate>) ClassUtils.forName(
+				DEFAULT_CACHE_AWARE_CONTEXT_LOADER_DELEGATE_CLASS_NAME, BootstrapUtils.class.getClassLoader());
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Instantiating CacheAwareContextLoaderDelegate from class [%s]", className));
+				logger.debug(String.format("Instantiating CacheAwareContextLoaderDelegate from class [%s]",
+					clazz.getName()));
 			}
 			return BeanUtils.instantiateClass(clazz, CacheAwareContextLoaderDelegate.class);
 		}
 		catch (Throwable ex) {
-			throw new IllegalStateException("Could not create CacheAwareContextLoaderDelegate [" + className + "]", ex);
+			throw new IllegalStateException("Could not load CacheAwareContextLoaderDelegate [" + clazz + "]", ex);
 		}
 	}
 
