@@ -43,6 +43,7 @@ import org.springframework.beans.factory.support.BeanDefinitionValueResolver;
 import org.springframework.beans.factory.support.InstanceSupplier;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.SimpleInstantiationStrategy;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
@@ -207,9 +208,24 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 		Executable executable = this.lookup.get(registeredBean);
 		AutowiredArguments arguments = resolveArguments(registeredBean, executable);
 		if (this.generator != null) {
-			return this.generator.apply(registeredBean, arguments);
+			return invokeBeanSupplier(executable, () ->
+					this.generator.apply(registeredBean, arguments));
 		}
-		return instantiate(registeredBean.getBeanFactory(), executable, arguments.toArray());
+		return invokeBeanSupplier(executable, () ->
+				instantiate(registeredBean.getBeanFactory(), executable, arguments.toArray()));
+	}
+
+	private T invokeBeanSupplier(Executable executable, ThrowingSupplier<T> beanSupplier) {
+		if (!(executable instanceof Method)) {
+			return beanSupplier.get();
+		}
+		try {
+			SimpleInstantiationStrategy.setCurrentlyInvokedFactoryMethod((Method) executable);
+			return beanSupplier.get();
+		}
+		finally {
+			SimpleInstantiationStrategy.setCurrentlyInvokedFactoryMethod(null);
+		}
 	}
 
 	@Nullable

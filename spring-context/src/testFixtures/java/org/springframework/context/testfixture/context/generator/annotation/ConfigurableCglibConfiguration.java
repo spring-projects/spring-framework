@@ -16,28 +16,21 @@
 
 package org.springframework.context.testfixture.context.generator.annotation;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 @Configuration
-public class CglibConfiguration {
+public class ConfigurableCglibConfiguration extends CglibConfiguration {
 
-	private static final AtomicInteger counter = new AtomicInteger();
+	private final Environment environment;
 
-	@Bean
-	public String prefix() {
-		return getPrefix() + counter.getAndIncrement();
+	public ConfigurableCglibConfiguration(Environment environment) {
+		this.environment = environment;
 	}
 
-	@Bean
-	public String text() {
-		return prefix() + " World";
-	}
-
+	@Override
 	protected String getPrefix() {
-		return "Hello";
+		return this.environment.getProperty("test.prefix", String.class, "Howdy");
 	}
 
 }

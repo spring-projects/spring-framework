@@ -109,8 +109,7 @@ class InstanceSupplierCodeGenerator {
 
 		String beanName = registeredBean.getBeanName();
 		Class<?> beanClass = registeredBean.getBeanClass();
-		Class<?> declaringClass = ClassUtils
-				.getUserClass(constructor.getDeclaringClass());
+		Class<?> declaringClass = constructor.getDeclaringClass();
 		boolean dependsOnBean = ClassUtils.isInnerClass(declaringClass);
 		Visibility accessVisibility = getAccessVisibility(registeredBean, constructor);
 		if (accessVisibility != Visibility.PRIVATE) {
