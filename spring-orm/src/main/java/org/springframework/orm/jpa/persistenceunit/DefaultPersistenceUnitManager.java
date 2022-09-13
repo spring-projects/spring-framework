@@ -579,6 +579,10 @@ public class DefaultPersistenceUnitManager
 			return (ResourceUtils.isJarURL(url) ? ResourceUtils.extractJarFileURL(url) : url);
 		}
 		catch (IOException ex) {
+			if (ORIGINAL_DEFAULT_PERSISTENCE_UNIT_ROOT_LOCATION.equals(this.defaultPersistenceUnitRootLocation)) {
+				logger.debug("Unable to resolve classpath root as persistence unit root URL");
+				return null;
+			}
 			throw new PersistenceException("Unable to resolve persistence unit root URL", ex);
 		}
 	}
