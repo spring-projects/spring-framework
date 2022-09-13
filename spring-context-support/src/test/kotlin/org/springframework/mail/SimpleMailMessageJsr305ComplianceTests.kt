@@ -1,4 +1,4 @@
-package org.springframework.mail/*
+/*
  * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,11 +14,11 @@ package org.springframework.mail/*
  * limitations under the License.
  */
 
+package org.springframework.mail
+
 import org.junit.jupiter.api.Test
 
-import java.util.*
-import kotlin.reflect.KParameter
-import kotlin.reflect.full.declaredMemberFunctions
+import java.util.Date
 
 /**
  * These tests are intended to verify correct behavior of SimpleMailMessage when used from
@@ -43,30 +43,83 @@ import kotlin.reflect.full.declaredMemberFunctions
  *
  * @author Steve Gerhardt
  */
+@Suppress("UsePropertyAccessSyntax")
 class SimpleMailMessageJsr305ComplianceTests {
 
-	private inline fun <reified T : Any> T.getUnsafeVarargSetterByReflection(name : String) : Function1<Array<Any?>?, Unit> {
+	/**
+	 * Allows Kotlin code to pass a singular `null` to a `vararg`-accepting Java method.
+	 * Normally, Kotlin does not allow null to be passed as a `vararg` parameter as it
+	 * internally interprets the type signature as Array<T>, which is not nullable.
+	 *
+	 * However, Java allows (in theory) for null to be passed as a single vararg,
+	 * rendering the array nullable. But it is not possible for Kotlin code to exercise
+	 * that code path directly, hence this helper function.
+	 *
+	 * This function wraps the original function having the signature `vararg param : P`
+	 * in Kotlin or `P... param` in Java, and allows it to accept Array<[P]?>? instead.
+	 *
+	 * @param P The type of the `vararg` parameter of the function to be called. Should
+	 * 	not need to be passed explicitly.
+	 * @param varargFunctionReference A function reference to the vararg instance method
+	 * 	to be called.
+	 * @return A function that accepts `null` or an array of [P] elements
+	 */
+	private inline fun <reified T : Any, reified P> unsafeVarargSetterByReflection(
+		noinline varargFunctionReference : T.(Array<P>) -> Unit,
+	) : T.(Array<P>?) -> Unit {
 		return { arrayForVararg ->
-			this::class.declaredMemberFunctions
-				.first {
-					val isFirstValueParameterVararg = it.parameters
-						.firstOrNull { p -> p.kind == KParameter.Kind.VALUE }
-						?.isVararg == true
-
-					it.name == name && isFirstValueParameterVararg
-				}
+			// Must make call via reflection instead of directly to avoid type checks
+			// on the array parameter.
+			@Suppress("UNCHECKED_CAST")
+			(varargFunctionReference as kotlin.reflect.KFunction1<T, Array<P>?>)
 				.call(this, arrayForVararg)
 		}
 	}
 
+	private fun SimpleMailMessage.unsafeSetTo(varargParams : Array<String>?) =
+		unsafeVarargSetterByReflection(SimpleMailMessage::setTo)(varargParams)
+
+	private fun SimpleMailMessage.unsafeSetCc(varargParams : Array<String>?) =
+		unsafeVarargSetterByReflection(SimpleMailMessage::setCc)(varargParams)
+
+	private fun SimpleMailMessage.unsafeSetBcc(varargParams : Array<String>?) =
+		unsafeVarargSetterByReflection(SimpleMailMessage::setBcc)(varargParams)
+
+	// Warning suppressed intentionally - avoid calling Kotlin getters or setters for here
+	// since we are ensuring the helper method works correctly.
 	@Test
+	@Suppress("UsePropertyAccessSyntax")
+	fun `Unsafe vararg setter should successfully call a vararg-accepting setter method`() {
+		val message = SimpleMailMessage()
+
+		message.unsafeSetTo(arrayOf("test@example.com"))
+		assert(message.getTo()?.toList() == listOf("test@example.com"))
+		message.unsafeSetTo(null)
+		assert(message.getTo() == null)
+
+		message.unsafeSetCc(arrayOf("test2@example.com"))
+		assert(message.getCc()?.toList() == listOf("test2@example.com"))
+		message.unsafeSetCc(null)
+		assert(message.getCc() == null)
+
+		message.unsafeSetBcc(arrayOf("test3@example.com"))
+		assert(message.getBcc()?.toList() == listOf("test3@example.com"))
+		message.unsafeSetBcc(null)
+		assert(message.getBcc() == null)
+	}
+
+	// Suppressed because the intent is to directly call the setter method - the JSR305
+	// annotations being missing will still allow this test to succeed but only if it
+	// calls the setter methods directly.
+	@Test
+	@Suppress("UsePropertyAccessSyntax")
 	fun `Null message parameters via Java setters should be null via Kotlin getters`() {
 		val message = SimpleMailMessage()
 		message.setFrom(null)
-		message.getUnsafeVarargSetterByReflection("setTo")(null)
+		message.unsafeSetTo(null)
 		message.setReplyTo(null)
-		message.getUnsafeVarargSetterByReflection("setCc")(null)
-		message.getUnsafeVarargSetterByReflection("setBcc")(null)
+		message.unsafeSetTo(null)
+		message.unsafeSetTo(null)
 		message.setSentDate(null)
 		message.setSubject(null)
 		message.setText(null)
@@ -94,6 +147,7 @@ class SimpleMailMessageJsr305ComplianceTests {
 	}
 
 	@Test
+	@Suppress("UsePropertyAccessSyntax")
 	fun `Non-null message parameters via Java setters should be non-null via Kotlin getters`() {
 		val message = SimpleMailMessage()
 		message.setFrom("me@mail.org")
@@ -107,29 +161,59 @@ class SimpleMailMessageJsr305ComplianceTests {
 		message.setText("my text")
 
 		assert(message.from == "me@mail.org")
-		assert(message.to.let { it != null && it.contains("you@mail.org") })
+		assert(message.to?.toList() == listOf("you@mail.org"))
 		assert(message.replyTo == "reply@mail.org")
-		assert(message.cc.let { it != null && it.toList() == listOf("he@mail.org", "she@mail.org") })
-		assert(message.bcc.let { it != null && it.toList() == listOf("us@mail.org", "them@mail.org") })
+		assert(message.cc?.toList() == listOf("he@mail.org", "she@mail.org"))
+		assert(message.bcc?.toList() == listOf("us@mail.org", "them@mail.org"))
 		assert(message.sentDate == sentDate)
 		assert(message.subject == "my subject")
 		assert(message.text == "my text")
 	}
 
+	// If this test prevents successful compilation, it is nearly guaranteed the nullability
+	// annotation is missing on the setter method for the erroneous line of code.
 	@Test
 	fun `Message parameters can be set via Kotlin setters`() {
 		val message = SimpleMailMessage()
 		message.from = "me@mail.org"
+		message.setTo("mail1@mail.org", "mail2@mail.org")
 		message.replyTo = "reply@mail.org"
+		message.setCc("mail3@mail.org", "mail4@mail.org")
+		message.setBcc("mail5@mail.org")
 		val sentDate = Date()
 		message.sentDate = sentDate
 		message.subject = "my subject"
 		message.text = "my text"
 
 		assert(message.from == "me@mail.org")
+		assert(message.to?.toList() == listOf("mail1@mail.org", "mail2@mail.org"))
 		assert(message.replyTo == "reply@mail.org")
+		assert(message.cc?.toList() == listOf("mail3@mail.org", "mail4@mail.org"))
+		assert(message.bcc?.toList() == listOf("mail5@mail.org"))
 		assert(message.sentDate == sentDate)
 		assert(message.subject == "my subject")
 		assert(message.text == "my text")
+	}
+
+	@Test
+	fun `Message parameters can be set to null values via Kotlin setters`() {
+		val message = SimpleMailMessage()
+		message.from = null
+		message.unsafeSetTo(null)
+		message.replyTo = null
+		message.unsafeSetCc(null)
+		message.unsafeSetBcc(null)
+		message.sentDate = null
+		message.subject = null
+		message.text = null
+
+		assert(message.from == null)
+		assert(message.to == null)
+		assert(message.replyTo == null)
+		assert(message.cc == null)
+		assert(message.bcc == null)
+		assert(message.sentDate == null)
+		assert(message.subject == null)
+		assert(message.text == null)
 	}
 }
