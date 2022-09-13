@@ -2149,20 +2149,25 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		@Nullable
 		public Object getOrderSource(Object obj) {
 			String beanName = this.instancesToBeanNames.get(obj);
-			if (beanName == null || !containsBeanDefinition(beanName)) {
+			if (beanName == null) {
 				return null;
 			}
-			RootBeanDefinition beanDefinition = getMergedLocalBeanDefinition(beanName);
-			List<Object> sources = new ArrayList<>(2);
-			Method factoryMethod = beanDefinition.getResolvedFactoryMethod();
-			if (factoryMethod != null) {
-				sources.add(factoryMethod);
+			try {
+				RootBeanDefinition beanDefinition = (RootBeanDefinition) getMergedBeanDefinition(beanName);
+				List<Object> sources = new ArrayList<>(2);
+				Method factoryMethod = beanDefinition.getResolvedFactoryMethod();
+				if (factoryMethod != null) {
+					sources.add(factoryMethod);
+				}
+				Class<?> targetType = beanDefinition.getTargetType();
+				if (targetType != null && targetType != obj.getClass()) {
+					sources.add(targetType);
+				}
+				return sources.toArray();
 			}
-			Class<?> targetType = beanDefinition.getTargetType();
-			if (targetType != null && targetType != obj.getClass()) {
-				sources.add(targetType);
+			catch (NoSuchBeanDefinitionException ex) {
+				return null;
 			}
-			return sources.toArray();
 		}
 	}
 
