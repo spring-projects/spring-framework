@@ -143,13 +143,14 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	private Collection<DataBuffer> processDataBuffer(
 			DataBuffer buffer, DataBufferUtils.Matcher matcher, LimitedDataBufferList chunks) {
 
+		boolean release = true;
 		try {
 			List<DataBuffer> result = null;
 			do {
 				int endIndex = matcher.match(buffer);
 				if (endIndex == -1) {
 					chunks.add(buffer);
-					DataBufferUtils.retain(buffer); // retain after add (may raise DataBufferLimitException)
+					release = false;
 					break;
 				}
 				DataBuffer split = buffer.split(endIndex + 1);
@@ -177,7 +178,9 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 			return (result != null ? result : Collections.emptyList());
 		}
 		finally {
-			DataBufferUtils.release(buffer);
+			if (release) {
+				DataBufferUtils.release(buffer);
+			}
 		}
 	}
 

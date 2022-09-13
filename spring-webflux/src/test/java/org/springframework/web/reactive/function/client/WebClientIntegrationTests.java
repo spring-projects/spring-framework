@@ -1258,6 +1258,26 @@ class WebClientIntegrationTests {
 				.verify();
 	}
 
+	@ParameterizedWebClientTest
+	void retrieveTextDecodedToFlux(ClientHttpConnector connector) {
+		startServer(connector);
+
+		prepareResponse(response -> response
+				.setHeader("Content-Type", "text/plain")
+				.setBody("Hey now"));
+
+		Flux<String> result = this.webClient.get()
+				.uri("/")
+				.accept(MediaType.TEXT_PLAIN)
+				.retrieve()
+				.bodyToFlux(String.class);
+
+		StepVerifier.create(result)
+				.expectNext("Hey now")
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+	}
+
 	private <T> Mono<T> doMalformedChunkedResponseTest(
 			ClientHttpConnector connector, Function<ResponseSpec, Mono<T>> handler) {
 
