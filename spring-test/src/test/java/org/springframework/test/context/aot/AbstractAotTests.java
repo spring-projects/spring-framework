@@ -31,7 +31,7 @@ abstract class AbstractAotTests {
 
 	static final String[] expectedSourceFilesForBasicSpringTests = {
 		// Global
-		"org/springframework/test/context/aot/TestAotMappings__Generated.java",
+		"org/springframework/test/context/aot/AotTestContextInitializers__Generated.java",
 		"org/springframework/test/context/aot/AotTestAttributes__Generated.java",
 		// BasicSpringJupiterSharedConfigTests
 		"org/springframework/context/event/DefaultEventListenerFactory__TestContext001_BeanDefinitions.java",

@@ -32,7 +32,7 @@ import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
 import org.springframework.test.context.aot.AotContextLoader;
-import org.springframework.test.context.aot.TestAotMappings;
+import org.springframework.test.context.aot.AotTestContextInitializers;
 import org.springframework.test.context.aot.TestContextAotException;
 import org.springframework.util.Assert;
 
@@ -57,7 +57,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	static final ContextCache defaultContextCache = new DefaultContextCache();
 
 	@Nullable
-	private final TestAotMappings testAotMappings = getTestAotMappings();
+	private final AotTestContextInitializers aotTestContextInitializers = getAotTestContextInitializers();
 
 	private final ContextCache contextCache;
 
@@ -168,7 +168,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	protected ApplicationContext loadContextInAotMode(MergedContextConfiguration mergedConfig) throws Exception {
 		Class<?> testClass = mergedConfig.getTestClass();
 		ApplicationContextInitializer<ConfigurableApplicationContext> contextInitializer =
-				this.testAotMappings.getContextInitializer(testClass);
+				this.aotTestContextInitializers.getContextInitializer(testClass);
 		Assert.state(contextInitializer != null,
 				() -> "Failed to load AOT ApplicationContextInitializer for test class [%s]"
 						.formatted(testClass.getName()));
@@ -200,17 +200,18 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	 * Determine if we are running in AOT mode for the supplied test class.
 	 */
 	private boolean runningInAotMode(Class<?> testClass) {
-		return (this.testAotMappings != null && this.testAotMappings.isSupportedTestClass(testClass));
+		return (this.aotTestContextInitializers != null &&
+				this.aotTestContextInitializers.isSupportedTestClass(testClass));
 	}
 
 	@Nullable
-	private static TestAotMappings getTestAotMappings() {
+	private static AotTestContextInitializers getAotTestContextInitializers() {
 		if (AotDetector.useGeneratedArtifacts()) {
 			try {
-				return new TestAotMappings();
+				return new AotTestContextInitializers();
 			}
 			catch (Exception ex) {
-				throw new IllegalStateException("Failed to instantiate TestAotMappings", ex);
+				throw new IllegalStateException("Failed to instantiate AotTestContextInitializers", ex);
 			}
 		}
 		return null;

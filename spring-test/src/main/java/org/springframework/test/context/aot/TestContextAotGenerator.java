@@ -240,13 +240,13 @@ public class TestContextAotGenerator {
 	}
 
 	private void generateTestAotMappings(MultiValueMap<ClassName, Class<?>> initializerClassMappings) {
-		ClassNameGenerator classNameGenerator = new ClassNameGenerator(TestAotMappings.class);
+		ClassNameGenerator classNameGenerator = new ClassNameGenerator(AotTestContextInitializers.class);
 		DefaultGenerationContext generationContext =
 				new DefaultGenerationContext(classNameGenerator, this.generatedFiles, this.runtimeHints);
 		GeneratedClasses generatedClasses = generationContext.getGeneratedClasses();
 
-		TestAotMappingsCodeGenerator codeGenerator =
-				new TestAotMappingsCodeGenerator(initializerClassMappings, generatedClasses);
+		AotTestContextInitializersCodeGenerator codeGenerator =
+				new AotTestContextInitializersCodeGenerator(initializerClassMappings, generatedClasses);
 		generationContext.writeGeneratedContent();
 		String className = codeGenerator.getGeneratedClass().getName().reflectionName();
 		registerPublicMethods(className);

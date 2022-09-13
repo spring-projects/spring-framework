@@ -41,14 +41,14 @@ import org.springframework.javapoet.WildcardTypeName;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Internal code generator for mappings used by {@link TestAotMappings}.
+ * Internal code generator for mappings used by {@link AotTestContextInitializers}.
  *
  * @author Sam Brannen
  * @since 6.0
  */
-class TestAotMappingsCodeGenerator {
+class AotTestContextInitializersCodeGenerator {
 
-	private static final Log logger = LogFactory.getLog(TestAotMappingsCodeGenerator.class);
+	private static final Log logger = LogFactory.getLog(AotTestContextInitializersCodeGenerator.class);
 
 	private static final ParameterizedTypeName CONTEXT_INITIALIZER = ParameterizedTypeName.get(
 			ClassName.get(ApplicationContextInitializer.class),
@@ -67,7 +67,7 @@ class TestAotMappingsCodeGenerator {
 	private final GeneratedClass generatedClass;
 
 
-	TestAotMappingsCodeGenerator(MultiValueMap<ClassName, Class<?>> initializerClassMappings,
+	AotTestContextInitializersCodeGenerator(MultiValueMap<ClassName, Class<?>> initializerClassMappings,
 			GeneratedClasses generatedClasses) {
 
 		this.initializerClassMappings = initializerClassMappings;
@@ -82,13 +82,13 @@ class TestAotMappingsCodeGenerator {
 	private void generateType(TypeSpec.Builder type) {
 		logger.debug(LogMessage.format("Generating AOT test mappings in %s",
 				this.generatedClass.getName().reflectionName()));
-		type.addJavadoc("Generated mappings for {@link $T}.", TestAotMappings.class);
+		type.addJavadoc("Generated mappings for {@link $T}.", AotTestContextInitializers.class);
 		type.addModifiers(Modifier.PUBLIC);
 		type.addMethod(generateMappingMethod());
 	}
 
 	private MethodSpec generateMappingMethod() {
-		MethodSpec.Builder method = MethodSpec.methodBuilder(TestAotMappings.GENERATED_MAPPINGS_METHOD_NAME);
+		MethodSpec.Builder method = MethodSpec.methodBuilder(AotTestContextInitializers.GENERATED_MAPPINGS_METHOD_NAME);
 		method.addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 		method.returns(CONTEXT_SUPPLIER_MAP);
 		method.addCode(generateMappingCode());

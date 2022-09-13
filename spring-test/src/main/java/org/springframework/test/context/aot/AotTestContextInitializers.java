@@ -28,8 +28,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * {@code TestAotMappings} provides mappings from test classes to AOT-optimized
- * context initializers.
+ * {@code AotTestContextInitializers} provides mappings from test classes to
+ * AOT-optimized context initializers.
  *
  * <p>If a test class is not {@linkplain #isSupportedTestClass(Class) supported} in
  * AOT mode, {@link #getContextInitializer(Class)} will return {@code null}.
@@ -42,27 +42,27 @@ import org.springframework.util.ReflectionUtils;
  * @author Stephane Nicoll
  * @since 6.0
  */
-public class TestAotMappings {
+public class AotTestContextInitializers {
 
 	// TODO Add support in ClassNameGenerator for supplying a predefined class name.
 	// There is a similar issue in Spring Boot where code relies on a generated name.
-	// Ideally we would generate a class named: org.springframework.test.context.aot.GeneratedTestAotMappings
-	static final String GENERATED_MAPPINGS_CLASS_NAME = TestAotMappings.class.getName() + "__Generated";
+	// Ideally we would generate a class named: org.springframework.test.context.aot.GeneratedAotTestContextInitializers
+	static final String GENERATED_MAPPINGS_CLASS_NAME = AotTestContextInitializers.class.getName() + "__Generated";
 
 	static final String GENERATED_MAPPINGS_METHOD_NAME = "getContextInitializers";
 
 	private final Map<String, Supplier<ApplicationContextInitializer<ConfigurableApplicationContext>>> contextInitializers;
 
 
-	public TestAotMappings() {
+	public AotTestContextInitializers() {
 		this(GENERATED_MAPPINGS_CLASS_NAME);
 	}
 
-	TestAotMappings(String initializerClassName) {
+	AotTestContextInitializers(String initializerClassName) {
 		this(loadContextInitializersMap(initializerClassName));
 	}
 
-	TestAotMappings(Map<String, Supplier<ApplicationContextInitializer<ConfigurableApplicationContext>>> contextInitializers) {
+	AotTestContextInitializers(Map<String, Supplier<ApplicationContextInitializer<ConfigurableApplicationContext>>> contextInitializers) {
 		this.contextInitializers = contextInitializers;
 	}
 
