@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,12 @@ import java.util.Map;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.spi.PersistenceUnitInfo;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.cfg.Environment;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
 import org.hibernate.jpa.boot.internal.PersistenceUnitInfoDescriptor;
 
+import org.springframework.core.NativeDetector;
 import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
 
 /**
@@ -36,10 +38,17 @@ import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
  *
  * @author Juergen Hoeller
  * @author Joris Kuipers
+ * @author Sebastien Deleuze
  * @since 4.1
  * @see Configuration#addPackage
  */
 class SpringHibernateJpaPersistenceProvider extends HibernatePersistenceProvider {
+
+	static {
+		if (NativeDetector.inNativeImage()) {
+			System.setProperty(Environment.BYTECODE_PROVIDER, Environment.BYTECODE_PROVIDER_NAME_NONE);
+		}
+	}
 
 	@Override
 	@SuppressWarnings("rawtypes")
