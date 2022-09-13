@@ -1,5 +1,7 @@
 description = "Spring Context Support"
 
+apply plugin: "kotlin"
+
 dependencies {
 	api(project(":spring-beans"))
 	api(project(":spring-context"))
@@ -12,6 +14,8 @@ dependencies {
 	optional("com.github.ben-manes.caffeine:caffeine")
 	optional("org.quartz-scheduler:quartz")
 	optional("org.freemarker:freemarker")
+	optional("org.jetbrains.kotlin:kotlin-reflect")
+	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	testImplementation(project(":spring-context"))
 	testImplementation(testFixtures(project(":spring-beans")))
 	testImplementation(testFixtures(project(":spring-context")))
@@ -26,4 +30,11 @@ dependencies {
 	testFixturesApi("org.junit.jupiter:junit-jupiter-api")
 	testFixturesImplementation("org.assertj:assertj-core")
 	testFixturesImplementation("org.mockito:mockito-core")
+}
+
+// Compile the Kotlin test code differently from the rest - it needs
+// -Xjsr305=strict to ensure that parameter and return types are
+// correctly annotated from Kotlin's perspective.
+compileTestKotlin {
+	kotlinOptions.freeCompilerArgs += "-Xjsr305=strict"
 }
