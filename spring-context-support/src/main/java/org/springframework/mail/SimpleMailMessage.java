@@ -93,7 +93,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 
 
 	@Override
-	public void setFrom(String from) {
+	public void setFrom(@Nullable String from) {
 		this.from = from;
 	}
 
@@ -103,7 +103,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	}
 
 	@Override
-	public void setReplyTo(String replyTo) {
+	public void setReplyTo(@Nullable String replyTo) {
 		this.replyTo = replyTo;
 	}
 
@@ -113,7 +113,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	}
 
 	@Override
-	public void setTo(String to) {
+	public void setTo(@Nullable String to) {
 		this.to = new String[] {to};
 	}
 
@@ -128,12 +128,12 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	}
 
 	@Override
-	public void setCc(String cc) {
+	public void setCc(@Nullable String cc) {
 		this.cc = new String[] {cc};
 	}
 
 	@Override
-	public void setCc(String... cc) {
+	public void setCc(@Nullable String... cc) {
 		this.cc = cc;
 	}
 
@@ -143,12 +143,12 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	}
 
 	@Override
-	public void setBcc(String bcc) {
+	public void setBcc(@Nullable String bcc) {
 		this.bcc = new String[] {bcc};
 	}
 
 	@Override
-	public void setBcc(String... bcc) {
+	public void setBcc(@Nullable String... bcc) {
 		this.bcc = bcc;
 	}
 
@@ -158,7 +158,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	}
 
 	@Override
-	public void setSentDate(Date sentDate) {
+	public void setSentDate(@Nullable Date sentDate) {
 		this.sentDate = sentDate;
 	}
 
@@ -168,7 +168,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	}
 
 	@Override
-	public void setSubject(String subject) {
+	public void setSubject(@Nullable String subject) {
 		this.subject = subject;
 	}
 
@@ -178,7 +178,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	}
 
 	@Override
-	public void setText(String text) {
+	public void setText(@Nullable String text) {
 		this.text = text;
 	}
 
