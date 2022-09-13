@@ -19,7 +19,6 @@ package org.springframework.test.context.cache;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.aot.AotDetector;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -56,8 +55,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	 */
 	static final ContextCache defaultContextCache = new DefaultContextCache();
 
-	@Nullable
-	private final AotTestContextInitializers aotTestContextInitializers = getAotTestContextInitializers();
+	private final AotTestContextInitializers aotTestContextInitializers = new AotTestContextInitializers();
 
 	private final ContextCache contextCache;
 
@@ -200,21 +198,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	 * Determine if we are running in AOT mode for the supplied test class.
 	 */
 	private boolean runningInAotMode(Class<?> testClass) {
-		return (this.aotTestContextInitializers != null &&
-				this.aotTestContextInitializers.isSupportedTestClass(testClass));
-	}
-
-	@Nullable
-	private static AotTestContextInitializers getAotTestContextInitializers() {
-		if (AotDetector.useGeneratedArtifacts()) {
-			try {
-				return new AotTestContextInitializers();
-			}
-			catch (Exception ex) {
-				throw new IllegalStateException("Failed to instantiate AotTestContextInitializers", ex);
-			}
-		}
-		return null;
+		return this.aotTestContextInitializers.isSupportedTestClass(testClass);
 	}
 
 }

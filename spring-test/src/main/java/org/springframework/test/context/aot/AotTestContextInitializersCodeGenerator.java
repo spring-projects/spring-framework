@@ -61,6 +61,15 @@ class AotTestContextInitializersCodeGenerator {
 	private static final TypeName CONTEXT_SUPPLIER_MAP = ParameterizedTypeName
 			.get(ClassName.get(Map.class), ClassName.get(String.class), CONTEXT_INITIALIZER_SUPPLIER);
 
+	private static final String GENERATED_SUFFIX = "Generated";
+
+	// TODO Add support in ClassNameGenerator for supplying a predefined class name.
+	// There is a similar issue in Spring Boot where code relies on a generated name.
+	// Ideally we would generate a class named: org.springframework.test.context.aot.GeneratedAotTestContextInitializers
+	static final String GENERATED_MAPPINGS_CLASS_NAME = AotTestContextInitializers.class.getName() + "__" + GENERATED_SUFFIX;
+
+	static final String GENERATED_MAPPINGS_METHOD_NAME = "getContextInitializers";
+
 
 	private final MultiValueMap<ClassName, Class<?>> initializerClassMappings;
 
@@ -71,7 +80,7 @@ class AotTestContextInitializersCodeGenerator {
 			GeneratedClasses generatedClasses) {
 
 		this.initializerClassMappings = initializerClassMappings;
-		this.generatedClass = generatedClasses.addForFeature("Generated", this::generateType);
+		this.generatedClass = generatedClasses.addForFeature(GENERATED_SUFFIX, this::generateType);
 	}
 
 
@@ -88,7 +97,7 @@ class AotTestContextInitializersCodeGenerator {
 	}
 
 	private MethodSpec generateMappingMethod() {
-		MethodSpec.Builder method = MethodSpec.methodBuilder(AotTestContextInitializers.GENERATED_MAPPINGS_METHOD_NAME);
+		MethodSpec.Builder method = MethodSpec.methodBuilder(GENERATED_MAPPINGS_METHOD_NAME);
 		method.addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 		method.returns(CONTEXT_SUPPLIER_MAP);
 		method.addCode(generateMappingCode());

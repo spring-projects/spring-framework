@@ -114,6 +114,7 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 			try {
 				System.setProperty(AotDetector.AOT_ENABLED, "true");
 				AotTestAttributesFactory.reset();
+				AotTestContextInitializersFactory.reset();
 
 				AotTestAttributes aotAttributes = AotTestAttributes.getInstance();
 				assertThatExceptionOfType(UnsupportedOperationException.class)
@@ -153,7 +154,7 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 	}
 
 	private static void assertRuntimeHints(RuntimeHints runtimeHints) {
-		assertReflectionRegistered(runtimeHints, AotTestContextInitializers.GENERATED_MAPPINGS_CLASS_NAME, INVOKE_PUBLIC_METHODS);
+		assertReflectionRegistered(runtimeHints, AotTestContextInitializersCodeGenerator.GENERATED_MAPPINGS_CLASS_NAME, INVOKE_PUBLIC_METHODS);
 		assertReflectionRegistered(runtimeHints, AotTestAttributesCodeGenerator.GENERATED_ATTRIBUTES_CLASS_NAME, INVOKE_PUBLIC_METHODS);
 
 		Stream.of(

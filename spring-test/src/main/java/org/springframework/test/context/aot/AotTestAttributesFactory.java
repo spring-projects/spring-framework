@@ -16,16 +16,11 @@
 
 package org.springframework.test.context.aot;
 
-import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.aot.AotDetector;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Factory for {@link AotTestAttributes}.
@@ -64,7 +59,7 @@ final class AotTestAttributesFactory {
 	}
 
 	/**
-	 * Reset AOT test attributes.
+	 * Reset the factory.
 	 * <p>Only for internal use.
 	 */
 	static void reset() {
@@ -73,23 +68,11 @@ final class AotTestAttributesFactory {
 		}
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings("unchecked")
 	private static Map<String, String> loadAttributesMap() {
 		String className = AotTestAttributesCodeGenerator.GENERATED_ATTRIBUTES_CLASS_NAME;
 		String methodName = AotTestAttributesCodeGenerator.GENERATED_ATTRIBUTES_METHOD_NAME;
-		try {
-			Class<?> clazz = ClassUtils.forName(className, null);
-			Method method = ReflectionUtils.findMethod(clazz, methodName);
-			Assert.state(method != null, () -> "No %s() method found in %s".formatted(methodName, clazz.getName()));
-			Map<String, String> attributes = (Map<String, String>) ReflectionUtils.invokeMethod(method, null);
-			return Collections.unmodifiableMap(attributes);
-		}
-		catch (IllegalStateException ex) {
-			throw ex;
-		}
-		catch (Exception ex) {
-			throw new IllegalStateException("Failed to invoke %s() method on %s".formatted(methodName, className), ex);
-		}
+		return GeneratedMapUtils.loadMap(className, methodName);
 	}
 
 }
