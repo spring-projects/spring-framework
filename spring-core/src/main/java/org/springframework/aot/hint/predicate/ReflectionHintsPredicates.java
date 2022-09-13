@@ -114,6 +114,23 @@ public class ReflectionHintsPredicates {
 		return new MethodHintPredicate(getMethod(type, methodName));
 	}
 
+	/**
+	 * Return a predicate that checks whether a reflection hint is registered for the method that matches the given selector.
+	 * This looks up a method on the given type with the expected name, if unique.
+	 * By default, both introspection and invocation hints match.
+	 * <p>The returned type exposes additional methods that refine the predicate behavior.
+	 * @param className the name of the class holding the method
+	 * @param methodName the method name
+	 * @return the {@link RuntimeHints} predicate
+	 * @throws ClassNotFoundException if the class cannot be resolved.
+	 * @throws IllegalArgumentException if the method cannot be found or if multiple methods are found with the same name.
+	 */
+	public MethodHintPredicate onMethod(String className, String methodName) throws ClassNotFoundException {
+		Assert.notNull(className, "'className' should not be null");
+		Assert.hasText(methodName, "'methodName' should not be null");
+		return onMethod(Class.forName(className), methodName);
+	}
+
 	private Method getMethod(Class<?> type, String methodName) {
 		ReflectionUtils.MethodFilter selector = method -> methodName.equals(method.getName());
 		Set<Method> methods = MethodIntrospector.selectMethods(type, selector);
@@ -146,6 +163,23 @@ public class ReflectionHintsPredicates {
 			throw new IllegalArgumentException("No field named '" + fieldName + "' on class " + type.getName());
 		}
 		return new FieldHintPredicate(field);
+	}
+
+	/**
+	 * Return a predicate that checks whether a reflection hint is registered for the field that matches the given selector.
+	 * This looks up a field on the given type with the expected name, if present.
+	 * By default, unsafe or write access are not considered.
+	 * <p>The returned type exposes additional methods that refine the predicate behavior.
+	 * @param className the name of the class holding the field
+	 * @param fieldName the field name
+	 * @return the {@link RuntimeHints} predicate
+	 * @throws ClassNotFoundException if the class cannot be resolved.
+	 * @throws IllegalArgumentException if a field cannot be found with the given name.
+	 */
+	public FieldHintPredicate onField(String className, String fieldName) throws ClassNotFoundException {
+		Assert.notNull(className, "'className' should not be null");
+		Assert.hasText(fieldName, "'fieldName' should not be empty");
+		return onField(Class.forName(className), fieldName);
 	}
 
 	/**

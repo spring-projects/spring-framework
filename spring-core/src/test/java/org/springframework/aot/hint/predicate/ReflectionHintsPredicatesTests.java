@@ -33,6 +33,7 @@ import org.springframework.aot.hint.TypeReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link ReflectionHintsPredicates}
@@ -320,6 +321,12 @@ class ReflectionHintsPredicatesTests {
 		}
 
 		@Test
+		void methodIntrospectionFailsForUnknownType() {
+			assertThatThrownBy(() -> reflection.onMethod("com.example.DoesNotExist", "publicMethod").introspect())
+					.isInstanceOf(ClassNotFoundException.class);
+		}
+
+		@Test
 		void methodIntrospectionMatchesIntrospectPublicMethods() {
 			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_PUBLIC_METHODS);
 			assertPredicateMatches(reflection.onMethod(SampleClass.class, "publicMethod").introspect());
@@ -470,6 +477,12 @@ class ReflectionHintsPredicatesTests {
 		@Test
 		void shouldFailForMissingField() {
 			assertThatIllegalArgumentException().isThrownBy(() -> reflection.onField(SampleClass.class, "missingField"));
+		}
+
+		@Test
+		void shouldFailForUnknownClass() {
+			assertThatThrownBy(() -> reflection.onField("com.example.DoesNotExist", "missingField"))
+					.isInstanceOf(ClassNotFoundException.class);
 		}
 
 		@Test
