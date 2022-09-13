@@ -114,7 +114,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		this.upgradeStrategy = upgradeStrategy;
 	}
 
-	private static RequestUpgradeStrategy initUpgradeStrategy() {
+	static RequestUpgradeStrategy initUpgradeStrategy() {
 		String className;
 		if (tomcatPresent) {
 			className = "TomcatRequestUpgradeStrategy";
