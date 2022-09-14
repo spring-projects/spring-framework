@@ -211,7 +211,8 @@ public class MvcNamespaceTests {
 
 		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
 		assertThat(adapter).isNotNull();
-		assertThat(new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect")).asInstanceOf(BOOLEAN).isFalse();
+		assertThat(new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect"))
+				.asInstanceOf(BOOLEAN).isTrue();
 
 		List<HttpMessageConverter<?>> converters = adapter.getMessageConverters();
 		assertThat(converters.size() > 0).isTrue();

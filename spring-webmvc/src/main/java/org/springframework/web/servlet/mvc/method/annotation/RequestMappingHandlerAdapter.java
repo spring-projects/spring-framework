@@ -176,7 +176,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 	private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
-	private boolean ignoreDefaultModelOnRedirect = false;
+	private boolean ignoreDefaultModelOnRedirect = true;
 
 	private int cacheSecondsForSessionAttributeHandlers = 0;
 
@@ -465,7 +465,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
-	 * By default the content of the "default" model is used both during
+	 * By default, the content of the "default" model is used both during
 	 * rendering and redirect scenarios. Alternatively a controller method
 	 * can declare a {@link RedirectAttributes} argument and use it to provide
 	 * attributes for a redirect.
@@ -474,10 +474,12 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * is not declared. Setting it to {@code false} means the "default" model
 	 * may be used in a redirect if the controller method doesn't declare a
 	 * RedirectAttributes argument.
-	 * <p>The default setting is {@code false} but new applications should
-	 * consider setting it to {@code true}.
+	 * <p>As of 6.0, this property is set to {@code true} by default.
 	 * @see RedirectAttributes
+	 * @deprecated as of 6.0 without a replacement; once removed, the default
+	 * model will always be ignored on redirect
 	 */
+	@Deprecated
 	public void setIgnoreDefaultModelOnRedirect(boolean ignoreDefaultModelOnRedirect) {
 		this.ignoreDefaultModelOnRedirect = ignoreDefaultModelOnRedirect;
 	}
@@ -848,6 +850,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * @since 4.2
 	 * @see #createInvocableHandlerMethod(HandlerMethod)
 	 */
+	@SuppressWarnings("deprecation")
 	@Nullable
 	protected ModelAndView invokeHandlerMethod(HttpServletRequest request,
 			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
