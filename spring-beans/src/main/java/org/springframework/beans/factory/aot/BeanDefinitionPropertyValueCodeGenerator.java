@@ -83,8 +83,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 
 
 	CodeBlock generateCode(@Nullable Object value) {
-		ResolvableType type = (value != null) ? ResolvableType.forInstance(value)
-				: ResolvableType.NONE;
+		ResolvableType type = ResolvableType.forInstance(value);
 		try {
 			return generateCode(value, type);
 		}
@@ -205,7 +204,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			}
 			return null;
 		}
-
 	}
 
 
@@ -223,7 +221,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			}
 			return null;
 		}
-
 	}
 
 
@@ -240,7 +237,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			}
 			return null;
 		}
-
 	}
 
 
@@ -257,7 +253,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			}
 			return null;
 		}
-
 	}
 
 
@@ -281,7 +276,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			}
 			return null;
 		}
-
 	}
 
 
@@ -334,7 +328,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			code.add(")");
 			return code.build();
 		}
-
 	}
 
 
@@ -346,7 +339,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 		public ManagedListDelegate() {
 			super(ManagedList.class, CodeBlock.of("new $T()", ManagedList.class));
 		}
-
 	}
 
 
@@ -358,7 +350,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 		public ManagedSetDelegate() {
 			super(ManagedSet.class, CodeBlock.of("new $T()", ManagedSet.class));
 		}
-
 	}
 
 
@@ -367,8 +358,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 	 */
 	private class ManagedMapDelegate implements Delegate {
 
-		private static final CodeBlock EMPTY_RESULT = CodeBlock.of("$T.ofEntries()",
-				ManagedMap.class);
+		private static final CodeBlock EMPTY_RESULT = CodeBlock.of("$T.ofEntries()", ManagedMap.class);
 
 		@Override
 		@Nullable
@@ -379,8 +369,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			return null;
 		}
 
-		private <K, V> CodeBlock generateManagedMapCode(ResolvableType type,
-				ManagedMap<K, V> managedMap) {
+		private <K, V> CodeBlock generateManagedMapCode(ResolvableType type, ManagedMap<K, V> managedMap) {
 			if (managedMap.isEmpty()) {
 				return EMPTY_RESULT;
 			}
@@ -403,7 +392,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			code.add(")");
 			return code.build();
 		}
-
 	}
 
 
@@ -415,7 +403,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 		ListDelegate() {
 			super(List.class, CodeBlock.of("$T.emptyList()", Collections.class));
 		}
-
 	}
 
 
@@ -441,7 +428,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 		private Set<?> orderForCodeConsistency(Set<?> set) {
 			return new TreeSet<Object>(set);
 		}
-
 	}
 
 
@@ -450,8 +436,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 	 */
 	private class MapDelegate implements Delegate {
 
-		private static final CodeBlock EMPTY_RESULT = CodeBlock.of("$T.emptyMap()",
-				Collections.class);
+		private static final CodeBlock EMPTY_RESULT = CodeBlock.of("$T.emptyMap()", Collections.class);
 
 		@Override
 		@Nullable
@@ -502,6 +487,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 
 		private <K, V> CodeBlock generateLinkedHashMapCode(Map<K, V> map,
 				ResolvableType keyType, ResolvableType valueType) {
+
 			GeneratedMethods generatedMethods = BeanDefinitionPropertyValueCodeGenerator.this.generatedMethods;
 			GeneratedMethod generatedMethod = generatedMethods.add("getMap", method -> {
 				method.addAnnotation(AnnotationSpec
@@ -520,7 +506,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			});
 			return CodeBlock.of("$L()", generatedMethod.getName());
 		}
-
 	}
 
 
@@ -532,8 +517,8 @@ class BeanDefinitionPropertyValueCodeGenerator {
 		@Override
 		@Nullable
 		public CodeBlock generateCode(Object value, ResolvableType type) {
-			if (value instanceof RuntimeBeanReference runtimeBeanReference
-					&& runtimeBeanReference.getBeanType() != null) {
+			if (value instanceof RuntimeBeanReference runtimeBeanReference &&
+					runtimeBeanReference.getBeanType() != null) {
 				return CodeBlock.of("new $T($T.class)", RuntimeBeanReference.class,
 						runtimeBeanReference.getBeanType());
 			}
@@ -543,7 +528,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			}
 			return null;
 		}
-
 	}
 
 }

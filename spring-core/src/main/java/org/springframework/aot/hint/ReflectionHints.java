@@ -133,6 +133,7 @@ public class ReflectionHints {
 	 */
 	public ReflectionHints registerTypeIfPresent(@Nullable ClassLoader classLoader,
 			String typeName, Consumer<TypeHint.Builder> typeHint) {
+
 		if (ClassUtils.isPresent(typeName, classLoader)) {
 			registerType(TypeReference.of(typeName), typeHint);
 		}
@@ -149,6 +150,7 @@ public class ReflectionHints {
 	 */
 	public ReflectionHints registerTypeIfPresent(@Nullable ClassLoader classLoader,
 			String typeName, MemberCategory... memberCategories) {
+
 		return registerTypeIfPresent(classLoader, typeName, TypeHint.builtWith(memberCategories));
 	}
 
@@ -208,7 +210,6 @@ public class ReflectionHints {
 	 * @deprecated in favor of {@link #registerConstructor(Constructor, ExecutableMode)}
 	 */
 	@Deprecated
-	@SuppressWarnings("deprecation")
 	public ReflectionHints registerConstructor(Constructor<?> constructor, Consumer<ExecutableHint.Builder> constructorHint) {
 		return registerType(TypeReference.of(constructor.getDeclaringClass()),
 				typeHint -> typeHint.withConstructor(mapParameters(constructor), constructorHint));
@@ -246,15 +247,14 @@ public class ReflectionHints {
 	 * @deprecated in favor of {@link #registerMethod(Method, ExecutableMode)}
 	 */
 	@Deprecated
-	@SuppressWarnings("deprecation")
+
 	public ReflectionHints registerMethod(Method method, Consumer<ExecutableHint.Builder> methodHint) {
 		return registerType(TypeReference.of(method.getDeclaringClass()),
 				typeHint -> typeHint.withMethod(method.getName(), mapParameters(method), methodHint));
 	}
 
 	private List<TypeReference> mapParameters(Executable executable) {
-		return Arrays.stream(executable.getParameterTypes()).map(TypeReference::of)
-				.collect(Collectors.toList());
+		return Arrays.stream(executable.getParameterTypes()).map(TypeReference::of).collect(Collectors.toList());
 	}
 
 }

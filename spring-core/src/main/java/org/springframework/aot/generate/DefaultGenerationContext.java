@@ -80,6 +80,7 @@ public class DefaultGenerationContext implements GenerationContext {
 	 */
 	DefaultGenerationContext(GeneratedClasses generatedClasses,
 			GeneratedFiles generatedFiles, RuntimeHints runtimeHints) {
+
 		Assert.notNull(generatedClasses, "'generatedClasses' must not be null");
 		Assert.notNull(generatedFiles, "'generatedFiles' must not be null");
 		Assert.notNull(runtimeHints, "'runtimeHints' must not be null");
@@ -90,14 +91,14 @@ public class DefaultGenerationContext implements GenerationContext {
 	}
 
 	private DefaultGenerationContext(DefaultGenerationContext existing, String name) {
-		int sequence = existing.sequenceGenerator
-				.computeIfAbsent(name, key -> new AtomicInteger()).getAndIncrement();
+		int sequence = existing.sequenceGenerator.computeIfAbsent(name, key -> new AtomicInteger()).getAndIncrement();
 		String featureName = (sequence > 0 ? name + sequence : name);
 		this.sequenceGenerator = existing.sequenceGenerator;
 		this.generatedClasses = existing.generatedClasses.withFeatureNamePrefix(featureName);
 		this.generatedFiles = existing.generatedFiles;
 		this.runtimeHints = existing.runtimeHints;
 	}
+
 
 	@Override
 	public GeneratedClasses getGeneratedClasses() {

@@ -73,19 +73,20 @@ class DefaultBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments
 	public Class<?> getTarget(RegisteredBean registeredBean,
 			Executable constructorOrFactoryMethod) {
 
-		Class<?> target = extractDeclaringClass(registeredBean.getBeanType(),
-				constructorOrFactoryMethod);
+		Class<?> target = extractDeclaringClass(registeredBean.getBeanType(), constructorOrFactoryMethod);
 		while (target.getName().startsWith("java.") && registeredBean.isInnerBean()) {
-			target = registeredBean.getParent().getBeanClass();
+			RegisteredBean parent = registeredBean.getParent();
+			Assert.state(parent != null, "No parent available for inner bean");
+			target = parent.getBeanClass();
 		}
 		return target;
 	}
 
 	private Class<?> extractDeclaringClass(ResolvableType beanType, Executable executable) {
 		Class<?> declaringClass = ClassUtils.getUserClass(executable.getDeclaringClass());
-		if (executable instanceof Constructor<?>
-				&& AccessVisibility.forMember(executable) == AccessVisibility.PUBLIC
-				&& FactoryBean.class.isAssignableFrom(declaringClass)) {
+		if (executable instanceof Constructor<?> &&
+				AccessVisibility.forMember(executable) == AccessVisibility.PUBLIC &&
+				FactoryBean.class.isAssignableFrom(declaringClass)) {
 			return extractTargetClassFromFactoryBean(declaringClass, beanType);
 		}
 		return executable.getDeclaringClass();
@@ -101,8 +102,7 @@ class DefaultBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments
 	 * @return the target class to use
 	 */
 	private Class<?> extractTargetClassFromFactoryBean(Class<?> factoryBeanType, ResolvableType beanType) {
-		ResolvableType target = ResolvableType.forType(factoryBeanType)
-				.as(FactoryBean.class).getGeneric(0);
+		ResolvableType target = ResolvableType.forType(factoryBeanType).as(FactoryBean.class).getGeneric(0);
 		if (target.getType().equals(Class.class)) {
 			return target.toClass();
 		}
@@ -155,8 +155,7 @@ class DefaultBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments
 					.getBeanDefinitionMethodGenerator(innerRegisteredBean, name);
 			Assert.state(methodGenerator != null, "Unexpected filtering of inner-bean");
 			MethodReference generatedMethod = methodGenerator
-					.generateBeanDefinitionMethod(generationContext,
-							this.beanRegistrationsCode);
+					.generateBeanDefinitionMethod(generationContext, this.beanRegistrationsCode);
 			return generatedMethod.toInvokeCodeBlock(ArgumentCodeGenerator.none());
 		}
 		return null;
@@ -181,13 +180,11 @@ class DefaultBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments
 
 		CodeBlock.Builder code = CodeBlock.builder();
 		if (postProcessors.isEmpty()) {
-			code.addStatement("$L.setInstanceSupplier($L)", BEAN_DEFINITION_VARIABLE,
-					instanceSupplierCode);
+			code.addStatement("$L.setInstanceSupplier($L)", BEAN_DEFINITION_VARIABLE, instanceSupplierCode);
 			return code.build();
 		}
 		code.addStatement("$T $L = $L",
-				ParameterizedTypeName.get(InstanceSupplier.class,
-						this.registeredBean.getBeanClass()),
+				ParameterizedTypeName.get(InstanceSupplier.class, this.registeredBean.getBeanClass()),
 				INSTANCE_SUPPLIER_VARIABLE, instanceSupplierCode);
 		for (MethodReference postProcessor : postProcessors) {
 			code.addStatement("$L = $L.andThen($L)", INSTANCE_SUPPLIER_VARIABLE,

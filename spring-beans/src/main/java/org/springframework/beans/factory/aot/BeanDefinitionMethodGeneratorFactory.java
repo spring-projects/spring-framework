@@ -41,8 +41,7 @@ import org.springframework.util.ObjectUtils;
  */
 class BeanDefinitionMethodGeneratorFactory {
 
-	private static final Log logger = LogFactory
-			.getLog(BeanDefinitionMethodGeneratorFactory.class);
+	private static final Log logger = LogFactory.getLog(BeanDefinitionMethodGeneratorFactory.class);
 
 
 	private final AotServices<BeanRegistrationAotProcessor> aotProcessors;
