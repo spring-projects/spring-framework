@@ -312,8 +312,7 @@ public final class TypeHint implements ConditionalHint {
 
 		private ExecutableKey(String name, List<TypeReference> parameterTypes) {
 			this.name = name;
-			this.parameterTypes = parameterTypes.stream().map(TypeReference::getCanonicalName)
-					.collect(Collectors.toList());
+			this.parameterTypes = parameterTypes.stream().map(TypeReference::getCanonicalName).toList();
 		}
 
 		@Override

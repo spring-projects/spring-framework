@@ -49,7 +49,6 @@ import org.springframework.util.ReflectionUtils;
 public class ReflectionHintsPredicates {
 
 	ReflectionHintsPredicates() {
-
 	}
 
 	/**
@@ -138,10 +137,10 @@ public class ReflectionHintsPredicates {
 			return methods.iterator().next();
 		}
 		else if (methods.size() > 1) {
-			throw new IllegalArgumentException(String.format("Found multiple methods named '%s' on class %s", methodName, type.getName()));
+			throw new IllegalArgumentException("Found multiple methods named '%s' on class %s".formatted(methodName, type.getName()));
 		}
 		else {
-			throw new IllegalArgumentException("No method named '" + methodName + "' on class " + type.getName());
+			throw new IllegalArgumentException("No method named '%s' on class %s".formatted(methodName, type.getName()));
 		}
 	}
 
@@ -160,7 +159,7 @@ public class ReflectionHintsPredicates {
 		Assert.hasText(fieldName, "'fieldName' should not be empty");
 		Field field = ReflectionUtils.findField(type, fieldName);
 		if (field == null) {
-			throw new IllegalArgumentException("No field named '" + fieldName + "' on class " + type.getName());
+			throw new IllegalArgumentException("No field named '%s' on class %s".formatted(fieldName, type.getName()));
 		}
 		return new FieldHintPredicate(field);
 	}
@@ -315,15 +314,13 @@ public class ReflectionHintsPredicates {
 		/**
 		 * Indicate whether the specified {@code ExecutableHint} covers the
 		 * reflection needs of the specified executable definition.
-		 * @return {@code true} if the member matches (same type, name and parameters),
-		 * and the configured {@code ExecutableMode} is compatibe
+		 * @return {@code true} if the member matches (same type, name, and parameters),
+		 * and the configured {@code ExecutableMode} is compatible
 		 */
 		static boolean includes(ExecutableHint hint, String name,
 				List<TypeReference> parameterTypes, ExecutableMode executableModes) {
-			return hint.getName().equals(name)
-					&& hint.getParameterTypes().equals(parameterTypes)
-					&& (hint.getMode().equals(ExecutableMode.INVOKE)
-					|| !executableModes.equals(ExecutableMode.INVOKE));
+			return hint.getName().equals(name) && hint.getParameterTypes().equals(parameterTypes) &&
+					(hint.getMode().equals(ExecutableMode.INVOKE) || !executableModes.equals(ExecutableMode.INVOKE));
 		}
 	}
 
@@ -355,17 +352,14 @@ public class ReflectionHintsPredicates {
 		Predicate<RuntimeHints> exactMatch() {
 			return hints -> (hints.reflection().getTypeHint(this.executable.getDeclaringClass()) != null) &&
 					hints.reflection().getTypeHint(this.executable.getDeclaringClass()).constructors().anyMatch(executableHint -> {
-						List<TypeReference> parameters = Arrays.stream(this.executable.getParameterTypes())
-								.map(TypeReference::of).toList();
-						return includes(executableHint, "<init>",
-								parameters, this.executableMode);
+						List<TypeReference> parameters = TypeReference.listOf(this.executable.getParameterTypes());
+						return includes(executableHint, "<init>", parameters, this.executableMode);
 					});
 		}
 
 	}
 
 	public static class MethodHintPredicate extends ExecutableHintPredicate<Method> {
-
 
 		MethodHintPredicate(Method method) {
 			super(method);
@@ -394,10 +388,8 @@ public class ReflectionHintsPredicates {
 		Predicate<RuntimeHints> exactMatch() {
 			return hints -> (hints.reflection().getTypeHint(this.executable.getDeclaringClass()) != null) &&
 					hints.reflection().getTypeHint(this.executable.getDeclaringClass()).methods().anyMatch(executableHint -> {
-						List<TypeReference> parameters = Arrays.stream(this.executable.getParameterTypes())
-								.map(TypeReference::of).toList();
-						return includes(executableHint, this.executable.getName(),
-								parameters, this.executableMode);
+						List<TypeReference> parameters = TypeReference.listOf(this.executable.getParameterTypes());
+						return includes(executableHint, this.executable.getName(), parameters, this.executableMode);
 					});
 		}
 
@@ -422,8 +414,8 @@ public class ReflectionHintsPredicates {
 
 		private boolean memberCategoryMatch(TypeHint typeHint) {
 			if (Modifier.isPublic(this.field.getModifiers())) {
-				return typeHint.getMemberCategories().contains(MemberCategory.PUBLIC_FIELDS)
-						|| typeHint.getMemberCategories().contains(MemberCategory.DECLARED_FIELDS);
+				return typeHint.getMemberCategories().contains(MemberCategory.PUBLIC_FIELDS) ||
+						typeHint.getMemberCategories().contains(MemberCategory.DECLARED_FIELDS);
 			}
 			else {
 				return typeHint.getMemberCategories().contains(MemberCategory.DECLARED_FIELDS);
@@ -434,6 +426,7 @@ public class ReflectionHintsPredicates {
 			return typeHint.fields().anyMatch(fieldHint ->
 					this.field.getName().equals(fieldHint.getName()));
 		}
+
 	}
 
 }

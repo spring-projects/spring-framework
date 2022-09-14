@@ -96,14 +96,10 @@ class ProxyHintsTests {
 
 	private static Consumer<JdkProxyHint> proxiedInterfaces(Class<?>... proxiedInterfaces) {
 		return jdkProxyHint -> assertThat(jdkProxyHint.getProxiedInterfaces())
-				.containsExactly(toTypeReferences(proxiedInterfaces));
+				.containsExactlyElementsOf(TypeReference.listOf(proxiedInterfaces));
 	}
 
 	private static TypeReference[] toTypeReferences(String... proxiedInterfaces) {
-		return Arrays.stream(proxiedInterfaces).map(TypeReference::of).toArray(TypeReference[]::new);
-	}
-
-	private static TypeReference[] toTypeReferences(Class<?>... proxiedInterfaces) {
 		return Arrays.stream(proxiedInterfaces).map(TypeReference::of).toArray(TypeReference[]::new);
 	}
 

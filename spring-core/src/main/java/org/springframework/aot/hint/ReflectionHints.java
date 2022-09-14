@@ -20,12 +20,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.aot.hint.TypeHint.Builder;
@@ -255,7 +253,7 @@ public class ReflectionHints {
 	}
 
 	private List<TypeReference> mapParameters(Executable executable) {
-		return Arrays.stream(executable.getParameterTypes()).map(TypeReference::of).collect(Collectors.toList());
+		return TypeReference.listOf(executable.getParameterTypes());
 	}
 
 }
