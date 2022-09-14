@@ -114,7 +114,7 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 	 * {@link java.util.concurrent.CancellationException} if the future has been cancelled.
 	 * @return the value associated with this future
 	 */
-	@Override
+	@Override  @Nullable
 	public T get() throws InterruptedException, ExecutionException {
 		return this.settableTask.get();
 	}
