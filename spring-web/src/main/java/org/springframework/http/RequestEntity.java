@@ -28,6 +28,7 @@ import java.util.function.Consumer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.util.UriTemplateHandler;
 
 /**
  * Extension of {@link HttpEntity} that also exposes the HTTP method and the
@@ -158,11 +159,23 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Return the URL of the request.
+	 * Return the {@link URI} for the target HTTP endpoint.
+	 * <p><strong>Note:</strong> This method raises
+	 * {@link UnsupportedOperationException} if the {@code RequestEntity} was
+	 * created with a URI template and variables rather than with a {@link URI}
+	 * instance. This is because a URI cannot be created without further input
+	 * on how to expand template and encode the URI. In such cases, the
+	 * {@code URI} is prepared by the
+	 * {@link org.springframework.web.client.RestTemplate} with the help of the
+	 * {@link UriTemplateHandler} it is configured with.
 	 */
 	public URI getUrl() {
 		if (this.url == null) {
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException(
+					"The RequestEntity was created with a URI template and variables, " +
+							"and there is not enough information on how to correctly expand and " +
+							"encode the URI template. This will be done by the RestTemplate instead " +
+							"with help from the UriTemplateHandler it is configured with.");
 		}
 		return this.url;
 	}
