@@ -137,12 +137,22 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 		);
 
 		testEncode(input, Pojo.class, step -> step
-				.consumeNextWith(expectString("["))
-				.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}"))
+				.consumeNextWith(expectString("[{\"foo\":\"foo\",\"bar\":\"bar\"}"))
 				.consumeNextWith(expectString(",{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"))
 				.consumeNextWith(expectString(",{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}"))
 				.consumeNextWith(expectString("]"))
 				.verifyComplete());
+	}
+
+	@Test // gh-29038
+	void encodeNonStreamWithErrorAsFirstSignal() {
+		String message = "I'm a teapot";
+		Flux<Object> input = Flux.error(new IllegalStateException(message));
+
+		Flux<DataBuffer> output = this.encoder.encode(
+				input, this.bufferFactory, ResolvableType.forClass(Pojo.class), null, null);
+
+		StepVerifier.create(output).expectErrorMessage(message).verify();
 	}
 
 	@Test
@@ -150,8 +160,7 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 		Flux<ParentClass> input = Flux.just(new Foo(), new Bar());
 
 		testEncode(input, ParentClass.class, step -> step
-				.consumeNextWith(expectString("["))
-				.consumeNextWith(expectString("{\"type\":\"foo\"}"))
+				.consumeNextWith(expectString("[{\"type\":\"foo\"}"))
 				.consumeNextWith(expectString(",{\"type\":\"bar\"}"))
 				.consumeNextWith(expectString("]"))
 				.verifyComplete());
@@ -159,7 +168,7 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 
 
 	@Test  // SPR-15727
-	public void encodeAsStreamWithCustomStreamingType() {
+	public void encodeStreamWithCustomStreamingType() {
 		MediaType fooMediaType = new MediaType("application", "foo");
 		MediaType barMediaType = new MediaType("application", "bar");
 		this.encoder.setStreamingMediaTypes(Arrays.asList(fooMediaType, barMediaType));
@@ -263,8 +272,7 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 				ResolvableType.forClass(Pojo.class), MimeTypeUtils.APPLICATION_JSON, Collections.emptyMap());
 
 		StepVerifier.create(result)
-				.consumeNextWith(expectString("["))
-				.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}"))
+				.consumeNextWith(expectString("[{\"foo\":\"foo\",\"bar\":\"bar\"}"))
 				.consumeNextWith(expectString("]"))
 				.expectComplete()
 				.verify(Duration.ofSeconds(5));

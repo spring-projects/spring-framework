@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,7 @@ import org.springframework.core.codec.EncodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageEncoder;
@@ -72,6 +74,8 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	private static final byte[] NEWLINE_SEPARATOR = {'\n'};
 
 	private static final byte[] EMPTY_BYTES = new byte[0];
+
+	private static DataBuffer EMPTY_BUFFER = DefaultDataBufferFactory.sharedInstance.wrap(EMPTY_BYTES);
 
 	private static final Map<String, JsonEncoding> ENCODINGS;
 
@@ -174,11 +178,21 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 			}
 			else {
 				JsonArrayJoinHelper helper = new JsonArrayJoinHelper();
-				return Flux.concat(
-						helper.getPrefix(bufferFactory, hints, logger),
-						Flux.from(inputStream).map(value -> encodeStreamingValue(
-								value, bufferFactory, hints, sequenceWriter, byteBuilder, helper.getDelimiter(), EMPTY_BYTES)),
-						helper.getSuffix(bufferFactory, hints, logger));
+
+				// Do not prepend JSON array prefix until first signal is known, onNext vs onError
+				// Keeps response not committed for error handling
+
+				Flux<DataBuffer> flux1 = helper.getPrefix(bufferFactory, hints, logger)
+						.concatWith(Flux.just(EMPTY_BUFFER).repeat());
+
+				Flux<DataBuffer> flux2 = Flux.from(inputStream).map(value -> encodeStreamingValue(
+						value, bufferFactory, hints, sequenceWriter, byteBuilder, helper.getDelimiter(), EMPTY_BYTES));
+
+				dataBufferFlux = Flux.zip(flux1, flux2, (buffer1, buffer2) ->
+								(buffer1 != EMPTY_BUFFER ?
+										bufferFactory.join(Arrays.asList(buffer1, buffer2)) :
+										buffer2))
+						.concatWith(helper.getSuffix(bufferFactory, hints, logger));
 			}
 
 			return dataBufferFlux
