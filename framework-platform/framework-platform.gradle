@@ -22,7 +22,7 @@ dependencies {
 	api(platform("org.mockito:mockito-bom:4.8.0"))
 
 	constraints {
-		api("com.fasterxml.woodstox:woodstox-core:6.3.0")
+		api("com.fasterxml.woodstox:woodstox-core:6.3.1")
 		api("com.fasterxml:aalto-xml:1.3.1")
 		api("com.github.ben-manes.caffeine:caffeine:3.1.1")
 		api("com.github.librepdf:openpdf:1.3.29")
@@ -109,7 +109,7 @@ dependencies {
 		api("org.codehaus.jettison:jettison:1.3.8")
 		api("org.dom4j:dom4j:2.1.3")
 		api("org.eclipse.jetty:jetty-reactive-httpclient:3.0.6")
-		api("org.eclipse.persistence:org.eclipse.persistence.jpa:3.0.2")
+		api("org.eclipse.persistence:org.eclipse.persistence.jpa:3.0.3")
 		api("org.eclipse:yasson:2.0.4")
 		api("org.ehcache:ehcache:3.4.0")
 		api("org.ehcache:jcache:1.0.1")
@@ -125,7 +125,7 @@ dependencies {
 		api("org.hibernate:hibernate-validator:7.0.5.Final")
 		api("org.hsqldb:hsqldb:2.7.0")
 		api("org.javamoney:moneta:1.4.2")
-		api("org.jruby:jruby:9.3.4.0")
+		api("org.jruby:jruby:9.3.8.0")
 		api("org.junit.support:testng-engine:1.0.4")
 		api("org.mozilla:rhino:1.7.11")
 		api("org.ogce:xpp3:1.1.6")
