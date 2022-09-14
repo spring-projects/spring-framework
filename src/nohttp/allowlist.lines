@@ -1,5 +1,4 @@
 ^http://aopalliance.sourceforge.net.*
-^http://[^/]*caucho.com.*
 ^http://jibx.sourceforge.net.*
 ^http://mx4j.sourceforge.net.*
 ^http://objenesis.org.*
