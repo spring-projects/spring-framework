@@ -72,6 +72,7 @@ class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandlerIntegra
 
 		URI url = new URI("http://localhost:" + this.port + "/foo");
 		RequestEntity<Void> request = RequestEntity.get(url).build();
+		@SuppressWarnings("resource")
 		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -84,6 +85,7 @@ class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandlerIntegra
 
 		URI url = new URI("http://localhost:" + this.port + "/bar");
 		RequestEntity<Void> request = RequestEntity.get(url).build();
+		@SuppressWarnings("resource")
 		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -96,6 +98,7 @@ class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandlerIntegra
 
 		URI url = new URI("http://localhost:" + this.port + "/header");
 		RequestEntity<Void> request = RequestEntity.get(url).build();
+		@SuppressWarnings("resource")
 		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -103,6 +106,7 @@ class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandlerIntegra
 	}
 
 	@ParameterizedHttpServerTest
+	@SuppressWarnings("resource")
 	void handlerNotFound(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 

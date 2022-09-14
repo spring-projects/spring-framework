@@ -210,6 +210,7 @@ public class ReflectionHints {
 	 * @deprecated in favor of {@link #registerConstructor(Constructor, ExecutableMode)}
 	 */
 	@Deprecated
+	@SuppressWarnings("deprecation")
 	public ReflectionHints registerConstructor(Constructor<?> constructor, Consumer<ExecutableHint.Builder> constructorHint) {
 		return registerType(TypeReference.of(constructor.getDeclaringClass()),
 				typeHint -> typeHint.withConstructor(mapParameters(constructor), constructorHint));
@@ -247,7 +248,7 @@ public class ReflectionHints {
 	 * @deprecated in favor of {@link #registerMethod(Method, ExecutableMode)}
 	 */
 	@Deprecated
-
+	@SuppressWarnings("deprecation")
 	public ReflectionHints registerMethod(Method method, Consumer<ExecutableHint.Builder> methodHint) {
 		return registerType(TypeReference.of(method.getDeclaringClass()),
 				typeHint -> typeHint.withMethod(method.getName(), mapParameters(method), methodHint));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	void getFormParts(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
+		@SuppressWarnings("resource")
 		RestTemplate restTemplate = new RestTemplate();
 		RequestEntity<MultiValueMap<String, Object>> request = RequestEntity
 				.post(new URI("http://localhost:" + port + "/form-parts"))

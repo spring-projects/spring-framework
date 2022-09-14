@@ -52,6 +52,7 @@ class AsyncIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		startServer(httpServer);
 
 		URI url = new URI("http://localhost:" + port);
+		@SuppressWarnings("resource")
 		ResponseEntity<String> response = new RestTemplate().exchange(RequestEntity.get(url).build(), String.class);
 
 		assertThat(response.getBody()).isEqualTo("hello");

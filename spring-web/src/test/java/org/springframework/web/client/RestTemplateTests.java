@@ -106,6 +106,7 @@ class RestTemplateTests {
 
 	@Test // gh-29008
 	void defaultMessageConvertersWithKotlinSerialization() {
+		@SuppressWarnings("resource")
 		RestTemplate restTemplate = new RestTemplate();
 		List<HttpMessageConverter<?>> httpMessageConverters = restTemplate.getMessageConverters();
 		assertThat(httpMessageConverters).extracting("class").containsOnlyOnce(

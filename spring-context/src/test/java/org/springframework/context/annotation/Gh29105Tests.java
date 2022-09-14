@@ -47,6 +47,8 @@ public class Gh29105Tests {
 		List<Class<?>> orderedTypes = child.getBeanProvider(MyService.class)
 				.orderedStream().map(Object::getClass).collect(Collectors.toList());
 		assertThat(orderedTypes).containsExactly(CustomService.class, DefaultService.class);
+		parent.close();
+		child.close();
 	}
 
 
@@ -78,4 +80,5 @@ public class Gh29105Tests {
 		}
 
 	}
+
 }
