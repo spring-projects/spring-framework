@@ -34,6 +34,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
+import org.springframework.scheduling.concurrent.ExecutorConfigurationSupport;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -552,6 +553,9 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 
 	@Override
 	public void destroy() {
+		if (this.taskScheduler instanceof ExecutorConfigurationSupport) {
+			((ExecutorConfigurationSupport) this.taskScheduler).shutdown();
+		}
 		for (ScheduledTask task : this.scheduledTasks) {
 			task.cancel();
 		}
