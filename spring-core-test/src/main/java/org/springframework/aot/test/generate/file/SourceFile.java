@@ -35,9 +35,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link DynamicFile} that holds Java source code and provides
- * {@link SourceFileAssert} support. Usually created from an AOT generated type,
- * for example:
- *
+ * {@link SourceFileAssert} support. Usually created from an AOT generated
+ * type, for example:
  * <pre class="code">
  * SourceFile.of(generatedFile::writeTo)
  * </pre>
@@ -45,8 +44,7 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @since 6.0
  */
-public final class SourceFile extends DynamicFile
-		implements AssertProvider<SourceFileAssert> {
+public final class SourceFile extends DynamicFile implements AssertProvider<SourceFileAssert> {
 
 
 	private final String className;

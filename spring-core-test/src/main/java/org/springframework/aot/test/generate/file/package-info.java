@@ -1,7 +1,5 @@
 /**
  * Support classes for running assertions on generated files.
- *
- * @author Stephane Nicoll
  */
 @NonNullApi
 @NonNullFields

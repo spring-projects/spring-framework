@@ -38,8 +38,8 @@ public abstract sealed class DynamicFile permits SourceFile, ResourceFile {
 
 
 	protected DynamicFile(String path, String content) {
-		Assert.hasText(path, "Path must not be empty");
-		Assert.hasText(content, "Content must not be empty");
+		Assert.hasText(path, "'path' must not be empty");
+		Assert.hasText(content, "'content' must not be empty");
 		this.path = path;
 		this.content = content;
 	}

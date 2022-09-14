@@ -114,7 +114,7 @@ class SourceFilesTests {
 	@Test
 	void getSingleWhenHasMultipleFilesThrowsException() {
 		SourceFiles sourceFiles = SourceFiles.of(SOURCE_FILE_1, SOURCE_FILE_2);
-		assertThatIllegalStateException().isThrownBy(() -> sourceFiles.getSingle());
+		assertThatIllegalStateException().isThrownBy(sourceFiles::getSingle);
 	}
 
 	@Test

@@ -110,7 +110,7 @@ class ReResourceFilesTests {
 	@Test
 	void getSingleWhenHasMultipleFilesThrowsException() {
 		ResourceFiles resourceFiles = ResourceFiles.of(RESOURCE_FILE_1, RESOURCE_FILE_2);
-		assertThatIllegalStateException().isThrownBy(() -> resourceFiles.getSingle());
+		assertThatIllegalStateException().isThrownBy(resourceFiles::getSingle);
 	}
 
 	@Test

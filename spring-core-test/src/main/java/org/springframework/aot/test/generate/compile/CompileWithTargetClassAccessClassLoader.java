@@ -21,6 +21,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 
+import org.springframework.lang.Nullable;
+
 /**
  * {@link ClassLoader} implementation to support
  * {@link CompileWithTargetClassAccess @CompileWithTargetClassAccess}.
@@ -74,6 +76,7 @@ final class CompileWithTargetClassAccessClassLoader extends ClassLoader {
 	}
 
 	@Override
+	@Nullable
 	protected URL findResource(String name) {
 		return this.testClassLoader.getResource(name);
 	}

@@ -158,7 +158,7 @@ public class DynamicClassLoader extends ClassLoader {
 
 
 		@Override
-		protected URLConnection openConnection(URL url) throws IOException {
+		protected URLConnection openConnection(URL url) {
 			return new ResourceFileConnection(url, this.file);
 		}
 
@@ -177,11 +177,11 @@ public class DynamicClassLoader extends ClassLoader {
 
 
 		@Override
-		public void connect() throws IOException {
+		public void connect() {
 		}
 
 		@Override
-		public InputStream getInputStream() throws IOException {
+		public InputStream getInputStream() {
 			return new ByteArrayInputStream(
 					this.file.getContent().getBytes(StandardCharsets.UTF_8));
 		}

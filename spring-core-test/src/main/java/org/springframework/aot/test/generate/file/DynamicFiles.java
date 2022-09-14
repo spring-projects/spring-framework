@@ -38,8 +38,7 @@ import org.springframework.lang.Nullable;
 final class DynamicFiles<F extends DynamicFile> implements Iterable<F> {
 
 
-	private static final DynamicFiles<?> NONE = new DynamicFiles<>(
-			Collections.emptyMap());
+	private static final DynamicFiles<?> NONE = new DynamicFiles<>(Collections.emptyMap());
 
 
 	private final Map<String, F> files;

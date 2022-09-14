@@ -39,7 +39,7 @@ class DynamicJavaFileObjectTests {
 	}
 
 	@Test
-	void getCharContentReturnsContent() throws Exception {
+	void getCharContentReturnsContent() {
 		DynamicJavaFileObject fileObject = new DynamicJavaFileObject(SourceFile.of(CONTENT));
 		assertThat(fileObject.getCharContent(true)).isEqualTo(CONTENT);
 	}

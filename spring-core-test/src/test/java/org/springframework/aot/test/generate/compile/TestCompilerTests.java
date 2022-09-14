@@ -206,7 +206,7 @@ class TestCompilerTests {
 
 	@Test
 	@CompileWithTargetClassAccess
-	void compiledCodeCanAccessExistingPackagePrivateClassIfAnnotated() throws ClassNotFoundException, LinkageError {
+	void compiledCodeCanAccessExistingPackagePrivateClassIfAnnotated() throws LinkageError {
 		SourceFiles sourceFiles = SourceFiles.of(SourceFile.of("""
 				package com.example;
 

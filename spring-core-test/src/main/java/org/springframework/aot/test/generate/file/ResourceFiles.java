@@ -111,7 +111,7 @@ public final class ResourceFiles implements Iterable<ResourceFile> {
 
 	/**
 	 * Get the {@link ResourceFile} with the given
-	 * {@code DynamicFile#getPath() path}.
+	 * {@linkplain  DynamicFile#getPath() path}.
 	 * @param path the path to find
 	 * @return a {@link ResourceFile} instance or {@code null}
 	 */
@@ -121,7 +121,7 @@ public final class ResourceFiles implements Iterable<ResourceFile> {
 	}
 
 	/**
-	 * Return the single source file contained in the collection.
+	 * Return the single {@link ResourceFile} contained in the collection.
 	 * @return the single file
 	 * @throws IllegalStateException if the collection doesn't contain exactly
 	 * one file

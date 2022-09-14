@@ -114,7 +114,7 @@ public final class SourceFiles implements Iterable<SourceFile> {
 
 	/**
 	 * Get the {@link SourceFile} with the given
-	 * {@code DynamicFile#getPath() path}.
+	 * {@linkplain  DynamicFile#getPath() path}.
 	 * @param path the path to find
 	 * @return a {@link SourceFile} instance or {@code null}
 	 */
