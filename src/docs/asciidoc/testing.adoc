@@ -1870,7 +1870,7 @@ Spring test configuration annotations are processed within enclosing class hiera
 for inner test classes.
 
 If `@NestedTestConfiguration` is not present or meta-present on a test class, in its
-super type hierarchy, or in its enclosing class hierarchy, the default _enclosing
+supertype hierarchy, or in its enclosing class hierarchy, the default _enclosing
 configuration inheritance mode_ will be used. See the tip below for details on how to
 change the default mode.
 

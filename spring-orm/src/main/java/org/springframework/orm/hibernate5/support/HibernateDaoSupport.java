@@ -26,7 +26,7 @@ import org.springframework.orm.hibernate5.HibernateTemplate;
 import org.springframework.util.Assert;
 
 /**
- * Convenient super class for Hibernate-based data access objects.
+ * Convenient superclass for Hibernate-based data access objects.
  *
  * <p>Requires a {@link SessionFactory} to be set, providing a
  * {@link org.springframework.orm.hibernate5.HibernateTemplate} based on it to

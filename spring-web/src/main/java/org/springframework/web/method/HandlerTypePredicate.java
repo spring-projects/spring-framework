@@ -128,7 +128,7 @@ public final class HandlerTypePredicate implements Predicate<Class<?>> {
 
 	/**
 	 * Match handlers that are assignable to a given type.
-	 * @param types one or more handler super types
+	 * @param types one or more handler supertypes
 	 */
 	public static HandlerTypePredicate forAssignableType(Class<?>... types) {
 		return new Builder().assignableType(types).build();
@@ -187,7 +187,7 @@ public final class HandlerTypePredicate implements Predicate<Class<?>> {
 
 		/**
 		 * Match handlers that are assignable to a given type.
-		 * @param types one or more handler super types
+		 * @param types one or more handler supertypes
 		 */
 		public Builder assignableType(Class<?>... types) {
 			this.assignableTypes.addAll(Arrays.asList(types));
