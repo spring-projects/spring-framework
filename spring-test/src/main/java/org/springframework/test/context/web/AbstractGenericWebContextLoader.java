@@ -237,7 +237,7 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	 * {@code GenericWebApplicationContext} with a custom
 	 * {@link DefaultListableBeanFactory} implementation.
 	 * @return a newly instantiated {@code GenericWebApplicationContext}
-	 * @since 5.2.23
+	 * @since 5.3.23
 	 */
 	protected GenericWebApplicationContext createContext() {
 		return new GenericWebApplicationContext();
