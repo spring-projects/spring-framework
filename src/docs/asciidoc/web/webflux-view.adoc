@@ -26,7 +26,7 @@ configuration involves a few bean declarations, such as
 `SpringResourceTemplateResolver`, `SpringWebFluxTemplateEngine`, and
 `ThymeleafReactiveViewResolver`. For more details, see
 https://www.thymeleaf.org/documentation.html[Thymeleaf+Spring] and the WebFlux integration
-http://forum.thymeleaf.org/Thymeleaf-3-0-8-JUST-PUBLISHED-td4030687.html[announcement].
+https://web.archive.org/web/20210623051330/http%3A//forum.thymeleaf.org/Thymeleaf-3-0-8-JUST-PUBLISHED-td4030687.html[announcement].
 
 
 

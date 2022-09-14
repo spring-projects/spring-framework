@@ -149,7 +149,7 @@ asciidoctorPdf {
 task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'asciidoctorPdf', 'dokkaHtmlMultiModule']) {
 	group = "Distribution"
 	description = "Builds -${archiveClassifier} archive containing api and reference " +
-			"for deployment at https://docs.spring.io/spring-framework/docs."
+			"for deployment at https://docs.spring.io/spring-framework/docs/."
 
 	archiveBaseName.set("spring-framework")
 	archiveClassifier.set("docs")

@@ -34,7 +34,7 @@ The other part of the answer is functional programming. Much as the addition of 
 in Java 5 created opportunities (such as annotated REST controllers or unit tests), the
 addition of lambda expressions in Java 8 created opportunities for functional APIs in Java.
 This is a boon for non-blocking applications and continuation-style APIs (as popularized
-by `CompletableFuture` and http://reactivex.io/[ReactiveX]) that allow declarative
+by `CompletableFuture` and https://reactivex.io/[ReactiveX]) that allow declarative
 composition of asynchronous logic. At the programming-model level, Java 8 enabled Spring
 WebFlux to offer functional web endpoints alongside annotated controllers.
 
@@ -87,7 +87,7 @@ Spring WebFlux. It provides the
 https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html[`Mono`] and
 https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html[`Flux`] API types
 to work on data sequences of 0..1 (`Mono`) and 0..N (`Flux`) through a rich set of operators aligned with the
-ReactiveX http://reactivex.io/documentation/operators.html[vocabulary of operators].
+ReactiveX https://reactivex.io/documentation/operators.html[vocabulary of operators].
 Reactor is a Reactive Streams library and, therefore, all of its operators support non-blocking back pressure.
 Reactor has a strong focus on server-side Java. It is developed in close collaboration
 with Spring.

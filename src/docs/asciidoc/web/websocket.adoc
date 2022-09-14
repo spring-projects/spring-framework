@@ -597,7 +597,7 @@ a key reason for having SockJS. This section covers important
 considerations about running in those browsers.
 
 The SockJS client supports Ajax/XHR streaming in IE 8 and 9 by using Microsoft's
-https://blogs.msdn.com/b/ieinternals/archive/2010/05/13/xdomainrequest-restrictions-limitations-and-workarounds.aspx[`XDomainRequest`].
+https://web.archive.org/web/20160219230343/https://blogs.msdn.com/b/ieinternals/archive/2010/05/13/xdomainrequest-restrictions-limitations-and-workarounds.aspx[`XDomainRequest`].
 That works across domains but does not support sending cookies.
 Cookies are often essential for Java applications.
 However, since the SockJS client can be used with many server

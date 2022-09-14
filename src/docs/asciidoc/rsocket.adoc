@@ -53,7 +53,7 @@ through RSocket across the network.
 === The Protocol
 
 One of the benefits of RSocket is that it has well defined behavior on the wire and an
-easy to read https://rsocket.io/about/Protocol[specification] along with some protocol
+easy to read https://rsocket.io/about/protocol[specification] along with some protocol
 {gh-rsocket}/rsocket/tree/master/Extensions[extensions]. Therefore it is
 a good idea to read the spec, independent of language implementations and higher level
 framework APIs. This section provides a succinct overview to establish some context.

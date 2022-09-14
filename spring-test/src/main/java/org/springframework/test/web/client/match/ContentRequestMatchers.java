@@ -259,7 +259,7 @@ public class ContentRequestMatchers {
 	 * two are "similar" - i.e. they contain the same elements and attributes
 	 * regardless of order.
 	 * <p>Use of this matcher assumes the
-	 * <a href="http://xmlunit.sourceforge.net/">XMLUnit</a> library is available.
+	 * <a href="https://www.xmlunit.org/">XMLUnit</a> library is available.
 	 * @param expectedXmlContent the expected XML content
 	 */
 	public RequestMatcher xml(String expectedXmlContent) {

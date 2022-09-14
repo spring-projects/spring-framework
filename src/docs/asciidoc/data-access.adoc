@@ -131,7 +131,7 @@ Typically, you need an application server's JTA capability only if your applicat
 to handle transactions across multiple resources, which is not a requirement for many
 applications. Many high-end applications use a single, highly scalable database (such as
 Oracle RAC) instead. Stand-alone transaction managers (such as
-https://www.atomikos.com/[Atomikos Transactions] and http://jotm.objectweb.org/[JOTM])
+https://www.atomikos.com/[Atomikos Transactions] and https://jotm.ow2.org/[JOTM])
 are other options. Of course, you may need other application server capabilities, such as
 Java Message Service (JMS) and Jakarta EE Connector Architecture (JCA).
 
@@ -2880,7 +2880,7 @@ treats them as errors.
 
 For more information about the Spring Framework's transaction support, see:
 
-* https://www.javaworld.com/javaworld/jw-01-2009/jw-01-spring-transactions.html[Distributed
+* https://www.infoworld.com/article/2077963/distributed-transactions-in-spring--with-and-without-xa.html[Distributed
   transactions in Spring, with and without XA] is a JavaWorld presentation in which
   Spring's David Syer guides you through seven patterns for distributed
   transactions in Spring applications, three of them with XA and four without.
@@ -6229,7 +6229,7 @@ it with values from the Java `ARRAY`, as the following example shows:
 === Embedded Database Support
 
 The `org.springframework.jdbc.datasource.embedded` package provides support for embedded
-Java database engines. Support for http://www.hsqldb.org[HSQL],
+Java database engines. Support for https://www.hsqldb.org[HSQL],
 https://www.h2database.com[H2], and https://db.apache.org/derby[Derby] is provided
 natively. You can also use an extensible API to plug in new embedded database types and
 `DataSource` implementations.
