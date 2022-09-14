@@ -26,9 +26,6 @@ dependencies {
 	}
 	optional("org.eclipse.jetty.websocket:websocket-jetty-client")
 	optional("io.undertow:undertow-websockets-jsr-jakarta")
-	optional("org.apache.httpcomponents:httpclient") {
-		exclude group: "commons-logging", module: "commons-logging"
-	}
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("com.google.protobuf:protobuf-java-util")

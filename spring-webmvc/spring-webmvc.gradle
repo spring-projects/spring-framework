@@ -44,9 +44,6 @@ dependencies {
 	testImplementation("org.eclipse.jetty:jetty-server") {
 		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
 	}
-	testImplementation("org.apache.httpcomponents:httpclient") {
-		exclude group: "commons-logging", module: "commons-logging"
-	}
 	testImplementation("commons-io:commons-io")
 	testImplementation("org.mozilla:rhino")
 	testImplementation("org.dom4j:dom4j") {
@@ -64,6 +61,7 @@ dependencies {
 	testImplementation("io.projectreactor:reactor-core")
 	testImplementation("io.reactivex.rxjava3:rxjava")
 	testImplementation("org.jetbrains.kotlin:kotlin-script-runtime")
+	testRuntimeOnly("org.apache.httpcomponents.client5:httpclient5")
 	testRuntimeOnly("org.jetbrains.kotlin:kotlin-scripting-jsr223")
 	testRuntimeOnly("org.jruby:jruby")
 	testRuntimeOnly("org.python:jython-standalone")
