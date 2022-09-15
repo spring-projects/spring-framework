@@ -31,7 +31,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @author Sam Brannen
  * @since 4.1
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class EmptyDatabaseConfig {
 
 	@Bean
