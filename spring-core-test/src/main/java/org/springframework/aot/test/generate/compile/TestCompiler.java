@@ -35,6 +35,8 @@ import javax.tools.ToolProvider;
 
 import org.springframework.aot.generate.GeneratedFiles.Kind;
 import org.springframework.aot.generate.InMemoryGeneratedFiles;
+import org.springframework.aot.test.generate.file.ClassFile;
+import org.springframework.aot.test.generate.file.ClassFiles;
 import org.springframework.aot.test.generate.file.ResourceFile;
 import org.springframework.aot.test.generate.file.ResourceFiles;
 import org.springframework.aot.test.generate.file.SourceFile;
@@ -61,17 +63,20 @@ public final class TestCompiler {
 
 	private final ResourceFiles resourceFiles;
 
+	private final ClassFiles classFiles;
+
 	private final List<Processor> processors;
 
 
 	private TestCompiler(@Nullable ClassLoader classLoader, JavaCompiler compiler,
-			SourceFiles sourceFiles, ResourceFiles resourceFiles,
+			SourceFiles sourceFiles, ResourceFiles resourceFiles, ClassFiles classFiles,
 			List<Processor> processors) {
 
 		this.classLoader = classLoader;
 		this.compiler = compiler;
 		this.sourceFiles = sourceFiles;
 		this.resourceFiles = resourceFiles;
+		this.classFiles = classFiles;
 		this.processors = processors;
 	}
 
@@ -91,12 +96,12 @@ public final class TestCompiler {
 	 */
 	public static TestCompiler forCompiler(JavaCompiler javaCompiler) {
 		return new TestCompiler(null, javaCompiler, SourceFiles.none(),
-				ResourceFiles.none(), Collections.emptyList());
+				ResourceFiles.none(), ClassFiles.none(), Collections.emptyList());
 	}
 
 	/**
 	 * Create a new {@code TestCompiler} instance with additional generated
-	 * source and resource files.
+	 * source, resource, and class files.
 	 * @param generatedFiles the generated files to add
 	 * @return a new {@code TestCompiler} instance
 	 */
@@ -107,7 +112,11 @@ public final class TestCompiler {
 		List<ResourceFile> resourceFiles = new ArrayList<>();
 		generatedFiles.getGeneratedFiles(Kind.RESOURCE).forEach(
 				(path, inputStreamSource) -> resourceFiles.add(ResourceFile.of(path, inputStreamSource)));
-		return withSources(sourceFiles).withResources(resourceFiles);
+		List<ClassFile> classFiles = new ArrayList<>();
+		generatedFiles.getGeneratedFiles(Kind.CLASS).forEach(
+				(path, inputStreamSource) -> classFiles.add(ClassFile.of(
+						ClassFile.toClassName(path), inputStreamSource)));
+		return withSources(sourceFiles).withResources(resourceFiles).withClasses(classFiles);
 	}
 
 	/**
@@ -117,7 +126,8 @@ public final class TestCompiler {
 	 */
 	public TestCompiler withSources(SourceFile... sourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler,
-				this.sourceFiles.and(sourceFiles), this.resourceFiles, this.processors);
+				this.sourceFiles.and(sourceFiles), this.resourceFiles,
+				this.classFiles, this.processors);
 	}
 
 	/**
@@ -127,7 +137,8 @@ public final class TestCompiler {
 	 */
 	public TestCompiler withSources(Iterable<SourceFile> sourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler,
-				this.sourceFiles.and(sourceFiles), this.resourceFiles, this.processors);
+				this.sourceFiles.and(sourceFiles), this.resourceFiles,
+				this.classFiles, this.processors);
 	}
 
 	/**
@@ -137,7 +148,8 @@ public final class TestCompiler {
 	 */
 	public TestCompiler withSources(SourceFiles sourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler,
-				this.sourceFiles.and(sourceFiles), this.resourceFiles, this.processors);
+				this.sourceFiles.and(sourceFiles), this.resourceFiles,
+				this.classFiles, this.processors);
 	}
 
 	/**
@@ -147,7 +159,7 @@ public final class TestCompiler {
 	 */
 	public TestCompiler withResources(ResourceFile... resourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler, this.sourceFiles,
-				this.resourceFiles.and(resourceFiles), this.processors);
+				this.resourceFiles.and(resourceFiles), this.classFiles, this.processors);
 	}
 
 	/**
@@ -157,7 +169,7 @@ public final class TestCompiler {
 	 */
 	public TestCompiler withResources(Iterable<ResourceFile> resourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler, this.sourceFiles,
-				this.resourceFiles.and(resourceFiles), this.processors);
+				this.resourceFiles.and(resourceFiles), this.classFiles, this.processors);
 	}
 
 	/**
@@ -167,7 +179,17 @@ public final class TestCompiler {
 	 */
 	public TestCompiler withResources(ResourceFiles resourceFiles) {
 		return new TestCompiler(this.classLoader, this.compiler, this.sourceFiles,
-				this.resourceFiles.and(resourceFiles), this.processors);
+				this.resourceFiles.and(resourceFiles), this.classFiles, this.processors);
+	}
+
+	/**
+	 * Create a new {@code TestCompiler} instance with additional classes.
+	 * @param classFiles the additional classes
+	 * @return a new {@code TestCompiler} instance
+	 */
+	public TestCompiler withClasses(Iterable<ClassFile> classFiles) {
+		return new TestCompiler(this.classLoader, this.compiler, this.sourceFiles,
+				this.resourceFiles, this.classFiles.and(classFiles), this.processors);
 	}
 
 	/**
@@ -179,7 +201,7 @@ public final class TestCompiler {
 		List<Processor> mergedProcessors = new ArrayList<>(this.processors);
 		mergedProcessors.addAll(Arrays.asList(processors));
 		return new TestCompiler(this.classLoader, this.compiler, this.sourceFiles,
-				this.resourceFiles, mergedProcessors);
+				this.resourceFiles, this.classFiles, mergedProcessors);
 	}
 
 	/**
@@ -191,7 +213,7 @@ public final class TestCompiler {
 		List<Processor> mergedProcessors = new ArrayList<>(this.processors);
 		processors.forEach(mergedProcessors::add);
 		return new TestCompiler(this.classLoader, this.compiler, this.sourceFiles,
-				this.resourceFiles, mergedProcessors);
+				this.resourceFiles, this.classFiles, mergedProcessors);
 	}
 
 	/**
@@ -269,7 +291,7 @@ public final class TestCompiler {
 		StandardJavaFileManager standardFileManager = this.compiler.getStandardFileManager(
 				null, null, null);
 		DynamicJavaFileManager fileManager = new DynamicJavaFileManager(
-				standardFileManager, classLoaderToUse);
+				standardFileManager, classLoaderToUse, this.classFiles);
 		if (!this.sourceFiles.isEmpty()) {
 			Errors errors = new Errors();
 			CompilationTask task = this.compiler.getTask(null, fileManager, errors, null,

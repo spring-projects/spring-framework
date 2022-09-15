@@ -30,11 +30,13 @@ import javax.lang.model.element.TypeElement;
 import com.example.PublicInterface;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.test.generate.file.ClassFile;
 import org.springframework.aot.test.generate.file.ResourceFile;
 import org.springframework.aot.test.generate.file.ResourceFiles;
 import org.springframework.aot.test.generate.file.SourceFile;
 import org.springframework.aot.test.generate.file.SourceFiles;
 import org.springframework.aot.test.generate.file.WritableContent;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -241,6 +243,46 @@ class TestCompilerTests {
 				.withMessageContaining(ClassUtils.getShortName(CompileWithTargetClassAccess.class));
 	}
 
+	@Test
+	void compiledCodeCanReferenceAdditionalClassInSamePackage() {
+		SourceFiles sourceFiles = SourceFiles.of(SourceFile.of("""
+				package com.example;
+
+				public class Test implements PublicInterface {
+
+					public String perform() {
+						return Messages.HELLO;
+					}
+
+				}
+				"""));
+		ClassFile messagesClass = ClassFile.of("com.example.Messages",
+				new ClassPathResource("com.example.Messages"));
+		TestCompiler.forSystem().withClasses(List.of(messagesClass)).compile(sourceFiles, compiled ->
+				assertThat(compiled.getInstance(PublicInterface.class, "com.example.Test").perform())
+						.isEqualTo("Hello"));
+	}
+
+	@Test
+	void compiledCodeCanReferenceAdditionalClassInDifferentPackage() {
+		SourceFiles sourceFiles = SourceFiles.of(SourceFile.of("""
+				package com.example;
+
+				import com.example.subpackage.Messages;
+
+				public class Test implements PublicInterface {
+
+					public String perform() {
+						return Messages.HELLO;
+					}
+
+				}
+				"""));
+		ClassFile messagesClass = ClassFile.of("com.example.subpackage.Messages",
+				new ClassPathResource("com.example.subpackage.Messages"));
+		TestCompiler.forSystem().withClasses(List.of(messagesClass)).compile(sourceFiles, compiled -> assertThat(
+				compiled.getInstance(PublicInterface.class, "com.example.Test").perform()).isEqualTo("Hello from subpackage"));
+	}
 
 	private void assertSuppliesHelloWorld(Compiled compiled) {
 		assertThat(compiled.getInstance(Supplier.class).get()).isEqualTo("Hello World!");
