@@ -177,18 +177,6 @@ public class ReflectionHints {
 
 	/**
 	 * Register the need for reflection on the specified {@link Constructor},
-	 * enabling {@link ExecutableMode#INVOKE}.
-	 * @param constructor the constructor that requires reflection
-	 * @return {@code this}, to facilitate method chaining
-	 * @deprecated in favor of {@link #registerConstructor(Constructor, ExecutableMode)}
-	 */
-	@Deprecated
-	public ReflectionHints registerConstructor(Constructor<?> constructor) {
-		return registerConstructor(constructor, ExecutableMode.INVOKE);
-	}
-
-	/**
-	 * Register the need for reflection on the specified {@link Constructor},
 	 * using the specified {@link ExecutableMode}.
 	 * @param constructor the constructor that requires reflection
 	 * @param mode the requested mode
@@ -197,33 +185,6 @@ public class ReflectionHints {
 	public ReflectionHints registerConstructor(Constructor<?> constructor, ExecutableMode mode) {
 		return registerType(TypeReference.of(constructor.getDeclaringClass()),
 				typeHint -> typeHint.withConstructor(mapParameters(constructor), mode));
-	}
-
-	/**
-	 * Register the need for reflection on the specified {@link Constructor}.
-	 * @param constructor the constructor that requires reflection
-	 * @param constructorHint a builder to further customize the hints of this
-	 * constructor
-	 * @return {@code this}, to facilitate method chaining`
-	 * @deprecated in favor of {@link #registerConstructor(Constructor, ExecutableMode)}
-	 */
-	@Deprecated
-	@SuppressWarnings("deprecation")
-	public ReflectionHints registerConstructor(Constructor<?> constructor, Consumer<ExecutableHint.Builder> constructorHint) {
-		return registerType(TypeReference.of(constructor.getDeclaringClass()),
-				typeHint -> typeHint.withConstructor(mapParameters(constructor), constructorHint));
-	}
-
-	/**
-	 * Register the need for reflection on the specified {@link Method},
-	 * enabling {@link ExecutableMode#INVOKE}.
-	 * @param method the method that requires reflection
-	 * @return {@code this}, to facilitate method chaining
-	 * @deprecated in favor of {@link #registerMethod(Method, ExecutableMode)}
-	 */
-	@Deprecated
-	public ReflectionHints registerMethod(Method method) {
-		return registerMethod(method, ExecutableMode.INVOKE);
 	}
 
 	/**
@@ -236,20 +197,6 @@ public class ReflectionHints {
 	public ReflectionHints registerMethod(Method method, ExecutableMode mode) {
 		return registerType(TypeReference.of(method.getDeclaringClass()),
 				typeHint -> typeHint.withMethod(method.getName(), mapParameters(method), mode));
-	}
-
-	/**
-	 * Register the need for reflection on the specified {@link Method}.
-	 * @param method the method that requires reflection
-	 * @param methodHint a builder to further customize the hints of this method
-	 * @return {@code this}, to facilitate method chaining
-	 * @deprecated in favor of {@link #registerMethod(Method, ExecutableMode)}
-	 */
-	@Deprecated
-	@SuppressWarnings("deprecation")
-	public ReflectionHints registerMethod(Method method, Consumer<ExecutableHint.Builder> methodHint) {
-		return registerType(TypeReference.of(method.getDeclaringClass()),
-				typeHint -> typeHint.withMethod(method.getName(), mapParameters(method), methodHint));
 	}
 
 	private List<TypeReference> mapParameters(Executable executable) {

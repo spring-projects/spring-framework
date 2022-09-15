@@ -198,18 +198,6 @@ public final class TypeHint implements ConditionalHint {
 
 		/**
 		 * Register the need for reflection on the constructor with the specified
-		 * parameter types, enabling {@link ExecutableMode#INVOKE}.
-		 * @param parameterTypes the parameter types of the constructor
-		 * @return {@code this}, to facilitate method chaining
-		 * @deprecated in favor of {@link #withConstructor(List, ExecutableMode)}
-		 */
-		@Deprecated
-		public Builder withConstructor(List<TypeReference> parameterTypes) {
-			return withConstructor(parameterTypes, ExecutableMode.INVOKE);
-		}
-
-		/**
-		 * Register the need for reflection on the constructor with the specified
 		 * parameter types, using the specified {@link ExecutableMode}.
 		 * @param parameterTypes the parameter types of the constructor
 		 * @param mode the requested mode
@@ -226,29 +214,14 @@ public final class TypeHint implements ConditionalHint {
 		 * @param constructorHint a builder to further customize the hints of this
 		 * constructor
 		 * @return {@code this}, to facilitate method chaining
-		 * @deprecated in favor of {@link #withConstructor(List, ExecutableMode)}
 		 */
-		@Deprecated
-		public Builder withConstructor(List<TypeReference> parameterTypes,
+		private Builder withConstructor(List<TypeReference> parameterTypes,
 				Consumer<ExecutableHint.Builder> constructorHint) {
 			ExecutableKey key = new ExecutableKey("<init>", parameterTypes);
 			ExecutableHint.Builder builder = this.constructors.computeIfAbsent(key,
 					k -> ExecutableHint.ofConstructor(parameterTypes));
 			constructorHint.accept(builder);
 			return this;
-		}
-
-		/**
-		 * Register the need for reflection on the method with the specified name
-		 * and parameter types, enabling {@link ExecutableMode#INVOKE}.
-		 * @param name the name of the method
-		 * @param parameterTypes the parameter types of the constructor
-		 * @return {@code this}, to facilitate method chaining
-		 * @deprecated in favor of {@link #withMethod(String, List, ExecutableMode)}
-		 */
-		@Deprecated
-		public Builder withMethod(String name, List<TypeReference> parameterTypes) {
-			return withMethod(name, parameterTypes, ExecutableMode.INVOKE);
 		}
 
 		/**
@@ -270,10 +243,8 @@ public final class TypeHint implements ConditionalHint {
 		 * @param parameterTypes the parameter types of the constructor
 		 * @param methodHint a builder to further customize the hints of this method
 		 * @return {@code this}, to facilitate method chaining
-		 * @deprecated in favor of {@link #withMethod(String, List, ExecutableMode)}
 		 */
-		@Deprecated
-		public Builder withMethod(String name, List<TypeReference> parameterTypes,
+		private Builder withMethod(String name, List<TypeReference> parameterTypes,
 				Consumer<ExecutableHint.Builder> methodHint) {
 			ExecutableKey key = new ExecutableKey(name, parameterTypes);
 			ExecutableHint.Builder builder = this.methods.computeIfAbsent(key,

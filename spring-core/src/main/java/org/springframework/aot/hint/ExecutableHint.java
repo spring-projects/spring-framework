@@ -123,23 +123,6 @@ public final class ExecutableHint extends MemberHint {
 		}
 
 		/**
-		 * Set the {@linkplain ExecutableMode modes} to use.
-		 * @param modes the mode to use
-		 * @return {@code this}, to facilitate method chaining
-		 * @deprecated only a single mode can be set, use {@link #withMode(ExecutableMode)} instead
-		 */
-		@Deprecated
-		public Builder setModes(ExecutableMode... modes) {
-			if (modes.length > 1) {
-				throw new UnsupportedOperationException();
-			}
-			if (modes.length == 1) {
-				withMode(modes[0]);
-			}
-			return this;
-		}
-
-		/**
 		 * Create an {@link ExecutableHint} based on the state of this builder.
 		 * @return an executable hint
 		 */
