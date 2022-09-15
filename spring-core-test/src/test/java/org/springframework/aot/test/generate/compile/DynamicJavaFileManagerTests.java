@@ -33,7 +33,6 @@ import static org.mockito.BDDMockito.then;
  * Tests for {@link DynamicJavaFileManager}.
  *
  * @author Phillip Webb
- * @since 6.0
  */
 class DynamicJavaFileManagerTests {
 

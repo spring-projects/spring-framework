@@ -24,7 +24,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatObject;
 
-class ReResourceFilesTests {
+/**
+ * Tests for {@link ResourceFilesTests}.
+ *
+ * @author Phillip Webb
+ */
+class ResourceFilesTests {
 
 	private static final ResourceFile RESOURCE_FILE_1 = ResourceFile.of("path1",
 			"resource1");

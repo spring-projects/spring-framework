@@ -24,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link ResourceFile}.
  *
  * @author Phillip Webb
- * @since 6.0
  */
 class ResourceFileTests {
 

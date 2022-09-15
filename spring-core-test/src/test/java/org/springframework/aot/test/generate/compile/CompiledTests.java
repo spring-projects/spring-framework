@@ -34,7 +34,6 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * Tests for {@link Compiled}.
  *
  * @author Phillip Webb
- * @since 6.0
  */
 class CompiledTests {
 
