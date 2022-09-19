@@ -198,7 +198,7 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 		suspend fun entityFlux() : ResponseEntity<Flux<String>> {
 			val strings = Flux.interval(Duration.ofMillis(100)).take(5)
 					.map { l -> l.toString() }
-			delay(1)
+			delay(10)
 			return ResponseEntity.ok().body(strings)
 		}
 
