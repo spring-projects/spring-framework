@@ -32,7 +32,7 @@ import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
 import org.springframework.aot.test.generate.TestGenerationContext;
-import org.springframework.aot.test.generate.compile.CompileWithTargetClassAccess;
+import org.springframework.aot.test.generate.compile.CompileWithForkedClassLoader;
 import org.springframework.aot.test.generate.compile.Compiled;
 import org.springframework.aot.test.generate.compile.TestCompiler;
 import org.springframework.aot.test.generate.file.SourceFile;
@@ -387,7 +387,7 @@ class BeanDefinitionMethodGeneratorTests {
 	}
 
 	@Test
-	@CompileWithTargetClassAccess
+	@CompileWithForkedClassLoader
 	void generateBeanDefinitionMethodWhenPackagePrivateBean() {
 		RegisteredBean registeredBean = registerBean(
 				new RootBeanDefinition(PackagePrivateTestBean.class));

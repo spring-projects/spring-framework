@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.aot.test.generate.TestGenerationContext;
-import org.springframework.aot.test.generate.compile.CompileWithTargetClassAccess;
+import org.springframework.aot.test.generate.compile.CompileWithForkedClassLoader;
 import org.springframework.aot.test.generate.compile.Compiled;
 import org.springframework.aot.test.generate.compile.TestCompiler;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
@@ -53,7 +53,7 @@ import static org.mockito.Mockito.mock;
  * @author Stephane Nicoll
  * @author Phillip Webb
  */
-@CompileWithTargetClassAccess
+@CompileWithForkedClassLoader
 class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 
 	private DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();

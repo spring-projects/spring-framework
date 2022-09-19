@@ -27,7 +27,7 @@ import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.aot.test.generate.TestGenerationContext;
-import org.springframework.aot.test.generate.compile.CompileWithTargetClassAccess;
+import org.springframework.aot.test.generate.compile.CompileWithForkedClassLoader;
 import org.springframework.aot.test.generate.compile.Compiled;
 import org.springframework.aot.test.generate.compile.TestCompiler;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
@@ -85,7 +85,7 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 	}
 
 	@Test
-	@CompileWithTargetClassAccess
+	@CompileWithForkedClassLoader
 	void contributeWhenPackagePrivateFieldInjectionInjectsUsingConsumer() {
 		Environment environment = new StandardEnvironment();
 		this.beanFactory.registerSingleton("environment", environment);
@@ -122,7 +122,7 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 	}
 
 	@Test
-	@CompileWithTargetClassAccess
+	@CompileWithForkedClassLoader
 	void contributeWhenPackagePrivateMethodInjectionInjectsUsingConsumer() {
 		Environment environment = new StandardEnvironment();
 		this.beanFactory.registerSingleton("environment", environment);

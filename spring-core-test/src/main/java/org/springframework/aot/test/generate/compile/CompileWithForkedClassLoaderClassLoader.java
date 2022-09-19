@@ -26,28 +26,37 @@ import org.springframework.lang.Nullable;
 
 /**
  * {@link ClassLoader} implementation to support
- * {@link CompileWithTargetClassAccess @CompileWithTargetClassAccess}.
+ * {@link CompileWithForkedClassLoader @CompileWithForkedClassLoader}.
  *
  * @author Phillip Webb
+ * @author Andy Wilkinson
+ * @author Stephane Nicoll
  * @since 6.0
  */
-final class CompileWithTargetClassAccessClassLoader extends ClassLoader {
+final class CompileWithForkedClassLoaderClassLoader extends ClassLoader {
 
 	private final ClassLoader testClassLoader;
 
 	private Function<String, byte[]> classResourceLookup = name -> null;
 
 
-	public CompileWithTargetClassAccessClassLoader(ClassLoader testClassLoader) {
+	public CompileWithForkedClassLoaderClassLoader(ClassLoader testClassLoader) {
 		super(testClassLoader.getParent());
 		this.testClassLoader = testClassLoader;
 	}
 
-	// Invoked reflectively by DynamicClassLoader constructor
+	// Invoked reflectively by DynamicClassLoader
 	@SuppressWarnings("unused")
 	void setClassResourceLookup(Function<String, byte[]> classResourceLookup) {
 		this.classResourceLookup = classResourceLookup;
 	}
+
+	// Invoked reflectively by DynamicClassLoader
+	@SuppressWarnings("unused")
+	Class<?> defineDynamicClass(String name, byte[] b, int off, int len) {
+		return super.defineClass(name, b, off, len);
+	}
+
 
 	@Override
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
@@ -81,13 +90,6 @@ final class CompileWithTargetClassAccessClassLoader extends ClassLoader {
 		}
 		return null;
 	}
-
-	// Invoked reflectively by DynamicClassLoader.findDefineClassMethod(ClassLoader)
-	@SuppressWarnings("unused")
-	Class<?> defineClassWithTargetAccess(String name, byte[] b, int off, int len) {
-		return super.defineClass(name, b, off, len);
-	}
-
 
 	@Override
 	protected Enumeration<URL> findResources(String name) throws IOException {

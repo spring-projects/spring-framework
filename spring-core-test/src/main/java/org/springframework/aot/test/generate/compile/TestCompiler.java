@@ -276,7 +276,7 @@ public final class TestCompiler {
 		}
 		catch (IllegalAccessError ex) {
 			throw new IllegalAccessError(ex.getMessage() + ". " +
-					"For non-public access ensure you annotate your test class or test method with @CompileWithTargetClassAccess");
+					"For non-public access ensure you annotate your test class or test method with @CompileWithForkedClassLoader");
 		}
 		finally {
 			Thread.currentThread().setContextClassLoader(previousClassLoader);

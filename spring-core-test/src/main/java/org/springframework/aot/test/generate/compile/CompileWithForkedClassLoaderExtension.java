@@ -34,14 +34,14 @@ import static org.junit.platform.launcher.EngineFilter.includeEngines;
 
 /**
  * JUnit Jupiter {@link InvocationInterceptor} to support
- * {@link CompileWithTargetClassAccess @CompileWithTargetClassAccess}.
+ * {@link CompileWithForkedClassLoader @CompileWithForkedClassLoader}.
  *
  * @author Christoph Dreis
  * @author Phillip Webb
  * @author Sam Brannen
  * @since 6.0
  */
-class CompileWithTargetClassAccessExtension implements InvocationInterceptor {
+class CompileWithForkedClassLoaderExtension implements InvocationInterceptor {
 
 	@Override
 	public void interceptBeforeAllMethod(Invocation<Void> invocation,
@@ -105,7 +105,7 @@ class CompileWithTargetClassAccessExtension implements InvocationInterceptor {
 		Class<?> testClass = extensionContext.getRequiredTestClass();
 		ClassLoader classLoader = testClass.getClassLoader();
 		return classLoader.getClass().getName()
-				.equals(CompileWithTargetClassAccessClassLoader.class.getName());
+				.equals(CompileWithForkedClassLoaderClassLoader.class.getName());
 	}
 
 	private void runTestWithModifiedClassPath(
@@ -115,7 +115,7 @@ class CompileWithTargetClassAccessExtension implements InvocationInterceptor {
 		Class<?> testClass = extensionContext.getRequiredTestClass();
 		Method testMethod = invocationContext.getExecutable();
 		ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-		ClassLoader forkedClassPathClassLoader = new CompileWithTargetClassAccessClassLoader(
+		ClassLoader forkedClassPathClassLoader = new CompileWithForkedClassLoaderClassLoader(
 				testClass.getClassLoader());
 		Thread.currentThread().setContextClassLoader(forkedClassPathClassLoader);
 		try {

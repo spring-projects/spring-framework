@@ -26,8 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Annotation that registers a JUnit Jupiter extension for test classes or test
- * methods that need a {@link TestCompiler} with non-public access to target
- * classes.
+ * methods that need to use a forked classloader with compiled code.
  *
  * <p>The extension allows the compiler to define classes without polluting the
  * test {@link ClassLoader}.
@@ -45,6 +44,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.METHOD })
 @Documented
-@ExtendWith(CompileWithTargetClassAccessExtension.class)
-public @interface CompileWithTargetClassAccess {
+@ExtendWith(CompileWithForkedClassLoaderExtension.class)
+public @interface CompileWithForkedClassLoader {
 }

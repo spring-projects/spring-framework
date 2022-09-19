@@ -40,7 +40,7 @@
 	<suppress files="Target_ClassFinder" checks="HideUtilityClassConstructor"/>
 
 	<!-- spring-core-test -->
-	<suppress files="CompileWithTargetClassAccess" checks="IllegalImport" id="bannedJUnitJupiterImports" />
+	<suppress files="CompileWithForkedClassLoader" checks="IllegalImport" id="bannedJUnitJupiterImports" />
 	<suppress files="org[\\/]springframework[\\/]aot[\\/]test[\\/]agent[\\/].+" checks="IllegalImport" id="bannedJUnitJupiterImports" />
 
 	<!-- spring-expression -->

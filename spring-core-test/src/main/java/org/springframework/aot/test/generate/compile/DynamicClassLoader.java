@@ -63,14 +63,14 @@ public class DynamicClassLoader extends ClassLoader {
 		this.classFiles = classFiles;
 		this.compiledClasses = compiledClasses;
 		Class<? extends ClassLoader> parentClass = parent.getClass();
-		if (parentClass.getName().equals(CompileWithTargetClassAccessClassLoader.class.getName())) {
+		if (parentClass.getName().equals(CompileWithForkedClassLoaderClassLoader.class.getName())) {
 			Method setClassResourceLookupMethod = ReflectionUtils.findMethod(parentClass,
 					"setClassResourceLookup", Function.class);
 			ReflectionUtils.makeAccessible(setClassResourceLookupMethod);
 			ReflectionUtils.invokeMethod(setClassResourceLookupMethod,
 					getParent(), (Function<String, byte[]>) this::findClassBytes);
 			this.defineClassMethod = ReflectionUtils.findMethod(parentClass,
-					"defineClassWithTargetAccess", String.class, byte[].class, int.class, int.class);
+					"defineDynamicClass", String.class, byte[].class, int.class, int.class);
 			ReflectionUtils.makeAccessible(this.defineClassMethod);
 			this.compiledClasses.forEach((name, file) -> defineClass(name, file.getBytes()));
 		}

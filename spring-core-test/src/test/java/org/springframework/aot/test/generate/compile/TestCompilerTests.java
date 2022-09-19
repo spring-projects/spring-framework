@@ -206,7 +206,7 @@ class TestCompilerTests {
 	}
 
 	@Test
-	@CompileWithTargetClassAccess
+	@CompileWithForkedClassLoader
 	void compiledCodeCanAccessExistingPackagePrivateClassIfAnnotated() throws LinkageError {
 		SourceFiles sourceFiles = SourceFiles.of(SourceFile.of("""
 				package com.example;
@@ -240,7 +240,7 @@ class TestCompilerTests {
 		assertThatExceptionOfType(IllegalAccessError.class)
 				.isThrownBy(() -> TestCompiler.forSystem().compile(sourceFiles,
 						compiled -> compiled.getInstance(PublicInterface.class, "com.example.Test").perform()))
-				.withMessageContaining(ClassUtils.getShortName(CompileWithTargetClassAccess.class));
+				.withMessageContaining(ClassUtils.getShortName(CompileWithForkedClassLoader.class));
 	}
 
 	@Test
