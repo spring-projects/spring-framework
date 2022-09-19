@@ -849,9 +849,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			if (requestCallback != null) {
 				requestCallback.doWithRequest(request);
 			}
-			try (Observation.Scope scope = observation.openScope()) {
-				response = request.execute();
-			}
+			response = request.execute();
 			observationContext.setResponse(response);
 			handleResponse(url, method, response);
 			return (responseExtractor != null ? responseExtractor.extractData(response) : null);

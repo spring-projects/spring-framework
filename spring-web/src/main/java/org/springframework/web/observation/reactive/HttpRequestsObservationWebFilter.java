@@ -97,8 +97,8 @@ public class HttpRequestsObservationWebFilter implements WebFilter {
 	}
 
 	private Publisher<Void> filter(ServerWebExchange exchange, HttpRequestsObservationContext observationContext, Mono<Void> call) {
-		Observation observation = Observation.createNotStarted(this.observationConvention, DEFAULT_OBSERVATION_CONVENTION,
-				observationContext, this.observationRegistry);
+		Observation observation = HttpRequestsObservation.HTTP_REQUESTS.createNotStarted(this.observationConvention,
+				DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, this.observationRegistry);
 		observation.start();
 		return call.doOnEach(signal -> {
 					Throwable throwable = signal.getThrowable();
