@@ -6,8 +6,13 @@ on:
   push:
     branches:
       - '*.x'
+permissions:
+  contents: read
 jobs:
   build:
+    permissions:
+      contents: read
+      issues: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
