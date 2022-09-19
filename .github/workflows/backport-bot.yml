@@ -6,8 +6,13 @@ on:
   push:
     branches:
       - '*.x'
+permissions:
+  contents: read
 jobs:
   build:
+    permissions:
+      contents: read # to fetch code (actions/checkout)
+      issues: write # to create and close issues
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
