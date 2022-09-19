@@ -26,6 +26,8 @@ import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
+import java.util.Map;
+import java.util.function.Function;
 
 import org.springframework.aot.test.generate.file.ClassFile;
 import org.springframework.aot.test.generate.file.ClassFiles;
@@ -47,47 +49,65 @@ public class DynamicClassLoader extends ClassLoader {
 
 	private final ClassFiles classFiles;
 
+	private final Map<String, DynamicClassFileObject> compiledClasses;
+
 	@Nullable
 	private final Method defineClassMethod;
 
 
 	public DynamicClassLoader(ClassLoader parent, ResourceFiles resourceFiles,
-			ClassFiles classFiles) {
+			ClassFiles classFiles, Map<String, DynamicClassFileObject> compiledClasses) {
 
 		super(parent);
 		this.resourceFiles = resourceFiles;
 		this.classFiles = classFiles;
-		this.defineClassMethod = findDefineClassMethod(parent);
-		if (this.defineClassMethod != null) {
-			classFiles.forEach(this::defineClass);
-		}
-	}
-
-	@Nullable
-	private Method findDefineClassMethod(ClassLoader parent) {
+		this.compiledClasses = compiledClasses;
 		Class<? extends ClassLoader> parentClass = parent.getClass();
 		if (parentClass.getName().equals(CompileWithTargetClassAccessClassLoader.class.getName())) {
-			Method defineClassMethod = ReflectionUtils.findMethod(parentClass,
+			Method setClassResourceLookupMethod = ReflectionUtils.findMethod(parentClass,
+					"setClassResourceLookup", Function.class);
+			ReflectionUtils.makeAccessible(setClassResourceLookupMethod);
+			ReflectionUtils.invokeMethod(setClassResourceLookupMethod,
+					getParent(), (Function<String, byte[]>) this::findClassBytes);
+			this.defineClassMethod = ReflectionUtils.findMethod(parentClass,
 					"defineClassWithTargetAccess", String.class, byte[].class, int.class, int.class);
-			ReflectionUtils.makeAccessible(defineClassMethod);
-			return defineClassMethod;
+			ReflectionUtils.makeAccessible(this.defineClassMethod);
+			this.compiledClasses.forEach((name, file) -> defineClass(name, file.getBytes()));
 		}
-		return null;
+		else {
+			this.defineClassMethod = null;
+		}
 	}
 
 
 	@Override
 	protected Class<?> findClass(String name) throws ClassNotFoundException {
-		ClassFile classFile = this.classFiles.get(name);
-		if (classFile != null) {
-			return defineClass(classFile);
+		byte[] bytes = findClassBytes(name);
+		if (bytes != null) {
+			return defineClass(name, bytes);
 		}
 		return super.findClass(name);
 	}
 
-	private Class<?> defineClass(ClassFile classFile) {
-		String name = classFile.getName();
-		byte[] bytes = classFile.getContent();
+	@Nullable
+	private byte[] findClassBytes(String name) {
+		DynamicClassFileObject compiledClass = this.compiledClasses.get(name);
+		if(compiledClass != null) {
+			return compiledClass.getBytes();
+		}
+		return findClassFileBytes(name);
+	}
+
+	@Nullable
+	private byte[] findClassFileBytes(String name) {
+		ClassFile classFile = this.classFiles.get(name);
+		if (classFile != null) {
+			return classFile.getContent();
+		}
+		return null;
+	}
+
+	private Class<?> defineClass(String name, byte[] bytes) {
 		if (this.defineClassMethod != null) {
 			return (Class<?>) ReflectionUtils.invokeMethod(this.defineClassMethod,
 					getParent(), name, bytes, 0, bytes.length);

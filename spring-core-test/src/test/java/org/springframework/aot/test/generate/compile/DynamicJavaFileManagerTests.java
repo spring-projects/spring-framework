@@ -101,8 +101,8 @@ class DynamicJavaFileManagerTests {
 				Kind.CLASS, null);
 		this.fileManager.getJavaFileForOutput(this.location, "com.example.MyClass2",
 				Kind.CLASS, null);
-		assertThat(this.fileManager.getClassFiles().stream().map(ClassFile::getName))
-				.contains("com.example.MyClass1", "com.example.MyClass2");
+		assertThat(this.fileManager.getCompiledClasses()).containsKeys(
+				"com.example.MyClass1", "com.example.MyClass2");
 	}
 
 	@Test

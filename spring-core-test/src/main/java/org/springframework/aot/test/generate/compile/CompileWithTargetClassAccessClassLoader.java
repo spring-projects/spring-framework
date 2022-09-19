@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.function.Function;
 
 import org.springframework.lang.Nullable;
 
@@ -34,12 +35,19 @@ final class CompileWithTargetClassAccessClassLoader extends ClassLoader {
 
 	private final ClassLoader testClassLoader;
 
+	private Function<String, byte[]> classResourceLookup = name -> null;
+
 
 	public CompileWithTargetClassAccessClassLoader(ClassLoader testClassLoader) {
 		super(testClassLoader.getParent());
 		this.testClassLoader = testClassLoader;
 	}
 
+	// Invoked reflectively by DynamicClassLoader constructor
+	@SuppressWarnings("unused")
+	void setClassResourceLookup(Function<String, byte[]> classResourceLookup) {
+		this.classResourceLookup = classResourceLookup;
+	}
 
 	@Override
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
@@ -51,24 +59,35 @@ final class CompileWithTargetClassAccessClassLoader extends ClassLoader {
 
 	@Override
 	protected Class<?> findClass(String name) throws ClassNotFoundException {
+		byte[] bytes = findClassBytes(name);
+		return (bytes != null) ? defineClass(name, bytes, 0, bytes.length, null) : super.findClass(name);
+	}
+
+	@Nullable
+	private byte[] findClassBytes(String name) {
+		byte[] bytes = this.classResourceLookup.apply(name);
+		if (bytes != null) {
+			return bytes;
+		}
 		String resourceName = name.replace(".", "/") + ".class";
 		InputStream stream = this.testClassLoader.getResourceAsStream(resourceName);
 		if (stream != null) {
 			try (stream) {
-				byte[] bytes = stream.readAllBytes();
-				return defineClass(name, bytes, 0, bytes.length, null);
+				return stream.readAllBytes();
 			}
 			catch (IOException ex) {
+				// ignore
 			}
 		}
-		return super.findClass(name);
+		return null;
 	}
 
-
 	// Invoked reflectively by DynamicClassLoader.findDefineClassMethod(ClassLoader)
+	@SuppressWarnings("unused")
 	Class<?> defineClassWithTargetAccess(String name, byte[] b, int off, int len) {
 		return super.defineClass(name, b, off, len);
 	}
+
 
 	@Override
 	protected Enumeration<URL> findResources(String name) throws IOException {

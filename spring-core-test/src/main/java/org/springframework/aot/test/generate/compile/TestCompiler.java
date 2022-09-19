@@ -304,7 +304,7 @@ public final class TestCompiler {
 				throw new CompilationException(errors.toString(), this.sourceFiles, this.resourceFiles);
 			}
 		}
-		return new DynamicClassLoader(classLoaderToUse, this.resourceFiles, fileManager.getClassFiles());
+		return new DynamicClassLoader(classLoaderToUse, this.resourceFiles, this.classFiles, fileManager.getCompiledClasses());
 	}
 
 	/**
