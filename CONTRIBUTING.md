@@ -66,7 +66,7 @@ follow-up reports will need to be created as new issues with a fresh description
 #### Submit a Pull Request
 
 1. If you have not previously done so, please sign the
-[Contributor License Agreement](https://cla.pivotal.io/sign/spring). You will be reminded
+[Contributor License Agreement](https://cla.spring.io/sign/spring). You will be reminded
 automatically when you submit the PR.
 
 1. Should you create an issue first? No, just create the pull request and use the

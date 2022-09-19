@@ -21,13 +21,7 @@ Email, Tasks, Scheduling, Caching.
 https://github.com/spring-projects/spring-framework/wiki[*Wiki*] :: What's New,
 Upgrade Notes, Supported Versions, and other cross-version information.
 
-ifdef::backend-html5[]
-NOTE: This documentation is also available as {docs-spring-framework}/reference/pdf/index.pdf[PDF].
-endif::[]
-
-ifdef::backend-pdf[]
-NOTE: This documentation is also available as {docs-spring-framework}/reference/html/index.html[HTML].
-endif::[]
+NOTE: This documentation is available in {docs-spring-framework}/reference/html/index.html[HTML] and {docs-spring-framework}/reference/pdf/index.pdf[PDF] formats.
 
 Rod Johnson, Juergen Hoeller, Keith Donald, Colin Sampaleanu, Rob Harrop, Thomas Risberg,
 Alef Arendsen, Darren Davison, Dmitriy Kopylenko, Mark Pollack, Thierry Templier, Erwin
@@ -36,7 +30,7 @@ Brannen, Ramnivas Laddad, Arjen Poutsma, Chris Beams, Tareq Abedrabbo, Andy Clem
 Syer, Oliver Gierke, Rossen Stoyanchev, Phillip Webb, Rob Winch, Brian Clozel, Stephane
 Nicoll, Sebastien Deleuze, Jay Bryant, Mark Paluch
 
-Copyright © 2002 - 2022 Pivotal, Inc. All Rights Reserved.
+Copyright © 2002 - 2022 VMware, Inc. All Rights Reserved.
 
 Copies of this document may be made for your own use and for distribution to others,
 provided that you do not charge any fee for such copies and further provided that each
