@@ -47,7 +47,6 @@ import org.springframework.core.codec.EncodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageEncoder;
@@ -73,8 +72,6 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	private static final byte[] NEWLINE_SEPARATOR = {'\n'};
 
 	private static final byte[] EMPTY_BYTES = new byte[0];
-
-	private static DataBuffer EMPTY_BUFFER = DefaultDataBufferFactory.sharedInstance.wrap(EMPTY_BYTES);
 
 	private static final Map<String, JsonEncoding> ENCODINGS;
 
