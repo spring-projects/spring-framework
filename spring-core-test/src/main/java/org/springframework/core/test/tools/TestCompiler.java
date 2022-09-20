@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import javax.annotation.processing.Processor;
 import javax.tools.Diagnostic;
@@ -96,7 +96,7 @@ public final class TestCompiler {
 	 * @param customizer the customizer to call
 	 * @return a new {@code TestCompiler} instance with the customizations applied
 	 */
-	public TestCompiler with(Function<TestCompiler, TestCompiler> customizer) {
+	public TestCompiler with(UnaryOperator<TestCompiler> customizer) {
 		return customizer.apply(this);
 	}
 
