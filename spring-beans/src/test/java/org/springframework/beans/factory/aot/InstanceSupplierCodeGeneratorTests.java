@@ -31,8 +31,6 @@ import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.TypeHint;
 import org.springframework.aot.test.generate.TestGenerationContext;
-import org.springframework.aot.test.generate.compile.Compiled;
-import org.springframework.aot.test.generate.compile.TestCompiler;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -51,6 +49,8 @@ import org.springframework.beans.testfixture.beans.factory.generator.factory.Num
 import org.springframework.beans.testfixture.beans.factory.generator.factory.SampleFactory;
 import org.springframework.beans.testfixture.beans.factory.generator.injection.InjectionComponent;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.test.tools.Compiled;
+import org.springframework.core.test.tools.TestCompiler;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
