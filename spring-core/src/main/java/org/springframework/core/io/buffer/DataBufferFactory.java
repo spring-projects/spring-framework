@@ -36,7 +36,7 @@ public interface DataBufferFactory {
 	 * @return the allocated buffer
 	 * @deprecated as of 6.0, in favor of {@link #allocateBuffer(int)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	DataBuffer allocateBuffer();
 
 	/**

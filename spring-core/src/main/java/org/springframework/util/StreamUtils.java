@@ -215,7 +215,7 @@ public abstract class StreamUtils {
 	 * @since 4.2.2
 	 * @deprecated as of 6.0 in favor of {@link InputStream#nullInputStream()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public static InputStream emptyInput() {
 		return InputStream.nullInputStream();
 	}

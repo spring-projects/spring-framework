@@ -479,7 +479,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * @deprecated as of 6.0 without a replacement; once removed, the default
 	 * model will always be ignored on redirect
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public void setIgnoreDefaultModelOnRedirect(boolean ignoreDefaultModelOnRedirect) {
 		this.ignoreDefaultModelOnRedirect = ignoreDefaultModelOnRedirect;
 	}

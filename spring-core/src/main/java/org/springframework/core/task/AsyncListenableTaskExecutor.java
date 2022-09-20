@@ -31,7 +31,7 @@ import org.springframework.util.concurrent.ListenableFuture;
  * {@link AsyncTaskExecutor#submitCompletable(Runnable)} and
  * {@link AsyncTaskExecutor#submitCompletable(Callable)}
  */
-@Deprecated
+@Deprecated(since = "6.0")
 public interface AsyncListenableTaskExecutor extends AsyncTaskExecutor {
 
 	/**

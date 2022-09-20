@@ -42,7 +42,7 @@ public interface HttpRequest extends HttpMessage {
 	 * @deprecated as of Spring Framework 6.0 in favor of {@link #getMethod()} and
 	 * {@link HttpMethod#name()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	String getMethodValue();
 
 	/**

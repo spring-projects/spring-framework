@@ -159,7 +159,7 @@ public final class ConcurrentLruCache<K, V> {
 	 * Return the maximum number of entries in the cache.
 	 * @deprecated in favor of {@link #capacity()} as of 6.0.
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public int sizeLimit() {
 		return this.capacity;
 	}

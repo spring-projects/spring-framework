@@ -96,7 +96,7 @@ public class ReactorNettyTcpStompClient extends StompClientSupport {
 	 * @return a ListenableFuture for access to the session when ready for use
 	 * @deprecated as of 6.0, in favor of {@link #connectAsync(StompSessionHandler)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public org.springframework.util.concurrent.ListenableFuture<StompSession> connect(
 			StompSessionHandler handler) {
 		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(
@@ -122,7 +122,7 @@ public class ReactorNettyTcpStompClient extends StompClientSupport {
 	 * @return a ListenableFuture for access to the session when ready for use
 	 * @deprecated as of 6.0, in favor of {@link #connectAsync(StompHeaders, StompSessionHandler)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public org.springframework.util.concurrent.ListenableFuture<StompSession> connect(
 			@Nullable StompHeaders connectHeaders, StompSessionHandler handler) {
 		ConnectionHandlingStompSession session = createSession(connectHeaders, handler);

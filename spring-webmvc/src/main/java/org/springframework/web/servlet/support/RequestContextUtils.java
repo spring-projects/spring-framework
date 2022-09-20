@@ -185,7 +185,7 @@ public abstract class RequestContextUtils {
 	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Nullable
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public static org.springframework.web.servlet.ThemeResolver getThemeResolver(HttpServletRequest request) {
 		return (org.springframework.web.servlet.ThemeResolver) request.getAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE);
 	}
@@ -198,7 +198,7 @@ public abstract class RequestContextUtils {
 	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Nullable
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public static org.springframework.ui.context.ThemeSource getThemeSource(HttpServletRequest request) {
 		return (org.springframework.ui.context.ThemeSource) request.getAttribute(DispatcherServlet.THEME_SOURCE_ATTRIBUTE);
 	}
@@ -212,7 +212,7 @@ public abstract class RequestContextUtils {
 	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Nullable
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public static org.springframework.ui.context.Theme getTheme(HttpServletRequest request) {
 		org.springframework.web.servlet.ThemeResolver themeResolver = getThemeResolver(request);
 		org.springframework.ui.context.ThemeSource themeSource = getThemeSource(request);

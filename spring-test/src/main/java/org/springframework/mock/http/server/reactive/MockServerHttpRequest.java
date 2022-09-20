@@ -240,7 +240,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	 * @since 5.2.7
 	 * @deprecated as of Spring Framework 6.0 in favor of {@link #method(HttpMethod, String, Object...)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public static BodyBuilder method(String httpMethod, String uri, Object... vars) {
 		Assert.isTrue(StringUtils.hasText(httpMethod), "HTTP method is required.");
 		return new DefaultBodyBuilder(HttpMethod.valueOf(httpMethod), toUri(uri, vars));

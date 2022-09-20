@@ -80,7 +80,7 @@ public class RequestContext {
 	 * @see org.springframework.web.servlet.theme.AbstractThemeResolver#ORIGINAL_DEFAULT_THEME_NAME
 	 * @deprecated as of 6.0, with no direct replacement
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public static final String DEFAULT_THEME_NAME = "theme";
 
 	/**
@@ -392,7 +392,7 @@ public class RequestContext {
 	 * <p>Resolved lazily for more efficiency when theme support is not being used.
 	 * @deprecated as of 6.0, with no direct replacement
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public org.springframework.ui.context.Theme getTheme() {
 		if (this.theme == null) {
 			// Lazily determine theme to use for this RequestContext.
@@ -431,7 +431,7 @@ public class RequestContext {
 	 * @see org.springframework.web.servlet.ThemeResolver#setThemeName
 	 * @deprecated as of 6.0, with no direct replacement
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public void changeTheme(@Nullable org.springframework.ui.context.Theme theme) {
 		org.springframework.web.servlet.ThemeResolver themeResolver = RequestContextUtils.getThemeResolver(this.request);
 		if (themeResolver == null) {

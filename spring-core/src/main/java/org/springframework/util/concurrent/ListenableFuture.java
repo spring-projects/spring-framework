@@ -34,7 +34,7 @@ import java.util.function.BiConsumer;
  * @param <T> the result type returned by this Future's {@code get} method
  * @deprecated as of 6.0, in favor of {@link CompletableFuture}
  */
-@Deprecated
+@Deprecated(since = "6.0")
 public interface ListenableFuture<T> extends Future<T> {
 
 	/**
@@ -43,7 +43,7 @@ public interface ListenableFuture<T> extends Future<T> {
 	 * @deprecated as of 6.0, in favor of
 	 * {@link CompletableFuture#whenComplete(BiConsumer)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	void addCallback(ListenableFutureCallback<? super T> callback);
 
 	/**
@@ -54,7 +54,7 @@ public interface ListenableFuture<T> extends Future<T> {
 	 * @deprecated as of 6.0, in favor of
 	 * {@link CompletableFuture#whenComplete(BiConsumer)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	void addCallback(SuccessCallback<? super T> successCallback, FailureCallback failureCallback);
 
 

@@ -270,7 +270,7 @@ public class SpringFactoriesLoader {
 	 * @see #loadFactories
 	 * @deprecated as of 6.0 in favor of {@link #load(Class, ArgumentResolver, FailureHandler)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public static List<String> loadFactoryNames(Class<?> factoryType, @Nullable ClassLoader classLoader) {
 		return forDefaultResourceLocation(classLoader).loadFactoryNames(factoryType);
 	}

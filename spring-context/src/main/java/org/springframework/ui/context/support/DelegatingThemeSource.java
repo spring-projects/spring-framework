@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.ui.context.ThemeSource;
  * @see UiApplicationContextUtils
  * @deprecated as of 6.0, with no direct replacement
  */
-@Deprecated
+@Deprecated(since = "6.0")
 public class DelegatingThemeSource implements HierarchicalThemeSource {
 
 	@Nullable

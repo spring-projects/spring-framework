@@ -114,7 +114,7 @@ public interface DataBuffer {
 	 * @deprecated as of 6.0, in favor of {@link #ensureWritable(int)}, which
 	 * has different semantics
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	DataBuffer capacity(int capacity);
 
 	/**
@@ -126,7 +126,7 @@ public interface DataBuffer {
 	 * @since 5.1.4
 	 * @deprecated since 6.0, in favor of {@link #ensureWritable(int)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	default DataBuffer ensureCapacity(int capacity) {
 		return ensureWritable(capacity);
 	}
@@ -304,7 +304,7 @@ public interface DataBuffer {
 	 * @deprecated as of 6.0, in favor of {@link #split(int)}, which
 	 * has different semantics
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	DataBuffer slice(int index, int length);
 
 	/**
@@ -322,7 +322,7 @@ public interface DataBuffer {
 	 * @deprecated as of 6.0, in favor of {@link #split(int)}, which
 	 * has different semantics
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	default DataBuffer retainedSlice(int index, int length) {
 		return DataBufferUtils.retain(slice(index, length));
 	}
@@ -356,7 +356,7 @@ public interface DataBuffer {
 	 * @deprecated as of 6.0, in favor of {@link #toByteBuffer()}, which does
 	 * <strong>not</strong> share data and returns a copy.
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	ByteBuffer asByteBuffer();
 
 	/**
@@ -371,7 +371,7 @@ public interface DataBuffer {
 	 * @deprecated as of 6.0, in favor of {@link #toByteBuffer(int, int)}, which
 	 * does <strong>not</strong> share data and returns a copy.
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	ByteBuffer asByteBuffer(int index, int length);
 
 	/**

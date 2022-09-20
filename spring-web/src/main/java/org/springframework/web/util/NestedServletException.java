@@ -41,7 +41,7 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.core.NestedRuntimeException
  * @deprecated as of 6.0, in favor of standard {@link ServletException} nesting
  */
-@Deprecated
+@Deprecated(since = "6.0")
 public class NestedServletException extends ServletException {
 
 	/** Use serialVersionUID from Spring 1.2 for interoperability. */

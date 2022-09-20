@@ -174,7 +174,7 @@ public class WebClientResponseException extends WebClientException {
 	 * Return the raw HTTP status code value.
 	 * @deprecated as of 6.0, in favor of {@link #getStatusCode()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public int getRawStatusCode() {
 		return this.statusCode.value();
 	}

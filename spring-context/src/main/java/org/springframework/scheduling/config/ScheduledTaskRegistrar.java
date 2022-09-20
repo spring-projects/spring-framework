@@ -294,7 +294,7 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 	 * Add a {@code Runnable} task to be triggered at the given fixed-rate interval.
 	 * @deprecated as of 6.0, in favor of {@link #addFixedRateTask(Runnable, Duration)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public void addFixedRateTask(Runnable task, long interval) {
 		addFixedRateTask(new IntervalTask(task, Duration.ofMillis(interval)));
 	}
@@ -324,7 +324,7 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 	 * Add a Runnable task to be triggered with the given fixed delay.
 	 * @deprecated as of 6.0, in favor of {@link #addFixedDelayTask(Runnable, Duration)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public void addFixedDelayTask(Runnable task, long delay) {
 		addFixedDelayTask(new IntervalTask(task, Duration.ofMillis(delay)));
 	}

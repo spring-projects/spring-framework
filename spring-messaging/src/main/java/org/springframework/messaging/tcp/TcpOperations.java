@@ -34,7 +34,7 @@ public interface TcpOperations<P> {
 	 * connection is successfully established
 	 * @deprecated as of 6.0, in favor of {@link #connectAsync(TcpConnectionHandler)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	default org.springframework.util.concurrent.ListenableFuture<Void> connect(
 			TcpConnectionHandler<P> connectionHandler) {
 		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(
@@ -58,7 +58,7 @@ public interface TcpOperations<P> {
 	 * initial connection is successfully established
 	 * @deprecated as of 6.0, in favor of {@link #connectAsync(TcpConnectionHandler, ReconnectStrategy)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	default org.springframework.util.concurrent.ListenableFuture<Void> connect(
 			TcpConnectionHandler<P> connectionHandler, ReconnectStrategy reconnectStrategy) {
 		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(
@@ -81,7 +81,7 @@ public interface TcpOperations<P> {
 	 * connection is successfully closed
 	 * @deprecated as of 6.0, in favor of {@link #shutdownAsync()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	default org.springframework.util.concurrent.ListenableFuture<Void> shutdown() {
 		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(
 				shutdownAsync());

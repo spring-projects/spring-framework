@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.web.util.WebUtils;
  * @see #setThemeName
  * @deprecated as of 6.0, with no concrete replacement
  */
-@Deprecated
+@Deprecated(since = "6.0")
 public class SessionThemeResolver extends AbstractThemeResolver {
 
 	/**

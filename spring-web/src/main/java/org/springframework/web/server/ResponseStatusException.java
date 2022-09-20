@@ -104,7 +104,7 @@ public class ResponseStatusException extends ErrorResponseException {
 	 * @since 5.1.13
 	 * @deprecated as of 6.0 in favor of {@link #getHeaders()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public HttpHeaders getResponseHeaders() {
 		return HttpHeaders.EMPTY;
 	}

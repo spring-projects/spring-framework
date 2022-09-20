@@ -75,7 +75,7 @@ public interface ServerRequest {
 	 * @return the HTTP method as a String
 	 * @deprecated as of 6.0, in favor of {@link #method()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	String methodName();
 
 	/**

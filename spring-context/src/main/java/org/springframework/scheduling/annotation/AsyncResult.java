@@ -47,7 +47,7 @@ import org.springframework.util.concurrent.SuccessCallback;
  * @see #forExecutionException(Throwable)
  * @deprecated as of 6.0, in favor of {@link CompletableFuture}
  */
-@Deprecated
+@Deprecated(since = "6.0")
 public class AsyncResult<V> implements ListenableFuture<V> {
 
 	@Nullable

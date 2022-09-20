@@ -157,7 +157,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @since 4.3
 	 * @deprecated as of 6.0, in favor of {@link #getStatusCode()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public int getStatusCodeValue() {
 		if (this.status instanceof HttpStatusCode statusCode) {
 			return statusCode.value();

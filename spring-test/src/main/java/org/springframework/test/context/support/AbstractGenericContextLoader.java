@@ -256,7 +256,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * @see #loadContext(MergedContextConfiguration)
 	 * @deprecated as of Spring Framework 6.0, in favor of {@link #loadContext(MergedContextConfiguration)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	@Override
 	public final ConfigurableApplicationContext loadContext(String... locations) throws Exception {
 		if (logger.isDebugEnabled()) {
