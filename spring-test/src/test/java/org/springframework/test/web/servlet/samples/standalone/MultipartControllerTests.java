@@ -18,7 +18,6 @@ package org.springframework.test.web.servlet.samples.standalone;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -241,7 +240,6 @@ class MultipartControllerTests {
 		Filter filter = new RequestWrappingFilter();
 		MockMvc mockMvc = standaloneSetup(new MultipartController()).addFilter(filter).build();
 
-		Map<String, String> jsonMap = Collections.singletonMap("name", "yeeeah");
 		mockMvc.perform(multipart("/json").file(jsonPart)).andExpect(status().isFound());
 	}
 
