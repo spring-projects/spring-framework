@@ -16,6 +16,8 @@
 
 package org.springframework.aot.test.generate.file;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
@@ -42,10 +44,12 @@ import org.springframework.util.StringUtils;
  * </pre>
  *
  * @author Phillip Webb
+ * @author Scott Frederick
  * @since 6.0
  */
 public final class SourceFile extends DynamicFile implements AssertProvider<SourceFileAssert> {
 
+	private static final File TEST_SOURCE_DIRECTORY = new File("src/test/java");
 
 	private final String className;
 
@@ -55,6 +59,28 @@ public final class SourceFile extends DynamicFile implements AssertProvider<Sour
 		this.className = className;
 	}
 
+	/**
+	 * Factory method to create a new {@link SourceFile} by looking up source
+	 * for the given test {@code Class}.
+	 * @param type the class file to get the source from
+	 * @return a {@link SourceFile} instance
+	 */
+	public static SourceFile forTestClass(Class<?> type) {
+		return forClass(TEST_SOURCE_DIRECTORY, type);
+	}
+
+	/**
+	 * Factory method to create a new {@link SourceFile} by looking up source
+	 * for the given {@code Class}.
+	 * @param sourceDirectory the source directory
+	 * @param type the class file to get the source from
+	 * @return a {@link SourceFile} instance
+	 */
+	public static SourceFile forClass(File sourceDirectory, Class<?> type) {
+		String sourceFileName = type.getName().replace('.', '/');
+		File sourceFile = new File(sourceDirectory, sourceFileName + ".java");
+		return SourceFile.of(() -> new FileInputStream(sourceFile));
+	}
 
 	/**
 	 * Factory method to create a new {@link SourceFile} from the given

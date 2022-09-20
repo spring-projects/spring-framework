@@ -27,32 +27,29 @@ import javax.tools.JavaFileObject;
 import javax.tools.SimpleJavaFileObject;
 
 /**
- * In-memory {@link JavaFileObject} used to hold class bytecode.
+ * In-memory {@link JavaFileObject} used to hold generated resource file contents.
  *
  * @author Phillip Webb
+ * @author Scott Frederick
  * @since 6.0
  */
-class DynamicClassFileObject extends SimpleJavaFileObject {
-
-	private final String className;
+class DynamicResourceFileObject extends SimpleJavaFileObject {
 
 	private volatile byte[] bytes;
 
 
-	DynamicClassFileObject(String className) {
-		super(createUri(className), Kind.CLASS);
-		this.className = className;
+	DynamicResourceFileObject(String fileName) {
+		super(createUri(fileName), Kind.OTHER);
 	}
 
-	DynamicClassFileObject(String className, byte[] bytes) {
-		super(createUri(className), Kind.CLASS);
-		this.className = className;
-		this.bytes = bytes;
+	DynamicResourceFileObject(String fileName, String content) {
+		super(createUri(fileName), Kind.OTHER);
+		this.bytes = content.getBytes();
 	}
 
 
-	private static URI createUri(String className) {
-		return URI.create("class:///" + className.replace('.', '/') + ".class");
+	private static URI createUri(String fileName) {
+		return URI.create("resource:///" + fileName);
 	}
 
 	@Override
@@ -65,15 +62,11 @@ class DynamicClassFileObject extends SimpleJavaFileObject {
 
 	@Override
 	public OutputStream openOutputStream() {
-		return new JavaClassOutputStream();
+		return new JavaResourceOutputStream();
 	}
 
 	private void closeOutputStream(byte[] bytes) {
 		this.bytes = bytes;
-	}
-
-	String getClassName() {
-		return this.className;
 	}
 
 	byte[] getBytes() {
@@ -81,7 +74,7 @@ class DynamicClassFileObject extends SimpleJavaFileObject {
 	}
 
 
-	class JavaClassOutputStream extends ByteArrayOutputStream {
+	class JavaResourceOutputStream extends ByteArrayOutputStream {
 
 		@Override
 		public void close() {

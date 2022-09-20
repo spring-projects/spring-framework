@@ -44,11 +44,23 @@ public final class ResourceFile extends DynamicFile implements AssertProvider<Re
 	 * {@link CharSequence}.
 	 * @param path the relative path of the file or {@code null} to have the
 	 * path deduced
-	 * @param charSequence a file containing the file contents
+	 * @param charSequence a char sequence containing the file contents
 	 * @return a {@link ResourceFile} instance
 	 */
 	public static ResourceFile of(String path, CharSequence charSequence) {
 		return new ResourceFile(path, charSequence.toString());
+	}
+
+	/**
+	 * Factory method to create a new {@link ResourceFile} from the given
+	 * {@code byte[]}.
+	 * @param path the relative path of the file or {@code null} to have the
+	 * path deduced
+	 * @param bytes a byte array containing the file contents
+	 * @return a {@link ResourceFile} instance
+	 */
+	public static ResourceFile of(String path, byte[] bytes) {
+		return new ResourceFile(path, new String(bytes, StandardCharsets.UTF_8));
 	}
 
 	/**

@@ -291,7 +291,7 @@ public final class TestCompiler {
 		StandardJavaFileManager standardFileManager = this.compiler.getStandardFileManager(
 				null, null, null);
 		DynamicJavaFileManager fileManager = new DynamicJavaFileManager(
-				standardFileManager, classLoaderToUse, this.classFiles);
+				standardFileManager, classLoaderToUse, this.classFiles, this.resourceFiles);
 		if (!this.sourceFiles.isEmpty()) {
 			Errors errors = new Errors();
 			CompilationTask task = this.compiler.getTask(null, fileManager, errors, null,
@@ -304,7 +304,8 @@ public final class TestCompiler {
 				throw new CompilationException(errors.toString(), this.sourceFiles, this.resourceFiles);
 			}
 		}
-		return new DynamicClassLoader(classLoaderToUse, this.resourceFiles, this.classFiles, fileManager.getCompiledClasses());
+		return new DynamicClassLoader(classLoaderToUse, this.classFiles, this.resourceFiles,
+				fileManager.getDynamicClassFiles(), fileManager.getDynamicResourceFiles());
 	}
 
 	/**
@@ -340,11 +341,13 @@ public final class TestCompiler {
 			if (diagnostic.getKind() == Diagnostic.Kind.ERROR) {
 				this.message.append('\n');
 				this.message.append(diagnostic.getMessage(Locale.getDefault()));
-				this.message.append(' ');
-				this.message.append(diagnostic.getSource().getName());
-				this.message.append(' ');
-				this.message.append(diagnostic.getLineNumber()).append(':')
-						.append(diagnostic.getColumnNumber());
+				if (diagnostic.getSource() != null) {
+					this.message.append(' ');
+					this.message.append(diagnostic.getSource().getName());
+					this.message.append(' ');
+					this.message.append(diagnostic.getLineNumber()).append(':')
+							.append(diagnostic.getColumnNumber());
+				}
 			}
 		}
 

@@ -16,6 +16,7 @@
 
 package org.springframework.aot.test.generate.file;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * Tests for {@link SourceFile}.
  *
  * @author Phillip Webb
+ * @author Scott Frederick
  */
 class SourceFileTests {
 
@@ -81,6 +83,20 @@ class SourceFileTests {
 		SourceFile sourceFile = SourceFile.of("com/example/DifferentPath.java",
 				HELLO_WORLD);
 		assertThat(sourceFile.getPath()).isEqualTo("com/example/DifferentPath.java");
+	}
+
+	@Test
+	void forClassWithClassUsesClass() {
+		SourceFile sourceFile = SourceFile.forClass(new File("src/test/java"), SourceFileTests.class);
+		assertThat(sourceFile.getPath()).isEqualTo("org/springframework/aot/test/generate/file/SourceFileTests.java");
+		assertThat(sourceFile.getClassName()).isEqualTo("org.springframework.aot.test.generate.file.SourceFileTests");
+	}
+
+	@Test
+	void forTestClassWithClassUsesClass() {
+		SourceFile sourceFile = SourceFile.forTestClass(SourceFileTests.class);
+		assertThat(sourceFile.getPath()).isEqualTo("org/springframework/aot/test/generate/file/SourceFileTests.java");
+		assertThat(sourceFile.getClassName()).isEqualTo("org.springframework.aot.test.generate.file.SourceFileTests");
 	}
 
 	@Test

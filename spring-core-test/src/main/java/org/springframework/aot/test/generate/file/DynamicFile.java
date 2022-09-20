@@ -17,6 +17,7 @@
 package org.springframework.aot.test.generate.file;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import org.springframework.util.Assert;
@@ -54,6 +55,14 @@ public abstract sealed class DynamicFile permits SourceFile, ResourceFile {
 		catch (IOException ex) {
 			throw new IllegalStateException("Unable to read content", ex);
 		}
+	}
+
+	/**
+	 * Return the contents of the file as a byte array.
+	 * @return the file contents as a byte array
+	 */
+	public byte[] getBytes() {
+		return this.content.getBytes(StandardCharsets.UTF_8);
 	}
 
 	/**

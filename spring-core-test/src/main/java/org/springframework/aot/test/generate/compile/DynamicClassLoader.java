@@ -24,10 +24,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
-import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.springframework.aot.test.generate.file.ClassFile;
 import org.springframework.aot.test.generate.file.ClassFiles;
@@ -41,27 +41,32 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Phillip Webb
  * @author Andy Wilkinson
+ * @author Scott Frederick
  * @since 6.0
  */
 public class DynamicClassLoader extends ClassLoader {
 
-	private final ResourceFiles resourceFiles;
-
 	private final ClassFiles classFiles;
 
-	private final Map<String, DynamicClassFileObject> compiledClasses;
+	private final ResourceFiles resourceFiles;
+
+	private final Map<String, DynamicClassFileObject> dynamicClassFiles;
+
+	private final Map<String, DynamicResourceFileObject> dynamicResourceFiles;
 
 	@Nullable
 	private final Method defineClassMethod;
 
 
-	public DynamicClassLoader(ClassLoader parent, ResourceFiles resourceFiles,
-			ClassFiles classFiles, Map<String, DynamicClassFileObject> compiledClasses) {
+	public DynamicClassLoader(ClassLoader parent, ClassFiles classFiles, ResourceFiles resourceFiles,
+			Map<String, DynamicClassFileObject> dynamicClassFiles,
+			Map<String, DynamicResourceFileObject> dynamicResourceFiles) {
 
 		super(parent);
-		this.resourceFiles = resourceFiles;
 		this.classFiles = classFiles;
-		this.compiledClasses = compiledClasses;
+		this.resourceFiles = resourceFiles;
+		this.dynamicClassFiles = dynamicClassFiles;
+		this.dynamicResourceFiles = dynamicResourceFiles;
 		Class<? extends ClassLoader> parentClass = parent.getClass();
 		if (parentClass.getName().equals(CompileWithForkedClassLoaderClassLoader.class.getName())) {
 			Method setClassResourceLookupMethod = ReflectionUtils.findMethod(parentClass,
@@ -72,7 +77,7 @@ public class DynamicClassLoader extends ClassLoader {
 			this.defineClassMethod = ReflectionUtils.findMethod(parentClass,
 					"defineDynamicClass", String.class, byte[].class, int.class, int.class);
 			ReflectionUtils.makeAccessible(this.defineClassMethod);
-			this.compiledClasses.forEach((name, file) -> defineClass(name, file.getBytes()));
+			this.dynamicClassFiles.forEach((name, file) -> defineClass(name, file.getBytes()));
 		}
 		else {
 			this.defineClassMethod = null;
@@ -83,28 +88,19 @@ public class DynamicClassLoader extends ClassLoader {
 	@Override
 	protected Class<?> findClass(String name) throws ClassNotFoundException {
 		byte[] bytes = findClassBytes(name);
-		if (bytes != null) {
+		if(bytes != null) {
 			return defineClass(name, bytes);
 		}
 		return super.findClass(name);
 	}
 
-	@Nullable
 	private byte[] findClassBytes(String name) {
-		DynamicClassFileObject compiledClass = this.compiledClasses.get(name);
-		if(compiledClass != null) {
-			return compiledClass.getBytes();
-		}
-		return findClassFileBytes(name);
-	}
-
-	@Nullable
-	private byte[] findClassFileBytes(String name) {
 		ClassFile classFile = this.classFiles.get(name);
 		if (classFile != null) {
 			return classFile.getContent();
 		}
-		return null;
+		DynamicClassFileObject dynamicClassFile = this.dynamicClassFiles.get(name);
+		return (dynamicClassFile != null) ? dynamicClassFile.getBytes() : null;
 	}
 
 	private Class<?> defineClass(String name, byte[] bytes) {
@@ -128,17 +124,25 @@ public class DynamicClassLoader extends ClassLoader {
 	@Override
 	@Nullable
 	protected URL findResource(String name) {
-		ResourceFile file = this.resourceFiles.get(name);
-		if (file != null) {
-			try {
-				return new URL(null, "resource:///" + file.getPath(),
-						new ResourceFileHandler(file));
-			}
-			catch (MalformedURLException ex) {
-				throw new IllegalStateException(ex);
-			}
+		ResourceFile resourceFile = this.resourceFiles.get(name);
+		if (resourceFile != null) {
+			return createResourceUrl(resourceFile.getPath(), resourceFile::getBytes);
+		}
+		DynamicResourceFileObject dynamicResourceFile = this.dynamicResourceFiles.get(name);
+		if (dynamicResourceFile != null && dynamicResourceFile.getBytes() != null) {
+			return createResourceUrl(dynamicResourceFile.getName(), dynamicResourceFile::getBytes);
 		}
 		return super.findResource(name);
+	}
+
+	private URL createResourceUrl(String name, Supplier<byte[]> bytesSupplier) {
+		try {
+			return new URL(null, "resource:///" + name,
+					new ResourceFileHandler(bytesSupplier));
+		}
+		catch (MalformedURLException ex) {
+			throw new IllegalStateException(ex);
+		}
 	}
 
 
@@ -171,17 +175,17 @@ public class DynamicClassLoader extends ClassLoader {
 
 	private static class ResourceFileHandler extends URLStreamHandler {
 
-		private final ResourceFile file;
+		private final Supplier<byte[]> bytesSupplier;
 
 
-		ResourceFileHandler(ResourceFile file) {
-			this.file = file;
+		ResourceFileHandler(Supplier<byte[]> bytesSupplier) {
+			this.bytesSupplier = bytesSupplier;
 		}
 
 
 		@Override
 		protected URLConnection openConnection(URL url) {
-			return new ResourceFileConnection(url, this.file);
+			return new ResourceFileConnection(url, this.bytesSupplier);
 		}
 
 	}
@@ -189,12 +193,12 @@ public class DynamicClassLoader extends ClassLoader {
 
 	private static class ResourceFileConnection extends URLConnection {
 
-		private final ResourceFile file;
+		private final Supplier<byte[]> bytesSupplier;
 
 
-		protected ResourceFileConnection(URL url, ResourceFile file) {
+		protected ResourceFileConnection(URL url, Supplier<byte[]> bytesSupplier) {
 			super(url);
-			this.file = file;
+			this.bytesSupplier = bytesSupplier;
 		}
 
 
@@ -204,8 +208,7 @@ public class DynamicClassLoader extends ClassLoader {
 
 		@Override
 		public InputStream getInputStream() {
-			return new ByteArrayInputStream(
-					this.file.getContent().getBytes(StandardCharsets.UTF_8));
+			return new ByteArrayInputStream(this.bytesSupplier.get());
 		}
 
 	}

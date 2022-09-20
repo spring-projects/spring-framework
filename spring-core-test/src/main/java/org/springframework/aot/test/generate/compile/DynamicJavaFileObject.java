@@ -36,7 +36,7 @@ class DynamicJavaFileObject extends SimpleJavaFileObject {
 
 
 	DynamicJavaFileObject(SourceFile sourceFile) {
-		super(URI.create(sourceFile.getPath()), Kind.SOURCE);
+		super(URI.create("java:///" + sourceFile.getPath()), Kind.SOURCE);
 		this.sourceFile = sourceFile;
 	}
 

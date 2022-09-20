@@ -34,22 +34,19 @@ class DynamicClassFileObjectTests {
 
 	@Test
 	void getUriReturnsGeneratedUriBasedOnClassName() {
-		DynamicClassFileObject fileObject = new DynamicClassFileObject(
-				"com.example.MyClass");
+		DynamicClassFileObject fileObject = new DynamicClassFileObject("com.example.MyClass");
 		assertThat(fileObject.toUri()).hasToString("class:///com/example/MyClass.class");
 	}
 
 	@Test
 	void getKindReturnsClass() {
-		DynamicClassFileObject fileObject = new DynamicClassFileObject(
-				"com.example.MyClass");
+		DynamicClassFileObject fileObject = new DynamicClassFileObject("com.example.MyClass");
 		assertThat(fileObject.getKind()).isEqualTo(Kind.CLASS);
 	}
 
 	@Test
 	void openOutputStreamWritesToBytes() throws Exception {
-		DynamicClassFileObject fileObject = new DynamicClassFileObject(
-				"com.example.MyClass");
+		DynamicClassFileObject fileObject = new DynamicClassFileObject("com.example.MyClass");
 		try(OutputStream outputStream = fileObject.openOutputStream()) {
 			new ByteArrayInputStream("test".getBytes()).transferTo(outputStream);
 		}

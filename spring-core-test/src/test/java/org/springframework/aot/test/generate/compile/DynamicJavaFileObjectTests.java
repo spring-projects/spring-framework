@@ -34,7 +34,7 @@ class DynamicJavaFileObjectTests {
 	@Test
 	void getUriReturnsPath() {
 		DynamicJavaFileObject fileObject = new DynamicJavaFileObject(SourceFile.of(CONTENT));
-		assertThat(fileObject.toUri()).hasToString("com/example/Hello.java");
+		assertThat(fileObject.toUri()).hasToString("java:///com/example/Hello.java");
 	}
 
 	@Test

@@ -32,6 +32,8 @@ import javax.tools.JavaFileObject.Kind;
 
 import org.springframework.aot.test.generate.file.ClassFile;
 import org.springframework.aot.test.generate.file.ClassFiles;
+import org.springframework.aot.test.generate.file.ResourceFile;
+import org.springframework.aot.test.generate.file.ResourceFiles;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -40,6 +42,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Phillip Webb
  * @author Andy Wilkinson
+ * @author Scott Frederick
  * @since 6.0
  */
 class DynamicJavaFileManager extends ForwardingJavaFileManager<JavaFileManager> {
@@ -48,16 +51,21 @@ class DynamicJavaFileManager extends ForwardingJavaFileManager<JavaFileManager> 
 
 	private final ClassFiles classFiles;
 
-	private final Map<String, DynamicClassFileObject> compiledClasses = Collections.synchronizedMap(
-			new LinkedHashMap<>());
+	private final ResourceFiles resourceFiles;
+
+	private final Map<String, DynamicClassFileObject> dynamicClassFiles = Collections.synchronizedMap(new LinkedHashMap<>());
+
+	private final Map<String, DynamicResourceFileObject> dynamicResourceFiles= Collections.synchronizedMap(new LinkedHashMap<>());
 
 
-	DynamicJavaFileManager(JavaFileManager fileManager, ClassLoader classLoader, ClassFiles classFiles) {
+	DynamicJavaFileManager(JavaFileManager fileManager, ClassLoader classLoader,
+			ClassFiles classFiles, ResourceFiles resourceFiles) {
+
 		super(fileManager);
-		this.classLoader = classLoader;
 		this.classFiles = classFiles;
+		this.resourceFiles = resourceFiles;
+		this.classLoader = classLoader;
 	}
-
 
 	@Override
 	public ClassLoader getClassLoader(Location location) {
@@ -65,11 +73,24 @@ class DynamicJavaFileManager extends ForwardingJavaFileManager<JavaFileManager> 
 	}
 
 	@Override
+	public FileObject getFileForOutput(Location location, String packageName,
+			String relativeName, FileObject sibling) {
+		ResourceFile resourceFile = this.resourceFiles.get(relativeName);
+		if (resourceFile != null) {
+			return new DynamicResourceFileObject(relativeName, resourceFile.getContent());
+		}
+		return this.dynamicResourceFiles.computeIfAbsent(relativeName, DynamicResourceFileObject::new);
+	}
+
+	@Override
 	public JavaFileObject getJavaFileForOutput(Location location, String className,
 			JavaFileObject.Kind kind, FileObject sibling) throws IOException {
 		if (kind == JavaFileObject.Kind.CLASS) {
-			return this.compiledClasses.computeIfAbsent(className,
-					DynamicClassFileObject::new);
+			ClassFile classFile = this.classFiles.get(className);
+			if (classFile != null) {
+				return new DynamicClassFileObject(className, classFile.getContent());
+			}
+			return this.dynamicClassFiles.computeIfAbsent(className, DynamicClassFileObject::new);
 		}
 		return super.getJavaFileForOutput(location, className, kind, sibling);
 	}
@@ -85,6 +106,12 @@ class DynamicJavaFileManager extends ForwardingJavaFileManager<JavaFileManager> 
 					result.add(new DynamicClassFileObject(candidate.getName(), candidate.getContent()));
 				}
 			}
+			for (DynamicClassFileObject candidate : this.dynamicClassFiles.values()) {
+				String existingPackageName = ClassUtils.getPackageName(candidate.getClassName());
+				if (existingPackageName.equals(packageName) || (recurse && existingPackageName.startsWith(packageName + "."))) {
+					result.add(candidate);
+				}
+			}
 		}
 		super.list(location, packageName, kinds, recurse).forEach(result::add);
 		return result;
@@ -98,8 +125,12 @@ class DynamicJavaFileManager extends ForwardingJavaFileManager<JavaFileManager> 
 		return super.inferBinaryName(location, file);
 	}
 
-	Map<String, DynamicClassFileObject> getCompiledClasses() {
-		return this.compiledClasses;
+	Map<String, DynamicClassFileObject> getDynamicClassFiles() {
+		return this.dynamicClassFiles;
+	}
+
+	Map<String, DynamicResourceFileObject> getDynamicResourceFiles() {
+		return Collections.unmodifiableMap(this.dynamicResourceFiles);
 	}
 
 }

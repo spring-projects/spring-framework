@@ -17,8 +17,10 @@
 package org.springframework.aot.test.generate.compile;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.EnumSet;
 
+import javax.tools.FileObject;
 import javax.tools.JavaFileManager;
 import javax.tools.JavaFileManager.Location;
 import javax.tools.JavaFileObject;
@@ -31,6 +33,9 @@ import org.mockito.MockitoAnnotations;
 
 import org.springframework.aot.test.generate.file.ClassFile;
 import org.springframework.aot.test.generate.file.ClassFiles;
+import org.springframework.aot.test.generate.file.ResourceFile;
+import org.springframework.aot.test.generate.file.ResourceFiles;
+import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.then;
@@ -39,10 +44,13 @@ import static org.mockito.BDDMockito.then;
  * Tests for {@link DynamicJavaFileManager}.
  *
  * @author Phillip Webb
+ * @author Scott Frederick
  */
 class DynamicJavaFileManagerTests {
 
 	private static final byte[] DUMMY_BYTECODE = new byte[] { 'a' };
+
+	private static final String DUMMY_RESOURCE = "a";
 
 	@Mock
 	private JavaFileManager parentFileManager;
@@ -58,9 +66,14 @@ class DynamicJavaFileManagerTests {
 	void setup() {
 		MockitoAnnotations.openMocks(this);
 		this.classLoader = new ClassLoader() {};
+		ClassFiles classFiles = ClassFiles.of(
+				ClassFile.of("com.example.one.ClassOne", DUMMY_BYTECODE),
+				ClassFile.of("com.example.two.ClassTwo", DUMMY_BYTECODE));
+		ResourceFiles resourceFiles = ResourceFiles.of(
+				ResourceFile.of("com/example/one/resource.one", DUMMY_RESOURCE),
+				ResourceFile.of("com/example/two/resource.two", DUMMY_RESOURCE));
 		this.fileManager = new DynamicJavaFileManager(this.parentFileManager, this.classLoader,
-				ClassFiles.of(ClassFile.of("com.example.one.ClassOne", DUMMY_BYTECODE),
-						ClassFile.of("com.example.two.ClassTwo", DUMMY_BYTECODE)));
+				classFiles, resourceFiles);
 	}
 
 	@Test
@@ -81,6 +94,7 @@ class DynamicJavaFileManagerTests {
 			throws Exception {
 		JavaFileObject fileObject1 = this.fileManager.getJavaFileForOutput(this.location,
 				"com.example.MyClass", Kind.CLASS, null);
+		writeDummyResource(fileObject1);
 		JavaFileObject fileObject2 = this.fileManager.getJavaFileForOutput(this.location,
 				"com.example.MyClass", Kind.CLASS, null);
 		assertThat(fileObject1).isSameAs(fileObject2);
@@ -97,11 +111,11 @@ class DynamicJavaFileManagerTests {
 
 	@Test
 	void getClassFilesReturnsClassFiles() throws Exception {
-		this.fileManager.getJavaFileForOutput(this.location, "com.example.MyClass1",
-				Kind.CLASS, null);
-		this.fileManager.getJavaFileForOutput(this.location, "com.example.MyClass2",
-				Kind.CLASS, null);
-		assertThat(this.fileManager.getCompiledClasses()).containsKeys(
+		writeDummyBytecode(this.fileManager.getJavaFileForOutput(this.location, "com.example.MyClass1",
+				Kind.CLASS, null));
+		writeDummyBytecode(this.fileManager.getJavaFileForOutput(this.location, "com.example.MyClass2",
+				Kind.CLASS, null));
+		assertThat(this.fileManager.getDynamicClassFiles()).containsKeys(
 				"com.example.MyClass1", "com.example.MyClass2");
 	}
 
@@ -127,6 +141,33 @@ class DynamicJavaFileManagerTests {
 		Iterable<JavaFileObject> listed = this.fileManager.list(
 				this.location, "com.example", EnumSet.of(Kind.SOURCE), true);
 		assertThat(listed).hasSize(0);
+	}
+
+	@Test
+	void getFileForOutputReturnsDynamicResourceFile() {
+		FileObject fileObject = this.fileManager.getFileForOutput(this.location,
+				"", "META-INF/generated.properties", null);
+		assertThat(fileObject).isInstanceOf(DynamicResourceFileObject.class);
+	}
+
+	@Test
+	void getFileForOutputReturnsFile() throws Exception {
+		writeDummyResource(this.fileManager.getFileForOutput(this.location, "", "META-INF/first.properties", null));
+		writeDummyResource(this.fileManager.getFileForOutput(this.location, "", "META-INF/second.properties", null));
+		assertThat(this.fileManager.getDynamicResourceFiles()).containsKeys("META-INF/first.properties",
+				"META-INF/second.properties");
+	}
+
+	private void writeDummyBytecode(JavaFileObject fileObject) throws IOException {
+		try (OutputStream outputStream = fileObject.openOutputStream()) {
+			StreamUtils.copy(DUMMY_BYTECODE, outputStream);
+		}
+	}
+
+	private void writeDummyResource(FileObject fileObject) throws IOException {
+		try (OutputStream outputStream = fileObject.openOutputStream()) {
+			StreamUtils.copy(DUMMY_RESOURCE.getBytes(), outputStream);
+		}
 	}
 
 }
