@@ -21,6 +21,10 @@ tasks.withType(JavaCompile) {
 	]
 }
 
+tasks.withType(Javadoc) {
+	enabled = false
+}
+
 eclipse.classpath.file {
 	whenMerged {
 		entries.find{ it.path ==~ '.*JRE_CONTAINER.*' }.each {
