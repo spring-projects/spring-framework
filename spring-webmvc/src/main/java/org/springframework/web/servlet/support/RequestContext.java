@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -425,9 +425,10 @@ public class RequestContext {
 
 	/**
 	 * Change the current theme to the specified one,
-	 * storing the new theme name through the configured {@link ThemeResolver}.
+	 * storing the new theme name through the configured
+	 * {@link org.springframework.web.servlet.ThemeResolver ThemeResolver}.
 	 * @param theme the new theme
-	 * @see ThemeResolver#setThemeName
+	 * @see org.springframework.web.servlet.ThemeResolver#setThemeName
 	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Deprecated
@@ -442,9 +443,10 @@ public class RequestContext {
 
 	/**
 	 * Change the current theme to the specified theme by name,
-	 * storing the new theme name through the configured {@link ThemeResolver}.
+	 * storing the new theme name through the configured
+	 * {@link org.springframework.web.servlet.ThemeResolver ThemeResolver}.
 	 * @param themeName the name of the new theme
-	 * @see ThemeResolver#setThemeName
+	 * @see org.springframework.web.servlet.ThemeResolver#setThemeName
 	 */
 	@Deprecated
 	public void changeTheme(String themeName) {
