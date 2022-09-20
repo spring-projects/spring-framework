@@ -65,13 +65,13 @@ class SourceFileAssertTests {
 
 	@Test
 	void isEqualToWhenEqual() {
-		assertThat(this.sourceFile).isEqualTo(SAMPLE);
+		assertThat(this.sourceFile).hasContent(SAMPLE);
 	}
 
 	@Test
 	void isEqualToWhenNotEqualThrowsException() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(
-				() -> assertThat(this.sourceFile).isEqualTo("no")).withMessageContaining(
+				() -> assertThat(this.sourceFile).hasContent("no")).withMessageContaining(
 						"expected", "but was");
 	}
 

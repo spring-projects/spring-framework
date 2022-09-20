@@ -66,7 +66,7 @@ class MockSpringFactoriesLoaderTests {
 		assertThat(factories.get(1)).isInstanceOf(TestFactoryTwo.class);
 	}
 
-	static interface TestFactoryType {
+	interface TestFactoryType {
 
 	}
 

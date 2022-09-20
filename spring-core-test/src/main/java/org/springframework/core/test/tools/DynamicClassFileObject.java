@@ -26,6 +26,8 @@ import java.net.URI;
 import javax.tools.JavaFileObject;
 import javax.tools.SimpleJavaFileObject;
 
+import org.springframework.lang.Nullable;
+
 /**
  * In-memory {@link JavaFileObject} used to hold class bytecode.
  *
@@ -36,6 +38,7 @@ class DynamicClassFileObject extends SimpleJavaFileObject {
 
 	private final String className;
 
+	@Nullable
 	private volatile byte[] bytes;
 
 
@@ -57,10 +60,11 @@ class DynamicClassFileObject extends SimpleJavaFileObject {
 
 	@Override
 	public InputStream openInputStream() throws IOException {
-		if (this.bytes == null) {
+		byte[] content = this.bytes;
+		if (content == null) {
 			throw new IOException("No data written");
 		}
-		return new ByteArrayInputStream(this.bytes);
+		return new ByteArrayInputStream(content);
 	}
 
 	@Override
@@ -76,6 +80,7 @@ class DynamicClassFileObject extends SimpleJavaFileObject {
 		return this.className;
 	}
 
+	@Nullable
 	byte[] getBytes() {
 		return this.bytes;
 	}

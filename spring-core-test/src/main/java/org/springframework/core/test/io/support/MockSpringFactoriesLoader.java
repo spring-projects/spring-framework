@@ -17,6 +17,7 @@
 package org.springframework.core.test.io.support;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -58,7 +59,8 @@ public class MockSpringFactoriesLoader extends SpringFactoriesLoader {
 		this(classLoader, new LinkedHashMap<>());
 	}
 
-	protected MockSpringFactoriesLoader(ClassLoader classLoader, Map<String, List<String>> factories) {
+	protected MockSpringFactoriesLoader(@Nullable ClassLoader classLoader,
+			Map<String, List<String>> factories) {
 		super(classLoader, factories);
 		this.factories = factories;
 	}
@@ -66,8 +68,8 @@ public class MockSpringFactoriesLoader extends SpringFactoriesLoader {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected <T> T instantiateFactory(String implementationName, Class<T> type, ArgumentResolver argumentResolver,
-			FailureHandler failureHandler) {
+	protected <T> T instantiateFactory(String implementationName, Class<T> type,
+			@Nullable ArgumentResolver argumentResolver, FailureHandler failureHandler) {
 		if (implementationName.startsWith("!")) {
 			Object implementation = this.implementations.get(implementationName);
 			if (implementation != null) {
@@ -83,7 +85,6 @@ public class MockSpringFactoriesLoader extends SpringFactoriesLoader {
 	 * @param factoryImplementations the implementation classes
 	 */
 	@SafeVarargs
-	@SuppressWarnings("unchecked")
 	public final <T> void add(Class<T> factoryType, Class<? extends T>... factoryImplementations) {
 		for (Class<? extends T> factoryImplementation : factoryImplementations) {
 			add(factoryType.getName(), factoryImplementation.getName());
@@ -96,10 +97,9 @@ public class MockSpringFactoriesLoader extends SpringFactoriesLoader {
 	 * @param factoryImplementations the implementation class names
 	 */
 	public void add(String factoryType, String... factoryImplementations) {
-		List<String> implementations = this.factories.computeIfAbsent(factoryType, key -> new ArrayList<>());
-		for (String factoryImplementation : factoryImplementations) {
-			implementations.add(factoryImplementation);
-		}
+		List<String> implementations = this.factories.computeIfAbsent(
+				factoryType, key -> new ArrayList<>());
+		Collections.addAll(implementations, factoryImplementations);
 	}
 
 	/**

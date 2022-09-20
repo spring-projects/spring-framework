@@ -30,6 +30,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -65,12 +66,12 @@ public class DynamicClassLoader extends ClassLoader {
 		this.dynamicResourceFiles = dynamicResourceFiles;
 		Class<? extends ClassLoader> parentClass = parent.getClass();
 		if (parentClass.getName().equals(CompileWithForkedClassLoaderClassLoader.class.getName())) {
-			Method setClassResourceLookupMethod = ReflectionUtils.findMethod(parentClass,
+			Method setClassResourceLookupMethod = lookupMethod(parentClass,
 					"setClassResourceLookup", Function.class);
 			ReflectionUtils.makeAccessible(setClassResourceLookupMethod);
 			ReflectionUtils.invokeMethod(setClassResourceLookupMethod,
 					getParent(), (Function<String, byte[]>) this::findClassBytes);
-			this.defineClassMethod = ReflectionUtils.findMethod(parentClass,
+			this.defineClassMethod = lookupMethod(parentClass,
 					"defineDynamicClass", String.class, byte[].class, int.class, int.class);
 			ReflectionUtils.makeAccessible(this.defineClassMethod);
 			this.dynamicClassFiles.forEach((name, file) -> defineClass(name, file.getBytes()));
@@ -84,12 +85,13 @@ public class DynamicClassLoader extends ClassLoader {
 	@Override
 	protected Class<?> findClass(String name) throws ClassNotFoundException {
 		byte[] bytes = findClassBytes(name);
-		if(bytes != null) {
+		if (bytes != null) {
 			return defineClass(name, bytes);
 		}
 		return super.findClass(name);
 	}
 
+	@Nullable
 	private byte[] findClassBytes(String name) {
 		ClassFile classFile = this.classFiles.get(name);
 		if (classFile != null) {
@@ -139,6 +141,12 @@ public class DynamicClassLoader extends ClassLoader {
 		catch (MalformedURLException ex) {
 			throw new IllegalStateException(ex);
 		}
+	}
+
+	private static Method lookupMethod(Class<?> target, String name, Class<?>... parameterTypes) {
+		Method method = ReflectionUtils.findMethod(target, name, parameterTypes);
+		Assert.notNull(method, "Expected method '" + name + "' on '" + target.getName());
+		return method;
 	}
 
 

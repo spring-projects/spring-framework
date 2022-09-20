@@ -309,12 +309,12 @@ public final class TestCompiler {
 	 */
 	public TestCompiler printFiles(PrintStream printStream) {
 		for (SourceFile sourceFile : this.sourceFiles) {
-			printStream.append("---- source:   " + sourceFile.getPath() + "\n\n");
+			printStream.append("---- source:   ").append(sourceFile.getPath()).append("\n\n");
 			printStream.append(sourceFile.getContent());
 			printStream.append("\n\n");
 		}
 		for (ResourceFile resourceFile : this.resourceFiles) {
-			printStream.append("---- resource: " + resourceFile.getPath() + "\n\n");
+			printStream.append("---- resource: ").append(resourceFile.getPath()).append("\n\n");
 			printStream.append(resourceFile.getContent());
 			printStream.append("\n\n");
 		}

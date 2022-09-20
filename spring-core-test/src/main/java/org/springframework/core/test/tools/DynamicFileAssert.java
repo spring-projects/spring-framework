@@ -26,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Assertion methods for {@code DynamicFile} instances.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 6.0
  * @param <A> the assertion type
  * @param <F> the file type
@@ -38,24 +39,34 @@ public class DynamicFileAssert<A extends DynamicFileAssert<A, F>, F extends Dyna
 		super(actual, selfType);
 	}
 
+	/**
+	 * Verify that the actual content is equal to the given one.
+	 * @param content the expected content of the file
+	 * @return {@code this}, to facilitate method chaining
+	 */
+	public A hasContent(@Nullable CharSequence content) {
+		assertThat(this.actual.getContent()).isEqualTo(
+				content != null ? content.toString() : null);
+		return this.myself;
+	}
 
+	/**
+	 * Verify that the actual content contains all the given values.
+	 * @param values the values to look for
+	 * @return {@code this}, to facilitate method chaining
+	 */
 	public A contains(CharSequence... values) {
 		assertThat(this.actual.getContent()).contains(values);
 		return this.myself;
 	}
 
+	/**
+	 * Verify that the actual content does not contain any of the given values.
+	 * @param values the values to look for
+	 * @return {@code this}, to facilitate method chaining
+	 */
 	public A doesNotContain(CharSequence... values) {
 		assertThat(this.actual.getContent()).doesNotContain(values);
-		return this.myself;
-	}
-
-	@Override
-	public A isEqualTo(@Nullable Object expected) {
-		if (expected instanceof DynamicFile) {
-			return super.isEqualTo(expected);
-		}
-		assertThat(this.actual.getContent()).isEqualTo(
-				expected != null ? expected.toString() : null);
 		return this.myself;
 	}
 

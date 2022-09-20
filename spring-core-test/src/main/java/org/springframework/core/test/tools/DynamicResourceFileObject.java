@@ -26,6 +26,8 @@ import java.net.URI;
 import javax.tools.JavaFileObject;
 import javax.tools.SimpleJavaFileObject;
 
+import org.springframework.lang.Nullable;
+
 /**
  * In-memory {@link JavaFileObject} used to hold generated resource file contents.
  *
@@ -35,6 +37,7 @@ import javax.tools.SimpleJavaFileObject;
  */
 class DynamicResourceFileObject extends SimpleJavaFileObject {
 
+	@Nullable
 	private volatile byte[] bytes;
 
 
@@ -54,10 +57,11 @@ class DynamicResourceFileObject extends SimpleJavaFileObject {
 
 	@Override
 	public InputStream openInputStream() throws IOException {
-		if (this.bytes == null) {
+		byte[] content = this.bytes;
+		if (content == null) {
 			throw new IOException("No data written");
 		}
-		return new ByteArrayInputStream(this.bytes);
+		return new ByteArrayInputStream(content);
 	}
 
 	@Override
@@ -69,6 +73,7 @@ class DynamicResourceFileObject extends SimpleJavaFileObject {
 		this.bytes = bytes;
 	}
 
+	@Nullable
 	byte[] getBytes() {
 		return this.bytes;
 	}
