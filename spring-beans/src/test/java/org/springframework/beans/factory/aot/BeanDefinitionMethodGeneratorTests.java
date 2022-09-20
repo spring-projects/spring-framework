@@ -425,7 +425,7 @@ class BeanDefinitionMethodGeneratorTests {
 					.addCode("return $L;", methodInvocation).build());
 		});
 		this.generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(this.generationContext.getGeneratedFiles()).compile(compiled ->
+		TestCompiler.forSystem().with(this.generationContext).compile(compiled ->
 				result.accept((RootBeanDefinition) compiled.getInstance(Supplier.class).get(), compiled));
 	}
 

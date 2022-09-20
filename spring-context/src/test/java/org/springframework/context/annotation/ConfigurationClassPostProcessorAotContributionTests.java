@@ -165,7 +165,7 @@ class ConfigurationClassPostProcessorAotContributionTests {
 						.build());
 			});
 			generationContext.writeGeneratedContent();
-			TestCompiler.forSystem().withFiles(generationContext.getGeneratedFiles()).compile(compiled ->
+			TestCompiler.forSystem().with(generationContext).compile(compiled ->
 					result.accept(compiled.getInstance(Consumer.class), compiled));
 		}
 
@@ -297,7 +297,7 @@ class ConfigurationClassPostProcessorAotContributionTests {
 						.build());
 			});
 			generationContext.writeGeneratedContent();
-			TestCompiler.forSystem().withFiles(generationContext.getGeneratedFiles()).compile(compiled ->
+			TestCompiler.forSystem().with(generationContext).compile(compiled ->
 					result.accept(compiled.getInstance(Consumer.class), compiled));
 		}
 

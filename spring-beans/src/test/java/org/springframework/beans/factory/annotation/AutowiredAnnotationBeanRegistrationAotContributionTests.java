@@ -176,7 +176,7 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 
 		});
 		this.generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(this.generationContext.getGeneratedFiles()).compile(compiled ->
+		TestCompiler.forSystem().with(this.generationContext).compile(compiled ->
 				result.accept(compiled.getInstance(BiFunction.class), compiled));
 	}
 

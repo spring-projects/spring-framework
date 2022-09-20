@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import javax.sql.DataSource;
@@ -33,6 +34,7 @@ import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
+import org.springframework.aot.test.generate.GeneratedFilesTestCompilerUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -83,6 +85,10 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @CompileWithForkedClassLoader
 class TestContextAotGeneratorTests extends AbstractAotTests {
 
+	private static Function<TestCompiler, TestCompiler> setupGeneratedFiles(InMemoryGeneratedFiles generatedFiles) {
+		return testCompiler -> GeneratedFilesTestCompilerUtils.configure(testCompiler, generatedFiles);
+	}
+
 	/**
 	 * End-to-end tests within the scope of the {@link TestContextAotGenerator}.
 	 *
@@ -110,7 +116,7 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		List<String> sourceFiles = generatedFiles.getGeneratedFiles(Kind.SOURCE).keySet().stream().toList();
 		assertThat(sourceFiles).containsExactlyInAnyOrder(expectedSourceFiles);
 
-		TestCompiler.forSystem().withFiles(generatedFiles).compile(ThrowingConsumer.of(compiled -> {
+		TestCompiler.forSystem().with(setupGeneratedFiles(generatedFiles)).compile(ThrowingConsumer.of(compiled -> {
 			try {
 				System.setProperty(AotDetector.AOT_ENABLED, "true");
 				AotTestAttributesFactory.reset();
@@ -321,7 +327,7 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
 		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
 		List<Mapping> mappings = processAheadOfTime(generator, testClasses);
-		TestCompiler.forSystem().withFiles(generatedFiles).compile(ThrowingConsumer.of(compiled -> {
+		TestCompiler.forSystem().with(setupGeneratedFiles(generatedFiles)).compile(ThrowingConsumer.of(compiled -> {
 			for (Mapping mapping : mappings) {
 				MergedContextConfiguration mergedConfig = mapping.mergedConfig();
 				ApplicationContextInitializer<ConfigurableApplicationContext> contextInitializer =

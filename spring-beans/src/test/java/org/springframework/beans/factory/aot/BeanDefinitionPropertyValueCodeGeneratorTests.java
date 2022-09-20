@@ -76,7 +76,7 @@ class BeanDefinitionPropertyValueCodeGeneratorTests {
 					.returns(Object.class).addStatement("return $L", generatedCode).build());
 		});
 		generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(generationContext.getGeneratedFiles()).compile(compiled ->
+		TestCompiler.forSystem().with(generationContext).compile(compiled ->
 				result.accept(compiled.getInstance(Supplier.class).get(), compiled));
 	}
 

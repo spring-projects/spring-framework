@@ -175,7 +175,7 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 		BeanRegistrationCode beanRegistrationCode = mock(BeanRegistrationCode.class);
 		contribution.applyTo(generationContext, beanRegistrationCode);
 		generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(generationContext.getGeneratedFiles())
+		TestCompiler.forSystem().with(generationContext)
 				.compile(compiled -> result.accept(new Invoker(compiled), compiled));
 	}
 

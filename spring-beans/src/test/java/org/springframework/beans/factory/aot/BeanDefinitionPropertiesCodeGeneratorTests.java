@@ -429,7 +429,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 					.addStatement("return beanDefinition").build());
 		});
 		this.generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(this.generationContext.getGeneratedFiles()).compile(compiled -> {
+		TestCompiler.forSystem().with(this.generationContext).compile(compiled -> {
 			RootBeanDefinition suppliedBeanDefinition = (RootBeanDefinition) compiled
 					.getInstance(Supplier.class).get();
 			result.accept(suppliedBeanDefinition, compiled);

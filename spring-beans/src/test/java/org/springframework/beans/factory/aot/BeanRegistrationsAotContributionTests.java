@@ -167,7 +167,7 @@ class BeanRegistrationsAotContributionTests {
 					.build());
 		});
 		this.generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(this.generationContext.getGeneratedFiles()).compile(compiled ->
+		TestCompiler.forSystem().with(this.generationContext).compile(compiled ->
 				result.accept(compiled.getInstance(Consumer.class), compiled));
 	}
 

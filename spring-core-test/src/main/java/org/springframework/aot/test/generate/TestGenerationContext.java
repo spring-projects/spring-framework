@@ -16,20 +16,24 @@
 
 package org.springframework.aot.test.generate;
 
+import java.util.function.Function;
+
 import org.springframework.aot.generate.ClassNameGenerator;
 import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.InMemoryGeneratedFiles;
+import org.springframework.core.test.tools.TestCompiler;
 
 /**
  * {@link GenerationContext} test implementation that uses
- * {@link InMemoryGeneratedFiles}.
+ * {@link InMemoryGeneratedFiles} and can configure a {@link TestCompiler}
+ * instance.
  *
  * @author Stephane Nicoll
  * @author Sam Brannen
  * @since 6.0
  */
-public class TestGenerationContext extends DefaultGenerationContext {
+public class TestGenerationContext extends DefaultGenerationContext implements Function<TestCompiler, TestCompiler> {
 
 	/**
 	 * Create an instance using the specified {@link ClassNameGenerator}.
@@ -58,6 +62,17 @@ public class TestGenerationContext extends DefaultGenerationContext {
 	@Override
 	public InMemoryGeneratedFiles getGeneratedFiles() {
 		return (InMemoryGeneratedFiles) super.getGeneratedFiles();
+	}
+
+	/**
+	 * Configure the specified {@link TestCompiler} with the state of this context.
+	 * @param testCompiler the compiler to configure
+	 * @return a new {@link TestCompiler} instance configured with the generated files
+	 * @see TestCompiler#with(Function)
+	 */
+	@Override
+	public TestCompiler apply(TestCompiler testCompiler) {
+		return GeneratedFilesTestCompilerUtils.configure(testCompiler, getGeneratedFiles());
 	}
 
 }

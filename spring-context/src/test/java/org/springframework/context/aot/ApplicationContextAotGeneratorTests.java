@@ -315,7 +315,7 @@ class ApplicationContextAotGeneratorTests {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void testCompiledResult(TestGenerationContext generationContext,
 			BiConsumer<ApplicationContextInitializer<GenericApplicationContext>, Compiled> result) {
-		TestCompiler.forSystem().withFiles(generationContext.getGeneratedFiles()).compile(compiled ->
+		TestCompiler.forSystem().with(generationContext).compile(compiled ->
 				result.accept(compiled.getInstance(ApplicationContextInitializer.class), compiled));
 	}
 

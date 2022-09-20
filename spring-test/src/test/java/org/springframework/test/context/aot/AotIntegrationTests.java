@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Disabled;
@@ -37,6 +38,7 @@ import org.opentest4j.MultipleFailuresError;
 import org.springframework.aot.AotDetector;
 import org.springframework.aot.generate.GeneratedFiles.Kind;
 import org.springframework.aot.generate.InMemoryGeneratedFiles;
+import org.springframework.aot.test.generate.GeneratedFilesTestCompilerUtils;
 import org.springframework.core.test.tools.CompileWithForkedClassLoader;
 import org.springframework.core.test.tools.TestCompiler;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterSharedConfigTests;
@@ -92,7 +94,7 @@ class AotIntegrationTests extends AbstractAotTests {
 		assertThat(sourceFiles).containsExactlyInAnyOrder(expectedSourceFilesForBasicSpringTests);
 
 		// AOT BUILD-TIME: COMPILATION
-		TestCompiler.forSystem().withFiles(generatedFiles)
+		TestCompiler.forSystem().with(setupGeneratedFiles(generatedFiles))
 			// .printFiles(System.out)
 			.compile(compiled ->
 				// AOT RUN-TIME: EXECUTION
@@ -123,11 +125,15 @@ class AotIntegrationTests extends AbstractAotTests {
 		generator.processAheadOfTime(testClasses.stream());
 
 		// AOT BUILD-TIME: COMPILATION
-		TestCompiler.forSystem().withFiles(generatedFiles)
+		TestCompiler.forSystem().with(setupGeneratedFiles(generatedFiles))
 			// .printFiles(System.out)
 			.compile(compiled ->
 				// AOT RUN-TIME: EXECUTION
 				runTestsInAotMode(testClasses));
+	}
+
+	private static Function<TestCompiler, TestCompiler> setupGeneratedFiles(InMemoryGeneratedFiles generatedFiles) {
+		return testCompiler -> GeneratedFilesTestCompilerUtils.configure(testCompiler, generatedFiles);
 	}
 
 	private static void runTestsInAotMode(List<Class<?>> testClasses) {

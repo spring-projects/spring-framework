@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javax.annotation.processing.Processor;
 import javax.tools.Diagnostic;
@@ -33,8 +34,6 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
-import org.springframework.aot.generate.GeneratedFiles.Kind;
-import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.lang.Nullable;
 
 /**
@@ -93,23 +92,12 @@ public final class TestCompiler {
 	}
 
 	/**
-	 * Create a new {@code TestCompiler} instance with additional generated
-	 * source, resource, and class files.
-	 * @param generatedFiles the generated files to add
-	 * @return a new {@code TestCompiler} instance
+	 * Apply customization to this compiler.
+	 * @param customizer the customizer to call
+	 * @return a new {@code TestCompiler} instance with the customizations applied
 	 */
-	public TestCompiler withFiles(InMemoryGeneratedFiles generatedFiles) {
-		List<SourceFile> sourceFiles = new ArrayList<>();
-		generatedFiles.getGeneratedFiles(Kind.SOURCE).forEach(
-				(path, inputStreamSource) -> sourceFiles.add(SourceFile.of(inputStreamSource)));
-		List<ResourceFile> resourceFiles = new ArrayList<>();
-		generatedFiles.getGeneratedFiles(Kind.RESOURCE).forEach(
-				(path, inputStreamSource) -> resourceFiles.add(ResourceFile.of(path, inputStreamSource)));
-		List<ClassFile> classFiles = new ArrayList<>();
-		generatedFiles.getGeneratedFiles(Kind.CLASS).forEach(
-				(path, inputStreamSource) -> classFiles.add(ClassFile.of(
-						ClassFile.toClassName(path), inputStreamSource)));
-		return withSources(sourceFiles).withResources(resourceFiles).withClasses(classFiles);
+	public TestCompiler with(Function<TestCompiler, TestCompiler> customizer) {
+		return customizer.apply(this);
 	}
 
 	/**

@@ -86,7 +86,7 @@ class ApplicationContextAotGeneratorRuntimeHintsTests {
 		TestGenerationContext generationContext = new TestGenerationContext();
 		generator.processAheadOfTime(applicationContext, generationContext);
 		generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(generationContext.getGeneratedFiles()).compile(compiled -> {
+		TestCompiler.forSystem().with(generationContext).compile(compiled -> {
 			ApplicationContextInitializer instance = compiled.getInstance(ApplicationContextInitializer.class);
 			GenericApplicationContext freshContext = new GenericApplicationContext();
 			RuntimeHintsInvocations recordedInvocations = RuntimeHintsRecorder.record(() -> {

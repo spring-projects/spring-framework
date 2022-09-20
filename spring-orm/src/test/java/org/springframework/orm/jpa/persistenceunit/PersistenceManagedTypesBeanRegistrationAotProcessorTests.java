@@ -109,7 +109,7 @@ class PersistenceManagedTypesBeanRegistrationAotProcessorTests {
 		TestGenerationContext generationContext = new TestGenerationContext();
 		generator.processAheadOfTime(applicationContext, generationContext);
 		generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(generationContext.getGeneratedFiles()).compile(compiled ->
+		TestCompiler.forSystem().with(generationContext).compile(compiled ->
 				result.accept(compiled.getInstance(ApplicationContextInitializer.class), compiled));
 	}
 

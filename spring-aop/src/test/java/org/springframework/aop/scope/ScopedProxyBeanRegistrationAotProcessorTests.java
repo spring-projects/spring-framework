@@ -151,7 +151,7 @@ class ScopedProxyBeanRegistrationAotProcessorTests {
 					.build());
 		});
 		this.generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(this.generationContext.getGeneratedFiles()).compile(compiled -> {
+		TestCompiler.forSystem().with(this.generationContext).compile(compiled -> {
 			DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory();
 			freshBeanFactory.setBeanClassLoader(compiled.getClassLoader());
 			compiled.getInstance(Consumer.class).accept(freshBeanFactory);
