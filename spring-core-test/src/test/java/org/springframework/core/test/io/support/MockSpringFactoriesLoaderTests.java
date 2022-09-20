@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.core.mock;
+package org.springframework.core.test.io.support;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.Order;
+import org.springframework.core.test.io.support.MockSpringFactoriesLoader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

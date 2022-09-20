@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.mock;
+package org.springframework.core.test.io.support;
 
 import java.util.ArrayList;
 import java.util.HashMap;
