@@ -18,6 +18,8 @@ package org.springframework.beans.factory.aot;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -191,6 +193,19 @@ class BeanDefinitionPropertyValueCodeGeneratorTests {
 			compile("test\n", (instance, compiled) -> {
 				assertThat(instance).isEqualTo("test\n");
 				assertThat(compiled.getSourceFile()).contains("\n");
+			});
+		}
+
+	}
+
+	@Nested
+	class CharsetTests {
+
+		@Test
+		void generateWhenCharset() {
+			compile(StandardCharsets.UTF_8, (instance, compiled) -> {
+				assertThat(instance).isEqualTo(Charset.forName("UTF-8"));
+				assertThat(compiled.getSourceFile()).contains("\"UTF-8\"");
 			});
 		}
 

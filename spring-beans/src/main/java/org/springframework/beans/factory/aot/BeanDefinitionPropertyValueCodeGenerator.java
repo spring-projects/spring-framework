@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.aot;
 
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -63,6 +64,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 	private final List<Delegate> delegates = List.of(
 			new PrimitiveDelegate(),
 			new StringDelegate(),
+			new CharsetDelegate(),
 			new EnumDelegate(),
 			new ClassDelegate(),
 			new ResolvableTypeDelegate(),
@@ -204,6 +206,23 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			}
 			return null;
 		}
+	}
+
+
+	/**
+	 * {@link Delegate} for {@link Charset} types.
+	 */
+	private static class CharsetDelegate implements Delegate {
+
+		@Override
+		@Nullable
+		public CodeBlock generateCode(Object value, ResolvableType type) {
+			if (value instanceof Charset charset) {
+				return CodeBlock.of("$T.forName($S)", Charset.class, charset.name());
+			}
+			return null;
+		}
+
 	}
 
 
