@@ -234,7 +234,7 @@ public class TestContextAotGenerator {
 	}
 
 	DefaultGenerationContext createGenerationContext(Class<?> testClass) {
-		ClassNameGenerator classNameGenerator = new ClassNameGenerator(testClass);
+		ClassNameGenerator classNameGenerator = new ClassNameGenerator(ClassName.get(testClass));
 		DefaultGenerationContext generationContext =
 				new DefaultGenerationContext(classNameGenerator, this.generatedFiles, this.runtimeHints);
 		return generationContext.withName(nextTestContextId());
@@ -245,7 +245,8 @@ public class TestContextAotGenerator {
 	}
 
 	private void generateTestAotMappings(MultiValueMap<ClassName, Class<?>> initializerClassMappings) {
-		ClassNameGenerator classNameGenerator = new ClassNameGenerator(AotTestContextInitializers.class);
+		ClassNameGenerator classNameGenerator = new ClassNameGenerator(
+				ClassName.get(AotTestContextInitializers.class));
 		DefaultGenerationContext generationContext =
 				new DefaultGenerationContext(classNameGenerator, this.generatedFiles, this.runtimeHints);
 		GeneratedClasses generatedClasses = generationContext.getGeneratedClasses();
@@ -258,7 +259,8 @@ public class TestContextAotGenerator {
 	}
 
 	private void generateAotTestAttributes() {
-		ClassNameGenerator classNameGenerator = new ClassNameGenerator(AotTestAttributes.class);
+		ClassNameGenerator classNameGenerator = new ClassNameGenerator(
+				ClassName.get(AotTestAttributes.class));
 		DefaultGenerationContext generationContext =
 				new DefaultGenerationContext(classNameGenerator, this.generatedFiles, this.runtimeHints);
 		GeneratedClasses generatedClasses = generationContext.getGeneratedClasses();
