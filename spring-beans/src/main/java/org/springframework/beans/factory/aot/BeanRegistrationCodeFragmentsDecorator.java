@@ -26,6 +26,7 @@ import org.springframework.aot.generate.MethodReference;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.ResolvableType;
+import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.util.Assert;
 
@@ -51,7 +52,7 @@ public class BeanRegistrationCodeFragmentsDecorator implements BeanRegistrationC
 	}
 
 	@Override
-	public Class<?> getTarget(RegisteredBean registeredBean,
+	public ClassName getTarget(RegisteredBean registeredBean,
 			Executable constructorOrFactoryMethod) {
 
 		return this.delegate.getTarget(registeredBean, constructorOrFactoryMethod);
