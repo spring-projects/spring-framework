@@ -51,7 +51,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -189,9 +188,6 @@ public abstract class BeanUtils {
 		try {
 			ReflectionUtils.makeAccessible(ctor);
 			if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(ctor.getDeclaringClass())) {
-				if (ObjectUtils.isEmpty(args)) {
-					return KotlinDelegate.instantiateClass(ctor);
-				}
 				return KotlinDelegate.instantiateClass(ctor, args);
 			}
 			else {
@@ -884,9 +880,13 @@ public abstract class BeanUtils {
 			}
 
 			List<KParameter> parameters = kotlinConstructor.getParameters();
-			Map<KParameter, Object> argParameters = CollectionUtils.newHashMap(parameters.size());
+
 			Assert.isTrue(args.length <= parameters.size(),
 					"Number of provided arguments should be less of equals than number of constructor parameters");
+			if (parameters.isEmpty()) {
+				return kotlinConstructor.call();
+			}
+			Map<KParameter, Object> argParameters = CollectionUtils.newHashMap(parameters.size());
 			for (int i = 0 ; i < args.length ; i++) {
 				if (!(parameters.get(i).isOptional() && args[i] == null)) {
 					argParameters.put(parameters.get(i), args[i]);
@@ -894,24 +894,6 @@ public abstract class BeanUtils {
 			}
 			return kotlinConstructor.callBy(argParameters);
 		}
-
-		/**
-		 * Instantiate a Kotlin class using provided no-arg constructor.
-		 * @param ctor the constructor of the Kotlin class to instantiate
-		 */
-		public static <T> T instantiateClass(Constructor<T> ctor)
-				throws IllegalAccessException, InvocationTargetException, InstantiationException {
-
-			KFunction<T> kotlinConstructor = ReflectJvmMapping.getKotlinFunction(ctor);
-			if (kotlinConstructor == null) {
-				return ctor.newInstance();
-			}
-			List<KParameter> parameters = kotlinConstructor.getParameters();
-			Assert.isTrue(parameters.isEmpty(), "Default no-args constructor must have no params");
-			Map<KParameter, Object> argParameters = Collections.emptyMap();
-			return kotlinConstructor.callBy(argParameters);
-		}
-
 
 	}
 
