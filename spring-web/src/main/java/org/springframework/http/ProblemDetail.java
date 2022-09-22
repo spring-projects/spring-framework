@@ -156,8 +156,12 @@ public class ProblemDetail {
 	/**
 	 * Set a "dynamic" property to be added to a generic {@link #getProperties()
 	 * properties map}.
+	 * <p>When Jackson JSON is present on the classpath, any properties set here
+	 * are rendered as top level key-value pairs in the output JSON. Otherwise,
+	 * they are rendered as a {@code "properties"} sub-map.
 	 * @param name the property name
 	 * @param value the property value
+	 * @see org.springframework.http.converter.json.ProblemDetailJacksonMixin
 	 */
 	public void setProperty(String name, Object value) {
 		this.properties = (this.properties != null ? this.properties : new LinkedHashMap<>());
@@ -214,6 +218,10 @@ public class ProblemDetail {
 	 * Return a generic map of properties that are not known ahead of time,
 	 * possibly {@code null} if no properties have been added. To add a property,
 	 * use {@link #setProperty(String, Object)}.
+	 * <p>When Jackson JSON is present on the classpath, the content of this map
+	 * is unwrapped and rendered as top level key-value pairs in the output JSON.
+	 * Otherwise, they are rendered as a {@code "properties"} sub-map.
+	 * @see org.springframework.http.converter.json.ProblemDetailJacksonMixin
 	 */
 	@Nullable
 	public Map<String, Object> getProperties() {

@@ -3525,9 +3525,9 @@ back on "application/problem+json".
 
 Applications can extend `ProblemDetail` with non-standard fields in one of two ways:
 
-. Add properties to the generic `properties` map in `ProblemDetail`. When using
-the Jackson library, this `properties` map is unwrapped and as top level JSON
-properties with the help of `ProblemDetailJacksonMixin`.
+. Add properties to the generic `properties` map in `ProblemDetail`. When the Jackson JSON
+library is present, this `properties` map is unwrapped and rendered as top level
+key-value pairs in the output JSON, with the help of `ProblemDetailJacksonMixin`.
 . Create a `ProblemDetail` subclass that defines the extra, non-standard fields.
 Subclasses can use a protected copy constructor in order to re-create an existing
 `ProblemDetail` as a subclass. This can be done centrally from an `@ControllerAdvice`
