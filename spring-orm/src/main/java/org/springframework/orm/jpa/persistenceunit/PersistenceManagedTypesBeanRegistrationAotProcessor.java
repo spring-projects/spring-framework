@@ -34,6 +34,7 @@ import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.aot.BeanRegistrationCodeFragments;
+import org.springframework.beans.factory.aot.BeanRegistrationCodeFragmentsDecorator;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.javapoet.CodeBlock;
@@ -58,13 +59,13 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 	@Override
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		if (PersistenceManagedTypes.class.isAssignableFrom(registeredBean.getBeanClass())) {
-			return BeanRegistrationAotContribution.ofBeanRegistrationCodeFragmentsCustomizer(codeFragments ->
+			return BeanRegistrationAotContribution.withCustomCodeFragments(codeFragments ->
 					new JpaManagedTypesBeanRegistrationCodeFragments(codeFragments, registeredBean));
 		}
 		return null;
 	}
 
-	private static class JpaManagedTypesBeanRegistrationCodeFragments extends BeanRegistrationCodeFragments {
+	private static class JpaManagedTypesBeanRegistrationCodeFragments extends BeanRegistrationCodeFragmentsDecorator {
 
 		private static final ParameterizedTypeName LIST_OF_STRINGS_TYPE = ParameterizedTypeName.get(List.class, String.class);
 
