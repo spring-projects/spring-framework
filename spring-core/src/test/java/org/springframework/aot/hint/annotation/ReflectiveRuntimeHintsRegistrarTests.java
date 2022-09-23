@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.TypeHint;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.core.annotation.AliasFor;
@@ -40,6 +41,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
  * Tests for {@link ReflectiveRuntimeHintsRegistrar}.
  *
  * @author Stephane Nicoll
+ * @author Andy Wilkinson
  */
 class ReflectiveRuntimeHintsRegistrarTests {
 
@@ -59,6 +61,14 @@ class ReflectiveRuntimeHintsRegistrarTests {
 		process(SampleTypeAnnotatedBean.class);
 		assertThat(this.runtimeHints.reflection().getTypeHint(SampleTypeAnnotatedBean.class))
 				.isNotNull();
+	}
+
+	@Test
+	void shouldProcessWithMultipleProcessorsWithAnnotationOnType() {
+		process(SampleMultipleCustomProcessors.class);
+		TypeHint typeHint = this.runtimeHints.reflection().getTypeHint(SampleMultipleCustomProcessors.class);
+		assertThat(typeHint).isNotNull();
+		assertThat(typeHint.getMemberCategories()).containsExactly(MemberCategory.INVOKE_DECLARED_METHODS);
 	}
 
 	@Test
@@ -236,6 +246,14 @@ class ReflectiveRuntimeHintsRegistrarTests {
 
 	}
 
+	@Target({ ElementType.TYPE })
+	@Retention(RetentionPolicy.RUNTIME)
+	@Documented
+	@Reflective(TestTypeHintReflectiveProcessor.class)
+	@interface ReflectiveWithCustomProcessor {
+
+	}
+
 	interface SampleInterface {
 
 		@Reflective
@@ -251,19 +269,39 @@ class ReflectiveRuntimeHintsRegistrarTests {
 
 	static class SampleCustomProcessor {
 
-		@Reflective(TestReflectiveProcessor.class)
+		@Reflective(TestMethodHintReflectiveProcessor.class)
 		public String managed() {
 			return "test";
 		}
 
 	}
 
-	private static class TestReflectiveProcessor extends SimpleReflectiveProcessor {
+	@Reflective
+	@ReflectiveWithCustomProcessor
+	static class SampleMultipleCustomProcessors {
+
+		public String managed() {
+			return "test";
+		}
+
+	}
+
+	private static class TestMethodHintReflectiveProcessor extends SimpleReflectiveProcessor {
 
 		@Override
 		protected void registerMethodHint(ReflectionHints hints, Method method) {
 			super.registerMethodHint(hints, method);
 			hints.registerType(method.getReturnType(), MemberCategory.INVOKE_DECLARED_METHODS);
+		}
+
+	}
+
+	private static class TestTypeHintReflectiveProcessor extends SimpleReflectiveProcessor {
+
+		@Override
+		protected void registerTypeHint(ReflectionHints hints, Class<?> type) {
+			super.registerTypeHint(hints, type);
+			hints.registerType(type, MemberCategory.INVOKE_DECLARED_METHODS);
 		}
 
 	}
