@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -71,14 +70,14 @@ public class CustomizedJackson2JsonEncoderTests extends AbstractEncoderTests<Jac
 		);
 
 		testEncode(input, MyCustomizedEncoderBean.class, step -> step
-				.consumeNextWith(expectString("[" +
-						"{\"property\":\"Value1\"}," +
-						"{\"property\":\"Value2\"}]")
-						.andThen(DataBufferUtils::release))
+				.consumeNextWith(expectString("[{\"property\":\"Value1\"}").andThen(DataBufferUtils::release))
+				.consumeNextWith(expectString(",{\"property\":\"Value2\"}").andThen(DataBufferUtils::release))
+				.consumeNextWith(expectString("]").andThen(DataBufferUtils::release))
 				.verifyComplete());
 	}
 
-	public static class MyCustomizedEncoderBean {
+
+	private static class MyCustomizedEncoderBean {
 
 		private MyCustomEncoderEnum property;
 
@@ -95,7 +94,8 @@ public class CustomizedJackson2JsonEncoderTests extends AbstractEncoderTests<Jac
 		}
 	}
 
-	public enum MyCustomEncoderEnum {
+
+	private enum MyCustomEncoderEnum {
 		VAL1,
 		VAL2;
 
@@ -105,16 +105,15 @@ public class CustomizedJackson2JsonEncoderTests extends AbstractEncoderTests<Jac
 		}
 	}
 
+
 	private static class Jackson2JsonEncoderWithCustomization extends Jackson2JsonEncoder {
 
 		@Override
-		protected Mono<ObjectWriter> customizeWriterFromStream(ObjectWriter writer, MimeType mimeType, ResolvableType elementType, Map<String, Object> hints) {
-			return Mono.just(writer.with(SerializationFeature.WRITE_ENUMS_USING_TO_STRING));
-		}
+		protected ObjectWriter customizeWriter(
+				ObjectWriter writer, MimeType mimeType, ResolvableType elementType, Map<String, Object> hints) {
 
-		@Override
-		protected ObjectWriter customizeWriter(ObjectWriter writer, MimeType mimeType, ResolvableType elementType, Map<String, Object> hints) {
 			return writer.with(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
 		}
 	}
+
 }

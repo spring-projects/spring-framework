@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.testfixture.codec.AbstractDecoderTests;
-import org.springframework.util.MimeType;
 
 /**
  * Unit tests for a customized {@link Jackson2JsonDecoder}.
@@ -83,7 +82,8 @@ public class CustomizedJackson2JsonDecoderTests extends AbstractDecoderTests<Jac
 		});
 	}
 
-	public static class MyCustomizedDecoderBean {
+
+	private static class MyCustomizedDecoderBean {
 
 		private MyCustomDecoderEnum property;
 
@@ -96,7 +96,8 @@ public class CustomizedJackson2JsonDecoderTests extends AbstractDecoderTests<Jac
 		}
 	}
 
-	public enum MyCustomDecoderEnum {
+
+	private enum MyCustomDecoderEnum {
 		VAL1,
 		VAL2;
 
@@ -106,16 +107,15 @@ public class CustomizedJackson2JsonDecoderTests extends AbstractDecoderTests<Jac
 		}
 	}
 
+
 	private static class Jackson2JsonDecoderWithCustomization extends Jackson2JsonDecoder {
 
 		@Override
-		protected Mono<ObjectReader> customizeReaderFromStream(ObjectReader reader, MimeType mimeType, ResolvableType elementType, Map<String, Object> hints) {
-			return Mono.just(reader.with(DeserializationFeature.READ_ENUMS_USING_TO_STRING));
-		}
+		protected ObjectReader customizeReader(
+				ObjectReader reader, ResolvableType elementType, Map<String, Object> hints) {
 
-		@Override
-		protected ObjectReader customizeReader(ObjectReader reader, MimeType mimeType, ResolvableType elementType, Map<String, Object> hints) {
 			return reader.with(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
 		}
 	}
+
 }

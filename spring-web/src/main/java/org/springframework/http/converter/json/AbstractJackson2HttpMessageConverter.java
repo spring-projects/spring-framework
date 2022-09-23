@@ -59,7 +59,6 @@ import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -411,12 +410,14 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	}
 
 	/**
-	 * Provides the ability for subclasses to customize the {@link ObjectReader} for deserialization.
-	 * @param reader the {@link ObjectReader} available for customization
-	 * @param javaType the specified type to deserialize to
+	 * Subclasses can use this method to customize {@link ObjectReader} used
+	 * for reading values.
+	 * @param reader the reader instance to customize
+	 * @param javaType the target type of element values to read to
 	 * @return the customized {@link ObjectReader}
+	 * @since 6.0
 	 */
-	protected ObjectReader customizeReader(@NonNull ObjectReader reader, JavaType javaType) {
+	protected ObjectReader customizeReader(ObjectReader reader, JavaType javaType) {
 		return reader;
 	}
 
@@ -495,14 +496,17 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	}
 
 	/**
-	 * Provides the ability for subclasses to customize the {@link ObjectWriter} for serialization.
-	 * @param writer the {@link ObjectWriter} available for customization
-	 * @param javaType the specified type to serialize from
-	 * @param contentType the output content type
+	 * Subclasses can use this method to customize {@link ObjectWriter} used
+	 * for writing values.
+	 * @param writer the writer instance to customize
+	 * @param javaType the type of element values to write
+	 * @param contentType the selected media type
 	 * @return the customized {@link ObjectWriter}
+	 * @since 6.0
 	 */
-	protected ObjectWriter customizeWriter(@NonNull ObjectWriter writer, @Nullable JavaType javaType,
-			@Nullable MediaType contentType) {
+	protected ObjectWriter customizeWriter(
+			ObjectWriter writer, @Nullable JavaType javaType, @Nullable MediaType contentType) {
+
 		return writer;
 	}
 
