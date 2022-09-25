@@ -745,7 +745,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		FileSystem fileSystem;
 		try {
 			fileSystem = FileSystems.getFileSystem(rootDirResource.getURI().resolve("/"));
-		} catch (Exception e) {
+		}
+		catch (Exception ex) {
 			fileSystem = FileSystems.newFileSystem(rootDirResource.getURI().resolve("/"), Map.of(),
 					ClassUtils.getDefaultClassLoader());
 		}
@@ -769,17 +770,20 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				if (getPathMatcher().match(patternPath.toString(), file.toString())) {
 					try {
 						result.add(new UrlResource(file.toUri()));
-					} catch (MalformedURLException e) {
+					}
+					catch (MalformedURLException ex) {
 						// ignore
 					}
 				}
 			});
-		} catch (NoSuchFileException e) {
+		}
+		catch (NoSuchFileException ex) {
 			// ignore
 		}
 		try {
 			fileSystem.close();
-		} catch (UnsupportedOperationException e) {
+		}
+		catch (UnsupportedOperationException ex) {
 			// ignore
 		}
 		return result;
