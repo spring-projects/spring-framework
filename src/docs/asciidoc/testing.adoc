@@ -7051,7 +7051,7 @@ To set up MockMvc through Spring configuration, use the following:
 
 		@BeforeEach
 		void setup(WebApplicationContext wac) {
-			this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
 		}
 
 		// ...
