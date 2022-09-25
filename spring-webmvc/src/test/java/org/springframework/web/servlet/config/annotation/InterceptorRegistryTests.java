@@ -57,7 +57,6 @@ public class InterceptorRegistryTests {
 
 	private final HandlerInterceptor interceptor1 = new LocaleChangeInterceptor();
 
-	@Deprecated
 	private final HandlerInterceptor interceptor2 = new ThemeChangeInterceptor();
 
 	private TestWebRequestInterceptor webInterceptor1;
