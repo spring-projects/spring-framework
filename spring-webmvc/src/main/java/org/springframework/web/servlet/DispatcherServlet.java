@@ -169,7 +169,10 @@ public class DispatcherServlet extends FrameworkServlet {
 	/** Well-known name for the LocaleResolver object in the bean factory for this namespace. */
 	public static final String LOCALE_RESOLVER_BEAN_NAME = "localeResolver";
 
-	/** Well-known name for the ThemeResolver object in the bean factory for this namespace. */
+	/**
+	 * Well-known name for the ThemeResolver object in the bean factory for this namespace.
+	 * @deprecated as of 6.0, with no direct replacement
+	 */
 	@Deprecated
 	public static final String THEME_RESOLVER_BEAN_NAME = "themeResolver";
 
@@ -227,6 +230,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Request attribute to hold the current ThemeResolver, retrievable by views.
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getThemeResolver
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Deprecated
 	public static final String THEME_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME_RESOLVER";
@@ -234,6 +238,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Request attribute to hold the current ThemeSource, retrievable by views.
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getThemeSource
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Deprecated
 	public static final String THEME_SOURCE_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME_SOURCE";
