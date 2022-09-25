@@ -57,7 +57,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	protected final Log logger = HttpLogging.forLogName(getClass());
 
 	/**
-	 * This converter type argument
+	 * This converter type argument.
 	 */
 	@Nullable
 	private Class<?> typeArgument;
@@ -247,8 +247,8 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	@SuppressWarnings("unchecked")
 	protected T unboxIfNeeded(T value) {
 		// Skip unboxing if the type is unknown to ensure type safety
-		if (typeArgument != null) {
-			if (value instanceof Optional && !typeArgument.equals(Optional.class)) {
+		if (this.typeArgument != null) {
+			if (value instanceof Optional && !this.typeArgument.equals(Optional.class)) {
 				return ((Optional<T>) value).orElse(value);
 			}
 		}
@@ -348,7 +348,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 			throws IOException, HttpMessageNotWritableException;
 
 	/**
-	 * Resolve generic type of this converter and set it to {@link this#typeArgument}
+	 * Resolve generic type of this converter and set it to {@link this#typeArgument}.
 	 */
 	private void resolveTypeArgument() {
 		this.typeArgument = GenericTypeResolver.resolveTypeArgument(this.getClass(), AbstractHttpMessageConverter.class);
