@@ -26,6 +26,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -765,9 +766,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			files.forEach(file -> {
 				if (getPathMatcher().match(patternPath.toString(), file.toString())) {
 					try {
-						result.add(new UrlResource(file.toUri()));
+						result.add(convertToResource(file.toUri()));
 					}
-					catch (MalformedURLException ex) {
+					catch (Exception ex) {
 						// ignore
 					}
 				}
@@ -849,14 +850,12 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	}
 
 	@Nullable
-	private static Resource findResource(ModuleReader moduleReader, String name) {
+	private Resource findResource(ModuleReader moduleReader, String name) {
 		try {
 			return moduleReader.find(name)
 					// If it's a "file:" URI, use FileSystemResource to avoid duplicates
 					// for the same path discovered via class-path scanning.
-					.map(uri -> ResourceUtils.URL_PROTOCOL_FILE.equals(uri.getScheme()) ?
-							new FileSystemResource(uri.getPath()) :
-							UrlResource.from(uri))
+					.map(this::convertToResource)
 					.orElse(null);
 		}
 		catch (Exception ex) {
@@ -865,6 +864,12 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			}
 			return null;
 		}
+	}
+
+	private Resource convertToResource(URI uri) {
+		return ResourceUtils.URL_PROTOCOL_FILE.equals(uri.getScheme()) ?
+				new FileSystemResource(uri.getPath()) :
+				UrlResource.from(uri);
 	}
 
 	private static String stripLeadingSlash(String path) {
