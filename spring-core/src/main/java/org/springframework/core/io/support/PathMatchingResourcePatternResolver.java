@@ -729,7 +729,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	/**
 	 * Find all resources in the file system of the supplied root directory that
 	 * match the given location sub pattern via the Ant-style PathMatcher.
-	 * @param rootDirResource the root directory as Resource
+	 * @param rootDirResource the root directory as a Resource
 	 * @param subPattern the sub pattern to match (below the root directory)
 	 * @return a mutable Set of matching Resource instances
 	 * @throws IOException in case of I/O errors
@@ -738,50 +738,47 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	protected Set<Resource> doFindPathMatchingFileResources(Resource rootDirResource, String subPattern)
 			throws IOException {
 
-		Set<Resource> result = new HashSet<>();
+
+		URI rootDirUri = rootDirResource.getURI();
+		String rootDir = rootDirUri.getRawPath();
+		if (!"file".equals(rootDirUri.getScheme()) && rootDir.startsWith("/")) {
+			rootDir = stripLeadingSlash(rootDir);
+			rootDir = stripTrailingSlash(rootDir);
+			if (rootDir.isEmpty()) {
+				rootDir = "/";
+			}
+		}
 		FileSystem fileSystem;
 		try {
-			fileSystem = FileSystems.getFileSystem(rootDirResource.getURI().resolve("/"));
+			fileSystem = FileSystems.getFileSystem(rootDirUri.resolve("/"));
 		}
 		catch (Exception ex) {
-			fileSystem = FileSystems.newFileSystem(rootDirResource.getURI().resolve("/"), Map.of(),
+			fileSystem = FileSystems.newFileSystem(rootDirUri.resolve("/"), Map.of(),
 					ClassUtils.getDefaultClassLoader());
 		}
-		String rootPath = rootDirResource.getURI().getRawPath();
-		if (!("file").equals(rootDirResource.getURI().getScheme()) && rootPath.startsWith("/")) {
-			rootPath = rootPath.substring(1);
-			if (rootPath.length()==0) {
-				return result;
-			}
-			if (rootPath.endsWith("/")) {
-				rootPath = rootPath.substring(0, rootPath.length()-1);
-			}
-			if (rootPath.length()==0) {
-				return result;
-			}
-		}
-		Path path = fileSystem.getPath(rootPath);
-		Path patternPath = path.resolve(subPattern);
-		try (Stream<Path> files = Files.walk(path)) {
-			files.forEach(file -> {
-				if (getPathMatcher().match(patternPath.toString(), file.toString())) {
-					try {
-						result.add(convertToResource(file.toUri()));
-					}
-					catch (Exception ex) {
-						// ignore
-					}
+
+		Path rootPath = fileSystem.getPath(rootDir);
+		String resourcePattern = rootPath.resolve(subPattern).toString();
+		Predicate<Path> resourcePatternMatches = path -> getPathMatcher().match(resourcePattern, path.toString());
+		Set<Resource> result = new HashSet<>();
+		try (Stream<Path> files = Files.walk(rootPath)) {
+			files.filter(resourcePatternMatches).sorted().forEach(file -> {
+				try {
+					result.add(convertToResource(file.toUri()));
+				}
+				catch (Exception ex) {
+					// TODO Introduce logging
 				}
 			});
 		}
 		catch (NoSuchFileException ex) {
-			// ignore
+			// TODO Introduce logging
 		}
 		try {
 			fileSystem.close();
 		}
 		catch (UnsupportedOperationException ex) {
-			// ignore
+			// TODO Introduce logging
 		}
 		return result;
 	}
@@ -874,6 +871,10 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	private static String stripLeadingSlash(String path) {
 		return (path.startsWith("/") ? path.substring(1) : path);
+	}
+
+	private static String stripTrailingSlash(String path) {
+		return (path.endsWith("/") ? path.substring(0, path.length() - 1) : path);
 	}
 
 
