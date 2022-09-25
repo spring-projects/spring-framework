@@ -100,14 +100,13 @@ import org.springframework.util.StringUtils;
  * classpath:com/mycompany/**&#47;applicationContext.xml</pre>
  * the resolver follows a more complex but defined procedure to try to resolve
  * the wildcard. It produces a {@code Resource} for the path up to the last
- * non-wildcard segment and obtains a {@code URL} from it. If this URL is
- * not a "{@code jar:}" URL or container-specific variant (e.g.
- * "{@code zip:}" in WebLogic, "{@code wsjar}" in WebSphere", etc.),
- * then a {@code java.io.File} is obtained from it, and used to resolve the
- * wildcard by walking the filesystem. In the case of a jar URL, the resolver
- * either gets a {@code java.net.JarURLConnection} from it, or manually parses
- * the jar URL, and then traverses the contents of the jar file, to resolve the
- * wildcards.
+ * non-wildcard segment and obtains a {@code URL} from it. If this URL is not a
+ * "{@code jar:}" URL or container-specific variant (e.g. "{@code zip:}" in WebLogic,
+ * "{@code wsjar}" in WebSphere", etc.), then the root directory of the filesystem
+ * associated with the URL is obtained and used to resolve the wildcards by walking
+ * the filesystem. In the case of a jar URL, the resolver either gets a
+ * {@code java.net.JarURLConnection} from it, or manually parses the jar URL, and
+ * then traverses the contents of the jar file, to resolve the wildcards.
  *
  * <p><b>Implications on portability:</b>
  *
@@ -137,7 +136,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>There is special support for retrieving multiple class path resources with
  * the same name, via the "{@code classpath*:}" prefix. For example,
- * "{@code classpath*:META-INF/beans.xml}" will find all "beans.xml"
+ * "{@code classpath*:META-INF/beans.xml}" will find all "META-INF/beans.xml"
  * files in the class path, be it in "classes" directories or in JAR files.
  * This is particularly useful for autodetecting config files of the same name
  * at the same location within each jar file. Internally, this happens via a
@@ -149,7 +148,7 @@ import org.springframework.util.StringUtils;
  * {@code ClassLoader.getResources()} call is used on the last non-wildcard
  * path segment to get all the matching resources in the class loader hierarchy,
  * and then off each resource the same PathMatcher resolution strategy described
- * above is used for the wildcard subpath.
+ * above is used for the wildcard sub pattern.
  *
  * <p><b>Other notes:</b>
  *
@@ -526,8 +525,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	/**
 	 * Find all resources that match the given location pattern via the
-	 * Ant-style PathMatcher. Supports resources in jar files and zip files
-	 * and in the file system.
+	 * Ant-style PathMatcher. Supports resources in OSGi bundles, JBoss VFS,
+	 * jar files, zip files, and file systems.
 	 * @param locationPattern the location pattern to match
 	 * @return the result as Resource array
 	 * @throws IOException in case of I/O errors
@@ -568,15 +567,13 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	/**
 	 * Determine the root directory for the given location.
-	 * <p>Used for determining the starting point for file matching,
-	 * resolving the root directory location to a {@code java.io.File}
-	 * and passing it into {@code retrieveMatchingFiles}, with the
-	 * remainder of the location as pattern.
-	 * <p>Will return "/WEB-INF/" for the pattern "/WEB-INF/*.xml",
-	 * for example.
+	 * <p>Used for determining the starting point for file matching, resolving the
+	 * root directory location to be passed into {@link #getResources(String)},
+	 * with the remainder of the location to be used as the sub pattern.
+	 * <p>Will return "/WEB-INF/" for the location "/WEB-INF/*.xml", for example.
 	 * @param location the location to check
 	 * @return the part of the location that denotes the root directory
-	 * @see #retrieveMatchingFiles
+	 * @see #findPathMatchingResources(String)
 	 */
 	protected String determineRootDir(String location) {
 		int prefixEnd = location.indexOf(':') + 1;
@@ -729,13 +726,12 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	}
 
 	/**
-	 * Find all resources in the file system that match the given location pattern
-	 * via the Ant-style PathMatcher.
+	 * Find all resources in the file system of the supplied root directory that
+	 * match the given location sub pattern via the Ant-style PathMatcher.
 	 * @param rootDirResource the root directory as Resource
 	 * @param subPattern the sub pattern to match (below the root directory)
 	 * @return a mutable Set of matching Resource instances
 	 * @throws IOException in case of I/O errors
-	 * @see #retrieveMatchingFiles
 	 * @see org.springframework.util.PathMatcher
 	 */
 	protected Set<Resource> doFindPathMatchingFileResources(Resource rootDirResource, String subPattern)
