@@ -892,6 +892,12 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 */
 	protected Set<Resource> findAllModulePathResources(String locationPattern) throws IOException {
 		Set<Resource> result = new LinkedHashSet<>(16);
+
+		// Skip scanning the module path when running in a native image.
+		if (NativeDetector.inNativeImage()) {
+			return result;
+		}
+
 		String resourcePattern = stripLeadingSlash(locationPattern);
 		Predicate<String> resourcePatternMatches = (getPathMatcher().isPattern(resourcePattern) ?
 				path -> getPathMatcher().match(resourcePattern, path) :
