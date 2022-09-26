@@ -64,7 +64,7 @@ eclipse.classpath.file.whenMerged {
 // so that they can see test fixtures.
 // https://github.com/melix/jmh-gradle-plugin/issues/157
 eclipse.classpath.file.whenMerged {
-	entries.findAll { it.path =~ /src\/jmh\/(java|resources)/ }.each {
+	entries.findAll { it.path =~ /src\/jmh\/(java|kotlin|resources)/ }.each {
 		it.entryAttributes['test'] = 'true'
 	}
 }
