@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
-import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -413,7 +412,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 					Collections.<String>emptyList() : Collections.singletonList(messages[i]));
 			default -> Arrays.stream(Arrays.copyOfRange(messages, i, messages.length))
 					.filter(message -> !message.trim().isEmpty())
-					.collect(Collectors.toList());
+					.toList();
 		};
 	}
 

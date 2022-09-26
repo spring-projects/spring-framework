@@ -22,7 +22,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import io.netty5.handler.codec.http.HttpHeaders;
 
@@ -165,7 +164,7 @@ class Netty5HeadersAdapter implements MultiValueMap<String, String> {
 	@Override
 	public Collection<List<String>> values() {
 		return this.headers.names().stream()
-				.map(this.headers::getAll).collect(Collectors.toList());
+				.map(this.headers::getAll).toList();
 	}
 
 	@Override

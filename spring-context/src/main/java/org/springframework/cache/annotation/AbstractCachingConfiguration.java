@@ -19,7 +19,6 @@ package org.springframework.cache.annotation;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +76,7 @@ public abstract class AbstractCachingConfiguration implements ImportAware {
 	@Autowired
 	void setConfigurers(ObjectProvider<CachingConfigurer> configurers) {
 		Supplier<CachingConfigurer> configurer = () -> {
-			List<CachingConfigurer> candidates = configurers.stream().collect(Collectors.toList());
+			List<CachingConfigurer> candidates = configurers.stream().toList();
 			if (CollectionUtils.isEmpty(candidates)) {
 				return null;
 			}

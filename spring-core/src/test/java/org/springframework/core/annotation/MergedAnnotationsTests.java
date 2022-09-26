@@ -33,7 +33,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jakarta.annotation.Resource;
@@ -1896,7 +1895,7 @@ class MergedAnnotationsTests {
 				Adapt.ANNOTATION_TO_MAP);
 		Map<String, Object>[] filters = (Map[]) map.get("excludeFilters");
 		List<String> patterns = Arrays.stream(filters).map(
-				m -> (String) m.get("pattern")).collect(Collectors.toList());
+				m -> (String) m.get("pattern")).toList();
 		assertThat(patterns).containsExactly("*Foo", "*Bar");
 		filters[0].put("pattern", "newFoo");
 		filters[0].put("enigma", 42);

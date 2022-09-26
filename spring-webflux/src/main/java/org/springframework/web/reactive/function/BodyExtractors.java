@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -203,7 +202,7 @@ public abstract class BodyExtractors {
 				.orElseGet(() -> {
 					List<MediaType> mediaTypes = context.messageReaders().stream()
 							.flatMap(reader -> reader.getReadableMediaTypes(elementType).stream())
-							.collect(Collectors.toList());
+							.toList();
 					return errorFunction.apply(
 							new UnsupportedMediaTypeException(contentType, mediaTypes, elementType));
 				});

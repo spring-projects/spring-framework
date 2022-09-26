@@ -28,7 +28,6 @@ import java.util.Set;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -336,7 +335,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 			return messageConverters.stream()
 					.filter(messageConverter -> messageConverter.canWrite(entityClass, null))
 					.flatMap(messageConverter -> messageConverter.getSupportedMediaTypes(entityClass).stream())
-					.collect(Collectors.toList());
+					.toList();
 		}
 
 	}

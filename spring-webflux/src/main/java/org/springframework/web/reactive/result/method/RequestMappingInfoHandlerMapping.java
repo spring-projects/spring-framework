@@ -300,7 +300,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			return this.partialMatches.stream()
 					.filter(PartialMatch::hasProducesMatch)
 					.map(match -> match.getInfo().getParamsCondition().getExpressions())
-					.collect(Collectors.toList());
+					.toList();
 		}
 
 		/**

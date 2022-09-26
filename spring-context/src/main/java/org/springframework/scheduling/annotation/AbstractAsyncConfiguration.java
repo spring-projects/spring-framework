@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.ObjectProvider;
@@ -72,7 +71,7 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 	@Autowired
 	void setConfigurers(ObjectProvider<AsyncConfigurer> configurers) {
 		Supplier<AsyncConfigurer> configurer = SingletonSupplier.of(() -> {
-			List<AsyncConfigurer> candidates = configurers.stream().collect(Collectors.toList());
+			List<AsyncConfigurer> candidates = configurers.stream().toList();
 			if (CollectionUtils.isEmpty(candidates)) {
 				return null;
 			}

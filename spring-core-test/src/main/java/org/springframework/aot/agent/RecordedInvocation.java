@@ -18,7 +18,6 @@ package org.springframework.aot.agent;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.aot.hint.RuntimeHints;
@@ -153,7 +152,7 @@ public final class RecordedInvocation {
 	 * @return the argument types, starting at the given index
 	 */
 	public List<TypeReference> getArgumentTypes(int index) {
-		return Arrays.stream(this.arguments).skip(index).map(param -> TypeReference.of(param.getClass())).collect(Collectors.toList());
+		return Arrays.stream(this.arguments).skip(index).map(param -> TypeReference.of(param.getClass())).toList();
 	}
 
 	/**
@@ -259,7 +258,7 @@ public final class RecordedInvocation {
 		public RecordedInvocation build() {
 			List<StackWalker.StackFrame> stackFrames = StackWalker.getInstance().walk(stream -> stream
 					.dropWhile(stackFrame -> stackFrame.getClassName().startsWith(getClass().getPackageName()))
-					.collect(Collectors.toList()));
+					.toList());
 			return new RecordedInvocation(this.instrumentedMethod, this.instance, this.arguments, this.returnValue, stackFrames);
 		}
 

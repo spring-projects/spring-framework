@@ -25,7 +25,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
@@ -136,7 +135,7 @@ public class CorsConfiguration {
 	 */
 	public void setAllowedOrigins(@Nullable List<String> origins) {
 		this.allowedOrigins = (origins == null ? null :
-				origins.stream().filter(Objects::nonNull).map(this::trimTrailingSlash).collect(Collectors.toList()));
+				origins.stream().filter(Objects::nonNull).map(this::trimTrailingSlash).toList());
 	}
 
 	private String trimTrailingSlash(String origin) {
@@ -212,7 +211,7 @@ public class CorsConfiguration {
 		}
 		return this.allowedOriginPatterns.stream()
 				.map(OriginPattern::getDeclaredPattern)
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 	/**
@@ -445,7 +444,7 @@ public class CorsConfiguration {
 		if (this.allowedMethods == null) {
 			this.allowedMethods = DEFAULT_PERMIT_METHODS;
 			this.resolvedMethods = DEFAULT_PERMIT_METHODS
-					.stream().map(HttpMethod::valueOf).collect(Collectors.toList());
+					.stream().map(HttpMethod::valueOf).toList();
 		}
 		if (this.allowedHeaders == null) {
 			this.allowedHeaders = DEFAULT_PERMIT_ALL;
