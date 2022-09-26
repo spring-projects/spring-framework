@@ -121,7 +121,11 @@ public class KotlinSerializationJsonEncoder extends AbstractEncoder<Object> {
 	private KSerializer<Object> serializer(Type type) {
 		KSerializer<Object> serializer = serializerCache.get(type);
 		if (serializer == null) {
-			serializer = SerializersKt.serializerOrNull(type);
+			try {
+				serializer = SerializersKt.serializerOrNull(type);
+			}
+			catch (IllegalArgumentException ignored) {
+			}
 			if (serializer == null || hasPolymorphism(serializer.getDescriptor(), new HashSet<>())) {
 				return null;
 			}

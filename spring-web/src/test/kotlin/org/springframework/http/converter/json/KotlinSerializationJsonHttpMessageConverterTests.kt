@@ -21,6 +21,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Test
 import org.springframework.core.Ordered
+import org.springframework.core.ResolvableType
 import org.springframework.http.MediaType
 import org.springframework.http.MockHttpInputMessage
 import org.springframework.http.MockHttpOutputMessage
@@ -62,6 +63,8 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 
 		assertThat(converter.canRead(typeTokenOf<Ordered>(), Ordered::class.java, MediaType.APPLICATION_JSON)).isFalse()
 		assertThat(converter.canRead(typeTokenOf<List<Ordered>>(), List::class.java, MediaType.APPLICATION_JSON)).isFalse()
+
+		assertThat(converter.canRead(ResolvableType.NONE.type, null, MediaType.APPLICATION_JSON)).isFalse()
 	}
 
 	@Test
@@ -83,6 +86,8 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 		assertThat(converter.canWrite(typeTokenOf<List<Int>>(), List::class.java, MediaType.APPLICATION_PDF)).isFalse()
 
 		assertThat(converter.canWrite(typeTokenOf<Ordered>(), Ordered::class.java, MediaType.APPLICATION_JSON)).isFalse()
+
+		assertThat(converter.canWrite(ResolvableType.NONE.type, SerializableBean::class.java, MediaType.APPLICATION_JSON)).isFalse()
 	}
 
 	@Test
