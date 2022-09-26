@@ -738,16 +738,16 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	protected Set<Resource> doFindPathMatchingFileResources(Resource rootDirResource, String subPattern)
 			throws IOException {
 
-
 		URI rootDirUri = rootDirResource.getURI();
-		String rootDir = rootDirUri.getRawPath();
-		if (!"file".equals(rootDirUri.getScheme()) && rootDir.startsWith("/")) {
-			rootDir = stripLeadingSlash(rootDir);
-			rootDir = stripTrailingSlash(rootDir);
-			if (rootDir.isEmpty()) {
-				rootDir = "/";
-			}
+		String rootDir = rootDirUri.getPath();
+		// If the URI is for a "resource" in the GraalVM native image file system, we have to
+		// ensure that the root directory does not end in a slash while simultaneously ensuring
+		// that the root directory is not an empty string (since fileSystem.getPath("").resolve(str)
+		// throws an ArrayIndexOutOfBoundsException in a native image).
+		if ("resource".equals(rootDirUri.getScheme()) && (rootDir.length() > 1) && rootDir.endsWith("/")) {
+			rootDir = rootDir.substring(0, rootDir.length() - 1);
 		}
+
 		FileSystem fileSystem;
 		try {
 			fileSystem = FileSystems.getFileSystem(rootDirUri.resolve("/"));
@@ -871,10 +871,6 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	private static String stripLeadingSlash(String path) {
 		return (path.startsWith("/") ? path.substring(1) : path);
-	}
-
-	private static String stripTrailingSlash(String path) {
-		return (path.endsWith("/") ? path.substring(0, path.length() - 1) : path);
 	}
 
 
