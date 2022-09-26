@@ -176,15 +176,13 @@ class GenericTypeResolverTests {
 	@Test
 	public void resolvePartiallySpecializedTypeVariables() {
 		Type resolved = resolveType(BiGenericClass.class.getTypeParameters()[0], TypeFixedBiGenericClass.class);
-		assertThat(resolved).isNotNull();
-		assertThat(D.class).isEqualTo(resolved);
+		assertThat(resolved).isEqualTo(D.class);
 	}
 
 	@Test
 	public void resolveTransitiveTypeVariableWithDifferentName() {
 		Type resolved = resolveType(BiGenericClass.class.getTypeParameters()[1], TypeFixedBiGenericClass.class);
-		assertThat(resolved).isNotNull();
-		assertThat(E.class).isEqualTo(resolved);
+		assertThat(resolved).isEqualTo(E.class);
 	}
 
 	public interface MyInterfaceType<T> {

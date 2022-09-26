@@ -203,7 +203,6 @@ public final class GenericTypeResolver {
 			if (variableResolver == null) {
 				return ResolvableType.NONE;
 			}
-
 			resolvedType = variableResolver.resolveVariable(typeVariable);
 			if (resolvedType != null) {
 				return resolvedType;
@@ -223,7 +222,6 @@ public final class GenericTypeResolver {
 				return resolvedType;
 			}
 		}
-
 		return ResolvableType.NONE;
 	}
 
