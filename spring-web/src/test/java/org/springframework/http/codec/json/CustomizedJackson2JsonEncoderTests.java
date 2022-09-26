@@ -35,9 +35,9 @@ import static org.springframework.http.MediaType.APPLICATION_NDJSON;
  *
  * @author Jason Laber
  */
-public class CustomizedJackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonEncoder> {
+class CustomizedJackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonEncoder> {
 
-	public CustomizedJackson2JsonEncoderTests() {
+	CustomizedJackson2JsonEncoderTests() {
 		super(new Jackson2JsonEncoderWithCustomization());
 	}
 
@@ -47,8 +47,8 @@ public class CustomizedJackson2JsonEncoderTests extends AbstractEncoderTests<Jac
 		// Not Testing, covered under Jackson2JsonEncoderTests
 	}
 
-	@Override
 	@Test
+	@Override
 	public void encode() throws Exception {
 		Flux<MyCustomizedEncoderBean> input = Flux.just(
 				new MyCustomizedEncoderBean(MyCustomEncoderEnum.VAL1),
@@ -63,7 +63,7 @@ public class CustomizedJackson2JsonEncoderTests extends AbstractEncoderTests<Jac
 	}
 
 	@Test
-	public void encodeNonStream() {
+	void encodeNonStream() {
 		Flux<MyCustomizedEncoderBean> input = Flux.just(
 				new MyCustomizedEncoderBean(MyCustomEncoderEnum.VAL1),
 				new MyCustomizedEncoderBean(MyCustomEncoderEnum.VAL2)
@@ -85,10 +85,12 @@ public class CustomizedJackson2JsonEncoderTests extends AbstractEncoderTests<Jac
 			this.property = property;
 		}
 
+		@SuppressWarnings("unused")
 		public MyCustomEncoderEnum getProperty() {
 			return property;
 		}
 
+		@SuppressWarnings("unused")
 		public void setProperty(MyCustomEncoderEnum property) {
 			this.property = property;
 		}

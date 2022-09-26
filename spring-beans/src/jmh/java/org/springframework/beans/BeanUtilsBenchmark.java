@@ -54,6 +54,7 @@ public class BeanUtilsBenchmark {
 	static class TestClass1{
 	};
 
+	@SuppressWarnings("unused")
 	static class TestClass2 {
 		private final int value1;
 		private final String value2;
@@ -63,4 +64,5 @@ public class BeanUtilsBenchmark {
 			this.value2 = value2;
 		}
 	}
+
 }

@@ -35,19 +35,20 @@ import org.springframework.core.testfixture.codec.AbstractDecoderTests;
  *
  * @author Jason Laber
  */
-public class CustomizedJackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonDecoder> {
+class CustomizedJackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonDecoder> {
 
-	public CustomizedJackson2JsonDecoderTests() {
+	CustomizedJackson2JsonDecoderTests() {
 		super(new Jackson2JsonDecoderWithCustomization());
 	}
+
 
 	@Override
 	public void canDecode() throws Exception {
 		// Not Testing, covered under Jackson2JsonDecoderTests
 	}
 
-	@Override
 	@Test
+	@Override
 	public void decode() throws Exception {
 		Flux<DataBuffer> input = Flux.concat(stringBuffer("{\"property\":\"Value1\"}"));
 
@@ -56,8 +57,8 @@ public class CustomizedJackson2JsonDecoderTests extends AbstractDecoderTests<Jac
 				.verifyComplete());
 	}
 
-	@Override
 	@Test
+	@Override
 	public void decodeToMono() throws Exception {
 		Mono<DataBuffer> input = stringBuffer("{\"property\":\"Value2\"}");
 
@@ -91,6 +92,7 @@ public class CustomizedJackson2JsonDecoderTests extends AbstractDecoderTests<Jac
 			return property;
 		}
 
+		@SuppressWarnings("unused")
 		public void setProperty(MyCustomDecoderEnum property) {
 			this.property = property;
 		}
