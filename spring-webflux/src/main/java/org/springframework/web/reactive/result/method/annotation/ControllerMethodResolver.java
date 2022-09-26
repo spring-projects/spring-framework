@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -133,9 +132,9 @@ class ControllerMethodResolver {
 			ConfigurableApplicationContext context) {
 
 		return initResolvers(customResolvers, adapterRegistry, context, false, Collections.emptyList()).stream()
-				.filter(resolver -> resolver instanceof SyncHandlerMethodArgumentResolver)
-				.map(resolver -> (SyncHandlerMethodArgumentResolver) resolver)
-				.collect(Collectors.toList());
+				.filter(SyncHandlerMethodArgumentResolver.class::isInstance)
+				.map(SyncHandlerMethodArgumentResolver.class::cast)
+				.toList();
 	}
 
 	private static List<HandlerMethodArgumentResolver> modelMethodResolvers(

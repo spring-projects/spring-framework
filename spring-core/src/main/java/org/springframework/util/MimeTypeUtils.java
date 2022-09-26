@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.function.BiPredicate;
-import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
 
@@ -292,7 +291,7 @@ public abstract class MimeTypeUtils {
 		return tokenize(mimeTypes).stream()
 				.filter(StringUtils::hasText)
 				.map(MimeTypeUtils::parseMimeType)
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 	/**

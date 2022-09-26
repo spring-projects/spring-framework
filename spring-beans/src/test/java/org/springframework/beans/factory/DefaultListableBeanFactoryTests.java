@@ -2020,7 +2020,7 @@ class DefaultListableBeanFactoryTests {
 		lbf.setParentBeanFactory(parentBf);
 		lbf.registerBeanDefinition("low", new RootBeanDefinition(LowPriorityTestBean.class));
 		List<Class<?>> orderedTypes = lbf.getBeanProvider(TestBean.class).orderedStream()
-				.map(Object::getClass).collect(Collectors.toList());
+				.map(Object::getClass).toList();
 		assertThat(orderedTypes).containsExactly(
 				HighPriorityTestBean.class, LowPriorityTestBean.class, TestBean.class);
 	}

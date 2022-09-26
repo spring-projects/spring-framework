@@ -19,7 +19,6 @@ package org.springframework.web.bind.support;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import reactor.core.publisher.Mono;
 
@@ -124,7 +123,7 @@ public class WebExchangeDataBinder extends WebDataBinder {
 		if (!CollectionUtils.isEmpty(values)) {
 			values = values.stream()
 					.map(value -> value instanceof FormFieldPart ? ((FormFieldPart) value).value() : value)
-					.collect(Collectors.toList());
+					.toList();
 			params.put(key, values.size() == 1 ? values.get(0) : values);
 		}
 	}

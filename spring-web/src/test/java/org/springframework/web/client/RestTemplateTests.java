@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -523,7 +522,7 @@ class RestTemplateTests {
 			final List<List<String>> accepts = request.getHeaders().toMultimap().entrySet().stream()
 					.filter(entry -> entry.getKey().equalsIgnoreCase("accept"))
 					.map(Entry::getValue)
-					.collect(Collectors.toList());
+					.toList();
 
 			assertThat(accepts).hasSize(1);
 			assertThat(accepts.get(0)).hasSize(1);

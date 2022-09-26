@@ -22,7 +22,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import io.netty.buffer.PooledByteBufAllocator;
 import org.apache.commons.logging.Log;
@@ -140,7 +139,7 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 		// Remove LeakAwareDataBuffer wrapper so delegate can find native buffers
 		dataBuffers = dataBuffers.stream()
 				.map(o -> o instanceof LeakAwareDataBuffer ? ((LeakAwareDataBuffer) o).dataBuffer() : o)
-				.collect(Collectors.toList());
+				.toList();
 		return new LeakAwareDataBuffer(this.delegate.join(dataBuffers), this);
 	}
 

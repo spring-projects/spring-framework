@@ -30,7 +30,6 @@ import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
@@ -122,7 +121,7 @@ class DefaultWebClient implements WebClient {
 		return (CollectionUtils.isEmpty(handlerMap) ? Collections.emptyList() :
 				handlerMap.entrySet().stream()
 						.map(entry -> new DefaultResponseSpec.StatusHandler(entry.getKey(), entry.getValue()))
-						.collect(Collectors.toList()));
+						.toList());
 	};
 
 

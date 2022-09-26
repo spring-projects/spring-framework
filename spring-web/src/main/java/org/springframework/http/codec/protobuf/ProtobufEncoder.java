@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.google.protobuf.Message;
 import org.reactivestreams.Publisher;
@@ -61,7 +60,7 @@ public class ProtobufEncoder extends ProtobufCodecSupport implements HttpMessage
 			.stream()
 			.map(mimeType -> new MediaType(mimeType.getType(), mimeType.getSubtype(),
 					Collections.singletonMap(DELIMITED_KEY, DELIMITED_VALUE)))
-			.collect(Collectors.toList());
+			.toList();
 
 
 	@Override

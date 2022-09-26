@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.micrometer.observation.Observation;
@@ -971,7 +970,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 						.filter(converter -> canReadResponse(this.responseType, converter))
 						.flatMap((HttpMessageConverter<?> converter) -> getSupportedMediaTypes(this.responseType, converter))
 						.distinct()
-						.collect(Collectors.toList());
+						.toList();
 				MimeTypeUtils.sortBySpecificity(allSupportedMediaTypes);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Accept=" + allSupportedMediaTypes);
