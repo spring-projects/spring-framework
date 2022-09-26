@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.function.BiPredicate;
+import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
 
@@ -279,7 +280,7 @@ public abstract class MimeTypeUtils {
 	}
 
 	/**
-	 * Parse the comma-separated string into a list of {@code MimeType} objects.
+	 * Parse the comma-separated string into a mutable list of {@code MimeType} objects.
 	 * @param mimeTypes the string to parse
 	 * @return the list of mime types
 	 * @throws InvalidMimeTypeException if the string cannot be parsed
@@ -291,7 +292,7 @@ public abstract class MimeTypeUtils {
 		return tokenize(mimeTypes).stream()
 				.filter(StringUtils::hasText)
 				.map(MimeTypeUtils::parseMimeType)
-				.toList();
+				.collect(Collectors.toList());
 	}
 
 	/**

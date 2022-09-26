@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
@@ -135,7 +136,7 @@ public class CorsConfiguration {
 	 */
 	public void setAllowedOrigins(@Nullable List<String> origins) {
 		this.allowedOrigins = (origins == null ? null :
-				origins.stream().filter(Objects::nonNull).map(this::trimTrailingSlash).toList());
+				origins.stream().filter(Objects::nonNull).map(this::trimTrailingSlash).collect(Collectors.toList()));
 	}
 
 	private String trimTrailingSlash(String origin) {
