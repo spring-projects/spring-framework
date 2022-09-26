@@ -409,6 +409,7 @@ public class RequestContext {
 	 * Determine the fallback theme for this context.
 	 * <p>The default implementation returns the default theme (with name "theme").
 	 * @return the fallback theme (never {@code null})
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Deprecated
 	protected org.springframework.ui.context.Theme getFallbackTheme() {
@@ -447,6 +448,7 @@ public class RequestContext {
 	 * {@link org.springframework.web.servlet.ThemeResolver ThemeResolver}.
 	 * @param themeName the name of the new theme
 	 * @see org.springframework.web.servlet.ThemeResolver#setThemeName
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Deprecated
 	public void changeTheme(String themeName) {
@@ -740,6 +742,7 @@ public class RequestContext {
 	 * @param code the code of the message
 	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Deprecated
 	public String getThemeMessage(String code, String defaultMessage) {
@@ -755,6 +758,7 @@ public class RequestContext {
 	 * @param args arguments for the message, or {@code null} if none
 	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Deprecated
 	public String getThemeMessage(String code, @Nullable Object[] args, String defaultMessage) {
@@ -770,6 +774,7 @@ public class RequestContext {
 	 * @param args arguments for the message as a List, or {@code null} if none
 	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Deprecated
 	public String getThemeMessage(String code, @Nullable List<?> args, String defaultMessage) {
@@ -785,6 +790,7 @@ public class RequestContext {
 	 * @param code the code of the message
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Deprecated
 	public String getThemeMessage(String code) throws NoSuchMessageException {
@@ -799,6 +805,7 @@ public class RequestContext {
 	 * @param args arguments for the message, or {@code null} if none
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Deprecated
 	public String getThemeMessage(String code, @Nullable Object[] args) throws NoSuchMessageException {
@@ -813,6 +820,7 @@ public class RequestContext {
 	 * @param args arguments for the message as a List, or {@code null} if none
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Deprecated
 	public String getThemeMessage(String code, @Nullable List<?> args) throws NoSuchMessageException {
@@ -826,6 +834,7 @@ public class RequestContext {
 	 * @param resolvable the MessageSourceResolvable
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Deprecated
 	public String getThemeMessage(MessageSourceResolvable resolvable) throws NoSuchMessageException {

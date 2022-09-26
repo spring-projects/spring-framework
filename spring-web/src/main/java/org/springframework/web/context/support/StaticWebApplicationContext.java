@@ -50,7 +50,7 @@ import org.springframework.web.context.ServletContextAware;
  * {@link org.springframework.context.support.AbstractApplicationContext},
  * this class detects a bean of type {@link org.springframework.ui.context.ThemeSource}
  * in the context, under the special bean name "themeSource".
- * Theme support is deprecated as of 6.0
+ * Theme support is deprecated as of 6.0 with no direct replacement.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
