@@ -16,7 +16,6 @@
 
 package org.springframework.aot.test.generate;
 
-import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 import org.springframework.aot.generate.ClassNameGenerator;
@@ -69,7 +68,7 @@ public class TestGenerationContext extends DefaultGenerationContext implements U
 	 * Configure the specified {@link TestCompiler} with the state of this context.
 	 * @param testCompiler the compiler to configure
 	 * @return a new {@link TestCompiler} instance configured with the generated files
-	 * @see TestCompiler#with(Function)
+	 * @see TestCompiler#with(UnaryOperator)
 	 */
 	@Override
 	public TestCompiler apply(TestCompiler testCompiler) {
