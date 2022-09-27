@@ -859,55 +859,50 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
 
 		ServletWebRequest webRequest = new ServletWebRequest(request, response);
-		try {
-			WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);
-			ModelFactory modelFactory = getModelFactory(handlerMethod, binderFactory);
+		WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);
+		ModelFactory modelFactory = getModelFactory(handlerMethod, binderFactory);
 
-			ServletInvocableHandlerMethod invocableMethod = createInvocableHandlerMethod(handlerMethod);
-			if (this.argumentResolvers != null) {
-				invocableMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
-			}
-			if (this.returnValueHandlers != null) {
-				invocableMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
-			}
-			invocableMethod.setDataBinderFactory(binderFactory);
-			invocableMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
-
-			ModelAndViewContainer mavContainer = new ModelAndViewContainer();
-			mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
-			modelFactory.initModel(webRequest, mavContainer, invocableMethod);
-			mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);
-
-			AsyncWebRequest asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);
-			asyncWebRequest.setTimeout(this.asyncRequestTimeout);
-
-			WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-			asyncManager.setTaskExecutor(this.taskExecutor);
-			asyncManager.setAsyncWebRequest(asyncWebRequest);
-			asyncManager.registerCallableInterceptors(this.callableInterceptors);
-			asyncManager.registerDeferredResultInterceptors(this.deferredResultInterceptors);
-
-			if (asyncManager.hasConcurrentResult()) {
-				Object result = asyncManager.getConcurrentResult();
-				mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];
-				asyncManager.clearConcurrentResult();
-				LogFormatUtils.traceDebug(logger, traceOn -> {
-					String formatted = LogFormatUtils.formatValue(result, !traceOn);
-					return "Resume with async result [" + formatted + "]";
-				});
-				invocableMethod = invocableMethod.wrapConcurrentResult(result);
-			}
-
-			invocableMethod.invokeAndHandle(webRequest, mavContainer);
-			if (asyncManager.isConcurrentHandlingStarted()) {
-				return null;
-			}
-
-			return getModelAndView(mavContainer, modelFactory, webRequest);
+		ServletInvocableHandlerMethod invocableMethod = createInvocableHandlerMethod(handlerMethod);
+		if (this.argumentResolvers != null) {
+			invocableMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
 		}
-		finally {
-			webRequest.requestCompleted();
+		if (this.returnValueHandlers != null) {
+			invocableMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
 		}
+		invocableMethod.setDataBinderFactory(binderFactory);
+		invocableMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
+
+		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
+		mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
+		modelFactory.initModel(webRequest, mavContainer, invocableMethod);
+		mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);
+
+		AsyncWebRequest asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);
+		asyncWebRequest.setTimeout(this.asyncRequestTimeout);
+
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+		asyncManager.setTaskExecutor(this.taskExecutor);
+		asyncManager.setAsyncWebRequest(asyncWebRequest);
+		asyncManager.registerCallableInterceptors(this.callableInterceptors);
+		asyncManager.registerDeferredResultInterceptors(this.deferredResultInterceptors);
+
+		if (asyncManager.hasConcurrentResult()) {
+			Object result = asyncManager.getConcurrentResult();
+			mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];
+			asyncManager.clearConcurrentResult();
+			LogFormatUtils.traceDebug(logger, traceOn -> {
+				String formatted = LogFormatUtils.formatValue(result, !traceOn);
+				return "Resume with async result [" + formatted + "]";
+			});
+			invocableMethod = invocableMethod.wrapConcurrentResult(result);
+		}
+
+		invocableMethod.invokeAndHandle(webRequest, mavContainer);
+		if (asyncManager.isConcurrentHandlingStarted()) {
+			return null;
+		}
+
+		return getModelAndView(mavContainer, modelFactory, webRequest);
 	}
 
 	/**
