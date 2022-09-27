@@ -158,7 +158,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
-	private List<HttpMessageConverter<?>> messageConverters;
+	private List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
 
 	private final List<Object> requestResponseBodyAdvice = new ArrayList<>();
 
@@ -198,22 +198,6 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	private final Map<Class<?>, Set<Method>> modelAttributeCache = new ConcurrentHashMap<>(64);
 
 	private final Map<ControllerAdviceBean, Set<Method>> modelAttributeAdviceCache = new LinkedHashMap<>();
-
-
-	public RequestMappingHandlerAdapter() {
-		this.messageConverters = new ArrayList<>(4);
-		this.messageConverters.add(new ByteArrayHttpMessageConverter());
-		this.messageConverters.add(new StringHttpMessageConverter());
-		if (!shouldIgnoreXml) {
-			try {
-				this.messageConverters.add(new SourceHttpMessageConverter<>());
-			}
-			catch (Error err) {
-				// Ignore when no TransformerFactory implementation is available
-			}
-		}
-		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
-	}
 
 
 	/**
@@ -358,7 +342,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * request and response.
 	 */
 	public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
-		this.messageConverters = messageConverters;
+		this.messageConverters.clear();
+		this.messageConverters.addAll(messageConverters);
 	}
 
 	/**
@@ -569,6 +554,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	public void afterPropertiesSet() {
 		// Do this first, it may add ResponseBody advice beans
 		initControllerAdviceCache();
+		initMessageConverters();
 
 		if (this.argumentResolvers == null) {
 			List<HandlerMethodArgumentResolver> resolvers = getDefaultArgumentResolvers();
@@ -582,6 +568,23 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			List<HandlerMethodReturnValueHandler> handlers = getDefaultReturnValueHandlers();
 			this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite().addHandlers(handlers);
 		}
+	}
+
+	private void initMessageConverters() {
+		if (!this.messageConverters.isEmpty()) {
+			return;
+		}
+		this.messageConverters.add(new ByteArrayHttpMessageConverter());
+		this.messageConverters.add(new StringHttpMessageConverter());
+		if (!shouldIgnoreXml) {
+			try {
+				this.messageConverters.add(new SourceHttpMessageConverter<>());
+			}
+			catch (Error err) {
+				// Ignore when no TransformerFactory implementation is available
+			}
+		}
+		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 	}
 
 	private void initControllerAdviceCache() {
