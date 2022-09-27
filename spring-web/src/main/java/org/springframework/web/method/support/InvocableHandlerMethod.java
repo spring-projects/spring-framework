@@ -20,10 +20,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-import org.springframework.context.MessageSource;
-import org.jetbrains.annotations.NotNull;
 import org.reactivestreams.Publisher;
 
+import org.springframework.context.MessageSource;
 import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.KotlinDetector;
@@ -203,7 +202,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		Method method = getBridgedMethod();
 		try {
 			if (KotlinDetector.isSuspendingFunction(method)) {
-				return invokeSuspendingFunction(method, args);
+				return invokeSuspendingFunction(method, getBean(), args);
 			}
 			return method.invoke(getBean(), args);
 		}
@@ -232,11 +231,17 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Invokes Kotlin coroutine suspended function.
+	 * Invoke the given Kotlin coroutine suspended function.
+	 *
+	 * <p>The default implementation invokes
+	 * {@link CoroutinesUtils#invokeSuspendingFunction(Method, Object, Object...)},
+	 * but subclasses can override this method to use
+	 * {@link CoroutinesUtils#invokeSuspendingFunction(kotlin.coroutines.CoroutineContext, Method, Object, Object...)}
+	 * instead.
+	 * @since 6.0
 	 */
-	@NotNull
-	protected Publisher<?> invokeSuspendingFunction(Method method, Object[] args) {
-		return CoroutinesUtils.invokeSuspendingFunction(method, getBean(), args);
+	protected Publisher<?> invokeSuspendingFunction(Method method, Object target, Object[] args) {
+		return CoroutinesUtils.invokeSuspendingFunction(method, target, args);
 	}
 
 }
