@@ -23,6 +23,7 @@ import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.core.test.tools.TestCompiler;
+import org.springframework.javapoet.ClassName;
 
 /**
  * {@link GenerationContext} test implementation that uses
@@ -36,6 +37,11 @@ import org.springframework.core.test.tools.TestCompiler;
 public class TestGenerationContext extends DefaultGenerationContext implements UnaryOperator<TestCompiler> {
 
 	/**
+	 * The default test target {@link ClassName}.
+	 */
+	public static final ClassName TEST_TARGET = ClassName.get("com.example", "TestTarget");
+
+	/**
 	 * Create an instance using the specified {@link ClassNameGenerator}.
 	 * @param classNameGenerator the class name generator to use
 	 */
@@ -47,15 +53,15 @@ public class TestGenerationContext extends DefaultGenerationContext implements U
 	 * Create an instance using the specified {@code target}.
 	 * @param target the default target class to use
 	 */
-	public TestGenerationContext(Class<?> target) {
+	public TestGenerationContext(ClassName target) {
 		this(new ClassNameGenerator(target));
 	}
 
 	/**
-	 * Create an instance using {@link TestTarget} as the {@code target}.
+	 * Create an instance using {@link #TEST_TARGET} as the {@code target}.
 	 */
 	public TestGenerationContext() {
-		this(TestTarget.class);
+		this(TEST_TARGET);
 	}
 
 

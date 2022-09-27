@@ -22,6 +22,7 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.GeneratedFiles.Kind;
+import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.TypeSpec;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,7 +43,7 @@ class GeneratedClassesTests {
 	private static final Consumer<TypeSpec.Builder> emptyTypeCustomizer = type -> {};
 
 	private final GeneratedClasses generatedClasses = new GeneratedClasses(
-			new ClassNameGenerator(Object.class));
+			new ClassNameGenerator(ClassName.get("com.example", "Test")));
 
 	@Test
 	void createWhenClassNameGeneratorIsNullThrowsException() {
@@ -76,7 +77,7 @@ class GeneratedClassesTests {
 	@Test
 	void addForFeatureUsesDefaultTarget() {
 		GeneratedClass generatedClass = this.generatedClasses.addForFeature("Test", emptyTypeCustomizer);
-		assertThat(generatedClass.getName()).hasToString("java.lang.Object__Test");
+		assertThat(generatedClass.getName()).hasToString("com.example.Test__Test");
 	}
 
 	@Test

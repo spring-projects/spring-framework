@@ -26,6 +26,7 @@ import org.springframework.beans.factory.support.InstanceSupplier;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.ResolvableType;
+import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 
 /**
@@ -52,9 +53,9 @@ public interface BeanRegistrationCodeFragments {
 	 * the code.
 	 * @param registeredBean the registered bean
 	 * @param constructorOrFactoryMethod the constructor or factory method
-	 * @return the target class
+	 * @return the target {@link ClassName}
 	 */
-	Class<?> getTarget(RegisteredBean registeredBean,
+	ClassName getTarget(RegisteredBean registeredBean,
 			Executable constructorOrFactoryMethod);
 
 	/**

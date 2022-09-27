@@ -37,6 +37,7 @@ import org.springframework.beans.factory.support.InstanceSupplier;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.ResolvableType;
+import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.lang.Nullable;
 
@@ -108,8 +109,8 @@ class ScopedProxyBeanRegistrationAotProcessor implements BeanRegistrationAotProc
 		}
 
 		@Override
-		public Class<?> getTarget(RegisteredBean registeredBean, Executable constructorOrFactoryMethod) {
-			return this.targetBeanDefinition.getResolvableType().toClass();
+		public ClassName getTarget(RegisteredBean registeredBean, Executable constructorOrFactoryMethod) {
+			return ClassName.get(this.targetBeanDefinition.getResolvableType().toClass());
 		}
 
 		@Override

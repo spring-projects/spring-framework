@@ -94,9 +94,9 @@ class BeanDefinitionMethodGenerator {
 		registerRuntimeHintsIfNecessary(generationContext.getRuntimeHints());
 		BeanRegistrationCodeFragments codeFragments = getCodeFragments(generationContext,
 				beanRegistrationsCode);
-		Class<?> target = codeFragments.getTarget(this.registeredBean,
+		ClassName target = codeFragments.getTarget(this.registeredBean,
 				this.constructorOrFactoryMethod);
-		if (!target.getName().startsWith("java.")) {
+		if (!target.canonicalName().startsWith("java.")) {
 			GeneratedClass generatedClass = generationContext.getGeneratedClasses()
 					.getOrAddForFeatureComponent("BeanDefinitions", target, type -> {
 						type.addJavadoc("Bean definitions for {@link $T}", target);

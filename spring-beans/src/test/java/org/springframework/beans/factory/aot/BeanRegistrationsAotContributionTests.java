@@ -33,7 +33,6 @@ import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
 import org.springframework.aot.test.generate.TestGenerationContext;
-import org.springframework.aot.test.generate.TestTarget;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -97,7 +96,7 @@ class BeanRegistrationsAotContributionTests {
 	@Test
 	void applyToWhenHasNameGeneratesPrefixedFeatureName() {
 		this.generationContext = new TestGenerationContext(
-				new ClassNameGenerator(TestTarget.class, "Management"));
+				new ClassNameGenerator(TestGenerationContext.TEST_TARGET, "Management"));
 		this.beanFactoryInitializationCode = new MockBeanFactoryInitializationCode(this.generationContext);
 		Map<String, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
 		RegisteredBean registeredBean = registerBean(

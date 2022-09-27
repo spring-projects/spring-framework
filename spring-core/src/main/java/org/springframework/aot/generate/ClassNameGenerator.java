@@ -27,8 +27,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Generate unique class names based on a target {@link Class} and a feature
- * name.
+ * Generate unique class names based on a target {@link ClassName} and a
+ * feature name.
  *
  * <p>This class is stateful, so the same instance should be used for all name
  * generation.
@@ -43,7 +43,7 @@ public final class ClassNameGenerator {
 
 	private static final String AOT_FEATURE = "Aot";
 
-	private final Class<?> defaultTarget;
+	private final ClassName defaultTarget;
 
 	private final String featureNamePrefix;
 
@@ -55,7 +55,7 @@ public final class ClassNameGenerator {
 	 * feature name prefix.
 	 * @param defaultTarget the default target class to use
 	 */
-	public ClassNameGenerator(Class<?> defaultTarget) {
+	public ClassNameGenerator(ClassName defaultTarget) {
 		this(defaultTarget, "");
 	}
 
@@ -65,11 +65,11 @@ public final class ClassNameGenerator {
 	 * @param defaultTarget the default target class to use
 	 * @param featureNamePrefix the prefix to use to qualify feature names
 	 */
-	public ClassNameGenerator(Class<?> defaultTarget, String featureNamePrefix) {
+	public ClassNameGenerator(ClassName defaultTarget, String featureNamePrefix) {
 		this(defaultTarget, featureNamePrefix, new ConcurrentHashMap<>());
 	}
 
-	private ClassNameGenerator(Class<?> defaultTarget, String featureNamePrefix,
+	private ClassNameGenerator(ClassName defaultTarget, String featureNamePrefix,
 			Map<String, AtomicInteger> sequenceGenerator) {
 		Assert.notNull(defaultTarget, "'defaultTarget' must not be null");
 		this.defaultTarget = defaultTarget;
@@ -98,16 +98,16 @@ public final class ClassNameGenerator {
 	 * {@code null} to use the main target
 	 * @return a unique generated class name
 	 */
-	public ClassName generateClassName(String featureName, @Nullable Class<?> target) {
+	public ClassName generateClassName(String featureName, @Nullable ClassName target) {
 		return generateSequencedClassName(getRootName(featureName, target));
 	}
 
-	private String getRootName(String featureName, @Nullable Class<?> target) {
+	private String getRootName(String featureName, @Nullable ClassName target) {
 		Assert.hasLength(featureName, "'featureName' must not be empty");
 		featureName = clean(featureName);
-		Class<?> targetToUse = (target != null ? target : this.defaultTarget);
+		ClassName targetToUse = (target != null ? target : this.defaultTarget);
 		String featureNameToUse = this.featureNamePrefix + featureName;
-		return targetToUse.getName().replace("$", "_") + SEPARATOR + StringUtils.capitalize(featureNameToUse);
+		return toName(targetToUse).replace("$", "_") + SEPARATOR + StringUtils.capitalize(featureNameToUse);
 	}
 
 	private String clean(String name) {
@@ -145,6 +145,10 @@ public final class ClassNameGenerator {
 	ClassNameGenerator withFeatureNamePrefix(String featureNamePrefix) {
 		return new ClassNameGenerator(this.defaultTarget, featureNamePrefix,
 				this.sequenceGenerator);
+	}
+
+	private static String toName(ClassName className) {
+		return GeneratedTypeReference.of(className).getName();
 	}
 
 }

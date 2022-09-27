@@ -34,6 +34,7 @@ import org.springframework.beans.testfixture.beans.factory.aot.SimpleBean;
 import org.springframework.beans.testfixture.beans.factory.aot.SimpleBeanConfiguration;
 import org.springframework.beans.testfixture.beans.factory.aot.SimpleBeanFactoryBean;
 import org.springframework.core.ResolvableType;
+import org.springframework.javapoet.ClassName;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,45 +53,45 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 	@Test
 	void getTargetOnConstructor() {
 		RegisteredBean registeredBean = registerTestBean(SimpleBean.class);
-		assertThat(createInstance(registeredBean).getTarget(registeredBean,
-				SimpleBean.class.getDeclaredConstructors()[0])).isEqualTo(SimpleBean.class);
+		assertTarget(createInstance(registeredBean).getTarget(registeredBean,
+				SimpleBean.class.getDeclaredConstructors()[0]), SimpleBean.class);
 	}
 
 	@Test
 	void getTargetOnConstructorToPublicFactoryBean() {
 		RegisteredBean registeredBean = registerTestBean(SimpleBean.class);
-		assertThat(createInstance(registeredBean).getTarget(registeredBean,
-				SimpleBeanFactoryBean.class.getDeclaredConstructors()[0])).isEqualTo(SimpleBean.class);
+		assertTarget(createInstance(registeredBean).getTarget(registeredBean,
+				SimpleBeanFactoryBean.class.getDeclaredConstructors()[0]), SimpleBean.class);
 	}
 
 	@Test
 	void getTargetOnConstructorToPublicGenericFactoryBeanExtractTargetFromFactoryBeanType() {
 		RegisteredBean registeredBean = registerTestBean(ResolvableType
 				.forClassWithGenerics(GenericFactoryBean.class, SimpleBean.class));
-		assertThat(createInstance(registeredBean).getTarget(registeredBean,
-				GenericFactoryBean.class.getDeclaredConstructors()[0])).isEqualTo(SimpleBean.class);
+		assertTarget(createInstance(registeredBean).getTarget(registeredBean,
+				GenericFactoryBean.class.getDeclaredConstructors()[0]), SimpleBean.class);
 	}
 
 	@Test
 	void getTargetOnConstructorToPublicGenericFactoryBeanWithBoundExtractTargetFromFactoryBeanType() {
 		RegisteredBean registeredBean = registerTestBean(ResolvableType
 				.forClassWithGenerics(NumberFactoryBean.class, Integer.class));
-		assertThat(createInstance(registeredBean).getTarget(registeredBean,
-				NumberFactoryBean.class.getDeclaredConstructors()[0])).isEqualTo(Integer.class);
+		assertTarget(createInstance(registeredBean).getTarget(registeredBean,
+				NumberFactoryBean.class.getDeclaredConstructors()[0]), Integer.class);
 	}
 
 	@Test
 	void getTargetOnConstructorToPublicGenericFactoryBeanUseBeanTypeAsFallback() {
 		RegisteredBean registeredBean = registerTestBean(SimpleBean.class);
-		assertThat(createInstance(registeredBean).getTarget(registeredBean,
-				GenericFactoryBean.class.getDeclaredConstructors()[0])).isEqualTo(SimpleBean.class);
+		assertTarget(createInstance(registeredBean).getTarget(registeredBean,
+				GenericFactoryBean.class.getDeclaredConstructors()[0]), SimpleBean.class);
 	}
 
 	@Test
 	void getTargetOnConstructorToProtectedFactoryBean() {
 		RegisteredBean registeredBean = registerTestBean(SimpleBean.class);
-		assertThat(createInstance(registeredBean).getTarget(registeredBean,
-				PrivilegedTestBeanFactoryBean.class.getDeclaredConstructors()[0])).isEqualTo(
+		assertTarget(createInstance(registeredBean).getTarget(registeredBean,
+						PrivilegedTestBeanFactoryBean.class.getDeclaredConstructors()[0]),
 				PrivilegedTestBeanFactoryBean.class);
 	}
 
@@ -99,8 +100,8 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 		RegisteredBean registeredBean = registerTestBean(SimpleBean.class);
 		Method method = ReflectionUtils.findMethod(SimpleBeanConfiguration.class, "simpleBean");
 		assertThat(method).isNotNull();
-		assertThat(createInstance(registeredBean).getTarget(registeredBean,
-				method)).isEqualTo(SimpleBeanConfiguration.class);
+		assertTarget(createInstance(registeredBean).getTarget(registeredBean, method),
+				SimpleBeanConfiguration.class);
 	}
 
 	@Test
@@ -110,16 +111,15 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 				new RootBeanDefinition(String.class));
 		Method method = ReflectionUtils.findMethod(getClass(), "createString");
 		assertThat(method).isNotNull();
-		assertThat(createInstance(innerBean).getTarget(innerBean,
-				method)).isEqualTo(getClass());
+		assertTarget(createInstance(innerBean).getTarget(innerBean, method), getClass());
 	}
 
 	@Test
 	void getTargetOnConstructorWithInnerBeanInJavaPackage() {
 		RegisteredBean registeredBean = registerTestBean(SimpleBean.class);
 		RegisteredBean innerBean = RegisteredBean.ofInnerBean(registeredBean, "innerTestBean", new RootBeanDefinition(String.class));
-		assertThat(createInstance(innerBean).getTarget(innerBean,
-				String.class.getDeclaredConstructors()[0])).isEqualTo(SimpleBean.class);
+		assertTarget(createInstance(innerBean).getTarget(innerBean,
+				String.class.getDeclaredConstructors()[0]), SimpleBean.class);
 	}
 
 	@Test
@@ -127,8 +127,8 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 		RegisteredBean registeredBean = registerTestBean(SimpleBean.class);
 		RegisteredBean innerBean = RegisteredBean.ofInnerBean(registeredBean, "innerTestBean",
 				new RootBeanDefinition(StringFactoryBean.class));
-		assertThat(createInstance(innerBean).getTarget(innerBean,
-				StringFactoryBean.class.getDeclaredConstructors()[0])).isEqualTo(SimpleBean.class);
+		assertTarget(createInstance(innerBean).getTarget(innerBean,
+				StringFactoryBean.class.getDeclaredConstructors()[0]), SimpleBean.class);
 	}
 
 	@Test
@@ -138,8 +138,8 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 				new RootBeanDefinition(SimpleBean.class));
 		Method method = ReflectionUtils.findMethod(SimpleBeanConfiguration.class, "simpleBean");
 		assertThat(method).isNotNull();
-		assertThat(createInstance(innerBean).getTarget(innerBean, method))
-				.isEqualTo(SimpleBeanConfiguration.class);
+		assertTarget(createInstance(innerBean).getTarget(innerBean, method),
+				SimpleBeanConfiguration.class);
 	}
 
 	@Test
@@ -147,8 +147,8 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 		RegisteredBean registeredBean = registerTestBean(DummyFactory.class);
 		RegisteredBean innerBean = RegisteredBean.ofInnerBean(registeredBean, "innerTestBean",
 				new RootBeanDefinition(SimpleBean.class));
-		assertThat(createInstance(innerBean).getTarget(innerBean,
-				SimpleBean.class.getDeclaredConstructors()[0])).isEqualTo(SimpleBean.class);
+		assertTarget(createInstance(innerBean).getTarget(innerBean,
+				SimpleBean.class.getDeclaredConstructors()[0]), SimpleBean.class);
 	}
 
 	@Test
@@ -156,8 +156,12 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 		RegisteredBean registeredBean = registerTestBean(DummyFactory.class);
 		RegisteredBean innerBean = RegisteredBean.ofInnerBean(registeredBean, "innerTestBean",
 				new RootBeanDefinition(SimpleBean.class));
-		assertThat(createInstance(innerBean).getTarget(innerBean,
-				SimpleBeanFactoryBean.class.getDeclaredConstructors()[0])).isEqualTo(SimpleBean.class);
+		assertTarget(createInstance(innerBean).getTarget(innerBean,
+				SimpleBeanFactoryBean.class.getDeclaredConstructors()[0]), SimpleBean.class);
+	}
+
+	private void assertTarget(ClassName target, Class<?> expected) {
+		assertThat(target).isEqualTo(ClassName.get(expected));
 	}
 
 

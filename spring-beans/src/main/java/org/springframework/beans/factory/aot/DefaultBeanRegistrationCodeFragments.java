@@ -32,6 +32,7 @@ import org.springframework.beans.factory.support.InstanceSupplier;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.ResolvableType;
+import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.ParameterizedTypeName;
 import org.springframework.lang.Nullable;
@@ -70,7 +71,7 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 
 
 	@Override
-	public Class<?> getTarget(RegisteredBean registeredBean,
+	public ClassName getTarget(RegisteredBean registeredBean,
 			Executable constructorOrFactoryMethod) {
 
 		Class<?> target = extractDeclaringClass(registeredBean.getBeanType(), constructorOrFactoryMethod);
@@ -79,7 +80,7 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 			Assert.state(parent != null, "No parent available for inner bean");
 			target = parent.getBeanClass();
 		}
-		return target;
+		return ClassName.get(target);
 	}
 
 	private Class<?> extractDeclaringClass(ResolvableType beanType, Executable executable) {
