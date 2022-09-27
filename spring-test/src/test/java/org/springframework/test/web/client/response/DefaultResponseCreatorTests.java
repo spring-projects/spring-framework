@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,23 +52,25 @@ import static org.mockito.Mockito.mock;
  * Tests for the {@link DefaultResponseCreator} factory methods.
  *
  * @author Ashley Scopes
+ * @author Rossen Stoyanchev
  */
 class DefaultResponseCreatorTests {
+
 	@ParameterizedTest(name = "expect status to be set [{0}]")
 	@ValueSource(ints = {200, 401, 429})
 	void expectStatus(int statusValue) throws IOException {
 		HttpStatus status = HttpStatus.valueOf(statusValue);
-		ClientHttpResponse response = createResponse(new DefaultResponseCreator(status));
-		assertThat(response.getStatusCode()).isEqualTo(status);
+		DefaultResponseCreator creator = new DefaultResponseCreator(status);
+
+		assertThat(createResponse(creator).getStatusCode()).isEqualTo(status);
 	}
 
 	@Test
 	void setBodyFromString() throws IOException {
 		// Use unicode codepoint for "thinking" emoji to help verify correct encoding is used internally.
-		ClientHttpResponse response = createResponse(new DefaultResponseCreator(HttpStatus.OK)
-				.body("hello, world! \uD83E\uDD14"));
+		DefaultResponseCreator creator = new DefaultResponseCreator(HttpStatus.OK).body("hello, world! \uD83E\uDD14");
 
-		assertThat(IOUtils.toByteArray(response.getBody()))
+		assertThat(IOUtils.toByteArray(createResponse(creator).getBody()))
 				.isEqualTo("hello, world! \uD83E\uDD14".getBytes(StandardCharsets.UTF_8));
 	}
 
@@ -81,68 +83,62 @@ class DefaultResponseCreatorTests {
 				.isTrue();
 
 		Charset charsetObj = Charset.forName(charset);
-
 		String content = "hello! €½$~@><·─";
 
-		ClientHttpResponse response = createResponse(new DefaultResponseCreator(HttpStatus.OK)
-				.body(content, charsetObj));
+		DefaultResponseCreator creator = new DefaultResponseCreator(HttpStatus.OK).body(content, charsetObj);
 
 		ByteBuffer expectBuff = charsetObj.encode(content);
 		byte[] expect = new byte[expectBuff.remaining()];
 		expectBuff.get(expect);
 
-		assertThat(IOUtils.toByteArray(response.getBody())).isEqualTo(expect);
+		assertThat(IOUtils.toByteArray(createResponse(creator).getBody())).isEqualTo(expect);
 	}
 
 	@Test
 	void setBodyFromByteArray() throws IOException {
 		byte[] body = { 0, 9, 18, 27, 36, 45, 54, 63, 72, 81, 90 };
-		ClientHttpResponse response = createResponse(new DefaultResponseCreator(HttpStatus.OK).body(body));
-		assertThat(IOUtils.toByteArray(response.getBody())).isEqualTo(body);
+		DefaultResponseCreator creator = new DefaultResponseCreator(HttpStatus.OK).body(body);
+
+		assertThat(IOUtils.toByteArray(createResponse(creator).getBody())).isEqualTo(body);
 	}
 
 	@Test
 	void setBodyFromResource() throws IOException {
 		byte[] resourceContent = {7, 14, 21, 28, 35};
-
 		Resource resource = mock(Resource.class);
 		given(resource.getInputStream()).willReturn(new ByteArrayInputStream(resourceContent));
 
 		ClientHttpResponse response = createResponse(new DefaultResponseCreator(HttpStatus.OK).body(resource));
 
 		then(resource).should().getInputStream();
-
 		assertThat(IOUtils.toByteArray(response.getBody())).isEqualTo(resourceContent);
 	}
 
 	@Test
 	void setContentType() throws IOException {
-		ClientHttpResponse response = createResponse(new DefaultResponseCreator(HttpStatus.OK)
-				.contentType(MediaType.APPLICATION_JSON));
+		MediaType mediaType = MediaType.APPLICATION_JSON;
+		DefaultResponseCreator creator = new DefaultResponseCreator(HttpStatus.OK).contentType(mediaType);
 
-		assertThat(response.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+		assertThat(createResponse(creator).getHeaders().getContentType()).isEqualTo(mediaType);
 	}
 
 	@Test
 	void setLocation() throws IOException {
-		URI uri = UriComponentsBuilder
-				.fromUriString("https://docs.spring.io/spring-framework/docs/current/reference/html/testing.html")
-				.build()
-				.toUri();
+		URI uri = URI.create("https://docs.spring.io/spring-framework/docs/current/reference/html/testing.html");
+		DefaultResponseCreator creator = new DefaultResponseCreator(HttpStatus.OK).location(uri);
 
-		ClientHttpResponse response = createResponse(new DefaultResponseCreator(HttpStatus.OK).location(uri));
-		assertThat(response.getHeaders().getLocation()).isEqualTo(uri);
+		assertThat(createResponse(creator).getHeaders().getLocation()).isEqualTo(uri);
 	}
 
 	@Test
 	void setHeader() throws IOException {
 
-		ClientHttpResponse response = createResponse(new DefaultResponseCreator(HttpStatus.OK)
+		DefaultResponseCreator creator = new DefaultResponseCreator(HttpStatus.OK)
 				.header("foo", "bar")
 				.header("baz", "bork")
-				.headers("lorem", "ipsum", "dolor", "sit", "amet"));
+				.header("lorem", "ipsum", "dolor", "sit", "amet");
 
-		HttpHeaders headers = response.getHeaders();
+		HttpHeaders headers = createResponse(creator).getHeaders();
 		assertThat(headers.get("foo")).isNotNull().isEqualTo(Collections.singletonList("bar"));
 		assertThat(headers.get("baz")).isNotNull().isEqualTo(Collections.singletonList("bork"));
 		assertThat(headers.get("lorem")).isNotNull().isEqualTo(Arrays.asList("ipsum", "dolor", "sit", "amet"));
@@ -158,11 +154,11 @@ class DefaultResponseCreatorTests {
 		HttpHeaders secondHeaders = new HttpHeaders();
 		secondHeaders.setAllow(Collections.singleton(HttpMethod.PUT));
 
-		ClientHttpResponse response = createResponse(new DefaultResponseCreator(HttpStatus.OK)
+		DefaultResponseCreator creator = new DefaultResponseCreator(HttpStatus.OK)
 				.headers(firstHeaders)
-				.headers(secondHeaders));
+				.headers(secondHeaders);
 
-		HttpHeaders responseHeaders = response.getHeaders();
+		HttpHeaders responseHeaders = createResponse(creator).getHeaders();
 
 		assertThat(responseHeaders.getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
 		assertThat(responseHeaders.getOrigin()).isEqualTo("https://github.com");
@@ -176,12 +172,12 @@ class DefaultResponseCreatorTests {
 		ResponseCookie thirdCookie = ResponseCookie.from("cookie-cookie", "cookies").build();
 		ResponseCookie fourthCookie = ResponseCookie.from("foobar", "bazbork").build();
 
-		ClientHttpResponse response = createResponse(new DefaultResponseCreator(HttpStatus.OK)
-				.cookie(firstCookie)
-				.cookie(secondCookie)
-				.cookies(thirdCookie, fourthCookie));
+		DefaultResponseCreator creator = new DefaultResponseCreator(HttpStatus.OK)
+				.cookies(firstCookie)
+				.cookies(secondCookie)
+				.cookies(thirdCookie, fourthCookie);
 
-		HttpHeaders responseHeaders = response.getHeaders();
+		HttpHeaders responseHeaders = createResponse(creator).getHeaders();
 
 		assertThat(responseHeaders.get(HttpHeaders.SET_COOKIE))
 				.isNotNull()
@@ -207,11 +203,11 @@ class DefaultResponseCreatorTests {
 		firstCookies.add(thirdCookie.getName(), thirdCookie);
 		firstCookies.add(fourthCookie.getName(), fourthCookie);
 
-		ClientHttpResponse response = createResponse(new DefaultResponseCreator(HttpStatus.OK)
+		DefaultResponseCreator creator = new DefaultResponseCreator(HttpStatus.OK)
 				.cookies(firstCookies)
-				.cookies(secondCookies));
+				.cookies(secondCookies);
 
-		HttpHeaders responseHeaders = response.getHeaders();
+		HttpHeaders responseHeaders = createResponse(creator).getHeaders();
 
 		assertThat(responseHeaders.get(HttpHeaders.SET_COOKIE))
 				.isNotNull()
@@ -227,4 +223,5 @@ class DefaultResponseCreatorTests {
 		URI uri = UriComponentsBuilder.fromUriString("/foo/bar").build().toUri();
 		return creator.createResponse(new MockClientHttpRequest(HttpMethod.POST, uri));
 	}
+
 }

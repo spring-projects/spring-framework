@@ -20,10 +20,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -84,6 +80,7 @@ public class DefaultResponseCreator implements ResponseCreator {
 
 	/**
 	 * Set the body from a string using the given character set.
+	 * @since 6.0
 	 */
 	public DefaultResponseCreator body(String content, Charset charset) {
 		this.content = content.getBytes(charset);
@@ -123,22 +120,13 @@ public class DefaultResponseCreator implements ResponseCreator {
 	}
 
 	/**
-	 * Add a single header.
+	 * Add a response header with one or more values.
+	 * @since 6.0
 	 */
-	public DefaultResponseCreator header(String name, String value) {
-		// This is really just an alias, but it makes the interface more fluent.
-		return headers(name, value);
-	}
-
-	/**
-	 * Add one or more headers.
-	 */
-	public DefaultResponseCreator headers(String name, String ... value) {
-		List<String> valueList = Stream.of(value)
-				.filter(Objects::nonNull)
-				.collect(Collectors.toList());
-
-		this.headers.addAll(name, valueList);
+	public DefaultResponseCreator header(String name, String ... headerValues) {
+		for (String headerValue : headerValues) {
+			this.headers.add(name, headerValue);
+		}
 		return this;
 	}
 
@@ -151,33 +139,22 @@ public class DefaultResponseCreator implements ResponseCreator {
 	}
 
 	/**
-	 * Add a single cookie.
-	 */
-	public DefaultResponseCreator cookie(ResponseCookie cookie) {
-		// This is really just an alias, but it makes the interface more fluent.
-		return cookies(cookie);
-	}
-
-	/**
 	 * Add one or more cookies.
+	 * @since 6.0
 	 */
 	public DefaultResponseCreator cookies(ResponseCookie... cookies) {
 		for (ResponseCookie cookie : cookies) {
 			this.headers.add(HttpHeaders.SET_COOKIE, cookie.toString());
 		}
-
 		return this;
 	}
 
 	/**
-	 * Copy all given cookies.
+	 * Copy all cookies from the given {@link MultiValueMap}.
+	 * @since 6.0
 	 */
-	public DefaultResponseCreator cookies(MultiValueMap<String, ResponseCookie> cookies) {
-		cookies.values()
-				.stream()
-				.flatMap(List::stream)
-				.forEach(cookie -> this.headers.add(HttpHeaders.SET_COOKIE, cookie.toString()));
-
+	public DefaultResponseCreator cookies(MultiValueMap<String, ResponseCookie> multiValueMap) {
+		multiValueMap.values().forEach(cookies -> cookies.forEach(this::cookies));
 		return this;
 	}
 
