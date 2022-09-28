@@ -148,7 +148,7 @@ class CookieLocaleResolverTests {
 		assertThat(cookie).isNotNull();
 		assertThat(cookie.getName()).isEqualTo(CookieLocaleResolver.DEFAULT_COOKIE_NAME);
 		assertThat(cookie.getDomain()).isNull();
-		assertThat(cookie.getPath()).isEqualTo(CookieLocaleResolver.DEFAULT_COOKIE_PATH);
+		assertThat(cookie.getPath()).isEqualTo("/");
 		assertThat(cookie.getSecure()).isFalse();
 		assertThat(cookie.getSameSite()).isEqualTo("Lax");
 
@@ -216,7 +216,7 @@ class CookieLocaleResolverTests {
 		assertThat(cookie).isNotNull();
 		assertThat(cookie.getName()).isEqualTo(CookieLocaleResolver.DEFAULT_COOKIE_NAME);
 		assertThat(cookie.getDomain()).isNull();
-		assertThat(cookie.getPath()).isEqualTo(CookieLocaleResolver.DEFAULT_COOKIE_PATH);
+		assertThat(cookie.getPath()).isEqualTo("/");
 		assertThat(cookie.getSecure()).isFalse();
 		assertThat(cookie.getSameSite()).isEqualTo("Lax");
 		assertThat(cookie.getValue()).isEqualTo("de-AT");
@@ -239,7 +239,7 @@ class CookieLocaleResolverTests {
 		assertThat(cookie).isNotNull();
 		assertThat(cookie.getName()).isEqualTo(CookieLocaleResolver.DEFAULT_COOKIE_NAME);
 		assertThat(cookie.getDomain()).isNull();
-		assertThat(cookie.getPath()).isEqualTo(CookieLocaleResolver.DEFAULT_COOKIE_PATH);
+		assertThat(cookie.getPath()).isEqualTo("/");
 		assertThat(cookie.getSecure()).isFalse();
 		assertThat(cookie.getSameSite()).isEqualTo("Lax");
 		assertThat(cookie.getValue()).isEqualTo("de_AT");

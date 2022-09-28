@@ -88,26 +88,15 @@ public class CookieLocaleResolver extends AbstractLocaleContextResolver {
 	 */
 	public static final String DEFAULT_COOKIE_NAME = CookieLocaleResolver.class.getName() + ".LOCALE";
 
-	/**
-	 * The default cookie max age (persists until browser shutdown) if none is
-	 * explicitly set.
-	 */
-	public static final Duration DEFAULT_COOKIE_MAX_AGE = Duration.ofSeconds(-1);
-
-	/**
-	 * The default cookie path used if none is explicitly set.
-	 */
-	public static final String DEFAULT_COOKIE_PATH = "/";
-
 	private static final Log logger = LogFactory.getLog(CookieLocaleResolver.class);
 
 
 	private String cookieName;
 
-	private Duration cookieMaxAge = DEFAULT_COOKIE_MAX_AGE;
+	private Duration cookieMaxAge = Duration.ofSeconds(-1);
 
 	@Nullable
-	private String cookiePath = DEFAULT_COOKIE_PATH;
+	private String cookiePath = "/";
 
 	@Nullable
 	private String cookieDomain;
@@ -131,9 +120,7 @@ public class CookieLocaleResolver extends AbstractLocaleContextResolver {
 
 
 	/**
-	 * Create a new instance of {@link CookieLocaleResolver} using the supplied
-	 * cookie name.
-	 * @param cookieName the cookie name
+	 * Constructor with a given cookie name.
 	 * @since 6.0
 	 */
 	public CookieLocaleResolver(String cookieName) {
@@ -142,8 +129,7 @@ public class CookieLocaleResolver extends AbstractLocaleContextResolver {
 	}
 
 	/**
-	 * Create a new instance of {@link CookieLocaleResolver} using the
-	 * {@linkplain #DEFAULT_COOKIE_NAME default cookie name}.
+	 * Constructor with a {@linkplain #DEFAULT_COOKIE_NAME default cookie name}.
 	 */
 	public CookieLocaleResolver() {
 		this(DEFAULT_COOKIE_NAME);
@@ -153,7 +139,7 @@ public class CookieLocaleResolver extends AbstractLocaleContextResolver {
 	/**
 	 * Set the name of cookie created by this resolver.
 	 * @param cookieName the cookie name
-	 * @deprecated since 6.0, in favor of {@link #CookieLocaleResolver(String)}
+	 * @deprecated as of 6.0 in favor of {@link #CookieLocaleResolver(String)}
 	 */
 	@Deprecated
 	public void setCookieName(String cookieName) {
@@ -163,6 +149,8 @@ public class CookieLocaleResolver extends AbstractLocaleContextResolver {
 
 	/**
 	 * Set the cookie "Max-Age" attribute.
+	 * <p>By default, this is set to -1 in which case the cookie persists until
+	 * browser shutdown.
 	 * @since 6.0
 	 * @see org.springframework.http.ResponseCookie.ResponseCookieBuilder#maxAge(Duration)
 	 */
@@ -172,8 +160,8 @@ public class CookieLocaleResolver extends AbstractLocaleContextResolver {
 	}
 
 	/**
-	 * Variant of {@link #setCookieMaxAge(Duration)} accepting a value in
-	 * seconds.
+	 * Variant of {@link #setCookieMaxAge(Duration)} with a value in seconds.
+	 * @deprecated as of 6.0 in favor of {@link #setCookieMaxAge(Duration)}
 	 */
 	@Deprecated
 	public void setCookieMaxAge(@Nullable Integer cookieMaxAge) {
@@ -182,6 +170,7 @@ public class CookieLocaleResolver extends AbstractLocaleContextResolver {
 
 	/**
 	 * Set the cookie "Path" attribute.
+	 * <p>By default, this is set to {@code "/"}.
 	 * @see org.springframework.http.ResponseCookie.ResponseCookieBuilder#path(String)
 	 */
 	public void setCookiePath(@Nullable String cookiePath) {
