@@ -99,7 +99,7 @@ class GeneratedClassesTests {
 	}
 
 	@Test
-	void getOrAddForFeatureComponentWhenNewReturnsGeneratedMethod() {
+	void getOrAddForFeatureComponentWhenNewReturnsGeneratedClass() {
 		GeneratedClass generatedClass1 = this.generatedClasses
 				.getOrAddForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
 		GeneratedClass generatedClass2 = this.generatedClasses
@@ -109,7 +109,7 @@ class GeneratedClassesTests {
 	}
 
 	@Test
-	void getOrAddForFeatureWhenNewReturnsGeneratedMethod() {
+	void getOrAddForFeatureWhenNewReturnsGeneratedClass() {
 		GeneratedClass generatedClass1 = this.generatedClasses
 				.getOrAddForFeature("one", emptyTypeCustomizer);
 		GeneratedClass generatedClass2 = this.generatedClasses
@@ -119,7 +119,7 @@ class GeneratedClassesTests {
 	}
 
 	@Test
-	void getOrAddForFeatureComponentWhenRepeatReturnsSameGeneratedMethod() {
+	void getOrAddForFeatureComponentWhenRepeatReturnsSameGeneratedClass() {
 		GeneratedClass generatedClass1 = this.generatedClasses
 				.getOrAddForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
 		GeneratedClass generatedClass2 = this.generatedClasses
@@ -131,7 +131,7 @@ class GeneratedClassesTests {
 	}
 
 	@Test
-	void getOrAddForFeatureWhenRepeatReturnsSameGeneratedMethod() {
+	void getOrAddForFeatureWhenRepeatReturnsSameGeneratedClass() {
 		GeneratedClass generatedClass1 = this.generatedClasses
 				.getOrAddForFeature("one", emptyTypeCustomizer);
 		GeneratedClass generatedClass2 = this.generatedClasses
@@ -145,10 +145,14 @@ class GeneratedClassesTests {
 	@Test
 	void getOrAddForFeatureComponentWhenHasFeatureNamePrefix() {
 		GeneratedClasses prefixed = this.generatedClasses.withFeatureNamePrefix("prefix");
-		GeneratedClass generatedClass1 = this.generatedClasses.getOrAddForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
-		GeneratedClass generatedClass2 = this.generatedClasses.getOrAddForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
-		GeneratedClass generatedClass3 = prefixed.getOrAddForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
-		GeneratedClass generatedClass4 = prefixed.getOrAddForFeatureComponent("one", TestComponent.class, emptyTypeCustomizer);
+		GeneratedClass generatedClass1 = this.generatedClasses.getOrAddForFeatureComponent(
+				"one", TestComponent.class, emptyTypeCustomizer);
+		GeneratedClass generatedClass2 = this.generatedClasses.getOrAddForFeatureComponent(
+				"one", TestComponent.class, emptyTypeCustomizer);
+		GeneratedClass generatedClass3 = prefixed.getOrAddForFeatureComponent
+				("one", TestComponent.class, emptyTypeCustomizer);
+		GeneratedClass generatedClass4 = prefixed.getOrAddForFeatureComponent(
+				"one", TestComponent.class, emptyTypeCustomizer);
 		assertThat(generatedClass1).isSameAs(generatedClass2).isNotSameAs(generatedClass3);
 		assertThat(generatedClass3).isSameAs(generatedClass4);
 	}
