@@ -24,7 +24,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledInNativeImage;
 
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
@@ -122,7 +121,7 @@ class PathMatchingResourcePatternResolverTests {
 			assertFilenames(pattern, CLASSES_IN_REACTOR_UTIL_ANNOTATION);
 		}
 
-		@DisabledInNativeImage  // https://github.com/oracle/graal/issues/5020
+		// Fails in a native image -- https://github.com/oracle/graal/issues/5020
 		@Test
 		void rootPatternRetrievalInJarFiles() throws IOException {
 			assertThat(resolver.getResources("classpath*:*.dtd")).extracting(Resource::getFilename)
