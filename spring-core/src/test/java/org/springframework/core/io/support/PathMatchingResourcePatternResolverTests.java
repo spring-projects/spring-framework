@@ -137,6 +137,7 @@ class PathMatchingResourcePatternResolverTests {
 		Resource[] resources = resolver.getResources(pattern);
 		List<String> actualNames = Arrays.stream(resources)
 				.map(Resource::getFilename)
+				// Need to decode within GraalVM native image to get %23 converted to #.
 				.map(filename -> URLDecoder.decode(filename, UTF_8))
 				.sorted()
 				.toList();
