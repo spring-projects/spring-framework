@@ -24,7 +24,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Jean-Pierre Pawlak
  * @author Juergen Hoeller
- * @deprecated as of 6.0, with no concrete replacement
+ * @deprecated as of 6.0 in favor of using CSS, without direct replacement
  */
 @Deprecated(since = "6.0")
 public interface HierarchicalThemeSource extends ThemeSource {

@@ -1052,6 +1052,9 @@ application, thereby enhancing user experience. A theme is a collection of stati
 resources, typically style sheets and images, that affect the visual style of the
 application.
 
+WARNING: as of 6.0 support for themes has been deprecated theme in favor of using CSS,
+and without any special support on the server side.
+
 
 [[mvc-themeresolver-defining]]
 ==== Defining a theme

@@ -33,7 +33,7 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @since 17.06.2003
  * @see #setDefaultThemeName
- * @deprecated as of 6.0, with no direct replacement
+ * @deprecated as of 6.0 in favor of using CSS, without direct replacement
  */
 @Deprecated(since = "6.0")
 public class FixedThemeResolver extends AbstractThemeResolver {

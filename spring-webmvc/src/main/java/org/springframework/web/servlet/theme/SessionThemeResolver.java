@@ -36,7 +36,7 @@ import org.springframework.web.util.WebUtils;
  * @author Juergen Hoeller
  * @since 17.06.2003
  * @see #setThemeName
- * @deprecated as of 6.0, with no concrete replacement
+ * @deprecated as of 6.0 in favor of using CSS, without direct replacement
  */
 @Deprecated(since = "6.0")
 public class SessionThemeResolver extends AbstractThemeResolver {

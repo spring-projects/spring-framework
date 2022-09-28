@@ -28,7 +28,7 @@ import org.springframework.context.MessageSource;
  * @since 17.06.2003
  * @see ThemeSource
  * @see org.springframework.web.servlet.ThemeResolver
- * @deprecated as of 6.0, with no direct replacement
+ * @deprecated as of 6.0 in favor of using CSS, without direct replacement
  */
 @Deprecated(since = "6.0")
 public interface Theme {

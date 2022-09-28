@@ -31,7 +31,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * @author Juergen Hoeller
  * @since 20.06.2003
  * @see org.springframework.web.servlet.ThemeResolver
- * @deprecated as of 6.0, with no concrete replacement
+ * @deprecated as of 6.0 in favor of using CSS, without direct replacement
  */
 @Deprecated(since = "6.0")
 public class ThemeChangeInterceptor implements HandlerInterceptor {

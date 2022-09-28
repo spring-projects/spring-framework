@@ -42,7 +42,7 @@ import org.springframework.ui.context.ThemeSource;
  * @see #setBasenamePrefix
  * @see java.util.ResourceBundle
  * @see org.springframework.context.support.ResourceBundleMessageSource
- * @deprecated as of 6.0, with no direct replacement
+ * @deprecated as of 6.0 in favor of using CSS, without direct replacement
  */
 @Deprecated(since = "6.0")
 public class ResourceBundleThemeSource implements HierarchicalThemeSource, BeanClassLoaderAware {

@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 17.06.2003
- * @deprecated as of 6.0, with no concrete replacement
+ * @deprecated as of 6.0 in favor of using CSS, without direct replacement
  */
 @Deprecated(since = "6.0")
 public class SimpleTheme implements Theme {

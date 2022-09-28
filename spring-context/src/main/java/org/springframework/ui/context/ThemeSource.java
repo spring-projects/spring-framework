@@ -26,7 +26,7 @@ import org.springframework.lang.Nullable;
  * @author Jean-Pierre Pawlak
  * @author Juergen Hoeller
  * @see Theme
- * @deprecated as of 6.0, with no direct replacement
+ * @deprecated as of 6.0 in favor of using CSS, without direct replacement
  */
 @Deprecated(since = "6.0")
 public interface ThemeSource {

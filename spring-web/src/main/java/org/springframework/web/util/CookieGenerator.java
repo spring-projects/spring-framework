@@ -29,15 +29,13 @@ import org.springframework.util.Assert;
  * as bean properties and being able to add and remove cookie to/from a
  * given response.
  *
- * <p>Can serve as base class for components that generate specific cookies,
- * such as CookieThemeResolver.
+ * <p>Can serve as base class for components that generate specific cookies.
  *
  * @author Juergen Hoeller
  * @since 1.1.4
  * @see #addCookie
  * @see #removeCookie
- * @see org.springframework.web.servlet.theme.CookieThemeResolver
- * @deprecated since 6.0 in favor of {@link org.springframework.http.ResponseCookie}
+ * @deprecated as of 6.0 in favor of {@link org.springframework.http.ResponseCookie}
  */
 @Deprecated
 public class CookieGenerator {
