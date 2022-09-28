@@ -42,7 +42,9 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.AnnotatedBean;
 import org.springframework.beans.testfixture.beans.GenericBean;
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.beans.testfixture.beans.factory.aot.InnerBeanConfiguration;
 import org.springframework.beans.testfixture.beans.factory.aot.MockBeanRegistrationsCode;
+import org.springframework.beans.testfixture.beans.factory.aot.SimpleBean;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.test.io.support.MockSpringFactoriesLoader;
 import org.springframework.core.test.tools.CompileWithForkedClassLoader;
@@ -60,6 +62,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * {@link DefaultBeanRegistrationCodeFragments}.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
 class BeanDefinitionMethodGeneratorTests {
 
@@ -96,6 +99,52 @@ class BeanDefinitionMethodGeneratorTests {
 			assertThat(sourceFile).contains("beanType = TestBean.class");
 			assertThat(sourceFile).contains("setInstanceSupplier(TestBean::new)");
 			assertThat(actual).isInstanceOf(RootBeanDefinition.class);
+		});
+	}
+
+	@Test
+	void generateBeanDefinitionMethodWhenHasInnerClassTargetMethodGeneratesMethod() {
+		this.beanFactory.registerBeanDefinition("testBeanConfiguration", new RootBeanDefinition(
+				InnerBeanConfiguration.Simple.class));
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(SimpleBean.class);
+		beanDefinition.setFactoryBeanName("testBeanConfiguration");
+		beanDefinition.setFactoryMethodName("simpleBean");
+		RegisteredBean registeredBean = registerBean(beanDefinition);
+		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
+				this.methodGeneratorFactory, registeredBean, null,
+				Collections.emptyList());
+		MethodReference method = generator.generateBeanDefinitionMethod(
+				this.generationContext, this.beanRegistrationsCode);
+		compile(method, (actual, compiled) -> {
+			SourceFile sourceFile = compiled.getSourceFile(".*BeanDefinitions");
+			assertThat(sourceFile.getClassName()).endsWith("InnerBeanConfiguration__BeanDefinitions");
+			assertThat(sourceFile).contains("public static class Simple__BeanDefinitions")
+					.contains("Bean definitions for {@link InnerBeanConfiguration.Simple}")
+					.doesNotContain("Another__BeanDefinitions");
+
+		});
+	}
+
+	@Test
+	void generateBeanDefinitionMethodWhenHasNestedInnerClassTargetMethodGeneratesMethod() {
+		this.beanFactory.registerBeanDefinition("testBeanConfiguration", new RootBeanDefinition(
+				InnerBeanConfiguration.Simple.Another.class));
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(SimpleBean.class);
+		beanDefinition.setFactoryBeanName("testBeanConfiguration");
+		beanDefinition.setFactoryMethodName("anotherBean");
+		RegisteredBean registeredBean = registerBean(beanDefinition);
+		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
+				this.methodGeneratorFactory, registeredBean, null,
+				Collections.emptyList());
+		MethodReference method = generator.generateBeanDefinitionMethod(
+				this.generationContext, this.beanRegistrationsCode);
+		compile(method, (actual, compiled) -> {
+			SourceFile sourceFile = compiled.getSourceFile(".*BeanDefinitions");
+			assertThat(sourceFile.getClassName()).endsWith("InnerBeanConfiguration__BeanDefinitions");
+			assertThat(sourceFile).contains("public static class Simple__BeanDefinitions")
+					.contains("Bean definitions for {@link InnerBeanConfiguration.Simple}")
+					.contains("public static class Another__BeanDefinitions")
+					.contains("Bean definitions for {@link InnerBeanConfiguration.Simple.Another}");
 		});
 	}
 

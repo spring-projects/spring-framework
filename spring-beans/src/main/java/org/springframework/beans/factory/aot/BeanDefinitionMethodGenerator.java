@@ -44,6 +44,7 @@ import org.springframework.util.StringUtils;
  * Generates a method that returns a {@link BeanDefinition} to be registered.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 6.0
  * @see BeanDefinitionMethodGeneratorFactory
  */
@@ -97,11 +98,7 @@ class BeanDefinitionMethodGenerator {
 		ClassName target = codeFragments.getTarget(this.registeredBean,
 				this.constructorOrFactoryMethod);
 		if (!target.canonicalName().startsWith("java.")) {
-			GeneratedClass generatedClass = generationContext.getGeneratedClasses()
-					.getOrAddForFeatureComponent("BeanDefinitions", target, type -> {
-						type.addJavadoc("Bean definitions for {@link $T}", target);
-						type.addModifiers(Modifier.PUBLIC);
-					});
+			GeneratedClass generatedClass = lookupGeneratedClass(generationContext, target);
 			GeneratedMethods generatedMethods = generatedClass.getMethods()
 					.withPrefix(getName());
 			GeneratedMethod generatedMethod = generateBeanDefinitionMethod(
@@ -115,6 +112,43 @@ class BeanDefinitionMethodGenerator {
 				beanRegistrationsCode.getClassName(), generatedMethods, codeFragments,
 				Modifier.PRIVATE);
 		return generatedMethod.toMethodReference();
+	}
+
+	/**
+	 * Return the {@link GeneratedClass} to use for the specified {@code target}.
+	 * <p>If the target class is an inner class, a corresponding inner class in
+	 * the original structure is created.
+	 * @param generationContext the generation context to use
+	 * @param target the chosen target class name for the bean definition
+	 * @return the generated class to use
+	 */
+	private static GeneratedClass lookupGeneratedClass(GenerationContext generationContext, ClassName target) {
+		ClassName topLevelClassName = target.topLevelClassName();
+		GeneratedClass generatedClass = generationContext.getGeneratedClasses()
+				.getOrAddForFeatureComponent("BeanDefinitions", topLevelClassName, type -> {
+					type.addJavadoc("Bean definitions for {@link $T}", topLevelClassName);
+					type.addModifiers(Modifier.PUBLIC);
+				});
+		List<String> names = target.simpleNames();
+		if (names.size() == 1) {
+			return generatedClass;
+		}
+		List<String> namesToProcess = names.subList(1, names.size());
+		ClassName currentTargetClassName = topLevelClassName;
+		GeneratedClass tmp = generatedClass;
+		for (String nameToProcess : namesToProcess) {
+			currentTargetClassName = currentTargetClassName.nestedClass(nameToProcess);
+			tmp = createInnerClass(tmp, nameToProcess + "__BeanDefinitions", currentTargetClassName);
+		}
+		return tmp;
+	}
+
+	private static GeneratedClass createInnerClass(GeneratedClass generatedClass,
+			String name, ClassName target) {
+		return generatedClass.getOrAdd(name, type -> {
+			type.addJavadoc("Bean definitions for {@link $T}", target);
+			type.addModifiers(Modifier.PUBLIC, Modifier.STATIC);
+		});
 	}
 
 	private BeanRegistrationCodeFragments getCodeFragments(GenerationContext generationContext,

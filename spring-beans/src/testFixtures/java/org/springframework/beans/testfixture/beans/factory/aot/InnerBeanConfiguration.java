@@ -17,14 +17,24 @@
 package org.springframework.beans.testfixture.beans.factory.aot;
 
 /**
- * A sample configuration.
+ * A configuration with inner classes.
  *
  * @author Stephane Nicoll
  */
-public class SimpleBeanConfiguration {
+public class InnerBeanConfiguration {
 
-	public SimpleBean simpleBean() {
-		return new SimpleBean();
+	public static class Simple {
+
+		public SimpleBean simpleBean() {
+			return new SimpleBean();
+		}
+
+		public static class Another {
+
+			public SimpleBean anotherBean() {
+				return new SimpleBean();
+			}
+
+		}
 	}
-
 }
