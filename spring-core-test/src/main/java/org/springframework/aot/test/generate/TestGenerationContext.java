@@ -51,11 +51,20 @@ public class TestGenerationContext extends DefaultGenerationContext implements U
 
 	/**
 	 * Create an instance using the specified {@code target}.
-	 * @param target the default target class to use
+	 * @param target the default target class name to use
 	 */
 	public TestGenerationContext(ClassName target) {
 		this(new ClassNameGenerator(target));
 	}
+
+	/**
+	 * Create an instance using the specified {@code target}.
+	 * @param target the default target class to use
+	 */
+	public TestGenerationContext(Class<?> target) {
+		this(ClassName.get(target));
+	}
+
 
 	/**
 	 * Create an instance using {@link #TEST_TARGET} as the {@code target}.
