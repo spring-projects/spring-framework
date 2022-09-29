@@ -16,8 +16,6 @@
 
 package org.springframework.context.aot;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.RootBeanDefinition;
