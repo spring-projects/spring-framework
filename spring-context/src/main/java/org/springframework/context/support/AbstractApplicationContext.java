@@ -748,18 +748,19 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// BeanFactory interface not registered as resolvable type in a plain factory.
 		// MessageSource registered (and found for autowiring) as a bean.
-		// 设置几个自动装配的特殊规则，当在进行IOC容器初始化过程中如果有多个实现，那么就使用指定的对象进行依赖注入
+		// 设置几个自动装配的特殊规则，当在进行IOC容器初始化过程中如果有多个实现，那么就使用指定(右边的值)的对象进行依赖注入
 		beanFactory.registerResolvableDependency(BeanFactory.class, beanFactory);
 		beanFactory.registerResolvableDependency(ResourceLoader.class, this);
 		beanFactory.registerResolvableDependency(ApplicationEventPublisher.class, this);
 		beanFactory.registerResolvableDependency(ApplicationContext.class, this);
 
 		// Register early post-processor for detecting inner beans as ApplicationListeners.
-		// 注册 BeanPostProcessor
+		// 添加一个 BeanPostProcessor 处理器，ApplicationListenerDetector，用于装饰监听器
+		// 初始化 Bean 的时候，如果是 ApplicationListener 类型且为单例模式，则添加到 Spring 应用上下文
 		beanFactory.addBeanPostProcessor(new ApplicationListenerDetector(this));
 
 		// Detect a LoadTimeWeaver and prepare for weaving, if found.
-		// 通过 AspectJ 的类加载器织入
+		// 增加对 AspectJ 的支持，AOP 相关
 		if (!NativeDetector.inNativeImage() && beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
 			beanFactory.addBeanPostProcessor(new LoadTimeWeaverAwareProcessor(beanFactory));
 			// Set a temporary ClassLoader for type matching.
@@ -767,6 +768,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Register default environment beans.
+		// 注册几个 ApplicationContext 上下文默认的 Bean 对象
 		// 注册默认的系统环境 Bean(单例) 到一级缓存
 		if (!beanFactory.containsLocalBean(ENVIRONMENT_BEAN_NAME)) {
 			beanFactory.registerSingleton(ENVIRONMENT_BEAN_NAME, getEnvironment());
@@ -783,29 +785,33 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * 模板方法设计模式
 	 * 而在SpringBoot中的AnnotationConfigServletWebServerApplicationContext#postProcessBeanFactory()是对这个方法进行了覆盖的
 	 * Modify the application context's internal bean factory after its standard
 	 * initialization. All bean definitions will have been loaded, but no beans
 	 * will have been instantiated yet. This allows for registering special
 	 * BeanPostProcessors etc in certain ApplicationContext implementations.
 	 * @param beanFactory the bean factory used by the application context
+	 * TODO 模板方法设计模式,该抽象方法交由子类去实现
 	 */
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 	}
 
 	/**
-	 * 根据顺序，实例化并注册所有的 BeanFactoryPostProcessor Bean 实例
 	 * Instantiate and invoke all registered BeanFactoryPostProcessor beans,
 	 * respecting explicit order if given.
 	 * <p>Must be called before singleton instantiation.
+	 * 根据顺序，实例化并注册所有的 BeanFactoryPostProcessor Bean 实例
+	 * 这里借助于 PostProcessorRegistrationDelegate 这个类执行所有 BeanFactoryPostProcessor 处理器，对前面创建的 BeanFactory 进行后置处理
 	 */
 	protected void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
+
+		// 执行所有的BeanFactoryPostProcessor处理器
 		// getBeanFactoryPostProcessors() 直接返回通过硬编码形式注册的 BeanFactoryPostProcessor 类型的处理器集合
 		PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());
 
 		// Detect a LoadTimeWeaver and prepare for weaving, if found in the meantime
 		// (e.g. through an @Bean method registered by ConfigurationClassPostProcessor)
+		// 在 prepareBeanFactory() 方法中也有相同操作
 		// 通过类加载器织入，loadTimeWeaver (LOAD_TIME_WEAVER_BEAN_NAME)
 		if (!NativeDetector.inNativeImage() && beanFactory.getTempClassLoader() == null && beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
 			beanFactory.addBeanPostProcessor(new LoadTimeWeaverAwareProcessor(beanFactory));
