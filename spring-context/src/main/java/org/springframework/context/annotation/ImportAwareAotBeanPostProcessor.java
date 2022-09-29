@@ -50,8 +50,8 @@ public final class ImportAwareAotBeanPostProcessor implements BeanPostProcessor,
 
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) {
-		if (bean instanceof ImportAware) {
-			setAnnotationMetadata((ImportAware) bean);
+		if (bean instanceof ImportAware importAware) {
+			setAnnotationMetadata(importAware);
 		}
 		return bean;
 	}

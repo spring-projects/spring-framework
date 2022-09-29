@@ -83,8 +83,8 @@ class ConditionEvaluator {
 		}
 
 		if (phase == null) {
-			if (metadata instanceof AnnotationMetadata &&
-					ConfigurationClassUtils.isConfigurationCandidate((AnnotationMetadata) metadata)) {
+			if (metadata instanceof AnnotationMetadata annotationMetadata &&
+					ConfigurationClassUtils.isConfigurationCandidate(annotationMetadata)) {
 				return shouldSkip(metadata, ConfigurationPhase.PARSE_CONFIGURATION);
 			}
 			return shouldSkip(metadata, ConfigurationPhase.REGISTER_BEAN);
@@ -102,8 +102,8 @@ class ConditionEvaluator {
 
 		for (Condition condition : conditions) {
 			ConfigurationPhase requiredPhase = null;
-			if (condition instanceof ConfigurationCondition) {
-				requiredPhase = ((ConfigurationCondition) condition).getConfigurationPhase();
+			if (condition instanceof ConfigurationCondition configurationCondition) {
+				requiredPhase = configurationCondition.getConfigurationPhase();
 			}
 			if ((requiredPhase == null || requiredPhase == phase) && !condition.matches(this.context, metadata)) {
 				return true;
@@ -156,25 +156,25 @@ class ConditionEvaluator {
 
 		@Nullable
 		private ConfigurableListableBeanFactory deduceBeanFactory(@Nullable BeanDefinitionRegistry source) {
-			if (source instanceof ConfigurableListableBeanFactory) {
-				return (ConfigurableListableBeanFactory) source;
+			if (source instanceof ConfigurableListableBeanFactory configurableListableBeanFactory) {
+				return configurableListableBeanFactory;
 			}
-			if (source instanceof ConfigurableApplicationContext) {
-				return (((ConfigurableApplicationContext) source).getBeanFactory());
+			if (source instanceof ConfigurableApplicationContext configurableApplicationContext) {
+				return configurableApplicationContext.getBeanFactory();
 			}
 			return null;
 		}
 
 		private Environment deduceEnvironment(@Nullable BeanDefinitionRegistry source) {
-			if (source instanceof EnvironmentCapable) {
-				return ((EnvironmentCapable) source).getEnvironment();
+			if (source instanceof EnvironmentCapable environmentCapable) {
+				return environmentCapable.getEnvironment();
 			}
 			return new StandardEnvironment();
 		}
 
 		private ResourceLoader deduceResourceLoader(@Nullable BeanDefinitionRegistry source) {
-			if (source instanceof ResourceLoader) {
-				return (ResourceLoader) source;
+			if (source instanceof ResourceLoader resourceLoaderSource) {
+				return resourceLoaderSource;
 			}
 			return new DefaultResourceLoader();
 		}

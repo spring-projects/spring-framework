@@ -56,8 +56,8 @@ final class BeanMethod extends ConfigurationMethod {
 
 	@Override
 	public boolean equals(@Nullable Object obj) {
-		return ((this == obj) || ((obj instanceof BeanMethod) &&
-				this.metadata.equals(((BeanMethod) obj).metadata)));
+		return ((this == obj) || ((obj instanceof BeanMethod beanMethod) &&
+				this.metadata.equals((beanMethod).metadata)));
 	}
 
 	@Override

@@ -60,8 +60,8 @@ abstract class ParserStrategyUtils {
 		if (clazz.isInterface()) {
 			throw new BeanInstantiationException(clazz, "Specified class is an interface");
 		}
-		ClassLoader classLoader = (registry instanceof ConfigurableBeanFactory ?
-				((ConfigurableBeanFactory) registry).getBeanClassLoader() : resourceLoader.getClassLoader());
+		ClassLoader classLoader = (registry instanceof ConfigurableBeanFactory configurableBeanFactory ?
+				configurableBeanFactory.getBeanClassLoader() : resourceLoader.getClassLoader());
 		T instance = (T) createInstance(clazz, environment, resourceLoader, registry, classLoader);
 		ParserStrategyUtils.invokeAwareMethods(instance, environment, resourceLoader, registry, classLoader);
 		return instance;
@@ -122,17 +122,18 @@ abstract class ParserStrategyUtils {
 			ResourceLoader resourceLoader, BeanDefinitionRegistry registry, @Nullable ClassLoader classLoader) {
 
 		if (parserStrategyBean instanceof Aware) {
-			if (parserStrategyBean instanceof BeanClassLoaderAware && classLoader != null) {
-				((BeanClassLoaderAware) parserStrategyBean).setBeanClassLoader(classLoader);
+			if (parserStrategyBean instanceof BeanClassLoaderAware beanClassLoaderAware && classLoader != null) {
+				beanClassLoaderAware.setBeanClassLoader(classLoader);
 			}
-			if (parserStrategyBean instanceof BeanFactoryAware && registry instanceof BeanFactory) {
-				((BeanFactoryAware) parserStrategyBean).setBeanFactory((BeanFactory) registry);
+			if (parserStrategyBean instanceof BeanFactoryAware beanFactoryAware
+					&& registry instanceof BeanFactory beanFactory) {
+				beanFactoryAware.setBeanFactory(beanFactory);
 			}
-			if (parserStrategyBean instanceof EnvironmentAware) {
-				((EnvironmentAware) parserStrategyBean).setEnvironment(environment);
+			if (parserStrategyBean instanceof EnvironmentAware environmentAware) {
+				environmentAware.setEnvironment(environment);
 			}
-			if (parserStrategyBean instanceof ResourceLoaderAware) {
-				((ResourceLoaderAware) parserStrategyBean).setResourceLoader(resourceLoader);
+			if (parserStrategyBean instanceof ResourceLoaderAware resourceLoaderAware) {
+				resourceLoaderAware.setResourceLoader(resourceLoader);
 			}
 		}
 	}

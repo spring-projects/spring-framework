@@ -63,7 +63,7 @@ public class SimpleKey implements Serializable {
 	@Override
 	public boolean equals(@Nullable Object other) {
 		return (this == other ||
-				(other instanceof SimpleKey && Arrays.deepEquals(this.params, ((SimpleKey) other).params)));
+				(other instanceof SimpleKey simpleKey && Arrays.deepEquals(this.params, simpleKey.params)));
 	}
 
 	@Override

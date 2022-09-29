@@ -55,7 +55,7 @@ public class NoOpCacheManager implements CacheManager {
 	public Cache getCache(String name) {
 		Cache cache = this.caches.get(name);
 		if (cache == null) {
-			this.caches.computeIfAbsent(name, key -> new NoOpCache(name));
+			this.caches.computeIfAbsent(name, NoOpCache::new);
 			synchronized (this.cacheNames) {
 				this.cacheNames.add(name);
 			}
