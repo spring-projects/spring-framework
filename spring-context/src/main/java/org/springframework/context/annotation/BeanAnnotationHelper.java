@@ -42,20 +42,20 @@ abstract class BeanAnnotationHelper {
 	}
 
 	public static String determineBeanNameFor(Method beanMethod) {
-		String beanName = beanNameCache.get(beanMethod);
-		if (beanName == null) {
-			// By default, the bean name is the name of the @Bean-annotated method
-			beanName = beanMethod.getName();
-			// Check to see if the user has explicitly set a custom bean name...
-			AnnotationAttributes bean =
-					AnnotatedElementUtils.findMergedAnnotationAttributes(beanMethod, Bean.class, false, false);
-			if (bean != null) {
-				String[] names = bean.getStringArray("name");
-				if (names.length > 0) {
-					beanName = names[0];
-				}
+		return beanNameCache.computeIfAbsent(beanMethod, BeanAnnotationHelper::resolveBeanName);
+	}
+
+	private static String resolveBeanName(Method beanMethod) {
+		// By default, the bean name is the name of the @Bean-annotated method
+		String beanName = beanMethod.getName();
+		// Check to see if the user has explicitly set a custom bean name...
+		AnnotationAttributes bean =
+				AnnotatedElementUtils.findMergedAnnotationAttributes(beanMethod, Bean.class, false, false);
+		if (bean != null) {
+			String[] names = bean.getStringArray("name");
+			if (names.length > 0) {
+				beanName = names[0];
 			}
-			beanNameCache.put(beanMethod, beanName);
 		}
 		return beanName;
 	}

@@ -96,17 +96,15 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 		// The provider may support on-demand cache creation...
 		Cache missingCache = getMissingCache(name);
 		if (missingCache != null) {
-			// Fully synchronize now for missing cache registration
-			synchronized (this.cacheMap) {
-				cache = this.cacheMap.get(name);
-				if (cache == null) {
-					cache = decorateCache(missingCache);
-					this.cacheMap.put(name, cache);
-					updateCacheNames(name);
-				}
-			}
+			return this.cacheMap.computeIfAbsent(name, k -> createCache(name, missingCache));
 		}
-		return cache;
+		return null;
+	}
+
+	private Cache createCache(String name, Cache missingCache) {
+		var decoragedCache = decorateCache(missingCache);
+		updateCacheNames(name);
+		return decoragedCache;
 	}
 
 	@Override
