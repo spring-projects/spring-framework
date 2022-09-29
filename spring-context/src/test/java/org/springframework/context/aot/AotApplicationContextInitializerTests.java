@@ -74,18 +74,6 @@ class AotApplicationContextInitializerTests {
 				.withMessageContaining(ConfigurableApplicationContextInitializer.class.getName());
 	}
 
-	@Test
-	void getAotInitializersReturnsOnlyAotInitializers() {
-		ApplicationContextInitializer<GenericApplicationContext> l1 = context -> { };
-		ApplicationContextInitializer<GenericApplicationContext> l2 = context -> { };
-		AotApplicationContextInitializer<GenericApplicationContext> a1 = context -> { };
-		AotApplicationContextInitializer<GenericApplicationContext> a2 = l2::initialize;
-		List<ApplicationContextInitializer<GenericApplicationContext>> initializers = List.of(l1, l2, a1, a2);
-		List<AotApplicationContextInitializer<GenericApplicationContext>> aotInitializers = AotApplicationContextInitializer
-				.getAotInitializers(initializers);
-		assertThat(aotInitializers).containsExactly(a1, a2);
-	}
-
 
 	static class TestApplicationContextInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
 

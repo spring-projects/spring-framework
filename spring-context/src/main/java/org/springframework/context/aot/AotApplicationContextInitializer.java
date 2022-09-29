@@ -16,10 +16,6 @@
 
 package org.springframework.context.aot;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -88,26 +84,6 @@ public interface AotApplicationContextInitializer<C extends ConfigurableApplicat
 			throw new IllegalArgumentException(
 					"Failed to instantiate ApplicationContextInitializer: " + initializerClassName, ex);
 		}
-	}
-
-	/**
-	 * Return a new {@link List} containing only {@link AotApplicationContextInitializer} instances.
-	 * @param <C> the application context type
-	 * @param initializers the source initializers
-	 * @return a list of the {@link AotApplicationContextInitializer} instances
-	 */
-	@SuppressWarnings("unchecked")
-	public static <C extends ConfigurableApplicationContext> List<AotApplicationContextInitializer<C>> getAotInitializers(
-			Collection<? extends ApplicationContextInitializer<? extends C>> initializers) {
-
-		Assert.notNull(initializers, "'initializers' must not be null");
-		List<AotApplicationContextInitializer<C>> aotInitializers = new ArrayList<>();
-		for (ApplicationContextInitializer<?> candidate : initializers) {
-			if (candidate instanceof AotApplicationContextInitializer<?> aotInitializer) {
-				aotInitializers.add((AotApplicationContextInitializer<C>) aotInitializer);
-			}
-		}
-		return aotInitializers;
 	}
 
 }
