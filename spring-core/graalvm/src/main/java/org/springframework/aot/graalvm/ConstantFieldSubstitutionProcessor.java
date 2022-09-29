@@ -66,14 +66,22 @@ class ConstantFieldSubstitutionProcessor extends SubstitutionProcessor {
 			String fieldIdentifier = declaringClass.toJavaName() + "#" + field.getName();
 			for (Pattern pattern : patterns) {
 				if (pattern.matcher(fieldIdentifier).matches()) {
-					JavaConstant constant = lookupConstant(declaringClass.toJavaName(), field.getName());
-					if (constant != null) {
-						// TODO Use proper logging only when --verbose is specified when https://github.com/oracle/graal/issues/4669 will be fixed
+					try {
+						JavaConstant constant = lookupConstant(declaringClass.toJavaName(), field.getName());
+						if (constant != null) {
+							// TODO Use proper logging only when --verbose is specified when https://github.com/oracle/graal/issues/4669 will be fixed
+							if (!this.seen.contains(fieldIdentifier)) {
+								this.seen.add(fieldIdentifier);
+								System.out.println("Field " + fieldIdentifier + " set to " + constant.toValueString() + " at build time");
+							}
+							return new ConstantReadableJavaField(field, constant);
+						}
+					}
+					catch (Throwable ex) {
 						if (!this.seen.contains(fieldIdentifier)) {
 							this.seen.add(fieldIdentifier);
-							System.out.println("Field " + fieldIdentifier + " set to " + constant.toValueString() + " at build time");
+							System.out.println("Processing of field " + fieldIdentifier + " skipped due the following error : " + ex.getMessage());
 						}
-						return new ConstantReadableJavaField(field, constant);
 					}
 				}
 			}
