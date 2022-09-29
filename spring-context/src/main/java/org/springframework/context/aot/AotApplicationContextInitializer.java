@@ -57,7 +57,7 @@ public interface AotApplicationContextInitializer<C extends ConfigurableApplicat
 	 * @param initializerClassNames the class names of the initializers to load
 	 * @return a new {@link AotApplicationContextInitializer} instance
 	 */
-	static <C extends ConfigurableApplicationContext> ApplicationContextInitializer<C> forInitializerClasses(
+	static <C extends ConfigurableApplicationContext> AotApplicationContextInitializer<C> forInitializerClasses(
 			String... initializerClassNames) {
 
 		Assert.noNullElements(initializerClassNames, "'initializerClassNames' must not contain null elements");
