@@ -16,24 +16,18 @@
 
 package org.springframework.context.aot;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
 
 /**
  * Initializes a {@link ConfigurableApplicationContext} using AOT optimizations.
  *
  * @author Stephane Nicoll
  * @since 6.0
+ * @deprecated in favor of {@link AotApplicationContextInitializer}
  */
+@Deprecated(since = "6.0", forRemoval = true)
 public class ApplicationContextAotInitializer {
-
-	private static final Log logger = LogFactory.getLog(ApplicationContextAotInitializer.class);
 
 	/**
 	 * Initialize the specified application context using the specified
@@ -43,35 +37,7 @@ public class ApplicationContextAotInitializer {
 	 * @param initializerClassNames the application context initializer class names
 	 */
 	public void initialize(ConfigurableApplicationContext context, String... initializerClassNames) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Initializing ApplicationContext with AOT");
-		}
-		for (String initializerClassName : initializerClassNames) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Applying " + initializerClassName);
-			}
-			loadInitializer(initializerClassName, context.getClassLoader()).initialize(context);
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private ApplicationContextInitializer<ConfigurableApplicationContext> loadInitializer(
-			String className, @Nullable ClassLoader classLoader) {
-		Object initializer = instantiate(className, classLoader);
-		if (!(initializer instanceof ApplicationContextInitializer)) {
-			throw new IllegalArgumentException("Not an ApplicationContextInitializer: " + className);
-		}
-		return (ApplicationContextInitializer<ConfigurableApplicationContext>) initializer;
-	}
-
-	private static Object instantiate(String className, @Nullable ClassLoader classLoader) {
-		try {
-			Class<?> type = ClassUtils.forName(className, classLoader);
-			return BeanUtils.instantiateClass(type);
-		}
-		catch (Exception ex) {
-			throw new IllegalArgumentException("Failed to instantiate ApplicationContextInitializer: " + className, ex);
-		}
+		AotApplicationContextInitializer.forInitializerClasses(initializerClassNames).initialize(context);
 	}
 
 }

@@ -16,6 +16,8 @@
 
 package org.springframework.context.aot;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -26,48 +28,62 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Tests for {@link ApplicationContextAotInitializer}.
+ * Tests for {@link AotApplicationContextInitializer}.
  *
  * @author Stephane Nicoll
  */
-@Deprecated
-class ApplicationContextAotInitializerTests {
-
-	private final ApplicationContextAotInitializer initializer = new ApplicationContextAotInitializer();
+class AotApplicationContextInitializerTests {
 
 	@Test
-	void initializeInvokeApplicationContextInitializer() {
+	void initializeInvokesApplicationContextInitializer() {
 		GenericApplicationContext context = new GenericApplicationContext();
-		initializer.initialize(context, TestApplicationContextInitializer.class.getName());
+		AotApplicationContextInitializer.forInitializerClasses(
+				TestApplicationContextInitializer.class.getName())
+				.initialize(context);
 		assertThat(context.getBeanDefinitionNames()).containsExactly("test");
 	}
 
 	@Test
-	void initializeInvokeApplicationContextInitializersInOrder() {
+	void initializeInvokesApplicationContextInitializersInOrder() {
 		GenericApplicationContext context = new GenericApplicationContext();
-		initializer.initialize(context, AnotherApplicationContextInitializer.class.getName(),
-				TestApplicationContextInitializer.class.getName());
+		AotApplicationContextInitializer.forInitializerClasses(
+				AnotherApplicationContextInitializer.class.getName(),
+				TestApplicationContextInitializer.class.getName())
+				.initialize(context);
 		assertThat(context.getBeanDefinitionNames()).containsExactly("another", "test");
 	}
 
 	@Test
-	void initializeFailWithNonApplicationContextInitializer() {
+	void initializeWhenClassIsNotApplicationContextInitializerThrowsException() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> initializer.initialize(context, "java.lang.String"))
+				.isThrownBy(() -> AotApplicationContextInitializer.forInitializerClasses("java.lang.String")
+						.initialize(context))
 				.withMessageContaining("not assignable")
 				.withMessageContaining("ApplicationContextInitializer")
 				.withMessageContaining("java.lang.String");
 	}
 
 	@Test
-	void initializeFailWithApplicationContextInitializerAndNonDefaultConstructor() {
+	void initializeWhenInitializerHasNoDefaultConstructorThrowsException() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> initializer.initialize(context,
-						ConfigurableApplicationContextInitializer.class.getName()))
+				.isThrownBy(() -> AotApplicationContextInitializer.forInitializerClasses(
+						ConfigurableApplicationContextInitializer.class.getName()).initialize(context))
 				.withMessageContaining("Failed to instantiate ApplicationContextInitializer: ")
 				.withMessageContaining(ConfigurableApplicationContextInitializer.class.getName());
+	}
+
+	@Test
+	void getAotInitializersReturnsOnlyAotInitializers() {
+		ApplicationContextInitializer<GenericApplicationContext> l1 = context -> { };
+		ApplicationContextInitializer<GenericApplicationContext> l2 = context -> { };
+		AotApplicationContextInitializer<GenericApplicationContext> a1 = context -> { };
+		AotApplicationContextInitializer<GenericApplicationContext> a2 = l2::initialize;
+		List<ApplicationContextInitializer<GenericApplicationContext>> initializers = List.of(l1, l2, a1, a2);
+		List<AotApplicationContextInitializer<GenericApplicationContext>> aotInitializers = AotApplicationContextInitializer
+				.getAotInitializers(initializers);
+		assertThat(aotInitializers).containsExactly(a1, a2);
 	}
 
 
