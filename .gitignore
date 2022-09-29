@@ -48,4 +48,3 @@ atlassian-ide-plugin.xml
 
 # VS Code
 .vscode/
-/gradle/wrapper/gradle-wrapper.jar
