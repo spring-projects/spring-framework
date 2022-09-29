@@ -145,7 +145,8 @@ public final class CloseStatus implements Serializable {
 	 * client that may be done during normal shutdown.
 	 * @since 4.0.3
 	 */
-	public static final CloseStatus SESSION_NOT_RELIABLE = new CloseStatus(4500);
+	public static final CloseStatus SESSION_NOT_RELIABLE = new CloseStatus(4500)
+			.withReason("Failed to send message within the configured send limit");
 
 
 	private final int code;
