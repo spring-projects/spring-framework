@@ -77,8 +77,8 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 
 	@Override
 	public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
-		if (definition instanceof AnnotatedBeanDefinition) {
-			String beanName = determineBeanNameFromAnnotation((AnnotatedBeanDefinition) definition);
+		if (definition instanceof AnnotatedBeanDefinition annotatedBeanDefinition) {
+			String beanName = determineBeanNameFromAnnotation(annotatedBeanDefinition);
 			if (StringUtils.hasText(beanName)) {
 				// Explicit bean name found.
 				return beanName;
@@ -107,14 +107,12 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 				});
 				if (isStereotypeWithNameValue(type, metaTypes, attributes)) {
 					Object value = attributes.get("value");
-					if (value instanceof String strVal) {
-						if (StringUtils.hasLength(strVal)) {
-							if (beanName != null && !strVal.equals(beanName)) {
-								throw new IllegalStateException("Stereotype annotations suggest inconsistent " +
-										"component names: '" + beanName + "' versus '" + strVal + "'");
-							}
-							beanName = strVal;
+					if (value instanceof String strVal && StringUtils.hasLength(strVal)) {
+						if (beanName != null && !strVal.equals(beanName)) {
+							throw new IllegalStateException("Stereotype annotations suggest inconsistent " +
+									"component names: '" + beanName + "' versus '" + strVal + "'");
 						}
+						beanName = strVal;
 					}
 				}
 			}
