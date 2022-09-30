@@ -38,31 +38,32 @@ import static org.assertj.core.api.Assertions.fail;
  * Unit tests for various {@link LocaleResolver} implementations.
  *
  * @author Juergen Hoeller
+ * @author Vedran Pavic
  * @since 20.03.2003
  */
 class LocaleResolverTests {
 
 	@Test
 	void acceptHeaderLocaleResolver() {
-		doTest(new AcceptHeaderLocaleResolver(), false);
+		doTest(new AcceptHeaderLocaleResolver(), false, false);
 	}
 
 	@Test
 	void fixedLocaleResolver() {
-		doTest(new FixedLocaleResolver(Locale.UK), false);
+		doTest(new FixedLocaleResolver(Locale.UK), false, true);
 	}
 
 	@Test
 	void cookieLocaleResolver() {
-		doTest(new CookieLocaleResolver(), true);
+		doTest(new CookieLocaleResolver(), true, true);
 	}
 
 	@Test
 	void sessionLocaleResolver() {
-		doTest(new SessionLocaleResolver(), true);
+		doTest(new SessionLocaleResolver(), true, true);
 	}
 
-	private void doTest(LocaleResolver localeResolver, boolean shouldSet) {
+	private void doTest(LocaleResolver localeResolver, boolean shouldSet, boolean timeZoneAware) {
 		// create mocks
 		MockServletContext context = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(context);
@@ -93,15 +94,19 @@ class LocaleResolverTests {
 			else {
 				assertThat(localeContext.getLocale()).isEqualTo(Locale.UK);
 			}
-			boolean condition2 = localeContext instanceof TimeZoneAwareLocaleContext;
-			assertThat(condition2).isTrue();
-			assertThat(((TimeZoneAwareLocaleContext) localeContext).getTimeZone()).isNull();
+			if (timeZoneAware) {
+				boolean condition2 = localeContext instanceof TimeZoneAwareLocaleContext;
+				assertThat(condition2).isTrue();
+				assertThat(((TimeZoneAwareLocaleContext) localeContext).getTimeZone()).isNull();
+			}
 
 			if (localeContextResolver instanceof AbstractLocaleContextResolver) {
 				((AbstractLocaleContextResolver) localeContextResolver).setDefaultTimeZone(TimeZone.getTimeZone("GMT+1"));
 				request.removeAttribute(CookieLocaleResolver.LOCALE_REQUEST_ATTRIBUTE_NAME);
 				localeContextResolver.resolveLocaleContext(request);
-				assertThat(TimeZone.getTimeZone("GMT+1")).isEqualTo(((TimeZoneAwareLocaleContext) localeContext).getTimeZone());
+				if (timeZoneAware) {
+					assertThat(TimeZone.getTimeZone("GMT+1")).isEqualTo(((TimeZoneAwareLocaleContext) localeContext).getTimeZone());
+				}
 			}
 
 			try {

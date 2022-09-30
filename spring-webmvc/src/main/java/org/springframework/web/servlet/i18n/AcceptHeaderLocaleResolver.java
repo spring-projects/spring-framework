@@ -24,6 +24,8 @@ import java.util.Locale;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.context.i18n.LocaleContext;
+import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.LocaleResolver;
@@ -41,7 +43,7 @@ import org.springframework.web.servlet.LocaleResolver;
  * @since 27.02.2003
  * @see jakarta.servlet.http.HttpServletRequest#getLocale()
  */
-public class AcceptHeaderLocaleResolver extends AbstractLocaleResolver {
+public class AcceptHeaderLocaleResolver extends AbstractLocaleContextResolver {
 
 	private final List<Locale> supportedLocales = new ArrayList<>(4);
 
@@ -68,21 +70,21 @@ public class AcceptHeaderLocaleResolver extends AbstractLocaleResolver {
 
 
 	@Override
-	public Locale resolveLocale(HttpServletRequest request) {
+	public LocaleContext resolveLocaleContext(HttpServletRequest request) {
 		Locale defaultLocale = getDefaultLocale();
 		if (defaultLocale != null && request.getHeader("Accept-Language") == null) {
-			return defaultLocale;
+			return new SimpleLocaleContext(defaultLocale);
 		}
 		Locale requestLocale = request.getLocale();
 		List<Locale> supportedLocales = getSupportedLocales();
 		if (supportedLocales.isEmpty() || supportedLocales.contains(requestLocale)) {
-			return requestLocale;
+			return new SimpleLocaleContext(requestLocale);
 		}
 		Locale supportedLocale = findSupportedLocale(request, supportedLocales);
 		if (supportedLocale != null) {
-			return supportedLocale;
+			return new SimpleLocaleContext(supportedLocale);
 		}
-		return (defaultLocale != null ? defaultLocale : requestLocale);
+		return new SimpleLocaleContext(defaultLocale != null ? defaultLocale : requestLocale);
 	}
 
 	@Nullable
@@ -112,7 +114,8 @@ public class AcceptHeaderLocaleResolver extends AbstractLocaleResolver {
 	}
 
 	@Override
-	public void setLocale(HttpServletRequest request, @Nullable HttpServletResponse response, @Nullable Locale locale) {
+	public void setLocaleContext(HttpServletRequest request, @Nullable HttpServletResponse response,
+			@Nullable LocaleContext localeContext) {
 		throw new UnsupportedOperationException(
 				"Cannot change HTTP Accept-Language header - use a different locale resolution strategy");
 	}
