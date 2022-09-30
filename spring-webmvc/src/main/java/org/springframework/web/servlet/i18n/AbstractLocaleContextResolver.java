@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.i18n;
 
+import java.util.Locale;
 import java.util.TimeZone;
 
 import org.springframework.lang.Nullable;
@@ -32,11 +33,31 @@ import org.springframework.web.servlet.LocaleContextResolver;
  * @see #setDefaultLocale
  * @see #setDefaultTimeZone
  */
-public abstract class AbstractLocaleContextResolver extends AbstractLocaleResolver implements LocaleContextResolver {
+public abstract class AbstractLocaleContextResolver implements LocaleContextResolver {
+
+	@Nullable
+	private Locale defaultLocale;
 
 	@Nullable
 	private TimeZone defaultTimeZone;
 
+
+	/**
+	 * Set a default {@link Locale} that this resolver will return if no other
+	 * locale is found.
+	 */
+	public void setDefaultLocale(@Nullable Locale defaultLocale) {
+		this.defaultLocale = defaultLocale;
+	}
+
+	/**
+	 * Get the default {@link Locale} that this resolver is supposed to fall back
+	 * to, if any.
+	 */
+	@Nullable
+	protected Locale getDefaultLocale() {
+		return this.defaultLocale;
+	}
 
 	/**
 	 * Set a default {@link TimeZone} that this resolver will return if no other

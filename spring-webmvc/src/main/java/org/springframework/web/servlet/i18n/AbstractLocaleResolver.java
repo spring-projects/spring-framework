@@ -29,7 +29,9 @@ import org.springframework.web.servlet.LocaleResolver;
  * @author Juergen Hoeller
  * @since 1.2.9
  * @see #setDefaultLocale
+ * @deprecated since 6.0 in favor of {@link AbstractLocaleContextResolver}
  */
+@Deprecated(since = "6.0")
 public abstract class AbstractLocaleResolver implements LocaleResolver {
 
 	@Nullable
