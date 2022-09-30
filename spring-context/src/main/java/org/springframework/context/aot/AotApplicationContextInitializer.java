@@ -24,6 +24,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.log.LogMessage;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -67,14 +68,14 @@ public interface AotApplicationContextInitializer<C extends ConfigurableApplicat
 		logger.debug("Initializing ApplicationContext with AOT");
 		for (String initializerClassName : initializerClassNames) {
 			logger.trace(LogMessage.format("Applying %s", initializerClassName));
-			instantiateInitializer(classLoader, initializerClassName)
+			instantiateInitializer(initializerClassName, classLoader)
 					.initialize(applicationContext);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	static <C extends ConfigurableApplicationContext> ApplicationContextInitializer<C> instantiateInitializer(
-			ClassLoader classLoader, String initializerClassName) {
+			String initializerClassName, @Nullable ClassLoader classLoader) {
 		try {
 			Class<?> initializerClass = ClassUtils.resolveClassName(initializerClassName, classLoader);
 			Assert.isAssignable(ApplicationContextInitializer.class, initializerClass);

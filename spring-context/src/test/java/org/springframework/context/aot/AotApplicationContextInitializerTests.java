@@ -36,7 +36,7 @@ class AotApplicationContextInitializerTests {
 	void initializeInvokesApplicationContextInitializer() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		AotApplicationContextInitializer.forInitializerClasses(
-				TestApplicationContextInitializer.class.getName())
+						TestApplicationContextInitializer.class.getName())
 				.initialize(context);
 		assertThat(context.getBeanDefinitionNames()).containsExactly("test");
 	}
@@ -45,8 +45,8 @@ class AotApplicationContextInitializerTests {
 	void initializeInvokesApplicationContextInitializersInOrder() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		AotApplicationContextInitializer.forInitializerClasses(
-				AnotherApplicationContextInitializer.class.getName(),
-				TestApplicationContextInitializer.class.getName())
+						AnotherApplicationContextInitializer.class.getName(),
+						TestApplicationContextInitializer.class.getName())
 				.initialize(context);
 		assertThat(context.getBeanDefinitionNames()).containsExactly("another", "test");
 	}
@@ -93,6 +93,7 @@ class AotApplicationContextInitializerTests {
 
 	static class ConfigurableApplicationContextInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
 
+		@SuppressWarnings("unused")
 		public ConfigurableApplicationContextInitializer(ClassLoader classLoader) {
 		}
 
