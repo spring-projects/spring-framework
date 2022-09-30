@@ -389,7 +389,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 
 		Object propValue;
 		try {
-			propValue = getPropertyValue(getterTokens);
+			propValue = ObjectUtils.unwrapOptional(getPropertyValue(getterTokens));
 		}
 		catch (NotReadablePropertyException ex) {
 			throw new NotWritablePropertyException(getRootClass(), this.nestedPath + tokens.canonicalName,
@@ -642,6 +642,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 				// apply indexes and map keys
 				for (int i = 0; i < tokens.keys.length; i++) {
 					String key = tokens.keys[i];
+					value = ObjectUtils.unwrapOptional(value);
 					if (value == null) {
 						throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + propertyName,
 								"Cannot access indexed value of property referenced in indexed " +

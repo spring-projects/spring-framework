@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Optional;
 
 import org.springframework.core.io.Resource;
 
@@ -77,6 +78,11 @@ public class GenericBean<T> {
 
 	private List<T> genericListProperty;
 
+	private Optional<List<Integer>> optionalOfList;
+
+	private Optional<Integer[]> optionalOfArray;
+
+	private Optional<Map<Integer, Long>> optionalOfMap;
 
 	public GenericBean() {
 	}
@@ -287,6 +293,30 @@ public class GenericBean<T> {
 
 	public void setStandardEnumMap(EnumMap<CustomEnum, Integer> standardEnumMap) {
 		this.standardEnumMap = standardEnumMap;
+	}
+
+	public Optional<List<Integer>> getOptionalOfList() {
+		return optionalOfList;
+	}
+
+	public void setOptionalOfList(Optional<List<Integer>> optionalOfList) {
+		this.optionalOfList = optionalOfList;
+	}
+
+	public Optional<Integer[]> getOptionalOfArray() {
+		return optionalOfArray;
+	}
+
+	public void setOptionalOfArray(Optional<Integer[]> optionalOfArray) {
+		this.optionalOfArray = optionalOfArray;
+	}
+
+	public Optional<Map<Integer, Long>> getOptionalOfMap() {
+		return optionalOfMap;
+	}
+
+	public void setOptionalOfMap(Optional<Map<Integer, Long>> optionalOfMap) {
+		this.optionalOfMap = optionalOfMap;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -515,6 +516,73 @@ class BeanWrapperGenericsTests {
 
 		bw.setPropertyValue("data['message']", "it works!");
 		assertThat(data.get("message")).isEqualTo("it works!");
+	}
+
+
+	@Test
+	void testGenericOptionalOfLists() {
+		GenericBean<String> gb = new GenericBean<>();
+		Optional<List<Integer>> input = Optional.of(new ArrayList<>());
+		gb.setOptionalOfList(input);
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		bw.setPropertyValue("optionalOfList[0]", 5);
+		assertThat(bw.getPropertyValue("optionalOfList[0]")).isEqualTo(5);
+		assertThat(gb.getOptionalOfList().get().get(0)).isEqualTo(5);
+	}
+
+	@Test
+	void testGenericOptionalOfListsWithElementConversion() {
+		GenericBean<String> gb = new GenericBean<>();
+		Optional<List<Integer>> input = Optional.of(new ArrayList<>());
+		gb.setOptionalOfList(input);
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		bw.setPropertyValue("optionalOfList[0]", "5");
+		assertThat(bw.getPropertyValue("optionalOfList[0]")).isEqualTo(5);
+		assertThat(gb.getOptionalOfList().get().get(0)).isEqualTo(5);
+	}
+
+	@Test
+	void testGenericOptionalOfArrays() {
+		GenericBean<String> gb = new GenericBean<>();
+		Optional<Integer[]> input = Optional.of(new Integer[] {1, 2});
+		gb.setOptionalOfArray(input);
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		bw.setPropertyValue("optionalOfArray[1]", 3);
+		assertThat(bw.getPropertyValue("optionalOfArray[1]")).isEqualTo(3);
+		assertThat(gb.getOptionalOfArray().get()[1]).isEqualTo(3);
+	}
+
+	@Test
+	void testGenericOptionalOfArraysWithElementConversion() {
+		GenericBean<String> gb = new GenericBean<>();
+		Optional<Integer[]> input = Optional.of(new Integer[] {1, 2});
+		gb.setOptionalOfArray(input);
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		bw.setPropertyValue("optionalOfArray[1]", "3");
+		assertThat(bw.getPropertyValue("optionalOfArray[1]")).isEqualTo(3);
+		assertThat(gb.getOptionalOfArray().get()[1]).isEqualTo(3);
+	}
+
+	@Test
+	void testGenericOptionalOfMaps() {
+		GenericBean<String> gb = new GenericBean<>();
+		Optional<Map<Integer, Long>> list = Optional.of(new HashMap<>());
+		gb.setOptionalOfMap(list);
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		bw.setPropertyValue("optionalOfMap[10]", 5L);
+		assertThat(bw.getPropertyValue("optionalOfMap[10]")).isEqualTo(5L);
+		assertThat(gb.getOptionalOfMap().get().get(10)).isEqualTo(Long.valueOf(5));
+	}
+
+	@Test
+	void testGenericOptionalOfMapsWithElementConversion() {
+		GenericBean<String> gb = new GenericBean<>();
+		Optional<Map<Integer, Long>> list = Optional.of(new HashMap<>());
+		gb.setOptionalOfMap(list);
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		bw.setPropertyValue("optionalOfMap[10]", "5");
+		assertThat(bw.getPropertyValue("optionalOfMap[10]")).isEqualTo(5L);
+		assertThat(gb.getOptionalOfMap().get().get(10)).isEqualTo(Long.valueOf(5));
 	}
 
 
