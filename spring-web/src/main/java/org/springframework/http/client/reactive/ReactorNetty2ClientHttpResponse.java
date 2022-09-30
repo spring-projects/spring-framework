@@ -25,6 +25,7 @@ import io.netty5.handler.codec.http.cookie.DefaultCookie;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
+import reactor.netty5.ChannelOperationsId;
 import reactor.netty5.Connection;
 import reactor.netty5.NettyInbound;
 import reactor.netty5.http.client.HttpClientResponse;
@@ -82,7 +83,10 @@ class ReactorNetty2ClientHttpResponse implements ClientHttpResponse {
 
 	@Override
 	public String getId() {
-		String id = ChannelOperationsIdHelper.getId(this.response);
+		String id = null;
+		if (this.response instanceof ChannelOperationsId operationsId) {
+			id = (logger.isDebugEnabled() ? operationsId.asLongText() : operationsId.asShortText());
+		}
 		if (id == null && this.response instanceof Connection connection) {
 			id = connection.channel().id().asShortText();
 		}
@@ -174,18 +178,6 @@ class ReactorNetty2ClientHttpResponse implements ClientHttpResponse {
 		return "ReactorNetty2ClientHttpResponse{" +
 				"request=[" + this.response.method().name() + " " + this.response.uri() + "]," +
 				"status=" + getRawStatusCode() + '}';
-	}
-
-
-	private static class ChannelOperationsIdHelper {
-
-		@Nullable
-		public static String getId(HttpClientResponse response) {
-			if (response instanceof reactor.netty5.ChannelOperationsId id) {
-				return (logger.isDebugEnabled() ? id.asLongText() : id.asShortText());
-			}
-			return null;
-		}
 	}
 
 }

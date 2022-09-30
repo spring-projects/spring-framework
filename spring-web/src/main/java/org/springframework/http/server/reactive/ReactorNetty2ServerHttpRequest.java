@@ -29,6 +29,7 @@ import io.netty5.handler.codec.http.cookie.Cookie;
 import io.netty5.handler.ssl.SslHandler;
 import org.apache.commons.logging.Log;
 import reactor.core.publisher.Flux;
+import reactor.netty5.ChannelOperationsId;
 import reactor.netty5.Connection;
 import reactor.netty5.http.server.HttpServerRequest;
 
@@ -208,7 +209,10 @@ class ReactorNetty2ServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	protected String initLogPrefix() {
-		String id = (ChannelOperationsIdHelper.getId(this.request));
+		String id = null;
+		if (this.request instanceof ChannelOperationsId operationsId) {
+			id = (logger.isDebugEnabled() ? operationsId.asLongText() : operationsId.asShortText());
+		}
 		if (id != null) {
 			return id;
 		}
@@ -217,20 +221,6 @@ class ReactorNetty2ServerHttpRequest extends AbstractServerHttpRequest {
 					"-" + logPrefixIndex.incrementAndGet();
 		}
 		return getId();
-	}
-
-
-	private static class ChannelOperationsIdHelper {
-
-		@Nullable
-		public static String getId(HttpServerRequest request) {
-			if (request instanceof reactor.netty.ChannelOperationsId) {
-				return (logger.isDebugEnabled() ?
-						((reactor.netty.ChannelOperationsId) request).asLongText() :
-						((reactor.netty.ChannelOperationsId) request).asShortText());
-			}
-			return null;
-		}
 	}
 
 }
