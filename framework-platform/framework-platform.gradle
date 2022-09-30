@@ -41,7 +41,7 @@ dependencies {
 		api("com.sun.xml.bind:jaxb-core:3.0.2")
 		api("com.sun.xml.bind:jaxb-impl:3.0.2")
 		api("com.sun.xml.bind:jaxb-xjc:3.0.2")
-		api("com.thoughtworks.qdox:qdox:2.0.1")
+		api("com.thoughtworks.qdox:qdox:2.0.2")
 		api("com.thoughtworks.xstream:xstream:1.4.19")
 		api("commons-io:commons-io:2.11.0")
 		api("de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1")
