@@ -340,7 +340,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 	/**
 	 * Configure an {@link ObservationRegistry} for collecting spans and metrics
-	 * for request execution. By default, {@link Observation} are No-Ops.
+	 * for request execution. By default, {@link Observation observations} are no-ops.
 	 * @param observationRegistry the observation registry to use
 	 * @since 6.0
 	 */
@@ -830,6 +830,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * @param requestCallback object that prepares the request (can be {@code null})
 	 * @param responseExtractor object that extracts the return value from the response (can be {@code null})
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
+	 * @since 6.0
 	 */
 	@Nullable
 	@SuppressWarnings("try")

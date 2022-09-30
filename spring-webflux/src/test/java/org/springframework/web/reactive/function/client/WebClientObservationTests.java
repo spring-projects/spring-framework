@@ -39,19 +39,19 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * Tests for the {@link WebClient} {@link io.micrometer.observation.Observation observations}.
  * @author Brian Clozel
  */
-public class DefaultClientObservationTests {
+class WebClientObservationTests {
 
 
 	private final TestObservationRegistry observationRegistry = TestObservationRegistry.create();
 
-	private ExchangeFunction exchangeFunction = mock(ExchangeFunction.class);
+	private final ExchangeFunction exchangeFunction = mock(ExchangeFunction.class);
 
-	private ArgumentCaptor<ClientRequest> request = ArgumentCaptor.forClass(ClientRequest.class);
+	private final ArgumentCaptor<ClientRequest> request = ArgumentCaptor.forClass(ClientRequest.class);
 
 	private WebClient.Builder builder;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		ClientResponse mockResponse = mock(ClientResponse.class);
 		when(mockResponse.statusCode()).thenReturn(HttpStatus.OK);
 		when(mockResponse.bodyToMono(Void.class)).thenReturn(Mono.empty());

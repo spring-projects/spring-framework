@@ -85,7 +85,7 @@ class HttpRequestsObservationWebFilterTests {
 		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "UNKNOWN");
 	}
 
-	WebFilterChain createFilterChain(ThrowingConsumer<ServerWebExchange> exchangeConsumer) {
+	private WebFilterChain createFilterChain(ThrowingConsumer<ServerWebExchange> exchangeConsumer) {
 		return filterExchange -> {
 			try {
 				exchangeConsumer.accept(filterExchange);

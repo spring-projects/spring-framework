@@ -26,7 +26,7 @@ import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
-import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationConvention;
 import io.micrometer.observation.ObservationRegistry;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -346,7 +346,7 @@ public interface WebClient {
 		Builder observationRegistry(ObservationRegistry observationRegistry);
 
 		/**
-		 * Provide a {@link Observation.ObservationConvention} to use for collecting
+		 * Provide an {@link ObservationConvention} to use for collecting
 		 * metadata for the current observation. Will use {@link DefaultClientObservationConvention}
 		 * if none provided.
 		 * @param observationConvention the observation convention to use

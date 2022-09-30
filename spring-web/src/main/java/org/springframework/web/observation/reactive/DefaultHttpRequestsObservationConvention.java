@@ -21,6 +21,7 @@ import io.micrometer.common.KeyValues;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.observation.HttpOutcome;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.pattern.PathPattern;
 
 /**
@@ -92,6 +93,9 @@ public class DefaultHttpRequestsObservationConvention implements HttpRequestsObs
 	}
 
 	protected KeyValue status(HttpRequestsObservationContext context) {
+		if (context.isConnectionAborted()) {
+			return STATUS_UNKNOWN;
+		}
 		return (context.getResponse() != null) ? KeyValue.of(HttpRequestsObservation.LowCardinalityKeyNames.STATUS, Integer.toString(context.getResponse().getStatusCode().value())) : STATUS_UNKNOWN;
 	}
 
@@ -120,16 +124,19 @@ public class DefaultHttpRequestsObservationConvention implements HttpRequestsObs
 	}
 
 	protected KeyValue exception(HttpRequestsObservationContext context) {
-		return context.getError().map(throwable ->
-						KeyValue.of(HttpRequestsObservation.LowCardinalityKeyNames.EXCEPTION, throwable.getClass().getSimpleName()))
-				.orElse(EXCEPTION_NONE);
+		return context.getError().map(throwable -> {
+			String simpleName = throwable.getClass().getSimpleName();
+			return KeyValue.of(HttpRequestsObservation.LowCardinalityKeyNames.EXCEPTION,
+					StringUtils.hasText(simpleName) ? simpleName : throwable.getClass().getName());
+		})
+		.orElse(EXCEPTION_NONE);
 	}
 
 	protected KeyValue outcome(HttpRequestsObservationContext context) {
 		if (context.isConnectionAborted()) {
 			return HttpOutcome.UNKNOWN.asKeyValue();
 		}
-		else if (context.getResponse() != null) {
+		if (context.getResponse() != null) {
 			HttpOutcome httpOutcome = HttpOutcome.forStatus(context.getResponse().getStatusCode());
 			return httpOutcome.asKeyValue();
 		}

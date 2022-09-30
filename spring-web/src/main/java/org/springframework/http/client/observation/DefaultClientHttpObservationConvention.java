@@ -23,7 +23,6 @@ import io.micrometer.common.KeyValues;
 
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.observation.HttpOutcome;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -41,9 +40,15 @@ public class DefaultClientHttpObservationConvention implements ClientHttpObserva
 
 	private static final KeyValue METHOD_NONE = KeyValue.of(ClientHttpObservation.LowCardinalityKeyNames.METHOD, "none");
 
+	private static final KeyValue STATUS_IO_ERROR = KeyValue.of(ClientHttpObservation.LowCardinalityKeyNames.STATUS, "IO_ERROR");
+
+	private static final KeyValue STATUS_CLIENT_ERROR = KeyValue.of(ClientHttpObservation.LowCardinalityKeyNames.STATUS, "CLIENT_ERROR");
+
 	private static final KeyValue EXCEPTION_NONE = KeyValue.of(ClientHttpObservation.LowCardinalityKeyNames.EXCEPTION, "none");
 
 	private static final KeyValue URI_EXPANDED_NONE = KeyValue.of(ClientHttpObservation.HighCardinalityKeyNames.URI_EXPANDED, "none");
+
+	private static final KeyValue CLIENT_NAME_NONE = KeyValue.of(ClientHttpObservation.HighCardinalityKeyNames.CLIENT_NAME, "none");
 
 	private final String name;
 
@@ -94,18 +99,15 @@ public class DefaultClientHttpObservationConvention implements ClientHttpObserva
 	}
 
 	protected KeyValue status(ClientHttpObservationContext context) {
-		return KeyValue.of(ClientHttpObservation.LowCardinalityKeyNames.STATUS, getStatusMessage(context.getResponse()));
-	}
-
-	private String getStatusMessage(@Nullable ClientHttpResponse response) {
+		ClientHttpResponse response = context.getResponse();
+		if (response == null) {
+			return STATUS_CLIENT_ERROR;
+		}
 		try {
-			if (response == null) {
-				return "CLIENT_ERROR";
-			}
-			return String.valueOf(response.getStatusCode().value());
+			return KeyValue.of(ClientHttpObservation.LowCardinalityKeyNames.STATUS, String.valueOf(response.getStatusCode().value()));
 		}
 		catch (IOException ex) {
-			return "IO_ERROR";
+			return STATUS_IO_ERROR;
 		}
 	}
 
@@ -118,14 +120,14 @@ public class DefaultClientHttpObservationConvention implements ClientHttpObserva
 	}
 
 	protected static KeyValue outcome(ClientHttpObservationContext context) {
-		try {
-			if (context.getResponse() != null) {
+		if (context.getResponse() != null) {
+			try {
 				HttpOutcome httpOutcome = HttpOutcome.forStatus(context.getResponse().getStatusCode());
 				return httpOutcome.asKeyValue();
 			}
-		}
-		catch (IOException ex) {
-			// Continue
+			catch (IOException ex) {
+				// Continue
+			}
 		}
 		return HttpOutcome.UNKNOWN.asKeyValue();
 	}
@@ -143,11 +145,10 @@ public class DefaultClientHttpObservationConvention implements ClientHttpObserva
 	}
 
 	protected KeyValue clientName(ClientHttpObservationContext context) {
-		String host = "none";
 		if (context.getCarrier() != null && context.getCarrier().getURI().getHost() != null) {
-			host = context.getCarrier().getURI().getHost();
+			return KeyValue.of(ClientHttpObservation.HighCardinalityKeyNames.CLIENT_NAME, context.getCarrier().getURI().getHost());
 		}
-		return KeyValue.of(ClientHttpObservation.HighCardinalityKeyNames.CLIENT_NAME, host);
+		return CLIENT_NAME_NONE;
 	}
 
 }

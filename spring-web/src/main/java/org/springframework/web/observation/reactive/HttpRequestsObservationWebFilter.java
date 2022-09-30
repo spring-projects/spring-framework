@@ -60,17 +60,17 @@ public class HttpRequestsObservationWebFilter implements WebFilter {
 	private final HttpRequestsObservationConvention observationConvention;
 
 	/**
-	 * Create a {@code HttpRequestsObservationWebFilter} that records observations
+	 * Create an {@code HttpRequestsObservationWebFilter} that records observations
 	 * against the given {@link ObservationRegistry}. The default
 	 * {@link DefaultHttpRequestsObservationConvention convention} will be used.
 	 * @param observationRegistry the registry to use for recording observations
 	 */
 	public HttpRequestsObservationWebFilter(ObservationRegistry observationRegistry) {
-		this(observationRegistry, new DefaultHttpRequestsObservationConvention());
+		this(observationRegistry, DEFAULT_OBSERVATION_CONVENTION);
 	}
 
 	/**
-	 * Create a {@code HttpRequestsObservationWebFilter} that records observations
+	 * Create an {@code HttpRequestsObservationWebFilter} that records observations
 	 * against the given {@link ObservationRegistry} with a custom convention.
 	 * @param observationRegistry the registry to use for recording observations
 	 * @param observationConvention the convention to use for all recorded observations

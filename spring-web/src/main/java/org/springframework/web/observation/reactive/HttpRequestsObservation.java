@@ -23,7 +23,7 @@ import io.micrometer.observation.docs.DocumentedObservation;
 
 /**
  * Documented {@link io.micrometer.common.KeyValue KeyValues} for the HTTP server observations
- * for Servlet-based web applications.
+ * for reactive web applications.
  * <p>This class is used by automated tools to document KeyValues attached to the HTTP server observations.
  * @author Brian Clozel
  * @since 6.0
@@ -54,7 +54,7 @@ public enum HttpRequestsObservation implements DocumentedObservation {
 	public enum LowCardinalityKeyNames implements KeyName {
 
 		/**
-		 * Name of HTTP request method or {@code "None"} if the request was not received properly.
+		 * Name of HTTP request method or {@code "none"} if the request was not received properly.
 		 */
 		METHOD {
 			@Override
@@ -65,7 +65,7 @@ public enum HttpRequestsObservation implements DocumentedObservation {
 		},
 
 		/**
-		 * HTTP response raw status code, or {@code "STATUS_UNKNOWN"} if no response was created.
+		 * HTTP response raw status code, or {@code "UNKNOWN"} if no response was created.
 		 */
 		STATUS {
 			@Override
@@ -87,7 +87,7 @@ public enum HttpRequestsObservation implements DocumentedObservation {
 		},
 
 		/**
-		 * Name of the exception thrown during the exchange, or {@code "None"} if no exception happened.
+		 * Name of the exception thrown during the exchange, or {@code "none"} if no exception happened.
 		 */
 		EXCEPTION {
 			@Override

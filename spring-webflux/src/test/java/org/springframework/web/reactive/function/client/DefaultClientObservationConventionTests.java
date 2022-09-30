@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class DefaultClientObservationConventionTests {
 
-	private DefaultClientObservationConvention observationConvention = new DefaultClientObservationConvention();
+	private final DefaultClientObservationConvention observationConvention = new DefaultClientObservationConvention();
 
 	@Test
 	void shouldHaveName() {

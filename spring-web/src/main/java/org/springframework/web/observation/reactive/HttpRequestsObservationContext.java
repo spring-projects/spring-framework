@@ -40,8 +40,8 @@ public class HttpRequestsObservationContext extends RequestReplyReceiverContext<
 
 	public HttpRequestsObservationContext(ServerWebExchange exchange) {
 		super((request, key) -> request.getHeaders().getFirst(key));
-		this.setCarrier(exchange.getRequest());
-		this.setResponse(exchange.getResponse());
+		setCarrier(exchange.getRequest());
+		setResponse(exchange.getResponse());
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class HttpRequestsObservationContext extends RequestReplyReceiverContext<
 
 	/**
 	 * Whether the current connection was aborted by the client, resulting
-	 * in a {@link reactor.core.publisher.SignalType#CANCEL cancel signal} on te reactive chain,
+	 * in a {@link reactor.core.publisher.SignalType#CANCEL cancel signal} on the reactive chain,
 	 * or an {@code AbortedException} when reading the request.
 	 * @return if the connection has been aborted
 	 */

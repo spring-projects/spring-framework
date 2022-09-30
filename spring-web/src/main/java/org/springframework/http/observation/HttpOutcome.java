@@ -22,12 +22,12 @@ import org.springframework.http.HttpStatusCode;
 
 /**
  * The outcome of an HTTP request.
- * <p>Used as the {@code "outcome} {@link io.micrometer.common.KeyValue}
+ * <p>Used as the {@code "outcome"} {@link io.micrometer.common.KeyValue}
  * for HTTP {@link io.micrometer.observation.Observation observations}.
  *
  * @author Brian Clozel
  * @author Andy Wilkinson
- * @since 6.0.0
+ * @since 6.0
  */
 public enum HttpOutcome {
 

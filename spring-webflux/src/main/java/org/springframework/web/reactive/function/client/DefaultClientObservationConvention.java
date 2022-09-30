@@ -22,6 +22,7 @@ import io.micrometer.common.KeyValue;
 import io.micrometer.common.KeyValues;
 import io.micrometer.observation.ObservationConvention;
 
+import org.springframework.http.client.observation.ClientHttpObservation;
 import org.springframework.http.observation.HttpOutcome;
 import org.springframework.util.StringUtils;
 
@@ -40,8 +41,15 @@ public class DefaultClientObservationConvention implements ClientObservationConv
 
 	private static final KeyValue METHOD_NONE = KeyValue.of(ClientObservation.LowCardinalityKeyNames.METHOD, "none");
 
+	private static final KeyValue STATUS_IO_ERROR = KeyValue.of(ClientHttpObservation.LowCardinalityKeyNames.STATUS, "IO_ERROR");
+
+	private static final KeyValue STATUS_CLIENT_ERROR = KeyValue.of(ClientHttpObservation.LowCardinalityKeyNames.STATUS, "CLIENT_ERROR");
+
 	private static final KeyValue EXCEPTION_NONE = KeyValue.of(ClientObservation.LowCardinalityKeyNames.EXCEPTION, "none");
 
+	private static final KeyValue URI_EXPANDED_NONE = KeyValue.of(ClientHttpObservation.HighCardinalityKeyNames.URI_EXPANDED, "none");
+
+	private static final KeyValue CLIENT_NAME_NONE = KeyValue.of(ClientHttpObservation.HighCardinalityKeyNames.CLIENT_NAME, "none");
 
 	private final String name;
 
@@ -93,17 +101,17 @@ public class DefaultClientObservationConvention implements ClientObservationConv
 	}
 
 	protected KeyValue status(ClientObservationContext context) {
-		return KeyValue.of(ClientObservation.LowCardinalityKeyNames.STATUS, getStatusMessage(context));
-	}
-
-	private String getStatusMessage(ClientObservationContext context) {
-		if (context.getResponse() != null) {
-			return String.valueOf(context.getResponse().statusCode().value());
+		if (context.isAborted()) {
+			return STATUS_CLIENT_ERROR;
 		}
-		if (context.getError().isPresent()) {
-			return (context.getError().get() instanceof IOException) ? "IO_ERROR" : "CLIENT_ERROR";
+		ClientResponse response = context.getResponse();
+		if (response != null) {
+			return KeyValue.of(ClientObservation.LowCardinalityKeyNames.STATUS, String.valueOf(response.statusCode().value()));
 		}
-		return "CLIENT_ERROR";
+		if (context.getError().isPresent() && context.getError().get() instanceof IOException) {
+			return STATUS_IO_ERROR;
+		}
+		return STATUS_CLIENT_ERROR;
 	}
 
 	protected KeyValue exception(ClientObservationContext context) {
@@ -114,11 +122,11 @@ public class DefaultClientObservationConvention implements ClientObservationConv
 		}).orElse(EXCEPTION_NONE);
 	}
 
-	protected static KeyValue outcome(ClientObservationContext context) {
+	protected KeyValue outcome(ClientObservationContext context) {
 		if (context.isAborted()) {
 			return HttpOutcome.UNKNOWN.asKeyValue();
 		}
-		else if (context.getResponse() != null) {
+		if (context.getResponse() != null) {
 			HttpOutcome httpOutcome = HttpOutcome.forStatus(context.getResponse().statusCode());
 			return httpOutcome.asKeyValue();
 		}
@@ -134,15 +142,14 @@ public class DefaultClientObservationConvention implements ClientObservationConv
 		if (context.getCarrier() != null) {
 			return KeyValue.of(ClientObservation.HighCardinalityKeyNames.URI_EXPANDED, context.getCarrier().url().toASCIIString());
 		}
-		return KeyValue.of(ClientObservation.HighCardinalityKeyNames.URI_EXPANDED, "none");
+		return URI_EXPANDED_NONE;
 	}
 
 	protected KeyValue clientName(ClientObservationContext context) {
-		String host = "none";
 		if (context.getCarrier() != null && context.getCarrier().url().getHost() != null) {
-			host = context.getCarrier().url().getHost();
+			return KeyValue.of(ClientObservation.HighCardinalityKeyNames.CLIENT_NAME, context.getCarrier().url().getHost());
 		}
-		return KeyValue.of(ClientObservation.HighCardinalityKeyNames.CLIENT_NAME, host);
+		return CLIENT_NAME_NONE;
 	}
 
 }

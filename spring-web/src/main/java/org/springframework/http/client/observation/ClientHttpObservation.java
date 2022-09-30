@@ -56,7 +56,7 @@ public enum ClientHttpObservation implements DocumentedObservation {
 	public enum LowCardinalityKeyNames implements KeyName {
 
 		/**
-		 * Name of HTTP request method or {@code "None"} if the request could not be created.
+		 * Name of HTTP request method or {@code "none"} if the request could not be created.
 		 */
 		METHOD {
 			@Override
@@ -67,7 +67,7 @@ public enum ClientHttpObservation implements DocumentedObservation {
 		},
 
 		/**
-		 * URI template used for HTTP request, or {@code ""} if none was provided.
+		 * URI template used for HTTP request, or {@code "none"} if none was provided.
 		 */
 		URI {
 			@Override
@@ -88,7 +88,7 @@ public enum ClientHttpObservation implements DocumentedObservation {
 		},
 
 		/**
-		 * Name of the exception thrown during the exchange, or {@code "None"} if no exception happened.
+		 * Name of the exception thrown during the exchange, or {@code "none"} if no exception happened.
 		 */
 		EXCEPTION {
 			@Override

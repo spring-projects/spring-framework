@@ -37,7 +37,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * for HTTP exchanges. This collects information about the execution time and
  * information gathered from the {@link HttpRequestsObservationContext}.
  * <p>Web Frameworks can fetch the current {@link HttpRequestsObservationContext context}
- * as a {@link #CURRENT_OBSERVATION_ATTRIBUTE request attribute} and contribute
+ * as a {@link #CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE request attribute} and contribute
  * additional information to it.
  * The configured {@link HttpRequestsObservationConvention} will use this context to collect
  * {@link io.micrometer.common.KeyValue metadata} and attach it to the observation.
@@ -61,17 +61,17 @@ public class HttpRequestsObservationFilter extends OncePerRequestFilter {
 	private final HttpRequestsObservationConvention observationConvention;
 
 	/**
-	 * Create a {@code HttpRequestsObservationFilter} that records observations
+	 * Create an {@code HttpRequestsObservationFilter} that records observations
 	 * against the given {@link ObservationRegistry}. The default
 	 * {@link DefaultHttpRequestsObservationConvention convention} will be used.
 	 * @param observationRegistry the registry to use for recording observations
 	 */
 	public HttpRequestsObservationFilter(ObservationRegistry observationRegistry) {
-		this(observationRegistry, new DefaultHttpRequestsObservationConvention());
+		this(observationRegistry, DEFAULT_OBSERVATION_CONVENTION);
 	}
 
 	/**
-	 * Create a {@code HttpRequestsObservationFilter} that records observations
+	 * Create an {@code HttpRequestsObservationFilter} that records observations
 	 * against the given {@link ObservationRegistry} with a custom convention.
 	 * @param observationRegistry the registry to use for recording observations
 	 * @param observationConvention the convention to use for all recorded observations

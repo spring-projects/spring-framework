@@ -36,8 +36,8 @@ public class HttpRequestsObservationContext extends RequestReplyReceiverContext<
 
 	public HttpRequestsObservationContext(HttpServletRequest request, HttpServletResponse response) {
 		super(HttpServletRequest::getHeader);
-		this.setCarrier(request);
-		this.setResponse(response);
+		setCarrier(request);
+		setResponse(response);
 	}
 
 	@Nullable
