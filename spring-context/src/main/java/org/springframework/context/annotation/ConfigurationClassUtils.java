@@ -90,36 +90,9 @@ abstract class ConfigurationClassUtils {
 			return false;
 		}
 
-		AnnotationMetadata metadata;
-		if (beanDef instanceof AnnotatedBeanDefinition &&
-				className.equals(((AnnotatedBeanDefinition) beanDef).getMetadata().getClassName())) {
-			// Can reuse the pre-parsed metadata from the given BeanDefinition...
-			metadata = ((AnnotatedBeanDefinition) beanDef).getMetadata();
-		}
-		else if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) beanDef).hasBeanClass()) {
-			// Check already loaded Class if present...
-			// since we possibly can't even load the class file for this Class.
-			Class<?> beanClass = ((AbstractBeanDefinition) beanDef).getBeanClass();
-			if (BeanFactoryPostProcessor.class.isAssignableFrom(beanClass) ||
-					BeanPostProcessor.class.isAssignableFrom(beanClass) ||
-					AopInfrastructureBean.class.isAssignableFrom(beanClass) ||
-					EventListenerFactory.class.isAssignableFrom(beanClass)) {
-				return false;
-			}
-			metadata = AnnotationMetadata.introspect(beanClass);
-		}
-		else {
-			try {
-				MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(className);
-				metadata = metadataReader.getAnnotationMetadata();
-			}
-			catch (IOException ex) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Could not find class file for introspecting configuration annotations: " +
-							className, ex);
-				}
-				return false;
-			}
+		AnnotationMetadata metadata = resolveAnnotationMetadata(beanDef, metadataReaderFactory, className);
+		if (metadata == null) {
+			return false;
 		}
 
 		Map<String, Object> config = metadata.getAnnotationAttributes(Configuration.class.getName());
@@ -140,6 +113,42 @@ abstract class ConfigurationClassUtils {
 		}
 
 		return true;
+	}
+
+	@Nullable
+	private static AnnotationMetadata resolveAnnotationMetadata(BeanDefinition beanDef, MetadataReaderFactory metadataReaderFactory, String className) {
+		AnnotationMetadata metadata;
+		if (beanDef instanceof AnnotatedBeanDefinition annotatedBeanDefinition &&
+				className.equals(annotatedBeanDefinition.getMetadata().getClassName())) {
+			// Can reuse the pre-parsed metadata from the given BeanDefinition...
+			metadata = ((AnnotatedBeanDefinition) beanDef).getMetadata();
+		}
+		else if (beanDef instanceof AbstractBeanDefinition abstractBeanDefinition && abstractBeanDefinition.hasBeanClass()) {
+			// Check already loaded Class if present...
+			// since we possibly can't even load the class file for this Class.
+			Class<?> beanClass = ((AbstractBeanDefinition) beanDef).getBeanClass();
+			if (BeanFactoryPostProcessor.class.isAssignableFrom(beanClass) ||
+					BeanPostProcessor.class.isAssignableFrom(beanClass) ||
+					AopInfrastructureBean.class.isAssignableFrom(beanClass) ||
+					EventListenerFactory.class.isAssignableFrom(beanClass)) {
+				return null;
+			}
+			metadata = AnnotationMetadata.introspect(beanClass);
+		}
+		else {
+			try {
+				MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(className);
+				metadata = metadataReader.getAnnotationMetadata();
+			}
+			catch (IOException ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Could not find class file for introspecting configuration annotations: " +
+							className, ex);
+				}
+				return null;
+			}
+		}
+		return metadata;
 	}
 
 	/**

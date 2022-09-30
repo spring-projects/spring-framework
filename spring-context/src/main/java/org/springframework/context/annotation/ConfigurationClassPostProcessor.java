@@ -344,18 +344,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		});
 
 		// Detect any custom bean name generation strategy supplied through the enclosing application context
-		SingletonBeanRegistry sbr = null;
-		if (registry instanceof SingletonBeanRegistry) {
-			sbr = (SingletonBeanRegistry) registry;
-			if (!this.localBeanNameGeneratorSet) {
-				BeanNameGenerator generator = (BeanNameGenerator) sbr.getSingleton(
-						AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR);
-				if (generator != null) {
-					this.componentScanBeanNameGenerator = generator;
-					this.importBeanNameGenerator = generator;
-				}
-			}
-		}
+		SingletonBeanRegistry sbr = detectCustomBeanNameGenerationStrategy(registry);
 
 		if (this.environment == null) {
 			this.environment = new StandardEnvironment();
@@ -423,6 +412,23 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 	}
 
+	@org.jetbrains.annotations.Nullable
+	private SingletonBeanRegistry detectCustomBeanNameGenerationStrategy(BeanDefinitionRegistry registry) {
+		SingletonBeanRegistry sbr = null;
+		if (registry instanceof SingletonBeanRegistry singletonBeanRegistry) {
+			sbr = singletonBeanRegistry;
+			if (!this.localBeanNameGeneratorSet) {
+				BeanNameGenerator generator = (BeanNameGenerator) sbr.getSingleton(
+						AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR);
+				if (generator != null) {
+					this.componentScanBeanNameGenerator = generator;
+					this.importBeanNameGenerator = generator;
+				}
+			}
+		}
+		return sbr;
+	}
+
 	/**
 	 * Post-processes a BeanFactory in search of Configuration class BeanDefinitions;
 	 * any candidates are then enhanced by a {@link ConfigurationClassEnhancer}.
@@ -480,6 +486,11 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		ConfigurationClassEnhancer enhancer = new ConfigurationClassEnhancer();
+		enhanceConfigBeanDefinitions(configBeanDefs, enhancer);
+		enhanceConfigClasses.tag("classCount", () -> String.valueOf(configBeanDefs.keySet().size())).end();
+	}
+
+	private void enhanceConfigBeanDefinitions(Map<String, AbstractBeanDefinition> configBeanDefs, ConfigurationClassEnhancer enhancer) {
 		for (Map.Entry<String, AbstractBeanDefinition> entry : configBeanDefs.entrySet()) {
 			AbstractBeanDefinition beanDef = entry.getValue();
 			// If a @Configuration class gets proxied, always proxy the target class
@@ -495,7 +506,6 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				beanDef.setBeanClass(enhancedClass);
 			}
 		}
-		enhanceConfigClasses.tag("classCount", () -> String.valueOf(configBeanDefs.keySet().size())).end();
 	}
 
 

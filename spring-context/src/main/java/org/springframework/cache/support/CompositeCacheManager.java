@@ -19,10 +19,9 @@ package org.springframework.cache.support;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.Cache;
@@ -101,22 +100,19 @@ public class CompositeCacheManager implements CacheManager, InitializingBean {
 	@Override
 	@Nullable
 	public Cache getCache(String name) {
-		for (CacheManager cacheManager : this.cacheManagers) {
-			Cache cache = cacheManager.getCache(name);
-			if (cache != null) {
-				return cache;
-			}
-		}
-		return null;
+		return this.cacheManagers.stream()
+				.map(manager -> manager.getCache(name))
+				.filter(Objects::nonNull)
+				.findFirst()
+				.orElse(null);
 	}
 
 	@Override
 	public Collection<String> getCacheNames() {
-		Set<String> names = new LinkedHashSet<>();
-		for (CacheManager manager : this.cacheManagers) {
-			names.addAll(manager.getCacheNames());
-		}
-		return Collections.unmodifiableSet(names);
+		return this.cacheManagers.stream()
+				.map(CacheManager::getCacheNames)
+				.flatMap(Collection::stream)
+				.collect(Collectors.toUnmodifiableSet());
 	}
 
 }

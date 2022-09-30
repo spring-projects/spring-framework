@@ -72,9 +72,7 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 			Method method = methodParam.getMethod();
 			if (method == null || void.class == method.getReturnType()) {
 				Lazy lazy = AnnotationUtils.getAnnotation(methodParam.getAnnotatedElement(), Lazy.class);
-				if (lazy != null && lazy.value()) {
-					return true;
-				}
+				return lazy != null && lazy.value();
 			}
 		}
 		return false;

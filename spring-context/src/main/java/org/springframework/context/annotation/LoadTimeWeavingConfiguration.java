@@ -91,6 +91,12 @@ public class LoadTimeWeavingConfiguration implements ImportAware, BeanClassLoade
 			loadTimeWeaver = new DefaultContextLoadTimeWeaver(this.beanClassLoader);
 		}
 
+		enableAspectJWeavingByEnum(loadTimeWeaver);
+
+		return loadTimeWeaver;
+	}
+
+	private void enableAspectJWeavingByEnum(LoadTimeWeaver loadTimeWeaver) {
 		if (this.enableLTW != null) {
 			AspectJWeaving aspectJWeaving = this.enableLTW.getEnum("aspectjWeaving");
 			switch (aspectJWeaving) {
@@ -110,8 +116,6 @@ public class LoadTimeWeavingConfiguration implements ImportAware, BeanClassLoade
 					break;
 			}
 		}
-
-		return loadTimeWeaver;
 	}
 
 }

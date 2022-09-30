@@ -19,7 +19,10 @@ package org.springframework.cache.interceptor;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -58,28 +61,18 @@ public class CompositeCacheOperationSource implements CacheOperationSource, Seri
 
 	@Override
 	public boolean isCandidateClass(Class<?> targetClass) {
-		for (CacheOperationSource source : this.cacheOperationSources) {
-			if (source.isCandidateClass(targetClass)) {
-				return true;
-			}
-		}
-		return false;
+		return Arrays.stream(this.cacheOperationSources)
+				.anyMatch(source -> source.isCandidateClass(targetClass));
 	}
 
 	@Override
 	@Nullable
 	public Collection<CacheOperation> getCacheOperations(Method method, @Nullable Class<?> targetClass) {
-		Collection<CacheOperation> ops = null;
-		for (CacheOperationSource source : this.cacheOperationSources) {
-			Collection<CacheOperation> cacheOperations = source.getCacheOperations(method, targetClass);
-			if (cacheOperations != null) {
-				if (ops == null) {
-					ops = new ArrayList<>();
-				}
-				ops.addAll(cacheOperations);
-			}
-		}
-		return ops;
+		return Arrays.stream(this.cacheOperationSources)
+				.map(source -> source.getCacheOperations(method, targetClass))
+				.filter(Objects::nonNull)
+				.flatMap(Collection::stream)
+				.collect(Collectors.toCollection(ArrayList::new));
 	}
 
 }

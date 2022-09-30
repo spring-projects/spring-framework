@@ -275,35 +275,44 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	 * @return the resolved metadata for the operation
 	 */
 	protected CacheOperationMetadata getCacheOperationMetadata(
-			CacheOperation operation, Method method, Class<?> targetClass) {
-
+			CacheOperation operation,
+			Method method,
+			Class<?> targetClass
+	) {
 		CacheOperationCacheKey cacheKey = new CacheOperationCacheKey(operation, method, targetClass);
-		CacheOperationMetadata metadata = this.metadataCache.get(cacheKey);
-		if (metadata == null) {
-			KeyGenerator operationKeyGenerator;
-			if (StringUtils.hasText(operation.getKeyGenerator())) {
-				operationKeyGenerator = getBean(operation.getKeyGenerator(), KeyGenerator.class);
-			}
-			else {
-				operationKeyGenerator = getKeyGenerator();
-			}
-			CacheResolver operationCacheResolver;
-			if (StringUtils.hasText(operation.getCacheResolver())) {
-				operationCacheResolver = getBean(operation.getCacheResolver(), CacheResolver.class);
-			}
-			else if (StringUtils.hasText(operation.getCacheManager())) {
-				CacheManager cacheManager = getBean(operation.getCacheManager(), CacheManager.class);
-				operationCacheResolver = new SimpleCacheResolver(cacheManager);
-			}
-			else {
-				operationCacheResolver = getCacheResolver();
-				Assert.state(operationCacheResolver != null, "No CacheResolver/CacheManager set");
-			}
-			metadata = new CacheOperationMetadata(operation, method, targetClass,
-					operationKeyGenerator, operationCacheResolver);
-			this.metadataCache.put(cacheKey, metadata);
+		return this.metadataCache.computeIfAbsent(cacheKey,
+				k -> createCacheOperationMetadata(operation, method, targetClass));
+	}
+
+	private CacheOperationMetadata createCacheOperationMetadata(
+			CacheOperation operation,
+			Method method,
+			Class<?> targetClass
+	) {
+		KeyGenerator operationKeyGenerator = determineKeyGenerator(operation);
+		CacheResolver operationCacheResolver = determineCacheResolver(operation);
+		return new CacheOperationMetadata(operation, method, targetClass,
+				operationKeyGenerator, operationCacheResolver);
+	}
+
+	private KeyGenerator determineKeyGenerator(CacheOperation operation) {
+		if (StringUtils.hasText(operation.getKeyGenerator())) {
+			return getBean(operation.getKeyGenerator(), KeyGenerator.class);
 		}
-		return metadata;
+		return getKeyGenerator();
+	}
+
+	private CacheResolver determineCacheResolver(CacheOperation operation) {
+		if (StringUtils.hasText(operation.getCacheResolver())) {
+			return getBean(operation.getCacheResolver(), CacheResolver.class);
+		}
+		else if (StringUtils.hasText(operation.getCacheManager())) {
+			CacheManager cacheManager = getBean(operation.getCacheManager(), CacheManager.class);
+			return new SimpleCacheResolver(cacheManager);
+		}
+		var operationCacheResolver = getCacheResolver();
+		Assert.state(operationCacheResolver != null, "No CacheResolver/CacheManager set");
+		return operationCacheResolver;
 	}
 
 	/**
@@ -772,11 +781,11 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		protected boolean canPutToCache(@Nullable Object value) {
 			String unless = "";
-			if (this.metadata.operation instanceof CacheableOperation) {
-				unless = ((CacheableOperation) this.metadata.operation).getUnless();
+			if (this.metadata.operation instanceof CacheableOperation cacheableOperation) {
+				unless = cacheableOperation.getUnless();
 			}
-			else if (this.metadata.operation instanceof CachePutOperation) {
-				unless = ((CachePutOperation) this.metadata.operation).getUnless();
+			else if (this.metadata.operation instanceof CachePutOperation cachePutOperation) {
+				unless = cachePutOperation.getUnless();
 			}
 			if (StringUtils.hasText(unless)) {
 				EvaluationContext evaluationContext = createEvaluationContext(value);

@@ -258,15 +258,7 @@ class ConfigurationClassBeanDefinitionReader {
 		beanDef.setDestroyMethodName(destroyMethodName);
 
 		// Consider scoping
-		ScopedProxyMode proxyMode = ScopedProxyMode.NO;
-		AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(metadata, Scope.class);
-		if (attributes != null) {
-			beanDef.setScope(attributes.getString("value"));
-			proxyMode = attributes.getEnum("proxyMode");
-			if (proxyMode == ScopedProxyMode.DEFAULT) {
-				proxyMode = ScopedProxyMode.NO;
-			}
-		}
+		ScopedProxyMode proxyMode = resolveProxyMode(metadata, beanDef);
 
 		// Replace the original bean definition with the target one, if necessary
 		BeanDefinition beanDefToRegister = beanDef;
@@ -283,6 +275,19 @@ class ConfigurationClassBeanDefinitionReader {
 					configClass.getMetadata().getClassName(), beanName));
 		}
 		this.registry.registerBeanDefinition(beanName, beanDefToRegister);
+	}
+
+	private static ScopedProxyMode resolveProxyMode(MethodMetadata metadata, ConfigurationClassBeanDefinition beanDef) {
+		ScopedProxyMode proxyMode = ScopedProxyMode.NO;
+		AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(metadata, Scope.class);
+		if (attributes != null) {
+			beanDef.setScope(attributes.getString("value"));
+			proxyMode = attributes.getEnum("proxyMode");
+			if (proxyMode == ScopedProxyMode.DEFAULT) {
+				return ScopedProxyMode.NO;
+			}
+		}
+		return proxyMode;
 	}
 
 	protected boolean isOverriddenByExistingDefinition(BeanMethod beanMethod, String beanName) {
@@ -342,41 +347,50 @@ class ConfigurationClassBeanDefinitionReader {
 
 		importedResources.forEach((resource, readerClass) -> {
 			// Default reader selection necessary?
-			if (BeanDefinitionReader.class == readerClass) {
-				if (StringUtils.endsWithIgnoreCase(resource, ".groovy")) {
-					// When clearly asking for Groovy, that's what they'll get...
-					readerClass = GroovyBeanDefinitionReader.class;
-				}
-				else if (shouldIgnoreXml) {
-					throw new UnsupportedOperationException("XML support disabled");
-				}
-				else {
-					// Primarily ".xml" files but for any other extension as well
-					readerClass = XmlBeanDefinitionReader.class;
-				}
-			}
-
-			BeanDefinitionReader reader = readerInstanceCache.get(readerClass);
-			if (reader == null) {
-				try {
-					// Instantiate the specified BeanDefinitionReader
-					reader = readerClass.getConstructor(BeanDefinitionRegistry.class).newInstance(this.registry);
-					// Delegate the current ResourceLoader to it if possible
-					if (reader instanceof AbstractBeanDefinitionReader abdr) {
-						abdr.setResourceLoader(this.resourceLoader);
-						abdr.setEnvironment(this.environment);
-					}
-					readerInstanceCache.put(readerClass, reader);
-				}
-				catch (Throwable ex) {
-					throw new IllegalStateException(
-							"Could not instantiate BeanDefinitionReader class [" + readerClass.getName() + "]");
-				}
-			}
+			readerClass = resolveReaderClass(resource, readerClass);
+			BeanDefinitionReader reader = createReaderInstance(readerInstanceCache, readerClass);
 
 			// TODO SPR-6310: qualify relative path locations as done in AbstractContextLoader.modifyLocations
 			reader.loadBeanDefinitions(resource);
 		});
+	}
+
+	private BeanDefinitionReader createReaderInstance(Map<Class<?>, BeanDefinitionReader> readerInstanceCache, Class<? extends BeanDefinitionReader> readerClass) {
+		BeanDefinitionReader reader = readerInstanceCache.get(readerClass);
+		if (reader == null) {
+			try {
+				// Instantiate the specified BeanDefinitionReader
+				reader = readerClass.getConstructor(BeanDefinitionRegistry.class).newInstance(this.registry);
+				// Delegate the current ResourceLoader to it if possible
+				if (reader instanceof AbstractBeanDefinitionReader abdr) {
+					abdr.setResourceLoader(this.resourceLoader);
+					abdr.setEnvironment(this.environment);
+				}
+				readerInstanceCache.put(readerClass, reader);
+			}
+			catch (Throwable ex) {
+				throw new IllegalStateException(
+						"Could not instantiate BeanDefinitionReader class [" + readerClass.getName() + "]");
+			}
+		}
+		return reader;
+	}
+
+	private static Class<? extends BeanDefinitionReader> resolveReaderClass(String resource, Class<? extends BeanDefinitionReader> readerClass) {
+		if (BeanDefinitionReader.class == readerClass) {
+			if (StringUtils.endsWithIgnoreCase(resource, ".groovy")) {
+				// When clearly asking for Groovy, that's what they'll get...
+				readerClass = GroovyBeanDefinitionReader.class;
+			}
+			else if (shouldIgnoreXml) {
+				throw new UnsupportedOperationException("XML support disabled");
+			}
+			else {
+				// Primarily ".xml" files but for any other extension as well
+				readerClass = XmlBeanDefinitionReader.class;
+			}
+		}
+		return readerClass;
 	}
 
 	private void loadBeanDefinitionsFromRegistrars(Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> registrars) {

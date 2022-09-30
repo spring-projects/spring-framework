@@ -74,6 +74,22 @@ class ComponentScanAnnotationParser {
 		scanner.setBeanNameGenerator(useInheritedGenerator ? this.beanNameGenerator :
 				BeanUtils.instantiateClass(generatorClass));
 
+		scanProxyResolver(componentScan, scanner);
+		scanner.setResourcePattern(componentScan.getString("resourcePattern"));
+		scanFilters(componentScan, scanner);
+		scanLazyInit(componentScan, scanner);
+		Set<String> basePackages = scanBasePackages(componentScan, declaringClass);
+
+		scanner.addExcludeFilter(new AbstractTypeHierarchyTraversingFilter(false, false) {
+			@Override
+			protected boolean matchClassName(String className) {
+				return declaringClass.equals(className);
+			}
+		});
+		return scanner.doScan(StringUtils.toStringArray(basePackages));
+	}
+
+	private static void scanProxyResolver(AnnotationAttributes componentScan, ClassPathBeanDefinitionScanner scanner) {
 		ScopedProxyMode scopedProxyMode = componentScan.getEnum("scopedProxy");
 		if (scopedProxyMode != ScopedProxyMode.DEFAULT) {
 			scanner.setScopedProxyMode(scopedProxyMode);
@@ -82,9 +98,33 @@ class ComponentScanAnnotationParser {
 			Class<? extends ScopeMetadataResolver> resolverClass = componentScan.getClass("scopeResolver");
 			scanner.setScopeMetadataResolver(BeanUtils.instantiateClass(resolverClass));
 		}
+	}
 
-		scanner.setResourcePattern(componentScan.getString("resourcePattern"));
+	private static void scanLazyInit(AnnotationAttributes componentScan, ClassPathBeanDefinitionScanner scanner) {
+		boolean lazyInit = componentScan.getBoolean("lazyInit");
+		if (lazyInit) {
+			scanner.getBeanDefinitionDefaults().setLazyInit(true);
+		}
+	}
 
+	private Set<String> scanBasePackages(AnnotationAttributes componentScan, String declaringClass) {
+		Set<String> basePackages = new LinkedHashSet<>();
+		String[] basePackagesArray = componentScan.getStringArray("basePackages");
+		for (String pkg : basePackagesArray) {
+			String[] tokenized = StringUtils.tokenizeToStringArray(this.environment.resolvePlaceholders(pkg),
+					ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);
+			Collections.addAll(basePackages, tokenized);
+		}
+		for (Class<?> clazz : componentScan.getClassArray("basePackageClasses")) {
+			basePackages.add(ClassUtils.getPackageName(clazz));
+		}
+		if (basePackages.isEmpty()) {
+			basePackages.add(ClassUtils.getPackageName(declaringClass));
+		}
+		return basePackages;
+	}
+
+	private void scanFilters(AnnotationAttributes componentScan, ClassPathBeanDefinitionScanner scanner) {
 		for (AnnotationAttributes includeFilterAttributes : componentScan.getAnnotationArray("includeFilters")) {
 			List<TypeFilter> typeFilters = TypeFilterUtils.createTypeFiltersFor(includeFilterAttributes, this.environment,
 					this.resourceLoader, this.registry);
@@ -99,33 +139,6 @@ class ComponentScanAnnotationParser {
 				scanner.addExcludeFilter(typeFilter);
 			}
 		}
-
-		boolean lazyInit = componentScan.getBoolean("lazyInit");
-		if (lazyInit) {
-			scanner.getBeanDefinitionDefaults().setLazyInit(true);
-		}
-
-		Set<String> basePackages = new LinkedHashSet<>();
-		String[] basePackagesArray = componentScan.getStringArray("basePackages");
-		for (String pkg : basePackagesArray) {
-			String[] tokenized = StringUtils.tokenizeToStringArray(this.environment.resolvePlaceholders(pkg),
-					ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);
-			Collections.addAll(basePackages, tokenized);
-		}
-		for (Class<?> clazz : componentScan.getClassArray("basePackageClasses")) {
-			basePackages.add(ClassUtils.getPackageName(clazz));
-		}
-		if (basePackages.isEmpty()) {
-			basePackages.add(ClassUtils.getPackageName(declaringClass));
-		}
-
-		scanner.addExcludeFilter(new AbstractTypeHierarchyTraversingFilter(false, false) {
-			@Override
-			protected boolean matchClassName(String className) {
-				return declaringClass.equals(className);
-			}
-		});
-		return scanner.doScan(StringUtils.toStringArray(basePackages));
 	}
 
 }

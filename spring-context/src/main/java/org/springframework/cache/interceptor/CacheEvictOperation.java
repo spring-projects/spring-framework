@@ -70,12 +70,11 @@ public class CacheEvictOperation extends CacheOperation {
 
 		@Override
 		protected StringBuilder getOperationDescription() {
-			StringBuilder sb = super.getOperationDescription();
-			sb.append(',');
-			sb.append(this.cacheWide);
-			sb.append(',');
-			sb.append(this.beforeInvocation);
-			return sb;
+			return super.getOperationDescription()
+				.append(',')
+				.append(this.cacheWide)
+				.append(',')
+				.append(this.beforeInvocation);
 		}
 
 		@Override

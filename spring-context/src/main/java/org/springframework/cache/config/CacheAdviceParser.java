@@ -102,23 +102,38 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 		ManagedMap<TypedStringValue, Collection<CacheOperation>> cacheOpMap = new ManagedMap<>();
 		cacheOpMap.setSource(parserContext.extractSource(definition));
 
-		List<Element> cacheableCacheMethods = DomUtils.getChildElementsByTagName(definition, CACHEABLE_ELEMENT);
+		cacheOpMap.putAll(parseCacheableCacheMethods(definition, parserContext, prop));
+		cacheOpMap.putAll(parseEvictCacheMethods(definition, parserContext, prop));
+		cacheOpMap.putAll(parsePutCacheMethods(definition, parserContext, prop));
 
-		for (Element opElement : cacheableCacheMethods) {
+		RootBeanDefinition attributeSourceDefinition = new RootBeanDefinition(NameMatchCacheOperationSource.class);
+		attributeSourceDefinition.setSource(parserContext.extractSource(definition));
+		attributeSourceDefinition.getPropertyValues().add("nameMap", cacheOpMap);
+		return attributeSourceDefinition;
+	}
+
+	private static ManagedMap<TypedStringValue, Collection<CacheOperation>> parsePutCacheMethods(Element definition, ParserContext parserContext, Props prop) {
+		List<Element> putCacheMethods = DomUtils.getChildElementsByTagName(definition, CACHE_PUT_ELEMENT);
+
+		ManagedMap<TypedStringValue, Collection<CacheOperation>> cacheOpMap = new ManagedMap<>();
+		for (Element opElement : putCacheMethods) {
 			String name = prop.merge(opElement, parserContext.getReaderContext());
 			TypedStringValue nameHolder = new TypedStringValue(name);
 			nameHolder.setSource(parserContext.extractSource(opElement));
-			CacheableOperation.Builder builder = prop.merge(opElement,
-					parserContext.getReaderContext(), new CacheableOperation.Builder());
+			CachePutOperation.Builder builder = prop.merge(opElement,
+					parserContext.getReaderContext(), new CachePutOperation.Builder());
 			builder.setUnless(getAttributeValue(opElement, "unless", ""));
-			builder.setSync(Boolean.parseBoolean(getAttributeValue(opElement, "sync", "false")));
 
 			Collection<CacheOperation> col = cacheOpMap.computeIfAbsent(nameHolder, k -> new ArrayList<>(2));
 			col.add(builder.build());
 		}
+		return cacheOpMap;
+	}
 
+	private static ManagedMap<TypedStringValue, Collection<CacheOperation>> parseEvictCacheMethods(Element definition, ParserContext parserContext, Props prop) {
 		List<Element> evictCacheMethods = DomUtils.getChildElementsByTagName(definition, CACHE_EVICT_ELEMENT);
 
+		ManagedMap<TypedStringValue, Collection<CacheOperation>> cacheOpMap = new ManagedMap<>();
 		for (Element opElement : evictCacheMethods) {
 			String name = prop.merge(opElement, parserContext.getReaderContext());
 			TypedStringValue nameHolder = new TypedStringValue(name);
@@ -139,25 +154,26 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			Collection<CacheOperation> col = cacheOpMap.computeIfAbsent(nameHolder, k -> new ArrayList<>(2));
 			col.add(builder.build());
 		}
+		return cacheOpMap;
+	}
 
-		List<Element> putCacheMethods = DomUtils.getChildElementsByTagName(definition, CACHE_PUT_ELEMENT);
+	private static ManagedMap<TypedStringValue, Collection<CacheOperation>> parseCacheableCacheMethods(Element definition, ParserContext parserContext, Props prop) {
+		List<Element> cacheableCacheMethods = DomUtils.getChildElementsByTagName(definition, CACHEABLE_ELEMENT);
 
-		for (Element opElement : putCacheMethods) {
+		ManagedMap<TypedStringValue, Collection<CacheOperation>> cacheOpMap = new ManagedMap<>();
+		for (Element opElement : cacheableCacheMethods) {
 			String name = prop.merge(opElement, parserContext.getReaderContext());
 			TypedStringValue nameHolder = new TypedStringValue(name);
 			nameHolder.setSource(parserContext.extractSource(opElement));
-			CachePutOperation.Builder builder = prop.merge(opElement,
-					parserContext.getReaderContext(), new CachePutOperation.Builder());
+			CacheableOperation.Builder builder = prop.merge(opElement,
+					parserContext.getReaderContext(), new CacheableOperation.Builder());
 			builder.setUnless(getAttributeValue(opElement, "unless", ""));
+			builder.setSync(Boolean.parseBoolean(getAttributeValue(opElement, "sync", "false")));
 
 			Collection<CacheOperation> col = cacheOpMap.computeIfAbsent(nameHolder, k -> new ArrayList<>(2));
 			col.add(builder.build());
 		}
-
-		RootBeanDefinition attributeSourceDefinition = new RootBeanDefinition(NameMatchCacheOperationSource.class);
-		attributeSourceDefinition.setSource(parserContext.extractSource(definition));
-		attributeSourceDefinition.getPropertyValues().add("nameMap", cacheOpMap);
-		return attributeSourceDefinition;
+		return cacheOpMap;
 	}
 
 
