@@ -57,7 +57,7 @@ class HttpOutcomeTests {
 	}
 
 	@ParameterizedTest
-	@ValueSource(ints = {404, 404, 405})
+	@ValueSource(ints = {400, 404, 405})
 	void shouldResolveClientError(int code) {
 		HttpOutcome httpOutcome = HttpOutcome.forStatus(HttpStatusCode.valueOf(code));
 		assertThat(httpOutcome).isEqualTo(HttpOutcome.CLIENT_ERROR);

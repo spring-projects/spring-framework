@@ -64,7 +64,7 @@ public enum ClientObservation implements DocumentedObservation {
 		},
 
 		/**
-		 * URI template used for HTTP request, or {@code ""} if none was provided.
+		 * URI template used for HTTP request, or {@code "none"} if none was provided.
 		 */
 		URI {
 			@Override

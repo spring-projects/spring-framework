@@ -135,7 +135,7 @@ class DefaultHttpRequestsObservationConventionTests {
 		exchange.getResponse().setRawStatusCode(200);
 
 		assertThat(this.convention.getLowCardinalityKeyValues(context)).hasSize(5)
-				.contains(KeyValue.of("method", "GET"), KeyValue.of("uri", "UNKNOWN"), KeyValue.of("status", "200"),
+				.contains(KeyValue.of("method", "GET"), KeyValue.of("uri", "UNKNOWN"), KeyValue.of("status", "UNKNOWN"),
 						KeyValue.of("exception", "none"), KeyValue.of("outcome", "UNKNOWN"));
 		assertThat(this.convention.getHighCardinalityKeyValues(context)).hasSize(1)
 				.contains(KeyValue.of("uri.expanded", "/test/resource"));

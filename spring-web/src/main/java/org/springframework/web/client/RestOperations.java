@@ -653,7 +653,7 @@ public interface RestOperations {
 	 * Execute the HTTP method to the given URI template, preparing the request with the
 	 * {@link RequestCallback}, and reading the response with a {@link ResponseExtractor}.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param url the URL
+	 * @param uriTemplate the URI template
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param requestCallback object that prepares the request
 	 * @param responseExtractor object that extracts the return value from the response
@@ -661,7 +661,7 @@ public interface RestOperations {
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
 	@Nullable
-	<T> T execute(String url, HttpMethod method, @Nullable RequestCallback requestCallback,
+	<T> T execute(String uriTemplate, HttpMethod method, @Nullable RequestCallback requestCallback,
 			@Nullable ResponseExtractor<T> responseExtractor, Object... uriVariables)
 			throws RestClientException;
 
@@ -669,7 +669,7 @@ public interface RestOperations {
 	 * Execute the HTTP method to the given URI template, preparing the request with the
 	 * {@link RequestCallback}, and reading the response with a {@link ResponseExtractor}.
 	 * <p>URI Template variables are expanded using the given URI variables map.
-	 * @param url the URL
+	 * @param uriTemplate the URI template
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param requestCallback object that prepares the request
 	 * @param responseExtractor object that extracts the return value from the response
@@ -677,7 +677,7 @@ public interface RestOperations {
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
 	@Nullable
-	<T> T execute(String url, HttpMethod method, @Nullable RequestCallback requestCallback,
+	<T> T execute(String uriTemplate, HttpMethod method, @Nullable RequestCallback requestCallback,
 			@Nullable ResponseExtractor<T> responseExtractor, Map<String, ?> uriVariables)
 			throws RestClientException;
 

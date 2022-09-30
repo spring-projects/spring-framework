@@ -19,7 +19,6 @@ package org.springframework.web.client;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +26,6 @@ import io.micrometer.observation.tck.TestObservationRegistry;
 import io.micrometer.observation.tck.TestObservationRegistryAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.BDDMockito;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -43,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.springframework.http.HttpMethod.GET;
 
@@ -50,7 +49,7 @@ import static org.springframework.http.HttpMethod.GET;
  * Tests for the client HTTP observations with {@link RestTemplate}.
  * @author Brian Clozel
  */
-public class RestTemplateObservationTests {
+class RestTemplateObservationTests {
 
 
 	private final TestObservationRegistry observationRegistry = TestObservationRegistry.create();
@@ -102,7 +101,7 @@ public class RestTemplateObservationTests {
 
 
 	@Test
-	void executeAddsSucessAsOutcome() throws Exception {
+	void executeAddsSuccessAsOutcome() throws Exception {
 		mockSentRequest(GET, "https://example.org");
 		mockResponseStatus(HttpStatus.OK);
 		mockResponseBody("Hello World", MediaType.TEXT_PLAIN);
@@ -117,7 +116,7 @@ public class RestTemplateObservationTests {
 		String url = "https://example.org";
 		mockSentRequest(GET, url);
 		mockResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-		BDDMockito.willThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR))
+		willThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR))
 				.given(errorHandler).handleError(new URI(url), GET, response);
 
 		assertThatExceptionOfType(HttpServerErrorException.class).isThrownBy(() ->
@@ -133,7 +132,7 @@ public class RestTemplateObservationTests {
 
 		given(converter.canRead(String.class, null)).willReturn(true);
 		MediaType supportedMediaType = new MediaType("test", "supported");
-		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(supportedMediaType));
+		given(converter.getSupportedMediaTypes()).willReturn(List.of(supportedMediaType));
 		MediaType other = new MediaType("test", "other");
 		mockResponseBody("Test Body", other);
 		given(converter.canRead(String.class, other)).willReturn(false);

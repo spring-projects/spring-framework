@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * Tests for {@link HttpRequestsObservationFilter}.
  * @author Brian Clozel
  */
-public class HttpRequestsObservationFilterTests {
+class HttpRequestsObservationFilterTests {
 
 	private final TestObservationRegistry observationRegistry = TestObservationRegistry.create();
 

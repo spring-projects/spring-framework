@@ -22,6 +22,7 @@ import io.micrometer.common.KeyValues;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.observation.HttpOutcome;
+import org.springframework.util.StringUtils;
 
 /**
  * Default {@link HttpRequestsObservationConvention}.
@@ -118,9 +119,12 @@ public class DefaultHttpRequestsObservationConvention implements HttpRequestsObs
 	}
 
 	protected KeyValue exception(HttpRequestsObservationContext context) {
-		return context.getError().map(throwable ->
-						KeyValue.of(HttpRequestsObservation.LowCardinalityKeyNames.EXCEPTION, throwable.getClass().getSimpleName()))
-				.orElse(EXCEPTION_NONE);
+		return context.getError().map(throwable -> {
+			String simpleName = throwable.getClass().getSimpleName();
+			return KeyValue.of(HttpRequestsObservation.LowCardinalityKeyNames.EXCEPTION,
+					StringUtils.hasText(simpleName) ? simpleName : throwable.getClass().getName());
+		})
+		.orElse(EXCEPTION_NONE);
 	}
 
 	protected KeyValue outcome(HttpRequestsObservationContext context) {
