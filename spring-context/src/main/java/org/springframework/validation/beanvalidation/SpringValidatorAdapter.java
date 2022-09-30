@@ -157,32 +157,7 @@ public class SpringValidatorAdapter implements SmartValidator, jakarta.validatio
 			FieldError fieldError = errors.getFieldError(field);
 			if (fieldError == null || !fieldError.isBindingFailure()) {
 				try {
-					ConstraintDescriptor<?> cd = violation.getConstraintDescriptor();
-					String errorCode = determineErrorCode(cd);
-					Object[] errorArgs = getArgumentsForConstraint(errors.getObjectName(), field, cd);
-					if (errors instanceof BindingResult bindingResult) {
-						// Can do custom FieldError registration with invalid value from ConstraintViolation,
-						// as necessary for Hibernate Validator compatibility (non-indexed set path in field)
-						String nestedField = bindingResult.getNestedPath() + field;
-						if (nestedField.isEmpty()) {
-							String[] errorCodes = bindingResult.resolveMessageCodes(errorCode);
-							ObjectError error = new ViolationObjectError(
-									errors.getObjectName(), errorCodes, errorArgs, violation, this);
-							bindingResult.addError(error);
-						}
-						else {
-							Object rejectedValue = getRejectedValue(field, violation, bindingResult);
-							String[] errorCodes = bindingResult.resolveMessageCodes(errorCode, field);
-							FieldError error = new ViolationFieldError(errors.getObjectName(), nestedField,
-									rejectedValue, errorCodes, errorArgs, violation, this);
-							bindingResult.addError(error);
-						}
-					}
-					else {
-						// Got no BindingResult - can only do standard rejectValue call
-						// with automatic extraction of the current field value
-						errors.rejectValue(field, errorCode, errorArgs, violation.getMessage());
-					}
+					appendErrors(errors, violation, field);
 				}
 				catch (NotReadablePropertyException ex) {
 					throw new IllegalStateException("JSR-303 validated property '" + field +
@@ -190,6 +165,35 @@ public class SpringValidatorAdapter implements SmartValidator, jakarta.validatio
 							"check your DataBinder's configuration (bean property versus direct field access)", ex);
 				}
 			}
+		}
+	}
+
+	private void appendErrors(Errors errors, ConstraintViolation<Object> violation, String field) {
+		ConstraintDescriptor<?> cd = violation.getConstraintDescriptor();
+		String errorCode = determineErrorCode(cd);
+		Object[] errorArgs = getArgumentsForConstraint(errors.getObjectName(), field, cd);
+		if (errors instanceof BindingResult bindingResult) {
+			// Can do custom FieldError registration with invalid value from ConstraintViolation,
+			// as necessary for Hibernate Validator compatibility (non-indexed set path in field)
+			String nestedField = bindingResult.getNestedPath() + field;
+			if (nestedField.isEmpty()) {
+				String[] errorCodes = bindingResult.resolveMessageCodes(errorCode);
+				ObjectError error = new ViolationObjectError(
+						errors.getObjectName(), errorCodes, errorArgs, violation, this);
+				bindingResult.addError(error);
+			}
+			else {
+				Object rejectedValue = getRejectedValue(field, violation, bindingResult);
+				String[] errorCodes = bindingResult.resolveMessageCodes(errorCode, field);
+				FieldError error = new ViolationFieldError(errors.getObjectName(), nestedField,
+						rejectedValue, errorCodes, errorArgs, violation, this);
+				bindingResult.addError(error);
+			}
+		}
+		else {
+			// Got no BindingResult - can only do standard rejectValue call
+			// with automatic extraction of the current field value
+			errors.rejectValue(field, errorCode, errorArgs, violation.getMessage());
 		}
 	}
 
@@ -208,15 +212,7 @@ public class SpringValidatorAdapter implements SmartValidator, jakarta.validatio
 		boolean first = true;
 		for (Path.Node node : path) {
 			if (node.isInIterable()) {
-				sb.append('[');
-				Object index = node.getIndex();
-				if (index == null) {
-					index = node.getKey();
-				}
-				if (index != null) {
-					sb.append(index);
-				}
-				sb.append(']');
+				sb.append(createIndexFieldPart(node));
 			}
 			String name = node.getName();
 			if (name != null && node.getKind() == ElementKind.PROPERTY && !name.startsWith("<")) {
@@ -228,6 +224,17 @@ public class SpringValidatorAdapter implements SmartValidator, jakarta.validatio
 			}
 		}
 		return sb.toString();
+	}
+
+	private static String createIndexFieldPart(Path.Node node) {
+		Object index = node.getIndex();
+		if (index == null) {
+			index = node.getKey();
+		}
+		if (index != null) {
+			return "[" + index + "]";
+		}
+		return "[]";
 	}
 
 	/**
@@ -267,14 +274,16 @@ public class SpringValidatorAdapter implements SmartValidator, jakarta.validatio
 		arguments.add(getResolvableField(objectName, field));
 		// Using a TreeMap for alphabetical ordering of attribute names
 		Map<String, Object> attributesToExpose = new TreeMap<>();
-		descriptor.getAttributes().forEach((attributeName, attributeValue) -> {
+		for (Map.Entry<String, Object> entry : descriptor.getAttributes().entrySet()) {
+			String attributeName = entry.getKey();
+			Object attributeValue = entry.getValue();
 			if (!internalAnnotationAttributes.contains(attributeName)) {
 				if (attributeValue instanceof String str) {
 					attributeValue = new ResolvableAttribute(str);
 				}
 				attributesToExpose.put(attributeName, attributeValue);
 			}
-		});
+		}
 		arguments.addAll(attributesToExpose.values());
 		return arguments.toArray();
 	}

@@ -105,8 +105,8 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 		if (sourceType.isInstance(this.source)) {
 			return sourceType.cast(this.source);
 		}
-		else if (this.source instanceof Throwable) {
-			Throwable cause = ((Throwable) this.source).getCause();
+		else if (this.source instanceof Throwable throwable) {
+			Throwable cause = throwable.getCause();
 			if (sourceType.isInstance(cause)) {
 				return sourceType.cast(cause);
 			}
@@ -126,7 +126,7 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 	 */
 	public boolean contains(Class<?> sourceType) {
 		return (sourceType.isInstance(this.source) ||
-				(this.source instanceof Throwable && sourceType.isInstance(((Throwable) this.source).getCause())));
+				(this.source instanceof Throwable throwable && sourceType.isInstance(throwable.getCause())));
 	}
 
 

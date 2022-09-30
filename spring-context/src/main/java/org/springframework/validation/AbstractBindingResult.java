@@ -169,8 +169,8 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	public List<FieldError> getFieldErrors() {
 		List<FieldError> result = new ArrayList<>();
 		for (ObjectError objectError : this.errors) {
-			if (objectError instanceof FieldError) {
-				result.add((FieldError) objectError);
+			if (objectError instanceof FieldError fieldError) {
+				result.add(fieldError);
 			}
 		}
 		return Collections.unmodifiableList(result);
@@ -180,8 +180,8 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	@Nullable
 	public FieldError getFieldError() {
 		for (ObjectError objectError : this.errors) {
-			if (objectError instanceof FieldError) {
-				return (FieldError) objectError;
+			if (objectError instanceof FieldError fieldError) {
+				return fieldError;
 			}
 		}
 		return null;
@@ -192,8 +192,8 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 		List<FieldError> result = new ArrayList<>();
 		String fixedField = fixedField(field);
 		for (ObjectError objectError : this.errors) {
-			if (objectError instanceof FieldError && isMatchingFieldError(fixedField, (FieldError) objectError)) {
-				result.add((FieldError) objectError);
+			if (objectError instanceof FieldError fieldError && isMatchingFieldError(fixedField, (FieldError) objectError)) {
+				result.add(fieldError);
 			}
 		}
 		return Collections.unmodifiableList(result);

@@ -71,7 +71,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 */
 	@Override
 	public PropertyEditorRegistry getPropertyEditorRegistry() {
-		return (getTarget() != null ? getPropertyAccessor() : null);
+		return getTarget() != null ? getPropertyAccessor() : null;
 	}
 
 	/**
