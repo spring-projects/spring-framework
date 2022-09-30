@@ -37,6 +37,18 @@ class DefaultClientObservationConventionTests {
 	private DefaultClientObservationConvention observationConvention = new DefaultClientObservationConvention();
 
 	@Test
+	void shouldHaveName() {
+		assertThat(this.observationConvention.getName()).isEqualTo("http.client.requests");
+	}
+
+	@Test
+	void shouldHaveContextualName() {
+		ClientObservationContext context = new ClientObservationContext();
+		context.setCarrier(ClientRequest.create(HttpMethod.GET, URI.create("/test")).build());
+		assertThat(this.observationConvention.getContextualName(context)).isEqualTo("http get");
+	}
+
+	@Test
 	void shouldOnlySupportWebClientObservationContext() {
 		assertThat(this.observationConvention.supportsContext(new ClientObservationContext())).isTrue();
 		assertThat(this.observationConvention.supportsContext(new Observation.Context())).isFalse();

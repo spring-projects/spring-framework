@@ -33,7 +33,7 @@ class DefaultHttpRequestsObservationConventionTests {
 
 	private final DefaultHttpRequestsObservationConvention convention = new DefaultHttpRequestsObservationConvention();
 
-	private final MockHttpServletRequest request = new MockHttpServletRequest();
+	private final MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test/resource");
 
 	private final MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -43,6 +43,11 @@ class DefaultHttpRequestsObservationConventionTests {
 	@Test
 	void shouldHaveDefaultName() {
 		assertThat(convention.getName()).isEqualTo("http.server.requests");
+	}
+
+	@Test
+	void shouldHaveContextualName() {
+		assertThat(convention.getContextualName(this.context)).isEqualTo("http get");
 	}
 
 	@Test
@@ -66,7 +71,6 @@ class DefaultHttpRequestsObservationConventionTests {
 
 	@Test
 	void addsKeyValuesForExchangeWithPathPattern() {
-		this.request.setMethod("GET");
 		this.request.setRequestURI("/test/resource");
 		this.request.setPathInfo("/test/resource");
 		this.context.setPathPattern("/test/{name}");
@@ -80,7 +84,6 @@ class DefaultHttpRequestsObservationConventionTests {
 
 	@Test
 	void addsKeyValuesForErrorExchange() {
-		this.request.setMethod("GET");
 		this.request.setRequestURI("/test/resource");
 		this.request.setPathInfo("/test/resource");
 		this.context.setError(new IllegalArgumentException("custom error"));
@@ -95,7 +98,6 @@ class DefaultHttpRequestsObservationConventionTests {
 
 	@Test
 	void addsKeyValuesForRedirectExchange() {
-		this.request.setMethod("GET");
 		this.request.setRequestURI("/test/redirect");
 		this.request.setPathInfo("/test/redirect");
 		this.response.setStatus(302);
@@ -110,7 +112,6 @@ class DefaultHttpRequestsObservationConventionTests {
 
 	@Test
 	void addsKeyValuesForNotFoundExchange() {
-		this.request.setMethod("GET");
 		this.request.setRequestURI("/test/notFound");
 		this.request.setPathInfo("/test/notFound");
 		this.response.setStatus(404);

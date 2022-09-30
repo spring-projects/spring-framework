@@ -68,6 +68,11 @@ public class DefaultClientObservationConvention implements ClientObservationConv
 	}
 
 	@Override
+	public String getContextualName(ClientObservationContext context) {
+		return "http " + context.getCarrier().method().name().toLowerCase();
+	}
+
+	@Override
 	public KeyValues getLowCardinalityKeyValues(ClientObservationContext context) {
 		return KeyValues.of(uri(context), method(context), status(context), exception(context), outcome(context));
 	}

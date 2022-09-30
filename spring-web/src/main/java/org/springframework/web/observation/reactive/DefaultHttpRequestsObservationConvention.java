@@ -74,6 +74,11 @@ public class DefaultHttpRequestsObservationConvention implements HttpRequestsObs
 	}
 
 	@Override
+	public String getContextualName(HttpRequestsObservationContext context) {
+		return "http " + context.getCarrier().getMethod().name().toLowerCase();
+	}
+
+	@Override
 	public KeyValues getLowCardinalityKeyValues(HttpRequestsObservationContext context) {
 		return KeyValues.of(method(context), uri(context), status(context), exception(context), outcome(context));
 	}

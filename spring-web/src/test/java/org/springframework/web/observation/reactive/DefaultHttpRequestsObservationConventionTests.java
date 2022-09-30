@@ -43,6 +43,13 @@ class DefaultHttpRequestsObservationConventionTests {
 	}
 
 	@Test
+	void shouldHaveContextualName() {
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/test/resource"));
+		HttpRequestsObservationContext context = new HttpRequestsObservationContext(exchange);
+		assertThat(convention.getContextualName(context)).isEqualTo("http get");
+	}
+
+	@Test
 	void supportsOnlyHttpRequestsObservationContext() {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post("/test/resource"));
 		HttpRequestsObservationContext context = new HttpRequestsObservationContext(exchange);
