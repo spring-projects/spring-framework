@@ -110,10 +110,6 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 					Object value = attributes.get("value");
 					if (value instanceof String strVal) {
 						if (StringUtils.hasLength(strVal)) {
-							if (beanName != null && !strVal.equals(beanName)) {
-								throw new IllegalStateException("Stereotype annotations suggest inconsistent " +
-										"component names: '" + beanName + "' versus '" + strVal + "'");
-							}
 							beanName = strVal;
 						}
 					}
