@@ -84,6 +84,8 @@ configure([rootProject] + javaProjects) { project ->
 		systemProperty("java.awt.headless", "true")
 		systemProperty("testGroups", project.properties.get("testGroups"))
 		systemProperty("io.netty.leakDetection.level", "paranoid")
+		jvmArgs(["--add-opens=java.base/java.lang=ALL-UNNAMED",
+				 "--add-opens=java.base/java.util=ALL-UNNAMED"])
 	}
 
 	checkstyle {
