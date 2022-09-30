@@ -924,7 +924,7 @@ destination:/topic/price.stock.MMM
 
 A server cannot send unsolicited messages. All messages
 from a server must be in response to a specific client subscription, and the
-`subscription-id` header of the server message must match the `id` header of the
+`subscription` header of the server message must match the `id` header of the
 client subscription.
 
 The preceding overview is intended to provide the most basic understanding of the
