@@ -51,7 +51,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
@@ -121,7 +121,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	@Nullable
 	private List<ViewResolver> viewResolvers;
 
-	private LocaleResolver localeResolver = new AcceptHeaderLocaleResolver();
+	private LocaleContextResolver localeResolver = new AcceptHeaderLocaleResolver();
 
 	@Nullable
 	private FlashMapManager flashMapManager;
@@ -297,7 +297,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	 * Provide a LocaleResolver instance.
 	 * If not provided, the default one used is {@link AcceptHeaderLocaleResolver}.
 	 */
-	public StandaloneMockMvcBuilder setLocaleResolver(LocaleResolver localeResolver) {
+	public StandaloneMockMvcBuilder setLocaleResolver(LocaleContextResolver localeResolver) {
 		this.localeResolver = localeResolver;
 		return this;
 	}

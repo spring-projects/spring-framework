@@ -87,7 +87,7 @@ import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.servlet.ThemeResolver;
@@ -232,7 +232,7 @@ public class MvcNamespaceTests {
 		assertThat(appContext.getBean(ConversionService.class)).isNotNull();
 		assertThat(appContext.getBean(LocalValidatorFactoryBean.class)).isNotNull();
 		assertThat(appContext.getBean(Validator.class)).isNotNull();
-		assertThat(appContext.getBean("localeResolver", LocaleResolver.class)).isNotNull();
+		assertThat(appContext.getBean("localeResolver", LocaleContextResolver.class)).isNotNull();
 		assertThat(appContext.getBean("themeResolver", ThemeResolver.class)).isNotNull();
 		assertThat(appContext.getBean("viewNameTranslator", RequestToViewNameTranslator.class)).isNotNull();
 		assertThat(appContext.getBean("flashMapManager", FlashMapManager.class)).isNotNull();

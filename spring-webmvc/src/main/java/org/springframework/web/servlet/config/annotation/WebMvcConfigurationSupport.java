@@ -80,7 +80,7 @@ import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.function.support.HandlerFunctionAdapter;
@@ -1158,7 +1158,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	@Bean
-	public LocaleResolver localeResolver() {
+	public LocaleContextResolver localeResolver() {
 		return new AcceptHeaderLocaleResolver();
 	}
 

@@ -49,38 +49,38 @@ class AcceptHeaderLocaleResolverTests {
 
 	@Test
 	void resolve() {
-		assertThat(this.resolver.resolveLocale(request(CANADA))).isEqualTo(CANADA);
-		assertThat(this.resolver.resolveLocale(request(US, CANADA))).isEqualTo(US);
+		assertThat(this.resolver.resolveLocaleContext(request(CANADA)).getLocale()).isEqualTo(CANADA);
+		assertThat(this.resolver.resolveLocaleContext(request(US, CANADA)).getLocale()).isEqualTo(US);
 	}
 
 	@Test
 	void resolvePreferredSupported() {
 		this.resolver.setSupportedLocales(Collections.singletonList(CANADA));
-		assertThat(this.resolver.resolveLocale(request(US, CANADA))).isEqualTo(CANADA);
+		assertThat(this.resolver.resolveLocaleContext(request(US, CANADA)).getLocale()).isEqualTo(CANADA);
 	}
 
 	@Test
 	void resolvePreferredNotSupported() {
 		this.resolver.setSupportedLocales(Collections.singletonList(CANADA));
-		assertThat(this.resolver.resolveLocale(request(US, UK))).isEqualTo(US);
+		assertThat(this.resolver.resolveLocaleContext(request(US, UK)).getLocale()).isEqualTo(US);
 	}
 
 	@Test
 	void resolvePreferredAgainstLanguageOnly() {
 		this.resolver.setSupportedLocales(Collections.singletonList(ENGLISH));
-		assertThat(this.resolver.resolveLocale(request(GERMANY, US, UK))).isEqualTo(ENGLISH);
+		assertThat(this.resolver.resolveLocaleContext(request(GERMANY, US, UK)).getLocale()).isEqualTo(ENGLISH);
 	}
 
 	@Test
 	void resolvePreferredAgainstCountryIfPossible() {
 		this.resolver.setSupportedLocales(Arrays.asList(ENGLISH, UK));
-		assertThat(this.resolver.resolveLocale(request(GERMANY, US, UK))).isEqualTo(UK);
+		assertThat(this.resolver.resolveLocaleContext(request(GERMANY, US, UK)).getLocale()).isEqualTo(UK);
 	}
 
 	@Test
 	void resolvePreferredAgainstLanguageWithMultipleSupportedLocales() {
 		this.resolver.setSupportedLocales(Arrays.asList(GERMAN, US));
-		assertThat(this.resolver.resolveLocale(request(GERMANY, US, UK))).isEqualTo(GERMAN);
+		assertThat(this.resolver.resolveLocaleContext(request(GERMANY, US, UK)).getLocale()).isEqualTo(GERMAN);
 	}
 
 	@Test
@@ -91,18 +91,18 @@ class AcceptHeaderLocaleResolverTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Accept-Language", KOREA.toLanguageTag());
 		request.setPreferredLocales(Collections.singletonList(KOREA));
-		assertThat(this.resolver.resolveLocale(request)).isEqualTo(Locale.JAPAN);
+		assertThat(this.resolver.resolveLocaleContext(request).getLocale()).isEqualTo(Locale.JAPAN);
 	}
 
 	@Test
 	void defaultLocale() {
 		this.resolver.setDefaultLocale(JAPANESE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		assertThat(this.resolver.resolveLocale(request)).isEqualTo(JAPANESE);
+		assertThat(this.resolver.resolveLocaleContext(request).getLocale()).isEqualTo(JAPANESE);
 
 		request.addHeader("Accept-Language", US.toLanguageTag());
 		request.setPreferredLocales(Collections.singletonList(US));
-		assertThat(this.resolver.resolveLocale(request)).isEqualTo(US);
+		assertThat(this.resolver.resolveLocaleContext(request).getLocale()).isEqualTo(US);
 	}
 
 

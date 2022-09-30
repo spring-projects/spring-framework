@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
@@ -326,7 +326,7 @@ public class WebMvcConfigurationSupportTests {
 	@Test
 	public void defaultLocaleResolverConfiguration() {
 		ApplicationContext context = initContext(WebConfig.class);
-		LocaleResolver localeResolver = context.getBean(LOCALE_RESOLVER_BEAN_NAME, LocaleResolver.class);
+		LocaleContextResolver localeResolver = context.getBean(LOCALE_RESOLVER_BEAN_NAME, LocaleContextResolver.class);
 
 		assertThat(localeResolver).isNotNull();
 		assertThat(localeResolver).isInstanceOf(AcceptHeaderLocaleResolver.class);

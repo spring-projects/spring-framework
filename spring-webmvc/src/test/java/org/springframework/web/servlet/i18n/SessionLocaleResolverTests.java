@@ -22,6 +22,7 @@ import java.util.TimeZone;
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
@@ -48,27 +49,27 @@ class SessionLocaleResolverTests {
 	void resolveLocale() {
 		request.getSession().setAttribute(SessionLocaleResolver.LOCALE_SESSION_ATTRIBUTE_NAME, Locale.GERMAN);
 
-		assertThat(resolver.resolveLocale(request)).isEqualTo(Locale.GERMAN);
+		assertThat(resolver.resolveLocaleContext(request).getLocale()).isEqualTo(Locale.GERMAN);
 	}
 
 	@Test
 	void setAndResolveLocale() {
-		resolver.setLocale(request, response, Locale.GERMAN);
-		assertThat(resolver.resolveLocale(request)).isEqualTo(Locale.GERMAN);
+		resolver.setLocaleContext(request, response, new SimpleLocaleContext(Locale.GERMAN));
+		assertThat(resolver.resolveLocaleContext(request).getLocale()).isEqualTo(Locale.GERMAN);
 
 		HttpSession session = request.getSession();
 		request = new MockHttpServletRequest();
 		request.setSession(session);
 		resolver = new SessionLocaleResolver();
 
-		assertThat(resolver.resolveLocale(request)).isEqualTo(Locale.GERMAN);
+		assertThat(resolver.resolveLocaleContext(request).getLocale()).isEqualTo(Locale.GERMAN);
 	}
 
 	@Test
 	void resolveLocaleWithoutSession() throws Exception {
 		request.addPreferredLocale(Locale.TAIWAN);
 
-		assertThat(resolver.resolveLocale(request)).isEqualTo(request.getLocale());
+		assertThat(resolver.resolveLocaleContext(request).getLocale()).isEqualTo(request.getLocale());
 	}
 
 	@Test
@@ -77,7 +78,7 @@ class SessionLocaleResolverTests {
 
 		resolver.setDefaultLocale(Locale.GERMAN);
 
-		assertThat(resolver.resolveLocale(request)).isEqualTo(Locale.GERMAN);
+		assertThat(resolver.resolveLocaleContext(request).getLocale()).isEqualTo(Locale.GERMAN);
 	}
 
 	@Test
@@ -85,7 +86,7 @@ class SessionLocaleResolverTests {
 		request.addPreferredLocale(Locale.TAIWAN);
 		request.getSession().setAttribute(SessionLocaleResolver.LOCALE_SESSION_ATTRIBUTE_NAME, Locale.GERMAN);
 
-		resolver.setLocale(request, response, null);
+		resolver.setLocaleContext(request, response, null);
 		Locale locale = (Locale) request.getSession().getAttribute(SessionLocaleResolver.LOCALE_SESSION_ATTRIBUTE_NAME);
 		assertThat(locale).isNull();
 
@@ -94,7 +95,7 @@ class SessionLocaleResolverTests {
 		request.addPreferredLocale(Locale.TAIWAN);
 		request.setSession(session);
 		resolver = new SessionLocaleResolver();
-		assertThat(resolver.resolveLocale(request)).isEqualTo(Locale.TAIWAN);
+		assertThat(resolver.resolveLocaleContext(request).getLocale()).isEqualTo(Locale.TAIWAN);
 	}
 
 	@Test
@@ -103,7 +104,7 @@ class SessionLocaleResolverTests {
 
 		resolver.setDefaultLocaleFunction(request -> Locale.GERMAN);
 
-		assertThat(resolver.resolveLocale(request)).isEqualTo(Locale.GERMAN);
+		assertThat(resolver.resolveLocaleContext(request).getLocale()).isEqualTo(Locale.GERMAN);
 	}
 
 	@Test

@@ -45,7 +45,7 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -335,9 +335,9 @@ public interface MockMvcWebTestClient {
 		/**
 		 * Provide the LocaleResolver to use.
 		 * <p>This is delegated to
-		 * {@link StandaloneMockMvcBuilder#setLocaleResolver(LocaleResolver)}.
+		 * {@link StandaloneMockMvcBuilder#setLocaleResolver(LocaleContextResolver)}.
 		 */
-		ControllerSpec localeResolver(LocaleResolver localeResolver);
+		ControllerSpec localeResolver(LocaleContextResolver localeResolver);
 
 		/**
 		 * Provide a custom FlashMapManager.

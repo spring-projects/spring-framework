@@ -120,7 +120,7 @@ import org.springframework.web.util.WebUtils;
  * implementation for Servlet 3 is included. The MultipartResolver bean name is
  * "multipartResolver"; default is none.
  *
- * <li>Its locale resolution strategy is determined by a {@link LocaleResolver}.
+ * <li>Its locale resolution strategy is determined by a {@link LocaleContextResolver}.
  * Out-of-the-box implementations work via HTTP accept header, cookie, or session.
  * The LocaleResolver bean name is "localeResolver"; default is
  * {@link org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver}.
@@ -156,6 +156,7 @@ import org.springframework.web.util.WebUtils;
  * @author Chris Beams
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Vedran Pavic
  * @see org.springframework.web.HttpRequestHandler
  * @see org.springframework.web.servlet.mvc.Controller
  * @see org.springframework.web.context.ContextLoaderListener
@@ -313,9 +314,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	@Nullable
 	private MultipartResolver multipartResolver;
 
-	/** LocaleResolver used by this servlet. */
+	/** LocaleContextResolver used by this servlet. */
 	@Nullable
-	private LocaleResolver localeResolver;
+	private LocaleContextResolver localeResolver;
 
 	/** ThemeResolver used by this servlet. */
 	@Nullable
@@ -543,7 +544,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initLocaleResolver(ApplicationContext context) {
 		try {
-			this.localeResolver = context.getBean(LOCALE_RESOLVER_BEAN_NAME, LocaleResolver.class);
+			this.localeResolver = context.getBean(LOCALE_RESOLVER_BEAN_NAME, LocaleContextResolver.class);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Detected " + this.localeResolver);
 			}
@@ -553,7 +554,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// We need to use the default.
-			this.localeResolver = getDefaultStrategy(context, LocaleResolver.class);
+			this.localeResolver = getDefaultStrategy(context, LocaleContextResolver.class);
 			if (logger.isTraceEnabled()) {
 				logger.trace("No LocaleResolver '" + LOCALE_RESOLVER_BEAN_NAME +
 						"': using default [" + this.localeResolver.getClass().getSimpleName() + "]");
@@ -1186,13 +1187,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	@Override
 	protected LocaleContext buildLocaleContext(final HttpServletRequest request) {
-		LocaleResolver lr = this.localeResolver;
-		if (lr instanceof LocaleContextResolver) {
-			return ((LocaleContextResolver) lr).resolveLocaleContext(request);
-		}
-		else {
-			return () -> (lr != null ? lr.resolveLocale(request) : request.getLocale());
-		}
+		LocaleContextResolver lr = this.localeResolver;
+		return (lr != null ? lr.resolveLocaleContext(request) : request::getLocale);
 	}
 
 	/**
@@ -1379,8 +1375,13 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	protected void render(ModelAndView mv, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		// Determine locale for request and apply it to the response.
-		Locale locale =
-				(this.localeResolver != null ? this.localeResolver.resolveLocale(request) : request.getLocale());
+		Locale locale = null;
+		if (this.localeResolver != null) {
+			locale = this.localeResolver.resolveLocaleContext(request).getLocale();
+		}
+		if (locale == null) {
+			locale = request.getLocale();
+		}
 		response.setLocale(locale);
 
 		View view;

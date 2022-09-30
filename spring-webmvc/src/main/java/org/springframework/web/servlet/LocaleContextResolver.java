@@ -42,6 +42,7 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.web.servlet.support.RequestContext#getTimeZone
  * @see org.springframework.web.servlet.support.RequestContextUtils#getTimeZone
  */
+@SuppressWarnings("deprecation")
 public interface LocaleContextResolver extends LocaleResolver {
 
 	/**
@@ -58,7 +59,6 @@ public interface LocaleContextResolver extends LocaleResolver {
 	 * the returned context, which again can be accessed through downcasting.
 	 * @param request the request to resolve the locale context for
 	 * @return the current locale context (never {@code null}
-	 * @see #resolveLocale(HttpServletRequest)
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocale
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getTimeZone
 	 */
@@ -72,7 +72,6 @@ public interface LocaleContextResolver extends LocaleResolver {
 	 * @param localeContext the new locale context, or {@code null} to clear the locale
 	 * @throws UnsupportedOperationException if the LocaleResolver implementation
 	 * does not support dynamic changing of the locale or time zone
-	 * @see #setLocale(HttpServletRequest, HttpServletResponse, Locale)
 	 * @see org.springframework.context.i18n.SimpleLocaleContext
 	 * @see org.springframework.context.i18n.SimpleTimeZoneAwareLocaleContext
 	 */

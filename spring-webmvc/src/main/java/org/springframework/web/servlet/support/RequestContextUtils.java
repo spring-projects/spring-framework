@@ -37,7 +37,6 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.LocaleContextResolver;
-import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -50,6 +49,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
+ * @author Vedran Pavic
  * @since 03.03.2003
  * @see RequestContext
  * @see org.springframework.web.servlet.DispatcherServlet
@@ -116,19 +116,19 @@ public abstract class RequestContextUtils {
 	}
 
 	/**
-	 * Return the {@link LocaleResolver} that has been bound to the request by the
+	 * Return the {@link LocaleContextResolver} that has been bound to the request by the
 	 * {@link DispatcherServlet}.
 	 * @param request current HTTP request
 	 * @return the current {@code LocaleResolver}, or {@code null} if not found
 	 */
 	@Nullable
-	public static LocaleResolver getLocaleResolver(HttpServletRequest request) {
-		return (LocaleResolver) request.getAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE);
+	public static LocaleContextResolver getLocaleResolver(HttpServletRequest request) {
+		return (LocaleContextResolver) request.getAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE);
 	}
 
 	/**
 	 * Retrieve the current locale from the given request, using the
-	 * {@link LocaleResolver} bound to the request by the {@link DispatcherServlet}
+	 * {@link LocaleContextResolver} bound to the request by the {@link DispatcherServlet}
 	 * (if available), falling back to the request's locale based on the
 	 * {@code Accept-Language} header or the default locale for the server.
 	 * <p>This method serves as a straightforward alternative to the standard
@@ -143,13 +143,19 @@ public abstract class RequestContextUtils {
 	 * @see org.springframework.context.i18n.LocaleContextHolder#getLocale()
 	 */
 	public static Locale getLocale(HttpServletRequest request) {
-		LocaleResolver localeResolver = getLocaleResolver(request);
-		return (localeResolver != null ? localeResolver.resolveLocale(request) : request.getLocale());
+		LocaleContextResolver localeResolver = getLocaleResolver(request);
+		if (localeResolver != null) {
+			Locale locale = localeResolver.resolveLocaleContext(request).getLocale();
+			if (locale != null) {
+				return locale;
+			}
+		}
+		return request.getLocale();
 	}
 
 	/**
 	 * Retrieve the current time zone from the given request, using the
-	 * {@link TimeZoneAwareLocaleContext} in the {@link LocaleResolver} bound to
+	 * {@link TimeZoneAwareLocaleContext} in the {@link LocaleContextResolver} bound to
 	 * the request by the {@link DispatcherServlet} (if available).
 	 * <p>Note: This method returns {@code null} if no specific time zone can be
 	 * resolved for the given request. This is in contrast to {@link #getLocale}
@@ -167,9 +173,9 @@ public abstract class RequestContextUtils {
 	 */
 	@Nullable
 	public static TimeZone getTimeZone(HttpServletRequest request) {
-		LocaleResolver localeResolver = getLocaleResolver(request);
-		if (localeResolver instanceof LocaleContextResolver localeContextResolver) {
-			LocaleContext localeContext = localeContextResolver.resolveLocaleContext(request);
+		LocaleContextResolver localeResolver = getLocaleResolver(request);
+		if (localeResolver != null) {
+			LocaleContext localeContext = localeResolver.resolveLocaleContext(request);
 			if (localeContext instanceof TimeZoneAwareLocaleContext timeZoneAwareLocaleContext) {
 				return timeZoneAwareLocaleContext.getTimeZone();
 			}

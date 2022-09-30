@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.web.servlet.tags;
 
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
-import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.SimpleWebApplicationContext;
 import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
@@ -49,7 +49,7 @@ public abstract class AbstractTagTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		if (inDispatcherServlet()) {
 			request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
-			LocaleResolver lr = new AcceptHeaderLocaleResolver();
+			LocaleContextResolver lr = new AcceptHeaderLocaleResolver();
 			request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, lr);
 			ThemeResolver tr = new FixedThemeResolver();
 			request.setAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE, tr);

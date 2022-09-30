@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
@@ -38,7 +39,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @since 20.06.2003
- * @see org.springframework.web.servlet.LocaleResolver
+ * @see org.springframework.web.servlet.LocaleContextResolver
  */
 public class LocaleChangeInterceptor implements HandlerInterceptor {
 
@@ -116,13 +117,14 @@ public class LocaleChangeInterceptor implements HandlerInterceptor {
 		String newLocale = request.getParameter(getParamName());
 		if (newLocale != null) {
 			if (checkHttpMethod(request.getMethod())) {
-				LocaleResolver localeResolver = RequestContextUtils.getLocaleResolver(request);
+				LocaleContextResolver localeResolver = RequestContextUtils.getLocaleResolver(request);
 				if (localeResolver == null) {
 					throw new IllegalStateException(
 							"No LocaleResolver found: not in a DispatcherServlet request?");
 				}
 				try {
-					localeResolver.setLocale(request, response, parseLocaleValue(newLocale));
+					localeResolver.setLocaleContext(request, response,
+							new SimpleLocaleContext(parseLocaleValue(newLocale)));
 				}
 				catch (IllegalArgumentException ex) {
 					if (isIgnoreInvalidLocale()) {

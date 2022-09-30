@@ -28,14 +28,14 @@ import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.LocaleContextResolver;
 
 /**
- * {@link LocaleResolver} implementation that simply uses the primary locale
+ * {@link LocaleContextResolver} implementation that simply uses the primary locale
  * specified in the {@code Accept-Language} header of the HTTP request (that is,
  * the locale sent by the client browser, normally that of the client's OS).
  *
- * <p>Note: Does not support {@link #setLocale} since the {@code Accept-Language}
+ * <p>Note: Does not support {@link #setLocaleContext} since the {@code Accept-Language}
  * header can only be changed by changing the client's locale settings.
  *
  * @author Juergen Hoeller

@@ -32,6 +32,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContext;
+import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.context.i18n.SimpleTimeZoneAwareLocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
 import org.springframework.lang.Nullable;
@@ -44,7 +45,6 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.EscapedErrors;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.LocaleContextResolver;
-import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UrlPathHelper;
@@ -66,6 +66,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
+ * @author Vedran Pavic
  * @since 03.03.2003
  * @see org.springframework.web.servlet.DispatcherServlet
  * @see org.springframework.web.servlet.view.AbstractView#setRequestContextAttribute
@@ -225,17 +226,13 @@ public class RequestContext {
 		TimeZone timeZone = null;
 
 		// Determine locale to use for this RequestContext.
-		LocaleResolver localeResolver = RequestContextUtils.getLocaleResolver(request);
-		if (localeResolver instanceof LocaleContextResolver) {
-			LocaleContext localeContext = ((LocaleContextResolver) localeResolver).resolveLocaleContext(request);
+		LocaleContextResolver localeResolver = RequestContextUtils.getLocaleResolver(request);
+		if (localeResolver != null) {
+			LocaleContext localeContext = localeResolver.resolveLocaleContext(request);
 			locale = localeContext.getLocale();
 			if (localeContext instanceof TimeZoneAwareLocaleContext) {
 				timeZone = ((TimeZoneAwareLocaleContext) localeContext).getTimeZone();
 			}
-		}
-		else if (localeResolver != null) {
-			// Try LocaleResolver (we're within a DispatcherServlet request).
-			locale = localeResolver.resolveLocale(request);
 		}
 
 		this.locale = locale;
@@ -299,7 +296,7 @@ public class RequestContext {
 
 	/**
 	 * Return the current Locale (falling back to the request locale; never {@code null}).
-	 * <p>Typically coming from a DispatcherServlet's {@link LocaleResolver}.
+	 * <p>Typically coming from a DispatcherServlet's {@link LocaleContextResolver}.
 	 * Also includes a fallback check for JSTL's Locale attribute.
 	 * @see RequestContextUtils#getLocale
 	 */
@@ -354,34 +351,34 @@ public class RequestContext {
 
 	/**
 	 * Change the current locale to the specified one,
-	 * storing the new locale through the configured {@link LocaleResolver}.
+	 * storing the new locale through the configured {@link LocaleContextResolver}.
 	 * @param locale the new locale
-	 * @see LocaleResolver#setLocale
+	 * @see LocaleContextResolver#setLocaleContext
 	 * @see #changeLocale(java.util.Locale, java.util.TimeZone)
 	 */
 	public void changeLocale(Locale locale) {
-		LocaleResolver localeResolver = RequestContextUtils.getLocaleResolver(this.request);
+		LocaleContextResolver localeResolver = RequestContextUtils.getLocaleResolver(this.request);
 		if (localeResolver == null) {
-			throw new IllegalStateException("Cannot change locale if no LocaleResolver configured");
+			throw new IllegalStateException("Cannot change locale if no LocaleContextResolver configured");
 		}
-		localeResolver.setLocale(this.request, this.response, locale);
+		localeResolver.setLocaleContext(this.request, this.response, new SimpleLocaleContext(locale));
 		this.locale = locale;
 	}
 
 	/**
 	 * Change the current locale to the specified locale and time zone context,
-	 * storing the new locale context through the configured {@link LocaleResolver}.
+	 * storing the new locale context through the configured {@link LocaleContextResolver}.
 	 * @param locale the new locale
 	 * @param timeZone the new time zone
 	 * @see LocaleContextResolver#setLocaleContext
 	 * @see org.springframework.context.i18n.SimpleTimeZoneAwareLocaleContext
 	 */
 	public void changeLocale(Locale locale, TimeZone timeZone) {
-		LocaleResolver localeResolver = RequestContextUtils.getLocaleResolver(this.request);
-		if (!(localeResolver instanceof LocaleContextResolver)) {
+		LocaleContextResolver localeResolver = RequestContextUtils.getLocaleResolver(this.request);
+		if (localeResolver == null) {
 			throw new IllegalStateException("Cannot change locale context if no LocaleContextResolver configured");
 		}
-		((LocaleContextResolver) localeResolver).setLocaleContext(this.request, this.response,
+		localeResolver.setLocaleContext(this.request, this.response,
 				new SimpleTimeZoneAwareLocaleContext(locale, timeZone));
 		this.locale = locale;
 		this.timeZone = timeZone;

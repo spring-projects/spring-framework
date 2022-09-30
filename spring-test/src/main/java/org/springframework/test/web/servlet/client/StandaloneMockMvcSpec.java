@@ -31,7 +31,7 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -135,7 +135,7 @@ class StandaloneMockMvcSpec extends AbstractMockMvcServerSpec<MockMvcWebTestClie
 	}
 
 	@Override
-	public StandaloneMockMvcSpec localeResolver(LocaleResolver localeResolver) {
+	public StandaloneMockMvcSpec localeResolver(LocaleContextResolver localeResolver) {
 		this.mockMvcBuilder.setLocaleResolver(localeResolver);
 		return this;
 	}

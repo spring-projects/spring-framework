@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,12 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * {@link ServletWebRequest} subclass that is aware of
  * {@link org.springframework.web.servlet.DispatcherServlet}'s
  * request context, such as the Locale determined by the configured
- * {@link org.springframework.web.servlet.LocaleResolver}.
+ * {@link org.springframework.web.servlet.LocaleContextResolver}.
  *
  * @author Juergen Hoeller
  * @since 2.0
  * @see #getLocale()
- * @see org.springframework.web.servlet.LocaleResolver
+ * @see org.springframework.web.servlet.LocaleContextResolver
  */
 public class DispatcherServletWebRequest extends ServletWebRequest {
 

@@ -904,7 +904,7 @@ See <<mvc-config-view-resolvers>> under <<mvc-config>> for configuration details
 
 Most parts of Spring's architecture support internationalization, as the Spring web
 MVC framework does. `DispatcherServlet` lets you automatically resolve messages
-by using the client's locale. This is done with `LocaleResolver` objects.
+by using the client's locale. This is done with `LocaleContextResolver` objects.
 
 When a request comes in, the `DispatcherServlet` looks for a locale resolver and, if it
 finds one, it tries to use it to set the locale. By using the `RequestContext.getLocale()`
@@ -1013,7 +1013,7 @@ modifies the corresponding `HttpSession` attributes against the current `HttpSer
 
 You can enable changing of locales by adding the `LocaleChangeInterceptor` to one of the
 `HandlerMapping` definitions. It detects a parameter in the request and changes the locale
-accordingly, calling the `setLocale` method on the `LocaleResolver` in the dispatcher's
+accordingly, calling the `setLocale` method on the `LocaleContextResolver` in the dispatcher's
 application context. The next example shows that calls to all `{asterisk}.view` resources
 that contain a parameter named `siteLanguage` now changes the locale. So, for example,
 a request for the URL, `https://www.sf.net/home.view?siteLanguage=nl`, changes the site
@@ -1111,7 +1111,7 @@ background image with Dutch text on it.
 After you define themes, as described in the <<mvc-themeresolver-defining, preceding section>>,
 you decide which theme to use. The `DispatcherServlet` looks for a bean named `themeResolver`
 to find out which `ThemeResolver` implementation to use. A theme resolver works in much the same
-way as a `LocaleResolver`. It detects the theme to use for a particular request and can also
+way as a `LocaleContextResolver`. It detects the theme to use for a particular request and can also
 alter the request's theme. The following table describes the theme resolvers provided by Spring:
 
 [[mvc-theme-resolver-impls-tbl]]
@@ -2098,8 +2098,8 @@ and others) and is equivalent to `required=false`.
 | The HTTP method of the request.
 
 | `java.util.Locale`
-| The current request locale, determined by the most specific `LocaleResolver` available (in
-  effect, the configured `LocaleResolver` or `LocaleContextResolver`).
+| The current request locale, determined by the most specific `LocaleContextResolver` available (in
+  effect, the configured `LocaleContextResolver`).
 
 | `java.util.TimeZone` + `java.time.ZoneId`
 | The time zone associated with the current request, as determined by a `LocaleContextResolver`.
@@ -3932,8 +3932,8 @@ level, <<mvc-exceptionhandlers, HandlerExceptionResolver>> mechanism.
 | The HTTP method of the request.
 
 | `java.util.Locale`
-| The current request locale, determined by the most specific `LocaleResolver` available -- in
-  effect, the configured `LocaleResolver` or `LocaleContextResolver`.
+| The current request locale, determined by the most specific `LocaleContextResolver` available -- in
+  effect, the configured `LocaleContextResolver`.
 
 | `java.util.TimeZone`, `java.time.ZoneId`
 | The time zone associated with the current request, as determined by a `LocaleContextResolver`.

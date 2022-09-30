@@ -34,11 +34,11 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.util.WebUtils;
 
 /**
- * {@link LocaleResolver} implementation that uses a cookie sent back to the user
+ * {@link LocaleContextResolver} implementation that uses a cookie sent back to the user
  * in case of a custom setting, with a fallback to the configured default locale,
  * the request's {@code Accept-Language} header, or the default locale for the server.
  *

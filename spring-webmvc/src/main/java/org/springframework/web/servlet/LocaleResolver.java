@@ -50,7 +50,9 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.context.i18n.LocaleContextHolder
  * @see org.springframework.web.servlet.support.RequestContext#getLocale
  * @see org.springframework.web.servlet.support.RequestContextUtils#getLocale
+ * @deprecated since 6.0 in favor of {@link LocaleContextResolver}
  */
+@Deprecated(since = "6.0")
 public interface LocaleResolver {
 
 	/**

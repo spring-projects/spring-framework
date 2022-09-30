@@ -61,7 +61,7 @@ class CookieLocaleResolverTests {
 		request.setCookies(cookie);
 
 		resolver = new CookieLocaleResolver("LanguageKoekje");
-		Locale loc = resolver.resolveLocale(request);
+		Locale loc = resolver.resolveLocaleContext(request).getLocale();
 		assertThat(loc.getLanguage()).isEqualTo("nl");
 	}
 
@@ -141,8 +141,8 @@ class CookieLocaleResolverTests {
 	}
 
 	@Test
-	void setAndResolveLocale() {
-		resolver.setLocale(request, response, new Locale("nl", ""));
+	void setAndResolveLocaleContext() {
+		resolver.setLocaleContext(request, response, new SimpleLocaleContext(new Locale("nl", "")));
 
 		MockCookie cookie = MockCookie.parse(response.getHeader(HttpHeaders.SET_COOKIE));
 		assertThat(cookie).isNotNull();
@@ -152,19 +152,6 @@ class CookieLocaleResolverTests {
 		assertThat(cookie.getSecure()).isFalse();
 		assertThat(cookie.getSameSite()).isEqualTo("Lax");
 
-		request = new MockHttpServletRequest();
-		request.setCookies(cookie);
-
-		resolver = new CookieLocaleResolver();
-		Locale loc = resolver.resolveLocale(request);
-		assertThat(loc.getLanguage()).isEqualTo("nl");
-	}
-
-	@Test
-	void setAndResolveLocaleContext() {
-		resolver.setLocaleContext(request, response, new SimpleLocaleContext(new Locale("nl", "")));
-
-		Cookie cookie = response.getCookie(CookieLocaleResolver.DEFAULT_COOKIE_NAME);
 		request = new MockHttpServletRequest();
 		request.setCookies(cookie);
 
@@ -210,7 +197,7 @@ class CookieLocaleResolverTests {
 
 	@Test
 	void setAndResolveLocaleWithCountry() {
-		resolver.setLocale(request, response, new Locale("de", "AT"));
+		resolver.setLocaleContext(request, response, new SimpleLocaleContext(new Locale("de", "AT")));
 
 		MockCookie cookie = MockCookie.parse(response.getHeader(HttpHeaders.SET_COOKIE));
 		assertThat(cookie).isNotNull();
@@ -225,7 +212,7 @@ class CookieLocaleResolverTests {
 		request.setCookies(cookie);
 
 		resolver = new CookieLocaleResolver();
-		Locale loc = resolver.resolveLocale(request);
+		Locale loc = resolver.resolveLocaleContext(request).getLocale();
 		assertThat(loc.getLanguage()).isEqualTo("de");
 		assertThat(loc.getCountry()).isEqualTo("AT");
 	}
@@ -233,7 +220,7 @@ class CookieLocaleResolverTests {
 	@Test
 	void setAndResolveLocaleWithCountryAsLegacyJava() {
 		resolver.setLanguageTagCompliant(false);
-		resolver.setLocale(request, response, new Locale("de", "AT"));
+		resolver.setLocaleContext(request, response, new SimpleLocaleContext(new Locale("de", "AT")));
 
 		MockCookie cookie = MockCookie.parse(response.getHeader(HttpHeaders.SET_COOKIE));
 		assertThat(cookie).isNotNull();
@@ -248,7 +235,7 @@ class CookieLocaleResolverTests {
 		request.setCookies(cookie);
 
 		resolver = new CookieLocaleResolver();
-		Locale loc = resolver.resolveLocale(request);
+		Locale loc = resolver.resolveLocaleContext(request).getLocale();
 		assertThat(loc.getLanguage()).isEqualTo("de");
 		assertThat(loc.getCountry()).isEqualTo("AT");
 	}
@@ -261,7 +248,7 @@ class CookieLocaleResolverTests {
 		resolver.setCookieMaxAge(Duration.ofSeconds(10000));
 		resolver.setCookieSecure(true);
 		resolver.setCookieSameSite("Lax");
-		resolver.setLocale(request, response, new Locale("nl", ""));
+		resolver.setLocaleContext(request, response, new SimpleLocaleContext(new Locale("nl", "")));
 
 		MockCookie cookie = MockCookie.parse(response.getHeader(HttpHeaders.SET_COOKIE));
 		assertThat(cookie).isNotNull();
@@ -276,16 +263,8 @@ class CookieLocaleResolverTests {
 		request.setCookies(cookie);
 
 		resolver = new CookieLocaleResolver("LanguageKoek");
-		Locale loc = resolver.resolveLocale(request);
+		Locale loc = resolver.resolveLocaleContext(request).getLocale();
 		assertThat(loc.getLanguage()).isEqualTo("nl");
-	}
-
-	@Test
-	void resolveLocaleWithoutCookie() {
-		request.addPreferredLocale(Locale.TAIWAN);
-
-		Locale loc = resolver.resolveLocale(request);
-		assertThat(loc).isEqualTo(request.getLocale());
 	}
 
 	@Test
@@ -296,16 +275,6 @@ class CookieLocaleResolverTests {
 		assertThat(loc.getLocale()).isEqualTo(request.getLocale());
 		assertThat(loc).isInstanceOf(TimeZoneAwareLocaleContext.class);
 		assertThat(((TimeZoneAwareLocaleContext) loc).getTimeZone()).isNull();
-	}
-
-	@Test
-	void resolveLocaleWithoutCookieAndDefaultLocale() {
-		request.addPreferredLocale(Locale.TAIWAN);
-
-		resolver.setDefaultLocale(Locale.GERMAN);
-
-		Locale loc = resolver.resolveLocale(request);
-		assertThat(loc).isEqualTo(Locale.GERMAN);
 	}
 
 	@Test
@@ -322,16 +291,6 @@ class CookieLocaleResolverTests {
 	}
 
 	@Test
-	void resolveLocaleWithCookieWithoutLocale() {
-		request.addPreferredLocale(Locale.TAIWAN);
-		Cookie cookie = new Cookie(CookieLocaleResolver.DEFAULT_COOKIE_NAME, "");
-		request.setCookies(cookie);
-
-		Locale loc = resolver.resolveLocale(request);
-		assertThat(loc).isEqualTo(request.getLocale());
-	}
-
-	@Test
 	void resolveLocaleContextWithCookieWithoutLocale() {
 		request.addPreferredLocale(Locale.TAIWAN);
 		Cookie cookie = new Cookie(CookieLocaleResolver.DEFAULT_COOKIE_NAME, "");
@@ -341,23 +300,6 @@ class CookieLocaleResolverTests {
 		assertThat(loc.getLocale()).isEqualTo(request.getLocale());
 		assertThat(loc).isInstanceOf(TimeZoneAwareLocaleContext.class);
 		assertThat(((TimeZoneAwareLocaleContext) loc).getTimeZone()).isNull();
-	}
-
-	@Test
-	void setLocaleToNull() {
-		request.addPreferredLocale(Locale.TAIWAN);
-		Cookie cookie = new Cookie(CookieLocaleResolver.DEFAULT_COOKIE_NAME, Locale.UK.toString());
-		request.setCookies(cookie);
-
-		resolver.setLocale(request, response, null);
-		Locale locale = (Locale) request.getAttribute(CookieLocaleResolver.LOCALE_REQUEST_ATTRIBUTE_NAME);
-		assertThat(locale).isEqualTo(Locale.TAIWAN);
-
-		Cookie[] cookies = response.getCookies();
-		assertThat(cookies).hasSize(1);
-		Cookie localeCookie = cookies[0];
-		assertThat(localeCookie.getName()).isEqualTo(CookieLocaleResolver.DEFAULT_COOKIE_NAME);
-		assertThat(localeCookie.getValue()).isEqualTo("");
 	}
 
 	@Test
@@ -371,24 +313,6 @@ class CookieLocaleResolverTests {
 		assertThat(locale).isEqualTo(Locale.TAIWAN);
 		TimeZone timeZone = (TimeZone) request.getAttribute(CookieLocaleResolver.TIME_ZONE_REQUEST_ATTRIBUTE_NAME);
 		assertThat(timeZone).isNull();
-
-		Cookie[] cookies = response.getCookies();
-		assertThat(cookies).hasSize(1);
-		Cookie localeCookie = cookies[0];
-		assertThat(localeCookie.getName()).isEqualTo(CookieLocaleResolver.DEFAULT_COOKIE_NAME);
-		assertThat(localeCookie.getValue()).isEqualTo("");
-	}
-
-	@Test
-	void setLocaleToNullWithDefault() {
-		request.addPreferredLocale(Locale.TAIWAN);
-		Cookie cookie = new Cookie(CookieLocaleResolver.DEFAULT_COOKIE_NAME, Locale.UK.toString());
-		request.setCookies(cookie);
-
-		resolver.setDefaultLocale(Locale.CANADA_FRENCH);
-		resolver.setLocale(request, response, null);
-		Locale locale = (Locale) request.getAttribute(CookieLocaleResolver.LOCALE_REQUEST_ATTRIBUTE_NAME);
-		assertThat(locale).isEqualTo(Locale.CANADA_FRENCH);
 
 		Cookie[] cookies = response.getCookies();
 		assertThat(cookies).hasSize(1);
@@ -424,7 +348,7 @@ class CookieLocaleResolverTests {
 
 		resolver.setDefaultLocaleFunction(request -> Locale.GERMAN);
 
-		assertThat(resolver.resolveLocale(request)).isEqualTo(Locale.GERMAN);
+		assertThat(resolver.resolveLocaleContext(request).getLocale()).isEqualTo(Locale.GERMAN);
 	}
 
 	@Test

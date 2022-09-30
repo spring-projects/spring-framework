@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.util.WebUtils;
 
 /**
- * {@link org.springframework.web.servlet.LocaleResolver} implementation that
+ * {@link org.springframework.web.servlet.LocaleContextResolver} implementation that
  * uses a locale attribute in the user's session in case of a custom setting,
  * with a fallback to the configured default locale, the request's
  * {@code Accept-Language} header, or the default locale for the server.
