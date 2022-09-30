@@ -40,6 +40,8 @@ import static org.mockito.Mockito.mock;
  */
 class DefaultClientHttpObservationConventionTests {
 
+	private final MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, "/test");
+
 	private final DefaultClientHttpObservationConvention observationConvention = new DefaultClientHttpObservationConvention();
 
 	@Test
@@ -49,36 +51,15 @@ class DefaultClientHttpObservationConventionTests {
 
 	@Test
 	void shouldHaveContextualName() {
-		ClientHttpObservationContext context = new ClientHttpObservationContext();
-		context.setCarrier(new MockClientHttpRequest(HttpMethod.GET, "/test"));
+		ClientHttpObservationContext context = new ClientHttpObservationContext(this.request);
 		assertThat(this.observationConvention.getContextualName(context)).isEqualTo("http get");
 	}
 
 	@Test
 	void supportsOnlyClientHttpObservationContext() {
-		assertThat(this.observationConvention.supportsContext(new ClientHttpObservationContext())).isTrue();
+		ClientHttpObservationContext context = new ClientHttpObservationContext(this.request);
+		assertThat(this.observationConvention.supportsContext(context)).isTrue();
 		assertThat(this.observationConvention.supportsContext(new Observation.Context())).isFalse();
-	}
-
-	@Test
-	void addsKeyValuesForNullExchange() {
-		ClientHttpObservationContext context = new ClientHttpObservationContext();
-		assertThat(this.observationConvention.getLowCardinalityKeyValues(context)).hasSize(5)
-				.contains(KeyValue.of("method", "none"), KeyValue.of("uri", "none"), KeyValue.of("status", "CLIENT_ERROR"),
-						KeyValue.of("exception", "none"), KeyValue.of("outcome", "UNKNOWN"));
-		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).hasSize(2)
-				.contains(KeyValue.of("client.name", "none"), KeyValue.of("uri.expanded", "none"));
-	}
-
-	@Test
-	void addsKeyValuesForExchangeWithException() {
-		ClientHttpObservationContext context = new ClientHttpObservationContext();
-		context.setError(new IllegalStateException("Could not create client request"));
-		assertThat(this.observationConvention.getLowCardinalityKeyValues(context)).hasSize(5)
-				.contains(KeyValue.of("method", "none"), KeyValue.of("uri", "none"), KeyValue.of("status", "CLIENT_ERROR"),
-						KeyValue.of("exception", "IllegalStateException"), KeyValue.of("outcome", "UNKNOWN"));
-		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).hasSize(2)
-				.contains(KeyValue.of("client.name", "none"), KeyValue.of("uri.expanded", "none"));
 	}
 
 	@Test
@@ -113,7 +94,7 @@ class DefaultClientHttpObservationConventionTests {
 
 	@Test
 	void addsKeyValueForNonResolvableStatus() throws Exception {
-		ClientHttpObservationContext context = new ClientHttpObservationContext();
+		ClientHttpObservationContext context = new ClientHttpObservationContext(this.request);
 		ClientHttpResponse response = mock(ClientHttpResponse.class);
 		context.setResponse(response);
 		given(response.getStatusCode()).willThrow(new IOException("test error"));
@@ -121,8 +102,7 @@ class DefaultClientHttpObservationConventionTests {
 	}
 
 	private ClientHttpObservationContext createContext(ClientHttpRequest request, ClientHttpResponse response) {
-		ClientHttpObservationContext context = new ClientHttpObservationContext();
-		context.setCarrier(request);
+		ClientHttpObservationContext context = new ClientHttpObservationContext(request);
 		context.setResponse(response);
 		return context;
 	}

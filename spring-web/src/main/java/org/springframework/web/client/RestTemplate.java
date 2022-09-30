@@ -839,14 +839,20 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 		Assert.notNull(url, "url is required");
 		Assert.notNull(method, "HttpMethod is required");
-		ClientHttpObservationContext observationContext = new ClientHttpObservationContext();
+		ClientHttpRequest request;
+		try {
+			request = createRequest(url, method);
+		}
+		catch (IOException ex) {
+			ResourceAccessException exception = createResourceAccessException(url, method, ex);
+			throw exception;
+		}
+		ClientHttpObservationContext observationContext = new ClientHttpObservationContext(request);
+		observationContext.setUriTemplate(uriTemplate);
 		Observation observation = ClientHttpObservation.HTTP_REQUEST.observation(this.observationConvention,
 				DEFAULT_OBSERVATION_CONVENTION, observationContext, this.observationRegistry).start();
-		observationContext.setUriTemplate(uriTemplate);
 		ClientHttpResponse response = null;
 		try {
-			ClientHttpRequest request = createRequest(url, method);
-			observationContext.setCarrier(request);
 			if (requestCallback != null) {
 				requestCallback.doWithRequest(request);
 			}
@@ -856,11 +862,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			return (responseExtractor != null ? responseExtractor.extractData(response) : null);
 		}
 		catch (IOException ex) {
-			String resource = url.toString();
-			String query = url.getRawQuery();
-			resource = (query != null ? resource.substring(0, resource.indexOf('?')) : resource);
-			ResourceAccessException exception = new ResourceAccessException("I/O error on " + method.name() +
-					" request for \"" + resource + "\": " + ex.getMessage(), ex);
+			ResourceAccessException exception = createResourceAccessException(url, method, ex);
 			observation.error(exception);
 			throw exception;
 		}
@@ -874,6 +876,15 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			}
 			observation.stop();
 		}
+	}
+
+	protected static ResourceAccessException createResourceAccessException(URI url, HttpMethod method, IOException ex) {
+		String resource = url.toString();
+		String query = url.getRawQuery();
+		resource = (query != null ? resource.substring(0, resource.indexOf('?')) : resource);
+		ResourceAccessException exception = new ResourceAccessException("I/O error on " + method.name() +
+				" request for \"" + resource + "\": " + ex.getMessage(), ex);
+		return exception;
 	}
 
 	/**

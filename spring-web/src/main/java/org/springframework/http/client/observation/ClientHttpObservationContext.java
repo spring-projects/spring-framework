@@ -36,8 +36,13 @@ public class ClientHttpObservationContext extends RequestReplySenderContext<Clie
 	@Nullable
 	private String uriTemplate;
 
-	public ClientHttpObservationContext() {
+	/**
+	 * Create an observation context for {@link ClientHttpRequest} observations.
+	 * @param request the HTTP client request
+	 */
+	public ClientHttpObservationContext(ClientHttpRequest request) {
 		super(ClientHttpObservationContext::setRequestHeader);
+		this.setCarrier(request);
 	}
 
 	private static void setRequestHeader(@Nullable ClientHttpRequest request, String name, String value) {

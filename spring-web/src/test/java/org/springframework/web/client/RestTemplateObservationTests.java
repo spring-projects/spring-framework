@@ -22,6 +22,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationHandler;
 import io.micrometer.observation.tck.TestObservationRegistry;
 import io.micrometer.observation.tck.TestObservationRegistryAssert;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,8 +37,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.observation.ClientHttpObservationContext;
 import org.springframework.http.converter.HttpMessageConverter;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -73,6 +77,7 @@ class RestTemplateObservationTests {
 		this.template.setRequestFactory(this.requestFactory);
 		this.template.setErrorHandler(this.errorHandler);
 		this.template.setObservationRegistry(this.observationRegistry);
+		this.observationRegistry.observationConfig().observationHandler(new ContextAssertionObservationHandler());
 	}
 
 	@Test
@@ -185,6 +190,19 @@ class RestTemplateObservationTests {
 	private TestObservationRegistryAssert.TestObservationRegistryAssertReturningObservationContextAssert assertThatHttpObservation() {
 		return TestObservationRegistryAssert.assertThat(this.observationRegistry)
 				.hasObservationWithNameEqualTo("http.client.requests").that();
+	}
+
+	static class ContextAssertionObservationHandler implements ObservationHandler<ClientHttpObservationContext> {
+
+		@Override
+		public boolean supportsContext(Observation.Context context) {
+			return context instanceof ClientHttpObservationContext;
+		}
+
+		@Override
+		public void onStart(ClientHttpObservationContext context) {
+			assertThat(context.getCarrier()).isNotNull();
+		}
 	}
 
 }
