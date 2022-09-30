@@ -474,7 +474,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 						// Possibly "c:" drive prefix on Windows, to be upper-cased for proper duplicate detection
 						filePath = StringUtils.capitalize(filePath);
 					}
-					// # can appear in directories/filenames, java.net.URL should not treat it as a fragment
+					// Since '#' can appear in directories/filenames, java.net.URL should not treat it as a fragment
 					filePath = StringUtils.replace(filePath, "#", "%23");
 					// Build URL that points to the root of the jar file
 					UrlResource jarResource = new UrlResource(ResourceUtils.JAR_URL_PREFIX +
@@ -602,8 +602,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	/**
 	 * Return whether the given resource handle indicates a jar resource
-	 * that the {@code doFindPathMatchingJarResources} method can handle.
-	 * <p>By default, the URL protocols "jar", "zip", "vfszip and "wsjar"
+	 * that the {@link #doFindPathMatchingJarResources} method can handle.
+	 * <p>By default, the URL protocols "jar", "zip", "vfszip, and "wsjar"
 	 * will be treated as jar resources. This template method allows for
 	 * detecting further kinds of jar-like resources, e.g. through
 	 * {@code instanceof} checks on the resource handle type.
@@ -620,7 +620,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * Find all resources in jar files that match the given location pattern
 	 * via the Ant-style PathMatcher.
 	 * @param rootDirResource the root directory as Resource
-	 * @param rootDirURL the pre-resolved root directory URL
+	 * @param rootDirUrl the pre-resolved root directory URL
 	 * @param subPattern the sub pattern to match (below the root directory)
 	 * @return a mutable Set of matching Resource instances
 	 * @throws IOException in case of I/O errors
@@ -628,10 +628,10 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see java.net.JarURLConnection
 	 * @see org.springframework.util.PathMatcher
 	 */
-	protected Set<Resource> doFindPathMatchingJarResources(Resource rootDirResource, URL rootDirURL, String subPattern)
+	protected Set<Resource> doFindPathMatchingJarResources(Resource rootDirResource, URL rootDirUrl, String subPattern)
 			throws IOException {
 
-		URLConnection con = rootDirURL.openConnection();
+		URLConnection con = rootDirUrl.openConnection();
 		JarFile jarFile;
 		String jarFileUrl;
 		String rootEntryPath;
@@ -651,7 +651,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			// We'll assume URLs of the format "jar:path!/entry", with the protocol
 			// being arbitrary as long as following the entry format.
 			// We'll also handle paths with and without leading "file:" prefix.
-			String urlFile = rootDirURL.getFile();
+			String urlFile = rootDirUrl.getFile();
 			try {
 				int separatorIndex = urlFile.indexOf(ResourceUtils.WAR_URL_SEPARATOR);
 				if (separatorIndex == -1) {
@@ -918,9 +918,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	private static class VfsResourceMatchingDelegate {
 
 		public static Set<Resource> findMatchingResources(
-				URL rootDirURL, String locationPattern, PathMatcher pathMatcher) throws IOException {
+				URL rootDirUrl, String locationPattern, PathMatcher pathMatcher) throws IOException {
 
-			Object root = VfsPatternUtils.findRoot(rootDirURL);
+			Object root = VfsPatternUtils.findRoot(rootDirUrl);
 			PatternVirtualFileVisitor visitor =
 					new PatternVirtualFileVisitor(VfsPatternUtils.getPath(root), locationPattern, pathMatcher);
 			VfsPatternUtils.visit(root, visitor);
