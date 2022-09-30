@@ -764,14 +764,15 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		try {
 			Path rootPath = fileSystem.getPath(rootDir);
 			String resourcePattern = rootPath.resolve(subPattern).toString();
-			Predicate<Path> resourcePatternMatches = path -> getPathMatcher().match(resourcePattern, path.toString());
+			Predicate<Path> isMatchingFile =
+					path -> Files.isRegularFile(path) && getPathMatcher().match(resourcePattern, path.toString());
 			if (logger.isTraceEnabled()) {
 				logger.trace("Searching directory [%s] for files matching pattern [%s]"
 						.formatted(rootPath.toAbsolutePath(), subPattern));
 			}
 			Set<Resource> result = new LinkedHashSet<>();
 			try (Stream<Path> files = Files.walk(rootPath)) {
-				files.filter(resourcePatternMatches).sorted().forEach(file -> {
+				files.filter(isMatchingFile).sorted().forEach(file -> {
 					try {
 						result.add(convertToResource(file.toUri()));
 					}

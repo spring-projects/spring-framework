@@ -18,7 +18,9 @@ package org.springframework.core.io.support;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URLDecoder;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 /**
  * Tests for {@link PathMatchingResourcePatternResolver}.
  *
- * <p>If tests fail, uncomment the diagnostics in {@link #assertFilenames}.
+ * <p>If tests fail, uncomment the diagnostics in {@link #assertFilenames(String, boolean, String...)}.
  *
  * @author Oliver Hutchison
  * @author Juergen Hoeller
@@ -62,7 +64,7 @@ class PathMatchingResourcePatternResolverTests {
 	class InvalidPatterns {
 
 		@Test
-		void invalidPrefixWithPatternElementInItThrowsException() throws IOException {
+		void invalidPrefixWithPatternElementInItThrowsException() {
 			assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() -> resolver.getResources("xx**:**/*.xy"));
 		}
 
@@ -73,22 +75,34 @@ class PathMatchingResourcePatternResolverTests {
 	class FileSystemResources {
 
 		@Test
-		void singleResourceOnFileSystem() throws IOException {
+		void singleResourceOnFileSystem() {
 			String pattern = "org/springframework/core/io/support/PathMatchingResourcePatternResolverTests.class";
-			assertFilenames(pattern, "PathMatchingResourcePatternResolverTests.class");
+			assertExactFilenames(pattern, "PathMatchingResourcePatternResolverTests.class");
 		}
 
 		@Test
-		void classpathStarWithPatternOnFileSystem() throws IOException {
+		void classpathStarWithPatternOnFileSystem() {
 			String pattern = "classpath*:org/springframework/core/io/sup*/*.class";
 			String[] expectedFilenames = StringUtils.concatenateStringArrays(CLASSES_IN_CORE_IO_SUPPORT, TEST_CLASSES_IN_CORE_IO_SUPPORT);
 			assertFilenames(pattern, expectedFilenames);
 		}
 
-		@Test
-		void getResourcesOnFileSystemContainingHashtagsInTheirFileNames() throws IOException {
-			String pattern = "classpath*:org/springframework/core/io/**/resource#test*.txt";
-			assertFilenames(pattern, "resource#test1.txt", "resource#test2.txt");
+		@Nested
+		class WithHashtagsInTheirFileNames {
+
+			@Test
+			void usingClasspathStarProtocol() {
+				String pattern = "classpath*:org/springframework/core/io/**/resource#test*.txt";
+				assertExactFilenames(pattern, "resource#test1.txt", "resource#test2.txt");
+			}
+
+			@Test
+			void usingFilePrototol() {
+				Path testResourcesDir = Path.of("src/test/resources").toAbsolutePath();
+				String pattern = "file:%s/scanned-resources/**".formatted(testResourcesDir);
+				assertExactFilenames(pattern, "resource#test1.txt", "resource#test2.txt");
+			}
+
 		}
 
 	}
@@ -98,57 +112,75 @@ class PathMatchingResourcePatternResolverTests {
 	class JarResources {
 
 		@Test
-		void singleResourceInJar() throws IOException {
+		void singleResourceInJar() {
 			String pattern = "org/reactivestreams/Publisher.class";
-			assertFilenames(pattern, "Publisher.class");
+			assertExactFilenames(pattern, "Publisher.class");
 		}
 
 		@Test
-		void singleResourceInRootOfJar() throws IOException {
+		void singleResourceInRootOfJar() {
 			String pattern = "aspectj_1_5_0.dtd";
-			assertFilenames(pattern, "aspectj_1_5_0.dtd");
+			assertExactFilenames(pattern, "aspectj_1_5_0.dtd");
 		}
 
 		@Test
-		void classpathWithPatternInJar() throws IOException {
+		void classpathWithPatternInJar() {
 			String pattern = "classpath:reactor/util/annotation/*.class";
-			assertFilenames(pattern, CLASSES_IN_REACTOR_UTIL_ANNOTATION);
+			assertExactFilenames(pattern, CLASSES_IN_REACTOR_UTIL_ANNOTATION);
 		}
 
 		@Test
-		void classpathStarWithPatternInJar() throws IOException {
+		void classpathStarWithPatternInJar() {
 			String pattern = "classpath*:reactor/util/annotation/*.class";
-			assertFilenames(pattern, CLASSES_IN_REACTOR_UTIL_ANNOTATION);
+			assertExactFilenames(pattern, CLASSES_IN_REACTOR_UTIL_ANNOTATION);
 		}
 
 		// Fails in a native image -- https://github.com/oracle/graal/issues/5020
 		@Test
 		void rootPatternRetrievalInJarFiles() throws IOException {
-			assertThat(resolver.getResources("classpath*:*.dtd")).extracting(Resource::getFilename)
+			assertThat(resolver.getResources("classpath*:aspectj*.dtd")).extracting(Resource::getFilename)
 				.as("Could not find aspectj_1_5_0.dtd in the root of the aspectjweaver jar")
-				.contains("aspectj_1_5_0.dtd");
+				.containsExactly("aspectj_1_5_0.dtd");
 		}
 
 	}
 
 
-	private void assertFilenames(String pattern, String... filenames) throws IOException {
-		Resource[] resources = resolver.getResources(pattern);
-		List<String> actualNames = Arrays.stream(resources)
-				.map(Resource::getFilename)
-				// Need to decode within GraalVM native image to get %23 converted to #.
-				.map(filename -> URLDecoder.decode(filename, UTF_8))
-				.sorted()
-				.toList();
+	private void assertFilenames(String pattern, String... filenames) {
+		assertFilenames(pattern, false, filenames);
+	}
 
-		// Uncomment the following if you encounter problems with matching against the file system.
-		// List<String> expectedNames = Arrays.stream(filenames).sorted().toList();
-		// System.out.println("----------------------------------------------------------------------");
-		// System.out.println("Expected: " + expectedNames);
-		// System.out.println("Actual: " + actualNames);
-		// Arrays.stream(resources).forEach(System.out::println);
+	private void assertExactFilenames(String pattern, String... filenames) {
+		assertFilenames(pattern, true, filenames);
+	}
 
-		assertThat(actualNames).as("subset of files found").contains(filenames);
+	private void assertFilenames(String pattern, boolean exactly, String... filenames) {
+		try {
+			Resource[] resources = resolver.getResources(pattern);
+			List<String> actualNames = Arrays.stream(resources)
+					.map(Resource::getFilename)
+					// Need to decode within GraalVM native image to get %23 converted to #.
+					.map(filename -> URLDecoder.decode(filename, UTF_8))
+					.sorted()
+					.toList();
+
+			// Uncomment the following if you encounter problems with matching against the file system.
+			// List<String> expectedNames = Arrays.stream(filenames).sorted().toList();
+			// System.out.println("----------------------------------------------------------------------");
+			// System.out.println("Expected: " + expectedNames);
+			// System.out.println("Actual: " + actualNames);
+			// Arrays.stream(resources).forEach(System.out::println);
+
+			if (exactly) {
+				assertThat(actualNames).as("subset of files found").containsExactlyInAnyOrder(filenames);
+			}
+			else {
+				assertThat(actualNames).as("subset of files found").contains(filenames);
+			}
+		}
+		catch (IOException ex) {
+			throw new UncheckedIOException(ex);
+		}
 	}
 
 }
