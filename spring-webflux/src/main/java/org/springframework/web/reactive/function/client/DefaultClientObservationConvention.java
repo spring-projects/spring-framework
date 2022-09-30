@@ -22,7 +22,7 @@ import io.micrometer.common.KeyValue;
 import io.micrometer.common.KeyValues;
 import io.micrometer.observation.ObservationConvention;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.http.observation.HttpOutcome;
 import org.springframework.util.StringUtils;
 
 /**
@@ -42,7 +42,6 @@ public class DefaultClientObservationConvention implements ClientObservationConv
 
 	private static final KeyValue EXCEPTION_NONE = KeyValue.of(ClientObservation.LowCardinalityKeyNames.EXCEPTION, "none");
 
-	private static final KeyValue OUTCOME_UNKNOWN = KeyValue.of(ClientObservation.LowCardinalityKeyNames.OUTCOME, "UNKNOWN");
 
 	private final String name;
 
@@ -117,15 +116,13 @@ public class DefaultClientObservationConvention implements ClientObservationConv
 
 	protected static KeyValue outcome(ClientObservationContext context) {
 		if (context.isAborted()) {
-			return OUTCOME_UNKNOWN;
+			return HttpOutcome.UNKNOWN.asKeyValue();
 		}
 		else if (context.getResponse() != null) {
-			HttpStatus status = HttpStatus.resolve(context.getResponse().statusCode().value());
-			if (status != null) {
-				return KeyValue.of(ClientObservation.LowCardinalityKeyNames.OUTCOME, status.series().name());
-			}
+			HttpOutcome httpOutcome = HttpOutcome.forStatus(context.getResponse().statusCode());
+			return httpOutcome.asKeyValue();
 		}
-		return OUTCOME_UNKNOWN;
+		return HttpOutcome.UNKNOWN.asKeyValue();
 	}
 
 	@Override

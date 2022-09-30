@@ -66,7 +66,7 @@ public class DefaultClientObservationTests {
 				.retrieve().bodyToMono(Void.class).block(Duration.ofSeconds(10));
 		verifyAndGetRequest();
 
-		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESSFUL")
+		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS")
 				.hasLowCardinalityKeyValue("uri", "/resource/{id}");
 	}
 

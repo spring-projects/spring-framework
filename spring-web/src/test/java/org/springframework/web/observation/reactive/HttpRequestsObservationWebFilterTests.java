@@ -55,7 +55,7 @@ class HttpRequestsObservationWebFilterTests {
 			assertThat(observationContext.get().getResponse()).isEqualTo(exchange.getResponse());
 		});
 		this.filter.filter(exchange, filterChain).block();
-		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESSFUL");
+		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS");
 	}
 
 	@Test

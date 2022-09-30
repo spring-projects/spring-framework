@@ -20,6 +20,8 @@ import io.micrometer.common.KeyValue;
 import io.micrometer.common.KeyValues;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.observation.HttpOutcome;
 
 /**
  * Default {@link HttpRequestsObservationConvention}.
@@ -43,8 +45,6 @@ public class DefaultHttpRequestsObservationConvention implements HttpRequestsObs
 	private static final KeyValue URI_REDIRECTION = KeyValue.of(HttpRequestsObservation.LowCardinalityKeyNames.URI, "REDIRECTION");
 
 	private static final KeyValue EXCEPTION_NONE = KeyValue.of(HttpRequestsObservation.LowCardinalityKeyNames.EXCEPTION, "none");
-
-	private static final KeyValue OUTCOME_UNKNOWN = KeyValue.of(HttpRequestsObservation.LowCardinalityKeyNames.OUTCOME, "UNKNOWN");
 
 	private static final KeyValue URI_EXPANDED_UNKNOWN = KeyValue.of(HttpRequestsObservation.HighCardinalityKeyNames.URI_EXPANDED, "UNKNOWN");
 
@@ -125,12 +125,11 @@ public class DefaultHttpRequestsObservationConvention implements HttpRequestsObs
 
 	protected KeyValue outcome(HttpRequestsObservationContext context) {
 		if (context.getResponse() != null) {
-			HttpStatus status = HttpStatus.resolve(context.getResponse().getStatus());
-			if (status != null) {
-				return KeyValue.of(HttpRequestsObservation.LowCardinalityKeyNames.OUTCOME, status.series().name());
-			}
+			HttpStatusCode statusCode = HttpStatusCode.valueOf(context.getResponse().getStatus());
+			HttpOutcome httpOutcome = HttpOutcome.forStatus(statusCode);
+			return httpOutcome.asKeyValue();
 		}
-		return OUTCOME_UNKNOWN;
+		return HttpOutcome.UNKNOWN.asKeyValue();
 	}
 
 	protected KeyValue uriExpanded(HttpRequestsObservationContext context) {

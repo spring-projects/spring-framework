@@ -88,7 +88,7 @@ class DefaultClientHttpObservationConventionTests {
 		context.setUriTemplate("/resource/{id}");
 		assertThat(this.observationConvention.getLowCardinalityKeyValues(context))
 				.contains(KeyValue.of("exception", "none"), KeyValue.of("method", "GET"), KeyValue.of("uri", "/resource/{id}"),
-						KeyValue.of("status", "200"), KeyValue.of("outcome", "SUCCESSFUL"));
+						KeyValue.of("status", "200"), KeyValue.of("outcome", "SUCCESS"));
 		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).hasSize(2)
 				.contains(KeyValue.of("client.name", "none"), KeyValue.of("uri.expanded", "/resource/42"));
 	}

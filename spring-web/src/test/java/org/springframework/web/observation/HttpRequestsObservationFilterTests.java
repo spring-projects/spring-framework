@@ -57,7 +57,7 @@ public class HttpRequestsObservationFilterTests {
 		assertThat(context.getCarrier()).isEqualTo(this.request);
 		assertThat(context.getResponse()).isEqualTo(this.response);
 		assertThat(context.getPathPattern()).isNull();
-		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESSFUL");
+		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS");
 	}
 
 	@Test
@@ -84,7 +84,7 @@ public class HttpRequestsObservationFilterTests {
 		HttpRequestsObservationContext context = (HttpRequestsObservationContext) this.request
 				.getAttribute(HttpRequestsObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE);
 		assertThat(context.getError()).get().isEqualTo(customError);
-		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESSFUL");
+		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS");
 	}
 
 	private TestObservationRegistryAssert.TestObservationRegistryAssertReturningObservationContextAssert assertThatHttpObservation() {

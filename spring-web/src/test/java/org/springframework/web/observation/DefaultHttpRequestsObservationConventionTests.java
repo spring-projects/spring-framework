@@ -64,7 +64,7 @@ class DefaultHttpRequestsObservationConventionTests {
 
 		assertThat(this.convention.getLowCardinalityKeyValues(this.context)).hasSize(5)
 				.contains(KeyValue.of("method", "POST"), KeyValue.of("uri", "UNKNOWN"), KeyValue.of("status", "200"),
-						KeyValue.of("exception", "none"), KeyValue.of("outcome", "SUCCESSFUL"));
+						KeyValue.of("exception", "none"), KeyValue.of("outcome", "SUCCESS"));
 		assertThat(this.convention.getHighCardinalityKeyValues(this.context)).hasSize(1)
 				.contains(KeyValue.of("uri.expanded", "/test/resource"));
 	}
@@ -77,7 +77,7 @@ class DefaultHttpRequestsObservationConventionTests {
 
 		assertThat(this.convention.getLowCardinalityKeyValues(this.context)).hasSize(5)
 				.contains(KeyValue.of("method", "GET"), KeyValue.of("uri", "/test/{name}"), KeyValue.of("status", "200"),
-						KeyValue.of("exception", "none"), KeyValue.of("outcome", "SUCCESSFUL"));
+						KeyValue.of("exception", "none"), KeyValue.of("outcome", "SUCCESS"));
 		assertThat(this.convention.getHighCardinalityKeyValues(this.context)).hasSize(1)
 				.contains(KeyValue.of("uri.expanded", "/test/resource"));
 	}

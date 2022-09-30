@@ -21,8 +21,8 @@ import java.io.IOException;
 import io.micrometer.common.KeyValue;
 import io.micrometer.common.KeyValues;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.observation.HttpOutcome;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
@@ -42,8 +42,6 @@ public class DefaultClientHttpObservationConvention implements ClientHttpObserva
 	private static final KeyValue METHOD_NONE = KeyValue.of(ClientHttpObservation.LowCardinalityKeyNames.METHOD, "none");
 
 	private static final KeyValue EXCEPTION_NONE = KeyValue.of(ClientHttpObservation.LowCardinalityKeyNames.EXCEPTION, "none");
-
-	private static final KeyValue OUTCOME_UNKNOWN = KeyValue.of(ClientHttpObservation.LowCardinalityKeyNames.OUTCOME, "UNKNOWN");
 
 	private static final KeyValue URI_EXPANDED_NONE = KeyValue.of(ClientHttpObservation.HighCardinalityKeyNames.URI_EXPANDED, "none");
 
@@ -122,16 +120,14 @@ public class DefaultClientHttpObservationConvention implements ClientHttpObserva
 	protected static KeyValue outcome(ClientHttpObservationContext context) {
 		try {
 			if (context.getResponse() != null) {
-				HttpStatus status = HttpStatus.resolve(context.getResponse().getStatusCode().value());
-				if (status != null) {
-					return KeyValue.of(ClientHttpObservation.LowCardinalityKeyNames.OUTCOME, status.series().name());
-				}
+				HttpOutcome httpOutcome = HttpOutcome.forStatus(context.getResponse().getStatusCode());
+				return httpOutcome.asKeyValue();
 			}
 		}
 		catch (IOException ex) {
 			// Continue
 		}
-		return OUTCOME_UNKNOWN;
+		return HttpOutcome.UNKNOWN.asKeyValue();
 	}
 
 	@Override
