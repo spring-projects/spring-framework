@@ -44,6 +44,7 @@ import org.springframework.util.StringUtils;
  */
 public class CustomDateEditor extends PropertyEditorSupport {
 
+	@Nullable
 	private final DateFormat dateFormat;
 
 	private final boolean allowEmpty;
