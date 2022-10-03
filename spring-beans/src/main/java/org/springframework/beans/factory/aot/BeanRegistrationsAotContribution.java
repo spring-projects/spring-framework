@@ -26,7 +26,10 @@ import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
+import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
@@ -36,6 +39,7 @@ import org.springframework.javapoet.MethodSpec;
  * register bean definitions.
  *
  * @author Phillip Webb
+ * @author Brian Clozel
  * @since 6.0
  * @see BeanRegistrationsAotProcessor
  */
@@ -44,11 +48,11 @@ class BeanRegistrationsAotContribution
 
 	private static final String BEAN_FACTORY_PARAMETER_NAME = "beanFactory";
 
-	private final Map<String, BeanDefinitionMethodGenerator> registrations;
+	private final Map<RegisteredBean, BeanDefinitionMethodGenerator> registrations;
 
 
 	BeanRegistrationsAotContribution(
-			Map<String, BeanDefinitionMethodGenerator> registrations) {
+			Map<RegisteredBean, BeanDefinitionMethodGenerator> registrations) {
 
 		this.registrations = registrations;
 	}
@@ -67,7 +71,14 @@ class BeanRegistrationsAotContribution
 		GeneratedMethod generatedMethod = codeGenerator.getMethods().add("registerBeanDefinitions", method ->
 				generateRegisterMethod(method, generationContext, codeGenerator));
 		beanFactoryInitializationCode.addInitializer(generatedMethod.toMethodReference());
+		generateRegisterHints(generationContext.getRuntimeHints(), this.registrations);
 	}
+
+	private void generateRegisterHints(RuntimeHints runtimeHints, Map<RegisteredBean, BeanDefinitionMethodGenerator> registrations) {
+		registrations.keySet().forEach(registeredBean -> runtimeHints.reflection()
+				.registerType(registeredBean.getBeanClass(), MemberCategory.INTROSPECT_DECLARED_METHODS));
+	}
+
 
 	private void generateRegisterMethod(MethodSpec.Builder method,
 			GenerationContext generationContext,
@@ -78,14 +89,14 @@ class BeanRegistrationsAotContribution
 		method.addParameter(DefaultListableBeanFactory.class,
 				BEAN_FACTORY_PARAMETER_NAME);
 		CodeBlock.Builder code = CodeBlock.builder();
-		this.registrations.forEach((beanName, beanDefinitionMethodGenerator) -> {
+		this.registrations.forEach((registeredBean, beanDefinitionMethodGenerator) -> {
 			MethodReference beanDefinitionMethod = beanDefinitionMethodGenerator
 					.generateBeanDefinitionMethod(generationContext,
 							beanRegistrationsCode);
 			CodeBlock methodInvocation = beanDefinitionMethod.toInvokeCodeBlock(
 					ArgumentCodeGenerator.none(), beanRegistrationsCode.getClassName());
 			code.addStatement("$L.registerBeanDefinition($S, $L)",
-					BEAN_FACTORY_PARAMETER_NAME, beanName,
+					BEAN_FACTORY_PARAMETER_NAME, registeredBean.getBeanName(),
 					methodInvocation);
 		});
 		method.addCode(code.build());

@@ -27,6 +27,7 @@ import org.springframework.beans.factory.support.RegisteredBean;
  * register beans.
  *
  * @author Phillip Webb
+ * @author Brian Clozel
  * @since 6.0
  */
 class BeanRegistrationsAotProcessor implements BeanFactoryInitializationAotProcessor {
@@ -35,13 +36,13 @@ class BeanRegistrationsAotProcessor implements BeanFactoryInitializationAotProce
 	public BeanRegistrationsAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
 		BeanDefinitionMethodGeneratorFactory beanDefinitionMethodGeneratorFactory =
 				new BeanDefinitionMethodGeneratorFactory(beanFactory);
-		Map<String, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
+		Map<RegisteredBean, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
 		for (String beanName : beanFactory.getBeanDefinitionNames()) {
 			RegisteredBean registeredBean = RegisteredBean.of(beanFactory, beanName);
 			BeanDefinitionMethodGenerator beanDefinitionMethodGenerator = beanDefinitionMethodGeneratorFactory
 					.getBeanDefinitionMethodGenerator(registeredBean, null);
 			if (beanDefinitionMethodGenerator != null) {
-				registrations.put(beanName, beanDefinitionMethodGenerator);
+				registrations.put(registeredBean, beanDefinitionMethodGenerator);
 			}
 		}
 		if (registrations.isEmpty()) {
