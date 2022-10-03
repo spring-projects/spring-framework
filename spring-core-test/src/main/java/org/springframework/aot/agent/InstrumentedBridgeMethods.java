@@ -18,7 +18,6 @@ package org.springframework.aot.agent;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
@@ -335,32 +334,6 @@ public abstract class InstrumentedBridgeMethods {
 	/*
 	 * Bridge methods for java.lang.reflect.Method
 	 */
-
-	public static Annotation[] methodgetAnnotations(Method method) {
-		Annotation[] result = null;
-		try {
-			result = method.getAnnotations();
-		}
-		finally {
-			RecordedInvocation invocation = RecordedInvocation.of(InstrumentedMethod.METHOD_GETANNOTATIONS)
-					.onInstance(method).returnValue(result).build();
-			RecordedInvocationsPublisher.publish(invocation);
-		}
-		return result;
-	}
-
-	public static Class<?>[] methodgetParameterTypes(Method method) {
-		Class<?>[] result = null;
-		try {
-			result = method.getParameterTypes();
-		}
-		finally {
-			RecordedInvocation invocation = RecordedInvocation.of(InstrumentedMethod.METHOD_GETPARAMETERTYPES)
-					.onInstance(method).returnValue(result).build();
-			RecordedInvocationsPublisher.publish(invocation);
-		}
-		return result;
-	}
 
 	public static Object methodinvoke(Method method, Object object, Object... arguments) throws InvocationTargetException, IllegalAccessException {
 		Object result = null;

@@ -166,22 +166,6 @@ public class RuntimeHintsAgentTests {
 				}, MethodReference.of(Method.class, "invoke")),
 				Arguments.of((Runnable) () -> {
 					try {
-						toStringMethod.getAnnotations();
-					}
-					catch (Exception e) {
-						throw new RuntimeException(e);
-					}
-				}, MethodReference.of(Method.class, "getAnnotations")),
-				Arguments.of((Runnable) () -> {
-					try {
-						toStringMethod.getParameterTypes();
-					}
-					catch (Exception e) {
-						throw new RuntimeException(e);
-					}
-				}, MethodReference.of(Method.class, "getParameterTypes")),
-				Arguments.of((Runnable) () -> {
-					try {
 						privateGreetMethod.invoke(new PrivateClass());
 					}
 					catch (Exception e) {

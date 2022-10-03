@@ -243,29 +243,6 @@ public class ReflectionHintsPredicates {
 					.anyMatch(memberCategory -> getTypeHint(hints).getMemberCategories().contains(memberCategory)));
 		}
 
-		/**
-		 * Refine the current predicate to only match if a hint is present for any of its constructors.
-		 * @return the refined {@link RuntimeHints} predicate
-		 */
-		public Predicate<RuntimeHints> withAnyConstructor() {
-			return this.and(hints -> getTypeHint(hints).constructors().findAny().isPresent());
-		}
-
-		/**
-		 * Refine the current predicate to only match if a hint is present for any of its methods.
-		 * @return the refined {@link RuntimeHints} predicate
-		 */
-		public Predicate<RuntimeHints> withAnyMethod() {
-			return this.and(hints -> getTypeHint(hints).methods().findAny().isPresent());
-		}
-
-		/**
-		 * Refine the current predicate to only match if a hint is present for any of its fields.
-		 * @return the refined {@link RuntimeHints} predicate
-		 */
-		public Predicate<RuntimeHints> withAnyField() {
-			return this.and(hints -> getTypeHint(hints).fields().findAny().isPresent());
-		}
 	}
 
 	public abstract static class ExecutableHintPredicate<T extends Executable> implements Predicate<RuntimeHints> {

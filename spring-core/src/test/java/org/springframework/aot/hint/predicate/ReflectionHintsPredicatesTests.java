@@ -296,18 +296,6 @@ class ReflectionHintsPredicatesTests {
 			assertPredicateMatches(reflection.onConstructor(privateConstructor).invoke());
 		}
 
-		@Test
-		void reflectionOnAnyConstructorDoesNotMatchTypeReflection() {
-			runtimeHints.reflection().registerType(SampleClass.class);
-			assertPredicateDoesNotMatch(reflection.onType(SampleClass.class).withAnyConstructor());
-		}
-
-		@Test
-		void reflectionOnAnyConstructorMatchesConstructorReflection() {
-			runtimeHints.reflection().registerConstructor(publicConstructor, ExecutableMode.INVOKE);
-			assertPredicateMatches(reflection.onType(SampleClass.class).withAnyConstructor());
-		}
-
 	}
 
 	@Nested
@@ -457,18 +445,6 @@ class ReflectionHintsPredicatesTests {
 			assertPredicateMatches(reflection.onMethod(SampleClass.class, "privateMethod").invoke());
 		}
 
-		@Test
-		void reflectionOnAnyMethodDoesNotMatchTypeReflection() {
-			runtimeHints.reflection().registerType(SampleClass.class);
-			assertPredicateDoesNotMatch(reflection.onType(SampleClass.class).withAnyMethod());
-		}
-
-		@Test
-		void reflectionOnAnyMethodMatchesMethodReflection() {
-			runtimeHints.reflection().registerMethod(publicMethod, ExecutableMode.INVOKE);
-			assertPredicateMatches(reflection.onType(SampleClass.class).withAnyMethod());
-		}
-
 	}
 
 	@Nested
@@ -525,18 +501,6 @@ class ReflectionHintsPredicatesTests {
 		void privateFieldReflectionMatchesDeclaredFieldsHint() {
 			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.DECLARED_FIELDS);
 			assertPredicateMatches(reflection.onField(SampleClass.class, "privateField"));
-		}
-
-		@Test
-		void reflectionOnAnyFieldDoesNotMatchTypeReflection() {
-			runtimeHints.reflection().registerType(SampleClass.class);
-			assertPredicateDoesNotMatch(reflection.onType(SampleClass.class).withAnyField());
-		}
-
-		@Test
-		void reflectionOnAnyFieldMatchesFieldReflection() {
-			runtimeHints.reflection().registerField(publicField);
-			assertPredicateMatches(reflection.onType(SampleClass.class).withAnyField());
 		}
 
 	}
