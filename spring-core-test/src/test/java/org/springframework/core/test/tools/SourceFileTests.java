@@ -152,8 +152,8 @@ class SourceFileTests {
 			package com.example;
 
 			public record RecordProperties(
-					@org.springframework.boot.context.properties.bind.DefaultValue("default-value-1") String property1,
-					@org.springframework.boot.context.properties.bind.DefaultValue("default-value-2") String property2) {
+					@org.springframework.lang.NonNull("test") String property1,
+					@org.springframework.lang.NonNull("test") String property2) {
 			}
 		""");
 		assertThat(sourceFile.getClassName()).isEqualTo("com.example.RecordProperties");
