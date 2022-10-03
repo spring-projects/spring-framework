@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.annotation;
+package org.springframework.beans.testfixture.beans;
 
-import org.springframework.core.env.Environment;
+@SuppressWarnings("unused")
+public class TestBeanWithPackagePrivateMethod {
 
-public class PrivateFieldInjectionSample {
+	private int age;
 
-	@Autowired
-	@SuppressWarnings("unused")
-	private Environment environment;
+	void setAge(int age) {
+		this.age = age;
+	}
 
 }

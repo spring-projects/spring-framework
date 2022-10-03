@@ -20,9 +20,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 
-import org.springframework.aot.generate.AccessVisibility;
+import org.springframework.aot.generate.AccessControl;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -45,11 +46,15 @@ import org.springframework.util.ReflectionUtils;
  */
 class InjectionCodeGenerator {
 
+	private final ClassName targetClassName;
+
 	private final RuntimeHints hints;
 
 
-	InjectionCodeGenerator(RuntimeHints hints) {
+	InjectionCodeGenerator(ClassName targetClassName, RuntimeHints hints) {
+		Assert.notNull(hints, "TargetClassName must not be null");
 		Assert.notNull(hints, "Hints must not be null");
+		this.targetClassName = targetClassName;
 		this.hints = hints;
 	}
 
@@ -72,9 +77,8 @@ class InjectionCodeGenerator {
 			CodeBlock resourceToInject) {
 
 		CodeBlock.Builder code = CodeBlock.builder();
-		AccessVisibility visibility = AccessVisibility.forMember(field);
-		if (visibility == AccessVisibility.PRIVATE
-				|| visibility == AccessVisibility.PROTECTED) {
+		AccessControl accessControl = AccessControl.forMember(field);
+		if (!accessControl.isAccessibleFrom(this.targetClassName)) {
 			this.hints.reflection().registerField(field);
 			code.addStatement("$T field = $T.findField($T.class, $S)", Field.class,
 					ReflectionUtils.class, field.getDeclaringClass(), field.getName());
@@ -95,9 +99,8 @@ class InjectionCodeGenerator {
 		Assert.isTrue(method.getParameterCount() == 1,
 				"Method '" + method.getName() + "' must declare a single parameter");
 		CodeBlock.Builder code = CodeBlock.builder();
-		AccessVisibility visibility = AccessVisibility.forMember(method);
-		if (visibility == AccessVisibility.PRIVATE
-				|| visibility == AccessVisibility.PROTECTED) {
+		AccessControl accessControl = AccessControl.forMember(method);
+		if (!accessControl.isAccessibleFrom(this.targetClassName)) {
 			this.hints.reflection().registerMethod(method, ExecutableMode.INVOKE);
 			code.addStatement("$T method = $T.findMethod($T.class, $S, $T.class)",
 					Method.class, ReflectionUtils.class, method.getDeclaringClass(),

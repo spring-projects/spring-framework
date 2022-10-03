@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.annotation;
+package org.springframework.beans.testfixture.beans.factory.annotation;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 
 public class PackagePrivateMethodInjectionSample {
 
-	@SuppressWarnings("unused")
-	private Environment environment;
+	public Environment environment;
 
 	@Autowired
 	void setTestBean(Environment environment) {

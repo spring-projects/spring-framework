@@ -24,7 +24,8 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
-import org.springframework.aot.generate.AccessVisibility;
+import org.springframework.aot.generate.AccessControl;
+import org.springframework.aot.generate.AccessControl.Visibility;
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
@@ -111,10 +112,9 @@ class InstanceSupplierCodeGenerator {
 		Class<?> declaringClass = ClassUtils
 				.getUserClass(constructor.getDeclaringClass());
 		boolean dependsOnBean = ClassUtils.isInnerClass(declaringClass);
-		AccessVisibility accessVisibility = getAccessVisibility(registeredBean,
-				constructor);
-		if (accessVisibility == AccessVisibility.PUBLIC
-				|| accessVisibility == AccessVisibility.PACKAGE_PRIVATE) {
+		Visibility accessVisibility = getAccessVisibility(registeredBean, constructor);
+		if (accessVisibility == Visibility.PUBLIC
+				|| accessVisibility == Visibility.PACKAGE_PRIVATE) {
 			return generateCodeForAccessibleConstructor(beanName, beanClass, constructor,
 					dependsOnBean, declaringClass);
 		}
@@ -207,10 +207,9 @@ class InstanceSupplierCodeGenerator {
 		Class<?> declaringClass = ClassUtils
 				.getUserClass(factoryMethod.getDeclaringClass());
 		boolean dependsOnBean = !Modifier.isStatic(factoryMethod.getModifiers());
-		AccessVisibility accessVisibility = getAccessVisibility(registeredBean,
-				factoryMethod);
-		if (accessVisibility == AccessVisibility.PUBLIC
-				|| accessVisibility == AccessVisibility.PACKAGE_PRIVATE) {
+		Visibility accessVisibility = getAccessVisibility(registeredBean, factoryMethod);
+		if (accessVisibility == Visibility.PUBLIC
+				|| accessVisibility == Visibility.PACKAGE_PRIVATE) {
 			return generateCodeForAccessibleFactoryMethod(beanName, beanClass, factoryMethod,
 					declaringClass, dependsOnBean);
 		}
@@ -314,13 +313,13 @@ class InstanceSupplierCodeGenerator {
 		return code.build();
 	}
 
-	protected AccessVisibility getAccessVisibility(RegisteredBean registeredBean,
+	private Visibility getAccessVisibility(RegisteredBean registeredBean,
 			Member member) {
 
-		AccessVisibility beanTypeAccessVisibility = AccessVisibility
+		AccessControl beanTypeAccessControl = AccessControl
 				.forResolvableType(registeredBean.getBeanType());
-		AccessVisibility memberAccessVisibility = AccessVisibility.forMember(member);
-		return AccessVisibility.lowest(beanTypeAccessVisibility, memberAccessVisibility);
+		AccessControl memberAccessControl = AccessControl.forMember(member);
+		return AccessControl.lowest(beanTypeAccessControl, memberAccessControl).getVisibility();
 	}
 
 	private CodeBlock generateParameterTypesCode(Class<?>[] parameterTypes, int offset) {

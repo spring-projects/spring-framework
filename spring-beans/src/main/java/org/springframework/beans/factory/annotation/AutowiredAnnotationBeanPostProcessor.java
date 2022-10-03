@@ -40,7 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.aot.generate.AccessVisibility;
+import org.springframework.aot.generate.AccessControl;
 import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GenerationContext;
@@ -81,6 +81,7 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -941,7 +942,8 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 				method.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER);
 				method.addParameter(this.target, INSTANCE_PARAMETER);
 				method.returns(this.target);
-				method.addCode(generateMethodCode(generationContext.getRuntimeHints()));
+				method.addCode(generateMethodCode(generatedClass.getName(),
+						generationContext.getRuntimeHints()));
 			});
 			beanRegistrationCode.addInstancePostProcessor(generateMethod.toMethodReference());
 
@@ -950,41 +952,42 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			}
 		}
 
-		private CodeBlock generateMethodCode(RuntimeHints hints) {
+		private CodeBlock generateMethodCode(ClassName targetClassName, RuntimeHints hints) {
 			CodeBlock.Builder code = CodeBlock.builder();
 			for (AutowiredElement autowiredElement : this.autowiredElements) {
-				code.addStatement(
-						generateMethodStatementForElement(autowiredElement, hints));
+				code.addStatement(generateMethodStatementForElement(
+						targetClassName, autowiredElement, hints));
 			}
 			code.addStatement("return $L", INSTANCE_PARAMETER);
 			return code.build();
 		}
 
-		private CodeBlock generateMethodStatementForElement(
+		private CodeBlock generateMethodStatementForElement(ClassName targetClassName,
 				AutowiredElement autowiredElement, RuntimeHints hints) {
 
 			Member member = autowiredElement.getMember();
 			boolean required = autowiredElement.required;
 			if (member instanceof Field field) {
-				return generateMethodStatementForField(field, required, hints);
+				return generateMethodStatementForField(
+						targetClassName, field, required, hints);
 			}
 			if (member instanceof Method method) {
-				return generateMethodStatementForMethod(method, required, hints);
+				return generateMethodStatementForMethod(
+						targetClassName, method, required, hints);
 			}
 			throw new IllegalStateException(
 					"Unsupported member type " + member.getClass().getName());
 		}
 
-		private CodeBlock generateMethodStatementForField(Field field, boolean required,
-				RuntimeHints hints) {
+		private CodeBlock generateMethodStatementForField(ClassName targetClassName,
+				Field field, boolean required, RuntimeHints hints) {
 
 			hints.reflection().registerField(field);
 			CodeBlock resolver = CodeBlock.of("$T.$L($S)",
 					AutowiredFieldValueResolver.class,
 					(!required) ? "forField" : "forRequiredField", field.getName());
-			AccessVisibility visibility = AccessVisibility.forMember(field);
-			if (visibility == AccessVisibility.PRIVATE
-					|| visibility == AccessVisibility.PROTECTED) {
+			AccessControl accessControl = AccessControl.forMember(field);
+			if (!accessControl.isAccessibleFrom(targetClassName)) {
 				return CodeBlock.of("$L.resolveAndSet($L, $L)", resolver,
 						REGISTERED_BEAN_PARAMETER, INSTANCE_PARAMETER);
 			}
@@ -992,8 +995,8 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 					field.getName(), resolver, REGISTERED_BEAN_PARAMETER);
 		}
 
-		private CodeBlock generateMethodStatementForMethod(Method method,
-				boolean required, RuntimeHints hints) {
+		private CodeBlock generateMethodStatementForMethod(ClassName targetClassName,
+				Method method, boolean required, RuntimeHints hints) {
 
 			CodeBlock.Builder code = CodeBlock.builder();
 			code.add("$T.$L", AutowiredMethodArgumentsResolver.class,
@@ -1004,9 +1007,8 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 						generateParameterTypesCode(method.getParameterTypes()));
 			}
 			code.add(")");
-			AccessVisibility visibility = AccessVisibility.forMember(method);
-			if (visibility == AccessVisibility.PRIVATE
-					|| visibility == AccessVisibility.PROTECTED) {
+			AccessControl accessControl = AccessControl.forMember(method);
+			if (!accessControl.isAccessibleFrom(targetClassName)) {
 				hints.reflection().registerMethod(method, ExecutableMode.INVOKE);
 				code.add(".resolveAndInvoke($L, $L)", REGISTERED_BEAN_PARAMETER,
 						INSTANCE_PARAMETER);

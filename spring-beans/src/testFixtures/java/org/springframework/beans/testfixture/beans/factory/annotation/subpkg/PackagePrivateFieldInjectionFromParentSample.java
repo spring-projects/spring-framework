@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.annotation;
+package org.springframework.beans.testfixture.beans.factory.annotation.subpkg;
 
-import org.springframework.core.env.Environment;
+import org.springframework.beans.testfixture.beans.factory.annotation.PackagePrivateFieldInjectionSample;
 
-public class PackagePrivateFieldInjectionSample {
+public class PackagePrivateFieldInjectionFromParentSample extends PackagePrivateFieldInjectionSample {
 
-	@Autowired
-	Environment environment;
+	// see environment from parent
 
 }
