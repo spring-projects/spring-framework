@@ -30,9 +30,9 @@ import org.springframework.lang.Nullable;
  *
  * <p>Note: Using this interface on a registered bean will cause the bean
  * <em>and</em> all of its dependencies to be initialized during AOT processing.
- * We generally recommend that this interface is only used with infrastructure beans
- * such as {@link BeanFactoryPostProcessor} which have limited dependencies and
- * are already initialized early in the bean factory lifecycle.
+ * We generally recommend that this interface is only used with infrastructure
+ * beans such as {@link BeanFactoryPostProcessor} which have limited dependencies
+ * and are already initialized early in the bean factory lifecycle.
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
