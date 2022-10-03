@@ -57,8 +57,8 @@ public class MethodProxy {
 		proxy.createInfo = new CreateInfo(c1, c2);
 
 		// SPRING PATCH BEGIN
-		if (!c1.isInterface() && c1 != Object.class) {
-			// Try early initialization for overridden methods on subclasses
+		if (!c1.isInterface() && c1 != Object.class && !Factory.class.isAssignableFrom(c2)) {
+			// Try early initialization for overridden methods on specifically purposed subclasses
 			try {
 				proxy.init();
 			}
