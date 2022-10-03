@@ -17,6 +17,9 @@
 package org.springframework.web.reactive.socket.client;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
@@ -148,18 +151,26 @@ public class ReactorNetty2WebSocketClient implements WebSocketClient {
 				.next();
 	}
 
-	private void setNettyHeaders(HttpHeaders httpHeaders, io.netty5.handler.codec.http.HttpHeaders nettyHeaders) {
+	private void setNettyHeaders(HttpHeaders httpHeaders, io.netty5.handler.codec.http.headers.HttpHeaders nettyHeaders) {
 		httpHeaders.forEach(nettyHeaders::set);
 	}
 
 	private HttpHeaders toHttpHeaders(WebsocketInbound inbound) {
 		HttpHeaders headers = new HttpHeaders();
-		io.netty5.handler.codec.http.HttpHeaders nettyHeaders = inbound.headers();
+		io.netty5.handler.codec.http.headers.HttpHeaders nettyHeaders = inbound.headers();
 		nettyHeaders.forEach(entry -> {
-			String name = entry.getKey();
-			headers.put(name, nettyHeaders.getAll(name));
+			CharSequence name = entry.getKey();
+			headers.put(name.toString(), getAll(nettyHeaders.valuesIterator(name)));
 		});
 		return headers;
+	}
+
+	private static List<String> getAll(Iterator<CharSequence> valuesIterator) {
+		List<String> result = new ArrayList<>();
+		while (valuesIterator.hasNext()) {
+			result.add(valuesIterator.next().toString());
+		}
+		return result;
 	}
 
 }

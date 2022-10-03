@@ -19,7 +19,7 @@ package org.springframework.messaging.tcp.reactor;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
-import io.netty5.buffer.api.Buffer;
+import io.netty5.buffer.Buffer;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.netty5.NettyInbound;

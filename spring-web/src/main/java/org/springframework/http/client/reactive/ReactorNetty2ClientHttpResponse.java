@@ -20,8 +20,8 @@ import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 
-import io.netty5.handler.codec.http.cookie.Cookie;
-import io.netty5.handler.codec.http.cookie.DefaultCookie;
+import io.netty5.handler.codec.http.headers.DefaultHttpSetCookie;
+import io.netty5.handler.codec.http.headers.HttpSetCookie;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
@@ -129,11 +129,11 @@ class ReactorNetty2ClientHttpResponse implements ClientHttpResponse {
 		MultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
 		this.response.cookies().values().stream()
 				.flatMap(Collection::stream)
-				.forEach(cookie -> result.add(cookie.name(),
-						ResponseCookie.fromClientResponse(cookie.name(), cookie.value())
-								.domain(cookie.domain())
-								.path(cookie.path())
-								.maxAge(cookie.maxAge())
+				.forEach(cookie -> result.add(cookie.name().toString(),
+						ResponseCookie.fromClientResponse(cookie.name().toString(), cookie.value().toString())
+								.domain(cookie.domain() != null ? cookie.domain().toString() : null)
+								.path(cookie.path() != null ? cookie.path().toString() : null)
+								.maxAge(cookie.maxAge() != null ? cookie.maxAge() : -1L)
 								.secure(cookie.isSecure())
 								.httpOnly(cookie.isHttpOnly())
 								.sameSite(getSameSite(cookie))
@@ -142,8 +142,8 @@ class ReactorNetty2ClientHttpResponse implements ClientHttpResponse {
 	}
 
 	@Nullable
-	private static String getSameSite(Cookie cookie) {
-		if (cookie instanceof DefaultCookie defaultCookie) {
+	private static String getSameSite(HttpSetCookie cookie) {
+		if (cookie instanceof DefaultHttpSetCookie defaultCookie) {
 			if (defaultCookie.sameSite() != null) {
 				return defaultCookie.sameSite().name();
 			}

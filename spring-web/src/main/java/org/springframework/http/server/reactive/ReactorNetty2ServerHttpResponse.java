@@ -19,7 +19,7 @@ package org.springframework.http.server.reactive;
 import java.nio.file.Path;
 import java.util.List;
 
-import io.netty5.buffer.api.Buffer;
+import io.netty5.buffer.Buffer;
 import io.netty5.channel.ChannelId;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

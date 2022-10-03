@@ -18,7 +18,7 @@ package org.springframework.core.codec;
 
 import java.util.Map;
 
-import io.netty5.buffer.api.Buffer;
+import io.netty5.buffer.Buffer;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
