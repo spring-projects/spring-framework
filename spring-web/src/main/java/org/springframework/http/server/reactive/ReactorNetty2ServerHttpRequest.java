@@ -80,9 +80,9 @@ class ReactorNetty2ServerHttpRequest extends AbstractServerHttpRequest {
 
 	private static URI resolveBaseUrl(HttpServerRequest request) throws URISyntaxException {
 		String scheme = getScheme(request);
-		CharSequence headerCS = request.requestHeaders().get(HttpHeaderNames.HOST);
-		if (headerCS != null) {
-			String header = headerCS.toString();
+		CharSequence charSequence = request.requestHeaders().get(HttpHeaderNames.HOST);
+		if (charSequence != null) {
+			String header = charSequence.toString();
 			final int portIndex;
 			if (header.startsWith("[")) {
 				portIndex = header.indexOf(':', header.indexOf(']'));

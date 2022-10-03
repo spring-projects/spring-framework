@@ -19,12 +19,11 @@ package org.springframework.http.server.reactive;
 import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.stream.StreamSupport;
 
 import io.netty5.handler.codec.http.headers.HttpHeaders;
@@ -55,7 +54,7 @@ final class Netty5HeadersAdapter implements MultiValueMap<String, String> {
 	@Nullable
 	public String getFirst(String key) {
 		CharSequence value = this.headers.get(key);
-		return value != null ? value.toString() : null;
+		return (value != null ? value.toString() : null);
 	}
 
 	@Override
@@ -116,16 +115,18 @@ final class Netty5HeadersAdapter implements MultiValueMap<String, String> {
 	@Override
 	public boolean containsValue(Object value) {
 		return (value instanceof String &&
-				StreamSupport.stream(
-								Spliterators.spliteratorUnknownSize(this.headers.iterator(), Spliterator.ORDERED), false)
+				StreamSupport.stream(this.headers.spliterator(), false)
 						.anyMatch(entry -> value.equals(entry.getValue())));
 	}
 
 	@Override
 	@Nullable
 	public List<String> get(Object key) {
-		if (containsKey(key)) {
-			return getAll(this.headers.valuesIterator((CharSequence) key));
+		Iterator<CharSequence> iterator = this.headers.valuesIterator((CharSequence) key);
+		if (iterator.hasNext()) {
+			List<String> result = new ArrayList<>();
+			iterator.forEachRemaining(value -> result.add(value.toString()));
+			return result;
 		}
 		return null;
 	}
@@ -133,7 +134,7 @@ final class Netty5HeadersAdapter implements MultiValueMap<String, String> {
 	@Nullable
 	@Override
 	public List<String> put(String key, @Nullable List<String> value) {
-		List<String> previousValues = getAll(this.headers.valuesIterator(key));
+		List<String> previousValues = get(key);
 		this.headers.set(key, value);
 		return previousValues;
 	}
@@ -142,7 +143,7 @@ final class Netty5HeadersAdapter implements MultiValueMap<String, String> {
 	@Override
 	public List<String> remove(Object key) {
 		if (key instanceof String headerName) {
-			List<String> previousValues = getAll(this.headers.valuesIterator(headerName));
+			List<String> previousValues = get(headerName);
 			this.headers.remove(headerName);
 			return previousValues;
 		}
@@ -166,8 +167,9 @@ final class Netty5HeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public Collection<List<String>> values() {
-		return this.headers.names().stream()
-				.map(key -> getAll(this.headers.valuesIterator(key))).toList();
+		List<List<String>> result = new ArrayList<>(this.headers.size());
+		forEach((key, value) -> result.add(value));
+		return result;
 	}
 
 	@Override
@@ -189,19 +191,6 @@ final class Netty5HeadersAdapter implements MultiValueMap<String, String> {
 	@Override
 	public String toString() {
 		return org.springframework.http.HttpHeaders.formatHeaders(this);
-	}
-
-
-	@Nullable
-	private static List<String> getAll(Iterator<CharSequence> valuesIterator) {
-		if (!valuesIterator.hasNext()) {
-			return null;
-		}
-		List<String> result = new ArrayList<>();
-		while (valuesIterator.hasNext()) {
-			result.add(valuesIterator.next().toString());
-		}
-		return result;
 	}
 
 
@@ -236,12 +225,8 @@ final class Netty5HeadersAdapter implements MultiValueMap<String, String> {
 
 		@Override
 		public List<String> getValue() {
-			List<String> result = new ArrayList<>();
-			Iterator<CharSequence> valuesIterator = headers.valuesIterator(this.key);
-			while (valuesIterator.hasNext()) {
-				result.add(valuesIterator.next().toString());
-			}
-			return result;
+			List<String> values = get(this.key);
+			return (values != null ? values : Collections.emptyList());
 		}
 
 		@Override

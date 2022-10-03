@@ -157,11 +157,8 @@ public class ReactorNetty2WebSocketClient implements WebSocketClient {
 
 	private HttpHeaders toHttpHeaders(WebsocketInbound inbound) {
 		HttpHeaders headers = new HttpHeaders();
-		io.netty5.handler.codec.http.headers.HttpHeaders nettyHeaders = inbound.headers();
-		nettyHeaders.forEach(entry -> {
-			CharSequence name = entry.getKey();
-			headers.put(name.toString(), getAll(nettyHeaders.valuesIterator(name)));
-		});
+		inbound.headers().iterator().forEachRemaining(entry ->
+				headers.add(entry.getKey().toString(), entry.getValue().toString()));
 		return headers;
 	}
 
