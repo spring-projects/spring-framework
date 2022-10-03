@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.io.CleanupMode.NEVER;
 
 /**
  * Unit tests for {@link ClassPathResource}.
@@ -152,17 +153,20 @@ class ClassPathResourceTests {
 	}
 
 	@Test
-	void emptyFileReadable(@TempDir File tempDir) throws IOException {
+	// Since the JAR file created in this test cannot be deleted on MS windows,
+	// we use `cleanup = NEVER`.
+	void emptyFileReadable(@TempDir(cleanup = NEVER) File tempDir) throws IOException {
 		File file = new File(tempDir, "empty.txt");
 		assertThat(file.createNewFile()).isTrue();
 		assertThat(file.isFile());
 
-		ClassLoader fileClassLoader = new URLClassLoader(new URL[]{tempDir.toURI().toURL()});
-
-		Resource emptyFile = new ClassPathResource("empty.txt", fileClassLoader);
-		assertThat(emptyFile.exists()).isTrue();
-		assertThat(emptyFile.isReadable()).isTrue();
-		assertThat(emptyFile.contentLength()).isEqualTo(0);
+		try (URLClassLoader fileClassLoader = new URLClassLoader(new URL[]{tempDir.toURI().toURL()})) {
+			Resource emptyFile = new ClassPathResource("empty.txt", fileClassLoader);
+			assertThat(emptyFile.exists()).isTrue();
+			assertThat(emptyFile.isReadable()).isTrue();
+			assertThat(emptyFile.contentLength()).isEqualTo(0);
+			file.delete();
+		}
 
 		File jarFile = new File(tempDir, "test.jar");
 		try (ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(jarFile))) {
@@ -171,12 +175,15 @@ class ClassPathResourceTests {
 		}
 		assertThat(jarFile.isFile());
 
-		ClassLoader jarClassLoader = new URLClassLoader(new URL[]{jarFile.toURI().toURL()});
+		try (URLClassLoader jarClassLoader = new URLClassLoader(new URL[]{jarFile.toURI().toURL()})) {
+			Resource emptyJarEntry = new ClassPathResource("empty2.txt", jarClassLoader);
+			assertThat(emptyJarEntry.exists()).isTrue();
+			assertThat(emptyJarEntry.isReadable()).isTrue();
+			assertThat(emptyJarEntry.contentLength()).isEqualTo(0);
+		}
 
-		Resource emptyJarEntry = new ClassPathResource("empty2.txt", jarClassLoader);
-		assertThat(emptyJarEntry.exists()).isTrue();
-		assertThat(emptyJarEntry.isReadable()).isTrue();
-		assertThat(emptyJarEntry.contentLength()).isEqualTo(0);
+		jarFile.deleteOnExit();
+		tempDir.deleteOnExit();
 	}
 
 }
