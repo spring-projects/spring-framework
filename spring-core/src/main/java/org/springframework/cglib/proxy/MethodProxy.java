@@ -55,6 +55,13 @@ public class MethodProxy {
 		proxy.sig1 = new Signature(name1, desc);
 		proxy.sig2 = new Signature(name2, desc);
 		proxy.createInfo = new CreateInfo(c1, c2);
+
+		// SPRING PATCH BEGIN: early initialization for overridden methods on subclasses
+		if (!c1.isInterface()) {
+			proxy.init();
+		}
+		// SPRING PATCH END
+
 		return proxy;
 	}
 

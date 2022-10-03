@@ -541,7 +541,7 @@ class ConfigurationClassEnhancer {
 				if (method.getName().equals("getObject") && args.length == 0) {
 					return beanFactory.getBean(beanName);
 				}
-				return proxy.invoke(factoryBean, args);
+				return method.invoke(factoryBean, args);
 			});
 
 			return fbProxy;
