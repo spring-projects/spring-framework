@@ -56,9 +56,15 @@ public class MethodProxy {
 		proxy.sig2 = new Signature(name2, desc);
 		proxy.createInfo = new CreateInfo(c1, c2);
 
-		// SPRING PATCH BEGIN: early initialization for overridden methods on subclasses
-		if (!c1.isInterface()) {
-			proxy.init();
+		// SPRING PATCH BEGIN
+		if (!c1.isInterface() && c1 != Object.class) {
+			// Try early initialization for overridden methods on subclasses
+			try {
+				proxy.init();
+			}
+			catch (CodeGenerationException ex) {
+				// Ignore - to be retried when actually needed later on (possibly not at all)
+			}
 		}
 		// SPRING PATCH END
 
