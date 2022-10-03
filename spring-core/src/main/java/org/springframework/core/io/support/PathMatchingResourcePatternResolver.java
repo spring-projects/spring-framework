@@ -31,14 +31,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLConnection;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -155,7 +152,7 @@ import org.springframework.util.StringUtils;
  * with a location pattern using the "classpath*:" prefix it will first search
  * all modules in the {@linkplain ModuleLayer#boot() boot layer}, excluding
  * {@linkplain ModuleFinder#ofSystem() system modules}. It will then search the
- * classpath using {@link Classloader} APIs as described previously and return the
+ * classpath using {@link ClassLoader} APIs as described previously and return the
  * combined results. Consequently, some of the limitations of classpath searches
  * may not apply when applications are deployed as modules.
  *
@@ -737,88 +734,70 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			throws IOException {
 
 		URI rootDirUri;
-		String rootDir;
 		try {
 			rootDirUri = rootDirResource.getURI();
-			rootDir = rootDirUri.getPath();
-			// If the URI is for a "resource" in the GraalVM native image file system, we have to
-			// ensure that the root directory does not end in a slash while simultaneously ensuring
-			// that the root directory is not an empty string (since fileSystem.getPath("").resolve(str)
-			// throws an ArrayIndexOutOfBoundsException in a native image).
-			if ("resource".equals(rootDirUri.getScheme()) && (rootDir.length() > 1) && rootDir.endsWith("/")) {
-				rootDir = rootDir.substring(0, rootDir.length() - 1);
-			}
 		}
 		catch (Exception ex) {
 			if (logger.isInfoEnabled()) {
-				logger.info("Failed to resolve %s in the file system: %s".formatted(rootDirResource, ex));
+				logger.info("Failed to resolve %s as URI: %s".formatted(rootDirResource, ex));
 			}
 			return Collections.emptySet();
 		}
 
-		FileSystem fileSystem = getFileSystem(rootDirUri);
-		if (fileSystem == null) {
-			return Collections.emptySet();
-		}
-
-		try {
-			Path rootPath = fileSystem.getPath(rootDir);
-			String resourcePattern = rootPath.resolve(subPattern).toString();
-			Predicate<Path> isMatchingFile =
-					path -> Files.isRegularFile(path) && getPathMatcher().match(resourcePattern, path.toString());
-			if (logger.isTraceEnabled()) {
-				logger.trace("Searching directory [%s] for files matching pattern [%s]"
-						.formatted(rootPath.toAbsolutePath(), subPattern));
-			}
-			Set<Resource> result = new LinkedHashSet<>();
-			try (Stream<Path> files = Files.walk(rootPath)) {
-				files.filter(isMatchingFile).sorted().forEach(file -> {
-					try {
-						result.add(convertToResource(file.toUri()));
-					}
-					catch (Exception ex) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Failed to convert file %s to an org.springframework.core.io.Resource: %s"
-									.formatted(file, ex));
-						}
-					}
-				});
+		Path rootPath = null;
+		if (rootDirUri.isAbsolute() && !rootDirUri.isOpaque()) {
+			// Prefer Path resolution from URI if possible
+			try {
+				rootPath = Path.of(rootDirUri);
 			}
 			catch (Exception ex) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Faild to complete search in directory [%s] for files matching pattern [%s]: %s"
-							.formatted(rootPath.toAbsolutePath(), subPattern, ex));
+					logger.debug("Failed to resolve %s in file system: %s".formatted(rootDirUri, ex));
 				}
-			}
-			return result;
-		}
-		finally {
-			try {
-				fileSystem.close();
-			}
-			catch (UnsupportedOperationException ex) {
-				// ignore
+				// Fallback via Resource.getFile() below
 			}
 		}
-	}
+		if (rootPath == null) {
+			// Resource.getFile() resolution as a fallback -
+			// for custom URI formats and custom Resource implementations
+			rootPath = Path.of(rootDirResource.getFile().getAbsolutePath());
+		}
 
-	@Nullable
-	private FileSystem getFileSystem(URI uri) {
-		try {
-			URI root = uri.resolve("/");
-			try {
-				return FileSystems.getFileSystem(root);
-			}
-			catch (Exception ex) {
-				return FileSystems.newFileSystem(root, Map.of(), ClassUtils.getDefaultClassLoader());
-			}
+		String rootDir = StringUtils.cleanPath(rootPath.toString());
+		if (!rootDir.endsWith("/")) {
+			rootDir += "/";
+		}
+
+		String resourcePattern = rootDir + StringUtils.cleanPath(subPattern);
+		Predicate<Path> isMatchingFile = (path -> Files.isRegularFile(path) &&
+				getPathMatcher().match(resourcePattern, StringUtils.cleanPath(path.toString())));
+
+		if (logger.isTraceEnabled()) {
+			logger.trace("Searching directory [%s] for files matching pattern [%s]"
+					.formatted(rootPath.toAbsolutePath(), subPattern));
+		}
+
+		Set<Resource> result = new LinkedHashSet<>();
+		try (Stream<Path> files = Files.walk(rootPath)) {
+			files.filter(isMatchingFile).sorted().forEach(file -> {
+				try {
+					result.add(new FileSystemResource(file));
+				}
+				catch (Exception ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Failed to convert file %s to an org.springframework.core.io.Resource: %s"
+								.formatted(file, ex));
+					}
+				}
+			});
 		}
 		catch (Exception ex) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Failed to resolve java.nio.file.FileSystem for %s: %s".formatted(uri, ex));
+			if (logger.isDebugEnabled()) {
+				logger.debug("Failed to complete search in directory [%s] for files matching pattern [%s]: %s"
+						.formatted(rootPath.toAbsolutePath(), subPattern, ex));
 			}
-			return null;
 		}
+		return result;
 	}
 
 	/**
@@ -902,9 +881,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	}
 
 	private Resource convertToResource(URI uri) {
-		return ResourceUtils.URL_PROTOCOL_FILE.equals(uri.getScheme()) ?
-				new FileSystemResource(uri.getPath()) :
-				UrlResource.from(uri);
+		return (ResourceUtils.URL_PROTOCOL_FILE.equals(uri.getScheme()) ?
+				new FileSystemResource(uri.getPath()) : UrlResource.from(uri));
 	}
 
 	private static String stripLeadingSlash(String path) {
