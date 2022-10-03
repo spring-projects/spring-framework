@@ -31,11 +31,15 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLConnection;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -736,6 +740,19 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		URI rootDirUri;
 		try {
 			rootDirUri = rootDirResource.getURI();
+			// If the URI is for a "resource" in the GraalVM native image file system, we have to
+			// ensure that the root directory does not end in a slash while simultaneously ensuring
+			// that the root directory is not an empty string (since Path#resolve throws an
+			// ArrayIndexOutOfBoundsException in a native image if the initial Path is created
+			// from an empty string).
+			String scheme = rootDirUri.getScheme();
+			String path = rootDirUri.getPath();
+			if ("resource".equals(scheme) && (path.length() > 1) && path.endsWith("/")) {
+				path = path.substring(0, path.length() - 1);
+				// Retain the fragment as well, since root folders in the native image
+				// file system are indexed via the fragment (e.g., resource:/#1).
+				rootDirUri = new URI(scheme, path, rootDirUri.getFragment());
+			}
 		}
 		catch (Exception ex) {
 			if (logger.isInfoEnabled()) {
@@ -744,60 +761,75 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			return Collections.emptySet();
 		}
 
-		Path rootPath = null;
-		if (rootDirUri.isAbsolute() && !rootDirUri.isOpaque()) {
-			// Prefer Path resolution from URI if possible
-			try {
-				rootPath = Path.of(rootDirUri);
-			}
-			catch (Exception ex) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Failed to resolve %s in file system: %s".formatted(rootDirUri, ex));
-				}
-				// Fallback via Resource.getFile() below
-			}
-		}
-		if (rootPath == null) {
-			// Resource.getFile() resolution as a fallback -
-			// for custom URI formats and custom Resource implementations
-			rootPath = Path.of(rootDirResource.getFile().getAbsolutePath());
-		}
-
-		String rootDir = StringUtils.cleanPath(rootPath.toString());
-		if (!rootDir.endsWith("/")) {
-			rootDir += "/";
-		}
-
-		String resourcePattern = rootDir + StringUtils.cleanPath(subPattern);
-		Predicate<Path> isMatchingFile = (path -> Files.isRegularFile(path) &&
-				getPathMatcher().match(resourcePattern, StringUtils.cleanPath(path.toString())));
-
-		if (logger.isTraceEnabled()) {
-			logger.trace("Searching directory [%s] for files matching pattern [%s]"
-					.formatted(rootPath.toAbsolutePath(), subPattern));
-		}
-
-		Set<Resource> result = new LinkedHashSet<>();
-		try (Stream<Path> files = Files.walk(rootPath)) {
-			files.filter(isMatchingFile).sorted().forEach(file -> {
+		FileSystem fileSystem = null;
+		try {
+			Path rootPath = null;
+			if (rootDirUri.isAbsolute() && !rootDirUri.isOpaque()) {
+				// Prefer Path resolution from URI if possible
 				try {
-					result.add(new FileSystemResource(file));
+					try {
+						rootPath = Path.of(rootDirUri);
+					}
+					catch (FileSystemNotFoundException ex) {
+						// If the file system was not found, assume it's a custom file system that needs to be installed.
+						fileSystem = FileSystems.newFileSystem(rootDirUri, Map.of(), ClassUtils.getDefaultClassLoader());
+						rootPath = Path.of(rootDirUri);
+					}
 				}
 				catch (Exception ex) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Failed to convert file %s to an org.springframework.core.io.Resource: %s"
-								.formatted(file, ex));
+						logger.debug("Failed to resolve %s in file system: %s".formatted(rootDirUri, ex));
 					}
+					// Fallback via Resource.getFile() below
 				}
-			});
+			}
+			if (rootPath == null) {
+				// Resource.getFile() resolution as a fallback -
+				// for custom URI formats and custom Resource implementations
+				rootPath = Path.of(rootDirResource.getFile().getAbsolutePath());
+			}
+
+			String rootDir = StringUtils.cleanPath(rootPath.toString());
+			if (!rootDir.endsWith("/")) {
+				rootDir += "/";
+			}
+
+			String resourcePattern = rootDir + StringUtils.cleanPath(subPattern);
+			Predicate<Path> isMatchingFile = path -> (Files.isRegularFile(path) &&
+					getPathMatcher().match(resourcePattern, StringUtils.cleanPath(path.toString())));
+
+			if (logger.isTraceEnabled()) {
+				logger.trace("Searching directory [%s] for files matching pattern [%s]"
+						.formatted(rootPath.toAbsolutePath(), subPattern));
+			}
+
+			Set<Resource> result = new LinkedHashSet<>();
+			try (Stream<Path> files = Files.walk(rootPath)) {
+				files.filter(isMatchingFile).sorted().forEach(file -> {
+					try {
+						result.add(new FileSystemResource(file));
+					}
+					catch (Exception ex) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Failed to convert file %s to an org.springframework.core.io.Resource: %s"
+									.formatted(file, ex));
+						}
+					}
+				});
+			}
+			catch (Exception ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Failed to complete search in directory [%s] for files matching pattern [%s]: %s"
+							.formatted(rootPath.toAbsolutePath(), subPattern, ex));
+				}
+			}
+			return result;
 		}
-		catch (Exception ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Failed to complete search in directory [%s] for files matching pattern [%s]: %s"
-						.formatted(rootPath.toAbsolutePath(), subPattern, ex));
+		finally {
+			if (fileSystem != null) {
+				fileSystem.close();
 			}
 		}
-		return result;
 	}
 
 	/**
