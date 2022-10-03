@@ -50,7 +50,7 @@ class BeanRegistrationsAotProcessorTests {
 		BeanRegistrationsAotContribution contribution = processor
 				.processAheadOfTime(beanFactory);
 		assertThat(contribution).extracting("registrations")
-				.asInstanceOf(InstanceOfAssertFactories.MAP).hasSize(2);
+				.asInstanceOf(InstanceOfAssertFactories.MAP).containsKeys("b1", "b2");
 	}
 
 }

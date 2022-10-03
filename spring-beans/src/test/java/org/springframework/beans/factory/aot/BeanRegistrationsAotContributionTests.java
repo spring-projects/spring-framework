@@ -32,8 +32,6 @@ import org.springframework.aot.generate.ClassNameGenerator;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
-import org.springframework.aot.hint.MemberCategory;
-import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
@@ -78,13 +76,13 @@ class BeanRegistrationsAotContributionTests {
 
 	@Test
 	void applyToAppliesContribution() {
-		Map<BeanRegistrationKey, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
+		Map<String, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
 		RegisteredBean registeredBean = registerBean(
 				new RootBeanDefinition(TestBean.class));
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
 				this.methodGeneratorFactory, registeredBean, null,
 				Collections.emptyList());
-		registrations.put(new BeanRegistrationKey(registeredBean.getBeanName(), registeredBean.getBeanClass()), generator);
+		registrations.put("testBean", generator);
 		BeanRegistrationsAotContribution contribution = new BeanRegistrationsAotContribution(
 				registrations);
 		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
@@ -100,13 +98,13 @@ class BeanRegistrationsAotContributionTests {
 		this.generationContext = new TestGenerationContext(
 				new ClassNameGenerator(TestGenerationContext.TEST_TARGET, "Management"));
 		this.beanFactoryInitializationCode = new MockBeanFactoryInitializationCode(this.generationContext);
-		Map<BeanRegistrationKey, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
+		Map<String, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
 		RegisteredBean registeredBean = registerBean(
 				new RootBeanDefinition(TestBean.class));
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
 				this.methodGeneratorFactory, registeredBean, null,
 				Collections.emptyList());
-		registrations.put(new BeanRegistrationKey(registeredBean.getBeanName(), registeredBean.getBeanClass()), generator);
+		registrations.put("testBean", generator);
 		BeanRegistrationsAotContribution contribution = new BeanRegistrationsAotContribution(
 				registrations);
 		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
@@ -119,7 +117,7 @@ class BeanRegistrationsAotContributionTests {
 	@Test
 	void applyToCallsRegistrationsWithBeanRegistrationsCode() {
 		List<BeanRegistrationsCode> beanRegistrationsCodes = new ArrayList<>();
-		Map<BeanRegistrationKey, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
+		Map<String, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
 		RegisteredBean registeredBean = registerBean(
 				new RootBeanDefinition(TestBean.class));
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
@@ -136,29 +134,13 @@ class BeanRegistrationsAotContributionTests {
 			}
 
 		};
-		registrations.put(new BeanRegistrationKey(registeredBean.getBeanName(), registeredBean.getBeanClass()), generator);
+		registrations.put("testBean", generator);
 		BeanRegistrationsAotContribution contribution = new BeanRegistrationsAotContribution(
 				registrations);
 		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
 		assertThat(beanRegistrationsCodes).hasSize(1);
 		BeanRegistrationsCode actual = beanRegistrationsCodes.get(0);
 		assertThat(actual.getMethods()).isNotNull();
-	}
-
-	@Test
-	void applyToRegisterReflectionHints() {
-		Map<BeanRegistrationKey, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
-		RegisteredBean registeredBean = registerBean(
-				new RootBeanDefinition(TestBean.class));
-		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
-				this.methodGeneratorFactory, registeredBean, null,
-				Collections.emptyList());
-		registrations.put(new BeanRegistrationKey(registeredBean.getBeanName(), registeredBean.getBeanClass()), generator);
-		BeanRegistrationsAotContribution contribution = new BeanRegistrationsAotContribution(
-				registrations);
-		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
-		assertThat(RuntimeHintsPredicates.reflection().onType(TestBean.class).withMemberCategory(MemberCategory.INTROSPECT_DECLARED_METHODS))
-				.accepts(this.generationContext.getRuntimeHints());
 	}
 
 	private RegisteredBean registerBean(RootBeanDefinition rootBeanDefinition) {
