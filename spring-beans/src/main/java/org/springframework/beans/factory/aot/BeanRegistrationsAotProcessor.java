@@ -36,13 +36,13 @@ class BeanRegistrationsAotProcessor implements BeanFactoryInitializationAotProce
 	public BeanRegistrationsAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
 		BeanDefinitionMethodGeneratorFactory beanDefinitionMethodGeneratorFactory =
 				new BeanDefinitionMethodGeneratorFactory(beanFactory);
-		Map<RegisteredBean, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
+		Map<BeanRegistrationKey, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
 		for (String beanName : beanFactory.getBeanDefinitionNames()) {
 			RegisteredBean registeredBean = RegisteredBean.of(beanFactory, beanName);
 			BeanDefinitionMethodGenerator beanDefinitionMethodGenerator = beanDefinitionMethodGeneratorFactory
 					.getBeanDefinitionMethodGenerator(registeredBean, null);
 			if (beanDefinitionMethodGenerator != null) {
-				registrations.put(registeredBean, beanDefinitionMethodGenerator);
+				registrations.put(new BeanRegistrationKey(beanName, registeredBean.getBeanClass()), beanDefinitionMethodGenerator);
 			}
 		}
 		if (registrations.isEmpty()) {

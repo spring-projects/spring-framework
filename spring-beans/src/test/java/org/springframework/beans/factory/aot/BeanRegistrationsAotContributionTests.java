@@ -78,13 +78,13 @@ class BeanRegistrationsAotContributionTests {
 
 	@Test
 	void applyToAppliesContribution() {
-		Map<RegisteredBean, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
+		Map<BeanRegistrationKey, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
 		RegisteredBean registeredBean = registerBean(
 				new RootBeanDefinition(TestBean.class));
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
 				this.methodGeneratorFactory, registeredBean, null,
 				Collections.emptyList());
-		registrations.put(registeredBean, generator);
+		registrations.put(new BeanRegistrationKey(registeredBean.getBeanName(), registeredBean.getBeanClass()), generator);
 		BeanRegistrationsAotContribution contribution = new BeanRegistrationsAotContribution(
 				registrations);
 		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
@@ -100,13 +100,13 @@ class BeanRegistrationsAotContributionTests {
 		this.generationContext = new TestGenerationContext(
 				new ClassNameGenerator(TestGenerationContext.TEST_TARGET, "Management"));
 		this.beanFactoryInitializationCode = new MockBeanFactoryInitializationCode(this.generationContext);
-		Map<RegisteredBean, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
+		Map<BeanRegistrationKey, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
 		RegisteredBean registeredBean = registerBean(
 				new RootBeanDefinition(TestBean.class));
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
 				this.methodGeneratorFactory, registeredBean, null,
 				Collections.emptyList());
-		registrations.put(registeredBean, generator);
+		registrations.put(new BeanRegistrationKey(registeredBean.getBeanName(), registeredBean.getBeanClass()), generator);
 		BeanRegistrationsAotContribution contribution = new BeanRegistrationsAotContribution(
 				registrations);
 		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
@@ -119,7 +119,7 @@ class BeanRegistrationsAotContributionTests {
 	@Test
 	void applyToCallsRegistrationsWithBeanRegistrationsCode() {
 		List<BeanRegistrationsCode> beanRegistrationsCodes = new ArrayList<>();
-		Map<RegisteredBean, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
+		Map<BeanRegistrationKey, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
 		RegisteredBean registeredBean = registerBean(
 				new RootBeanDefinition(TestBean.class));
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
@@ -136,7 +136,7 @@ class BeanRegistrationsAotContributionTests {
 			}
 
 		};
-		registrations.put(registeredBean, generator);
+		registrations.put(new BeanRegistrationKey(registeredBean.getBeanName(), registeredBean.getBeanClass()), generator);
 		BeanRegistrationsAotContribution contribution = new BeanRegistrationsAotContribution(
 				registrations);
 		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
@@ -147,13 +147,13 @@ class BeanRegistrationsAotContributionTests {
 
 	@Test
 	void applyToRegisterReflectionHints() {
-		Map<RegisteredBean, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
+		Map<BeanRegistrationKey, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
 		RegisteredBean registeredBean = registerBean(
 				new RootBeanDefinition(TestBean.class));
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
 				this.methodGeneratorFactory, registeredBean, null,
 				Collections.emptyList());
-		registrations.put(registeredBean, generator);
+		registrations.put(new BeanRegistrationKey(registeredBean.getBeanName(), registeredBean.getBeanClass()), generator);
 		BeanRegistrationsAotContribution contribution = new BeanRegistrationsAotContribution(
 				registrations);
 		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);

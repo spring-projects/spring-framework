@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -194,23 +193,6 @@ public final class RegisteredBean {
 	@Nullable
 	public RegisteredBean getParent() {
 		return this.parent;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		RegisteredBean that = (RegisteredBean) o;
-		return this.beanName.equals(that.beanName);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(this.beanName);
 	}
 
 	@Override

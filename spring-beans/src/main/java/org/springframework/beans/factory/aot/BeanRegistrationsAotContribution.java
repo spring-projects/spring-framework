@@ -29,7 +29,6 @@ import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
@@ -48,11 +47,11 @@ class BeanRegistrationsAotContribution
 
 	private static final String BEAN_FACTORY_PARAMETER_NAME = "beanFactory";
 
-	private final Map<RegisteredBean, BeanDefinitionMethodGenerator> registrations;
+	private final Map<BeanRegistrationKey, BeanDefinitionMethodGenerator> registrations;
 
 
 	BeanRegistrationsAotContribution(
-			Map<RegisteredBean, BeanDefinitionMethodGenerator> registrations) {
+			Map<BeanRegistrationKey, BeanDefinitionMethodGenerator> registrations) {
 
 		this.registrations = registrations;
 	}
@@ -74,9 +73,9 @@ class BeanRegistrationsAotContribution
 		generateRegisterHints(generationContext.getRuntimeHints(), this.registrations);
 	}
 
-	private void generateRegisterHints(RuntimeHints runtimeHints, Map<RegisteredBean, BeanDefinitionMethodGenerator> registrations) {
-		registrations.keySet().forEach(registeredBean -> runtimeHints.reflection()
-				.registerType(registeredBean.getBeanClass(), MemberCategory.INTROSPECT_DECLARED_METHODS));
+	private void generateRegisterHints(RuntimeHints runtimeHints, Map<BeanRegistrationKey, BeanDefinitionMethodGenerator> registrations) {
+		registrations.keySet().forEach(beanRegistrationKey -> runtimeHints.reflection()
+				.registerType(beanRegistrationKey.beanClass(), MemberCategory.INTROSPECT_DECLARED_METHODS));
 	}
 
 
@@ -89,14 +88,14 @@ class BeanRegistrationsAotContribution
 		method.addParameter(DefaultListableBeanFactory.class,
 				BEAN_FACTORY_PARAMETER_NAME);
 		CodeBlock.Builder code = CodeBlock.builder();
-		this.registrations.forEach((registeredBean, beanDefinitionMethodGenerator) -> {
+		this.registrations.forEach((beanRegistrationKey, beanDefinitionMethodGenerator) -> {
 			MethodReference beanDefinitionMethod = beanDefinitionMethodGenerator
 					.generateBeanDefinitionMethod(generationContext,
 							beanRegistrationsCode);
 			CodeBlock methodInvocation = beanDefinitionMethod.toInvokeCodeBlock(
 					ArgumentCodeGenerator.none(), beanRegistrationsCode.getClassName());
 			code.addStatement("$L.registerBeanDefinition($S, $L)",
-					BEAN_FACTORY_PARAMETER_NAME, registeredBean.getBeanName(),
+					BEAN_FACTORY_PARAMETER_NAME, beanRegistrationKey.beanName(),
 					methodInvocation);
 		});
 		method.addCode(code.build());
