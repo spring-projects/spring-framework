@@ -18,8 +18,8 @@ package org.springframework.core.codec;
 
 import java.nio.charset.StandardCharsets;
 
-import io.netty5.buffer.api.Buffer;
-import io.netty5.buffer.api.DefaultBufferAllocators;
+import io.netty5.buffer.Buffer;
+import io.netty5.buffer.DefaultBufferAllocators;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
