@@ -50,6 +50,7 @@ class AotProcessorTests {
 		assertThat(className).isEqualTo(ClassName.get(SampleApplication.class.getPackageName(),
 				"AotProcessorTests_SampleApplication__ApplicationContextInitializer"));
 		assertThat(directory).satisfies(hasGeneratedAssetsForSampleApplication());
+		context.close();
 	}
 
 	@Test
@@ -81,6 +82,7 @@ class AotProcessorTests {
 		processor.process();
 		assertThat(directory.resolve("resource/META-INF/native-image/com.example/example/native-image.properties"))
 				.doesNotExist();
+		context.close();
 	}
 
 	private Path createExisting(Path directory) throws IOException {

@@ -46,8 +46,10 @@ class ReflectionHintsPredicatesTests {
 
 	private static Constructor<?> publicConstructor;
 
+	@SuppressWarnings("unused")
 	private static Method publicMethod;
 
+	@SuppressWarnings("unused")
 	private static Field publicField;
 
 	private final ReflectionHintsPredicates reflection = new ReflectionHintsPredicates();
