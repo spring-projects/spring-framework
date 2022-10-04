@@ -49,7 +49,7 @@ final class SimpleTypeReference extends AbstractTypeReference {
 		if (!className.contains("$")) {
 			return createTypeReference(className);
 		}
-		String[] elements = className.split("\\$");
+		String[] elements = className.split("(?<!\\$)\\$(?!\\$)");
 		SimpleTypeReference typeReference = createTypeReference(elements[0]);
 		for (int i = 1; i < elements.length; i++) {
 			typeReference = new SimpleTypeReference(typeReference.getPackageName(), elements[i], typeReference);
