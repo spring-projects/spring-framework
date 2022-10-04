@@ -113,8 +113,7 @@ class InstanceSupplierCodeGenerator {
 				.getUserClass(constructor.getDeclaringClass());
 		boolean dependsOnBean = ClassUtils.isInnerClass(declaringClass);
 		Visibility accessVisibility = getAccessVisibility(registeredBean, constructor);
-		if (accessVisibility == Visibility.PUBLIC
-				|| accessVisibility == Visibility.PACKAGE_PRIVATE) {
+		if (accessVisibility != Visibility.PRIVATE) {
 			return generateCodeForAccessibleConstructor(beanName, beanClass, constructor,
 					dependsOnBean, declaringClass);
 		}
@@ -208,8 +207,7 @@ class InstanceSupplierCodeGenerator {
 				.getUserClass(factoryMethod.getDeclaringClass());
 		boolean dependsOnBean = !Modifier.isStatic(factoryMethod.getModifiers());
 		Visibility accessVisibility = getAccessVisibility(registeredBean, factoryMethod);
-		if (accessVisibility == Visibility.PUBLIC
-				|| accessVisibility == Visibility.PACKAGE_PRIVATE) {
+		if (accessVisibility != Visibility.PRIVATE) {
 			return generateCodeForAccessibleFactoryMethod(beanName, beanClass, factoryMethod,
 					declaringClass, dependsOnBean);
 		}
