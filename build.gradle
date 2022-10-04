@@ -428,6 +428,10 @@ configure(rootProject) {
 		}
 	}
 
+	tasks.named("checkstyleNohttp").configure {
+		maxHeapSize = "1g"
+	}
+
 	publishing {
 		publications {
 			mavenJava(MavenPublication) {
