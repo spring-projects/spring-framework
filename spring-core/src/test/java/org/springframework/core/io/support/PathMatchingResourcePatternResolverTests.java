@@ -19,9 +19,7 @@ package org.springframework.core.io.support;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.URLDecoder;
 import java.nio.file.Path;
-import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,8 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.text.Normalizer.Form.NFC;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -107,30 +103,6 @@ class PathMatchingResourcePatternResolverTests {
 
 		}
 
-		@Nested
-		class ContainingJapaneseCharactersInTheirPathsAndFileNames {
-
-			@Test
-			void usingClasspathStarProtocol() {
-				String pattern = "classpath*:example/japanese/バリューオブジェクト/**/*.class";
-				String pathPrefix = ".+example/japanese/";
-
-				assertExactFilenames(pattern, "バリューオブジェクト.class");
-				assertExactSubPaths(pattern, pathPrefix, "バリューオブジェクト/バリューオブジェクト.class");
-			}
-
-			@Test
-			void usingFilePrototol() {
-				Path testResourcesDir = Path.of("src/test/resources").toAbsolutePath();
-				String pattern = String.format("file:%s/japanese-resources/バリューオブジェクト/**/*.text", testResourcesDir);
-				String pathPrefix = ".+japanese-resources/";
-
-				assertExactFilenames(pattern, "バリューオブジェクト.text");
-				assertExactSubPaths(pattern, pathPrefix, "バリューオブジェクト/バリューオブジェクト.text");
-			}
-
-		}
-
 	}
 
 
@@ -201,33 +173,6 @@ class PathMatchingResourcePatternResolverTests {
 			else {
 				assertThat(actualNames).as("subset of files found").contains(filenames);
 			}
-		}
-		catch (IOException ex) {
-			throw new UncheckedIOException(ex);
-		}
-	}
-
-	private void assertExactSubPaths(String pattern, String pathPrefix, String... subPaths) {
-		try {
-			Resource[] resources = resolver.getResources(pattern);
-			List<String> actualSubPaths = Arrays.stream(resources)
-					.map(resource -> getPath(resource).replaceFirst(pathPrefix, ""))
-					// TODO Remove URL-decoding and Unicode normalization.
-					// https://github.com/spring-projects/spring-framework/issues/29243
-					.map(path -> URLDecoder.decode(path, UTF_8))
-					.map(path -> Normalizer.normalize(path, NFC))
-					.sorted()
-					.toList();
-			assertThat(actualSubPaths).containsExactlyInAnyOrder(subPaths);
-		}
-		catch (IOException ex) {
-			throw new UncheckedIOException(ex);
-		}
-	}
-
-	private String getPath(Resource resource) {
-		try {
-			return resource.getURL().getPath();
 		}
 		catch (IOException ex) {
 			throw new UncheckedIOException(ex);
