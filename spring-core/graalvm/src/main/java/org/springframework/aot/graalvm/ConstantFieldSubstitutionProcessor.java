@@ -17,8 +17,8 @@
 package org.springframework.aot.graalvm;
 
 import java.lang.reflect.Field;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import com.oracle.graal.pointsto.infrastructure.SubstitutionProcessor;
@@ -51,7 +51,7 @@ class ConstantFieldSubstitutionProcessor extends SubstitutionProcessor {
 
 	private final ThrowawayClassLoader throwawayClassLoader;
 
-	private Set<String> seen = new LinkedHashSet<>();
+	private Map<String, ConstantReadableJavaField> cache = new HashMap<>();
 
 
 	ConstantFieldSubstitutionProcessor(DebugContext debug, ClassLoader applicationClassLoader) {
@@ -67,21 +67,27 @@ class ConstantFieldSubstitutionProcessor extends SubstitutionProcessor {
 			for (Pattern pattern : patterns) {
 				if (pattern.matcher(fieldIdentifier).matches()) {
 					try {
+						if (this.cache.containsKey(fieldIdentifier)) {
+							ConstantReadableJavaField readableJavaField = this.cache.get(fieldIdentifier);
+							if (readableJavaField != null) {
+								return readableJavaField;
+							}
+							else {
+								return super.lookup(field);
+							}
+						}
 						JavaConstant constant = lookupConstant(declaringClass.toJavaName(), field.getName());
 						if (constant != null) {
 							// TODO Use proper logging only when --verbose is specified when https://github.com/oracle/graal/issues/4669 will be fixed
-							if (!this.seen.contains(fieldIdentifier)) {
-								this.seen.add(fieldIdentifier);
-								System.out.println("Field " + fieldIdentifier + " set to " + constant.toValueString() + " at build time");
-							}
-							return new ConstantReadableJavaField(field, constant);
+							ConstantReadableJavaField readableJavaField = new ConstantReadableJavaField(field, constant);
+							this.cache.put(fieldIdentifier, readableJavaField);
+							System.out.println("Field " + fieldIdentifier + " set to " + constant.toValueString() + " at build time");
+							return readableJavaField;
 						}
 					}
 					catch (Throwable ex) {
-						if (!this.seen.contains(fieldIdentifier)) {
-							this.seen.add(fieldIdentifier);
-							System.out.println("Processing of field " + fieldIdentifier + " skipped due the following error : " + ex.getMessage());
-						}
+						System.out.println("Processing of field " + fieldIdentifier + " skipped due the following error : " + ex.getMessage());
+						this.cache.put(fieldIdentifier, null);
 					}
 				}
 			}
