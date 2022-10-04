@@ -16,9 +16,13 @@
 
 package org.springframework.web;
 
+import java.util.Locale;
+
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
+import org.springframework.lang.Nullable;
 
 
 /**
@@ -58,5 +62,49 @@ public interface ErrorResponse {
 	 * should match the response status.
 	 */
 	ProblemDetail getBody();
+
+	/**
+	 * Return a code to use to resolve the problem "detail" for this exception
+	 * through a {@link org.springframework.context.MessageSource}.
+	 * <p>By default this is initialized via
+	 * {@link #getDefaultDetailMessageCode(Class, String)} but each exception
+	 * overrides this to provide relevant data that that can be expanded into
+	 * placeholders within the message.
+	 */
+	default String getDetailMessageCode() {
+		return getDefaultDetailMessageCode(getClass(), null);
+	}
+
+	/**
+	 * Return the arguments to use to resolve the problem "detail" through a
+	 * {@link MessageSource}.
+	 */
+	@Nullable
+	default Object[] getDetailMessageArguments() {
+		return null;
+	}
+
+	/**
+	 * Variant of {@link #getDetailMessageArguments()} that uses the given
+	 * {@link MessageSource} to resolve the message arguments.
+	 * <p>By default this delegates to {@link #getDetailMessageArguments()}
+	 * by concrete implementations may override it, for example in order to
+	 * resolve validation errors through a {@code MessageSource}.
+	 */
+	@Nullable
+	default Object[] getDetailMessageArguments(MessageSource messageSource, Locale locale) {
+		return getDetailMessageArguments();
+	}
+
+	/**
+	 * Build a message code for the given exception type, which consists of
+	 * {@code "problemDetail."} followed by the full {@link Class#getName() class name}.
+	 * @param exceptionType the exception type for which to build a code
+	 * @param suffix an optional suffix, e.g. for exceptions that may have multiple
+	 * error message with different arguments.
+	 */
+	static String getDefaultDetailMessageCode(Class<?> exceptionType, @Nullable String suffix) {
+		return "problemDetail." + exceptionType.getName() + (suffix != null ? "." + suffix : "");
+	}
 
 }

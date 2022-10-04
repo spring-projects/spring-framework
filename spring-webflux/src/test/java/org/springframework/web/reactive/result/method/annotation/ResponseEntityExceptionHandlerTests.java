@@ -18,13 +18,15 @@ package org.springframework.web.reactive.result.method.annotation;
 
 
 import java.lang.reflect.Method;
-import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.StaticMessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -33,6 +35,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.server.MethodNotAllowedException;
@@ -97,7 +100,7 @@ public class ResponseEntityExceptionHandlerTests {
 
 	@Test
 	void handleWebExchangeBindException() {
-		testException(new WebExchangeBindException(null, null));
+		testException(new WebExchangeBindException(null, new BeanPropertyBindingResult(new Object(), "foo")));
 	}
 
 	@Test
@@ -120,20 +123,40 @@ public class ResponseEntityExceptionHandlerTests {
 		testException(new ErrorResponseException(HttpStatus.CONFLICT));
 	}
 
+	@Test
+	void errorResponseProblemDetailViaMessageSource() {
+
+		Locale locale = Locale.UK;
+		LocaleContextHolder.setLocale(locale);
+
+		StaticMessageSource messageSource = new StaticMessageSource();
+		messageSource.addMessage(
+				"problemDetail." + UnsupportedMediaTypeStatusException.class.getName(), locale,
+				"Content-Type {0} not supported. Supported: {1}");
+
+		this.exceptionHandler.setMessageSource(messageSource);
+
+		Exception ex = new UnsupportedMediaTypeStatusException(MediaType.APPLICATION_JSON,
+				List.of(MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML));
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/")
+				.acceptLanguageAsLocales(locale).build());
+
+		ResponseEntity<?> responseEntity = this.exceptionHandler.handleException(ex, exchange).block();
+
+		ProblemDetail body = (ProblemDetail) responseEntity.getBody();
+		assertThat(body.getDetail()).isEqualTo(
+				"Content-Type application/json not supported. Supported: [application/atom+xml, application/xml]");
+	}
+
 
 	@SuppressWarnings("unchecked")
 	private ResponseEntity<ProblemDetail> testException(ErrorResponseException exception) {
-		ResponseEntity<?> responseEntity =
-				this.exceptionHandler.handleException(exception, this.exchange).block();
-
-		assertThat(responseEntity).isNotNull();
-		assertThat(responseEntity.getStatusCode()).isEqualTo(exception.getStatusCode());
-
-		assertThat(responseEntity.getBody()).isNotNull().isInstanceOf(ProblemDetail.class);
-		ProblemDetail body = (ProblemDetail) responseEntity.getBody();
-		assertThat(body.getType()).isEqualTo(URI.create(exception.getClass().getName()));
-
-		return (ResponseEntity<ProblemDetail>) responseEntity;
+		ResponseEntity<?> entity = this.exceptionHandler.handleException(exception, this.exchange).block();
+		assertThat(entity).isNotNull();
+		assertThat(entity.getStatusCode()).isEqualTo(exception.getStatusCode());
+		assertThat(entity.getBody()).isNotNull().isInstanceOf(ProblemDetail.class);
+		return (ResponseEntity<ProblemDetail>) entity;
 	}
 
 
@@ -142,9 +165,7 @@ public class ResponseEntityExceptionHandlerTests {
 		private Mono<ResponseEntity<Object>> handleAndSetTypeToExceptionName(
 				ErrorResponseException ex, HttpHeaders headers, HttpStatusCode status, ServerWebExchange exchange) {
 
-			ProblemDetail body = ex.getBody();
-			body.setType(URI.create(ex.getClass().getName()));
-			return handleExceptionInternal(ex, body, headers, status, exchange);
+			return handleExceptionInternal(ex, null, headers, status, exchange);
 		}
 
 		@Override

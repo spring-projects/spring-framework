@@ -18,6 +18,7 @@ package org.springframework.web.server;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ProblemDetail;
 import org.springframework.lang.Nullable;
 import org.springframework.web.ErrorResponseException;
 
@@ -75,6 +76,22 @@ public class ResponseStatusException extends ErrorResponseException {
 	 */
 	public ResponseStatusException(HttpStatusCode status, @Nullable String reason, @Nullable Throwable cause) {
 		super(status, cause);
+		this.reason = reason;
+	}
+
+	/**
+	 * Constructor with a {@link org.springframework.context.MessageSource}
+	 * code and arguments to resolve the detail message with.
+	 * @param status the HTTP status (required)
+	 * @param reason the associated reason (optional)
+	 * @param cause a nested exception (optional)
+	 * @since 6.0
+	 */
+	protected ResponseStatusException(
+			HttpStatusCode status, @Nullable String reason, @Nullable Throwable cause,
+			@Nullable String messageDetailCode, @Nullable Object[] messageDetailArguments) {
+
+		super(status, ProblemDetail.forStatus(status), cause, messageDetailCode, messageDetailArguments);
 		this.reason = reason;
 	}
 

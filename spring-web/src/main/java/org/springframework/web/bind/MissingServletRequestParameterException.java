@@ -49,7 +49,7 @@ public class MissingServletRequestParameterException extends MissingRequestValue
 	public MissingServletRequestParameterException(
 			String parameterName, String parameterType, boolean missingAfterConversion) {
 
-		super("", missingAfterConversion);
+		super("", missingAfterConversion, null, new Object[] {parameterName});
 		this.parameterName = parameterName;
 		this.parameterType = parameterType;
 		getBody().setDetail("Required parameter '" + this.parameterName + "' is not present.");

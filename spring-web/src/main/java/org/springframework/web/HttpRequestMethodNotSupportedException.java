@@ -52,7 +52,9 @@ public class HttpRequestMethodNotSupportedException extends ServletException imp
 	/**
 	 * Create a new HttpRequestMethodNotSupportedException.
 	 * @param method the unsupported HTTP request method
+	 * @deprecated 6.0 in favor of {@link #HttpRequestMethodNotSupportedException(String, Collection)}
 	 */
+	@Deprecated(since = "6.0", forRemoval = true)
 	public HttpRequestMethodNotSupportedException(String method) {
 		this(method, (String[]) null);
 	}
@@ -61,7 +63,9 @@ public class HttpRequestMethodNotSupportedException extends ServletException imp
 	 * Create a new HttpRequestMethodNotSupportedException.
 	 * @param method the unsupported HTTP request method
 	 * @param msg the detail message
+	 * @deprecated in favor of {@link #HttpRequestMethodNotSupportedException(String, Collection)}
 	 */
+	@Deprecated(since = "6.0", forRemoval = true)
 	public HttpRequestMethodNotSupportedException(String method, String msg) {
 		this(method, null, msg);
 	}
@@ -69,7 +73,7 @@ public class HttpRequestMethodNotSupportedException extends ServletException imp
 	/**
 	 * Create a new HttpRequestMethodNotSupportedException.
 	 * @param method the unsupported HTTP request method
-	 * @param supportedMethods the actually supported HTTP methods (may be {@code null})
+	 * @param supportedMethods the actually supported HTTP methods (possibly {@code null})
 	 */
 	public HttpRequestMethodNotSupportedException(String method, @Nullable Collection<String> supportedMethods) {
 		this(method, (supportedMethods != null ? StringUtils.toStringArray(supportedMethods) : null));
@@ -78,8 +82,10 @@ public class HttpRequestMethodNotSupportedException extends ServletException imp
 	/**
 	 * Create a new HttpRequestMethodNotSupportedException.
 	 * @param method the unsupported HTTP request method
-	 * @param supportedMethods the actually supported HTTP methods (may be {@code null})
+	 * @param supportedMethods the actually supported HTTP methods (possibly {@code null})
+	 * @deprecated in favor of {@link #HttpRequestMethodNotSupportedException(String, Collection)}
 	 */
+	@Deprecated(since = "6.0", forRemoval = true)
 	public HttpRequestMethodNotSupportedException(String method, @Nullable String[] supportedMethods) {
 		this(method, supportedMethods, "Request method '" + method + "' is not supported");
 	}
@@ -89,7 +95,9 @@ public class HttpRequestMethodNotSupportedException extends ServletException imp
 	 * @param method the unsupported HTTP request method
 	 * @param supportedMethods the actually supported HTTP methods
 	 * @param msg the detail message
+	 * @deprecated in favor of {@link #HttpRequestMethodNotSupportedException(String, Collection)}
 	 */
+	@Deprecated(since = "6.0", forRemoval = true)
 	public HttpRequestMethodNotSupportedException(String method, @Nullable String[] supportedMethods, String msg) {
 		super(msg);
 		this.method = method;
@@ -151,6 +159,11 @@ public class HttpRequestMethodNotSupportedException extends ServletException imp
 	@Override
 	public ProblemDetail getBody() {
 		return this.body;
+	}
+
+	@Override
+	public Object[] getDetailMessageArguments() {
+		return new Object[] {getMethod(), getSupportedHttpMethods()};
 	}
 
 }

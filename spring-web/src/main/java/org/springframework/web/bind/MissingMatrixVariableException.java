@@ -54,7 +54,7 @@ public class MissingMatrixVariableException extends MissingRequestValueException
 	public MissingMatrixVariableException(
 			String variableName, MethodParameter parameter, boolean missingAfterConversion) {
 
-		super("", missingAfterConversion);
+		super("", missingAfterConversion, null, new Object[] {variableName});
 		this.variableName = variableName;
 		this.parameter = parameter;
 		getBody().setDetail("Required path parameter '" + this.variableName + "' is not present.");
