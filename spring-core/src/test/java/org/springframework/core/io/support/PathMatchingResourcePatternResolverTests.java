@@ -19,7 +19,6 @@ package org.springframework.core.io.support;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.URLDecoder;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
@@ -30,7 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -159,8 +157,6 @@ class PathMatchingResourcePatternResolverTests {
 			Resource[] resources = resolver.getResources(pattern);
 			List<String> actualNames = Arrays.stream(resources)
 					.map(Resource::getFilename)
-					// Need to decode within GraalVM native image to get %23 converted to #.
-					.map(filename -> URLDecoder.decode(filename, UTF_8))
 					.sorted()
 					.toList();
 
