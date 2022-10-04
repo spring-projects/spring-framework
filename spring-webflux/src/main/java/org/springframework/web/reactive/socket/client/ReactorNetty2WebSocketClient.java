@@ -76,7 +76,6 @@ public class ReactorNetty2WebSocketClient implements WebSocketClient {
 	/**
 	 * Constructor that accepts an existing {@link HttpClient} builder
 	 * and a pre-configured {@link WebsocketClientSpec.Builder}.
-	 * @since 5.3
 	 */
 	public ReactorNetty2WebSocketClient(
 			HttpClient httpClient, Supplier<WebsocketClientSpec.Builder> builderSupplier) {
@@ -100,7 +99,6 @@ public class ReactorNetty2WebSocketClient implements WebSocketClient {
 	 * configuration. This can be used to check the configured parameters except
 	 * for sub-protocols which depend on the {@link WebSocketHandler} that is used
 	 * for a given upgrade.
-	 * @since 5.3
 	 */
 	public WebsocketClientSpec getWebsocketClientSpec() {
 		return buildSpec(null);
