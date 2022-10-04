@@ -38,6 +38,8 @@
 	<suppress files="ResolvableType" checks="FinalClass"/>
 	<suppress files="[\\/]src[\\/]testFixtures[\\/]java[\\/].+" checks="IllegalImport" id="bannedJUnitJupiterImports"/>
 
+	<suppress files="[\\/]src[\\/]test[\\/]java[\\/]example[\\/]japanese[\\/].+" checks="TypeName" />
+
 	<!-- spring-expression -->
 	<suppress files="ExpressionException" checks="MutableException"/>
 	<suppress files="SpelMessage" checks="JavadocVariable|JavadocStyle"/>
