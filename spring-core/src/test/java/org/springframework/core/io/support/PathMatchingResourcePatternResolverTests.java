@@ -91,14 +91,20 @@ class PathMatchingResourcePatternResolverTests {
 			@Test
 			void usingClasspathStarProtocol() {
 				String pattern = "classpath*:org/springframework/core/io/**/resource#test*.txt";
+				String pathPrefix = ".+org/springframework/core/io/";
+
 				assertExactFilenames(pattern, "resource#test1.txt", "resource#test2.txt");
+				assertExactSubPaths(pattern, pathPrefix, "support/resource#test1.txt", "support/resource#test2.txt");
 			}
 
 			@Test
 			void usingFilePrototol() {
 				Path testResourcesDir = Path.of("src/test/resources").toAbsolutePath();
 				String pattern = "file:%s/scanned-resources/**".formatted(testResourcesDir);
+				String pathPrefix = ".+scanned-resources/";
+
 				assertExactFilenames(pattern, "resource#test1.txt", "resource#test2.txt");
+				assertExactSubPaths(pattern, pathPrefix, "resource#test1.txt", "resource#test2.txt");
 			}
 
 		}
@@ -173,6 +179,32 @@ class PathMatchingResourcePatternResolverTests {
 			else {
 				assertThat(actualNames).as("subset of files found").contains(filenames);
 			}
+		}
+		catch (IOException ex) {
+			throw new UncheckedIOException(ex);
+		}
+	}
+
+	private void assertExactSubPaths(String pattern, String pathPrefix, String... subPaths) {
+		try {
+			Resource[] resources = resolver.getResources(pattern);
+			List<String> actualSubPaths = Arrays.stream(resources)
+					.map(resource -> getPath(resource).replaceFirst(pathPrefix, ""))
+					.sorted()
+					.toList();
+			assertThat(actualSubPaths).containsExactlyInAnyOrder(subPaths);
+		}
+		catch (IOException ex) {
+			throw new UncheckedIOException(ex);
+		}
+	}
+
+	private String getPath(Resource resource) {
+		try {
+			// Tests fail if we use getURL(). They would also fail on Mac OS when using getURI()
+			// if the resource paths are not Unicode normalized.
+			// See: https://github.com/spring-projects/spring-framework/issues/29243
+			return resource.getFile().getPath();
 		}
 		catch (IOException ex) {
 			throw new UncheckedIOException(ex);
