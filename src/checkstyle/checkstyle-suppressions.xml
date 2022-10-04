@@ -43,6 +43,8 @@
 	<suppress files="CompileWithForkedClassLoader" checks="IllegalImport" id="bannedJUnitJupiterImports" />
 	<suppress files="org[\\/]springframework[\\/]aot[\\/]test[\\/]agent[\\/].+" checks="IllegalImport" id="bannedJUnitJupiterImports" />
 
+	<suppress files="[\\/]src[\\/]test[\\/]java[\\/]example[\\/]japanese[\\/].+" checks="TypeName" />
+
 	<!-- spring-expression -->
 	<suppress files="ExpressionException" checks="MutableException"/>
 	<suppress files="SpelMessage" checks="JavadocVariable|JavadocStyle"/>

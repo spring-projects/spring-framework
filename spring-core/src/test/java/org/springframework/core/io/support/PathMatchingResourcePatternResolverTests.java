@@ -103,6 +103,30 @@ class PathMatchingResourcePatternResolverTests {
 
 		}
 
+		@Nested
+		class ContainingJapaneseCharactersInTheirPathsAndFileNames {
+
+			@Test
+			void usingClasspathStarProtocol() {
+				String pattern = "classpath*:example/japanese/バリューオブジェクト/**/*.class";
+				String pathPrefix = ".+example/japanese/";
+
+				assertExactFilenames(pattern, "バリューオブジェクト.class");
+				assertExactSubPaths(pattern, pathPrefix, "バリューオブジェクト/バリューオブジェクト.class");
+			}
+
+			@Test
+			void usingFilePrototol() {
+				Path testResourcesDir = Paths.get("src/test/resources").toAbsolutePath();
+				String pattern = String.format("file:%s/japanese-resources/バリューオブジェクト/**/*.text", testResourcesDir);
+				String pathPrefix = ".+japanese-resources/";
+
+				assertExactFilenames(pattern, "バリューオブジェクト.text");
+				assertExactSubPaths(pattern, pathPrefix, "バリューオブジェクト/バリューオブジェクト.text");
+			}
+
+		}
+
 	}
 
 
@@ -173,6 +197,29 @@ class PathMatchingResourcePatternResolverTests {
 			else {
 				assertThat(actualNames).as("subset of files found").contains(filenames);
 			}
+		}
+		catch (IOException ex) {
+			throw new UncheckedIOException(ex);
+		}
+	}
+
+	private void assertExactSubPaths(String pattern, String pathPrefix, String... subPaths) {
+		try {
+			Resource[] resources = resolver.getResources(pattern);
+			List<String> actualSubPaths = Arrays.stream(resources)
+					.map(resource -> getPath(resource).replaceFirst(pathPrefix, ""))
+					.sorted()
+					.collect(Collectors.toList());
+			assertThat(actualSubPaths).containsExactlyInAnyOrder(subPaths);
+		}
+		catch (IOException ex) {
+			throw new UncheckedIOException(ex);
+		}
+	}
+
+	private String getPath(Resource resource) {
+		try {
+			return resource.getURL().getPath();
 		}
 		catch (IOException ex) {
 			throw new UncheckedIOException(ex);
