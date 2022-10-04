@@ -17,9 +17,6 @@
 package org.springframework.web.reactive.socket.client;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
@@ -160,14 +157,6 @@ public class ReactorNetty2WebSocketClient implements WebSocketClient {
 		inbound.headers().iterator().forEachRemaining(entry ->
 				headers.add(entry.getKey().toString(), entry.getValue().toString()));
 		return headers;
-	}
-
-	private static List<String> getAll(Iterator<CharSequence> valuesIterator) {
-		List<String> result = new ArrayList<>();
-		while (valuesIterator.hasNext()) {
-			result.add(valuesIterator.next().toString());
-		}
-		return result;
 	}
 
 }
