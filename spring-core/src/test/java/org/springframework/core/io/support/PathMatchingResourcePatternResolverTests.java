@@ -26,6 +26,7 @@ import java.util.List;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
@@ -200,15 +201,15 @@ class PathMatchingResourcePatternResolverTests {
 	}
 
 	private String getPath(Resource resource) {
-		try {
-			// Tests fail if we use getURL(). They would also fail on Mac OS when using getURI()
-			// if the resource paths are not Unicode normalized.
-			// See: https://github.com/spring-projects/spring-framework/issues/29243
-			return resource.getFile().getPath();
-		}
-		catch (IOException ex) {
-			throw new UncheckedIOException(ex);
-		}
+		// Tests fail if we use resouce.getURL().getPath(). They would also fail on Mac OS when
+		// using resouce.getURI().getPath() if the resource paths are not Unicode normalized.
+		//
+		// On the JVM, all tests should pass when using resouce.getFile().getPath(); however,
+		// we use FileSystemResource#getPath since this test class is sometimes run within a
+		// GraalVM native image which cannot support Path#toFile.
+		//
+		// See: https://github.com/spring-projects/spring-framework/issues/29243
+		return ((FileSystemResource) resource).getPath();
 	}
 
 }
