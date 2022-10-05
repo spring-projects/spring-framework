@@ -83,8 +83,9 @@ class ClassPathResourceTests {
 
 		@Test
 		void resourcesWithEquivalentAbsolutePathsFromTheSameClassLoaderAreEqual() {
-			Resource resource1 = new ClassPathResource("Resource.class", getClass());
-			Resource resource2 = new ClassPathResource("org/springframework/core/io/Resource.class", getClass().getClassLoader());
+			ClassPathResource resource1 = new ClassPathResource("Resource.class", getClass());
+			ClassPathResource resource2 = new ClassPathResource("org/springframework/core/io/Resource.class", getClass().getClassLoader());
+			assertThat(resource1.getPath()).isEqualTo(resource2.getPath());
 			assertThat(resource1).isEqualTo(resource2);
 			assertThat(resource2).isEqualTo(resource1);
 		}
@@ -97,9 +98,10 @@ class ClassPathResourceTests {
 				}
 			}
 
-			Resource resource1 = new ClassPathResource("Resource.class", getClass());
-			Resource resource2 = new ClassPathResource("org/springframework/core/io/Resource.class",
+			ClassPathResource resource1 = new ClassPathResource("Resource.class", getClass());
+			ClassPathResource resource2 = new ClassPathResource("org/springframework/core/io/Resource.class",
 					new SimpleThrowawayClassLoader(getClass().getClassLoader()));
+			assertThat(resource1.getPath()).isEqualTo(resource2.getPath());
 			assertThat(resource1).isNotEqualTo(resource2);
 			assertThat(resource2).isNotEqualTo(resource1);
 		}
