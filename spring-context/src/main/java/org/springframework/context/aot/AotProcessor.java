@@ -91,7 +91,7 @@ public abstract class AotProcessor {
 
 
 	/**
-	 * Invoke the processing by clearing target outputs first, followed by
+	 * Invoke the processing by clearing output directories first, followed by
 	 * {@link #performAotProcessing(GenericApplicationContext)}.
 	 * @return the {@code ClassName} of the {@code ApplicationContextInitializer}
 	 * entry point
@@ -103,18 +103,18 @@ public abstract class AotProcessor {
 	}
 
 	/**
-	 * Delete the source, resource and class outputs.
+	 * Delete the source, resource, and class output directories.
 	 */
 	protected void deleteExistingOutput() {
 		deleteExistingOutput(this.sourceOutput, this.resourceOutput, this.classOutput);
 	}
 
 	/**
-	 * Perform ahead-of-time processing on the specified context. Code,
-	 * resources and generated classes are stored in the configured outputs. In
-	 * particular, additional hints are registered for the application and its
-	 * entry point.
-	 * @param applicationContext the context to process.
+	 * Perform ahead-of-time processing of the specified context.
+	 * <p>Code, resources, and generated classes are stored in the configured
+	 * output directories. In addition, run-time hints are registered for the
+	 * application and its entry point.
+	 * @param applicationContext the context to process
 	 */
 	protected ClassName performAotProcessing(GenericApplicationContext applicationContext) {
 		FileSystemGeneratedFiles generatedFiles = new FileSystemGeneratedFiles(this::getRoot);
