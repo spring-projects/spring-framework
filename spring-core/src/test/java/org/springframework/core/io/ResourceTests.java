@@ -30,7 +30,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
 import java.util.stream.Stream;
 
 import okhttp3.mockwebserver.Dispatcher;
@@ -203,40 +202,6 @@ class ResourceTests {
 			Resource resource = new InputStreamResource(is, "my description");
 			assertThat(resource.getDescription().contains("my description")).isTrue();
 		}
-	}
-
-
-	@Nested
-	class ClassPathResourceTests {
-
-		@Test
-		void equalsAndHashCode() {
-			Resource resource = new ClassPathResource("org/springframework/core/io/Resource.class");
-			Resource resource2 = new ClassPathResource("org/springframework/core/../core/io/./Resource.class");
-			Resource resource3 = new ClassPathResource("org/springframework/core/").createRelative("../core/io/./Resource.class");
-			assertThat(resource2).isEqualTo(resource);
-			assertThat(resource3).isEqualTo(resource);
-			// Check whether equal/hashCode works in a HashSet.
-			HashSet<Resource> resources = new HashSet<>();
-			resources.add(resource);
-			resources.add(resource2);
-			assertThat(resources.size()).isEqualTo(1);
-		}
-
-		@Test
-		void resourcesWithDifferentPathsAreEqual() {
-			Resource resource = new ClassPathResource("org/springframework/core/io/Resource.class", getClass().getClassLoader());
-			ClassPathResource sameResource = new ClassPathResource("org/springframework/core/../core/io/./Resource.class", getClass().getClassLoader());
-			assertThat(sameResource).isEqualTo(resource);
-		}
-
-		@Test
-		void relativeResourcesAreEqual() throws Exception {
-			Resource resource = new ClassPathResource("dir/");
-			Resource relative = resource.createRelative("subdir");
-			assertThat(relative).isEqualTo(new ClassPathResource("dir/subdir"));
-		}
-
 	}
 
 	@Nested

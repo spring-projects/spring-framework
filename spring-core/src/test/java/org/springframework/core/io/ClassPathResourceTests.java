@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.HashSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -49,6 +50,43 @@ class ClassPathResourceTests {
 	private static final String ABSOLUTE_PATH_TO_NONEXISTENT_RESOURCE = PACKAGE_PATH + '/' + NONEXISTENT_RESOURCE_NAME;
 	private static final String ABSOLUTE_PATH_TO_NONEXISTENT_RESOURCE_WITH_LEADING_SLASH = '/' + ABSOLUTE_PATH_TO_NONEXISTENT_RESOURCE;
 
+
+	@Nested
+	class EqualsAndHashCode {
+
+		@Test
+		void equalsAndHashCode() {
+			Resource resource1 = new ClassPathResource("org/springframework/core/io/Resource.class");
+			Resource resource2 = new ClassPathResource("org/springframework/core/../core/io/./Resource.class");
+			Resource resource3 = new ClassPathResource("org/springframework/core/").createRelative("../core/io/./Resource.class");
+
+			assertThat(resource2).isEqualTo(resource1);
+			assertThat(resource3).isEqualTo(resource1);
+			assertThat(resource2).hasSameHashCodeAs(resource1);
+			assertThat(resource3).hasSameHashCodeAs(resource1);
+
+			// Check whether equal/hashCode works in a HashSet.
+			HashSet<Resource> resources = new HashSet<>();
+			resources.add(resource1);
+			resources.add(resource2);
+			assertThat(resources).hasSize(1);
+		}
+
+		@Test
+		void resourcesWithDifferentInputPathsAreEqual() {
+			Resource resource1 = new ClassPathResource("org/springframework/core/io/Resource.class", getClass().getClassLoader());
+			ClassPathResource resource2 = new ClassPathResource("org/springframework/core/../core/io/./Resource.class", getClass().getClassLoader());
+			assertThat(resource2).isEqualTo(resource1);
+		}
+
+		@Test
+		void relativeResourcesAreEqual() throws Exception {
+			Resource resource = new ClassPathResource("dir/");
+			Resource relative = resource.createRelative("subdir");
+			assertThat(relative).isEqualTo(new ClassPathResource("dir/subdir"));
+		}
+
+	}
 
 	@Nested
 	class GetInputStream {
