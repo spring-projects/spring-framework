@@ -24,7 +24,6 @@ import java.net.URL;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -271,9 +270,14 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 		if (!(other instanceof ClassPathResource otherRes)) {
 			return false;
 		}
-		return (this.path.equals(otherRes.path) &&
-				ObjectUtils.nullSafeEquals(this.classLoader, otherRes.classLoader) &&
-				ObjectUtils.nullSafeEquals(this.clazz, otherRes.clazz));
+		if (!this.absolutePath.equals(otherRes.absolutePath)) {
+			return false;
+		}
+		ClassLoader thisClassLoader =
+				(this.classLoader != null ? this.classLoader : this.clazz.getClassLoader());
+		ClassLoader otherClassLoader =
+				(otherRes.classLoader != null ? otherRes.classLoader : otherRes.clazz.getClassLoader());
+		return thisClassLoader.equals(otherClassLoader);
 	}
 
 	/**

@@ -30,6 +30,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import org.springframework.core.OverridingClassLoader;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.io.CleanupMode.NEVER;
@@ -77,6 +79,29 @@ class ClassPathResourceTests {
 			Resource resource1 = new ClassPathResource("org/springframework/core/io/Resource.class", getClass().getClassLoader());
 			ClassPathResource resource2 = new ClassPathResource("org/springframework/core/../core/io/./Resource.class", getClass().getClassLoader());
 			assertThat(resource2).isEqualTo(resource1);
+		}
+
+		@Test
+		void resourcesWithEquivalentAbsolutePathsFromTheSameClassLoaderAreEqual() {
+			Resource resource1 = new ClassPathResource("Resource.class", getClass());
+			Resource resource2 = new ClassPathResource("org/springframework/core/io/Resource.class", getClass().getClassLoader());
+			assertThat(resource1).isEqualTo(resource2);
+			assertThat(resource2).isEqualTo(resource1);
+		}
+
+		@Test
+		void resourcesWithEquivalentAbsolutePathsFromDifferentClassLoadersAreNotEqual() {
+			class SimpleThrowawayClassLoader extends OverridingClassLoader {
+				SimpleThrowawayClassLoader(ClassLoader parent) {
+					super(parent);
+				}
+			}
+
+			Resource resource1 = new ClassPathResource("Resource.class", getClass());
+			Resource resource2 = new ClassPathResource("org/springframework/core/io/Resource.class",
+					new SimpleThrowawayClassLoader(getClass().getClassLoader()));
+			assertThat(resource1).isNotEqualTo(resource2);
+			assertThat(resource2).isNotEqualTo(resource1);
 		}
 
 		@Test
