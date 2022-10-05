@@ -71,7 +71,7 @@ class DefaultClientHttpObservationConventionTests {
 				.contains(KeyValue.of("exception", "none"), KeyValue.of("method", "GET"), KeyValue.of("uri", "/resource/{id}"),
 						KeyValue.of("status", "200"), KeyValue.of("outcome", "SUCCESS"));
 		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).hasSize(2)
-				.contains(KeyValue.of("client.name", "none"), KeyValue.of("uri.expanded", "/resource/42"));
+				.contains(KeyValue.of("client.name", "none"), KeyValue.of("http.url", "/resource/42"));
 	}
 
 	@Test
@@ -81,7 +81,7 @@ class DefaultClientHttpObservationConventionTests {
 		assertThat(this.observationConvention.getLowCardinalityKeyValues(context))
 				.contains(KeyValue.of("method", "GET"), KeyValue.of("uri", "none"));
 		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).hasSize(2)
-				.contains(KeyValue.of("uri.expanded", "/resource/42"));
+				.contains(KeyValue.of("http.url", "/resource/42"));
 	}
 
 	@Test

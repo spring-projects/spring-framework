@@ -66,7 +66,7 @@ class DefaultHttpRequestsObservationConventionTests {
 				.contains(KeyValue.of("method", "POST"), KeyValue.of("uri", "UNKNOWN"), KeyValue.of("status", "200"),
 						KeyValue.of("exception", "none"), KeyValue.of("outcome", "SUCCESS"));
 		assertThat(this.convention.getHighCardinalityKeyValues(this.context)).hasSize(1)
-				.contains(KeyValue.of("uri.expanded", "/test/resource"));
+				.contains(KeyValue.of("http.url", "/test/resource"));
 	}
 
 	@Test
@@ -79,7 +79,7 @@ class DefaultHttpRequestsObservationConventionTests {
 				.contains(KeyValue.of("method", "GET"), KeyValue.of("uri", "/test/{name}"), KeyValue.of("status", "200"),
 						KeyValue.of("exception", "none"), KeyValue.of("outcome", "SUCCESS"));
 		assertThat(this.convention.getHighCardinalityKeyValues(this.context)).hasSize(1)
-				.contains(KeyValue.of("uri.expanded", "/test/resource"));
+				.contains(KeyValue.of("http.url", "/test/resource"));
 	}
 
 	@Test
@@ -93,7 +93,7 @@ class DefaultHttpRequestsObservationConventionTests {
 				.contains(KeyValue.of("method", "GET"), KeyValue.of("uri", "UNKNOWN"), KeyValue.of("status", "500"),
 						KeyValue.of("exception", "IllegalArgumentException"), KeyValue.of("outcome", "SERVER_ERROR"));
 		assertThat(this.convention.getHighCardinalityKeyValues(this.context)).hasSize(1)
-				.contains(KeyValue.of("uri.expanded", "/test/resource"));
+				.contains(KeyValue.of("http.url", "/test/resource"));
 	}
 
 	@Test
@@ -107,7 +107,7 @@ class DefaultHttpRequestsObservationConventionTests {
 				.contains(KeyValue.of("method", "GET"), KeyValue.of("uri", "REDIRECTION"), KeyValue.of("status", "302"),
 						KeyValue.of("exception", "none"), KeyValue.of("outcome", "REDIRECTION"));
 		assertThat(this.convention.getHighCardinalityKeyValues(this.context)).hasSize(1)
-				.contains(KeyValue.of("uri.expanded", "/test/redirect"));
+				.contains(KeyValue.of("http.url", "/test/redirect"));
 	}
 
 	@Test
@@ -120,7 +120,7 @@ class DefaultHttpRequestsObservationConventionTests {
 				.contains(KeyValue.of("method", "GET"), KeyValue.of("uri", "NOT_FOUND"), KeyValue.of("status", "404"),
 						KeyValue.of("exception", "none"), KeyValue.of("outcome", "CLIENT_ERROR"));
 		assertThat(this.convention.getHighCardinalityKeyValues(this.context)).hasSize(1)
-				.contains(KeyValue.of("uri.expanded", "/test/notFound"));
+				.contains(KeyValue.of("http.url", "/test/notFound"));
 	}
 
 }

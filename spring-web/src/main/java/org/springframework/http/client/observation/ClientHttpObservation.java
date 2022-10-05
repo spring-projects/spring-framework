@@ -115,10 +115,10 @@ public enum ClientHttpObservation implements DocumentedObservation {
 		/**
 		 * HTTP request URI.
 		 */
-		URI_EXPANDED {
+		HTTP_URL {
 			@Override
 			public String asString() {
-				return "uri.expanded";
+				return "http.url";
 			}
 		},
 
