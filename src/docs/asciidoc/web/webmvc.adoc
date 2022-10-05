@@ -4827,47 +4827,50 @@ include::webmvc-cors.adoc[leveloffset=+1]
 == REST API exceptions
 [.small]#<<web-reactive.adoc#webflux-ann-rest-exceptions, WebFlux>>#
 
-A common requirement for REST services is to include error details in the body of the
-response. The Spring Framework provides support for
-https://www.rfc-editor.org/rfc/rfc7807.html[RFC 7807] formatted error responses.
+A common requirement for REST services is to include details in the body of an error
+response. The Spring Framework supports the "Problem Details for HTTP APIs"
+specification, https://www.rfc-editor.org/rfc/rfc7807.html[RFC 7807]. These are the main
+abstractions for this support:
 
-Main abstractions and supporting infrastructure:
+- `ProblemDetail` -- representation for an RFC 7807 problem detail; a simple container
+for both standard fields defined in the spec, and for non-standard ones.
+- `ErrorResponse` -- contract to expose HTTP error response details including HTTP
+status, response headers, and a body in the format of RFC 7807; this allows exceptions to
+encapsulate and expose the details of how they map to an HTTP response. All Spring MVC
+exceptions implement this.
+- `ErrorResponseException` -- basic `ErrorResponse` implementation that others
+can use as a convenient base class.
+- `ResponseEntityExceptionHandler` -- convenient base class for an
+<<mvc-ann-controller-advice,@ControllerAdvice>> that handles all Spring MVC exceptions,
+and any `ErrorResponseException`, and renders an error response with a body.
 
-- `ProblemDetail` in the `spring-web` module is the core abstraction that represents an
-RFC 7807 problem detail. It helps to enable a range of features in Spring MVC for the
-handling and rendering of such responses.
-- `ErrorResponse` is an interface that defines an error response, including status, headers,
-and `ProblemDetail` as its body. All Spring web exceptions implement this interface, and
-thus encapsulate a default opinion on how they map to an RFC 7807 error response.
-- `ErrorResponseException` is a `RuntimeException` that implements `ErrorResponse`, which
-can be raised directly or serve as a base class for other exceptions.
-- {api-spring-framework}/web/servlet/mvc/method/annotation/ResponseEntityExceptionHandler.html[`ResponseEntityExceptionHandler`]
-provides handling for Spring MVC exceptions and for any `ErrorResponseException`.
-Applications can extend this as an <<mvc-ann-controller-advice>> to enable RFC 7807 support.
+You can return `ProblemDetail` or `ErrorResponse` directly from `@RequestMapping` or
+from `@ExceptionHandler` controller methods to render an RFC 7807 response as follows:
 
-`ProblemDetail` and `ErrorResponse` are supported as return values from
-`@ExceptionHandler` and `@RequestMapping` controller methods. The `status` property of
-`ProblemDetail` is used to set the response status, while the `instance` property is set
-from the current URL path, if not already set.
+- The `status` property of `ProblemDetail` determines the HTTP status.
+- The `instance` property of `ProblemDetail` is set from the current URL path, if not
+already set.
+- For content negotiation, the Jackson `HttpMessageConverter` prefers
+"application/problem+json" over "application/json" when rendering a `ProblemDetail`,
+and also falls back on it if no compatible media type is found.
 
-The Jackson `HttpMessageConverter` returns "application/problem+json" as a preferred
-choice to serialize `ProblemDetail` to JSON as part of content negotiation. If no suitable
-media type is found to render a `ProblemDetail` response body, content negotiation falls
-back on "application/problem+json".
+You can extend an RFC 7807 response with non-standard fields as follows:
 
-Applications can extend `ProblemDetail` with non-standard fields in one of two ways:
+- Insert into the "properties" `Map` of `ProblemDetail`. When using the Jackson
+library, the Spring Framework registers `ProblemDetailJacksonMixin` that ensures this
+"properties" `Map` is unwrapped and rendered as top level JSON properties in the
+response, and likewise any unknown property during deserialization is inserted into
+this `Map`.
+- Extend `ProblemDetail` to add dedicated non-standard properties. The copy constructor
+in `ProblemDetail` allows a sub-class to make it easy to be created from an existing
+`ProblemDetail`. This could be done centrally, e.g. from an `@ControllerAdvice` such as
+`ResponseEntityExceptionHandler` that re-creates the `ProblemDetail` of an exception into
+a subclass with the additional non-standard fields.
 
-. Add properties to the generic `properties` map in `ProblemDetail`. When using
-the Jackson library, this `properties` map is unwrapped and as top level JSON
-properties with the help of `ProblemDetailJacksonMixin`.
-. Create a `ProblemDetail` subclass that defines the extra, non-standard fields.
-Subclasses can use a protected copy constructor in order to re-create an existing
-`ProblemDetail` as a subclass. This can be done centrally from an `@ControllerAdvice`
-such as `ResponseEntityExceptionHandler`.
-
-On the client side, `WebClientResponseException` and `RestClientResponseException` provide
-methods that decode the response body to some target type. This is useful to decode to a
-`ProblemDetail`, or to any other class, including subclasses of `ProblemDetail`.
+A client application can catch `WebClientResponseException`, when using the `WebClient`,
+or `RestClientResponseException` when using the `RestTemplate`, and use their
+`getResponseBodyAs` methods to decode the error response body to any target type such as
+`ProblemDetail`, or a subclass of `ProblemDetail`.
 
 
 
