@@ -16,7 +16,6 @@
 
 package org.springframework.test.context.aot;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -67,6 +66,9 @@ public class TestContextAotGenerator {
 
 	private final AotServices<TestRuntimeHintsRegistrar> testRuntimeHintsRegistrars;
 
+	private final MergedContextConfigurationRuntimeHints mergedConfigRuntimeHints =
+			new MergedContextConfigurationRuntimeHints();
+
 	private final AtomicInteger sequence = new AtomicInteger();
 
 	private final GeneratedFiles generatedFiles;
@@ -115,7 +117,14 @@ public class TestContextAotGenerator {
 			resetAotFactories();
 
 			MultiValueMap<MergedContextConfiguration, Class<?>> mergedConfigMappings = new LinkedMultiValueMap<>();
-			testClasses.forEach(testClass -> mergedConfigMappings.add(buildMergedContextConfiguration(testClass), testClass));
+			ClassLoader classLoader = getClass().getClassLoader();
+			testClasses.forEach(testClass -> {
+				MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
+				mergedConfigMappings.add(mergedConfig, testClass);
+				this.testRuntimeHintsRegistrars.forEach(registrar ->
+						registrar.registerHints(this.runtimeHints, testClass, classLoader));
+				this.mergedConfigRuntimeHints.registerHints(this.runtimeHints, mergedConfig, classLoader);
+			});
 			MultiValueMap<ClassName, Class<?>> initializerClassMappings = processAheadOfTime(mergedConfigMappings);
 
 			generateTestAotMappings(initializerClassMappings);
@@ -137,9 +146,6 @@ public class TestContextAotGenerator {
 			logger.debug(LogMessage.format("Generating AOT artifacts for test classes %s",
 					testClasses.stream().map(Class::getName).toList()));
 			try {
-				this.testRuntimeHintsRegistrars.forEach(registrar -> registrar.registerHints(mergedConfig,
-						Collections.unmodifiableList(testClasses), this.runtimeHints, getClass().getClassLoader()));
-
 				// Use first test class discovered for a given unique MergedContextConfiguration.
 				Class<?> testClass = testClasses.get(0);
 				DefaultGenerationContext generationContext = createGenerationContext(testClass);

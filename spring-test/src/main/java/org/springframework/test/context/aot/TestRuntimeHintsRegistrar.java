@@ -16,10 +16,7 @@
 
 package org.springframework.test.context.aot;
 
-import java.util.List;
-
 import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.test.context.MergedContextConfiguration;
 
 /**
  * Contract for registering {@link RuntimeHints} for integration tests run with
@@ -34,8 +31,8 @@ import org.springframework.test.context.MergedContextConfiguration;
  * <p>This API serves as a companion to the core
  * {@link org.springframework.aot.hint.RuntimeHintsRegistrar RuntimeHintsRegistrar}
  * API. If you need to register global hints for testing support that are not
- * specific to a particular test class or {@link MergedContextConfiguration}, favor
- * implementing {@code RuntimeHintsRegistrar} over this API.
+ * specific to particular test classes, favor implementing {@code RuntimeHintsRegistrar}
+ * over this API.
  *
  * @author Sam Brannen
  * @since 6.0
@@ -45,13 +42,10 @@ public interface TestRuntimeHintsRegistrar {
 
 	/**
 	 * Contribute hints to the given {@link RuntimeHints} instance.
-	 * @param mergedConfig the merged context configuration to process
-	 * @param testClasses the test classes that share the supplied merged context
-	 * configuration
 	 * @param runtimeHints the {@code RuntimeHints} to use
+	 * @param testClass the test class to process
 	 * @param classLoader the classloader to use
 	 */
-	void registerHints(MergedContextConfiguration mergedConfig, List<Class<?>> testClasses,
-			RuntimeHints runtimeHints, ClassLoader classLoader);
+	void registerHints(RuntimeHints runtimeHints, Class<?> testClass, ClassLoader classLoader);
 
 }
