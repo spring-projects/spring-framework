@@ -34,21 +34,20 @@ import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
 
 /**
- * Command-line application that scans the provided classpath roots for Spring
- * integration test classes and then generates AOT artifacts for those test
- * classes in the provided output directories.
+ * Filesystem-based ahead-of-time (AOT) processing base implementation that scans
+ * the provided classpath roots for Spring integration test classes and then
+ * generates AOT artifacts for those test classes in the configured output directories.
  *
- * <p><strong>For internal use only.</strong>
+ * <p>Typically used in a build tool.
  *
  * @author Sam Brannen
  * @author Stephane Nicoll
  * @author Andy Wilkinson
  * @author Phillip Webb
  * @since 6.0
- * @see TestClassScanner
  * @see TestContextAotGenerator
  * @see FileNativeConfigurationWriter
- * @see org.springframework.boot.AotProcessor
+ * @see org.springframework.context.aot.AotProcessor
  */
 public class TestAotProcessor {
 
@@ -91,14 +90,19 @@ public class TestAotProcessor {
 
 
 	/**
-	 * Trigger processing of the test classes in the configured classpath roots.
+	 * Trigger processing of the test classes by
+	 * {@linkplain #deleteExistingOutput() clearing output directories} first and
+	 * then {@linkplain #performAotProcessing() performing AOT processing}.
 	 */
 	public void process() {
 		deleteExistingOutput();
 		performAotProcessing();
 	}
 
-	private void deleteExistingOutput() {
+	/**
+	 * Delete the source, resource, and class output directories.
+	 */
+	protected void deleteExistingOutput() {
 		deleteExistingOutput(this.sourceOutput, this.resourceOutput, this.classOutput);
 	}
 
@@ -113,7 +117,14 @@ public class TestAotProcessor {
 		}
 	}
 
-	private void performAotProcessing() {
+	/**
+	 * Perform ahead-of-time processing of Spring integration test classes.
+	 * <p>Code, resources, and generated classes are stored in the configured
+	 * output directories. In addition, run-time hints are registered for the
+	 * application contexts used by the test classes as well as test infrastructure
+	 * components used by the tests.
+	 */
+	protected void performAotProcessing() {
 		TestClassScanner scanner = new TestClassScanner(Set.of(this.classpathRoots));
 		Stream<Class<?>> testClasses = scanner.scan();
 
