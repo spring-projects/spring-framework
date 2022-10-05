@@ -472,8 +472,11 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	 * @param request the current request
 	 * @return a {@code ResponseEntity} for the response to use, possibly
 	 * {@code null} when the response is already committed
+	 * @deprecated as of 6.0 since {@link org.springframework.web.method.annotation.ModelAttributeMethodProcessor}
+	 * now raises the {@link MethodArgumentNotValidException} subclass instead.
 	 */
 	@Nullable
+	@Deprecated(since = "6.0", forRemoval = true)
 	protected ResponseEntity<Object> handleBindException(
 			BindException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
