@@ -79,7 +79,7 @@ import static org.springframework.core.annotation.MergedAnnotations.SearchStrate
  * @author Sam Brannen
  * @since 6.0
  */
-public class TestClassScanner {
+class TestClassScanner {
 
 	// JUnit Jupiter
 	private static final String EXTEND_WITH_ANNOTATION_NAME = "org.junit.jupiter.api.extension.ExtendWith";
