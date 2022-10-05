@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -58,7 +59,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Brian Clozel
  */
 class ResourceTests {
-
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("resource")
@@ -270,6 +270,22 @@ class ResourceTests {
 			assertThat(new UrlResource("file:/dir/test.txt?argh").getFilename()).isEqualTo("test.txt");
 			assertThat(new UrlResource("file:\\dir\\test.txt?argh").getFilename()).isEqualTo("test.txt");
 			assertThat(new UrlResource("file:\\dir/test.txt?argh").getFilename()).isEqualTo("test.txt");
+		}
+
+		@Test
+		void filenameContainingHashTagIsExtractedFromFilePathUnencoded() throws Exception {
+			String unencodedPath = "/dir/test#1.txt";
+			String encodedPath = "/dir/test%231.txt";
+
+			URI uri = new URI("file", unencodedPath, null);
+			URL url = uri.toURL();
+			assertThat(uri.getPath()).isEqualTo(unencodedPath);
+			assertThat(uri.getRawPath()).isEqualTo(encodedPath);
+			assertThat(url.getPath()).isEqualTo(encodedPath);
+
+			UrlResource urlResource = new UrlResource(url);
+			assertThat(urlResource.getURI().getPath()).isEqualTo(unencodedPath);
+			assertThat(urlResource.getFilename()).isEqualTo("test#1.txt");
 		}
 
 		@Test
