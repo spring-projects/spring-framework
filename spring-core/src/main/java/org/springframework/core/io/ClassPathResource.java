@@ -24,6 +24,7 @@ import java.net.URL;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -164,7 +165,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	}
 
 	/**
-	 * Resolves a URL for the underlying class path resource.
+	 * Resolves a {@link URL} for the underlying class path resource.
 	 * @return the resolved URL, or {@code null} if not resolvable
 	 */
 	@Nullable
@@ -174,10 +175,10 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 				return this.clazz.getResource(this.path);
 			}
 			else if (this.classLoader != null) {
-				return this.classLoader.getResource(this.path);
+				return this.classLoader.getResource(this.absolutePath);
 			}
 			else {
-				return ClassLoader.getSystemResource(this.path);
+				return ClassLoader.getSystemResource(this.absolutePath);
 			}
 		}
 		catch (IllegalArgumentException ex) {
@@ -188,9 +189,11 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	}
 
 	/**
-	 * This implementation opens an InputStream for the given class path resource.
+	 * This implementation opens an {@link InputStream} for the underlying class
+	 * path resource, if available.
 	 * @see ClassLoader#getResourceAsStream(String)
 	 * @see Class#getResourceAsStream(String)
+	 * @see ClassLoader#getSystemResourceAsStream(String)
 	 */
 	@Override
 	public InputStream getInputStream() throws IOException {
@@ -199,10 +202,10 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 			is = this.clazz.getResourceAsStream(this.path);
 		}
 		else if (this.classLoader != null) {
-			is = this.classLoader.getResourceAsStream(this.path);
+			is = this.classLoader.getResourceAsStream(this.absolutePath);
 		}
 		else {
-			is = ClassLoader.getSystemResourceAsStream(this.path);
+			is = ClassLoader.getSystemResourceAsStream(this.absolutePath);
 		}
 		if (is == null) {
 			throw new FileNotFoundException(getDescription() + " cannot be opened because it does not exist");
@@ -227,8 +230,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 
 	/**
 	 * This implementation creates a {@code ClassPathResource}, applying the given
-	 * path relative to the {@link #getPath() path} of the underlying resource of
-	 * this descriptor.
+	 * path relative to the path used to create this descriptor.
 	 * @see StringUtils#applyRelativePath(String, String)
 	 */
 	@Override
@@ -246,7 +248,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	@Override
 	@Nullable
 	public String getFilename() {
-		return StringUtils.getFilename(this.path);
+		return StringUtils.getFilename(this.absolutePath);
 	}
 
 	/**
@@ -260,29 +262,24 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 
 
 	/**
-	 * This implementation compares the underlying class path locations.
+	 * This implementation compares the underlying class path locations and
+	 * associated class loaders.
+	 * @see #getPath()
+	 * @see #getClassLoader()
 	 */
 	@Override
-	public boolean equals(@Nullable Object other) {
-		if (this == other) {
+	public boolean equals(@Nullable Object obj) {
+		if (this == obj) {
 			return true;
 		}
-		if (!(other instanceof ClassPathResource otherRes)) {
-			return false;
-		}
-		if (!this.absolutePath.equals(otherRes.absolutePath)) {
-			return false;
-		}
-		ClassLoader thisClassLoader =
-				(this.classLoader != null ? this.classLoader : this.clazz.getClassLoader());
-		ClassLoader otherClassLoader =
-				(otherRes.classLoader != null ? otherRes.classLoader : otherRes.clazz.getClassLoader());
-		return thisClassLoader.equals(otherClassLoader);
+		return ((obj instanceof ClassPathResource other) &&
+				this.absolutePath.equals(other.absolutePath) &&
+				ObjectUtils.nullSafeEquals(getClassLoader(), other.getClassLoader()));
 	}
 
 	/**
-	 * This implementation returns the hash code of the underlying
-	 * class path location.
+	 * This implementation returns the hash code of the underlying class path location.
+	 * @see #getPath()
 	 */
 	@Override
 	public int hashCode() {
