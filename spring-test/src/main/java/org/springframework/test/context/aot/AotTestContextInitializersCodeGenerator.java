@@ -63,8 +63,7 @@ class AotTestContextInitializersCodeGenerator {
 
 	private static final String GENERATED_SUFFIX = "Generated";
 
-	// TODO Add support in ClassNameGenerator for supplying a predefined class name.
-	// There is a similar issue in Spring Boot where code relies on a generated name.
+	// TODO Consider an alternative means for specifying the name of the generated class.
 	// Ideally we would generate a class named: org.springframework.test.context.aot.GeneratedAotTestContextInitializers
 	static final String GENERATED_MAPPINGS_CLASS_NAME = AotTestContextInitializers.class.getName() + "__" + GENERATED_SUFFIX;
 

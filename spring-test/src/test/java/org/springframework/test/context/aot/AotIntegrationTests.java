@@ -16,7 +16,6 @@
 
 package org.springframework.test.context.aot;
 
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;

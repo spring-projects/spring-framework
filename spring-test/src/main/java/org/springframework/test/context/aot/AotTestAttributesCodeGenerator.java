@@ -48,6 +48,8 @@ class AotTestAttributesCodeGenerator {
 
 	private static final String GENERATED_SUFFIX = "Generated";
 
+	// TODO Consider an alternative means for specifying the name of the generated class.
+	// Ideally we would generate a class named: org.springframework.test.context.aot.GeneratedAotTestAttributes
 	static final String GENERATED_ATTRIBUTES_CLASS_NAME = AotTestAttributes.class.getName() + "__" + GENERATED_SUFFIX;
 
 	static final String GENERATED_ATTRIBUTES_METHOD_NAME = "getAttributes";
