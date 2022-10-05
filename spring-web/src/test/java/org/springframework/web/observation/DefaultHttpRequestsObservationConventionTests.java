@@ -60,7 +60,6 @@ class DefaultHttpRequestsObservationConventionTests {
 	void addsKeyValuesForExchange() {
 		this.request.setMethod("POST");
 		this.request.setRequestURI("/test/resource");
-		this.request.setPathInfo("/test/resource");
 
 		assertThat(this.convention.getLowCardinalityKeyValues(this.context)).hasSize(5)
 				.contains(KeyValue.of("method", "POST"), KeyValue.of("uri", "UNKNOWN"), KeyValue.of("status", "200"),
@@ -72,7 +71,6 @@ class DefaultHttpRequestsObservationConventionTests {
 	@Test
 	void addsKeyValuesForExchangeWithPathPattern() {
 		this.request.setRequestURI("/test/resource");
-		this.request.setPathInfo("/test/resource");
 		this.context.setPathPattern("/test/{name}");
 
 		assertThat(this.convention.getLowCardinalityKeyValues(this.context)).hasSize(5)
@@ -85,7 +83,6 @@ class DefaultHttpRequestsObservationConventionTests {
 	@Test
 	void addsKeyValuesForErrorExchange() {
 		this.request.setRequestURI("/test/resource");
-		this.request.setPathInfo("/test/resource");
 		this.context.setError(new IllegalArgumentException("custom error"));
 		this.response.setStatus(500);
 
@@ -99,7 +96,6 @@ class DefaultHttpRequestsObservationConventionTests {
 	@Test
 	void addsKeyValuesForRedirectExchange() {
 		this.request.setRequestURI("/test/redirect");
-		this.request.setPathInfo("/test/redirect");
 		this.response.setStatus(302);
 		this.response.addHeader("Location", "https://example.org/other");
 
@@ -113,7 +109,6 @@ class DefaultHttpRequestsObservationConventionTests {
 	@Test
 	void addsKeyValuesForNotFoundExchange() {
 		this.request.setRequestURI("/test/notFound");
-		this.request.setPathInfo("/test/notFound");
 		this.response.setStatus(404);
 
 		assertThat(this.convention.getLowCardinalityKeyValues(this.context)).hasSize(5)

@@ -48,7 +48,7 @@ public class DefaultHttpRequestsObservationConvention implements HttpRequestsObs
 
 	private static final KeyValue EXCEPTION_NONE = KeyValue.of(HttpRequestsObservation.LowCardinalityKeyNames.EXCEPTION, "none");
 
-	private static final KeyValue URI_EXPANDED_UNKNOWN = KeyValue.of(HttpRequestsObservation.HighCardinalityKeyNames.HTTP_URL, "UNKNOWN");
+	private static final KeyValue HTTP_URL_UNKNOWN = KeyValue.of(HttpRequestsObservation.HighCardinalityKeyNames.HTTP_URL, "UNKNOWN");
 
 	private final String name;
 
@@ -85,7 +85,7 @@ public class DefaultHttpRequestsObservationConvention implements HttpRequestsObs
 
 	@Override
 	public KeyValues getHighCardinalityKeyValues(HttpRequestsObservationContext context) {
-		return KeyValues.of(uriExpanded(context));
+		return KeyValues.of(httpUrl(context));
 	}
 
 	protected KeyValue method(HttpRequestsObservationContext context) {
@@ -143,12 +143,12 @@ public class DefaultHttpRequestsObservationConvention implements HttpRequestsObs
 		return HttpOutcome.UNKNOWN.asKeyValue();
 	}
 
-	protected KeyValue uriExpanded(HttpRequestsObservationContext context) {
+	protected KeyValue httpUrl(HttpRequestsObservationContext context) {
 		if (context.getCarrier() != null) {
 			String uriExpanded = context.getCarrier().getPath().toString();
 			return KeyValue.of(HttpRequestsObservation.HighCardinalityKeyNames.HTTP_URL, uriExpanded);
 		}
-		return URI_EXPANDED_UNKNOWN;
+		return HTTP_URL_UNKNOWN;
 	}
 
 }

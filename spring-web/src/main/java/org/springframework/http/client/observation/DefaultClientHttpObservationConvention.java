@@ -46,7 +46,7 @@ public class DefaultClientHttpObservationConvention implements ClientHttpObserva
 
 	private static final KeyValue EXCEPTION_NONE = KeyValue.of(ClientHttpObservation.LowCardinalityKeyNames.EXCEPTION, "none");
 
-	private static final KeyValue URI_EXPANDED_NONE = KeyValue.of(ClientHttpObservation.HighCardinalityKeyNames.HTTP_URL, "none");
+	private static final KeyValue HTTP_URL_NONE = KeyValue.of(ClientHttpObservation.HighCardinalityKeyNames.HTTP_URL, "none");
 
 	private static final KeyValue CLIENT_NAME_NONE = KeyValue.of(ClientHttpObservation.HighCardinalityKeyNames.CLIENT_NAME, "none");
 
@@ -141,7 +141,7 @@ public class DefaultClientHttpObservationConvention implements ClientHttpObserva
 		if (context.getCarrier() != null) {
 			return KeyValue.of(ClientHttpObservation.HighCardinalityKeyNames.HTTP_URL, context.getCarrier().getURI().toASCIIString());
 		}
-		return URI_EXPANDED_NONE;
+		return HTTP_URL_NONE;
 	}
 
 	protected KeyValue clientName(ClientHttpObservationContext context) {
