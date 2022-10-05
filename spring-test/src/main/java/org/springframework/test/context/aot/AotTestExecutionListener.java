@@ -33,10 +33,10 @@ public interface AotTestExecutionListener extends TestExecutionListener {
 	 * {@link RuntimeHints} instance.
 	 * <p>If possible, implementations should use the specified {@link ClassLoader}
 	 * to determine if hints have to be contributed.
-	 * @param testClass the test class to process
 	 * @param runtimeHints the {@code RuntimeHints} to use
+	 * @param testClass the test class to process
 	 * @param classLoader the classloader to use
 	 */
-	void processAheadOfTime(Class<?> testClass, RuntimeHints runtimeHints, ClassLoader classLoader);
+	void processAheadOfTime(RuntimeHints runtimeHints, Class<?> testClass, ClassLoader classLoader);
 
 }
