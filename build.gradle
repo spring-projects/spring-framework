@@ -93,6 +93,14 @@ configure([rootProject] + javaProjects) { project ->
 		configDirectory.set(rootProject.file("src/checkstyle"))
 	}
 
+	tasks.named("checkstyleMain").configure {
+		maxHeapSize = "1g"
+	}
+
+	tasks.named("checkstyleTest").configure {
+		maxHeapSize = "1g"
+	}
+
 	dependencies {
 		dependencyManagement(enforcedPlatform(dependencies.project(path: ":framework-platform")))
 		testImplementation("org.junit.jupiter:junit-jupiter-api")
