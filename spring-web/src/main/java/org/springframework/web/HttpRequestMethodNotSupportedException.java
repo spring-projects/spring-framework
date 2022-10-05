@@ -52,9 +52,7 @@ public class HttpRequestMethodNotSupportedException extends ServletException imp
 	/**
 	 * Create a new HttpRequestMethodNotSupportedException.
 	 * @param method the unsupported HTTP request method
-	 * @deprecated 6.0 in favor of {@link #HttpRequestMethodNotSupportedException(String, Collection)}
 	 */
-	@Deprecated(since = "6.0", forRemoval = true)
 	public HttpRequestMethodNotSupportedException(String method) {
 		this(method, (String[]) null);
 	}

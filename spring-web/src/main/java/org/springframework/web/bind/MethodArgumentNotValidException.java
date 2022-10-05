@@ -111,8 +111,8 @@ public class MethodArgumentNotValidException extends BindException implements Er
 	}
 
 	/**
-	 * Convert each given {@link ObjectError} to a single quote String, taking
-	 * either an error's default message as a first choice, or its error code.
+	 * Convert each given {@link ObjectError} to a String in single quotes, taking
+	 * either the error's default message, or its error code.
 	 * @since 6.0
 	 */
 	public static List<String> errorsToStringList(List<? extends ObjectError> errors) {
@@ -121,9 +121,9 @@ public class MethodArgumentNotValidException extends BindException implements Er
 	}
 
 	/**
-	 * Variant of {@link #errorsToStringList(List)} that uses the provided
-	 * {@link MessageSource} to resolve the error code, or otherwise fall
-	 * back on its default message.
+	 * Variant of {@link #errorsToStringList(List)} that uses a
+	 * {@link MessageSource} to resolve the message code of the error, or fall
+	 * back on the error's default message.
 	 * @since 6.0
 	 */
 	@SuppressWarnings("ConstantConditions")

@@ -80,8 +80,8 @@ public class ResponseStatusException extends ErrorResponseException {
 	}
 
 	/**
-	 * Constructor with a {@link org.springframework.context.MessageSource}
-	 * code and arguments to resolve the detail message with.
+	 * Constructor with a message code and arguments for resolving the error
+	 * "detail" via {@link org.springframework.context.MessageSource}.
 	 * @param status the HTTP status (required)
 	 * @param reason the associated reason (optional)
 	 * @param cause a nested exception (optional)

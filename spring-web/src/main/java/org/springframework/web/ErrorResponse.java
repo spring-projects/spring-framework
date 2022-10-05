@@ -65,19 +65,19 @@ public interface ErrorResponse {
 
 	/**
 	 * Return a code to use to resolve the problem "detail" for this exception
-	 * through a {@link org.springframework.context.MessageSource}.
+	 * through a {@link MessageSource}.
 	 * <p>By default this is initialized via
-	 * {@link #getDefaultDetailMessageCode(Class, String)} but each exception
-	 * overrides this to provide relevant data that that can be expanded into
-	 * placeholders within the message.
+	 * {@link #getDefaultDetailMessageCode(Class, String)}.
 	 */
 	default String getDetailMessageCode() {
 		return getDefaultDetailMessageCode(getClass(), null);
 	}
 
 	/**
-	 * Return the arguments to use to resolve the problem "detail" through a
-	 * {@link MessageSource}.
+	 * Return arguments to use along with a {@link #getDetailMessageCode()
+	 * message code} to resolve the problem "detail" for this exception
+	 * through a {@link MessageSource}. The arguments are expanded
+	 * into placeholders of the message value, e.g. "Invalid content type {0}".
 	 */
 	@Nullable
 	default Object[] getDetailMessageArguments() {
@@ -86,10 +86,8 @@ public interface ErrorResponse {
 
 	/**
 	 * Variant of {@link #getDetailMessageArguments()} that uses the given
-	 * {@link MessageSource} to resolve the message arguments.
-	 * <p>By default this delegates to {@link #getDetailMessageArguments()}
-	 * by concrete implementations may override it, for example in order to
-	 * resolve validation errors through a {@code MessageSource}.
+	 * {@link MessageSource} for resolving the message argument values.
+	 * This is useful for example to message codes from validation errors.
 	 */
 	@Nullable
 	default Object[] getDetailMessageArguments(MessageSource messageSource, Locale locale) {

@@ -69,7 +69,7 @@ public class UnsatisfiedServletRequestParameterException extends ServletRequestB
 	private static List<String> paramsToStringList(List<String[]> paramConditions) {
 		Assert.notEmpty(paramConditions, "Parameter conditions must not be empty");
 		return paramConditions.stream()
-				.map(c -> "\"" + StringUtils.arrayToDelimitedString(c, ", ") + "\"")
+				.map(condition -> "\"" + StringUtils.arrayToDelimitedString(condition, ", ") + "\"")
 				.collect(Collectors.toList());
 	}
 

@@ -57,8 +57,8 @@ public class ServerWebInputException extends ResponseStatusException {
 	}
 
 	/**
-	 * Constructor with a {@link org.springframework.context.MessageSource} code
-	 * and arguments to resolve the detail message with.
+	 * Constructor with a message code and arguments for resolving the error
+	 * "detail" via {@link org.springframework.context.MessageSource}.
 	 * @since 6.0
 	 */
 	protected ServerWebInputException(String reason, @Nullable MethodParameter parameter, @Nullable Throwable cause,

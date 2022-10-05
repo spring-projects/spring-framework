@@ -41,8 +41,8 @@ public class MissingRequestValueException extends ServletRequestBindingException
 	}
 
 	/**
-	 * Constructor with a message and a flag that indicates whether the value
-	 * was not completely missing but became was {@code null} after conversion.
+	 * Constructor with a message and a flag that indicates whether a value
+	 * was present but became {@code null} after conversion.
 	 */
 	public MissingRequestValueException(String msg, boolean missingAfterConversion) {
 		super(msg);
