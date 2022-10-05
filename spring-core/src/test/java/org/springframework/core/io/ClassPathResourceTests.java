@@ -91,6 +91,14 @@ class ClassPathResourceTests {
 		}
 
 		@Test
+		void resourcesWithEquivalentAbsolutePathsHaveSameHashCode() {
+			ClassPathResource resource1 = new ClassPathResource("Resource.class", getClass());
+			ClassPathResource resource2 = new ClassPathResource("org/springframework/core/io/Resource.class", getClass().getClassLoader());
+			assertThat(resource1.getPath()).isEqualTo(resource2.getPath());
+			assertThat(resource1).hasSameHashCodeAs(resource2);
+		}
+
+		@Test
 		void resourcesWithEquivalentAbsolutePathsFromDifferentClassLoadersAreNotEqual() {
 			class SimpleThrowawayClassLoader extends OverridingClassLoader {
 				SimpleThrowawayClassLoader(ClassLoader parent) {

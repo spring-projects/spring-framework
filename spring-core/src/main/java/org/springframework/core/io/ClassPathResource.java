@@ -286,7 +286,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 */
 	@Override
 	public int hashCode() {
-		return this.path.hashCode();
+		return this.absolutePath.hashCode();
 	}
 
 }
