@@ -38,12 +38,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
- * Tests for AOT constructor and factory method resolution.
+ * Tests for {@link ConstructorResolver} focused on AOT constructor and factory
+ * method resolution.
  *
  * @author Stephane Nicoll
  * @author Phillip Webb
  */
-class ConstructorAndFactoryMethodResolutionTests {
+class ConstructorResolverAotTests {
 
 	@Test
 	void detectBeanInstanceExecutableWithBeanClassAndFactoryMethodName() {
