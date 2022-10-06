@@ -18,13 +18,19 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+import io.micrometer.context.ContextRegistry;
+import io.micrometer.context.ContextSnapshot;
+import io.micrometer.context.ContextSnapshot.Scope;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
+import reactor.core.scheduler.Schedulers;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
@@ -237,6 +243,46 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 
 		assertThat(this.response.getContentType()).isEqualTo("text/event-stream");
 		assertThat(this.response.getContentAsString()).isEqualTo("data:foo\n\ndata:bar\n\ndata:baz\n\n");
+	}
+
+	@SuppressWarnings({"try","unused"})
+	@Test
+	public void responseBodyFluxWithThreadLocal() throws Exception {
+
+		this.request.addHeader("Accept", "text/event-stream");
+
+		ThreadLocal<String> threadLocal = new ThreadLocal<>();
+		ContextRegistry.getInstance().registerThreadLocalAccessor("key", threadLocal);
+
+		CountDownLatch latch = new CountDownLatch(1);
+
+		Flux<String> flux = Flux.just("foo", "bar", "baz")
+				.publishOn(Schedulers.boundedElastic())
+				.transformDeferredContextual((theFlux, contextView) ->
+						theFlux.map(s -> {
+							try (Scope scope = ContextSnapshot.setThreadLocalsFrom(contextView, "key")) {
+								return s + threadLocal.get();
+							}
+						}))
+				.doOnTerminate(latch::countDown);
+
+		try {
+			threadLocal.set("123");
+			this.handler.handleReturnValue(flux,
+					on(TestController.class).resolveReturnType(Flux.class, String.class),
+					this.mavContainer, this.webRequest);
+		}
+		finally {
+			threadLocal.remove();
+		}
+
+		latch.await(5, TimeUnit.SECONDS);
+
+		assertThat(this.request.isAsyncStarted()).isTrue();
+		assertThat(this.response.getStatus()).isEqualTo(200);
+
+		assertThat(this.response.getContentType()).isEqualTo("text/event-stream");
+		assertThat(this.response.getContentAsString()).isEqualTo("data:foo123\n\ndata:bar123\n\ndata:baz123\n\n");
 	}
 
 	@Test // gh-21972

@@ -4756,6 +4756,46 @@ suitable under load. If you plan to stream with a reactive type, you should use 
 
 
 
+[[mvc-ann-async-context-propagation]]
+=== Context Propagation
+
+It is common to propagate context via `java.lang.ThreadLocal`. This works transparently
+for handling on the same thread, but requires additional work for asynchronous handling
+across multiple threads. The Micrometer
+https://github.com/micrometer-metrics/context-propagation#context-propagation-library[Context Propagation]
+library simplifies context propagation across threads, and across context mechanisms such
+as `ThreadLocal` values,
+Reactor https://projectreactor.io/docs/core/release/reference/#context[context],
+GraphQL Java https://www.graphql-java.com/documentation/concerns/#context-objects[context],
+and others.
+
+If Micrometer Context Propagation is present on the classpath, when a controller method
+returns a <<mvc-ann-async-reactive-types,reactive type>> such as `Flux` or `Mono`, all
+`ThreadLocal` values, for which there is a registered `io.micrometer.ThreadLocalAccessor`,
+are written to the Reactor `Context` as key-value pairs, using the key assigned by the
+`ThreadLocalAccessor`.
+
+For other asynchronous handling scenarios, you can use the Context Propagation library
+directly. For example:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	// Capture ThreadLocal values from the main thread ...
+	ContextSnapshot snapshot = ContextSnapshot.captureAll();
+
+	// On a different thread: restore ThreadLocal values
+	try (ContextSnapshot.Scope scoped = snapshot.setThreadLocals()) {
+		// ...
+	}
+----
+
+For more details, see the
+https://micrometer.io/docs/contextPropagation[documentation] of the Micrometer Context
+Propagation library.
+
+
+
 [[mvc-ann-async-disconnects]]
 === Disconnects
 [.small]#<<web-reactive.adoc#webflux-codecs-streaming, WebFlux>>#
