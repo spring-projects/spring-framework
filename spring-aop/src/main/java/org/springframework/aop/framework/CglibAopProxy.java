@@ -126,9 +126,6 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 */
 	public CglibAopProxy(AdvisedSupport config) throws AopConfigException {
 		Assert.notNull(config, "AdvisedSupport must not be null");
-		if (config.getAdvisorCount() == 0 && config.getTargetSource() == AdvisedSupport.EMPTY_TARGET_SOURCE) {
-			throw new AopConfigException("No advisors and no TargetSource specified");
-		}
 		this.advised = config;
 		this.advisedDispatcher = new AdvisedDispatcher(this.advised);
 	}
