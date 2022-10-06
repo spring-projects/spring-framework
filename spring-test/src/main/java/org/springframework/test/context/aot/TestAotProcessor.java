@@ -67,7 +67,6 @@ public class TestAotProcessor {
 	/**
 	 * Create a new processor for the specified test classpath roots and
 	 * general settings.
-	 *
 	 * @param classpathRoots the classpath roots to scan for test classes
 	 * @param sourceOutput the location of generated sources
 	 * @param resourceOutput the location of generated resources

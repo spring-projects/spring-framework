@@ -202,8 +202,7 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 			Executable constructorOrFactoryMethod, boolean allowDirectSupplierShortcut) {
 
 		return new InstanceSupplierCodeGenerator(generationContext,
-				beanRegistrationCode.getClassName(),
-				beanRegistrationCode.getMethods(), allowDirectSupplierShortcut)
+				beanRegistrationCode.getClassName(), beanRegistrationCode.getMethods(), allowDirectSupplierShortcut)
 				.generateCode(this.registeredBean, constructorOrFactoryMethod);
 	}
 

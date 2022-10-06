@@ -61,8 +61,7 @@ public abstract class AotProcessor {
 	private final String artifactId;
 
 	/**
-	 * Create a new instance.
-	 *
+	 * Create a new processor instance.
 	 * @param application the application entry point
 	 * @param sourceOutput the location of generated sources
 	 * @param resourceOutput the location of generated resources
@@ -74,6 +73,7 @@ public abstract class AotProcessor {
 	 */
 	protected AotProcessor(Class<?> application, Path sourceOutput, Path resourceOutput,
 			Path classOutput, String groupId, String artifactId) {
+
 		this.application = application;
 		this.sourceOutput = sourceOutput;
 		this.resourceOutput = resourceOutput;
@@ -158,6 +158,7 @@ public abstract class AotProcessor {
 
 	private void registerEntryPointHint(DefaultGenerationContext generationContext,
 			ClassName generatedInitializerClassName) {
+
 		TypeReference generatedType = TypeReference.of(generatedInitializerClassName.canonicalName());
 		TypeReference applicationType = TypeReference.of(this.application);
 		ReflectionHints reflection = generationContext.getRuntimeHints().reflection();

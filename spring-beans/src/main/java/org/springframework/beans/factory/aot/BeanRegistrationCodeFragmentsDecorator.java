@@ -94,8 +94,7 @@ public class BeanRegistrationCodeFragmentsDecorator implements BeanRegistrationC
 			Executable constructorOrFactoryMethod, boolean allowDirectSupplierShortcut) {
 
 		return this.delegate.generateInstanceSupplierCode(generationContext,
-				beanRegistrationCode, constructorOrFactoryMethod,
-				allowDirectSupplierShortcut);
+				beanRegistrationCode, constructorOrFactoryMethod, allowDirectSupplierShortcut);
 	}
 
 	@Override

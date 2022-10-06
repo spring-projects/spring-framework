@@ -44,6 +44,7 @@ public interface BeanRegistrationAotContribution {
 	 */
 	default BeanRegistrationCodeFragments customizeBeanRegistrationCodeFragments(
 			GenerationContext generationContext, BeanRegistrationCodeFragments codeFragments) {
+
 		return codeFragments;
 	}
 
@@ -52,8 +53,7 @@ public interface BeanRegistrationAotContribution {
 	 * @param generationContext the generation context
 	 * @param beanRegistrationCode the generated registration
 	 */
-	void applyTo(GenerationContext generationContext,
-			BeanRegistrationCode beanRegistrationCode);
+	void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode);
 
 	/**
 	 * Create a {@link BeanRegistrationAotContribution} that customizes
@@ -66,20 +66,19 @@ public interface BeanRegistrationAotContribution {
 	 */
 	static BeanRegistrationAotContribution withCustomCodeFragments(
 			UnaryOperator<BeanRegistrationCodeFragments> defaultCodeFragments) {
-		Assert.notNull(defaultCodeFragments, "'defaultCodeFragments' must not be null");
-		return new BeanRegistrationAotContribution() {
 
+		Assert.notNull(defaultCodeFragments, "'defaultCodeFragments' must not be null");
+
+		return new BeanRegistrationAotContribution() {
 			@Override
 			public BeanRegistrationCodeFragments customizeBeanRegistrationCodeFragments(
 					GenerationContext generationContext, BeanRegistrationCodeFragments codeFragments) {
 				return defaultCodeFragments.apply(codeFragments);
 			}
-
 			@Override
 			public void applyTo(GenerationContext generationContext,
 					BeanRegistrationCode beanRegistrationCode) {
 			}
-
 		};
 	}
 

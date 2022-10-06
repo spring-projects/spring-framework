@@ -47,9 +47,9 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class PathMatchingResourcePatternResolverTests {
 
 	private static final String[] CLASSES_IN_CORE_IO_SUPPORT = { "EncodedResource.class",
-		"LocalizedResourceHelper.class", "PathMatchingResourcePatternResolver.class", "PropertiesLoaderSupport.class",
-		"PropertiesLoaderUtils.class", "ResourceArrayPropertyEditor.class", "ResourcePatternResolver.class",
-		"ResourcePatternUtils.class", "SpringFactoriesLoader.class" };
+			"LocalizedResourceHelper.class", "PathMatchingResourcePatternResolver.class", "PropertiesLoaderSupport.class",
+			"PropertiesLoaderUtils.class", "ResourceArrayPropertyEditor.class", "ResourcePatternResolver.class",
+			"ResourcePatternUtils.class", "SpringFactoriesLoader.class" };
 
 	private static final String[] TEST_CLASSES_IN_CORE_IO_SUPPORT = { "PathMatchingResourcePatternResolverTests.class" };
 
@@ -99,7 +99,7 @@ class PathMatchingResourcePatternResolverTests {
 			}
 
 			@Test
-			void usingFilePrototol() {
+			void usingFileProtocol() {
 				Path testResourcesDir = Path.of("src/test/resources").toAbsolutePath();
 				String pattern = "file:%s/scanned-resources/**".formatted(testResourcesDir);
 				String pathPrefix = ".+scanned-resources/";
@@ -107,9 +107,7 @@ class PathMatchingResourcePatternResolverTests {
 				assertExactFilenames(pattern, "resource#test1.txt", "resource#test2.txt");
 				assertExactSubPaths(pattern, pathPrefix, "resource#test1.txt", "resource#test2.txt");
 			}
-
 		}
-
 	}
 
 
@@ -147,7 +145,6 @@ class PathMatchingResourcePatternResolverTests {
 				.as("Could not find aspectj_1_5_0.dtd in the root of the aspectjweaver jar")
 				.containsExactly("aspectj_1_5_0.dtd");
 		}
-
 	}
 
 

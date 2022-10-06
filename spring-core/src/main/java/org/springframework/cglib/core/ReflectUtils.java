@@ -430,6 +430,10 @@ public class ReflectUtils {
 	}
 
 	// SPRING PATCH BEGIN
+	public static void setGeneratedClassHandler(BiConsumer<String, byte[]> handler) {
+		generatedClassHandler = handler;
+	}
+
 	public static Class defineClass(String className, byte[] b, ClassLoader loader) throws Exception {
 		return defineClass(className, b, loader, null, null);
 	}
@@ -438,10 +442,6 @@ public class ReflectUtils {
 			ProtectionDomain protectionDomain) throws Exception {
 
 		return defineClass(className, b, loader, protectionDomain, null);
-	}
-
-	public static void setGeneratedClassHandler(BiConsumer<String, byte[]> handler) {
-		generatedClassHandler = handler;
 	}
 
 	@SuppressWarnings({"deprecation", "serial"})
