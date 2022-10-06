@@ -44,9 +44,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.client.observation.ClientHttpObservation;
 import org.springframework.http.client.observation.ClientHttpObservationContext;
 import org.springframework.http.client.observation.ClientHttpObservationConvention;
+import org.springframework.http.client.observation.ClientHttpObservationDocumentation;
 import org.springframework.http.client.observation.DefaultClientHttpObservationConvention;
 import org.springframework.http.client.support.InterceptingHttpAccessor;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
@@ -865,8 +865,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 		ClientHttpObservationContext observationContext = new ClientHttpObservationContext(request);
 		observationContext.setUriTemplate(uriTemplate);
-		Observation observation = ClientHttpObservation.HTTP_REQUEST.observation(this.observationConvention,
-				DEFAULT_OBSERVATION_CONVENTION, observationContext, this.observationRegistry).start();
+		Observation observation = ClientHttpObservationDocumentation.HTTP_REQUEST.observation(this.observationConvention,
+				DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, this.observationRegistry).start();
 		ClientHttpResponse response = null;
 		try {
 			if (requestCallback != null) {

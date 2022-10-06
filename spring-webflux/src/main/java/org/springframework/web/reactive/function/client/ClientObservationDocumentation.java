@@ -14,41 +14,38 @@
  * limitations under the License.
  */
 
-package org.springframework.http.client.observation;
+package org.springframework.web.reactive.function.client;
 
 import io.micrometer.common.docs.KeyName;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
-import io.micrometer.observation.docs.DocumentedObservation;
-
-import org.springframework.http.client.ClientHttpRequestFactory;
-
+import io.micrometer.observation.docs.ObservationDocumentation;
 
 /**
- * Documented {@link io.micrometer.common.KeyValue KeyValues} for {@link ClientHttpRequestFactory HTTP client observations}.
+ * Documented {@link io.micrometer.common.KeyValue KeyValues} for the {@link WebClient} observations.
  * <p>This class is used by automated tools to document KeyValues attached to the HTTP client observations.
  * @author Brian Clozel
  * @since 6.0
  */
-public enum ClientHttpObservation implements DocumentedObservation {
+public enum ClientObservationDocumentation implements ObservationDocumentation {
 
 	/**
-	 * Observation created for a client HTTP exchange.
+	 * Observation created for an HTTP client exchange.
 	 */
 	HTTP_REQUEST {
 		@Override
 		public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
-			return DefaultClientHttpObservationConvention.class;
+			return DefaultClientObservationConvention.class;
 		}
 
 		@Override
 		public KeyName[] getLowCardinalityKeyNames() {
-			return LowCardinalityKeyNames.values();
+			return ClientObservationDocumentation.LowCardinalityKeyNames.values();
 		}
 
 		@Override
 		public KeyName[] getHighCardinalityKeyNames() {
-			return HighCardinalityKeyNames.values();
+			return ClientObservationDocumentation.HighCardinalityKeyNames.values();
 		}
 
 	};
@@ -99,6 +96,7 @@ public enum ClientHttpObservation implements DocumentedObservation {
 
 		/**
 		 * Outcome of the HTTP client exchange.
+		 *
 		 * @see org.springframework.http.HttpStatus.Series
 		 */
 		OUTCOME {

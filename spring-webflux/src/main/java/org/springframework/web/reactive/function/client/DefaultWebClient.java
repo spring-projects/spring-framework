@@ -460,8 +460,8 @@ class DefaultWebClient implements WebClient {
 					initRequestBuilder().body(this.inserter).build() :
 					initRequestBuilder().build());
 			return Mono.defer(() -> {
-				Observation observation = ClientObservation.HTTP_REQUEST.observation(observationConvention,
-						DEFAULT_OBSERVATION_CONVENTION, observationContext, observationRegistry).start();
+				Observation observation = ClientObservationDocumentation.HTTP_REQUEST.observation(observationConvention,
+						DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, observationRegistry).start();
 				observationContext.setCarrier(request);
 				observationContext.setUriTemplate((String) request.attribute(URI_TEMPLATE_ATTRIBUTE).orElse(null));
 				Mono<ClientResponse> responseMono = exchangeFunction.exchange(request)

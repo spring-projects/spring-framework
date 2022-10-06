@@ -34,21 +34,21 @@ public class DefaultHttpRequestsObservationConvention implements HttpRequestsObs
 
 	private static final String DEFAULT_NAME = "http.server.requests";
 
-	private static final KeyValue METHOD_UNKNOWN = KeyValue.of(HttpRequestsObservation.LowCardinalityKeyNames.METHOD, "UNKNOWN");
+	private static final KeyValue METHOD_UNKNOWN = KeyValue.of(HttpRequestsObservationDocumentation.LowCardinalityKeyNames.METHOD, "UNKNOWN");
 
-	private static final KeyValue STATUS_UNKNOWN = KeyValue.of(HttpRequestsObservation.LowCardinalityKeyNames.STATUS, "UNKNOWN");
+	private static final KeyValue STATUS_UNKNOWN = KeyValue.of(HttpRequestsObservationDocumentation.LowCardinalityKeyNames.STATUS, "UNKNOWN");
 
-	private static final KeyValue URI_UNKNOWN = KeyValue.of(HttpRequestsObservation.LowCardinalityKeyNames.URI, "UNKNOWN");
+	private static final KeyValue URI_UNKNOWN = KeyValue.of(HttpRequestsObservationDocumentation.LowCardinalityKeyNames.URI, "UNKNOWN");
 
-	private static final KeyValue URI_ROOT = KeyValue.of(HttpRequestsObservation.LowCardinalityKeyNames.URI, "root");
+	private static final KeyValue URI_ROOT = KeyValue.of(HttpRequestsObservationDocumentation.LowCardinalityKeyNames.URI, "root");
 
-	private static final KeyValue URI_NOT_FOUND = KeyValue.of(HttpRequestsObservation.LowCardinalityKeyNames.URI, "NOT_FOUND");
+	private static final KeyValue URI_NOT_FOUND = KeyValue.of(HttpRequestsObservationDocumentation.LowCardinalityKeyNames.URI, "NOT_FOUND");
 
-	private static final KeyValue URI_REDIRECTION = KeyValue.of(HttpRequestsObservation.LowCardinalityKeyNames.URI, "REDIRECTION");
+	private static final KeyValue URI_REDIRECTION = KeyValue.of(HttpRequestsObservationDocumentation.LowCardinalityKeyNames.URI, "REDIRECTION");
 
-	private static final KeyValue EXCEPTION_NONE = KeyValue.of(HttpRequestsObservation.LowCardinalityKeyNames.EXCEPTION, "none");
+	private static final KeyValue EXCEPTION_NONE = KeyValue.of(HttpRequestsObservationDocumentation.LowCardinalityKeyNames.EXCEPTION, "none");
 
-	private static final KeyValue HTTP_URL_UNKNOWN = KeyValue.of(HttpRequestsObservation.HighCardinalityKeyNames.HTTP_URL, "UNKNOWN");
+	private static final KeyValue HTTP_URL_UNKNOWN = KeyValue.of(HttpRequestsObservationDocumentation.HighCardinalityKeyNames.HTTP_URL, "UNKNOWN");
 
 	private final String name;
 
@@ -89,14 +89,14 @@ public class DefaultHttpRequestsObservationConvention implements HttpRequestsObs
 	}
 
 	protected KeyValue method(HttpRequestsObservationContext context) {
-		return (context.getCarrier() != null) ? KeyValue.of(HttpRequestsObservation.LowCardinalityKeyNames.METHOD, context.getCarrier().getMethod().name()) : METHOD_UNKNOWN;
+		return (context.getCarrier() != null) ? KeyValue.of(HttpRequestsObservationDocumentation.LowCardinalityKeyNames.METHOD, context.getCarrier().getMethod().name()) : METHOD_UNKNOWN;
 	}
 
 	protected KeyValue status(HttpRequestsObservationContext context) {
 		if (context.isConnectionAborted()) {
 			return STATUS_UNKNOWN;
 		}
-		return (context.getResponse() != null) ? KeyValue.of(HttpRequestsObservation.LowCardinalityKeyNames.STATUS, Integer.toString(context.getResponse().getStatusCode().value())) : STATUS_UNKNOWN;
+		return (context.getResponse() != null) ? KeyValue.of(HttpRequestsObservationDocumentation.LowCardinalityKeyNames.STATUS, Integer.toString(context.getResponse().getStatusCode().value())) : STATUS_UNKNOWN;
 	}
 
 	protected KeyValue uri(HttpRequestsObservationContext context) {
@@ -124,12 +124,13 @@ public class DefaultHttpRequestsObservationConvention implements HttpRequestsObs
 	}
 
 	protected KeyValue exception(HttpRequestsObservationContext context) {
-		return context.getError().map(throwable -> {
-			String simpleName = throwable.getClass().getSimpleName();
-			return KeyValue.of(HttpRequestsObservation.LowCardinalityKeyNames.EXCEPTION,
-					StringUtils.hasText(simpleName) ? simpleName : throwable.getClass().getName());
-		})
-		.orElse(EXCEPTION_NONE);
+		Throwable error = context.getError();
+		if (error != null) {
+			String simpleName = error.getClass().getSimpleName();
+			return KeyValue.of(HttpRequestsObservationDocumentation.LowCardinalityKeyNames.EXCEPTION,
+					StringUtils.hasText(simpleName) ? simpleName : error.getClass().getName());
+		}
+		return EXCEPTION_NONE;
 	}
 
 	protected KeyValue outcome(HttpRequestsObservationContext context) {
@@ -146,7 +147,7 @@ public class DefaultHttpRequestsObservationConvention implements HttpRequestsObs
 	protected KeyValue httpUrl(HttpRequestsObservationContext context) {
 		if (context.getCarrier() != null) {
 			String uriExpanded = context.getCarrier().getPath().toString();
-			return KeyValue.of(HttpRequestsObservation.HighCardinalityKeyNames.HTTP_URL, uriExpanded);
+			return KeyValue.of(HttpRequestsObservationDocumentation.HighCardinalityKeyNames.HTTP_URL, uriExpanded);
 		}
 		return HTTP_URL_UNKNOWN;
 	}

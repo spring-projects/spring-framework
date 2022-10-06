@@ -69,7 +69,7 @@ class HttpRequestsObservationWebFilterTests {
 				.expectError(IllegalArgumentException.class)
 				.verify();
 		Optional<HttpRequestsObservationContext> observationContext = HttpRequestsObservationWebFilter.findObservationContext(exchange);
-		assertThat(observationContext.get().getError()).get().isInstanceOf(IllegalArgumentException.class);
+		assertThat(observationContext.get().getError()).isInstanceOf(IllegalArgumentException.class);
 		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SERVER_ERROR");
 	}
 

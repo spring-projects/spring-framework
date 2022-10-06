@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-package org.springframework.web.observation.reactive;
+package org.springframework.web.observation;
 
 import io.micrometer.common.docs.KeyName;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
-import io.micrometer.observation.docs.DocumentedObservation;
+import io.micrometer.observation.docs.ObservationDocumentation;
 
 /**
  * Documented {@link io.micrometer.common.KeyValue KeyValues} for the HTTP server observations
- * for reactive web applications.
+ * for Servlet-based web applications.
  * <p>This class is used by automated tools to document KeyValues attached to the HTTP server observations.
  * @author Brian Clozel
  * @since 6.0
  */
-public enum HttpRequestsObservation implements DocumentedObservation {
+public enum HttpRequestsObservationDocumentation implements ObservationDocumentation {
 
 	/**
 	 * HTTP server request observations.

@@ -14,38 +14,39 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.function.client;
+package org.springframework.web.observation.reactive;
 
 import io.micrometer.common.docs.KeyName;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
-import io.micrometer.observation.docs.DocumentedObservation;
+import io.micrometer.observation.docs.ObservationDocumentation;
 
 /**
- * Documented {@link io.micrometer.common.KeyValue KeyValues} for the {@link WebClient} observations.
- * <p>This class is used by automated tools to document KeyValues attached to the HTTP client observations.
+ * Documented {@link io.micrometer.common.KeyValue KeyValues} for the HTTP server observations
+ * for reactive web applications.
+ * <p>This class is used by automated tools to document KeyValues attached to the HTTP server observations.
  * @author Brian Clozel
  * @since 6.0
  */
-public enum ClientObservation implements DocumentedObservation {
+public enum HttpRequestsObservationDocumentation implements ObservationDocumentation {
 
 	/**
-	 * Observation created for an HTTP client exchange.
+	 * HTTP server request observations.
 	 */
-	HTTP_REQUEST {
+	HTTP_REQUESTS {
 		@Override
 		public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
-			return DefaultClientObservationConvention.class;
+			return DefaultHttpRequestsObservationConvention.class;
 		}
 
 		@Override
 		public KeyName[] getLowCardinalityKeyNames() {
-			return ClientObservation.LowCardinalityKeyNames.values();
+			return LowCardinalityKeyNames.values();
 		}
 
 		@Override
 		public KeyName[] getHighCardinalityKeyNames() {
-			return ClientObservation.HighCardinalityKeyNames.values();
+			return HighCardinalityKeyNames.values();
 		}
 
 	};
@@ -53,7 +54,7 @@ public enum ClientObservation implements DocumentedObservation {
 	public enum LowCardinalityKeyNames implements KeyName {
 
 		/**
-		 * Name of HTTP request method or {@code "none"} if the request could not be created.
+		 * Name of HTTP request method or {@code "none"} if the request was not received properly.
 		 */
 		METHOD {
 			@Override
@@ -64,23 +65,24 @@ public enum ClientObservation implements DocumentedObservation {
 		},
 
 		/**
-		 * URI template used for HTTP request, or {@code "none"} if none was provided.
-		 */
-		URI {
-			@Override
-			public String asString() {
-				return "uri";
-			}
-		},
-
-		/**
-		 * HTTP response raw status code, or {@code "IO_ERROR"} in case of {@code IOException},
-		 * or {@code "CLIENT_ERROR"} if no response was received.
+		 * HTTP response raw status code, or {@code "UNKNOWN"} if no response was created.
 		 */
 		STATUS {
 			@Override
 			public String asString() {
 				return "status";
+			}
+		},
+
+		/**
+		 * URI pattern for the matching handler if available, falling back to {@code REDIRECTION} for 3xx responses,
+		 * {@code NOT_FOUND} for 404 responses, {@code root} for requests with no path info,
+		 * and {@code UNKNOWN} for all other requests.
+		 */
+		URI {
+			@Override
+			public String asString() {
+				return "uri";
 			}
 		},
 
@@ -95,8 +97,7 @@ public enum ClientObservation implements DocumentedObservation {
 		},
 
 		/**
-		 * Outcome of the HTTP client exchange.
-		 *
+		 * Outcome of the HTTP server exchange.
 		 * @see org.springframework.http.HttpStatus.Series
 		 */
 		OUTCOME {
@@ -105,7 +106,6 @@ public enum ClientObservation implements DocumentedObservation {
 				return "outcome";
 			}
 		}
-
 	}
 
 	public enum HighCardinalityKeyNames implements KeyName {
@@ -118,18 +118,7 @@ public enum ClientObservation implements DocumentedObservation {
 			public String asString() {
 				return "http.url";
 			}
-		},
-
-		/**
-		 * Client name derived from the request URI host.
-		 */
-		CLIENT_NAME {
-			@Override
-			public String asString() {
-				return "client.name";
-			}
 		}
 
 	}
-
 }

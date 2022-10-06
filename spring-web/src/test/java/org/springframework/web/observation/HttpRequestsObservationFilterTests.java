@@ -68,7 +68,7 @@ class HttpRequestsObservationFilterTests {
 
 		HttpRequestsObservationContext context = (HttpRequestsObservationContext) this.request
 				.getAttribute(HttpRequestsObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE);
-		assertThat(context.getError()).get().isEqualTo(customError);
+		assertThat(context.getError()).isEqualTo(customError);
 		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SERVER_ERROR");
 	}
 
@@ -83,7 +83,7 @@ class HttpRequestsObservationFilterTests {
 		}).isInstanceOf(ServletException.class);
 		HttpRequestsObservationContext context = (HttpRequestsObservationContext) this.request
 				.getAttribute(HttpRequestsObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE);
-		assertThat(context.getError()).get().isEqualTo(customError);
+		assertThat(context.getError()).isEqualTo(customError);
 		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS");
 	}
 
