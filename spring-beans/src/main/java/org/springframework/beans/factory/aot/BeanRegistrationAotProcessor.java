@@ -22,7 +22,12 @@ import org.springframework.lang.Nullable;
 
 /**
  * AOT processor that makes bean registration contributions by processing
- * {@link RegisteredBean} instances.
+ * {@link RegisteredBean} instances. An AOT processor replaces its usual
+ * runtime behavior by an optimized arrangement, usually in generated
+ * code. For that reason, a component that implements this interface is
+ * not contributed by default. If a component that implements this
+ * interface still needs to be invoked at runtime,
+ * {@link #isBeanExcludedFromAotProcessing} can be overridden.
  *
  * <p>{@link BeanRegistrationAotProcessor} implementations may be registered in
  * a {@value AotServices#FACTORIES_RESOURCE_LOCATION} resource or as a bean.
@@ -34,6 +39,7 @@ import org.springframework.lang.Nullable;
  * already initialized early in the bean factory lifecycle.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 6.0
  * @see BeanRegistrationAotContribution
  */
