@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -362,7 +362,8 @@ public class ContentRequestMatchers {
 
 		public static MultiValueMap<String, ?> parse(MockClientHttpRequest request) {
 			try {
-				FileUpload fileUpload = new FileUpload(new DiskFileItemFactory());
+				FileUpload fileUpload = new FileUpload();
+				fileUpload.setFileItemFactory(new DiskFileItemFactory());
 
 				List<FileItem> fileItems = fileUpload.parseRequest(new UploadContext() {
 					private final byte[] body = request.getBodyAsBytes();
