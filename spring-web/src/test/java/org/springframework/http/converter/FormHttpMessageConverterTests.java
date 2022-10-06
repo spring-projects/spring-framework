@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.tomcat.util.http.fileupload.FileItem;
-import org.apache.tomcat.util.http.fileupload.FileItemFactory;
 import org.apache.tomcat.util.http.fileupload.FileUpload;
 import org.apache.tomcat.util.http.fileupload.RequestContext;
 import org.apache.tomcat.util.http.fileupload.UploadContext;
@@ -191,8 +190,8 @@ public class FormHttpMessageConverterTests {
 		assertThat(contentType.getParameters()).containsKeys("charset", "boundary", "foo"); // gh-21568, gh-25839
 
 		// see if Commons FileUpload can read what we wrote
-		FileItemFactory fileItemFactory = new DiskFileItemFactory();
-		FileUpload fileUpload = new FileUpload(fileItemFactory);
+		FileUpload fileUpload = new FileUpload();
+		fileUpload.setFileItemFactory(new DiskFileItemFactory());
 		RequestContext requestContext = new MockHttpOutputMessageRequestContext(outputMessage);
 		List<FileItem> items = fileUpload.parseRequest(requestContext);
 		assertThat(items.size()).isEqualTo(6);
@@ -251,8 +250,8 @@ public class FormHttpMessageConverterTests {
 		assertThat(contentType.getParameter("boundary")).as("No boundary found").isNotNull();
 
 		// see if Commons FileUpload can read what we wrote
-		FileItemFactory fileItemFactory = new DiskFileItemFactory();
-		FileUpload fileUpload = new FileUpload(fileItemFactory);
+		FileUpload fileUpload = new FileUpload();
+		fileUpload.setFileItemFactory(new DiskFileItemFactory());
 		RequestContext requestContext = new MockHttpOutputMessageRequestContext(outputMessage);
 		List<FileItem> items = fileUpload.parseRequest(requestContext);
 		assertThat(items.size()).isEqualTo(2);
