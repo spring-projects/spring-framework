@@ -36,7 +36,7 @@ public class ProxyHints {
 	 * Return the interface-based proxies that are required.
 	 * @return a stream of {@link JdkProxyHint}
 	 */
-	public Stream<JdkProxyHint> jdkProxies() {
+	public Stream<JdkProxyHint> jdkProxyHints() {
 		return this.jdkProxies.stream();
 	}
 

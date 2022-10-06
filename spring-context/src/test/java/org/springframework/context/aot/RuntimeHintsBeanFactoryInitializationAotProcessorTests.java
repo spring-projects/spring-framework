@@ -100,7 +100,7 @@ class RuntimeHintsBeanFactoryInitializationAotProcessorTests {
 		this.generator.processAheadOfTime(applicationContext,
 				this.generationContext);
 		RuntimeHints runtimeHints = this.generationContext.getRuntimeHints();
-		assertThat(runtimeHints.resources().resourceBundles().map(ResourceBundleHint::getBaseName))
+		assertThat(runtimeHints.resources().resourceBundleHints().map(ResourceBundleHint::getBaseName))
 				.containsOnly("com.example.example0", "sample");
 		assertThat(IncrementalRuntimeHintsRegistrar.counter.get()).isEqualTo(1);
 	}
@@ -116,7 +116,7 @@ class RuntimeHintsBeanFactoryInitializationAotProcessorTests {
 
 	private void assertThatSampleRegistrarContributed() {
 		Stream<ResourceBundleHint> bundleHints = this.generationContext.getRuntimeHints()
-				.resources().resourceBundles();
+				.resources().resourceBundleHints();
 		assertThat(bundleHints)
 				.anyMatch(bundleHint -> "sample".equals(bundleHint.getBaseName()));
 	}

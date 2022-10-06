@@ -51,7 +51,7 @@ public class ResourceHintsPredicates {
 	 */
 	public Predicate<RuntimeHints> forBundle(String bundleName) {
 		Assert.hasText(bundleName, "resource bundle name should not be empty");
-		return runtimeHints -> runtimeHints.resources().resourceBundles()
+		return runtimeHints -> runtimeHints.resources().resourceBundleHints()
 				.anyMatch(bundleHint -> bundleName.equals(bundleHint.getBaseName()));
 	}
 
@@ -115,7 +115,7 @@ public class ResourceHintsPredicates {
 		static AggregatedResourcePatternHints of(ResourceHints resourceHints) {
 			List<ResourcePatternHint> includes = new ArrayList<>();
 			List<ResourcePatternHint> excludes = new ArrayList<>();
-			resourceHints.resourcePatterns().forEach(resourcePatternHint -> {
+			resourceHints.resourcePatternHints().forEach(resourcePatternHint -> {
 				includes.addAll(resourcePatternHint.getIncludes());
 				excludes.addAll(resourcePatternHint.getExcludes());
 			});

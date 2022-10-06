@@ -40,12 +40,12 @@ public enum HintType {
 	REFLECTION(ReflectionHints.class),
 
 	/**
-	 * Resource pattern hint, as described by {@link org.springframework.aot.hint.ResourceHints#resourcePatterns()}.
+	 * Resource pattern hint, as described by {@link org.springframework.aot.hint.ResourceHints#resourcePatternHints()}.
 	 */
 	RESOURCE_PATTERN(ResourcePatternHint.class),
 
 	/**
-	 * Resource bundle hint, as described by {@link org.springframework.aot.hint.ResourceHints#resourceBundles()}.
+	 * Resource bundle hint, as described by {@link org.springframework.aot.hint.ResourceHints#resourceBundleHints()}.
 	 */
 	RESOURCE_BUNDLE(ResourceBundleHint.class),
 
@@ -55,7 +55,7 @@ public enum HintType {
 	JAVA_SERIALIZATION(JavaSerializationHint.class),
 
 	/**
-	 * JDK proxies hint, as described by {@link org.springframework.aot.hint.ProxyHints#jdkProxies()}.
+	 * JDK proxies hint, as described by {@link org.springframework.aot.hint.ProxyHints#jdkProxyHints()}.
 	 */
 	JDK_PROXIES(JdkProxyHint.class);
 

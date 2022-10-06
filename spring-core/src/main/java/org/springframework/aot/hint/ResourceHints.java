@@ -54,7 +54,7 @@ public class ResourceHints {
 	 * Return the resources that should be made available at runtime.
 	 * @return a stream of {@link ResourcePatternHints}
 	 */
-	public Stream<ResourcePatternHints> resourcePatterns() {
+	public Stream<ResourcePatternHints> resourcePatternHints() {
 		Stream<ResourcePatternHints> patterns = this.resourcePatternHints.stream();
 		return (this.types.isEmpty() ? patterns
 				: Stream.concat(Stream.of(typesPatternResourceHint()), patterns));
@@ -64,7 +64,7 @@ public class ResourceHints {
 	 * Return the resource bundles that should be made available at runtime.
 	 * @return a stream of {@link ResourceBundleHint}
 	 */
-	public Stream<ResourceBundleHint> resourceBundles() {
+	public Stream<ResourceBundleHint> resourceBundleHints() {
 		return this.resourceBundleHints.stream();
 	}
 

@@ -145,7 +145,7 @@ class ConfigurationClassPostProcessorAotContributionTests {
 		void applyToWhenHasImportAwareConfigurationRegistersHints() {
 			BeanFactoryInitializationAotContribution contribution = getContribution(ImportConfiguration.class);
 			contribution.applyTo(generationContext, beanFactoryInitializationCode);
-			assertThat(generationContext.getRuntimeHints().resources().resourcePatterns())
+			assertThat(generationContext.getRuntimeHints().resources().resourcePatternHints())
 					.singleElement()
 					.satisfies(resourceHint -> assertThat(resourceHint.getIncludes())
 							.map(ResourcePatternHint::getPattern)

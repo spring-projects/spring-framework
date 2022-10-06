@@ -53,20 +53,20 @@ class ProxyHintsTests {
 	@Test
 	void registerJdkProxyWithInterface() {
 		this.proxyHints.registerJdkProxy(Function.class);
-		assertThat(this.proxyHints.jdkProxies()).singleElement().satisfies(proxiedInterfaces(Function.class));
+		assertThat(this.proxyHints.jdkProxyHints()).singleElement().satisfies(proxiedInterfaces(Function.class));
 	}
 
 	@Test
 	void registerJdkProxyWithTypeReferences() {
 		this.proxyHints.registerJdkProxy(TypeReference.of(Function.class), TypeReference.of("com.example.Advised"));
-		assertThat(this.proxyHints.jdkProxies()).singleElement()
+		assertThat(this.proxyHints.jdkProxyHints()).singleElement()
 				.satisfies(proxiedInterfaces(Function.class.getName(), "com.example.Advised"));
 	}
 
 	@Test
 	void registerJdkProxyWithConsumer() {
 		this.proxyHints.registerJdkProxy(springProxy("com.example.Test"));
-		assertThat(this.proxyHints.jdkProxies()).singleElement().satisfies(proxiedInterfaces(
+		assertThat(this.proxyHints.jdkProxyHints()).singleElement().satisfies(proxiedInterfaces(
 				"com.example.Test",
 				"org.springframework.aop.SpringProxy",
 				"org.springframework.aop.framework.Advised",
@@ -77,7 +77,7 @@ class ProxyHintsTests {
 	void registerJdkProxyTwiceExposesOneHint() {
 		this.proxyHints.registerJdkProxy(Function.class);
 		this.proxyHints.registerJdkProxy(TypeReference.of(Function.class.getName()));
-		assertThat(this.proxyHints.jdkProxies()).singleElement().satisfies(proxiedInterfaces(Function.class));
+		assertThat(this.proxyHints.jdkProxyHints()).singleElement().satisfies(proxiedInterfaces(Function.class));
 	}
 
 
