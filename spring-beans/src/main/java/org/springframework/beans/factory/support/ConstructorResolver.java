@@ -371,7 +371,7 @@ class ConstructorResolver {
 	 */
 	private Method[] getCandidateMethods(Class<?> factoryClass, RootBeanDefinition mbd) {
 		return (mbd.isNonPublicAccessAllowed() ?
-				ReflectionUtils.getAllDeclaredMethods(factoryClass) : factoryClass.getMethods());
+				ReflectionUtils.getUniqueDeclaredMethods(factoryClass) : factoryClass.getMethods());
 	}
 
 	private boolean isStaticCandidate(Method method, Class<?> factoryClass) {

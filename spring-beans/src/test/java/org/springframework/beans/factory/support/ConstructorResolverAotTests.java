@@ -86,7 +86,7 @@ class ConstructorResolverAotTests {
 	}
 
 	@Test
-	void beanDefinitionWithFactoryMethodNameAndMatchingMethodNamesThatShouldBeIgnored() {
+	void beanDefinitionWithFactoryMethodNameAndMatchingMethodNames() {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		BeanDefinition beanDefinition = BeanDefinitionBuilder
 				.rootBeanDefinition(DummySampleFactory.class).setFactoryMethod("of")
@@ -94,6 +94,18 @@ class ConstructorResolverAotTests {
 		Executable executable = resolve(beanFactory, beanDefinition);
 		assertThat(executable).isNotNull().isEqualTo(ReflectionUtils
 				.findMethod(DummySampleFactory.class, "of", Integer.class));
+	}
+
+	@Test
+	void beanDefinitionWithFactoryMethodNameAndOverriddenMethod() {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(ExtendedSampleFactory.class));
+		BeanDefinition beanDefinition = BeanDefinitionBuilder
+				.rootBeanDefinition(String.class).setFactoryMethodOnBean("resolve", "config")
+				.addConstructorArgValue("test").getBeanDefinition();
+		Executable executable = resolve(beanFactory, beanDefinition);
+		assertThat(executable).isNotNull().isEqualTo(ReflectionUtils
+				.findMethod(ExtendedSampleFactory.class, "resolve", String.class));
 	}
 
 	@Test
@@ -386,8 +398,17 @@ class ConstructorResolverAotTests {
 			return value.toString();
 		}
 
-		private String of(String ignored) {
-			return ignored;
+		protected String resolve(String value) {
+			return value;
+		}
+	}
+
+	@SuppressWarnings("unused")
+	static class ExtendedSampleFactory extends DummySampleFactory {
+
+		@Override
+		protected String resolve(String value) {
+			return super.resolve(value);
 		}
 	}
 
