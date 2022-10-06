@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.build.compile;
+package org.springframework.build;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.plugins.JavaLibraryPlugin;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.tasks.compile.JavaCompile;
@@ -33,7 +34,7 @@ import org.gradle.api.tasks.compile.JavaCompile;
  * @author Sam Brannen
  * @author Sebastien Deleuze
  */
-public class CompilerConventionsPlugin implements Plugin<Project> {
+public class CompilerConventions {
 
 	private static final List<String> COMPILER_ARGS;
 
@@ -58,9 +59,8 @@ public class CompilerConventionsPlugin implements Plugin<Project> {
 				"-Xlint:-deprecation", "-Xlint:-unchecked"));
 	}
 
-	@Override
 	public void apply(Project project) {
-		project.getPlugins().withType(JavaLibraryPlugin.class, javaPlugin -> applyJavaCompileConventions(project));
+		project.getPlugins().withType(JavaBasePlugin.class, javaPlugin -> applyJavaCompileConventions(project));
 	}
 
 	/**

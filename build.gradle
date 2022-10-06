@@ -46,7 +46,7 @@ configure([rootProject] + javaProjects) { project ->
 	apply plugin: "java"
 	apply plugin: "java-test-fixtures"
 	apply plugin: "checkstyle"
-	apply plugin: 'org.springframework.build.compile'
+	apply plugin: 'org.springframework.build.conventions'
 	apply from: "${rootDir}/gradle/toolchains.gradle"
 	apply from: "${rootDir}/gradle/ide.gradle"
 
