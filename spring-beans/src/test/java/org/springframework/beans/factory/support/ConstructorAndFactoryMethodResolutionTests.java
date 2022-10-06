@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.aot;
+package org.springframework.beans.factory.support;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Executable;
@@ -26,9 +26,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.factory.generator.factory.NumberHolder;
 import org.springframework.beans.testfixture.beans.factory.generator.factory.NumberHolderFactoryBean;
 import org.springframework.beans.testfixture.beans.factory.generator.factory.SampleFactory;
@@ -41,12 +38,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
- * Tests for {@link ConstructorOrFactoryMethodResolver}.
+ * Tests for AOT constructor and factory method resolution.
  *
  * @author Stephane Nicoll
  * @author Phillip Webb
  */
-class ConstructorOrFactoryMethodResolverTests {
+class ConstructorAndFactoryMethodResolutionTests {
 
 	@Test
 	void detectBeanInstanceExecutableWithBeanClassAndFactoryMethodName() {
@@ -118,21 +115,6 @@ class ConstructorOrFactoryMethodResolverTests {
 		beanFactory.registerSingleton("testBean", "test");
 		BeanDefinition beanDefinition = BeanDefinitionBuilder
 				.rootBeanDefinition(SampleBeanWithConstructors.class)
-				.addConstructorArgReference("testNumber")
-				.addConstructorArgReference("testBean").getBeanDefinition();
-		Executable executable = resolve(beanFactory, beanDefinition);
-		assertThat(executable).isNotNull().isEqualTo(SampleBeanWithConstructors.class
-				.getDeclaredConstructor(Number.class, String.class));
-	}
-
-	@Test
-	void genericBeanDefinitionWithConstructorArgsForMultipleConstructors()
-			throws Exception {
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		beanFactory.registerSingleton("testNumber", 1L);
-		beanFactory.registerSingleton("testBean", "test");
-		BeanDefinition beanDefinition = BeanDefinitionBuilder
-				.genericBeanDefinition(SampleBeanWithConstructors.class)
 				.addConstructorArgReference("testNumber")
 				.addConstructorArgReference("testBean").getBeanDefinition();
 		Executable executable = resolve(beanFactory, beanDefinition);
@@ -341,7 +323,8 @@ class ConstructorOrFactoryMethodResolverTests {
 
 
 	private Executable resolve(DefaultListableBeanFactory beanFactory, BeanDefinition beanDefinition) {
-		return new ConstructorOrFactoryMethodResolver(beanFactory).resolve(beanDefinition);
+		return new ConstructorResolver(beanFactory).resolveConstructorOrFactoryMethod(
+				"testBean", (RootBeanDefinition) beanDefinition);
 	}
 
 

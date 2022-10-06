@@ -294,9 +294,9 @@ class InstanceSupplierCodeGeneratorTests {
 		return (T) beanFactory.getBean("testBean");
 	}
 
-	private void compile(DefaultListableBeanFactory beanFactory,
-			BeanDefinition beanDefinition,
+	private void compile(DefaultListableBeanFactory beanFactory, BeanDefinition beanDefinition,
 			BiConsumer<InstanceSupplier<?>, Compiled> result) {
+
 		DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory(beanFactory);
 		freshBeanFactory.registerBeanDefinition("testBean", beanDefinition);
 		RegisteredBean registeredBean = RegisteredBean.of(freshBeanFactory, "testBean");
@@ -305,7 +305,7 @@ class InstanceSupplierCodeGeneratorTests {
 		InstanceSupplierCodeGenerator generator = new InstanceSupplierCodeGenerator(
 				this.generationContext, generateClass.getName(),
 				generateClass.getMethods(), false);
-		Executable constructorOrFactoryMethod = ConstructorOrFactoryMethodResolver.resolve(registeredBean);
+		Executable constructorOrFactoryMethod = registeredBean.resolveConstructorOrFactoryMethod();
 		assertThat(constructorOrFactoryMethod).isNotNull();
 		CodeBlock generatedCode = generator.generateCode(registeredBean, constructorOrFactoryMethod);
 		typeBuilder.set(type -> {
