@@ -34,7 +34,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.util.LinkedMultiValueMap;
@@ -156,7 +155,7 @@ class CollectionFactoryTests {
 	@Test
 	void createApproximateCollectionFromEmptyHashSet() {
 		Collection<String> set = createApproximateCollection(new HashSet<String>(), 2);
-		Assertions.assertThat(set).isEmpty();
+		assertThat(set).isEmpty();
 	}
 
 	@Test

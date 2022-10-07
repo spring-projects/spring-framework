@@ -16,7 +16,7 @@
 
 package org.springframework.core
 
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class KotlinBridgeMethodResolverTests {
@@ -25,22 +25,22 @@ class KotlinBridgeMethodResolverTests {
 	fun findBridgedMethod() {
 		val unbridged = GenericRepository::class.java.getDeclaredMethod("delete", Int::class.java)
 		val bridged = GenericRepository::class.java.getDeclaredMethod("delete", Any::class.java)
-		Assertions.assertThat(unbridged.isBridge).isFalse
-		Assertions.assertThat(bridged.isBridge).isTrue
+		assertThat(unbridged.isBridge).isFalse
+		assertThat(bridged.isBridge).isTrue
 
-		Assertions.assertThat(BridgeMethodResolver.findBridgedMethod(unbridged)).`as`("Unbridged method not returned directly").isEqualTo(unbridged)
-		Assertions.assertThat(BridgeMethodResolver.findBridgedMethod(bridged)).`as`("Incorrect bridged method returned").isEqualTo(unbridged)
+		assertThat(BridgeMethodResolver.findBridgedMethod(unbridged)).`as`("Unbridged method not returned directly").isEqualTo(unbridged)
+		assertThat(BridgeMethodResolver.findBridgedMethod(bridged)).`as`("Incorrect bridged method returned").isEqualTo(unbridged)
 	}
 
 	@Test
 	fun findBridgedMethodWithArrays() {
 		val unbridged = GenericRepository::class.java.getDeclaredMethod("delete", Array<Int>::class.java)
 		val bridged = GenericRepository::class.java.getDeclaredMethod("delete", Array<Any>::class.java)
-		Assertions.assertThat(unbridged.isBridge).isFalse
-		Assertions.assertThat(bridged.isBridge).isTrue
+		assertThat(unbridged.isBridge).isFalse
+		assertThat(bridged.isBridge).isTrue
 
-		Assertions.assertThat(BridgeMethodResolver.findBridgedMethod(unbridged)).`as`("Unbridged method not returned directly").isEqualTo(unbridged)
-		Assertions.assertThat(BridgeMethodResolver.findBridgedMethod(bridged)).`as`("Incorrect bridged method returned").isEqualTo(unbridged)
+		assertThat(BridgeMethodResolver.findBridgedMethod(unbridged)).`as`("Unbridged method not returned directly").isEqualTo(unbridged)
+		assertThat(BridgeMethodResolver.findBridgedMethod(bridged)).`as`("Incorrect bridged method returned").isEqualTo(unbridged)
 	}
 }
 

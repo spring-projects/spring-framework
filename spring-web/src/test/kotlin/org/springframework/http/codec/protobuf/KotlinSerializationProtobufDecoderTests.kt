@@ -20,7 +20,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoBuf
 import kotlinx.serialization.serializer
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.core.Ordered
 import org.springframework.core.ResolvableType
@@ -44,18 +44,18 @@ class KotlinSerializationCborDecoderTests : AbstractDecoderTests<KotlinSerializa
 	@Test
 	override fun canDecode() {
 		for (mimeType in listOf(MediaType.APPLICATION_PROTOBUF, MediaType.APPLICATION_OCTET_STREAM, MediaType("application", "vnd.google.protobuf"))) {
-			Assertions.assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java),mimeType)).isTrue()
+			assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java),mimeType)).isTrue()
 
-			Assertions.assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Int::class.java), mimeType)).isTrue()
-			Assertions.assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Ordered::class.java), mimeType)).isFalse()
-			Assertions.assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Pojo::class.java), mimeType)).isTrue()
-			Assertions.assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), mimeType)).isTrue()
-			Assertions.assertThat(decoder.canDecode(ResolvableType.forClass(Ordered::class.java), mimeType)).isFalse()
+			assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Int::class.java), mimeType)).isTrue()
+			assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Ordered::class.java), mimeType)).isFalse()
+			assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Pojo::class.java), mimeType)).isTrue()
+			assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), mimeType)).isTrue()
+			assertThat(decoder.canDecode(ResolvableType.forClass(Ordered::class.java), mimeType)).isFalse()
 		}
-		Assertions.assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java), null)).isTrue()
-		Assertions.assertThat(decoder.canDecode(ResolvableType.forClass(String::class.java), null)).isFalse()
-		Assertions.assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java), MediaType.APPLICATION_XML)).isFalse()
-		Assertions.assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_PDF)).isFalse()
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java), null)).isTrue()
+		assertThat(decoder.canDecode(ResolvableType.forClass(String::class.java), null)).isFalse()
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java), MediaType.APPLICATION_XML)).isFalse()
+		assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_PDF)).isFalse()
 	}
 
 	@Test

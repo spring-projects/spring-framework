@@ -16,7 +16,7 @@
 
 package org.springframework.transaction.interceptor
 
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.springframework.aop.framework.ProxyFactory
 import org.springframework.transaction.ReactiveTransactionManager
 
@@ -44,9 +44,9 @@ class CoroutinesTransactionInterceptorTests : AbstractCoroutinesTransactionAspec
 	override fun advised(target: Any, rtm: ReactiveTransactionManager, tas: TransactionAttributeSource): Any {
 		val ti = TransactionInterceptor()
 		ti.transactionManager = rtm
-		Assertions.assertThat(ti.transactionManager).isEqualTo(rtm)
+		assertThat(ti.transactionManager).isEqualTo(rtm)
 		ti.transactionAttributeSource = tas
-		Assertions.assertThat(ti.transactionAttributeSource).isEqualTo(tas)
+		assertThat(ti.transactionAttributeSource).isEqualTo(tas)
 		val pf = ProxyFactory(target)
 		pf.addAdvice(0, ti)
 		return pf.proxy

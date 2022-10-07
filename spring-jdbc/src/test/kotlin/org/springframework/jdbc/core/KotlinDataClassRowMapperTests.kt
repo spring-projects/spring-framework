@@ -16,7 +16,7 @@
 
 package org.springframework.jdbc.core
 
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.jdbc.core.test.ConstructorPerson
 import java.math.BigDecimal
@@ -31,7 +31,7 @@ class KotlinDataClassRowMapperTests : AbstractRowMapperTests() {
 			"select name, age, birth_date, balance from people",
 			DataClassRowMapper(ConstructorPerson::class.java)
 		)
-		Assertions.assertThat(result.size).isEqualTo(1)
+		assertThat(result.size).isEqualTo(1)
 		verifyPerson(result[0])
 		mock.verifyClosed()
 	}
@@ -43,8 +43,8 @@ class KotlinDataClassRowMapperTests : AbstractRowMapperTests() {
 			"select name, age, birth_date, balance from people",
 			DataClassRowMapper(KotlinPerson::class.java)
 		)
-		Assertions.assertThat(result.size).isEqualTo(1)
-		Assertions.assertThat(result[0].name).isEqualTo("Bubba appended by init")
+		assertThat(result.size).isEqualTo(1)
+		assertThat(result[0].name).isEqualTo("Bubba appended by init")
 	}
 
 
