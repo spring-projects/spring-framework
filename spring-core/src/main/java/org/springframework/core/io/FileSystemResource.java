@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
@@ -34,6 +35,7 @@ import java.nio.file.StandardOpenOption;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -48,6 +50,7 @@ import org.springframework.util.StringUtils;
  * interactions via NIO.2, only resorting to {@link File} on {@link #getFile()}.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 28.12.2003
  * @see #FileSystemResource(String)
  * @see #FileSystemResource(File)
@@ -226,7 +229,23 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 */
 	@Override
 	public URI getURI() throws IOException {
-		return (this.file != null ? this.file.toURI() : this.filePath.toUri());
+		if (this.file != null) {
+			return this.file.toURI();
+		}
+		else {
+			URI uri = this.filePath.toUri();
+			// Normalize URI? See https://github.com/spring-projects/spring-framework/issues/29275
+			String scheme = uri.getScheme();
+			if (ResourceUtils.URL_PROTOCOL_FILE.equals(scheme)) {
+				try {
+					uri = new URI(scheme, uri.getPath(), null);
+				}
+				catch (URISyntaxException ex) {
+					throw new IllegalStateException("Failed to normalize URI: " + uri, ex);
+				}
+			}
+			return uri;
+		}
 	}
 
 	/**
