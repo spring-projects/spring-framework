@@ -96,7 +96,7 @@ class BeanDefinitionMethodGenerator {
 		BeanRegistrationCodeFragments codeFragments = getCodeFragments(generationContext,
 				beanRegistrationsCode);
 		ClassName target = codeFragments.getTarget(this.registeredBean, this.constructorOrFactoryMethod);
-		if (!target.canonicalName().startsWith("java.")) {
+		if (isWritablePackageName(target)) {
 			GeneratedClass generatedClass = lookupGeneratedClass(generationContext, target);
 			GeneratedMethods generatedMethods = generatedClass.getMethods().withPrefix(getName());
 			GeneratedMethod generatedMethod = generateBeanDefinitionMethod(generationContext,
@@ -107,6 +107,16 @@ class BeanDefinitionMethodGenerator {
 		GeneratedMethod generatedMethod = generateBeanDefinitionMethod(generationContext,
 				beanRegistrationsCode.getClassName(), generatedMethods, codeFragments, Modifier.PRIVATE);
 		return generatedMethod.toMethodReference();
+	}
+
+	/**
+	 * Specify if the {@link ClassName} belongs to a writable package.
+	 * @param target the target to check
+	 * @return {@code true} if generated code in that package is allowed
+	 */
+	private boolean isWritablePackageName(ClassName target) {
+		String packageName = target.packageName();
+		return (!packageName.startsWith("java.") && !packageName.startsWith("javax."));
 	}
 
 	/**

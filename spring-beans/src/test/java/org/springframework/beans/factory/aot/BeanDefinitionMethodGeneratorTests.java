@@ -24,6 +24,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import javax.lang.model.element.Modifier;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.junit.jupiter.api.Test;
 
@@ -452,6 +453,37 @@ class BeanDefinitionMethodGeneratorTests {
 			assertThat(bean).isInstanceOf(PackagePrivateTestBean.class);
 			assertThat(compiled.getSourceFileFromPackage(
 					PackagePrivateTestBean.class.getPackageName())).isNotNull();
+		});
+	}
+
+	@Test
+	void generateBeanDefinitionMethodWhenBeanIsInJavaPackage() {
+		RootBeanDefinition beanDefinition = (RootBeanDefinition) BeanDefinitionBuilder
+				.rootBeanDefinition(String.class).addConstructorArgValue("test").getBeanDefinition();
+		testBeanDefinitionMethodInCurrentFile(String.class, beanDefinition);
+	}
+
+	@Test
+	void generateBeanDefinitionMethodWhenBeanIsInJavaxPackage() {
+		RootBeanDefinition beanDefinition = (RootBeanDefinition) BeanDefinitionBuilder
+				.rootBeanDefinition(DocumentBuilderFactory.class).setFactoryMethod("newDefaultInstance").getBeanDefinition();
+		testBeanDefinitionMethodInCurrentFile(DocumentBuilderFactory.class, beanDefinition);
+	}
+
+	private void testBeanDefinitionMethodInCurrentFile(Class<?> targetType, RootBeanDefinition beanDefinition) {
+		RegisteredBean registeredBean = registerBean(new RootBeanDefinition(beanDefinition));
+		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
+				this.methodGeneratorFactory, registeredBean, null,
+				Collections.emptyList());
+		MethodReference method = generator.generateBeanDefinitionMethod(
+				this.generationContext, this.beanRegistrationsCode);
+		compile(method, (actual, compiled) -> {
+			DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory();
+			freshBeanFactory.registerBeanDefinition("test", actual);
+			Object bean = freshBeanFactory.getBean("test");
+			assertThat(bean).isInstanceOf(targetType);
+			assertThat(compiled.getSourceFiles().stream().filter(sourceFile ->
+					sourceFile.getClassName().startsWith(targetType.getPackageName()))).isEmpty();
 		});
 	}
 
