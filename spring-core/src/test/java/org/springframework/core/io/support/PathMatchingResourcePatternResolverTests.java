@@ -108,6 +108,21 @@ class PathMatchingResourcePatternResolverTests {
 				assertExactFilenames(pattern, "resource#test1.txt", "resource#test2.txt");
 				assertExactSubPaths(pattern, pathPrefix, "resource#test1.txt", "resource#test2.txt");
 			}
+
+			@Test
+			void usingFileProtocolAndAssertingUrlAndUriSyntax() throws Exception {
+				Path testResourcesDir = Paths.get("src/test/resources").toAbsolutePath();
+				String pattern = String.format("file:%s/scanned-resources/**/resource#test1.txt", testResourcesDir);
+				Resource[] resources = resolver.getResources(pattern);
+				assertThat(resources).hasSize(1);
+				Resource resource = resources[0];
+				assertThat(resource.getFilename()).isEqualTo("resource#test1.txt");
+				// The following assertions serve as regression tests for the lack of the
+				// "authority component" (//) in the returned URI/URL. For example, we are
+				// expecting file:/my/path (or file:/C:/My/Path) instead of file:///my/path.
+				assertThat(resource.getURL().toString()).matches("^file:\\/[^\\/].+test1\\.txt$");
+				assertThat(resource.getURI().toString()).matches("^file:\\/[^\\/].+test1\\.txt$");
+			}
 		}
 	}
 
