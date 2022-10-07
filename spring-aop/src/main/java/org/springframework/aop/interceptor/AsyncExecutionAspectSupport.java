@@ -83,7 +83,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	private BeanFactory beanFactory;
 
 	@Nullable
-	private StringValueResolver stringValueResolver;
+	private StringValueResolver embeddedValueResolver;
 
 	/**
 	 * Create a new instance with a default {@link AsyncUncaughtExceptionHandler}.
@@ -155,7 +155,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 		if (beanFactory instanceof ConfigurableBeanFactory configurableBeanFactory) {
-			this.stringValueResolver = new EmbeddedValueResolver(configurableBeanFactory);
+			this.embeddedValueResolver = new EmbeddedValueResolver(configurableBeanFactory);
 		}
 	}
 
@@ -170,8 +170,8 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 		if (executor == null) {
 			Executor targetExecutor;
 			String qualifier = getExecutorQualifier(method);
-			if (this.stringValueResolver != null && StringUtils.hasLength(qualifier)) {
-				qualifier = this.stringValueResolver.resolveStringValue(qualifier);
+			if (this.embeddedValueResolver != null && StringUtils.hasLength(qualifier)) {
+				qualifier = this.embeddedValueResolver.resolveStringValue(qualifier);
 			}
 			if (StringUtils.hasLength(qualifier)) {
 				targetExecutor = findQualifiedExecutor(this.beanFactory, qualifier);

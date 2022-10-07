@@ -147,7 +147,7 @@ public class EnableAsyncTests {
 			Future<Thread> workerThread2 = asyncBean.myWork2();
 			assertThat(workerThread2.get().getName()).startsWith("myExecutor2-");
 
-			Future<Thread> workerThread3 = asyncBean.defaultExecutor();
+			Future<Thread> workerThread3 = asyncBean.fallBackToDefaultExecutor();
 			assertThat(workerThread3.get().getName()).startsWith("SimpleAsyncTaskExecutor");
 		}
 		finally {
@@ -386,8 +386,8 @@ public class EnableAsyncTests {
 			return new AsyncResult<>(Thread.currentThread());
 		}
 
-		@Async("${my.app.targetExecutor:}")
-		public Future<Thread> defaultExecutor() {
+		@Async("${my.app.myExecutor.UNDEFINED:}")
+		public Future<Thread> fallBackToDefaultExecutor() {
 			return new AsyncResult<>(Thread.currentThread());
 		}
 	}
