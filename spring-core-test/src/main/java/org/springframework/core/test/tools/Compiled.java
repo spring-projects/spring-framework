@@ -128,7 +128,7 @@ public class Compiled {
 		List<Class<?>> matching = getAllCompiledClasses().stream().filter(type::isAssignableFrom).toList();
 		Assert.state(!matching.isEmpty(), () -> "No instance found of type " + type.getName());
 		Assert.state(matching.size() == 1, () -> "Multiple instances found of type " + type.getName());
-		return newInstance(matching.get(0));
+		return type.cast(newInstance(matching.get(0)));
 	}
 
 	/**
@@ -142,7 +142,7 @@ public class Compiled {
 	 */
 	public <T> T getInstance(Class<T> type, String className) {
 		Class<?> loaded = loadClass(className);
-		return newInstance(loaded);
+		return type.cast(newInstance(loaded));
 	}
 
 	/**
@@ -159,11 +159,10 @@ public class Compiled {
 		return compiledClasses;
 	}
 
-	@SuppressWarnings("unchecked")
-	private <T> T newInstance(Class<?> loaded) {
+	private Object newInstance(Class<?> loaded) {
 		try {
 			Constructor<?> constructor = loaded.getDeclaredConstructor();
-			return (T) constructor.newInstance();
+			return constructor.newInstance();
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(ex);
