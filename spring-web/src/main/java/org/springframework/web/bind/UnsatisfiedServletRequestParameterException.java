@@ -77,7 +77,6 @@ public class UnsatisfiedServletRequestParameterException extends ServletRequestB
 	@Override
 	public String getMessage() {
 		StringBuilder sb = new StringBuilder("Parameter conditions ");
-		int i = 0;
 		sb.append(String.join(" OR ", paramsToStringList(this.paramConditions)));
 		sb.append(" not met for actual request parameters: ");
 		sb.append(requestParameterMapToString(this.actualParams));
