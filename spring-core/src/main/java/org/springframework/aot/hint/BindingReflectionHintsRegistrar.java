@@ -64,12 +64,21 @@ public class BindingReflectionHintsRegistrar {
 	}
 
 	/**
-	 * Return whether the members of the type should be registered transitively.
+	 * Return whether the type should be skipped.
 	 * @param type the type to evaluate
-	 * @return {@code true} if the members of the type should be registered transitively
+	 * @return {@code true} if the type should be skipped
 	 */
-	protected boolean shouldRegisterMembers(Class<?> type) {
-		return !type.getCanonicalName().startsWith("java.") && !type.isArray();
+	protected boolean shouldSkipType(Class<?> type) {
+		return type.isPrimitive() || type == Object.class;
+	}
+
+	/**
+	 * Return whether the members of the type should be skipped.
+	 * @param type the type to evaluate
+	 * @return {@code true} if the members of the type should be skipped
+	 */
+	protected boolean shouldSkipMembers(Class<?> type) {
+		return type.getCanonicalName().startsWith("java.") || type.isArray();
 	}
 
 	private void registerReflectionHints(ReflectionHints hints, Set<Type> seen, Type type) {
@@ -78,11 +87,11 @@ public class BindingReflectionHintsRegistrar {
 		}
 		seen.add(type);
 		if (type instanceof Class<?> clazz) {
-			if (clazz.isPrimitive() || clazz == Object.class) {
+			if (shouldSkipType(clazz)) {
 				return;
 			}
 			hints.registerType(clazz, typeHint -> {
-				if (shouldRegisterMembers(clazz)) {
+				if (!shouldSkipMembers(clazz)) {
 					if (clazz.isRecord()) {
 						typeHint.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 						for (RecordComponent recordComponent : clazz.getRecordComponents()) {
