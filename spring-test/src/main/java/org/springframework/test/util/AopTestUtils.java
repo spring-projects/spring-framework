@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ public abstract class AopTestUtils {
 	 * {@linkplain AopUtils#isAopProxy proxy}, the target of the proxy will
 	 * be returned; otherwise, the {@code candidate} will be returned
 	 * <em>as is</em>.
+	 * @param <T> the type of the target object
 	 * @param candidate the instance to check (potentially a Spring AOP proxy;
 	 * never {@code null})
 	 * @return the target object or the {@code candidate} (never {@code null})
@@ -75,11 +76,18 @@ public abstract class AopTestUtils {
 	 * {@linkplain AopUtils#isAopProxy proxy}, the ultimate target of all
 	 * nested proxies will be returned; otherwise, the {@code candidate}
 	 * will be returned <em>as is</em>.
+	 * <p>NOTE: If the top-level proxy or a nested proxy is not backed by a
+	 * {@linkplain org.springframework.aop.TargetSource#isStatic() static}
+	 * {@link org.springframework.aop.TargetSource TargetSource}, invocation of
+	 * this utility method may result in undesired behavior such as infinite
+	 * recursion leading to a {@link StackOverflowError}.
+	 * @param <T> the type of the target object
 	 * @param candidate the instance to check (potentially a Spring AOP proxy;
 	 * never {@code null})
 	 * @return the target object or the {@code candidate} (never {@code null})
 	 * @throws IllegalStateException if an error occurs while unwrapping a proxy
 	 * @see Advised#getTargetSource()
+	 * @see org.springframework.aop.TargetSource#isStatic()
 	 * @see org.springframework.aop.framework.AopProxyUtils#ultimateTargetClass
 	 */
 	@SuppressWarnings("unchecked")
