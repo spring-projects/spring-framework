@@ -144,6 +144,14 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 				.verifyComplete());
 	}
 
+	@Test
+	public void encodeNonStreamEmpty() {
+		testEncode(Flux.empty(), Pojo.class, step -> step
+				.consumeNextWith(expectString("["))
+				.consumeNextWith(expectString("]"))
+				.verifyComplete());
+	}
+
 	@Test // gh-29038
 	void encodeNonStreamWithErrorAsFirstSignal() {
 		String message = "I'm a teapot";

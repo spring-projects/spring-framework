@@ -198,6 +198,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 										bufferFactory.join(Arrays.asList(bufferFactory.wrap(prefix), dataBuffer)) :
 										dataBuffer);
 							})
+							.switchIfEmpty(Mono.fromCallable(() -> bufferFactory.wrap(helper.getPrefix())))
 							.concatWith(Mono.fromCallable(() -> bufferFactory.wrap(helper.getSuffix())));
 				}
 
