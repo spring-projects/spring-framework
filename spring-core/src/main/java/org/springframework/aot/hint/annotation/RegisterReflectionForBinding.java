@@ -26,8 +26,8 @@ import org.springframework.core.annotation.AliasFor;
 
 /**
  * Indicates that one or more {@link Class} reflection hints should be registered for
- * data binding purpose (class, fields, properties, record components for the whole
- * type hierarchy).
+ * data binding purpose (class, fields, properties, record components, including
+ * types transitively used on properties and record components).
  *
  * <p>Typically used to annotate the bean class or bean method where the reflection hint
  * is needed.
@@ -42,16 +42,14 @@ import org.springframework.core.annotation.AliasFor;
 public @interface RegisterReflectionForBinding {
 
 	/**
-	 * Classes for which reflection hints should be registered to enable data binding
-	 * (class, fields, properties, record components for the whole type hierarchy).
+	 * Classes for which reflection hints should be registered.
 	 * @see #classes()
 	 */
 	@AliasFor("classes")
 	Class<?>[] value() default {};
 
 	/**
-	 * Classes for which reflection hints should be registered to enable data binding
-	 * (class, fields, properties, record components for the whole type hierarchy).
+	 * Classes for which reflection hints should be registered.
 	 * @see #value()
 	 */
 	@AliasFor("value")

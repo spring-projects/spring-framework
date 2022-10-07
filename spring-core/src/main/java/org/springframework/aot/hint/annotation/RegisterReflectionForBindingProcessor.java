@@ -25,7 +25,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 /**
  * A {@link ReflectiveProcessor} implementation that registers reflection hints
  * for data binding purpose (class, constructors, fields, properties, record
- * components for the whole type hierarchy).
+ * components, including types transitively used on properties and record components).
  *
  * @author Sebastien Deleuze
  * @since 6.0

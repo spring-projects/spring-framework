@@ -39,8 +39,8 @@ import org.springframework.util.ClassUtils;
  * Register the necessary reflection hints so that the specified type can be
  * bound at runtime. Fields, constructors, properties and record components
  * are registered, except for a set of types like those in the {@code java.}
- * package where just the type is registered.
- * Types are discovered transitively and generic type are registered as well.
+ * package where just the type is registered. Types are discovered transitively
+ * on properties and record components, and generic types are registered as well.
  *
  * @author Sebastien Deleuze
  * @since 6.0
@@ -54,7 +54,7 @@ public class BindingReflectionHintsRegistrar {
 	/**
 	 * Register the necessary reflection hints to bind the specified types.
 	 * @param hints the hints instance to use
-	 * @param types the types to bind
+	 * @param types the types to register
 	 */
 	public void registerReflectionHints(ReflectionHints hints, Type... types) {
 		Set<Type> seen = new LinkedHashSet<>();
@@ -73,15 +73,15 @@ public class BindingReflectionHintsRegistrar {
 	}
 
 	private void registerReflectionHints(ReflectionHints hints, Set<Type> seen, Type type) {
+		if (seen.contains(type)) {
+			return;
+		}
+		seen.add(type);
 		if (type instanceof Class<?> clazz) {
 			if (clazz.isPrimitive() || clazz == Object.class) {
 				return;
 			}
 			hints.registerType(clazz, typeHint -> {
-				if (seen.contains(type)) {
-					return;
-				}
-				seen.add(type);
 				if (shouldRegisterMembers(clazz)) {
 					if (clazz.isRecord()) {
 						typeHint.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
@@ -114,7 +114,7 @@ public class BindingReflectionHintsRegistrar {
 			});
 		}
 		Set<Class<?>> referencedTypes = new LinkedHashSet<>();
-		collectReferencedTypes(seen, referencedTypes, type);
+		collectReferencedTypes(referencedTypes, ResolvableType.forType(type));
 		referencedTypes.forEach(referencedType -> registerReflectionHints(hints, seen, referencedType));
 	}
 
@@ -122,9 +122,7 @@ public class BindingReflectionHintsRegistrar {
 		hints.registerMethod(method, ExecutableMode.INVOKE);
 		MethodParameter methodParameter = MethodParameter.forExecutable(method, -1);
 		Type methodParameterType = methodParameter.getGenericParameterType();
-		if (!seen.contains(methodParameterType)) {
-			registerReflectionHints(hints, seen, methodParameterType);
-		}
+		registerReflectionHints(hints, seen, methodParameterType);
 	}
 
 	private void registerPropertyHints(ReflectionHints hints, Set<Type> seen, @Nullable Method method, int parameterIndex) {
@@ -133,9 +131,7 @@ public class BindingReflectionHintsRegistrar {
 			hints.registerMethod(method, ExecutableMode.INVOKE);
 			MethodParameter methodParameter = MethodParameter.forExecutable(method, parameterIndex);
 			Type methodParameterType = methodParameter.getGenericParameterType();
-			if (!seen.contains(methodParameterType)) {
-				registerReflectionHints(hints, seen, methodParameterType);
-			}
+			registerReflectionHints(hints, seen, methodParameterType);
 		}
 	}
 
@@ -150,16 +146,12 @@ public class BindingReflectionHintsRegistrar {
 		}
 	}
 
-	private void collectReferencedTypes(Set<Type> seen, Set<Class<?>> types, Type type) {
-		if (seen.contains(type)) {
-			return;
-		}
-		ResolvableType resolvableType = ResolvableType.forType(type);
+	private void collectReferencedTypes(Set<Class<?>> types, ResolvableType resolvableType) {
 		Class<?> clazz = resolvableType.resolve();
 		if (clazz != null && !types.contains(clazz)) {
 			types.add(clazz);
 			for (ResolvableType genericResolvableType : resolvableType.getGenerics()) {
-				collectReferencedTypes(seen, types, genericResolvableType.getType());
+				collectReferencedTypes(types, genericResolvableType);
 			}
 		}
 	}
