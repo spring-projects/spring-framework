@@ -1098,10 +1098,10 @@ javadoc.
 [[spring-testing-annotation-testexecutionlisteners]]
 ===== `@TestExecutionListeners`
 
-`@TestExecutionListeners` defines class-level metadata for configuring the
-`TestExecutionListener` implementations that should be registered with the
-`TestContextManager`. Typically, `@TestExecutionListeners` is used in conjunction with
-`@ContextConfiguration`.
+`@TestExecutionListeners` is used to register listeners for a particular test class, its
+subclasses, and its nested classes. If you wish to register a listener globally, you
+should register it via the automatic discovery mechanism described in
+<<testcontext-tel-config>>.
 
 The following example shows how to register two `TestExecutionListener` implementations:
 
@@ -1132,7 +1132,9 @@ By default, `@TestExecutionListeners` provides support for inheriting listeners 
 superclasses or enclosing classes. See
 <<testcontext-junit-jupiter-nested-test-configuration>> and the 
 {api-spring-framework}/test/context/TestExecutionListeners.html[`@TestExecutionListeners`
-javadoc] for an example and further details.
+javadoc] for an example and further details. If you discover that you need to switch
+back to using the default `TestExecutionListener` implementations, see the note
+in <<testcontext-tel-config-registering-tels>>.
 
 [[spring-testing-annotation-recordapplicationevents]]
 ===== `@RecordApplicationEvents`
@@ -2459,11 +2461,45 @@ by default, exactly in the following order:
 [[testcontext-tel-config-registering-tels]]
 ===== Registering `TestExecutionListener` Implementations
 
-You can register `TestExecutionListener` implementations for a test class and its
-subclasses by using the `@TestExecutionListeners` annotation. See
+You can register `TestExecutionListener` implementations explicitly for a test class, its
+subclasses, and its nested classes by using the `@TestExecutionListeners` annotation. See
 <<integration-testing-annotations, annotation support>> and the javadoc for
 {api-spring-framework}/test/context/TestExecutionListeners.html[`@TestExecutionListeners`]
 for details and examples.
+
+.Switching to default `TestExecutionListener` implementations
+[NOTE]
+====
+If you extend a class that is annotated with `@TestExecutionListeners` and you need to
+switch to using the default set of listeners, you can annotate your class with the
+following.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	// Switch to default listeners
+	@TestExecutionListeners(
+		listeners = {},
+		inheritListeners = false,
+		mergeMode = MERGE_WITH_DEFAULTS)
+	class MyTest extends BaseTest {
+		// class body...
+	}
+----
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// Switch to default listeners
+	@TestExecutionListeners(
+		listeners = [],
+		inheritListeners = false,
+		mergeMode = MERGE_WITH_DEFAULTS)
+	class MyTest : BaseTest {
+		// class body...
+	}
+----
+====
 
 [[testcontext-tel-config-automatic-discovery]]
 ===== Automatic Discovery of Default `TestExecutionListener` Implementations
