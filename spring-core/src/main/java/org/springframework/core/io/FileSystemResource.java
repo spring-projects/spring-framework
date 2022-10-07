@@ -248,7 +248,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 					uri = new URI(scheme, uri.getPath(), null);
 				}
 				catch (URISyntaxException ex) {
-					throw new IllegalStateException("Failed to normalize URI: " + uri, ex);
+					throw new IOException("Failed to normalize URI: " + uri, ex);
 				}
 			}
 			return uri;
