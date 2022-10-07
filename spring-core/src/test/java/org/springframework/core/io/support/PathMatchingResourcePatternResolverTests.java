@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -107,6 +108,7 @@ class PathMatchingResourcePatternResolverTests {
 				assertExactSubPaths(pattern, pathPrefix, "resource#test1.txt", "resource#test2.txt");
 			}
 
+			@Disabled("Disabled until gh-29275 is addressed")
 			@Test
 			void usingFileProtocolAndAssertingUrlAndUriSyntax() throws Exception {
 				Path testResourcesDir = Path.of("src/test/resources").toAbsolutePath();
