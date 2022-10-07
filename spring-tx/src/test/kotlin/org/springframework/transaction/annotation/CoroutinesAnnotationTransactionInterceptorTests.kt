@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import org.springframework.aop.framework.ProxyFactory
 import org.springframework.transaction.interceptor.TransactionInterceptor
@@ -60,7 +61,6 @@ class CoroutinesAnnotationTransactionInterceptorTests {
 			}
 			catch (ex: IllegalStateException) {
 			}
-
 		}
 		assertReactiveGetTransactionAndRollbackCount(1)
 	}
@@ -72,7 +72,7 @@ class CoroutinesAnnotationTransactionInterceptorTests {
 		proxyFactory.addAdvice(TransactionInterceptor(rtm, source))
 		val proxy = proxyFactory.proxy as TestWithCoroutines
 		runBlocking {
-			Assertions.assertThat(proxy.suspendingValueSuccess()).isEqualTo("foo")
+			assertThat(proxy.suspendingValueSuccess()).isEqualTo("foo")
 		}
 		assertReactiveGetTransactionAndCommitCount(1)
 	}
@@ -86,7 +86,7 @@ class CoroutinesAnnotationTransactionInterceptorTests {
 		runBlocking {
 			try {
 				proxy.suspendingValueFailure()
-				Assertions.fail("No exception thrown as expected")
+				fail("No exception thrown as expected")
 			}
 			catch (ex: IllegalStateException) {
 			}
@@ -101,7 +101,7 @@ class CoroutinesAnnotationTransactionInterceptorTests {
 		proxyFactory.addAdvice(TransactionInterceptor(rtm, source))
 		val proxy = proxyFactory.proxy as TestWithCoroutines
 		runBlocking {
-			Assertions.assertThat(proxy.suspendingFlowSuccess().toList()).containsExactly("foo", "foo")
+			assertThat(proxy.suspendingFlowSuccess().toList()).containsExactly("foo", "foo")
 		}
 		assertReactiveGetTransactionAndCommitCount(1)
 	}
@@ -113,19 +113,19 @@ class CoroutinesAnnotationTransactionInterceptorTests {
 		proxyFactory.addAdvice(TransactionInterceptor(rtm, source))
 		val proxy = proxyFactory.proxy as TestWithCoroutines
 		runBlocking {
-			Assertions.assertThat(proxy.flowSuccess().toList()).containsExactly("foo", "foo")
+			assertThat(proxy.flowSuccess().toList()).containsExactly("foo", "foo")
 		}
 		assertReactiveGetTransactionAndCommitCount(1)
 	}
 
 	private fun assertReactiveGetTransactionAndCommitCount(expectedCount: Int) {
-		Assertions.assertThat(rtm.begun).isEqualTo(expectedCount)
-		Assertions.assertThat(rtm.commits).isEqualTo(expectedCount)
+		assertThat(rtm.begun).isEqualTo(expectedCount)
+		assertThat(rtm.commits).isEqualTo(expectedCount)
 	}
 
 	private fun assertReactiveGetTransactionAndRollbackCount(expectedCount: Int) {
-		Assertions.assertThat(rtm.begun).isEqualTo(expectedCount)
-		Assertions.assertThat(rtm.rollbacks).isEqualTo(expectedCount)
+		assertThat(rtm.begun).isEqualTo(expectedCount)
+		assertThat(rtm.rollbacks).isEqualTo(expectedCount)
 	}
 
 	@Transactional
