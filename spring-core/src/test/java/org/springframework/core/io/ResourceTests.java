@@ -252,6 +252,27 @@ class ResourceTests {
 			}
 		}
 
+		@Test
+		void urlAndUriAreNormalizedWhenCreatedFromFile() throws Exception {
+			Path path = Path.of("src/test/resources/scanned-resources/resource#test1.txt").toAbsolutePath();
+			assertUrlAndUriBehavior(new FileSystemResource(path.toFile()));
+		}
+
+		@Test
+		void urlAndUriAreNormalizedWhenCreatedFromPath() throws Exception {
+			Path path = Path.of("src/test/resources/scanned-resources/resource#test1.txt").toAbsolutePath();
+			assertUrlAndUriBehavior(new FileSystemResource(path));
+		}
+
+		/**
+		 * The following assertions serve as regression tests for the lack of the
+		 * "authority component" (//) in the returned URI/URL. For example, we are
+		 * expecting file:/my/path (or file:/C:/My/Path) instead of file:///my/path.
+		 */
+		private void assertUrlAndUriBehavior(Resource resource) throws IOException {
+			assertThat(resource.getURL().toString()).matches("^file:\\/[^\\/].+test1\\.txt$");
+			assertThat(resource.getURI().toString()).matches("^file:\\/[^\\/].+test1\\.txt$");
+		}
 	}
 
 	@Nested
