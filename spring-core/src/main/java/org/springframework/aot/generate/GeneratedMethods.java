@@ -71,6 +71,15 @@ public class GeneratedMethods {
 
 	/**
 	 * Add a new {@link GeneratedMethod}.
+	 * <p>The {@code suggestedName} should provide the unqualified form of what
+	 * the method does. For instance, if the method returns an instance of a
+	 * given type, {@code getInstance} can be used as it is automatically
+	 * qualified using {@linkplain #withPrefix(String) the current prefix}.
+	 * <p>The prefix is applied a little differently for suggested names that
+	 * start with {@code get}, {@code set}, or {@code is}. Taking the previous
+	 * example with a {@code myBean} prefix, the actual method name is
+	 * {@code getMyBeanInstance}. Further processing of the method can happen
+	 * to ensure uniqueness within a class.
 	 * @param suggestedName the suggested name for the method
 	 * @param method a {@link Consumer} used to build method
 	 * @return the newly added {@link GeneratedMethod}
@@ -82,6 +91,16 @@ public class GeneratedMethods {
 
 	/**
 	 * Add a new {@link GeneratedMethod}.
+	 * <p>The {@code suggestedNameParts} should provide the unqualified form of
+	 * what the method does. For instance, if the method returns an instance of
+	 * a given type, {@code ["get", "instance"]} can be used as it is
+	 * automatically qualified using {@linkplain #withPrefix(String) the current
+	 * prefix}.
+	 * <p>The prefix is applied a little differently for suggested name parts
+	 * that start with {@code get}, {@code set}, or {@code is}. Taking the
+	 * previous example with a {@code myBean} prefix, the actual method name is
+	 * {@code getMyBeanInstance}. Further processing of the method can happen
+	 * to ensure uniqueness within a class.
 	 * @param suggestedNameParts the suggested name parts for the method
 	 * @param method a {@link Consumer} used to build method
 	 * @return the newly added {@link GeneratedMethod}
@@ -95,7 +114,13 @@ public class GeneratedMethods {
 		return generatedMethod;
 	}
 
-
+	/**
+	 * Specify the prefix to use for method names. The prefix applies to
+	 * suggested method names, with special handling of {@code get}, {@code set},
+	 * and {@code is} prefixes in the suggested name itself.
+	 * @param prefix the prefix to add to suggested method names
+	 * @return a new instance with the specified prefix
+	 */
 	public GeneratedMethods withPrefix(String prefix) {
 		Assert.notNull(prefix, "'prefix' must not be null");
 		return new GeneratedMethods(this.className, this.methodNameGenerator,
