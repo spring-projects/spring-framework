@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
@@ -48,9 +49,9 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class PathMatchingResourcePatternResolverTests {
 
 	private static final String[] CLASSES_IN_CORE_IO_SUPPORT = { "EncodedResource.class",
-		"LocalizedResourceHelper.class", "PathMatchingResourcePatternResolver.class", "PropertiesLoaderSupport.class",
-		"PropertiesLoaderUtils.class", "ResourceArrayPropertyEditor.class", "ResourcePatternResolver.class",
-		"ResourcePatternUtils.class", "SpringFactoriesLoader.class" };
+			"LocalizedResourceHelper.class", "PathMatchingResourcePatternResolver.class", "PropertiesLoaderSupport.class",
+			"PropertiesLoaderUtils.class", "ResourceArrayPropertyEditor.class", "ResourcePatternResolver.class",
+			"ResourcePatternUtils.class", "SpringFactoriesLoader.class" };
 
 	private static final String[] TEST_CLASSES_IN_CORE_IO_SUPPORT = { "PathMatchingResourcePatternResolverTests.class" };
 
@@ -67,7 +68,6 @@ class PathMatchingResourcePatternResolverTests {
 		void invalidPrefixWithPatternElementInItThrowsException() {
 			assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() -> resolver.getResources("xx**:**/*.xy"));
 		}
-
 	}
 
 
@@ -93,18 +93,22 @@ class PathMatchingResourcePatternResolverTests {
 			@Test
 			void usingClasspathStarProtocol() {
 				String pattern = "classpath*:org/springframework/core/io/**/resource#test*.txt";
+				String pathPrefix = ".+org/springframework/core/io/";
+
 				assertExactFilenames(pattern, "resource#test1.txt", "resource#test2.txt");
+				assertExactSubPaths(pattern, pathPrefix, "support/resource#test1.txt", "support/resource#test2.txt");
 			}
 
 			@Test
-			void usingFilePrototol() {
+			void usingFileProtocol() {
 				Path testResourcesDir = Paths.get("src/test/resources").toAbsolutePath();
 				String pattern = String.format("file:%s/scanned-resources/**", testResourcesDir);
+				String pathPrefix = ".+scanned-resources/";
+
 				assertExactFilenames(pattern, "resource#test1.txt", "resource#test2.txt");
+				assertExactSubPaths(pattern, pathPrefix, "resource#test1.txt", "resource#test2.txt");
 			}
-
 		}
-
 	}
 
 
@@ -142,7 +146,6 @@ class PathMatchingResourcePatternResolverTests {
 				.as("Could not find aspectj_1_5_0.dtd in the root of the aspectjweaver jar")
 				.containsExactly("aspectj_1_5_0.dtd");
 		}
-
 	}
 
 
@@ -179,6 +182,32 @@ class PathMatchingResourcePatternResolverTests {
 		catch (IOException ex) {
 			throw new UncheckedIOException(ex);
 		}
+	}
+
+	private void assertExactSubPaths(String pattern, String pathPrefix, String... subPaths) {
+		try {
+			Resource[] resources = resolver.getResources(pattern);
+			List<String> actualSubPaths = Arrays.stream(resources)
+					.map(resource -> getPath(resource).replaceFirst(pathPrefix, ""))
+					.sorted()
+					.collect(Collectors.toList());
+			assertThat(actualSubPaths).containsExactlyInAnyOrder(subPaths);
+		}
+		catch (IOException ex) {
+			throw new UncheckedIOException(ex);
+		}
+	}
+
+	private String getPath(Resource resource) {
+		// Tests fail if we use resouce.getURL().getPath(). They would also fail on Mac OS when
+		// using resouce.getURI().getPath() if the resource paths are not Unicode normalized.
+		//
+		// On the JVM, all tests should pass when using resouce.getFile().getPath(); however,
+		// we use FileSystemResource#getPath since this test class is sometimes run within a
+		// GraalVM native image which cannot support Path#toFile.
+		//
+		// See: https://github.com/spring-projects/spring-framework/issues/29243
+		return ((FileSystemResource) resource).getPath();
 	}
 
 }
