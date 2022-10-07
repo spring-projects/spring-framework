@@ -249,15 +249,15 @@ public abstract class ServletRequestPathUtils {
 			if (requestUri == null) {
 				requestUri = request.getRequestURI();
 			}
-			if (UrlPathHelper.servlet4Present) {
-				String servletPathPrefix = Servlet4Delegate.getServletPathPrefix(request);
-				if (StringUtils.hasText(servletPathPrefix)) {
-					if (servletPathPrefix.endsWith("/")) {
-						servletPathPrefix = servletPathPrefix.substring(0, servletPathPrefix.length() - 1);
-					}
-					return new ServletRequestPath(requestUri, request.getContextPath(), servletPathPrefix);
+
+			String servletPathPrefix = Servlet4Delegate.getServletPathPrefix(request);
+			if (StringUtils.hasText(servletPathPrefix)) {
+				if (servletPathPrefix.endsWith("/")) {
+					servletPathPrefix = servletPathPrefix.substring(0, servletPathPrefix.length() - 1);
 				}
+				return new ServletRequestPath(requestUri, request.getContextPath(), servletPathPrefix);
 			}
+
 			return RequestPath.parse(requestUri, request.getContextPath());
 		}
 	}
