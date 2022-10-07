@@ -20,7 +20,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.protobuf.ProtoBuf
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.core.Ordered
 import org.springframework.core.ResolvableType
@@ -52,18 +52,18 @@ class KotlinSerializationProtobufEncoderTests : AbstractEncoderTests<KotlinSeria
 	@Test
 	override fun canEncode() {
 		val pojoType = ResolvableType.forClass(Pojo::class.java)
-		Assertions.assertThat(encoder.canEncode(pojoType, null)).isTrue()
+		assertThat(encoder.canEncode(pojoType, null)).isTrue()
 
 		for (mimeType in ProtobufCodecSupport.MIME_TYPES) {
 			val mediaType = MediaType(mimeType)
-			Assertions.assertThat(encoder.canEncode(pojoType, mediaType)).isTrue()
+			assertThat(encoder.canEncode(pojoType, mediaType)).isTrue()
 
-			Assertions.assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Int::class.java), mimeType)).isTrue()
-			Assertions.assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Ordered::class.java), mimeType)).isFalse()
-			Assertions.assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Pojo::class.java), mimeType)).isTrue()
-			Assertions.assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), mimeType)).isTrue()
+			assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Int::class.java), mimeType)).isTrue()
+			assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Ordered::class.java), mimeType)).isFalse()
+			assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Pojo::class.java), mimeType)).isTrue()
+			assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), mimeType)).isTrue()
 		}
-		Assertions.assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_PDF)).isFalse()
+		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_PDF)).isFalse()
 	}
 
 	@Test
@@ -99,12 +99,12 @@ class KotlinSerializationProtobufEncoderTests : AbstractEncoderTests<KotlinSeria
 
 	@Test
 	fun canNotEncode() {
-		Assertions.assertThat(encoder.canEncode(ResolvableType.forClass(String::class.java), null)).isFalse()
-		Assertions.assertThat(encoder.canEncode(ResolvableType.forClass(Pojo::class.java), MediaType.APPLICATION_XML)).isFalse()
+		assertThat(encoder.canEncode(ResolvableType.forClass(String::class.java), null)).isFalse()
+		assertThat(encoder.canEncode(ResolvableType.forClass(Pojo::class.java), MediaType.APPLICATION_XML)).isFalse()
 		val sseType = ResolvableType.forClass(ServerSentEvent::class.java)
 		for (mediaType in mediaTypes) {
-			Assertions.assertThat(encoder.canEncode(sseType, mediaType)).isFalse()
-			Assertions.assertThat(encoder.canEncode(ResolvableType.forClass(Ordered::class.java), mediaType)).isFalse()
+			assertThat(encoder.canEncode(sseType, mediaType)).isFalse()
+			assertThat(encoder.canEncode(ResolvableType.forClass(Ordered::class.java), mediaType)).isFalse()
 		}
 	}
 
