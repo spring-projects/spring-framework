@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors
+ * Copyright 2002-2022 the original author or authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.jdbc.core
 
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.jdbc.core.test.ConstructorPerson
 import java.math.BigDecimal
@@ -31,7 +31,7 @@ class KotlinDataClassRowMapperTests : AbstractRowMapperTests() {
 			"select name, age, birth_date, balance from people",
 			DataClassRowMapper(ConstructorPerson::class.java)
 		)
-		Assertions.assertThat(result.size).isEqualTo(1)
+		assertThat(result.size).isEqualTo(1)
 		verifyPerson(result[0])
 		mock.verifyClosed()
 	}
@@ -43,8 +43,8 @@ class KotlinDataClassRowMapperTests : AbstractRowMapperTests() {
 			"select name, age, birth_date, balance from people",
 			DataClassRowMapper(KotlinPerson::class.java)
 		)
-		Assertions.assertThat(result.size).isEqualTo(1)
-		Assertions.assertThat(result[0].name).isEqualTo("Bubba appended by init")
+		assertThat(result.size).isEqualTo(1)
+		assertThat(result[0].name).isEqualTo("Bubba appended by init")
 	}
 
 
