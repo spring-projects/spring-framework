@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.springframework.util.MultiValueMap;
  * respectively.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0
  * @see EntityExchangeResult
  * @see FluxExchangeResult
@@ -171,6 +172,8 @@ public class ExchangeResult {
 
 	/**
 	 * Return the HTTP status code as an {@link HttpStatus} enum value.
+	 * @throws IllegalArgumentException in case of an unknown HTTP status code
+	 * @see #getRawStatusCode()
 	 */
 	public HttpStatus getStatus() {
 		return this.response.getStatusCode();
@@ -248,11 +251,20 @@ public class ExchangeResult {
 				"\n" +
 				formatBody(getRequestHeaders().getContentType(), this.requestBody) + "\n" +
 				"\n" +
-				"< " + getStatus() + " " + getStatus().getReasonPhrase() + "\n" +
+				"< " + formatStatus() + "\n" +
 				"< " + formatHeaders(getResponseHeaders(), "\n< ") + "\n" +
 				"\n" +
 				formatBody(getResponseHeaders().getContentType(), this.responseBody) +"\n" +
 				formatMockServerResult();
+	}
+
+	private String formatStatus() {
+		try {
+			return getStatus() + " " + getStatus().getReasonPhrase();
+		}
+		catch (Exception ex) {
+			return Integer.toString(getRawStatusCode());
+		}
 	}
 
 	private String formatHeaders(HttpHeaders headers, String delimiter) {
