@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,8 +49,10 @@ import org.springframework.test.context.web.ServletTestExecutionListener;
  * the appropriate {@link org.springframework.test.context.TestExecutionListener
  * TestExecutionListeners} manually.</em>
  *
- * <p>The following {@link org.springframework.test.context.TestExecutionListener
- * TestExecutionListeners} are configured by default:
+ * <p>This class explicitly registers the following {@code TestExecutionListener}
+ * implementations. If you want to switch to using the <em>default</em> set of
+ * listeners, see the class-level Javadoc for
+ * {@link TestExecutionListeners @TestExecutionListeners} for details.
  *
  * <ul>
  * <li>{@link org.springframework.test.context.web.ServletTestExecutionListener}
