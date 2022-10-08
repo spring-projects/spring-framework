@@ -36,12 +36,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestContextManager;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.event.ApplicationEventsTestExecutionListener;
-import org.springframework.test.context.event.EventPublishingTestExecutionListener;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
-import org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener;
-import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import org.springframework.test.context.web.ServletTestExecutionListener;
 
 /**
  * Abstract base test class which integrates the <em>Spring TestContext Framework</em>
@@ -52,26 +46,9 @@ import org.springframework.test.context.web.ServletTestExecutionListener;
  * {@link ContextConfiguration @ContextConfiguration} annotation to
  * configure the {@linkplain ApplicationContext application context} {@linkplain
  * ContextConfiguration#locations() resource locations} or {@linkplain
- * ContextConfiguration#classes() component classes}. <em>If your test does not
- * need to load an application context, you may choose to omit the
- * {@link ContextConfiguration @ContextConfiguration} declaration and to configure
- * the appropriate {@link org.springframework.test.context.TestExecutionListener
- * TestExecutionListeners} manually.</em> Concrete subclasses must also have
- * constructors which either implicitly or explicitly delegate to {@code super();}.
- *
- * <p>This class explicitly registers the following {@code TestExecutionListener}
- * implementations. If you want to switch to using the <em>default</em> set of
- * listeners, see the class-level Javadoc for
- * {@link TestExecutionListeners @TestExecutionListeners} for details.
- *
- * <ul>
- * <li>{@link org.springframework.test.context.web.ServletTestExecutionListener}
- * <li>{@link org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener}
- * <li>{@link org.springframework.test.context.event.ApplicationEventsTestExecutionListener}
- * <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener}
- * <li>{@link org.springframework.test.context.support.DirtiesContextTestExecutionListener}
- * <li>{@link org.springframework.test.context.event.EventPublishingTestExecutionListener}
- * </ul>
+ * ContextConfiguration#classes() component classes}. Concrete subclasses must
+ * also have constructors which either implicitly or explicitly delegate to
+ * {@code super();}.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
@@ -80,18 +57,9 @@ import org.springframework.test.context.web.ServletTestExecutionListener;
  * @see TestContext
  * @see TestContextManager
  * @see TestExecutionListeners
- * @see ServletTestExecutionListener
- * @see DirtiesContextBeforeModesTestExecutionListener
- * @see ApplicationEventsTestExecutionListener
- * @see DependencyInjectionTestExecutionListener
- * @see DirtiesContextTestExecutionListener
- * @see EventPublishingTestExecutionListener
  * @see AbstractTransactionalTestNGSpringContextTests
  * @see org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests
  */
-@TestExecutionListeners({ ServletTestExecutionListener.class, DirtiesContextBeforeModesTestExecutionListener.class,
-	ApplicationEventsTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
-	DirtiesContextTestExecutionListener.class, EventPublishingTestExecutionListener.class })
 public abstract class AbstractTestNGSpringContextTests implements IHookable, ApplicationContextAware {
 
 	/** Logger available to subclasses. */
