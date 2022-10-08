@@ -148,6 +148,7 @@ class AopProxyUtilsTests {
 	sealed interface SealedInterface {
 	}
 
+	@SuppressWarnings("unused")
 	static final class SealedClass implements SealedInterface {
 	}
 
