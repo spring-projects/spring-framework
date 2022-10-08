@@ -132,6 +132,7 @@ class ReflectiveRuntimeHintsRegistrarTests {
 		this.registrar.registerRuntimeHints(this.runtimeHints, beanClass);
 	}
 
+
 	@Reflective
 	@SuppressWarnings("unused")
 	static class SampleTypeAnnotatedBean {
@@ -139,7 +140,6 @@ class ReflectiveRuntimeHintsRegistrarTests {
 		private String notManaged;
 
 		public void notManaged() {
-
 		}
 	}
 
@@ -148,13 +148,10 @@ class ReflectiveRuntimeHintsRegistrarTests {
 
 		@Reflective
 		SampleConstructorAnnotatedBean(String name) {
-
 		}
 
 		SampleConstructorAnnotatedBean(Integer nameAsNumber) {
-
 		}
-
 	}
 
 	@SuppressWarnings("unused")
@@ -176,7 +173,6 @@ class ReflectiveRuntimeHintsRegistrarTests {
 
 		void notManaged() {
 		}
-
 	}
 
 	@SuppressWarnings("unused")
@@ -188,7 +184,6 @@ class ReflectiveRuntimeHintsRegistrarTests {
 
 		void notManaged() {
 		}
-
 	}
 
 	@SuppressWarnings("unused")
@@ -200,7 +195,6 @@ class ReflectiveRuntimeHintsRegistrarTests {
 
 		void notManaged() {
 		}
-
 	}
 
 	static class SampleMethodAnnotatedBeanWithInterface implements SampleInterface {
@@ -211,7 +205,6 @@ class ReflectiveRuntimeHintsRegistrarTests {
 
 		public void notManaged() {
 		}
-
 	}
 
 	static class SampleMethodAnnotatedBeanWithInheritance extends SampleInheritedClass {
@@ -222,7 +215,6 @@ class ReflectiveRuntimeHintsRegistrarTests {
 
 		public void notManaged() {
 		}
-
 	}
 
 	@Target({ ElementType.METHOD, ElementType.ANNOTATION_TYPE })
@@ -251,7 +243,6 @@ class ReflectiveRuntimeHintsRegistrarTests {
 	@Documented
 	@Reflective(TestTypeHintReflectiveProcessor.class)
 	@interface ReflectiveWithCustomProcessor {
-
 	}
 
 	interface SampleInterface {
@@ -273,7 +264,6 @@ class ReflectiveRuntimeHintsRegistrarTests {
 		public String managed() {
 			return "test";
 		}
-
 	}
 
 	@Reflective
@@ -283,7 +273,6 @@ class ReflectiveRuntimeHintsRegistrarTests {
 		public String managed() {
 			return "test";
 		}
-
 	}
 
 	private static class TestMethodHintReflectiveProcessor extends SimpleReflectiveProcessor {
@@ -293,7 +282,6 @@ class ReflectiveRuntimeHintsRegistrarTests {
 			super.registerMethodHint(hints, method);
 			hints.registerType(method.getReturnType(), MemberCategory.INVOKE_DECLARED_METHODS);
 		}
-
 	}
 
 	private static class TestTypeHintReflectiveProcessor extends SimpleReflectiveProcessor {
@@ -303,7 +291,6 @@ class ReflectiveRuntimeHintsRegistrarTests {
 			super.registerTypeHint(hints, type);
 			hints.registerType(type, MemberCategory.INVOKE_DECLARED_METHODS);
 		}
-
 	}
 
 }

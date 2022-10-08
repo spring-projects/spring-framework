@@ -61,7 +61,7 @@ import org.springframework.util.MimeType;
 /**
  * Base class providing support methods for Jackson 2.9 encoding. For non-streaming use
  * cases, {@link Flux} elements are collected into a {@link List} before serialization for
- * performance reason.
+ * performance reasons.
  *
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
@@ -347,13 +347,13 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	}
 
 	/**
-	 * Subclasses can use this method to customize {@link ObjectWriter} used
+	 * Subclasses can use this method to customize the {@link ObjectWriter} used
 	 * for writing values.
 	 * @param writer the writer instance to customize
 	 * @param mimeType the selected MIME type
 	 * @param elementType the type of element values to write
-	 * @param hints a map with serialization hints;
-	 * the Reactor Context, when available, may be accessed under the key
+	 * @param hints a map with serialization hints; the Reactor Context, when
+	 * available, may be accessed under the key
 	 * {@code ContextView.class.getName()}
 	 * @return the customized {@code ObjectWriter} to use
 	 */
