@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -195,7 +194,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 										delimiter, EMPTY_BYTES);
 
 								return (prefix.length > 0 ?
-										bufferFactory.join(Arrays.asList(bufferFactory.wrap(prefix), dataBuffer)) :
+										bufferFactory.join(List.of(bufferFactory.wrap(prefix), dataBuffer)) :
 										dataBuffer);
 							})
 							.switchIfEmpty(Mono.fromCallable(() -> bufferFactory.wrap(helper.getPrefix())))

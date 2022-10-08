@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.aot.hint.ReflectionHints;
@@ -39,7 +38,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Stephane Nicoll
  * @author Andy Wilkinson
- * since 6.0
+ * @since 6.0
  */
 public class ReflectiveRuntimeHintsRegistrar {
 
@@ -92,13 +91,13 @@ public class ReflectiveRuntimeHintsRegistrar {
 
 	@SuppressWarnings("unchecked")
 	private Entry createEntry(AnnotatedElement element) {
-		List<Class<? extends ReflectiveProcessor>> processorClasses =
+		List<ReflectiveProcessor> processors =
 				MergedAnnotations.from(element, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY)
 						.stream(Reflective.class).flatMap(annotation -> Stream.of(annotation.getClassArray("value")))
-								.map(type -> (Class<? extends ReflectiveProcessor>) type).collect(Collectors.toList());
-		List<ReflectiveProcessor> processors = processorClasses.stream().distinct()
-				.map(processorClass -> this.processors.computeIfAbsent(processorClass, this::instantiateClass))
-				.toList();
+						.map(type -> (Class<? extends ReflectiveProcessor>) type)
+						.distinct()
+						.map(processorClass -> this.processors.computeIfAbsent(processorClass, this::instantiateClass))
+						.toList();
 		ReflectiveProcessor processorToUse = (processors.size() == 1 ? processors.get(0)
 				: new DelegateReflectiveProcessor(processors));
 		return new Entry(element, processorToUse);

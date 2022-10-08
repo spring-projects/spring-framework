@@ -51,8 +51,8 @@ public class BeanUtilsBenchmark {
 		return BeanUtils.instantiateClass(this.constructor, 1, "str");
 	}
 
-	static class TestClass1{
-	};
+	static class TestClass1 {
+	}
 
 	@SuppressWarnings("unused")
 	static class TestClass2 {
