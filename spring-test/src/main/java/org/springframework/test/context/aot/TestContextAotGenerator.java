@@ -123,7 +123,6 @@ public class TestContextAotGenerator {
 				mergedConfigMappings.add(mergedConfig, testClass);
 				this.testRuntimeHintsRegistrars.forEach(registrar ->
 						registrar.registerHints(this.runtimeHints, testClass, classLoader));
-				this.mergedConfigRuntimeHints.registerHints(this.runtimeHints, mergedConfig, classLoader);
 			});
 			MultiValueMap<ClassName, Class<?>> initializerClassMappings = processAheadOfTime(mergedConfigMappings);
 
@@ -141,10 +140,12 @@ public class TestContextAotGenerator {
 	}
 
 	private MultiValueMap<ClassName, Class<?>> processAheadOfTime(MultiValueMap<MergedContextConfiguration, Class<?>> mergedConfigMappings) {
+		ClassLoader classLoader = getClass().getClassLoader();
 		MultiValueMap<ClassName, Class<?>> initializerClassMappings = new LinkedMultiValueMap<>();
 		mergedConfigMappings.forEach((mergedConfig, testClasses) -> {
 			logger.debug(LogMessage.format("Generating AOT artifacts for test classes %s",
 					testClasses.stream().map(Class::getName).toList()));
+			this.mergedConfigRuntimeHints.registerHints(this.runtimeHints, mergedConfig, classLoader);
 			try {
 				// Use first test class discovered for a given unique MergedContextConfiguration.
 				Class<?> testClass = testClasses.get(0);
