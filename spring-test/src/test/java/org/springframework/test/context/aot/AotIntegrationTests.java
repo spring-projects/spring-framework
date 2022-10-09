@@ -39,6 +39,7 @@ import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.test.generate.CompilerFiles;
 import org.springframework.core.test.tools.CompileWithForkedClassLoader;
 import org.springframework.core.test.tools.TestCompiler;
+import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterImportedConfigTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterSharedConfigTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringTestNGTests;
@@ -96,9 +97,13 @@ class AotIntegrationTests extends AbstractAotTests {
 			// .printFiles(System.out)
 			.compile(compiled ->
 				// AOT RUN-TIME: EXECUTION
-				runTestsInAotMode(5, List.of(
+				runTestsInAotMode(6, List.of(
 					BasicSpringJupiterSharedConfigTests.class,
 					BasicSpringJupiterTests.class, // NestedTests get executed automatically
+					// Run @Import tests AFTER the tests with otherwise identical config
+					// in order to ensure that the other test classes are not accidentally
+					// using the config for the @Import tests.
+					BasicSpringJupiterImportedConfigTests.class,
 					BasicSpringTestNGTests.class,
 					BasicSpringVintageTests.class)));
 	}

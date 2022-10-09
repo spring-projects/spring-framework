@@ -86,18 +86,19 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	@Override
 	public boolean isContextLoaded(MergedContextConfiguration mergedContextConfiguration) {
 		synchronized (this.contextCache) {
-			return this.contextCache.contains(mergedContextConfiguration);
+			return this.contextCache.contains(replaceIfNecessary(mergedContextConfiguration));
 		}
 	}
 
 	@Override
 	public ApplicationContext loadContext(MergedContextConfiguration mergedContextConfiguration) {
+		mergedContextConfiguration = replaceIfNecessary(mergedContextConfiguration);
 		synchronized (this.contextCache) {
 			ApplicationContext context = this.contextCache.get(mergedContextConfiguration);
 			if (context == null) {
 				try {
-					if (runningInAotMode(mergedContextConfiguration.getTestClass())) {
-						context = loadContextInAotMode(mergedContextConfiguration);
+					if (mergedContextConfiguration instanceof AotMergedContextConfiguration aotMergedConfig) {
+						context = loadContextInAotMode(aotMergedConfig);
 					}
 					else {
 						context = loadContextInternal(mergedContextConfiguration);
@@ -129,7 +130,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	@Override
 	public void closeContext(MergedContextConfiguration mergedContextConfiguration, @Nullable HierarchyMode hierarchyMode) {
 		synchronized (this.contextCache) {
-			this.contextCache.remove(mergedContextConfiguration, hierarchyMode);
+			this.contextCache.remove(replaceIfNecessary(mergedContextConfiguration), hierarchyMode);
 		}
 	}
 
@@ -163,23 +164,23 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 		}
 	}
 
-	protected ApplicationContext loadContextInAotMode(MergedContextConfiguration mergedConfig) throws Exception {
-		Class<?> testClass = mergedConfig.getTestClass();
+	protected ApplicationContext loadContextInAotMode(AotMergedContextConfiguration aotMergedConfig) throws Exception {
+		Class<?> testClass = aotMergedConfig.getTestClass();
 		ApplicationContextInitializer<ConfigurableApplicationContext> contextInitializer =
 				this.aotTestContextInitializers.getContextInitializer(testClass);
 		Assert.state(contextInitializer != null,
 				() -> "Failed to load AOT ApplicationContextInitializer for test class [%s]"
 						.formatted(testClass.getName()));
-		ContextLoader contextLoader = getContextLoader(mergedConfig);
-		logger.info(LogMessage.format("Loading ApplicationContext in AOT mode for %s", mergedConfig));
+		ContextLoader contextLoader = getContextLoader(aotMergedConfig);
+		logger.info(LogMessage.format("Loading ApplicationContext in AOT mode for %s", aotMergedConfig.getOriginal()));
 		if (!((contextLoader instanceof AotContextLoader aotContextLoader) &&
-				(aotContextLoader.loadContextForAotRuntime(mergedConfig, contextInitializer)
+				(aotContextLoader.loadContextForAotRuntime(aotMergedConfig.getOriginal(), contextInitializer)
 						instanceof GenericApplicationContext gac))) {
 			throw new TestContextAotException("""
 					Cannot load ApplicationContext for AOT runtime for %s. The configured \
 					ContextLoader [%s] must be an AotContextLoader and must create a \
 					GenericApplicationContext."""
-						.formatted(mergedConfig, contextLoader.getClass().getName()));
+						.formatted(aotMergedConfig.getOriginal(), contextLoader.getClass().getName()));
 		}
 		gac.registerShutdownHook();
 		return gac;
@@ -195,10 +196,24 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	}
 
 	/**
-	 * Determine if we are running in AOT mode for the supplied test class.
+	 * If the test class associated with the supplied {@link MergedContextConfiguration}
+	 * has an AOT-optimized {@link ApplicationContext}, this method will create an
+	 * {@link AotMergedContextConfiguration} to replace the provided {@code MergedContextConfiguration}.
+	 * <p>Otherwise, this method simply returns the supplied {@code MergedContextConfiguration}
+	 * unmodified.
+	 * <p>This allows for transparent {@link org.springframework.test.context.cache.ContextCache ContextCache}
+	 * support for AOT-optimized application contexts.
 	 */
-	private boolean runningInAotMode(Class<?> testClass) {
-		return this.aotTestContextInitializers.isSupportedTestClass(testClass);
+	@SuppressWarnings("unchecked")
+	private MergedContextConfiguration replaceIfNecessary(MergedContextConfiguration mergedConfig) {
+		Class<?> testClass = mergedConfig.getTestClass();
+		if (this.aotTestContextInitializers.isSupportedTestClass(testClass)) {
+			Class<? extends ApplicationContextInitializer<?>> contextInitializerClass =
+					(Class<? extends ApplicationContextInitializer<?>>)
+							this.aotTestContextInitializers.getContextInitializer(testClass).getClass();
+			return new AotMergedContextConfiguration(testClass, contextInitializerClass, mergedConfig, this);
+		}
+		return mergedConfig;
 	}
 
 }

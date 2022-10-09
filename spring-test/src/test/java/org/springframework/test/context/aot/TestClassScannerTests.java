@@ -18,6 +18,7 @@ package org.springframework.test.context.aot;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterImportedConfigTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterSharedConfigTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringTestNGTests;
@@ -37,6 +38,7 @@ class TestClassScannerTests extends AbstractAotTests {
 	void scanBasicTestClasses() {
 		assertThat(scan("org.springframework.test.context.aot.samples.basic"))
 			.containsExactlyInAnyOrder(
+				BasicSpringJupiterImportedConfigTests.class,
 				BasicSpringJupiterSharedConfigTests.class,
 				BasicSpringJupiterTests.class,
 				BasicSpringJupiterTests.NestedTests.class,
@@ -48,8 +50,9 @@ class TestClassScannerTests extends AbstractAotTests {
 	@Test
 	void scanTestSuitesForJupiter() {
 		assertThat(scan("org.springframework.test.context.aot.samples.suites.jupiter"))
-			.containsExactlyInAnyOrder(BasicSpringJupiterSharedConfigTests.class,
-				BasicSpringJupiterTests.class, BasicSpringJupiterTests.NestedTests.class);
+			.containsExactlyInAnyOrder(BasicSpringJupiterImportedConfigTests.class,
+				BasicSpringJupiterSharedConfigTests.class, BasicSpringJupiterTests.class,
+				BasicSpringJupiterTests.NestedTests.class);
 	}
 
 	@Test
@@ -68,6 +71,7 @@ class TestClassScannerTests extends AbstractAotTests {
 	void scanTestSuitesForAllTestEngines() {
 		assertThat(scan("org.springframework.test.context.aot.samples.suites.all"))
 			.containsExactlyInAnyOrder(
+				BasicSpringJupiterImportedConfigTests.class,
 				BasicSpringJupiterSharedConfigTests.class,
 				BasicSpringJupiterTests.class,
 				BasicSpringJupiterTests.NestedTests.class,
@@ -80,6 +84,7 @@ class TestClassScannerTests extends AbstractAotTests {
 	void scanTestSuitesWithNestedSuites() {
 		assertThat(scan("org.springframework.test.context.aot.samples.suites.nested"))
 			.containsExactlyInAnyOrder(
+				BasicSpringJupiterImportedConfigTests.class,
 				BasicSpringJupiterSharedConfigTests.class,
 				BasicSpringJupiterTests.class,
 				BasicSpringJupiterTests.NestedTests.class,
