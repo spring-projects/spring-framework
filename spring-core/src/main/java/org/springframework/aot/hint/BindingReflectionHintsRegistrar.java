@@ -63,21 +63,11 @@ public class BindingReflectionHintsRegistrar {
 		}
 	}
 
-	/**
-	 * Return whether the type should be skipped.
-	 * @param type the type to evaluate
-	 * @return {@code true} if the type should be skipped
-	 */
-	protected boolean shouldSkipType(Class<?> type) {
+	private boolean shouldSkipType(Class<?> type) {
 		return type.isPrimitive() || type == Object.class;
 	}
 
-	/**
-	 * Return whether the members of the type should be skipped.
-	 * @param type the type to evaluate
-	 * @return {@code true} if the members of the type should be skipped
-	 */
-	protected boolean shouldSkipMembers(Class<?> type) {
+	private boolean shouldSkipMembers(Class<?> type) {
 		return type.getCanonicalName().startsWith("java.") || type.isArray();
 	}
 
