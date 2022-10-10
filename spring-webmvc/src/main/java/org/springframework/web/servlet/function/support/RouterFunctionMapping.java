@@ -25,7 +25,6 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.SpringProperties;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -56,14 +55,6 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * @since 5.2
  */
 public class RouterFunctionMapping extends AbstractHandlerMapping implements InitializingBean {
-
-	/**
-	 * Boolean flag controlled by a {@code spring.xml.ignore} system property that instructs Spring to
-	 * ignore XML, i.e. to not initialize the XML-related infrastructure.
-	 * <p>The default is "false".
-	 */
-	private static final boolean shouldIgnoreXml = SpringProperties.getFlag("spring.xml.ignore");
-
 
 	@Nullable
 	private RouterFunction<?> routerFunction;
@@ -198,14 +189,11 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>(4);
 		messageConverters.add(new ByteArrayHttpMessageConverter());
 		messageConverters.add(new StringHttpMessageConverter());
-
-		if (!shouldIgnoreXml) {
-			try {
-				messageConverters.add(new SourceHttpMessageConverter<>());
-			}
-			catch (Error err) {
-				// Ignore when no TransformerFactory implementation is available
-			}
+		try {
+			messageConverters.add(new SourceHttpMessageConverter<>());
+		}
+		catch (Error err) {
+			// Ignore when no TransformerFactory implementation is available
 		}
 		messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 
