@@ -17,6 +17,7 @@
 package org.springframework.http.codec.multipart;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -602,7 +603,10 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 		@Override
 		public void onComplete() {
 			if (changeState(this, DisposedState.INSTANCE, null)) {
-				emitError(new DecodingException("Could not find end of body"));
+				String msg = "Could not find end of body (␍␊--" +
+						new String(MultipartParser.this.boundary, StandardCharsets.UTF_8) +
+						")";
+				emitError(new DecodingException(msg));
 			}
 		}
 
