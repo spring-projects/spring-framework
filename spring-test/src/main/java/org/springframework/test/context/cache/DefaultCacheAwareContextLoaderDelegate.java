@@ -209,8 +209,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 		Class<?> testClass = mergedConfig.getTestClass();
 		if (this.aotTestContextInitializers.isSupportedTestClass(testClass)) {
 			Class<? extends ApplicationContextInitializer<?>> contextInitializerClass =
-					(Class<? extends ApplicationContextInitializer<?>>)
-							this.aotTestContextInitializers.getContextInitializer(testClass).getClass();
+					this.aotTestContextInitializers.getContextInitializerClass(testClass);
 			return new AotMergedContextConfiguration(testClass, contextInitializerClass, mergedConfig, this);
 		}
 		return mergedConfig;

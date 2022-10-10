@@ -35,6 +35,9 @@ final class AotTestContextInitializersFactory {
 	@Nullable
 	private static volatile Map<String, Supplier<ApplicationContextInitializer<ConfigurableApplicationContext>>> contextInitializers;
 
+	@Nullable
+	private static volatile Map<String, Class<ApplicationContextInitializer<?>>> contextInitializerClasses;
+
 
 	private AotTestContextInitializersFactory() {
 	}
@@ -59,6 +62,20 @@ final class AotTestContextInitializersFactory {
 		return initializers;
 	}
 
+	static Map<String, Class<ApplicationContextInitializer<?>>> getContextInitializerClasses() {
+		Map<String, Class<ApplicationContextInitializer<?>>> initializerClasses = contextInitializerClasses;
+		if (initializerClasses == null) {
+			synchronized (AotTestContextInitializersFactory.class) {
+				initializerClasses = contextInitializerClasses;
+				if (initializerClasses == null) {
+					initializerClasses = (AotDetector.useGeneratedArtifacts() ? loadContextInitializerClassesMap() : Map.of());
+					contextInitializerClasses = initializerClasses;
+				}
+			}
+		}
+		return initializerClasses;
+	}
+
 	/**
 	 * Reset the factory.
 	 * <p>Only for internal use.
@@ -66,13 +83,21 @@ final class AotTestContextInitializersFactory {
 	static void reset() {
 		synchronized (AotTestContextInitializersFactory.class) {
 			contextInitializers = null;
+			contextInitializerClasses = null;
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	private static Map<String, Supplier<ApplicationContextInitializer<ConfigurableApplicationContext>>> loadContextInitializersMap() {
 		String className = AotTestContextInitializersCodeGenerator.GENERATED_MAPPINGS_CLASS_NAME;
-		String methodName = AotTestContextInitializersCodeGenerator.GENERATED_MAPPINGS_METHOD_NAME;
+		String methodName = AotTestContextInitializersCodeGenerator.GET_CONTEXT_INITIALIZERS_METHOD_NAME;
+		return GeneratedMapUtils.loadMap(className, methodName);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Map<String, Class<ApplicationContextInitializer<?>>> loadContextInitializerClassesMap() {
+		String className = AotTestContextInitializersCodeGenerator.GENERATED_MAPPINGS_CLASS_NAME;
+		String methodName = AotTestContextInitializersCodeGenerator.GET_CONTEXT_INITIALIZER_CLASSES_METHOD_NAME;
 		return GeneratedMapUtils.loadMap(className, methodName);
 	}
 

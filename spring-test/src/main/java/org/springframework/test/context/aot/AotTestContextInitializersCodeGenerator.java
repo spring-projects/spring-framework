@@ -50,16 +50,28 @@ class AotTestContextInitializersCodeGenerator {
 
 	private static final Log logger = LogFactory.getLog(AotTestContextInitializersCodeGenerator.class);
 
+	// ApplicationContextInitializer<? extends ConfigurableApplicationContext>
 	private static final ParameterizedTypeName CONTEXT_INITIALIZER = ParameterizedTypeName.get(
 			ClassName.get(ApplicationContextInitializer.class),
 			WildcardTypeName.subtypeOf(ConfigurableApplicationContext.class));
 
+	// Supplier<ApplicationContextInitializer<? extends ConfigurableApplicationContext>>
 	private static final ParameterizedTypeName CONTEXT_INITIALIZER_SUPPLIER = ParameterizedTypeName
 			.get(ClassName.get(Supplier.class), CONTEXT_INITIALIZER);
 
 	// Map<String, Supplier<ApplicationContextInitializer<? extends ConfigurableApplicationContext>>>
-	private static final TypeName CONTEXT_SUPPLIER_MAP = ParameterizedTypeName
+	private static final TypeName CONTEXT_INITIALIZER_SUPPLIER_MAP = ParameterizedTypeName
 			.get(ClassName.get(Map.class), ClassName.get(String.class), CONTEXT_INITIALIZER_SUPPLIER);
+
+	// Class<ApplicationContextInitializer<?>
+	private static final ParameterizedTypeName CONTEXT_INITIALIZER_CLASS = ParameterizedTypeName
+			.get(ClassName.get(Class.class), WildcardTypeName.subtypeOf(
+				ParameterizedTypeName.get(ClassName.get(ApplicationContextInitializer.class),
+					WildcardTypeName.subtypeOf(Object.class))));
+
+	// Map<String, Class<ApplicationContextInitializer<?>>>
+	private static final TypeName CONTEXT_INITIALIZER_CLASS_MAP = ParameterizedTypeName
+			.get(ClassName.get(Map.class), ClassName.get(String.class), CONTEXT_INITIALIZER_CLASS);
 
 	private static final String GENERATED_SUFFIX = "Generated";
 
@@ -67,7 +79,9 @@ class AotTestContextInitializersCodeGenerator {
 	// Ideally we would generate a class named: org.springframework.test.context.aot.GeneratedAotTestContextInitializers
 	static final String GENERATED_MAPPINGS_CLASS_NAME = AotTestContextInitializers.class.getName() + "__" + GENERATED_SUFFIX;
 
-	static final String GENERATED_MAPPINGS_METHOD_NAME = "getContextInitializers";
+	static final String GET_CONTEXT_INITIALIZERS_METHOD_NAME = "getContextInitializers";
+
+	static final String GET_CONTEXT_INITIALIZER_CLASSES_METHOD_NAME = "getContextInitializerClasses";
 
 
 	private final MultiValueMap<ClassName, Class<?>> initializerClassMappings;
@@ -92,27 +106,51 @@ class AotTestContextInitializersCodeGenerator {
 				this.generatedClass.getName().reflectionName()));
 		type.addJavadoc("Generated mappings for {@link $T}.", AotTestContextInitializers.class);
 		type.addModifiers(Modifier.PUBLIC);
-		type.addMethod(generateMappingMethod());
+		type.addMethod(contextInitializersMappingMethod());
+		type.addMethod(contextInitializerClassesMappingMethod());
 	}
 
-	private MethodSpec generateMappingMethod() {
-		MethodSpec.Builder method = MethodSpec.methodBuilder(GENERATED_MAPPINGS_METHOD_NAME);
+	private MethodSpec contextInitializersMappingMethod() {
+		MethodSpec.Builder method = MethodSpec.methodBuilder(GET_CONTEXT_INITIALIZERS_METHOD_NAME);
 		method.addModifiers(Modifier.PUBLIC, Modifier.STATIC);
-		method.returns(CONTEXT_SUPPLIER_MAP);
-		method.addCode(generateMappingCode());
+		method.returns(CONTEXT_INITIALIZER_SUPPLIER_MAP);
+		method.addCode(generateContextInitializersMappingCode());
 		return method.build();
 	}
 
-	private CodeBlock generateMappingCode() {
+	private CodeBlock generateContextInitializersMappingCode() {
 		CodeBlock.Builder code = CodeBlock.builder();
-		code.addStatement("$T map = new $T<>()", CONTEXT_SUPPLIER_MAP, HashMap.class);
+		code.addStatement("$T map = new $T<>()", CONTEXT_INITIALIZER_SUPPLIER_MAP, HashMap.class);
 		this.initializerClassMappings.forEach((className, testClasses) -> {
 			List<String> testClassNames = testClasses.stream().map(Class::getName).toList();
 			logger.debug(LogMessage.format(
-					"Generating mapping from AOT context initializer [%s] to test classes %s",
+					"Generating mapping from AOT context initializer supplier [%s] to test classes %s",
 					className.reflectionName(), testClassNames));
 			testClassNames.forEach(testClassName ->
 				code.addStatement("map.put($S, () -> new $T())", testClassName, className));
+		});
+		code.addStatement("return map");
+		return code.build();
+	}
+
+	private MethodSpec contextInitializerClassesMappingMethod() {
+		MethodSpec.Builder method = MethodSpec.methodBuilder(GET_CONTEXT_INITIALIZER_CLASSES_METHOD_NAME);
+		method.addModifiers(Modifier.PUBLIC, Modifier.STATIC);
+		method.returns(CONTEXT_INITIALIZER_CLASS_MAP);
+		method.addCode(generateContextInitializerClassesMappingCode());
+		return method.build();
+	}
+
+	private CodeBlock generateContextInitializerClassesMappingCode() {
+		CodeBlock.Builder code = CodeBlock.builder();
+		code.addStatement("$T map = new $T<>()", CONTEXT_INITIALIZER_CLASS_MAP, HashMap.class);
+		this.initializerClassMappings.forEach((className, testClasses) -> {
+			List<String> testClassNames = testClasses.stream().map(Class::getName).toList();
+			logger.debug(LogMessage.format(
+					"Generating mapping from AOT context initializer class [%s] to test classes %s",
+					className.reflectionName(), testClassNames));
+			testClassNames.forEach(testClassName ->
+				code.addStatement("map.put($S, $T.class)", testClassName, className));
 		});
 		code.addStatement("return map");
 		return code.build();

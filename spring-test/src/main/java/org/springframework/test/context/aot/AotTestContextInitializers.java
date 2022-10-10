@@ -32,8 +32,8 @@ import org.springframework.lang.Nullable;
  *
  * <p>If we are not running in {@linkplain AotDetector#useGeneratedArtifacts()
  * AOT mode} or if a test class is not {@linkplain #isSupportedTestClass(Class)
- * supported} in AOT mode, {@link #getContextInitializer(Class)} will return
- * {@code null}.
+ * supported} in AOT mode, {@link #getContextInitializer(Class)} and
+ * {@link #getContextInitializerClass(Class)} will return {@code null}.
  *
  * @author Sam Brannen
  * @since 6.0
@@ -42,13 +42,20 @@ public class AotTestContextInitializers {
 
 	private final Map<String, Supplier<ApplicationContextInitializer<ConfigurableApplicationContext>>> contextInitializers;
 
+	private final Map<String, Class<ApplicationContextInitializer<?>>> contextInitializerClasses;
+
 
 	public AotTestContextInitializers() {
-		this(AotTestContextInitializersFactory.getContextInitializers());
+		this(AotTestContextInitializersFactory.getContextInitializers(),
+			AotTestContextInitializersFactory.getContextInitializerClasses());
 	}
 
-	AotTestContextInitializers(Map<String, Supplier<ApplicationContextInitializer<ConfigurableApplicationContext>>> contextInitializers) {
+	AotTestContextInitializers(
+			Map<String, Supplier<ApplicationContextInitializer<ConfigurableApplicationContext>>> contextInitializers,
+			Map<String, Class<ApplicationContextInitializer<?>>> contextInitializerClasses) {
+
 		this.contextInitializers = contextInitializers;
+		this.contextInitializerClasses = contextInitializerClasses;
 	}
 
 
@@ -67,12 +74,26 @@ public class AotTestContextInitializers {
 	 * @return the AOT context initializer, or {@code null} if there is no AOT context
 	 * initializer for the specified test class
 	 * @see #isSupportedTestClass(Class)
+	 * @see #getContextInitializerClass(Class)
 	 */
 	@Nullable
 	public ApplicationContextInitializer<ConfigurableApplicationContext> getContextInitializer(Class<?> testClass) {
 		Supplier<ApplicationContextInitializer<ConfigurableApplicationContext>> supplier =
 				this.contextInitializers.get(testClass.getName());
 		return (supplier != null ? supplier.get() : null);
+	}
+
+	/**
+	 * Get the AOT {@link ApplicationContextInitializer} {@link Class} for the
+	 * specified test class.
+	 * @return the AOT context initializer class, or {@code null} if there is no
+	 * AOT context initializer for the specified test class
+	 * @see #isSupportedTestClass(Class)
+	 * @see #getContextInitializer(Class)
+	 */
+	@Nullable
+	public Class<ApplicationContextInitializer<?>> getContextInitializerClass(Class<?> testClass) {
+		return this.contextInitializerClasses.get(testClass.getName());
 	}
 
 }
