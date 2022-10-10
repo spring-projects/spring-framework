@@ -42,30 +42,32 @@ import org.springframework.util.CollectionUtils;
  * @author Stephane Nicoll
  * @author Andy Wilkinson
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 6.0
  * @see org.springframework.test.context.aot.TestAotProcessor
  */
 public abstract class ContextAotProcessor extends AbstractAotProcessor {
 
-	private final Class<?> application;
+	private final Class<?> applicationClass;
+
 
 	/**
 	 * Create a new processor for the specified application entry point and
 	 * common settings.
-	 * @param application the application entry point
+	 * @param applicationClass the application entry point (class with a {@code main()} method)
 	 * @param settings the settings to apply
 	 */
-	protected ContextAotProcessor(Class<?> application, Settings settings) {
+	protected ContextAotProcessor(Class<?> applicationClass, Settings settings) {
 		super(settings);
-		this.application = application;
+		this.applicationClass = applicationClass;
 	}
 
 
 	/**
-	 * Get the the application entry point.
+	 * Get the the application entry point (typically a class with a {@code main()} method).
 	 */
-	protected Class<?> getApplication() {
-		return this.application;
+	protected Class<?> getApplicationClass() {
+		return this.applicationClass;
 	}
 
 
@@ -77,16 +79,16 @@ public abstract class ContextAotProcessor extends AbstractAotProcessor {
 	 */
 	public ClassName process() {
 		deleteExistingOutput();
-		GenericApplicationContext applicationContext = prepareApplicationContext(getApplication());
+		GenericApplicationContext applicationContext = prepareApplicationContext(getApplicationClass());
 		return performAotProcessing(applicationContext);
 	}
 
 	/**
 	 * Prepare the {@link GenericApplicationContext} for the specified
-	 * application to be used against an {@link ApplicationContextAotGenerator}.
+	 * application entry point to be used against an {@link ApplicationContextAotGenerator}.
 	 * @return a non-refreshed {@link GenericApplicationContext}
 	 */
-	protected abstract GenericApplicationContext prepareApplicationContext(Class<?> application);
+	protected abstract GenericApplicationContext prepareApplicationContext(Class<?> applicationClass);
 
 	/**
 	 * Perform ahead-of-time processing of the specified context.
@@ -104,31 +106,34 @@ public abstract class ContextAotProcessor extends AbstractAotProcessor {
 		registerEntryPointHint(generationContext, generatedInitializerClassName);
 		generationContext.writeGeneratedContent();
 		writeHints(generationContext.getRuntimeHints());
-		writeNativeImageProperties(getDefaultNativeImageArguments(getApplication().getName()));
+		writeNativeImageProperties(getDefaultNativeImageArguments(getApplicationClass().getName()));
 		return generatedInitializerClassName;
 	}
 
 	/**
-	 * Callback to customize the {@link ClassNameGenerator}. By default, a
-	 * standard {@link ClassNameGenerator} using the configured application
-	 * as the default target is used.
+	 * Callback to customize the {@link ClassNameGenerator}.
+	 * <p>By default, a standard {@link ClassNameGenerator} using the configured
+	 * {@linkplain #getApplicationClass() application entry point} as the default
+	 * target is used.
 	 * @return the class name generator
 	 */
 	protected ClassNameGenerator createClassNameGenerator() {
-		return new ClassNameGenerator(ClassName.get(getApplication()));
+		return new ClassNameGenerator(ClassName.get(getApplicationClass()));
 	}
 
 	/**
-	 * Return the native image arguments to use. By default, the main
-	 * class to use, as well as standard application flags are added.
+	 * Return the native image arguments to use.
+	 * <p>By default, the main class to use, as well as standard application flags
+	 * are added.
 	 * <p>If the returned list is empty, no {@code native-image.properties} is
 	 * contributed.
-	 * @param application the application entry point
+	 * @param applicationClassName the fully qualified class name of the application
+	 * entry point
 	 * @return the native image options to contribute
 	 */
-	protected List<String> getDefaultNativeImageArguments(String application) {
+	protected List<String> getDefaultNativeImageArguments(String applicationClassName) {
 		List<String> args = new ArrayList<>();
-		args.add("-H:Class=" + application);
+		args.add("-H:Class=" + applicationClassName);
 		args.add("--report-unsupported-elements-at-runtime");
 		args.add("--no-fallback");
 		args.add("--install-exit-handlers");
@@ -139,7 +144,7 @@ public abstract class ContextAotProcessor extends AbstractAotProcessor {
 			ClassName generatedInitializerClassName) {
 
 		TypeReference generatedType = TypeReference.of(generatedInitializerClassName.canonicalName());
-		TypeReference applicationType = TypeReference.of(getApplication());
+		TypeReference applicationType = TypeReference.of(getApplicationClass());
 		ReflectionHints reflection = generationContext.getRuntimeHints().reflection();
 		reflection.registerType(applicationType);
 		reflection.registerType(generatedType, typeHint -> typeHint.onReachableType(applicationType)
