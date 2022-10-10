@@ -291,7 +291,7 @@ class CorsConfigurationTests {
 		config.setAllowCredentials(true);
 		assertThatIllegalArgumentException().isThrownBy(() -> config.checkOrigin("https://domain.com"));
 
-		// coma-delimited origins list
+		// comma-delimited origins list
 		config.setAllowedOrigins(Collections.singletonList("https://a1.com,https://a2.com"));
 		assertThat(config.checkOrigin("https://a1.com")).isEqualTo("https://a1.com");
 		assertThat(config.checkOrigin("https://a2.com/")).isEqualTo("https://a2.com/");
