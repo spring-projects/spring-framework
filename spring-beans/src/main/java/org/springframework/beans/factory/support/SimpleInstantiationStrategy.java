@@ -53,6 +53,14 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 		return currentlyInvokedFactoryMethod.get();
 	}
 
+	/**
+	 * Set the factory method currently being invoked or {@code null} to reset.
+	 * @param method the factory method currently being invoked or {@code null}
+	 */
+	public static void setCurrentlyInvokedFactoryMethod(@Nullable Method method) {
+		currentlyInvokedFactoryMethod.set(method);
+	}
+
 
 	@Override
 	public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner) {

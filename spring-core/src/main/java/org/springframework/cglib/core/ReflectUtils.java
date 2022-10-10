@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 import org.springframework.asm.Type;
 
@@ -59,6 +60,8 @@ public class ReflectUtils {
 	private static final ProtectionDomain PROTECTION_DOMAIN;
 
 	private static final List<Method> OBJECT_METHODS = new ArrayList<Method>();
+
+	private static BiConsumer<String, byte[]> generatedClassHandler;
 
 	// SPRING PATCH BEGIN
 	static {
@@ -427,6 +430,10 @@ public class ReflectUtils {
 	}
 
 	// SPRING PATCH BEGIN
+	public static void setGeneratedClassHandler(BiConsumer<String, byte[]> handler) {
+		generatedClassHandler = handler;
+	}
+
 	public static Class defineClass(String className, byte[] b, ClassLoader loader) throws Exception {
 		return defineClass(className, b, loader, null, null);
 	}
@@ -443,6 +450,11 @@ public class ReflectUtils {
 
 		Class c = null;
 		Throwable t = THROWABLE;
+
+		BiConsumer<String, byte[]> handlerToUse = generatedClassHandler;
+		if (handlerToUse != null) {
+			handlerToUse.accept(className, b);
+		}
 
 		// Preferred option: JDK 9+ Lookup.defineClass API if ClassLoader matches
 		if (contextClass != null && contextClass.getClassLoader() == loader) {

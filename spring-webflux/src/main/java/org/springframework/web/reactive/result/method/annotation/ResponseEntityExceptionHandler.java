@@ -16,10 +16,14 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.util.Locale;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.MessageSource;
+import org.springframework.context.MessageSourceAware;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
@@ -55,12 +59,21 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  * @author Rossen Stoyanchev
  * @since 6.0
  */
-public abstract class ResponseEntityExceptionHandler {
+public abstract class ResponseEntityExceptionHandler implements MessageSourceAware {
 
 	/**
 	 * Common logger for use in subclasses.
 	 */
 	protected final Log logger = LogFactory.getLog(getClass());
+
+	@Nullable
+	private MessageSource messageSource;
+
+
+	@Override
+	public void setMessageSource(MessageSource messageSource) {
+		this.messageSource = messageSource;
+	}
 
 
 	/**
@@ -306,10 +319,23 @@ public abstract class ResponseEntityExceptionHandler {
 		}
 
 		if (body == null && ex instanceof ErrorResponse errorResponse) {
-			body = errorResponse.getBody();
+			body = resolveDetailViaMessageSource(errorResponse, exchange.getLocaleContext().getLocale());
 		}
 
 		return createResponseEntity(body, headers, status, exchange);
+	}
+
+	private ProblemDetail resolveDetailViaMessageSource(ErrorResponse response, @Nullable Locale locale) {
+		ProblemDetail body = response.getBody();
+		if (this.messageSource != null) {
+			locale = (locale != null ? locale : Locale.getDefault());
+			Object[] arguments = response.getDetailMessageArguments(this.messageSource, locale);
+			String detail = this.messageSource.getMessage(response.getDetailMessageCode(), arguments, null, locale);
+			if (detail != null) {
+				body.setDetail(detail);
+			}
+		}
+		return body;
 	}
 
 	/**

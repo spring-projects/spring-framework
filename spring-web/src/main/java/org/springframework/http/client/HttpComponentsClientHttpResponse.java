@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,17 @@
 
 package org.springframework.http.client;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
-import org.springframework.util.StreamUtils;
 
 /**
  * {@link ClientHttpResponse} implementation based on
@@ -43,38 +41,38 @@ import org.springframework.util.StreamUtils;
  */
 final class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 
-	private final HttpResponse httpResponse;
+	private final ClassicHttpResponse httpResponse;
 
 	@Nullable
 	private HttpHeaders headers;
 
 
-	HttpComponentsClientHttpResponse(HttpResponse httpResponse) {
+	HttpComponentsClientHttpResponse(ClassicHttpResponse httpResponse) {
 		this.httpResponse = httpResponse;
 	}
 
 
 	@Override
-	public HttpStatusCode getStatusCode() throws IOException {
-		return HttpStatusCode.valueOf(this.httpResponse.getStatusLine().getStatusCode());
+	public HttpStatusCode getStatusCode() {
+		return HttpStatusCode.valueOf(this.httpResponse.getCode());
 	}
 
 	@Override
 	@Deprecated
-	public int getRawStatusCode() throws IOException {
-		return this.httpResponse.getStatusLine().getStatusCode();
+	public int getRawStatusCode() {
+		return this.httpResponse.getCode();
 	}
 
 	@Override
-	public String getStatusText() throws IOException {
-		return this.httpResponse.getStatusLine().getReasonPhrase();
+	public String getStatusText() {
+		return this.httpResponse.getReasonPhrase();
 	}
 
 	@Override
 	public HttpHeaders getHeaders() {
 		if (this.headers == null) {
 			this.headers = new HttpHeaders();
-			for (Header header : this.httpResponse.getAllHeaders()) {
+			for (Header header : this.httpResponse.getHeaders()) {
 				this.headers.add(header.getName(), header.getValue());
 			}
 		}
@@ -84,7 +82,7 @@ final class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public InputStream getBody() throws IOException {
 		HttpEntity entity = this.httpResponse.getEntity();
-		return (entity != null ? entity.getContent() : StreamUtils.emptyInput());
+		return (entity != null ? entity.getContent() : InputStream.nullInputStream());
 	}
 
 	@Override
@@ -96,9 +94,7 @@ final class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 				EntityUtils.consume(this.httpResponse.getEntity());
 			}
 			finally {
-				if (this.httpResponse instanceof Closeable) {
-					((Closeable) this.httpResponse).close();
-				}
+				this.httpResponse.close();
 			}
 		}
 		catch (IOException ex) {

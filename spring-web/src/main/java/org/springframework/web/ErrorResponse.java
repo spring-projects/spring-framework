@@ -16,9 +16,13 @@
 
 package org.springframework.web;
 
+import java.util.Locale;
+
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
+import org.springframework.lang.Nullable;
 
 
 /**
@@ -58,5 +62,47 @@ public interface ErrorResponse {
 	 * should match the response status.
 	 */
 	ProblemDetail getBody();
+
+	/**
+	 * Return a code to use to resolve the problem "detail" for this exception
+	 * through a {@link MessageSource}.
+	 * <p>By default this is initialized via
+	 * {@link #getDefaultDetailMessageCode(Class, String)}.
+	 */
+	default String getDetailMessageCode() {
+		return getDefaultDetailMessageCode(getClass(), null);
+	}
+
+	/**
+	 * Return arguments to use along with a {@link #getDetailMessageCode()
+	 * message code} to resolve the problem "detail" for this exception
+	 * through a {@link MessageSource}. The arguments are expanded
+	 * into placeholders of the message value, e.g. "Invalid content type {0}".
+	 */
+	@Nullable
+	default Object[] getDetailMessageArguments() {
+		return null;
+	}
+
+	/**
+	 * Variant of {@link #getDetailMessageArguments()} that uses the given
+	 * {@link MessageSource} for resolving the message argument values.
+	 * This is useful for example to message codes from validation errors.
+	 */
+	@Nullable
+	default Object[] getDetailMessageArguments(MessageSource messageSource, Locale locale) {
+		return getDetailMessageArguments();
+	}
+
+	/**
+	 * Build a message code for the given exception type, which consists of
+	 * {@code "problemDetail."} followed by the full {@link Class#getName() class name}.
+	 * @param exceptionType the exception type for which to build a code
+	 * @param suffix an optional suffix, e.g. for exceptions that may have multiple
+	 * error message with different arguments.
+	 */
+	static String getDefaultDetailMessageCode(Class<?> exceptionType, @Nullable String suffix) {
+		return "problemDetail." + exceptionType.getName() + (suffix != null ? "." + suffix : "");
+	}
 
 }

@@ -16,9 +16,7 @@
 
 package org.springframework.aot.hint;
 
-import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -55,20 +53,20 @@ class ProxyHintsTests {
 	@Test
 	void registerJdkProxyWithInterface() {
 		this.proxyHints.registerJdkProxy(Function.class);
-		assertThat(this.proxyHints.jdkProxies()).singleElement().satisfies(proxiedInterfaces(Function.class));
+		assertThat(this.proxyHints.jdkProxyHints()).singleElement().satisfies(proxiedInterfaces(Function.class));
 	}
 
 	@Test
 	void registerJdkProxyWithTypeReferences() {
 		this.proxyHints.registerJdkProxy(TypeReference.of(Function.class), TypeReference.of("com.example.Advised"));
-		assertThat(this.proxyHints.jdkProxies()).singleElement()
+		assertThat(this.proxyHints.jdkProxyHints()).singleElement()
 				.satisfies(proxiedInterfaces(Function.class.getName(), "com.example.Advised"));
 	}
 
 	@Test
 	void registerJdkProxyWithConsumer() {
 		this.proxyHints.registerJdkProxy(springProxy("com.example.Test"));
-		assertThat(this.proxyHints.jdkProxies()).singleElement().satisfies(proxiedInterfaces(
+		assertThat(this.proxyHints.jdkProxyHints()).singleElement().satisfies(proxiedInterfaces(
 				"com.example.Test",
 				"org.springframework.aop.SpringProxy",
 				"org.springframework.aop.framework.Advised",
@@ -79,34 +77,7 @@ class ProxyHintsTests {
 	void registerJdkProxyTwiceExposesOneHint() {
 		this.proxyHints.registerJdkProxy(Function.class);
 		this.proxyHints.registerJdkProxy(TypeReference.of(Function.class.getName()));
-		assertThat(this.proxyHints.jdkProxies()).singleElement().satisfies(proxiedInterfaces(Function.class));
-	}
-
-	@Test
-	void registerClassProxyWithTargetClassName() {
-		this.proxyHints.registerClassProxy(TypeReference.of(Properties.class.getName()), classProxyHint ->
-				classProxyHint.proxiedInterfaces(Serializable.class));
-		assertThat(this.proxyHints.classProxies()).singleElement().satisfies(classProxyHint -> {
-			assertThat(classProxyHint.getTargetClass()).isEqualTo(TypeReference.of(Properties.class));
-			assertThat(classProxyHint.getProxiedInterfaces()).containsOnly(TypeReference.of(Serializable.class));
-		});
-	}
-
-	@Test
-	void registerClassProxyWithTargetClass() {
-		this.proxyHints.registerClassProxy(Properties.class, classProxyHint ->
-				classProxyHint.proxiedInterfaces(Serializable.class));
-		assertThat(this.proxyHints.classProxies()).singleElement().satisfies(classProxyHint -> {
-			assertThat(classProxyHint.getTargetClass()).isEqualTo(TypeReference.of(Properties.class));
-			assertThat(classProxyHint.getProxiedInterfaces()).containsOnly(TypeReference.of(Serializable.class));
-		});
-	}
-
-	@Test
-	void registerClassProxyWithTargetInterface() {
-		assertThatIllegalArgumentException()
-			.isThrownBy(() -> this.proxyHints.registerClassProxy(Serializable.class, classProxyHint -> {}))
-			.withMessageContaining(Serializable.class.getName());
+		assertThat(this.proxyHints.jdkProxyHints()).singleElement().satisfies(proxiedInterfaces(Function.class));
 	}
 
 
@@ -125,14 +96,10 @@ class ProxyHintsTests {
 
 	private static Consumer<JdkProxyHint> proxiedInterfaces(Class<?>... proxiedInterfaces) {
 		return jdkProxyHint -> assertThat(jdkProxyHint.getProxiedInterfaces())
-				.containsExactly(toTypeReferences(proxiedInterfaces));
+				.containsExactlyElementsOf(TypeReference.listOf(proxiedInterfaces));
 	}
 
 	private static TypeReference[] toTypeReferences(String... proxiedInterfaces) {
-		return Arrays.stream(proxiedInterfaces).map(TypeReference::of).toArray(TypeReference[]::new);
-	}
-
-	private static TypeReference[] toTypeReferences(Class<?>... proxiedInterfaces) {
 		return Arrays.stream(proxiedInterfaces).map(TypeReference::of).toArray(TypeReference[]::new);
 	}
 
@@ -140,6 +107,7 @@ class ProxyHintsTests {
 	sealed interface SealedInterface {
 	}
 
+	@SuppressWarnings("unused")
 	static final class SealedClass implements SealedInterface {
 	}
 

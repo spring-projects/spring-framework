@@ -17,8 +17,9 @@
 package org.springframework.aot.graalvm;
 
 import java.lang.reflect.Field;
-import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 
 import com.oracle.graal.pointsto.infrastructure.SubstitutionProcessor;
@@ -51,13 +52,14 @@ class ConstantFieldSubstitutionProcessor extends SubstitutionProcessor {
 
 	private final ThrowawayClassLoader throwawayClassLoader;
 
-	private Set<String> seen = new LinkedHashSet<>();
+	private ConcurrentMap<String, ResolvedJavaField> cache = new ConcurrentHashMap<>();
+
+	private Set<String> ignoredFields = ConcurrentHashMap.newKeySet();
 
 
 	ConstantFieldSubstitutionProcessor(DebugContext debug, ClassLoader applicationClassLoader) {
 		this.throwawayClassLoader = new ThrowawayClassLoader(applicationClassLoader);
 	}
-
 
 	@Override
 	public ResolvedJavaField lookup(ResolvedJavaField field) {
@@ -65,15 +67,19 @@ class ConstantFieldSubstitutionProcessor extends SubstitutionProcessor {
 		if (field.getType().getJavaKind() == JavaKind.Boolean && field.isStatic()) {
 			String fieldIdentifier = declaringClass.toJavaName() + "#" + field.getName();
 			for (Pattern pattern : patterns) {
-				if (pattern.matcher(fieldIdentifier).matches()) {
-					JavaConstant constant = lookupConstant(declaringClass.toJavaName(), field.getName());
-					if (constant != null) {
-						// TODO Use proper logging only when --verbose is specified when https://github.com/oracle/graal/issues/4669 will be fixed
-						if (!this.seen.contains(fieldIdentifier)) {
-							this.seen.add(fieldIdentifier);
+				if (pattern.matcher(fieldIdentifier).matches() && !this.ignoredFields.contains(fieldIdentifier)) {
+					try {
+						return this.cache.computeIfAbsent(fieldIdentifier, key -> {
+							JavaConstant constant = lookupConstant(declaringClass.toJavaName(), field.getName());
+							// TODO Use proper logging only when --verbose is specified when https://github.com/oracle/graal/issues/4669 will be fixed
+							ConstantReadableJavaField readableJavaField = new ConstantReadableJavaField(field, constant);
 							System.out.println("Field " + fieldIdentifier + " set to " + constant.toValueString() + " at build time");
-						}
-						return new ConstantReadableJavaField(field, constant);
+							return readableJavaField;
+						});
+					}
+					catch (Throwable ex) {
+						this.ignoredFields.add(fieldIdentifier);
+						System.out.println("Processing of field " + fieldIdentifier + " skipped due the following error : " + ex.getMessage());
 					}
 				}
 			}

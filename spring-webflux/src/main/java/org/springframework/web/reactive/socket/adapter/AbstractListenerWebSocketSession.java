@@ -221,7 +221,13 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 			// Ignore result: can't overflow, ok if not first or no one listens
 			this.handlerCompletionSink.tryEmitError(ex);
 		}
-		close(CloseStatus.SERVER_ERROR.withReason(ex.getMessage()));
+		if (logger.isDebugEnabled()) {
+			logger.debug("WebSocket session completed with error", ex);
+		}
+		else if (logger.isInfoEnabled()) {
+			logger.info("WebSocket session completed with error: " + ex.getMessage());
+		}
+		close(CloseStatus.SERVER_ERROR);
 	}
 
 	@Override

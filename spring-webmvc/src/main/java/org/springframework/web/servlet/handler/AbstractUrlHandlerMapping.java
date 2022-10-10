@@ -34,6 +34,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.observation.HttpRequestsObservationFilter;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
@@ -107,7 +108,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * @deprecated as of 6.0, see
 	 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public void setUseTrailingSlashMatch(boolean useTrailingSlashMatch) {
 		this.useTrailingSlashMatch = useTrailingSlashMatch;
 		if (getPatternParser() != null) {
@@ -355,6 +356,8 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			HttpServletRequest request) {
 
 		request.setAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE, bestMatchingPattern);
+		HttpRequestsObservationFilter.findObservationContext(request)
+				.ifPresent(context -> context.setPathPattern(bestMatchingPattern));
 		request.setAttribute(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathWithinMapping);
 	}
 

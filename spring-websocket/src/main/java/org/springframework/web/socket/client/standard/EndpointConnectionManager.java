@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,10 +39,9 @@ import org.springframework.web.socket.client.ConnectionManagerSupport;
 import org.springframework.web.socket.handler.BeanCreatingHandlerProvider;
 
 /**
- * A WebSocket connection manager that is given a URI, an {@link Endpoint}, connects to a
- * WebSocket server through the {@link #start()} and {@link #stop()} methods. If
- * {@link #setAutoStartup(boolean)} is set to {@code true} this will be done automatically
- * when the Spring ApplicationContext is refreshed.
+ * WebSocket {@link ConnectionManagerSupport connection manager} that connects
+ * to the server via {@link WebSocketContainer} and handles the session with an
+ * {@link Endpoint}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -134,6 +133,12 @@ public class EndpointConnectionManager extends ConnectionManagerSupport implemen
 
 
 	@Override
+	public boolean isConnected() {
+		Session session = this.session;
+		return (session != null && session.isOpen());
+	}
+
+	@Override
 	protected void openConnection() {
 		this.taskExecutor.execute(() -> {
 			try {
@@ -166,12 +171,6 @@ public class EndpointConnectionManager extends ConnectionManagerSupport implemen
 		finally {
 			this.session = null;
 		}
-	}
-
-	@Override
-	protected boolean isConnected() {
-		Session session = this.session;
-		return (session != null && session.isOpen());
 	}
 
 }

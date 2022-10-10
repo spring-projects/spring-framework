@@ -35,7 +35,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.LimitedDataBufferList;
-import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -127,7 +126,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 					return Mono.just(lastBuffer);
 				}))
 				.doOnTerminate(chunks::releaseAndClear)
-				.doOnDiscard(PooledDataBuffer.class, PooledDataBuffer::release)
+				.doOnDiscard(DataBuffer.class, DataBufferUtils::release)
 				.map(buffer -> decode(buffer, elementType, mimeType, hints));
 	}
 
@@ -144,41 +143,44 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	private Collection<DataBuffer> processDataBuffer(
 			DataBuffer buffer, DataBufferUtils.Matcher matcher, LimitedDataBufferList chunks) {
 
+		boolean release = true;
 		try {
 			List<DataBuffer> result = null;
 			do {
 				int endIndex = matcher.match(buffer);
 				if (endIndex == -1) {
 					chunks.add(buffer);
-					DataBufferUtils.retain(buffer); // retain after add (may raise DataBufferLimitException)
+					release = false;
 					break;
 				}
-				int startIndex = buffer.readPosition();
-				int length = (endIndex - startIndex + 1);
-				DataBuffer slice = buffer.retainedSlice(startIndex, length);
-				result = (result != null ? result : new ArrayList<>());
+				DataBuffer split = buffer.split(endIndex + 1);
+				if (result == null) {
+					result = new ArrayList<>();
+				}
+				int delimiterLength = matcher.delimiter().length;
 				if (chunks.isEmpty()) {
 					if (this.stripDelimiter) {
-						slice.writePosition(slice.writePosition() - matcher.delimiter().length);
+						split.writePosition(split.writePosition() - delimiterLength);
 					}
-					result.add(slice);
+					result.add(split);
 				}
 				else {
-					chunks.add(slice);
+					chunks.add(split);
 					DataBuffer joined = buffer.factory().join(chunks);
 					if (this.stripDelimiter) {
-						joined.writePosition(joined.writePosition() - matcher.delimiter().length);
+						joined.writePosition(joined.writePosition() - delimiterLength);
 					}
 					result.add(joined);
 					chunks.clear();
 				}
-				buffer.readPosition(endIndex + 1);
 			}
 			while (buffer.readableByteCount() > 0);
 			return (result != null ? result : Collections.emptyList());
 		}
 		finally {
-			DataBufferUtils.release(buffer);
+			if (release) {
+				DataBufferUtils.release(buffer);
+			}
 		}
 	}
 
@@ -187,7 +189,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Charset charset = getCharset(mimeType);
-		CharBuffer charBuffer = charset.decode(dataBuffer.asByteBuffer());
+		CharBuffer charBuffer = charset.decode(dataBuffer.toByteBuffer());
 		DataBufferUtils.release(dataBuffer);
 		String value = charBuffer.toString();
 		LogFormatUtils.traceDebug(logger, traceOn -> {

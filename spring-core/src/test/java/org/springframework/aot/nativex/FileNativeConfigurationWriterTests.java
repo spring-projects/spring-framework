@@ -48,6 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link FileNativeConfigurationWriter}.
  *
  * @author Sebastien Deleuze
+ * @author Janne Valkealahti
  */
 public class FileNativeConfigurationWriterTests {
 
@@ -97,26 +98,19 @@ public class FileNativeConfigurationWriterTests {
 		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
 		RuntimeHints hints = new RuntimeHints();
 		ReflectionHints reflectionHints = hints.reflection();
-		reflectionHints.registerType(StringDecoder.class, builder -> {
-			builder
-					.onReachableType(TypeReference.of(String.class))
-					.withMembers(MemberCategory.PUBLIC_FIELDS, MemberCategory.DECLARED_FIELDS,
-							MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS, MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
-							MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-							MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS,
-							MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS,
-							MemberCategory.PUBLIC_CLASSES, MemberCategory.DECLARED_CLASSES)
-					.withField("DEFAULT_CHARSET", fieldBuilder -> {})
-					.withField("defaultCharset", fieldBuilder -> {
-						fieldBuilder.allowWrite(true);
-						fieldBuilder.allowUnsafeAccess(true);
-					})
-					.withConstructor(List.of(TypeReference.of(List.class), TypeReference.of(boolean.class), TypeReference.of(MimeType.class)), constructorHint ->
-							constructorHint.withMode(ExecutableMode.INTROSPECT))
-					.withMethod("setDefaultCharset", List.of(TypeReference.of(Charset.class)), ctorBuilder -> {})
-					.withMethod("getDefaultCharset", Collections.emptyList(), constructorHint ->
-							constructorHint.withMode(ExecutableMode.INTROSPECT));
-		});
+		reflectionHints.registerType(StringDecoder.class, builder -> builder
+				.onReachableType(String.class)
+				.withMembers(MemberCategory.PUBLIC_FIELDS, MemberCategory.DECLARED_FIELDS,
+						MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS, MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
+						MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+						MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS,
+						MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS,
+						MemberCategory.PUBLIC_CLASSES, MemberCategory.DECLARED_CLASSES)
+				.withField("DEFAULT_CHARSET")
+				.withField("defaultCharset")
+				.withConstructor(TypeReference.listOf(List.class, boolean.class, MimeType.class), ExecutableMode.INTROSPECT)
+				.withMethod("setDefaultCharset", TypeReference.listOf(Charset.class), ExecutableMode.INVOKE)
+				.withMethod("getDefaultCharset", Collections.emptyList(), ExecutableMode.INTROSPECT));
 		generator.write(hints);
 		assertEquals("""
 				[
@@ -137,7 +131,7 @@ public class FileNativeConfigurationWriterTests {
 						"allDeclaredClasses": true,
 						"fields": [
 							{ "name": "DEFAULT_CHARSET" },
-							{ "name": "defaultCharset", "allowWrite": true, "allowUnsafeAccess": true }
+							{ "name": "defaultCharset" }
 						],
 						"methods": [
 							{ "name": "setDefaultCharset", "parameterTypes": [ "java.nio.charset.Charset" ] }
@@ -148,6 +142,23 @@ public class FileNativeConfigurationWriterTests {
 						]
 					}
 				]""", "reflect-config.json");
+	}
+
+	@Test
+	void jniConfig() throws IOException, JSONException {
+		// same format as reflection so just test basic file generation
+		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
+		RuntimeHints hints = new RuntimeHints();
+		ReflectionHints jniHints = hints.jni();
+		jniHints.registerType(StringDecoder.class, builder -> builder.onReachableType(String.class));
+		generator.write(hints);
+		assertEquals("""
+				[
+					{
+						"name": "org.springframework.core.codec.StringDecoder",
+						"condition": { "typeReachable": "java.lang.String" }
+					}
+				]""", "jni-config.json");
 	}
 
 	@Test

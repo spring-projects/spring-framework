@@ -26,6 +26,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.web.observation.HttpRequestsObservationContext;
+import org.springframework.web.observation.HttpRequestsObservationFilter;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.function.HandlerFunction;
@@ -33,12 +35,14 @@ import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.RouterFunctions;
 import org.springframework.web.servlet.function.ServerResponse;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Tests for {@link RouterFunctionMapping}.
  * @author Arjen Poutsma
  * @author Brian Clozel
  */
@@ -170,11 +174,15 @@ class RouterFunctionMappingTests {
 
 		assertThat(result).isNotNull();
 		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE)).isEqualTo("/match");
+		assertThat(HttpRequestsObservationFilter.findObservationContext(request))
+				.hasValueSatisfying(context -> assertThat(context.getPathPattern()).isEqualTo("/match"));
 		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE)).isEqualTo(handlerFunction);
 	}
 
 	private MockHttpServletRequest createTestRequest(String path) {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", path);
+		request.setAttribute(HttpRequestsObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE,
+				new HttpRequestsObservationContext(request, new MockHttpServletResponse()));
 		ServletRequestPathUtils.parseAndCache(request);
 		return request;
 	}

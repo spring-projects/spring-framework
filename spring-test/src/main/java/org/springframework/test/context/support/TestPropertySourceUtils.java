@@ -26,7 +26,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -88,7 +87,7 @@ public abstract class TestPropertySourceUtils {
 			// Convert all the merged annotations for the current aggregate
 			// level to a list of TestPropertySourceAttributes.
 			List<TestPropertySourceAttributes> aggregatedAttributesList =
-					aggregatedAnnotations.stream().map(TestPropertySourceAttributes::new).collect(Collectors.toList());
+					aggregatedAnnotations.stream().map(TestPropertySourceAttributes::new).toList();
 			// Merge all TestPropertySourceAttributes instances for the current
 			// aggregate level into a single TestPropertySourceAttributes instance.
 			TestPropertySourceAttributes mergedAttributes = mergeTestPropertySourceAttributes(aggregatedAttributesList);

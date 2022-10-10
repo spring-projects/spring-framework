@@ -52,6 +52,7 @@ import org.springframework.web.context.ServletContextAware;
  * <p>In addition to the special beans detected by
  * {@link org.springframework.context.support.AbstractApplicationContext AbstractApplicationContext},
  * this class detects a {@link ThemeSource} bean in the context, with the name "themeSource".
+ * Theme support is deprecated as of 6.0 with no direct replacement.
  *
  * <p>If you wish to register annotated <em>component classes</em> with a
  * {@code GenericWebApplicationContext}, you can use an
@@ -77,6 +78,7 @@ import org.springframework.web.context.ServletContextAware;
  * @author Sam Brannen
  * @since 1.2
  */
+@SuppressWarnings("deprecation")
 public class GenericWebApplicationContext extends GenericApplicationContext
 		implements ConfigurableWebApplicationContext, ThemeSource {
 
@@ -213,6 +215,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 
 	@Override
 	@Nullable
+	@Deprecated
 	public Theme getTheme(String themeName) {
 		Assert.state(this.themeSource != null, "No ThemeSource available");
 		return this.themeSource.getTheme(themeName);

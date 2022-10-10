@@ -20,6 +20,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.reactivestreams.Publisher;
+
 import org.springframework.context.MessageSource;
 import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
@@ -200,13 +202,14 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		Method method = getBridgedMethod();
 		try {
 			if (KotlinDetector.isSuspendingFunction(method)) {
-				return CoroutinesUtils.invokeSuspendingFunction(method, getBean(), args);
+				return invokeSuspendingFunction(method, getBean(), args);
 			}
 			return method.invoke(getBean(), args);
 		}
 		catch (IllegalArgumentException ex) {
 			assertTargetBean(method, getBean(), args);
-			String text = (ex.getMessage() != null ? ex.getMessage() : "Illegal argument");
+			String text = (ex.getMessage() == null || ex.getCause() instanceof NullPointerException)
+					? "Illegal argument": ex.getMessage();
 			throw new IllegalStateException(formatInvokeError(text, args), ex);
 		}
 		catch (InvocationTargetException ex) {
@@ -225,6 +228,20 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				throw new IllegalStateException(formatInvokeError("Invocation failure", args), targetException);
 			}
 		}
+	}
+
+	/**
+	 * Invoke the given Kotlin coroutine suspended function.
+	 *
+	 * <p>The default implementation invokes
+	 * {@link CoroutinesUtils#invokeSuspendingFunction(Method, Object, Object...)},
+	 * but subclasses can override this method to use
+	 * {@link CoroutinesUtils#invokeSuspendingFunction(kotlin.coroutines.CoroutineContext, Method, Object, Object...)}
+	 * instead.
+	 * @since 6.0
+	 */
+	protected Publisher<?> invokeSuspendingFunction(Method method, Object target, Object[] args) {
+		return CoroutinesUtils.invokeSuspendingFunction(method, target, args);
 	}
 
 }

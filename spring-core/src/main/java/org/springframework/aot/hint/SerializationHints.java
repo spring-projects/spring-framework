@@ -45,7 +45,7 @@ public class SerializationHints {
 	 * that need to be serialized using Java serialization at runtime.
 	 * @return a stream of {@link JavaSerializationHint java serialization hints}
 	 */
-	public Stream<JavaSerializationHint> javaSerialization() {
+	public Stream<JavaSerializationHint> javaSerializationHints() {
 		return this.javaSerializationHints.stream();
 	}
 

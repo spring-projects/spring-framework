@@ -35,6 +35,7 @@ import org.springframework.web.testfixture.servlet.MockServletContext;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
+@SuppressWarnings("deprecation")
 public abstract class AbstractTagTests {
 
 	protected MockPageContext createPageContext() {

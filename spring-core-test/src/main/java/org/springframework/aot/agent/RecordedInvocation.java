@@ -18,7 +18,6 @@ package org.springframework.aot.agent;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.aot.hint.RuntimeHints;
@@ -110,10 +109,15 @@ public final class RecordedInvocation {
 	 */
 	public TypeReference getInstanceTypeReference() {
 		Assert.notNull(this.instance, "Cannot resolve 'this' for static invocations");
-		if (this.instance instanceof Class<?>) {
-			return TypeReference.of((Class<?>) this.instance);
-		}
 		return TypeReference.of(this.instance.getClass());
+	}
+
+	/**
+	 * Return whether the current invocation is static.
+	 * @return {@code true} if the invocation is static
+	 */
+	public boolean isStatic() {
+		return this.instance == null;
 	}
 
 	/**
@@ -148,7 +152,7 @@ public final class RecordedInvocation {
 	 * @return the argument types, starting at the given index
 	 */
 	public List<TypeReference> getArgumentTypes(int index) {
-		return Arrays.stream(this.arguments).skip(index).map(param -> TypeReference.of(param.getClass())).collect(Collectors.toList());
+		return Arrays.stream(this.arguments).skip(index).map(param -> TypeReference.of(param.getClass())).toList();
 	}
 
 	/**
@@ -172,8 +176,15 @@ public final class RecordedInvocation {
 
 	@Override
 	public String toString() {
-		return String.format("<%s> invocation of <%s> on type <%s> with arguments %s",
-				getHintType().hintClassName(), getMethodReference(), getInstanceTypeReference(), getArguments());
+		if(isStatic()) {
+			return String.format("<%s> invocation of <%s> with arguments %s",
+					getHintType().hintClassName(), getMethodReference(), getArguments());
+		}
+		else {
+			Class<?> instanceType = (getInstance() instanceof  Class<?>) ? getInstance() : getInstance().getClass();
+			return String.format("<%s> invocation of <%s> on type <%s> with arguments %s",
+					getHintType().hintClassName(), getMethodReference(), instanceType.getCanonicalName(), getArguments());
+		}
 	}
 
 	/**
@@ -247,7 +258,7 @@ public final class RecordedInvocation {
 		public RecordedInvocation build() {
 			List<StackWalker.StackFrame> stackFrames = StackWalker.getInstance().walk(stream -> stream
 					.dropWhile(stackFrame -> stackFrame.getClassName().startsWith(getClass().getPackageName()))
-					.collect(Collectors.toList()));
+					.toList());
 			return new RecordedInvocation(this.instrumentedMethod, this.instance, this.arguments, this.returnValue, stackFrames);
 		}
 

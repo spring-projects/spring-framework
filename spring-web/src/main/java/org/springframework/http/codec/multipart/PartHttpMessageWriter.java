@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
@@ -67,7 +66,7 @@ public class PartHttpMessageWriter extends MultipartWriterSupport implements Htt
 		Flux<DataBuffer> body = Flux.from(parts)
 				.concatMap(part -> encodePart(boundary, part, outputMessage.bufferFactory()))
 				.concatWith(generateLastLine(boundary, outputMessage.bufferFactory()))
-				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
+				.doOnDiscard(DataBuffer.class, DataBufferUtils::release);
 
 		if (logger.isDebugEnabled()) {
 			body = body.doOnNext(buffer -> Hints.touchDataBuffer(buffer, hints, logger));

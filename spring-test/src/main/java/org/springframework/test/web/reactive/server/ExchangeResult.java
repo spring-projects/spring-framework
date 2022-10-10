@@ -50,6 +50,7 @@ import org.springframework.util.MultiValueMap;
  * respectively.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0
  * @see EntityExchangeResult
  * @see FluxExchangeResult
@@ -168,7 +169,6 @@ public class ExchangeResult {
 		return this.requestBody.block(this.timeout);
 	}
 
-
 	/**
 	 * Return the HTTP status code as an {@link HttpStatusCode} value.
 	 */
@@ -181,7 +181,7 @@ public class ExchangeResult {
 	 * @since 5.1.10
 	 * @deprecated as of 6.0, in favor of {@link #getStatus()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public int getRawStatusCode() {
 		return this.response.getRawStatusCode();
 	}
@@ -249,20 +249,19 @@ public class ExchangeResult {
 				"\n" +
 				formatBody(getRequestHeaders().getContentType(), this.requestBody) + "\n" +
 				"\n" +
-				"< " + getStatus() + " " + getReasonPhrase(getStatus()) + "\n" +
+				"< " + formatStatus(getStatus()) + "\n" +
 				"< " + formatHeaders(getResponseHeaders(), "\n< ") + "\n" +
 				"\n" +
 				formatBody(getResponseHeaders().getContentType(), this.responseBody) +"\n" +
 				formatMockServerResult();
 	}
 
-	private static String getReasonPhrase(HttpStatusCode statusCode) {
+	private String formatStatus(HttpStatusCode statusCode) {
+		String result = statusCode.toString();
 		if (statusCode instanceof HttpStatus status) {
-			return status.getReasonPhrase();
+			result += " " + status.getReasonPhrase();
 		}
-		else {
-			return "";
-		}
+		return result;
 	}
 
 	private String formatHeaders(HttpHeaders headers, String delimiter) {

@@ -49,6 +49,7 @@ class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	void responseBodyError(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
+		@SuppressWarnings("resource")
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setErrorHandler(NO_OP_ERROR_HANDLER);
 
@@ -62,6 +63,7 @@ class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	void handlingError(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
+		@SuppressWarnings("resource")
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setErrorHandler(NO_OP_ERROR_HANDLER);
 
@@ -75,6 +77,7 @@ class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	void emptyPathSegments(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
+		@SuppressWarnings("resource")
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setErrorHandler(NO_OP_ERROR_HANDLER);
 

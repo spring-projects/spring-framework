@@ -226,7 +226,7 @@ public final class BridgeMethodResolver {
 	/**
 	 * Compare the signatures of the bridge method and the method which it bridges. If
 	 * the parameter and return types are the same, it is a 'visibility' bridge method
-	 * introduced in Java 6 to fix https://bugs.java.com/view_bug.do?bug_id=6342411.
+	 * introduced in Java 6 to fix https://bugs.openjdk.org/browse/JDK-6342411.
 	 * See also https://stas-blogspot.blogspot.com/2010/03/java-bridge-methods-explained.html
 	 * @return whether signatures match as described
 	 */

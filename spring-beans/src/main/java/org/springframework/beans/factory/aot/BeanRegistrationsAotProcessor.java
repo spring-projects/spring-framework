@@ -32,9 +32,7 @@ import org.springframework.beans.factory.support.RegisteredBean;
 class BeanRegistrationsAotProcessor implements BeanFactoryInitializationAotProcessor {
 
 	@Override
-	public BeanRegistrationsAotContribution processAheadOfTime(
-			ConfigurableListableBeanFactory beanFactory) {
-
+	public BeanRegistrationsAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
 		BeanDefinitionMethodGeneratorFactory beanDefinitionMethodGeneratorFactory =
 				new BeanDefinitionMethodGeneratorFactory(beanFactory);
 		Map<String, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();

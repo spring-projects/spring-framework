@@ -19,12 +19,11 @@ package org.springframework.aot.hint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.function.Consumer;
 
-import org.springframework.util.ObjectUtils;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * A hint that describes the need for reflection on a {@link Method} or
@@ -37,13 +36,13 @@ public final class ExecutableHint extends MemberHint {
 
 	private final List<TypeReference> parameterTypes;
 
-	private final List<ExecutableMode> modes;
+	private final ExecutableMode mode;
 
 
 	private ExecutableHint(Builder builder) {
 		super(builder.name);
 		this.parameterTypes = List.copyOf(builder.parameterTypes);
-		this.modes = List.copyOf(builder.modes);
+		this.mode = (builder.mode != null ? builder.mode : ExecutableMode.INVOKE);
 	}
 
 	/**
@@ -51,17 +50,17 @@ public final class ExecutableHint extends MemberHint {
 	 * @param parameterTypes the parameter types of the constructor
 	 * @return a builder
 	 */
-	public static Builder ofConstructor(List<TypeReference> parameterTypes) {
+	static Builder ofConstructor(List<TypeReference> parameterTypes) {
 		return new Builder("<init>", parameterTypes);
 	}
 
 	/**
-	 * Initialize a builder with the name and parameters types of a method.
+	 * Initialize a builder with the name and parameter types of a method.
 	 * @param name the name of the method
 	 * @param parameterTypes the parameter types of the method
 	 * @return a builder
 	 */
-	public static Builder ofMethod(String name, List<TypeReference> parameterTypes) {
+	static Builder ofMethod(String name, List<TypeReference> parameterTypes) {
 		return new Builder(name, parameterTypes);
 	}
 
@@ -75,13 +74,22 @@ public final class ExecutableHint extends MemberHint {
 	}
 
 	/**
-	 * Return the {@linkplain ExecutableMode modes} that apply to this hint.
-	 * @return the modes
+	 * Return the {@linkplain ExecutableMode mode} that applies to this hint.
+	 * @return the mode
 	 */
-	public List<ExecutableMode> getModes() {
-		return this.modes;
+	public ExecutableMode getMode() {
+		return this.mode;
 	}
 
+	/**
+	 * Return a {@link Consumer} that applies the given {@link ExecutableMode}
+	 * to the accepted {@link Builder}.
+	 * @param mode the mode to apply
+	 * @return a consumer to apply the mode
+	 */
+	public static Consumer<Builder> builtWith(ExecutableMode mode) {
+		return builder -> builder.withMode(mode);
+	}
 
 	/**
 	 * Builder for {@link ExecutableHint}.
@@ -92,7 +100,8 @@ public final class ExecutableHint extends MemberHint {
 
 		private final List<TypeReference> parameterTypes;
 
-		private final Set<ExecutableMode> modes = new LinkedHashSet<>();
+		@Nullable
+		private ExecutableMode mode;
 
 
 		Builder(String name, List<TypeReference> parameterTypes) {
@@ -101,24 +110,14 @@ public final class ExecutableHint extends MemberHint {
 		}
 
 		/**
-		 * Add the specified {@linkplain ExecutableMode mode} if necessary.
-		 * @param mode the mode to add
+		 * Specify that the {@linkplain ExecutableMode mode} is required.
+		 * @param mode the required mode
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder withMode(ExecutableMode mode) {
-			this.modes.add(mode);
-			return this;
-		}
-
-		/**
-		 * Set the {@linkplain ExecutableMode modes} to use.
-		 * @param modes the mode to use
-		 * @return {@code this}, to facilitate method chaining
-		 */
-		public Builder setModes(ExecutableMode... modes) {
-			this.modes.clear();
-			if (!ObjectUtils.isEmpty(modes)) {
-				this.modes.addAll(Arrays.asList(modes));
+			Assert.notNull(mode, "'mode' must not be null");
+			if ((this.mode == null) || !this.mode.includes(mode)) {
+				this.mode = mode;
 			}
 			return this;
 		}

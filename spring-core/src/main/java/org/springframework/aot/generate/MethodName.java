@@ -19,6 +19,7 @@ package org.springframework.aot.generate;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -115,7 +116,7 @@ final class MethodName {
 				.map(StringUtils::capitalize).collect(Collectors.joining()));
 	}
 
-	private static String clean(String part) {
+	private static String clean(@Nullable String part) {
 		char[] chars = (part != null) ? part.toCharArray() : new char[0];
 		StringBuilder name = new StringBuilder(chars.length);
 		boolean uppercase = false;

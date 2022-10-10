@@ -153,7 +153,7 @@ final class AnnotationTypeMappings {
 	 * @param index the index to return
 	 * @return the {@link AnnotationTypeMapping}
 	 * @throws IndexOutOfBoundsException if the index is out of range
-	 * (<tt>index &lt; 0 || index &gt;= size()</tt>)
+	 * ({@code index < 0 || index >= size()})
 	 */
 	AnnotationTypeMapping get(int index) {
 		return this.mappings.get(index);

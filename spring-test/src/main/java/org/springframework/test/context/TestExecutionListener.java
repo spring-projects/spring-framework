@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,24 @@ package org.springframework.test.context;
  * {@link org.springframework.core.annotation.Order @Order} annotation. See
  * {@link TestContextBootstrapper#getTestExecutionListeners()} for details.
  *
- * <p>Spring provides the following out-of-the-box implementations (all of
- * which implement {@code Ordered}):
+ * <h3>Registering TestExecutionListener Implementations</h3>
+ *
+ * <p>A {@code TestExecutionListener} can be registered explicitly for a test class,
+ * its subclasses, and its nested classes by using the
+ * {@link TestExecutionListeners @TestExecutionListeners} annotation. Explicit
+ * registration is suitable for custom listeners that are used in limited testing
+ * scenarios. However, it can become cumbersome if a custom listener needs to be
+ * used across an entire test suite. This issue is addressed through support for
+ * automatic discovery of <em>default</em> {@code TestExecutionListener}
+ * implementations through the
+ * {@link org.springframework.core.io.support.SpringFactoriesLoader SpringFactoriesLoader}
+ * mechanism. Specifically, default {@code TestExecutionListener} implementations
+ * can be registered under the {@code org.springframework.test.context.TestExecutionListener}
+ * key in a {@code META-INF/spring.factories} properties file.
+ *
+ * <p>Spring provides the following implementations. Each of these implements
+ * {@code Ordered} and is registered automatically by default.
+ *
  * <ul>
  * <li>{@link org.springframework.test.context.web.ServletTestExecutionListener
  * ServletTestExecutionListener}</li>

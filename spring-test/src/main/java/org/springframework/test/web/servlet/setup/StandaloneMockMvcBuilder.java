@@ -64,7 +64,6 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
-import org.springframework.web.servlet.theme.FixedThemeResolver;
 import org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.UrlPathHelper;
@@ -155,7 +154,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	private static List<Object> instantiateIfNecessary(Object[] specified) {
 		List<Object> instances = new ArrayList<>(specified.length);
 		for (Object obj : specified) {
-			instances.add(obj instanceof Class ? BeanUtils.instantiateClass((Class<?>) obj) : obj);
+			instances.add(obj instanceof Class<?> clazz ? BeanUtils.instantiateClass(clazz) : obj);
 		}
 		return instances;
 	}
@@ -346,7 +345,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	 * @deprecated as of 6.0, see
 	 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public StandaloneMockMvcBuilder setUseTrailingSlashPatternMatch(boolean useTrailingSlashPatternMatch) {
 		this.useTrailingSlashPatternMatch = useTrailingSlashPatternMatch;
 		return this;
@@ -394,6 +393,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 		return wac;
 	}
 
+	@SuppressWarnings("deprecation")
 	private void registerMvcSingletons(StubWebApplicationContext wac) {
 		StandaloneConfiguration config = new StandaloneConfiguration();
 		config.setApplicationContext(wac);
@@ -432,8 +432,10 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 		wac.addBeans(initViewResolvers(wac));
 		wac.addBean(DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME, this.localeResolver);
-		wac.addBean(DispatcherServlet.THEME_RESOLVER_BEAN_NAME, new FixedThemeResolver());
-		wac.addBean(DispatcherServlet.REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME, new DefaultRequestToViewNameTranslator());
+		wac.addBean(DispatcherServlet.THEME_RESOLVER_BEAN_NAME,
+				new org.springframework.web.servlet.theme.FixedThemeResolver());
+		wac.addBean(DispatcherServlet.REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME,
+				new DefaultRequestToViewNameTranslator());
 
 		this.flashMapManager = new SessionFlashMapManager();
 		wac.addBean(DispatcherServlet.FLASH_MAP_MANAGER_BEAN_NAME, this.flashMapManager);
@@ -445,8 +447,8 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 		this.viewResolvers = (this.viewResolvers != null ? this.viewResolvers :
 				Collections.singletonList(new InternalResourceViewResolver()));
 		for (Object viewResolver : this.viewResolvers) {
-			if (viewResolver instanceof WebApplicationObjectSupport) {
-				((WebApplicationObjectSupport) viewResolver).setApplicationContext(wac);
+			if (viewResolver instanceof WebApplicationObjectSupport support) {
+				support.setApplicationContext(wac);
 			}
 		}
 		return this.viewResolvers;
@@ -538,9 +540,9 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 		@Override
 		public Validator mvcValidator() {
 			Validator mvcValidator = (validator != null) ? validator : super.mvcValidator();
-			if (mvcValidator instanceof InitializingBean) {
+			if (mvcValidator instanceof InitializingBean initializingBean) {
 				try {
-					((InitializingBean) mvcValidator).afterPropertiesSet();
+					initializingBean.afterPropertiesSet();
 				}
 				catch (Exception ex) {
 					throw new BeanInitializationException("Failed to initialize Validator", ex);
@@ -555,15 +557,15 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 				return;
 			}
 			for (HandlerExceptionResolver resolver : handlerExceptionResolvers) {
-				if (resolver instanceof ApplicationContextAware) {
+				if (resolver instanceof ApplicationContextAware applicationContextAware) {
 					ApplicationContext applicationContext = getApplicationContext();
 					if (applicationContext != null) {
-						((ApplicationContextAware) resolver).setApplicationContext(applicationContext);
+						applicationContextAware.setApplicationContext(applicationContext);
 					}
 				}
-				if (resolver instanceof InitializingBean) {
+				if (resolver instanceof InitializingBean initializingBean) {
 					try {
-						((InitializingBean) resolver).afterPropertiesSet();
+						initializingBean.afterPropertiesSet();
 					}
 					catch (Exception ex) {
 						throw new IllegalStateException("Failure from afterPropertiesSet", ex);

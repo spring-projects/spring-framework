@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -357,7 +356,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 	private List<MediaType> getMediaTypes(List<View> views) {
 		return views.stream()
 				.flatMap(view -> view.getSupportedMediaTypes().stream())
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 }

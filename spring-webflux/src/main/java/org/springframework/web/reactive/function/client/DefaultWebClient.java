@@ -30,8 +30,9 @@ import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -72,6 +73,7 @@ class DefaultWebClient implements WebClient {
 	private static final Mono<ClientResponse> NO_HTTP_CLIENT_RESPONSE_ERROR = Mono.error(
 			() -> new IllegalStateException("The underlying HTTP client completed without emitting a response."));
 
+	private static final DefaultClientObservationConvention DEFAULT_OBSERVATION_CONVENTION = new DefaultClientObservationConvention();
 
 	private final ExchangeFunction exchangeFunction;
 
@@ -88,6 +90,10 @@ class DefaultWebClient implements WebClient {
 
 	private final List<DefaultResponseSpec.StatusHandler> defaultStatusHandlers;
 
+	private final ObservationRegistry observationRegistry;
+
+	private final ClientObservationConvention observationConvention;
+
 	private final DefaultWebClientBuilder builder;
 
 
@@ -95,12 +101,15 @@ class DefaultWebClient implements WebClient {
 			@Nullable HttpHeaders defaultHeaders, @Nullable MultiValueMap<String, String> defaultCookies,
 			@Nullable Consumer<RequestHeadersSpec<?>> defaultRequest,
 			@Nullable Map<Predicate<HttpStatusCode>, Function<ClientResponse, Mono<? extends Throwable>>> statusHandlerMap,
+			ObservationRegistry observationRegistry, ClientObservationConvention observationConvention,
 			DefaultWebClientBuilder builder) {
 
 		this.exchangeFunction = exchangeFunction;
 		this.uriBuilderFactory = uriBuilderFactory;
 		this.defaultHeaders = defaultHeaders;
 		this.defaultCookies = defaultCookies;
+		this.observationRegistry = observationRegistry;
+		this.observationConvention = observationConvention;
 		this.defaultRequest = defaultRequest;
 		this.defaultStatusHandlers = initStatusHandlers(statusHandlerMap);
 		this.builder = builder;
@@ -112,7 +121,7 @@ class DefaultWebClient implements WebClient {
 		return (CollectionUtils.isEmpty(handlerMap) ? Collections.emptyList() :
 				handlerMap.entrySet().stream()
 						.map(entry -> new DefaultResponseSpec.StatusHandler(entry.getKey(), entry.getValue()))
-						.collect(Collectors.toList()));
+						.toList());
 	};
 
 
@@ -388,21 +397,25 @@ class DefaultWebClient implements WebClient {
 		private HttpRequest createRequest() {
 			return new HttpRequest() {
 				private final URI uri = initUri();
+
 				private final HttpHeaders headers = initHeaders();
 
 				@Override
 				public HttpMethod getMethod() {
 					return httpMethod;
 				}
+
 				@Override
 				@Deprecated
 				public String getMethodValue() {
 					return httpMethod.name();
 				}
+
 				@Override
 				public URI getURI() {
 					return this.uri;
 				}
+
 				@Override
 				public HttpHeaders getHeaders() {
 					return this.headers;
@@ -442,17 +455,28 @@ class DefaultWebClient implements WebClient {
 		@Override
 		@SuppressWarnings("deprecation")
 		public Mono<ClientResponse> exchange() {
+			ClientObservationContext observationContext = new ClientObservationContext();
 			ClientRequest request = (this.inserter != null ?
 					initRequestBuilder().body(this.inserter).build() :
 					initRequestBuilder().build());
 			return Mono.defer(() -> {
+				Observation observation = ClientObservationDocumentation.HTTP_REQUEST.observation(observationConvention,
+						DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, observationRegistry).start();
+				observationContext.setCarrier(request);
+				observationContext.setUriTemplate((String) request.attribute(URI_TEMPLATE_ATTRIBUTE).orElse(null));
 				Mono<ClientResponse> responseMono = exchangeFunction.exchange(request)
 						.checkpoint("Request to " + this.httpMethod.name() + " " + this.uri + " [DefaultWebClient]")
 						.switchIfEmpty(NO_HTTP_CLIENT_RESPONSE_ERROR);
 				if (this.contextModifier != null) {
 					responseMono = responseMono.contextWrite(this.contextModifier);
 				}
-				return responseMono;
+				return responseMono.doOnNext(observationContext::setResponse)
+						.doOnError(observationContext::setError)
+						.doOnCancel(() -> {
+							observationContext.setAborted(true);
+							observation.stop();
+						})
+						.doOnTerminate(observation::stop);
 			});
 		}
 
@@ -652,7 +676,7 @@ class DefaultWebClient implements WebClient {
 			return (result != null ? result.flux().switchIfEmpty(body) : body);
 		}
 
-		private  <T> Mono<? extends ResponseEntity<Flux<T>>> handlerEntityFlux(ClientResponse response, Flux<T> body) {
+		private <T> Mono<? extends ResponseEntity<Flux<T>>> handlerEntityFlux(ClientResponse response, Flux<T> body) {
 			ResponseEntity<Flux<T>> entity = new ResponseEntity<>(
 					body.onErrorResume(WebClientUtils.WRAP_EXCEPTION_PREDICATE, exceptionWrappingFunction(response)),
 					response.headers().asHttpHeaders(),

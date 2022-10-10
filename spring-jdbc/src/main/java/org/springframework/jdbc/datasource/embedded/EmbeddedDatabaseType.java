@@ -25,7 +25,7 @@ package org.springframework.jdbc.datasource.embedded;
  */
 public enum EmbeddedDatabaseType {
 
-	/** The <a href="http://hsqldb.org">Hypersonic</a> Embedded Java SQL Database. */
+	/** The <a href="https://hsqldb.org">Hypersonic</a> Embedded Java SQL Database. */
 	HSQL,
 
 	/** The <a href="https://h2database.com">H2</a> Embedded Java SQL Database Engine. */

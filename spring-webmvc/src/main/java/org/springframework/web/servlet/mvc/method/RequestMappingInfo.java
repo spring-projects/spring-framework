@@ -954,7 +954,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * @deprecated as of 6.0, see
 		 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
 		 */
-		@Deprecated
+		@Deprecated(since = "6.0")
 		public void setTrailingSlashMatch(boolean trailingSlashMatch) {
 			this.trailingSlashMatch = trailingSlashMatch;
 		}
@@ -963,7 +963,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * Return whether to apply trailing slash matching in PatternsRequestCondition.
 		 * @deprecated as of 6.0 together with {@link #setTrailingSlashMatch(boolean)}
 		 */
-		@Deprecated
+		@Deprecated(since = "6.0")
 		public boolean useTrailingSlashMatch() {
 			return this.trailingSlashMatch;
 		}

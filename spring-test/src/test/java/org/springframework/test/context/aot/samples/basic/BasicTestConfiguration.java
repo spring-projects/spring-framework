@@ -18,8 +18,10 @@ package org.springframework.test.context.aot.samples.basic;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.aot.samples.common.DefaultMessageService;
 import org.springframework.test.context.aot.samples.common.MessageService;
+import org.springframework.test.context.aot.samples.common.SpanishMessageService;
 
 /**
  * @author Sam Brannen
@@ -29,8 +31,15 @@ import org.springframework.test.context.aot.samples.common.MessageService;
 class BasicTestConfiguration {
 
 	@Bean
-	MessageService messageService() {
+	@Profile("default")
+	MessageService defaultMessageService() {
 		return new DefaultMessageService();
+	}
+
+	@Bean
+	@Profile("spanish")
+	MessageService spanishMessageService() {
+		return new SpanishMessageService();
 	}
 
 }

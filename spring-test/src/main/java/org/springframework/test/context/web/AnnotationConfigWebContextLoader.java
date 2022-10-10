@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.test.context.web;
 
+import java.util.Arrays;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -23,7 +25,6 @@ import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.support.AnnotationConfigContextLoaderUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
 /**
@@ -159,7 +160,7 @@ public class AnnotationConfigWebContextLoader extends AbstractGenericWebContextL
 
 		Class<?>[] annotatedClasses = webMergedConfig.getClasses();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Registering annotated classes: " + ObjectUtils.nullSafeToString(annotatedClasses));
+			logger.debug("Registering annotated classes: " + Arrays.toString(annotatedClasses));
 		}
 		new AnnotatedBeanDefinitionReader(context).register(annotatedClasses);
 	}
@@ -173,10 +174,11 @@ public class AnnotationConfigWebContextLoader extends AbstractGenericWebContextL
 	@Override
 	protected void validateMergedContextConfiguration(WebMergedContextConfiguration webMergedConfig) {
 		if (webMergedConfig.hasLocations()) {
-			String msg = String.format("Test class [%s] has been configured with @ContextConfiguration's 'locations' " +
-							"(or 'value') attribute %s, but %s does not support resource locations.",
-					webMergedConfig.getTestClass().getName(),
-					ObjectUtils.nullSafeToString(webMergedConfig.getLocations()), getClass().getSimpleName());
+			String msg = """
+					Test class [%s] has been configured with @ContextConfiguration's 'locations' \
+					(or 'value') attribute %s, but %s does not support resource locations."""
+						.formatted(webMergedConfig.getTestClass().getName(),
+							Arrays.toString(webMergedConfig.getLocations()), getClass().getSimpleName());
 			logger.error(msg);
 			throw new IllegalStateException(msg);
 		}

@@ -26,6 +26,8 @@ import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
+import io.micrometer.observation.ObservationConvention;
+import io.micrometer.observation.ObservationRegistry;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -334,6 +336,23 @@ public interface WebClient {
 		 * @param exchangeFunction the exchange function to use
 		 */
 		Builder exchangeFunction(ExchangeFunction exchangeFunction);
+
+		/**
+		 * Provide an {@link ObservationRegistry} to use for recording
+		 * observations for HTTP client calls.
+		 * @param observationRegistry the observation registry to use
+		 * @since 6.0
+		 */
+		Builder observationRegistry(ObservationRegistry observationRegistry);
+
+		/**
+		 * Provide an {@link ObservationConvention} to use for collecting
+		 * metadata for the current observation. Will use {@link DefaultClientObservationConvention}
+		 * if none provided.
+		 * @param observationConvention the observation convention to use
+		 * @since 6.0
+		 */
+		Builder observationConvention(ClientObservationConvention observationConvention);
 
 		/**
 		 * Apply the given {@code Consumer} to this builder instance.

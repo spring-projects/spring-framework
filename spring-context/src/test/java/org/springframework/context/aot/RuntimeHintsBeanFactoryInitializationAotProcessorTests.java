@@ -26,10 +26,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.hint.ResourceBundleHint;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigUtils;
@@ -37,7 +37,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.testfixture.aot.generate.TestGenerationContext;
 import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,7 +55,7 @@ class RuntimeHintsBeanFactoryInitializationAotProcessorTests {
 
 	@BeforeEach
 	void setup() {
-		this.generationContext = new TestGenerationContext(new InMemoryGeneratedFiles());
+		this.generationContext = new TestGenerationContext();
 		this.generator = new ApplicationContextAotGenerator();
 	}
 
@@ -64,7 +63,7 @@ class RuntimeHintsBeanFactoryInitializationAotProcessorTests {
 	void shouldProcessRegistrarOnConfiguration() {
 		GenericApplicationContext applicationContext = createApplicationContext(
 				ConfigurationWithHints.class);
-		this.generator.generateApplicationContext(applicationContext,
+		this.generator.processAheadOfTime(applicationContext,
 				this.generationContext);
 		assertThatSampleRegistrarContributed();
 	}
@@ -73,7 +72,7 @@ class RuntimeHintsBeanFactoryInitializationAotProcessorTests {
 	void shouldProcessRegistrarOnBeanMethod() {
 		GenericApplicationContext applicationContext = createApplicationContext(
 				ConfigurationWithBeanDeclaringHints.class);
-		this.generator.generateApplicationContext(applicationContext,
+		this.generator.processAheadOfTime(applicationContext,
 				this.generationContext);
 		assertThatSampleRegistrarContributed();
 	}
@@ -83,7 +82,7 @@ class RuntimeHintsBeanFactoryInitializationAotProcessorTests {
 		GenericApplicationContext applicationContext = createApplicationContext();
 		applicationContext.setClassLoader(
 				new TestSpringFactoriesClassLoader("test-runtime-hints-aot.factories"));
-		this.generator.generateApplicationContext(applicationContext,
+		this.generator.processAheadOfTime(applicationContext,
 				this.generationContext);
 		assertThatSampleRegistrarContributed();
 	}
@@ -98,10 +97,10 @@ class RuntimeHintsBeanFactoryInitializationAotProcessorTests {
 		applicationContext.setClassLoader(
 				new TestSpringFactoriesClassLoader("test-duplicated-runtime-hints-aot.factories"));
 		IncrementalRuntimeHintsRegistrar.counter.set(0);
-		this.generator.generateApplicationContext(applicationContext,
+		this.generator.processAheadOfTime(applicationContext,
 				this.generationContext);
 		RuntimeHints runtimeHints = this.generationContext.getRuntimeHints();
-		assertThat(runtimeHints.resources().resourceBundles().map(ResourceBundleHint::getBaseName))
+		assertThat(runtimeHints.resources().resourceBundleHints().map(ResourceBundleHint::getBaseName))
 				.containsOnly("com.example.example0", "sample");
 		assertThat(IncrementalRuntimeHintsRegistrar.counter.get()).isEqualTo(1);
 	}
@@ -110,14 +109,14 @@ class RuntimeHintsBeanFactoryInitializationAotProcessorTests {
 	void shouldRejectRuntimeHintsRegistrarWithoutDefaultConstructor() {
 		GenericApplicationContext applicationContext = createApplicationContext(
 				ConfigurationWithIllegalRegistrar.class);
-		assertThatThrownBy(() -> this.generator.generateApplicationContext(
+		assertThatThrownBy(() -> this.generator.processAheadOfTime(
 				applicationContext, this.generationContext))
 				.isInstanceOf(BeanInstantiationException.class);
 	}
 
 	private void assertThatSampleRegistrarContributed() {
 		Stream<ResourceBundleHint> bundleHints = this.generationContext.getRuntimeHints()
-				.resources().resourceBundles();
+				.resources().resourceBundleHints();
 		assertThat(bundleHints)
 				.anyMatch(bundleHint -> "sample".equals(bundleHint.getBaseName()));
 	}

@@ -28,7 +28,7 @@ import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.aot.AotFactoriesLoader;
+import org.springframework.beans.factory.aot.AotServices;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotProcessor;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
@@ -46,19 +46,15 @@ import org.springframework.lang.Nullable;
  *
  * @author Brian Clozel
  */
-class RuntimeHintsBeanFactoryInitializationAotProcessor
-		implements BeanFactoryInitializationAotProcessor {
+class RuntimeHintsBeanFactoryInitializationAotProcessor implements BeanFactoryInitializationAotProcessor {
 
-	private static final Log logger = LogFactory
-			.getLog(RuntimeHintsBeanFactoryInitializationAotProcessor.class);
+	private static final Log logger = LogFactory.getLog(RuntimeHintsBeanFactoryInitializationAotProcessor.class);
 
 
 	@Override
-	public BeanFactoryInitializationAotContribution processAheadOfTime(
-			ConfigurableListableBeanFactory beanFactory) {
-		AotFactoriesLoader loader = new AotFactoriesLoader(beanFactory);
-		Map<Class<? extends RuntimeHintsRegistrar>, RuntimeHintsRegistrar> registrars = loader
-				.load(RuntimeHintsRegistrar.class).stream()
+	public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
+		Map<Class<? extends RuntimeHintsRegistrar>, RuntimeHintsRegistrar> registrars = AotServices
+				.factories(beanFactory.getBeanClassLoader()).load(RuntimeHintsRegistrar.class).stream()
 				.collect(LinkedHashMap::new, (map, item) -> map.put(item.getClass(), item), Map::putAll);
 		extractFromBeanFactory(beanFactory).forEach(registrarClass ->
 				registrars.computeIfAbsent(registrarClass, BeanUtils::instantiateClass));

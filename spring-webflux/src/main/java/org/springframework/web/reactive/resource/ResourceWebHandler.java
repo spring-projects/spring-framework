@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -359,7 +358,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 		}
 
 		if (isOptimizeLocations()) {
-			result = result.stream().filter(Resource::exists).collect(Collectors.toList());
+			result = result.stream().filter(Resource::exists).toList();
 		}
 
 		this.locationsToUse.clear();

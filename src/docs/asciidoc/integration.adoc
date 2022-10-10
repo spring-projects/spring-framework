@@ -325,7 +325,7 @@ to serialize only a subset of the object properties, as the following example sh
 ----
 
 [[rest-template-multipart]]
-===== Multipart
+==== Multipart
 
 To send multipart data, you need to provide a `MultiValueMap<String, Object>` whose values
 may be an `Object` for part content, a `Resource` for a file part, or an `HttpEntity` for
@@ -422,7 +422,7 @@ method parameters:
 
 [cols="1,2", options="header"]
 |===
-| Controller method argument | Description
+| Method argument | Description
 
 | `URI`
 | Dynamically set the URL for the request, overriding the annotation's `url` attribute.
@@ -469,7 +469,7 @@ Annotated, HTTP exchange methods support the following return values:
 
 [cols="1,2", options="header"]
 |===
-| Controller method return value | Description
+| Method return value | Description
 
 | `void`, `Mono<Void>`
 | Perform the given request, and release the response content, if any.

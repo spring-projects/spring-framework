@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,8 +40,6 @@ import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.messaging.tcp.TcpConnectionHandler;
 import org.springframework.messaging.tcp.TcpOperations;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureTask;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -309,10 +308,8 @@ class StompBrokerRelayMessageHandlerTests {
 	}
 
 
-	private static ListenableFutureTask<Void> getVoidFuture() {
-		ListenableFutureTask<Void> futureTask = new ListenableFutureTask<>(() -> null);
-		futureTask.run();
-		return futureTask;
+	private static CompletableFuture<Void> getVoidFuture() {
+		return CompletableFuture.completedFuture(null);
 	}
 
 
@@ -336,21 +333,22 @@ class StompBrokerRelayMessageHandlerTests {
 		}
 
 		@Override
-		public ListenableFuture<Void> connect(TcpConnectionHandler<byte[]> handler) {
+		public CompletableFuture<Void> connectAsync(TcpConnectionHandler<byte[]> handler) {
 			this.connectionHandler = handler;
 			handler.afterConnected(this.connection);
 			return getVoidFuture();
 		}
 
 		@Override
-		public ListenableFuture<Void> connect(TcpConnectionHandler<byte[]> handler, ReconnectStrategy strategy) {
+		public CompletableFuture<Void> connectAsync(TcpConnectionHandler<byte[]> handler,
+				ReconnectStrategy reconnectStrategy) {
 			this.connectionHandler = handler;
 			handler.afterConnected(this.connection);
 			return getVoidFuture();
 		}
 
 		@Override
-		public ListenableFuture<Void> shutdown() {
+		public CompletableFuture<Void> shutdownAsync() {
 			return getVoidFuture();
 		}
 
@@ -371,7 +369,7 @@ class StompBrokerRelayMessageHandlerTests {
 		}
 
 		@Override
-		public ListenableFuture<Void> send(Message<byte[]> message) {
+		public CompletableFuture<Void> sendAsync(Message<byte[]> message) {
 			this.messages.add(message);
 			return getVoidFuture();
 		}

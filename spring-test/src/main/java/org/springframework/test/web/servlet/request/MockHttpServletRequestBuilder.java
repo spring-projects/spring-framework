@@ -51,7 +51,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -804,7 +803,7 @@ public class MockHttpServletRequestBuilder
 		HttpInputMessage message = new HttpInputMessage() {
 			@Override
 			public InputStream getBody() {
-				return (content != null ? new ByteArrayInputStream(content) : StreamUtils.emptyInput());
+				return (content != null ? new ByteArrayInputStream(content) : InputStream.nullInputStream());
 			}
 			@Override
 			public HttpHeaders getHeaders() {

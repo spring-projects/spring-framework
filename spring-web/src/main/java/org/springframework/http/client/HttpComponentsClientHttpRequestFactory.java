@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,23 +19,29 @@ package org.springframework.http.client;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.Configurable;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpOptions;
-import org.apache.http.client.methods.HttpPatch;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpTrace;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.protocol.HttpContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
+import org.apache.hc.client5.http.classic.methods.HttpOptions;
+import org.apache.hc.client5.http.classic.methods.HttpPatch;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpPut;
+import org.apache.hc.client5.http.classic.methods.HttpTrace;
+import org.apache.hc.client5.http.config.Configurable;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.io.SocketConfig;
+import org.apache.hc.core5.http.protocol.HttpContext;
+import org.apache.hc.core5.util.Timeout;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.http.HttpMethod;
@@ -50,7 +56,7 @@ import org.springframework.util.Assert;
  * <p>Allows to use a pre-configured {@link HttpClient} instance -
  * potentially with authentication, HTTP connection pooling, etc.
  *
- * <p><b>NOTE:</b> Requires Apache HttpComponents 4.3 or higher, as of Spring 4.0.
+ * <p><b>NOTE:</b> Requires Apache HttpComponents 5.1 or higher, as of Spring 6.0.
  *
  * @author Oleg Kalnichevski
  * @author Arjen Poutsma
@@ -60,16 +66,19 @@ import org.springframework.util.Assert;
  */
 public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequestFactory, DisposableBean {
 
-	private HttpClient httpClient;
+	private static final Log logger = LogFactory.getLog(HttpComponentsClientHttpRequestFactory.class);
 
-	@Nullable
-	private RequestConfig requestConfig;
+
+	private HttpClient httpClient;
 
 	private boolean bufferRequestBody = true;
 
 	@Nullable
 	private BiFunction<HttpMethod, URI, HttpContext> httpContextFactory;
 
+	private int connectTimeout = -1;
+
+	private int connectionRequestTimeout = -1;
 
 	/**
 	 * Create a new instance of the {@code HttpComponentsClientHttpRequestFactory}
@@ -113,15 +122,15 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
 	 * <p>This options does not affect connection timeouts for SSL
 	 * handshakes or CONNECT requests; for that, it is required to
-	 * use the {@link org.apache.http.config.SocketConfig} on the
+	 * use the {@link SocketConfig} on the
 	 * {@link HttpClient} itself.
-	 * @param timeout the timeout value in milliseconds
+	 * @param connectTimeout the timeout value in milliseconds
 	 * @see RequestConfig#getConnectTimeout()
-	 * @see org.apache.http.config.SocketConfig#getSoTimeout
+	 * @see SocketConfig#getSoTimeout
 	 */
-	public void setConnectTimeout(int timeout) {
-		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
-		this.requestConfig = requestConfigBuilder().setConnectTimeout(timeout).build();
+	public void setConnectTimeout(int connectTimeout) {
+		Assert.isTrue(connectTimeout >= 0, "Timeout must be a non-negative value");
+		this.connectTimeout = connectTimeout;
 	}
 
 	/**
@@ -134,21 +143,24 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * @see RequestConfig#getConnectionRequestTimeout()
 	 */
 	public void setConnectionRequestTimeout(int connectionRequestTimeout) {
-		this.requestConfig = requestConfigBuilder()
-				.setConnectionRequestTimeout(connectionRequestTimeout).build();
+		Assert.isTrue(connectionRequestTimeout >= 0, "Timeout must be a non-negative value");
+		this.connectionRequestTimeout = connectionRequestTimeout;
 	}
 
 	/**
-	 * Set the socket read timeout for the underlying {@link RequestConfig}.
-	 * A timeout value of 0 specifies an infinite timeout.
-	 * <p>Additional properties can be configured by specifying a
-	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
-	 * @param timeout the timeout value in milliseconds
-	 * @see RequestConfig#getSocketTimeout()
+	 * As of version 6.0, setting this property has no effect.
+	 *
+	 * <p/>To change the socket read timeout, use {@link SocketConfig.Builder#setSoTimeout(Timeout)},
+	 * supply the resulting {@link SocketConfig} to
+	 * {@link org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder#setDefaultSocketConfig(SocketConfig)},
+	 * use the resulting connection manager for
+	 * {@link org.apache.hc.client5.http.impl.classic.HttpClientBuilder#setConnectionManager(HttpClientConnectionManager)},
+	 * and supply the built {@link HttpClient} to {@link #HttpComponentsClientHttpRequestFactory(HttpClient)}.
+	 * @deprecated as of 6.0, in favor of {@link SocketConfig.Builder#setSoTimeout(Timeout)}, see above.
 	 */
+	@Deprecated(since = "6.0", forRemoval = true)
 	public void setReadTimeout(int timeout) {
-		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
-		this.requestConfig = requestConfigBuilder().setSocketTimeout(timeout).build();
+		logger.warn("HttpComponentsClientHttpRequestFactory.setReadTimeout has no effect");
 	}
 
 	/**
@@ -179,7 +191,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		HttpClient client = getHttpClient();
 
-		HttpUriRequest httpRequest = createHttpUriRequest(httpMethod, uri);
+		ClassicHttpRequest httpRequest = createHttpUriRequest(httpMethod, uri);
 		postProcessHttpRequest(httpRequest);
 		HttpContext context = createHttpContext(httpMethod, uri);
 		if (context == null) {
@@ -211,14 +223,6 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 
 	/**
-	 * Return a builder for modifying the factory-level {@link RequestConfig}.
-	 * @since 4.2
-	 */
-	private RequestConfig.Builder requestConfigBuilder() {
-		return (this.requestConfig != null ? RequestConfig.copy(this.requestConfig) : RequestConfig.custom());
-	}
-
-	/**
 	 * Create a default {@link RequestConfig} to use with the given client.
 	 * Can return {@code null} to indicate that no custom request config should
 	 * be set and the defaults of the {@link HttpClient} should be used.
@@ -231,37 +235,31 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 */
 	@Nullable
 	protected RequestConfig createRequestConfig(Object client) {
-		if (client instanceof Configurable) {
-			RequestConfig clientRequestConfig = ((Configurable) client).getConfig();
+		if (client instanceof Configurable configurableClient) {
+			RequestConfig clientRequestConfig = configurableClient.getConfig();
 			return mergeRequestConfig(clientRequestConfig);
 		}
-		return this.requestConfig;
+		return mergeRequestConfig(RequestConfig.DEFAULT);
 	}
 
 	/**
 	 * Merge the given {@link HttpClient}-level {@link RequestConfig} with
-	 * the factory-level {@link RequestConfig}, if necessary.
+	 * the factory-level configuration, if necessary.
 	 * @param clientConfig the config held by the current
 	 * @return the merged request config
 	 * @since 4.2
 	 */
 	protected RequestConfig mergeRequestConfig(RequestConfig clientConfig) {
-		if (this.requestConfig == null) {  // nothing to merge
+		if (this.connectTimeout == -1 && this.connectionRequestTimeout == -1) {  // nothing to merge
 			return clientConfig;
 		}
 
 		RequestConfig.Builder builder = RequestConfig.copy(clientConfig);
-		int connectTimeout = this.requestConfig.getConnectTimeout();
-		if (connectTimeout >= 0) {
-			builder.setConnectTimeout(connectTimeout);
+		if (this.connectTimeout >= 0) {
+			builder.setConnectTimeout(this.connectTimeout, TimeUnit.MILLISECONDS);
 		}
-		int connectionRequestTimeout = this.requestConfig.getConnectionRequestTimeout();
-		if (connectionRequestTimeout >= 0) {
-			builder.setConnectionRequestTimeout(connectionRequestTimeout);
-		}
-		int socketTimeout = this.requestConfig.getSocketTimeout();
-		if (socketTimeout >= 0) {
-			builder.setSocketTimeout(socketTimeout);
+		if (this.connectionRequestTimeout >= 0) {
+			builder.setConnectionRequestTimeout(this.connectionRequestTimeout, TimeUnit.MILLISECONDS);
 		}
 		return builder.build();
 	}
@@ -272,7 +270,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * @param uri the URI
 	 * @return the Commons HttpMethodBase object
 	 */
-	protected HttpUriRequest createHttpUriRequest(HttpMethod httpMethod, URI uri) {
+	protected ClassicHttpRequest createHttpUriRequest(HttpMethod httpMethod, URI uri) {
 		if (HttpMethod.GET.equals(httpMethod)) {
 			return new HttpGet(uri);
 		}
@@ -301,12 +299,12 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	}
 
 	/**
-	 * Template method that allows for manipulating the {@link HttpUriRequest} before it is
+	 * Template method that allows for manipulating the {@link ClassicHttpRequest} before it is
 	 * returned as part of a {@link HttpComponentsClientHttpRequest}.
 	 * <p>The default implementation is empty.
 	 * @param request the request to process
 	 */
-	protected void postProcessHttpRequest(HttpUriRequest request) {
+	protected void postProcessHttpRequest(ClassicHttpRequest request) {
 	}
 
 	/**
@@ -324,36 +322,19 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 	/**
 	 * Shutdown hook that closes the underlying
-	 * {@link org.apache.http.conn.HttpClientConnectionManager ClientConnectionManager}'s
+	 * {@link HttpClientConnectionManager ClientConnectionManager}'s
 	 * connection pool, if any.
 	 */
 	@Override
 	public void destroy() throws Exception {
+		close();
+	}
+
+	@Override
+	public void close() throws IOException {
 		HttpClient httpClient = getHttpClient();
 		if (httpClient instanceof Closeable) {
 			((Closeable) httpClient).close();
-		}
-	}
-
-
-	/**
-	 * An alternative to {@link org.apache.http.client.methods.HttpDelete} that
-	 * extends {@link org.apache.http.client.methods.HttpEntityEnclosingRequestBase}
-	 * rather than {@link org.apache.http.client.methods.HttpRequestBase} and
-	 * hence allows HTTP delete with a request body. For use with the RestTemplate
-	 * exchange methods which allow the combination of HTTP DELETE with an entity.
-	 * @since 4.1.2
-	 */
-	private static class HttpDelete extends HttpEntityEnclosingRequestBase {
-
-		public HttpDelete(URI uri) {
-			super();
-			setURI(uri);
-		}
-
-		@Override
-		public String getMethod() {
-			return "DELETE";
 		}
 	}
 

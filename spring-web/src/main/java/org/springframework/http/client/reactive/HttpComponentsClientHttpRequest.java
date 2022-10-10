@@ -102,7 +102,7 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 	@Override
 	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
 		return doCommit(() -> {
-			this.byteBufferFlux = Flux.from(body).map(DataBuffer::asByteBuffer);
+			this.byteBufferFlux = Flux.from(body).map(DataBuffer::toByteBuffer);
 			return Mono.empty();
 		});
 	}

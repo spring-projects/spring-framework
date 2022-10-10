@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,7 +136,7 @@ class WiretapConnector implements ClientHttpConnector {
 		@Nullable
 		private final Flux<? extends Publisher<? extends DataBuffer>> publisherNested;
 
-		private final DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.allocateBuffer();
+		private final DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.allocateBuffer(256);
 
 		// unsafe(): we're intercepting, already serialized Publisher signals
 		private final Sinks.One<byte[]> content = Sinks.unsafe().one();

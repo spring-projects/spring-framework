@@ -59,7 +59,7 @@ public class SimpleTriggerContext implements TriggerContext {
 	 * @param lastCompletionTime last completion time
 	 * @deprecated as of 6.0, in favor of {@link #SimpleTriggerContext(Instant, Instant, Instant)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public SimpleTriggerContext(@Nullable Date lastScheduledExecutionTime, @Nullable Date lastActualExecutionTime,
 			@Nullable Date lastCompletionTime) {
 
@@ -106,7 +106,7 @@ public class SimpleTriggerContext implements TriggerContext {
 	 * @param lastCompletionTime last completion time
 	 * @deprecated as of 6.0, in favor of {@link #update(Instant, Instant, Instant)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public void update(@Nullable Date lastScheduledExecutionTime, @Nullable Date lastActualExecutionTime,
 			@Nullable Date lastCompletionTime) {
 

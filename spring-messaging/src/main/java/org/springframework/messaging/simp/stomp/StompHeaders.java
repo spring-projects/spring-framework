@@ -104,6 +104,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	public static final String RECEIPT_ID = "receipt-id";
 
 
+	@SuppressWarnings("serial")
 	private final Map<String, List<String>> headers;
 
 

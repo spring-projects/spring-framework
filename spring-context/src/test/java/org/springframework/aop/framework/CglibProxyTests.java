@@ -87,8 +87,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 		AdvisedSupport pc = new AdvisedSupport(ITestBean.class);
 		pc.addAdvice(new NopInterceptor());
 		AopProxy aop = createAopProxy(pc);
-		assertThatExceptionOfType(AopConfigException.class).isThrownBy(
-				aop::getProxy);
+		assertThatExceptionOfType(AopConfigException.class).isThrownBy(aop::getProxy);
 	}
 
 	@Test

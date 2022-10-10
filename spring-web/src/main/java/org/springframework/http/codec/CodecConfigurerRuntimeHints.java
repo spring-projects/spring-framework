@@ -29,20 +29,19 @@ import org.springframework.lang.Nullable;
  * implementations listed in {@code CodecConfigurer.properties}.
  *
  * @author Sebastien Deleuze
+ * @author Stephane Nicoll
  * @since 6.0
  */
 class CodecConfigurerRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
 	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
-		hints.resources().registerPattern("org/springframework/http/codec/CodecConfigurer.properties");
-		registerType(hints, DefaultClientCodecConfigurer.class);
-		registerType(hints, DefaultServerCodecConfigurer.class);
-	}
-
-	private void registerType(RuntimeHints hints, Class<?> type) {
-		hints.reflection().registerType(type, builder ->
-				builder.onReachableType(TypeReference.of(CodecConfigurerFactory.class))
+		hints.resources().registerPattern(
+				"org/springframework/http/codec/CodecConfigurer.properties");
+		hints.reflection().registerTypes(
+				TypeReference.listOf(DefaultClientCodecConfigurer.class, DefaultServerCodecConfigurer.class),
+				typeHint -> typeHint.onReachableType(CodecConfigurerFactory.class)
 						.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
 	}
+
 }

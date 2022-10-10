@@ -43,8 +43,8 @@ import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 import org.springframework.lang.Nullable;
 
 /**
- * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Hibernate
- * EntityManager.
+ * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Hibernate.
+ * Compatible with Hibernate ORM 5.5/5.6 as well as 6.0/6.1.
  *
  * <p>Exposes Hibernate's persistence provider and Hibernate's Session as extended
  * EntityManager interface, and adapts {@link AbstractJpaVendorAdapter}'s common

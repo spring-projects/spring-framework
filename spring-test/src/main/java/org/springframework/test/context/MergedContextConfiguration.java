@@ -84,6 +84,7 @@ public class MergedContextConfiguration implements Serializable {
 
 	private final Class<?>[] classes;
 
+	@SuppressWarnings("serial")
 	private final Set<Class<? extends ApplicationContextInitializer<?>>> contextInitializerClasses;
 
 	private final String[] activeProfiles;
@@ -92,11 +93,14 @@ public class MergedContextConfiguration implements Serializable {
 
 	private final String[] propertySourceProperties;
 
+	@SuppressWarnings("serial")
 	private final Set<ContextCustomizer> contextCustomizers;
 
+	@SuppressWarnings("serial")
 	private final ContextLoader contextLoader;
 
 	@Nullable
+	@SuppressWarnings("serial")
 	private final CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate;
 
 	@Nullable
@@ -113,7 +117,7 @@ public class MergedContextConfiguration implements Serializable {
 	 * @param contextLoader the resolved {@code ContextLoader}
 	 */
 	public MergedContextConfiguration(Class<?> testClass, @Nullable String[] locations, @Nullable Class<?>[] classes,
-			@Nullable String[] activeProfiles, @Nullable ContextLoader contextLoader) {
+			@Nullable String[] activeProfiles, ContextLoader contextLoader) {
 
 		this(testClass, locations, classes, null, activeProfiles, contextLoader);
 	}
@@ -130,7 +134,7 @@ public class MergedContextConfiguration implements Serializable {
 	 */
 	public MergedContextConfiguration(Class<?> testClass, @Nullable String[] locations, @Nullable Class<?>[] classes,
 			@Nullable Set<Class<? extends ApplicationContextInitializer<?>>> contextInitializerClasses,
-			@Nullable String[] activeProfiles, @Nullable ContextLoader contextLoader) {
+			@Nullable String[] activeProfiles, ContextLoader contextLoader) {
 
 		this(testClass, locations, classes, contextInitializerClasses, activeProfiles, contextLoader, null, null);
 	}
@@ -151,7 +155,7 @@ public class MergedContextConfiguration implements Serializable {
 	 */
 	public MergedContextConfiguration(Class<?> testClass, @Nullable String[] locations, @Nullable Class<?>[] classes,
 			@Nullable Set<Class<? extends ApplicationContextInitializer<?>>> contextInitializerClasses,
-			@Nullable String[] activeProfiles, @Nullable ContextLoader contextLoader,
+			@Nullable String[] activeProfiles, ContextLoader contextLoader,
 			@Nullable CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate,
 			@Nullable MergedContextConfiguration parent) {
 
@@ -197,7 +201,7 @@ public class MergedContextConfiguration implements Serializable {
 	public MergedContextConfiguration(Class<?> testClass, @Nullable String[] locations, @Nullable Class<?>[] classes,
 			@Nullable Set<Class<? extends ApplicationContextInitializer<?>>> contextInitializerClasses,
 			@Nullable String[] activeProfiles, @Nullable String[] propertySourceLocations,
-			@Nullable String[] propertySourceProperties, @Nullable ContextLoader contextLoader,
+			@Nullable String[] propertySourceProperties, ContextLoader contextLoader,
 			@Nullable CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate,
 			@Nullable MergedContextConfiguration parent) {
 
@@ -235,7 +239,7 @@ public class MergedContextConfiguration implements Serializable {
 			@Nullable Set<Class<? extends ApplicationContextInitializer<?>>> contextInitializerClasses,
 			@Nullable String[] activeProfiles, @Nullable String[] propertySourceLocations,
 			@Nullable String[] propertySourceProperties, @Nullable Set<ContextCustomizer> contextCustomizers,
-			@Nullable ContextLoader contextLoader, @Nullable CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate,
+			ContextLoader contextLoader, @Nullable CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate,
 			@Nullable MergedContextConfiguration parent) {
 
 		this.testClass = testClass;

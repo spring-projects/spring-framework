@@ -24,12 +24,15 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 
 /**
  * Gather the need for resources available at runtime.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.0
  */
 public class ResourceHints {
@@ -51,7 +54,7 @@ public class ResourceHints {
 	 * Return the resources that should be made available at runtime.
 	 * @return a stream of {@link ResourcePatternHints}
 	 */
-	public Stream<ResourcePatternHints> resourcePatterns() {
+	public Stream<ResourcePatternHints> resourcePatternHints() {
 		Stream<ResourcePatternHints> patterns = this.resourcePatternHints.stream();
 		return (this.types.isEmpty() ? patterns
 				: Stream.concat(Stream.of(typesPatternResourceHint()), patterns));
@@ -61,7 +64,7 @@ public class ResourceHints {
 	 * Return the resource bundles that should be made available at runtime.
 	 * @return a stream of {@link ResourceBundleHint}
 	 */
-	public Stream<ResourceBundleHint> resourceBundles() {
+	public Stream<ResourceBundleHint> resourceBundleHints() {
 		return this.resourceBundleHints.stream();
 	}
 
@@ -75,7 +78,8 @@ public class ResourceHints {
 	 * @param resourceHint a builder to customize the resource pattern
 	 * @return {@code this}, to facilitate method chaining
 	 */
-	public ResourceHints registerPatternIfPresent(@Nullable ClassLoader classLoader, String location, Consumer<ResourcePatternHints.Builder> resourceHint) {
+	public ResourceHints registerPatternIfPresent(@Nullable ClassLoader classLoader, String location,
+			Consumer<ResourcePatternHints.Builder> resourceHint) {
 		ClassLoader classLoaderToUse = (classLoader != null) ? classLoader : getClass().getClassLoader();
 		if (classLoaderToUse.getResource(location) != null) {
 			registerPattern(resourceHint);
@@ -106,6 +110,23 @@ public class ResourceHints {
 	 */
 	public ResourceHints registerPattern(String include) {
 		return registerPattern(builder -> builder.includes(include));
+	}
+
+	/**
+	 * Register that the supplied resource should be made available at runtime.
+	 * @param resource the resource to register
+	 * @throws IllegalArgumentException if the supplied resource is not a
+	 * {@link ClassPathResource} or does not {@linkplain Resource#exists() exist}
+	 * @see #registerPattern(String)
+	 * @see ClassPathResource#getPath()
+	 */
+	public void registerResource(Resource resource) {
+		if (resource instanceof ClassPathResource classPathResource && classPathResource.exists()) {
+			registerPattern(classPathResource.getPath());
+		}
+		else {
+			throw new IllegalArgumentException("Resource must be a ClassPathResource that exists: " + resource);
+		}
 	}
 
 	/**

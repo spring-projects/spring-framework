@@ -32,10 +32,14 @@ import org.springframework.core.annotation.AliasFor;
  * the annotated element. By default, a reflection hint is added on the
  * annotated element so that it can be discovered and invoked if necessary.
  *
+ * <p>A reflection hint is also added if necessary on the annotation that
+ * <em>directly</em> uses this annotation.
+ *
  * @author Stephane Nicoll
  * @author Sam Brannen
  * @since 6.0
  * @see SimpleReflectiveProcessor
+ * @see ReflectiveRuntimeHintsRegistrar
  */
 @Target({ ElementType.ANNOTATION_TYPE, ElementType.TYPE, ElementType.CONSTRUCTOR,
 		ElementType.FIELD, ElementType.METHOD })

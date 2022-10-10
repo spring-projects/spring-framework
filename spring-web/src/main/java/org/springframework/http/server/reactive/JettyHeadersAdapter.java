@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.HttpFields;
@@ -161,7 +160,7 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 	@Override
 	public Collection<List<String>> values() {
 		return this.headers.getFieldNamesCollection().stream()
-				.map(this.headers::getValuesList).collect(Collectors.toList());
+				.map(this.headers::getValuesList).toList();
 	}
 
 	@Override

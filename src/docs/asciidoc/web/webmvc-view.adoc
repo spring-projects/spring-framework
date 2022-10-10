@@ -479,7 +479,7 @@ In similar fashion, you can specify HTML escaping per field, as the following ex
 [[mvc-view-groovymarkup]]
 == Groovy Markup
 
-The http://groovy-lang.org/templating.html#_the_markuptemplateengine[Groovy Markup Template Engine]
+The https://groovy-lang.org/templating.html#_the_markuptemplateengine[Groovy Markup Template Engine]
 is primarily aimed at generating XML-like markup (XML, XHTML, HTML5, and others), but you can
 use it to generate any text-based content. The Spring Framework has a built-in
 integration for using Spring MVC with Groovy Markup.

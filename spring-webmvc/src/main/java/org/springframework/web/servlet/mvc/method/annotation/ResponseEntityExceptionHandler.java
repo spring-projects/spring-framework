@@ -16,12 +16,17 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.util.Locale;
+
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.context.MessageSource;
+import org.springframework.context.MessageSourceAware;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -64,7 +69,7 @@ import org.springframework.web.util.WebUtils;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public abstract class ResponseEntityExceptionHandler {
+public abstract class ResponseEntityExceptionHandler implements MessageSourceAware {
 
 	/**
 	 * Log category to use when no mapped handler is found for a request.
@@ -82,6 +87,16 @@ public abstract class ResponseEntityExceptionHandler {
 	 * Common logger for use in subclasses.
 	 */
 	protected final Log logger = LogFactory.getLog(getClass());
+
+
+	@Nullable
+	private MessageSource messageSource;
+
+
+	@Override
+	public void setMessageSource(MessageSource messageSource) {
+		this.messageSource = messageSource;
+	}
 
 
 	/**
@@ -457,8 +472,11 @@ public abstract class ResponseEntityExceptionHandler {
 	 * @param request the current request
 	 * @return a {@code ResponseEntity} for the response to use, possibly
 	 * {@code null} when the response is already committed
+	 * @deprecated as of 6.0 since {@link org.springframework.web.method.annotation.ModelAttributeMethodProcessor}
+	 * now raises the {@link MethodArgumentNotValidException} subclass instead.
 	 */
 	@Nullable
+	@Deprecated(since = "6.0", forRemoval = true)
 	protected ResponseEntity<Object> handleBindException(
 			BindException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
@@ -504,10 +522,23 @@ public abstract class ResponseEntityExceptionHandler {
 		}
 
 		if (body == null && ex instanceof ErrorResponse errorResponse) {
-			body = errorResponse.getBody();
+			body = resolveDetailViaMessageSource(errorResponse);
 		}
 
 		return createResponseEntity(body, headers, statusCode, request);
+	}
+
+	private ProblemDetail resolveDetailViaMessageSource(ErrorResponse response) {
+		ProblemDetail body = response.getBody();
+		if (this.messageSource != null) {
+			Locale locale = LocaleContextHolder.getLocale();
+			Object[] arguments = response.getDetailMessageArguments(this.messageSource, locale);
+			String detail = this.messageSource.getMessage(response.getDetailMessageCode(), arguments, null, locale);
+			if (detail != null) {
+				body.setDetail(detail);
+			}
+		}
+		return body;
 	}
 
 	/**

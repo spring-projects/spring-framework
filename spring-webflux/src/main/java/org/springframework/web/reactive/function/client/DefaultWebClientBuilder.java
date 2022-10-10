@@ -25,6 +25,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import io.micrometer.observation.ObservationRegistry;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
@@ -34,6 +35,7 @@ import org.springframework.http.client.reactive.HttpComponentsClientHttpConnecto
 import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.http.client.reactive.ReactorNetty2ClientHttpConnector;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -53,7 +55,9 @@ import org.springframework.web.util.UriBuilderFactory;
  */
 final class DefaultWebClientBuilder implements WebClient.Builder {
 
-	private static final boolean reactorClientPresent;
+	private static final boolean reactorNettyClientPresent;
+
+	private static final boolean reactorNetty2ClientPresent;
 
 	private static final boolean jettyClientPresent;
 
@@ -61,7 +65,8 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 
 	static {
 		ClassLoader loader = DefaultWebClientBuilder.class.getClassLoader();
-		reactorClientPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", loader);
+		reactorNettyClientPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", loader);
+		reactorNetty2ClientPresent = ClassUtils.isPresent("reactor.netty5.http.client.HttpClient", loader);
 		jettyClientPresent = ClassUtils.isPresent("org.eclipse.jetty.client.HttpClient", loader);
 		httpComponentsClientPresent =
 				ClassUtils.isPresent("org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient", loader) &&
@@ -105,6 +110,11 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	@Nullable
 	private ExchangeFunction exchangeFunction;
 
+	private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;
+
+	@Nullable
+	private ClientObservationConvention observationConvention;
+
 
 	public DefaultWebClientBuilder() {
 	}
@@ -136,6 +146,8 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		this.strategiesConfigurers = (other.strategiesConfigurers != null ?
 				new ArrayList<>(other.strategiesConfigurers) : null);
 		this.exchangeFunction = other.exchangeFunction;
+		this.observationRegistry = other.observationRegistry;
+		this.observationConvention = other.observationConvention;
 	}
 
 
@@ -269,6 +281,20 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	@Override
+	public WebClient.Builder observationRegistry(ObservationRegistry observationRegistry) {
+		Assert.notNull(observationRegistry, "observationRegistry must not be null");
+		this.observationRegistry = observationRegistry;
+		return this;
+	}
+
+	@Override
+	public WebClient.Builder observationConvention(ClientObservationConvention observationConvention) {
+		Assert.notNull(observationConvention, "observationConvention must not be null");
+		this.observationConvention = observationConvention;
+		return this;
+	}
+
+	@Override
 	public WebClient.Builder apply(Consumer<WebClient.Builder> builderConsumer) {
 		builderConsumer.accept(this);
 		return this;
@@ -302,12 +328,17 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 				defaultCookies,
 				this.defaultRequest,
 				this.statusHandlers,
+				this.observationRegistry,
+				this.observationConvention,
 				new DefaultWebClientBuilder(this));
 	}
 
 	private ClientHttpConnector initConnector() {
-		if (reactorClientPresent) {
+		if (reactorNettyClientPresent) {
 			return new ReactorClientHttpConnector();
+		}
+		else if (reactorNetty2ClientPresent) {
+			return new ReactorNetty2ClientHttpConnector();
 		}
 		else if (jettyClientPresent) {
 			return new JettyClientHttpConnector();

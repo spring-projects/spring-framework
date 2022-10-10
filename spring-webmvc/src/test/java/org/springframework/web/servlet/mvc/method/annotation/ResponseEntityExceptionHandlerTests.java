@@ -19,18 +19,22 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.StaticMessageSource;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
@@ -106,7 +110,7 @@ public class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
-	public void handleHttpMediaTypeNotSupported() {
+	public void httpMediaTypeNotSupported() {
 		ResponseEntity<Object> entity = testException(new HttpMediaTypeNotSupportedException(
 				MediaType.APPLICATION_JSON, List.of(MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML)));
 
@@ -150,6 +154,32 @@ public class ResponseEntityExceptionHandlerTests {
 	@Test
 	public void servletRequestBindingException() {
 		testException(new ServletRequestBindingException("message"));
+	}
+
+	@Test
+	public void errorResponseProblemDetailViaMessageSource() {
+
+		Locale locale = Locale.UK;
+		LocaleContextHolder.setLocale(locale);
+
+		try {
+			StaticMessageSource messageSource = new StaticMessageSource();
+			messageSource.addMessage(
+					"problemDetail." + HttpMediaTypeNotSupportedException.class.getName(), locale,
+					"Content-Type {0} not supported. Supported: {1}");
+
+			this.exceptionHandler.setMessageSource(messageSource);
+
+			ResponseEntity<?> entity = testException(new HttpMediaTypeNotSupportedException(
+					MediaType.APPLICATION_JSON, List.of(MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML)));
+
+			ProblemDetail body = (ProblemDetail) entity.getBody();
+			assertThat(body.getDetail()).isEqualTo(
+					"Content-Type application/json not supported. Supported: [application/atom+xml, application/xml]");
+		}
+		finally {
+			LocaleContextHolder.resetLocaleContext();
+		}
 	}
 
 	@Test

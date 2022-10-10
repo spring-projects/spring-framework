@@ -14,6 +14,7 @@ dependencies {
 	optional(project(":spring-webflux"))
 	optional(project(":spring-webmvc"))
 	optional(project(":spring-websocket"))
+	optional('info.picocli:picocli')	
 	optional("jakarta.activation:jakarta.activation-api")
 	optional("jakarta.el:jakarta.el-api")
 	optional("jakarta.inject:jakarta.inject-api")
@@ -30,7 +31,9 @@ dependencies {
 	optional("org.aspectj:aspectjweaver")
 	optional("org.apache.groovy:groovy")
 	optional("org.hamcrest:hamcrest")
-	optional("net.sourceforge.htmlunit:htmlunit")
+	optional("net.sourceforge.htmlunit:htmlunit") {
+		exclude group: "commons-logging", module: "commons-logging"
+	}
 	optional("org.seleniumhq.selenium:htmlunit-driver") {
 		exclude group: "net.bytebuddy", module: "byte-buddy"
 	}
@@ -45,6 +48,7 @@ dependencies {
 	optional("io.projectreactor:reactor-test")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	testImplementation(project(":spring-core-test"))
 	testImplementation(project(":spring-context-support"))
 	testImplementation(project(":spring-oxm"))
 	testImplementation(testFixtures(project(":spring-beans")))
@@ -52,6 +56,7 @@ dependencies {
 	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation(testFixtures(project(":spring-tx")))
 	testImplementation(testFixtures(project(":spring-web")))
+	testImplementation('io.micrometer:context-propagation')
 	testImplementation("jakarta.annotation:jakarta.annotation-api")
 	testImplementation("javax.cache:cache-api")
 	testImplementation("jakarta.ejb:jakarta.ejb-api")
@@ -65,7 +70,9 @@ dependencies {
 	testImplementation("com.thoughtworks.xstream:xstream")
 	testImplementation("com.rometools:rome")
 	testImplementation("org.hsqldb:hsqldb")
-	testImplementation("org.apache.httpcomponents:httpclient")
+	testImplementation("org.apache.httpcomponents:httpclient") {
+		exclude group: "commons-logging", module: "commons-logging"
+	}
 	testImplementation("io.projectreactor.netty:reactor-netty-http")
 	testImplementation("de.bechte.junit:junit-hierarchicalcontextrunner")
 	testRuntimeOnly("org.junit.vintage:junit-vintage-engine") {

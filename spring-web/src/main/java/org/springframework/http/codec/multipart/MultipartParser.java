@@ -321,10 +321,10 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 				if (logger.isTraceEnabled()) {
 					logger.trace("First boundary found @" + endIdx + " in " + buf);
 				}
-				DataBuffer headersBuf = MultipartUtils.sliceFrom(buf, endIdx);
-				DataBufferUtils.release(buf);
+				DataBuffer preambleBuffer = buf.split(endIdx + 1);
+				DataBufferUtils.release(preambleBuffer);
 
-				changeState(this, new HeadersState(), headersBuf);
+				changeState(this, new HeadersState(), buf);
 			}
 			else {
 				DataBufferUtils.release(buf);
@@ -390,13 +390,11 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 				}
 				long count = this.byteCount.addAndGet(endIdx);
 				if (belowMaxHeaderSize(count)) {
-					DataBuffer headerBuf = MultipartUtils.sliceTo(buf, endIdx);
+					DataBuffer headerBuf = buf.split(endIdx + 1);
 					this.buffers.add(headerBuf);
-					DataBuffer bodyBuf = MultipartUtils.sliceFrom(buf, endIdx);
-					DataBufferUtils.release(buf);
-
 					emitHeaders(parseHeaders());
-					changeState(this, new BodyState(), bodyBuf);
+
+					changeState(this, new BodyState(), buf);
 				}
 			}
 			else {
@@ -514,32 +512,35 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 		 * previous buffer, so we calculate the length and slice the current
 		 * and previous buffers accordingly. We then change to {@link HeadersState}
 		 * and pass on the remainder of {@code buffer}. If the needle is not found, we
-		 * make {@code buffer} the previous buffer.
+		 * enqueue {@code buffer}.
 		 */
 		@Override
 		public void onNext(DataBuffer buffer) {
 			int endIdx = this.boundary.match(buffer);
 			if (endIdx != -1) {
+				DataBuffer boundaryBuffer = buffer.split(endIdx + 1);
 				if (logger.isTraceEnabled()) {
 					logger.trace("Boundary found @" + endIdx + " in " + buffer);
 				}
-				int len = endIdx - buffer.readPosition() - this.boundaryLength + 1;
+				int len = endIdx - this.boundaryLength + 1;
 				if (len > 0) {
 					// whole boundary in buffer.
 					// slice off the body part, and flush
-					DataBuffer body = buffer.retainedSlice(buffer.readPosition(), len);
+					DataBuffer body = boundaryBuffer.split(len);
+					DataBufferUtils.release(boundaryBuffer);
 					enqueue(body);
 					flush();
 				}
 				else if (len < 0) {
 					// boundary spans multiple buffers, and we've just found the end
 					// iterate over buffers in reverse order
+					DataBufferUtils.release(boundaryBuffer);
 					DataBuffer prev;
 					while ((prev = this.queue.pollLast()) != null) {
 						int prevLen = prev.readableByteCount() + len;
 						if (prevLen > 0) {
 							// slice body part of previous buffer, and flush it
-							DataBuffer body = prev.retainedSlice(prev.readPosition(), prevLen);
+							DataBuffer body = prev.split(prevLen);
 							DataBufferUtils.release(prev);
 							enqueue(body);
 							flush();
@@ -557,10 +558,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 					flush();
 				}
 
-				DataBuffer remainder = MultipartUtils.sliceFrom(buffer, endIdx);
-				DataBufferUtils.release(buffer);
-
-				changeState(this, new HeadersState(), remainder);
+				changeState(this, new HeadersState(), buffer);
 			}
 			else {
 				enqueue(buffer);

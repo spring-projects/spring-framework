@@ -15,3 +15,6 @@ changelog:
       sort: "title"
       labels:
         - "type: dependency-upgrade"
+  contributors:
+    exclude:
+      names: ["bclozel", "jhoeller", "poutsma", "rstoyanchev", "sbrannen", "sdeleuze", "snicoll"]

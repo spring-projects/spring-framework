@@ -59,7 +59,7 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * @see #setThreadFactory
  * @see #setErrorHandler
  */
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial", "deprecation"})
 public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		implements AsyncListenableTaskExecutor, SchedulingTaskExecutor, TaskScheduler {
 

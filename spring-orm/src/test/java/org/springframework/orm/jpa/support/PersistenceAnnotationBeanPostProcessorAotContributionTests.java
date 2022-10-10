@@ -32,18 +32,16 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aot.generate.DefaultGenerationContext;
-import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.hint.TypeReference;
-import org.springframework.aot.test.generator.compile.CompileWithTargetClassAccess;
-import org.springframework.aot.test.generator.compile.Compiled;
-import org.springframework.aot.test.generator.compile.TestCompiler;
+import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.core.testfixture.aot.generate.TestGenerationContext;
+import org.springframework.core.test.tools.CompileWithForkedClassLoader;
+import org.springframework.core.test.tools.Compiled;
+import org.springframework.core.test.tools.TestCompiler;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,20 +53,17 @@ import static org.mockito.Mockito.mock;
  * @author Stephane Nicoll
  * @author Phillip Webb
  */
-@CompileWithTargetClassAccess
+@CompileWithForkedClassLoader
 class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 
 	private DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
-	private InMemoryGeneratedFiles generatedFiles;
-
-	private DefaultGenerationContext generationContext;
+	private TestGenerationContext generationContext;
 
 	@BeforeEach
 	void setup() {
 		this.beanFactory = new DefaultListableBeanFactory();
-		this.generatedFiles = new InMemoryGeneratedFiles();
-		this.generationContext = new TestGenerationContext(generatedFiles);
+		this.generationContext = new TestGenerationContext();
 	}
 
 	@Test
@@ -133,13 +128,8 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 					.singleElement().satisfies(typeHint -> {
 						assertThat(typeHint.getType()).isEqualTo(
 								TypeReference.of(DefaultPersistenceContextField.class));
-						assertThat(typeHint.fields()).singleElement()
-								.satisfies(fieldHint -> {
-									assertThat(fieldHint.getName())
-											.isEqualTo("entityManager");
-									assertThat(fieldHint.isAllowWrite()).isTrue();
-									assertThat(fieldHint.isAllowUnsafeAccess()).isFalse();
-								});
+						assertThat(typeHint.fields()).singleElement().satisfies(fieldHint ->
+								assertThat(fieldHint.getName()).isEqualTo("entityManager"));
 					});
 		});
 	}
@@ -185,7 +175,7 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 		BeanRegistrationCode beanRegistrationCode = mock(BeanRegistrationCode.class);
 		contribution.applyTo(generationContext, beanRegistrationCode);
 		generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(generatedFiles)
+		TestCompiler.forSystem().with(generationContext)
 				.compile(compiled -> result.accept(new Invoker(compiled), compiled));
 	}
 

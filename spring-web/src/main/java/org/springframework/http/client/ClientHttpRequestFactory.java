@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.http.client;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
 
@@ -29,7 +30,7 @@ import org.springframework.http.HttpMethod;
  * @since 3.0
  */
 @FunctionalInterface
-public interface ClientHttpRequestFactory {
+public interface ClientHttpRequestFactory extends Closeable {
 
 	/**
 	 * Create a new {@link ClientHttpRequest} for the specified URI and HTTP method.
@@ -42,4 +43,8 @@ public interface ClientHttpRequestFactory {
 	 */
 	ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException;
 
+	@Override
+	default void close() throws IOException {
+
+	}
 }

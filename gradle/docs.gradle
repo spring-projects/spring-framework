@@ -1,21 +1,14 @@
-ext {
-	documentedProjects = moduleProjects.findAll { it.name != 'spring-core-graalvm' }
-}
-
 configurations {
-	asciidoctorExt
+	asciidoctorExtensions
 }
 
 dependencies {
-	asciidoctorExt("io.spring.asciidoctor:spring-asciidoctor-extensions-block-switch:0.5.0")
+	asciidoctorExtensions "io.spring.asciidoctor.backends:spring-asciidoctor-backends:0.0.3"
 }
 
 repositories {
 	maven {
 		url "https://repo.spring.io/release"
-		mavenContent {
-			includeGroup "io.spring.asciidoctor"
-		}
 	}
 }
 
@@ -28,7 +21,7 @@ task api(type: Javadoc) {
 	title = "${rootProject.description} ${version} API"
 
 	dependsOn {
-		documentedProjects.collect {
+		moduleProjects.collect {
 			it.tasks.getByName("jar")
 		}
 	}
@@ -37,7 +30,7 @@ task api(type: Javadoc) {
 				// ensure the javadoc process can resolve types compiled from .aj sources
 				project(":spring-aspects").sourceSets.main.output
 		)
-		classpath += files(documentedProjects.collect { it.sourceSets.main.compileClasspath })
+		classpath += files(moduleProjects.collect { it.sourceSets.main.compileClasspath })
 	}
 
 	options {
@@ -52,7 +45,7 @@ task api(type: Javadoc) {
 		addBooleanOption('Xdoclint:syntax', true) // only check syntax with doclint
 		addBooleanOption('Werror', true) // fail build on Javadoc warnings
 	}
-	source documentedProjects.collect { project ->
+	source moduleProjects.collect { project ->
 		project.sourceSets.main.allJava
 	}
 	maxMemory = "1024m"
@@ -72,39 +65,19 @@ pluginManager.withPlugin("kotlin") {
 	}
 }
 
-task downloadResources(type: Download) {
-	def version = "0.2.5"
-	src "https://repo.spring.io/release/io/spring/docresources/" +
-			"spring-doc-resources/$version/spring-doc-resources-${version}.zip"
-	dest project.file("$buildDir/docs/spring-doc-resources.zip")
-	onlyIfModified true
-	useETag "all"
-}
-
-task extractDocResources(type: Copy, dependsOn: downloadResources) {
-	from project.zipTree(downloadResources.dest);
-	into "$buildDir/docs/spring-docs-resources/"
-}
-
 asciidoctorj {
 	def docRoot = 'https://docs.spring.io'
 	def docsSpringFramework = "${docRoot}/spring-framework/docs/${project.version}"
-	version = '2.4.1'
+	version = '2.4.3'
 	fatalWarnings ".*"
 	options doctype: 'book', eruby: 'erubis'
 	attributes([
 			icons: 'font',
 			idprefix: '',
 			idseparator: '-',
-			docinfo: 'shared,private-header', // https://docs.asciidoctor.org/asciidoctor/latest/docinfo/
 			revnumber: project.version,
 			sectanchors: '',
 			sectnums: '',
-			'source-highlighter': 'highlight.js',
-			highlightjsdir: 'js/highlight',
-			'highlightjs-theme': 'googlecode',
-			stylesdir: 'css/',
-			stylesheet: 'stylesheet.css',
 			'spring-version': project.version,
 			'spring-framework-main-code': 'https://github.com/spring-projects/spring-framework/tree/main',
 			'doc-root': docRoot,
@@ -119,17 +92,19 @@ asciidoctorj {
  */
 asciidoctor {
 	baseDirFollowsSourceDir()
-	configurations 'asciidoctorExt'
+	configurations "asciidoctorExtensions"
 	sources {
 		include '*.adoc'
 	}
 	outputDir "$buildDir/docs/ref-docs/html5"
+	outputOptions {
+		backends "spring-html"
+	}
 	logDocuments = true
 	resources {
 		from(sourceDir) {
-			include 'images/*.png', 'css/**', 'js/**'
+			include 'images/*.png'
 		}
-		from extractDocResources
 	}
 }
 
@@ -139,11 +114,14 @@ asciidoctor {
  */
 asciidoctorPdf {
 	baseDirFollowsSourceDir()
-	configurations 'asciidoctorExt'
+	configurations 'asciidoctorExtensions'
 	sources {
 		include '*.adoc'
 	}
 	outputDir "$buildDir/docs/ref-docs/pdf"
+	forkOptions {
+		jvmArgs += ["--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED"]
+	}
 	logDocuments = true
 }
 
@@ -153,7 +131,7 @@ asciidoctorPdf {
 task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'asciidoctorPdf', 'dokkaHtmlMultiModule']) {
 	group = "Distribution"
 	description = "Builds -${archiveClassifier} archive containing api and reference " +
-			"for deployment at https://docs.spring.io/spring-framework/docs."
+			"for deployment at https://docs.spring.io/spring-framework/docs/."
 
 	archiveBaseName.set("spring-framework")
 	archiveClassifier.set("docs")
@@ -184,7 +162,7 @@ task schemaZip(type: Zip) {
 	description = "Builds -${archiveClassifier} archive containing all " +
 			"XSDs for deployment at https://springframework.org/schema."
 	duplicatesStrategy DuplicatesStrategy.EXCLUDE
-	documentedProjects.each { module ->
+	moduleProjects.each { module ->
 		def Properties schemas = new Properties();
 
 		module.sourceSets.main.resources.find {
@@ -234,7 +212,7 @@ task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
 		into "${baseDir}/schema"
 	}
 
-	documentedProjects.each { module ->
+	moduleProjects.each { module ->
 		into ("${baseDir}/libs") {
 			from module.jar
 			if (module.tasks.findByPath("sourcesJar")) {
@@ -247,4 +225,4 @@ task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
 	}
 }
 
-distZip.mustRunAfter documentedProjects.check
+distZip.mustRunAfter moduleProjects.check

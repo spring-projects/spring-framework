@@ -39,7 +39,7 @@ class SerializationHintsWriter {
 	public static final SerializationHintsWriter INSTANCE = new SerializationHintsWriter();
 
 	public void write(BasicJsonWriter writer, SerializationHints hints) {
-		writer.writeArray(hints.javaSerialization().map(this::toAttributes).toList());
+		writer.writeArray(hints.javaSerializationHints().map(this::toAttributes).toList());
 	}
 
 	private Map<String, Object> toAttributes(JavaSerializationHint serializationHint) {

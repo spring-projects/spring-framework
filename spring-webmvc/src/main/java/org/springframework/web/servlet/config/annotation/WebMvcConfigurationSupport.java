@@ -25,7 +25,6 @@ import java.util.Map;
 
 import jakarta.servlet.ServletContext;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,7 +32,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.SpringProperties;
 import org.springframework.core.convert.converter.Converter;
@@ -47,6 +45,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.ResourceRegionHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.cbor.KotlinSerializationCborHttpMessageConverter;
 import org.springframework.http.converter.cbor.MappingJackson2CborHttpMessageConverter;
 import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
@@ -55,6 +54,7 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.JsonbHttpMessageConverter;
 import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.protobuf.KotlinSerializationProtobufHttpMessageConverter;
 import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
@@ -68,10 +68,10 @@ import org.springframework.util.PathMatcher;
 import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
+import org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.WebAnnotationsRuntimeHintsRegistrar;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.cors.CorsConfiguration;
@@ -84,7 +84,6 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
-import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.function.support.HandlerFunctionAdapter;
 import org.springframework.web.servlet.function.support.RouterFunctionMapping;
@@ -107,7 +106,6 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
-import org.springframework.web.servlet.theme.FixedThemeResolver;
 import org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.ViewResolverComposite;
@@ -190,7 +188,6 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * @see EnableWebMvc
  * @see WebMvcConfigurer
  */
-@ImportRuntimeHints(WebAnnotationsRuntimeHintsRegistrar.class)
 public class WebMvcConfigurationSupport implements ApplicationContextAware, ServletContextAware {
 
 	/**
@@ -216,7 +213,11 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 	private static final boolean jsonbPresent;
 
+	private static final boolean kotlinSerializationCborPresent;
+
 	private static final boolean kotlinSerializationJsonPresent;
+
+	private static final boolean kotlinSerializationProtobufPresent;
 
 	static {
 		ClassLoader classLoader = WebMvcConfigurationSupport.class.getClassLoader();
@@ -229,7 +230,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		jackson2CborPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", classLoader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
 		jsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
+		kotlinSerializationCborPresent = ClassUtils.isPresent("kotlinx.serialization.cbor.Cbor", classLoader);
 		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
+		kotlinSerializationProtobufPresent = ClassUtils.isPresent("kotlinx.serialization.protobuf.ProtoBuf", classLoader);
 	}
 
 
@@ -460,13 +463,13 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		if (!shouldIgnoreXml && (jaxb2Present || jackson2XmlPresent)) {
 			map.put("xml", MediaType.APPLICATION_XML);
 		}
-		if (jackson2Present || gsonPresent || jsonbPresent) {
+		if (jackson2Present || gsonPresent || jsonbPresent || kotlinSerializationJsonPresent) {
 			map.put("json", MediaType.APPLICATION_JSON);
 		}
 		if (jackson2SmilePresent) {
 			map.put("smile", MediaType.valueOf("application/x-jackson-smile"));
 		}
-		if (jackson2CborPresent) {
+		if (jackson2CborPresent || kotlinSerializationCborPresent) {
 			map.put("cbor", MediaType.APPLICATION_CBOR);
 		}
 		return map;
@@ -760,15 +763,12 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		Validator validator = getValidator();
 		if (validator == null) {
 			if (ClassUtils.isPresent("jakarta.validation.Validator", getClass().getClassLoader())) {
-				Class<?> clazz;
 				try {
-					String className = "org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean";
-					clazz = ClassUtils.forName(className, WebMvcConfigurationSupport.class.getClassLoader());
+					validator = new OptionalValidatorFactoryBean();
 				}
-				catch (ClassNotFoundException | LinkageError ex) {
-					throw new BeanInitializationException("Failed to resolve default validator class", ex);
+				catch (Throwable ex) {
+					throw new BeanInitializationException("Failed to create default validator", ex);
 				}
-				validator = (Validator) BeanUtils.instantiateClass(clazz);
 			}
 			else {
 				validator = new NoOpValidator();
@@ -916,9 +916,16 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			}
 		}
 
+		if (kotlinSerializationCborPresent) {
+			messageConverters.add(new KotlinSerializationCborHttpMessageConverter());
+		}
 		if (kotlinSerializationJsonPresent) {
 			messageConverters.add(new KotlinSerializationJsonHttpMessageConverter());
 		}
+		if (kotlinSerializationProtobufPresent) {
+			messageConverters.add(new KotlinSerializationProtobufHttpMessageConverter());
+		}
+
 		if (jackson2Present) {
 			Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.json();
 			if (this.applicationContext != null) {
@@ -1171,8 +1178,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	@Bean
-	public ThemeResolver themeResolver() {
-		return new FixedThemeResolver();
+	@Deprecated
+	public org.springframework.web.servlet.ThemeResolver themeResolver() {
+		return new org.springframework.web.servlet.theme.FixedThemeResolver();
 	}
 
 	@Bean

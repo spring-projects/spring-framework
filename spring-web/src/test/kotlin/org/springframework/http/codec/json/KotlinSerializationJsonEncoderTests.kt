@@ -17,7 +17,7 @@
 package org.springframework.http.codec.json
 
 import kotlinx.serialization.Serializable
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.core.Ordered
 import org.springframework.core.ResolvableType
@@ -43,19 +43,20 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 	override fun canEncode() {
 		val pojoType = ResolvableType.forClass(Pojo::class.java)
 		val jsonSubtype = MediaType("application", "vnd.test-micro-type+json")
-		Assertions.assertThat(encoder.canEncode(pojoType, MediaType.APPLICATION_JSON)).isTrue()
-		Assertions.assertThat(encoder.canEncode(pojoType, jsonSubtype)).isTrue()
-		Assertions.assertThat(encoder.canEncode(pojoType, null)).isTrue()
-		Assertions.assertThat(encoder.canEncode(ResolvableType.forClass(Pojo::class.java),
+		assertThat(encoder.canEncode(pojoType, MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(encoder.canEncode(pojoType, jsonSubtype)).isTrue()
+		assertThat(encoder.canEncode(pojoType, null)).isTrue()
+		assertThat(encoder.canEncode(ResolvableType.forClass(Pojo::class.java),
 				MediaType("application", "json", StandardCharsets.UTF_8))).isTrue()
-		Assertions.assertThat(encoder.canEncode(ResolvableType.forClass(Pojo::class.java),
+		assertThat(encoder.canEncode(ResolvableType.forClass(Pojo::class.java),
 				MediaType("application", "json", StandardCharsets.US_ASCII))).isTrue()
 
-		Assertions.assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Int::class.java), MediaType.APPLICATION_JSON)).isTrue()
-		Assertions.assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Ordered::class.java), MediaType.APPLICATION_JSON)).isFalse()
-		Assertions.assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Pojo::class.java), MediaType.APPLICATION_JSON)).isTrue()
-		Assertions.assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_JSON)).isTrue()
-		Assertions.assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_PDF)).isFalse()
+		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Int::class.java), MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Ordered::class.java), MediaType.APPLICATION_JSON)).isFalse()
+		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Pojo::class.java), MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_PDF)).isFalse()
+		assertThat(encoder.canEncode(ResolvableType.NONE, MediaType.APPLICATION_JSON)).isFalse()
 	}
 
 	@Test
@@ -87,11 +88,11 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 
 	@Test
 	fun canNotEncode() {
-		Assertions.assertThat(encoder.canEncode(ResolvableType.forClass(String::class.java), null)).isFalse()
-		Assertions.assertThat(encoder.canEncode(ResolvableType.forClass(Pojo::class.java), MediaType.APPLICATION_XML)).isFalse()
+		assertThat(encoder.canEncode(ResolvableType.forClass(String::class.java), null)).isFalse()
+		assertThat(encoder.canEncode(ResolvableType.forClass(Pojo::class.java), MediaType.APPLICATION_XML)).isFalse()
 		val sseType = ResolvableType.forClass(ServerSentEvent::class.java)
-		Assertions.assertThat(encoder.canEncode(sseType, MediaType.APPLICATION_JSON)).isFalse()
-		Assertions.assertThat(encoder.canEncode(ResolvableType.forClass(Ordered::class.java), MediaType.APPLICATION_JSON)).isFalse()
+		assertThat(encoder.canEncode(sseType, MediaType.APPLICATION_JSON)).isFalse()
+		assertThat(encoder.canEncode(ResolvableType.forClass(Ordered::class.java), MediaType.APPLICATION_JSON)).isFalse()
 	}
 
 

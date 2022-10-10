@@ -26,7 +26,7 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.lang.Nullable;
 
 /**
- * Convenient super class for application classes that need JMS access.
+ * Convenient superclass for application classes that need JMS access.
  *
  * <p>Requires a ConnectionFactory or a JmsTemplate instance to be set.
  * It will create its own JmsTemplate if a ConnectionFactory is passed in.

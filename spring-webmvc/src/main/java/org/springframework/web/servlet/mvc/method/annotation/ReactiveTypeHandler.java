@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,14 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.micrometer.context.ContextSnapshot;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
@@ -126,8 +129,18 @@ class ReactiveTypeHandler {
 			ModelAndViewContainer mav, NativeWebRequest request) throws Exception {
 
 		Assert.notNull(returnValue, "Expected return value");
-		ReactiveAdapter adapter = this.adapterRegistry.getAdapter(returnValue.getClass());
-		Assert.state(adapter != null, () -> "Unexpected return value: " + returnValue);
+		Class<?> clazz = returnValue.getClass();
+		ReactiveAdapter adapter = this.adapterRegistry.getAdapter(clazz);
+		Assert.state(adapter != null, () -> "Unexpected return value type: " + clazz);
+
+		if (Mono.class.isAssignableFrom(clazz)) {
+			ContextSnapshot snapshot = ContextSnapshot.captureAll();
+			returnValue = ((Mono<?>) returnValue).contextWrite(snapshot::updateContext);
+		}
+		else if (Flux.class.isAssignableFrom(clazz)) {
+			ContextSnapshot snapshot = ContextSnapshot.captureAll();
+			returnValue = ((Flux<?>) returnValue).contextWrite(snapshot::updateContext);
+		}
 
 		ResolvableType elementType = ResolvableType.forMethodParameter(returnType).getGeneric();
 		Class<?> elementClass = elementType.toClass();

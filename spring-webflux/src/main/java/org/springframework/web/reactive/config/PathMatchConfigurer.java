@@ -61,7 +61,7 @@ public class PathMatchConfigurer {
 	 * @deprecated as of 6.0, see
 	 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public PathMatchConfigurer setUseTrailingSlashMatch(Boolean trailingSlashMatch) {
 		this.trailingSlashMatch = trailingSlashMatch;
 		return this;

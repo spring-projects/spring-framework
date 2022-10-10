@@ -21,10 +21,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 
+import org.springframework.aot.hint.BindingReflectionHintsRegistrar;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.annotation.ReflectiveProcessor;
-import org.springframework.context.aot.BindingReflectionHintsRegistrar;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpEntity;
@@ -59,17 +59,17 @@ class RequestMappingReflectiveProcessor implements ReflectiveProcessor {
 	}
 
 	protected void registerTypeHints(ReflectionHints hints, Class<?> type) {
-		hints.registerType(type, hint -> {});
+		hints.registerType(type);
 	}
 
 	protected void registerMethodHints(ReflectionHints hints, Method method) {
-		hints.registerMethod(method, hint -> hint.setModes(ExecutableMode.INVOKE));
+		hints.registerMethod(method, ExecutableMode.INVOKE);
 		registerParameterHints(hints, method);
 		registerReturnValueHints(hints, method);
 	}
 
 	protected void registerParameterHints(ReflectionHints hints, Method method) {
-		hints.registerMethod(method, hint -> hint.setModes(ExecutableMode.INVOKE));
+		hints.registerMethod(method, ExecutableMode.INVOKE);
 		for (Parameter parameter : method.getParameters()) {
 			MethodParameter methodParameter = MethodParameter.forParameter(parameter);
 			if (methodParameter.hasParameterAnnotation(RequestBody.class) ||

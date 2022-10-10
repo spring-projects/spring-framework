@@ -256,10 +256,11 @@ public class BeanDefinitionValueResolver {
 	 */
 	public <T> T resolveInnerBean(@Nullable String innerBeanName, BeanDefinition innerBd,
 			BiFunction<String, RootBeanDefinition, T> resolver) {
-		String nameToUse = (innerBeanName != null ? innerBeanName : "(inner bean)"
-				+ BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR + ObjectUtils.getIdentityHexString(innerBd));
-		return resolver.apply(nameToUse, this.beanFactory.getMergedBeanDefinition(
-				nameToUse, innerBd, this.beanDefinition));
+
+		String nameToUse = (innerBeanName != null ? innerBeanName : "(inner bean)" +
+				BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR + ObjectUtils.getIdentityHexString(innerBd));
+		return resolver.apply(nameToUse,
+				this.beanFactory.getMergedBeanDefinition(nameToUse, innerBd, this.beanDefinition));
 	}
 
 	/**

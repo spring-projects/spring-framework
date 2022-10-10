@@ -98,7 +98,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	 * @deprecated as of 6.0, see
 	 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public void setUseTrailingSlashMatch(boolean trailingSlashMatch) {
 		this.patternParser.setMatchOptionalTrailingSeparator(trailingSlashMatch);
 	}

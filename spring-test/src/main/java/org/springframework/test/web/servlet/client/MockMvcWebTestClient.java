@@ -361,7 +361,7 @@ public interface MockMvcWebTestClient {
 		 * @deprecated as of 6.0, see
 		 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
 		 */
-		@Deprecated
+		@Deprecated(since = "6.0")
 		ControllerSpec useTrailingSlashPatternMatch(boolean useTrailingSlashPatternMatch);
 
 		/**

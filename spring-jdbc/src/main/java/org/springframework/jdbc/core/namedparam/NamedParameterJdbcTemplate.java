@@ -135,7 +135,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	 * Return the maximum number of entries for this template's SQL cache.
 	 */
 	public int getCacheLimit() {
-		return this.parsedSqlCache.sizeLimit();
+		return this.parsedSqlCache.capacity();
 	}
 
 

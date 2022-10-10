@@ -18,6 +18,8 @@ package org.springframework.aot.generate;
 
 import java.util.function.Consumer;
 
+import javax.lang.model.element.Modifier;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.javapoet.ClassName;
@@ -35,21 +37,34 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  */
 class GeneratedClassTests {
 
+	private static final ClassName TEST_CLASS_NAME = ClassName.get("com.example", "Test");
+
 	private static final Consumer<TypeSpec.Builder> emptyTypeCustomizer = type -> {};
 
 	private static final Consumer<MethodSpec.Builder> emptyMethodCustomizer = method -> {};
 
 	@Test
+	void getEnclosingNameOnTopLevelClassReturnsNull() {
+		GeneratedClass generatedClass = createGeneratedClass(TEST_CLASS_NAME);
+		assertThat(generatedClass.getEnclosingClass()).isNull();
+	}
+
+	@Test
+	void getEnclosingNameOnInnerClassReturnsParent() {
+		GeneratedClass generatedClass = createGeneratedClass(TEST_CLASS_NAME);
+		GeneratedClass innerGeneratedClass = generatedClass.getOrAdd("Test", emptyTypeCustomizer);
+		assertThat(innerGeneratedClass.getEnclosingClass()).isEqualTo(generatedClass);
+	}
+
+	@Test
 	void getNameReturnsName() {
-		ClassName name = ClassName.bestGuess("com.example.Test");
-		GeneratedClass generatedClass = new GeneratedClass(name, emptyTypeCustomizer);
-		assertThat(generatedClass.getName()).isSameAs(name);
+		GeneratedClass generatedClass = createGeneratedClass(TEST_CLASS_NAME);
+		assertThat(generatedClass.getName()).isSameAs(TEST_CLASS_NAME);
 	}
 
 	@Test
 	void reserveMethodNamesWhenNameUsedThrowsException() {
-		ClassName name = ClassName.bestGuess("com.example.Test");
-		GeneratedClass generatedClass = new GeneratedClass(name, emptyTypeCustomizer);
+		GeneratedClass generatedClass = createGeneratedClass(TEST_CLASS_NAME);
 		generatedClass.getMethods().add("apply", emptyMethodCustomizer);
 		assertThatIllegalStateException()
 				.isThrownBy(() -> generatedClass.reserveMethodNames("apply"));
@@ -57,8 +72,7 @@ class GeneratedClassTests {
 
 	@Test
 	void reserveMethodNamesReservesNames() {
-		ClassName name = ClassName.bestGuess("com.example.Test");
-		GeneratedClass generatedClass = new GeneratedClass(name, emptyTypeCustomizer);
+		GeneratedClass generatedClass = createGeneratedClass(TEST_CLASS_NAME);
 		generatedClass.reserveMethodNames("apply");
 		GeneratedMethod generatedMethod = generatedClass.getMethods().add("apply", emptyMethodCustomizer);
 		assertThat(generatedMethod.getName()).isEqualTo("apply1");
@@ -66,18 +80,45 @@ class GeneratedClassTests {
 
 	@Test
 	void generateMethodNameWhenAllEmptyPartsGeneratesSetName() {
-		ClassName name = ClassName.bestGuess("com.example.Test");
-		GeneratedClass generatedClass = new GeneratedClass(name, emptyTypeCustomizer);
+		GeneratedClass generatedClass = createGeneratedClass(TEST_CLASS_NAME);
 		GeneratedMethod generatedMethod = generatedClass.getMethods().add("123", emptyMethodCustomizer);
 		assertThat(generatedMethod.getName()).isEqualTo("$$aot");
 	}
 
 	@Test
+	void getOrAddWhenRepeatReturnsSameGeneratedClass() {
+		GeneratedClass generatedClass = createGeneratedClass(TEST_CLASS_NAME);
+		GeneratedClass innerGeneratedClass = generatedClass.getOrAdd("Inner", emptyTypeCustomizer);
+		GeneratedClass innerGeneratedClass2 = generatedClass.getOrAdd("Inner", emptyTypeCustomizer);
+		GeneratedClass innerGeneratedClass3 = generatedClass.getOrAdd("Inner", emptyTypeCustomizer);
+		assertThat(innerGeneratedClass).isSameAs(innerGeneratedClass2).isSameAs(innerGeneratedClass3);
+	}
+
+	@Test
 	void generateJavaFileIncludesGeneratedMethods() {
-		ClassName name = ClassName.bestGuess("com.example.Test");
-		GeneratedClass generatedClass = new GeneratedClass(name, emptyTypeCustomizer);
+		GeneratedClass generatedClass = createGeneratedClass(TEST_CLASS_NAME);
 		generatedClass.getMethods().add("test", method -> method.addJavadoc("Test Method"));
 		assertThat(generatedClass.generateJavaFile().toString()).contains("Test Method");
+	}
+
+	@Test
+	void generateJavaFileIncludesDeclaredClasses() {
+		GeneratedClass generatedClass = createGeneratedClass(TEST_CLASS_NAME);
+		generatedClass.getOrAdd("First", type -> type.modifiers.add(Modifier.STATIC));
+		generatedClass.getOrAdd("Second", type -> type.modifiers.add(Modifier.PRIVATE));
+		assertThat(generatedClass.generateJavaFile().toString())
+				.contains("static class First").contains("private class Second");
+	}
+
+	@Test
+	void generateJavaFileOnInnerClassThrowsException() {
+		GeneratedClass generatedClass = createGeneratedClass(TEST_CLASS_NAME)
+				.getOrAdd("Inner", emptyTypeCustomizer);
+		assertThatIllegalStateException().isThrownBy(generatedClass::generateJavaFile);
+	}
+
+	private static GeneratedClass createGeneratedClass(ClassName className) {
+		return new GeneratedClass(className, emptyTypeCustomizer);
 	}
 
 }

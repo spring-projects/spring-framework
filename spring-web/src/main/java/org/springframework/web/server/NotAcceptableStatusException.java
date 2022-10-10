@@ -18,12 +18,12 @@ package org.springframework.web.server;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.ErrorResponse;
 
 /**
  * Exception for errors that fit response status 406 (not acceptable).
@@ -34,6 +34,10 @@ import org.springframework.util.CollectionUtils;
 @SuppressWarnings("serial")
 public class NotAcceptableStatusException extends ResponseStatusException {
 
+	private static final String PARSE_ERROR_DETAIL_CODE =
+			ErrorResponse.getDefaultDetailMessageCode(NotAcceptableStatusException.class, "parseError");
+
+
 	private final List<MediaType> supportedMediaTypes;
 
 
@@ -41,7 +45,7 @@ public class NotAcceptableStatusException extends ResponseStatusException {
 	 * Constructor for when the requested Content-Type is invalid.
 	 */
 	public NotAcceptableStatusException(String reason) {
-		super(HttpStatus.NOT_ACCEPTABLE, reason);
+		super(HttpStatus.NOT_ACCEPTABLE, reason, null, PARSE_ERROR_DETAIL_CODE, null);
 		this.supportedMediaTypes = Collections.emptyList();
 		getBody().setDetail("Could not parse Accept header.");
 	}
@@ -50,10 +54,11 @@ public class NotAcceptableStatusException extends ResponseStatusException {
 	 * Constructor for when the requested Content-Type is not supported.
 	 */
 	public NotAcceptableStatusException(List<MediaType> mediaTypes) {
-		super(HttpStatus.NOT_ACCEPTABLE, "Could not find acceptable representation");
+		super(HttpStatus.NOT_ACCEPTABLE,
+				"Could not find acceptable representation", null, null, new Object[] {mediaTypes});
+
 		this.supportedMediaTypes = Collections.unmodifiableList(mediaTypes);
-		getBody().setDetail("Acceptable representations: " +
-				mediaTypes.stream().map(MediaType::toString).collect(Collectors.joining(", ", "'", "'")) + ".");
+		getBody().setDetail("Acceptable representations: " + mediaTypes + ".");
 	}
 
 
@@ -76,7 +81,7 @@ public class NotAcceptableStatusException extends ResponseStatusException {
 	 * @since 5.1.13
 	 * @deprecated as of 6.0 in favor of {@link #getHeaders()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	@Override
 	public HttpHeaders getResponseHeaders() {
 		return getHeaders();

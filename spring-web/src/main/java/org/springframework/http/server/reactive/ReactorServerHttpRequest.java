@@ -29,6 +29,7 @@ import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.ssl.SslHandler;
 import org.apache.commons.logging.Log;
 import reactor.core.publisher.Flux;
+import reactor.netty.ChannelOperationsId;
 import reactor.netty.Connection;
 import reactor.netty.http.server.HttpServerRequest;
 
@@ -39,7 +40,6 @@ import org.springframework.http.HttpLogging;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -51,10 +51,6 @@ import org.springframework.util.MultiValueMap;
  * @since 5.0
  */
 class ReactorServerHttpRequest extends AbstractServerHttpRequest {
-
-	/** Reactor Netty 1.0.5+. */
-	static final boolean reactorNettyRequestChannelOperationsIdPresent = ClassUtils.isPresent(
-			"reactor.netty.ChannelOperationsId", ReactorServerHttpRequest.class.getClassLoader());
 
 	private static final Log logger = HttpLogging.forLogName(ReactorServerHttpRequest.class);
 
@@ -212,31 +208,18 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	protected String initLogPrefix() {
-		if (reactorNettyRequestChannelOperationsIdPresent) {
-			String id = (ChannelOperationsIdHelper.getId(this.request));
-			if (id != null) {
-				return id;
-			}
+		String id = null;
+		if (this.request instanceof ChannelOperationsId operationsId) {
+			id = (logger.isDebugEnabled() ? operationsId.asLongText() : operationsId.asShortText());
+		}
+		if (id != null) {
+			return id;
 		}
 		if (this.request instanceof Connection) {
 			return ((Connection) this.request).channel().id().asShortText() +
 					"-" + logPrefixIndex.incrementAndGet();
 		}
 		return getId();
-	}
-
-
-	private static class ChannelOperationsIdHelper {
-
-		@Nullable
-		public static String getId(HttpServerRequest request) {
-			if (request instanceof reactor.netty.ChannelOperationsId) {
-				return (logger.isDebugEnabled() ?
-						((reactor.netty.ChannelOperationsId) request).asLongText() :
-						((reactor.netty.ChannelOperationsId) request).asShortText());
-			}
-			return null;
-		}
 	}
 
 }

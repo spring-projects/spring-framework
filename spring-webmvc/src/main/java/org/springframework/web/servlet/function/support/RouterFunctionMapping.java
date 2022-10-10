@@ -33,6 +33,7 @@ import org.springframework.http.converter.support.AllEncompassingFormHttpMessage
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.observation.HttpRequestsObservationFilter;
 import org.springframework.web.servlet.function.HandlerFunction;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.RouterFunctions;
@@ -234,6 +235,8 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 		if (matchingPattern != null) {
 			servletRequest.removeAttribute(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE);
 			servletRequest.setAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE, matchingPattern.getPatternString());
+			HttpRequestsObservationFilter.findObservationContext(request.servletRequest())
+					.ifPresent(context -> context.setPathPattern(matchingPattern.getPatternString()));
 		}
 		servletRequest.setAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE, handlerFunction);
 		servletRequest.setAttribute(RouterFunctions.REQUEST_ATTRIBUTE, request);

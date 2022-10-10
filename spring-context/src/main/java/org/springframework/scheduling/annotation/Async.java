@@ -22,6 +22,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.aot.hint.annotation.Reflective;
+
 /**
  * Annotation that marks a method as a candidate for <i>asynchronous</i> execution.
  *
@@ -54,6 +56,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Reflective
 public @interface Async {
 
 	/**

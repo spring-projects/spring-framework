@@ -215,12 +215,12 @@ through the use of the `<absolute-ordering />` element in `web.xml`, as the foll
 
 [source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
-	<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+	<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="
-			http://java.sun.com/xml/ns/javaee
-			https://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
-		version="3.0">
+			https://jakarta.ee/xml/ns/jakartaee
+			https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
+		version="5.0">
 
 		<absolute-ordering/>
 
@@ -233,12 +233,12 @@ Java initialization API. The following example shows how to do so:
 
 [source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
-	<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+	<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="
-			http://java.sun.com/xml/ns/javaee
-			https://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
-		version="3.0">
+			https://jakarta.ee/xml/ns/jakartaee
+			https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
+		version="5.0">
 
 		<absolute-ordering>
 			<name>spring_web</name>
@@ -597,7 +597,7 @@ a key reason for having SockJS. This section covers important
 considerations about running in those browsers.
 
 The SockJS client supports Ajax/XHR streaming in IE 8 and 9 by using Microsoft's
-https://blogs.msdn.com/b/ieinternals/archive/2010/05/13/xdomainrequest-restrictions-limitations-and-workarounds.aspx[`XDomainRequest`].
+https://web.archive.org/web/20160219230343/https://blogs.msdn.com/b/ieinternals/archive/2010/05/13/xdomainrequest-restrictions-limitations-and-workarounds.aspx[`XDomainRequest`].
 That works across domains but does not support sending cookies.
 Cookies are often essential for Java applications.
 However, since the SockJS client can be used with many server
@@ -1347,7 +1347,7 @@ receipt if the server supports it (simple broker does not). For example, with th
 	headers.setDestination("/topic/...");
 	headers.setReceipt("r1");
 	FrameHandler handler = ...;
-	stompSession.subscribe(headers, handler).addReceiptTask(() -> {
+	stompSession.subscribe(headers, handler).addReceiptTask(receiptHeaders -> {
 		// Subscription ready...
 	});
 ----

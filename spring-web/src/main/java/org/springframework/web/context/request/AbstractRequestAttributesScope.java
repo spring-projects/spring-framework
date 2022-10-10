@@ -28,7 +28,7 @@ import org.springframework.lang.Nullable;
  * this class which {@link RequestAttributes} scope to read attributes from.
  *
  * <p>Subclasses may wish to override the {@link #get} and {@link #remove}
- * methods to add synchronization around the call back into this super class.
+ * methods to add synchronization around the call back into this superclass.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

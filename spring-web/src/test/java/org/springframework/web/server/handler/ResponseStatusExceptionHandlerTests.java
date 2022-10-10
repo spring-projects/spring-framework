@@ -26,6 +26,6 @@ import org.springframework.web.testfixture.server.handler.AbstractResponseStatus
  */
 public class ResponseStatusExceptionHandlerTests extends AbstractResponseStatusExceptionHandlerTests {
 
-	// all tests in super class
+	// all tests in superclass
 
 }

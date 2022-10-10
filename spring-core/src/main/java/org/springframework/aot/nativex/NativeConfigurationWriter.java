@@ -29,6 +29,7 @@ import org.springframework.aot.hint.SerializationHints;
  *
  * @author Sebastien Deleuze
  * @author Stephane Nicoll
+ * @author Janne Valkealahti
  * @since 6.0
  * @see <a href="https://www.graalvm.org/22.1/reference-manual/native-image/BuildConfiguration/">Native Image Build Configuration</a>
  */
@@ -39,18 +40,21 @@ public abstract class NativeConfigurationWriter {
 	 * @param hints the hints to handle
 	 */
 	public void write(RuntimeHints hints) {
-		if (hints.serialization().javaSerialization().findAny().isPresent()) {
-			writeJavaSerializationHints(hints.serialization());
+		if (hints.serialization().javaSerializationHints().findAny().isPresent()) {
+			writeSerializationHints(hints.serialization());
 		}
-		if (hints.proxies().jdkProxies().findAny().isPresent()) {
+		if (hints.proxies().jdkProxyHints().findAny().isPresent()) {
 			writeProxyHints(hints.proxies());
 		}
 		if (hints.reflection().typeHints().findAny().isPresent()) {
 			writeReflectionHints(hints.reflection());
 		}
-		if (hints.resources().resourcePatterns().findAny().isPresent() ||
-				hints.resources().resourceBundles().findAny().isPresent()) {
+		if (hints.resources().resourcePatternHints().findAny().isPresent() ||
+				hints.resources().resourceBundleHints().findAny().isPresent()) {
 			writeResourceHints(hints.resources());
+		}
+		if (hints.jni().typeHints().findAny().isPresent()) {
+			writeJniHints(hints.jni());
 		}
 	}
 
@@ -62,7 +66,7 @@ public abstract class NativeConfigurationWriter {
 	 */
 	protected abstract void writeTo(String fileName, Consumer<BasicJsonWriter> writer);
 
-	private void writeJavaSerializationHints(SerializationHints hints) {
+	private void writeSerializationHints(SerializationHints hints) {
 		writeTo("serialization-config.json", writer ->
 				SerializationHintsWriter.INSTANCE.write(writer, hints));
 	}
@@ -80,6 +84,11 @@ public abstract class NativeConfigurationWriter {
 	private void writeResourceHints(ResourceHints hints) {
 		writeTo("resource-config.json", writer ->
 				ResourceHintsWriter.INSTANCE.write(writer, hints));
+	}
+
+	private void writeJniHints(ReflectionHints hints) {
+		writeTo("jni-config.json", writer ->
+				ReflectionHintsWriter.INSTANCE.write(writer, hints));
 	}
 
 }

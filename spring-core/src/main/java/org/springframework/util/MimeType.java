@@ -102,6 +102,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 
 	private final String subtype;
 
+	@SuppressWarnings("serial")
 	private final Map<String, String> parameters;
 
 	@Nullable
@@ -707,7 +708,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @param <T> the type of mime types that may be compared by this comparator
 	 * @deprecated As of 6.0, with no direct replacement
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public static class SpecificityComparator<T extends MimeType> implements Comparator<T> {
 
 		@Override

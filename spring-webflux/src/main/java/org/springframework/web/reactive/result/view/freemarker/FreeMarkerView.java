@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,10 +42,10 @@ import org.springframework.context.ApplicationContextException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.MimeType;
 import org.springframework.web.reactive.result.view.AbstractUrlBasedView;
 import org.springframework.web.reactive.result.view.RequestContext;
@@ -252,24 +252,21 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 					}
 
 					Locale locale = LocaleContextHolder.getLocale(exchange.getLocaleContext());
-					DataBuffer dataBuffer = exchange.getResponse().bufferFactory().allocateBuffer();
+					FastByteArrayOutputStream bos = new FastByteArrayOutputStream();
 					try {
 						Charset charset = getCharset(contentType);
-						Writer writer = new OutputStreamWriter(dataBuffer.asOutputStream(), charset);
+						Writer writer = new OutputStreamWriter(bos, charset);
 						getTemplate(locale).process(freeMarkerModel, writer);
-						return dataBuffer;
+
+						byte[] bytes = bos.toByteArrayUnsafe();
+						return exchange.getResponse().bufferFactory().wrap(bytes);
 					}
 					catch (IOException ex) {
-						DataBufferUtils.release(dataBuffer);
 						String message = "Could not load FreeMarker template for URL [" + getUrl() + "]";
 						throw new IllegalStateException(message, ex);
 					}
-					catch (Throwable ex) {
-						DataBufferUtils.release(dataBuffer);
-						throw ex;
-					}
 				})
-				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release));
+				.doOnDiscard(DataBuffer.class, DataBufferUtils::release));
 	}
 
 	private Charset getCharset(@Nullable MediaType mediaType) {

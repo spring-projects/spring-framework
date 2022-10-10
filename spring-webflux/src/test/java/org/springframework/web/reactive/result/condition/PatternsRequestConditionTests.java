@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result.condition;
 
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
@@ -210,7 +209,7 @@ public class PatternsRequestConditionTests {
 		return new PatternsRequestCondition(Arrays
 				.stream(patterns)
 				.map(this.parser::parse)
-				.collect(Collectors.toList()));
+				.toList());
 	}
 
 }
