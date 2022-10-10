@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.context.testfixture.context.generator.annotation;
+package org.springframework.context.testfixture.context.annotation;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.springframework.core.env.Environment;
 
-@Configuration(proxyBeanMethods = false)
-@Import(ImportAwareConfiguration.class)
-public class ImportConfiguration {
+@Configuration
+public class ConfigurableCglibConfiguration extends CglibConfiguration {
+
+	private final Environment environment;
+
+	public ConfigurableCglibConfiguration(Environment environment) {
+		this.environment = environment;
+	}
+
+	@Override
+	protected String getPrefix() {
+		return this.environment.getProperty("test.prefix", String.class, "Howdy");
+	}
+
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.testfixture.context.generator.annotation;
+package org.springframework.context.testfixture.context.annotation;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;

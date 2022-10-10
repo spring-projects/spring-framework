@@ -14,30 +14,28 @@
  * limitations under the License.
  */
 
-package org.springframework.context.testfixture.context.generator.annotation;
+package org.springframework.context.testfixture.context.annotation;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.core.env.Environment;
+import org.springframework.core.io.ResourceLoader;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+public class LazyAutowiredFieldComponent {
 
-@Configuration
-public class CglibConfiguration {
+	@Lazy
+	@Autowired
+	private Environment environment;
 
-	private static final AtomicInteger counter = new AtomicInteger();
+	@Autowired
+	private ResourceLoader resourceLoader;
 
-	@Bean
-	public String prefix() {
-		return getPrefix() + counter.getAndIncrement();
+	public Environment getEnvironment() {
+		return this.environment;
 	}
 
-	@Bean
-	public String text() {
-		return prefix() + " World";
-	}
 
-	protected String getPrefix() {
-		return "Hello";
+	public ResourceLoader getResourceLoader() {
+		return this.resourceLoader;
 	}
-
 }

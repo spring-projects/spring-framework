@@ -14,33 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.context.testfixture.context.generator.annotation;
+package org.springframework.context.testfixture.context.annotation;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 
-public class AutowiredComponent {
-
-	private Environment environment;
-
-	private Integer counter;
-
-	public Environment getEnvironment() {
-		return this.environment;
-	}
-
-	@Autowired
-	public void setEnvironment(Environment environment) {
-		this.environment = environment;
-	}
-
-	public Integer getCounter() {
-		return this.counter;
-	}
-
-	@Autowired
-	public void setCounter(Integer counter) {
-		this.counter = counter;
-	}
+@Configuration(proxyBeanMethods = false)
+@PropertySource(name = "testp1", value = "classpath:org/springframework/context/annotation/p1.properties")
+public class PropertySourceConfiguration {
 
 }

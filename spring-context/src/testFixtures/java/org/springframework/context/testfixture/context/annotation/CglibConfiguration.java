@@ -14,23 +14,30 @@
  * limitations under the License.
  */
 
-package org.springframework.context.testfixture.context.generator.annotation;
+package org.springframework.context.testfixture.context.annotation;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 
 @Configuration
-public class ConfigurableCglibConfiguration extends CglibConfiguration {
+public class CglibConfiguration {
 
-	private final Environment environment;
+	private static final AtomicInteger counter = new AtomicInteger();
 
-	public ConfigurableCglibConfiguration(Environment environment) {
-		this.environment = environment;
+	@Bean
+	public String prefix() {
+		return getPrefix() + counter.getAndIncrement();
 	}
 
-	@Override
+	@Bean
+	public String text() {
+		return prefix() + " World";
+	}
+
 	protected String getPrefix() {
-		return this.environment.getProperty("test.prefix", String.class, "Howdy");
+		return "Hello";
 	}
 
 }

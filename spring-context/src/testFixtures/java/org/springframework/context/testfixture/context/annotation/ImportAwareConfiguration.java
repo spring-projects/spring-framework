@@ -14,17 +14,28 @@
  * limitations under the License.
  */
 
-package org.springframework.context.testfixture.context.generator.annotation;
+package org.springframework.context.testfixture.context.annotation;
 
-import org.springframework.context.annotation.Bean;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportAware;
+import org.springframework.core.env.Environment;
+import org.springframework.core.type.AnnotationMetadata;
 
 @Configuration(proxyBeanMethods = false)
-public class SimpleConfiguration {
+@SuppressWarnings("unused")
+public class ImportAwareConfiguration implements ImportAware, EnvironmentAware {
 
-	@Bean
-	public String stringBean() {
-		return "Hello";
+	private AnnotationMetadata annotationMetadata;
+
+	@Override
+	public void setImportMetadata(AnnotationMetadata importMetadata) {
+		this.annotationMetadata = importMetadata;
+	}
+
+	@Override
+	public void setEnvironment(Environment environment) {
+
 	}
 
 }

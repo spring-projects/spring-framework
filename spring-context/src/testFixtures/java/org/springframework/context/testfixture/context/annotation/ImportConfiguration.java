@@ -14,28 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.context.testfixture.context.generator.annotation;
+package org.springframework.context.testfixture.context.annotation;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.core.env.Environment;
-import org.springframework.core.io.ResourceLoader;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
-public class LazyAutowiredFieldComponent {
-
-	@Lazy
-	@Autowired
-	private Environment environment;
-
-	@Autowired
-	private ResourceLoader resourceLoader;
-
-	public Environment getEnvironment() {
-		return this.environment;
-	}
-
-
-	public ResourceLoader getResourceLoader() {
-		return this.resourceLoader;
-	}
+@Configuration(proxyBeanMethods = false)
+@Import(ImportAwareConfiguration.class)
+public class ImportConfiguration {
 }

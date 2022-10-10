@@ -42,11 +42,11 @@ import org.springframework.beans.testfixture.beans.factory.aot.MockBeanFactoryIn
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.testfixture.context.annotation.CglibConfiguration;
+import org.springframework.context.testfixture.context.annotation.ImportAwareConfiguration;
+import org.springframework.context.testfixture.context.annotation.ImportConfiguration;
+import org.springframework.context.testfixture.context.annotation.SimpleConfiguration;
 import org.springframework.context.testfixture.context.generator.SimpleComponent;
-import org.springframework.context.testfixture.context.generator.annotation.CglibConfiguration;
-import org.springframework.context.testfixture.context.generator.annotation.ImportAwareConfiguration;
-import org.springframework.context.testfixture.context.generator.annotation.ImportConfiguration;
-import org.springframework.context.testfixture.context.generator.annotation.SimpleConfiguration;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.ResourceLoader;
@@ -149,8 +149,7 @@ class ConfigurationClassPostProcessorAotContributionTests {
 					.singleElement()
 					.satisfies(resourceHint -> assertThat(resourceHint.getIncludes())
 							.map(ResourcePatternHint::getPattern)
-							.containsOnly("org/springframework/context/testfixture/context/generator/annotation/"
-									+ "ImportConfiguration.class"));
+							.containsOnly("org/springframework/context/testfixture/context/annotation/ImportConfiguration.class"));
 		}
 
 		@SuppressWarnings("unchecked")

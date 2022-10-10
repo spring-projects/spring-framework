@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.testfixture.context.generator.annotation;
+package org.springframework.context.testfixture.context.annotation;
 
 import java.util.ArrayList;
 import java.util.List;

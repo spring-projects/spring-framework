@@ -14,28 +14,33 @@
  * limitations under the License.
  */
 
-package org.springframework.context.testfixture.context.generator.annotation;
+package org.springframework.context.testfixture.context.annotation;
 
-import org.springframework.context.EnvironmentAware;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportAware;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.core.type.AnnotationMetadata;
 
-@Configuration(proxyBeanMethods = false)
-@SuppressWarnings("unused")
-public class ImportAwareConfiguration implements ImportAware, EnvironmentAware {
+public class AutowiredComponent {
 
-	private AnnotationMetadata annotationMetadata;
+	private Environment environment;
 
-	@Override
-	public void setImportMetadata(AnnotationMetadata importMetadata) {
-		this.annotationMetadata = importMetadata;
+	private Integer counter;
+
+	public Environment getEnvironment() {
+		return this.environment;
 	}
 
-	@Override
+	@Autowired
 	public void setEnvironment(Environment environment) {
+		this.environment = environment;
+	}
 
+	public Integer getCounter() {
+		return this.counter;
+	}
+
+	@Autowired
+	public void setCounter(Integer counter) {
+		this.counter = counter;
 	}
 
 }

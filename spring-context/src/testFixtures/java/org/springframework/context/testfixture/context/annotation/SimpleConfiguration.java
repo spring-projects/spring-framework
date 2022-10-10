@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package org.springframework.context.testfixture.context.generator.annotation;
+package org.springframework.context.testfixture.context.annotation;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
 @Configuration(proxyBeanMethods = false)
-@PropertySource(name = "testp1", value = "classpath:org/springframework/context/annotation/p1.properties")
-public class PropertySourceConfiguration {
+public class SimpleConfiguration {
+
+	@Bean
+	public String stringBean() {
+		return "Hello";
+	}
 
 }
