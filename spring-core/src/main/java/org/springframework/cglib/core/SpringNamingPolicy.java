@@ -40,7 +40,7 @@ public final class SpringNamingPolicy implements NamingPolicy {
 		if (prefix == null) {
 			prefix = "org.springframework.cglib.empty.Object";
 		}
-		else if (prefix.startsWith("java")) {
+		else if (prefix.startsWith("java.") || prefix.startsWith("javax.")) {
 			prefix = "_" + prefix;
 		}
 
