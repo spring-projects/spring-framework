@@ -859,6 +859,54 @@ inline-style, through the built-in `BodyInserters`, as the following example sho
 			.awaitBody<Unit>()
 ----
 
+==== `PartEvent`
+
+To stream multipart data sequentially, you can provide multipart content through `PartEvent`
+objects.
+
+- Form fields can be created via `FormPartEvent::create`.
+- File uploads can be created via `FilePartEvent::create`.
+
+You can concatenate the streams returned from methods via `Flux::concat`, and create a request for
+the `WebClient`.
+
+For instance, this sample will POST a multipart form containing a form field and a file.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+Resource resource = ...
+Mono<String> result = webClient
+    .post()
+    .uri("https://example.com")
+    .body(Flux.concat(
+            FormPartEvent.create("field", "field value"),
+            FilePartEvent.create("file", resource)
+    ), PartEvent.class)
+    .retrieve()
+    .bodyToMono(String.class);
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+var resource: Resource = ...
+var result: Mono<String> = webClient
+	.post()
+	.uri("https://example.com")
+	.body(
+		Flux.concat(
+			FormPartEvent.create("field", "field value"),
+			FilePartEvent.create("file", resource)
+		)
+	)
+	.retrieve()
+	.bodyToMono()
+----
+
+On the server side, `PartEvent` objects that are received via `@RequestBody` or
+`ServerRequest::bodyToFlux(PartEvent.class)` can be relayed to another service
+via the `WebClient`.
+
 
 
 [[webflux-client-filter]]

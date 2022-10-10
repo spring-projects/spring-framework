@@ -619,11 +619,11 @@ https://github.com/synchronoss/nio-multipart[Synchronoss NIO Multipart] library.
 Both are configured through the `ServerCodecConfigurer` bean
 (see the <<webflux-web-handler-api, Web Handler API>>).
 
-To parse multipart data in streaming fashion, you can use the `Flux<Part>` returned from an
-`HttpMessageReader<Part>` instead. For example, in an annotated controller, use of
-`@RequestPart` implies `Map`-like access to individual parts by name and, hence, requires
-parsing multipart data in full. By contrast, you can use `@RequestBody` to decode the
-content to `Flux<Part>` without collecting to a `MultiValueMap`.
+To parse multipart data in streaming fashion, you can use the `Flux<PartEvent>` returned from the
+`PartEventHttpMessageReader` instead of using `@RequestPart`, as that  implies `Map`-like access
+to individual parts by name and, hence, requires parsing multipart data in full.
+By contrast, you can use `@RequestBody` to decode the content to `Flux<PartEvent>` without
+collecting to a `MultiValueMap`.
 
 
 [[webflux-forwarded-headers]]
@@ -2825,29 +2825,98 @@ as the following example shows:
 ----
 <1> Using `@RequestBody`.
 
+===== `PartEvent`
 
-To access multipart data sequentially, in streaming fashion, you can use `@RequestBody` with
-`Flux<Part>` (or `Flow<Part>` in Kotlin) instead, as the following example shows:
+To access multipart data sequentially, in a streaming fashion, you can use `@RequestBody` with
+`Flux<PartEvent>` (or `Flow<PartEvent>` in Kotlin).
+Each part in a multipart HTTP message will produce at
+least one `PartEvent` containing both headers and a buffer with the contents of the part.
+
+- Form fields will produce a *single* `FormPartEvent`, containing the value of the field.
+- File uploads will produce *one or more* `FilePartEvent` objects, containing the filename used
+when uploading. If the file is large enough to be split across multiple buffers, the first
+`FilePartEvent` will be followed by subsequent events.
+
+
+For example:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@PostMapping("/")
-	public String handle(@RequestBody Flux<Part> parts) { <1>
-		// ...
-	}
+  @PostMapping("/")
+  public void handle(@RequestBody Flux<PartEvent> allPartsEvents) { <1>
+      allPartsEvents.windowUntil(PartEvent::isLast) <2>
+              .concatMap(p -> p.switchOnFirst((signal, partEvents) -> { <3>
+                  if (signal.hasValue()) {
+                      PartEvent event = signal.get();
+                      if (event instanceof FormPartEvent formEvent) { <4>
+                          String value = formEvent.value();
+                          // handle form field
+                      }
+                      else if (event instanceof FilePartEvent fileEvent) { <5>
+                          String filename = fileEvent.filename();
+                          Flux<DataBuffer> contents = partEvents.map(PartEvent::content);
+                          // handle file upload
+                      }
+                      else {
+                          return Mono.error(new RuntimeException("Unexpected event: " + event));
+                      }
+                  }
+                  else {
+                      return partEvents; // either complete or error signal
+                  }
+              }));
+  }
 ----
 <1> Using `@RequestBody`.
+<2> The final `PartEvent` for a particular part will have `isLast()` set to `true`, and can be
+followed by additional events belonging to subsequent parts.
+This makes the `isLast` property suitable as a predicate for the `Flux::windowUntil` operator, to
+split events from all parts into windows that each belong to a single part.
+<3> The `Flux::switchOnFirst` operator allows you to see whether you are handling a form field or
+file upload.
+<4> Handling the form field.
+<5> Handling the file upload.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	@PostMapping("/")
-	fun handle(@RequestBody parts: Flow<Part>): String { // <1>
-		// ...
-	}
+	fun handle(@RequestBody allPartsEvents: Flux<PartEvent>) = { // <1>
+      allPartsEvents.windowUntil(PartEvent::isLast) <2>
+          .concatMap {
+              it.switchOnFirst { signal, partEvents -> <3>
+                  if (signal.hasValue()) {
+                      val event = signal.get()
+                      if (event is FormPartEvent) { <4>
+                          val value: String = event.value();
+                          // handle form field
+                      } else if (event is FilePartEvent) { <5>
+                          val filename: String = event.filename();
+                          val contents: Flux<DataBuffer> = partEvents.map(PartEvent::content);
+                          // handle file upload
+                      } else {
+                          return Mono.error(RuntimeException("Unexpected event: " + event));
+                      }
+                  } else {
+                      return partEvents; // either complete or error signal
+                  }
+              }
+          }
+}
 ----
 <1> Using `@RequestBody`.
+<2> The final `PartEvent` for a particular part will have `isLast()` set to `true`, and can be
+followed by additional events belonging to subsequent parts.
+This makes the `isLast` property suitable as a predicate for the `Flux::windowUntil` operator, to
+split events from all parts into windows that each belong to a single part.
+<3> The `Flux::switchOnFirst` operator allows you to see whether you are handling a form field or
+file upload.
+<4> Handling the form field.
+<5> Handling the file upload.
+
+Received part events can also be relayed to another service by using the `WebClient`.
+See <<webflux-client-body-multipart>>.
 
 
 [[webflux-ann-requestbody]]
