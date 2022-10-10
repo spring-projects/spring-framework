@@ -77,6 +77,9 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	private static final int MESSAGE_SQL_THROWABLE_CONSTRUCTOR = 4;
 	private static final int MESSAGE_SQL_SQLEX_CONSTRUCTOR = 5;
 
+	private static final boolean USER_PROVIDED_ERROR_CODES_FILE_PRESENT =
+			new ClassPathResource(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH, SQLErrorCodesFactory.class.getClassLoader()).exists();
+
 
 	/** Error codes used by this translator. */
 	@Nullable
@@ -424,8 +427,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	 * in the root of the classpath.
 	 */
 	static boolean hasUserProvidedErrorCodesFile() {
-		return new ClassPathResource(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH,
-				SQLErrorCodesFactory.class.getClassLoader()).exists();
+		return USER_PROVIDED_ERROR_CODES_FILE_PRESENT;
 	}
 
 }

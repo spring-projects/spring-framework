@@ -68,14 +68,20 @@ public class SQLErrorCodesFactory {
 
 	/**
 	 * Keep track of a single instance so we can return it to classes that request it.
+	 * Lazily initialized in order to avoid making {@code SQLErrorCodesFactory} constructor
+	 * reachable on native images when not needed.
 	 */
-	private static final SQLErrorCodesFactory instance = new SQLErrorCodesFactory();
+	@Nullable
+	private static SQLErrorCodesFactory instance;
 
 
 	/**
 	 * Return the singleton instance.
 	 */
 	public static SQLErrorCodesFactory getInstance() {
+		if (instance == null) {
+			instance = new SQLErrorCodesFactory();
+		}
 		return instance;
 	}
 
