@@ -118,14 +118,23 @@ class ContextAotProcessorTests {
 
 	private static class DemoContextAotProcessor extends ContextAotProcessor {
 
-		DemoContextAotProcessor(Class<?> application,
-				Path sourceOutput, Path resourceOutput, Path classOutput) {
-			super(application, sourceOutput, resourceOutput, classOutput, "com.example", "example");
+		DemoContextAotProcessor(Class<?> application, Path rootPath) {
+			this(application, rootPath.resolve("source"), rootPath.resolve("resource"), rootPath.resolve("class"));
 		}
 
-		DemoContextAotProcessor(Class<?> application, Path rootPath) {
-			super(application, rootPath.resolve("source"), rootPath.resolve("resource"),
-					rootPath.resolve("class"), "com.example", "example");
+		DemoContextAotProcessor(Class<?> application, Path sourceOutput, Path resourceOutput, Path classOutput) {
+			super(application, createSettings(sourceOutput, resourceOutput, classOutput, "com.example", "example"));
+		}
+
+		private static Settings createSettings(Path sourceOutput, Path resourceOutput,
+				Path classOutput, String groupId, String artifactId) {
+			Settings settings = new Settings();
+			settings.setSourceOutput(sourceOutput);
+			settings.setResourceOutput(resourceOutput);
+			settings.setClassOutput(classOutput);
+			settings.setArtifactId(artifactId);
+			settings.setGroupId(groupId);
+			return settings;
 		}
 
 		@Override

@@ -50,20 +50,13 @@ public abstract class ContextAotProcessor extends AbstractAotProcessor {
 	private final Class<?> application;
 
 	/**
-	 * Create a new processor instance.
+	 * Create a new processor for the specified application entry point and
+	 * common settings.
 	 * @param application the application entry point
-	 * @param sourceOutput the location of generated sources
-	 * @param resourceOutput the location of generated resources
-	 * @param classOutput the location of generated classes
-	 * @param groupId the group ID of the application, used to locate
-	 * {@code native-image.properties}
-	 * @param artifactId the artifact ID of the application, used to locate
-	 * {@code native-image.properties}
+	 * @param settings the settings to apply
 	 */
-	protected ContextAotProcessor(Class<?> application, Path sourceOutput, Path resourceOutput,
-			Path classOutput, String groupId, String artifactId) {
-
-		super(sourceOutput, resourceOutput, classOutput, groupId, artifactId);
+	protected ContextAotProcessor(Class<?> application, Settings settings) {
+		super(settings);
 		this.application = application;
 	}
 
@@ -160,8 +153,8 @@ public abstract class ContextAotProcessor extends AbstractAotProcessor {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Args = ");
 		sb.append(String.join(String.format(" \\%n"), args));
-		Path file = getResourceOutput()
-				.resolve("META-INF/native-image/" + getGroupId() + "/" + getArtifactId() + "/native-image.properties");
+		Path file = getSettings().getResourceOutput().resolve("META-INF/native-image/" +
+				getSettings().getGroupId() + "/" + getSettings().getArtifactId() + "/native-image.properties");
 		try {
 			if (!Files.exists(file)) {
 				Files.createDirectories(file.getParent());

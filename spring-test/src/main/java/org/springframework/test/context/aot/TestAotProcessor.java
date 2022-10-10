@@ -43,20 +43,12 @@ public abstract class TestAotProcessor extends AbstractAotProcessor {
 
 	/**
 	 * Create a new processor for the specified test classpath roots and
-	 * general settings.
+	 * common settings.
 	 * @param classpathRoots the classpath roots to scan for test classes
-	 * @param sourceOutput the location of generated sources
-	 * @param resourceOutput the location of generated resources
-	 * @param classOutput the location of generated classes
-	 * @param groupId the group ID of the application, used to locate
-	 * {@code native-image.properties}
-	 * @param artifactId the artifact ID of the application, used to locate
-	 * {@code native-image.properties}
+	 * @param settings the settings to apply
 	 */
-	public TestAotProcessor(Set<Path> classpathRoots, Path sourceOutput, Path resourceOutput, Path classOutput,
-			String groupId, String artifactId) {
-
-		super(sourceOutput, resourceOutput, classOutput, groupId, artifactId);
+	protected TestAotProcessor(Set<Path> classpathRoots, Settings settings) {
+		super(settings);
 		this.classpathRoots = classpathRoots;
 	}
 

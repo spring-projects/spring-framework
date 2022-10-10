@@ -23,6 +23,7 @@ import org.springframework.aot.generate.FileSystemGeneratedFiles;
 import org.springframework.aot.generate.GeneratedFiles.Kind;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.nativex.FileNativeConfigurationWriter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.FileSystemUtils;
 
 /**
@@ -43,77 +44,30 @@ import org.springframework.util.FileSystemUtils;
  */
 public abstract class AbstractAotProcessor {
 
-	private final Path sourceOutput;
-
-	private final Path resourceOutput;
-
-	private final Path classOutput;
-
-	private final String groupId;
-
-	private final String artifactId;
+	private final Settings settings;
 
 
 	/**
-	 * Create a new processor instance.
-	 * @param sourceOutput the location of generated sources
-	 * @param resourceOutput the location of generated resources
-	 * @param classOutput the location of generated classes
-	 * @param groupId the group ID of the application, used to locate
-	 * {@code native-image.properties}
-	 * @param artifactId the artifact ID of the application, used to locate
-	 * {@code native-image.properties}
+	 * Create a new processor instance with the supplied {@linkplain Settings settings}.
 	 */
-	protected AbstractAotProcessor(Path sourceOutput, Path resourceOutput,
-			Path classOutput, String groupId, String artifactId) {
-
-		this.sourceOutput = sourceOutput;
-		this.resourceOutput = resourceOutput;
-		this.classOutput = classOutput;
-		this.groupId = groupId;
-		this.artifactId = artifactId;
+	protected AbstractAotProcessor(Settings settings) {
+		this.settings = settings;
 	}
 
-	/**
-	 * Get the output directory for generated sources.
-	 */
-	protected Path getSourceOutput() {
-		return this.sourceOutput;
-	}
 
 	/**
-	 * Get the output directory for generated resources.
+	 * Get the {@linkplain Settings settings} for this AOT processor.
 	 */
-	protected Path getResourceOutput() {
-		return this.resourceOutput;
-	}
-
-	/**
-	 * Get the output directory for generated classes.
-	 */
-	protected Path getClassOutput() {
-		return this.classOutput;
-	}
-
-	/**
-	 * Get the group ID of the application.
-	 */
-	protected String getGroupId() {
-		return this.groupId;
-	}
-
-	/**
-	 * Get the artifact ID of the application.
-	 */
-	protected String getArtifactId() {
-		return this.artifactId;
+	protected Settings getSettings() {
+		return this.settings;
 	}
 
 	/**
 	 * Delete the source, resource, and class output directories.
 	 */
 	protected void deleteExistingOutput() {
-		deleteExistingOutput(getSourceOutput(), getResourceOutput(), getClassOutput());
+		deleteExistingOutput(getSettings().getSourceOutput(),
+				getSettings().getResourceOutput(), getSettings().getClassOutput());
 	}
 
 	private void deleteExistingOutput(Path... paths) {
@@ -133,16 +87,121 @@ public abstract class AbstractAotProcessor {
 
 	private Path getRoot(Kind kind) {
 		return switch (kind) {
-			case SOURCE -> getSourceOutput();
-			case RESOURCE -> getResourceOutput();
-			case CLASS -> getClassOutput();
+			case SOURCE -> getSettings().getSourceOutput();
+			case RESOURCE -> getSettings().getResourceOutput();
+			case CLASS -> getSettings().getClassOutput();
 		};
 	}
 
 	protected void writeHints(RuntimeHints hints) {
-		FileNativeConfigurationWriter writer =
-				new FileNativeConfigurationWriter(getResourceOutput(), getGroupId(), getArtifactId());
+		FileNativeConfigurationWriter writer = new FileNativeConfigurationWriter(
+				getSettings().getResourceOutput(), getSettings().getGroupId(), getSettings().getArtifactId());
 		writer.write(hints);
+	}
+
+	/**
+	 * Common settings for AOT processors.
+	 */
+	public static class Settings {
+
+		@Nullable
+		private Path sourceOutput;
+
+		@Nullable
+		private Path resourceOutput;
+
+		@Nullable
+		private Path classOutput;
+
+		@Nullable
+		private String groupId;
+
+		@Nullable
+		private String artifactId;
+
+
+		/**
+		 * Set the output directory for generated sources.
+		 * @param sourceOutput the location of generated sources
+		 */
+		public void setSourceOutput(Path sourceOutput) {
+			this.sourceOutput = sourceOutput;
+		}
+
+		/**
+		 * Get the output directory for generated sources.
+		 */
+		@Nullable
+		public Path getSourceOutput() {
+			return this.sourceOutput;
+		}
+
+		/**
+		 * Set the output directory for generated resources.
+		 * @param resourceOutput the location of generated resources
+		 */
+		public void setResourceOutput(Path resourceOutput) {
+			this.resourceOutput = resourceOutput;
+		}
+
+		/**
+		 * Get the output directory for generated resources.
+		 */
+		@Nullable
+		public Path getResourceOutput() {
+			return this.resourceOutput;
+		}
+
+		/**
+		 * Set the output directory for generated classes.
+		 * @param classOutput the location of generated classes
+		 */
+		public void setClassOutput(Path classOutput) {
+			this.classOutput = classOutput;
+		}
+
+		/**
+		 * Get the output directory for generated classes.
+		 */
+		@Nullable
+		public Path getClassOutput() {
+			return this.classOutput;
+		}
+
+		/**
+		 * Set the group ID of the application.
+		 * @param groupId the group ID of the application, used to locate
+		 * {@code native-image.properties}
+		 */
+		public void setGroupId(String groupId) {
+			this.groupId = groupId;
+		}
+
+		/**
+		 * Get the group ID of the application.
+		 */
+		@Nullable
+		public String getGroupId() {
+			return this.groupId;
+		}
+
+		/**
+		 * Set the artifact ID of the application.
+		 * @param artifactId the artifact ID of the application, used to locate
+		 * {@code native-image.properties}
+		 */
+		public void setArtifactId(String artifactId) {
+			this.artifactId = artifactId;
+		}
+
+		/**
+		 * Get the artifact ID of the application.
+		 */
+		@Nullable
+		public String getArtifactId() {
+			return this.artifactId;
+		}
+
 	}
 
 }

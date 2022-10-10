@@ -104,8 +104,20 @@ class TestAotProcessorTests extends AbstractAotTests {
 
 		DemoTestAotProcessor(Set<Path> classpathRoots, Path sourceOutput, Path resourceOutput, Path classOutput,
 				String groupId, String artifactId) {
-			super(classpathRoots, sourceOutput, resourceOutput, classOutput, groupId, artifactId);
+			super(classpathRoots, createSettings(sourceOutput, resourceOutput, classOutput, groupId, artifactId));
 		}
 
+		private static Settings createSettings(Path sourceOutput, Path resourceOutput, Path classOutput, String groupId,
+				String artifactId) {
+			Settings settings = new Settings();
+			settings.setSourceOutput(sourceOutput);
+			settings.setResourceOutput(resourceOutput);
+			settings.setClassOutput(classOutput);
+			settings.setArtifactId(artifactId);
+			settings.setGroupId(groupId);
+			return settings;
+		}
 	}
+
 }
+
