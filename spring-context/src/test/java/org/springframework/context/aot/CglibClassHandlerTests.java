@@ -30,57 +30,46 @@ import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.core.io.InputStreamSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Tests for {@link GeneratedClassHandler}.
+ * Tests for {@link CglibClassHandler}.
  *
  * @author Stephane Nicoll
  */
-class GeneratedClassHandlerTests {
+class CglibClassHandlerTests {
 
 	private static final byte[] TEST_CONTENT = new byte[] { 'a' };
 
 	private final TestGenerationContext generationContext;
 
-	private final GeneratedClassHandler handler;
+	private final CglibClassHandler handler;
 
-	public GeneratedClassHandlerTests() {
+	public CglibClassHandlerTests() {
 		this.generationContext = new TestGenerationContext();
-		this.handler = new GeneratedClassHandler(this.generationContext);
+		this.handler = new CglibClassHandler(this.generationContext);
 	}
 
 	@Test
-	void handlerGenerateRuntimeHintsForProxy() {
+	void handlerGeneratedClassCreatesRuntimeHintsForProxy() {
 		String className = "com.example.Test$$SpringCGLIB$$0";
-		this.handler.accept(className, TEST_CONTENT);
+		this.handler.handleGeneratedClass(className, TEST_CONTENT);
 		assertThat(RuntimeHintsPredicates.reflection().onType(TypeReference.of(className))
-				.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-						MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.DECLARED_FIELDS))
+				.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS))
 				.accepts(this.generationContext.getRuntimeHints());
 	}
 
 	@Test
-	void handlerGenerateRuntimeHintsForTargetType() {
-		String className = "com.example.Test$$SpringCGLIB$$0";
-		this.handler.accept(className, TEST_CONTENT);
-		assertThat(RuntimeHintsPredicates.reflection().onType(TypeReference.of("com.example.Test"))
-				.withMemberCategories(MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
-						MemberCategory.INVOKE_DECLARED_METHODS))
+	void handlerLoadedClassCreatesRuntimeHintsForProxy() {
+		this.handler.handleLoadedClass(CglibClassHandler.class);
+		assertThat(RuntimeHintsPredicates.reflection().onType(CglibClassHandler.class)
+				.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS))
 				.accepts(this.generationContext.getRuntimeHints());
-	}
-
-	@Test
-	void handlerFailsWithInvalidProxyClassName() {
-		String className = "com.example.Test$$AnotherProxy$$0";
-		assertThatIllegalArgumentException().isThrownBy(() -> this.handler.accept(className, TEST_CONTENT))
-				.withMessageContaining("Failed to extract target type");
 	}
 
 	@Test
 	void handlerRegisterGeneratedClass() throws IOException {
 		String className = "com.example.Test$$SpringCGLIB$$0";
-		this.handler.accept(className, TEST_CONTENT);
+		this.handler.handleGeneratedClass(className, TEST_CONTENT);
 		InMemoryGeneratedFiles generatedFiles = this.generationContext.getGeneratedFiles();
 		assertThat(generatedFiles.getGeneratedFiles(Kind.SOURCE)).isEmpty();
 		assertThat(generatedFiles.getGeneratedFiles(Kind.RESOURCE)).isEmpty();

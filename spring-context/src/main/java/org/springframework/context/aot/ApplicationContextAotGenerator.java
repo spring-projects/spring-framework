@@ -50,7 +50,7 @@ public class ApplicationContextAotGenerator {
 	 */
 	public ClassName processAheadOfTime(GenericApplicationContext applicationContext,
 			GenerationContext generationContext) {
-		return withGeneratedClassHandler(new GeneratedClassHandler(generationContext), () -> {
+		return withCglibClassHandler(new CglibClassHandler(generationContext), () -> {
 			applicationContext.refreshForAotProcessing(generationContext.getRuntimeHints());
 			DefaultListableBeanFactory beanFactory = applicationContext.getDefaultListableBeanFactory();
 			ApplicationContextInitializationCodeGenerator codeGenerator =
@@ -60,12 +60,14 @@ public class ApplicationContextAotGenerator {
 		});
 	}
 
-	private <T> T withGeneratedClassHandler(GeneratedClassHandler generatedClassHandler, Supplier<T> task) {
+	private <T> T withCglibClassHandler(CglibClassHandler cglibClassHandler, Supplier<T> task) {
 		try {
-			ReflectUtils.setGeneratedClassHandler(generatedClassHandler);
+			ReflectUtils.setLoadedClassHandler(cglibClassHandler::handleLoadedClass);
+			ReflectUtils.setGeneratedClassHandler(cglibClassHandler::handleGeneratedClass);
 			return task.get();
 		}
 		finally {
+			ReflectUtils.setLoadedClassHandler(null);
 			ReflectUtils.setGeneratedClassHandler(null);
 		}
 	}

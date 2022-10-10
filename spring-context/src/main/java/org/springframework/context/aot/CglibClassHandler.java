@@ -30,46 +30,48 @@ import org.springframework.cglib.core.ReflectUtils;
 import org.springframework.core.io.ByteArrayResource;
 
 /**
- * Handle generated classes by adding them to a {@link GenerationContext},
+ * Handle CGLIB classes by adding them to a {@link GenerationContext},
  * and register the necessary hints so that they can be instantiated.
  *
  * @author Stephane Nicoll
  * @see ReflectUtils#setGeneratedClassHandler(BiConsumer)
+ * @see ReflectUtils#setLoadedClassHandler(Consumer)
  */
-class GeneratedClassHandler implements BiConsumer<String, byte[]> {
+class CglibClassHandler {
 
-	private static final Consumer<Builder> asCglibProxy = hint ->
-			hint.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-					MemberCategory.INVOKE_DECLARED_METHODS,
-					MemberCategory.DECLARED_FIELDS);
-
-	private static final Consumer<Builder> asCglibProxyTargetType = hint ->
-			hint.withMembers(MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
-					MemberCategory.INVOKE_DECLARED_METHODS);
+	private static final Consumer<Builder> instantiateCglibProxy = hint ->
+			hint.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 
 	private final RuntimeHints runtimeHints;
 
 	private final GeneratedFiles generatedFiles;
 
-	GeneratedClassHandler(GenerationContext generationContext) {
+	CglibClassHandler(GenerationContext generationContext) {
 		this.runtimeHints = generationContext.getRuntimeHints();
 		this.generatedFiles = generationContext.getGeneratedFiles();
 	}
 
-	@Override
-	public void accept(String className, byte[] content) {
-		this.runtimeHints.reflection().registerType(TypeReference.of(className), asCglibProxy)
-				.registerType(TypeReference.of(getTargetTypeClassName(className)), asCglibProxyTargetType);
-		String path = className.replace(".", "/") + ".class";
+	/**
+	 * Handle the specified generated CGLIB class.
+	 * @param cglibClassName the name of the generated class
+	 * @param content the bytecode of the generated class
+	 */
+	public void handleGeneratedClass(String cglibClassName, byte[] content) {
+		registerHints(TypeReference.of(cglibClassName));
+		String path = cglibClassName.replace(".", "/") + ".class";
 		this.generatedFiles.addFile(Kind.CLASS, path, new ByteArrayResource(content));
 	}
 
-	private String getTargetTypeClassName(String proxyClassName) {
-		int index = proxyClassName.indexOf("$$SpringCGLIB$$");
-		if (index == -1) {
-			throw new IllegalArgumentException("Failed to extract target type from " + proxyClassName);
-		}
-		return proxyClassName.substring(0, index);
+	/**
+	 * Handle the specified loaded CGLIB class.
+	 * @param cglibClass a cglib class that has been loaded
+	 */
+	public void handleLoadedClass(Class<?> cglibClass) {
+		registerHints(TypeReference.of(cglibClass));
+	}
+
+	private void registerHints(TypeReference cglibTypeReference) {
+		this.runtimeHints.reflection().registerType(cglibTypeReference, instantiateCglibProxy);
 	}
 
 }

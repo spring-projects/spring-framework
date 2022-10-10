@@ -297,10 +297,15 @@ class ApplicationContextAotGeneratorTests {
 			GenericApplicationContext applicationContext = new AnnotationConfigApplicationContext();
 			applicationContext.registerBean(CglibConfiguration.class);
 			TestGenerationContext context = processAheadOfTime(applicationContext);
-			String proxyClassName = CglibConfiguration.class.getName() + "$$SpringCGLIB$$0";
+			isRegisteredCglibClass(context, CglibConfiguration.class.getName() + "$$SpringCGLIB$$0");
+			isRegisteredCglibClass(context, CglibConfiguration.class.getName() + "$$SpringCGLIB$$1");
+			isRegisteredCglibClass(context, CglibConfiguration.class.getName() + "$$SpringCGLIB$$2");
+		}
+
+		private void isRegisteredCglibClass(TestGenerationContext context, String cglibClassName) throws IOException {
 			assertThat(context.getGeneratedFiles()
-					.getGeneratedFileContent(Kind.CLASS, proxyClassName.replace('.', '/') + ".class")).isNotNull();
-			assertThat(RuntimeHintsPredicates.reflection().onType(TypeReference.of(proxyClassName))
+					.getGeneratedFileContent(Kind.CLASS, cglibClassName.replace('.', '/') + ".class")).isNotNull();
+			assertThat(RuntimeHintsPredicates.reflection().onType(TypeReference.of(cglibClassName))
 					.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(context.getRuntimeHints());
 		}
 

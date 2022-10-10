@@ -21,9 +21,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.TypeHint.Builder;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -46,6 +49,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.metrics.ApplicationStartup;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Generic ApplicationContext implementation that holds a single internal
@@ -106,6 +110,16 @@ import org.springframework.util.Assert;
  * @see org.springframework.beans.factory.support.PropertiesBeanDefinitionReader
  */
 public class GenericApplicationContext extends AbstractApplicationContext implements BeanDefinitionRegistry {
+
+	private static final Consumer<Builder> asCglibProxy = hint ->
+			hint.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+					MemberCategory.INVOKE_DECLARED_METHODS,
+					MemberCategory.DECLARED_FIELDS);
+
+	private static final Consumer<Builder> asCglibProxyTarget = hint ->
+			hint.withMembers(MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
+					MemberCategory.INVOKE_DECLARED_METHODS);
+
 
 	private final DefaultListableBeanFactory beanFactory;
 
@@ -432,6 +446,14 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 					beanType = bpp.determineBeanType(beanType, beanName);
 					if (Proxy.isProxyClass(beanType)) {
 						runtimeHints.proxies().registerJdkProxy(beanType.getInterfaces());
+					}
+					else {
+						Class<?> userClass = ClassUtils.getUserClass(beanType);
+						if (userClass != beanType) {
+							runtimeHints.reflection()
+									.registerType(beanType, asCglibProxy)
+									.registerType(userClass, asCglibProxyTarget);
+						}
 					}
 				}
 			}
