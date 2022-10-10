@@ -354,7 +354,8 @@ public class CodeFlow implements Opcodes {
 					case 'J' -> mv.visitInsn(I2L);
 					case 'I' -> { //nop
 					}
-					default -> throw new IllegalStateException("Unexpected value: " + targetDescriptor);
+					default ->
+							throw new IllegalStateException("Cannot get from " + stackTop + " to " + targetDescriptor);
 				}
 			}
 			case 'J' -> {
