@@ -128,13 +128,12 @@ class ContextAotProcessorTests {
 
 		private static Settings createSettings(Path sourceOutput, Path resourceOutput,
 				Path classOutput, String groupId, String artifactId) {
-			Settings settings = new Settings();
-			settings.setSourceOutput(sourceOutput);
-			settings.setResourceOutput(resourceOutput);
-			settings.setClassOutput(classOutput);
-			settings.setArtifactId(artifactId);
-			settings.setGroupId(groupId);
-			return settings;
+			return new Settings()
+					.setSourceOutput(sourceOutput)
+					.setResourceOutput(resourceOutput)
+					.setClassOutput(classOutput)
+					.setArtifactId(artifactId)
+					.setGroupId(groupId);
 		}
 
 		@Override

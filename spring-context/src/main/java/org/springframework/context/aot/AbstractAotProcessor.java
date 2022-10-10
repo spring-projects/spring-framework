@@ -123,9 +123,11 @@ public abstract class AbstractAotProcessor {
 		/**
 		 * Set the output directory for generated sources.
 		 * @param sourceOutput the location of generated sources
+		 * @return this settings object for method chaining
 		 */
-		public void setSourceOutput(Path sourceOutput) {
+		public Settings setSourceOutput(Path sourceOutput) {
 			this.sourceOutput = sourceOutput;
+			return this;
 		}
 
 		/**
@@ -139,9 +141,11 @@ public abstract class AbstractAotProcessor {
 		/**
 		 * Set the output directory for generated resources.
 		 * @param resourceOutput the location of generated resources
+		 * @return this settings object for method chaining
 		 */
-		public void setResourceOutput(Path resourceOutput) {
+		public Settings setResourceOutput(Path resourceOutput) {
 			this.resourceOutput = resourceOutput;
+			return this;
 		}
 
 		/**
@@ -155,9 +159,11 @@ public abstract class AbstractAotProcessor {
 		/**
 		 * Set the output directory for generated classes.
 		 * @param classOutput the location of generated classes
+		 * @return this settings object for method chaining
 		 */
-		public void setClassOutput(Path classOutput) {
+		public Settings setClassOutput(Path classOutput) {
 			this.classOutput = classOutput;
+			return this;
 		}
 
 		/**
@@ -172,9 +178,11 @@ public abstract class AbstractAotProcessor {
 		 * Set the group ID of the application.
 		 * @param groupId the group ID of the application, used to locate
 		 * {@code native-image.properties}
+		 * @return this settings object for method chaining
 		 */
-		public void setGroupId(String groupId) {
+		public Settings setGroupId(String groupId) {
 			this.groupId = groupId;
+			return this;
 		}
 
 		/**
@@ -189,9 +197,11 @@ public abstract class AbstractAotProcessor {
 		 * Set the artifact ID of the application.
 		 * @param artifactId the artifact ID of the application, used to locate
 		 * {@code native-image.properties}
+		 * @return this settings object for method chaining
 		 */
-		public void setArtifactId(String artifactId) {
+		public Settings setArtifactId(String artifactId) {
 			this.artifactId = artifactId;
+			return this;
 		}
 
 		/**
