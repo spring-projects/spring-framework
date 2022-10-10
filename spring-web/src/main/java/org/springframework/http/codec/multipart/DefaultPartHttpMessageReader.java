@@ -49,9 +49,6 @@ import org.springframework.util.Assert;
  * {@link #setMaxInMemorySize(int) maxInMemorySize} in memory, and parts larger
  * than that to a temporary file in
  * {@link #setFileStorageDirectory(Path) fileStorageDirectory}.
- * <p>In {@linkplain #setStreaming(boolean) streaming} mode, the contents of the
- * part is streamed directly from the parsed input buffer stream, and not stored
- * in memory nor file.
  *
  * <p>This reader can be provided to {@link MultipartHttpMessageReader} in order
  * to aggregate all parts into a Map.
@@ -181,7 +178,10 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	 * {@link #setMaxDiskUsagePerPart(long) maxDiskUsagePerPart},
 	 * {@link #setFileStorageDirectory(Path) fileStorageDirectory}, and
 	 * {@link #setBlockingOperationScheduler(Scheduler) fileCreationScheduler}.
+	 * @deprecated as of 6.0, in favor of {@link PartEvent} and
+	 * {@link PartEventHttpMessageReader}
 	 */
+	@Deprecated(since = "6.0", forRemoval = true)
 	public void setStreaming(boolean streaming) {
 		this.streaming = streaming;
 	}
