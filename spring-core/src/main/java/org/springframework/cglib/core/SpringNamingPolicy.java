@@ -31,20 +31,33 @@ public final class SpringNamingPolicy implements NamingPolicy {
 
 	public static final SpringNamingPolicy INSTANCE = new SpringNamingPolicy();
 
+	private static final String LABEL = "$$SpringCGLIB$$";
+
 	private SpringNamingPolicy() {
 	}
 
 	public String getClassName(String prefix, String source, Object key, Predicate names) {
 		if (prefix == null) {
 			prefix = "org.springframework.cglib.empty.Object";
-		} else if (prefix.startsWith("java")) {
+		}
+		else if (prefix.startsWith("java")) {
 			prefix = "_" + prefix;
 		}
-		String base = prefix + "$$SpringCGLIB$$";
+
+		String base;
+		int existingLabel = prefix.indexOf(LABEL);
+		if (existingLabel >= 0) {
+			base = prefix.substring(0, existingLabel + LABEL.length());
+		}
+		else {
+			base = prefix + LABEL;
+		}
+
 		int index = 0;
 		String attempt = base + index;
-		while (names.evaluate(attempt))
+		while (names.evaluate(attempt)) {
 			attempt = base + index++;
+		}
 		return attempt;
 	}
 
