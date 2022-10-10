@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.springframework.asm.Type;
 
@@ -62,6 +63,8 @@ public class ReflectUtils {
 	private static final List<Method> OBJECT_METHODS = new ArrayList<Method>();
 
 	private static BiConsumer<String, byte[]> generatedClassHandler;
+
+	private static Consumer<Class<?>> loadedClassHandler;
 
 	// SPRING PATCH BEGIN
 	static {
@@ -550,6 +553,21 @@ public class ReflectUtils {
 		Class.forName(className, true, loader);
 		return c;
 	}
+
+	public static void setLoadedClassHandler(Consumer<Class<?>> loadedClassHandler) {
+		ReflectUtils.loadedClassHandler = loadedClassHandler;
+	}
+
+	public static Class<?> loadClass(String className, ClassLoader classLoader) throws ClassNotFoundException {
+		// Force static initializers to run.
+		Class<?> clazz = Class.forName(className, true, classLoader);
+		Consumer<Class<?>> handlerToUse = loadedClassHandler;
+		if (handlerToUse != null) {
+			handlerToUse.accept(clazz);
+		}
+		return clazz;
+	}
+
 	// SPRING PATCH END
 
 	public static int findPackageProtected(Class[] classes) {

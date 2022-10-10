@@ -349,7 +349,9 @@ abstract public class AbstractClassGenerator<T> implements ClassGenerator {
 			if (attemptLoad) {
 				try {
 					// SPRING PATCH BEGIN
-					gen = Class.forName(getClassName(), true, classLoader);
+					synchronized (classLoader) { // just in case
+						gen = ReflectUtils.loadClass(getClassName(), classLoader);
+					}
 					// SPRING PATCH END
 					return gen;
 				}
