@@ -35,20 +35,20 @@ import org.springframework.javapoet.ClassName;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link AotProcessor}.
+ * Tests for {@link ContextAotProcessor}.
  *
  * @author Stephane Nicoll
  */
-class AotProcessorTests {
+class ContextAotProcessorTests {
 
 	@Test
 	void processGeneratesAssets(@TempDir Path directory) {
 		GenericApplicationContext context = new AnnotationConfigApplicationContext();
 		context.registerBean(SampleApplication.class);
-		AotProcessor processor = new TestAotProcessor(SampleApplication.class, directory);
+		ContextAotProcessor processor = new DemoContextAotProcessor(SampleApplication.class, directory);
 		ClassName className = processor.process();
 		assertThat(className).isEqualTo(ClassName.get(SampleApplication.class.getPackageName(),
-				"AotProcessorTests_SampleApplication__ApplicationContextInitializer"));
+				"ContextAotProcessorTests_SampleApplication__ApplicationContextInitializer"));
 		assertThat(directory).satisfies(hasGeneratedAssetsForSampleApplication());
 		context.close();
 	}
@@ -61,7 +61,7 @@ class AotProcessorTests {
 		Path existingSourceOutput = createExisting(sourceOutput);
 		Path existingResourceOutput = createExisting(resourceOutput);
 		Path existingClassOutput = createExisting(classOutput);
-		AotProcessor processor = new TestAotProcessor(SampleApplication.class,
+		ContextAotProcessor processor = new DemoContextAotProcessor(SampleApplication.class,
 				sourceOutput, resourceOutput, classOutput);
 		processor.process();
 		assertThat(existingSourceOutput).doesNotExist();
@@ -73,7 +73,7 @@ class AotProcessorTests {
 	void processWithEmptyNativeImageArgumentsDoesNotCreateNativeImageProperties(@TempDir Path directory) {
 		GenericApplicationContext context = new AnnotationConfigApplicationContext();
 		context.registerBean(SampleApplication.class);
-		AotProcessor processor = new TestAotProcessor(SampleApplication.class, directory) {
+		ContextAotProcessor processor = new DemoContextAotProcessor(SampleApplication.class, directory) {
 			@Override
 			protected List<String> getDefaultNativeImageArguments(String application) {
 				return Collections.emptyList();
@@ -95,19 +95,19 @@ class AotProcessorTests {
 	private Consumer<Path> hasGeneratedAssetsForSampleApplication() {
 		return directory -> {
 			assertThat(directory.resolve(
-					"source/org/springframework/context/aot/AotProcessorTests_SampleApplication__ApplicationContextInitializer.java"))
+					"source/org/springframework/context/aot/ContextAotProcessorTests_SampleApplication__ApplicationContextInitializer.java"))
 					.exists().isRegularFile();
-			assertThat(directory.resolve("source/org/springframework/context/aot/AotProcessorTests__BeanDefinitions.java"))
+			assertThat(directory.resolve("source/org/springframework/context/aot/ContextAotProcessorTests__BeanDefinitions.java"))
 					.exists().isRegularFile();
 			assertThat(directory.resolve(
-					"source/org/springframework/context/aot/AotProcessorTests_SampleApplication__BeanFactoryRegistrations.java"))
+					"source/org/springframework/context/aot/ContextAotProcessorTests_SampleApplication__BeanFactoryRegistrations.java"))
 					.exists().isRegularFile();
 			assertThat(directory.resolve("resource/META-INF/native-image/com.example/example/reflect-config.json"))
 					.exists().isRegularFile();
 			Path nativeImagePropertiesFile = directory
 					.resolve("resource/META-INF/native-image/com.example/example/native-image.properties");
 			assertThat(nativeImagePropertiesFile).exists().isRegularFile().hasContent("""
-					Args = -H:Class=org.springframework.context.aot.AotProcessorTests$SampleApplication \\
+					Args = -H:Class=org.springframework.context.aot.ContextAotProcessorTests$SampleApplication \\
 					--report-unsupported-elements-at-runtime \\
 					--no-fallback \\
 					--install-exit-handlers
@@ -116,14 +116,14 @@ class AotProcessorTests {
 	}
 
 
-	private static class TestAotProcessor extends AotProcessor {
+	private static class DemoContextAotProcessor extends ContextAotProcessor {
 
-		public TestAotProcessor(Class<?> application,
+		DemoContextAotProcessor(Class<?> application,
 				Path sourceOutput, Path resourceOutput, Path classOutput) {
 			super(application, sourceOutput, resourceOutput, classOutput, "com.example", "example");
 		}
 
-		public TestAotProcessor(Class<?> application, Path rootPath) {
+		DemoContextAotProcessor(Class<?> application, Path rootPath) {
 			super(application, rootPath.resolve("source"), rootPath.resolve("resource"),
 					rootPath.resolve("class"), "com.example", "example");
 		}

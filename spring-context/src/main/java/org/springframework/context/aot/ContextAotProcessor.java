@@ -26,39 +26,28 @@ import java.util.List;
 import org.springframework.aot.generate.ClassNameGenerator;
 import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.FileSystemGeneratedFiles;
-import org.springframework.aot.generate.GeneratedFiles.Kind;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.ReflectionHints;
-import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
-import org.springframework.aot.nativex.FileNativeConfigurationWriter;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.javapoet.ClassName;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.FileSystemUtils;
 
 /**
- * Filesystem-based ahead-of-time processing base implementation. Typically
- * used to kick off the optimizations of an application in a build tool.
+ * Filesystem-based ahead-of-time (AOT) processing base implementation.
+ *
+ * <p>Concrete implementations are typically used to kick off optimization of an
+ * application in a build tool.
  *
  * @author Stephane Nicoll
  * @author Andy Wilkinson
  * @author Phillip Webb
  * @since 6.0
+ * @see org.springframework.test.context.aot.TestAotProcessor
  */
-public abstract class AotProcessor {
+public abstract class ContextAotProcessor extends AbstractAotProcessor {
 
 	private final Class<?> application;
-
-	private final Path sourceOutput;
-
-	private final Path resourceOutput;
-
-	private final Path classOutput;
-
-	private final String groupId;
-
-	private final String artifactId;
 
 	/**
 	 * Create a new processor instance.
@@ -71,24 +60,12 @@ public abstract class AotProcessor {
 	 * @param artifactId the artifact ID of the application, used to locate
 	 * {@code native-image.properties}
 	 */
-	protected AotProcessor(Class<?> application, Path sourceOutput, Path resourceOutput,
+	protected ContextAotProcessor(Class<?> application, Path sourceOutput, Path resourceOutput,
 			Path classOutput, String groupId, String artifactId) {
 
+		super(sourceOutput, resourceOutput, classOutput, groupId, artifactId);
 		this.application = application;
-		this.sourceOutput = sourceOutput;
-		this.resourceOutput = resourceOutput;
-		this.classOutput = classOutput;
-		this.groupId = groupId;
-		this.artifactId = artifactId;
 	}
-
-	/**
-	 * Prepare the {@link GenericApplicationContext} for the specified
-	 * application to be used against an {@link ApplicationContextAotGenerator}.
-	 * @return a non-refreshed {@link GenericApplicationContext}
-	 */
-	protected abstract GenericApplicationContext prepareApplicationContext(Class<?> application);
-
 
 	/**
 	 * Invoke the processing by clearing output directories first, followed by
@@ -103,11 +80,11 @@ public abstract class AotProcessor {
 	}
 
 	/**
-	 * Delete the source, resource, and class output directories.
+	 * Prepare the {@link GenericApplicationContext} for the specified
+	 * application to be used against an {@link ApplicationContextAotGenerator}.
+	 * @return a non-refreshed {@link GenericApplicationContext}
 	 */
-	protected void deleteExistingOutput() {
-		deleteExistingOutput(this.sourceOutput, this.resourceOutput, this.classOutput);
-	}
+	protected abstract GenericApplicationContext prepareApplicationContext(Class<?> application);
 
 	/**
 	 * Perform ahead-of-time processing of the specified context.
@@ -117,7 +94,7 @@ public abstract class AotProcessor {
 	 * @param applicationContext the context to process
 	 */
 	protected ClassName performAotProcessing(GenericApplicationContext applicationContext) {
-		FileSystemGeneratedFiles generatedFiles = new FileSystemGeneratedFiles(this::getRoot);
+		FileSystemGeneratedFiles generatedFiles = createFileSystemGeneratedFiles();
 		DefaultGenerationContext generationContext = new DefaultGenerationContext(
 				createClassNameGenerator(), generatedFiles);
 		ApplicationContextAotGenerator generator = new ApplicationContextAotGenerator();
@@ -167,12 +144,6 @@ public abstract class AotProcessor {
 				.withConstructor(Collections.emptyList(), ExecutableMode.INVOKE));
 	}
 
-	private void writeHints(RuntimeHints hints) {
-		FileNativeConfigurationWriter writer =
-				new FileNativeConfigurationWriter(this.resourceOutput, this.groupId, this.artifactId);
-		writer.write(hints);
-	}
-
 	private void writeNativeImageProperties(List<String> args) {
 		if (CollectionUtils.isEmpty(args)) {
 			return;
@@ -180,8 +151,8 @@ public abstract class AotProcessor {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Args = ");
 		sb.append(String.join(String.format(" \\%n"), args));
-		Path file = this.resourceOutput
-				.resolve("META-INF/native-image/" + this.groupId + "/" + this.artifactId + "/native-image.properties");
+		Path file = getResourceOutput()
+				.resolve("META-INF/native-image/" + getGroupId() + "/" + getArtifactId() + "/native-image.properties");
 		try {
 			if (!Files.exists(file)) {
 				Files.createDirectories(file.getParent());
@@ -190,27 +161,8 @@ public abstract class AotProcessor {
 			Files.writeString(file, sb.toString());
 		}
 		catch (IOException ex) {
-			throw new IllegalStateException("Failed to write native-image properties", ex);
+			throw new IllegalStateException("Failed to write native-image.properties", ex);
 		}
-	}
-
-	private void deleteExistingOutput(Path... paths) {
-		for (Path path : paths) {
-			try {
-				FileSystemUtils.deleteRecursively(path);
-			}
-			catch (IOException ex) {
-				throw new RuntimeException("Failed to delete existing output in '" + path + "'");
-			}
-		}
-	}
-
-	private Path getRoot(Kind kind) {
-		return switch (kind) {
-			case SOURCE -> this.sourceOutput;
-			case RESOURCE -> this.resourceOutput;
-			case CLASS -> this.classOutput;
-		};
 	}
 
 }

@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -58,14 +59,15 @@ class TestAotProcessorTests extends AbstractAotTests {
 				BasicSpringVintageTests.class
 			).forEach(testClass -> copy(testClass, classpathRoot));
 
-		Path[] classpathRoots = { classpathRoot };
+		Set<Path> classpathRoots = Set.of(classpathRoot);
 		Path sourceOutput = tempDir.resolve("generated/sources");
 		Path resourceOutput = tempDir.resolve("generated/resources");
 		Path classOutput = tempDir.resolve("generated/classes");
 		String groupId = "org.example";
 		String artifactId = "app-tests";
 
-		TestAotProcessor processor = new TestAotProcessor(classpathRoots, sourceOutput, resourceOutput, classOutput, groupId, artifactId);
+		TestAotProcessor processor =
+				new DemoTestAotProcessor(classpathRoots, sourceOutput, resourceOutput, classOutput, groupId, artifactId);
 		processor.process();
 
 		assertThat(findFiles(sourceOutput)).containsExactlyInAnyOrderElementsOf(expectedSourceFiles());
@@ -97,4 +99,13 @@ class TestAotProcessorTests extends AbstractAotTests {
 		return Arrays.stream(expectedSourceFilesForBasicSpringTests).map(Path::of).toList();
 	}
 
+
+	private static class DemoTestAotProcessor extends TestAotProcessor {
+
+		DemoTestAotProcessor(Set<Path> classpathRoots, Path sourceOutput, Path resourceOutput, Path classOutput,
+				String groupId, String artifactId) {
+			super(classpathRoots, sourceOutput, resourceOutput, classOutput, groupId, artifactId);
+		}
+
+	}
 }
