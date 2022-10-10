@@ -126,8 +126,8 @@ public class TestContextAotGenerator {
 			});
 			MultiValueMap<ClassName, Class<?>> initializerClassMappings = processAheadOfTime(mergedConfigMappings);
 
-			generateTestAotMappings(initializerClassMappings);
-			generateAotTestAttributes();
+			generateAotTestContextInitializerMappings(initializerClassMappings);
+			generateAotTestAttributeMappings();
 		}
 		finally {
 			resetAotFactories();
@@ -139,7 +139,9 @@ public class TestContextAotGenerator {
 		AotTestContextInitializersFactory.reset();
 	}
 
-	private MultiValueMap<ClassName, Class<?>> processAheadOfTime(MultiValueMap<MergedContextConfiguration, Class<?>> mergedConfigMappings) {
+	private MultiValueMap<ClassName, Class<?>> processAheadOfTime(
+			MultiValueMap<MergedContextConfiguration, Class<?>> mergedConfigMappings) {
+
 		ClassLoader classLoader = getClass().getClassLoader();
 		MultiValueMap<ClassName, Class<?>> initializerClassMappings = new LinkedMultiValueMap<>();
 		mergedConfigMappings.forEach((mergedConfig, testClasses) -> {
@@ -251,9 +253,8 @@ public class TestContextAotGenerator {
 		return "TestContext%03d_".formatted(this.sequence.incrementAndGet());
 	}
 
-	private void generateTestAotMappings(MultiValueMap<ClassName, Class<?>> initializerClassMappings) {
-		ClassNameGenerator classNameGenerator = new ClassNameGenerator(
-				ClassName.get(AotTestContextInitializers.class));
+	private void generateAotTestContextInitializerMappings(MultiValueMap<ClassName, Class<?>> initializerClassMappings) {
+		ClassNameGenerator classNameGenerator = new ClassNameGenerator(ClassName.get(AotTestContextInitializers.class));
 		DefaultGenerationContext generationContext =
 				new DefaultGenerationContext(classNameGenerator, this.generatedFiles, this.runtimeHints);
 		GeneratedClasses generatedClasses = generationContext.getGeneratedClasses();
@@ -265,9 +266,8 @@ public class TestContextAotGenerator {
 		registerPublicMethods(className);
 	}
 
-	private void generateAotTestAttributes() {
-		ClassNameGenerator classNameGenerator = new ClassNameGenerator(
-				ClassName.get(AotTestAttributes.class));
+	private void generateAotTestAttributeMappings() {
+		ClassNameGenerator classNameGenerator = new ClassNameGenerator(ClassName.get(AotTestAttributes.class));
 		DefaultGenerationContext generationContext =
 				new DefaultGenerationContext(classNameGenerator, this.generatedFiles, this.runtimeHints);
 		GeneratedClasses generatedClasses = generationContext.getGeneratedClasses();

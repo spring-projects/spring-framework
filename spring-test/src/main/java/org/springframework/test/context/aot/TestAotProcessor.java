@@ -62,6 +62,14 @@ public abstract class TestAotProcessor extends AbstractAotProcessor {
 
 
 	/**
+	 * Get the classpath roots to scan for test classes.
+	 */
+	protected Set<Path> getClasspathRoots() {
+		return this.classpathRoots;
+	}
+
+
+	/**
 	 * Trigger processing of the test classes by
 	 * {@linkplain #deleteExistingOutput() clearing output directories} first and
 	 * then {@linkplain #performAotProcessing() performing AOT processing}.
@@ -79,7 +87,7 @@ public abstract class TestAotProcessor extends AbstractAotProcessor {
 	 * components used by the tests.
 	 */
 	protected void performAotProcessing() {
-		TestClassScanner scanner = new TestClassScanner(this.classpathRoots);
+		TestClassScanner scanner = new TestClassScanner(getClasspathRoots());
 		Stream<Class<?>> testClasses = scanner.scan();
 
 		GeneratedFiles generatedFiles = createFileSystemGeneratedFiles();

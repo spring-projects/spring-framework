@@ -67,6 +67,15 @@ public abstract class ContextAotProcessor extends AbstractAotProcessor {
 		this.application = application;
 	}
 
+
+	/**
+	 * Get the the application entry point.
+	 */
+	protected Class<?> getApplication() {
+		return this.application;
+	}
+
+
 	/**
 	 * Invoke the processing by clearing output directories first, followed by
 	 * {@link #performAotProcessing(GenericApplicationContext)}.
@@ -75,7 +84,7 @@ public abstract class ContextAotProcessor extends AbstractAotProcessor {
 	 */
 	public ClassName process() {
 		deleteExistingOutput();
-		GenericApplicationContext applicationContext = prepareApplicationContext(this.application);
+		GenericApplicationContext applicationContext = prepareApplicationContext(getApplication());
 		return performAotProcessing(applicationContext);
 	}
 
@@ -102,7 +111,7 @@ public abstract class ContextAotProcessor extends AbstractAotProcessor {
 		registerEntryPointHint(generationContext, generatedInitializerClassName);
 		generationContext.writeGeneratedContent();
 		writeHints(generationContext.getRuntimeHints());
-		writeNativeImageProperties(getDefaultNativeImageArguments(this.application.getName()));
+		writeNativeImageProperties(getDefaultNativeImageArguments(getApplication().getName()));
 		return generatedInitializerClassName;
 	}
 
@@ -113,7 +122,7 @@ public abstract class ContextAotProcessor extends AbstractAotProcessor {
 	 * @return the class name generator
 	 */
 	protected ClassNameGenerator createClassNameGenerator() {
-		return new ClassNameGenerator(ClassName.get(this.application));
+		return new ClassNameGenerator(ClassName.get(getApplication()));
 	}
 
 	/**
@@ -137,7 +146,7 @@ public abstract class ContextAotProcessor extends AbstractAotProcessor {
 			ClassName generatedInitializerClassName) {
 
 		TypeReference generatedType = TypeReference.of(generatedInitializerClassName.canonicalName());
-		TypeReference applicationType = TypeReference.of(this.application);
+		TypeReference applicationType = TypeReference.of(getApplication());
 		ReflectionHints reflection = generationContext.getRuntimeHints().reflection();
 		reflection.registerType(applicationType);
 		reflection.registerType(generatedType, typeHint -> typeHint.onReachableType(applicationType)
