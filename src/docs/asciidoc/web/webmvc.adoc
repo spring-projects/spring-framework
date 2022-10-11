@@ -4960,6 +4960,9 @@ The actual message code value is parameterized with placeholders, e.g.
 `"HTTP method {0} not supported"` to be expanded from the arguments.
 - `ResponseEntityExceptionHandler` uses the message code and the message arguments
 to resolve the problem "detail" field.
+- Lower level exceptions that cannot implement `ErrorResponse`, e.g. `TypeMismatchException`,
+have their problem detail, including message code and arguments set in
+`ResponseEntityExceptionHandler`.
 
 Message codes default to "problemDetail." + the fully qualified exception class name. Some
 exceptions may expose additional message codes in which case a suffix is added to
@@ -4975,6 +4978,10 @@ MVC exceptions:
 | (default)
 |
 
+| `ConversionNotSupportedException`
+| (default)
+| `{0}` property name, `{1}` property value
+
 | `HttpMediaTypeNotAcceptableException`
 | (default)
 | `{0}` list of supported media types
@@ -4989,6 +4996,14 @@ MVC exceptions:
 
 | `HttpMediaTypeNotSupportedException`
 | (default) + ".parseError"
+|
+
+| `HttpMessageNotReadableException`
+| (default)
+|
+
+| `HttpMessageNotWritableException`
+| (default)
 |
 
 | `HttpRequestMethodNotSupportedException`
@@ -5028,6 +5043,10 @@ MVC exceptions:
 | `NoHandlerFoundException`
 | (default)
 |
+
+| `TypeMismatchException`
+| (default)
+| `{0}` property name, `{1}` property value
 
 | `UnsatisfiedServletRequestParameterException`
 | (default)

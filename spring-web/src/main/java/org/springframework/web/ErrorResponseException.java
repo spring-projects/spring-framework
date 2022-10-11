@@ -80,7 +80,7 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 	 * resolve the detail message with.
 	 * @since 6.0
 	 */
-	protected ErrorResponseException(
+	public ErrorResponseException(
 			HttpStatusCode status, ProblemDetail body, @Nullable Throwable cause,
 			@Nullable String messageDetailCode, @Nullable Object[] messageDetailArguments) {
 

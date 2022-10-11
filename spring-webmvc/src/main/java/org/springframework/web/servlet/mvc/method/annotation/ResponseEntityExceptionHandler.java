@@ -380,7 +380,8 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	/**
 	 * Customize the handling of {@link ConversionNotSupportedException}.
 	 * <p>By default this method creates a {@link ProblemDetail} with the status
-	 * and a short detail message, and then delegates to
+	 * and a short detail message, and also looks up an override for the detail
+	 * via {@link MessageSource}, before delegating to
 	 * {@link #handleExceptionInternal}.
 	 * @param ex the exception to handle
 	 * @param headers the headers to use for the response
@@ -393,8 +394,10 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	protected ResponseEntity<Object> handleConversionNotSupported(
 			ConversionNotSupportedException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
-		ProblemDetail body = ProblemDetail.forStatusAndDetail(status,
-				"Failed to convert '" + ex.getPropertyName() + "' with value: '" + ex.getValue() + "'");
+		Object[] args = {ex.getPropertyName(), ex.getValue()};
+
+		ProblemDetail body = resolveDetailViaMessageSource(
+				status, args, "Failed to convert '" + args[0] + "' with value: '" + args[1] + "'");
 
 		return handleExceptionInternal(ex, body, headers, status, request);
 	}
@@ -402,7 +405,8 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	/**
 	 * Customize the handling of {@link TypeMismatchException}.
 	 * <p>By default this method creates a {@link ProblemDetail} with the status
-	 * and a short detail message, and then delegates to
+	 * and a short detail message, and also looks up an override for the detail
+	 * via {@link MessageSource}, before delegating to
 	 * {@link #handleExceptionInternal}.
 	 * @param ex the exception to handle
 	 * @param headers the headers to use for the response
@@ -415,8 +419,10 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	protected ResponseEntity<Object> handleTypeMismatch(
 			TypeMismatchException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
-		ProblemDetail body = ProblemDetail.forStatusAndDetail(status,
-				"Unexpected type for '" + ex.getPropertyName() + "' with value: '" + ex.getValue() + "'");
+		Object[] args = {ex.getPropertyName(), ex.getValue()};
+
+		ProblemDetail body = resolveDetailViaMessageSource(
+				status, args, "Failed to convert '" + args[0] + "' with value: '" + args[1] + "'");
 
 		return handleExceptionInternal(ex, body, headers, status, request);
 	}
@@ -424,7 +430,8 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	/**
 	 * Customize the handling of {@link HttpMessageNotReadableException}.
 	 * <p>By default this method creates a {@link ProblemDetail} with the status
-	 * and a short detail message, and then delegates to
+	 * and a short detail message, and also looks up an override for the detail
+	 * via {@link MessageSource}, before delegating to
 	 * {@link #handleExceptionInternal}.
 	 * @param ex the exception to handle
 	 * @param headers the headers to use for the response
@@ -437,14 +444,15 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	protected ResponseEntity<Object> handleHttpMessageNotReadable(
 			HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
-		ProblemDetail body = ProblemDetail.forStatusAndDetail(status, "Failed to read request body");
+		ProblemDetail body = resolveDetailViaMessageSource(status, null, "Failed to read request");
 		return handleExceptionInternal(ex, body, headers, status, request);
 	}
 
 	/**
 	 * Customize the handling of {@link HttpMessageNotWritableException}.
 	 * <p>By default this method creates a {@link ProblemDetail} with the status
-	 * and a short detail message, and then delegates to
+	 * and a short detail message, and also looks up an override for the detail
+	 * via {@link MessageSource}, before delegating to
 	 * {@link #handleExceptionInternal}.
 	 * @param ex the exception to handle
 	 * @param headers the headers to use for the response
@@ -457,7 +465,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	protected ResponseEntity<Object> handleHttpMessageNotWritable(
 			HttpMessageNotWritableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
-		ProblemDetail body = ProblemDetail.forStatusAndDetail(status, "Failed to write response body");
+		ProblemDetail body = resolveDetailViaMessageSource(status, null, "Failed to write request");
 		return handleExceptionInternal(ex, body, headers, status, request);
 	}
 
@@ -528,6 +536,17 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 		return createResponseEntity(body, headers, statusCode, request);
 	}
 
+	// For non-Web exceptions
+	private ProblemDetail resolveDetailViaMessageSource(
+			HttpStatusCode status, @Nullable Object[] arguments, String defaultDetail) {
+
+		ProblemDetail body = ProblemDetail.forStatusAndDetail(status, defaultDetail);
+		ErrorResponseException errorResponseEx = new ErrorResponseException(status, body, null, null, arguments);
+		body = resolveDetailViaMessageSource(errorResponseEx);
+		return body;
+	}
+
+	// For ErrorResponse exceptions
 	private ProblemDetail resolveDetailViaMessageSource(ErrorResponse response) {
 		ProblemDetail body = response.getBody();
 		if (this.messageSource != null) {
