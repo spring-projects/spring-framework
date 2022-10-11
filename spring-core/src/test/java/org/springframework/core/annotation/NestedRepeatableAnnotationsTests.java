@@ -65,6 +65,20 @@ class NestedRepeatableAnnotationsTests {
 		}
 
 		@Test
+		void getMergedRepeatableAnnotationsWithStandardRepeatables_AnnotatedElementUtils() {
+			Set<A> annotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(method, A.class);
+			// Merged, so we expect to find @A once with its value coming from @B(5).
+			assertThat(annotations).extracting(A::value).containsExactly(5);
+		}
+
+		@Test
+		void getMergedRepeatableAnnotationsWithExplicitContainer_AnnotatedElementUtils() {
+			Set<A> annotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(method, A.class, A.Container.class);
+			// Merged, so we expect to find @A once with its value coming from @B(5).
+			assertThat(annotations).extracting(A::value).containsExactly(5);
+		}
+
+		@Test
 		@SuppressWarnings("deprecation")
 		void getRepeatableAnnotations_AnnotationUtils() {
 			Set<A> annotations = AnnotationUtils.getRepeatableAnnotations(method, A.class);
@@ -107,7 +121,6 @@ class NestedRepeatableAnnotationsTests {
 		void findMergedRepeatableAnnotationsWithStandardRepeatables_AnnotatedElementUtils() {
 			Set<A> annotations = AnnotatedElementUtils.findMergedRepeatableAnnotations(method, A.class);
 			// Merged, so we expect to find @A twice with values coming from @B(5) and @B(10).
-			// However, findMergedRepeatableAnnotations() currently finds ZERO annotations.
 			assertThat(annotations).extracting(A::value).containsExactly(5, 10);
 		}
 
@@ -115,6 +128,28 @@ class NestedRepeatableAnnotationsTests {
 		void findMergedRepeatableAnnotationsWithExplicitContainer_AnnotatedElementUtils() {
 			Set<A> annotations = AnnotatedElementUtils.findMergedRepeatableAnnotations(method, A.class, A.Container.class);
 			// When findMergedRepeatableAnnotations(...) is invoked with an explicit container
+			// type, it uses RepeatableContainers.of(...) which limits the repeatable annotation
+			// support to a single container type.
+			//
+			// In this test case, we are therefore limiting the support to @A.Container, which
+			// means that @B.Container is unsupported and effectively ignored as a repeatable
+			// container type.
+			//
+			// Long story, short: the search doesn't find anything.
+			assertThat(annotations).isEmpty();
+		}
+
+		@Test
+		void getMergedRepeatableAnnotationsWithStandardRepeatables_AnnotatedElementUtils() {
+			Set<A> annotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(method, A.class);
+			// Merged, so we expect to find @A twice with values coming from @B(5) and @B(10).
+			assertThat(annotations).extracting(A::value).containsExactly(5, 10);
+		}
+
+		@Test
+		void getMergedRepeatableAnnotationsWithExplicitContainer_AnnotatedElementUtils() {
+			Set<A> annotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(method, A.class, A.Container.class);
+			// When getMergedRepeatableAnnotations(...) is invoked with an explicit container
 			// type, it uses RepeatableContainers.of(...) which limits the repeatable annotation
 			// support to a single container type.
 			//

@@ -766,7 +766,23 @@ public abstract class AnnotatedElementUtils {
 	private static MergedAnnotations getRepeatableAnnotations(AnnotatedElement element,
 			@Nullable Class<? extends Annotation> containerType, Class<? extends Annotation> annotationType) {
 
-		RepeatableContainers repeatableContainers = RepeatableContainers.of(annotationType, containerType);
+		RepeatableContainers repeatableContainers;
+		if (containerType == null) {
+			// Invoke RepeatableContainers.of() in order to adhere to the contract of
+			// getMergedRepeatableAnnotations() which states that an IllegalArgumentException
+			// will be thrown if the the container cannot be resolved.
+			//
+			// In any case, we use standardRepeatables() in order to support repeatable
+			// annotations on other types of repeatable annotations (i.e., nested repeatable
+			// annotation types).
+			//
+			// See https://github.com/spring-projects/spring-framework/issues/20279
+			RepeatableContainers.of(annotationType, null);
+			repeatableContainers = RepeatableContainers.standardRepeatables();
+		}
+		else {
+			repeatableContainers = RepeatableContainers.of(annotationType, containerType);
+		}
 		return MergedAnnotations.from(element, SearchStrategy.INHERITED_ANNOTATIONS, repeatableContainers);
 	}
 
