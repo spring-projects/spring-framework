@@ -433,6 +433,16 @@ public abstract class AnnotatedElementUtils {
 	 * single annotation and within annotation hierarchies.
 	 * <p>This method follows <em>get semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
+	 * <p><strong>WARNING</strong>: if the supplied {@code containerType} is not
+	 * {@code null}, the search will be restricted to supporting only repeatable
+	 * annotations whose container is the supplied {@code containerType}. This
+	 * prevents the search from finding repeatable annotations declared as
+	 * meta-annotations on other types of repeatable annotations. If you need to
+	 * support such a use case, favor {@link #getMergedRepeatableAnnotations(AnnotatedElement, Class)}
+	 * over this method or alternatively use the {@link MergedAnnotations} API
+	 * directly in conjunction with {@link RepeatableContainers} that are
+	 * {@linkplain RepeatableContainers#and(Class, Class) composed} to support
+	 * multiple repeatable annotation types.
 	 * @param element the annotated element (never {@code null})
 	 * @param annotationType the annotation type to find (never {@code null})
 	 * @param containerType the type of the container that holds the annotations;
