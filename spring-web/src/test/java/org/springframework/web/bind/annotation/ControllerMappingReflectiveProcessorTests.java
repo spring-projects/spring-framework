@@ -28,13 +28,13 @@ import org.springframework.http.HttpEntity;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link RequestMappingReflectiveProcessor}.
+ * Tests for {@link ControllerMappingReflectiveProcessor}.
  *
  * @author Sebastien Deleuze
  */
-public class RequestMappingReflectiveProcessorTests {
+public class ControllerMappingReflectiveProcessorTests {
 
-	private final RequestMappingReflectiveProcessor processor = new RequestMappingReflectiveProcessor();
+	private final ControllerMappingReflectiveProcessor processor = new ControllerMappingReflectiveProcessor();
 
 	private final ReflectionHints hints = new ReflectionHints();
 
