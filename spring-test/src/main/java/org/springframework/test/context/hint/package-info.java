@@ -4,7 +4,7 @@
  */
 @NonNullApi
 @NonNullFields
-package org.springframework.test.context.aot.hint;
+package org.springframework.test.context.hint;
 
 import org.springframework.lang.NonNullApi;
 import org.springframework.lang.NonNullFields;

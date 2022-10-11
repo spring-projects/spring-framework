@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.aot.hint;
+package org.springframework.test.context.hint;
 
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.core.annotation.MergedAnnotations;
