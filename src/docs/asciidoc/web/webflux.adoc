@@ -1967,6 +1967,14 @@ generally supported for all return values.
 | `HttpHeaders`
 | For returning a response with headers and no body.
 
+| `ErrorResponse`
+| To render an RFC 7807 error response with details in the body,
+  see <<webflux-ann-rest-exceptions>>
+
+| `ProblemDetail`
+| To render an RFC 7807 error response with details in the body,
+  see <<webflux-ann-rest-exceptions>>
+
 | `String`
 | A view name to be resolved with `ViewResolver` instances and used together with the implicit
   model -- determined through command objects and `@ModelAttribute` methods. The handler
@@ -3350,7 +3358,7 @@ include::web-data-binding-model-design.adoc[]
 
 
 [[webflux-ann-controller-exceptions]]
-=== Managing Exceptions
+=== Exceptions
 [.small]#<<web.adoc#mvc-ann-exceptionhandler, Web MVC>>#
 
 `@Controller` and <<webflux-ann-controller-advice, @ControllerAdvice>> classes can have
@@ -3409,6 +3417,23 @@ Support for `@ExceptionHandler` methods in Spring WebFlux is provided by the
 `HandlerAdapter` for `@RequestMapping` methods. See <<webflux-dispatcher-handler>>
 for more detail.
 
+
+
+[[webflux-ann-exceptionhandler-args]]
+==== Method Arguments
+[.small]#<<web.adoc#mvc-ann-exceptionhandler-args, Web MVC>>#
+
+`@ExceptionHandler` methods support the same <<webflux-ann-arguments,method arguments>>
+as `@RequestMapping` methods, except the request body might have been consumed already.
+
+
+
+[[webflux-ann-exceptionhandler-return-values]]
+==== Return Values
+[.small]#<<web.adoc#mvc-ann-exceptionhandler-return-values, Web MVC>>#
+
+`@ExceptionHandler` methods support the same <<webflux-ann-return-types,return values>>
+as `@RequestMapping` methods.
 
 
 

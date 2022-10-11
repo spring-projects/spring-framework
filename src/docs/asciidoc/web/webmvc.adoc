@@ -2215,6 +2215,14 @@ supported for all return values.
 | `HttpHeaders`
 | For returning a response with headers and no body.
 
+| `ErrorResponse`
+| To render an RFC 7807 error response with details in the body,
+  see <<mvc-ann-rest-exceptions>>
+
+| `ProblemDetail`
+| To render an RFC 7807 error response with details in the body,
+  see <<mvc-ann-rest-exceptions>>
+
 | `String`
 | A view name to be resolved with `ViewResolver` implementations and used together with the implicit
   model -- determined through command objects and `@ModelAttribute` methods. The handler
@@ -3898,6 +3906,7 @@ level, <<mvc-exceptionhandlers, HandlerExceptionResolver>> mechanism.
 
 [[mvc-ann-exceptionhandler-args]]
 ==== Method Arguments
+[.small]#<<webflux.adoc#webflux-ann-exceptionhandler-args, WebFlux>>#
 
 `@ExceptionHandler` methods support the following arguments:
 
@@ -3962,6 +3971,7 @@ level, <<mvc-exceptionhandlers, HandlerExceptionResolver>> mechanism.
 
 [[mvc-ann-exceptionhandler-return-values]]
 ==== Return Values
+[.small]#<<webflux.adoc#webflux-ann-exceptionhandler-return-values, WebFlux>>#
 
 `@ExceptionHandler` methods support the following return values:
 
@@ -3977,6 +3987,14 @@ level, <<mvc-exceptionhandlers, HandlerExceptionResolver>> mechanism.
 | The return value specifies that the full response (including the HTTP headers and the body)
   be converted through `HttpMessageConverter` instances and written to the response.
   See <<mvc-ann-responseentity>>.
+
+| `ErrorResponse`
+| To render an RFC 7807 error response with details in the body,
+see <<mvc-ann-rest-exceptions>>
+
+| `ProblemDetail`
+| To render an RFC 7807 error response with details in the body,
+see <<mvc-ann-rest-exceptions>>
 
 | `String`
 | A view name to be resolved with `ViewResolver` implementations and used together with the
