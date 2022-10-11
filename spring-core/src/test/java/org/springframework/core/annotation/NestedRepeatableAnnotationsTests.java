@@ -181,7 +181,7 @@ class NestedRepeatableAnnotationsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.METHOD, ElementType.ANNOTATION_TYPE })
 	@Repeatable(A.Container.class)
-	public @interface A {
+	@interface A {
 
 		int value() default 0;
 
@@ -197,7 +197,7 @@ class NestedRepeatableAnnotationsTests {
 	@Repeatable(B.Container.class)
 	@A
 	@A
-	public @interface B {
+	@interface B {
 
 		@AliasFor(annotation = A.class)
 		int value();
