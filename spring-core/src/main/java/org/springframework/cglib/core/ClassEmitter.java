@@ -15,8 +15,6 @@
  */
 package org.springframework.cglib.core;
 
-import org.springframework.cglib.transform.ClassTransformer;
-
 import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.FieldVisitor;
 import org.springframework.asm.MethodVisitor;

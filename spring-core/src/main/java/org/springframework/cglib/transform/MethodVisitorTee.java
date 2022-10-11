@@ -15,8 +15,13 @@
  */
 package org.springframework.cglib.transform;
 
+import org.springframework.asm.AnnotationVisitor;
+import org.springframework.asm.Attribute;
+import org.springframework.asm.Handle;
+import org.springframework.asm.Label;
+import org.springframework.asm.MethodVisitor;
+import org.springframework.asm.TypePath;
 import org.springframework.cglib.core.Constants;
-import org.springframework.asm.*;
 
 @SuppressWarnings("deprecation")
 public class MethodVisitorTee extends MethodVisitor {

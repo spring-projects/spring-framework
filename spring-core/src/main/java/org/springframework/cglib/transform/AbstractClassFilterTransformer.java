@@ -15,7 +15,12 @@
  */
 package org.springframework.cglib.transform;
 
-import org.springframework.asm.*;
+import org.springframework.asm.AnnotationVisitor;
+import org.springframework.asm.Attribute;
+import org.springframework.asm.ClassVisitor;
+import org.springframework.asm.FieldVisitor;
+import org.springframework.asm.MethodVisitor;
+import org.springframework.cglib.core.ClassTransformer;
 
 abstract public class AbstractClassFilterTransformer extends AbstractClassTransformer {
     private ClassTransformer pass;

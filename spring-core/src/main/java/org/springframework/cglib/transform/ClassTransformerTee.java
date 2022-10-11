@@ -15,6 +15,7 @@
  */
 package org.springframework.cglib.transform;
 
+import org.springframework.cglib.core.ClassTransformer;
 import org.springframework.cglib.core.Constants;
 import org.springframework.asm.ClassVisitor;
 

@@ -19,7 +19,7 @@ import org.springframework.cglib.core.ClassGenerator;
 import org.springframework.cglib.core.DefaultGeneratorStrategy;
 import org.springframework.cglib.core.GeneratorStrategy;
 import org.springframework.cglib.core.TypeUtils;
-import org.springframework.cglib.transform.ClassTransformer;
+import org.springframework.cglib.core.ClassTransformer;
 import org.springframework.cglib.transform.MethodFilter;
 import org.springframework.cglib.transform.MethodFilterTransformer;
 import org.springframework.cglib.transform.TransformingClassGenerator;
