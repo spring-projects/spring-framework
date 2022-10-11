@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 class SimpleAsyncTaskExecutorTests {
 
 	@Test
-	void cannotExecuteWhenConcurrencyIsSwitchedOff() throws Exception {
+	void cannotExecuteWhenConcurrencyIsSwitchedOff() {
 		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor();
 		executor.setConcurrencyLimit(ConcurrencyThrottleSupport.NO_CONCURRENCY);
 		assertThat(executor.isThrottleActive()).isTrue();
@@ -41,13 +41,13 @@ class SimpleAsyncTaskExecutorTests {
 	}
 
 	@Test
-	void throttleIsNotActiveByDefault() throws Exception {
+	void throttleIsNotActiveByDefault() {
 		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor();
 		assertThat(executor.isThrottleActive()).as("Concurrency throttle must not default to being active (on)").isFalse();
 	}
 
 	@Test
-	void threadNameGetsSetCorrectly() throws Exception {
+	void threadNameGetsSetCorrectly() {
 		final String customPrefix = "chankPop#";
 		final Object monitor = new Object();
 		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor(customPrefix);
@@ -57,7 +57,7 @@ class SimpleAsyncTaskExecutorTests {
 	}
 
 	@Test
-	void threadFactoryOverridesDefaults() throws Exception {
+	void threadFactoryOverridesDefaults() {
 		final Object monitor = new Object();
 		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor(runnable -> new Thread(runnable, "test"));
 		ThreadNameHarvester task = new ThreadNameHarvester(monitor);
@@ -66,7 +66,7 @@ class SimpleAsyncTaskExecutorTests {
 	}
 
 	@Test
-	void throwsExceptionWhenSuppliedWithNullRunnable() throws Exception {
+	void throwsExceptionWhenSuppliedWithNullRunnable() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new SimpleAsyncTaskExecutor().execute(null));
 	}

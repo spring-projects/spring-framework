@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import java.util.function.Consumer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.util.UriTemplateHandler;
 
 /**
  * Extension of {@link HttpEntity} that also exposes the HTTP method and the
@@ -167,7 +166,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * on how to expand template and encode the URI. In such cases, the
 	 * {@code URI} is prepared by the
 	 * {@link org.springframework.web.client.RestTemplate} with the help of the
-	 * {@link UriTemplateHandler} it is configured with.
+	 * {@link org.springframework.web.util.UriTemplateHandler} it is configured with.
 	 */
 	public URI getUrl() {
 		if (this.url == null) {

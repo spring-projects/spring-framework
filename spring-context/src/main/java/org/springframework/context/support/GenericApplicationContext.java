@@ -111,12 +111,12 @@ import org.springframework.util.ClassUtils;
  */
 public class GenericApplicationContext extends AbstractApplicationContext implements BeanDefinitionRegistry {
 
-	private static final Consumer<Builder> asCglibProxy = hint ->
+	private static final Consumer<Builder> asClassBasedProxy = hint ->
 			hint.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
 					MemberCategory.INVOKE_DECLARED_METHODS,
 					MemberCategory.DECLARED_FIELDS);
 
-	private static final Consumer<Builder> asCglibProxyTarget = hint ->
+	private static final Consumer<Builder> asProxiedUserClass = hint ->
 			hint.withMembers(MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
 					MemberCategory.INVOKE_DECLARED_METHODS);
 
@@ -445,14 +445,16 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 				for (SmartInstantiationAwareBeanPostProcessor bpp : bpps) {
 					beanType = bpp.determineBeanType(beanType, beanName);
 					if (Proxy.isProxyClass(beanType)) {
+						// A JDK proxy class needs an explicit hint
 						runtimeHints.proxies().registerJdkProxy(beanType.getInterfaces());
 					}
 					else {
+						// Potentially a CGLIB-generated subclass with reflection hints
 						Class<?> userClass = ClassUtils.getUserClass(beanType);
 						if (userClass != beanType) {
 							runtimeHints.reflection()
-									.registerType(beanType, asCglibProxy)
-									.registerType(userClass, asCglibProxyTarget);
+									.registerType(beanType, asClassBasedProxy)
+									.registerType(userClass, asProxiedUserClass);
 						}
 					}
 				}
