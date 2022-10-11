@@ -47,6 +47,7 @@ import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeType;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -80,6 +81,9 @@ class ReactiveTypeHandler {
 	@SuppressWarnings("deprecation")
 	private static final List<MediaType> JSON_STREAMING_MEDIA_TYPES =
 			Arrays.asList(MediaType.APPLICATION_NDJSON, MediaType.APPLICATION_STREAM_JSON);
+
+	private static final boolean isContextPropagationPresent = ClassUtils.isPresent(
+			"io.micrometer.context.ContextSnapshot", ReactiveTypeHandler.class.getClassLoader());
 
 	private static final Log logger = LogFactory.getLog(ReactiveTypeHandler.class);
 
@@ -133,13 +137,8 @@ class ReactiveTypeHandler {
 		ReactiveAdapter adapter = this.adapterRegistry.getAdapter(clazz);
 		Assert.state(adapter != null, () -> "Unexpected return value type: " + clazz);
 
-		if (Mono.class.isAssignableFrom(clazz)) {
-			ContextSnapshot snapshot = ContextSnapshot.captureAll();
-			returnValue = ((Mono<?>) returnValue).contextWrite(snapshot::updateContext);
-		}
-		else if (Flux.class.isAssignableFrom(clazz)) {
-			ContextSnapshot snapshot = ContextSnapshot.captureAll();
-			returnValue = ((Flux<?>) returnValue).contextWrite(snapshot::updateContext);
+		if (isContextPropagationPresent) {
+			returnValue = ContextSnapshotHelper.writeReactorContext(returnValue);
 		}
 
 		ResolvableType elementType = ResolvableType.forMethodParameter(returnType).getGeneric();
@@ -509,6 +508,24 @@ class ReactiveTypeHandler {
 
 		public ResolvableType getReturnType() {
 			return ResolvableType.forClassWithGenerics(List.class, this.elementType);
+		}
+	}
+
+
+	private static class ContextSnapshotHelper {
+
+		public static Object writeReactorContext(Object returnValue) {
+			if (Mono.class.isAssignableFrom(returnValue.getClass())) {
+				ContextSnapshot snapshot = ContextSnapshot.captureAll();
+				return ((Mono<?>) returnValue).contextWrite(snapshot::updateContext);
+			}
+			else if (Flux.class.isAssignableFrom(returnValue.getClass())) {
+				ContextSnapshot snapshot = ContextSnapshot.captureAll();
+				return ((Flux<?>) returnValue).contextWrite(snapshot::updateContext);
+			}
+			else {
+				return returnValue;
+			}
 		}
 	}
 
