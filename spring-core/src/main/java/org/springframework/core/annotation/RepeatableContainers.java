@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.util.ReflectionUtils;
  * <p>To completely disable repeatable support use {@link #none()}.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 5.2
  */
 public abstract class RepeatableContainers {
@@ -101,15 +102,19 @@ public abstract class RepeatableContainers {
 	}
 
 	/**
-	 * Create a {@link RepeatableContainers} instance that uses a defined
-	 * container and repeatable type.
-	 * @param repeatable the contained repeatable annotation
-	 * @param container the container annotation or {@code null}. If specified,
+	 * Create a {@link RepeatableContainers} instance that uses predefined
+	 * repeatable and container types.
+	 * @param repeatable the contained repeatable annotation type
+	 * @param container the container annotation type or {@code null}. If specified,
 	 * this annotation must declare a {@code value} attribute returning an array
 	 * of repeatable annotations. If not specified, the container will be
 	 * deduced by inspecting the {@code @Repeatable} annotation on
 	 * {@code repeatable}.
 	 * @return a {@link RepeatableContainers} instance
+	 * @throws IllegalArgumentException if the supplied container type is
+	 * {@code null} and the annotation type is not a repeatable annotation
+	 * @throws AnnotationConfigurationException if the supplied container type
+	 * is not a properly configured container for a repeatable annotation
 	 */
 	public static RepeatableContainers of(
 			Class<? extends Annotation> repeatable, @Nullable Class<? extends Annotation> container) {
