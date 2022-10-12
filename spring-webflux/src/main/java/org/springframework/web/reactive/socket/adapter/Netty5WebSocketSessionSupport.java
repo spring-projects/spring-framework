@@ -75,9 +75,8 @@ public abstract class Netty5WebSocketSessionSupport<T> extends AbstractWebSocket
 
 
 	protected WebSocketMessage toMessage(WebSocketFrame frame) {
-		WebSocketFrame newFrame = frame.send().receive();
-		DataBuffer payload = bufferFactory().wrap(newFrame.binaryData());
-		return new WebSocketMessage(messageTypes.get(newFrame.getClass()), payload, newFrame);
+		DataBuffer payload = bufferFactory().wrap(frame.binaryData());
+		return new WebSocketMessage(messageTypes.get(frame.getClass()), payload, frame);
 	}
 
 	protected WebSocketFrame toFrame(WebSocketMessage message) {

@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import io.netty5.buffer.Buffer;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -209,7 +210,13 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 
 		Flux<DataBuffer> buffer = Mono.from(input).concatWith(Flux.error(new InputException()));
 		assertThatExceptionOfType(InputException.class).isThrownBy(() ->
-				this.decoder.decode(buffer, outputType, mimeType, hints).blockLast(Duration.ofSeconds(5)));
+				this.decoder.decode(buffer, outputType, mimeType, hints)
+						.doOnNext(o -> {
+							if (o instanceof Buffer buf) {
+								buf.close();
+							}
+						})
+						.blockLast(Duration.ofSeconds(5)));
 	}
 
 	/**
@@ -226,7 +233,12 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 	protected void testDecodeCancel(Publisher<DataBuffer> input, ResolvableType outputType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Flux<?> result = this.decoder.decode(input, outputType, mimeType, hints);
+		Flux<?> result = this.decoder.decode(input, outputType, mimeType, hints)
+				.doOnNext(o -> {
+					if (o instanceof Buffer buf) {
+						buf.close();
+					}
+				});
 		StepVerifier.create(result).expectNextCount(1).thenCancel().verify();
 	}
 
