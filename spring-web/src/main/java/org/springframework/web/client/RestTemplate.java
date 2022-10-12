@@ -884,13 +884,11 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 	}
 
-	protected static ResourceAccessException createResourceAccessException(URI url, HttpMethod method, IOException ex) {
+	private static ResourceAccessException createResourceAccessException(URI url, HttpMethod method, IOException ex) {
 		String resource = url.toString();
-		String query = url.getRawQuery();
-		resource = (query != null ? resource.substring(0, resource.indexOf('?')) : resource);
-		ResourceAccessException exception = new ResourceAccessException("I/O error on " + method.name() +
+		resource = (url.getRawQuery() != null ? resource.substring(0, resource.indexOf('?')) : resource);
+		return new ResourceAccessException("I/O error on " + method.name() +
 				" request for \"" + resource + "\": " + ex.getMessage(), ex);
-		return exception;
 	}
 
 	/**
