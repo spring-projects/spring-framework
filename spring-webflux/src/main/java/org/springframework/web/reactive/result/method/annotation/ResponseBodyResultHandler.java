@@ -25,7 +25,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.reactive.HandlerResult;
@@ -86,7 +86,7 @@ public class ResponseBodyResultHandler extends AbstractMessageWriterResultHandle
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 		Object body = result.getReturnValue();
 		MethodParameter bodyTypeParameter = result.getReturnTypeSource();
-		if (body instanceof ProblemDetail detail) {
+		if (body instanceof ProblemDetails detail) {
 			exchange.getResponse().setStatusCode(HttpStatusCode.valueOf(detail.getStatus()));
 			if (detail.getInstance() == null) {
 				URI path = URI.create(exchange.getRequest().getPath().value());

@@ -60,7 +60,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.KotlinDetector;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -758,7 +758,7 @@ public class Jackson2ObjectMapperBuilder {
 			objectMapper.setFilterProvider(this.filters);
 		}
 
-		objectMapper.addMixIn(ProblemDetail.class, ProblemDetailJacksonMixin.class);
+		objectMapper.addMixIn(ProblemDetails.class, ProblemDetailsJacksonMixin.class);
 		this.mixIns.forEach(objectMapper::addMixIn);
 
 		if (!this.serializers.isEmpty() || !this.deserializers.isEmpty()) {

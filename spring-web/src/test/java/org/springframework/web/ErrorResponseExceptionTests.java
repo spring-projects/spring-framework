@@ -30,7 +30,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.validation.BindException;
@@ -392,7 +392,7 @@ public class ErrorResponseExceptionTests {
 	}
 
 	private void assertStatus(ErrorResponse ex, HttpStatus status) {
-		ProblemDetail body = ex.getBody();
+		ProblemDetails body = ex.getBody();
 		assertThat(ex.getStatusCode()).isEqualTo(status);
 		assertThat(body.getStatus()).isEqualTo(status.value());
 		assertThat(body.getTitle()).isEqualTo(status.getReasonPhrase());
@@ -431,7 +431,7 @@ public class ErrorResponseExceptionTests {
 		private final String code;
 
 		public MessageSourceTestHelper(Class<? extends ErrorResponse> exceptionType) {
-			this.code = "problemDetail." + exceptionType.getName();
+			this.code = "problemDetails." + exceptionType.getName();
 		}
 
 		public BindingResult initBindingResult() {

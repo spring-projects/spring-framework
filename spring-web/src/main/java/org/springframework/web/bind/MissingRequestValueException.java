@@ -16,7 +16,7 @@
 
 package org.springframework.web.bind;
 
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.lang.Nullable;
 
 /**
@@ -50,7 +50,7 @@ public class MissingRequestValueException extends ServletRequestBindingException
 	}
 
 	/**
-	 * Constructor with a given {@link ProblemDetail}, and a
+	 * Constructor with a given {@link ProblemDetails}, and a
 	 * {@link org.springframework.context.MessageSource} code and arguments to
 	 * resolve the detail message with.
 	 * @since 6.0

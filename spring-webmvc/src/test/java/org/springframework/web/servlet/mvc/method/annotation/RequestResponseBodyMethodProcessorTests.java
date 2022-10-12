@@ -44,7 +44,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -396,25 +396,25 @@ public class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@Test
-	void problemDetailDefaultMediaType() throws Exception {
-		testProblemDetailMediaType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
+	void problemDetailsDefaultMediaType() throws Exception {
+		testProblemDetailsMediaType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
 	}
 
 	@Test
-	void problemDetailWhenJsonRequested() throws Exception {
+	void problemDetailsWhenJsonRequested() throws Exception {
 		this.servletRequest.addHeader("Accept", MediaType.APPLICATION_JSON_VALUE);
-		testProblemDetailMediaType(MediaType.APPLICATION_JSON_VALUE);
+		testProblemDetailsMediaType(MediaType.APPLICATION_JSON_VALUE);
 	}
 
 	@Test
-	void problemDetailWhenNoMatchingMediaTypeRequested() throws Exception {
+	void problemDetailsWhenNoMatchingMediaTypeRequested() throws Exception {
 		this.servletRequest.addHeader("Accept", MediaType.APPLICATION_PDF_VALUE);
-		testProblemDetailMediaType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
+		testProblemDetailsMediaType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
 	}
 
-	private void testProblemDetailMediaType(String expectedContentType) throws Exception {
+	private void testProblemDetailsMediaType(String expectedContentType) throws Exception {
 
-		ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+		ProblemDetails problemDetails = ProblemDetails.forStatus(HttpStatus.BAD_REQUEST);
 
 		this.servletRequest.setRequestURI("/path");
 
@@ -423,9 +423,9 @@ public class RequestResponseBodyMethodProcessorTests {
 						Collections.singletonList(new MappingJackson2HttpMessageConverter()));
 
 		MethodParameter returnType =
-				new MethodParameter(getClass().getDeclaredMethod("handleAndReturnProblemDetail"), -1);
+				new MethodParameter(getClass().getDeclaredMethod("handleAndReturnProblemDetails"), -1);
 
-		processor.handleReturnValue(problemDetail, returnType, this.container, this.request);
+		processor.handleReturnValue(problemDetails, returnType, this.container, this.request);
 
 		assertThat(this.servletResponse.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
 		assertThat(this.servletResponse.getContentType()).isEqualTo(expectedContentType);
@@ -852,7 +852,7 @@ public class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@SuppressWarnings("ConstantConditions")
-	ProblemDetail handleAndReturnProblemDetail() {
+	ProblemDetails handleAndReturnProblemDetails() {
 		return null;
 	}
 

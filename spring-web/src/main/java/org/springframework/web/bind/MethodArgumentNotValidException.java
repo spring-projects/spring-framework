@@ -25,7 +25,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
@@ -46,7 +46,7 @@ public class MethodArgumentNotValidException extends BindException implements Er
 
 	private final MethodParameter parameter;
 
-	private final ProblemDetail body;
+	private final ProblemDetails body;
 
 
 	/**
@@ -57,7 +57,7 @@ public class MethodArgumentNotValidException extends BindException implements Er
 	public MethodArgumentNotValidException(MethodParameter parameter, BindingResult bindingResult) {
 		super(bindingResult);
 		this.parameter = parameter;
-		this.body = ProblemDetail.forStatusAndDetail(getStatusCode(), "Invalid request content.");
+		this.body = ProblemDetails.forStatusAndDetail(getStatusCode(), "Invalid request content.");
 	}
 
 
@@ -67,7 +67,7 @@ public class MethodArgumentNotValidException extends BindException implements Er
 	}
 
 	@Override
-	public ProblemDetail getBody() {
+	public ProblemDetails getBody() {
 		return this.body;
 	}
 

@@ -47,7 +47,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -133,7 +133,7 @@ public class HttpEntityMethodProcessorMockTests {
 
 	private MethodParameter returnTypeErrorResponse;
 
-	private MethodParameter returnTypeProblemDetail;
+	private MethodParameter returnTypeProblemDetails;
 
 	private ModelAndViewContainer mavContainer;
 
@@ -180,7 +180,7 @@ public class HttpEntityMethodProcessorMockTests {
 		returnTypeInt = new MethodParameter(getClass().getMethod("handle3"), -1);
 		returnTypeResponseEntityResource = new MethodParameter(getClass().getMethod("handle5"), -1);
 		returnTypeErrorResponse = new MethodParameter(getClass().getMethod("handle6"), -1);
-		returnTypeProblemDetail = new MethodParameter(getClass().getMethod("handle7"), -1);
+		returnTypeProblemDetails = new MethodParameter(getClass().getMethod("handle7"), -1);
 
 		mavContainer = new ModelAndViewContainer();
 		servletRequest = new MockHttpServletRequest("GET", "/foo");
@@ -203,7 +203,7 @@ public class HttpEntityMethodProcessorMockTests {
 		assertThat(processor.supportsReturnType(returnTypeHttpEntity)).as("HttpEntity return type not supported").isTrue();
 		assertThat(processor.supportsReturnType(returnTypeHttpEntitySubclass)).as("Custom HttpEntity subclass not supported").isTrue();
 		assertThat(processor.supportsReturnType(returnTypeErrorResponse)).isTrue();
-		assertThat(processor.supportsReturnType(returnTypeProblemDetail)).isTrue();
+		assertThat(processor.supportsReturnType(returnTypeProblemDetails)).isTrue();
 		assertThat(processor.supportsReturnType(paramRequestEntity)).as("RequestEntity parameter supported").isFalse();
 		assertThat(processor.supportsReturnType(returnTypeInt)).as("non-ResponseBody return type supported").isFalse();
 	}
@@ -293,16 +293,16 @@ public class HttpEntityMethodProcessorMockTests {
 		ErrorResponseException ex = new ErrorResponseException(HttpStatus.BAD_REQUEST);
 		ex.getHeaders().add("foo", "bar");
 		servletRequest.addHeader("Accept", APPLICATION_PROBLEM_JSON_VALUE);
-		given(jsonMessageConverter.canWrite(ProblemDetail.class, APPLICATION_PROBLEM_JSON)).willReturn(true);
+		given(jsonMessageConverter.canWrite(ProblemDetails.class, APPLICATION_PROBLEM_JSON)).willReturn(true);
 
-		processor.handleReturnValue(ex, returnTypeProblemDetail, mavContainer, webRequest);
+		processor.handleReturnValue(ex, returnTypeProblemDetails, mavContainer, webRequest);
 
 		assertThat(mavContainer.isRequestHandled()).isTrue();
 		assertThat(webRequest.getNativeResponse(HttpServletResponse.class).getStatus()).isEqualTo(400);
 		verify(jsonMessageConverter).write(eq(ex.getBody()), eq(APPLICATION_PROBLEM_JSON), isA(HttpOutputMessage.class));
 
 		assertThat(ex.getBody()).isNotNull()
-				.extracting(ProblemDetail::getInstance).isNotNull()
+				.extracting(ProblemDetails::getInstance).isNotNull()
 				.extracting(URI::toString)
 				.as("Instance was not set to the request path")
 				.isEqualTo(servletRequest.getRequestURI());
@@ -310,40 +310,40 @@ public class HttpEntityMethodProcessorMockTests {
 
 		// But if instance is set, it should be respected
 		ex.getBody().setInstance(URI.create("/something/else"));
-		processor.handleReturnValue(ex, returnTypeProblemDetail, mavContainer, webRequest);
+		processor.handleReturnValue(ex, returnTypeProblemDetails, mavContainer, webRequest);
 
 		assertThat(ex.getBody()).isNotNull()
-				.extracting(ProblemDetail::getInstance).isNotNull()
+				.extracting(ProblemDetails::getInstance).isNotNull()
 				.extracting(URI::toString)
 				.as("Instance was not set to the request path")
 				.isEqualTo("/something/else");
 	}
 
 	@Test
-	public void shouldHandleProblemDetail() throws Exception {
-		ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+	public void shouldHandleProblemDetails() throws Exception {
+		ProblemDetails problemDetails = ProblemDetails.forStatus(HttpStatus.BAD_REQUEST);
 		servletRequest.addHeader("Accept", APPLICATION_PROBLEM_JSON_VALUE);
-		given(jsonMessageConverter.canWrite(ProblemDetail.class, APPLICATION_PROBLEM_JSON)).willReturn(true);
+		given(jsonMessageConverter.canWrite(ProblemDetails.class, APPLICATION_PROBLEM_JSON)).willReturn(true);
 
-		processor.handleReturnValue(problemDetail, returnTypeProblemDetail, mavContainer, webRequest);
+		processor.handleReturnValue(problemDetails, returnTypeProblemDetails, mavContainer, webRequest);
 
 		assertThat(mavContainer.isRequestHandled()).isTrue();
 		assertThat(webRequest.getNativeResponse(HttpServletResponse.class).getStatus()).isEqualTo(400);
-		verify(jsonMessageConverter).write(eq(problemDetail), eq(APPLICATION_PROBLEM_JSON), isA(HttpOutputMessage.class));
+		verify(jsonMessageConverter).write(eq(problemDetails), eq(APPLICATION_PROBLEM_JSON), isA(HttpOutputMessage.class));
 
-		assertThat(problemDetail)
-				.extracting(ProblemDetail::getInstance).isNotNull()
+		assertThat(problemDetails)
+				.extracting(ProblemDetails::getInstance).isNotNull()
 				.extracting(URI::toString)
 				.as("Instance was not set to the request path")
 				.isEqualTo(servletRequest.getRequestURI());
 
 
 		// But if instance is set, it should be respected
-		problemDetail.setInstance(URI.create("/something/else"));
-		processor.handleReturnValue(problemDetail, returnTypeProblemDetail, mavContainer, webRequest);
+		problemDetails.setInstance(URI.create("/something/else"));
+		processor.handleReturnValue(problemDetails, returnTypeProblemDetails, mavContainer, webRequest);
 
-		assertThat(problemDetail).isNotNull()
-				.extracting(ProblemDetail::getInstance).isNotNull()
+		assertThat(problemDetails).isNotNull()
+				.extracting(ProblemDetails::getInstance).isNotNull()
 				.extracting(URI::toString)
 				.as("Instance was not set to the request path")
 				.isEqualTo("/something/else");
@@ -884,7 +884,7 @@ public class HttpEntityMethodProcessorMockTests {
 	}
 
 	@SuppressWarnings("unused")
-	public ProblemDetail handle7() {
+	public ProblemDetails handle7() {
 		return null;
 	}
 

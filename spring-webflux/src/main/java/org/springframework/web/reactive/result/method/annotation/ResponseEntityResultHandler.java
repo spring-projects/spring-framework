@@ -31,7 +31,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.HttpMessageWriter;
@@ -45,7 +45,7 @@ import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Handles return values of type {@link HttpEntity}, {@link ResponseEntity},
- * {@link HttpHeaders}, {@link ErrorResponse}, and {@link ProblemDetail}.
+ * {@link HttpHeaders}, {@link ErrorResponse}, and {@link ProblemDetails}.
  *
  * <p>By default the order for this result handler is set to 0. It is generally
  * safe to place it early in the order as it looks for a concrete return type.
@@ -109,7 +109,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 			return false;
 		}
 		return ((HttpEntity.class.isAssignableFrom(type) && !RequestEntity.class.isAssignableFrom(type)) ||
-				ErrorResponse.class.isAssignableFrom(type) || ProblemDetail.class.isAssignableFrom(type) ||
+				ErrorResponse.class.isAssignableFrom(type) || ProblemDetails.class.isAssignableFrom(type) ||
 				HttpHeaders.class.isAssignableFrom(type));
 	}
 
@@ -143,7 +143,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 			else if (returnValue instanceof ErrorResponse response) {
 				httpEntity = new ResponseEntity<>(response.getBody(), response.getHeaders(), response.getStatusCode());
 			}
-			else if (returnValue instanceof ProblemDetail detail) {
+			else if (returnValue instanceof ProblemDetails detail) {
 				httpEntity = ResponseEntity.of(detail).build();
 			}
 			else if (returnValue instanceof HttpHeaders) {
@@ -154,7 +154,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 						"HttpEntity or HttpHeaders expected but got: " + returnValue.getClass());
 			}
 
-			if (httpEntity.getBody() instanceof ProblemDetail detail) {
+			if (httpEntity.getBody() instanceof ProblemDetails detail) {
 				if (detail.getInstance() == null) {
 					URI path = URI.create(exchange.getRequest().getPath().value());
 					detail.setInstance(path);

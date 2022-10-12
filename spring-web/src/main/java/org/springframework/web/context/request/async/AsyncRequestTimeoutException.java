@@ -18,7 +18,7 @@ package org.springframework.web.context.request.async;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.web.ErrorResponse;
 
 /**
@@ -43,8 +43,8 @@ public class AsyncRequestTimeoutException extends RuntimeException implements Er
 	}
 
 	@Override
-	public ProblemDetail getBody() {
-		return ProblemDetail.forStatus(getStatusCode());
+	public ProblemDetails getBody() {
+		return ProblemDetails.forStatus(getStatusCode());
 	}
 
 }

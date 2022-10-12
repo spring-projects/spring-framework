@@ -34,7 +34,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
@@ -157,7 +157,7 @@ public class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
-	public void errorResponseProblemDetailViaMessageSource() {
+	public void errorResponseProblemDetailsViaMessageSource() {
 
 		Locale locale = Locale.UK;
 		LocaleContextHolder.setLocale(locale);
@@ -165,7 +165,7 @@ public class ResponseEntityExceptionHandlerTests {
 		try {
 			StaticMessageSource messageSource = new StaticMessageSource();
 			messageSource.addMessage(
-					"problemDetail." + HttpMediaTypeNotSupportedException.class.getName(), locale,
+					"problemDetails." + HttpMediaTypeNotSupportedException.class.getName(), locale,
 					"Content-Type {0} not supported. Supported: {1}");
 
 			this.exceptionHandler.setMessageSource(messageSource);
@@ -173,7 +173,7 @@ public class ResponseEntityExceptionHandlerTests {
 			ResponseEntity<?> entity = testException(new HttpMediaTypeNotSupportedException(
 					MediaType.APPLICATION_JSON, List.of(MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML)));
 
-			ProblemDetail body = (ProblemDetail) entity.getBody();
+			ProblemDetails body = (ProblemDetails) entity.getBody();
 			assertThat(body.getDetail()).isEqualTo(
 					"Content-Type application/json not supported. Supported: [application/atom+xml, application/xml]");
 		}

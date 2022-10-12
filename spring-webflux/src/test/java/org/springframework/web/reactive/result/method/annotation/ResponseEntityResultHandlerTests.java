@@ -46,7 +46,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
@@ -135,7 +135,7 @@ public class ResponseEntityResultHandlerTests {
 		returnType = on(TestController.class).resolveReturnType(ErrorResponse.class);
 		assertThat(this.resultHandler.supports(handlerResult(value, returnType))).isTrue();
 
-		returnType = on(TestController.class).resolveReturnType(ProblemDetail.class);
+		returnType = on(TestController.class).resolveReturnType(ProblemDetails.class);
 		assertThat(this.resultHandler.supports(handlerResult(value, returnType))).isTrue();
 
 		// SPR-15785
@@ -263,10 +263,10 @@ public class ResponseEntityResultHandlerTests {
 	}
 
 	@Test
-	public void handleProblemDetail() {
-		ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-		MethodParameter returnType = on(TestController.class).resolveReturnType(ProblemDetail.class);
-		HandlerResult result = handlerResult(problemDetail, returnType);
+	public void handleProblemDetails() {
+		ProblemDetails problemDetails = ProblemDetails.forStatus(HttpStatus.BAD_REQUEST);
+		MethodParameter returnType = on(TestController.class).resolveReturnType(ProblemDetails.class);
+		HandlerResult result = handlerResult(problemDetails, returnType);
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path"));
 		exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_PROBLEM_JSON);
 		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
@@ -556,7 +556,7 @@ public class ResponseEntityResultHandlerTests {
 
 		ErrorResponse errorResponse() { return null; }
 
-		ProblemDetail problemDetail() { return null; }
+		ProblemDetails problemDetails() { return null; }
 
 		HttpHeaders httpHeaders() { return null; }
 

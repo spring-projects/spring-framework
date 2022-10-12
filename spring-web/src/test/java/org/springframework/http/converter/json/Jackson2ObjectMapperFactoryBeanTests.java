@@ -60,7 +60,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.FatalBeanException;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -245,7 +245,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		ObjectMapper mapper = this.factory.getObject();
 
 		assertThat(mapper.mixInCount()).isEqualTo(2);
-		assertThat(mapper.findMixInClassFor(ProblemDetail.class)).isAssignableFrom(ProblemDetailJacksonMixin.class);
+		assertThat(mapper.findMixInClassFor(ProblemDetails.class)).isAssignableFrom(ProblemDetailsJacksonMixin.class);
 		assertThat(mapper.findMixInClassFor(target)).isSameAs(mixinSource);
 	}
 

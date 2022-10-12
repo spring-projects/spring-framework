@@ -23,25 +23,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for serializing a {@link org.springframework.http.ProblemDetail} through
+ * Tests for serializing a {@link org.springframework.http.ProblemDetails} through
  * the Jackson library.
  *
  * @author Rossen Stoyanchev
  * @since 6.0
  */
-public class ProblemDetailJacksonMixinTests {
+public class ProblemDetailsJacksonMixinTests {
 
 	private final ObjectMapper mapper = new Jackson2ObjectMapperBuilder().build();
 
 	@Test
 	void writeStatusAndHeaders() throws Exception {
 		testWrite(
-				ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Missing header"),
+				ProblemDetails.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Missing header"),
 				"{\"type\":\"about:blank\"," +
 						"\"title\":\"Bad Request\"," +
 						"\"status\":400," +
@@ -50,10 +50,10 @@ public class ProblemDetailJacksonMixinTests {
 
 	@Test
 	void writeCustomProperty() throws Exception {
-		ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Missing header");
-		problemDetail.setProperty("host", "abc.org");
+		ProblemDetails problemDetails = ProblemDetails.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Missing header");
+		problemDetails.setProperty("host", "abc.org");
 
-		testWrite(problemDetail,
+		testWrite(problemDetails,
 				"{\"type\":\"about:blank\"," +
 						"\"title\":\"Bad Request\"," +
 						"\"status\":400," +
@@ -63,23 +63,23 @@ public class ProblemDetailJacksonMixinTests {
 
 	@Test
 	void readCustomProperty() throws Exception {
-		ProblemDetail problemDetail = this.mapper.readValue(
+		ProblemDetails problemDetails = this.mapper.readValue(
 				"{\"type\":\"about:blank\"," +
 						"\"title\":\"Bad Request\"," +
 						"\"status\":400," +
 						"\"detail\":\"Missing header\"," +
-						"\"host\":\"abc.org\"}", ProblemDetail.class);
+						"\"host\":\"abc.org\"}", ProblemDetails.class);
 
-		assertThat(problemDetail.getType()).isEqualTo(URI.create("about:blank"));
-		assertThat(problemDetail.getTitle()).isEqualTo("Bad Request");
-		assertThat(problemDetail.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
-		assertThat(problemDetail.getDetail()).isEqualTo("Missing header");
-		assertThat(problemDetail.getProperties()).containsEntry("host", "abc.org");
+		assertThat(problemDetails.getType()).isEqualTo(URI.create("about:blank"));
+		assertThat(problemDetails.getTitle()).isEqualTo("Bad Request");
+		assertThat(problemDetails.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+		assertThat(problemDetails.getDetail()).isEqualTo("Missing header");
+		assertThat(problemDetails.getProperties()).containsEntry("host", "abc.org");
 	}
 
 
-	private void testWrite(ProblemDetail problemDetail, String expected) throws Exception {
-		String output = this.mapper.writeValueAsString(problemDetail);
+	private void testWrite(ProblemDetails problemDetails, String expected) throws Exception {
+		String output = this.mapper.writeValueAsString(problemDetails);
 		assertThat(output).isEqualTo(expected);
 	}
 

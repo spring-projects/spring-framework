@@ -46,7 +46,7 @@ import org.springframework.http.HttpRange;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotWritableException;
@@ -243,8 +243,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			List<MediaType> compatibleMediaTypes = new ArrayList<>();
 			determineCompatibleMediaTypes(acceptableTypes, producibleTypes, compatibleMediaTypes);
 
-			// For ProblemDetail, fall back on RFC 7807 format
-			if (compatibleMediaTypes.isEmpty() && ProblemDetail.class.isAssignableFrom(valueType)) {
+			// For ProblemDetails, fall back on RFC 7807 format
+			if (compatibleMediaTypes.isEmpty() && ProblemDetails.class.isAssignableFrom(valueType)) {
 				determineCompatibleMediaTypes(this.problemMediaTypes, producibleTypes, compatibleMediaTypes);
 			}
 

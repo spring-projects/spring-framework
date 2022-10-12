@@ -21,13 +21,13 @@ import java.util.Locale;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.lang.Nullable;
 
 
 /**
  * Representation of a complete RFC 7807 error response including status,
- * headers, and an RFC 7808 formatted {@link ProblemDetail} body. Allows any
+ * headers, and an RFC 7808 formatted {@link ProblemDetails} body. Allows any
  * exception to expose HTTP error response information.
  *
  * <p>{@link ErrorResponseException} is a default implementation of this
@@ -58,10 +58,10 @@ public interface ErrorResponse {
 
 	/**
 	 * Return the body for the response, formatted as an RFC 7807
-	 * {@link ProblemDetail} whose {@link ProblemDetail#getStatus() status}
+	 * {@link ProblemDetails} whose {@link ProblemDetails#getStatus() status}
 	 * should match the response status.
 	 */
-	ProblemDetail getBody();
+	ProblemDetails getBody();
 
 	/**
 	 * Return a code to use to resolve the problem "detail" for this exception
@@ -96,13 +96,13 @@ public interface ErrorResponse {
 
 	/**
 	 * Build a message code for the given exception type, which consists of
-	 * {@code "problemDetail."} followed by the full {@link Class#getName() class name}.
+	 * {@code "problemDetails."} followed by the full {@link Class#getName() class name}.
 	 * @param exceptionType the exception type for which to build a code
 	 * @param suffix an optional suffix, e.g. for exceptions that may have multiple
 	 * error message with different arguments.
 	 */
 	static String getDefaultDetailMessageCode(Class<?> exceptionType, @Nullable String suffix) {
-		return "problemDetail." + exceptionType.getName() + (suffix != null ? "." + suffix : "");
+		return "problemDetails." + exceptionType.getName() + (suffix != null ? "." + suffix : "");
 	}
 
 }

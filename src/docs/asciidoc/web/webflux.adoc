@@ -1971,7 +1971,7 @@ generally supported for all return values.
 | To render an RFC 7807 error response with details in the body,
   see <<webflux-ann-rest-exceptions>>
 
-| `ProblemDetail`
+| `ProblemDetails`
 | To render an RFC 7807 error response with details in the body,
   see <<webflux-ann-rest-exceptions>>
 
@@ -3595,7 +3595,7 @@ specification, https://www.rfc-editor.org/rfc/rfc7807.html[RFC 7807].
 
 The following are the main abstractions for this support:
 
-- `ProblemDetail` -- representation for an RFC 7807 problem detail; a simple container
+- `ProblemDetails` -- representation for an RFC 7807 problem detail; a simple container
 for both standard fields defined in the spec, and for non-standard ones.
 - `ErrorResponse` -- contract to expose HTTP error response details including HTTP
 status, response headers, and a body in the format of RFC 7807; this allows exceptions to
@@ -3613,14 +3613,14 @@ and any `ErrorResponseException`, and renders an error response with a body.
 === Render
 [.small]#<<webmvc.adoc#mvc-ann-rest-exceptions-render, Web MVC>>#
 
-You can return `ProblemDetail` or `ErrorResponse` from any `@ExceptionHandler` or from
+You can return `ProblemDetails` or `ErrorResponse` from any `@ExceptionHandler` or from
 any `@RequestMapping` method to render an RFC 7807 response as follows:
 
-- The `status` property of `ProblemDetail` determines the HTTP status.
-- The `instance` property of `ProblemDetail` is set from the current URL path, if not
+- The `status` property of `ProblemDetails` determines the HTTP status.
+- The `instance` property of `ProblemDetails` is set from the current URL path, if not
 already set.
 - For content negotiation, the Jackson `HttpMessageConverter` prefers
-"application/problem+json" over "application/json" when rendering a `ProblemDetail`,
+"application/problem+json" over "application/json" when rendering a `ProblemDetails`,
 and also falls back on it if no compatible media type is found.
 
 To enable RFC 7807 responses for Spring WebFlux exceptions and for any
@@ -3637,17 +3637,17 @@ obtains HTTP status, headers, and error details from each exception and prepares
 
 You can extend an RFC 7807 response with non-standard fields in one of two ways.
 
-One, insert into the "properties" `Map` of `ProblemDetail`. When using the Jackson
-library, the Spring Framework registers `ProblemDetailJacksonMixin` that ensures this
+One, insert into the "properties" `Map` of `ProblemDetails`. When using the Jackson
+library, the Spring Framework registers `ProblemDetailsJacksonMixin` that ensures this
 "properties" `Map` is unwrapped and rendered as top level JSON properties in the
 response, and likewise any unknown property during deserialization is inserted into
 this `Map`.
 
-You can also extend `ProblemDetail` to add dedicated non-standard properties.
-The copy constructor in `ProblemDetail` allows a sub-class to make it easy to be created
-from an existing `ProblemDetail`. This could be done centrally, e.g. from an
+You can also extend `ProblemDetails` to add dedicated non-standard properties.
+The copy constructor in `ProblemDetails` allows a sub-class to make it easy to be created
+from an existing `ProblemDetails`. This could be done centrally, e.g. from an
 `@ControllerAdvice` such as `ResponseEntityExceptionHandler` that re-creates the
-`ProblemDetail` of an exception into a subclass with the additional non-standard fields.
+`ProblemDetails` of an exception into a subclass with the additional non-standard fields.
 
 
 
@@ -3665,7 +3665,7 @@ The actual message code value is parameterized with placeholders, e.g.
 - `ResponseEntityExceptionHandler` uses the message code and the message arguments
 to resolve the problem "detail" field.
 
-Message codes default to "problemDetail." + the fully qualified exception class name. Some
+Message codes default to "problemDetails." + the fully qualified exception class name. Some
 exceptions may expose additional message codes in which case a suffix is added to
 the default message code. The table below lists message arguments and codes for Spring
 WebFlux exceptions:
@@ -3724,7 +3724,7 @@ via `MessageSource`.
 A client application can catch `WebClientResponseException`, when using the `WebClient`,
 or `RestClientResponseException` when using the `RestTemplate`, and use their
 `getResponseBodyAs` methods to decode the error response body to any target type such as
-`ProblemDetail`, or a subclass of `ProblemDetail`.
+`ProblemDetails`, or a subclass of `ProblemDetails`.
 
 
 

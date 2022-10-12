@@ -26,7 +26,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.ErrorResponse;
@@ -325,8 +325,8 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 		return createResponseEntity(body, headers, status, exchange);
 	}
 
-	private ProblemDetail resolveDetailViaMessageSource(ErrorResponse response, @Nullable Locale locale) {
-		ProblemDetail body = response.getBody();
+	private ProblemDetails resolveDetailViaMessageSource(ErrorResponse response, @Nullable Locale locale) {
+		ProblemDetails body = response.getBody();
 		if (this.messageSource != null) {
 			locale = (locale != null ? locale : Locale.getDefault());
 			Object[] arguments = response.getDetailMessageArguments(this.messageSource, locale);
@@ -342,7 +342,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	 * Create the {@link ResponseEntity} to use from the given body, headers,
 	 * and statusCode. Subclasses can override this method to inspect and possibly
 	 * modify the body, headers, or statusCode, e.g. to re-create an instance of
-	 * {@link ProblemDetail} as an extension of {@link ProblemDetail}.
+	 * {@link ProblemDetails} as an extension of {@link ProblemDetails}.
 	 * @param body the body to use for the response
 	 * @param headers the headers to use for the response
 	 * @param status the status code to use for the response

@@ -32,7 +32,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -66,7 +66,7 @@ public class ResponseEntityExceptionHandlerTests {
 
 	@Test
 	void handleMethodNotAllowedException() {
-		ResponseEntity<ProblemDetail> entity = testException(
+		ResponseEntity<ProblemDetails> entity = testException(
 				new MethodNotAllowedException(HttpMethod.PATCH, List.of(HttpMethod.GET, HttpMethod.POST)));
 
 		assertThat(entity.getHeaders().getFirst(HttpHeaders.ALLOW)).isEqualTo("GET,POST");
@@ -74,7 +74,7 @@ public class ResponseEntityExceptionHandlerTests {
 
 	@Test
 	void handleNotAcceptableStatusException() {
-		ResponseEntity<ProblemDetail> entity = testException(
+		ResponseEntity<ProblemDetails> entity = testException(
 				new NotAcceptableStatusException(List.of(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML)));
 
 		assertThat(entity.getHeaders().getFirst(HttpHeaders.ACCEPT)).isEqualTo("application/json, application/xml");
@@ -82,7 +82,7 @@ public class ResponseEntityExceptionHandlerTests {
 
 	@Test
 	void handleUnsupportedMediaTypeStatusException() {
-		ResponseEntity<ProblemDetail> entity = testException(
+		ResponseEntity<ProblemDetails> entity = testException(
 				new UnsupportedMediaTypeStatusException(MediaType.APPLICATION_JSON, List.of(MediaType.APPLICATION_XML)));
 
 		assertThat(entity.getHeaders().getFirst(HttpHeaders.ACCEPT)).isEqualTo("application/xml");
@@ -124,14 +124,14 @@ public class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
-	void errorResponseProblemDetailViaMessageSource() {
+	void errorResponseProblemDetailsViaMessageSource() {
 
 		Locale locale = Locale.UK;
 		LocaleContextHolder.setLocale(locale);
 
 		StaticMessageSource messageSource = new StaticMessageSource();
 		messageSource.addMessage(
-				"problemDetail." + UnsupportedMediaTypeStatusException.class.getName(), locale,
+				"problemDetails." + UnsupportedMediaTypeStatusException.class.getName(), locale,
 				"Content-Type {0} not supported. Supported: {1}");
 
 		this.exceptionHandler.setMessageSource(messageSource);
@@ -144,19 +144,19 @@ public class ResponseEntityExceptionHandlerTests {
 
 		ResponseEntity<?> responseEntity = this.exceptionHandler.handleException(ex, exchange).block();
 
-		ProblemDetail body = (ProblemDetail) responseEntity.getBody();
+		ProblemDetails body = (ProblemDetails) responseEntity.getBody();
 		assertThat(body.getDetail()).isEqualTo(
 				"Content-Type application/json not supported. Supported: [application/atom+xml, application/xml]");
 	}
 
 
 	@SuppressWarnings("unchecked")
-	private ResponseEntity<ProblemDetail> testException(ErrorResponseException exception) {
+	private ResponseEntity<ProblemDetails> testException(ErrorResponseException exception) {
 		ResponseEntity<?> entity = this.exceptionHandler.handleException(exception, this.exchange).block();
 		assertThat(entity).isNotNull();
 		assertThat(entity.getStatusCode()).isEqualTo(exception.getStatusCode());
-		assertThat(entity.getBody()).isNotNull().isInstanceOf(ProblemDetail.class);
-		return (ResponseEntity<ProblemDetail>) entity;
+		assertThat(entity.getBody()).isNotNull().isInstanceOf(ProblemDetails.class);
+		return (ResponseEntity<ProblemDetails>) entity;
 	}
 
 

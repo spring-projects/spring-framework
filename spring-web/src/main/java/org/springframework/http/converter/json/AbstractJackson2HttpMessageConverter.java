@@ -53,7 +53,7 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.http.converter.AbstractGenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -93,7 +93,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	}
 
 
-	private List<MediaType> problemDetailMediaTypes = Collections.singletonList(MediaType.APPLICATION_PROBLEM_JSON);
+	private List<MediaType> problemDetailsMediaTypes = Collections.singletonList(MediaType.APPLICATION_PROBLEM_JSON);
 
 	protected ObjectMapper defaultObjectMapper;
 
@@ -127,11 +127,11 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 	@Override
 	public void setSupportedMediaTypes(List<MediaType> supportedMediaTypes) {
-		this.problemDetailMediaTypes = initProblemDetailMediaTypes(supportedMediaTypes);
+		this.problemDetailsMediaTypes = initProblemDetailsMediaTypes(supportedMediaTypes);
 		super.setSupportedMediaTypes(supportedMediaTypes);
 	}
 
-	private List<MediaType> initProblemDetailMediaTypes(List<MediaType> supportedMediaTypes) {
+	private List<MediaType> initProblemDetailsMediaTypes(List<MediaType> supportedMediaTypes) {
 		List<MediaType> mediaTypes = new ArrayList<>();
 		mediaTypes.add(MediaType.APPLICATION_PROBLEM_JSON);
 		mediaTypes.addAll(supportedMediaTypes);
@@ -217,8 +217,8 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		if (!CollectionUtils.isEmpty(result)) {
 			return result;
 		}
-		return (ProblemDetail.class.isAssignableFrom(clazz) ?
-				this.problemDetailMediaTypes : getSupportedMediaTypes());
+		return (ProblemDetails.class.isAssignableFrom(clazz) ?
+				this.problemDetailsMediaTypes : getSupportedMediaTypes());
 	}
 
 	private Map<Class<?>, Map<MediaType, ObjectMapper>> getObjectMapperRegistrations() {

@@ -27,7 +27,7 @@ import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
@@ -182,7 +182,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
 		ServletServerHttpResponse outputMessage = createOutputMessage(webRequest);
 
-		if (returnValue instanceof ProblemDetail detail) {
+		if (returnValue instanceof ProblemDetails detail) {
 			outputMessage.setStatusCode(HttpStatusCode.valueOf(detail.getStatus()));
 			if (detail.getInstance() == null) {
 				URI path = URI.create(inputMessage.getServletRequest().getRequestURI());

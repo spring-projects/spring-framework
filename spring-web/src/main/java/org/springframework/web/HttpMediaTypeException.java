@@ -22,7 +22,7 @@ import java.util.List;
 import jakarta.servlet.ServletException;
 
 import org.springframework.http.MediaType;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.lang.Nullable;
 
 /**
@@ -36,7 +36,7 @@ public abstract class HttpMediaTypeException extends ServletException implements
 
 	private final List<MediaType> supportedMediaTypes;
 
-	private final ProblemDetail body = ProblemDetail.forStatus(getStatusCode());
+	private final ProblemDetails body = ProblemDetails.forStatus(getStatusCode());
 
 	private final String messageDetailCode;
 
@@ -92,7 +92,7 @@ public abstract class HttpMediaTypeException extends ServletException implements
 	}
 
 	@Override
-	public ProblemDetail getBody() {
+	public ProblemDetails getBody() {
 		return this.body;
 	}
 

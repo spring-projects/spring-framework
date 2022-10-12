@@ -20,7 +20,7 @@ import jakarta.servlet.ServletException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.lang.Nullable;
 import org.springframework.web.ErrorResponse;
 
@@ -38,7 +38,7 @@ import org.springframework.web.ErrorResponse;
 @SuppressWarnings("serial")
 public class ServletRequestBindingException extends ServletException implements ErrorResponse {
 
-	private final ProblemDetail body = ProblemDetail.forStatus(getStatusCode());
+	private final ProblemDetails body = ProblemDetails.forStatus(getStatusCode());
 
 	private final String messageDetailCode;
 
@@ -108,7 +108,7 @@ public class ServletRequestBindingException extends ServletException implements 
 	}
 
 	@Override
-	public ProblemDetail getBody() {
+	public ProblemDetails getBody() {
 		return this.body;
 	}
 

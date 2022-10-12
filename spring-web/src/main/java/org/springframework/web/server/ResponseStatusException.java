@@ -18,13 +18,13 @@ package org.springframework.web.server;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.lang.Nullable;
 import org.springframework.web.ErrorResponseException;
 
 /**
  * Subclass of {@link ErrorResponseException} that accepts a "reason" and maps
- * it to the "detail" property of {@link org.springframework.http.ProblemDetail}.
+ * it to the "detail" property of {@link org.springframework.http.ProblemDetails}.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -91,7 +91,7 @@ public class ResponseStatusException extends ErrorResponseException {
 			HttpStatusCode status, @Nullable String reason, @Nullable Throwable cause,
 			@Nullable String messageDetailCode, @Nullable Object[] messageDetailArguments) {
 
-		super(status, ProblemDetail.forStatus(status), cause, messageDetailCode, messageDetailArguments);
+		super(status, ProblemDetails.forStatus(status), cause, messageDetailCode, messageDetailArguments);
 		this.reason = reason;
 	}
 

@@ -22,28 +22,28 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
 /**
  * An interface to associate Jackson annotations with
- * {@link org.springframework.http.ProblemDetail} to avoid a hard dependency on
+ * {@link org.springframework.http.ProblemDetails} to avoid a hard dependency on
  * the Jackson library.
  *
- * <p>The annotations ensure the {@link ProblemDetail#getProperties() properties}
+ * <p>The annotations ensure the {@link ProblemDetails#getProperties() properties}
  * map is unwrapped and rendered as top level JSON properties, and likewise that
  * the {@code properties} map contains unknown properties from the JSON.
  *
  * <p>{@link Jackson2ObjectMapperBuilder} automatically registers this as a
- * "mix-in" for {@link ProblemDetail}, which means it always applies, unless
+ * "mix-in" for {@link ProblemDetails}, which means it always applies, unless
  * an {@code ObjectMapper} is instantiated directly and configured for use.
  *
  * @author Rossen Stoyanchev
  * @since 6.0
  */
 @JsonInclude(NON_EMPTY)
-public interface ProblemDetailJacksonMixin {
+public interface ProblemDetailsJacksonMixin {
 
 	@JsonAnySetter
 	void setProperty(String name, Object value);

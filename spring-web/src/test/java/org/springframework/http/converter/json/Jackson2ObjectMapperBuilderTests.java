@@ -82,7 +82,7 @@ import kotlin.ranges.IntRange;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.FatalBeanException;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -374,7 +374,7 @@ class Jackson2ObjectMapperBuilderTests {
 				.build();
 
 		assertThat(mapper.mixInCount()).isEqualTo(2);
-		assertThat(mapper.findMixInClassFor(ProblemDetail.class)).isAssignableFrom(ProblemDetailJacksonMixin.class);
+		assertThat(mapper.findMixInClassFor(ProblemDetails.class)).isAssignableFrom(ProblemDetailsJacksonMixin.class);
 		assertThat(mapper.findMixInClassFor(target)).isSameAs(mixInSource);
 	}
 
@@ -390,7 +390,7 @@ class Jackson2ObjectMapperBuilderTests {
 				.build();
 
 		assertThat(mapper.mixInCount()).isEqualTo(2);
-		assertThat(mapper.findMixInClassFor(ProblemDetail.class)).isAssignableFrom(ProblemDetailJacksonMixin.class);
+		assertThat(mapper.findMixInClassFor(ProblemDetails.class)).isAssignableFrom(ProblemDetailsJacksonMixin.class);
 		assertThat(mapper.findMixInClassFor(target)).isSameAs(mixInSource);
 	}
 

@@ -18,7 +18,7 @@ package org.springframework.web.bind.annotation;
 
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.core.MethodParameter;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 
 /**
  * {@link ControllerMappingReflectiveProcessor} specific implementation that
@@ -32,7 +32,7 @@ class ExceptionHandlerReflectiveProcessor extends ControllerMappingReflectivePro
 	@Override
 	protected void registerReturnTypeHints(ReflectionHints hints, MethodParameter returnTypeParameter) {
 		Class<?> returnType = returnTypeParameter.getParameterType();
-		if (ProblemDetail.class.isAssignableFrom(returnType)) {
+		if (ProblemDetails.class.isAssignableFrom(returnType)) {
 			getBindingRegistrar().registerReflectionHints(hints, returnTypeParameter.getGenericParameterType());
 		}
 		super.registerReturnTypeHints(hints, returnTypeParameter);

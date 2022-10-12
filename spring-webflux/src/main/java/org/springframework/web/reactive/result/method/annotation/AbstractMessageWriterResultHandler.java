@@ -33,7 +33,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.lang.Nullable;
@@ -167,8 +167,8 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 			throw ex;
 		}
 
-		// For ProblemDetail, fall back on RFC 7807 format
-		if (bestMediaType == null && elementType.toClass().equals(ProblemDetail.class)) {
+		// For ProblemDetails, fall back on RFC 7807 format
+		if (bestMediaType == null && elementType.toClass().equals(ProblemDetails.class)) {
 			bestMediaType = selectMediaType(exchange, () -> getMediaTypesFor(elementType), this.problemMediaTypes);
 		}
 

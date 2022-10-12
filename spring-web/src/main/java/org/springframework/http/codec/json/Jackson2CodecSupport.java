@@ -38,7 +38,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
 import org.springframework.http.HttpLogging;
 import org.springframework.http.MediaType;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
@@ -90,7 +90,7 @@ public abstract class Jackson2CodecSupport {
 
 	private final List<MimeType> mimeTypes;
 
-	private final List<MimeType> problemDetailMimeTypes;
+	private final List<MimeType> problemDetailsMimeTypes;
 
 
 	/**
@@ -100,10 +100,10 @@ public abstract class Jackson2CodecSupport {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 		this.defaultObjectMapper = objectMapper;
 		this.mimeTypes = (!ObjectUtils.isEmpty(mimeTypes) ? List.of(mimeTypes) : DEFAULT_MIME_TYPES);
-		this.problemDetailMimeTypes = initProblemDetailMediaTypes(this.mimeTypes);
+		this.problemDetailsMimeTypes = initProblemDetailsMediaTypes(this.mimeTypes);
 	}
 
-	private static List<MimeType> initProblemDetailMediaTypes(List<MimeType> supportedMimeTypes) {
+	private static List<MimeType> initProblemDetailsMediaTypes(List<MimeType> supportedMimeTypes) {
 		List<MimeType> mimeTypes = new ArrayList<>();
 		mimeTypes.add(MediaType.APPLICATION_PROBLEM_JSON);
 		mimeTypes.addAll(supportedMimeTypes);
@@ -193,7 +193,7 @@ public abstract class Jackson2CodecSupport {
 		if (!CollectionUtils.isEmpty(result)) {
 			return result;
 		}
-		return (ProblemDetail.class.isAssignableFrom(elementClass) ? this.problemDetailMimeTypes : getMimeTypes());
+		return (ProblemDetails.class.isAssignableFrom(elementClass) ? this.problemDetailsMimeTypes : getMimeTypes());
 	}
 
 	protected boolean supportsMimeType(@Nullable MimeType mimeType) {

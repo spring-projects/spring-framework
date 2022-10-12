@@ -31,11 +31,11 @@ import org.springframework.util.Assert;
  * <p>For an extended response, an application can add to the
  * {@link #getProperties() properties} map. When using the Jackson library, the
  * {@code properties} map is expanded as top level JSON properties through the
- * {@link org.springframework.http.converter.json.ProblemDetailJacksonMixin}.
+ * {@link org.springframework.http.converter.json.ProblemDetailsJacksonMixin}.
  *
  * <p>For an extended response, an application can also create a subclass with
  * additional properties. Subclasses can use the protected copy constructor to
- * re-create an existing {@code ProblemDetail} instance as the subclass, e.g.
+ * re-create an existing {@code ProblemDetails} instance as the subclass, e.g.
  * from an {@code @ControllerAdvice} such as
  * {@link org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler}.
  *
@@ -46,7 +46,7 @@ import org.springframework.util.Assert;
  * @see org.springframework.web.ErrorResponse
  * @see org.springframework.web.ErrorResponseException
  */
-public class ProblemDetail {
+public class ProblemDetails {
 
 	private static final URI BLANK_TYPE = URI.create("about:blank");
 
@@ -70,19 +70,19 @@ public class ProblemDetail {
 
 	/**
 	 * Protected constructor for subclasses.
-	 * <p>To create a {@link ProblemDetail} instance, use static factory methods,
+	 * <p>To create a {@link ProblemDetails} instance, use static factory methods,
 	 * {@link #forStatus(HttpStatusCode)} or {@link #forStatus(int)}.
 	 * @param rawStatusCode the response status to use
 	 */
-	protected ProblemDetail(int rawStatusCode) {
+	protected ProblemDetails(int rawStatusCode) {
 		this.status = rawStatusCode;
 	}
 
 	/**
 	 * Copy constructor that a subclass can use to re-create and extend a
-	 * {@code ProblemDetail} with additional properties.
+	 * {@code ProblemDetails} with additional properties.
 	 */
-	protected ProblemDetail(ProblemDetail other) {
+	protected ProblemDetails(ProblemDetails other) {
 		this.type = other.type;
 		this.title = other.title;
 		this.status = other.status;
@@ -94,7 +94,7 @@ public class ProblemDetail {
 	/**
 	 * No-arg constructor, for deserialization.
 	 */
-	protected ProblemDetail() {
+	protected ProblemDetails() {
 	}
 
 
@@ -145,7 +145,7 @@ public class ProblemDetail {
 
 	/**
 	 * Setter for the {@link #getInstance() problem instance}.
-	 * <p>By default, when {@code ProblemDetail} is returned from an
+	 * <p>By default, when {@code ProblemDetails} is returned from an
 	 * {@code @ExceptionHandler} method, this is initialized to the request path.
 	 * @param instance the problem instance
 	 */
@@ -161,7 +161,7 @@ public class ProblemDetail {
 	 * they are rendered as a {@code "properties"} sub-map.
 	 * @param name the property name
 	 * @param value the property value
-	 * @see org.springframework.http.converter.json.ProblemDetailJacksonMixin
+	 * @see org.springframework.http.converter.json.ProblemDetailsJacksonMixin
 	 */
 	public void setProperty(String name, Object value) {
 		this.properties = (this.properties != null ? this.properties : new LinkedHashMap<>());
@@ -221,7 +221,7 @@ public class ProblemDetail {
 	 * <p>When Jackson JSON is present on the classpath, the content of this map
 	 * is unwrapped and rendered as top level key-value pairs in the output JSON.
 	 * Otherwise, they are rendered as a {@code "properties"} sub-map.
-	 * @see org.springframework.http.converter.json.ProblemDetailJacksonMixin
+	 * @see org.springframework.http.converter.json.ProblemDetailsJacksonMixin
 	 */
 	@Nullable
 	public Map<String, Object> getProperties() {
@@ -235,7 +235,7 @@ public class ProblemDetail {
 	}
 
 	/**
-	 * Return a String representation of the {@code ProblemDetail} fields.
+	 * Return a String representation of the {@code ProblemDetails} fields.
 	 * Subclasses can override this to append additional fields.
 	 */
 	protected String initToStringContent() {
@@ -251,28 +251,28 @@ public class ProblemDetail {
 	// Static factory methods
 
 	/**
-	 * Create a {@code ProblemDetail} instance with the given status code.
+	 * Create a {@code ProblemDetails} instance with the given status code.
 	 */
-	public static ProblemDetail forStatus(HttpStatusCode status) {
+	public static ProblemDetails forStatus(HttpStatusCode status) {
 		Assert.notNull(status, "HttpStatusCode is required");
 		return forStatus(status.value());
 	}
 
 	/**
-	 * Create a {@code ProblemDetail} instance with the given status value.
+	 * Create a {@code ProblemDetails} instance with the given status value.
 	 */
-	public static ProblemDetail forStatus(int status) {
-		return new ProblemDetail(status);
+	public static ProblemDetails forStatus(int status) {
+		return new ProblemDetails(status);
 	}
 
 	/**
-	 * Create a {@code ProblemDetail} instance with the given status and detail.
+	 * Create a {@code ProblemDetails} instance with the given status and detail.
 	 */
-	public static ProblemDetail forStatusAndDetail(HttpStatusCode status, String detail) {
+	public static ProblemDetails forStatusAndDetail(HttpStatusCode status, String detail) {
 		Assert.notNull(status, "HttpStatusCode is required");
-		ProblemDetail problemDetail = forStatus(status.value());
-		problemDetail.setDetail(detail);
-		return problemDetail;
+		ProblemDetails problemDetails = forStatus(status.value());
+		problemDetails.setDetail(detail);
+		return problemDetails;
 	}
 
 }

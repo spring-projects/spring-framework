@@ -32,7 +32,7 @@ import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
@@ -119,26 +119,26 @@ public class ResponseBodyResultHandlerTests {
 	}
 
 	@Test
-	void problemDetailContentNegotiation() {
+	void problemDetailsContentNegotiation() {
 
 		// Default
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path"));
-		testProblemDetailMediaType(exchange, MediaType.APPLICATION_PROBLEM_JSON);
+		testProblemDetailsMediaType(exchange, MediaType.APPLICATION_PROBLEM_JSON);
 
 		// JSON requested
 		exchange = MockServerWebExchange.from(get("/path").accept(MediaType.APPLICATION_JSON));
-		testProblemDetailMediaType(exchange, MediaType.APPLICATION_JSON);
+		testProblemDetailsMediaType(exchange, MediaType.APPLICATION_JSON);
 
 		// No match fallback
 		exchange = MockServerWebExchange.from(get("/path").accept(MediaType.APPLICATION_PDF));
-		testProblemDetailMediaType(exchange, MediaType.APPLICATION_PROBLEM_JSON);
+		testProblemDetailsMediaType(exchange, MediaType.APPLICATION_PROBLEM_JSON);
 	}
 
-	private void testProblemDetailMediaType(MockServerWebExchange exchange, MediaType expectedMediaType) {
-		ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+	private void testProblemDetailsMediaType(MockServerWebExchange exchange, MediaType expectedMediaType) {
+		ProblemDetails problemDetails = ProblemDetails.forStatus(HttpStatus.BAD_REQUEST);
 
-		Method method = on(TestRestController.class).returning(ProblemDetail.class).resolveMethod();
-		HandlerResult result = getHandlerResult(new TestRestController(), problemDetail, method);
+		Method method = on(TestRestController.class).returning(ProblemDetails.class).resolveMethod();
+		HandlerResult result = getHandlerResult(new TestRestController(), problemDetails, method);
 
 		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
 
@@ -192,7 +192,7 @@ public class ResponseBodyResultHandlerTests {
 			return null;
 		}
 
-		public ProblemDetail handleToProblemDetail() {
+		public ProblemDetails handleToProblemDetails() {
 			return null;
 		}
 

@@ -20,7 +20,7 @@ import jakarta.servlet.ServletException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.multipart.MultipartResolver;
 
@@ -45,7 +45,7 @@ public class MissingServletRequestPartException extends ServletException impleme
 
 	private final String requestPartName;
 
-	private final ProblemDetail body = ProblemDetail.forStatus(getStatusCode());
+	private final ProblemDetails body = ProblemDetails.forStatus(getStatusCode());
 
 
 	/**
@@ -76,11 +76,11 @@ public class MissingServletRequestPartException extends ServletException impleme
 
 	/**
 	 * Return the body for the response, formatted as an RFC 7807
-	 * {@link ProblemDetail} whose {@link ProblemDetail#getStatus() status}
+	 * {@link ProblemDetails} whose {@link ProblemDetails#getStatus() status}
 	 * should match the response status.
 	 */
 	@Override
-	public ProblemDetail getBody() {
+	public ProblemDetails getBody() {
 		return this.body;
 	}
 

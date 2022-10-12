@@ -26,7 +26,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -46,7 +46,7 @@ public class HttpRequestMethodNotSupportedException extends ServletException imp
 	@Nullable
 	private final String[] supportedMethods;
 
-	private final ProblemDetail body;
+	private final ProblemDetails body;
 
 
 	/**
@@ -102,7 +102,7 @@ public class HttpRequestMethodNotSupportedException extends ServletException imp
 		this.supportedMethods = supportedMethods;
 
 		String detail = "Method '" + method + "' is not supported.";
-		this.body = ProblemDetail.forStatusAndDetail(getStatusCode(), detail);
+		this.body = ProblemDetails.forStatusAndDetail(getStatusCode(), detail);
 	}
 
 
@@ -155,7 +155,7 @@ public class HttpRequestMethodNotSupportedException extends ServletException imp
 	}
 
 	@Override
-	public ProblemDetail getBody() {
+	public ProblemDetails getBody() {
 		return this.body;
 	}
 

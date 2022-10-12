@@ -23,7 +23,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.web.ErrorResponse;
 
 /**
@@ -46,7 +46,7 @@ public class NoHandlerFoundException extends ServletException implements ErrorRe
 
 	private final HttpHeaders headers;
 
-	private final ProblemDetail body;
+	private final ProblemDetails body;
 
 
 	/**
@@ -60,7 +60,7 @@ public class NoHandlerFoundException extends ServletException implements ErrorRe
 		this.httpMethod = httpMethod;
 		this.requestURL = requestURL;
 		this.headers = headers;
-		this.body = ProblemDetail.forStatusAndDetail(getStatusCode(), getMessage());
+		this.body = ProblemDetails.forStatusAndDetail(getStatusCode(), getMessage());
 	}
 
 	@Override
@@ -81,7 +81,7 @@ public class NoHandlerFoundException extends ServletException implements ErrorRe
 	}
 
 	@Override
-	public ProblemDetail getBody() {
+	public ProblemDetails getBody() {
 		return this.body;
 	}
 

@@ -21,17 +21,17 @@ import java.net.URI;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.lang.Nullable;
 
 /**
  * {@link RuntimeException} that implements {@link ErrorResponse} to expose
  * an HTTP status, response headers, and a body formatted as an RFC 7808
- * {@link ProblemDetail}.
+ * {@link ProblemDetails}.
  *
  * <p>The exception can be used as is, or it can be extended as a more specific
- * exception that populates the {@link ProblemDetail#setType(URI) type} or
- * {@link ProblemDetail#setDetail(String) detail} fields, or potentially adds
+ * exception that populates the {@link ProblemDetails#setType(URI) type} or
+ * {@link ProblemDetails#setDetail(String) detail} fields, or potentially adds
  * other non-standard properties.
  *
  * @author Rossen Stoyanchev
@@ -44,7 +44,7 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 
 	private final HttpHeaders headers = new HttpHeaders();
 
-	private final ProblemDetail body;
+	private final ProblemDetails body;
 
 	private final String messageDetailCode;
 
@@ -63,25 +63,25 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 	 * Constructor with a {@link HttpStatusCode} and an optional cause.
 	 */
 	public ErrorResponseException(HttpStatusCode status, @Nullable Throwable cause) {
-		this(status, ProblemDetail.forStatus(status), cause);
+		this(status, ProblemDetails.forStatus(status), cause);
 	}
 
 	/**
-	 * Constructor with a given {@link ProblemDetail} instance, possibly a
-	 * subclass of {@code ProblemDetail} with extended fields.
+	 * Constructor with a given {@link ProblemDetails} instance, possibly a
+	 * subclass of {@code ProblemDetails} with extended fields.
 	 */
-	public ErrorResponseException(HttpStatusCode status, ProblemDetail body, @Nullable Throwable cause) {
+	public ErrorResponseException(HttpStatusCode status, ProblemDetails body, @Nullable Throwable cause) {
 		this(status, body, cause, null, null);
 	}
 
 	/**
-	 * Constructor with a given {@link ProblemDetail}, and a
+	 * Constructor with a given {@link ProblemDetails}, and a
 	 * {@link org.springframework.context.MessageSource} code and arguments to
 	 * resolve the detail message with.
 	 * @since 6.0
 	 */
 	public ErrorResponseException(
-			HttpStatusCode status, ProblemDetail body, @Nullable Throwable cause,
+			HttpStatusCode status, ProblemDetails body, @Nullable Throwable cause,
 			@Nullable String messageDetailCode, @Nullable Object[] messageDetailArguments) {
 
 		super(null, cause);
@@ -108,7 +108,7 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 	}
 
 	/**
-	 * Set the {@link ProblemDetail#setType(URI) type} field of the response body.
+	 * Set the {@link ProblemDetails#setType(URI) type} field of the response body.
 	 * @param type the problem type
 	 */
 	public void setType(URI type) {
@@ -116,7 +116,7 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 	}
 
 	/**
-	 * Set the {@link ProblemDetail#setTitle(String) title} field of the response body.
+	 * Set the {@link ProblemDetails#setTitle(String) title} field of the response body.
 	 * @param title the problem title
 	 */
 	public void setTitle(@Nullable String title) {
@@ -124,7 +124,7 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 	}
 
 	/**
-	 * Set the {@link ProblemDetail#setDetail(String) detail} field of the response body.
+	 * Set the {@link ProblemDetails#setDetail(String) detail} field of the response body.
 	 * @param detail the problem detail
 	 */
 	public void setDetail(@Nullable String detail) {
@@ -132,7 +132,7 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 	}
 
 	/**
-	 * Set the {@link ProblemDetail#setInstance(URI) instance} field of the response body.
+	 * Set the {@link ProblemDetails#setInstance(URI) instance} field of the response body.
 	 * @param instance the problem instance
 	 */
 	public void setInstance(@Nullable URI instance) {
@@ -147,15 +147,15 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 	 * <li>{@link #setDetail(String)}
 	 * <li>{@link #setInstance(URI)}
 	 * </ul>
-	 * <p>By default, the status field of {@link ProblemDetail} is initialized
+	 * <p>By default, the status field of {@link ProblemDetails} is initialized
 	 * from the status provided to the constructor, which in turn may also
 	 * initialize the title field from the status reason phrase, if the status
 	 * is well-known. The instance field, if not set, is initialized from the
-	 * request path when a {@code ProblemDetail} is returned from an
+	 * request path when a {@code ProblemDetails} is returned from an
 	 * {@code @ExceptionHandler} method.
 	 */
 	@Override
-	public final ProblemDetail getBody() {
+	public final ProblemDetails getBody() {
 		return this.body;
 	}
 

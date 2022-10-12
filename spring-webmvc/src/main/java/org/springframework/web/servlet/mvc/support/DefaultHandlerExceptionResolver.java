@@ -27,7 +27,7 @@ import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ProblemDetails;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.lang.Nullable;
@@ -453,7 +453,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * Handle an {@link ErrorResponse} exception.
 	 * <p>The default implementation sets status and the headers of the response
 	 * to those obtained from the {@code ErrorResponse}. If available, the
-	 * {@link ProblemDetail#getDetail()}  is used as the message for
+	 * {@link ProblemDetails#getDetail()}  is used as the message for
 	 * {@link HttpServletResponse#sendError(int, String)}.
 	 * @param errorResponse the exception to be handled
 	 * @param request current HTTP request
