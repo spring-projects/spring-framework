@@ -91,12 +91,6 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	@Deprecated
-	public String getMethodValue() {
-		return this.httpMethod.name();
-	}
-
-	@Override
 	@Nullable
 	public InetSocketAddress getLocalAddress() {
 		return this.localAddress;

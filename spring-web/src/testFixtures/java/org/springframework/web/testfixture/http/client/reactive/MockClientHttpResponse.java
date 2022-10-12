@@ -72,12 +72,6 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 	}
 
 	@Override
-	@Deprecated
-	public int getRawStatusCode() {
-		return this.statusCode.value();
-	}
-
-	@Override
 	public HttpHeaders getHeaders() {
 		if (!getCookies().isEmpty() && this.headers.get(HttpHeaders.SET_COOKIE) == null) {
 			getCookies().values().stream().flatMap(Collection::stream)

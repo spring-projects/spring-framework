@@ -69,12 +69,6 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 	}
 
 	@Override
-	@Deprecated
-	public int getRawStatusCode() {
-		return this.reactiveResponse.getStatus();
-	}
-
-	@Override
 	public MultiValueMap<String, ResponseCookie> getCookies() {
 		MultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
 		List<String> cookieHeader = getHeaders().get(HttpHeaders.SET_COOKIE);

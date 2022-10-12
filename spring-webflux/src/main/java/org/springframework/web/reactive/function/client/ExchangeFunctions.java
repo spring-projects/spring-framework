@@ -145,12 +145,6 @@ public abstract class ExchangeFunctions {
 				}
 
 				@Override
-				@Deprecated
-				public String getMethodValue() {
-					return request.method().name();
-				}
-
-				@Override
 				public URI getURI() {
 					return request.url();
 				}

@@ -95,12 +95,6 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
-	@Deprecated
-	public String getMethodValue() {
-		return this.servletRequest.getMethod();
-	}
-
-	@Override
 	public URI getURI() {
 		if (this.uri == null) {
 			String urlString = null;

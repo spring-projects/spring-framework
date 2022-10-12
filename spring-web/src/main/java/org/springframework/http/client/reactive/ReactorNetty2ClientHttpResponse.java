@@ -119,12 +119,6 @@ class ReactorNetty2ClientHttpResponse implements ClientHttpResponse {
 	}
 
 	@Override
-	@Deprecated
-	public int getRawStatusCode() {
-		return this.response.status().code();
-	}
-
-	@Override
 	public MultiValueMap<String, ResponseCookie> getCookies() {
 		MultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
 		this.response.cookies().values().stream()
@@ -168,7 +162,7 @@ class ReactorNetty2ClientHttpResponse implements ClientHttpResponse {
 	}
 
 	private boolean mayHaveBody(HttpMethod method) {
-		int code = this.getRawStatusCode();
+		int code = this.getStatusCode().value();
 		return !((code >= 100 && code < 200) || code == 204 || code == 205 ||
 				method.equals(HttpMethod.HEAD) || getHeaders().getContentLength() == 0);
 	}
@@ -177,7 +171,7 @@ class ReactorNetty2ClientHttpResponse implements ClientHttpResponse {
 	public String toString() {
 		return "ReactorNetty2ClientHttpResponse{" +
 				"request=[" + this.response.method().name() + " " + this.response.uri() + "]," +
-				"status=" + getRawStatusCode() + '}';
+				"status=" + getStatusCode() + '}';
 	}
 
 }

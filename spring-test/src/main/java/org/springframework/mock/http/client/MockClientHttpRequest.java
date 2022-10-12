@@ -77,12 +77,6 @@ public class MockClientHttpRequest extends MockHttpOutputMessage implements Clie
 		return this.httpMethod;
 	}
 
-	@Override
-	@Deprecated
-	public String getMethodValue() {
-		return this.httpMethod.name();
-	}
-
 	public void setURI(URI uri) {
 		this.uri = uri;
 	}

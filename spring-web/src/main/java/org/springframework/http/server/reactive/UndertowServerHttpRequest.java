@@ -82,12 +82,6 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		return HttpMethod.valueOf(this.exchange.getRequestMethod().toString());
 	}
 
-	@Override
-	@Deprecated
-	public String getMethodValue() {
-		return this.exchange.getRequestMethod().toString();
-	}
-
 	@SuppressWarnings("deprecation")
 	@Override
 	protected MultiValueMap<String, HttpCookie> initCookies() {

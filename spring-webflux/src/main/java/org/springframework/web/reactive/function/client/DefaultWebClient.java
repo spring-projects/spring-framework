@@ -406,12 +406,6 @@ class DefaultWebClient implements WebClient {
 				}
 
 				@Override
-				@Deprecated
-				public String getMethodValue() {
-					return httpMethod.name();
-				}
-
-				@Override
 				public URI getURI() {
 					return this.uri;
 				}

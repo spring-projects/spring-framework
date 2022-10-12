@@ -57,12 +57,6 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		}
 
 		@Override
-		@Deprecated
-		public String getMethodValue() {
-			return "UNKNOWN";
-		}
-
-		@Override
 		public URI getURI() {
 			return this.empty;
 		}
@@ -259,12 +253,6 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		@Override
 		public HttpStatusCode getStatusCode() {
 			return this.statusCode;
-		}
-
-		@Override
-		@Deprecated
-		public int getRawStatusCode() {
-			return this.statusCode.value();
 		}
 
 		@Override

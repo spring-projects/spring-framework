@@ -63,15 +63,6 @@ public class HttpRequestWrapper implements HttpRequest {
 	}
 
 	/**
-	 * Return the method value of the wrapped request.
-	 */
-	@Override
-	@Deprecated
-	public String getMethodValue() {
-		return this.request.getMethodValue();
-	}
-
-	/**
 	 * Return the URI of the wrapped request.
 	 */
 	@Override

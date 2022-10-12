@@ -63,8 +63,10 @@ public interface ClientResponse {
 	 * @since 5.1
 	 * @deprecated as of 6.0, in favor of {@link #statusCode()}
 	 */
-	@Deprecated(since = "6.0")
-	int rawStatusCode();
+	@Deprecated(since = "6.0", forRemoval = true)
+	default int rawStatusCode() {
+		return statusCode().value();
+	}
 
 	/**
 	 * Return the headers of this response.

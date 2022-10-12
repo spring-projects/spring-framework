@@ -73,12 +73,6 @@ class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 	}
 
 	@Override
-	@Deprecated
-	public int getRawStatusCode() {
-		return this.message.getHead().getCode();
-	}
-
-	@Override
 	public MultiValueMap<String, ResponseCookie> getCookies() {
 		LinkedMultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
 		this.context.getCookieStore().getCookies().forEach(cookie ->

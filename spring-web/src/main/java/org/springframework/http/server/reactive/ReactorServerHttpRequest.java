@@ -141,12 +141,6 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	@Deprecated
-	public String getMethodValue() {
-		return this.request.method().name();
-	}
-
-	@Override
 	protected MultiValueMap<String, HttpCookie> initCookies() {
 		MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
 		for (CharSequence name : this.request.cookies().keySet()) {

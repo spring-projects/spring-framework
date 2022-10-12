@@ -61,12 +61,6 @@ public class ClientHttpResponseDecorator implements ClientHttpResponse {
 	}
 
 	@Override
-	@Deprecated
-	public int getRawStatusCode() {
-		return this.delegate.getRawStatusCode();
-	}
-
-	@Override
 	public HttpHeaders getHeaders() {
 		return this.delegate.getHeaders();
 	}

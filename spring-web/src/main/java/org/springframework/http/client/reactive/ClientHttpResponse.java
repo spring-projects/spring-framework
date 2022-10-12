@@ -53,8 +53,10 @@ public interface ClientHttpResponse extends ReactiveHttpInputMessage {
 	 * @see #getStatusCode()
 	 * @deprecated as of 6.0, in favor of {@link #getStatusCode()}
 	 */
-	@Deprecated(since = "6.0")
-	int getRawStatusCode();
+	@Deprecated(since = "6.0", forRemoval = true)
+	default int getRawStatusCode() {
+		return getStatusCode().value();
+	}
 
 	/**
 	 * Return a read-only map of response cookies received from the server.
