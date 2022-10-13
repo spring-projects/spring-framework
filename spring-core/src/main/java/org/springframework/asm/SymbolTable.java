@@ -157,71 +157,54 @@ final class SymbolTable {
       int itemOffset = classReader.getItem(itemIndex);
       int itemTag = inputBytes[itemOffset - 1];
       int nameAndTypeItemOffset;
-      switch (itemTag) {
-        case Symbol.CONSTANT_FIELDREF_TAG:
-        case Symbol.CONSTANT_METHODREF_TAG:
-        case Symbol.CONSTANT_INTERFACE_METHODREF_TAG:
-          nameAndTypeItemOffset =
-              classReader.getItem(classReader.readUnsignedShort(itemOffset + 2));
-          addConstantMemberReference(
-              itemIndex,
-              itemTag,
-              classReader.readClass(itemOffset, charBuffer),
-              classReader.readUTF8(nameAndTypeItemOffset, charBuffer),
-              classReader.readUTF8(nameAndTypeItemOffset + 2, charBuffer));
-          break;
-        case Symbol.CONSTANT_INTEGER_TAG:
-        case Symbol.CONSTANT_FLOAT_TAG:
-          addConstantIntegerOrFloat(itemIndex, itemTag, classReader.readInt(itemOffset));
-          break;
-        case Symbol.CONSTANT_NAME_AND_TYPE_TAG:
-          addConstantNameAndType(
-              itemIndex,
-              classReader.readUTF8(itemOffset, charBuffer),
-              classReader.readUTF8(itemOffset + 2, charBuffer));
-          break;
-        case Symbol.CONSTANT_LONG_TAG:
-        case Symbol.CONSTANT_DOUBLE_TAG:
-          addConstantLongOrDouble(itemIndex, itemTag, classReader.readLong(itemOffset));
-          break;
-        case Symbol.CONSTANT_UTF8_TAG:
-          addConstantUtf8(itemIndex, classReader.readUtf(itemIndex, charBuffer));
-          break;
-        case Symbol.CONSTANT_METHOD_HANDLE_TAG:
-          int memberRefItemOffset =
-              classReader.getItem(classReader.readUnsignedShort(itemOffset + 1));
-          nameAndTypeItemOffset =
-              classReader.getItem(classReader.readUnsignedShort(memberRefItemOffset + 2));
-          addConstantMethodHandle(
-              itemIndex,
-              classReader.readByte(itemOffset),
-              classReader.readClass(memberRefItemOffset, charBuffer),
-              classReader.readUTF8(nameAndTypeItemOffset, charBuffer),
-              classReader.readUTF8(nameAndTypeItemOffset + 2, charBuffer));
-          break;
-        case Symbol.CONSTANT_DYNAMIC_TAG:
-        case Symbol.CONSTANT_INVOKE_DYNAMIC_TAG:
-          hasBootstrapMethods = true;
-          nameAndTypeItemOffset =
-              classReader.getItem(classReader.readUnsignedShort(itemOffset + 2));
-          addConstantDynamicOrInvokeDynamicReference(
-              itemTag,
-              itemIndex,
-              classReader.readUTF8(nameAndTypeItemOffset, charBuffer),
-              classReader.readUTF8(nameAndTypeItemOffset + 2, charBuffer),
-              classReader.readUnsignedShort(itemOffset));
-          break;
-        case Symbol.CONSTANT_STRING_TAG:
-        case Symbol.CONSTANT_CLASS_TAG:
-        case Symbol.CONSTANT_METHOD_TYPE_TAG:
-        case Symbol.CONSTANT_MODULE_TAG:
-        case Symbol.CONSTANT_PACKAGE_TAG:
-          addConstantUtf8Reference(
-              itemIndex, itemTag, classReader.readUTF8(itemOffset, charBuffer));
-          break;
-        default:
-          throw new IllegalArgumentException();
-      }
+	  switch (itemTag) {
+		  case Symbol.CONSTANT_FIELDREF_TAG, Symbol.CONSTANT_METHODREF_TAG, Symbol.CONSTANT_INTERFACE_METHODREF_TAG -> {
+			  nameAndTypeItemOffset =
+					  classReader.getItem(classReader.readUnsignedShort(itemOffset + 2));
+			  addConstantMemberReference(
+					  itemIndex,
+					  itemTag,
+					  classReader.readClass(itemOffset, charBuffer),
+					  classReader.readUTF8(nameAndTypeItemOffset, charBuffer),
+					  classReader.readUTF8(nameAndTypeItemOffset + 2, charBuffer));
+		  }
+		  case Symbol.CONSTANT_INTEGER_TAG, Symbol.CONSTANT_FLOAT_TAG ->
+				  addConstantIntegerOrFloat(itemIndex, itemTag, classReader.readInt(itemOffset));
+		  case Symbol.CONSTANT_NAME_AND_TYPE_TAG -> addConstantNameAndType(
+				  itemIndex,
+				  classReader.readUTF8(itemOffset, charBuffer),
+				  classReader.readUTF8(itemOffset + 2, charBuffer));
+		  case Symbol.CONSTANT_LONG_TAG, Symbol.CONSTANT_DOUBLE_TAG ->
+				  addConstantLongOrDouble(itemIndex, itemTag, classReader.readLong(itemOffset));
+		  case Symbol.CONSTANT_UTF8_TAG -> addConstantUtf8(itemIndex, classReader.readUtf(itemIndex, charBuffer));
+		  case Symbol.CONSTANT_METHOD_HANDLE_TAG -> {
+			  int memberRefItemOffset =
+					  classReader.getItem(classReader.readUnsignedShort(itemOffset + 1));
+			  nameAndTypeItemOffset =
+					  classReader.getItem(classReader.readUnsignedShort(memberRefItemOffset + 2));
+			  addConstantMethodHandle(
+					  itemIndex,
+					  classReader.readByte(itemOffset),
+					  classReader.readClass(memberRefItemOffset, charBuffer),
+					  classReader.readUTF8(nameAndTypeItemOffset, charBuffer),
+					  classReader.readUTF8(nameAndTypeItemOffset + 2, charBuffer));
+		  }
+		  case Symbol.CONSTANT_DYNAMIC_TAG, Symbol.CONSTANT_INVOKE_DYNAMIC_TAG -> {
+			  hasBootstrapMethods = true;
+			  nameAndTypeItemOffset =
+					  classReader.getItem(classReader.readUnsignedShort(itemOffset + 2));
+			  addConstantDynamicOrInvokeDynamicReference(
+					  itemTag,
+					  itemIndex,
+					  classReader.readUTF8(nameAndTypeItemOffset, charBuffer),
+					  classReader.readUTF8(nameAndTypeItemOffset + 2, charBuffer),
+					  classReader.readUnsignedShort(itemOffset));
+		  }
+		  case Symbol.CONSTANT_STRING_TAG, Symbol.CONSTANT_CLASS_TAG, Symbol.CONSTANT_METHOD_TYPE_TAG, Symbol.CONSTANT_MODULE_TAG, Symbol.CONSTANT_PACKAGE_TAG ->
+				  addConstantUtf8Reference(
+						  itemIndex, itemTag, classReader.readUTF8(itemOffset, charBuffer));
+		  default -> throw new IllegalArgumentException();
+	  }
       itemIndex +=
           (itemTag == Symbol.CONSTANT_LONG_TAG || itemTag == Symbol.CONSTANT_DOUBLE_TAG) ? 2 : 1;
     }
