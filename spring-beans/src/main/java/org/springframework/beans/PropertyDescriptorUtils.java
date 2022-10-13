@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,14 @@ package org.springframework.beans;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Enumeration;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Common delegate methods for Spring's internal {@link PropertyDescriptor} implementations.
@@ -31,6 +35,82 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  */
 abstract class PropertyDescriptorUtils {
+
+	/**
+	 * Simple introspection algorithm for basic set/get/is accessor methods,
+	 * building corresponding JavaBeans property descriptors for them.
+	 * <p>This just supports the basic JavaBeans conventions, without indexed
+	 * properties or any customizers, and without other BeanInfo metadata.
+	 * For standard JavaBeans introspection, use the JavaBeans Introspector.
+	 * @param beanClass the target class to introspect
+	 * @return a collection of property descriptors
+	 * @throws IntrospectionException from introspecting the given bean class
+	 * @since 6.0
+	 * @see java.beans.Introspector#getBeanInfo(Class)
+	 */
+	public static Collection<PropertyDescriptor> determineBasicProperties(Class<?> beanClass) throws IntrospectionException {
+		Map<String, PropertyDescriptor> pdMap = new TreeMap<>();
+
+		for (Method method : beanClass.getMethods()) {
+			String methodName = method.getName();
+			boolean setter;
+			int nameIndex;
+			if (methodName.startsWith("set") && method.getParameterCount() == 1) {
+				setter = true;
+				nameIndex = 3;
+			}
+			else if (methodName.startsWith("get") && method.getParameterCount() == 0 && method.getReturnType() != Void.TYPE) {
+				setter = false;
+				nameIndex = 3;
+			}
+			else if (methodName.startsWith("is") && method.getParameterCount() == 0 && method.getReturnType() == boolean.class) {
+				setter = false;
+				nameIndex = 2;
+			}
+			else {
+				continue;
+			}
+
+			String propertyName = StringUtils.uncapitalizeAsProperty(methodName.substring(nameIndex));
+			PropertyDescriptor pd = pdMap.get(propertyName);
+			if (pd != null) {
+				if (setter) {
+					if (pd.getWriteMethod() == null ||
+							pd.getWriteMethod().getParameterTypes()[0].isAssignableFrom(method.getParameterTypes()[0])) {
+						try {
+							pd.setWriteMethod(method);
+						}
+						catch (IntrospectionException ex) {
+							// typically a type mismatch -> ignore
+						}
+					}
+				}
+				else {
+					if (pd.getReadMethod() == null ||
+							(pd.getReadMethod().getReturnType() == method.getReturnType() && method.getName().startsWith("is"))) {
+						try {
+							pd.setReadMethod(method);
+						}
+						catch (IntrospectionException ex) {
+							// typically a type mismatch -> ignore
+						}
+					}
+				}
+			}
+			else {
+				pd = new BasicPropertyDescriptor(propertyName, beanClass);
+				if (setter) {
+					pd.setWriteMethod(method);
+				}
+				else {
+					pd.setReadMethod(method);
+				}
+				pdMap.put(propertyName, pd);
+			}
+		}
+
+		return pdMap.values();
+	}
 
 	/**
 	 * See {@link java.beans.FeatureDescriptor}.
@@ -171,6 +251,47 @@ abstract class PropertyDescriptorUtils {
 				ObjectUtils.nullSafeEquals(pd.getPropertyType(), otherPd.getPropertyType()) &&
 				ObjectUtils.nullSafeEquals(pd.getPropertyEditorClass(), otherPd.getPropertyEditorClass()) &&
 				pd.isBound() == otherPd.isBound() && pd.isConstrained() == otherPd.isConstrained());
+	}
+
+
+	/**
+	 * PropertyDescriptor for {@link #determineBasicProperties(Class)},
+	 * not performing any early type determination for
+	 * {@link #setReadMethod}/{@link #setWriteMethod}.
+	 */
+	private static class BasicPropertyDescriptor extends PropertyDescriptor {
+
+		@Nullable
+		private Method readMethod;
+
+		@Nullable
+		private Method writeMethod;
+
+		public BasicPropertyDescriptor(String propertyName, Class<?> beanClass) throws IntrospectionException {
+			super(propertyName, beanClass, null, null);
+		}
+
+		@Override
+		public void setReadMethod(@Nullable Method readMethod) {
+			this.readMethod = readMethod;
+		}
+
+		@Override
+		@Nullable
+		public Method getReadMethod() {
+			return this.readMethod;
+		}
+
+		@Override
+		public void setWriteMethod(@Nullable Method writeMethod) {
+			this.writeMethod = writeMethod;
+		}
+
+		@Override
+		@Nullable
+		public Method getWriteMethod() {
+			return this.writeMethod;
+		}
 	}
 
 }

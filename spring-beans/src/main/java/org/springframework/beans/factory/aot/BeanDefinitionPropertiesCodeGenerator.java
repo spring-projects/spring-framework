@@ -16,9 +16,6 @@
 
 package org.springframework.beans.factory.aot;
 
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -34,8 +31,7 @@ import java.util.function.Predicate;
 import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.beans.BeanInfoFactory;
-import org.springframework.beans.ExtendedBeanInfoFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.FactoryBean;
@@ -80,8 +76,6 @@ class BeanDefinitionPropertiesCodeGenerator {
 	private static final RootBeanDefinition DEFAULT_BEAN_DEFINITION = new RootBeanDefinition();
 
 	private static final String BEAN_DEFINITION_VARIABLE = BeanRegistrationCodeFragments.BEAN_DEFINITION_VARIABLE;
-
-	private static final BeanInfoFactory beanInfoFactory = new ExtendedBeanInfoFactory();
 
 	private final RuntimeHints hints;
 
@@ -185,9 +179,8 @@ class BeanDefinitionPropertiesCodeGenerator {
 						BEAN_DEFINITION_VARIABLE, propertyValue.getName(), valueCode);
 			}
 			Class<?> infrastructureType = getInfrastructureType(beanDefinition);
-			BeanInfo beanInfo = (infrastructureType != Object.class) ? getBeanInfo(infrastructureType) : null;
-			if (beanInfo != null) {
-				Map<String, Method> writeMethods = getWriteMethods(beanInfo);
+			if (infrastructureType != Object.class) {
+				Map<String, Method> writeMethods = getWriteMethods(infrastructureType);
 				for (PropertyValue propertyValue : propertyValues) {
 					Method writeMethod = writeMethods.get(propertyValue.getName());
 					if (writeMethod != null) {
@@ -208,25 +201,10 @@ class BeanDefinitionPropertiesCodeGenerator {
 		return ClassUtils.getUserClass(beanDefinition.getResolvableType().toClass());
 	}
 
-	@Nullable
-	private BeanInfo getBeanInfo(Class<?> beanType) {
-		try {
-			BeanInfo beanInfo = beanInfoFactory.getBeanInfo(beanType);
-			if (beanInfo != null) {
-				return beanInfo;
-			}
-			return Introspector.getBeanInfo(beanType, Introspector.IGNORE_ALL_BEANINFO);
-		}
-		catch (IntrospectionException ex) {
-			return null;
-		}
-	}
-
-	private Map<String, Method> getWriteMethods(BeanInfo beanInfo) {
+	private Map<String, Method> getWriteMethods(Class<?> clazz) {
 		Map<String, Method> writeMethods = new HashMap<>();
-		for (PropertyDescriptor propertyDescriptor : beanInfo.getPropertyDescriptors()) {
-			writeMethods.put(propertyDescriptor.getName(),
-					propertyDescriptor.getWriteMethod());
+		for (PropertyDescriptor propertyDescriptor : BeanUtils.getPropertyDescriptors(clazz)) {
+			writeMethods.put(propertyDescriptor.getName(), propertyDescriptor.getWriteMethod());
 		}
 		return Collections.unmodifiableMap(writeMethods);
 	}

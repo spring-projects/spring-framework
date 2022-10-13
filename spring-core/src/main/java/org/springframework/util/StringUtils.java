@@ -554,6 +554,24 @@ public abstract class StringUtils {
 		return changeFirstCharacterCase(str, false);
 	}
 
+	/**
+	 * Uncapitalize a {@code String} in JavaBeans property format,
+	 * changing the first letter to lower case as per
+	 * {@link Character#toLowerCase(char)}, unless the initial two
+	 * letters are upper case in direct succession.
+	 * @param str the {@code String} to uncapitalize
+	 * @return the uncapitalized {@code String}
+	 * @since 6.0
+	 * @see java.beans.Introspector#decapitalize(String)
+	 */
+	public static String uncapitalizeAsProperty(String str) {
+		if (!hasLength(str) || (str.length() > 1 && Character.isUpperCase(str.charAt(0)) &&
+				Character.isUpperCase(str.charAt(1)))) {
+			return str;
+		}
+		return changeFirstCharacterCase(str, false);
+	}
+
 	private static String changeFirstCharacterCase(String str, boolean capitalize) {
 		if (!hasLength(str)) {
 			return str;
