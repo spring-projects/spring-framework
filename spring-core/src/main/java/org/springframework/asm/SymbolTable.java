@@ -472,9 +472,8 @@ final class SymbolTable {
       return addConstantDouble(((Double) value).doubleValue());
     } else if (value instanceof String) {
       return addConstantString((String) value);
-    } else if (value instanceof Type) {
-      Type type = (Type) value;
-      int typeSort = type.getSort();
+    } else if (value instanceof Type type) {
+		int typeSort = type.getSort();
       if (typeSort == Type.OBJECT) {
         return addConstantClass(type.getInternalName());
       } else if (typeSort == Type.METHOD) {
@@ -482,17 +481,15 @@ final class SymbolTable {
       } else { // type is a primitive or array type.
         return addConstantClass(type.getDescriptor());
       }
-    } else if (value instanceof Handle) {
-      Handle handle = (Handle) value;
-      return addConstantMethodHandle(
+    } else if (value instanceof Handle handle) {
+		return addConstantMethodHandle(
           handle.getTag(),
           handle.getOwner(),
           handle.getName(),
           handle.getDesc(),
           handle.isInterface());
-    } else if (value instanceof ConstantDynamic) {
-      ConstantDynamic constantDynamic = (ConstantDynamic) value;
-      return addConstantDynamic(
+    } else if (value instanceof ConstantDynamic constantDynamic) {
+		return addConstantDynamic(
           constantDynamic.getName(),
           constantDynamic.getDescriptor(),
           constantDynamic.getBootstrapMethod(),
