@@ -676,7 +676,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 						}
 					}
 					else if (value instanceof Map map) {
-						Class<?> mapKeyType = ph.getResolvableType().getNested(i + 1).asMap().resolveGeneric(0);
+						Class<?> mapKeyType = ph.getMapKeyType(i + 1);
 						// IMPORTANT: Do not pass full property name in here - property editors
 						// must not kick in for map keys but rather only for map values.
 						TypeDescriptor typeDescriptor = TypeDescriptor.valueOf(mapKeyType);
@@ -1029,19 +1029,26 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 
 		public abstract ResolvableType getResolvableType();
 
-		@Nullable
-		public Class<?> getMapKeyType(int nestingLevel) {
-			return getResolvableType().getNested(nestingLevel).asMap().resolveGeneric(0);
+		private boolean isOptional() {
+			return Optional.class.equals(getResolvableType().getRawClass());
 		}
 
 		@Nullable
-		public Class<?> getMapValueType(int nestingLevel) {
-			return getResolvableType().getNested(nestingLevel).asMap().resolveGeneric(1);
+		public Class<?> getMapKeyType(final int nestingLevel) {
+			var newNestingLevel = isOptional() ? nestingLevel + 1 : nestingLevel;
+			return getResolvableType().getNested(newNestingLevel).asMap().resolveGeneric(0);
 		}
 
 		@Nullable
-		public Class<?> getCollectionType(int nestingLevel) {
-			return getResolvableType().getNested(nestingLevel).asCollection().resolveGeneric();
+		public Class<?> getMapValueType(final int nestingLevel) {
+			var newNestingLevel = isOptional() ? nestingLevel + 1 : nestingLevel;
+			return getResolvableType().getNested(newNestingLevel).asMap().resolveGeneric(1);
+		}
+
+		@Nullable
+		public Class<?> getCollectionType(final int nestingLevel) {
+			var newNestingLevel = isOptional() ? nestingLevel + 1 : nestingLevel;
+			return getResolvableType().getNested(newNestingLevel).asCollection().resolveGeneric();
 		}
 
 		@Nullable

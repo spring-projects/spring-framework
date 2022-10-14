@@ -96,6 +96,8 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	private Number someNumber;
 
+	private Integer someInteger;
+
 	private Colour favouriteColour;
 
 	private Boolean someBoolean;
@@ -494,4 +496,11 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		return this.name;
 	}
 
+	public Integer getSomeInteger() {
+		return someInteger;
+	}
+
+	public void setSomeInteger(Integer someInteger) {
+		this.someInteger = someInteger;
+	}
 }

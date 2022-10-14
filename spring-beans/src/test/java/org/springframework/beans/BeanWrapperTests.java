@@ -230,6 +230,14 @@ class BeanWrapperTests extends AbstractPropertyAccessorTests {
 		assertThat(target.value.getName()).isEqualTo("y");
 		assertThat(target.getObject().get().getName()).isEqualTo("y");
 		assertThat(accessor.getPropertyValue("object.name")).isEqualTo("y");
+
+		accessor.setPropertyValue("object.someInteger", "5");
+		assertThat(target.value).isSameAs(tb);
+		assertThat(target.getObject().get()).isSameAs(tb);
+		assertThat(((Optional<TestBean>) accessor.getPropertyValue("object")).get()).isSameAs(tb);
+		assertThat(target.value.getSomeInteger()).isEqualTo(5);
+		assertThat(target.getObject().get().getSomeInteger()).isEqualTo(5);
+		assertThat(accessor.getPropertyValue("object.someInteger")).isEqualTo(5);
 	}
 
 	@Test

@@ -78,11 +78,11 @@ public class GenericBean<T> {
 
 	private List<T> genericListProperty;
 
-	private Optional<List<Integer>> optionalOfList;
+	private List<Integer> optionalOfList;
 
-	private Optional<Integer[]> optionalOfArray;
+	private Integer[] optionalOfArray;
 
-	private Optional<Map<Integer, Long>> optionalOfMap;
+	private Map<Integer, Long> optionalOfMap;
 
 	public GenericBean() {
 	}
@@ -296,26 +296,26 @@ public class GenericBean<T> {
 	}
 
 	public Optional<List<Integer>> getOptionalOfList() {
-		return optionalOfList;
+		return Optional.ofNullable(optionalOfList);
 	}
 
-	public void setOptionalOfList(Optional<List<Integer>> optionalOfList) {
+	public void setOptionalOfList(List<Integer> optionalOfList) {
 		this.optionalOfList = optionalOfList;
 	}
 
 	public Optional<Integer[]> getOptionalOfArray() {
-		return optionalOfArray;
+		return Optional.ofNullable(optionalOfArray);
 	}
 
-	public void setOptionalOfArray(Optional<Integer[]> optionalOfArray) {
+	public void setOptionalOfArray(Integer[] optionalOfArray) {
 		this.optionalOfArray = optionalOfArray;
 	}
 
 	public Optional<Map<Integer, Long>> getOptionalOfMap() {
-		return optionalOfMap;
+		return Optional.ofNullable(optionalOfMap);
 	}
 
-	public void setOptionalOfMap(Optional<Map<Integer, Long>> optionalOfMap) {
+	public void setOptionalOfMap(Map<Integer, Long> optionalOfMap) {
 		this.optionalOfMap = optionalOfMap;
 	}
 
