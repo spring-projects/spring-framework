@@ -44,7 +44,7 @@ public class ClassTransformerChain extends AbstractClassTransformer {
     }
 
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
         sb.append("ClassTransformerChain{");
         for (int i = 0; i < chain.length; i++) {
             if (i > 0) {
