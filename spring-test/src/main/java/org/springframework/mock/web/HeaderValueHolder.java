@@ -16,7 +16,6 @@
 
 package org.springframework.mock.web;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -61,11 +60,7 @@ class HeaderValueHolder {
 	}
 
 	List<String> getStringValues() {
-		List<String> stringList = new ArrayList<>(this.values.size());
-		for (Object value : this.values) {
-			stringList.add(value.toString());
-		}
-		return Collections.unmodifiableList(stringList);
+		return this.values.stream().map(Object::toString).toList();
 	}
 
 	@Nullable

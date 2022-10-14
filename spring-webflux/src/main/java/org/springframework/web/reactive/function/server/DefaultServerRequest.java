@@ -21,7 +21,6 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.security.Principal;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -88,7 +87,7 @@ class DefaultServerRequest implements ServerRequest {
 
 	DefaultServerRequest(ServerWebExchange exchange, List<HttpMessageReader<?>> messageReaders) {
 		this.exchange = exchange;
-		this.messageReaders = Collections.unmodifiableList(new ArrayList<>(messageReaders));
+		this.messageReaders = List.copyOf(messageReaders);
 		this.headers = new DefaultHeaders();
 	}
 

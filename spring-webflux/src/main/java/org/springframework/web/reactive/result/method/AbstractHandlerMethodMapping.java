@@ -107,9 +107,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	public Map<T, HandlerMethod> getHandlerMethods() {
 		this.mappingRegistry.acquireReadLock();
 		try {
-			return Collections.unmodifiableMap(
-					this.mappingRegistry.getRegistrations().entrySet().stream()
-							.collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().handlerMethod)));
+			return this.mappingRegistry.getRegistrations().entrySet().stream()
+					.collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, entry -> entry.getValue().handlerMethod));
 		}
 		finally {
 			this.mappingRegistry.releaseReadLock();

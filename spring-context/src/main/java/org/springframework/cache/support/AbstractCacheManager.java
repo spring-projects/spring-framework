@@ -22,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.Cache;
@@ -64,13 +65,13 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 		synchronized (this.cacheMap) {
 			this.cacheNames = Collections.emptySet();
 			this.cacheMap.clear();
-			Set<String> cacheNames = new LinkedHashSet<>(caches.size());
 			for (Cache cache : caches) {
 				String name = cache.getName();
 				this.cacheMap.put(name, decorateCache(cache));
-				cacheNames.add(name);
 			}
-			this.cacheNames = Collections.unmodifiableSet(cacheNames);
+			this.cacheNames = caches.stream()
+					.map(Cache::getName)
+					.collect(Collectors.toUnmodifiableSet());
 		}
 	}
 
