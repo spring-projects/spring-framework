@@ -36,6 +36,9 @@ import org.springframework.util.StringUtils;
  */
 abstract class PropertyDescriptorUtils {
 
+	public static final PropertyDescriptor[] EMPTY_PROPERTY_DESCRIPTOR_ARRAY = {};
+
+
 	/**
 	 * Simple introspection algorithm for basic set/get/is accessor methods,
 	 * building corresponding JavaBeans property descriptors for them.
@@ -46,6 +49,7 @@ abstract class PropertyDescriptorUtils {
 	 * @return a collection of property descriptors
 	 * @throws IntrospectionException from introspecting the given bean class
 	 * @since 6.0
+	 * @see SimpleBeanInfoFactory
 	 * @see java.beans.Introspector#getBeanInfo(Class)
 	 */
 	public static Collection<PropertyDescriptor> determineBasicProperties(Class<?> beanClass) throws IntrospectionException {

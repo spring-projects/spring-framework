@@ -19,12 +19,10 @@ package org.springframework.beans;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
-import java.beans.SimpleBeanInfo;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.security.ProtectionDomain;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -79,11 +77,10 @@ import org.springframework.util.StringUtils;
  */
 public final class CachedIntrospectionResults {
 
-	private static final PropertyDescriptor[] EMPTY_PROPERTY_DESCRIPTOR_ARRAY = {};
-
-
 	private static final List<BeanInfoFactory> beanInfoFactories = SpringFactoriesLoader.loadFactories(
 			BeanInfoFactory.class, CachedIntrospectionResults.class.getClassLoader());
+
+	private static final SimpleBeanInfoFactory simpleBeanInfoFactory = new SimpleBeanInfoFactory();
 
 	private static final Log logger = LogFactory.getLog(CachedIntrospectionResults.class);
 
@@ -228,14 +225,7 @@ public final class CachedIntrospectionResults {
 				return beanInfo;
 			}
 		}
-
-		Collection<PropertyDescriptor> pds = PropertyDescriptorUtils.determineBasicProperties(beanClass);
-		return new SimpleBeanInfo() {
-			@Override
-			public PropertyDescriptor[] getPropertyDescriptors() {
-				return pds.toArray(EMPTY_PROPERTY_DESCRIPTOR_ARRAY);
-			}
-		};
+		return simpleBeanInfoFactory.getBeanInfo(beanClass);
 	}
 
 
@@ -405,7 +395,7 @@ public final class CachedIntrospectionResults {
 	}
 
 	PropertyDescriptor[] getPropertyDescriptors() {
-		return this.propertyDescriptors.values().toArray(EMPTY_PROPERTY_DESCRIPTOR_ARRAY);
+		return this.propertyDescriptors.values().toArray(PropertyDescriptorUtils.EMPTY_PROPERTY_DESCRIPTOR_ARRAY);
 	}
 
 	private PropertyDescriptor buildGenericTypeAwarePropertyDescriptor(Class<?> beanClass, PropertyDescriptor pd) {
