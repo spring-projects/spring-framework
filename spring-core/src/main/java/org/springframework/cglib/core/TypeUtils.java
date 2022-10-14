@@ -171,7 +171,7 @@ public class TypeUtils {
         int rparen = s.indexOf(')', lparen);
         String returnType = s.substring(0, space);
         String methodName = s.substring(space + 1, lparen);
-        StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
         sb.append('(');
         for (Iterator it = parseTypes(s, lparen + 1, rparen).iterator(); it.hasNext();) {
             sb.append(it.next());
@@ -195,7 +195,7 @@ public class TypeUtils {
     }
 
     public static Signature parseConstructor(Type[] types) {
-        StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
         sb.append("(");
         for (int i = 0; i < types.length; i++) {
             sb.append(types[i].getDescriptor());
@@ -233,7 +233,7 @@ public class TypeUtils {
         } else if (type.indexOf('.') < 0) {
             return map("java.lang." + type);
         } else {
-            StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
             int index = 0;
             while ((index = type.indexOf("[]", index) + 1) > 0) {
                 sb.append('[');
@@ -402,7 +402,7 @@ public class TypeUtils {
     }
 
     public static String escapeType(String s) {
-        StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
         for (int i = 0, len = s.length(); i < len; i++) {
             char c = s.charAt(i);
             switch (c) {
