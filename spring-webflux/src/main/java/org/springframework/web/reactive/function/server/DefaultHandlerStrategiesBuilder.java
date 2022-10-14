@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.function.server;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -135,7 +134,7 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 		}
 
 		private static <T> List<T> unmodifiableCopy(List<? extends T> list) {
-			return Collections.unmodifiableList(new ArrayList<>(list));
+			return List.copyOf(list);
 		}
 
 		@Override

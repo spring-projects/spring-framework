@@ -17,10 +17,9 @@
 package org.springframework.web.socket.sockjs.transport;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
@@ -47,15 +46,8 @@ public enum TransportType {
 	HTML_FILE("htmlfile", HttpMethod.GET, "cors", "jsessionid", "no_cache");
 
 
-	private static final Map<String, TransportType> TRANSPORT_TYPES;
-
-	static {
-		Map<String, TransportType> transportTypes = new HashMap<>();
-		for (TransportType type : values()) {
-			transportTypes.put(type.value, type);
-		}
-		TRANSPORT_TYPES = Collections.unmodifiableMap(transportTypes);
-	}
+	private static final Map<String, TransportType> TRANSPORT_TYPES =
+			Arrays.stream(values()).collect(Collectors.toUnmodifiableMap(type -> type.value, type -> type));
 
 	@Nullable
 	public static TransportType fromValue(String value) {

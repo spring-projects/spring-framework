@@ -171,7 +171,7 @@ final class DefaultRenderingResponseBuilder implements RenderingResponse.Builder
 
 			super(statusCode, headers, cookies, Collections.emptyMap());
 			this.name = name;
-			this.model = Collections.unmodifiableMap(new LinkedHashMap<>(model));
+			this.model = Map.copyOf(model);
 		}
 
 		@Override
