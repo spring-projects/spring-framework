@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.observation;
+package org.springframework.web.observation.servlet;
 
 import java.io.IOException;
 import java.util.Optional;

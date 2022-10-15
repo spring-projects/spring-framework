@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.observation;
+package org.springframework.web.observation.servlet;
 
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;

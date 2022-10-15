@@ -26,8 +26,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.web.observation.HttpRequestsObservationContext;
-import org.springframework.web.observation.HttpRequestsObservationFilter;
+import org.springframework.web.observation.servlet.HttpRequestsObservationContext;
+import org.springframework.web.observation.servlet.HttpRequestsObservationFilter;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.function.HandlerFunction;

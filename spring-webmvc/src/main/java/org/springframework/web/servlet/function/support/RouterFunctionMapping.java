@@ -32,7 +32,7 @@ import org.springframework.http.converter.support.AllEncompassingFormHttpMessage
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.observation.HttpRequestsObservationFilter;
+import org.springframework.web.observation.servlet.HttpRequestsObservationFilter;
 import org.springframework.web.servlet.function.HandlerFunction;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.RouterFunctions;

@@ -20,6 +20,8 @@ import io.micrometer.common.KeyValue;
 import io.micrometer.observation.Observation;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.web.observation.servlet.DefaultHttpRequestsObservationConvention;
+import org.springframework.web.observation.servlet.HttpRequestsObservationContext;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
