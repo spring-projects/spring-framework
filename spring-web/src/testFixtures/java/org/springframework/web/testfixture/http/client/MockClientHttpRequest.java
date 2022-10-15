@@ -103,6 +103,7 @@ public class MockClientHttpRequest implements ClientHttpRequest {
 		return this.httpMethod;
 	}
 
+	@SuppressWarnings("removal")
 	@Override
 	@Deprecated
 	public String getMethodValue() {
