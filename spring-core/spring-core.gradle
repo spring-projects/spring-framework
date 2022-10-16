@@ -58,11 +58,11 @@ task objenesisSourceJar(type: Jar) {
 dependencies {
 	javapoet("com.squareup:javapoet:${javapoetVersion}@jar")
 	objenesis("org.objenesis:objenesis:${objenesisVersion}@jar")
-	graalvm(project(path: ":graalvm-feature", configuration: 'classesOnlyElements'))
 	api(files(javapoetRepackJar))
 	api(files(objenesisRepackJar))
 	api(project(":spring-jcl"))
 	compileOnly("io.projectreactor.tools:blockhound")
+	compileOnly("org.graalvm.sdk:graal-sdk")
 	optional("net.sf.jopt-simple:jopt-simple")
 	optional("org.aspectj:aspectjweaver")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
@@ -108,8 +108,6 @@ jar {
 	from(zipTree(objenesisRepackJar.archivePath)) {
 		include "org/springframework/objenesis/**"
 	}
-
-	from configurations.graalvm
 }
 
 test {

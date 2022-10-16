@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.aot.graalvm;
+package org.springframework.aot.nativex.feature;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

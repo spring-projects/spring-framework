@@ -18,8 +18,6 @@ include "spring-context"
 include "spring-context-indexer"
 include "spring-context-support"
 include "spring-core"
-include "graalvm-feature"
-project(':graalvm-feature').projectDir = file('spring-core/graalvm')
 include "spring-core-test"
 include "spring-expression"
 include "spring-instrument"

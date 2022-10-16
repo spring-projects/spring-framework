@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.aot.graalvm;
+package org.springframework.aot.nativex.substitution;
 
 import com.oracle.svm.core.annotate.Alias;
 import com.oracle.svm.core.annotate.TargetClass;

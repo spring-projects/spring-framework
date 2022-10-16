@@ -120,7 +120,7 @@ dependencies {
 		api("org.glassfish.external:opendmk_jmxremote_optional_jar:1.0-b01-ea")
 		api("org.glassfish.tyrus:tyrus-container-servlet:2.0.1")
 		api("org.glassfish:jakarta.el:4.0.2")
-		api("org.graalvm.nativeimage:svm:22.1.0.1")
+		api("org.graalvm.sdk:graal-sdk:22.3.0")
 		api("org.hamcrest:hamcrest:2.2")
 		api("org.hibernate:hibernate-core-jakarta:5.6.12.Final")
 		api("org.hibernate:hibernate-validator:7.0.5.Final")
