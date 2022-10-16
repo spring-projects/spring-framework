@@ -29,14 +29,17 @@ import org.springframework.lang.Nullable;
  * attempts to find a matching versioned resource contained in a WebJar JAR file.
  *
  * <p>This allows WebJars.org users to write version agnostic paths in their templates,
- * like {@code <script src="/jquery/jquery.min.js"/>}.
- * This path will be resolved to the unique version {@code <script src="/jquery/1.2.0/jquery.min.js"/>},
+ * like {@code <script src="/webjars/jquery/jquery.min.js"/>}.
+ * This path will be resolved to the unique version {@code <script src="/webjars/jquery/1.2.0/jquery.min.js"/>},
  * which is a better fit for HTTP caching and version management in applications.
  *
  * <p>This also resolves resources for version agnostic HTTP requests {@code "GET /jquery/jquery.min.js"}.
  *
  * <p>This resolver requires the {@code org.webjars:webjars-locator-core} library
  * on the classpath and is automatically registered if that library is present.
+ *
+ * <p>Be aware that {@code WebJarAssetLocator} constructor performs a classpath scanning that
+ * could slow down application startup.
  *
  * @author Brian Clozel
  * @since 4.2
