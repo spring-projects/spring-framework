@@ -56,6 +56,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	/**
 	 * Set the factory method currently being invoked or {@code null} to reset.
 	 * @param method the factory method currently being invoked or {@code null}
+	 * @since 6.0
 	 */
 	public static void setCurrentlyInvokedFactoryMethod(@Nullable Method method) {
 		currentlyInvokedFactoryMethod.set(method);
