@@ -53,9 +53,8 @@ final class AnnotationTypeMapping {
 	private static final Log logger = LogFactory.getLog(AnnotationTypeMapping.class);
 
 	/**
-	 * Set of fully qualified class names concatenated with attribute names for
-	 * annotations which we have already checked for use of convention-based
-	 * annotation attribute overrides.
+	 * Set of fully qualified class names for annotations which we have already
+	 * checked for use of convention-based annotation attribute overrides.
 	 * @since 6.0
 	 * @see #addConventionMappings()
 	 */
@@ -284,21 +283,12 @@ final class AnnotationTypeMapping {
 		}
 		AttributeMethods rootAttributes = this.root.getAttributes();
 		int[] mappings = this.conventionMappings;
+		Set<String> conventionMappedAttributes = new HashSet<>();
 		for (int i = 0; i < mappings.length; i++) {
 			String name = this.attributes.get(i).getName();
 			int mapped = rootAttributes.indexOf(name);
 			if (!MergedAnnotation.VALUE.equals(name) && mapped != -1 && !isExplicitAttributeOverride(name)) {
-				String rootAnnotationTypeName = this.root.annotationType.getName();
-				String cacheKey = rootAnnotationTypeName + "." + name;
-				// We want to avoid duplicate log warnings as much as possible, without full synchronization.
-				if (conventionBasedOverrideCheckCache.add(cacheKey) && logger.isWarnEnabled()) {
-					logger.warn("""
-							Support for convention-based annotation attribute overrides is \
-							deprecated and will be removed in Spring Framework 6.1. Please \
-							annotate the '%s' attribute in @%s with an appropriate @AliasFor \
-							declaration -- for example, @AliasFor(annotation = %s.class)."""
-								.formatted(name, rootAnnotationTypeName, this.annotationType.getName()));
-				}
+				conventionMappedAttributes.add(name);
 				mappings[i] = mapped;
 				MirrorSet mirrors = getMirrorSets().getAssigned(i);
 				if (mirrors != null) {
@@ -307,6 +297,16 @@ final class AnnotationTypeMapping {
 					}
 				}
 			}
+		}
+		String rootAnnotationTypeName = this.root.annotationType.getName();
+		// We want to avoid duplicate log warnings as much as possible, without full synchronization.
+		if (conventionBasedOverrideCheckCache.add(rootAnnotationTypeName) &&
+				!conventionMappedAttributes.isEmpty() && logger.isWarnEnabled()) {
+			logger.warn("""
+					Support for convention-based annotation attribute overrides is deprecated \
+					and will be removed in Spring Framework 6.1. Please annotate the following \
+					attributes in @%s with appropriate @AliasFor declarations: %s"""
+						.formatted(rootAnnotationTypeName, conventionMappedAttributes));
 		}
 	}
 

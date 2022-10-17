@@ -2445,6 +2445,10 @@ class MergedAnnotationsTests {
 		// Do NOT use @AliasFor here until Spring 6.1
 		// @AliasFor(annotation = ContextConfiguration.class)
 		String[] locations() default {};
+
+		// Do NOT use @AliasFor here until Spring 6.1
+		// @AliasFor(annotation = ContextConfiguration.class)
+		Class<?>[] classes() default {};
 	}
 
 	@ContextConfiguration(value = "duplicateDeclaration")
