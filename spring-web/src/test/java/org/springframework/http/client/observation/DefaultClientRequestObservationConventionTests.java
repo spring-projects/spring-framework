@@ -34,15 +34,15 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
- * Tests for {@link DefaultClientHttpObservationConvention}.
+ * Tests for {@link DefaultClientRequestObservationConvention}.
  *
  * @author Brian Clozel
  */
-class DefaultClientHttpObservationConventionTests {
+class DefaultClientRequestObservationConventionTests {
 
 	private final MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, "/test");
 
-	private final DefaultClientHttpObservationConvention observationConvention = new DefaultClientHttpObservationConvention();
+	private final DefaultClientRequestObservationConvention observationConvention = new DefaultClientRequestObservationConvention();
 
 	@Test
 	void shouldHaveName() {
@@ -51,20 +51,20 @@ class DefaultClientHttpObservationConventionTests {
 
 	@Test
 	void shouldHaveContextualName() {
-		ClientHttpObservationContext context = new ClientHttpObservationContext(this.request);
+		ClientRequestObservationContext context = new ClientRequestObservationContext(this.request);
 		assertThat(this.observationConvention.getContextualName(context)).isEqualTo("http get");
 	}
 
 	@Test
 	void supportsOnlyClientHttpObservationContext() {
-		ClientHttpObservationContext context = new ClientHttpObservationContext(this.request);
+		ClientRequestObservationContext context = new ClientRequestObservationContext(this.request);
 		assertThat(this.observationConvention.supportsContext(context)).isTrue();
 		assertThat(this.observationConvention.supportsContext(new Observation.Context())).isFalse();
 	}
 
 	@Test
 	void addsKeyValuesForRequestWithUriTemplate() {
-		ClientHttpObservationContext context = createContext(
+		ClientRequestObservationContext context = createContext(
 				new MockClientHttpRequest(HttpMethod.GET, "/resource/{id}", 42), new MockClientHttpResponse());
 		context.setUriTemplate("/resource/{id}");
 		assertThat(this.observationConvention.getLowCardinalityKeyValues(context))
@@ -76,7 +76,7 @@ class DefaultClientHttpObservationConventionTests {
 
 	@Test
 	void addsKeyValuesForRequestWithoutUriTemplate() {
-		ClientHttpObservationContext context = createContext(
+		ClientRequestObservationContext context = createContext(
 				new MockClientHttpRequest(HttpMethod.GET, "/resource/42"), new MockClientHttpResponse());
 		assertThat(this.observationConvention.getLowCardinalityKeyValues(context))
 				.contains(KeyValue.of("method", "GET"), KeyValue.of("uri", "none"));
@@ -86,7 +86,7 @@ class DefaultClientHttpObservationConventionTests {
 
 	@Test
 	void addsClientNameForRequestWithHost() {
-		ClientHttpObservationContext context = createContext(
+		ClientRequestObservationContext context = createContext(
 				new MockClientHttpRequest(HttpMethod.GET, "https://localhost:8080/resource/42"),
 				new MockClientHttpResponse());
 		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).contains(KeyValue.of("client.name", "localhost"));
@@ -94,15 +94,15 @@ class DefaultClientHttpObservationConventionTests {
 
 	@Test
 	void addsKeyValueForNonResolvableStatus() throws Exception {
-		ClientHttpObservationContext context = new ClientHttpObservationContext(this.request);
+		ClientRequestObservationContext context = new ClientRequestObservationContext(this.request);
 		ClientHttpResponse response = mock(ClientHttpResponse.class);
 		context.setResponse(response);
 		given(response.getStatusCode()).willThrow(new IOException("test error"));
 		assertThat(this.observationConvention.getLowCardinalityKeyValues(context)).contains(KeyValue.of("status", "IO_ERROR"));
 	}
 
-	private ClientHttpObservationContext createContext(ClientHttpRequest request, ClientHttpResponse response) {
-		ClientHttpObservationContext context = new ClientHttpObservationContext(request);
+	private ClientRequestObservationContext createContext(ClientHttpRequest request, ClientHttpResponse response) {
+		ClientRequestObservationContext context = new ClientRequestObservationContext(request);
 		context.setResponse(response);
 		return context;
 	}

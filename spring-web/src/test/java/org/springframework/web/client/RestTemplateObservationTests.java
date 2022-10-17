@@ -37,7 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.client.observation.ClientHttpObservationContext;
+import org.springframework.http.client.observation.ClientRequestObservationContext;
 import org.springframework.http.converter.HttpMessageConverter;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -192,15 +192,15 @@ class RestTemplateObservationTests {
 				.hasObservationWithNameEqualTo("http.client.requests").that();
 	}
 
-	static class ContextAssertionObservationHandler implements ObservationHandler<ClientHttpObservationContext> {
+	static class ContextAssertionObservationHandler implements ObservationHandler<ClientRequestObservationContext> {
 
 		@Override
 		public boolean supportsContext(Observation.Context context) {
-			return context instanceof ClientHttpObservationContext;
+			return context instanceof ClientRequestObservationContext;
 		}
 
 		@Override
-		public void onStart(ClientHttpObservationContext context) {
+		public void onStart(ClientRequestObservationContext context) {
 			assertThat(context.getCarrier()).isNotNull();
 		}
 	}

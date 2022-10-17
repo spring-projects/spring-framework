@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.observation;
+package org.springframework.http.observation;
 
 import io.micrometer.common.KeyValue;
 import io.micrometer.observation.Observation;
@@ -26,18 +26,18 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link DefaultHttpRequestsObservationConvention}.
+ * Tests for {@link DefaultServerRequestObservationConvention}.
  * @author Brian Clozel
  */
-class DefaultHttpRequestsObservationConventionTests {
+class DefaultServerRequestObservationConventionTests {
 
-	private final DefaultHttpRequestsObservationConvention convention = new DefaultHttpRequestsObservationConvention();
+	private final DefaultServerRequestObservationConvention convention = new DefaultServerRequestObservationConvention();
 
 	private final MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test/resource");
 
 	private final MockHttpServletResponse response = new MockHttpServletResponse();
 
-	private final HttpRequestsObservationContext context = new HttpRequestsObservationContext(this.request, this.response);
+	private final ServerRequestObservationContext context = new ServerRequestObservationContext(this.request, this.response);
 
 
 	@Test

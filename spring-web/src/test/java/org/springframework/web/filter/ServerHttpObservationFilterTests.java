@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.observation;
+package org.springframework.web.filter;
 
 import io.micrometer.observation.tck.TestObservationRegistry;
 import io.micrometer.observation.tck.TestObservationRegistryAssert;
@@ -23,6 +23,7 @@ import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.http.observation.ServerRequestObservationContext;
 import org.springframework.web.testfixture.servlet.MockFilterChain;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
@@ -31,14 +32,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Tests for {@link HttpRequestsObservationFilter}.
+ * Tests for {@link ServerHttpObservationFilter}.
  * @author Brian Clozel
  */
-class HttpRequestsObservationFilterTests {
+class ServerHttpObservationFilterTests {
 
 	private final TestObservationRegistry observationRegistry = TestObservationRegistry.create();
 
-	private final HttpRequestsObservationFilter filter = new HttpRequestsObservationFilter(this.observationRegistry);
+	private final ServerHttpObservationFilter filter = new ServerHttpObservationFilter(this.observationRegistry);
 
 	private final MockFilterChain mockFilterChain = new MockFilterChain();
 
@@ -51,8 +52,8 @@ class HttpRequestsObservationFilterTests {
 	void filterShouldFillObservationContext() throws Exception {
 		this.filter.doFilter(this.request, this.response, this.mockFilterChain);
 
-		HttpRequestsObservationContext context = (HttpRequestsObservationContext) this.request
-				.getAttribute(HttpRequestsObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE);
+		ServerRequestObservationContext context = (ServerRequestObservationContext) this.request
+				.getAttribute(ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE);
 		assertThat(context).isNotNull();
 		assertThat(context.getCarrier()).isEqualTo(this.request);
 		assertThat(context.getResponse()).isEqualTo(this.response);
@@ -66,8 +67,8 @@ class HttpRequestsObservationFilterTests {
 		this.request.setAttribute(RequestDispatcher.ERROR_EXCEPTION, customError);
 		this.filter.doFilter(this.request, this.response, this.mockFilterChain);
 
-		HttpRequestsObservationContext context = (HttpRequestsObservationContext) this.request
-				.getAttribute(HttpRequestsObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE);
+		ServerRequestObservationContext context = (ServerRequestObservationContext) this.request
+				.getAttribute(ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE);
 		assertThat(context.getError()).isEqualTo(customError);
 		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SERVER_ERROR");
 	}
@@ -81,8 +82,8 @@ class HttpRequestsObservationFilterTests {
 				throw new ServletException(customError);
 			});
 		}).isInstanceOf(ServletException.class);
-		HttpRequestsObservationContext context = (HttpRequestsObservationContext) this.request
-				.getAttribute(HttpRequestsObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE);
+		ServerRequestObservationContext context = (ServerRequestObservationContext) this.request
+				.getAttribute(ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE);
 		assertThat(context.getError()).isEqualTo(customError);
 		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS");
 	}

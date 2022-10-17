@@ -347,12 +347,12 @@ public interface WebClient {
 
 		/**
 		 * Provide an {@link ObservationConvention} to use for collecting
-		 * metadata for the current observation. Will use {@link DefaultClientObservationConvention}
+		 * metadata for the request observation. Will use {@link DefaultClientRequestObservationConvention}
 		 * if none provided.
 		 * @param observationConvention the observation convention to use
 		 * @since 6.0
 		 */
-		Builder observationConvention(ClientObservationConvention observationConvention);
+		Builder observationConvention(ClientRequestObservationConvention observationConvention);
 
 		/**
 		 * Apply the given {@code Consumer} to this builder instance.

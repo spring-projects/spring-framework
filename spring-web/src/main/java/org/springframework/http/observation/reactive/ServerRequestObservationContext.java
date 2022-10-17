@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.observation.reactive;
+package org.springframework.http.observation.reactive;
 
 import io.micrometer.observation.transport.RequestReplyReceiverContext;
 
@@ -25,20 +25,22 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
 
 /**
- * Context that holds information for metadata collection during observations for reactive web applications.
+ * Context that holds information for metadata collection during observations
+ * for {@link ServerHttpObservationDocumentation#HTTP_REQUESTS reactive HTTP exchanges}.
  * <p>This context also extends {@link RequestReplyReceiverContext} for propagating
  * tracing information with the HTTP server exchange.
+ *
  * @author Brian Clozel
  * @since 6.0
  */
-public class HttpRequestsObservationContext extends RequestReplyReceiverContext<ServerHttpRequest, ServerHttpResponse> {
+public class ServerRequestObservationContext extends RequestReplyReceiverContext<ServerHttpRequest, ServerHttpResponse> {
 
 	@Nullable
 	private PathPattern pathPattern;
 
 	private boolean connectionAborted;
 
-	public HttpRequestsObservationContext(ServerWebExchange exchange) {
+	public ServerRequestObservationContext(ServerWebExchange exchange) {
 		super((request, key) -> request.getHeaders().getFirst(key));
 		setCarrier(exchange.getRequest());
 		setResponse(exchange.getResponse());
@@ -74,7 +76,13 @@ public class HttpRequestsObservationContext extends RequestReplyReceiverContext<
 		return this.connectionAborted;
 	}
 
-	void setConnectionAborted(boolean connectionAborted) {
+	/**
+	 * Set whether the current connection was aborted by the client, resulting
+	 * in a {@link reactor.core.publisher.SignalType#CANCEL cancel signal} on the reactive chain,
+	 * or an {@code AbortedException} when reading the request.
+	 * @param connectionAborted if the connection has been aborted
+	 */
+	public void setConnectionAborted(boolean connectionAborted) {
 		this.connectionAborted = connectionAborted;
 	}
 

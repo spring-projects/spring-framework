@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.web.observation;
+package org.springframework.http.client.observation;
 
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
 
 /**
- * Interface for an {@link ObservationConvention} related to Servlet HTTP exchanges.
+ * Interface for an {@link ObservationConvention} for
+ * {@link ClientHttpObservationDocumentation#HTTP_REQUEST client HTTP exchanges}.
+ *
  * @author Brian Clozel
  * @since 6.0
  */
-public interface HttpRequestsObservationConvention extends ObservationConvention<HttpRequestsObservationContext> {
+public interface ClientRequestObservationConvention extends ObservationConvention<ClientRequestObservationContext> {
 
 	@Override
 	default boolean supportsContext(Observation.Context context) {
-		return context instanceof HttpRequestsObservationContext;
+		return context instanceof ClientRequestObservationContext;
 	}
 
 }

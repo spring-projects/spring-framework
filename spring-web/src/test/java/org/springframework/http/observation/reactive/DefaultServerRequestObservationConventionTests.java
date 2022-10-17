@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.observation.reactive;
+package org.springframework.http.observation.reactive;
 
 import io.micrometer.common.KeyValue;
 import io.micrometer.observation.Observation;
@@ -29,12 +29,12 @@ import org.springframework.web.util.pattern.PathPatternParser;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link DefaultHttpRequestsObservationConvention}.
+ * Tests for {@link DefaultServerRequestObservationConvention}.
  * @author Brian Clozel
  */
-class DefaultHttpRequestsObservationConventionTests {
+class DefaultServerRequestObservationConventionTests {
 
-	private final DefaultHttpRequestsObservationConvention convention = new DefaultHttpRequestsObservationConvention();
+	private final DefaultServerRequestObservationConvention convention = new DefaultServerRequestObservationConvention();
 
 
 	@Test
@@ -45,14 +45,14 @@ class DefaultHttpRequestsObservationConventionTests {
 	@Test
 	void shouldHaveContextualName() {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/test/resource"));
-		HttpRequestsObservationContext context = new HttpRequestsObservationContext(exchange);
+		ServerRequestObservationContext context = new ServerRequestObservationContext(exchange);
 		assertThat(convention.getContextualName(context)).isEqualTo("http get");
 	}
 
 	@Test
 	void supportsOnlyHttpRequestsObservationContext() {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post("/test/resource"));
-		HttpRequestsObservationContext context = new HttpRequestsObservationContext(exchange);
+		ServerRequestObservationContext context = new ServerRequestObservationContext(exchange);
 		assertThat(this.convention.supportsContext(context)).isTrue();
 		assertThat(this.convention.supportsContext(new Observation.Context())).isFalse();
 	}
@@ -61,7 +61,7 @@ class DefaultHttpRequestsObservationConventionTests {
 	void addsKeyValuesForExchange() {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post("/test/resource"));
 		exchange.getResponse().setRawStatusCode(201);
-		HttpRequestsObservationContext context = new HttpRequestsObservationContext(exchange);
+		ServerRequestObservationContext context = new ServerRequestObservationContext(exchange);
 
 		assertThat(this.convention.getLowCardinalityKeyValues(context)).hasSize(5)
 				.contains(KeyValue.of("method", "POST"), KeyValue.of("uri", "UNKNOWN"), KeyValue.of("status", "201"),
@@ -74,7 +74,7 @@ class DefaultHttpRequestsObservationConventionTests {
 	void addsKeyValuesForExchangeWithPathPattern() {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/test/resource"));
 		exchange.getResponse().setRawStatusCode(200);
-		HttpRequestsObservationContext context = new HttpRequestsObservationContext(exchange);
+		ServerRequestObservationContext context = new ServerRequestObservationContext(exchange);
 		PathPattern pathPattern = getPathPattern("/test/{name}");
 		context.setPathPattern(pathPattern);
 
@@ -89,7 +89,7 @@ class DefaultHttpRequestsObservationConventionTests {
 	@Test
 	void addsKeyValuesForErrorExchange() {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/test/resource"));
-		HttpRequestsObservationContext context = new HttpRequestsObservationContext(exchange);
+		ServerRequestObservationContext context = new ServerRequestObservationContext(exchange);
 		context.setError(new IllegalArgumentException("custom error"));
 		exchange.getResponse().setRawStatusCode(500);
 
@@ -103,7 +103,7 @@ class DefaultHttpRequestsObservationConventionTests {
 	@Test
 	void addsKeyValuesForRedirectExchange() {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/test/redirect"));
-		HttpRequestsObservationContext context = new HttpRequestsObservationContext(exchange);
+		ServerRequestObservationContext context = new ServerRequestObservationContext(exchange);
 		exchange.getResponse().setRawStatusCode(302);
 		exchange.getResponse().getHeaders().add("Location", "https://example.org/other");
 
@@ -117,7 +117,7 @@ class DefaultHttpRequestsObservationConventionTests {
 	@Test
 	void addsKeyValuesForNotFoundExchange() {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/test/notFound"));
-		HttpRequestsObservationContext context = new HttpRequestsObservationContext(exchange);
+		ServerRequestObservationContext context = new ServerRequestObservationContext(exchange);
 		exchange.getResponse().setRawStatusCode(404);
 
 		assertThat(this.convention.getLowCardinalityKeyValues(context)).hasSize(5)
@@ -130,7 +130,7 @@ class DefaultHttpRequestsObservationConventionTests {
 	@Test
 	void addsKeyValuesForCancelledExchange() {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/test/resource"));
-		HttpRequestsObservationContext context = new HttpRequestsObservationContext(exchange);
+		ServerRequestObservationContext context = new ServerRequestObservationContext(exchange);
 		context.setConnectionAborted(true);
 		exchange.getResponse().setRawStatusCode(200);
 

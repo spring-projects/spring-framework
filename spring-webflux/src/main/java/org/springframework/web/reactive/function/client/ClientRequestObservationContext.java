@@ -14,40 +14,34 @@
  * limitations under the License.
  */
 
-package org.springframework.http.client.observation;
+package org.springframework.web.reactive.function.client;
 
 import io.micrometer.observation.transport.RequestReplySenderContext;
 
-import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.Nullable;
 
 /**
  * Context that holds information for metadata collection
- * during the {@link ClientHttpRequestFactory client HTTP} observations.
- * <p>This context also extends {@link RequestReplySenderContext} for propagating tracing
- * information with the HTTP client exchange.
+ * during the {@link ClientHttpObservationDocumentation#HTTP_REQUEST HTTP client exchange observations}.
+ *
  * @author Brian Clozel
  * @since 6.0
  */
-public class ClientHttpObservationContext extends RequestReplySenderContext<ClientHttpRequest, ClientHttpResponse> {
+public class ClientRequestObservationContext extends RequestReplySenderContext<ClientRequest, ClientResponse> {
 
 	@Nullable
 	private String uriTemplate;
 
-	/**
-	 * Create an observation context for {@link ClientHttpRequest} observations.
-	 * @param request the HTTP client request
-	 */
-	public ClientHttpObservationContext(ClientHttpRequest request) {
-		super(ClientHttpObservationContext::setRequestHeader);
-		this.setCarrier(request);
+	private boolean aborted;
+
+
+	public ClientRequestObservationContext() {
+		super(ClientRequestObservationContext::setRequestHeader);
 	}
 
-	private static void setRequestHeader(@Nullable ClientHttpRequest request, String name, String value) {
+	private static void setRequestHeader(@Nullable ClientRequest request, String name, String value) {
 		if (request != null) {
-			request.getHeaders().set(name, value);
+			request.headers().set(name, value);
 		}
 	}
 
@@ -66,4 +60,19 @@ public class ClientHttpObservationContext extends RequestReplySenderContext<Clie
 		this.uriTemplate = uriTemplate;
 	}
 
+	/**
+	 * Whether the client aborted the current HTTP exchange before receiving any response.
+	 * @return whether the exchange has been aborted
+	 */
+	public boolean isAborted() {
+		return this.aborted;
+	}
+
+	/**
+	 * Set whether the client aborted the current HTTP exchange.
+	 * @param aborted whether the exchange has been aborted
+	 */
+	void setAborted(boolean aborted) {
+		this.aborted = aborted;
+	}
 }

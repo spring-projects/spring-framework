@@ -26,8 +26,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.web.observation.HttpRequestsObservationContext;
-import org.springframework.web.observation.HttpRequestsObservationFilter;
+import org.springframework.http.observation.ServerRequestObservationContext;
+import org.springframework.web.filter.ServerHttpObservationFilter;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.function.HandlerFunction;
@@ -174,15 +174,15 @@ class RouterFunctionMappingTests {
 
 		assertThat(result).isNotNull();
 		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE)).isEqualTo("/match");
-		assertThat(HttpRequestsObservationFilter.findObservationContext(request))
+		assertThat(ServerHttpObservationFilter.findObservationContext(request))
 				.hasValueSatisfying(context -> assertThat(context.getPathPattern()).isEqualTo("/match"));
 		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE)).isEqualTo(handlerFunction);
 	}
 
 	private MockHttpServletRequest createTestRequest(String path) {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", path);
-		request.setAttribute(HttpRequestsObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE,
-				new HttpRequestsObservationContext(request, new MockHttpServletResponse()));
+		request.setAttribute(ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE,
+				new ServerRequestObservationContext(request, new MockHttpServletResponse()));
 		ServletRequestPathUtils.parseAndCache(request);
 		return request;
 	}

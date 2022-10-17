@@ -25,8 +25,9 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 
 
 /**
- * Documented {@link io.micrometer.common.KeyValue KeyValues} for {@link ClientHttpRequestFactory HTTP client observations}.
+ * Documented {@link io.micrometer.common.KeyValue KeyValues} for {@link ClientHttpRequestFactory HTTP client} observations.
  * <p>This class is used by automated tools to document KeyValues attached to the HTTP client observations.
+ *
  * @author Brian Clozel
  * @since 6.0
  */
@@ -38,7 +39,7 @@ public enum ClientHttpObservationDocumentation implements ObservationDocumentati
 	HTTP_REQUEST {
 		@Override
 		public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
-			return DefaultClientHttpObservationConvention.class;
+			return DefaultClientRequestObservationConvention.class;
 		}
 
 		@Override

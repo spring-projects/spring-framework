@@ -113,7 +113,7 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;
 
 	@Nullable
-	private ClientObservationConvention observationConvention;
+	private ClientRequestObservationConvention observationConvention;
 
 
 	public DefaultWebClientBuilder() {
@@ -288,7 +288,7 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	@Override
-	public WebClient.Builder observationConvention(ClientObservationConvention observationConvention) {
+	public WebClient.Builder observationConvention(ClientRequestObservationConvention observationConvention) {
 		Assert.notNull(observationConvention, "observationConvention must not be null");
 		this.observationConvention = observationConvention;
 		return this;

@@ -73,7 +73,7 @@ class DefaultWebClient implements WebClient {
 	private static final Mono<ClientResponse> NO_HTTP_CLIENT_RESPONSE_ERROR = Mono.error(
 			() -> new IllegalStateException("The underlying HTTP client completed without emitting a response."));
 
-	private static final DefaultClientObservationConvention DEFAULT_OBSERVATION_CONVENTION = new DefaultClientObservationConvention();
+	private static final DefaultClientRequestObservationConvention DEFAULT_OBSERVATION_CONVENTION = new DefaultClientRequestObservationConvention();
 
 	private final ExchangeFunction exchangeFunction;
 
@@ -92,7 +92,7 @@ class DefaultWebClient implements WebClient {
 
 	private final ObservationRegistry observationRegistry;
 
-	private final ClientObservationConvention observationConvention;
+	private final ClientRequestObservationConvention observationConvention;
 
 	private final DefaultWebClientBuilder builder;
 
@@ -101,7 +101,7 @@ class DefaultWebClient implements WebClient {
 			@Nullable HttpHeaders defaultHeaders, @Nullable MultiValueMap<String, String> defaultCookies,
 			@Nullable Consumer<RequestHeadersSpec<?>> defaultRequest,
 			@Nullable Map<Predicate<HttpStatusCode>, Function<ClientResponse, Mono<? extends Throwable>>> statusHandlerMap,
-			ObservationRegistry observationRegistry, ClientObservationConvention observationConvention,
+			ObservationRegistry observationRegistry, ClientRequestObservationConvention observationConvention,
 			DefaultWebClientBuilder builder) {
 
 		this.exchangeFunction = exchangeFunction;
@@ -449,12 +449,12 @@ class DefaultWebClient implements WebClient {
 		@Override
 		@SuppressWarnings("deprecation")
 		public Mono<ClientResponse> exchange() {
-			ClientObservationContext observationContext = new ClientObservationContext();
+			ClientRequestObservationContext observationContext = new ClientRequestObservationContext();
 			ClientRequest request = (this.inserter != null ?
 					initRequestBuilder().body(this.inserter).build() :
 					initRequestBuilder().build());
 			return Mono.defer(() -> {
-				Observation observation = ClientObservationDocumentation.HTTP_REQUEST.observation(observationConvention,
+				Observation observation = ClientHttpObservationDocumentation.HTTP_REQUEST.observation(observationConvention,
 						DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, observationRegistry).start();
 				observationContext.setCarrier(request);
 				observationContext.setUriTemplate((String) request.attribute(URI_TEMPLATE_ATTRIBUTE).orElse(null));

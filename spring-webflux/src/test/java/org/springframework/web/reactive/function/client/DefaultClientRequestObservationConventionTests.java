@@ -28,13 +28,13 @@ import org.springframework.http.HttpStatus;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link DefaultClientObservationConvention}.
+ * Tests for {@link DefaultClientRequestObservationConvention}.
  *
  * @author Brian Clozel
  */
-class DefaultClientObservationConventionTests {
+class DefaultClientRequestObservationConventionTests {
 
-	private final DefaultClientObservationConvention observationConvention = new DefaultClientObservationConvention();
+	private final DefaultClientRequestObservationConvention observationConvention = new DefaultClientRequestObservationConvention();
 
 	@Test
 	void shouldHaveName() {
@@ -43,20 +43,20 @@ class DefaultClientObservationConventionTests {
 
 	@Test
 	void shouldHaveContextualName() {
-		ClientObservationContext context = new ClientObservationContext();
+		ClientRequestObservationContext context = new ClientRequestObservationContext();
 		context.setCarrier(ClientRequest.create(HttpMethod.GET, URI.create("/test")).build());
 		assertThat(this.observationConvention.getContextualName(context)).isEqualTo("http get");
 	}
 
 	@Test
 	void shouldOnlySupportWebClientObservationContext() {
-		assertThat(this.observationConvention.supportsContext(new ClientObservationContext())).isTrue();
+		assertThat(this.observationConvention.supportsContext(new ClientRequestObservationContext())).isTrue();
 		assertThat(this.observationConvention.supportsContext(new Observation.Context())).isFalse();
 	}
 
 	@Test
 	void shouldAddKeyValuesForNullExchange() {
-		ClientObservationContext context = new ClientObservationContext();
+		ClientRequestObservationContext context = new ClientRequestObservationContext();
 		assertThat(this.observationConvention.getLowCardinalityKeyValues(context)).hasSize(5)
 				.contains(KeyValue.of("method", "none"), KeyValue.of("uri", "none"), KeyValue.of("status", "CLIENT_ERROR"),
 						KeyValue.of("exception", "none"), KeyValue.of("outcome", "UNKNOWN"));
@@ -66,7 +66,7 @@ class DefaultClientObservationConventionTests {
 
 	@Test
 	void shouldAddKeyValuesForExchangeWithException() {
-		ClientObservationContext context = new ClientObservationContext();
+		ClientRequestObservationContext context = new ClientRequestObservationContext();
 		context.setError(new IllegalStateException("Could not create client request"));
 		assertThat(this.observationConvention.getLowCardinalityKeyValues(context)).hasSize(5)
 				.contains(KeyValue.of("method", "none"), KeyValue.of("uri", "none"), KeyValue.of("status", "CLIENT_ERROR"),
@@ -79,7 +79,7 @@ class DefaultClientObservationConventionTests {
 	void shouldAddKeyValuesForRequestWithUriTemplate() {
 		ClientRequest request = ClientRequest.create(HttpMethod.GET, URI.create("/resource/42"))
 				.attribute(WebClient.class.getName() + ".uriTemplate", "/resource/{id}").build();
-		ClientObservationContext context = createContext(request);
+		ClientRequestObservationContext context = createContext(request);
 		context.setUriTemplate("/resource/{id}");
 		assertThat(this.observationConvention.getLowCardinalityKeyValues(context))
 				.contains(KeyValue.of("exception", "none"), KeyValue.of("method", "GET"), KeyValue.of("uri", "/resource/{id}"),
@@ -90,7 +90,7 @@ class DefaultClientObservationConventionTests {
 
 	@Test
 	void shouldAddKeyValuesForRequestWithoutUriTemplate() {
-		ClientObservationContext context = createContext(ClientRequest.create(HttpMethod.GET, URI.create("/resource/42")).build());
+		ClientRequestObservationContext context = createContext(ClientRequest.create(HttpMethod.GET, URI.create("/resource/42")).build());
 		assertThat(this.observationConvention.getLowCardinalityKeyValues(context))
 				.contains(KeyValue.of("method", "GET"), KeyValue.of("uri", "none"));
 		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).hasSize(2).contains(KeyValue.of("http.url", "/resource/42"));
@@ -98,12 +98,12 @@ class DefaultClientObservationConventionTests {
 
 	@Test
 	void shouldAddClientNameKeyValueForRequestWithHost() {
-		ClientObservationContext context = createContext(ClientRequest.create(HttpMethod.GET, URI.create("https://localhost:8080/resource/42")).build());
+		ClientRequestObservationContext context = createContext(ClientRequest.create(HttpMethod.GET, URI.create("https://localhost:8080/resource/42")).build());
 		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).contains(KeyValue.of("client.name", "localhost"));
 	}
 
-	private ClientObservationContext createContext(ClientRequest request) {
-		ClientObservationContext context = new ClientObservationContext();
+	private ClientRequestObservationContext createContext(ClientRequest request) {
+		ClientRequestObservationContext context = new ClientRequestObservationContext();
 		context.setCarrier(request);
 		context.setResponse(ClientResponse.create(HttpStatus.OK).build());
 		return context;

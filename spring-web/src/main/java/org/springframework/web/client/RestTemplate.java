@@ -43,10 +43,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.client.observation.ClientHttpObservationContext;
-import org.springframework.http.client.observation.ClientHttpObservationConvention;
 import org.springframework.http.client.observation.ClientHttpObservationDocumentation;
-import org.springframework.http.client.observation.DefaultClientHttpObservationConvention;
+import org.springframework.http.client.observation.ClientRequestObservationContext;
+import org.springframework.http.client.observation.ClientRequestObservationConvention;
+import org.springframework.http.client.observation.DefaultClientRequestObservationConvention;
 import org.springframework.http.client.support.InterceptingHttpAccessor;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.GenericHttpMessageConverter;
@@ -125,7 +125,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 	private static final boolean kotlinSerializationProtobufPresent;
 
-	private static final ClientHttpObservationConvention DEFAULT_OBSERVATION_CONVENTION = new DefaultClientHttpObservationConvention();
+	private static final ClientRequestObservationConvention DEFAULT_OBSERVATION_CONVENTION = new DefaultClientRequestObservationConvention();
 
 	static {
 		ClassLoader classLoader = RestTemplate.class.getClassLoader();
@@ -155,7 +155,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;
 
 	@Nullable
-	private ClientHttpObservationConvention observationConvention;
+	private ClientRequestObservationConvention observationConvention;
 
 
 	/**
@@ -358,13 +358,13 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	/**
 	 * Configure an {@link ObservationConvention} that sets the name of the
 	 * {@link Observation observation} as well as its {@link io.micrometer.common.KeyValues}
-	 * extracted from the {@link ClientHttpObservationContext}.
-	 * If none set, the {@link DefaultClientHttpObservationConvention default convention} will be used.
+	 * extracted from the {@link ClientRequestObservationContext}.
+	 * If none set, the {@link DefaultClientRequestObservationConvention default convention} will be used.
 	 * @param observationConvention the observation convention to use
 	 * @since 6.0
 	 * @see #setObservationRegistry(ObservationRegistry)
 	 */
-	public void setObservationConvention(ClientHttpObservationConvention observationConvention) {
+	public void setObservationConvention(ClientRequestObservationConvention observationConvention) {
 		Assert.notNull(observationConvention, "observationConvention must not be null");
 		this.observationConvention = observationConvention;
 	}
@@ -853,7 +853,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			ResourceAccessException exception = createResourceAccessException(url, method, ex);
 			throw exception;
 		}
-		ClientHttpObservationContext observationContext = new ClientHttpObservationContext(request);
+		ClientRequestObservationContext observationContext = new ClientRequestObservationContext(request);
 		observationContext.setUriTemplate(uriTemplate);
 		Observation observation = ClientHttpObservationDocumentation.HTTP_REQUEST.observation(this.observationConvention,
 				DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, this.observationRegistry).start();

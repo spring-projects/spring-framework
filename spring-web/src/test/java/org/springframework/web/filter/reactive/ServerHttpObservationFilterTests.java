@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.observation.reactive;
+package org.springframework.web.filter.reactive;
 
 
 import java.util.Optional;
@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.http.observation.reactive.ServerRequestObservationContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
@@ -34,22 +35,22 @@ import org.springframework.web.testfixture.server.MockServerWebExchange;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link HttpRequestsObservationWebFilter}.
+ * Tests for {@link ServerHttpObservationFilter}.
  *
  * @author Brian Clozel
  */
-class HttpRequestsObservationWebFilterTests {
+class ServerHttpObservationFilterTests {
 
 	private final TestObservationRegistry observationRegistry = TestObservationRegistry.create();
 
-	private final HttpRequestsObservationWebFilter filter = new HttpRequestsObservationWebFilter(this.observationRegistry);
+	private final ServerHttpObservationFilter filter = new ServerHttpObservationFilter(this.observationRegistry);
 
 	@Test
 	void filterShouldFillObservationContext() {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post("/test/resource"));
 		exchange.getResponse().setRawStatusCode(200);
 		WebFilterChain filterChain = createFilterChain(filterExchange -> {
-			Optional<HttpRequestsObservationContext> observationContext = HttpRequestsObservationWebFilter.findObservationContext(filterExchange);
+			Optional<ServerRequestObservationContext> observationContext = ServerHttpObservationFilter.findObservationContext(filterExchange);
 			assertThat(observationContext).isPresent();
 			assertThat(observationContext.get().getCarrier()).isEqualTo(exchange.getRequest());
 			assertThat(observationContext.get().getResponse()).isEqualTo(exchange.getResponse());
@@ -68,7 +69,7 @@ class HttpRequestsObservationWebFilterTests {
 		StepVerifier.create(this.filter.filter(exchange, filterChain))
 				.expectError(IllegalArgumentException.class)
 				.verify();
-		Optional<HttpRequestsObservationContext> observationContext = HttpRequestsObservationWebFilter.findObservationContext(exchange);
+		Optional<ServerRequestObservationContext> observationContext = ServerHttpObservationFilter.findObservationContext(exchange);
 		assertThat(observationContext.get().getError()).isInstanceOf(IllegalArgumentException.class);
 		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SERVER_ERROR");
 	}

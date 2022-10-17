@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.function.client;
+package org.springframework.http.observation.reactive;
 
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
 
 /**
- * Interface for an {@link ObservationConvention} related to client HTTP exchanges.
+ * Interface for an {@link ObservationConvention} for {@link ServerHttpObservationDocumentation#HTTP_REQUESTS reactive HTTP exchanges}.
+ *
  * @author Brian Clozel
  * @since 6.0
  */
-public interface ClientObservationConvention extends ObservationConvention<ClientObservationContext> {
+public interface ServerRequestObservationConvention extends ObservationConvention<ServerRequestObservationContext> {
 
 	@Override
 	default boolean supportsContext(Observation.Context context) {
-		return context instanceof ClientObservationContext;
+		return context instanceof ServerRequestObservationContext;
 	}
 
 }

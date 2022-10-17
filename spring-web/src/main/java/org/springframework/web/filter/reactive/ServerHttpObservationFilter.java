@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.observation.reactive;
+package org.springframework.web.filter.reactive;
 
 import java.util.Optional;
 import java.util.Set;
@@ -24,6 +24,10 @@ import io.micrometer.observation.ObservationRegistry;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.observation.reactive.DefaultServerRequestObservationConvention;
+import org.springframework.http.observation.reactive.ServerHttpObservationDocumentation;
+import org.springframework.http.observation.reactive.ServerRequestObservationContext;
+import org.springframework.http.observation.reactive.ServerRequestObservationConvention;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
@@ -33,39 +37,39 @@ import org.springframework.web.server.WebFilterChain;
 /**
  * {@link org.springframework.web.server.WebFilter} that creates {@link Observation observations}
  * for HTTP exchanges. This collects information about the execution time and
- * information gathered from the {@link HttpRequestsObservationContext}.
- * <p>Web Frameworks can fetch the current {@link HttpRequestsObservationContext context}
+ * information gathered from the {@link ServerRequestObservationContext}.
+ * <p>Web Frameworks can fetch the current {@link ServerRequestObservationContext context}
  * as a {@link #CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE request attribute} and contribute
  * additional information to it.
- * The configured {@link HttpRequestsObservationConvention} will use this context to collect
+ * The configured {@link ServerRequestObservationConvention} will use this context to collect
  * {@link io.micrometer.common.KeyValue metadata} and attach it to the observation.
  *
  * @author Brian Clozel
  * @since 6.0
  */
-public class HttpRequestsObservationWebFilter implements WebFilter {
+public class ServerHttpObservationFilter implements WebFilter {
 
 	/**
-	 * Name of the request attribute holding the {@link HttpRequestsObservationContext context} for the current observation.
+	 * Name of the request attribute holding the {@link ServerRequestObservationContext context} for the current observation.
 	 */
-	public static final String CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE = HttpRequestsObservationWebFilter.class.getName() + ".context";
+	public static final String CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE = ServerHttpObservationFilter.class.getName() + ".context";
 
-	private static final HttpRequestsObservationConvention DEFAULT_OBSERVATION_CONVENTION = new DefaultHttpRequestsObservationConvention();
+	private static final ServerRequestObservationConvention DEFAULT_OBSERVATION_CONVENTION = new DefaultServerRequestObservationConvention();
 
 	private static final Set<String> DISCONNECTED_CLIENT_EXCEPTIONS = Set.of("AbortedException",
 			"ClientAbortException", "EOFException", "EofException");
 
 	private final ObservationRegistry observationRegistry;
 
-	private final HttpRequestsObservationConvention observationConvention;
+	private final ServerRequestObservationConvention observationConvention;
 
 	/**
 	 * Create an {@code HttpRequestsObservationWebFilter} that records observations
 	 * against the given {@link ObservationRegistry}. The default
-	 * {@link DefaultHttpRequestsObservationConvention convention} will be used.
+	 * {@link DefaultServerRequestObservationConvention convention} will be used.
 	 * @param observationRegistry the registry to use for recording observations
 	 */
-	public HttpRequestsObservationWebFilter(ObservationRegistry observationRegistry) {
+	public ServerHttpObservationFilter(ObservationRegistry observationRegistry) {
 		this(observationRegistry, DEFAULT_OBSERVATION_CONVENTION);
 	}
 
@@ -75,29 +79,29 @@ public class HttpRequestsObservationWebFilter implements WebFilter {
 	 * @param observationRegistry the registry to use for recording observations
 	 * @param observationConvention the convention to use for all recorded observations
 	 */
-	public HttpRequestsObservationWebFilter(ObservationRegistry observationRegistry, HttpRequestsObservationConvention observationConvention) {
+	public ServerHttpObservationFilter(ObservationRegistry observationRegistry, ServerRequestObservationConvention observationConvention) {
 		this.observationRegistry = observationRegistry;
 		this.observationConvention = observationConvention;
 	}
 
 	/**
-	 * Get the current {@link HttpRequestsObservationContext observation context} from the given request, if available.
+	 * Get the current {@link ServerRequestObservationContext observation context} from the given request, if available.
 	 * @param exchange the current exchange
 	 * @return the current observation context
 	 */
-	public static Optional<HttpRequestsObservationContext> findObservationContext(ServerWebExchange exchange) {
+	public static Optional<ServerRequestObservationContext> findObservationContext(ServerWebExchange exchange) {
 		return Optional.ofNullable(exchange.getAttribute(CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE));
 	}
 
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-		HttpRequestsObservationContext observationContext = new HttpRequestsObservationContext(exchange);
+		ServerRequestObservationContext observationContext = new ServerRequestObservationContext(exchange);
 		exchange.getAttributes().put(CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
 		return chain.filter(exchange).transformDeferred(call -> filter(exchange, observationContext, call));
 	}
 
-	private Publisher<Void> filter(ServerWebExchange exchange, HttpRequestsObservationContext observationContext, Mono<Void> call) {
-		Observation observation = HttpRequestsObservationDocumentation.HTTP_REQUESTS.observation(this.observationConvention,
+	private Publisher<Void> filter(ServerWebExchange exchange, ServerRequestObservationContext observationContext, Mono<Void> call) {
+		Observation observation = ServerHttpObservationDocumentation.HTTP_REQUESTS.observation(this.observationConvention,
 				DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, this.observationRegistry);
 		observation.start();
 		return call.doOnEach(signal -> {

@@ -1,5 +1,5 @@
 /**
- * Base support for HTTP {@link io.micrometer.observation.Observation}.
+ * Instrumentation for {@link io.micrometer.observation.Observation observing} HTTP applications.
  */
 @NonNullApi
 @NonNullFields

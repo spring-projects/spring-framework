@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.observation;
+package org.springframework.http.observation;
 
 import io.micrometer.observation.transport.RequestReplyReceiverContext;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,18 +23,20 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.lang.Nullable;
 
 /**
- * Context that holds information for metadata collection during observations for Servlet web application.
+ * Context that holds information for metadata collection during observations
+ * for {@link ServerHttpObservationDocumentation#HTTP_REQUESTS Servlet HTTP exchanges}.
  * <p>This context also extends {@link RequestReplyReceiverContext} for propagating
  * tracing information with the HTTP server exchange.
+ *
  * @author Brian Clozel
  * @since 6.0
  */
-public class HttpRequestsObservationContext extends RequestReplyReceiverContext<HttpServletRequest, HttpServletResponse> {
+public class ServerRequestObservationContext extends RequestReplyReceiverContext<HttpServletRequest, HttpServletResponse> {
 
 	@Nullable
 	private String pathPattern;
 
-	public HttpRequestsObservationContext(HttpServletRequest request, HttpServletResponse response) {
+	public ServerRequestObservationContext(HttpServletRequest request, HttpServletResponse response) {
 		super(HttpServletRequest::getHeader);
 		setCarrier(request);
 		setResponse(response);

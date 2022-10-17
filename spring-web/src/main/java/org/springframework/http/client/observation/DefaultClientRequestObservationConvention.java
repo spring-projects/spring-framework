@@ -21,18 +21,19 @@ import java.io.IOException;
 import io.micrometer.common.KeyValue;
 import io.micrometer.common.KeyValues;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.observation.HttpOutcome;
 import org.springframework.util.StringUtils;
 
 /**
- * Default implementation for a {@link ClientHttpObservationConvention},
- * extracting information from the {@link ClientHttpObservationContext}.
+ * Default implementation for a {@link ClientRequestObservationConvention},
+ * extracting information from the {@link ClientRequestObservationContext}.
  *
  * @author Brian Clozel
  * @since 6.0
  */
-public class DefaultClientHttpObservationConvention implements ClientHttpObservationConvention {
+public class DefaultClientRequestObservationConvention implements ClientRequestObservationConvention {
 
 	private static final String DEFAULT_NAME = "http.client.requests";
 
@@ -44,18 +45,23 @@ public class DefaultClientHttpObservationConvention implements ClientHttpObserva
 
 	private static final KeyValue STATUS_CLIENT_ERROR = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.STATUS, "CLIENT_ERROR");
 
+	private static final KeyValue HTTP_OUTCOME_SUCCESS = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.OUTCOME, "SUCCESS");
+
+	private static final KeyValue HTTP_OUTCOME_UNKNOWN = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.OUTCOME, "UNKNOWN");
+
 	private static final KeyValue EXCEPTION_NONE = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.EXCEPTION, "none");
 
 	private static final KeyValue HTTP_URL_NONE = KeyValue.of(ClientHttpObservationDocumentation.HighCardinalityKeyNames.HTTP_URL, "none");
 
 	private static final KeyValue CLIENT_NAME_NONE = KeyValue.of(ClientHttpObservationDocumentation.HighCardinalityKeyNames.CLIENT_NAME, "none");
 
+
 	private final String name;
 
 	/**
 	 * Create a convention with the default name {@code "http.client.requests"}.
 	 */
-	public DefaultClientHttpObservationConvention() {
+	public DefaultClientRequestObservationConvention() {
 		this(DEFAULT_NAME);
 	}
 
@@ -63,7 +69,7 @@ public class DefaultClientHttpObservationConvention implements ClientHttpObserva
 	 * Create a convention with a custom name.
 	 * @param name the observation name
 	 */
-	public DefaultClientHttpObservationConvention(String name) {
+	public DefaultClientRequestObservationConvention(String name) {
 		this.name = name;
 	}
 
@@ -73,23 +79,23 @@ public class DefaultClientHttpObservationConvention implements ClientHttpObserva
 	}
 
 	@Override
-	public String getContextualName(ClientHttpObservationContext context) {
+	public String getContextualName(ClientRequestObservationContext context) {
 		return "http " + context.getCarrier().getMethod().name().toLowerCase();
 	}
 
 	@Override
-	public KeyValues getLowCardinalityKeyValues(ClientHttpObservationContext context) {
+	public KeyValues getLowCardinalityKeyValues(ClientRequestObservationContext context) {
 		return KeyValues.of(uri(context), method(context), status(context), exception(context), outcome(context));
 	}
 
-	protected KeyValue uri(ClientHttpObservationContext context) {
+	protected KeyValue uri(ClientRequestObservationContext context) {
 		if (context.getUriTemplate() != null) {
 			return KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.URI, context.getUriTemplate());
 		}
 		return URI_NONE;
 	}
 
-	protected KeyValue method(ClientHttpObservationContext context) {
+	protected KeyValue method(ClientRequestObservationContext context) {
 		if (context.getCarrier() != null) {
 			return KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.METHOD, context.getCarrier().getMethod().name());
 		}
@@ -98,7 +104,7 @@ public class DefaultClientHttpObservationConvention implements ClientHttpObserva
 		}
 	}
 
-	protected KeyValue status(ClientHttpObservationContext context) {
+	protected KeyValue status(ClientRequestObservationContext context) {
 		ClientHttpResponse response = context.getResponse();
 		if (response == null) {
 			return STATUS_CLIENT_ERROR;
@@ -111,7 +117,7 @@ public class DefaultClientHttpObservationConvention implements ClientHttpObserva
 		}
 	}
 
-	protected KeyValue exception(ClientHttpObservationContext context) {
+	protected KeyValue exception(ClientRequestObservationContext context) {
 		Throwable error = context.getError();
 		if (error != null) {
 			String simpleName = error.getClass().getSimpleName();
@@ -121,36 +127,51 @@ public class DefaultClientHttpObservationConvention implements ClientHttpObserva
 		return EXCEPTION_NONE;
 	}
 
-	protected static KeyValue outcome(ClientHttpObservationContext context) {
+	protected static KeyValue outcome(ClientRequestObservationContext context) {
 		if (context.getResponse() != null) {
 			try {
-				HttpOutcome httpOutcome = HttpOutcome.forStatus(context.getResponse().getStatusCode());
-				return httpOutcome.asKeyValue();
+				return HttpOutcome.forStatus(context.getResponse().getStatusCode());
 			}
 			catch (IOException ex) {
 				// Continue
 			}
 		}
-		return HttpOutcome.UNKNOWN.asKeyValue();
+		return HTTP_OUTCOME_UNKNOWN;
 	}
 
 	@Override
-	public KeyValues getHighCardinalityKeyValues(ClientHttpObservationContext context) {
+	public KeyValues getHighCardinalityKeyValues(ClientRequestObservationContext context) {
 		return KeyValues.of(requestUri(context), clientName(context));
 	}
 
-	protected KeyValue requestUri(ClientHttpObservationContext context) {
+	protected KeyValue requestUri(ClientRequestObservationContext context) {
 		if (context.getCarrier() != null) {
 			return KeyValue.of(ClientHttpObservationDocumentation.HighCardinalityKeyNames.HTTP_URL, context.getCarrier().getURI().toASCIIString());
 		}
 		return HTTP_URL_NONE;
 	}
 
-	protected KeyValue clientName(ClientHttpObservationContext context) {
+	protected KeyValue clientName(ClientRequestObservationContext context) {
 		if (context.getCarrier() != null && context.getCarrier().getURI().getHost() != null) {
 			return KeyValue.of(ClientHttpObservationDocumentation.HighCardinalityKeyNames.CLIENT_NAME, context.getCarrier().getURI().getHost());
 		}
 		return CLIENT_NAME_NONE;
+	}
+
+	static class HttpOutcome {
+
+		static KeyValue forStatus(HttpStatusCode statusCode) {
+			if (statusCode.is2xxSuccessful()) {
+				return HTTP_OUTCOME_SUCCESS;
+			}
+			else if (statusCode instanceof HttpStatus status){
+				return KeyValue.of("outcome", status.series().name());
+			}
+			else {
+				return HTTP_OUTCOME_UNKNOWN;
+			}
+		}
+
 	}
 
 }
