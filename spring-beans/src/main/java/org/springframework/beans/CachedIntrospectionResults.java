@@ -97,8 +97,6 @@ public final class CachedIntrospectionResults {
 	 */
 	public static final String IGNORE_BEANINFO_PROPERTY_NAME = "spring.beaninfo.ignore";
 
-	private static final PropertyDescriptor[] EMPTY_PROPERTY_DESCRIPTOR_ARRAY = {};
-
 
 	private static final boolean shouldIntrospectorIgnoreBeaninfoClasses =
 			SpringProperties.getFlag(IGNORE_BEANINFO_PROPERTY_NAME);
@@ -422,7 +420,7 @@ public final class CachedIntrospectionResults {
 	}
 
 	PropertyDescriptor[] getPropertyDescriptors() {
-		return this.propertyDescriptors.values().toArray(EMPTY_PROPERTY_DESCRIPTOR_ARRAY);
+		return this.propertyDescriptors.values().toArray(PropertyDescriptorUtils.EMPTY_PROPERTY_DESCRIPTOR_ARRAY);
 	}
 
 	private PropertyDescriptor buildGenericTypeAwarePropertyDescriptor(Class<?> beanClass, PropertyDescriptor pd) {
