@@ -39,7 +39,7 @@ import org.springframework.lang.NonNull;
  * {@link BeanInfoFactory} types to take precedence.
  *
  * @author Juergen Hoeller
- * @since 6.0
+ * @since 5.3.24
  * @see ExtendedBeanInfoFactory
  * @see CachedIntrospectionResults
  */

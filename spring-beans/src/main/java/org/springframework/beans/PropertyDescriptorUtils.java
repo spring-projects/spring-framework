@@ -48,7 +48,7 @@ abstract class PropertyDescriptorUtils {
 	 * @param beanClass the target class to introspect
 	 * @return a collection of property descriptors
 	 * @throws IntrospectionException from introspecting the given bean class
-	 * @since 6.0
+	 * @since 5.3.24
 	 * @see SimpleBeanInfoFactory
 	 * @see java.beans.Introspector#getBeanInfo(Class)
 	 */
@@ -57,6 +57,7 @@ abstract class PropertyDescriptorUtils {
 
 		for (Method method : beanClass.getMethods()) {
 			String methodName = method.getName();
+
 			boolean setter;
 			int nameIndex;
 			if (methodName.startsWith("set") && method.getParameterCount() == 1) {
@@ -76,6 +77,10 @@ abstract class PropertyDescriptorUtils {
 			}
 
 			String propertyName = StringUtils.uncapitalizeAsProperty(methodName.substring(nameIndex));
+			if (propertyName.isEmpty()) {
+				continue;
+			}
+
 			PropertyDescriptor pd = pdMap.get(propertyName);
 			if (pd != null) {
 				if (setter) {
@@ -262,6 +267,7 @@ abstract class PropertyDescriptorUtils {
 	 * PropertyDescriptor for {@link #determineBasicProperties(Class)},
 	 * not performing any early type determination for
 	 * {@link #setReadMethod}/{@link #setWriteMethod}.
+	 * @since 5.3.24
 	 */
 	private static class BasicPropertyDescriptor extends PropertyDescriptor {
 
