@@ -22,6 +22,8 @@ import java.lang.reflect.Type;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import kotlin.jvm.JvmClassMappingKt;
+import kotlin.reflect.KClass;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -101,6 +103,7 @@ public class BindingReflectionHintsRegistrar {
 					}
 				}
 				if (KotlinDetector.isKotlinType(clazz)) {
+					KotlinDelegate.registerComponentHints(hints, clazz);
 					registerKotlinSerializationHints(hints, clazz);
 				}
 			});
@@ -144,6 +147,24 @@ public class BindingReflectionHintsRegistrar {
 			types.add(clazz);
 			for (ResolvableType genericResolvableType : resolvableType.getGenerics()) {
 				collectReferencedTypes(types, genericResolvableType);
+			}
+		}
+	}
+
+	/**
+	 * Inner class to avoid a hard dependency on Kotlin at runtime.
+	 */
+	private static class KotlinDelegate {
+
+		public static void registerComponentHints(ReflectionHints hints, Class<?> type) {
+			KClass<?> kClass = JvmClassMappingKt.getKotlinClass(type);
+			if (kClass.isData()) {
+				for (Method method : type.getMethods()) {
+					String methodName = method.getName();
+					if (methodName.startsWith("component") || methodName.equals("copy")) {
+						hints.registerMethod(method, ExecutableMode.INVOKE);
+					}
+				}
 			}
 		}
 	}

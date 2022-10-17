@@ -19,6 +19,7 @@ package org.springframework.aot.hint
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.ThrowingConsumer
 import org.junit.jupiter.api.Test
+import org.springframework.aot.hint.predicate.RuntimeHintsPredicates
 
 /**
  * Tests for Kotlin support in [BindingReflectionHintsRegistrar].
@@ -32,7 +33,7 @@ class KotlinBindingReflectionHintsRegistrarTests {
 	private val hints = RuntimeHints()
 
 	@Test
-	fun `Register type for Kotlinx serialization`() {
+	fun `Register reflection hints for Kotlinx serialization`() {
 		bindingRegistrar.registerReflectionHints(hints.reflection(), SampleSerializableClass::class.java)
 		assertThat(hints.reflection().typeHints()).satisfiesExactlyInAnyOrder(
 			ThrowingConsumer { typeHint: TypeHint ->
@@ -59,7 +60,17 @@ class KotlinBindingReflectionHintsRegistrarTests {
 					})
 			})
 	}
+
+	@Test
+	fun `Register reflection hints for Kotlin data class`() {
+		bindingRegistrar.registerReflectionHints(hints.reflection(), SampleDataClass::class.java)
+		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleDataClass::class.java, "component1")).accepts(hints)
+		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleDataClass::class.java, "copy")).accepts(hints)
+		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleDataClass::class.java, "getName")).accepts(hints)
+	}
 }
 
 @kotlinx.serialization.Serializable
 class SampleSerializableClass(val name: String)
+
+data class SampleDataClass(val name: String)
