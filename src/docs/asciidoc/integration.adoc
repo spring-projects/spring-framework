@@ -390,8 +390,7 @@ Two, create a proxy that will perform the declared HTTP exchanges:
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	WebClient client = WebClient.builder().baseUrl("https://api.github.com/").build();
-	HttpServiceProxyFactory factory = WebClientAdapter.createHttpServiceProxyFactory(client);
-	factory.afterPropertiesSet();
+	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builder(WebClientAdapter.forClient(client)).build();
 
 	RepositoryService service = factory.createClient(RepositoryService.class);
 ----

@@ -43,10 +43,10 @@ import org.springframework.util.StringValueResolver;
 import org.springframework.web.service.annotation.HttpExchange;
 
 /**
- * Factory for creating a client proxy given an HTTP service interface with
+ * Factory to create a client proxy from an HTTP service interface with
  * {@link HttpExchange @HttpExchange} methods.
  *
- * <p>This class is intended to be declared as a bean in a Spring configuration.
+ * <p>To create an instance, use static methods to obtain a {@link Builder Builder}.
  *
  * @author Rossen Stoyanchev
  * @since 6.0
@@ -54,81 +54,98 @@ import org.springframework.web.service.annotation.HttpExchange;
  */
 public final class HttpServiceProxyFactory implements InitializingBean, EmbeddedValueResolverAware {
 
-	private final HttpClientAdapter clientAdapter;
+	@Nullable
+	private final BuilderInitializedFactory builderInitializedFactory;
 
 	@Nullable
-	private List<HttpServiceArgumentResolver> customArgumentResolvers;
-
-	@Nullable
-	private List<HttpServiceArgumentResolver> argumentResolvers;
-
-	@Nullable
-	private ConversionService conversionService;
-
-	@Nullable
-	private StringValueResolver embeddedValueResolver;
-
-	private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
-
-	private Duration blockTimeout = Duration.ofSeconds(5);
+	private final BeanStyleFactory beanStyleFactory;
 
 
 	/**
 	 * Create an instance with the underlying HTTP client to use.
 	 * @param clientAdapter an adapter for the client
-	 * @see org.springframework.web.reactive.function.client.support.WebClientAdapter#createHttpServiceProxyFactory(org.springframework.web.reactive.function.client.WebClient)
+	 * @deprecated as of 6.0 RC1 in favor of using the Builder to initialize
+	 * the HttpServiceProxyFactory instance.
 	 */
+	@Deprecated(since = "6.0.0-RC1", forRemoval = true)
 	public HttpServiceProxyFactory(HttpClientAdapter clientAdapter) {
-		Assert.notNull(clientAdapter, "HttpClientAdapter is required");
-		this.clientAdapter = clientAdapter;
+		this.beanStyleFactory = new BeanStyleFactory(clientAdapter);
+		this.builderInitializedFactory = null;
+	}
+
+	private HttpServiceProxyFactory(
+			HttpClientAdapter clientAdapter, List<HttpServiceArgumentResolver> argumentResolvers,
+			@Nullable StringValueResolver embeddedValueResolver,
+			ReactiveAdapterRegistry reactiveAdapterRegistry, Duration blockTimeout) {
+
+		this.beanStyleFactory = null;
+		this.builderInitializedFactory = new BuilderInitializedFactory(
+				clientAdapter, argumentResolvers, embeddedValueResolver, reactiveAdapterRegistry, blockTimeout);
 	}
 
 
 	/**
 	 * Register a custom argument resolver, invoked ahead of default resolvers.
 	 * @param resolver the resolver to add
+	 * @deprecated as of 6.0 RC1 in favor of using the Builder to initialize
+	 * the HttpServiceProxyFactory instance.
 	 */
+	@Deprecated(since = "6.0.0-RC1", forRemoval = true)
 	public void addCustomArgumentResolver(HttpServiceArgumentResolver resolver) {
-		if (this.customArgumentResolvers == null) {
-			this.customArgumentResolvers = new ArrayList<>();
-		}
-		this.customArgumentResolvers.add(resolver);
+		Assert.state(this.beanStyleFactory != null, "HttpServiceProxyFactory was created through the builder");
+		this.beanStyleFactory.addCustomArgumentResolver(resolver);
 	}
 
 	/**
 	 * Set the custom argument resolvers to use, ahead of default resolvers.
 	 * @param resolvers the resolvers to use
+	 * @deprecated as of 6.0 RC1 in favor of using the Builder to initialize
+	 * the HttpServiceProxyFactory instance.
 	 */
+	@Deprecated(since = "6.0.0-RC1", forRemoval = true)
 	public void setCustomArgumentResolvers(List<HttpServiceArgumentResolver> resolvers) {
-		this.customArgumentResolvers = new ArrayList<>(resolvers);
+		Assert.state(this.beanStyleFactory != null, "HttpServiceProxyFactory was created through the builder");
+		this.beanStyleFactory.setCustomArgumentResolvers(resolvers);
 	}
 
 	/**
 	 * Set the {@link ConversionService} to use where input values need to
 	 * be formatted as Strings.
 	 * <p>By default this is {@link DefaultFormattingConversionService}.
+	 * @deprecated as of 6.0 RC1 in favor of using the Builder to initialize
+	 * the HttpServiceProxyFactory instance.
 	 */
+	@Deprecated(since = "6.0.0-RC1", forRemoval = true)
 	public void setConversionService(ConversionService conversionService) {
-		this.conversionService = conversionService;
+		Assert.state(this.beanStyleFactory != null, "HttpServiceProxyFactory was created through the builder");
+		this.beanStyleFactory.setConversionService(conversionService);
 	}
 
 	/**
 	 * Set the StringValueResolver to use for resolving placeholders and
 	 * expressions in {@link HttpExchange#url()}.
 	 * @param resolver the resolver to use
+	 * @deprecated as of 6.0 RC1 in favor of using the Builder to initialize
+	 * an HttpServiceProxyFactory instance.
 	 */
+	@Deprecated(since = "6.0.0-RC1", forRemoval = true)
 	@Override
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
-		this.embeddedValueResolver = resolver;
+		Assert.state(this.beanStyleFactory != null, "HttpServiceProxyFactory was created through the builder");
+		this.beanStyleFactory.setEmbeddedValueResolver(resolver);
 	}
 
 	/**
 	 * Set the {@link ReactiveAdapterRegistry} to use to support different
 	 * asynchronous types for HTTP service method return values.
 	 * <p>By default this is {@link ReactiveAdapterRegistry#getSharedInstance()}.
+	 * @deprecated as of 6.0 RC1 in favor of using the Builder to initialize
+	 * an HttpServiceProxyFactory instance.
 	 */
+	@Deprecated(since = "6.0.0-RC1", forRemoval = true)
 	public void setReactiveAdapterRegistry(ReactiveAdapterRegistry registry) {
-		this.reactiveAdapterRegistry = registry;
+		Assert.state(this.beanStyleFactory != null, "HttpServiceProxyFactory was created through the builder");
+		this.beanStyleFactory.setReactiveAdapterRegistry(registry);
 	}
 
 	/**
@@ -136,42 +153,22 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 	 * with a synchronous (blocking) method signature.
 	 * <p>By default this is 5 seconds.
 	 * @param blockTimeout the timeout value
+	 * @deprecated as of 6.0 RC1 in favor of using the Builder to initialize
+	 * an HttpServiceProxyFactory instance.
 	 */
+	@Deprecated(since = "6.0.0-RC1", forRemoval = true)
 	public void setBlockTimeout(Duration blockTimeout) {
-		this.blockTimeout = blockTimeout;
+		Assert.state(this.beanStyleFactory != null, "HttpServiceProxyFactory was created through the builder");
+		this.beanStyleFactory.setBlockTimeout(blockTimeout);
 	}
 
 
 	@Override
+	@Deprecated
 	public void afterPropertiesSet() throws Exception {
-
-		this.conversionService = (this.conversionService != null ?
-				this.conversionService : new DefaultFormattingConversionService());
-
-		this.argumentResolvers = initArgumentResolvers(this.conversionService);
-	}
-
-	private List<HttpServiceArgumentResolver> initArgumentResolvers(ConversionService conversionService) {
-		List<HttpServiceArgumentResolver> resolvers = new ArrayList<>();
-
-		// Custom
-		if (this.customArgumentResolvers != null) {
-			resolvers.addAll(this.customArgumentResolvers);
+		if (this.beanStyleFactory != null) {
+			this.beanStyleFactory.afterPropertiesSet();
 		}
-
-		// Annotation-based
-		resolvers.add(new RequestHeaderArgumentResolver(conversionService));
-		resolvers.add(new RequestBodyArgumentResolver(this.reactiveAdapterRegistry));
-		resolvers.add(new PathVariableArgumentResolver(conversionService));
-		resolvers.add(new RequestParamArgumentResolver(conversionService));
-		resolvers.add(new CookieValueArgumentResolver(conversionService));
-		resolvers.add(new RequestAttributeArgumentResolver());
-
-		// Specific type
-		resolvers.add(new UrlArgumentResolver());
-		resolvers.add(new HttpMethodArgumentResolver());
-
-		return resolvers;
 	}
 
 
@@ -183,26 +180,163 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 	 * @return the created proxy
 	 */
 	public <S> S createClient(Class<S> serviceType) {
-
-		List<HttpServiceMethod> httpServiceMethods =
-				MethodIntrospector.selectMethods(serviceType, this::isExchangeMethod).stream()
-						.map(method -> createHttpServiceMethod(serviceType, method))
-						.toList();
-
-		return ProxyFactory.getProxy(serviceType, new HttpServiceMethodInterceptor(httpServiceMethods));
+		if (this.builderInitializedFactory != null) {
+			return this.builderInitializedFactory.createClient(serviceType);
+		}
+		else if (this.beanStyleFactory != null) {
+			return this.beanStyleFactory.createClient(serviceType);
+		}
+		else {
+			throw new IllegalStateException("Expected Builder initialized or Bean-style delegate");
+		}
 	}
 
-	private boolean isExchangeMethod(Method method) {
-		return AnnotatedElementUtils.hasAnnotation(method, HttpExchange.class);
+
+	/**
+	 * Return an {@link HttpServiceProxyFactory} builder, initialized with the
+	 * given client.
+	 */
+	public static Builder builder(HttpClientAdapter clientAdapter) {
+		return new Builder().clientAdapter(clientAdapter);
 	}
 
-	private <S> HttpServiceMethod createHttpServiceMethod(Class<S> serviceType, Method method) {
-		Assert.notNull(this.argumentResolvers,
-				"No argument resolvers: afterPropertiesSet was not called");
+	/**
+	 * Return an {@link HttpServiceProxyFactory} builder.
+	 */
+	public static Builder builder() {
+		return new Builder();
+	}
 
-		return new HttpServiceMethod(
-				method, serviceType, this.argumentResolvers, this.clientAdapter,
-				this.embeddedValueResolver, this.reactiveAdapterRegistry, this.blockTimeout);
+
+	/**
+	 * Builder to create an {@link HttpServiceProxyFactory}.
+	 */
+	public static final class Builder {
+
+		@Nullable
+		private HttpClientAdapter clientAdapter;
+
+		@Nullable
+		private List<HttpServiceArgumentResolver> argumentResolvers;
+
+		@Nullable
+		private ConversionService conversionService;
+
+		@Nullable
+		private StringValueResolver embeddedValueResolver;
+
+		private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
+
+		@Nullable
+		private Duration blockTimeout;
+
+		private Builder() {
+		}
+
+		/**
+		 * Provide the HTTP client to perform requests through.
+		 * @param clientAdapter a client adapted to {@link HttpClientAdapter}
+		 * @return this same builder instance
+		 */
+		public Builder clientAdapter(HttpClientAdapter clientAdapter) {
+			this.clientAdapter = clientAdapter;
+			return this;
+		}
+
+		/**
+		 * Register a custom argument resolver, invoked ahead of default resolvers.
+		 * @param resolver the resolver to add
+		 * @return this same builder instance
+		 */
+		public Builder customArgumentResolver(HttpServiceArgumentResolver resolver) {
+			this.argumentResolvers = (this.argumentResolvers != null ? this.argumentResolvers : new ArrayList<>());
+			this.argumentResolvers.add(resolver);
+			return this;
+		}
+
+		/**
+		 * Set the {@link ConversionService} to use where input values need to
+		 * be formatted as Strings.
+		 * <p>By default this is {@link DefaultFormattingConversionService}.
+		 * @return this same builder instance
+		 */
+		public Builder conversionService(ConversionService conversionService) {
+			this.conversionService = conversionService;
+			return this;
+		}
+
+		/**
+		 * Set the {@link StringValueResolver} to use for resolving placeholders
+		 * and expressions embedded in {@link HttpExchange#url()}.
+		 * @param embeddedValueResolver the resolver to use
+		 * @return this same builder instance
+		 */
+		public Builder embeddedValueResolver(StringValueResolver embeddedValueResolver) {
+			this.embeddedValueResolver = embeddedValueResolver;
+			return this;
+		}
+
+		/**
+		 * Set the {@link ReactiveAdapterRegistry} to use to support different
+		 * asynchronous types for HTTP service method return values.
+		 * <p>By default this is {@link ReactiveAdapterRegistry#getSharedInstance()}.
+		 * @return this same builder instance
+		 */
+		public Builder reactiveAdapterRegistry(ReactiveAdapterRegistry registry) {
+			this.reactiveAdapterRegistry = registry;
+			return this;
+		}
+
+		/**
+		 * Configure how long to wait for a response for an HTTP service method
+		 * with a synchronous (blocking) method signature.
+		 * <p>By default this is 5 seconds.
+		 * @param blockTimeout the timeout value
+		 * @return this same builder instance
+		 */
+		public Builder blockTimeout(Duration blockTimeout) {
+			this.blockTimeout = blockTimeout;
+			return this;
+		}
+
+		/**
+		 * Build the {@link HttpServiceProxyFactory} instance.
+		 */
+		public HttpServiceProxyFactory build() {
+			Assert.notNull(this.clientAdapter, "HttpClientAdapter is required");
+
+			return new HttpServiceProxyFactory(
+					this.clientAdapter, initArgumentResolvers(),
+					this.embeddedValueResolver, this.reactiveAdapterRegistry,
+					(this.blockTimeout != null ? this.blockTimeout : Duration.ofSeconds(5)));
+		}
+
+		private List<HttpServiceArgumentResolver> initArgumentResolvers() {
+			List<HttpServiceArgumentResolver> resolvers = new ArrayList<>();
+
+			// Custom
+			if (this.argumentResolvers != null) {
+				resolvers.addAll(this.argumentResolvers);
+			}
+
+			ConversionService service = (this.conversionService != null ?
+					this.conversionService : new DefaultFormattingConversionService());
+
+			// Annotation-based
+			resolvers.add(new RequestHeaderArgumentResolver(service));
+			resolvers.add(new RequestBodyArgumentResolver(this.reactiveAdapterRegistry));
+			resolvers.add(new PathVariableArgumentResolver(service));
+			resolvers.add(new RequestParamArgumentResolver(service));
+			resolvers.add(new CookieValueArgumentResolver(service));
+			resolvers.add(new RequestAttributeArgumentResolver());
+
+			// Specific type
+			resolvers.add(new UrlArgumentResolver());
+			resolvers.add(new HttpMethodArgumentResolver());
+
+			return resolvers;
+		}
+
 	}
 
 
@@ -233,6 +367,176 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 			}
 			throw new IllegalStateException("Unexpected method invocation: " + method);
 		}
+	}
+
+
+	/**
+	 * Temporary class until bean-style initialization is removed.
+	 */
+	private static final class BuilderInitializedFactory {
+
+		private final HttpClientAdapter clientAdapter;
+
+		private final List<HttpServiceArgumentResolver> argumentResolvers;
+
+		@Nullable
+		private final StringValueResolver embeddedValueResolver;
+
+		private final ReactiveAdapterRegistry reactiveAdapterRegistry;
+
+		private final Duration blockTimeout;
+
+		private BuilderInitializedFactory(
+				HttpClientAdapter clientAdapter, List<HttpServiceArgumentResolver> argumentResolvers,
+				@Nullable StringValueResolver embeddedValueResolver,
+				ReactiveAdapterRegistry reactiveAdapterRegistry, Duration blockTimeout) {
+
+			this.clientAdapter = clientAdapter;
+			this.argumentResolvers = argumentResolvers;
+			this.embeddedValueResolver = embeddedValueResolver;
+			this.reactiveAdapterRegistry = reactiveAdapterRegistry;
+			this.blockTimeout = blockTimeout;
+		}
+
+		public <S> S createClient(Class<S> serviceType) {
+
+			List<HttpServiceMethod> httpServiceMethods =
+					MethodIntrospector.selectMethods(serviceType, this::isExchangeMethod).stream()
+							.map(method -> createHttpServiceMethod(serviceType, method))
+							.toList();
+
+			return ProxyFactory.getProxy(serviceType, new HttpServiceMethodInterceptor(httpServiceMethods));
+		}
+
+		private boolean isExchangeMethod(Method method) {
+			return AnnotatedElementUtils.hasAnnotation(method, HttpExchange.class);
+		}
+
+		private <S> HttpServiceMethod createHttpServiceMethod(Class<S> serviceType, Method method) {
+			Assert.notNull(this.argumentResolvers,
+					"No argument resolvers: afterPropertiesSet was not called");
+
+			return new HttpServiceMethod(
+					method, serviceType, this.argumentResolvers, this.clientAdapter,
+					this.embeddedValueResolver, this.reactiveAdapterRegistry, this.blockTimeout);
+		}
+
+	}
+
+
+	/**
+	 * Temporary class to support bean-style initialization during deprecation period.
+	 */
+	private static final class BeanStyleFactory implements InitializingBean, EmbeddedValueResolverAware {
+
+		private final HttpClientAdapter clientAdapter;
+
+		@Nullable
+		private List<HttpServiceArgumentResolver> customArgumentResolvers;
+
+		@Nullable
+		private List<HttpServiceArgumentResolver> argumentResolvers;
+
+		@Nullable
+		private ConversionService conversionService;
+
+		@Nullable
+		private StringValueResolver embeddedValueResolver;
+
+		private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
+
+		private Duration blockTimeout = Duration.ofSeconds(5);
+
+		BeanStyleFactory(HttpClientAdapter clientAdapter) {
+			Assert.notNull(clientAdapter, "HttpClientAdapter is required");
+			this.clientAdapter = clientAdapter;
+		}
+
+		public void addCustomArgumentResolver(HttpServiceArgumentResolver resolver) {
+			if (this.customArgumentResolvers == null) {
+				this.customArgumentResolvers = new ArrayList<>();
+			}
+			this.customArgumentResolvers.add(resolver);
+		}
+
+		public void setCustomArgumentResolvers(List<HttpServiceArgumentResolver> resolvers) {
+			this.customArgumentResolvers = new ArrayList<>(resolvers);
+		}
+
+		public void setConversionService(ConversionService conversionService) {
+			this.conversionService = conversionService;
+		}
+
+		@Override
+		public void setEmbeddedValueResolver(StringValueResolver resolver) {
+			this.embeddedValueResolver = resolver;
+		}
+
+		public void setReactiveAdapterRegistry(ReactiveAdapterRegistry registry) {
+			this.reactiveAdapterRegistry = registry;
+		}
+
+		public void setBlockTimeout(Duration blockTimeout) {
+			this.blockTimeout = blockTimeout;
+		}
+
+
+		@Override
+		public void afterPropertiesSet() throws Exception {
+
+			this.conversionService = (this.conversionService != null ?
+					this.conversionService : new DefaultFormattingConversionService());
+
+			this.argumentResolvers = initArgumentResolvers(this.conversionService);
+		}
+
+		private List<HttpServiceArgumentResolver> initArgumentResolvers(ConversionService conversionService) {
+			List<HttpServiceArgumentResolver> resolvers = new ArrayList<>();
+
+			// Custom
+			if (this.customArgumentResolvers != null) {
+				resolvers.addAll(this.customArgumentResolvers);
+			}
+
+			// Annotation-based
+			resolvers.add(new RequestHeaderArgumentResolver(conversionService));
+			resolvers.add(new RequestBodyArgumentResolver(this.reactiveAdapterRegistry));
+			resolvers.add(new PathVariableArgumentResolver(conversionService));
+			resolvers.add(new RequestParamArgumentResolver(conversionService));
+			resolvers.add(new CookieValueArgumentResolver(conversionService));
+			resolvers.add(new RequestAttributeArgumentResolver());
+
+			// Specific type
+			resolvers.add(new UrlArgumentResolver());
+			resolvers.add(new HttpMethodArgumentResolver());
+
+			return resolvers;
+		}
+
+
+		public <S> S createClient(Class<S> serviceType) {
+
+			List<HttpServiceMethod> httpServiceMethods =
+					MethodIntrospector.selectMethods(serviceType, this::isExchangeMethod).stream()
+							.map(method -> createHttpServiceMethod(serviceType, method))
+							.toList();
+
+			return ProxyFactory.getProxy(serviceType, new HttpServiceMethodInterceptor(httpServiceMethods));
+		}
+
+		private boolean isExchangeMethod(Method method) {
+			return AnnotatedElementUtils.hasAnnotation(method, HttpExchange.class);
+		}
+
+		private <S> HttpServiceMethod createHttpServiceMethod(Class<S> serviceType, Method method) {
+			Assert.notNull(this.argumentResolvers,
+					"No argument resolvers: afterPropertiesSet was not called");
+
+			return new HttpServiceMethod(
+					method, serviceType, this.argumentResolvers, this.clientAdapter,
+					this.embeddedValueResolver, this.reactiveAdapterRegistry, this.blockTimeout);
+		}
+
 	}
 
 }
