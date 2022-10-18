@@ -91,6 +91,8 @@ class PersistenceManagedTypesBeanRegistrationAotProcessorTests {
 					.accepts(hints);
 			assertThat(RuntimeHintsPredicates.reflection().onType(Employee.class)
 					.withMemberCategories(MemberCategory.DECLARED_FIELDS)).accepts(hints);
+			assertThat(RuntimeHintsPredicates.reflection().onMethod(Employee.class, "preRemove"))
+					.accepts(hints);
 			assertThat(RuntimeHintsPredicates.reflection().onType(EmployeeId.class)
 					.withMemberCategories(MemberCategory.DECLARED_FIELDS)).accepts(hints);
 			assertThat(RuntimeHintsPredicates.reflection().onType(EmployeeLocationConverter.class)

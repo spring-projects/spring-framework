@@ -16,7 +16,9 @@
 
 package org.springframework.orm.jpa.persistenceunit;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Executable;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.lang.model.element.Modifier;
@@ -24,11 +26,20 @@ import javax.lang.model.element.Modifier;
 import jakarta.persistence.Converter;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.IdClass;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.PostRemove;
+import jakarta.persistence.PostUpdate;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreRemove;
+import jakarta.persistence.PreUpdate;
 
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.BindingReflectionHintsRegistrar;
+import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
@@ -41,6 +52,7 @@ import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.ParameterizedTypeName;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link BeanRegistrationAotProcessor} implementations for persistence managed
@@ -54,6 +66,9 @@ import org.springframework.util.ClassUtils;
  * @since 6.0
  */
 class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
+
+	private static final List<Class<? extends Annotation>> CALLBACK_TYPES = Arrays.asList(PreUpdate.class,
+			PostUpdate.class, PrePersist.class, PostPersist.class, PreRemove.class, PostRemove.class, PostLoad.class);
 
 	@Nullable
 	@Override
@@ -115,6 +130,7 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 					contributeEntityListenersHints(hints, managedClass);
 					contributeIdClassHints(hints, managedClass);
 					contributeConverterHints(hints, managedClass);
+					contributeCallbackHints(hints, managedClass);
 				}
 				catch (ClassNotFoundException ex) {
 					throw new IllegalArgumentException("Failed to instantiate the managed class: " + managedClassName, ex);
@@ -145,5 +161,11 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 			}
 		}
 
+		private void contributeCallbackHints(RuntimeHints hints, Class<?> managedClass) {
+			ReflectionHints reflection = hints.reflection();
+			ReflectionUtils.doWithMethods(managedClass, method ->
+					reflection.registerMethod(method, ExecutableMode.INVOKE),
+					method -> CALLBACK_TYPES.stream().anyMatch(method::isAnnotationPresent));
+		}
 	}
 }

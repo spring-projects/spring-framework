@@ -20,6 +20,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
+import jakarta.persistence.PreRemove;
 
 @Entity
 @IdClass(EmployeeId.class)
@@ -58,5 +59,9 @@ public class Employee {
 
 	public void setLocation(EmployeeLocation location) {
 		this.location = location;
+	}
+
+	@PreRemove
+	public void preRemove() {
 	}
 }
