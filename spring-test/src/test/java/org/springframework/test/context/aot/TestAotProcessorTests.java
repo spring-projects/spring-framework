@@ -109,12 +109,13 @@ class TestAotProcessorTests extends AbstractAotTests {
 
 		private static Settings createSettings(Path sourceOutput, Path resourceOutput, Path classOutput, String groupId,
 				String artifactId) {
-			return new Settings()
-					.setSourceOutput(sourceOutput)
-					.setResourceOutput(resourceOutput)
-					.setClassOutput(classOutput)
-					.setArtifactId(artifactId)
-					.setGroupId(groupId);
+			return Settings.builder()
+					.sourceOutput(sourceOutput)
+					.resourceOutput(resourceOutput)
+					.classOutput(classOutput)
+					.artifactId(artifactId)
+					.groupId(groupId)
+					.build();
 		}
 	}
 

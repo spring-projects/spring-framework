@@ -24,6 +24,7 @@ import org.springframework.aot.generate.GeneratedFiles.Kind;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.nativex.FileNativeConfigurationWriter;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
 
 /**
@@ -49,6 +50,7 @@ public abstract class AbstractAotProcessor {
 
 	/**
 	 * Create a new processor instance with the supplied {@linkplain Settings settings}.
+	 * @see Settings#builder()
 	 */
 	protected AbstractAotProcessor(Settings settings) {
 		this.settings = settings;
@@ -102,114 +104,163 @@ public abstract class AbstractAotProcessor {
 	/**
 	 * Common settings for AOT processors.
 	 */
-	public static class Settings {
+	public static final class Settings {
 
-		@Nullable
-		private Path sourceOutput;
+		private final Path sourceOutput;
 
-		@Nullable
-		private Path resourceOutput;
+		private final Path resourceOutput;
 
-		@Nullable
-		private Path classOutput;
+		private final Path classOutput;
 
-		@Nullable
-		private String groupId;
+		private final String groupId;
 
-		@Nullable
-		private String artifactId;
+		private final String artifactId;
+
+
+		private Settings(Path sourceOutput, Path resourceOutput, Path classOutput, String groupId, String artifactId) {
+			this.sourceOutput = sourceOutput;
+			this.resourceOutput = resourceOutput;
+			this.classOutput = classOutput;
+			this.groupId = groupId;
+			this.artifactId = artifactId;
+		}
 
 
 		/**
-		 * Set the output directory for generated sources.
-		 * @param sourceOutput the location of generated sources
-		 * @return this settings object for method chaining
+		 * Create a new {@link Builder} for {@link Settings}.
 		 */
-		public Settings setSourceOutput(Path sourceOutput) {
-			this.sourceOutput = sourceOutput;
-			return this;
+		public static Builder builder() {
+			return new Builder();
 		}
+
 
 		/**
 		 * Get the output directory for generated sources.
 		 */
-		@Nullable
 		public Path getSourceOutput() {
 			return this.sourceOutput;
 		}
 
 		/**
-		 * Set the output directory for generated resources.
-		 * @param resourceOutput the location of generated resources
-		 * @return this settings object for method chaining
-		 */
-		public Settings setResourceOutput(Path resourceOutput) {
-			this.resourceOutput = resourceOutput;
-			return this;
-		}
-
-		/**
 		 * Get the output directory for generated resources.
 		 */
-		@Nullable
 		public Path getResourceOutput() {
 			return this.resourceOutput;
 		}
 
 		/**
-		 * Set the output directory for generated classes.
-		 * @param classOutput the location of generated classes
-		 * @return this settings object for method chaining
-		 */
-		public Settings setClassOutput(Path classOutput) {
-			this.classOutput = classOutput;
-			return this;
-		}
-
-		/**
 		 * Get the output directory for generated classes.
 		 */
-		@Nullable
 		public Path getClassOutput() {
 			return this.classOutput;
 		}
 
 		/**
-		 * Set the group ID of the application.
-		 * @param groupId the group ID of the application, used to locate
-		 * {@code native-image.properties}
-		 * @return this settings object for method chaining
-		 */
-		public Settings setGroupId(String groupId) {
-			this.groupId = groupId;
-			return this;
-		}
-
-		/**
 		 * Get the group ID of the application.
 		 */
-		@Nullable
 		public String getGroupId() {
 			return this.groupId;
 		}
 
 		/**
-		 * Set the artifact ID of the application.
-		 * @param artifactId the artifact ID of the application, used to locate
-		 * {@code native-image.properties}
-		 * @return this settings object for method chaining
-		 */
-		public Settings setArtifactId(String artifactId) {
-			this.artifactId = artifactId;
-			return this;
-		}
-
-		/**
 		 * Get the artifact ID of the application.
 		 */
-		@Nullable
 		public String getArtifactId() {
 			return this.artifactId;
+		}
+
+
+		/**
+		 * Fluent builder API for {@link Settings}.
+		 */
+		public static final class Builder {
+
+			@Nullable
+			private Path sourceOutput;
+
+			@Nullable
+			private Path resourceOutput;
+
+			@Nullable
+			private Path classOutput;
+
+			@Nullable
+			private String groupId;
+
+			@Nullable
+			private String artifactId;
+
+
+			private Builder() {
+				// internal constructor
+			}
+
+
+			/**
+			 * Set the output directory for generated sources.
+			 * @param sourceOutput the location of generated sources
+			 * @return this builder for method chaining
+			 */
+			public Builder sourceOutput(Path sourceOutput) {
+				this.sourceOutput = sourceOutput;
+				return this;
+			}
+
+			/**
+			 * Set the output directory for generated resources.
+			 * @param resourceOutput the location of generated resources
+			 * @return this builder for method chaining
+			 */
+			public Builder resourceOutput(Path resourceOutput) {
+				this.resourceOutput = resourceOutput;
+				return this;
+			}
+
+			/**
+			 * Set the output directory for generated classes.
+			 * @param classOutput the location of generated classes
+			 * @return this builder for method chaining
+			 */
+			public Builder classOutput(Path classOutput) {
+				this.classOutput = classOutput;
+				return this;
+			}
+
+			/**
+			 * Set the group ID of the application.
+			 * @param groupId the group ID of the application, used to locate
+			 * {@code native-image.properties}
+			 * @return this builder for method chaining
+			 */
+			public Builder groupId(String groupId) {
+				this.groupId = groupId;
+				return this;
+			}
+
+			/**
+			 * Set the artifact ID of the application.
+			 * @param artifactId the artifact ID of the application, used to locate
+			 * {@code native-image.properties}
+			 * @return this builder for method chaining
+			 */
+			public Builder artifactId(String artifactId) {
+				this.artifactId = artifactId;
+				return this;
+			}
+
+			/**
+			 * Build the {@link Settings} configured in this {@code Builder}.
+			 */
+			public Settings build() {
+				Assert.notNull(this.sourceOutput, "'sourceOutput' must not be null");
+				Assert.notNull(this.resourceOutput, "'resourceOutput' must not be null");
+				Assert.notNull(this.classOutput, "'classOutput' must not be null");
+				Assert.hasText(this.groupId, "'groupId' must not be null or empty");
+				Assert.hasText(this.artifactId, "'artifactId' must not be null or empty");
+				return new Settings(this.sourceOutput, this.resourceOutput, this.classOutput,
+						this.groupId, this.artifactId);
+			}
+
 		}
 
 	}
