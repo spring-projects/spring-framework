@@ -19,6 +19,7 @@ package org.springframework.test.context.aot;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.test.context.ContextLoadException;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
 
@@ -52,10 +53,22 @@ public interface AotContextLoader extends SmartContextLoader {
 	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#registerShutdownHook()
 	 * register a JVM shutdown hook} for it. Otherwise, this method should implement
 	 * behavior identical to {@code loadContext(MergedContextConfiguration)}.
+	 * <p>Any exception thrown while attempting to load an {@code ApplicationContext}
+	 * should be wrapped in a {@link ContextLoadException}. Concrete implementations
+	 * should therefore contain a try-catch block similar to the following.
+	 * <pre style="code">
+	 * GenericApplicationContext context = // create context
+	 * try {
+	 *     // configure context
+	 * }
+	 * catch (Exception ex) {
+	 *     throw new ContextLoadException(context, ex);
+	 * }
+	 * </pre>
 	 * @param mergedConfig the merged context configuration to use to load the
 	 * application context
 	 * @return a new {@code GenericApplicationContext}
-	 * @throws Exception if context loading failed
+	 * @throws ContextLoadException if context loading failed
 	 * @see #loadContextForAotRuntime(MergedContextConfiguration, ApplicationContextInitializer)
 	 */
 	ApplicationContext loadContextForAotProcessing(MergedContextConfiguration mergedConfig) throws Exception;
@@ -67,12 +80,24 @@ public interface AotContextLoader extends SmartContextLoader {
 	 * <p>This method must instantiate, initialize, and
 	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#refresh()
 	 * refresh} the {@code ApplicationContext}.
+	 * <p>Any exception thrown while attempting to load an {@code ApplicationContext}
+	 * should be wrapped in a {@link ContextLoadException}. Concrete implementations
+	 * should therefore contain a try-catch block similar to the following.
+	 * <pre style="code">
+	 * GenericApplicationContext context = // create context
+	 * try {
+	 *     // configure and refresh context
+	 * }
+	 * catch (Exception ex) {
+	 *     throw new ContextLoadException(context, ex);
+	 * }
+	 * </pre>
 	 * @param mergedConfig the merged context configuration to use to load the
 	 * application context
 	 * @param initializer the {@code ApplicationContextInitializer} that should
 	 * be applied to the context in order to recreate bean definitions
 	 * @return a new {@code GenericApplicationContext}
-	 * @throws Exception if context loading failed
+	 * @throws ContextLoadException if context loading failed
 	 * @see #loadContextForAotProcessing(MergedContextConfiguration)
 	 */
 	ApplicationContext loadContextForAotRuntime(MergedContextConfiguration mergedConfig,

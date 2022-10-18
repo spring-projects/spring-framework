@@ -39,6 +39,7 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.log.LogMessage;
 import org.springframework.javapoet.ClassName;
 import org.springframework.test.context.BootstrapUtils;
+import org.springframework.test.context.ContextLoadException;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
@@ -217,9 +218,10 @@ public class TestContextAotGenerator {
 				}
 			}
 			catch (Exception ex) {
+				Throwable cause = (ex instanceof ContextLoadException cle ? cle.getCause() : ex);
 				throw new TestContextAotException(
 						"Failed to load ApplicationContext for AOT processing for test class [%s]"
-							.formatted(testClass.getName()), ex);
+							.formatted(testClass.getName()), cause);
 			}
 		}
 		throw new TestContextAotException("""

@@ -26,7 +26,9 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.log.LogMessage;
 import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
+import org.springframework.test.context.ApplicationContextFailureProcessor;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
+import org.springframework.test.context.ContextLoadException;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
@@ -58,6 +60,9 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	private final AotTestContextInitializers aotTestContextInitializers = new AotTestContextInitializers();
 
 	private final ContextCache contextCache;
+
+	@Nullable
+	private ApplicationContextFailureProcessor contextFailureProcessor;
 
 
 	/**
@@ -110,8 +115,23 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 					this.contextCache.put(mergedContextConfiguration, context);
 				}
 				catch (Exception ex) {
+					Throwable cause = ex;
+					if (ex instanceof ContextLoadException cle) {
+						cause = cle.getCause();
+						if (this.contextFailureProcessor != null) {
+							try {
+								this.contextFailureProcessor.processLoadFailure(cle.getApplicationContext(), cause);
+							}
+							catch (Throwable throwable) {
+								if (logger.isDebugEnabled()) {
+									logger.debug("Ignoring exception thrown from ApplicationContextFailureProcessor [%s]: %s"
+											.formatted(this.contextFailureProcessor, throwable));
+								}
+							}
+						}
+					}
 					throw new IllegalStateException(
-						"Failed to load ApplicationContext for " + mergedContextConfiguration, ex);
+						"Failed to load ApplicationContext for " + mergedContextConfiguration, cause);
 				}
 			}
 			else {
@@ -133,6 +153,12 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 			this.contextCache.remove(replaceIfNecessary(mergedContextConfiguration), hierarchyMode);
 		}
 	}
+
+	@Override
+	public void setContextFailureProcessor(ApplicationContextFailureProcessor contextFailureProcessor) {
+		this.contextFailureProcessor = contextFailureProcessor;
+	}
+
 
 	/**
 	 * Get the {@link ContextCache} used by this context loader delegate.

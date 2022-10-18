@@ -35,6 +35,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.core.io.support.SpringFactoriesLoader.FailureHandler;
 import org.springframework.lang.Nullable;
+import org.springframework.test.context.ApplicationContextFailureProcessor;
 import org.springframework.test.context.BootstrapContext;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.test.context.ContextConfiguration;
@@ -494,15 +495,40 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	/**
 	 * Get the {@link CacheAwareContextLoaderDelegate} to use for transparent
 	 * interaction with the {@code ContextCache}.
-	 * <p>The default implementation simply delegates to
-	 * {@code getBootstrapContext().getCacheAwareContextLoaderDelegate()}.
+	 * <p>The default implementation delegates to
+	 * {@code getBootstrapContext().getCacheAwareContextLoaderDelegate()} and
+	 * supplies the returned delegate the configured
+	 * {@link #getApplicationContextFailureProcessor() ApplicationContextFailureProcessor}.
 	 * <p>Concrete subclasses may choose to override this method to return a custom
 	 * {@code CacheAwareContextLoaderDelegate} implementation with custom
 	 * {@link org.springframework.test.context.cache.ContextCache ContextCache} support.
 	 * @return the context loader delegate (never {@code null})
+	 * @see #getApplicationContextFailureProcessor()
 	 */
 	protected CacheAwareContextLoaderDelegate getCacheAwareContextLoaderDelegate() {
-		return getBootstrapContext().getCacheAwareContextLoaderDelegate();
+		CacheAwareContextLoaderDelegate delegate = getBootstrapContext().getCacheAwareContextLoaderDelegate();
+		ApplicationContextFailureProcessor contextFailureProcessor = getApplicationContextFailureProcessor();
+		if (contextFailureProcessor != null) {
+			delegate.setContextFailureProcessor(contextFailureProcessor);
+		}
+		return delegate;
+	}
+
+	/**
+	 * Get the {@link ApplicationContextFailureProcessor} to use.
+	 * <p>The default implementation returns {@code null}.
+	 * <p>Concrete subclasses may choose to override this method to provide an
+	 * {@code ApplicationContextFailureProcessor} that will be supplied to the
+	 * configured {@code CacheAwareContextLoaderDelegate} in
+	 * {@link #getCacheAwareContextLoaderDelegate()}.
+	 * @return the context failure processor to use, or {@code null} if no processor
+	 * should be used
+	 * @since 6.0
+	 * @see #getCacheAwareContextLoaderDelegate()
+	 */
+	@Nullable
+	protected ApplicationContextFailureProcessor getApplicationContextFailureProcessor() {
+		return null;
 	}
 
 	/**

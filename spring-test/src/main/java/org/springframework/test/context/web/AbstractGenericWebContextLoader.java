@@ -29,6 +29,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.test.context.ContextLoadException;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.aot.AotContextLoader;
 import org.springframework.test.context.support.AbstractContextLoader;
@@ -156,12 +157,17 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 		validateMergedContextConfiguration(webMergedConfig);
 
 		GenericWebApplicationContext context = createContext();
-		configureWebResources(context, webMergedConfig);
-		prepareContext(context, webMergedConfig);
-		initializer.initialize(context);
-		customizeContext(context, webMergedConfig);
-		context.refresh();
-		return context;
+		try {
+			configureWebResources(context, webMergedConfig);
+			prepareContext(context, webMergedConfig);
+			initializer.initialize(context);
+			customizeContext(context, webMergedConfig);
+			context.refresh();
+			return context;
+		}
+		catch (Exception ex) {
+			throw new ContextLoadException(context, ex);
+		}
 	}
 
 	/**
@@ -194,24 +200,28 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 		validateMergedContextConfiguration(webMergedConfig);
 
 		GenericWebApplicationContext context = createContext();
+		try {
+			ApplicationContext parent = mergedConfig.getParentApplicationContext();
+			if (parent != null) {
+				context.setParent(parent);
+			}
+			configureWebResources(context, webMergedConfig);
+			prepareContext(context, webMergedConfig);
+			customizeBeanFactory(context.getDefaultListableBeanFactory(), webMergedConfig);
+			loadBeanDefinitions(context, webMergedConfig);
+			AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
+			customizeContext(context, webMergedConfig);
 
-		ApplicationContext parent = mergedConfig.getParentApplicationContext();
-		if (parent != null) {
-			context.setParent(parent);
+			if (!forAotProcessing) {
+				context.refresh();
+				context.registerShutdownHook();
+			}
+
+			return context;
 		}
-		configureWebResources(context, webMergedConfig);
-		prepareContext(context, webMergedConfig);
-		customizeBeanFactory(context.getDefaultListableBeanFactory(), webMergedConfig);
-		loadBeanDefinitions(context, webMergedConfig);
-		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
-		customizeContext(context, webMergedConfig);
-
-		if (!forAotProcessing) {
-			context.refresh();
-			context.registerShutdownHook();
+		catch (Exception ex) {
+			throw new ContextLoadException(context, ex);
 		}
-
-		return context;
 	}
 
 	/**

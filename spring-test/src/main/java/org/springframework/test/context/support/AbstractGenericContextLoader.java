@@ -28,6 +28,7 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.test.context.ContextLoadException;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.aot.AotContextLoader;
 import org.springframework.util.Assert;
@@ -159,13 +160,18 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 		validateMergedContextConfiguration(mergedConfig);
 
 		GenericApplicationContext context = createContext();
-		prepareContext(context);
-		prepareContext(context, mergedConfig);
-		initializer.initialize(context);
-		customizeContext(context);
-		customizeContext(context, mergedConfig);
-		context.refresh();
-		return context;
+		try {
+			prepareContext(context);
+			prepareContext(context, mergedConfig);
+			initializer.initialize(context);
+			customizeContext(context);
+			customizeContext(context, mergedConfig);
+			context.refresh();
+			return context;
+		}
+		catch (Exception ex) {
+			throw new ContextLoadException(context, ex);
+		}
 	}
 
 	/**
@@ -189,25 +195,30 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 		validateMergedContextConfiguration(mergedConfig);
 
 		GenericApplicationContext context = createContext();
-		ApplicationContext parent = mergedConfig.getParentApplicationContext();
-		if (parent != null) {
-			context.setParent(parent);
+		try {
+			ApplicationContext parent = mergedConfig.getParentApplicationContext();
+			if (parent != null) {
+				context.setParent(parent);
+			}
+
+			prepareContext(context);
+			prepareContext(context, mergedConfig);
+			customizeBeanFactory(context.getDefaultListableBeanFactory());
+			loadBeanDefinitions(context, mergedConfig);
+			AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
+			customizeContext(context);
+			customizeContext(context, mergedConfig);
+
+			if (!forAotProcessing) {
+				context.refresh();
+				context.registerShutdownHook();
+			}
+
+			return context;
 		}
-
-		prepareContext(context);
-		prepareContext(context, mergedConfig);
-		customizeBeanFactory(context.getDefaultListableBeanFactory());
-		loadBeanDefinitions(context, mergedConfig);
-		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
-		customizeContext(context);
-		customizeContext(context, mergedConfig);
-
-		if (!forAotProcessing) {
-			context.refresh();
-			context.registerShutdownHook();
+		catch (Exception ex) {
+			throw new ContextLoadException(context, ex);
 		}
-
-		return context;
 	}
 
 	/**

@@ -126,10 +126,23 @@ public interface SmartContextLoader extends ContextLoader {
 	 * closed on JVM shutdown. This allows for freeing of external resources held
 	 * by beans within the context &mdash; for example, temporary files.</li>
 	 * </ul>
+	 * <p>As of Spring Framework 6.0, any exception thrown while attempting to
+	 * load an {@code ApplicationContext} should be wrapped in a
+	 * {@link ContextLoadException}. Concrete implementations should therefore
+	 * contain a try-catch block similar to the following.
+	 * <pre style="code">
+	 * ApplicationContext context = // create context
+	 * try {
+	 *     // configure and refresh context
+	 * }
+	 * catch (Exception ex) {
+	 *     throw new ContextLoadException(context, ex);
+	 * }
+	 * </pre>
 	 * @param mergedConfig the merged context configuration to use to load the
 	 * application context
 	 * @return a new application context
-	 * @throws Exception if context loading failed
+	 * @throws ContextLoadException if context loading failed
 	 * @see #processContextConfiguration(ContextConfigurationAttributes)
 	 * @see #loadContextForAotProcessing(MergedContextConfiguration)
 	 * @see org.springframework.context.annotation.AnnotationConfigUtils#registerAnnotationConfigProcessors(org.springframework.beans.factory.support.BeanDefinitionRegistry)

@@ -75,6 +75,7 @@ public interface CacheAwareContextLoaderDelegate {
 	 * the application context
 	 * @see #isContextLoaded
 	 * @see #closeContext
+	 * @see #setContextFailureProcessor
 	 */
 	ApplicationContext loadContext(MergedContextConfiguration mergedContextConfiguration);
 
@@ -99,5 +100,19 @@ public interface CacheAwareContextLoaderDelegate {
 	 * @see #loadContext
 	 */
 	void closeContext(MergedContextConfiguration mergedContextConfiguration, @Nullable HierarchyMode hierarchyMode);
+
+	/**
+	 * Set the {@link ApplicationContextFailureProcessor} to use.
+	 * <p>The default implementation ignores the supplied processor.
+	 * <p>Concrete implementations should override this method to store a reference
+	 * to the supplied processor and use it to process {@link ContextLoadException
+	 * ContextLoadExceptions} thrown from context loaders in
+	 * {@link #loadContext(MergedContextConfiguration)}.
+	 * @param contextFailureProcessor the context failure processor to use
+	 * @since 6.0
+	 */
+	default void setContextFailureProcessor(ApplicationContextFailureProcessor contextFailureProcessor) {
+		// no-op
+	}
 
 }
