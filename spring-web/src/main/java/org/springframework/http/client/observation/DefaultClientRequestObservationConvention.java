@@ -164,8 +164,8 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 			if (statusCode.is2xxSuccessful()) {
 				return HTTP_OUTCOME_SUCCESS;
 			}
-			else if (statusCode instanceof HttpStatus status){
-				return KeyValue.of("outcome", status.series().name());
+			else if (statusCode instanceof HttpStatus status) {
+				return KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.OUTCOME, status.series().name());
 			}
 			else {
 				return HTTP_OUTCOME_UNKNOWN;

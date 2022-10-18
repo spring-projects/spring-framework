@@ -86,7 +86,7 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 
 	@Override
 	public KeyValues getHighCardinalityKeyValues(ServerRequestObservationContext context) {
-		return KeyValues.of(uriExpanded(context));
+		return KeyValues.of(httpUrl(context));
 	}
 
 	protected KeyValue method(ServerRequestObservationContext context) {
@@ -104,7 +104,7 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 				if (pattern.isEmpty()) {
 					return URI_ROOT;
 				}
-				return KeyValue.of("uri", pattern);
+				return KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.URI, pattern);
 			}
 			if (context.getResponse() != null) {
 				HttpStatus status = HttpStatus.resolve(context.getResponse().getStatus());
@@ -139,7 +139,7 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 		return HTTP_OUTCOME_UNKNOWN;
 	}
 
-	protected KeyValue uriExpanded(ServerRequestObservationContext context) {
+	protected KeyValue httpUrl(ServerRequestObservationContext context) {
 		if (context.getCarrier() != null) {
 			return KeyValue.of(ServerHttpObservationDocumentation.HighCardinalityKeyNames.HTTP_URL, context.getCarrier().getRequestURI());
 		}
@@ -153,8 +153,8 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 			if (statusCode.is2xxSuccessful()) {
 				return HTTP_OUTCOME_SUCCESS;
 			}
-			else if (statusCode instanceof HttpStatus status){
-				return KeyValue.of("outcome", status.series().name());
+			else if (statusCode instanceof HttpStatus status) {
+				return KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.OUTCOME, status.series().name());
 			}
 			else {
 				return HTTP_OUTCOME_UNKNOWN;
