@@ -48,7 +48,9 @@ class SimpleBeanInfoFactory implements BeanInfoFactory, Ordered {
 	@Override
 	@NonNull
 	public BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException {
-		Collection<PropertyDescriptor> pds = PropertyDescriptorUtils.determineBasicProperties(beanClass);
+		Collection<? extends PropertyDescriptor> pds =
+				PropertyDescriptorUtils.determineBasicProperties(beanClass);
+
 		return new SimpleBeanInfo() {
 			@Override
 			public PropertyDescriptor[] getPropertyDescriptors() {

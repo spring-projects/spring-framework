@@ -19,8 +19,10 @@ package org.springframework.beans;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -52,8 +54,10 @@ abstract class PropertyDescriptorUtils {
 	 * @see SimpleBeanInfoFactory
 	 * @see java.beans.Introspector#getBeanInfo(Class)
 	 */
-	public static Collection<PropertyDescriptor> determineBasicProperties(Class<?> beanClass) throws IntrospectionException {
-		Map<String, PropertyDescriptor> pdMap = new TreeMap<>();
+	public static Collection<? extends PropertyDescriptor> determineBasicProperties(Class<?> beanClass)
+			throws IntrospectionException {
+
+		Map<String, BasicPropertyDescriptor> pdMap = new TreeMap<>();
 
 		for (Method method : beanClass.getMethods()) {
 			String methodName = method.getName();
@@ -81,39 +85,26 @@ abstract class PropertyDescriptorUtils {
 				continue;
 			}
 
-			PropertyDescriptor pd = pdMap.get(propertyName);
+			BasicPropertyDescriptor pd = pdMap.get(propertyName);
 			if (pd != null) {
 				if (setter) {
 					if (pd.getWriteMethod() == null ||
 							pd.getWriteMethod().getParameterTypes()[0].isAssignableFrom(method.getParameterTypes()[0])) {
-						try {
-							pd.setWriteMethod(method);
-						}
-						catch (IntrospectionException ex) {
-							// typically a type mismatch -> ignore
-						}
+						pd.setWriteMethod(method);
+					}
+					else {
+						pd.addWriteMethod(method);
 					}
 				}
 				else {
 					if (pd.getReadMethod() == null ||
 							(pd.getReadMethod().getReturnType() == method.getReturnType() && method.getName().startsWith("is"))) {
-						try {
-							pd.setReadMethod(method);
-						}
-						catch (IntrospectionException ex) {
-							// typically a type mismatch -> ignore
-						}
+						pd.setReadMethod(method);
 					}
 				}
 			}
 			else {
-				pd = new BasicPropertyDescriptor(propertyName, beanClass);
-				if (setter) {
-					pd.setWriteMethod(method);
-				}
-				else {
-					pd.setReadMethod(method);
-				}
+				pd = new BasicPropertyDescriptor(propertyName, (!setter ? method : null), (setter ? method : null));
 				pdMap.put(propertyName, pd);
 			}
 		}
@@ -277,8 +268,12 @@ abstract class PropertyDescriptorUtils {
 		@Nullable
 		private Method writeMethod;
 
-		public BasicPropertyDescriptor(String propertyName, Class<?> beanClass) throws IntrospectionException {
-			super(propertyName, beanClass, null, null);
+		private final List<Method> alternativeWriteMethods = new ArrayList<>();
+
+		public BasicPropertyDescriptor(String propertyName, @Nullable Method readMethod, @Nullable Method writeMethod)
+				throws IntrospectionException {
+
+			super(propertyName, readMethod, writeMethod);
 		}
 
 		@Override
@@ -297,11 +292,33 @@ abstract class PropertyDescriptorUtils {
 			this.writeMethod = writeMethod;
 		}
 
+		public void addWriteMethod(Method writeMethod) {
+			if (this.writeMethod != null) {
+				this.alternativeWriteMethods.add(this.writeMethod);
+				this.writeMethod = null;
+			}
+			this.alternativeWriteMethods.add(writeMethod);
+		}
+
 		@Override
 		@Nullable
 		public Method getWriteMethod() {
+			if (this.writeMethod == null && !this.alternativeWriteMethods.isEmpty()) {
+				if (this.readMethod == null) {
+					return this.alternativeWriteMethods.get(0);
+				}
+				else {
+					for (Method method : this.alternativeWriteMethods) {
+						if (this.readMethod.getReturnType().isAssignableFrom(method.getParameterTypes()[0])) {
+							this.writeMethod = method;
+							break;
+						}
+					}
+				}
+			}
 			return this.writeMethod;
 		}
 	}
+
 
 }
