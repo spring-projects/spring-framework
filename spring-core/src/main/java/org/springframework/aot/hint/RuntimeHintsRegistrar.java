@@ -23,9 +23,10 @@ import org.springframework.lang.Nullable;
  * of the deployment unit. Implementations should, if possible, use the specified
  * {@link ClassLoader} to determine if hints have to be contributed.
  *
- * <p>Implementations of this interface can be registered statically in
- * {@code META-INF/spring/aot.factories} by using the FQN of this interface as
- * the key. A standard no-arg constructor is required for implementations.
+ * <p>Implementations of this interface can be registered dynamically by using
+ * {@link org.springframework.context.annotation.ImportRuntimeHints @ImportRuntimeHints}
+ * or statically in {@code META-INF/spring/aot.factories} by using the FQN of this
+ * interface as the key. A standard no-arg constructor is required for implementations.
  *
  * @author Brian Clozel
  * @author Stephane Nicoll
