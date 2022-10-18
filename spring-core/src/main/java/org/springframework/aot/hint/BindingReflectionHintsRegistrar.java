@@ -24,8 +24,6 @@ import java.util.Set;
 
 import kotlin.jvm.JvmClassMappingKt;
 import kotlin.reflect.KClass;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
@@ -44,8 +42,6 @@ import org.springframework.util.ClassUtils;
  * @since 6.0
  */
 public class BindingReflectionHintsRegistrar {
-
-	private static final Log logger = LogFactory.getLog(BindingReflectionHintsRegistrar.class);
 
 	private static final String KOTLIN_COMPANION_SUFFIX = "$Companion";
 
