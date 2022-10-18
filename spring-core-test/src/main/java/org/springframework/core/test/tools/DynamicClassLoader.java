@@ -31,6 +31,7 @@ import java.util.function.Supplier;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -91,15 +92,7 @@ public class DynamicClassLoader extends ClassLoader {
 		return super.findClass(name);
 	}
 
-	@Nullable
-	private byte[] findClassBytes(String name) {
-		ClassFile classFile = this.classFiles.get(name);
-		if (classFile != null) {
-			return classFile.getContent();
-		}
-		DynamicClassFileObject dynamicClassFile = this.dynamicClassFiles.get(name);
-		return (dynamicClassFile != null) ? dynamicClassFile.getBytes() : null;
-	}
+
 
 	private Class<?> defineClass(String name, byte[] bytes) {
 		if (this.defineClassMethod != null) {
@@ -108,7 +101,6 @@ public class DynamicClassLoader extends ClassLoader {
 		}
 		return defineClass(name, bytes, 0, bytes.length);
 	}
-
 
 	@Override
 	protected Enumeration<URL> findResources(String name) throws IOException {
@@ -122,6 +114,14 @@ public class DynamicClassLoader extends ClassLoader {
 	@Override
 	@Nullable
 	protected URL findResource(String name) {
+		if (name.endsWith(ClassUtils.CLASS_FILE_SUFFIX)) {
+			String className = ClassUtils.convertResourcePathToClassName(name.substring(0,
+					name.length() - ClassUtils.CLASS_FILE_SUFFIX.length()));
+			byte[] classBytes = findClassBytes(className);
+			if (classBytes != null) {
+				return createResourceUrl(name, () -> classBytes);
+			}
+		}
 		ResourceFile resourceFile = this.resourceFiles.get(name);
 		if (resourceFile != null) {
 			return createResourceUrl(resourceFile.getPath(), resourceFile::getBytes);
@@ -131,6 +131,16 @@ public class DynamicClassLoader extends ClassLoader {
 			return createResourceUrl(dynamicResourceFile.getName(), dynamicResourceFile::getBytes);
 		}
 		return super.findResource(name);
+	}
+
+	@Nullable
+	private byte[] findClassBytes(String name) {
+		ClassFile classFile = this.classFiles.get(name);
+		if (classFile != null) {
+			return classFile.getContent();
+		}
+		DynamicClassFileObject dynamicClassFile = this.dynamicClassFiles.get(name);
+		return (dynamicClassFile != null) ? dynamicClassFile.getBytes() : null;
 	}
 
 	private URL createResourceUrl(String name, Supplier<byte[]> bytesSupplier) {

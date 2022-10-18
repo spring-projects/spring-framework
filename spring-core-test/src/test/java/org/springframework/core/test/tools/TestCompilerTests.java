@@ -16,6 +16,7 @@
 
 package org.springframework.core.test.tools;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -276,6 +277,15 @@ class TestCompilerTests {
 				new ClassPathResource("com.example.subpackage.Messages"));
 		TestCompiler.forSystem().withClasses(List.of(messagesClass)).compile(sourceFiles, compiled -> assertThat(
 				compiled.getInstance(PublicInterface.class, "com.example.Test").perform()).isEqualTo("Hello from subpackage"));
+	}
+
+	@Test
+	void getResourceForCompiledBytecode() {
+		SourceFile sourceFile = SourceFile.of(HELLO_WORLD);
+		TestCompiler.forSystem().compile(sourceFile, compiled -> {
+			InputStream stream = compiled.getClassLoader().getResourceAsStream("com/example/Hello.class");
+			assertThat(stream).isNotNull();
+		});
 	}
 
 	private void assertSuppliesHelloWorld(Compiled compiled) {
