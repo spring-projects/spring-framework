@@ -21,6 +21,7 @@ import java.lang.reflect.AnnotatedElement;
 import org.springframework.aot.hint.BindingReflectionHintsRegistrar;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.Assert;
 
 /**
  * A {@link ReflectiveProcessor} implementation that registers reflection hints
@@ -38,7 +39,10 @@ public class RegisterReflectionForBindingProcessor implements ReflectiveProcesso
 	public void registerReflectionHints(ReflectionHints hints, AnnotatedElement element) {
 		RegisterReflectionForBinding registerReflection = AnnotationUtils.getAnnotation(element, RegisterReflectionForBinding.class);
 		if (registerReflection != null) {
-			for (Class<?> type : registerReflection.classes()) {
+			Class<?>[] classes = registerReflection.classes();
+			Assert.state(classes.length != 0, "A least one class should be specified in" +
+					" @RegisterReflectionForBinding attributes and none was provided on " + element);
+			for (Class<?> type : classes) {
 				this.bindingRegistrar.registerReflectionHints(hints, type);
 			}
 		}

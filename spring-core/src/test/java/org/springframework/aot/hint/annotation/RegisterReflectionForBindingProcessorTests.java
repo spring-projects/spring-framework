@@ -22,6 +22,7 @@ import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link RegisterReflectionForBindingProcessor}.
@@ -50,6 +51,21 @@ public class RegisterReflectionForBindingProcessorTests {
 		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleClassWithGetter.class, "getName")).accepts(hints);
 	}
 
+	@Test
+	void throwExceptionWithoutAnnotationAttributeOnClass() {
+		assertThatThrownBy(() -> processor.registerReflectionHints(hints.reflection(),
+				SampleClassWithoutAnnotationAttribute.class))
+				.isInstanceOf(IllegalStateException.class);
+	}
+
+	@Test
+	void throwExceptionWithoutAnnotationAttributeOnMethod() throws NoSuchMethodException {
+		assertThatThrownBy(() -> processor.registerReflectionHints(hints.reflection(),
+				SampleClassWithoutMethodLevelAnnotationAttribute.class.getMethod("method")))
+				.isInstanceOf(IllegalStateException.class);
+	}
+
+
 	@RegisterReflectionForBinding(SampleClassWithGetter.class)
 	static class ClassLevelAnnotatedBean {
 	}
@@ -66,7 +82,17 @@ public class RegisterReflectionForBindingProcessorTests {
 		public String getName() {
 			return null;
 		}
+	}
 
+	@RegisterReflectionForBinding
+	static class SampleClassWithoutAnnotationAttribute {
+	}
+
+	static class SampleClassWithoutMethodLevelAnnotationAttribute {
+
+		@RegisterReflectionForBinding
+		public void method() {
+		}
 	}
 
 }
