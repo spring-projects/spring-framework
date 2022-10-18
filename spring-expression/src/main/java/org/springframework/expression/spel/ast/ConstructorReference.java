@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -268,6 +268,13 @@ public class ConstructorReference extends SpelNodeImpl {
 		}
 
 		String type = (String) intendedArrayType;
+
+		if (state.getEvaluationContext().getConstructorResolvers().isEmpty()) {
+			// No constructor resolver -> no array construction either (as of 5.3.38)
+			throw new SpelEvaluationException(getStartPosition(), SpelMessage.CONSTRUCTOR_NOT_FOUND,
+					type + "[]", "[]");
+		}
+
 		Class<?> componentType;
 		TypeCode arrayTypeCode = TypeCode.forName(type);
 		if (arrayTypeCode == TypeCode.OBJECT) {

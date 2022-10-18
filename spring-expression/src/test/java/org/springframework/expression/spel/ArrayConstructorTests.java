@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,21 @@ package org.springframework.expression.spel;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.SimpleEvaluationContext;
 import org.springframework.util.ObjectUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Test construction of arrays.
  *
  * @author Andy Clement
  * @author Sam Brannen
+ * @author Juergen Hoeller
  */
 class ArrayConstructorTests extends AbstractExpressionTests {
 
@@ -97,7 +101,7 @@ class ArrayConstructorTests extends AbstractExpressionTests {
 	void typeArrayConstructors() {
 		evaluate("new String[]{'a','b','c','d'}[1]", "b", String.class);
 		evaluateAndCheckError("new String[]{'a','b','c','d'}.size()", SpelMessage.METHOD_NOT_FOUND, 30, "size()",
-			"java.lang.String[]");
+				"java.lang.String[]");
 		evaluate("new String[]{'a','b','c','d'}.length", 4, Integer.class);
 	}
 
@@ -110,9 +114,17 @@ class ArrayConstructorTests extends AbstractExpressionTests {
 	void multiDimensionalArrays() {
 		evaluate("new String[2][2]", "[Ljava.lang.String;[2]{[2]{null,null},[2]{null,null}}", String[][].class);
 		evaluate("new String[3][2][1]",
-			"[[Ljava.lang.String;[3]{[2]{[1]{null},[1]{null}},[2]{[1]{null},[1]{null}},[2]{[1]{null},[1]{null}}}",
-			String[][][].class);
+				"[[Ljava.lang.String;[3]{[2]{[1]{null},[1]{null}},[2]{[1]{null},[1]{null}},[2]{[1]{null},[1]{null}}}",
+				String[][][].class);
 	}
+
+	@Test
+	void noArrayConstruction() {
+		EvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding().build();
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				parser.parseExpression("new int[2]").getValue(context));
+	}
+
 
 	private void evaluateArrayBuildingExpression(String expression, String expectedToString) {
 		SpelExpressionParser parser = new SpelExpressionParser();
