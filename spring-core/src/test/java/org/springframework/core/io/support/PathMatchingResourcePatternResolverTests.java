@@ -146,15 +146,14 @@ class PathMatchingResourcePatternResolverTests {
 			}
 
 			@Test
-			void usingClasspathStarProtocolWithWildcardInPatternAndEndingWithSlashStarStar() throws Exception {
-				String pattern = "classpath*:org/springframework/core/io/sup*/**";
+			void usingClasspathStarProtocolWithWildcardInPatternAndEndingWithSuffixPattern() throws Exception {
+				String pattern = "classpath*:org/springframework/core/io/sup*/*.txt";
 				String pathPrefix = ".+org/springframework/core/io/";
 
 				List<String> actualSubPaths = getSubPathsIgnoringClassFiles(pattern, pathPrefix);
 
-				// We DO find "support" if the pattern ENDS with "/**".
 				assertThat(actualSubPaths)
-						.containsExactlyInAnyOrder("support", "support/resource#test1.txt", "support/resource#test2.txt");
+						.containsExactlyInAnyOrder("support/resource#test1.txt", "support/resource#test2.txt");
 			}
 
 			private List<String> getSubPathsIgnoringClassFiles(String pattern, String pathPrefix) throws IOException {
@@ -167,7 +166,7 @@ class PathMatchingResourcePatternResolverTests {
 			}
 
 			@Test
-			void usingFileProtocolWithoutWildcardInPatternAndEndingInSlashStarStar() throws Exception {
+			void usingFileProtocolWithoutWildcardInPatternAndEndingInSlashStarStar()  {
 				Path testResourcesDir = Paths.get("src/test/resources").toAbsolutePath();
 				String pattern = String.format("file:%s/scanned-resources/**", testResourcesDir);
 				String pathPrefix = ".+?resources/";
@@ -179,7 +178,7 @@ class PathMatchingResourcePatternResolverTests {
 			}
 
 			@Test
-			void usingFileProtocolWithWildcardInPatternAndEndingInSlashStarStar() throws Exception {
+			void usingFileProtocolWithWildcardInPatternAndEndingInSlashStarStar() {
 				Path testResourcesDir = Paths.get("src/test/resources").toAbsolutePath();
 				String pattern = String.format("file:%s/scanned*resources/**", testResourcesDir);
 				String pathPrefix = ".+?resources/";
