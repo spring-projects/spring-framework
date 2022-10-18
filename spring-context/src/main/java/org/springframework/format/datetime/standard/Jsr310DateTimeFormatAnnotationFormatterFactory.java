@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,6 +96,8 @@ public class Jsr310DateTimeFormatAnnotationFormatterFactory extends EmbeddedValu
 	@Override
 	@SuppressWarnings("unchecked")
 	public Parser<?> getParser(DateTimeFormat annotation, Class<?> fieldType) {
+		DateTimeFormatter formatter = getFormatter(annotation, fieldType);
+
 		List<String> resolvedFallbackPatterns = new ArrayList<>();
 		for (String fallbackPattern : annotation.fallbackPatterns()) {
 			String resolvedFallbackPattern = resolveEmbeddedValue(fallbackPattern);
@@ -104,7 +106,6 @@ public class Jsr310DateTimeFormatAnnotationFormatterFactory extends EmbeddedValu
 			}
 		}
 
-		DateTimeFormatter formatter = getFormatter(annotation, fieldType);
 		return new TemporalAccessorParser((Class<? extends TemporalAccessor>) fieldType,
 				formatter, resolvedFallbackPatterns.toArray(new String[0]), annotation);
 	}
