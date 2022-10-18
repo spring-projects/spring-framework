@@ -36,9 +36,9 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 
 	private static final String DEFAULT_NAME = "http.client.requests";
 
-	private static final KeyValue URI_NONE = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.URI, "none");
+	private static final KeyValue URI_NONE = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.URI, KeyValue.NONE_VALUE);
 
-	private static final KeyValue METHOD_NONE = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.METHOD, "none");
+	private static final KeyValue METHOD_NONE = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.METHOD, KeyValue.NONE_VALUE);
 
 	private static final KeyValue STATUS_IO_ERROR = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.STATUS, "IO_ERROR");
 
@@ -48,11 +48,11 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 
 	private static final KeyValue HTTP_OUTCOME_UNKNOWN = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.OUTCOME, "UNKNOWN");
 
-	private static final KeyValue EXCEPTION_NONE = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.EXCEPTION, "none");
+	private static final KeyValue EXCEPTION_NONE = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.EXCEPTION, KeyValue.NONE_VALUE);
 
-	private static final KeyValue HTTP_URL_NONE = KeyValue.of(ClientHttpObservationDocumentation.HighCardinalityKeyNames.HTTP_URL, "none");
+	private static final KeyValue HTTP_URL_NONE = KeyValue.of(ClientHttpObservationDocumentation.HighCardinalityKeyNames.HTTP_URL, KeyValue.NONE_VALUE);
 
-	private static final KeyValue CLIENT_NAME_NONE = KeyValue.of(ClientHttpObservationDocumentation.HighCardinalityKeyNames.CLIENT_NAME, "none");
+	private static final KeyValue CLIENT_NAME_NONE = KeyValue.of(ClientHttpObservationDocumentation.HighCardinalityKeyNames.CLIENT_NAME, KeyValue.NONE_VALUE);
 
 	private final String name;
 
