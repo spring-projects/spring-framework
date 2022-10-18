@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -100,7 +99,6 @@ class PathMatchingResourcePatternResolverTests {
 				assertExactSubPaths(pattern, pathPrefix, "support/resource#test1.txt", "support/resource#test2.txt");
 			}
 
-			@Disabled("Until gh-29333 is resolved")
 			@Test
 			void usingClasspathStarProtocolWithWildcardInPatternAndNotEndingInSlash() throws Exception {
 				String pattern = "classpath*:org/springframework/core/io/sup*";
@@ -112,7 +110,6 @@ class PathMatchingResourcePatternResolverTests {
 				assertThat(actualSubPaths).containsExactly("support");
 			}
 
-			@Disabled("Until gh-29333 is resolved")
 			@Test
 			void usingFileProtocolWithWildcardInPatternAndNotEndingInSlash() throws Exception {
 				Path testResourcesDir = Paths.get("src/test/resources").toAbsolutePath();
@@ -148,17 +145,15 @@ class PathMatchingResourcePatternResolverTests {
 				assertThat(actualSubPaths).isEmpty();
 			}
 
-			@Disabled("Until gh-29333 is resolved")
 			@Test
-			void usingClasspathStarProtocolWithWildcardInPatternAndEndingWithSlashStarStar() throws Exception {
-				String pattern = "classpath*:org/springframework/core/io/sup*/**";
+			void usingClasspathStarProtocolWithWildcardInPatternAndEndingWithSuffixPattern() throws Exception {
+				String pattern = "classpath*:org/springframework/core/io/sup*/*.txt";
 				String pathPrefix = ".+org/springframework/core/io/";
 
 				List<String> actualSubPaths = getSubPathsIgnoringClassFilesEtc(pattern, pathPrefix);
 
-				// We DO find "support" if the pattern ENDS with "/**".
 				assertThat(actualSubPaths)
-						.containsExactlyInAnyOrder("support", "support/resource#test1.txt", "support/resource#test2.txt");
+						.containsExactlyInAnyOrder("support/resource#test1.txt", "support/resource#test2.txt");
 			}
 
 			private List<String> getSubPathsIgnoringClassFilesEtc(String pattern, String pathPrefix) throws IOException {
@@ -173,7 +168,7 @@ class PathMatchingResourcePatternResolverTests {
 			}
 
 			@Test
-			void usingFileProtocolWithoutWildcardInPatternAndEndingInSlashStarStar() throws Exception {
+			void usingFileProtocolWithoutWildcardInPatternAndEndingInSlashStarStar()  {
 				Path testResourcesDir = Paths.get("src/test/resources").toAbsolutePath();
 				String pattern = String.format("file:%s/scanned-resources/**", testResourcesDir);
 				String pathPrefix = ".+?resources/";
@@ -184,9 +179,8 @@ class PathMatchingResourcePatternResolverTests {
 						"scanned-resources/resource#test2.txt");
 			}
 
-			@Disabled("Until gh-29333 is resolved")
 			@Test
-			void usingFileProtocolWithWildcardInPatternAndEndingInSlashStarStar() throws Exception {
+			void usingFileProtocolWithWildcardInPatternAndEndingInSlashStarStar() {
 				Path testResourcesDir = Paths.get("src/test/resources").toAbsolutePath();
 				String pattern = String.format("file:%s/scanned*resources/**", testResourcesDir);
 				String pathPrefix = ".+?resources/";

@@ -781,8 +781,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				rootDir += "/";
 			}
 
+			Path rootPathForPattern = rootPath;
 			String resourcePattern = rootDir + StringUtils.cleanPath(subPattern);
-			Predicate<Path> isMatchingFile = path -> (Files.isRegularFile(path) &&
+			Predicate<Path> isMatchingFile = path -> (!path.equals(rootPathForPattern) &&
 					getPathMatcher().match(resourcePattern, StringUtils.cleanPath(path.toString())));
 
 			if (logger.isTraceEnabled()) {
