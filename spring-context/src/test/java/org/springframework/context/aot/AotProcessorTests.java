@@ -27,12 +27,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Tests for {@link AbstractAotProcessor}, settings, and builder.
+ * Tests for {@link AbstractAotProcessor}.
  *
  * @author Sam Brannen
+ * @author Stephane Nicoll
  * @since 6.0
  */
 class AotProcessorTests {
+
+	@Test
+	void springAotProcessingIsAvailableInDoProcess(@TempDir Path tempDir) {
+		Settings settings = createTestSettings(tempDir);
+		assertThat(new AbstractAotProcessor<String>(settings) {
+			@Override
+			protected String doProcess() {
+				assertThat(System.getProperty("spring.aot.processing")).isEqualTo("true");
+				return "Hello";
+			}
+		}.process()).isEqualTo("Hello");
+	}
 
 	@Test
 	void builderRejectsMissingSourceOutput() {
@@ -121,6 +134,16 @@ class AotProcessorTests {
 		assertThat(settings.getClassOutput()).isEqualTo(tempDir);
 		assertThat(settings.getGroupId()).isEqualTo("my-group");
 		assertThat(settings.getArtifactId()).isEqualTo("my-artifact");
+	}
+
+	private static Settings createTestSettings(Path tempDir) {
+		return Settings.builder()
+				.sourceOutput(tempDir)
+				.resourceOutput(tempDir)
+				.classOutput(tempDir)
+				.groupId("my-group")
+				.artifactId("my-artifact")
+				.build();
 	}
 
 }

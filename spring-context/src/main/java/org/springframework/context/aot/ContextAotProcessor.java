@@ -46,7 +46,7 @@ import org.springframework.util.CollectionUtils;
  * @since 6.0
  * @see org.springframework.test.context.aot.TestAotProcessor
  */
-public abstract class ContextAotProcessor extends AbstractAotProcessor {
+public abstract class ContextAotProcessor extends AbstractAotProcessor<ClassName> {
 
 	private final Class<?> applicationClass;
 
@@ -64,7 +64,7 @@ public abstract class ContextAotProcessor extends AbstractAotProcessor {
 
 
 	/**
-	 * Get the the application entry point (typically a class with a {@code main()} method).
+	 * Get the application entry point (typically a class with a {@code main()} method).
 	 */
 	protected Class<?> getApplicationClass() {
 		return this.applicationClass;
@@ -77,7 +77,8 @@ public abstract class ContextAotProcessor extends AbstractAotProcessor {
 	 * @return the {@code ClassName} of the {@code ApplicationContextInitializer}
 	 * entry point
 	 */
-	public ClassName process() {
+	@Override
+	protected ClassName doProcess() {
 		deleteExistingOutput();
 		GenericApplicationContext applicationContext = prepareApplicationContext(getApplicationClass());
 		return performAotProcessing(applicationContext);

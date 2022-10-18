@@ -36,7 +36,7 @@ import org.springframework.context.aot.AbstractAotProcessor;
  * @see TestContextAotGenerator
  * @see org.springframework.context.aot.ContextAotProcessor
  */
-public abstract class TestAotProcessor extends AbstractAotProcessor {
+public abstract class TestAotProcessor extends AbstractAotProcessor<Void> {
 
 	private final Set<Path> classpathRoots;
 
@@ -66,9 +66,11 @@ public abstract class TestAotProcessor extends AbstractAotProcessor {
 	 * {@linkplain #deleteExistingOutput() clearing output directories} first and
 	 * then {@linkplain #performAotProcessing() performing AOT processing}.
 	 */
-	public void process() {
+	@Override
+	protected Void doProcess() {
 		deleteExistingOutput();
 		performAotProcessing();
+		return null;
 	}
 
 	/**
