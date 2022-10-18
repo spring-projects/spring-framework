@@ -111,6 +111,15 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
+	void testBindLocalDateWithISO() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("localDate", "2009-10-31");
+		binder.bind(propertyValues);
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("localDate")).isEqualTo("10/31/09");
+	}
+
+	@Test
 	void testBindLocalDateWithSpecificStyle() {
 		DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
 		registrar.setDateStyle(FormatStyle.LONG);
@@ -208,6 +217,15 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
+	void testBindLocalTimeWithISO() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("localTime", "12:00:00");
+		binder.bind(propertyValues);
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("localTime")).isEqualTo("12:00 PM");
+	}
+
+	@Test
 	void testBindLocalTimeWithSpecificStyle() {
 		DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
 		registrar.setTimeStyle(FormatStyle.MEDIUM);
@@ -253,6 +271,17 @@ class DateTimeFormattingTests {
 	void testBindLocalDateTime() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localDateTime", LocalDateTime.of(2009, 10, 31, 12, 0));
+		binder.bind(propertyValues);
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		String value = binder.getBindingResult().getFieldValue("localDateTime").toString();
+		assertThat(value.startsWith("10/31/09")).isTrue();
+		assertThat(value.endsWith("12:00 PM")).isTrue();
+	}
+
+	@Test
+	void testBindLocalDateTimeWithISO() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("localDateTime", "2009-10-31T12:00:00");
 		binder.bind(propertyValues);
 		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
 		String value = binder.getBindingResult().getFieldValue("localDateTime").toString();
