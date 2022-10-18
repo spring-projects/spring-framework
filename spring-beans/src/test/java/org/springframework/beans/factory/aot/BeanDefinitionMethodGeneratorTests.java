@@ -38,6 +38,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueH
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.InstanceSupplier;
+import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.AnnotatedBean;
@@ -377,6 +378,37 @@ class BeanDefinitionMethodGeneratorTests {
 			catch (Exception ex) {
 				throw new IllegalStateException(ex);
 			}
+		});
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	void generateBeanDefinitionMethodWhenHasListOfInnerBeansPropertyValueGeneratesMethod() {
+		RootBeanDefinition firstInnerBeanDefinition = (RootBeanDefinition) BeanDefinitionBuilder
+				.rootBeanDefinition(TestBean.class).addPropertyValue("name", "one")
+				.getBeanDefinition();
+		RootBeanDefinition secondInnerBeanDefinition = (RootBeanDefinition) BeanDefinitionBuilder
+				.rootBeanDefinition(TestBean.class).addPropertyValue("name", "two")
+				.getBeanDefinition();
+		ManagedList<RootBeanDefinition> list = new ManagedList<>();
+		list.add(firstInnerBeanDefinition);
+		list.add(secondInnerBeanDefinition);
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(TestBean.class);
+		beanDefinition.getPropertyValues().add("someList", list);
+		RegisteredBean registeredBean = registerBean(beanDefinition);
+		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
+				this.methodGeneratorFactory, registeredBean, null,
+				Collections.emptyList());
+		MethodReference method = generator.generateBeanDefinitionMethod(
+				this.generationContext, this.beanRegistrationsCode);
+		compile(method, (actual, compiled) -> {
+			ManagedList<RootBeanDefinition> actualPropertyValue = (ManagedList<RootBeanDefinition>) actual
+					.getPropertyValues().get("someList");
+			assertThat(actualPropertyValue).isNotNull().hasSize(2);
+			assertThat(actualPropertyValue.get(0).getPropertyValues().get("name")).isEqualTo("one");
+			assertThat(actualPropertyValue.get(1).getPropertyValues().get("name")).isEqualTo("two");
+			assertThat(compiled.getSourceFileFromPackage(TestBean.class.getPackageName()))
+					.contains("getSomeListBeanDefinition()", "getSomeListBeanDefinition1()");
 		});
 	}
 

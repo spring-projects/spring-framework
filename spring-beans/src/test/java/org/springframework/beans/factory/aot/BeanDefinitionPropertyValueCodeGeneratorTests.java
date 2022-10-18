@@ -64,12 +64,15 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  */
 class BeanDefinitionPropertyValueCodeGeneratorTests {
 
+	private static BeanDefinitionPropertyValueCodeGenerator createPropertyValuesCodeGenerator(GeneratedClass generatedClass) {
+		return new BeanDefinitionPropertyValueCodeGenerator(generatedClass.getMethods(), null);
+	}
+
 	private void compile(Object value, BiConsumer<Object, Compiled> result) {
 		TestGenerationContext generationContext = new TestGenerationContext();
 		DeferredTypeBuilder typeBuilder = new DeferredTypeBuilder();
 		GeneratedClass generatedClass = generationContext.getGeneratedClasses().addForFeature("TestCode", typeBuilder);
-		CodeBlock generatedCode = new BeanDefinitionPropertyValueCodeGenerator(
-				generatedClass.getMethods()).generateCode(value);
+		CodeBlock generatedCode = createPropertyValuesCodeGenerator(generatedClass).generateCode(value);
 		typeBuilder.set(type -> {
 			type.addModifiers(Modifier.PUBLIC);
 			type.addSuperinterface(
@@ -544,8 +547,7 @@ class BeanDefinitionPropertyValueCodeGeneratorTests {
 			TestGenerationContext context = new TestGenerationContext();
 			GeneratedClass generatedClass = context.getGeneratedClasses()
 					.addForFeature("Test", type -> {});
-			new BeanDefinitionPropertyValueCodeGenerator(generatedClass.getMethods())
-					.generateCode(value);
+			createPropertyValuesCodeGenerator(generatedClass).generateCode(value);
 		}
 
 		record SampleValue(String name) {}

@@ -18,6 +18,7 @@ package org.springframework.beans.factory.aot;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -81,8 +82,6 @@ class BeanDefinitionPropertiesCodeGenerator {
 
 	private final Predicate<String> attributeFilter;
 
-	private final BiFunction<String, Object, CodeBlock> customValueCodeGenerator;
-
 	private final BeanDefinitionPropertyValueCodeGenerator valueCodeGenerator;
 
 
@@ -92,9 +91,8 @@ class BeanDefinitionPropertiesCodeGenerator {
 
 		this.hints = hints;
 		this.attributeFilter = attributeFilter;
-		this.customValueCodeGenerator = customValueCodeGenerator;
-		this.valueCodeGenerator = new BeanDefinitionPropertyValueCodeGenerator(
-				generatedMethods);
+		this.valueCodeGenerator = new BeanDefinitionPropertyValueCodeGenerator(generatedMethods,
+				(object, type) -> customValueCodeGenerator.apply(PropertyNamesStack.peek(), object));
 	}
 
 
@@ -150,12 +148,7 @@ class BeanDefinitionPropertiesCodeGenerator {
 				.getConstructorArgumentValues().getIndexedArgumentValues();
 		if (!argumentValues.isEmpty()) {
 			argumentValues.forEach((index, valueHolder) -> {
-				String name = valueHolder.getName();
-				Object value = valueHolder.getValue();
-				CodeBlock valueCode = this.customValueCodeGenerator.apply(name, value);
-				if (valueCode == null) {
-					valueCode = this.valueCodeGenerator.generateCode(value);
-				}
+				CodeBlock valueCode = generateValue(valueHolder.getName(), valueHolder.getValue());
 				code.addStatement(
 						"$L.getConstructorArgumentValues().addIndexedArgumentValue($L, $L)",
 						BEAN_DEFINITION_VARIABLE, index, valueCode);
@@ -170,11 +163,7 @@ class BeanDefinitionPropertiesCodeGenerator {
 		if (!propertyValues.isEmpty()) {
 			for (PropertyValue propertyValue : propertyValues) {
 				String name = propertyValue.getName();
-				Object value = propertyValue.getValue();
-				CodeBlock valueCode = this.customValueCodeGenerator.apply(name, value);
-				if (valueCode == null) {
-					valueCode = this.valueCodeGenerator.generateCode(value);
-				}
+				CodeBlock valueCode = generateValue(name, propertyValue.getValue());
 				code.addStatement("$L.getPropertyValues().addPropertyValue($S, $L)",
 						BEAN_DEFINITION_VARIABLE, propertyValue.getName(), valueCode);
 			}
@@ -188,6 +177,16 @@ class BeanDefinitionPropertiesCodeGenerator {
 					}
 				}
 			}
+		}
+	}
+
+	private CodeBlock generateValue(@Nullable String name, @Nullable Object value) {
+		try {
+			PropertyNamesStack.push(name);
+			return this.valueCodeGenerator.generateCode(value);
+		}
+		finally {
+			PropertyNamesStack.pop();
 		}
 	}
 
@@ -280,6 +279,27 @@ class BeanDefinitionPropertiesCodeGenerator {
 			code.addStatement(format, BEAN_DEFINITION_VARIABLE,
 					formatter.apply(actualValue));
 		}
+	}
+
+	static class PropertyNamesStack {
+
+		private static final ThreadLocal<ArrayDeque<String>> threadLocal = ThreadLocal.withInitial(ArrayDeque::new);
+
+		static void push(@Nullable String name) {
+			String valueToSet = (name != null) ? name : "";
+			threadLocal.get().push(valueToSet);
+		}
+
+		static void pop() {
+			threadLocal.get().pop();
+		}
+
+		@Nullable
+		static String peek() {
+			String value = threadLocal.get().peek();
+			return ("".equals(value) ? null : value);
+		}
+
 	}
 
 }

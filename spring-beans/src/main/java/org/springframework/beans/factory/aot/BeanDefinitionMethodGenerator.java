@@ -57,7 +57,7 @@ class BeanDefinitionMethodGenerator {
 	private final Executable constructorOrFactoryMethod;
 
 	@Nullable
-	private final String innerBeanPropertyName;
+	private final String currentPropertyName;
 
 	private final List<BeanRegistrationAotContribution> aotContributions;
 
@@ -66,18 +66,18 @@ class BeanDefinitionMethodGenerator {
 	 * Create a new {@link BeanDefinitionMethodGenerator} instance.
 	 * @param methodGeneratorFactory the method generator factory
 	 * @param registeredBean the registered bean
-	 * @param innerBeanPropertyName the inner bean property name
+	 * @param currentPropertyName the current property name
 	 * @param aotContributions the AOT contributions
 	 */
 	BeanDefinitionMethodGenerator(
 			BeanDefinitionMethodGeneratorFactory methodGeneratorFactory,
-			RegisteredBean registeredBean, @Nullable String innerBeanPropertyName,
+			RegisteredBean registeredBean, @Nullable String currentPropertyName,
 			List<BeanRegistrationAotContribution> aotContributions) {
 
 		this.methodGeneratorFactory = methodGeneratorFactory;
 		this.registeredBean = registeredBean;
 		this.constructorOrFactoryMethod = registeredBean.resolveConstructorOrFactoryMethod();
-		this.innerBeanPropertyName = innerBeanPropertyName;
+		this.currentPropertyName = currentPropertyName;
 		this.aotContributions = aotContributions;
 	}
 
@@ -188,8 +188,8 @@ class BeanDefinitionMethodGenerator {
 	}
 
 	private String getName() {
-		if (this.innerBeanPropertyName != null) {
-			return this.innerBeanPropertyName;
+		if (this.currentPropertyName != null) {
+			return this.currentPropertyName;
 		}
 		if (!this.registeredBean.isGeneratedBeanName()) {
 			return getSimpleBeanName(this.registeredBean.getBeanName());

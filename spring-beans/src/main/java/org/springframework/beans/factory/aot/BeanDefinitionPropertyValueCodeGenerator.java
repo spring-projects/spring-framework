@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.aot;
 
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,6 +30,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 import org.springframework.aot.generate.GeneratedMethod;
@@ -61,26 +63,32 @@ class BeanDefinitionPropertyValueCodeGenerator {
 
 	private final GeneratedMethods generatedMethods;
 
-	private final List<Delegate> delegates = List.of(
-			new PrimitiveDelegate(),
-			new StringDelegate(),
-			new CharsetDelegate(),
-			new EnumDelegate(),
-			new ClassDelegate(),
-			new ResolvableTypeDelegate(),
-			new ArrayDelegate(),
-			new ManagedListDelegate(),
-			new ManagedSetDelegate(),
-			new ManagedMapDelegate(),
-			new ListDelegate(),
-			new SetDelegate(),
-			new MapDelegate(),
-			new BeanReferenceDelegate()
-	);
+	private final List<Delegate> delegates;
 
 
-	BeanDefinitionPropertyValueCodeGenerator(GeneratedMethods generatedMethods) {
+	BeanDefinitionPropertyValueCodeGenerator(GeneratedMethods generatedMethods,
+			@Nullable BiFunction<Object, ResolvableType, CodeBlock> customValueGenerator) {
 		this.generatedMethods = generatedMethods;
+		this.delegates = new ArrayList<>();
+		if (customValueGenerator != null) {
+			this.delegates.add(customValueGenerator::apply);
+		}
+		this.delegates.addAll(List.of(
+				new PrimitiveDelegate(),
+				new StringDelegate(),
+				new CharsetDelegate(),
+				new EnumDelegate(),
+				new ClassDelegate(),
+				new ResolvableTypeDelegate(),
+				new ArrayDelegate(),
+				new ManagedListDelegate(),
+				new ManagedSetDelegate(),
+				new ManagedMapDelegate(),
+				new ListDelegate(),
+				new SetDelegate(),
+				new MapDelegate(),
+				new BeanReferenceDelegate()
+		));
 	}
 
 
