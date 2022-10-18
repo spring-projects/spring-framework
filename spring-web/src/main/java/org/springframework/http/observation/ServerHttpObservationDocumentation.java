@@ -16,6 +16,7 @@
 
 package org.springframework.http.observation;
 
+import io.micrometer.common.KeyValue;
 import io.micrometer.common.docs.KeyName;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
@@ -55,7 +56,7 @@ public enum ServerHttpObservationDocumentation implements ObservationDocumentati
 	public enum LowCardinalityKeyNames implements KeyName {
 
 		/**
-		 * Name of HTTP request method or {@code "none"} if the request was not received properly.
+		 * Name of HTTP request method or {@value KeyValue#NONE_VALUE} if the request was not received properly.
 		 */
 		METHOD {
 			@Override
@@ -88,7 +89,7 @@ public enum ServerHttpObservationDocumentation implements ObservationDocumentati
 		},
 
 		/**
-		 * Name of the exception thrown during the exchange, or {@code "none"} if no exception happened.
+		 * Name of the exception thrown during the exchange, or {@value KeyValue#NONE_VALUE}} if no exception happened.
 		 */
 		EXCEPTION {
 			@Override
