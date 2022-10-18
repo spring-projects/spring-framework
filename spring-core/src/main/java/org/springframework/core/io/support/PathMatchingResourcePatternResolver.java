@@ -740,19 +740,6 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		URI rootDirUri;
 		try {
 			rootDirUri = rootDirResource.getURI();
-			// If the URI is for a "resource" in the GraalVM native image file system, we have to
-			// ensure that the root directory does not end in a slash while simultaneously ensuring
-			// that the root directory is not an empty string (since Path#resolve throws an
-			// ArrayIndexOutOfBoundsException in a native image if the initial Path is created
-			// from an empty string).
-			String scheme = rootDirUri.getScheme();
-			String path = rootDirUri.getPath();
-			if ("resource".equals(scheme) && (path.length() > 1) && path.endsWith("/")) {
-				path = path.substring(0, path.length() - 1);
-				// Retain the fragment as well, since root folders in the native image
-				// file system are indexed via the fragment (e.g., resource:/#1).
-				rootDirUri = new URI(scheme, path, rootDirUri.getFragment());
-			}
 		}
 		catch (Exception ex) {
 			if (logger.isInfoEnabled()) {
