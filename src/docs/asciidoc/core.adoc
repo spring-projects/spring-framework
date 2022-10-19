@@ -19,6 +19,9 @@ Coverage of Spring's integration with AspectJ (currently the richest -- in terms
 features -- and certainly most mature AOP implementation in the Java enterprise space)
 is also provided.
 
+AOT processing can be used to optimize your application ahead-of-time. It is typically
+used for native image deployment using GraalVM.
+
 include::core/core-beans.adoc[leveloffset=+1]
 
 include::core/core-resources.adoc[leveloffset=+1]
@@ -36,5 +39,7 @@ include::core/core-null-safety.adoc[leveloffset=+1]
 include::core/core-databuffer-codec.adoc[leveloffset=+1]
 
 include::core/core-spring-jcl.adoc[leveloffset=+1]
+
+include::core/core-aot.adoc[leveloffset=+1]
 
 include::core/core-appendix.adoc[leveloffset=+1]
