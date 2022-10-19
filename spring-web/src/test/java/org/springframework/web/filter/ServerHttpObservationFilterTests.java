@@ -70,7 +70,7 @@ class ServerHttpObservationFilterTests {
 		ServerRequestObservationContext context = (ServerRequestObservationContext) this.request
 				.getAttribute(ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE);
 		assertThat(context.getError()).isEqualTo(customError);
-		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SERVER_ERROR");
+		assertThatHttpObservation().hasLowCardinalityKeyValue("exception", "IllegalArgumentException");
 	}
 
 	@Test

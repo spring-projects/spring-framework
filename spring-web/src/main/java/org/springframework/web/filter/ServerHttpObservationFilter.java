@@ -27,7 +27,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.observation.DefaultServerRequestObservationConvention;
 import org.springframework.http.observation.ServerHttpObservationDocumentation;
 import org.springframework.http.observation.ServerRequestObservationContext;
@@ -117,7 +116,6 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 			if (!request.isAsyncStarted()) {
 				Throwable error = fetchException(request);
 				if (error != null) {
-					response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 					observation.error(error);
 				}
 				observation.stop();
