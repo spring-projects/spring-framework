@@ -325,6 +325,9 @@ public class NamedParameterUtilsTests {
 		ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);
 		assertThat(psql.getNamedParameterCount()).isEqualTo(1);
 		assertThat(psql.getParameterNames()).containsExactly("ext");
+
+		String sqlToUse = NamedParameterUtils.substituteNamedParameters(psql, null);
+		assertThat(sqlToUse).isEqualTo("SELECT ARRAY[?]");
 	}
 
 	@Test  // gh-27925
@@ -345,11 +348,14 @@ public class NamedParameterUtilsTests {
 		}
 
 		Foo foo = new Foo();
-		Object[] params = NamedParameterUtils.buildValueArray(psql,
-				new BeanPropertySqlParameterSource(foo), null);
+		SqlParameterSource paramSource = new BeanPropertySqlParameterSource(foo);
+		Object[] params = NamedParameterUtils.buildValueArray(psql, paramSource, null);
 
 		assertThat(params[0]).isInstanceOf(SqlParameterValue.class);
 		assertThat(((SqlParameterValue) params[0]).getValue()).isEqualTo(foo.getHeaders().get("id"));
+
+		String sqlToUse = NamedParameterUtils.substituteNamedParameters(psql, paramSource);
+		assertThat(sqlToUse).isEqualTo("insert into foos (id) values (?)");
 	}
 
 }

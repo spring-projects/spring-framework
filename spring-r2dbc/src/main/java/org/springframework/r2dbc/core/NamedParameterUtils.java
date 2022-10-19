@@ -160,8 +160,10 @@ abstract class NamedParameterUtils {
 					}
 					if (j - i > 1) {
 						parameter = sql.substring(i + 1, j);
-						if (parameter.contains("[")) {
-							parameter += "]";  // preserve end bracket for index/key
+						if (j < statement.length && statement[j] == ']' && parameter.contains("[")) {
+							// preserve end bracket for index/key
+							j++;
+							parameter = sql.substring(i + 1, j);
 						}
 						namedParameterCount = addNewNamedParameter(
 								namedParameters, namedParameterCount, parameter);
