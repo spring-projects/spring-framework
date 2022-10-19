@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.Netty5DataBufferFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -128,8 +129,15 @@ public class WebSocketMessage {
 	 * @see DataBufferUtils#retain(DataBuffer)
 	 */
 	public WebSocketMessage retain() {
-		DataBufferUtils.retain(this.payload);
-		return this;
+		if (!(this.nativeMessage instanceof io.netty5.handler.codec.http.websocketx.WebSocketFrame frame) ) {
+			DataBufferUtils.retain(this.payload);
+			return this;
+		}
+		else {
+			io.netty5.handler.codec.http.websocketx.WebSocketFrame newFrame = frame.send().receive();
+			DataBuffer newPayload = ((Netty5DataBufferFactory) this.payload.factory()).wrap(newFrame.binaryData());
+			return new WebSocketMessage(this.type, newPayload, newFrame);
+		}
 	}
 
 	/**

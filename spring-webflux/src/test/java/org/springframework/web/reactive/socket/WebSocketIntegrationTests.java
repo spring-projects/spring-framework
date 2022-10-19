@@ -220,7 +220,7 @@ class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 			return Mono.deferContextual(contextView -> {
 				String key = ServerWebExchangeContextFilter.EXCHANGE_CONTEXT_ATTRIBUTE;
 				assertThat(contextView.getOrEmpty(key).orElse(null)).isNotNull();
-				return session.send(session.receive().doOnNext(WebSocketMessage::retain));
+				return session.send(session.receive().map(WebSocketMessage::retain));
 			});
 		}
 	}
