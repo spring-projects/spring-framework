@@ -145,13 +145,11 @@ class ScopedProxyBeanRegistrationAotProcessor implements BeanRegistrationAotProc
 
 			GeneratedMethod generatedMethod = beanRegistrationCode.getMethods()
 					.add("getScopedProxyInstance", method -> {
-						Class<?> beanClass = this.targetBeanDefinition.getResolvableType()
-								.toClass();
 						method.addJavadoc(
 								"Create the scoped proxy bean instance for '$L'.",
 								this.registeredBean.getBeanName());
 						method.addModifiers(Modifier.PRIVATE, Modifier.STATIC);
-						method.returns(beanClass);
+						method.returns(ScopedProxyFactoryBean.class);
 						method.addParameter(RegisteredBean.class,
 								REGISTERED_BEAN_PARAMETER_NAME);
 						method.addStatement("$T factory = new $T()",
@@ -162,8 +160,7 @@ class ScopedProxyBeanRegistrationAotProcessor implements BeanRegistrationAotProc
 						method.addStatement(
 								"factory.setBeanFactory($L.getBeanFactory())",
 								REGISTERED_BEAN_PARAMETER_NAME);
-						method.addStatement("return ($T) factory.getObject()",
-								beanClass);
+						method.addStatement("return factory");
 					});
 			return CodeBlock.of("$T.of($L)", InstanceSupplier.class,
 					generatedMethod.toMethodReference().toCodeBlock());
