@@ -47,11 +47,10 @@ public class RSocketServiceMethodTests {
 
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	public void setUp() {
 		this.rsocket = new TestRSocket();
 		RSocketRequester requester = RSocketRequester.wrap(this.rsocket, TEXT_PLAIN, TEXT_PLAIN, RSocketStrategies.create());
-		this.proxyFactory = new RSocketServiceProxyFactory(requester);
-		this.proxyFactory.afterPropertiesSet();
+		this.proxyFactory = RSocketServiceProxyFactory.builder(requester).build();
 	}
 
 

@@ -935,8 +935,7 @@ Two, create a proxy that will perform the declared RSocket exchanges:
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	RSocketRequester requester = ... ;
-	RSocketServiceProxyFactory factory = new RSocketServiceProxyFactory(requester);
-	factory.afterPropertiesSet();
+	RSocketServiceProxyFactory factory = RSocketServiceProxyFactory.builder(requester).build();
 
 	RepositoryService service = factory.createClient(RadarService.class);
 ----

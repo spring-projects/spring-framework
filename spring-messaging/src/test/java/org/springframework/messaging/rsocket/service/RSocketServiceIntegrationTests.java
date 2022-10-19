@@ -75,9 +75,7 @@ class RSocketServiceIntegrationTests {
 				.rsocketStrategies(context.getBean(RSocketStrategies.class))
 				.tcp("localhost", 7000);
 
-		RSocketServiceProxyFactory proxyFactory = new RSocketServiceProxyFactory(requester);
-		proxyFactory.afterPropertiesSet();
-
+		RSocketServiceProxyFactory proxyFactory = RSocketServiceProxyFactory.builder(requester).build();
 		serviceProxy = proxyFactory.createClient(Service.class);
 
 		context.close();

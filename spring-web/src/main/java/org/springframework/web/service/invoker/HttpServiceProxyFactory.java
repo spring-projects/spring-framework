@@ -64,10 +64,10 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 	/**
 	 * Create an instance with the underlying HTTP client to use.
 	 * @param clientAdapter an adapter for the client
-	 * @deprecated as of 6.0 RC1 in favor of using the Builder to initialize
-	 * the HttpServiceProxyFactory instance.
+	 * @deprecated in favor of using the Builder to initialize the
+	 * HttpServiceProxyFactory instance.
 	 */
-	@Deprecated(since = "6.0.0-RC1", forRemoval = true)
+	@Deprecated(since = "6.0.0-RC2", forRemoval = true)
 	public HttpServiceProxyFactory(HttpClientAdapter clientAdapter) {
 		this.beanStyleFactory = new BeanStyleFactory(clientAdapter);
 		this.builderInitializedFactory = null;
@@ -87,10 +87,10 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 	/**
 	 * Register a custom argument resolver, invoked ahead of default resolvers.
 	 * @param resolver the resolver to add
-	 * @deprecated as of 6.0 RC1 in favor of using the Builder to initialize
-	 * the HttpServiceProxyFactory instance.
+	 * @deprecated in favor of using the Builder to initialize the
+	 * HttpServiceProxyFactory instance.
 	 */
-	@Deprecated(since = "6.0.0-RC1", forRemoval = true)
+	@Deprecated(since = "6.0.0-RC2", forRemoval = true)
 	public void addCustomArgumentResolver(HttpServiceArgumentResolver resolver) {
 		Assert.state(this.beanStyleFactory != null, "HttpServiceProxyFactory was created through the builder");
 		this.beanStyleFactory.addCustomArgumentResolver(resolver);
@@ -99,10 +99,10 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 	/**
 	 * Set the custom argument resolvers to use, ahead of default resolvers.
 	 * @param resolvers the resolvers to use
-	 * @deprecated as of 6.0 RC1 in favor of using the Builder to initialize
-	 * the HttpServiceProxyFactory instance.
+	 * @deprecated in favor of using the Builder to initialize the
+	 * HttpServiceProxyFactory instance.
 	 */
-	@Deprecated(since = "6.0.0-RC1", forRemoval = true)
+	@Deprecated(since = "6.0.0-RC2", forRemoval = true)
 	public void setCustomArgumentResolvers(List<HttpServiceArgumentResolver> resolvers) {
 		Assert.state(this.beanStyleFactory != null, "HttpServiceProxyFactory was created through the builder");
 		this.beanStyleFactory.setCustomArgumentResolvers(resolvers);
@@ -112,10 +112,10 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 	 * Set the {@link ConversionService} to use where input values need to
 	 * be formatted as Strings.
 	 * <p>By default this is {@link DefaultFormattingConversionService}.
-	 * @deprecated as of 6.0 RC1 in favor of using the Builder to initialize
-	 * the HttpServiceProxyFactory instance.
+	 * @deprecated in favor of using the Builder to initialize the
+	 * HttpServiceProxyFactory instance.
 	 */
-	@Deprecated(since = "6.0.0-RC1", forRemoval = true)
+	@Deprecated(since = "6.0.0-RC2", forRemoval = true)
 	public void setConversionService(ConversionService conversionService) {
 		Assert.state(this.beanStyleFactory != null, "HttpServiceProxyFactory was created through the builder");
 		this.beanStyleFactory.setConversionService(conversionService);
@@ -125,10 +125,10 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 	 * Set the StringValueResolver to use for resolving placeholders and
 	 * expressions in {@link HttpExchange#url()}.
 	 * @param resolver the resolver to use
-	 * @deprecated as of 6.0 RC1 in favor of using the Builder to initialize
-	 * an HttpServiceProxyFactory instance.
+	 * @deprecated in favor of using the Builder to initialize the
+	 * HttpServiceProxyFactory instance.
 	 */
-	@Deprecated(since = "6.0.0-RC1", forRemoval = true)
+	@Deprecated(since = "6.0.0-RC2", forRemoval = true)
 	@Override
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
 		Assert.state(this.beanStyleFactory != null, "HttpServiceProxyFactory was created through the builder");
@@ -139,10 +139,10 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 	 * Set the {@link ReactiveAdapterRegistry} to use to support different
 	 * asynchronous types for HTTP service method return values.
 	 * <p>By default this is {@link ReactiveAdapterRegistry#getSharedInstance()}.
-	 * @deprecated as of 6.0 RC1 in favor of using the Builder to initialize
-	 * an HttpServiceProxyFactory instance.
+	 * @deprecated in favor of using the Builder to initialize the
+	 * HttpServiceProxyFactory instance.
 	 */
-	@Deprecated(since = "6.0.0-RC1", forRemoval = true)
+	@Deprecated(since = "6.0.0-RC2", forRemoval = true)
 	public void setReactiveAdapterRegistry(ReactiveAdapterRegistry registry) {
 		Assert.state(this.beanStyleFactory != null, "HttpServiceProxyFactory was created through the builder");
 		this.beanStyleFactory.setReactiveAdapterRegistry(registry);
@@ -153,10 +153,10 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 	 * with a synchronous (blocking) method signature.
 	 * <p>By default this is 5 seconds.
 	 * @param blockTimeout the timeout value
-	 * @deprecated as of 6.0 RC1 in favor of using the Builder to initialize
-	 * an HttpServiceProxyFactory instance.
+	 * @deprecated in favor of using the Builder to initialize the
+	 * HttpServiceProxyFactory instance.
 	 */
-	@Deprecated(since = "6.0.0-RC1", forRemoval = true)
+	@Deprecated(since = "6.0.0-RC2", forRemoval = true)
 	public void setBlockTimeout(Duration blockTimeout) {
 		Assert.state(this.beanStyleFactory != null, "HttpServiceProxyFactory was created through the builder");
 		this.beanStyleFactory.setBlockTimeout(blockTimeout);
@@ -216,8 +216,7 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 		@Nullable
 		private HttpClientAdapter clientAdapter;
 
-		@Nullable
-		private List<HttpServiceArgumentResolver> argumentResolvers;
+		private final List<HttpServiceArgumentResolver> customArgumentResolvers = new ArrayList<>();
 
 		@Nullable
 		private ConversionService conversionService;
@@ -249,8 +248,7 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 		 * @return this same builder instance
 		 */
 		public Builder customArgumentResolver(HttpServiceArgumentResolver resolver) {
-			this.argumentResolvers = (this.argumentResolvers != null ? this.argumentResolvers : new ArrayList<>());
-			this.argumentResolvers.add(resolver);
+			this.customArgumentResolvers.add(resolver);
 			return this;
 		}
 
@@ -312,12 +310,9 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 		}
 
 		private List<HttpServiceArgumentResolver> initArgumentResolvers() {
-			List<HttpServiceArgumentResolver> resolvers = new ArrayList<>();
 
 			// Custom
-			if (this.argumentResolvers != null) {
-				resolvers.addAll(this.argumentResolvers);
-			}
+			List<HttpServiceArgumentResolver> resolvers = new ArrayList<>(this.customArgumentResolvers);
 
 			ConversionService service = (this.conversionService != null ?
 					this.conversionService : new DefaultFormattingConversionService());
@@ -336,7 +331,6 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 
 			return resolvers;
 		}
-
 	}
 
 
@@ -420,7 +414,6 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 					method, serviceType, this.argumentResolvers, this.clientAdapter,
 					this.embeddedValueResolver, this.reactiveAdapterRegistry, this.blockTimeout);
 		}
-
 	}
 
 
@@ -536,7 +529,6 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 					method, serviceType, this.argumentResolvers, this.clientAdapter,
 					this.embeddedValueResolver, this.reactiveAdapterRegistry, this.blockTimeout);
 		}
-
 	}
 
 }
