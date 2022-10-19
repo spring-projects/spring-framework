@@ -16,6 +16,7 @@
 
 package org.springframework.web.filter;
 
+import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.observation.tck.TestObservationRegistry;
 import io.micrometer.observation.tck.TestObservationRegistryAssert;
 import jakarta.servlet.RequestDispatcher;
@@ -33,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link ServerHttpObservationFilter}.
+ *
  * @author Brian Clozel
  */
 class ServerHttpObservationFilterTests {
@@ -59,6 +61,16 @@ class ServerHttpObservationFilterTests {
 		assertThat(context.getResponse()).isEqualTo(this.response);
 		assertThat(context.getPathPattern()).isNull();
 		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS");
+	}
+
+	@Test
+	void filterShouldAcceptNoOpObservationContext() throws Exception {
+		ServerHttpObservationFilter filter = new ServerHttpObservationFilter(ObservationRegistry.NOOP);
+		filter.doFilter(this.request, this.response, this.mockFilterChain);
+
+		ServerRequestObservationContext context = (ServerRequestObservationContext) this.request
+				.getAttribute(ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE);
+		assertThat(context).isNull();
 	}
 
 	@Test

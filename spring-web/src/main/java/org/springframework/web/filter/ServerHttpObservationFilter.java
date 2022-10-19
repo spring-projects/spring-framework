@@ -130,7 +130,9 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 			observation = ServerHttpObservationDocumentation.HTTP_REQUESTS.observation(this.observationConvention,
 					DEFAULT_OBSERVATION_CONVENTION, () -> context, this.observationRegistry).start();
 			request.setAttribute(CURRENT_OBSERVATION_ATTRIBUTE, observation);
-			request.setAttribute(CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observation.getContext());
+			if (!observation.isNoop()) {
+				request.setAttribute(CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observation.getContext());
+			}
 		}
 		return observation;
 	}
