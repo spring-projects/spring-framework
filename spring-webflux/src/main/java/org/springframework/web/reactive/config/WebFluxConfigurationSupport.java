@@ -85,6 +85,10 @@ import org.springframework.web.server.i18n.LocaleContextResolver;
  */
 public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
+	private static final boolean jakartaValidatorPresent =
+			ClassUtils.isPresent("jakarta.validation.Validator", WebFluxConfigurationSupport.class.getClassLoader());
+
+
 	@Nullable
 	private Map<String, CorsConfiguration> corsConfigurations;
 
@@ -384,7 +388,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	public Validator webFluxValidator() {
 		Validator validator = getValidator();
 		if (validator == null) {
-			if (ClassUtils.isPresent("jakarta.validation.Validator", getClass().getClassLoader())) {
+			if (jakartaValidatorPresent) {
 				try {
 					validator = new OptionalValidatorFactoryBean();
 				}
