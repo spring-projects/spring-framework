@@ -439,25 +439,34 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 		List<SmartInstantiationAwareBeanPostProcessor> bpps =
 				PostProcessorRegistrationDelegate.loadBeanPostProcessors(
 						this.beanFactory, SmartInstantiationAwareBeanPostProcessor.class);
+
 		for (String beanName : this.beanFactory.getBeanDefinitionNames()) {
 			Class<?> beanType = this.beanFactory.getType(beanName);
 			if (beanType != null) {
+				registerProxyHintIfNecessary(beanType, runtimeHints);
 				for (SmartInstantiationAwareBeanPostProcessor bpp : bpps) {
-					beanType = bpp.determineBeanType(beanType, beanName);
-					if (Proxy.isProxyClass(beanType)) {
-						// A JDK proxy class needs an explicit hint
-						runtimeHints.proxies().registerJdkProxy(beanType.getInterfaces());
-					}
-					else {
-						// Potentially a CGLIB-generated subclass with reflection hints
-						Class<?> userClass = ClassUtils.getUserClass(beanType);
-						if (userClass != beanType) {
-							runtimeHints.reflection()
-									.registerType(beanType, asClassBasedProxy)
-									.registerType(userClass, asProxiedUserClass);
-						}
+					Class<?> newBeanType = bpp.determineBeanType(beanType, beanName);
+					if (newBeanType != beanType) {
+						registerProxyHintIfNecessary(newBeanType, runtimeHints);
+						beanType = newBeanType;
 					}
 				}
+			}
+		}
+	}
+
+	private void registerProxyHintIfNecessary(Class<?> beanType, RuntimeHints runtimeHints) {
+		if (Proxy.isProxyClass(beanType)) {
+			// A JDK proxy class needs an explicit hint
+			runtimeHints.proxies().registerJdkProxy(beanType.getInterfaces());
+		}
+		else {
+			// Potentially a CGLIB-generated subclass with reflection hints
+			Class<?> userClass = ClassUtils.getUserClass(beanType);
+			if (userClass != beanType) {
+				runtimeHints.reflection()
+						.registerType(beanType, asClassBasedProxy)
+						.registerType(userClass, asProxiedUserClass);
 			}
 		}
 	}
