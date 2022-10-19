@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,12 +208,12 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 	protected void testDecodeError(Publisher<DataBuffer> input, ResolvableType outputType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Flux<DataBuffer> buffer = Mono.from(input).concatWith(Flux.error(new InputException()));
+		Flux<DataBuffer> flux = Mono.from(input).concatWith(Flux.error(new InputException()));
 		assertThatExceptionOfType(InputException.class).isThrownBy(() ->
-				this.decoder.decode(buffer, outputType, mimeType, hints)
-						.doOnNext(o -> {
-							if (o instanceof Buffer buf) {
-								buf.close();
+				this.decoder.decode(flux, outputType, mimeType, hints)
+						.doOnNext(object -> {
+							if (object instanceof Buffer buffer) {
+								buffer.close();
 							}
 						})
 						.blockLast(Duration.ofSeconds(5)));
@@ -234,9 +234,9 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Flux<?> result = this.decoder.decode(input, outputType, mimeType, hints)
-				.doOnNext(o -> {
-					if (o instanceof Buffer buf) {
-						buf.close();
+				.doOnNext(object -> {
+					if (object instanceof Buffer buffer) {
+						buffer.close();
 					}
 				});
 		StepVerifier.create(result).expectNextCount(1).thenCancel().verify();

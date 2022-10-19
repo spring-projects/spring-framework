@@ -524,7 +524,6 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	@SuppressWarnings("deprecation")
 	void asByteBufferIndexLength(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
@@ -534,12 +533,10 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 		ByteBuffer result = buffer.asByteBuffer(1, 2);
 		assertThat(result.capacity()).isEqualTo(2);
 
-		boolean isNetty5DataBufferFactory = bufferFactory instanceof Netty5DataBufferFactory;
-		if (isNetty5DataBufferFactory) {
+		assumeFalse(bufferFactory instanceof Netty5DataBufferFactory, () -> {
 			DataBufferUtils.release(buffer);
-		}
-
-		assumeFalse(isNetty5DataBufferFactory, "Netty 5 does share the internal buffer");
+			return "Netty 5 does share the internal buffer";
+		});
 
 		buffer.write((byte) 'c');
 		assertThat(result.remaining()).isEqualTo(2);
