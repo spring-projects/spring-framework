@@ -475,8 +475,7 @@ class AnnotationConfigApplicationContextTests {
 		RuntimeHints runtimeHints = new RuntimeHints();
 		context.refreshForAotProcessing(runtimeHints);
 		assertThat(RuntimeHintsPredicates.reflection().onType(TypeReference.of(CglibConfiguration.class))
-				.withMemberCategories(MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
-						MemberCategory.INVOKE_DECLARED_METHODS))
+				.withMemberCategories(MemberCategory.INVOKE_PUBLIC_METHODS))
 				.accepts(runtimeHints);
 	}
 
