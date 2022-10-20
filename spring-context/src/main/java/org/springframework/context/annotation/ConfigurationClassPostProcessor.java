@@ -39,7 +39,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.framework.autoproxy.AutoProxyUtils;
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GenerationContext;
+import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.ResourceHints;
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -739,20 +741,22 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		public CodeBlock generateInstanceSupplierCode(GenerationContext generationContext,
 				BeanRegistrationCode beanRegistrationCode, Executable constructorOrFactoryMethod,
 				boolean allowDirectSupplierShortcut) {
+			Executable executableToUse = proxyExecutable(generationContext.getRuntimeHints(), constructorOrFactoryMethod);
 			return super.generateInstanceSupplierCode(generationContext, beanRegistrationCode,
-					proxyExecutable(constructorOrFactoryMethod), allowDirectSupplierShortcut);
+					executableToUse, allowDirectSupplierShortcut);
 		}
 
-		private Executable proxyExecutable(Executable rawClassExecutable) {
-			if (rawClassExecutable instanceof Constructor<?>) {
+		private Executable proxyExecutable(RuntimeHints runtimeHints, Executable userExecutable) {
+			if (userExecutable instanceof Constructor<?> userConstructor) {
 				try {
-					return this.proxyClass.getConstructor(rawClassExecutable.getParameterTypes());
+					runtimeHints.reflection().registerConstructor(userConstructor, ExecutableMode.INTROSPECT);
+					return this.proxyClass.getConstructor(userExecutable.getParameterTypes());
 				}
 				catch (NoSuchMethodException ex) {
 					throw new IllegalStateException("No matching constructor found on proxy " + this.proxyClass, ex);
 				}
 			}
-			return rawClassExecutable;
+			return userExecutable;
 		}
 
 	}

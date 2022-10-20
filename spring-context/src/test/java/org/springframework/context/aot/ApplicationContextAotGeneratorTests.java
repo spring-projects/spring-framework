@@ -17,6 +17,7 @@
 package org.springframework.context.aot;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -331,6 +332,16 @@ class ApplicationContextAotGeneratorTests {
 				assertThat(freshApplicationContext.getBean("prefix", String.class)).isEqualTo("Hi0");
 				assertThat(freshApplicationContext.getBean("text", String.class)).isEqualTo("Hi0 World");
 			});
+		}
+
+		@Test
+		void processAheadOfTimeWhenHasCglibProxyWithArgumentsRegisterIntrospectionHintsOnUserClass() {
+			GenericApplicationContext applicationContext = new AnnotationConfigApplicationContext();
+			applicationContext.registerBean(ConfigurableCglibConfiguration.class);
+			TestGenerationContext generationContext = processAheadOfTime(applicationContext);
+			Constructor<?> userConstructor = ConfigurableCglibConfiguration.class.getDeclaredConstructors()[0];
+			assertThat(RuntimeHintsPredicates.reflection().onConstructor(userConstructor).introspect())
+					.accepts(generationContext.getRuntimeHints());
 		}
 
 	}
