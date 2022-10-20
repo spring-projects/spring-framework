@@ -16,12 +16,12 @@
 
 package org.springframework.util;
 
-import org.springframework.lang.Nullable;
-
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Simple stop watch, allowing for timing of a number of tasks, exposing total
@@ -284,7 +284,7 @@ public class StopWatch {
 			throw new IllegalStateException("No tasks run: can't get last task info");
 		}
 		long lastTimeNanos = this.lastTaskInfo.getTimeNanos();
-		return convertTimeUnit(lastTimeNanos, DEFAULT_TIME_UNIT, timeUnit);
+		return convertTimeUnit(lastTimeNanos, DEFAULT_TIME_UNIT, this.timeUnit);
 	}
 
 	public double getLastTime(TimeUnit timeUnit) {
@@ -306,7 +306,7 @@ public class StopWatch {
 	 * Get total running time in type of current TimeUnit field
 	 */
 	public double getTotalTime() {
-		return convertTimeUnit(this.totalTimeNanos, DEFAULT_TIME_UNIT, timeUnit);
+		return convertTimeUnit(this.totalTimeNanos, DEFAULT_TIME_UNIT, this.timeUnit);
 	}
 
 	/**
@@ -329,7 +329,7 @@ public class StopWatch {
 		}
 		else {
 			sb.append("---------------------------------------------\n");
-			sb.append(getTimeUnitAbbreviation(timeUnit)).append("         %     Task name\n");
+			sb.append(getTimeUnitAbbreviation(this.timeUnit)).append("         %     Task name\n");
 			sb.append("---------------------------------------------\n");
 			NumberFormat nf = NumberFormat.getNumberInstance();
 			nf.setMinimumIntegerDigits(9);
@@ -338,7 +338,7 @@ public class StopWatch {
 			pf.setMinimumIntegerDigits(3);
 			pf.setGroupingUsed(false);
 			for (TaskInfo task : getTaskInfo()) {
-				sb.append(nf.format(convertTimeUnit(task.getTimeNanos(), DEFAULT_TIME_UNIT, timeUnit))).append("  ");
+				sb.append(nf.format(convertTimeUnit(task.getTimeNanos(), DEFAULT_TIME_UNIT, this.timeUnit))).append("  ");
 				sb.append(pf.format((double) task.getTimeNanos() / getTotalTimeNanos())).append("  ");
 				sb.append(task.getTaskName()).append('\n');
 			}
