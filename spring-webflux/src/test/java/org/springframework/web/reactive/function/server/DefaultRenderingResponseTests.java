@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function.server;
 
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -37,6 +38,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.result.view.AbstractView;
+import org.springframework.web.reactive.result.view.RedirectView;
 import org.springframework.web.reactive.result.view.View;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.reactive.result.view.ViewResolverSupport;
@@ -47,8 +49,10 @@ import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Arjen Poutsma
@@ -153,6 +157,41 @@ public class DefaultRenderingResponseTests {
 						model.equals(response.model()))
 				.expectComplete()
 				.verify();
+	}
+
+	@Test
+	public void writeTo() {
+		Map<String, Object> model = Collections.singletonMap("foo", "bar");
+		RenderingResponse renderingResponse = RenderingResponse.create("view")
+				.status(HttpStatus.FOUND)
+				.modelAttributes(model)
+				.build().block(Duration.of(5, ChronoUnit.MILLIS));
+		assertThat(renderingResponse).isNotNull();
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://localhost"));
+		MediaType contentType = MediaType.APPLICATION_PDF;
+		exchange.getResponse().getHeaders().setContentType(contentType);
+
+		ViewResolver viewResolver = mock(ViewResolver.class);
+		RedirectView view = mock(RedirectView.class);
+		given(viewResolver.resolveViewName(eq("view"), any())).willReturn(Mono.just(view));
+		given(view.render(model, contentType, exchange)).willReturn(Mono.empty());
+
+		List<ViewResolver> viewResolvers = new ArrayList<>();
+		viewResolvers.add(viewResolver);
+
+		HandlerStrategies mockConfig = mock(HandlerStrategies.class);
+		given(mockConfig.viewResolvers()).willReturn(viewResolvers);
+
+		ServerResponse.Context context = mock(ServerResponse.Context.class);
+		given(context.viewResolvers()).willReturn(viewResolvers);
+
+		Mono<Void> result = renderingResponse.writeTo(exchange, context);
+		StepVerifier.create(result)
+				.expectComplete()
+				.verify();
+
+		verify(view).setStatusCode(HttpStatus.FOUND);
 	}
 
 	@Test

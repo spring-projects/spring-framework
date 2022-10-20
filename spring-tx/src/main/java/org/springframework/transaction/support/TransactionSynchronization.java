@@ -54,6 +54,10 @@ public interface TransactionSynchronization extends Ordered, Flushable {
 	int STATUS_UNKNOWN = 2;
 
 
+	/**
+	 * Return the execution order for this transaction synchronization.
+	 * <p>Default is {@link Ordered#LOWEST_PRECEDENCE}.
+	 */
 	@Override
 	default int getOrder() {
 		return Ordered.LOWEST_PRECEDENCE;

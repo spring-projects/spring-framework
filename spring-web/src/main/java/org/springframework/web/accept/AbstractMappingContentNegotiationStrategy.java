@@ -40,9 +40,9 @@ import org.springframework.web.context.request.NativeWebRequest;
  * through the base class {@link MappingMediaTypeFileExtensionResolver} which
  * stores such mappings.
  *
- * <p>The method {@link #handleNoMatch} allow sub-classes to plug in additional
+ * <p>The method {@link #handleNoMatch} allow subclasses to plug in additional
  * ways of looking up media types (e.g. through the Java Activation framework,
- * or {@link javax.servlet.ServletContext#getMimeType}. Media types resolved
+ * or {@link jakarta.servlet.ServletContext#getMimeType}). Media types resolved
  * via base classes are then added to the base class
  * {@link MappingMediaTypeFileExtensionResolver}, i.e. cached for new lookups.
  *
@@ -142,7 +142,7 @@ public abstract class AbstractMappingContentNegotiationStrategy extends MappingM
 
 	/**
 	 * Override to provide handling when a key is not resolved via.
-	 * {@link #lookupMediaType}. Sub-classes can take further steps to
+	 * {@link #lookupMediaType}. Subclasses can take further steps to
 	 * determine the media type(s). If a MediaType is returned from
 	 * this method it will be added to the cache in the base class.
 	 */

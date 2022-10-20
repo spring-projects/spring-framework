@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,16 +31,16 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * {@code MergedContextConfiguration} encapsulates the <em>merged</em>
- * context configuration declared on a test class and all of its superclasses
- * via {@link ContextConfiguration @ContextConfiguration},
+ * {@code MergedContextConfiguration} encapsulates the <em>merged</em> context
+ * configuration declared on a test class and all of its superclasses and
+ * enclosing classes via {@link ContextConfiguration @ContextConfiguration},
  * {@link ActiveProfiles @ActiveProfiles}, and
  * {@link TestPropertySource @TestPropertySource}.
  *
  * <p>Merged context resource locations, annotated classes, active profiles,
  * property resource locations, and in-lined properties represent all declared
- * values in the test class hierarchy taking into consideration the semantics
- * of the {@link ContextConfiguration#inheritLocations},
+ * values in the test class hierarchy and enclosing class hierarchy taking into
+ * consideration the semantics of the {@link ContextConfiguration#inheritLocations},
  * {@link ActiveProfiles#inheritProfiles},
  * {@link TestPropertySource#inheritLocations}, and
  * {@link TestPropertySource#inheritProperties} flags.
@@ -84,6 +84,7 @@ public class MergedContextConfiguration implements Serializable {
 
 	private final Class<?>[] classes;
 
+	@SuppressWarnings("serial")
 	private final Set<Class<? extends ApplicationContextInitializer<?>>> contextInitializerClasses;
 
 	private final String[] activeProfiles;
@@ -92,11 +93,14 @@ public class MergedContextConfiguration implements Serializable {
 
 	private final String[] propertySourceProperties;
 
+	@SuppressWarnings("serial")
 	private final Set<ContextCustomizer> contextCustomizers;
 
+	@SuppressWarnings("serial")
 	private final ContextLoader contextLoader;
 
 	@Nullable
+	@SuppressWarnings("serial")
 	private final CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate;
 
 	@Nullable
@@ -112,8 +116,8 @@ public class MergedContextConfiguration implements Serializable {
 	 * @param activeProfiles the merged active bean definition profiles
 	 * @param contextLoader the resolved {@code ContextLoader}
 	 */
-	public MergedContextConfiguration(Class<?> testClass, String[] locations, Class<?>[] classes,
-			String[] activeProfiles, ContextLoader contextLoader) {
+	public MergedContextConfiguration(Class<?> testClass, @Nullable String[] locations, @Nullable Class<?>[] classes,
+			@Nullable String[] activeProfiles, ContextLoader contextLoader) {
 
 		this(testClass, locations, classes, null, activeProfiles, contextLoader);
 	}
@@ -128,9 +132,9 @@ public class MergedContextConfiguration implements Serializable {
 	 * @param activeProfiles the merged active bean definition profiles
 	 * @param contextLoader the resolved {@code ContextLoader}
 	 */
-	public MergedContextConfiguration(Class<?> testClass, String[] locations, Class<?>[] classes,
+	public MergedContextConfiguration(Class<?> testClass, @Nullable String[] locations, @Nullable Class<?>[] classes,
 			@Nullable Set<Class<? extends ApplicationContextInitializer<?>>> contextInitializerClasses,
-			String[] activeProfiles, ContextLoader contextLoader) {
+			@Nullable String[] activeProfiles, ContextLoader contextLoader) {
 
 		this(testClass, locations, classes, contextInitializerClasses, activeProfiles, contextLoader, null, null);
 	}
@@ -149,9 +153,9 @@ public class MergedContextConfiguration implements Serializable {
 	 * @param parent the parent configuration or {@code null} if there is no parent
 	 * @since 3.2.2
 	 */
-	public MergedContextConfiguration(Class<?> testClass, String[] locations, Class<?>[] classes,
+	public MergedContextConfiguration(Class<?> testClass, @Nullable String[] locations, @Nullable Class<?>[] classes,
 			@Nullable Set<Class<? extends ApplicationContextInitializer<?>>> contextInitializerClasses,
-			String[] activeProfiles, ContextLoader contextLoader,
+			@Nullable String[] activeProfiles, ContextLoader contextLoader,
 			@Nullable CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate,
 			@Nullable MergedContextConfiguration parent) {
 
@@ -372,8 +376,8 @@ public class MergedContextConfiguration implements Serializable {
 	 * Get the {@link MergedContextConfiguration} for the parent application context
 	 * in a context hierarchy.
 	 * @return the parent configuration or {@code null} if there is no parent
-	 * @see #getParentApplicationContext()
 	 * @since 3.2.2
+	 * @see #getParentApplicationContext()
 	 */
 	@Nullable
 	public MergedContextConfiguration getParent() {
@@ -386,8 +390,8 @@ public class MergedContextConfiguration implements Serializable {
 	 * <p>If the parent context has not yet been loaded, it will be loaded, stored
 	 * in the cache, and then returned.
 	 * @return the parent {@code ApplicationContext} or {@code null} if there is no parent
-	 * @see #getParent()
 	 * @since 3.2.2
+	 * @see #getParent()
 	 */
 	@Nullable
 	public ApplicationContext getParentApplicationContext() {

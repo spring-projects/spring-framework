@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,11 +73,9 @@ public class ProxyConfig implements Serializable {
 	 * The exact meaning of "aggressive optimizations" will differ
 	 * between proxies, but there is usually some tradeoff.
 	 * Default is "false".
-	 * <p>For example, optimization will usually mean that advice changes won't
-	 * take effect after a proxy has been created. For this reason, optimization
-	 * is disabled by default. An optimize value of "true" may be ignored
-	 * if other settings preclude optimization: for example, if "exposeProxy"
-	 * is set to "true" and that's not compatible with the optimization.
+	 * <p>With Spring's current proxy options, this flag effectively
+	 * enforces CGLIB proxies (similar to {@link #setProxyTargetClass})
+	 * but without any class validation checks (for final methods etc).
 	 */
 	public void setOptimize(boolean optimize) {
 		this.optimize = optimize;

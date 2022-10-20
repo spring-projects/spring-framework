@@ -95,7 +95,9 @@ public class MockClientHttpRequest extends AbstractClientHttpRequest implements 
 		return this.httpMethod;
 	}
 
+	@SuppressWarnings("removal")
 	@Override
+	@Deprecated
 	public String getMethodValue() {
 		return this.httpMethod.name();
 	}

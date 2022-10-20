@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,7 +200,7 @@ public final class CloseStatus {
 	 * @since 5.3
 	 */
 	public static CloseStatus create(int code, @Nullable String reason) {
-		if (StringUtils.isEmpty(reason)) {
+		if (!StringUtils.hasText(reason)) {
 			switch (code) {
 				case 1000:
 					return NORMAL;
@@ -239,10 +239,9 @@ public final class CloseStatus {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof CloseStatus)) {
+		if (!(other instanceof CloseStatus otherStatus)) {
 			return false;
 		}
-		CloseStatus otherStatus = (CloseStatus) other;
 		return (this.code == otherStatus.code &&
 				ObjectUtils.nullSafeEquals(this.reason, otherStatus.reason));
 	}

@@ -63,7 +63,6 @@ public abstract class CorsUtils {
 	 * {@code "Forwarded"} and {@code "X-Forwarded-*"} headers that specify the
 	 * client-originated address. Consider using the {@code ForwardedHeaderFilter}
 	 * to extract and use, or to discard such headers.
-	 *
 	 * @return {@code true} if the request is a same-origin one, {@code false} in case
 	 * of a cross-origin request
 	 * @deprecated as of 5.2, same-origin checks are performed directly by {@link #isCorsRequest}

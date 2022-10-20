@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,25 +30,29 @@ import static org.hamcrest.core.Is.is;
  */
 class JsonPathExpectationsHelperTests {
 
-	private static final String CONTENT = "{" + //
-			"'str':         'foo',           " + //
-			"'num':         5,               " + //
-			"'bool':        true,            " + //
-			"'arr':         [42],            " + //
-			"'colorMap':    {'red': 'rojo'}, " + //
-			"'whitespace':  '    ',          " + //
-			"'emptyString': '',              " + //
-			"'emptyArray':  [],              " + //
-			"'emptyMap':    {}               " + //
-	"}";
+	private static final String CONTENT = """
+			{
+				'str':         'foo',
+				'num':         5,
+				'bool':        true,
+				'arr':         [42],
+				'colorMap':    {'red': 'rojo'},
+				'whitespace':  '    ',
+				'emptyString': '',
+				'emptyArray':  [],
+				'emptyMap':    {}
+			}""";
 
-	private static final String SIMPSONS = "{ 'familyMembers': [ " + //
-			"{'name': 'Homer' }, " + //
-			"{'name': 'Marge' }, " + //
-			"{'name': 'Bart'  }, " + //
-			"{'name': 'Lisa'  }, " + //
-			"{'name': 'Maggie'}  " + //
-	" ] }";
+	private static final String SIMPSONS = """
+			{
+				'familyMembers': [
+					{'name': 'Homer' },
+					{'name': 'Marge' },
+					{'name': 'Bart'  },
+					{'name': 'Lisa'  },
+					{'name': 'Maggie'}
+				]
+			}""";
 
 
 	@Test

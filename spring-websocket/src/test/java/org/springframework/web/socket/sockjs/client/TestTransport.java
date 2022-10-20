@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,13 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
+import org.springframework.lang.Nullable;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
@@ -46,7 +47,8 @@ class TestTransport implements Transport {
 
 	private TransportRequest request;
 
-	private ListenableFuture future;
+	@Nullable
+	private CompletableFuture<WebSocketSession> future;
 
 
 	public TestTransport(String name) {
@@ -67,17 +69,17 @@ class TestTransport implements Transport {
 	}
 
 	@SuppressWarnings("unchecked")
-	public ListenableFutureCallback<WebSocketSession> getConnectCallback() {
-		ArgumentCaptor<ListenableFutureCallback> captor = ArgumentCaptor.forClass(ListenableFutureCallback.class);
-		verify(this.future).addCallback(captor.capture());
+	public BiConsumer<WebSocketSession, Throwable> getConnectCallback() {
+		ArgumentCaptor<BiConsumer> captor = ArgumentCaptor.forClass(BiConsumer.class);
+		verify(this.future).whenComplete(captor.capture());
 		return captor.getValue();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public ListenableFuture<WebSocketSession> connect(TransportRequest request, WebSocketHandler handler) {
+	public CompletableFuture<WebSocketSession> connectAsync(TransportRequest request, WebSocketHandler handler) {
 		this.request = request;
-		this.future = mock(ListenableFuture.class);
+		this.future = mock(CompletableFuture.class);
 		return this.future;
 	}
 

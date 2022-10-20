@@ -16,6 +16,8 @@
 
 package org.springframework.http.client.reactive;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.function.BiFunction;
@@ -48,7 +50,7 @@ import org.springframework.util.Assert;
  * @since 5.3
  * @see <a href="https://hc.apache.org/index.html">Apache HttpComponents</a>
  */
-public class HttpComponentsClientHttpConnector implements ClientHttpConnector {
+public class HttpComponentsClientHttpConnector implements ClientHttpConnector, Closeable {
 
 	private final CloseableHttpAsyncClient client;
 
@@ -126,6 +128,10 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector {
 		});
 	}
 
+	@Override
+	public void close() throws IOException {
+		this.client.close();
+	}
 
 	private static class MonoFutureCallbackAdapter
 			implements FutureCallback<Message<HttpResponse, Publisher<ByteBuffer>>> {

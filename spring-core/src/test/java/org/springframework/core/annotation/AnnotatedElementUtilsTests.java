@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,11 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
-import javax.annotation.Resource;
 import javax.annotation.meta.When;
 
+import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.AnnotationUtilsTests.ExtendsBaseClassWithGenericAnnotatedMethod;
@@ -80,6 +81,90 @@ import static org.springframework.core.annotation.AnnotationUtilsTests.asArray;
 class AnnotatedElementUtilsTests {
 
 	private static final String TX_NAME = Transactional.class.getName();
+
+
+	@Nested
+	class ConventionBasedAnnotationAttributeOverrideTests {
+
+		@Test
+		void getMergedAnnotationAttributesWithConventionBasedComposedAnnotation() {
+			Class<?> element = ConventionBasedComposedContextConfigClass.class;
+			String name = ContextConfig.class.getName();
+			AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
+
+			assertThat(attributes).as("Should find @ContextConfig on " + element.getSimpleName()).isNotNull();
+			assertThat(attributes.getStringArray("locations")).as("locations").containsExactly("explicitDeclaration");
+			assertThat(attributes.getStringArray("value")).as("value").containsExactly("explicitDeclaration");
+
+			// Verify contracts between utility methods:
+			assertThat(isAnnotated(element, name)).isTrue();
+		}
+
+		/**
+		 * This test should never pass, simply because Spring does not support a hybrid
+		 * approach for annotation attribute overrides with transitive implicit aliases.
+		 * See SPR-13554 for details.
+		 * <p>Furthermore, if you choose to execute this test, it can fail for either
+		 * the first test class or the second one (with different exceptions), depending
+		 * on the order in which the JVM returns the attribute methods via reflection.
+		 */
+		@Disabled("Permanently disabled but left in place for illustrative purposes")
+		@Test
+		void getMergedAnnotationAttributesWithHalfConventionBasedAndHalfAliasedComposedAnnotation() {
+			for (Class<?> clazz : asList(HalfConventionBasedAndHalfAliasedComposedContextConfigClassV1.class,
+					HalfConventionBasedAndHalfAliasedComposedContextConfigClassV2.class)) {
+				getMergedAnnotationAttributesWithHalfConventionBasedAndHalfAliasedComposedAnnotation(clazz);
+			}
+		}
+
+		private void getMergedAnnotationAttributesWithHalfConventionBasedAndHalfAliasedComposedAnnotation(Class<?> clazz) {
+			String name = ContextConfig.class.getName();
+			String simpleName = clazz.getSimpleName();
+			AnnotationAttributes attributes = getMergedAnnotationAttributes(clazz, name);
+
+			assertThat(attributes).as("Should find @ContextConfig on " + simpleName).isNotNull();
+			assertThat(attributes.getStringArray("locations")).as("locations for class [" + simpleName + "]")
+				.containsExactly("explicitDeclaration");
+			assertThat(attributes.getStringArray("value")).as("value for class [" + simpleName + "]")
+				.containsExactly("explicitDeclaration");
+
+			// Verify contracts between utility methods:
+			assertThat(isAnnotated(clazz, name)).isTrue();
+		}
+
+		@Test
+		void getMergedAnnotationAttributesWithInvalidConventionBasedComposedAnnotation() {
+			Class<?> element = InvalidConventionBasedComposedContextConfigClass.class;
+			assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+					getMergedAnnotationAttributes(element, ContextConfig.class))
+					.withMessageContaining("Different @AliasFor mirror values for annotation")
+					.withMessageContaining("attribute 'locations' and its alias 'value'")
+					.withMessageContaining("values of [{requiredLocationsDeclaration}] and [{duplicateDeclaration}]");
+		}
+
+		@Test
+		void findMergedAnnotationAttributesWithSingleElementOverridingAnArrayViaConvention() {
+			assertComponentScanAttributes(ConventionBasedSinglePackageComponentScanClass.class, "com.example.app.test");
+		}
+
+		@Test
+		void findMergedAnnotationWithLocalAliasesThatConflictWithAttributesInMetaAnnotationByConvention() {
+			Class<?> element = SpringAppConfigClass.class;
+			ContextConfig contextConfig = findMergedAnnotation(element, ContextConfig.class);
+
+			assertThat(contextConfig).as("Should find @ContextConfig on " + element).isNotNull();
+			assertThat(contextConfig.locations()).as("locations for " + element).isEmpty();
+			// 'value' in @SpringAppConfig should not override 'value' in @ContextConfig
+			assertThat(contextConfig.value()).as("value for " + element).isEmpty();
+			assertThat(contextConfig.classes()).as("classes for " + element).containsExactly(Number.class);
+		}
+
+		@Test
+		void findMergedAnnotationWithSingleElementOverridingAnArrayViaConvention() throws Exception {
+			assertWebMapping(WebController.class.getMethod("postMappedWithPathAttribute"));
+		}
+
+	}
 
 
 	@Test
@@ -364,51 +449,6 @@ class AnnotatedElementUtilsTests {
 	}
 
 	@Test
-	void getMergedAnnotationAttributesWithConventionBasedComposedAnnotation() {
-		Class<?> element = ConventionBasedComposedContextConfigClass.class;
-		String name = ContextConfig.class.getName();
-		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
-
-		assertThat(attributes).as("Should find @ContextConfig on " + element.getSimpleName()).isNotNull();
-		assertThat(attributes.getStringArray("locations")).as("locations").isEqualTo(asArray("explicitDeclaration"));
-		assertThat(attributes.getStringArray("value")).as("value").isEqualTo(asArray("explicitDeclaration"));
-
-		// Verify contracts between utility methods:
-		assertThat(isAnnotated(element, name)).isTrue();
-	}
-
-	/**
-	 * This test should never pass, simply because Spring does not support a hybrid
-	 * approach for annotation attribute overrides with transitive implicit aliases.
-	 * See SPR-13554 for details.
-	 * <p>Furthermore, if you choose to execute this test, it can fail for either
-	 * the first test class or the second one (with different exceptions), depending
-	 * on the order in which the JVM returns the attribute methods via reflection.
-	 */
-	@Disabled("Permanently disabled but left in place for illustrative purposes")
-	@Test
-	void getMergedAnnotationAttributesWithHalfConventionBasedAndHalfAliasedComposedAnnotation() {
-		for (Class<?> clazz : asList(HalfConventionBasedAndHalfAliasedComposedContextConfigClassV1.class,
-				HalfConventionBasedAndHalfAliasedComposedContextConfigClassV2.class)) {
-			getMergedAnnotationAttributesWithHalfConventionBasedAndHalfAliasedComposedAnnotation(clazz);
-		}
-	}
-
-	private void getMergedAnnotationAttributesWithHalfConventionBasedAndHalfAliasedComposedAnnotation(Class<?> clazz) {
-		String[] expected = asArray("explicitDeclaration");
-		String name = ContextConfig.class.getName();
-		String simpleName = clazz.getSimpleName();
-		AnnotationAttributes attributes = getMergedAnnotationAttributes(clazz, name);
-
-		assertThat(attributes).as("Should find @ContextConfig on " + simpleName).isNotNull();
-		assertThat(attributes.getStringArray("locations")).as("locations for class [" + clazz.getSimpleName() + "]").isEqualTo(expected);
-		assertThat(attributes.getStringArray("value")).as("value for class [" + clazz.getSimpleName() + "]").isEqualTo(expected);
-
-		// Verify contracts between utility methods:
-		assertThat(isAnnotated(clazz, name)).isTrue();
-	}
-
-	@Test
 	void getMergedAnnotationAttributesWithAliasedComposedAnnotation() {
 		Class<?> element = AliasedComposedContextConfigClass.class;
 		String name = ContextConfig.class.getName();
@@ -528,16 +568,6 @@ class AnnotatedElementUtilsTests {
 
 		// Verify contracts between utility methods:
 		assertThat(isAnnotated(element, name)).isTrue();
-	}
-
-	@Test
-	void getMergedAnnotationAttributesWithInvalidConventionBasedComposedAnnotation() {
-		Class<?> element = InvalidConventionBasedComposedContextConfigClass.class;
-		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
-				getMergedAnnotationAttributes(element, ContextConfig.class))
-				.withMessageContaining("Different @AliasFor mirror values for annotation")
-				.withMessageContaining("attribute 'locations' and its alias 'value'")
-				.withMessageContaining("values of [{requiredLocationsDeclaration}] and [{duplicateDeclaration}]");
 	}
 
 	@Test
@@ -744,11 +774,6 @@ class AnnotatedElementUtilsTests {
 	}
 
 	@Test
-	void findMergedAnnotationAttributesWithSingleElementOverridingAnArrayViaConvention() {
-		assertComponentScanAttributes(ConventionBasedSinglePackageComponentScanClass.class, "com.example.app.test");
-	}
-
-	@Test
 	void findMergedAnnotationAttributesWithSingleElementOverridingAnArrayViaAliasFor() {
 		assertComponentScanAttributes(AliasForBasedSinglePackageComponentScanClass.class, "com.example.app.test");
 	}
@@ -798,24 +823,6 @@ class AnnotatedElementUtilsTests {
 		assertThat(testPropSource).as("@TestPropSource on " + element).isNotNull();
 		assertThat(testPropSource.locations()).as("locations").isEqualTo(propFiles);
 		assertThat(testPropSource.value()).as("value").isEqualTo(propFiles);
-	}
-
-	@Test
-	void findMergedAnnotationWithLocalAliasesThatConflictWithAttributesInMetaAnnotationByConvention() {
-		final String[] EMPTY = new String[0];
-		Class<?> element = SpringAppConfigClass.class;
-		ContextConfig contextConfig = findMergedAnnotation(element, ContextConfig.class);
-
-		assertThat(contextConfig).as("Should find @ContextConfig on " + element).isNotNull();
-		assertThat(contextConfig.locations()).as("locations for " + element).isEqualTo(EMPTY);
-		// 'value' in @SpringAppConfig should not override 'value' in @ContextConfig
-		assertThat(contextConfig.value()).as("value for " + element).isEqualTo(EMPTY);
-		assertThat(contextConfig.classes()).as("classes for " + element).isEqualTo(new Class<?>[] {Number.class});
-	}
-
-	@Test
-	void findMergedAnnotationWithSingleElementOverridingAnArrayViaConvention() throws Exception {
-		assertWebMapping(WebController.class.getMethod("postMappedWithPathAttribute"));
 	}
 
 	@Test
@@ -1054,6 +1061,8 @@ class AnnotatedElementUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ConventionBasedComposedContextConfig {
 
+		// Do NOT use @AliasFor here until Spring 6.1
+		// @AliasFor(annotation = ContextConfig.class)
 		String[] locations() default {};
 	}
 
@@ -1061,6 +1070,8 @@ class AnnotatedElementUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface InvalidConventionBasedComposedContextConfig {
 
+		// Do NOT use @AliasFor here until Spring 6.1
+		// @AliasFor(annotation = ContextConfig.class)
 		String[] locations();
 	}
 
@@ -1218,9 +1229,13 @@ class AnnotatedElementUtilsTests {
 		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
 		String[] locations() default {};
 
+		// Do NOT use @AliasFor(annotation = ...) here until Spring 6.1
+		// @AliasFor(annotation = ContextConfig.class, attribute = "classes")
 		@AliasFor("value")
 		Class<?>[] classes() default {};
 
+		// Do NOT use @AliasFor(annotation = ...) here until Spring 6.1
+		// @AliasFor(annotation = ContextConfig.class, attribute = "classes")
 		@AliasFor("classes")
 		Class<?>[] value() default {};
 	}
@@ -1259,6 +1274,8 @@ class AnnotatedElementUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ConventionBasedSinglePackageComponentScan {
 
+		// Do NOT use @AliasFor here until Spring 6.1
+		// @AliasFor(annotation = ComponentScan.class)
 		String basePackages();
 	}
 
@@ -1338,7 +1355,7 @@ class AnnotatedElementUtilsTests {
 	}
 
 	@Transactional
-	static interface InterfaceWithInheritedAnnotation {
+	interface InterfaceWithInheritedAnnotation {
 
 		@Order
 		void handleFromInterface();

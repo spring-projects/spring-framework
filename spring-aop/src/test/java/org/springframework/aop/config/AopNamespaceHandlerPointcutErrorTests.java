@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,10 @@ import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifie
  * @author Mark Fisher
  * @author Chris Beams
  */
-public class AopNamespaceHandlerPointcutErrorTests {
+class AopNamespaceHandlerPointcutErrorTests {
 
 	@Test
-	public void testDuplicatePointcutConfig() {
+	void duplicatePointcutConfig() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
 				new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
@@ -42,7 +42,7 @@ public class AopNamespaceHandlerPointcutErrorTests {
 	}
 
 	@Test
-	public void testMissingPointcutConfig() {
+	void missingPointcutConfig() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
 				new XmlBeanDefinitionReader(bf).loadBeanDefinitions(

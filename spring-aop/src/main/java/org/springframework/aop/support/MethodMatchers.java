@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ public abstract class MethodMatchers {
 	 * @param targetClass the target class
 	 * @param hasIntroductions {@code true} if the object on whose behalf we are
 	 * asking is the subject on one or more introductions; {@code false} otherwise
-	 * @return whether or not this method matches statically
+	 * @return whether this method matches statically
 	 */
 	public static boolean matches(MethodMatcher mm, Method method, Class<?> targetClass, boolean hasIntroductions) {
 		Assert.notNull(mm, "MethodMatcher must not be null");
@@ -146,10 +146,9 @@ public abstract class MethodMatchers {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof UnionMethodMatcher)) {
+			if (!(other instanceof UnionMethodMatcher that)) {
 				return false;
 			}
-			UnionMethodMatcher that = (UnionMethodMatcher) other;
 			return (this.mm1.equals(that.mm1) && this.mm2.equals(that.mm2));
 		}
 
@@ -223,8 +222,7 @@ public abstract class MethodMatchers {
 			}
 			ClassFilter otherCf1 = ClassFilter.TRUE;
 			ClassFilter otherCf2 = ClassFilter.TRUE;
-			if (other instanceof ClassFilterAwareUnionMethodMatcher) {
-				ClassFilterAwareUnionMethodMatcher cfa = (ClassFilterAwareUnionMethodMatcher) other;
+			if (other instanceof ClassFilterAwareUnionMethodMatcher cfa) {
 				otherCf1 = cfa.cf1;
 				otherCf2 = cfa.cf2;
 			}
@@ -312,10 +310,9 @@ public abstract class MethodMatchers {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof IntersectionMethodMatcher)) {
+			if (!(other instanceof IntersectionMethodMatcher that)) {
 				return false;
 			}
-			IntersectionMethodMatcher that = (IntersectionMethodMatcher) other;
 			return (this.mm1.equals(that.mm1) && this.mm2.equals(that.mm2));
 		}
 

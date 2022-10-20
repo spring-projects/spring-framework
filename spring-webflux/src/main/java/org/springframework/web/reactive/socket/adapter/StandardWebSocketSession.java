@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,13 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-import javax.websocket.CloseReason;
-import javax.websocket.CloseReason.CloseCodes;
-import javax.websocket.SendHandler;
-import javax.websocket.SendResult;
-import javax.websocket.Session;
-
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.CloseReason.CloseCodes;
+import jakarta.websocket.SendHandler;
+import jakarta.websocket.SendResult;
+import jakarta.websocket.Session;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.lang.Nullable;
@@ -38,7 +37,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 
 /**
  * Spring {@link WebSocketSession} adapter for a standard Java (JSR 356)
- * {@link javax.websocket.Session}.
+ * {@link jakarta.websocket.Session}.
  *
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
@@ -51,9 +50,9 @@ public class StandardWebSocketSession extends AbstractListenerWebSocketSession<S
 	}
 
 	public StandardWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory,
-			@Nullable MonoProcessor<Void> completionMono) {
+			@Nullable Sinks.Empty<Void> completionSink) {
 
-		super(session, session.getId(), info, factory, completionMono);
+		super(session, session.getId(), info, factory, completionSink);
 	}
 
 
@@ -74,7 +73,7 @@ public class StandardWebSocketSession extends AbstractListenerWebSocketSession<S
 
 	@Override
 	protected boolean sendMessage(WebSocketMessage message) throws IOException {
-		ByteBuffer buffer = message.getPayload().asByteBuffer();
+		ByteBuffer buffer = message.getPayload().toByteBuffer();
 		if (WebSocketMessage.Type.TEXT.equals(message.getType())) {
 			getSendProcessor().setReadyToSend(false);
 			String text = new String(buffer.array(), StandardCharsets.UTF_8);
@@ -94,6 +93,11 @@ public class StandardWebSocketSession extends AbstractListenerWebSocketSession<S
 			throw new IllegalArgumentException("Unexpected message type: " + message.getType());
 		}
 		return true;
+	}
+
+	@Override
+	public boolean isOpen() {
+		return getDelegate().isOpen();
 	}
 
 	@Override

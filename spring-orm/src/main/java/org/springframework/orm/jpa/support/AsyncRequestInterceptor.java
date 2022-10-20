@@ -18,8 +18,7 @@ package org.springframework.orm.jpa.support;
 
 import java.util.concurrent.Callable;
 
-import javax.persistence.EntityManagerFactory;
-
+import jakarta.persistence.EntityManagerFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

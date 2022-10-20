@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,9 +73,8 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 	 */
 	public CachingMetadataReaderFactory(@Nullable ResourceLoader resourceLoader) {
 		super(resourceLoader);
-		if (resourceLoader instanceof DefaultResourceLoader) {
-			this.metadataReaderCache =
-					((DefaultResourceLoader) resourceLoader).getResourceCache(MetadataReader.class);
+		if (resourceLoader instanceof DefaultResourceLoader defaultResourceLoader) {
+			this.metadataReaderCache = defaultResourceLoader.getResourceCache(MetadataReader.class);
 		}
 		else {
 			setCacheLimit(DEFAULT_CACHE_LIMIT);
@@ -93,8 +92,8 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 		if (cacheLimit <= 0) {
 			this.metadataReaderCache = null;
 		}
-		else if (this.metadataReaderCache instanceof LocalResourceCache) {
-			((LocalResourceCache) this.metadataReaderCache).setCacheLimit(cacheLimit);
+		else if (this.metadataReaderCache instanceof LocalResourceCache localResourceCache) {
+			localResourceCache.setCacheLimit(cacheLimit);
 		}
 		else {
 			this.metadataReaderCache = new LocalResourceCache(cacheLimit);
@@ -105,8 +104,8 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 	 * Return the maximum number of entries for the MetadataReader cache.
 	 */
 	public int getCacheLimit() {
-		if (this.metadataReaderCache instanceof LocalResourceCache) {
-			return ((LocalResourceCache) this.metadataReaderCache).getCacheLimit();
+		if (this.metadataReaderCache instanceof LocalResourceCache localResourceCache) {
+			return localResourceCache.getCacheLimit();
 		}
 		else {
 			return (this.metadataReaderCache != null ? Integer.MAX_VALUE : 0);

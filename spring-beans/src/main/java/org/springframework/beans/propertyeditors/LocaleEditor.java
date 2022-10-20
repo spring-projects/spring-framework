@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import org.springframework.util.StringUtils;
 /**
  * Editor for {@code java.util.Locale}, to directly populate a Locale property.
  *
- * <p>Expects the same syntax as Locale's {@code toString}, i.e. language +
+ * <p>Expects the same syntax as Locale's {@code toString()}, i.e. language +
  * optionally country + optionally variant, separated by "_" (e.g. "en", "en_US").
- * Also accepts spaces as separators, as alternative to underscores.
+ * Also accepts spaces as separators, as an alternative to underscores.
  *
  * @author Juergen Hoeller
  * @since 26.05.2003

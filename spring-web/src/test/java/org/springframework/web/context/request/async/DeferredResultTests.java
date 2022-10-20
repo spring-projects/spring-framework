@@ -16,8 +16,6 @@
 
 package org.springframework.web.context.request.async;
 
-import java.util.function.Consumer;
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.context.request.async.DeferredResult.DeferredResultHandler;
@@ -127,12 +125,7 @@ public class DeferredResultTests {
 		DeferredResult<String> result = new DeferredResult<>(null, "error result");
 		result.setResultHandler(handler);
 		Exception e = new Exception();
-		result.onError(new Consumer<Throwable>() {
-			@Override
-			public void accept(Throwable t) {
-				sb.append("error event");
-			}
-		});
+		result.onError(t -> sb.append("error event"));
 
 		result.getInterceptor().handleError(null, null, e);
 

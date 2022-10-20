@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -183,8 +183,8 @@ public abstract class AopUtils {
 	 * may be {@code DefaultFoo}. In this case, the method may be
 	 * {@code DefaultFoo.bar()}. This enables attributes on that method to be found.
 	 * <p><b>NOTE:</b> In contrast to {@link org.springframework.util.ClassUtils#getMostSpecificMethod},
-	 * this method resolves Java 5 bridge methods in order to retrieve attributes
-	 * from the <i>original</i> method definition.
+	 * this method resolves bridge methods in order to retrieve attributes from
+	 * the <i>original</i> method definition.
 	 * @param method the method to be invoked, which may come from an interface
 	 * @param targetClass the target class for the current invocation.
 	 * May be {@code null} or may not even implement the method.
@@ -217,7 +217,7 @@ public abstract class AopUtils {
 	 * out a pointcut for a class.
 	 * @param pc the static or dynamic pointcut to check
 	 * @param targetClass the class to test
-	 * @param hasIntroductions whether or not the advisor chain
+	 * @param hasIntroductions whether the advisor chain
 	 * for this bean includes any introductions
 	 * @return whether the pointcut can apply on any method
 	 */
@@ -261,7 +261,7 @@ public abstract class AopUtils {
 	/**
 	 * Can the given advisor apply at all on the given class?
 	 * This is an important test as it can be used to optimize
-	 * out a advisor for a class.
+	 * out an advisor for a class.
 	 * @param advisor the advisor to check
 	 * @param targetClass class we're testing
 	 * @return whether the pointcut can apply on any method
@@ -272,11 +272,11 @@ public abstract class AopUtils {
 
 	/**
 	 * Can the given advisor apply at all on the given class?
-	 * <p>This is an important test as it can be used to optimize out a advisor for a class.
+	 * <p>This is an important test as it can be used to optimize out an advisor for a class.
 	 * This version also takes into account introductions (for IntroductionAwareMethodMatchers).
 	 * @param advisor the advisor to check
 	 * @param targetClass class we're testing
-	 * @param hasIntroductions whether or not the advisor chain for this bean includes
+	 * @param hasIntroductions whether the advisor chain for this bean includes
 	 * any introductions
 	 * @return whether the pointcut can apply on any method
 	 */
@@ -284,8 +284,7 @@ public abstract class AopUtils {
 		if (advisor instanceof IntroductionAdvisor) {
 			return ((IntroductionAdvisor) advisor).getClassFilter().matches(targetClass);
 		}
-		else if (advisor instanceof PointcutAdvisor) {
-			PointcutAdvisor pca = (PointcutAdvisor) advisor;
+		else if (advisor instanceof PointcutAdvisor pca) {
 			return canApply(pca.getPointcut(), targetClass, hasIntroductions);
 		}
 		else {

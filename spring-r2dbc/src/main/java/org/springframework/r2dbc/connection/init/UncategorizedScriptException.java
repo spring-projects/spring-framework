@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,11 @@
 package org.springframework.r2dbc.connection.init;
 
 /**
- * Thrown when we cannot determine anything more specific than "something went wrong while
- * processing an SQL script": for example, a {@link io.r2dbc.spi.R2dbcException} from
- * R2DBC that we cannot pinpoint more precisely.
+ * Thrown when we cannot determine anything more specific than "something went wrong
+ * while processing an SQL script": for example, an {@link io.r2dbc.spi.R2dbcException}
+ * from R2DBC that we cannot pinpoint more precisely.
  *
+ * @author Sam Brannen
  * @author Mark Paluch
  * @since 5.3
  */

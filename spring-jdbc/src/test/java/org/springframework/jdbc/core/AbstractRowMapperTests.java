@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 import java.sql.Timestamp;
@@ -30,6 +31,7 @@ import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.jdbc.core.test.ConcretePerson;
 import org.springframework.jdbc.core.test.ConstructorPerson;
 import org.springframework.jdbc.core.test.DatePerson;
+import org.springframework.jdbc.core.test.EmailPerson;
 import org.springframework.jdbc.core.test.Person;
 import org.springframework.jdbc.core.test.SpacePerson;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
@@ -62,7 +64,7 @@ public abstract class AbstractRowMapperTests {
 	protected void verifyPerson(ConcretePerson person) {
 		assertThat(person.getName()).isEqualTo("Bubba");
 		assertThat(person.getAge()).isEqualTo(22L);
-		assertThat(person.getBirth_date()).usingComparator(Date::compareTo).isEqualTo(new java.util.Date(1221222L));
+		assertThat(person.getBirthDate()).usingComparator(Date::compareTo).isEqualTo(new java.util.Date(1221222L));
 		assertThat(person.getBalance()).isEqualTo(new BigDecimal("1234.56"));
 		verifyPersonViaBeanWrapper(person);
 	}
@@ -89,16 +91,31 @@ public abstract class AbstractRowMapperTests {
 		verifyPersonViaBeanWrapper(person);
 	}
 
-	private void verifyPersonViaBeanWrapper(Object person) {
+	protected void verifyPersonViaBeanWrapper(Object person) {
 		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(person);
 		assertThat(bw.getPropertyValue("name")).isEqualTo("Bubba");
 		assertThat(bw.getPropertyValue("age")).isEqualTo(22L);
-		assertThat((Date) bw.getPropertyValue("birth_date")).usingComparator(Date::compareTo).isEqualTo(new java.util.Date(1221222L));
+		Date birthDate;
+		if (bw.isReadableProperty("birth_date")) {
+			birthDate = (Date) bw.getPropertyValue("birth_date");
+		}
+		else {
+			birthDate = (Date) bw.getPropertyValue("birthDate");
+		}
+		assertThat(birthDate).usingComparator(Date::compareTo).isEqualTo(new java.util.Date(1221222L));
 		assertThat(bw.getPropertyValue("balance")).isEqualTo(new BigDecimal("1234.56"));
 	}
 
+	protected void verifyPerson(EmailPerson person) {
+		assertThat(person.getName()).isEqualTo("Bubba");
+		assertThat(person.getAge()).isEqualTo(22L);
+		assertThat(person.getBirth_date()).usingComparator(Date::compareTo).isEqualTo(new java.util.Date(1221222L));
+		assertThat(person.getBalance()).isEqualTo(new BigDecimal("1234.56"));
+		assertThat(person.getEMail()).isEqualTo("hello@world.info");
+	}
 
-	protected enum MockType {ONE, TWO, THREE};
+
+	protected enum MockType {ONE, TWO, THREE, FOUR}
 
 
 	protected static class Mock {
@@ -135,19 +152,29 @@ public abstract class AbstractRowMapperTests {
 			given(resultSet.getObject(anyInt(), any(Class.class))).willThrow(new SQLFeatureNotSupportedException());
 			given(resultSet.getDate(3)).willReturn(new java.sql.Date(1221222L));
 			given(resultSet.getBigDecimal(4)).willReturn(new BigDecimal("1234.56"));
+			given(resultSet.getObject(4)).willReturn(new BigDecimal("1234.56"));
+			given(resultSet.getString(5)).willReturn("hello@world.info");
 			given(resultSet.wasNull()).willReturn(type == MockType.TWO);
 
-			given(resultSetMetaData.getColumnCount()).willReturn(4);
+			given(resultSetMetaData.getColumnCount()).willReturn(5);
 			given(resultSetMetaData.getColumnLabel(1)).willReturn(
 					type == MockType.THREE ? "Last Name" : "name");
 			given(resultSetMetaData.getColumnLabel(2)).willReturn("age");
-			given(resultSetMetaData.getColumnLabel(3)).willReturn("birth_date");
+			given(resultSetMetaData.getColumnLabel(3)).willReturn(type == MockType.FOUR ? "birthdate" :"birth_date");
 			given(resultSetMetaData.getColumnLabel(4)).willReturn("balance");
+			given(resultSetMetaData.getColumnLabel(5)).willReturn("e_mail");
 
 			given(resultSet.findColumn("name")).willReturn(1);
 			given(resultSet.findColumn("age")).willReturn(2);
-			given(resultSet.findColumn("birth_date")).willReturn(3);
+			if (type == MockType.FOUR) {
+				given(resultSet.findColumn("birthdate")).willReturn(3);
+			}
+			else {
+				given(resultSet.findColumn("birthdate")).willThrow(new SQLException());
+				given(resultSet.findColumn("birth_date")).willReturn(3);
+			}
 			given(resultSet.findColumn("balance")).willReturn(4);
+			given(resultSet.findColumn("e_mail")).willReturn(5);
 
 			jdbcTemplate = new JdbcTemplate();
 			jdbcTemplate.setDataSource(new SingleConnectionDataSource(connection, false));

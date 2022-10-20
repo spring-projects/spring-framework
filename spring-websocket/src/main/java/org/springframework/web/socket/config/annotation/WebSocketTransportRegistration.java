@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,12 +87,12 @@ public class WebSocketTransportRegistration {
 	 * <p><strong>NOTE</strong> that closing the session may not succeed in
 	 * actually closing the physical socket and may also hang. This is true
 	 * especially when using blocking IO such as the BIO connector in Tomcat
-	 * that is used by default on Tomcat 7. Therefore it is recommended to ensure
+	 * that is used by default on Tomcat 7. Therefore, it is recommended to ensure
 	 * the server is using non-blocking IO such as Tomcat's NIO connector that
 	 * is used by default on Tomcat 8. If you must use blocking IO consider
 	 * customizing OS-level TCP settings, for example
 	 * {@code /proc/sys/net/ipv4/tcp_retries2} on Linux.
-	 * <p>The default value is 10 seconds (i.e. 10 * 10000).
+	 * <p>The default value is 10 seconds (i.e. 10 * 1000).
 	 * @param timeLimit the timeout value in milliseconds; the value must be
 	 * greater than 0, otherwise it is ignored.
 	 */
@@ -123,7 +123,7 @@ public class WebSocketTransportRegistration {
 	 * <p><strong>NOTE</strong> that closing the session may not succeed in
 	 * actually closing the physical socket and may also hang. This is true
 	 * especially when using blocking IO such as the BIO connector in Tomcat
-	 * configured by default on Tomcat 7. Therefore it is recommended to ensure
+	 * configured by default on Tomcat 7. Therefore, it is recommended to ensure
 	 * the server is using non-blocking IO such as Tomcat's NIO connector used
 	 * by default on Tomcat 8. If you must use blocking IO consider customizing
 	 * OS-level TCP settings, for example {@code /proc/sys/net/ipv4/tcp_retries2}

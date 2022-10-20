@@ -16,8 +16,8 @@
 
 package org.springframework.web.jsf;
 
-import javax.faces.application.NavigationHandler;
-import javax.faces.context.FacesContext;
+import jakarta.faces.application.NavigationHandler;
+import jakarta.faces.context.FacesContext;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.lang.Nullable;

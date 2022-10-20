@@ -660,6 +660,7 @@ public class ResolvableMethod {
 			enhancer.setSuperclass(type);
 			enhancer.setInterfaces(new Class<?>[] {Supplier.class});
 			enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
+			enhancer.setAttemptLoad(true);
 			enhancer.setCallbackType(org.springframework.cglib.proxy.MethodInterceptor.class);
 
 			Class<?> proxyClass = enhancer.createClass();

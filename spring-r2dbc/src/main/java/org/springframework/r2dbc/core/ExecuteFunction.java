@@ -36,7 +36,7 @@ import org.reactivestreams.Publisher;
  * For example:
  * <p><pre class="code">
  * DatabaseClient.builder()
- *		.executeFunction(statement -> statement.execute())
+ *		.executeFunction(statement -&gt; statement.execute())
  * 		.build();
  * </pre>
  *
@@ -48,7 +48,7 @@ import org.reactivestreams.Publisher;
 public interface ExecuteFunction {
 
 	/**
-	 * Execute the given {@link Statement} for a stream of {@link Result}s.
+	 * Execute the given {@link Statement} for a stream of {@link Result} objects.
 	 * @param statement the request to execute
 	 * @return the delayed result stream
 	 */

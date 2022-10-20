@@ -20,6 +20,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Map;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ConfigurableApplicationContext;
@@ -121,6 +122,33 @@ class TestPropertySourceUtilsTests {
 				asArray("classpath:/foo1.xml", "classpath:/foo2.xml"), asArray("k1a=v1a", "k1b: v1b"));
 	}
 
+	/**
+	 * @since 5.3
+	 */
+	@Test
+	void locationsAndPropertiesDuplicatedLocally() {
+		assertMergedTestPropertySources(LocallyDuplicatedLocationsAndProperties.class,
+				asArray("classpath:/foo1.xml", "classpath:/foo2.xml"), asArray("k1a=v1a", "k1b: v1b"));
+	}
+
+	/**
+	 * @since 5.3
+	 */
+	@Test
+	void locationsAndPropertiesDuplicatedOnSuperclass() {
+		assertMergedTestPropertySources(DuplicatedLocationsAndPropertiesPropertySources.class,
+				asArray("classpath:/foo1.xml", "classpath:/foo2.xml"), asArray("k1a=v1a", "k1b: v1b"));
+	}
+
+	/**
+	 * @since 5.3
+	 */
+	@Test
+	void locationsAndPropertiesDuplicatedOnEnclosingClass() {
+		assertMergedTestPropertySources(LocationsAndPropertiesPropertySources.Nested.class,
+				asArray("classpath:/foo1.xml", "classpath:/foo2.xml"), asArray("k1a=v1a", "k1b: v1b"));
+	}
+
 	@Test
 	void extendedLocationsAndProperties() {
 		assertMergedTestPropertySources(ExtendedPropertySources.class,
@@ -145,7 +173,6 @@ class TestPropertySourceUtilsTests {
 		assertMergedTestPropertySources(OverriddenLocationsAndPropertiesPropertySources.class,
 				asArray("classpath:/baz.properties"), KEY_VALUE_PAIR);
 	}
-
 
 	@Test
 	void addPropertiesFilesToEnvironmentWithNullContext() {
@@ -266,9 +293,11 @@ class TestPropertySourceUtilsTests {
 			String[] expectedProperties) {
 
 		MergedTestPropertySources mergedPropertySources = buildMergedTestPropertySources(testClass);
-		assertThat(mergedPropertySources).isNotNull();
-		assertThat(mergedPropertySources.getLocations()).isEqualTo(expectedLocations);
-		assertThat(mergedPropertySources.getProperties()).isEqualTo(expectedProperties);
+		SoftAssertions.assertSoftly(softly -> {
+			softly.assertThat(mergedPropertySources).isNotNull();
+			softly.assertThat(mergedPropertySources.getLocations()).isEqualTo(expectedLocations);
+			softly.assertThat(mergedPropertySources.getProperties()).isEqualTo(expectedProperties);
+		});
 	}
 
 
@@ -315,6 +344,10 @@ class TestPropertySourceUtilsTests {
 
 	@TestPropertySource(locations = { "/foo1.xml", "/foo2.xml" }, properties = { "k1a=v1a", "k1b: v1b" })
 	static class LocationsAndPropertiesPropertySources {
+
+		@TestPropertySource(locations = { "/foo1.xml", "/foo2.xml" }, properties = { "k1a=v1a", "k1b: v1b" })
+		class Nested {
+		}
 	}
 
 	static class InheritedPropertySources extends LocationsAndPropertiesPropertySources {
@@ -334,6 +367,15 @@ class TestPropertySourceUtilsTests {
 
 	@TestPropertySource(locations = "/baz.properties", properties = "key = value", inheritLocations = false, inheritProperties = false)
 	static class OverriddenLocationsAndPropertiesPropertySources extends LocationsAndPropertiesPropertySources {
+	}
+
+	@TestPropertySource(locations = { "/foo1.xml", "/foo2.xml" }, properties = { "k1a=v1a", "k1b: v1b" })
+	@TestPropertySource(locations = { "/foo1.xml", "/foo2.xml" }, properties = { "k1a=v1a", "k1b: v1b" })
+	static class LocallyDuplicatedLocationsAndProperties {
+	}
+
+	@TestPropertySource(locations = { "/foo1.xml", "/foo2.xml" }, properties = { "k1a=v1a", "k1b: v1b" })
+	static class DuplicatedLocationsAndPropertiesPropertySources extends LocationsAndPropertiesPropertySources {
 	}
 
 }

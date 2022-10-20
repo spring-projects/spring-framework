@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,9 +72,9 @@ import org.springframework.util.StringUtils;
  *
  * Because the {@code CommandLinePropertySource} was added to the {@code Environment}'s
  * set of {@link MutablePropertySources} using the {@code #addFirst} method, it has
- * highest search precedence, meaning that while "db.hostname" and other properties may
- * exist in other property sources such as the system environment variables, it will be
- * chosen from the command line property source first. This is a reasonable approach
+ * the highest search precedence, meaning that while "db.hostname" and other properties
+ * may exist in other property sources such as the system environment variables, it will
+ * be chosen from the command line property source first. This is a reasonable approach
  * given that arguments specified on the command line are naturally more specific than
  * those specified as environment variables.
  *
@@ -110,7 +110,7 @@ import org.springframework.util.StringUtils;
  * evaluate true:
  *
  * <pre class="code">
- * CommandLinePropertySource<?> ps = ...
+ * CommandLinePropertySource&lt;?&gt; ps = ...
  * assert ps.containsProperty("o1") == true;
  * assert ps.containsProperty("o2") == true;
  * assert ps.containsProperty("o3") == false;
@@ -136,7 +136,7 @@ import org.springframework.util.StringUtils;
  * arguments" and available through the special {@linkplain
  * #DEFAULT_NON_OPTION_ARGS_PROPERTY_NAME "nonOptionArgs"} property.  If multiple
  * non-option arguments are specified, the value of this property will be a
- * comma-delimited string containing all of the arguments. This approach ensures a simple
+ * comma-delimited string containing all the arguments. This approach ensures a simple
  * and consistent return type (String) for all properties from a {@code
  * CommandLinePropertySource} and at the same time lends itself to conversion when used
  * in conjunction with the Spring {@link Environment} and its built-in {@code
@@ -149,7 +149,7 @@ import org.springframework.util.StringUtils;
  * will evaluate true:
  *
  * <pre class="code">
- * CommandLinePropertySource<?> ps = ...
+ * CommandLinePropertySource&lt;?&gt; ps = ...
  * assert ps.containsProperty("o1") == true;
  * assert ps.containsProperty("o2") == true;
  * assert ps.containsProperty("nonOptionArgs") == true;
@@ -189,7 +189,7 @@ import org.springframework.util.StringUtils;
  * <h3>Limitations</h3>
  *
  * This abstraction is not intended to expose the full power of underlying command line
- * parsing APIs such as JOpt or Commons CLI. It's intent is rather just the opposite: to
+ * parsing APIs such as JOpt or Commons CLI. Its intent is rather just the opposite: to
  * provide the simplest possible abstraction for accessing command line arguments
  * <em>after</em> they have been parsed. So the typical case will involve fully configuring
  * the underlying command line parsing API, parsing the {@code String[]} of arguments
@@ -246,7 +246,7 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 	 * This implementation first checks to see if the name specified is the special
 	 * {@linkplain #setNonOptionArgsPropertyName(String) "non-option arguments" property},
 	 * and if so delegates to the abstract {@link #getNonOptionArgs()} method
-	 * checking to see whether it returns an empty collection. Otherwise delegates to and
+	 * checking to see whether it returns an empty collection. Otherwise, delegates to and
 	 * returns the value of the abstract {@link #containsOption(String)} method.
 	 */
 	@Override
@@ -263,7 +263,7 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 	 * and if so delegates to the abstract {@link #getNonOptionArgs()} method. If so
 	 * and the collection of non-option arguments is empty, this method returns {@code
 	 * null}. If not empty, it returns a comma-separated String of all non-option
-	 * arguments. Otherwise delegates to and returns the result of the abstract {@link
+	 * arguments. Otherwise, delegates to and returns the result of the abstract {@link
 	 * #getOptionValues(String)} method.
 	 */
 	@Override

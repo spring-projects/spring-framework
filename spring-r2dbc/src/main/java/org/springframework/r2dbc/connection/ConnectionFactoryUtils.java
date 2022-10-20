@@ -29,8 +29,6 @@ import io.r2dbc.spi.R2dbcTimeoutException;
 import io.r2dbc.spi.R2dbcTransientException;
 import io.r2dbc.spi.R2dbcTransientResourceException;
 import io.r2dbc.spi.Wrapped;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.Ordered;
@@ -68,11 +66,6 @@ public abstract class ConnectionFactoryUtils {
 	 * Order value for ReactiveTransactionSynchronization objects that clean up R2DBC Connections.
 	 */
 	public static final int CONNECTION_SYNCHRONIZATION_ORDER = 1000;
-
-	private static final Log logger = LogFactory.getLog(ConnectionFactoryUtils.class);
-
-
-	private ConnectionFactoryUtils() {}
 
 
 	/**
@@ -112,48 +105,34 @@ public abstract class ConnectionFactoryUtils {
 			if (conHolder != null && (conHolder.hasConnection() || conHolder.isSynchronizedWithTransaction())) {
 				conHolder.requested();
 				if (!conHolder.hasConnection()) {
-
-					if (logger.isDebugEnabled()) {
-						logger.debug("Fetching resumed R2DBC Connection from ConnectionFactory");
-					}
 					return fetchConnection(connectionFactory).doOnNext(conHolder::setConnection);
 				}
 				return Mono.just(conHolder.getConnection());
 			}
 			// Else we either got no holder or an empty thread-bound holder here.
 
-			if (logger.isDebugEnabled()) {
-				logger.debug("Fetching R2DBC Connection from ConnectionFactory");
-			}
-
 			Mono<Connection> con = fetchConnection(connectionFactory);
-
 			if (synchronizationManager.isSynchronizationActive()) {
-
-				return con.flatMap(connection -> {
-					return Mono.just(connection).doOnNext(conn -> {
-
-						// Use same Connection for further R2DBC actions within the transaction.
-						// Thread-bound object will get removed by synchronization at transaction completion.
-						ConnectionHolder holderToUse = conHolder;
-						if (holderToUse == null) {
-							holderToUse = new ConnectionHolder(conn);
-						}
-						else {
-							holderToUse.setConnection(conn);
-						}
-						holderToUse.requested();
-						synchronizationManager
-								.registerSynchronization(new ConnectionSynchronization(holderToUse, connectionFactory));
-						holderToUse.setSynchronizedWithTransaction(true);
-						if (holderToUse != conHolder) {
-							synchronizationManager.bindResource(connectionFactory, holderToUse);
-						}
-					})      // Unexpected exception from external delegation call -> close Connection and rethrow.
-					.onErrorResume(e -> releaseConnection(connection, connectionFactory).then(Mono.error(e)));
-				});
+				return con.flatMap(connection -> Mono.just(connection).doOnNext(conn -> {
+					// Use same Connection for further R2DBC actions within the transaction.
+					// Thread-bound object will get removed by synchronization at transaction completion.
+					ConnectionHolder holderToUse = conHolder;
+					if (holderToUse == null) {
+						holderToUse = new ConnectionHolder(conn);
+					}
+					else {
+						holderToUse.setConnection(conn);
+					}
+					holderToUse.requested();
+					synchronizationManager
+							.registerSynchronization(new ConnectionSynchronization(holderToUse, connectionFactory));
+					holderToUse.setSynchronizedWithTransaction(true);
+					if (holderToUse != conHolder) {
+						synchronizationManager.bindResource(connectionFactory, holderToUse);
+					}
+				})      // Unexpected exception from external delegation call -> close Connection and rethrow.
+				.onErrorResume(e -> releaseConnection(connection, connectionFactory).then(Mono.error(e))));
 			}
-
 			return con;
 		}).onErrorResume(NoTransactionException.class, e -> Mono.from(connectionFactory.create()));
 	}
@@ -356,9 +335,7 @@ public abstract class ConnectionFactoryUtils {
 		@Override
 		public Mono<Void> suspend() {
 			if (this.holderActive) {
-				return TransactionSynchronizationManager.forCurrentTransaction()
-						.flatMap(synchronizationManager -> {
-
+				return TransactionSynchronizationManager.forCurrentTransaction().flatMap(synchronizationManager -> {
 					synchronizationManager.unbindResource(this.connectionFactory);
 					if (this.connectionHolder.hasConnection() && !this.connectionHolder.isOpen()) {
 						// Release Connection on suspend if the application doesn't keep
@@ -371,7 +348,6 @@ public abstract class ConnectionFactoryUtils {
 					return Mono.empty();
 				});
 			}
-
 			return Mono.empty();
 		}
 
@@ -388,11 +364,10 @@ public abstract class ConnectionFactoryUtils {
 
 		@Override
 		public Mono<Void> beforeCompletion() {
-			// Release Connection early if the holder is not open anymore
-			// (that is, not used by another resource
-			// that has its own cleanup via transaction synchronization),
-			// to avoid issues with strict transaction implementations that expect
-			// the close call before transaction completion.
+			// Release Connection early if the holder is not open anymore (that is,
+			// not used by another resource that has its own cleanup via transaction
+			// synchronization), to avoid issues with strict transaction implementations
+			// that expect the close call before transaction completion.
 			if (!this.connectionHolder.isOpen()) {
 				return TransactionSynchronizationManager.forCurrentTransaction().flatMap(synchronizationManager -> {
 					synchronizationManager.unbindResource(this.connectionFactory);
@@ -414,8 +389,7 @@ public abstract class ConnectionFactoryUtils {
 			if (this.holderActive) {
 				// The bound ConnectionHolder might not be available anymore,
 				// since afterCompletion might get called from a different thread.
-				return TransactionSynchronizationManager.forCurrentTransaction()
-						.flatMap(synchronizationManager -> {
+				return TransactionSynchronizationManager.forCurrentTransaction().flatMap(synchronizationManager -> {
 					synchronizationManager.unbindResourceIfPossible(this.connectionFactory);
 					this.holderActive = false;
 					if (this.connectionHolder.hasConnection()) {
@@ -426,7 +400,6 @@ public abstract class ConnectionFactoryUtils {
 					return Mono.empty();
 				});
 			}
-
 			this.connectionHolder.reset();
 			return Mono.empty();
 		}

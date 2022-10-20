@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.rsocket;
 
 import java.time.Duration;
@@ -41,11 +42,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- *
  * @author Rossen Stoyanchev
  * @since 5.2
  */
-public class MetadataEncoderTests {
+class MetadataEncoderTests {
 
 	private static MimeType COMPOSITE_METADATA =
 			MimeTypeUtils.parseMimeType(WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA.getString());
@@ -55,7 +55,7 @@ public class MetadataEncoderTests {
 
 
 	@Test
-	public void compositeMetadata() {
+	void compositeMetadata() {
 
 		Mono<String> asyncMeta1 = Mono.delay(Duration.ofMillis(1)).map(aLong -> "Async Metadata 1");
 		Mono<String> asyncMeta2 = Mono.delay(Duration.ofMillis(1)).map(aLong -> "Async Metadata 2");
@@ -101,7 +101,7 @@ public class MetadataEncoderTests {
 	}
 
 	@Test
-	public void routeWithRoutingMimeType() {
+	void routeWithRoutingMimeType() {
 
 		MimeType mimeType = MimeTypeUtils.parseMimeType(
 				WellKnownMimeType.MESSAGE_RSOCKET_ROUTING.getString());
@@ -116,7 +116,7 @@ public class MetadataEncoderTests {
 	}
 
 	@Test
-	public void routeWithTextPlainMimeType() {
+	void routeWithTextPlainMimeType() {
 		DataBuffer buffer =
 				new MetadataEncoder(MimeTypeUtils.TEXT_PLAIN, this.strategies)
 						.route("toA")
@@ -127,7 +127,7 @@ public class MetadataEncoderTests {
 	}
 
 	@Test
-	public void routeWithVars() {
+	void routeWithVars() {
 		DataBuffer buffer =
 				new MetadataEncoder(MimeTypeUtils.TEXT_PLAIN, this.strategies)
 						.route("a.{b}.{c}.d", "BBB", "C.C.C")
@@ -138,7 +138,7 @@ public class MetadataEncoderTests {
 	}
 
 	@Test
-	public void metadataWithTextPlainMimeType() {
+	void metadataWithTextPlainMimeType() {
 		DataBuffer buffer =
 				new MetadataEncoder(MimeTypeUtils.TEXT_PLAIN, this.strategies)
 						.metadata(Unpooled.wrappedBuffer("Raw data".getBytes(UTF_8)), null)
@@ -149,7 +149,7 @@ public class MetadataEncoderTests {
 	}
 
 	@Test
-	public void metadataWithByteBuf() {
+	void metadataWithByteBuf() {
 		DataBuffer buffer =
 				new MetadataEncoder(MimeTypeUtils.TEXT_PLAIN, this.strategies)
 						.metadata("toA", null)
@@ -160,7 +160,7 @@ public class MetadataEncoderTests {
 	}
 
 	@Test
-	public void compositeRequiredForMultipleEntries() {
+	void compositeRequiredForMultipleEntries() {
 
 		// Route, metadata
 		MetadataEncoder encoder1 = new MetadataEncoder(MimeTypeUtils.TEXT_PLAIN, this.strategies);
@@ -185,7 +185,7 @@ public class MetadataEncoderTests {
 	}
 
 	@Test
-	public void mimeTypeRequiredForCompositeEntries() {
+	void mimeTypeRequiredForCompositeEntries() {
 		MetadataEncoder encoder = new MetadataEncoder(COMPOSITE_METADATA, this.strategies);
 
 		assertThatThrownBy(() -> encoder.metadata("toA", null))
@@ -193,7 +193,7 @@ public class MetadataEncoderTests {
 	}
 
 	@Test
-	public void mimeTypeDoesNotMatchConnectionMetadataMimeType() {
+	void mimeTypeDoesNotMatchConnectionMetadataMimeType() {
 		MetadataEncoder encoder = new MetadataEncoder(MimeTypeUtils.TEXT_PLAIN, this.strategies);
 
 		assertThatThrownBy(() -> encoder.metadata("toA", MimeTypeUtils.APPLICATION_JSON))
@@ -202,7 +202,7 @@ public class MetadataEncoderTests {
 	}
 
 	@Test
-	public void defaultDataBufferFactory() {
+	void defaultDataBufferFactory() {
 		DefaultDataBufferFactory bufferFactory = DefaultDataBufferFactory.sharedInstance;
 		RSocketStrategies strategies = RSocketStrategies.builder().dataBufferFactory(bufferFactory).build();
 
@@ -212,7 +212,7 @@ public class MetadataEncoderTests {
 				.block();
 
 		ByteBuf byteBuf = new NettyDataBufferFactory(ByteBufAllocator.DEFAULT)
-				.wrap(buffer.asByteBuffer())
+				.wrap(buffer.toByteBuffer())
 				.getNativeBuffer();
 
 		CompositeMetadata entries = new CompositeMetadata(byteBuf, false);

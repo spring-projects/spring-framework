@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,9 @@ import org.springframework.util.ReflectionUtils;
  * (package {@code org.jboss.vfs}) and is in particular compatible with
  * JBoss AS 7 and WildFly 8+.
  *
- * <p>Thanks go to Marius Bogoevici for the initial patch.
- * <b>Note:</b> This is an internal class and should not be used outside the framework.
+ * <p>Thanks go to Marius Bogoevici for the initial implementation.
+ *
+ * <p><b>Note:</b> This is an internal class and should not be used outside the framework.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -102,8 +103,8 @@ public abstract class VfsUtils {
 		}
 		catch (InvocationTargetException ex) {
 			Throwable targetEx = ex.getTargetException();
-			if (targetEx instanceof IOException) {
-				throw (IOException) targetEx;
+			if (targetEx instanceof IOException ioException) {
+				throw ioException;
 			}
 			ReflectionUtils.handleInvocationTargetException(ex);
 		}

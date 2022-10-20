@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function.server
 
+import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Test
 import org.springframework.core.io.ClassPathResource
@@ -25,6 +26,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.*
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.*
 import org.springframework.web.testfixture.server.MockServerWebExchange
+import org.springframework.web.reactive.function.server.AttributesTestVisitor
 import reactor.test.StepVerifier
 
 /**
@@ -152,6 +154,30 @@ class CoRouterFunctionDslTests {
 		}
 	}
 
+	@Test
+	fun filtering() {
+		val mockRequest = get("https://example.com/filter").build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
+		StepVerifier.create(sampleRouter().route(request).flatMap { it.handle(request) })
+			.expectNextMatches { response ->
+				response.headers().getFirst("foo") == "bar"
+			}
+			.verifyComplete()
+	}
+
+	@Test
+	fun attributes() {
+		val visitor = AttributesTestVisitor()
+		attributesRouter.accept(visitor)
+		assertThat(visitor.routerFunctionsAttributes()).containsExactly(
+			listOf(mapOf("foo" to "bar", "baz" to "qux")),
+			listOf(mapOf("foo" to "bar", "baz" to "qux")),
+			listOf(mapOf("foo" to "bar"), mapOf("foo" to "n1")),
+			listOf(mapOf("baz" to "qux"), mapOf("foo" to "n1")),
+			listOf(mapOf("foo" to "n3"), mapOf("foo" to "n2"), mapOf("foo" to "n1"))
+		);
+		assertThat(visitor.visitCount()).isEqualTo(7);
+	}
 
 	private fun sampleRouter() = coRouter {
 		(GET("/foo/") or GET("/foos/")) { req -> handle(req) }
@@ -186,6 +212,18 @@ class CoRouterFunctionDslTests {
 		path("/baz", ::handle)
 		GET("/rendering") { RenderingResponse.create("index").buildAndAwait() }
 		add(otherRouter)
+		add(filterRouter)
+	}
+
+	private val filterRouter = coRouter {
+		"/filter" { request ->
+			ok().header("foo", request.headers().firstHeader("foo")).buildAndAwait()
+		}
+
+		filter { request, next ->
+			val newRequest = ServerRequest.from(request).apply { header("foo", "bar") }.build()
+			next(newRequest)
+		}
 	}
 
 	private val otherRouter = router {
@@ -207,6 +245,39 @@ class CoRouterFunctionDslTests {
 		onError<IllegalStateException> { _, _ ->
 			ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
 		}
+	}
+
+	private val attributesRouter = router {
+		GET("/atts/1") {
+			ok().build()
+		}
+		withAttribute("foo", "bar")
+		withAttribute("baz", "qux")
+		GET("/atts/2") {
+			ok().build()
+		}
+		withAttributes { atts ->
+			atts["foo"] = "bar"
+			atts["baz"] = "qux"
+		}
+		"/atts".nest {
+			GET("/3") {
+				ok().build()
+			}
+			withAttribute("foo", "bar")
+			GET("/4") {
+				ok().build()
+			}
+			withAttribute("baz", "qux")
+			"/5".nest {
+				GET {
+					ok().build()
+				}
+				withAttribute("foo", "n3")
+			}
+			withAttribute("foo", "n2")
+		}
+		withAttribute("foo", "n1")
 	}
 
 	@Suppress("UNUSED_PARAMETER")

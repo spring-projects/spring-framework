@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -269,13 +269,15 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		}
 
 		for (Message<byte[]> message : messages) {
-			try {
-				StompHeaderAccessor headerAccessor =
-						MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-				Assert.state(headerAccessor != null, "No StompHeaderAccessor");
+			StompHeaderAccessor headerAccessor =
+					MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+			Assert.state(headerAccessor != null, "No StompHeaderAccessor");
 
-				StompCommand command = headerAccessor.getCommand();
-				boolean isConnect = StompCommand.CONNECT.equals(command) || StompCommand.STOMP.equals(command);
+			StompCommand command = headerAccessor.getCommand();
+			boolean isConnect = StompCommand.CONNECT.equals(command) || StompCommand.STOMP.equals(command);
+
+			boolean sent = false;
+			try {
 
 				headerAccessor.setSessionId(session.getId());
 				headerAccessor.setSessionAttributes(session.getAttributes());
@@ -305,7 +307,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 				try {
 					SimpAttributesContextHolder.setAttributesFromMessage(message);
-					boolean sent = outputChannel.send(message);
+					sent = outputChannel.send(message);
 
 					if (sent) {
 						if (this.eventPublisher != null) {
@@ -327,9 +329,15 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 				}
 			}
 			catch (Throwable ex) {
-				if (logger.isErrorEnabled()) {
-					logger.error("Failed to send client message to application via MessageChannel" +
-							" in session " + session.getId() + ". Sending STOMP ERROR to client.", ex);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Failed to send message to MessageChannel in session " + session.getId(), ex);
+				}
+				else if (logger.isErrorEnabled()) {
+					// Skip unsent CONNECT messages (likely auth issues)
+					if (!isConnect || sent) {
+						logger.error("Failed to send message to MessageChannel in session " + session.getId() +
+								":" + ex.getMessage());
+					}
 				}
 				handleError(session, ex, message);
 			}
@@ -366,6 +374,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		headerAccessor.setMessage(error.getMessage());
 
 		byte[] bytes = this.stompEncoder.encode(headerAccessor.getMessageHeaders(), EMPTY_PAYLOAD);
+		// We cannot use try-with-resources here for the WebSocketSession, since we have
+		// custom handling of the close() method in a finally-block.
 		try {
 			session.sendMessage(new TextMessage(bytes));
 		}

@@ -142,7 +142,7 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 	}
 
 	/**
-	 * Unbind the Hibernate {@code Session} from the thread and close it).
+	 * Unbind the Hibernate {@code Session} from the thread and close it.
 	 * @see TransactionSynchronizationManager
 	 */
 	@Override

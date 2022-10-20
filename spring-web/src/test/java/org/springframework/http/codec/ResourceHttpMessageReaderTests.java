@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.codec;
 
 import java.io.IOException;
@@ -48,7 +49,7 @@ public class ResourceHttpMessageReaderTests extends AbstractLeakCheckingTests {
 		String body = "Test resource content";
 
 		ContentDisposition contentDisposition =
-				ContentDisposition.builder("attachment").name("file").filename(filename).build();
+				ContentDisposition.attachment().name("file").filename(filename).build();
 
 		MockClientHttpResponse response = new MockClientHttpResponse(HttpStatus.OK);
 		response.getHeaders().setContentType(MediaType.TEXT_PLAIN);

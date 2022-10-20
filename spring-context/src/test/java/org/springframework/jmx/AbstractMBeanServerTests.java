@@ -46,11 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * {@code jmxremote_optional.jar} into your classpath, for example in the {@code lib/ext}
  * folder of your JVM.
  *
- * <p>See also:
- * <ul>
- * <li><a href="https://jira.spring.io/browse/SPR-8093">SPR-8093</a></li>
- * <li><a href="https://issuetracker.springsource.com/browse/EBR-349">EBR-349</a></li>
- * </ul>
+ * <p>See also: <a href="https://jira.spring.io/browse/SPR-8093">SPR-8093</a>
  *
  * @author Rob Harrop
  * @author Juergen Hoeller

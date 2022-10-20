@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.function.Consumer;
 
-import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
 
+import jakarta.persistence.PersistenceException;
 import org.hibernate.ConnectionReleaseMode;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
@@ -497,7 +497,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					if (logger.isDebugEnabled()) {
 						logger.debug("Preparing JDBC Connection of Hibernate Session [" + session + "]");
 					}
-					Connection con = session.connection();
+					Connection con = session.getJdbcCoordinator().getLogicalConnection().getPhysicalConnection();
 					Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
 					txObject.setPreviousIsolationLevel(previousIsolationLevel);
 					txObject.setReadOnly(definition.isReadOnly());
@@ -562,7 +562,9 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 			// Register the Hibernate Session's JDBC Connection for the DataSource, if set.
 			if (getDataSource() != null) {
-				ConnectionHolder conHolder = new ConnectionHolder(session::connection);
+				final SessionImplementor sessionToUse = session;
+				ConnectionHolder conHolder = new ConnectionHolder(
+						() -> sessionToUse.getJdbcCoordinator().getLogicalConnection().getPhysicalConnection());
 				if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
 					conHolder.setTimeoutInSeconds(timeout);
 				}
@@ -724,7 +726,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			// the isolation level and/or read-only flag of the JDBC Connection here.
 			// Else, we need to rely on the connection pool to perform proper cleanup.
 			try {
-				Connection con = session.connection();
+				Connection con = session.getJdbcCoordinator().getLogicalConnection().getPhysicalConnection();
 				Integer previousHoldability = txObject.getPreviousHoldability();
 				if (previousHoldability != null) {
 					con.setHoldability(previousHoldability);
@@ -763,13 +765,15 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	/**
 	 * Disconnect a pre-existing Hibernate Session on transaction completion,
 	 * returning its database connection but preserving its entity state.
-	 * <p>The default implementation simply calls {@link Session#disconnect()}.
+	 * <p>The default implementation calls the equivalent of {@link Session#disconnect()}.
 	 * Subclasses may override this with a no-op or with fine-tuned disconnection logic.
 	 * @param session the Hibernate Session to disconnect
 	 * @see Session#disconnect()
 	 */
 	protected void disconnectOnCompletion(Session session) {
-		session.disconnect();
+		if (session instanceof SessionImplementor sessionImpl) {
+			sessionImpl.getJdbcCoordinator().getLogicalConnection().manualDisconnect();
+		}
 	}
 
 	/**

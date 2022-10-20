@@ -17,6 +17,7 @@
 package org.springframework.test.context.support;
 
 import java.lang.reflect.Method;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -26,12 +27,14 @@ import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextCustomizerFactory;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestContextAnnotationUtils;
 
 /**
  * {@link ContextCustomizerFactory} to support
  * {@link DynamicPropertySource @DynamicPropertySource} methods.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 5.2.5
  * @see DynamicPropertiesContextCustomizer
  */
@@ -42,11 +45,19 @@ class DynamicPropertiesContextCustomizerFactory implements ContextCustomizerFact
 	public DynamicPropertiesContextCustomizer createContextCustomizer(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributes) {
 
-		Set<Method> methods = MethodIntrospector.selectMethods(testClass, this::isAnnotated);
+		Set<Method> methods = new LinkedHashSet<>();
+		findMethods(testClass, methods);
 		if (methods.isEmpty()) {
 			return null;
 		}
 		return new DynamicPropertiesContextCustomizer(methods);
+	}
+
+	private void findMethods(Class<?> testClass, Set<Method> methods) {
+		methods.addAll(MethodIntrospector.selectMethods(testClass, this::isAnnotated));
+		if (TestContextAnnotationUtils.searchEnclosingClass(testClass)) {
+			findMethods(testClass.getEnclosingClass(), methods);
+		}
 	}
 
 	private boolean isAnnotated(Method method) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.test.context.support;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -39,6 +40,7 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @since 4.0
  */
+@SuppressWarnings("serial")
 public class DefaultTestContext implements TestContext {
 
 	private static final long serialVersionUID = -5827157174866681233L;
@@ -121,16 +123,15 @@ public class DefaultTestContext implements TestContext {
 	@Override
 	public ApplicationContext getApplicationContext() {
 		ApplicationContext context = this.cacheAwareContextLoaderDelegate.loadContext(this.mergedContextConfiguration);
-		if (context instanceof ConfigurableApplicationContext) {
-			@SuppressWarnings("resource")
-			ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
-			Assert.state(cac.isActive(), () ->
-					"The ApplicationContext loaded for [" + this.mergedContextConfiguration +
-					"] is not active. This may be due to one of the following reasons: " +
-					"1) the context was closed programmatically by user code; " +
-					"2) the context was closed during parallel test execution either " +
-					"according to @DirtiesContext semantics or due to automatic eviction " +
-					"from the ContextCache due to a maximum cache size policy.");
+		if (context instanceof ConfigurableApplicationContext cac) {
+			Assert.state(cac.isActive(), () -> """
+					The ApplicationContext loaded for %s is not active. \
+					This may be due to one of the following reasons: \
+					1) the context was closed programmatically by user code; \
+					2) the context was closed during parallel test execution either \
+					according to @DirtiesContext semantics or due to automatic eviction \
+					from the ContextCache due to a maximum cache size policy."""
+						.formatted(this.mergedContextConfiguration));
 		}
 		return context;
 	}
@@ -198,6 +199,17 @@ public class DefaultTestContext implements TestContext {
 	public Object getAttribute(String name) {
 		Assert.notNull(name, "Name must not be null");
 		return this.attributes.get(name);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T computeAttribute(String name, Function<String, T> computeFunction) {
+		Assert.notNull(name, "Name must not be null");
+		Assert.notNull(computeFunction, "Compute function must not be null");
+		Object value = this.attributes.computeIfAbsent(name, computeFunction);
+		Assert.state(value != null,
+				() -> "Compute function must not return null for attribute named '%s'".formatted(name));
+		return (T) value;
 	}
 
 	@Override

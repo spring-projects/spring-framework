@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link org.springframework.scripting.ScriptFactory} implementation based
- * on the JSR-223 script engine abstraction (as included in Java 6+).
+ * on the JSR-223 script engine abstraction (as included in Java).
  * Supports JavaScript, Groovy, JRuby, and other JSR-223 compliant engines.
  *
  * <p>Typically used in combination with a
@@ -241,11 +241,10 @@ public class StandardScriptFactory implements ScriptFactory, BeanClassLoaderAwar
 
 		if (adaptedIfc != null) {
 			ScriptEngine scriptEngine = this.scriptEngine;
-			if (!(scriptEngine instanceof Invocable)) {
+			if (!(scriptEngine instanceof Invocable invocable)) {
 				throw new ScriptCompilationException(scriptSource,
 						"ScriptEngine must implement Invocable in order to adapt it to an interface: " + scriptEngine);
 			}
-			Invocable invocable = (Invocable) scriptEngine;
 			if (script != null) {
 				script = invocable.getInterface(script, adaptedIfc);
 			}

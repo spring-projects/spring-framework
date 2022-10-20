@@ -20,7 +20,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -176,12 +175,7 @@ public class NamedParameterQueryTests {
 		MapSqlParameterSource params = new MapSqlParameterSource();
 		params.addValue("id", 3);
 		Object o = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id",
-				params, new RowMapper<Object>() {
-			@Override
-			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
-				return rs.getInt(1);
-			}
-		});
+				params, (RowMapper<Object>) (rs, rowNum) -> rs.getInt(1));
 
 		boolean condition = o instanceof Integer;
 		assertThat(condition).as("Correct result type").isTrue();

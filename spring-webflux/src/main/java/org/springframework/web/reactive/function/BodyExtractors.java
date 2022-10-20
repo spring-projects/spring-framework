@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -137,6 +136,9 @@ public abstract class BodyExtractors {
 
 	/**
 	 * Extractor to read multipart data into a {@code MultiValueMap<String, Part>}.
+	 * <p><strong>Note:</strong> that resources used for part handling,
+	 * like storage for the uploaded files, is not deleted automatically, but
+	 * should be done via {@link Part#delete()}.
 	 * @return {@code BodyExtractor} for multipart data
 	 */
 	// Parameterized for server-side use
@@ -151,6 +153,9 @@ public abstract class BodyExtractors {
 
 	/**
 	 * Extractor to read multipart data into {@code Flux<Part>}.
+	 * <p><strong>Note:</strong> that resources used for part handling,
+	 * like storage for the uploaded files, is not deleted automatically, but
+	 * should be done via {@link Part#delete()}.
 	 * @return {@code BodyExtractor} for multipart request parts
 	 */
 	// Parameterized for server-side use
@@ -196,8 +201,8 @@ public abstract class BodyExtractors {
 				.map(readerFunction)
 				.orElseGet(() -> {
 					List<MediaType> mediaTypes = context.messageReaders().stream()
-							.flatMap(reader -> reader.getReadableMediaTypes().stream())
-							.collect(Collectors.toList());
+							.flatMap(reader -> reader.getReadableMediaTypes(elementType).stream())
+							.toList();
 					return errorFunction.apply(
 							new UnsupportedMediaTypeException(contentType, mediaTypes, elementType));
 				});
@@ -224,7 +229,7 @@ public abstract class BodyExtractors {
 
 		Flux<T> result;
 		if (message.getHeaders().getContentType() == null) {
-			// Maybe it's okay there is no content type, if there is no content..
+			// Maybe it's okay there is no content type, if there is no content.
 			result = message.getBody().map(buffer -> {
 				DataBufferUtils.release(buffer);
 				throw ex;

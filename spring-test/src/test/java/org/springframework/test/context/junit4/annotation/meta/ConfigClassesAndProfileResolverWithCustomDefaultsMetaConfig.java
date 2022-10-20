@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.lang.annotation.Target;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ActiveProfilesResolver;
 import org.springframework.test.context.ContextConfiguration;
@@ -41,6 +42,13 @@ import org.springframework.test.context.ContextConfiguration;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface ConfigClassesAndProfileResolverWithCustomDefaultsMetaConfig {
+
+	@AliasFor(annotation = ContextConfiguration.class)
+	Class<?>[] classes() default { DevConfig.class, ProductionConfig.class, ResolverConfig.class };
+
+	@AliasFor(annotation = ActiveProfiles.class)
+	Class<? extends ActiveProfilesResolver> resolver() default CustomResolver.class;
+
 
 	@Configuration
 	@Profile("dev")
@@ -80,10 +88,5 @@ public @interface ConfigClassesAndProfileResolverWithCustomDefaultsMetaConfig {
 					: new String[] {};
 		}
 	}
-
-
-	Class<?>[] classes() default { DevConfig.class, ProductionConfig.class, ResolverConfig.class };
-
-	Class<? extends ActiveProfilesResolver> resolver() default CustomResolver.class;
 
 }

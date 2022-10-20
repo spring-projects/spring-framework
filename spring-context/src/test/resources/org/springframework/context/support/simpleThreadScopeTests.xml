@@ -12,10 +12,18 @@
 		</property>
 	</bean>
 
-	<bean id="threadScopedObject" class="org.springframework.beans.testfixture.beans.TestBean" scope="thread">
-		<property name="spouse" ref="threadScopedObject2" />
+	<!--
+		NOTE: The bean names removeNodeStatusScreen and removeNodeStatusPresenter are seemingly
+		quite odd for TestBean instances; however, these have been chosen due to the fact that
+		they end up in the same bucket within a HashMap/ConcurrentHashMap initialized with the
+		default initial capacity.
+
+		For details see: https://github.com/spring-projects/spring-framework/issues/25801
+	 -->
+	<bean id="removeNodeStatusScreen" class="org.springframework.beans.testfixture.beans.TestBean" scope="thread">
+		<property name="spouse" ref="removeNodeStatusPresenter" />
 	</bean>
 
-	<bean id="threadScopedObject2" class="org.springframework.beans.testfixture.beans.TestBean" scope="thread" />
+	<bean id="removeNodeStatusPresenter" class="org.springframework.beans.testfixture.beans.TestBean" scope="thread" />
 
 </beans>

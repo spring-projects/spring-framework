@@ -104,7 +104,7 @@ public class MailSendException extends MailException {
 	 * be available after serialization as well.
 	 * @return the Map of failed messages as keys and thrown exceptions as values
 	 * @see SimpleMailMessage
-	 * @see javax.mail.internet.MimeMessage
+	 * @see jakarta.mail.internet.MimeMessage
 	 */
 	public final Map<Object, Exception> getFailedMessages() {
 		return this.failedMessages;

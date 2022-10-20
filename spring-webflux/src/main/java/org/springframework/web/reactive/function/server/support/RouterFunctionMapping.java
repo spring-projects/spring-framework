@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,21 +119,23 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	}
 
 	private List<RouterFunction<?>> routerFunctions() {
-		List<RouterFunction<?>> functions = obtainApplicationContext()
+		return obtainApplicationContext()
 				.getBeanProvider(RouterFunction.class)
 				.orderedStream()
-				.map(router -> (RouterFunction<?>)router)
+				.map(router -> (RouterFunction<?>) router)
 				.collect(Collectors.toList());
-		return (!CollectionUtils.isEmpty(functions) ? functions : Collections.emptyList());
 	}
 
 	private void logRouterFunctions(List<RouterFunction<?>> routerFunctions) {
-		if (logger.isDebugEnabled()) {
+		if (mappingsLogger.isDebugEnabled()) {
+			routerFunctions.forEach(function -> mappingsLogger.debug("Mapped " + function));
+		}
+		else if (logger.isDebugEnabled()) {
 			int total = routerFunctions.size();
 			String message = total + " RouterFunction(s) in " + formatMappingName();
 			if (logger.isTraceEnabled()) {
 				if (total > 0) {
-					routerFunctions.forEach(routerFunction -> logger.trace("Mapped " + routerFunction));
+					routerFunctions.forEach(function -> logger.trace("Mapped " + function));
 				}
 				else {
 					logger.trace(message);

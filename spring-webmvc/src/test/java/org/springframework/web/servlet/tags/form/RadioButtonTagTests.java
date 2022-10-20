@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,8 @@ import java.beans.PropertyEditorSupport;
 import java.io.StringReader;
 import java.util.Collections;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.Tag;
-
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.Tag;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
@@ -41,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Juergen Hoeller
  * @author Jeremy Grelle
  */
-public class RadioButtonTagTests extends AbstractFormTagTests {
+class RadioButtonTagTests extends AbstractFormTagTests {
 
 	private RadioButtonTag tag;
 
@@ -60,7 +59,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withCheckedValue() throws Exception {
+	void withCheckedValue() throws Exception {
 		String dynamicAttribute1 = "attr1";
 		String dynamicAttribute2 = "attr2";
 
@@ -84,7 +83,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withCheckedValueAndDynamicAttributes() throws Exception {
+	void withCheckedValueAndDynamicAttributes() throws Exception {
 		this.tag.setPath("sex");
 		this.tag.setValue("M");
 		int result = this.tag.doStartTag();
@@ -100,7 +99,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withCheckedObjectValue() throws Exception {
+	void withCheckedObjectValue() throws Exception {
 		this.tag.setPath("myFloat");
 		this.tag.setValue(getFloat());
 		int result = this.tag.doStartTag();
@@ -116,7 +115,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withCheckedObjectValueAndEditor() throws Exception {
+	void withCheckedObjectValueAndEditor() throws Exception {
 		this.tag.setPath("myFloat");
 		this.tag.setValue("F12.99");
 
@@ -138,8 +137,8 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withUncheckedObjectValue() throws Exception {
-		Float value = new Float("99.45");
+	void withUncheckedObjectValue() throws Exception {
+		Float value = Float.valueOf("99.45");
 		this.tag.setPath("myFloat");
 		this.tag.setValue(value);
 		int result = this.tag.doStartTag();
@@ -155,7 +154,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withUncheckedValue() throws Exception {
+	void withUncheckedValue() throws Exception {
 		this.tag.setPath("sex");
 		this.tag.setValue("F");
 		int result = this.tag.doStartTag();
@@ -171,7 +170,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void collectionOfPets() throws Exception {
+	void collectionOfPets() throws Exception {
 		this.tag.setPath("pets");
 		this.tag.setValue(new Pet("Rudiger"));
 
@@ -194,7 +193,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void collectionOfPetsNotSelected() throws Exception {
+	void collectionOfPetsNotSelected() throws Exception {
 		this.tag.setPath("pets");
 		this.tag.setValue(new Pet("Santa's Little Helper"));
 
@@ -217,7 +216,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void collectionOfPetsWithEditor() throws Exception {
+	void collectionOfPetsWithEditor() throws Exception {
 		this.tag.setPath("pets");
 		this.tag.setValue(new ItemPet("Rudiger"));
 
@@ -245,7 +244,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void dynamicTypeAttribute() throws JspException {
+	void dynamicTypeAttribute() throws JspException {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.tag.setDynamicAttribute(null, "type", "email"))
 			.withMessage("Attribute type=\"email\" is not allowed");
@@ -260,7 +259,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 	}
 
 	private Float getFloat() {
-		return new Float("12.99");
+		return Float.valueOf("12.99");
 	}
 
 	@Override

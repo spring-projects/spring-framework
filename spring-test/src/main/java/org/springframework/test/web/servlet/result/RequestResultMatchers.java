@@ -18,11 +18,11 @@ package org.springframework.test.web.servlet.result;
 
 import java.util.concurrent.Callable;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.hamcrest.Matcher;
 
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.util.Assert;
@@ -98,7 +98,7 @@ public class RequestResultMatchers {
 	 * or {@link WebAsyncTask}. The value matched is the value returned from the
 	 * {@code Callable} or the exception raised.
 	 */
-	public ResultMatcher asyncResult(Object expectedResult) {
+	public ResultMatcher asyncResult(@Nullable Object expectedResult) {
 		return result -> {
 			HttpServletRequest request = result.getRequest();
 			assertAsyncStarted(request);
@@ -120,7 +120,7 @@ public class RequestResultMatchers {
 	/**
 	 * Assert a request attribute value.
 	 */
-	public ResultMatcher attribute(String name, Object expectedValue) {
+	public ResultMatcher attribute(String name, @Nullable Object expectedValue) {
 		return result ->
 				assertEquals("Request attribute '" + name + "'", expectedValue, result.getRequest().getAttribute(name));
 	}
@@ -141,7 +141,7 @@ public class RequestResultMatchers {
 	/**
 	 * Assert a session attribute value.
 	 */
-	public ResultMatcher sessionAttribute(String name, Object value) {
+	public ResultMatcher sessionAttribute(String name, @Nullable Object value) {
 		return result -> {
 			HttpSession session = result.getRequest().getSession();
 			Assert.state(session != null, "No HttpSession");

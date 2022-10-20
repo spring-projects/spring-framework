@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,11 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.SocketTimeoutException;
 import java.util.Collections;
+import java.util.Locale;
 
+import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,8 +33,11 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
@@ -42,6 +48,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.method.HandlerMethod;
@@ -55,7 +62,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
-import org.springframework.web.util.NestedServletException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -66,6 +72,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Arjen Poutsma
  * @author Kazuki Shimizu
  * @author Brian Clozel
+ * @author Rodolphe Lecocq
  * @since 3.1
  */
 @SuppressWarnings("unused")
@@ -189,6 +196,18 @@ public class ExceptionHandlerExceptionResolverTests {
 		assertThat(this.response.getContentAsString()).isEqualTo("IllegalArgumentException");
 	}
 
+	@Test  // gh-26317
+	void resolveExceptionResponseBodyMatchingCauseLevel2() throws UnsupportedEncodingException, NoSuchMethodException {
+		Exception ex = new Exception(new Exception(new IllegalArgumentException()));
+		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
+		this.resolver.afterPropertiesSet();
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertThat(mav).isNotNull();
+		assertThat(mav.isEmpty()).isTrue();
+		assertThat(this.response.getContentAsString()).isEqualTo("IllegalArgumentException");
+	}
+
 	@Test
 	void resolveExceptionResponseWriter() throws Exception {
 		IllegalArgumentException ex = new IllegalArgumentException();
@@ -257,6 +276,21 @@ public class ExceptionHandlerExceptionResolverTests {
 		assertThat(this.response.getContentAsString()).isEqualTo("TestExceptionResolver: IllegalStateException");
 	}
 
+	@Test  // gh-26317
+	void resolveExceptionGlobalHandlerOrderedMatchingCauseLevel2() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyConfig.class);
+		this.resolver.setApplicationContext(ctx);
+		this.resolver.afterPropertiesSet();
+
+		Exception ex = new Exception(new Exception(new IllegalStateException()));
+		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertThat(mav).as("Exception was not handled").isNotNull();
+		assertThat(mav.isEmpty()).isTrue();
+		assertThat(this.response.getContentAsString()).isEqualTo("TestExceptionResolver: IllegalStateException");
+	}
+
 	@Test  // SPR-12605
 	void resolveExceptionWithHandlerMethodArg() throws Exception {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyConfig.class);
@@ -281,7 +315,7 @@ public class ExceptionHandlerExceptionResolverTests {
 		AssertionError err = new AssertionError("argh");
 		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
 		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod,
-				new NestedServletException("Handler dispatch failed", err));
+				new ServletException("Handler dispatch failed", err));
 
 		assertThat(mav).as("Exception was not handled").isNotNull();
 		assertThat(mav.isEmpty()).isTrue();
@@ -294,14 +328,37 @@ public class ExceptionHandlerExceptionResolverTests {
 		this.resolver.setApplicationContext(ctx);
 		this.resolver.afterPropertiesSet();
 
-		AssertionError err = new AssertionError("argh");
-		FatalBeanException ex = new FatalBeanException("wrapped", err);
+		AssertionError rootCause = new AssertionError("argh");
+		FatalBeanException cause = new FatalBeanException("wrapped", rootCause);
+		Exception ex = new Exception(cause);  // gh-26317
 		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
 		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
 
 		assertThat(mav).as("Exception was not handled").isNotNull();
 		assertThat(mav.isEmpty()).isTrue();
-		assertThat(this.response.getContentAsString()).isEqualTo(err.toString());
+		assertThat(this.response.getContentAsString()).isEqualTo(rootCause.toString());
+	}
+
+	@Test //gh-27156
+	void resolveExceptionWithReasonResolvedByMessageSource() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyConfig.class);
+		StaticApplicationContext context = new StaticApplicationContext(ctx);
+		Locale locale = Locale.ENGLISH;
+		context.addMessage("gateway.timeout", locale, "Gateway Timeout");
+		context.refresh();
+		LocaleContextHolder.setLocale(locale);
+		this.resolver.setApplicationContext(context);
+		this.resolver.afterPropertiesSet();
+
+		SocketTimeoutException ex = new SocketTimeoutException();
+		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertThat(mav).as("Exception was not handled").isNotNull();
+		assertThat(mav.isEmpty()).isTrue();
+		assertThat(this.response.getStatus()).isEqualTo(HttpStatus.GATEWAY_TIMEOUT.value());
+		assertThat(this.response.getErrorMessage()).isEqualTo("Gateway Timeout");
+		assertThat(this.response.getContentAsString()).isEqualTo("");
 	}
 
 	@Test
@@ -311,6 +368,21 @@ public class ExceptionHandlerExceptionResolverTests {
 		this.resolver.afterPropertiesSet();
 
 		IllegalStateException ex = new IllegalStateException();
+		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertThat(mav).as("Exception was not handled").isNotNull();
+		assertThat(mav.isEmpty()).isTrue();
+		assertThat(this.response.getContentAsString()).isEqualTo("BasePackageTestExceptionResolver: IllegalStateException");
+	}
+
+	@Test  // gh-26317
+	void resolveExceptionControllerAdviceHandlerMatchingCauseLevel2() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyControllerAdviceConfig.class);
+		this.resolver.setApplicationContext(ctx);
+		this.resolver.afterPropertiesSet();
+
+		Exception ex = new Exception(new IllegalStateException());
 		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
 		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
 
@@ -486,6 +558,16 @@ public class ExceptionHandlerExceptionResolverTests {
 		}
 	}
 
+	@RestControllerAdvice
+	@Order(3)
+	static class ResponseStatusTestExceptionResolver {
+
+		@ExceptionHandler(SocketTimeoutException.class)
+		@ResponseStatus(code = HttpStatus.GATEWAY_TIMEOUT, reason = "gateway.timeout")
+		public void handleException(SocketTimeoutException ex) {
+
+		}
+	}
 
 	@Configuration
 	static class MyConfig {
@@ -498,6 +580,11 @@ public class ExceptionHandlerExceptionResolverTests {
 		@Bean
 		public AnotherTestExceptionResolver anotherTestExceptionResolver() {
 			return new AnotherTestExceptionResolver();
+		}
+
+		@Bean
+		public ResponseStatusTestExceptionResolver responseStatusTestExceptionResolver() {
+			return new ResponseStatusTestExceptionResolver();
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,9 @@ import java.net.URI;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -51,6 +50,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.reactive.function.BodyExtractor;
@@ -71,6 +71,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
 public abstract class RequestPredicates {
 
 	private static final Log logger = LogFactory.getLog(RequestPredicates.class);
+
 
 	/**
 	 * Return a {@code RequestPredicate} that always matches.
@@ -336,14 +337,14 @@ public abstract class RequestPredicates {
 		void method(Set<HttpMethod> methods);
 
 		/**
-		 * Receive notification of an path predicate.
+		 * Receive notification of a path predicate.
 		 * @param pattern the path pattern that makes up the predicate
 		 * @see RequestPredicates#path(String)
 		 */
 		void path(String pattern);
 
 		/**
-		 * Receive notification of an path extension predicate.
+		 * Receive notification of a path extension predicate.
 		 * @param extension the path extension that makes up the predicate
 		 * @see RequestPredicates#pathExtension(String)
 		 */
@@ -436,12 +437,12 @@ public abstract class RequestPredicates {
 
 		public HttpMethodPredicate(HttpMethod httpMethod) {
 			Assert.notNull(httpMethod, "HttpMethod must not be null");
-			this.httpMethods = EnumSet.of(httpMethod);
+			this.httpMethods = Collections.singleton(httpMethod);
 		}
 
 		public HttpMethodPredicate(HttpMethod... httpMethods) {
 			Assert.notEmpty(httpMethods, "HttpMethods must not be empty");
-			this.httpMethods = EnumSet.copyOf(Arrays.asList(httpMethods));
+			this.httpMethods = new LinkedHashSet<>(Arrays.asList(httpMethods));
 		}
 
 		@Override
@@ -452,16 +453,15 @@ public abstract class RequestPredicates {
 			return match;
 		}
 
-		@Nullable
 		private static HttpMethod method(ServerRequest request) {
 			if (CorsUtils.isPreFlightRequest(request.exchange().getRequest())) {
 				String accessControlRequestMethod =
 						request.headers().firstHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD);
-				return HttpMethod.resolve(accessControlRequestMethod);
+				if (accessControlRequestMethod != null) {
+					return HttpMethod.valueOf(accessControlRequestMethod);
+				}
 			}
-			else {
-				return request.method();
-			}
+			return request.method();
 		}
 
 		@Override
@@ -537,7 +537,6 @@ public abstract class RequestPredicates {
 		public String toString() {
 			return this.pattern.getPatternString();
 		}
-
 	}
 
 
@@ -566,12 +565,13 @@ public abstract class RequestPredicates {
 		}
 	}
 
+
 	private static class ContentTypePredicate extends HeadersPredicate {
 
 		private final Set<MediaType> mediaTypes;
 
 		public ContentTypePredicate(MediaType... mediaTypes) {
-			this(new HashSet<>(Arrays.asList(mediaTypes)));
+			this(Set.of(mediaTypes));
 		}
 
 		private ContentTypePredicate(Set<MediaType> mediaTypes) {
@@ -603,12 +603,13 @@ public abstract class RequestPredicates {
 		}
 	}
 
+
 	private static class AcceptPredicate extends HeadersPredicate {
 
 		private final Set<MediaType> mediaTypes;
 
 		public AcceptPredicate(MediaType... mediaTypes) {
-			this(new HashSet<>(Arrays.asList(mediaTypes)));
+			this(Set.of(mediaTypes));
 		}
 
 		private AcceptPredicate(Set<MediaType> mediaTypes) {
@@ -630,7 +631,7 @@ public abstract class RequestPredicates {
 				acceptedMediaTypes = Collections.singletonList(MediaType.ALL);
 			}
 			else {
-				MediaType.sortBySpecificityAndQuality(acceptedMediaTypes);
+				MimeTypeUtils.sortBySpecificity(acceptedMediaTypes);
 			}
 			return acceptedMediaTypes;
 		}
@@ -698,7 +699,6 @@ public abstract class RequestPredicates {
 							this.extension :
 							this.extensionPredicate);
 		}
-
 	}
 
 
@@ -796,10 +796,10 @@ public abstract class RequestPredicates {
 		@Override
 		public void changeParser(PathPatternParser parser) {
 			if (this.left instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) left).changeParser(parser);
+				((ChangePathPatternParserVisitor.Target) this.left).changeParser(parser);
 			}
 			if (this.right instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) right).changeParser(parser);
+				((ChangePathPatternParserVisitor.Target) this.right).changeParser(parser);
 			}
 		}
 
@@ -808,6 +808,7 @@ public abstract class RequestPredicates {
 			return String.format("(%s && %s)", this.left, this.right);
 		}
 	}
+
 
 	/**
 	 * {@link RequestPredicate} that negates a delegate predicate.
@@ -841,7 +842,7 @@ public abstract class RequestPredicates {
 		@Override
 		public void changeParser(PathPatternParser parser) {
 			if (this.delegate instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) delegate).changeParser(parser);
+				((ChangePathPatternParserVisitor.Target) this.delegate).changeParser(parser);
 			}
 		}
 
@@ -850,6 +851,7 @@ public abstract class RequestPredicates {
 			return "!" + this.delegate.toString();
 		}
 	}
+
 
 	/**
 	 * {@link RequestPredicate} where either {@code left} or {@code right} predicates
@@ -908,10 +910,10 @@ public abstract class RequestPredicates {
 		@Override
 		public void changeParser(PathPatternParser parser) {
 			if (this.left instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) left).changeParser(parser);
+				((ChangePathPatternParserVisitor.Target) this.left).changeParser(parser);
 			}
 			if (this.right instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) right).changeParser(parser);
+				((ChangePathPatternParserVisitor.Target) this.right).changeParser(parser);
 			}
 		}
 
@@ -967,6 +969,7 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		@Deprecated
 		public String methodName() {
 			return this.request.methodName();
 		}
@@ -1093,7 +1096,6 @@ public abstract class RequestPredicates {
 		public String toString() {
 			return method() + " " +  path();
 		}
-
 	}
 
 }

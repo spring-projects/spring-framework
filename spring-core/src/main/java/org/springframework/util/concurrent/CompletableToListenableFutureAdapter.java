@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,9 @@ import java.util.concurrent.TimeoutException;
  * @author Juergen Hoeller
  * @since 4.2
  * @param <T> the result type returned by this Future's {@code get} method
+ * @deprecated as of 6.0, with no concrete replacement
  */
+@Deprecated(since = "6.0")
 public class CompletableToListenableFutureAdapter<T> implements ListenableFuture<T> {
 
 	private final CompletableFuture<T> completableFuture;

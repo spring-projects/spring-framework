@@ -48,7 +48,7 @@ public class IntroductionBenchmarkTests {
 		}
 	}
 
-	public static interface Counter {
+	public interface Counter {
 		int getCount();
 	}
 

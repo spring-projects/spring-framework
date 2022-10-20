@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,21 @@ import org.springframework.web.multipart.MultipartFile;
  * the Servlet API; serves as base class for more specific DataBinder variants,
  * such as {@link org.springframework.web.bind.ServletRequestDataBinder}.
  *
+ * <p><strong>WARNING</strong>: Data binding can lead to security issues by exposing
+ * parts of the object graph that are not meant to be accessed or modified by
+ * external clients. Therefore, the design and use of data binding should be considered
+ * carefully with regard to security. For more details, please refer to the dedicated
+ * sections on data binding for
+ * <a href="https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-ann-initbinder-model-design">Spring Web MVC</a> and
+ * <a href="https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html#webflux-ann-initbinder-model-design">Spring WebFlux</a>
+ * in the reference manual.
+ *
  * <p>Includes support for field markers which address a common problem with
  * HTML checkboxes and select options: detecting that a field was part of
  * the form, but did not generate a request parameter because it was empty.
  * A field marker allows to detect that state and reset the corresponding
  * bean property accordingly. Default values, for parameters that are otherwise
- * not present, can specify a value for the field other then empty.
+ * not present, can specify a value for the field other than empty.
  *
  * @author Juergen Hoeller
  * @author Scott Andrews
@@ -194,6 +203,7 @@ public class WebDataBinder extends DataBinder {
 	protected void doBind(MutablePropertyValues mpvs) {
 		checkFieldDefaults(mpvs);
 		checkFieldMarkers(mpvs);
+		adaptEmptyArrayIndices(mpvs);
 		super.doBind(mpvs);
 	}
 
@@ -245,6 +255,27 @@ public class WebDataBinder extends DataBinder {
 					}
 					mpvs.removePropertyValue(pv);
 				}
+			}
+		}
+	}
+
+	/**
+	 * Check for property values with names that end on {@code "[]"}. This is
+	 * used by some clients for array syntax without an explicit index value.
+	 * If such values are found, drop the brackets to adapt to the expected way
+	 * of expressing the same for data binding purposes.
+	 * @param mpvs the property values to be bound (can be modified)
+	 * @since 5.3
+	 */
+	protected void adaptEmptyArrayIndices(MutablePropertyValues mpvs) {
+		for (PropertyValue pv : mpvs.getPropertyValues()) {
+			String name = pv.getName();
+			if (name.endsWith("[]")) {
+				String field = name.substring(0, name.length() - 2);
+				if (getPropertyAccessor().isWritableProperty(field) && !mpvs.contains(field)) {
+					mpvs.add(field, pv.getValue());
+				}
+				mpvs.removePropertyValue(pv);
 			}
 		}
 	}

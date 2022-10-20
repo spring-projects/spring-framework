@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,11 +34,9 @@ public class ManagedMapTests {
 
 	@Test
 	public void mergeSunnyDay() {
-		ManagedMap parent = new ManagedMap();
-		parent.put("one", "one");
-		parent.put("two", "two");
-		ManagedMap child = new ManagedMap();
-		child.put("three", "three");
+		ManagedMap parent = ManagedMap.ofEntries(Map.entry("one", "one"),
+				Map.entry("two", "two"));
+		ManagedMap child = ManagedMap.ofEntries(Map.entry("tree", "three"));
 		child.setMergeEnabled(true);
 		Map mergedMap = (Map) child.merge(parent);
 		assertThat(mergedMap.size()).as("merge() obviously did not work.").isEqualTo(3);
@@ -67,9 +65,8 @@ public class ManagedMapTests {
 
 	@Test
 	public void mergeEmptyChild() {
-		ManagedMap parent = new ManagedMap();
-		parent.put("one", "one");
-		parent.put("two", "two");
+		ManagedMap parent = ManagedMap.ofEntries(Map.entry("one", "one"),
+				Map.entry("two", "two"));
 		ManagedMap child = new ManagedMap();
 		child.setMergeEnabled(true);
 		Map mergedMap = (Map) child.merge(parent);
@@ -78,11 +75,9 @@ public class ManagedMapTests {
 
 	@Test
 	public void mergeChildValuesOverrideTheParents() {
-		ManagedMap parent = new ManagedMap();
-		parent.put("one", "one");
-		parent.put("two", "two");
-		ManagedMap child = new ManagedMap();
-		child.put("one", "fork");
+		ManagedMap parent = ManagedMap.ofEntries(Map.entry("one", "one"),
+				Map.entry("two", "two"));
+		ManagedMap child = ManagedMap.ofEntries(Map.entry("one", "fork"));
 		child.setMergeEnabled(true);
 		Map mergedMap = (Map) child.merge(parent);
 		// child value for 'one' must override parent value...

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,7 @@ public class TestContextManager {
 	 * @see #TestContextManager(TestContextBootstrapper)
 	 */
 	public TestContextManager(Class<?> testClass) {
-		this(BootstrapUtils.resolveTestContextBootstrapper(BootstrapUtils.createBootstrapContext(testClass)));
+		this(BootstrapUtils.resolveTestContextBootstrapper(testClass));
 	}
 
 	/**
@@ -129,6 +129,7 @@ public class TestContextManager {
 	 * <p>Delegates to the supplied {@code TestContextBootstrapper} for building
 	 * the {@code TestContext} and retrieving the {@code TestExecutionListeners}.
 	 * @param testContextBootstrapper the bootstrapper to use
+	 * @since 4.2
 	 * @see TestContextBootstrapper#buildTestContext
 	 * @see TestContextBootstrapper#getTestExecutionListeners
 	 * @see #registerTestExecutionListeners
@@ -221,8 +222,12 @@ public class TestContextManager {
 
 	/**
 	 * Hook for preparing a test instance prior to execution of any individual
-	 * test methods, for example for injecting dependencies, etc. Should be
-	 * called immediately after instantiation of the test instance.
+	 * test methods &mdash; for example, to inject dependencies.
+	 * <p>This method should be called immediately after instantiation of the test
+	 * class or as soon after instantiation as possible (as is the case with the
+	 * {@link org.springframework.test.context.junit4.rules.SpringMethodRule
+	 * SpringMethodRule}). In any case, this method must be called prior to any
+	 * framework-specific lifecycle callbacks.
 	 * <p>The managed {@link TestContext} will be updated with the supplied
 	 * {@code testInstance}.
 	 * <p>An attempt will be made to give each registered

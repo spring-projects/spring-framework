@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,6 +130,9 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 		}
 
 		Flux<DataBuffer> in = DataBufferUtils.read(resource, position, bufferFactory, this.bufferSize);
+		if (logger.isDebugEnabled()) {
+			in = in.doOnNext(buffer -> Hints.touchDataBuffer(buffer, hints, logger));
+		}
 		return DataBufferUtils.takeUntilByteCount(in, count);
 	}
 

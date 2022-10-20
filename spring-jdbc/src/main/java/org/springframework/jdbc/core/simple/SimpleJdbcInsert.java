@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,17 +26,17 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.KeyHolder;
 
 /**
- * A SimpleJdbcInsert is a multi-threaded, reusable object providing easy insert
+ * A SimpleJdbcInsert is a multithreaded, reusable object providing easy insert
  * capabilities for a table. It provides meta-data processing to simplify the code
  * needed to construct a basic insert statement. All you need to provide is the
  * name of the table and a Map containing the column names and the column values.
  *
  * <p>The meta-data processing is based on the DatabaseMetaData provided by the
  * JDBC driver. As long as the JDBC driver can provide the names of the columns
- * for a specified table than we can rely on this auto-detection feature. If that
+ * for a specified table then we can rely on this auto-detection feature. If that
  * is not the case, then the column names must be specified explicitly.
  *
- * <p>The actual insert is being handled using Spring's {@link JdbcTemplate}.
+ * <p>The actual insert is handled using Spring's {@link JdbcTemplate}.
  *
  * <p>Many of the configuration methods return the current instance of the
  * SimpleJdbcInsert to provide the ability to chain multiple ones together

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,20 +32,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
+import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
+import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -66,19 +71,21 @@ import org.springframework.util.ReflectionUtils;
  * init method and destroy method, respectively.
  *
  * <p>Spring's {@link org.springframework.context.annotation.CommonAnnotationBeanPostProcessor}
- * supports the JSR-250 {@link javax.annotation.PostConstruct} and {@link javax.annotation.PreDestroy}
+ * supports the {@link jakarta.annotation.PostConstruct} and {@link jakarta.annotation.PreDestroy}
  * annotations out of the box, as init annotation and destroy annotation, respectively.
- * Furthermore, it also supports the {@link javax.annotation.Resource} annotation
+ * Furthermore, it also supports the {@link jakarta.annotation.Resource} annotation
  * for annotation-driven injection of named beans.
  *
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
+ * @author Phillip Webb
  * @since 2.5
  * @see #setInitAnnotationType
  * @see #setDestroyAnnotationType
  */
 @SuppressWarnings("serial")
-public class InitDestroyAnnotationBeanPostProcessor
-		implements DestructionAwareBeanPostProcessor, MergedBeanDefinitionPostProcessor, PriorityOrdered, Serializable {
+public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareBeanPostProcessor,
+		MergedBeanDefinitionPostProcessor, BeanRegistrationAotProcessor, PriorityOrdered, Serializable {
 
 	private final transient LifecycleMetadata emptyLifecycleMetadata =
 			new LifecycleMetadata(Object.class, Collections.emptyList(), Collections.emptyList()) {
@@ -117,7 +124,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 	 * methods to call after configuration of a bean.
 	 * <p>Any custom annotation can be used, since there are no required
 	 * annotation attributes. There is no default, although a typical choice
-	 * is the JSR-250 {@link javax.annotation.PostConstruct} annotation.
+	 * is the {@link jakarta.annotation.PostConstruct} annotation.
 	 */
 	public void setInitAnnotationType(Class<? extends Annotation> initAnnotationType) {
 		this.initAnnotationType = initAnnotationType;
@@ -128,7 +135,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 	 * methods to call when the context is shutting down.
 	 * <p>Any custom annotation can be used, since there are no required
 	 * annotation attributes. There is no default, although a typical choice
-	 * is the JSR-250 {@link javax.annotation.PreDestroy} annotation.
+	 * is the {@link jakarta.annotation.PreDestroy} annotation.
 	 */
 	public void setDestroyAnnotationType(Class<? extends Annotation> destroyAnnotationType) {
 		this.destroyAnnotationType = destroyAnnotationType;
@@ -146,8 +153,36 @@ public class InitDestroyAnnotationBeanPostProcessor
 
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+		findInjectionMetadata(beanDefinition, beanType);
+	}
+
+	@Override
+	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+		RootBeanDefinition beanDefinition = registeredBean.getMergedBeanDefinition();
+		beanDefinition.resolveDestroyMethodIfNecessary();
+		LifecycleMetadata metadata = findInjectionMetadata(beanDefinition, registeredBean.getBeanClass());
+		if (!CollectionUtils.isEmpty(metadata.initMethods)) {
+			String[] initMethodNames = safeMerge(beanDefinition.getInitMethodNames(), metadata.initMethods);
+			beanDefinition.setInitMethodNames(initMethodNames);
+		}
+		if (!CollectionUtils.isEmpty(metadata.destroyMethods)) {
+			String[] destroyMethodNames = safeMerge(beanDefinition.getDestroyMethodNames(), metadata.destroyMethods);
+			beanDefinition.setDestroyMethodNames(destroyMethodNames);
+		}
+		return null;
+	}
+
+	private LifecycleMetadata findInjectionMetadata(RootBeanDefinition beanDefinition, Class<?> beanType) {
 		LifecycleMetadata metadata = findLifecycleMetadata(beanType);
 		metadata.checkConfigMembers(beanDefinition);
+		return metadata;
+	}
+
+	private String[] safeMerge(@Nullable String[] existingNames, Collection<LifecycleElement> detectedElements) {
+		Stream<String> detectedNames = detectedElements.stream().map(LifecycleElement::getIdentifier);
+		Stream<String> mergedNames = (existingNames != null ?
+				Stream.concat(Stream.of(existingNames), detectedNames) : detectedNames);
+		return mergedNames.distinct().toArray(String[]::new);
 	}
 
 	@Override
@@ -302,7 +337,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 					beanDefinition.registerExternallyManagedInitMethod(methodIdentifier);
 					checkedInitMethods.add(element);
 					if (logger.isTraceEnabled()) {
-						logger.trace("Registered init method on class [" + this.targetClass.getName() + "]: " + element);
+						logger.trace("Registered init method on class [" + this.targetClass.getName() + "]: " + methodIdentifier);
 					}
 				}
 			}
@@ -313,7 +348,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 					beanDefinition.registerExternallyManagedDestroyMethod(methodIdentifier);
 					checkedDestroyMethods.add(element);
 					if (logger.isTraceEnabled()) {
-						logger.trace("Registered destroy method on class [" + this.targetClass.getName() + "]: " + element);
+						logger.trace("Registered destroy method on class [" + this.targetClass.getName() + "]: " + methodIdentifier);
 					}
 				}
 			}
@@ -394,10 +429,9 @@ public class InitDestroyAnnotationBeanPostProcessor
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof LifecycleElement)) {
+			if (!(other instanceof LifecycleElement otherElement)) {
 				return false;
 			}
-			LifecycleElement otherElement = (LifecycleElement) other;
 			return (this.identifier.equals(otherElement.identifier));
 		}
 

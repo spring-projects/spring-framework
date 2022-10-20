@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,14 @@ package org.springframework.beans.propertyeditors;
 import java.beans.PropertyEditorSupport;
 import java.util.Currency;
 
+import org.springframework.util.StringUtils;
+
 /**
  * Editor for {@code java.util.Currency}, translating currency codes into Currency
  * objects. Exposes the currency code as text representation of a Currency object.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  * @see java.util.Currency
  */
@@ -31,6 +34,9 @@ public class CurrencyEditor extends PropertyEditorSupport {
 
 	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
+		if (StringUtils.hasText(text)) {
+			text = text.trim();
+		}
 		setValue(Currency.getInstance(text));
 	}
 

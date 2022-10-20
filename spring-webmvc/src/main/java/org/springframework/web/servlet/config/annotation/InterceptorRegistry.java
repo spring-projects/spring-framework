@@ -19,7 +19,6 @@ package org.springframework.web.servlet.config.annotation;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
@@ -71,7 +70,7 @@ public class InterceptorRegistry {
 		return this.registrations.stream()
 				.sorted(INTERCEPTOR_ORDER_COMPARATOR)
 				.map(InterceptorRegistration::getInterceptor)
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 

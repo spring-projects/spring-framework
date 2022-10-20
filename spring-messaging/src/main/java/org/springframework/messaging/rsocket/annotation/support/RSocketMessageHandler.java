@@ -193,7 +193,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * likewise when this property is set the {@code RSocketStrategies} are
 	 * mutated to change the extractor in it.
 	 * <p>By default this is set to the
-	 * {@link org.springframework.messaging.rsocket.RSocketStrategies.Builder#metadataExtractor(MetadataExtractor)} defaults}
+	 * {@link org.springframework.messaging.rsocket.RSocketStrategies.Builder#metadataExtractor(MetadataExtractor) defaults}
 	 * from {@code RSocketStrategies}.
 	 * @param extractor the extractor to use
 	 */
@@ -461,7 +461,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 *         RSocketMessageHandler.responder(strategies, new ClientHandler());
 	 *
 	 * RSocketRequester.builder()
-	 *         .rsocketConnector(connector -> connector.acceptor(responder))
+	 *         .rsocketConnector(connector -&gt; connector.acceptor(responder))
 	 *         .connectTcp("localhost", server.address().getPort());
 	 * </pre>
 	 *
@@ -471,7 +471,6 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * for more advanced scenarios, e.g. discovering handlers through a custom
 	 * stereotype annotation, consider declaring {@code RSocketMessageHandler}
 	 * as a bean, and then obtain the responder from it.
-	 *
 	 * @param strategies the strategies to set on the created
 	 * {@code RSocketMessageHandler}
 	 * @param candidateHandlers a list of Objects and/or Classes with annotated

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.web.servlet.HandlerMapping;
 /**
  * Resolves arguments annotated with {@link MatrixVariable @MatrixVariable}.
  *
- * <p>If the method parameter is of type {@link Map} it will by resolved by
+ * <p>If the method parameter is of type {@link Map} it will be resolved by
  * {@link MatrixVariableMapMethodArgumentResolver} instead unless the annotation
  * specifies a name in which case it is considered to be a single attribute of
  * type map (vs multiple attributes collected in a map).
@@ -126,6 +126,12 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 		throw new MissingMatrixVariableException(name, parameter);
 	}
 
+	@Override
+	protected void handleMissingValueAfterConversion(
+			String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
+
+		throw new MissingMatrixVariableException(name, parameter, true);
+	}
 
 	private static final class MatrixVariableNamedValueInfo extends NamedValueInfo {
 

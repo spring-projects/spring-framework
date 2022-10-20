@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,8 @@ package org.springframework.beans.factory.support;
 import java.lang.reflect.Method;
 
 /**
- * Interface to be implemented by classes that can reimplement any method
- * on an IoC-managed object: the <b>Method Injection</b> form of
- * Dependency Injection.
+ * Interface to be implemented by classes that can reimplement any method on an
+ * IoC-managed object: the <b>Method Injection</b> form of Dependency Injection.
  *
  * <p>Such methods may be (but need not be) abstract, in which case the
  * container will create a concrete subclass to instantiate.

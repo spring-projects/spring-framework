@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -37,7 +36,7 @@ import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
@@ -214,7 +213,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 					}
 					else if (Rendering.class.isAssignableFrom(clazz)) {
 						Rendering render = (Rendering) returnValue;
-						HttpStatus status = render.status();
+						HttpStatusCode status = render.status();
 						if (status != null) {
 							exchange.getResponse().setStatusCode(status);
 						}
@@ -320,7 +319,20 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 			}
 		}
 		List<MediaType> mediaTypes = getMediaTypes(views);
-		MediaType bestMediaType = selectMediaType(exchange, () -> mediaTypes);
+		MediaType bestMediaType;
+		try {
+			bestMediaType = selectMediaType(exchange, () -> mediaTypes);
+		}
+		catch (NotAcceptableStatusException ex) {
+			HttpStatusCode statusCode = exchange.getResponse().getStatusCode();
+			if (statusCode != null && statusCode.isError()) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Ignoring error response content (if any). " + ex.getReason());
+				}
+				return Mono.empty();
+			}
+			throw ex;
+		}
 		if (bestMediaType != null) {
 			for (View view : views) {
 				for (MediaType mediaType : view.getSupportedMediaTypes()) {
@@ -344,7 +356,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 	private List<MediaType> getMediaTypes(List<View> views) {
 		return views.stream()
 				.flatMap(view -> view.getSupportedMediaTypes().stream())
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 }

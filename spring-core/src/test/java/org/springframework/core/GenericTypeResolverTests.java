@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,8 +71,8 @@ class GenericTypeResolverTests {
 	void methodReturnTypes() {
 		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "integer"), MyInterfaceType.class)).isEqualTo(Integer.class);
 		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "string"), MyInterfaceType.class)).isEqualTo(String.class);
-		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "raw"), MyInterfaceType.class)).isEqualTo(null);
-		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "object"), MyInterfaceType.class)).isEqualTo(null);
+		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "raw"), MyInterfaceType.class)).isNull();
+		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "object"), MyInterfaceType.class)).isNull();
 	}
 
 	@Test
@@ -173,6 +173,17 @@ class GenericTypeResolverTests {
 		assertThat(resolved[1]).isEqualTo(Long.class);
 	}
 
+	@Test
+	public void resolvePartiallySpecializedTypeVariables() {
+		Type resolved = resolveType(BiGenericClass.class.getTypeParameters()[0], TypeFixedBiGenericClass.class);
+		assertThat(resolved).isEqualTo(D.class);
+	}
+
+	@Test
+	public void resolveTransitiveTypeVariableWithDifferentName() {
+		Type resolved = resolveType(BiGenericClass.class.getTypeParameters()[1], TypeFixedBiGenericClass.class);
+		assertThat(resolved).isEqualTo(E.class);
+	}
 
 	public interface MyInterfaceType<T> {
 	}
@@ -293,10 +304,22 @@ class GenericTypeResolverTests {
 
 	class B<T>{}
 
+	class C extends A {}
+
+	class D extends B<Long> {}
+
+	class E extends C {}
+
 	class TestIfc<T>{}
 
 	class TestImpl<I extends A, T extends B<I>> extends TestIfc<T>{
 	}
+
+	static abstract class BiGenericClass<T extends B<?>, V extends A> {}
+
+	static abstract class SpecializedBiGenericClass<U extends C> extends BiGenericClass<D, U>{}
+
+	static class TypeFixedBiGenericClass extends SpecializedBiGenericClass<E> {}
 
 	static class TopLevelClass<T> {
 		class Nested<X> {

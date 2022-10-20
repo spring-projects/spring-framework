@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,13 @@ package org.springframework.web.context;
 
 import java.util.Locale;
 
-import javax.servlet.ServletException;
-
+import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.NoSuchMessageException;
@@ -56,24 +53,15 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 		MockServletContext sc = new MockServletContext("");
 		root.setServletContext(sc);
 		root.setConfigLocations("/org/springframework/web/context/WEB-INF/applicationContext.xml");
-		root.addBeanFactoryPostProcessor(new BeanFactoryPostProcessor() {
+		root.addBeanFactoryPostProcessor(beanFactory -> beanFactory.addBeanPostProcessor(new BeanPostProcessor() {
 			@Override
-			public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-				beanFactory.addBeanPostProcessor(new BeanPostProcessor() {
-					@Override
-					public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
-						if (bean instanceof TestBean) {
-							((TestBean) bean).getFriends().add("myFriend");
-						}
-						return bean;
-					}
-					@Override
-					public Object postProcessAfterInitialization(Object bean, String name) throws BeansException {
-						return bean;
-					}
-				});
+			public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
+				if (bean instanceof TestBean testBean) {
+					testBean.getFriends().add("myFriend");
+				}
+				return bean;
 			}
-		});
+		}));
 		root.refresh();
 		XmlWebApplicationContext wac = new XmlWebApplicationContext();
 		wac.getEnvironment().addActiveProfile("wacProfile1");
@@ -109,7 +97,7 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 	@Test
 	@Override
 	public void count() {
-		assertThat(this.applicationContext.getBeanDefinitionCount() == 14).as("should have 14 beans, not "+ this.applicationContext.getBeanDefinitionCount()).isTrue();
+		assertThat(this.applicationContext.getBeanDefinitionCount()).as("should have 14 beans").isEqualTo(14);
 	}
 
 	@Test

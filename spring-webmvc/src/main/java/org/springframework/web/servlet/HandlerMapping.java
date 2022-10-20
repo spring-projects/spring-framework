@@ -16,8 +16,8 @@
 
 package org.springframework.web.servlet;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
 
@@ -45,7 +45,7 @@ import org.springframework.lang.Nullable;
  *
  * <p>Note: Implementations can implement the {@link org.springframework.core.Ordered}
  * interface to be able to specify a sorting order and thus a priority for getting
- * applied by DispatcherServlet. Non-Ordered instances get treated as lowest priority.
+ * applied by DispatcherServlet. Non-Ordered instances get treated as the lowest priority.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

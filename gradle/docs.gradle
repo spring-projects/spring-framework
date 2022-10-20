@@ -1,17 +1,14 @@
 configurations {
-	asciidoctorExt
+	asciidoctorExtensions
 }
 
 dependencies {
-	asciidoctorExt("io.spring.asciidoctor:spring-asciidoctor-extensions-block-switch:0.4.3.RELEASE")
+	asciidoctorExtensions "io.spring.asciidoctor.backends:spring-asciidoctor-backends:0.0.3"
 }
 
 repositories {
 	maven {
 		url "https://repo.spring.io/release"
-		mavenContent {
-			includeGroup "io.spring.asciidoctor"
-		}
 	}
 }
 
@@ -43,13 +40,10 @@ task api(type: Javadoc) {
 		header = rootProject.description
 		use = true
 		overview = "src/docs/api/overview.html"
-		stylesheetFile = file("src/docs/api/stylesheet.css")
 		splitIndex = true
 		links(project.ext.javadocLinks)
-		addStringOption('Xdoclint:none', '-quiet')
-		if(JavaVersion.current().isJava9Compatible()) {
-			addBooleanOption('html5', true)
-		}
+		addBooleanOption('Xdoclint:syntax', true) // only check syntax with doclint
+		addBooleanOption('Werror', true) // fail build on Javadoc warnings
 	}
 	source moduleProjects.collect { project ->
 		project.sourceSets.main.allJava
@@ -61,86 +55,34 @@ task api(type: Javadoc) {
 /**
  * Produce KDoc for all Spring Framework modules in "build/docs/kdoc"
  */
-dokka {
-	dependsOn {
-		tasks.getByName("api")
+pluginManager.withPlugin("kotlin") {
+	tasks.dokkaHtmlMultiModule.configure {
+		dependsOn {
+			tasks.getByName("api")
+		}
+		moduleName.set("spring-framework")
+		outputDirectory.set(project.file("$buildDir/docs/kdoc"))
 	}
-
-	doFirst {
-		configuration {
-			classpath = moduleProjects.collect { project -> project.jar.outputs.files.getFiles() }.flatten()
-			classpath += files(moduleProjects.collect { it.sourceSets.main.compileClasspath })
-
-			moduleProjects.findAll {
-				it.pluginManager.hasPlugin("kotlin")
-			}.each { project ->
-				def kotlinDirs = project.sourceSets.main.kotlin.srcDirs.collect()
-				kotlinDirs -= project.sourceSets.main.java.srcDirs
-				kotlinDirs.each { dir ->
-					if (dir.exists()) {
-						sourceRoot {
-							path = dir.path
-						}
-					}
-				}
-			}
-		}
-	}
-
-	outputFormat = "html"
-	outputDirectory = "$buildDir/docs/kdoc"
-
-	configuration {
-		moduleName = "spring-framework"
-
-		externalDocumentationLink {
-			url = new URL("https://docs.spring.io/spring-framework/docs/$version/javadoc-api/")
-			packageListUrl = new File(buildDir, "docs/javadoc/package-list").toURI().toURL()
-		}
-		externalDocumentationLink {
-			url = new URL("https://projectreactor.io/docs/core/release/api/")
-		}
-		externalDocumentationLink {
-			url = new URL("https://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/")
-		}
-		externalDocumentationLink {
-			url = new URL("https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/")
-		}
-	}
-}
-
-task downloadResources(type: Download) {
-	def version = "0.2.2.RELEASE"
-	src "https://repo.spring.io/release/io/spring/docresources/" +
-			"spring-doc-resources/$version/spring-doc-resources-${version}.zip"
-	dest project.file("$buildDir/docs/spring-doc-resources.zip")
-	onlyIfModified true
-	useETag "all"
-}
-
-task extractDocResources(type: Copy, dependsOn: downloadResources) {
-	from project.zipTree(downloadResources.dest);
-	into "$buildDir/docs/spring-docs-resources/"
 }
 
 asciidoctorj {
-	version = '2.4.1'
+	def docRoot = 'https://docs.spring.io'
+	def docsSpringFramework = "${docRoot}/spring-framework/docs/${project.version}"
+	version = '2.4.3'
 	fatalWarnings ".*"
 	options doctype: 'book', eruby: 'erubis'
 	attributes([
 			icons: 'font',
 			idprefix: '',
 			idseparator: '-',
-			docinfo: 'shared',
 			revnumber: project.version,
 			sectanchors: '',
 			sectnums: '',
-			'source-highlighter': 'highlight.js',
-			highlightjsdir: 'js/highlight',
-			'highlightjs-theme': 'googlecode',
-			stylesdir: 'css/',
-			stylesheet: 'stylesheet.css',
-			'spring-version': project.version
+			'spring-version': project.version,
+			'spring-framework-main-code': 'https://github.com/spring-projects/spring-framework/tree/main',
+			'doc-root': docRoot,
+			'docs-spring-framework': docsSpringFramework,
+			'api-spring-framework': "${docsSpringFramework}/javadoc-api/org/springframework"
 	])
 }
 
@@ -150,17 +92,19 @@ asciidoctorj {
  */
 asciidoctor {
 	baseDirFollowsSourceDir()
-	configurations 'asciidoctorExt'
+	configurations "asciidoctorExtensions"
 	sources {
 		include '*.adoc'
 	}
 	outputDir "$buildDir/docs/ref-docs/html5"
+	outputOptions {
+		backends "spring-html"
+	}
 	logDocuments = true
 	resources {
 		from(sourceDir) {
-			include 'images/*.png', 'css/**', 'js/**'
+			include 'images/*.png'
 		}
-		from extractDocResources
 	}
 }
 
@@ -170,21 +114,24 @@ asciidoctor {
  */
 asciidoctorPdf {
 	baseDirFollowsSourceDir()
-	configurations 'asciidoctorExt'
+	configurations 'asciidoctorExtensions'
 	sources {
 		include '*.adoc'
 	}
 	outputDir "$buildDir/docs/ref-docs/pdf"
+	forkOptions {
+		jvmArgs += ["--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED"]
+	}
 	logDocuments = true
 }
 
 /**
  * Zip all docs (API and reference) into a single archive
  */
-task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'asciidoctorPdf', 'dokka']) {
+task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'asciidoctorPdf', 'dokkaHtmlMultiModule']) {
 	group = "Distribution"
 	description = "Builds -${archiveClassifier} archive containing api and reference " +
-			"for deployment at https://docs.spring.io/spring-framework/docs."
+			"for deployment at https://docs.spring.io/spring-framework/docs/."
 
 	archiveBaseName.set("spring-framework")
 	archiveClassifier.set("docs")
@@ -194,13 +141,13 @@ task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'asciidoctorPdf', 'dok
 	from (api) {
 		into "javadoc-api"
 	}
-	from ("$asciidoctor.outputDir/html5") {
+	from ("$asciidoctor.outputDir") {
 		into "reference/html"
 	}
-	from ("$asciidoctor.outputDir/pdf") {
+	from ("$asciidoctorPdf.outputDir") {
 		into "reference/pdf"
 	}
-	from (dokka) {
+	from (dokkaHtmlMultiModule.outputDirectory) {
 		into "kdoc-api"
 	}
 }
@@ -257,11 +204,11 @@ task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
 		expand(copyright: new Date().format("yyyy"), version: project.version)
 	}
 
-	from(zipTree(docsZip.archivePath)) {
+	from(zipTree(docsZip.archiveFile)) {
 		into "${baseDir}/docs"
 	}
 
-	from(zipTree(schemaZip.archivePath)) {
+	from(zipTree(schemaZip.archiveFile)) {
 		into "${baseDir}/schema"
 	}
 

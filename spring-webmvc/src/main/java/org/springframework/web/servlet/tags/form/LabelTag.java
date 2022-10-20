@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -222,7 +222,7 @@ public class LabelTag extends AbstractHtmlElementTag {
 	/**
 	 * Writes the opening '{@code label}' tag and forces a block tag so
 	 * that body content is written correctly.
-	 * @return {@link javax.servlet.jsp.tagext.Tag#EVAL_BODY_INCLUDE}
+	 * @return {@link jakarta.servlet.jsp.tagext.Tag#EVAL_BODY_INCLUDE}
 	 */
 	@Override
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.persistence.spi.PersistenceUnitInfo;
-import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 
+import jakarta.persistence.spi.PersistenceUnitInfo;
+import jakarta.persistence.spi.PersistenceUnitTransactionType;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +38,7 @@ import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
 import org.springframework.jdbc.datasource.lookup.MapDataSourceLookup;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
  * Unit and integration tests for the JPA XML resource parsing support.
@@ -260,8 +260,7 @@ public class PersistenceXmlParsingTests {
 		PersistenceUnitReader reader = new PersistenceUnitReader(
 				new PathMatchingResourcePatternResolver(), new JndiDataSourceLookup());
 		String resource = "/org/springframework/orm/jpa/persistence-invalid.xml";
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
-				reader.readPersistenceUnitInfos(resource));
+		assertThatRuntimeException().isThrownBy(() -> reader.readPersistenceUnitInfos(resource));
 	}
 
 	@Disabled("not doing schema parsing anymore for JPA 2.0 compatibility")
@@ -270,8 +269,7 @@ public class PersistenceXmlParsingTests {
 		PersistenceUnitReader reader = new PersistenceUnitReader(
 				new PathMatchingResourcePatternResolver(), new JndiDataSourceLookup());
 		String resource = "/org/springframework/orm/jpa/persistence-no-schema.xml";
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
-				reader.readPersistenceUnitInfos(resource));
+		assertThatRuntimeException().isThrownBy(() -> reader.readPersistenceUnitInfos(resource));
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.lang.Nullable;
@@ -46,21 +44,15 @@ public abstract class NumberUtils {
 	 * Standard number types (all immutable):
 	 * Byte, Short, Integer, Long, BigInteger, Float, Double, BigDecimal.
 	 */
-	public static final Set<Class<?>> STANDARD_NUMBER_TYPES;
-
-	static {
-		Set<Class<?>> numberTypes = new HashSet<>(8);
-		numberTypes.add(Byte.class);
-		numberTypes.add(Short.class);
-		numberTypes.add(Integer.class);
-		numberTypes.add(Long.class);
-		numberTypes.add(BigInteger.class);
-		numberTypes.add(Float.class);
-		numberTypes.add(Double.class);
-		numberTypes.add(BigDecimal.class);
-		STANDARD_NUMBER_TYPES = Collections.unmodifiableSet(numberTypes);
-	}
-
+	public static final Set<Class<?>> STANDARD_NUMBER_TYPES = Set.of(
+			Byte.class,
+			Short.class,
+			Integer.class,
+			Long.class,
+			BigInteger.class,
+			Float.class,
+			Double.class,
+			BigDecimal.class);
 
 	/**
 	 * Convert the given number into an instance of the given target class.
@@ -114,9 +106,9 @@ public abstract class NumberUtils {
 			return (T) Long.valueOf(value);
 		}
 		else if (BigInteger.class == targetClass) {
-			if (number instanceof BigDecimal) {
+			if (number instanceof BigDecimal bigDecimal) {
 				// do not lose precision - use BigDecimal's own conversion
-				return (T) ((BigDecimal) number).toBigInteger();
+				return (T) bigDecimal.toBigInteger();
 			}
 			else {
 				// original value is not a Big* number - use standard long conversion
@@ -151,11 +143,11 @@ public abstract class NumberUtils {
 	 */
 	private static long checkedLongValue(Number number, Class<? extends Number> targetClass) {
 		BigInteger bigInt = null;
-		if (number instanceof BigInteger) {
-			bigInt = (BigInteger) number;
+		if (number instanceof BigInteger bigInteger) {
+			bigInt = bigInteger;
 		}
-		else if (number instanceof BigDecimal) {
-			bigInt = ((BigDecimal) number).toBigInteger();
+		else if (number instanceof BigDecimal bigDecimal) {
+			bigInt = bigDecimal.toBigInteger();
 		}
 		// Effectively analogous to JDK 8's BigInteger.longValueExact()
 		if (bigInt != null && (bigInt.compareTo(LONG_MIN) < 0 || bigInt.compareTo(LONG_MAX) > 0)) {

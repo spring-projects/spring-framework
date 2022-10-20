@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import io.undertow.websockets.core.WebSocketCallback;
 import io.undertow.websockets.core.WebSocketChannel;
 import io.undertow.websockets.core.WebSockets;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -52,9 +52,9 @@ public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<W
 	}
 
 	public UndertowWebSocketSession(WebSocketChannel channel, HandshakeInfo info,
-			DataBufferFactory factory, @Nullable MonoProcessor<Void> completionMono) {
+			DataBufferFactory factory, @Nullable Sinks.Empty<Void> completionSink) {
 
-		super(channel, ObjectUtils.getIdentityHexString(channel), info, factory, completionMono);
+		super(channel, ObjectUtils.getIdentityHexString(channel), info, factory, completionSink);
 		suspendReceiving();
 	}
 
@@ -76,7 +76,7 @@ public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<W
 
 	@Override
 	protected boolean sendMessage(WebSocketMessage message) throws IOException {
-		ByteBuffer buffer = message.getPayload().asByteBuffer();
+		ByteBuffer buffer = message.getPayload().toByteBuffer();
 		if (WebSocketMessage.Type.TEXT.equals(message.getType())) {
 			getSendProcessor().setReadyToSend(false);
 			String text = new String(buffer.array(), StandardCharsets.UTF_8);
@@ -98,6 +98,11 @@ public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<W
 			throw new IllegalArgumentException("Unexpected message type: " + message.getType());
 		}
 		return true;
+	}
+
+	@Override
+	public boolean isOpen() {
+		return getDelegate().isOpen();
 	}
 
 	@Override

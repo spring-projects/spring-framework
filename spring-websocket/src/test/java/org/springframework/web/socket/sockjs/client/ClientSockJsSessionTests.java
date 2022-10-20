@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketExtension;
@@ -56,7 +56,7 @@ public class ClientSockJsSessionTests {
 
 	private WebSocketHandler handler;
 
-	private SettableListenableFuture<WebSocketSession> connectFuture;
+	private CompletableFuture<WebSocketSession> connectFuture;
 
 
 	@BeforeEach
@@ -65,7 +65,7 @@ public class ClientSockJsSessionTests {
 		Transport transport = mock(Transport.class);
 		TransportRequest request = new DefaultTransportRequest(urlInfo, null, null, transport, TransportType.XHR, CODEC);
 		this.handler = mock(WebSocketHandler.class);
-		this.connectFuture = new SettableListenableFuture<>();
+		this.connectFuture = new CompletableFuture<>();
 		this.session = new TestClientSockJsSession(request, this.handler, this.connectFuture);
 	}
 
@@ -119,7 +119,7 @@ public class ClientSockJsSessionTests {
 	public void handleFrameMessageWithBadData() throws Exception {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
 		this.session.handleFrame("a['bad data");
-		assertThat(this.session.isOpen()).isEqualTo(false);
+		assertThat(this.session.isOpen()).isFalse();
 		assertThat(this.session.disconnectStatus).isEqualTo(CloseStatus.BAD_DATA);
 		verify(this.handler).afterConnectionEstablished(this.session);
 		verifyNoMoreInteractions(this.handler);
@@ -133,7 +133,7 @@ public class ClientSockJsSessionTests {
 		willThrow(new IllegalStateException("Fake error")).given(this.handler)
 				.handleMessage(this.session, new TextMessage("bar"));
 		this.session.handleFrame(SockJsFrame.messageFrame(CODEC, "foo", "bar").getContent());
-		assertThat(this.session.isOpen()).isEqualTo(true);
+		assertThat(this.session.isOpen()).isTrue();
 		verify(this.handler).afterConnectionEstablished(this.session);
 		verify(this.handler).handleMessage(this.session, new TextMessage("foo"));
 		verify(this.handler).handleMessage(this.session, new TextMessage("bar"));
@@ -144,7 +144,7 @@ public class ClientSockJsSessionTests {
 	public void handleFrameClose() throws Exception {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
 		this.session.handleFrame(SockJsFrame.closeFrame(1007, "").getContent());
-		assertThat(this.session.isOpen()).isEqualTo(false);
+		assertThat(this.session.isOpen()).isFalse();
 		assertThat(this.session.disconnectStatus).isEqualTo(new CloseStatus(1007, ""));
 		verify(this.handler).afterConnectionEstablished(this.session);
 		verifyNoMoreInteractions(this.handler);
@@ -162,7 +162,7 @@ public class ClientSockJsSessionTests {
 	public void afterTransportClosed() throws Exception {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
 		this.session.afterTransportClosed(CloseStatus.SERVER_ERROR);
-		assertThat(this.session.isOpen()).isEqualTo(false);
+		assertThat(this.session.isOpen()).isFalse();
 		verify(this.handler).afterConnectionEstablished(this.session);
 		verify(this.handler).afterConnectionClosed(this.session, CloseStatus.SERVER_ERROR);
 		verifyNoMoreInteractions(this.handler);
@@ -172,7 +172,7 @@ public class ClientSockJsSessionTests {
 	public void close() throws Exception {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
 		this.session.close();
-		assertThat(this.session.isOpen()).isEqualTo(false);
+		assertThat(this.session.isOpen()).isFalse();
 		assertThat(this.session.disconnectStatus).isEqualTo(CloseStatus.NORMAL);
 		verify(this.handler).afterConnectionEstablished(this.session);
 		verifyNoMoreInteractions(this.handler);
@@ -223,7 +223,7 @@ public class ClientSockJsSessionTests {
 
 
 		protected TestClientSockJsSession(TransportRequest request, WebSocketHandler handler,
-				SettableListenableFuture<WebSocketSession> connectFuture) {
+				CompletableFuture<WebSocketSession> connectFuture) {
 			super(request, handler, connectFuture);
 		}
 

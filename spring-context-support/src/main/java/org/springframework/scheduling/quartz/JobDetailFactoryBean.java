@@ -141,7 +141,7 @@ public class JobDetailFactoryBean
 	}
 
 	/**
-	 * Set the recovery flag for this job, i.e. whether or not the job should
+	 * Set the recovery flag for this job, i.e. whether the job should
 	 * get re-executed if a 'recovery' or 'fail-over' situation is encountered.
 	 */
 	public void setRequestsRecovery(boolean requestsRecovery) {

@@ -54,7 +54,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource implements TargetSour
 
 
 	/** Logger available to subclasses. */
-	protected final Log logger = LogFactory.getLog(getClass());
+	protected final transient Log logger = LogFactory.getLog(getClass());
 
 	/** Name of the target bean we will create on each invocation. */
 	private String targetBeanName;
@@ -66,6 +66,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource implements TargetSour
 	 * BeanFactory that owns this TargetSource. We need to hold onto this
 	 * reference so that we can create new prototype instances as necessary.
 	 */
+	@SuppressWarnings("serial")
 	private BeanFactory beanFactory;
 
 
@@ -191,9 +192,9 @@ public abstract class AbstractBeanFactoryBasedTargetSource implements TargetSour
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(getClass().getSimpleName());
-		sb.append(" for target bean '").append(this.targetBeanName).append("'");
+		sb.append(" for target bean '").append(this.targetBeanName).append('\'');
 		if (this.targetClass != null) {
-			sb.append(" of type [").append(this.targetClass.getName()).append("]");
+			sb.append(" of type [").append(this.targetClass.getName()).append(']');
 		}
 		return sb.toString();
 	}

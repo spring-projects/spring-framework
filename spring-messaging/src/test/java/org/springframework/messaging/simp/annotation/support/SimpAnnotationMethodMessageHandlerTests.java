@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
 import reactor.core.publisher.Sinks;
 
 import org.springframework.context.support.StaticApplicationContext;
@@ -62,7 +61,6 @@ import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
-import org.springframework.util.concurrent.ListenableFutureTask;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
@@ -342,8 +340,8 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		Message<?> message = createMessage("/app1/mono");
 		this.messageHandler.handleMessage(message);
 
-		assertThat(controller.monoProcessor).isNotNull();
-		controller.monoProcessor.onNext("foo");
+		assertThat(controller.sinkOne).isNotNull();
+		controller.sinkOne.emitValue("foo", Sinks.EmitFailureHandler.FAIL_FAST);
 		verify(this.converter).toMessage(this.payloadCaptor.capture(), any(MessageHeaders.class));
 		assertThat(this.payloadCaptor.getValue()).isEqualTo("foo");
 	}
@@ -357,7 +355,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		Message<?> message = createMessage("/app1/mono");
 		this.messageHandler.handleMessage(message);
 
-		controller.monoProcessor.onError(new IllegalStateException());
+		controller.sinkOne.emitError(new IllegalStateException(), Sinks.EmitFailureHandler.FAIL_FAST);
 		assertThat(controller.exceptionCaught).isTrue();
 	}
 
@@ -370,8 +368,8 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		Message<?> message = createMessage("/app1/flux");
 		this.messageHandler.handleMessage(message);
 
-		assertThat(controller.fluxSink).isNotNull();
-		controller.fluxSink.tryEmitNext("foo");
+		assertThat(controller.sinkMany).isNotNull();
+		controller.sinkMany.tryEmitNext("foo");
 
 		verify(this.converter, never()).toMessage(any(), any(MessageHeaders.class));
 	}
@@ -536,21 +534,22 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 	@Controller
 	@MessageMapping("listenable-future")
+	@SuppressWarnings("deprecation")
 	private static class ListenableFutureController {
 
-		private ListenableFutureTask<String> future;
+		private org.springframework.util.concurrent.ListenableFutureTask<String> future;
 
 		private boolean exceptionCaught = false;
 
 		@MessageMapping("success")
-		public ListenableFutureTask<String> handleListenableFuture() {
-			this.future = new ListenableFutureTask<>(() -> "foo");
+		public org.springframework.util.concurrent.ListenableFutureTask<String> handleListenableFuture() {
+			this.future = new org.springframework.util.concurrent.ListenableFutureTask<>(() -> "foo");
 			return this.future;
 		}
 
 		@MessageMapping("failure")
-		public ListenableFutureTask<String> handleListenableFutureException() {
-			this.future = new ListenableFutureTask<>(() -> {
+		public org.springframework.util.concurrent.ListenableFutureTask<String> handleListenableFutureException() {
+			this.future = new org.springframework.util.concurrent.ListenableFutureTask<>(() -> {
 				throw new IllegalStateException();
 			});
 			return this.future;
@@ -585,22 +584,22 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	@Controller
 	private static class ReactiveController {
 
-		private MonoProcessor<String> monoProcessor;
+		private Sinks.One<String> sinkOne;
 
-		private Sinks.Many<String> fluxSink;
+		private Sinks.Many<String> sinkMany;
 
 		private boolean exceptionCaught = false;
 
 		@MessageMapping("mono")
 		public Mono<String> handleMono() {
-			this.monoProcessor = MonoProcessor.fromSink(Sinks.one());
-			return this.monoProcessor;
+			this.sinkOne = Sinks.one();
+			return this.sinkOne.asMono();
 		}
 
 		@MessageMapping("flux")
 		public Flux<String> handleFlux() {
-			this.fluxSink = Sinks.many().unicast().onBackpressureBuffer();
-			return this.fluxSink.asFlux();
+			this.sinkMany = Sinks.many().unicast().onBackpressureBuffer();
+			return this.sinkMany.asFlux();
 		}
 
 		@MessageExceptionHandler(IllegalStateException.class)

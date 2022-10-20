@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,18 +51,20 @@ import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Binder that allows for setting property values onto a target object,
- * including support for validation and binding result analysis.
- * The binding process can be customized through specifying allowed fields,
+ * Binder that allows for setting property values on a target object, including
+ * support for validation and binding result analysis.
+ *
+ * <p>The binding process can be customized by specifying allowed field patterns,
  * required fields, custom editors, etc.
  *
- * <p>Note that there are potential security implications in failing to set an array
- * of allowed fields. In the case of HTTP form POST data for example, malicious clients
- * can attempt to subvert an application by supplying values for fields or properties
- * that do not exist on the form. In some cases this could lead to illegal data being
- * set on command objects <i>or their nested objects</i>. For this reason, it is
- * <b>highly recommended to specify the {@link #setAllowedFields allowedFields} property</b>
- * on the DataBinder.
+ * <p><strong>WARNING</strong>: Data binding can lead to security issues by exposing
+ * parts of the object graph that are not meant to be accessed or modified by
+ * external clients. Therefore, the design and use of data binding should be considered
+ * carefully with regard to security. For more details, please refer to the dedicated
+ * sections on data binding for
+ * <a href="https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-ann-initbinder-model-design">Spring Web MVC</a> and
+ * <a href="https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html#webflux-ann-initbinder-model-design">Spring WebFlux</a>
+ * in the reference manual.
  *
  * <p>The binding results can be examined via the {@link BindingResult} interface,
  * extending the {@link Errors} interface: see the {@link #getBindingResult()} method.
@@ -96,6 +98,7 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @author Stephane Nicoll
  * @author Kazuki Shimizu
+ * @author Sam Brannen
  * @see #setAllowedFields
  * @see #setRequiredFields
  * @see #registerCustomEditor
@@ -418,13 +421,21 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	/**
-	 * Register fields that should be allowed for binding. Default is all
-	 * fields. Restrict this for example to avoid unwanted modifications
-	 * by malicious users when binding HTTP request parameters.
-	 * <p>Supports "xxx*", "*xxx" and "*xxx*" patterns. More sophisticated matching
-	 * can be implemented by overriding the {@code isAllowed} method.
-	 * <p>Alternatively, specify a list of <i>disallowed</i> fields.
-	 * @param allowedFields array of field names
+	 * Register field patterns that should be allowed for binding.
+	 * <p>Default is all fields.
+	 * <p>Restrict this for example to avoid unwanted modifications by malicious
+	 * users when binding HTTP request parameters.
+	 * <p>Supports {@code "xxx*"}, {@code "*xxx"}, {@code "*xxx*"}, and
+	 * {@code "xxx*yyy"} matches (with an arbitrary number of pattern parts), as
+	 * well as direct equality.
+	 * <p>The default implementation of this method stores allowed field patterns
+	 * in {@linkplain PropertyAccessorUtils#canonicalPropertyName(String) canonical}
+	 * form. Subclasses which override this method must therefore take this into
+	 * account.
+	 * <p>More sophisticated matching can be implemented by overriding the
+	 * {@link #isAllowed} method.
+	 * <p>Alternatively, specify a list of <i>disallowed</i> field patterns.
+	 * @param allowedFields array of allowed field patterns
 	 * @see #setDisallowedFields
 	 * @see #isAllowed(String)
 	 */
@@ -433,8 +444,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	/**
-	 * Return the fields that should be allowed for binding.
-	 * @return array of field names
+	 * Return the field patterns that should be allowed for binding.
+	 * @return array of allowed field patterns
+	 * @see #setAllowedFields(String...)
 	 */
 	@Nullable
 	public String[] getAllowedFields() {
@@ -442,23 +454,44 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	/**
-	 * Register fields that should <i>not</i> be allowed for binding. Default is none.
-	 * Mark fields as disallowed for example to avoid unwanted modifications
-	 * by malicious users when binding HTTP request parameters.
-	 * <p>Supports "xxx*", "*xxx" and "*xxx*" patterns. More sophisticated matching
-	 * can be implemented by overriding the {@code isAllowed} method.
-	 * <p>Alternatively, specify a list of <i>allowed</i> fields.
-	 * @param disallowedFields array of field names
+	 * Register field patterns that should <i>not</i> be allowed for binding.
+	 * <p>Default is none.
+	 * <p>Mark fields as disallowed, for example to avoid unwanted
+	 * modifications by malicious users when binding HTTP request parameters.
+	 * <p>Supports {@code "xxx*"}, {@code "*xxx"}, {@code "*xxx*"}, and
+	 * {@code "xxx*yyy"} matches (with an arbitrary number of pattern parts), as
+	 * well as direct equality.
+	 * <p>The default implementation of this method stores disallowed field patterns
+	 * in {@linkplain PropertyAccessorUtils#canonicalPropertyName(String) canonical}
+	 * form. As of Spring Framework 5.2.21, the default implementation also transforms
+	 * disallowed field patterns to {@linkplain String#toLowerCase() lowercase} to
+	 * support case-insensitive pattern matching in {@link #isAllowed}. Subclasses
+	 * which override this method must therefore take both of these transformations
+	 * into account.
+	 * <p>More sophisticated matching can be implemented by overriding the
+	 * {@link #isAllowed} method.
+	 * <p>Alternatively, specify a list of <i>allowed</i> field patterns.
+	 * @param disallowedFields array of disallowed field patterns
 	 * @see #setAllowedFields
 	 * @see #isAllowed(String)
 	 */
 	public void setDisallowedFields(@Nullable String... disallowedFields) {
-		this.disallowedFields = PropertyAccessorUtils.canonicalPropertyNames(disallowedFields);
+		if (disallowedFields == null) {
+			this.disallowedFields = null;
+		}
+		else {
+			String[] fieldPatterns = new String[disallowedFields.length];
+			for (int i = 0; i < fieldPatterns.length; i++) {
+				fieldPatterns[i] = PropertyAccessorUtils.canonicalPropertyName(disallowedFields[i]).toLowerCase();
+			}
+			this.disallowedFields = fieldPatterns;
+		}
 	}
 
 	/**
-	 * Return the fields that should <i>not</i> be allowed for binding.
-	 * @return array of field names
+	 * Return the field patterns that should <i>not</i> be allowed for binding.
+	 * @return array of disallowed field patterns
+	 * @see #setDisallowedFields(String...)
 	 */
 	@Nullable
 	public String[] getDisallowedFields() {
@@ -770,15 +803,20 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	/**
-	 * Return if the given field is allowed for binding.
-	 * Invoked for each passed-in property value.
-	 * <p>The default implementation checks for "xxx*", "*xxx" and "*xxx*" matches,
-	 * as well as direct equality, in the specified lists of allowed fields and
-	 * disallowed fields. A field matching a disallowed pattern will not be accepted
-	 * even if it also happens to match a pattern in the allowed list.
-	 * <p>Can be overridden in subclasses.
+	 * Determine if the given field is allowed for binding.
+	 * <p>Invoked for each passed-in property value.
+	 * <p>Checks for {@code "xxx*"}, {@code "*xxx"}, {@code "*xxx*"}, and
+	 * {@code "xxx*yyy"} matches (with an arbitrary number of pattern parts), as
+	 * well as direct equality, in the configured lists of allowed field patterns
+	 * and disallowed field patterns.
+	 * <p>Matching against allowed field patterns is case-sensitive; whereas,
+	 * matching against disallowed field patterns is case-insensitive.
+	 * <p>A field matching a disallowed pattern will not be accepted even if it
+	 * also happens to match a pattern in the allowed list.
+	 * <p>Can be overridden in subclasses, but care must be taken to honor the
+	 * aforementioned contract.
 	 * @param field the field to check
-	 * @return if the field is allowed
+	 * @return {@code true} if the field is allowed
 	 * @see #setAllowedFields
 	 * @see #setDisallowedFields
 	 * @see org.springframework.util.PatternMatchUtils#simpleMatch(String, String)
@@ -787,7 +825,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		String[] allowed = getAllowedFields();
 		String[] disallowed = getDisallowedFields();
 		return ((ObjectUtils.isEmpty(allowed) || PatternMatchUtils.simpleMatch(allowed, field)) &&
-				(ObjectUtils.isEmpty(disallowed) || !PatternMatchUtils.simpleMatch(disallowed, field)));
+				(ObjectUtils.isEmpty(disallowed) || !PatternMatchUtils.simpleMatch(disallowed, field.toLowerCase())));
 	}
 
 	/**
@@ -835,7 +873,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	/**
 	 * Apply given property values to the target object.
-	 * <p>Default implementation applies all of the supplied property
+	 * <p>Default implementation applies all the supplied property
 	 * values as bean property values. By default, unknown fields will
 	 * be ignored.
 	 * @param mpvs the property values to be bound (can be modified)

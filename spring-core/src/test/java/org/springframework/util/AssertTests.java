@@ -645,7 +645,7 @@ class AssertTests {
 	void isAssignableWithNullSupertype() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				Assert.isAssignable(null, Integer.class, "enigma"))
-			.withMessageContaining("Super type to check against must not be null");
+			.withMessageContaining("Supertype to check against must not be null");
 	}
 
 	@Test
@@ -692,7 +692,7 @@ class AssertTests {
 	void isAssignableWithNullSupertypeAndMessageSupplier() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				Assert.isAssignable(null, Integer.class, () -> "enigma"))
-			.withMessageContaining("Super type to check against must not be null");
+			.withMessageContaining("Supertype to check against must not be null");
 	}
 
 	@Test

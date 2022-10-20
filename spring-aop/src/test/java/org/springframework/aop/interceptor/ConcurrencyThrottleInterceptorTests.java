@@ -125,16 +125,7 @@ public class ConcurrencyThrottleInterceptorTests {
 				try {
 					this.proxy.exceptional(this.ex);
 				}
-				catch (RuntimeException ex) {
-					if (ex == this.ex) {
-						logger.debug("Expected exception thrown", ex);
-					}
-					else {
-						// should never happen
-						ex.printStackTrace();
-					}
-				}
-				catch (Error err) {
+				catch (RuntimeException | Error err) {
 					if (err == this.ex) {
 						logger.debug("Expected exception thrown", err);
 					}
