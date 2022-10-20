@@ -35,6 +35,8 @@ import org.springframework.web.util.pattern.PathPattern;
  */
 public class ServerRequestObservationContext extends RequestReplyReceiverContext<ServerHttpRequest, ServerHttpResponse> {
 
+	private final ServerWebExchange serverWebExchange;
+
 	@Nullable
 	private PathPattern pathPattern;
 
@@ -42,8 +44,16 @@ public class ServerRequestObservationContext extends RequestReplyReceiverContext
 
 	public ServerRequestObservationContext(ServerWebExchange exchange) {
 		super((request, key) -> request.getHeaders().getFirst(key));
+		this.serverWebExchange = exchange;
 		setCarrier(exchange.getRequest());
 		setResponse(exchange.getResponse());
+	}
+
+	/**
+	 * Return the current {@link ServerWebExchange HTTP exchange}.
+	 */
+	public ServerWebExchange getServerWebExchange() {
+		return this.serverWebExchange;
 	}
 
 	/**
