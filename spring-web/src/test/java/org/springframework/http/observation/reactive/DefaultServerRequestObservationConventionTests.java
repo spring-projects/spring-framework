@@ -141,6 +141,16 @@ class DefaultServerRequestObservationConventionTests {
 				.contains(KeyValue.of("http.url", "/test/resource"));
 	}
 
+	@Test
+	void supportsNullStatusCode() {
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/test/resource"));
+		ServerRequestObservationContext context = new ServerRequestObservationContext(exchange);
+
+		assertThat(this.convention.getLowCardinalityKeyValues(context))
+				.contains(KeyValue.of("status", "UNKNOWN"),
+						KeyValue.of("exception", "none"), KeyValue.of("outcome", "UNKNOWN"));
+	}
+
 	private static PathPattern getPathPattern(String pattern) {
 		PathPatternParser pathPatternParser = new PathPatternParser();
 		return pathPatternParser.parse(pattern);

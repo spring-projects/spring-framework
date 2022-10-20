@@ -100,7 +100,8 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 		if (context.isConnectionAborted()) {
 			return STATUS_UNKNOWN;
 		}
-		return (context.getResponse() != null) ? KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.STATUS, Integer.toString(context.getResponse().getStatusCode().value())) : STATUS_UNKNOWN;
+		return (context.getResponse() != null && context.getResponse().getStatusCode() != null) ?
+				KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.STATUS, Integer.toString(context.getResponse().getStatusCode().value())) : STATUS_UNKNOWN;
 	}
 
 	protected KeyValue uri(ServerRequestObservationContext context) {
@@ -112,7 +113,7 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 				}
 				return KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.URI, pattern.toString());
 			}
-			if (context.getResponse() != null) {
+			if (context.getResponse() != null && context.getResponse().getStatusCode() != null) {
 				HttpStatus status = HttpStatus.resolve(context.getResponse().getStatusCode().value());
 				if (status != null) {
 					if (status.is3xxRedirection()) {
@@ -141,7 +142,7 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 		if (context.isConnectionAborted()) {
 			return HTTP_OUTCOME_UNKNOWN;
 		}
-		if (context.getResponse() != null) {
+		if (context.getResponse() != null && context.getResponse().getStatusCode() != null) {
 			return HttpOutcome.forStatus(context.getResponse().getStatusCode());
 		}
 		return HTTP_OUTCOME_UNKNOWN;
