@@ -40,7 +40,7 @@ as the following example shows:
 	PersonRepository repository = ...
 	PersonHandler handler = new PersonHandler(repository);
 
-	RouterFunction<ServerResponse> route = route()
+	RouterFunction<ServerResponse> route = route() <1>
 		.GET("/person/{id}", accept(APPLICATION_JSON), handler::getPerson)
 		.GET("/person", accept(APPLICATION_JSON), handler::listPeople)
 		.POST("/person", handler::createPerson)
@@ -64,6 +64,7 @@ as the following example shows:
 		}
 	}
 ----
+<1> Create router using `route()`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -125,7 +126,7 @@ For more on that, see <<web-reactive.adoc#webflux-reactive-libraries, Reactive L
 
 
 [[webflux-fn-request]]
-=== `ServerRequest`
+=== ServerRequest
 
 `ServerRequest` provides access to the HTTP method, URI, headers, and query parameters,
 while access to the body is provided through the `body` methods.
@@ -145,7 +146,7 @@ val string = request.awaitBody<String>()
 
 
 The following example extracts the body to a `Flux<Person>` (or a `Flow<Person>` in Kotlin),
-where `Person` objects are decoded from someserialized form, such as JSON or XML:
+where `Person` objects are decoded from some serialized form, such as JSON or XML:
 
 [source,java,role="primary"]
 .Java
@@ -172,7 +173,7 @@ Flux<Person> people = request.body(BodyExtractors.toFlux(Person.class));
 [source,kotlin,role="secondary"]
 .Kotlin
 ----
-	val string = request.body(BodyExtractors.toMono(String::class.java)).awaitFirst()
+	val string = request.body(BodyExtractors.toMono(String::class.java)).awaitSingle()
 	val people = request.body(BodyExtractors.toFlux(Person::class.java)).asFlow()
 ----
 
@@ -181,7 +182,7 @@ The following example shows how to access form data:
 [source,java,role="primary"]
 .Java
 ----
-Mono<MultiValueMap<String, String> map = request.formData();
+Mono<MultiValueMap<String, String>> map = request.formData();
 ----
 [source,kotlin,role="secondary"]
 .Kotlin
@@ -194,7 +195,7 @@ The following example shows how to access multipart data as a map:
 [source,java,role="primary"]
 .Java
 ----
-Mono<MultiValueMap<String, Part> map = request.multipartData();
+Mono<MultiValueMap<String, Part>> map = request.multipartData();
 ----
 [source,kotlin,role="secondary"]
 .Kotlin
@@ -202,23 +203,64 @@ Mono<MultiValueMap<String, Part> map = request.multipartData();
 val map = request.awaitMultipartData()
 ----
 
-The following example shows how to access multiparts, one at a time, in streaming fashion:
+The following example shows how to access multipart data, one at a time, in streaming fashion:
 
-[source,java,role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-Flux<Part> parts = request.body(BodyExtractors.toParts());
+Flux<PartEvent> allPartEvents = request.bodyToFlux(PartEvent.class);
+allPartsEvents.windowUntil(PartEvent::isLast)
+      .concatMap(p -> p.switchOnFirst((signal, partEvents) -> {
+          if (signal.hasValue()) {
+              PartEvent event = signal.get();
+              if (event instanceof FormPartEvent formEvent) {
+                  String value = formEvent.value();
+                  // handle form field
+              }
+              else if (event instanceof FilePartEvent fileEvent) {
+                  String filename = fileEvent.filename();
+                  Flux<DataBuffer> contents = partEvents.map(PartEvent::content);
+                  // handle file upload
+              }
+              else {
+                  return Mono.error(new RuntimeException("Unexpected event: " + event));
+              }
+          }
+          else {
+              return partEvents; // either complete or error signal
+          }
+      }));
 ----
-[source,kotlin,role="secondary"]
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-val parts = request.body(BodyExtractors.toParts()).asFlow()
+val parts = request.bodyToFlux<PartEvent>()
+allPartsEvents.windowUntil(PartEvent::isLast)
+    .concatMap {
+        it.switchOnFirst { signal, partEvents ->
+            if (signal.hasValue()) {
+                val event = signal.get()
+                if (event is FormPartEvent) {
+                    val value: String = event.value();
+                    // handle form field
+                } else if (event is FilePartEvent) {
+                    val filename: String = event.filename();
+                    val contents: Flux<DataBuffer> = partEvents.map(PartEvent::content);
+                    // handle file upload
+                } else {
+                    return Mono.error(RuntimeException("Unexpected event: " + event));
+                }
+            } else {
+                return partEvents; // either complete or error signal
+            }
+        }
+    }
+}
 ----
 
-
-
 [[webflux-fn-response]]
-=== `ServerResponse`
+=== ServerResponse
 
 `ServerResponse` provides access to the HTTP response and, since it is immutable, you can use
 a `build` method to create it. You can use the builder to set the response status, to add response
@@ -505,6 +547,8 @@ The example shown above also uses two request predicates, as the builder uses
 Router functions are evaluated in order: if the first route does not match, the
 second is evaluated, and so on.
 Therefore, it makes sense to declare more specific routes before general ones.
+This is also important when registering router functions as Spring beans, as will
+be described later.
 Note that this behavior is different from the annotation-based programming model, where the
 "most specific" controller method is picked automatically.
 
@@ -587,11 +631,11 @@ improved in the following way by using nested routes:
 RouterFunction<ServerResponse> route = route()
 	.path("/person", builder -> builder // <1>
 		.GET("/{id}", accept(APPLICATION_JSON), handler::getPerson)
-		.GET("", accept(APPLICATION_JSON), handler::listPeople)
-		.POST("/person", handler::createPerson))
+		.GET(accept(APPLICATION_JSON), handler::listPeople)
+		.POST(handler::createPerson))
 	.build();
 ----
-<1> Note that second parameter of `path` is a consumer that takes the a router builder.
+<1> Note that second parameter of `path` is a consumer that takes the router builder.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -599,8 +643,8 @@ RouterFunction<ServerResponse> route = route()
 	val route = coRouter {
 		"/person".nest {
 			GET("/{id}", accept(APPLICATION_JSON), handler::getPerson)
-			GET("", accept(APPLICATION_JSON), handler::listPeople)
-			POST("/person", handler::createPerson)
+			GET(accept(APPLICATION_JSON), handler::listPeople)
+			POST(handler::createPerson)
 		}
 	}
 ----
@@ -617,8 +661,8 @@ We can further improve by using the `nest` method together with `accept`:
 		.path("/person", b1 -> b1
 			.nest(accept(APPLICATION_JSON), b2 -> b2
 				.GET("/{id}", handler::getPerson)
-				.GET("", handler::listPeople))
-			.POST("/person", handler::createPerson))
+				.GET(handler::listPeople))
+			.POST(handler::createPerson))
 		.build();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -628,8 +672,8 @@ We can further improve by using the `nest` method together with `accept`:
 		"/person".nest {
 			accept(APPLICATION_JSON).nest {
 				GET("/{id}", handler::getPerson)
-				GET("", handler::listPeople)
-				POST("/person", handler::createPerson)
+				GET(handler::listPeople)
+				POST(handler::createPerson)
 			}
 		}
 	}
@@ -656,8 +700,8 @@ components required to process requests. The WebFlux Java configuration declares
 infrastructure components to support functional endpoints:
 
 * `RouterFunctionMapping`: Detects one or more `RouterFunction<?>` beans in the Spring
-configuration, combines them through `RouterFunction.andOther`, and routes requests to the
-resulting composed `RouterFunction`.
+configuration, <<core.adoc#beans-factory-ordered, orders them>>, combines them through
+`RouterFunction.andOther`, and routes requests to the resulting composed `RouterFunction`.
 * `HandlerFunctionAdapter`: Simple adapter that lets `DispatcherHandler` invoke
 a `HandlerFunction` that was mapped to a request.
 * `ServerResponseResultHandler`: Handles the result from the invocation of a
@@ -760,11 +804,11 @@ For instance, consider the following example:
 		.path("/person", b1 -> b1
 			.nest(accept(APPLICATION_JSON), b2 -> b2
 				.GET("/{id}", handler::getPerson)
-				.GET("", handler::listPeople)
+				.GET(handler::listPeople)
 				.before(request -> ServerRequest.from(request) // <1>
 					.header("X-RequestHeader", "Value")
 					.build()))
-			.POST("/person", handler::createPerson))
+			.POST(handler::createPerson))
 		.after((request, response) -> logResponse(response)) // <2>
 		.build();
 ----
@@ -782,7 +826,7 @@ For instance, consider the following example:
 				ServerRequest.from(it)
 						.header("X-RequestHeader", "Value").build()
 			}
-			POST("/person", handler::createPerson)
+			POST(handler::createPerson)
 			after { _, response -> // <2>
 				logResponse(response)
 			}
@@ -812,8 +856,8 @@ The following example shows how to do so:
 		.path("/person", b1 -> b1
 			.nest(accept(APPLICATION_JSON), b2 -> b2
 				.GET("/{id}", handler::getPerson)
-				.GET("", handler::listPeople))
-			.POST("/person", handler::createPerson))
+				.GET(handler::listPeople))
+			.POST(handler::createPerson))
 		.filter((request, next) -> {
 			if (securityManager.allowAccessTo(request.path())) {
 				return next.handle(request);
@@ -833,7 +877,7 @@ The following example shows how to do so:
 			("/person" and accept(APPLICATION_JSON)).nest {
 				GET("/{id}", handler::getPerson)
 				GET("", handler::listPeople)
-				POST("/person", handler::createPerson)
+				POST(handler::createPerson)
 				filter { request, next ->
 					if (securityManager.allowAccessTo(request.path())) {
 						next(request)

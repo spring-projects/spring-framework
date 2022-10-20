@@ -29,7 +29,7 @@ import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.invocation.AbstractExceptionHandlerMethodResolver;
 
 /**
- * A sub-class of {@link AbstractExceptionHandlerMethodResolver} that looks for
+ * A subclass of {@link AbstractExceptionHandlerMethodResolver} that looks for
  * {@link MessageExceptionHandler}-annotated methods in a given class. The actual
  * exception types handled are extracted either from the annotation, if present,
  * or from the method signature as a fallback option.

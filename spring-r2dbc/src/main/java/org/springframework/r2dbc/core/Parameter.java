@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,18 @@ import org.springframework.util.ObjectUtils;
  * A database value that can be set in a statement.
  *
  * @author Mark Paluch
+ * @author Juergen Hoeller
  * @since 5.3
+ * @deprecated since 6.0, use {@code io.r2dbc.spi.Parameter} instead.
  */
+@Deprecated(since = "6.0")
 public final class Parameter {
 
 	@Nullable
 	private final Object value;
 
 	private final Class<?> type;
+
 
 	private Parameter(@Nullable Object value, Class<?> type) {
 		Assert.notNull(type, "Type must not be null");
@@ -45,7 +49,7 @@ public final class Parameter {
 
 	/**
 	 * Create a new {@link Parameter} from {@code value}.
-	 * @param value must not be {@code null}
+	 * @param value the parameter value
 	 * @return the {@link Parameter} value for {@code value}
 	 */
 	public static Parameter from(Object value) {
@@ -55,12 +59,12 @@ public final class Parameter {
 
 	/**
 	 * Create a new {@link Parameter} from {@code value} and {@code type}.
-	 * @param value can be {@code null}
-	 * @param type must not be {@code null}
+	 * @param value the parameter value (can be {@code null})
+	 * @param type the parameter type
 	 * @return the {@link Parameter} value for {@code value}
 	 */
 	public static Parameter fromOrEmpty(@Nullable Object value, Class<?> type) {
-		return value == null ? empty(type) : new Parameter(value, ClassUtils.getUserClass(value));
+		return (value == null ? empty(type) : new Parameter(value, ClassUtils.getUserClass(value)));
 	}
 
 	/**
@@ -74,7 +78,7 @@ public final class Parameter {
 
 
 	/**
-	 * Return the column value. Can be {@code null}.
+	 * Return the column value (can be {@code null}).
 	 * @see #hasValue()
 	 */
 	@Nullable
@@ -83,14 +87,14 @@ public final class Parameter {
 	}
 
 	/**
-	 * Returns the column value type. Must be also present if the {@code value} is {@code null}.
+	 * Return the column value type. Must be also present if the {@code value} is {@code null}.
 	 */
 	public Class<?> getType() {
 		return this.type;
 	}
 
 	/**
-	 * Returns whether this {@link Parameter} has a value.
+	 * Return whether this {@link Parameter} has a value.
 	 * @return {@code false} if {@link #getValue()} is {@code null}
 	 */
 	public boolean hasValue() {
@@ -98,7 +102,7 @@ public final class Parameter {
 	}
 
 	/**
-	 * Returns whether this {@link Parameter} has a empty.
+	 * Return whether this {@link Parameter} has an empty value.
 	 * @return {@code true} if {@link #getValue()} is {@code null}
 	 */
 	public boolean isEmpty() {
@@ -111,11 +115,11 @@ public final class Parameter {
 		if (this == obj) {
 			return true;
 		}
-		if (!(obj instanceof Parameter)) {
+		if (!(obj instanceof Parameter other)) {
 			return false;
 		}
-		Parameter other = (Parameter) obj;
-		return ObjectUtils.nullSafeEquals(this.value, other.value) && ObjectUtils.nullSafeEquals(this.type, other.type);
+		return (ObjectUtils.nullSafeEquals(this.value, other.value) &&
+				ObjectUtils.nullSafeEquals(this.type, other.type));
 	}
 
 	@Override
@@ -125,7 +129,7 @@ public final class Parameter {
 
 	@Override
 	public String toString() {
-		return "Parameter[value=" + this.value + ", type=" + this.type + ']';
+		return "Parameter[value=" + this.value + ",type=" + this.type.getName() + "]";
 	}
 
 }

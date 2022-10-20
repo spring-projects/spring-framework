@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.http.codec;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -162,18 +161,13 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 		StringBuilder builder = new StringBuilder();
 		formData.forEach((name, values) ->
 				values.forEach(value -> {
-					try {
-						if (builder.length() != 0) {
-							builder.append('&');
-						}
-						builder.append(URLEncoder.encode(name, charset.name()));
-						if (value != null) {
-							builder.append('=');
-							builder.append(URLEncoder.encode(value, charset.name()));
-						}
+					if (builder.length() != 0) {
+						builder.append('&');
 					}
-					catch (UnsupportedEncodingException ex) {
-						throw new IllegalStateException(ex);
+					builder.append(URLEncoder.encode(name, charset));
+					if (value != null) {
+						builder.append('=');
+						builder.append(URLEncoder.encode(value, charset));
 					}
 				}));
 		return builder.toString();

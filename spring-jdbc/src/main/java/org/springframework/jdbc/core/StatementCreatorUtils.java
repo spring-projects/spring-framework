@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,9 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -98,6 +101,9 @@ public abstract class StatementCreatorUtils {
 		javaTypeToSqlTypeMap.put(double.class, Types.DOUBLE);
 		javaTypeToSqlTypeMap.put(Double.class, Types.DOUBLE);
 		javaTypeToSqlTypeMap.put(BigDecimal.class, Types.DECIMAL);
+		javaTypeToSqlTypeMap.put(LocalDate.class, Types.DATE);
+		javaTypeToSqlTypeMap.put(LocalTime.class, Types.TIME);
+		javaTypeToSqlTypeMap.put(LocalDateTime.class, Types.TIMESTAMP);
 		javaTypeToSqlTypeMap.put(java.sql.Date.class, Types.DATE);
 		javaTypeToSqlTypeMap.put(java.sql.Time.class, Types.TIME);
 		javaTypeToSqlTypeMap.put(java.sql.Timestamp.class, Types.TIMESTAMP);
@@ -202,8 +208,7 @@ public abstract class StatementCreatorUtils {
 		Object inValueToUse = inValue;
 
 		// override type info?
-		if (inValue instanceof SqlParameterValue) {
-			SqlParameterValue parameterValue = (SqlParameterValue) inValue;
+		if (inValue instanceof SqlParameterValue parameterValue) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Overriding type info with runtime info from SqlParameterValue: column index " + paramIndex +
 						", SQL type " + parameterValue.getSqlType() + ", type name " + parameterValue.getTypeName());
@@ -350,8 +355,7 @@ public abstract class StatementCreatorUtils {
 					ps.setDate(paramIndex, new java.sql.Date(((java.util.Date) inValue).getTime()));
 				}
 			}
-			else if (inValue instanceof Calendar) {
-				Calendar cal = (Calendar) inValue;
+			else if (inValue instanceof Calendar cal) {
 				ps.setDate(paramIndex, new java.sql.Date(cal.getTime().getTime()), cal);
 			}
 			else {
@@ -367,8 +371,7 @@ public abstract class StatementCreatorUtils {
 					ps.setTime(paramIndex, new java.sql.Time(((java.util.Date) inValue).getTime()));
 				}
 			}
-			else if (inValue instanceof Calendar) {
-				Calendar cal = (Calendar) inValue;
+			else if (inValue instanceof Calendar cal) {
 				ps.setTime(paramIndex, new java.sql.Time(cal.getTime().getTime()), cal);
 			}
 			else {
@@ -384,8 +387,7 @@ public abstract class StatementCreatorUtils {
 					ps.setTimestamp(paramIndex, new java.sql.Timestamp(((java.util.Date) inValue).getTime()));
 				}
 			}
-			else if (inValue instanceof Calendar) {
-				Calendar cal = (Calendar) inValue;
+			else if (inValue instanceof Calendar cal) {
 				ps.setTimestamp(paramIndex, new java.sql.Timestamp(cal.getTime().getTime()), cal);
 			}
 			else {
@@ -400,8 +402,7 @@ public abstract class StatementCreatorUtils {
 			else if (isDateValue(inValue.getClass())) {
 				ps.setTimestamp(paramIndex, new java.sql.Timestamp(((java.util.Date) inValue).getTime()));
 			}
-			else if (inValue instanceof Calendar) {
-				Calendar cal = (Calendar) inValue;
+			else if (inValue instanceof Calendar cal) {
 				ps.setTimestamp(paramIndex, new java.sql.Timestamp(cal.getTime().getTime()), cal);
 			}
 			else {

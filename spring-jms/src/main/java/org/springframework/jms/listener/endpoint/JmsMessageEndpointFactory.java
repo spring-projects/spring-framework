@@ -16,10 +16,10 @@
 
 package org.springframework.jms.listener.endpoint;
 
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.resource.ResourceException;
-import javax.resource.spi.UnavailableException;
+import jakarta.jms.Message;
+import jakarta.jms.MessageListener;
+import jakarta.resource.ResourceException;
+import jakarta.resource.spi.UnavailableException;
 
 import org.springframework.jca.endpoint.AbstractMessageEndpointFactory;
 import org.springframework.lang.Nullable;
@@ -27,9 +27,9 @@ import org.springframework.util.Assert;
 
 /**
  * JMS-specific implementation of the JCA 1.7
- * {@link javax.resource.spi.endpoint.MessageEndpointFactory} interface,
+ * {@link jakarta.resource.spi.endpoint.MessageEndpointFactory} interface,
  * providing transaction management capabilities for a JMS listener object
- * (e.g. a {@link javax.jms.MessageListener} object).
+ * (e.g. a {@link jakarta.jms.MessageListener} object).
  *
  * <p>Uses a static endpoint implementation, simply wrapping the
  * specified message listener object and exposing all of its implemented
@@ -38,7 +38,7 @@ import org.springframework.util.Assert;
  * <p>Typically used with Spring's {@link JmsMessageEndpointManager},
  * but not tied to it. As a consequence, this endpoint factory could
  * also be used with programmatic endpoint management on a native
- * {@link javax.resource.spi.ResourceAdapter} instance.
+ * {@link jakarta.resource.spi.ResourceAdapter} instance.
  *
  * @author Juergen Hoeller
  * @author Stephane Nicoll

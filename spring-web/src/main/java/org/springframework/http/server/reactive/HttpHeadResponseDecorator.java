@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.http.server.reactive;
-
-import java.util.function.BiFunction;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -41,24 +39,36 @@ public class HttpHeadResponseDecorator extends ServerHttpResponseDecorator {
 
 
 	/**
-	 * Apply {@link Flux#reduce(Object, BiFunction) reduce} on the body, count
-	 * the number of bytes produced, release data buffers without writing, and
-	 * set the {@literal Content-Length} header.
+	 * Consume and release the body without writing.
+	 * <p>If the headers contain neither Content-Length nor Transfer-Encoding,
+	 * and the body is a {@link Mono}, count the bytes and set Content-Length.
 	 */
 	@Override
+	@SuppressWarnings("unchecked")
 	public final Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
-		return Flux.from(body)
-				.reduce(0, (current, buffer) -> {
-					int next = current + buffer.readableByteCount();
-					DataBufferUtils.release(buffer);
-					return next;
-				})
-				.doOnNext(length -> {
-					if (length > 0 || getHeaders().getFirst(HttpHeaders.CONTENT_LENGTH) == null) {
-						getHeaders().setContentLength(length);
-					}
-				})
-				.then();
+		if (shouldSetContentLength() && body instanceof Mono) {
+			return ((Mono<? extends DataBuffer>) body)
+					.doOnSuccess(buffer -> {
+						if (buffer != null) {
+							getHeaders().setContentLength(buffer.readableByteCount());
+							DataBufferUtils.release(buffer);
+						}
+						else {
+							getHeaders().setContentLength(0);
+						}
+					})
+					.then();
+		}
+		else {
+			return Flux.from(body)
+					.doOnNext(DataBufferUtils::release)
+					.then();
+		}
+	}
+
+	private boolean shouldSetContentLength() {
+		return (getHeaders().getFirst(HttpHeaders.CONTENT_LENGTH) == null &&
+				getHeaders().getFirst(HttpHeaders.TRANSFER_ENCODING) == null);
 	}
 
 	/**

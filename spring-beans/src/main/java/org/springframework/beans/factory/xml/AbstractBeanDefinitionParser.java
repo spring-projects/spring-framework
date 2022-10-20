@@ -124,7 +124,7 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	/**
 	 * Register the supplied {@link BeanDefinitionHolder bean} with the supplied
 	 * {@link BeanDefinitionRegistry registry}.
-	 * <p>Subclasses can override this method to control whether or not the supplied
+	 * <p>Subclasses can override this method to control whether the supplied
 	 * {@link BeanDefinitionHolder bean} is actually even registered, or to
 	 * register even more beans.
 	 * <p>The default implementation registers the supplied {@link BeanDefinitionHolder bean}

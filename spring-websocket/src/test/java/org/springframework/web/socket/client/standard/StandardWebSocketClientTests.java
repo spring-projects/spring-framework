@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.websocket.ClientEndpointConfig;
-import javax.websocket.Endpoint;
-import javax.websocket.WebSocketContainer;
-
+import jakarta.websocket.ClientEndpointConfig;
+import jakarta.websocket.Endpoint;
+import jakarta.websocket.WebSocketContainer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -69,6 +68,7 @@ public class StandardWebSocketClientTests {
 
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testGetLocalAddress() throws Exception {
 		URI uri = new URI("ws://localhost/abc");
 		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
@@ -78,6 +78,7 @@ public class StandardWebSocketClientTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testGetLocalAddressWss() throws Exception {
 		URI uri = new URI("wss://localhost/abc");
 		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
@@ -87,6 +88,7 @@ public class StandardWebSocketClientTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testGetLocalAddressNoScheme() throws Exception {
 		URI uri = new URI("localhost/abc");
 		assertThatIllegalArgumentException().isThrownBy(() ->
@@ -94,6 +96,7 @@ public class StandardWebSocketClientTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testGetRemoteAddress() throws Exception {
 		URI uri = new URI("wss://localhost/abc");
 		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
@@ -104,8 +107,8 @@ public class StandardWebSocketClientTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void handshakeHeaders() throws Exception {
-
 		URI uri = new URI("ws://localhost/abc");
 		List<String> protocols = Collections.singletonList("abc");
 		this.headers.setSecWebSocketProtocol(protocols);
@@ -118,8 +121,8 @@ public class StandardWebSocketClientTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void clientEndpointConfig() throws Exception {
-
 		URI uri = new URI("ws://localhost/abc");
 		List<String> protocols = Collections.singletonList("abc");
 		this.headers.setSecWebSocketProtocol(protocols);
@@ -134,8 +137,8 @@ public class StandardWebSocketClientTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void clientEndpointConfigWithUserProperties() throws Exception {
-
 		Map<String,Object> userProperties = Collections.singletonMap("foo", "bar");
 
 		URI uri = new URI("ws://localhost/abc");
@@ -150,8 +153,8 @@ public class StandardWebSocketClientTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void standardWebSocketClientConfiguratorInsertsHandshakeHeaders() throws Exception {
-
 		URI uri = new URI("ws://localhost/abc");
 		this.headers.add("foo", "bar");
 
@@ -167,8 +170,8 @@ public class StandardWebSocketClientTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void taskExecutor() throws Exception {
-
 		URI uri = new URI("ws://localhost/abc");
 		this.wsClient.setTaskExecutor(new SimpleAsyncTaskExecutor());
 		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();

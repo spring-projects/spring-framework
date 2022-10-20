@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,17 +100,17 @@ public class FactoryMethodTests {
 
 		FactoryMethods fm = (FactoryMethods) xbf.getBean("fullWithNull");
 		assertThat(fm.getNum()).isEqualTo(27);
-		assertThat(fm.getName()).isEqualTo(null);
+		assertThat(fm.getName()).isNull();
 		assertThat(fm.getTestBean().getName()).isEqualTo("Juergen");
 
 		fm = (FactoryMethods) xbf.getBean("fullWithGenericNull");
 		assertThat(fm.getNum()).isEqualTo(27);
-		assertThat(fm.getName()).isEqualTo(null);
+		assertThat(fm.getName()).isNull();
 		assertThat(fm.getTestBean().getName()).isEqualTo("Juergen");
 
 		fm = (FactoryMethods) xbf.getBean("fullWithNamedNull");
 		assertThat(fm.getNum()).isEqualTo(27);
-		assertThat(fm.getName()).isEqualTo(null);
+		assertThat(fm.getName()).isNull();
 		assertThat(fm.getTestBean().getName()).isEqualTo("Juergen");
 	}
 

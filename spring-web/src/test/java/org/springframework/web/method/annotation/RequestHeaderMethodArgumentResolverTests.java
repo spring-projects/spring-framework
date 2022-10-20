@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
@@ -66,6 +67,7 @@ class RequestHeaderMethodArgumentResolverTests {
 	private MethodParameter paramDate;
 	private MethodParameter paramInstant;
 	private MethodParameter paramUuid;
+	private MethodParameter paramUuidOptional;
 
 	private MockHttpServletRequest servletRequest;
 
@@ -90,6 +92,7 @@ class RequestHeaderMethodArgumentResolverTests {
 		paramDate = new SynthesizingMethodParameter(method, 7);
 		paramInstant = new SynthesizingMethodParameter(method, 8);
 		paramUuid = new SynthesizingMethodParameter(method, 9);
+		paramUuidOptional = new SynthesizingMethodParameter(method, 10);
 
 		servletRequest = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
@@ -265,7 +268,28 @@ class RequestHeaderMethodArgumentResolverTests {
 
 		ConfigurableWebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
 		bindingInitializer.setConversionService(new DefaultFormattingConversionService());
-		Object result = resolver.resolveArgument(paramUuid, null, webRequest,
+
+		assertThatExceptionOfType(MissingRequestHeaderException.class).isThrownBy(() ->
+				resolver.resolveArgument(paramUuid, null, webRequest,
+						new DefaultDataBinderFactory(bindingInitializer)));
+	}
+
+	@Test
+	void uuidConversionWithEmptyValueOptional() throws Exception {
+		uuidConversionWithEmptyOrBlankValueOptional("");
+	}
+
+	@Test
+	void uuidConversionWithBlankValueOptional() throws Exception {
+		uuidConversionWithEmptyOrBlankValueOptional("     ");
+	}
+
+	private void uuidConversionWithEmptyOrBlankValueOptional(String uuid) throws Exception {
+		servletRequest.addHeader("name", uuid);
+
+		ConfigurableWebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
+		bindingInitializer.setConversionService(new DefaultFormattingConversionService());
+		Object result = resolver.resolveArgument(paramUuidOptional, null, webRequest,
 				new DefaultDataBinderFactory(bindingInitializer));
 
 		assertThat(result).isNull();
@@ -282,7 +306,8 @@ class RequestHeaderMethodArgumentResolverTests {
 			@RequestHeader("name") Map<?, ?> unsupported,
 			@RequestHeader("name") Date dateParam,
 			@RequestHeader("name") Instant instantParam,
-			@RequestHeader("name") UUID uuid) {
+			@RequestHeader("name") UUID uuid,
+			@RequestHeader(name = "name", required = false) UUID uuidOptional) {
 	}
 
 }

@@ -25,17 +25,17 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionBindingEvent;
-import javax.servlet.http.HttpSessionBindingListener;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSessionBindingEvent;
+import jakarta.servlet.http.HttpSessionBindingListener;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Mock implementation of the {@link javax.servlet.http.HttpSession} interface.
+ * Mock implementation of the {@link jakarta.servlet.http.HttpSession} interface.
  *
  * <p>As of Spring 5.0, this set of mocks is designed on a Servlet 4.0 baseline.
  *
@@ -149,7 +149,7 @@ public class MockHttpSession implements HttpSession {
 	}
 
 	@Override
-	public javax.servlet.http.HttpSessionContext getSessionContext() {
+	public jakarta.servlet.http.HttpSessionContext getSessionContext() {
 		throw new UnsupportedOperationException("getSessionContext");
 	}
 

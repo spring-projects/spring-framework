@@ -18,11 +18,12 @@ package org.springframework.orm.jpa;
 
 import java.util.Map;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.spi.PersistenceProvider;
-import javax.persistence.spi.PersistenceUnitInfo;
 import javax.sql.DataSource;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.spi.PersistenceProvider;
+import jakarta.persistence.spi.PersistenceUnitInfo;
 
 import org.springframework.lang.Nullable;
 
@@ -65,7 +66,7 @@ public interface EntityManagerFactoryInfo {
 	 * {@code getPersistenceUnitName()} must be equal to the value returned by
 	 * {@code PersistenceUnitInfo.getPersistenceUnitName()}.
 	 * @see #getPersistenceUnitInfo()
-	 * @see javax.persistence.spi.PersistenceUnitInfo#getPersistenceUnitName()
+	 * @see jakarta.persistence.spi.PersistenceUnitInfo#getPersistenceUnitName()
 	 */
 	@Nullable
 	String getPersistenceUnitName();
@@ -83,7 +84,7 @@ public interface EntityManagerFactoryInfo {
 	 * that this factory's EntityManagers will implement.
 	 * <p>A {@code null} return value suggests that autodetection is supposed
 	 * to happen: either based on a target {@code EntityManager} instance
-	 * or simply defaulting to {@code javax.persistence.EntityManager}.
+	 * or simply defaulting to {@code jakarta.persistence.EntityManager}.
 	 */
 	@Nullable
 	Class<? extends EntityManager> getEntityManagerInterface();

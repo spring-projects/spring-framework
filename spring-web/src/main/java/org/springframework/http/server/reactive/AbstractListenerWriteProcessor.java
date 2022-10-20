@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.util.StringUtils;
  * event-listener write APIs and Reactive Streams.
  *
  * <p>Specifically a base class for writing to the HTTP response body with
- * Servlet 3.1 non-blocking I/O and Undertow XNIO as well for writing WebSocket
+ * Servlet non-blocking I/O and Undertow XNIO as well for writing WebSocket
  * messages through the Java WebSocket API (JSR-356), Jetty, and Undertow.
  *
  * @author Arjen Poutsma
@@ -64,7 +64,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	private volatile T currentData;
 
 	/* Indicates "onComplete" was received during the (last) write. */
-	private volatile boolean subscriberCompleted;
+	private volatile boolean sourceCompleted;
 
 	/**
 	 * Indicates we're waiting for one last isReady-onWritePossible cycle
@@ -88,8 +88,10 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * @since 5.1
 	 */
 	public AbstractListenerWriteProcessor(String logPrefix) {
+		// AbstractListenerFlushProcessor calls cancelAndSetCompleted directly, so this cancel task
+		// won't be used for HTTP responses, but it can be for a WebSocket session.
+		this.resultPublisher = new WriteResultPublisher(logPrefix + "[WP] ", this::cancelAndSetCompleted);
 		this.logPrefix = (StringUtils.hasText(logPrefix) ? logPrefix : "");
-		this.resultPublisher = new WriteResultPublisher(logPrefix);
 	}
 
 
@@ -112,33 +114,35 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	@Override
 	public final void onNext(T data) {
 		if (rsWriteLogger.isTraceEnabled()) {
-			rsWriteLogger.trace(getLogPrefix() + "Item to write");
+			rsWriteLogger.trace(getLogPrefix() + "onNext: " + data.getClass().getSimpleName());
 		}
 		this.state.get().onNext(this, data);
 	}
 
 	/**
 	 * Error signal from the upstream, write Publisher. This is also used by
-	 * sub-classes to delegate error notifications from the container.
+	 * subclasses to delegate error notifications from the container.
 	 */
 	@Override
 	public final void onError(Throwable ex) {
+		State state = this.state.get();
 		if (rsWriteLogger.isTraceEnabled()) {
-			rsWriteLogger.trace(getLogPrefix() + "Write source error: " + ex);
+			rsWriteLogger.trace(getLogPrefix() + "onError: " + ex + " [" + state + "]");
 		}
-		this.state.get().onError(this, ex);
+		state.onError(this, ex);
 	}
 
 	/**
 	 * Completion signal from the upstream, write Publisher. This is also used
-	 * by sub-classes to delegate completion notifications from the container.
+	 * by subclasses to delegate completion notifications from the container.
 	 */
 	@Override
 	public final void onComplete() {
+		State state = this.state.get();
 		if (rsWriteLogger.isTraceEnabled()) {
-			rsWriteLogger.trace(getLogPrefix() + "No more items to write");
+			rsWriteLogger.trace(getLogPrefix() + "onComplete [" + state + "]");
 		}
-		this.state.get().onComplete(this);
+		state.onComplete(this);
 	}
 
 	/**
@@ -147,20 +151,50 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * container.
 	 */
 	public final void onWritePossible() {
+		State state = this.state.get();
 		if (rsWriteLogger.isTraceEnabled()) {
-			rsWriteLogger.trace(getLogPrefix() + "onWritePossible");
+			rsWriteLogger.trace(getLogPrefix() + "onWritePossible [" + state + "]");
 		}
-		this.state.get().onWritePossible(this);
+		state.onWritePossible(this);
 	}
 
 	/**
-	 * Invoked during an error or completion callback from the underlying
-	 * container to cancel the upstream subscription.
+	 * Cancel the upstream "write" Publisher only, for example due to
+	 * Servlet container error/completion notifications. This should usually
+	 * be followed up with a call to either {@link #onError(Throwable)} or
+	 * {@link #onComplete()} to notify the downstream chain, that is unless
+	 * cancellation came from downstream.
 	 */
 	public void cancel() {
-		rsWriteLogger.trace(getLogPrefix() + "Cancellation");
+		if (rsWriteLogger.isTraceEnabled()) {
+			rsWriteLogger.trace(getLogPrefix() + "cancel [" + this.state + "]");
+		}
 		if (this.subscription != null) {
 			this.subscription.cancel();
+		}
+	}
+
+	/**
+	 * Cancel the "write" Publisher and transition to COMPLETED immediately also
+	 * without notifying the downstream. For use when cancellation came from
+	 * downstream.
+	 */
+	void cancelAndSetCompleted() {
+		cancel();
+		for (;;) {
+			State prev = this.state.get();
+			if (prev == State.COMPLETED) {
+				break;
+			}
+			if (this.state.compareAndSet(prev, State.COMPLETED)) {
+				if (rsWriteLogger.isTraceEnabled()) {
+					rsWriteLogger.trace(getLogPrefix() + prev + " -> " + this.state);
+				}
+				if (prev != State.WRITING) {
+					discardCurrentData();
+				}
+				break;
+			}
 		}
 	}
 
@@ -168,9 +202,6 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 	@Override
 	public final void subscribe(Subscriber<? super Void> subscriber) {
-		// Technically, cancellation from the result subscriber should be propagated
-		// to the upstream subscription. In practice, HttpHandler server adapters
-		// don't have a reason to cancel the result subscription.
 		this.resultPublisher.subscribe(subscriber);
 	}
 
@@ -223,7 +254,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * the next item from the upstream, write Publisher.
 	 * <p>The default implementation is a no-op.
 	 * @deprecated originally introduced for Undertow to stop write notifications
-	 * when no data is available, but deprecated as of as of 5.0.6 since constant
+	 * when no data is available, but deprecated as of 5.0.6 since constant
 	 * switching on every requested item causes a significant slowdown.
 	 */
 	@Deprecated
@@ -238,7 +269,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	}
 
 	/**
-	 * Invoked when an I/O error occurs during a write. Sub-classes may choose
+	 * Invoked when an I/O error occurs during a write. Subclasses may choose
 	 * to ignore this if they know the underlying API will provide an error
 	 * notification in a container thread.
 	 * <p>Defaults to no-op.
@@ -287,7 +318,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	private void writeIfPossible() {
 		boolean result = isWritePossible();
 		if (!result && rsWriteLogger.isTraceEnabled()) {
-			rsWriteLogger.trace(getLogPrefix() + "isWritePossible: false");
+			rsWriteLogger.trace(getLogPrefix() + "isWritePossible false");
 		}
 		if (result) {
 			onWritePossible();
@@ -374,7 +405,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 						if (processor.write(data)) {
 							if (processor.changeState(WRITING, REQUESTED)) {
 								processor.currentData = null;
-								if (processor.subscriberCompleted) {
+								if (processor.sourceCompleted) {
 									processor.readyToCompleteAfterLastWrite = true;
 									processor.changeStateToReceived(REQUESTED);
 								}
@@ -397,9 +428,9 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 			@Override
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
-				processor.subscriberCompleted = true;
+				processor.sourceCompleted = true;
 				// A competing write might have completed very quickly
-				if (processor.state.get().equals(State.REQUESTED)) {
+				if (processor.state.get() == State.REQUESTED) {
 					processor.changeStateToComplete(State.REQUESTED);
 				}
 			}
@@ -408,9 +439,9 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 		WRITING {
 			@Override
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
-				processor.subscriberCompleted = true;
+				processor.sourceCompleted = true;
 				// A competing write might have completed very quickly
-				if (processor.state.get().equals(State.REQUESTED)) {
+				if (processor.state.get() == State.REQUESTED) {
 					processor.changeStateToComplete(State.REQUESTED);
 				}
 			}

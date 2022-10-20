@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
 import org.springframework.http.codec.multipart.DefaultPartHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
+import org.springframework.http.codec.multipart.PartEventHttpMessageReader;
 import org.springframework.http.codec.multipart.PartHttpMessageWriter;
 import org.springframework.lang.Nullable;
 
@@ -55,11 +56,13 @@ class ServerDefaultCodecsImpl extends BaseDefaultCodecs implements ServerCodecCo
 	@Override
 	public void multipartReader(HttpMessageReader<?> reader) {
 		this.multipartReader = reader;
+		initTypedReaders();
 	}
 
 	@Override
 	public void serverSentEventEncoder(Encoder<?> encoder) {
 		this.sseEncoder = encoder;
+		initObjectWriters();
 	}
 
 
@@ -67,11 +70,13 @@ class ServerDefaultCodecsImpl extends BaseDefaultCodecs implements ServerCodecCo
 	protected void extendTypedReaders(List<HttpMessageReader<?>> typedReaders) {
 		if (this.multipartReader != null) {
 			addCodec(typedReaders, this.multipartReader);
-			return;
 		}
-		DefaultPartHttpMessageReader partReader = new DefaultPartHttpMessageReader();
-		addCodec(typedReaders, partReader);
-		addCodec(typedReaders, new MultipartHttpMessageReader(partReader));
+		else {
+			DefaultPartHttpMessageReader partReader = new DefaultPartHttpMessageReader();
+			addCodec(typedReaders, partReader);
+			addCodec(typedReaders, new MultipartHttpMessageReader(partReader));
+		}
+		addCodec(typedReaders, new PartEventHttpMessageReader());
 	}
 
 	@Override
@@ -86,7 +91,10 @@ class ServerDefaultCodecsImpl extends BaseDefaultCodecs implements ServerCodecCo
 
 	@Nullable
 	private Encoder<?> getSseEncoder() {
-		return this.sseEncoder != null ? this.sseEncoder : jackson2Present ? getJackson2JsonEncoder() : null;
+		return this.sseEncoder != null ? this.sseEncoder :
+				jackson2Present ? getJackson2JsonEncoder() :
+				kotlinSerializationJsonPresent ? getKotlinSerializationJsonEncoder() :
+				null;
 	}
 
 }

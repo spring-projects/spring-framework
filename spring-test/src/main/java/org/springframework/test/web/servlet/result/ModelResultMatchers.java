@@ -18,6 +18,7 @@ package org.springframework.test.web.servlet.result;
 
 import org.hamcrest.Matcher;
 
+import org.springframework.lang.Nullable;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.ui.ModelMap;
@@ -67,7 +68,7 @@ public class ModelResultMatchers {
 	/**
 	 * Assert a model attribute value.
 	 */
-	public ResultMatcher attribute(String name, Object value) {
+	public ResultMatcher attribute(String name, @Nullable Object value) {
 		return result -> {
 			ModelAndView mav = getModelAndView(result);
 			assertEquals("Model attribute '" + name + "'", value, mav.getModel().get(name));

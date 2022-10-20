@@ -16,17 +16,17 @@
 
 package org.springframework.jms.connection;
 
-import javax.jms.Session;
+import jakarta.jms.Session;
 
 /**
- * Subinterface of {@link javax.jms.Session} to be implemented by
+ * Subinterface of {@link jakarta.jms.Session} to be implemented by
  * Session proxies. Allows access to the underlying target Session.
  *
  * @author Juergen Hoeller
  * @since 2.0.4
  * @see TransactionAwareConnectionFactoryProxy
  * @see CachingConnectionFactory
- * @see ConnectionFactoryUtils#getTargetSession(javax.jms.Session)
+ * @see ConnectionFactoryUtils#getTargetSession(jakarta.jms.Session)
  */
 public interface SessionProxy extends Session {
 

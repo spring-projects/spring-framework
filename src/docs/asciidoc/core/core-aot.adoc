@@ -1,0 +1,191 @@
+[[aot]]
+= Ahead of Time Optimizations
+
+This chapter covers Spring's Ahead of Time (AOT) optimizations.
+
+[[aot-introduction]]
+== Introduction to Ahead of Time Optimizations
+
+Spring's support for AOT optimizations is meant to inspect an `ApplicationContext` at build time and apply decisions and discovery logic that usually happens at runtime.
+Doing so allows building an application startup arrangement that is more straightforward and focused on a fixed set of features based mainly on the classpath and the `Environment`.
+
+Applying such optimizations early implies the following restrictions:
+
+* The classpath is fixed and fully defined at build time.
+* The beans defined in your application cannot change at runtime, meaning:
+** `@Profile`, in particular profile-specific configuration need to be chosen at build time.
+** Environment properties that impact the presence of a bean (`@Conditional`) are only considered at build time.
+
+When these restrictions are in place, it becomes possible to perform ahead-of-time processing at build time and generate additional assets.
+A Spring AOT processed application typically generates:
+
+* Java source code
+* Bytecode (usually for dynamic proxies)
+* {api-spring-framework}/aot/hint/RuntimeHints.html[`RuntimeHints`] for the use of reflection, resource loading, serialization, and JDK proxy.
+
+NOTE: At the moment, AOT is focused on allowing Spring Applications to be deployed as native images using GraalVM.
+We intend to offer more JVM-based use cases in future generations.
+
+[[aot-basics]]
+== AOT engine overview
+The entry point of the AOT engine for processing an `ApplicationContext` arrangement is `ApplicationContextAotGenerator`. It takes care of the following steps, based on `GenericApplicationContext` that represents the application to optimize and a {api-spring-framework}/aot/generate/GenerationContext.html[`GenerationContext`]:
+
+* Refresh an `ApplicationContext` for AOT processing. Contrary to a traditional refresh, this version only creates bean definitions, not bean instances.
+* Invoke the available `BeanFactoryInitializationAotProcessor` implementations and apply their contributions against the `GenerationContext`.
+For instance, a core implementation iterates over all candidate bean definitions and generate the necessary code to restore the state of the `BeanFactory`.
+
+Once this process completes, the `GenerationContext` has been updated with the generated code, resources, and classes that are necessary for the application to run.
+The `RuntimeHints` instance can also be used to generate the relevant GraalVM configuration files.
+
+`ApplicationContextAotGenerator#processAheadOfTime` returns the class name of the `ApplicationContextInitializer` entry point that permits to start the context with AOT optimizations.
+
+Those steps are covered in more details in the sections below.
+
+[[aot-refresh]]
+== Refresh for AOT Processing
+Refresh for AOT processing is supported on any `GenericApplicationContext` implementations.
+An application context is created with any number of entry points, usually in the form of `@Configuration`-annotated classes.
+
+Let's take a basic example:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+@Configuration(proxyBeanMethods=false)
+@ComponentScan
+@Import({DataSourceConfiguration.class, ContainerConfiguration.class})
+public class MyApplication {
+
+}
+----
+
+Starting this application with the regular runtime involves a number of steps including classpath scanning, configuration class parsing, bean instantiation, and lifecycle callback handling.
+Refresh for AOT processing is only applying a subset of what is happening with a <<beans-introduction,regular `refresh`>>.
+It can be triggered as follows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+GenericApplicationContext applicationContext = new AnnotatedConfigApplicationContext();
+context.register(MyApplication.class);
+context.refreshForAotProcessing();
+----
+
+In this mode, <<beans-factory-extension-factory-postprocessors,`BeanFactoryPostProcessor` implementations>> are invoked as usual.
+This includes configuration class parsing, import selectors, classpath scanning, etc.
+Such step makes sure that the `BeanRegistry` contains the relevant bean definitions for the application.
+If bean definitions are guarded by conditions (such as `@Profile`), these are discarded at this stage.
+
+Because this mode does not actually create bean instances, `BeanPostProcessor` are not invoked, except for specific variants that are relevant for AOT processing.
+These are:
+
+* `MergedBeanDefinitionPostProcessor` implementations post-process bean definitions to extract additional settings, such as init and destroy methods.
+* `SmartInstantiationAwareBeanPostProcessor` implementations determine a more precise bean type if necessary.
+This makes sure to create any proxy that is required at runtime.
+
+One this part completes, the `BeanFactory` contains the bean definitions that are necessary for the application to run. It does not trigger bean instantiations but allow the AOT engine to inspect the beans that would be created at runtime.
+
+[[aot-bean-factory-initialization-contributions]]
+== Bean Factory Initialization AOT Contributions
+Components that want to participate in this step can implement the {api-spring-framework}/beans/factory/aot/BeanFactoryInitializationAotProcessor.html[`BeanFactoryInitializationAotProcessor`] interface.
+Each implementation can return an AOT contribution, based on the state of the bean factory.
+
+An AOT contribution is a component that contributes generated code that reproduce a particular behavior.
+It can also contribute `RuntimeHints` to indicate the need for reflection, resource loading, serialization, or JDK proxy.
+
+`BeanFactoryInitializationAotProcessor` implementation should be registered in `META-INF/aot/spring.factories` with a key matching the fully qualified name of the interface.
+
+It can also be implemented on a bean directly.
+In this mode, the bean provides an AOT contribution equivalent to the feature it provides with a regular runtime.
+As such, such a bean is automatically excluded from the AOT-optimized context.
+
+[NOTE]
+====
+Using this interface on bean will cause the bean and **all** of its dependencies to be initialized during AOT processing.
+We generally recommend that this interface is only used with infrastructure beans such as `BeanFactoryPostProcessor` which have limited dependencies and are already initialized early in the bean factory lifecycle.
+If such a bean is registered using a factory `@Bean` method, make sure to make it `static` so that its enclosing `@Configuration` class does not have to be initialized.
+====
+
+
+[[aot-bean-registration-contributions]]
+=== Bean Registration AOT Contributions
+A core `BeanFactoryInitializationAotProcessor` implementation is about collecting the necessary contributions for each candidate `BeanDefinition`.
+It does so using a dedicated `BeanRegistrationAotProcessor`.
+
+This interface is used as follows:
+
+* On a `BeanPostProcessor` bean, to replace its runtime behavior.
+For instance <<beans-factory-extension-bpp-examples-aabpp,`AutowiredAnnotationBeanPostProcessor`>> is implementing this interface to generate code that injects members annotated with `@Autowired`.
+* On a type registered in `META-INF/aot/spring.factories` with a key matching the fully qualified name of the interface.
+Typically used whe the bean definition needs to be tuned for specific features of the core framework.
+
+[NOTE]
+====
+Using this interface on bean will cause the bean and **all** of its dependencies to be initialized during AOT processing.
+We generally recommend that this interface is only used with infrastructure beans such as `BeanPostProcessor` which have limited dependencies and are already initialized early in the bean factory lifecycle.
+If such a bean is registered using a factory `@Bean` method, make sure to make it `static` so that its enclosing `@Configuration` class does not have to be initialized.
+====
+
+If no `BeanRegistrationAotProcessor` handles a particular registered bean, the default implementation processes it.
+This should be the default behavior, as tuning the generated code for a bean definition should be restricted to corner cases.
+
+Taking our previous example, let's assume that `DataSourceConfiguration` is as follows:
+
+[source,java,indent=0]
+----
+	@Configuration(proxyBeanMethods = false)
+	public class DataSourceConfiguration {
+
+		@Bean
+		public SimpleDataSource dataSource() {
+			return new SimpleDataSource();
+		}
+
+	}
+----
+
+As there isn't any particular condition on this class, `dataSourceConfiguration` and `dataSource` are identified as candidates.
+The AOT engine would convert the configuration class above to code like this:
+
+[source,java,indent=0]
+----
+    /**
+     * Bean definitions for {@link DataSourceConfiguration}
+     */
+    public class DataSourceConfiguration__BeanDefinitions {
+        /**
+         * Get the bean definition for 'dataSourceConfiguration'
+         */
+        public static BeanDefinition getDataSourceConfigurationBeanDefinition() {
+            Class<?> beanType = DataSourceConfiguration.class;
+            RootBeanDefinition beanDefinition = new RootBeanDefinition(beanType);
+            beanDefinition.setInstanceSupplier(DataSourceConfiguration::new);
+            return beanDefinition;
+        }
+
+        /**
+         * Get the bean instance supplier for 'dataSource'.
+         */
+        private static BeanInstanceSupplier<SimpleDataSource> getDataSourceInstanceSupplier() {
+            return BeanInstanceSupplier.<SimpleDataSource>forFactoryMethod(DataSourceConfiguration.class, "dataSource")
+                    .withGenerator((registeredBean) -> registeredBean.getBeanFactory().getBean(DataSourceConfiguration.class).dataSource());
+        }
+
+        /**
+         * Get the bean definition for 'dataSource'
+         */
+        public static BeanDefinition getDataSourceBeanDefinition() {
+            Class<?> beanType = SimpleDataSource.class;
+            RootBeanDefinition beanDefinition = new RootBeanDefinition(beanType);
+            beanDefinition.setInstanceSupplier(getDataSourceInstanceSupplier());
+            return beanDefinition;
+        }
+    }
+----
+
+NOTE: The exact code generated may differ depending on the exact nature of your bean definitions.
+
+The generated code above create equivalent bean definitions to the `@Configuration` class, but in a direct way and without the use of reflection if at all possible.
+There is a bean definition for "`dataSourceConfiguration`" bean and one for "`dataSourceBean`".
+When a `datasource` instance is required, a `BeanInstanceSupplier` is called.
+This supplier invokes the `dataSource()` method on the `dataSourceConfiguration` bean.

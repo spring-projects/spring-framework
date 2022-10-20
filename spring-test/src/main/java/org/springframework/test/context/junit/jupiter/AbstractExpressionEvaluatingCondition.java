@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
+import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -105,6 +108,7 @@ abstract class AbstractExpressionEvaluatingCondition implements ExecutionConditi
 
 		boolean loadContext = loadContextExtractor.apply(annotation.get());
 		boolean evaluatedToTrue = evaluateExpression(expression, loadContext, annotationType, context);
+		ConditionEvaluationResult result;
 
 		if (evaluatedToTrue) {
 			String adjective = (enabledOnTrue ? "enabled" : "disabled");
@@ -114,7 +118,7 @@ abstract class AbstractExpressionEvaluatingCondition implements ExecutionConditi
 			if (logger.isInfoEnabled()) {
 				logger.info(reason);
 			}
-			return (enabledOnTrue ? ConditionEvaluationResult.enabled(reason)
+			result = (enabledOnTrue ? ConditionEvaluationResult.enabled(reason)
 					: ConditionEvaluationResult.disabled(reason));
 		}
 		else {
@@ -124,9 +128,26 @@ abstract class AbstractExpressionEvaluatingCondition implements ExecutionConditi
 			if (logger.isDebugEnabled()) {
 				logger.debug(reason);
 			}
-			return (enabledOnTrue ? ConditionEvaluationResult.disabled(reason) :
+			result = (enabledOnTrue ? ConditionEvaluationResult.disabled(reason) :
 					ConditionEvaluationResult.enabled(reason));
 		}
+
+		// If we eagerly loaded the ApplicationContext to evaluate SpEL expressions
+		// and the test class ends up being disabled, we have to check if the
+		// user asked for the ApplicationContext to be closed via @DirtiesContext,
+		// since the DirtiesContextTestExecutionListener will never be invoked for
+		// a disabled test class.
+		// See https://github.com/spring-projects/spring-framework/issues/26694
+		if (loadContext && result.isDisabled() && element instanceof Class) {
+			Class<?> testClass = (Class<?>) element;
+			DirtiesContext dirtiesContext = TestContextAnnotationUtils.findMergedAnnotation(testClass, DirtiesContext.class);
+			if (dirtiesContext != null) {
+				HierarchyMode hierarchyMode = dirtiesContext.hierarchyMode();
+				SpringExtension.getTestContextManager(context).getTestContext().markApplicationContextDirty(hierarchyMode);
+			}
+		}
+
+		return result;
 	}
 
 	private <A extends Annotation> boolean evaluateExpression(String expression, boolean loadContext,

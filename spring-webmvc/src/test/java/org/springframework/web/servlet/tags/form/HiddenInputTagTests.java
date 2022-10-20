@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.Tag;
-
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.Tag;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.testfixture.beans.TestBean;
@@ -30,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 /**
  * @author Rob Harrop
  */
-public class HiddenInputTagTests extends AbstractFormTagTests {
+class HiddenInputTagTests extends AbstractFormTagTests {
 
 	private HiddenInputTag tag;
 
@@ -49,7 +48,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void render() throws Exception {
+	void render() throws Exception {
 		this.tag.setPath("name");
 		int result = this.tag.doStartTag();
 		assertThat(result).isEqualTo(Tag.SKIP_BODY);
@@ -65,7 +64,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void withCustomBinder() throws Exception {
+	void withCustomBinder() throws Exception {
 		this.tag.setPath("myFloat");
 
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
@@ -84,14 +83,14 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	public void dynamicTypeAttribute() throws JspException {
+	void dynamicTypeAttribute() throws JspException {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.tag.setDynamicAttribute(null, "type", "email"))
 			.withMessage("Attribute type=\"email\" is not allowed");
 	}
 
 	@Test
-	public void disabledTrue() throws Exception {
+	void disabledTrue() throws Exception {
 		this.tag.setDisabled(true);
 
 		this.tag.doStartTag();
@@ -107,7 +106,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 	// SPR-8661
 
 	@Test
-	public void disabledFalse() throws Exception {
+	void disabledFalse() throws Exception {
 		this.tag.setDisabled(false);
 
 		this.tag.doStartTag();
@@ -132,7 +131,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 	protected TestBean createTestBean() {
 		this.bean = new TestBean();
 		bean.setName("Sally Greenwood");
-		bean.setMyFloat(new Float("12.34"));
+		bean.setMyFloat(Float.valueOf("12.34"));
 		return bean;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,6 @@ public class Jackson2SmileEncoder extends AbstractJackson2Encoder {
 	private static final MimeType[] DEFAULT_SMILE_MIME_TYPES = new MimeType[] {
 			new MimeType("application", "x-jackson-smile"),
 			new MimeType("application", "*+x-jackson-smile")};
-
-	private static final MimeType STREAM_MIME_TYPE =
-			MediaType.parseMediaType("application/stream+x-jackson-smile");
 
 	private static final byte[] STREAM_SEPARATOR = new byte[0];
 

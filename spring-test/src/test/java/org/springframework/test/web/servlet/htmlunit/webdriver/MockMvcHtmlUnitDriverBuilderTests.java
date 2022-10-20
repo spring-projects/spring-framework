@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,12 @@ package org.springframework.test.web.servlet.htmlunit.webdriver;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletRequest;
-
 import com.gargoylesoftware.htmlunit.util.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.testfixture.TestGroup;
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -75,10 +73,6 @@ class MockMvcHtmlUnitDriverBuilderTests {
 		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).withDelegate(otherDriver).build();
 
 		assertMockMvcUsed("http://localhost/test");
-
-		if (TestGroup.PERFORMANCE.isActive()) {
-			assertMockMvcNotUsed("https://example.com/");
-		}
 	}
 
 	@Test
@@ -86,10 +80,6 @@ class MockMvcHtmlUnitDriverBuilderTests {
 		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).build();
 
 		assertMockMvcUsed("http://localhost/test");
-
-		if (TestGroup.PERFORMANCE.isActive()) {
-			assertMockMvcNotUsed("https://example.com/");
-		}
 	}
 
 	@Test
@@ -119,10 +109,6 @@ class MockMvcHtmlUnitDriverBuilderTests {
 
 	private void assertMockMvcUsed(String url) throws Exception {
 		assertThat(get(url)).contains(EXPECTED_BODY);
-	}
-
-	private void assertMockMvcNotUsed(String url) throws Exception {
-		assertThat(get(url)).doesNotContain(EXPECTED_BODY);
 	}
 
 	private String get(String url) throws IOException {

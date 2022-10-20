@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.fail;
 public class ConsumesRequestConditionTests {
 
 	@Test
-	public void consumesMatch() throws Exception {
+	public void consumesMatch() {
 		MockServerWebExchange exchange = postExchange("text/plain");
 		ConsumesRequestCondition condition = new ConsumesRequestCondition("text/plain");
 
@@ -43,7 +43,7 @@ public class ConsumesRequestConditionTests {
 	}
 
 	@Test
-	public void negatedConsumesMatch() throws Exception {
+	public void negatedConsumesMatch() {
 		MockServerWebExchange exchange = postExchange("text/plain");
 		ConsumesRequestCondition condition = new ConsumesRequestCondition("!text/plain");
 
@@ -51,13 +51,13 @@ public class ConsumesRequestConditionTests {
 	}
 
 	@Test
-	public void getConsumableMediaTypesNegatedExpression() throws Exception {
+	public void getConsumableMediaTypesNegatedExpression() {
 		ConsumesRequestCondition condition = new ConsumesRequestCondition("!application/xml");
 		assertThat(condition.getConsumableMediaTypes()).isEqualTo(Collections.emptySet());
 	}
 
 	@Test
-	public void consumesWildcardMatch() throws Exception {
+	public void consumesWildcardMatch() {
 		MockServerWebExchange exchange = postExchange("text/plain");
 		ConsumesRequestCondition condition = new ConsumesRequestCondition("text/*");
 
@@ -65,7 +65,7 @@ public class ConsumesRequestConditionTests {
 	}
 
 	@Test
-	public void consumesMultipleMatch() throws Exception {
+	public void consumesMultipleMatch() {
 		MockServerWebExchange exchange = postExchange("text/plain");
 		ConsumesRequestCondition condition = new ConsumesRequestCondition("text/plain", "application/xml");
 
@@ -73,15 +73,35 @@ public class ConsumesRequestConditionTests {
 	}
 
 	@Test
-	public void consumesSingleNoMatch() throws Exception {
+	public void consumesSingleNoMatch() {
 		MockServerWebExchange exchange = postExchange("application/xml");
 		ConsumesRequestCondition condition = new ConsumesRequestCondition("text/plain");
 
 		assertThat(condition.getMatchingCondition(exchange)).isNull();
 	}
 
+	@Test // gh-28024
+	public void matchWithParameters() {
+		String base = "application/hal+json";
+		ConsumesRequestCondition condition = new ConsumesRequestCondition(base + ";profile=\"a\"");
+		MockServerWebExchange exchange = postExchange(base + ";profile=\"a\"");
+		assertThat(condition.getMatchingCondition(exchange)).isNotNull();
+
+		condition = new ConsumesRequestCondition(base + ";profile=\"a\"");
+		exchange = postExchange(base + ";profile=\"b\"");
+		assertThat(condition.getMatchingCondition(exchange)).isNull();
+
+		condition = new ConsumesRequestCondition(base + ";profile=\"a\"");
+		exchange = postExchange(base);
+		assertThat(condition.getMatchingCondition(exchange)).isNotNull();
+
+		condition = new ConsumesRequestCondition(base);
+		exchange = postExchange(base + ";profile=\"a\"");
+		assertThat(condition.getMatchingCondition(exchange)).isNotNull();
+	}
+
 	@Test
-	public void consumesParseError() throws Exception {
+	public void consumesParseError() {
 		MockServerWebExchange exchange = postExchange("01");
 		ConsumesRequestCondition condition = new ConsumesRequestCondition("text/plain");
 
@@ -89,7 +109,7 @@ public class ConsumesRequestConditionTests {
 	}
 
 	@Test
-	public void consumesParseErrorWithNegation() throws Exception {
+	public void consumesParseErrorWithNegation() {
 		MockServerWebExchange exchange = postExchange("01");
 		ConsumesRequestCondition condition = new ConsumesRequestCondition("!text/plain");
 
@@ -115,7 +135,7 @@ public class ConsumesRequestConditionTests {
 	}
 
 	@Test
-	public void compareToSingle() throws Exception {
+	public void compareToSingle() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 		ConsumesRequestCondition condition1 = new ConsumesRequestCondition("text/plain");
@@ -129,7 +149,7 @@ public class ConsumesRequestConditionTests {
 	}
 
 	@Test
-	public void compareToMultiple() throws Exception {
+	public void compareToMultiple() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 		ConsumesRequestCondition condition1 = new ConsumesRequestCondition("*/*", "text/plain");
@@ -153,7 +173,7 @@ public class ConsumesRequestConditionTests {
 	}
 
 	@Test
-	public void combineWithDefault() throws Exception {
+	public void combineWithDefault() {
 		ConsumesRequestCondition condition1 = new ConsumesRequestCondition("text/plain");
 		ConsumesRequestCondition condition2 = new ConsumesRequestCondition();
 
@@ -162,7 +182,7 @@ public class ConsumesRequestConditionTests {
 	}
 
 	@Test
-	public void parseConsumesAndHeaders() throws Exception {
+	public void parseConsumesAndHeaders() {
 		String[] consumes = new String[] {"text/plain"};
 		String[] headers = new String[]{"foo=bar", "content-type=application/xml,application/pdf"};
 		ConsumesRequestCondition condition = new ConsumesRequestCondition(consumes, headers);
@@ -171,7 +191,7 @@ public class ConsumesRequestConditionTests {
 	}
 
 	@Test
-	public void getMatchingCondition() throws Exception {
+	public void getMatchingCondition() {
 		MockServerWebExchange exchange = postExchange("text/plain");
 		ConsumesRequestCondition condition = new ConsumesRequestCondition("text/plain", "application/xml");
 

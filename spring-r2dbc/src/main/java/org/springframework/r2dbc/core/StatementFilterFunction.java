@@ -24,12 +24,15 @@ import org.springframework.util.Assert;
 
 /**
  * Represents a function that filters an {@link ExecuteFunction execute function}.
+ *
  * <p>The filter is executed when a {@link org.reactivestreams.Subscriber} subscribes
  * to the {@link Publisher} returned by the {@link DatabaseClient}.
+ *
  * <p>StatementFilterFunctions are typically used to specify additional details on
  * the Statement objects such as {@code fetchSize} or key generation.
  *
  * @author Mark Paluch
+ * @author Juergen Hoeller
  * @since 5.3
  * @see ExecuteFunction
  */
@@ -37,9 +40,15 @@ import org.springframework.util.Assert;
 public interface StatementFilterFunction {
 
 	/**
+	 * An empty {@link StatementFilterFunction} that delegates to {@link ExecuteFunction}.
+	 */
+	StatementFilterFunction EMPTY_FILTER = (statement, next) -> next.execute(statement);
+
+
+	/**
 	 * Apply this filter to the given {@link Statement} and {@link ExecuteFunction}.
 	 * <p>The given {@link ExecuteFunction} represents the next entity in the chain,
-	 * to be invoked via {@link ExecuteFunction#execute(Statement)} invoked} in
+	 * to be invoked via {@link ExecuteFunction#execute(Statement)} in
 	 * order to proceed with the execution, or not invoked to shortcut the chain.
 	 * @param statement the current {@link Statement}
 	 * @param next the next execute function in the chain

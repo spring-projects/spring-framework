@@ -118,7 +118,7 @@ class TestContextConcurrencyTests {
 
 	private static class TrackingListener implements TestExecutionListener {
 
-		private ThreadLocal<String> methodName = new ThreadLocal<>();
+		private final ThreadLocal<String> methodName = new ThreadLocal<>();
 
 
 		@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * Unit tests for {@link DefaultConversionService}.
  *
  * <p>In this package for enforcing accessibility checks to non-public classes outside
- * of the {@code org.springframework.core.convert.support} implementation package.
+ * the {@code org.springframework.core.convert.support} implementation package.
  * Only in such a scenario, {@code setAccessible(true)} is actually necessary.
  *
  * @author Keith Donald
@@ -79,7 +79,7 @@ class DefaultConversionServiceTests {
 
 	@Test
 	void stringToCharacterEmptyString() {
-		assertThat(conversionService.convert("", Character.class)).isEqualTo(null);
+		assertThat(conversionService.convert("", Character.class)).isNull();
 	}
 
 	@Test
@@ -95,29 +95,29 @@ class DefaultConversionServiceTests {
 
 	@Test
 	void stringToBooleanTrue() {
-		assertThat(conversionService.convert("true", Boolean.class)).isEqualTo(true);
-		assertThat(conversionService.convert("on", Boolean.class)).isEqualTo(true);
-		assertThat(conversionService.convert("yes", Boolean.class)).isEqualTo(true);
-		assertThat(conversionService.convert("1", Boolean.class)).isEqualTo(true);
-		assertThat(conversionService.convert("TRUE", Boolean.class)).isEqualTo(true);
-		assertThat(conversionService.convert("ON", Boolean.class)).isEqualTo(true);
-		assertThat(conversionService.convert("YES", Boolean.class)).isEqualTo(true);
+		assertThat(conversionService.convert("true", Boolean.class)).isTrue();
+		assertThat(conversionService.convert("on", Boolean.class)).isTrue();
+		assertThat(conversionService.convert("yes", Boolean.class)).isTrue();
+		assertThat(conversionService.convert("1", Boolean.class)).isTrue();
+		assertThat(conversionService.convert("TRUE", Boolean.class)).isTrue();
+		assertThat(conversionService.convert("ON", Boolean.class)).isTrue();
+		assertThat(conversionService.convert("YES", Boolean.class)).isTrue();
 	}
 
 	@Test
 	void stringToBooleanFalse() {
-		assertThat(conversionService.convert("false", Boolean.class)).isEqualTo(false);
-		assertThat(conversionService.convert("off", Boolean.class)).isEqualTo(false);
-		assertThat(conversionService.convert("no", Boolean.class)).isEqualTo(false);
-		assertThat(conversionService.convert("0", Boolean.class)).isEqualTo(false);
-		assertThat(conversionService.convert("FALSE", Boolean.class)).isEqualTo(false);
-		assertThat(conversionService.convert("OFF", Boolean.class)).isEqualTo(false);
-		assertThat(conversionService.convert("NO", Boolean.class)).isEqualTo(false);
+		assertThat(conversionService.convert("false", Boolean.class)).isFalse();
+		assertThat(conversionService.convert("off", Boolean.class)).isFalse();
+		assertThat(conversionService.convert("no", Boolean.class)).isFalse();
+		assertThat(conversionService.convert("0", Boolean.class)).isFalse();
+		assertThat(conversionService.convert("FALSE", Boolean.class)).isFalse();
+		assertThat(conversionService.convert("OFF", Boolean.class)).isFalse();
+		assertThat(conversionService.convert("NO", Boolean.class)).isFalse();
 	}
 
 	@Test
 	void stringToBooleanEmptyString() {
-		assertThat(conversionService.convert("", Boolean.class)).isEqualTo(null);
+		assertThat(conversionService.convert("", Boolean.class)).isNull();
 	}
 
 	@Test
@@ -219,7 +219,7 @@ class DefaultConversionServiceTests {
 
 	@Test
 	void stringToNumberEmptyString() {
-		assertThat(conversionService.convert("", Number.class)).isEqualTo(null);
+		assertThat(conversionService.convert("", Number.class)).isNull();
 	}
 
 	@Test
@@ -234,7 +234,7 @@ class DefaultConversionServiceTests {
 
 	@Test
 	void stringToEnumEmptyString() {
-		assertThat(conversionService.convert("", Foo.class)).isEqualTo(null);
+		assertThat(conversionService.convert("", Foo.class)).isNull();
 	}
 
 	@Test
@@ -254,7 +254,7 @@ class DefaultConversionServiceTests {
 
 	@Test
 	void integerToEnumNull() {
-		assertThat(conversionService.convert(null, Foo.class)).isEqualTo(null);
+		assertThat(conversionService.convert(null, Foo.class)).isNull();
 	}
 
 	@Test
@@ -824,6 +824,9 @@ class DefaultConversionServiceTests {
 		assertThat(ISBN.toStringCount).as("toString() invocations").isEqualTo(1);
 	}
 
+	/**
+	 * @see org.springframework.core.convert.support.ObjectToObjectConverterTests
+	 */
 	@Test
 	void convertObjectToObjectUsingValueOfMethod() {
 		ISBN.reset();
@@ -1096,10 +1099,9 @@ class DefaultConversionServiceTests {
 
 		@Override
 		public boolean equals(Object o) {
-			if (!(o instanceof SSN)) {
+			if (!(o instanceof SSN ssn)) {
 				return false;
 			}
-			SSN ssn = (SSN) o;
 			return this.value.equals(ssn.value);
 		}
 
@@ -1137,10 +1139,9 @@ class DefaultConversionServiceTests {
 
 		@Override
 		public boolean equals(Object o) {
-			if (!(o instanceof ISBN)) {
+			if (!(o instanceof ISBN isbn)) {
 				return false;
 			}
-			ISBN isbn = (ISBN) o;
 			return this.value.equals(isbn.value);
 		}
 

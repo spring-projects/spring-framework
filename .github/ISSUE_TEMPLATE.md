@@ -1,5 +1,5 @@
 <!--
-!!! For Security Vulnerabilities, please go to https://pivotal.io/security !!!
+!!! For Security Vulnerabilities, please go to https://spring.io/security-policy !!!
 -->
 **Affects:** \<Spring Framework version>
 

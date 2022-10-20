@@ -16,7 +16,7 @@
 
 package org.springframework.web.bind;
 
-import javax.servlet.ServletRequest;
+import jakarta.servlet.ServletRequest;
 
 import org.springframework.lang.Nullable;
 
@@ -48,7 +48,7 @@ public abstract class ServletRequestUtils {
 
 	/**
 	 * Get an Integer parameter, or {@code null} if not present.
-	 * Throws an exception if it the parameter value isn't a number.
+	 * Throws an exception if the parameter value isn't a number.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
 	 * @return the Integer value, or {@code null} if not present
@@ -112,7 +112,7 @@ public abstract class ServletRequestUtils {
 	}
 
 	/**
-	 * Get an array of int parameters, throwing an exception if not found or one is not a number..
+	 * Get an array of int parameters, throwing an exception if not found or one is not a number.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter with multiple possible values
 	 * @throws ServletRequestBindingException a subclass of ServletException,
@@ -127,7 +127,7 @@ public abstract class ServletRequestUtils {
 
 	/**
 	 * Get a Long parameter, or {@code null} if not present.
-	 * Throws an exception if it the parameter value isn't a number.
+	 * Throws an exception if the parameter value isn't a number.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
 	 * @return the Long value, or {@code null} if not present
@@ -206,7 +206,7 @@ public abstract class ServletRequestUtils {
 
 	/**
 	 * Get a Float parameter, or {@code null} if not present.
-	 * Throws an exception if it the parameter value isn't a number.
+	 * Throws an exception if the parameter value isn't a number.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
 	 * @return the Float value, or {@code null} if not present
@@ -285,7 +285,7 @@ public abstract class ServletRequestUtils {
 
 	/**
 	 * Get a Double parameter, or {@code null} if not present.
-	 * Throws an exception if it the parameter value isn't a number.
+	 * Throws an exception if the parameter value isn't a number.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
 	 * @return the Double value, or {@code null} if not present
@@ -364,7 +364,7 @@ public abstract class ServletRequestUtils {
 
 	/**
 	 * Get a Boolean parameter, or {@code null} if not present.
-	 * Throws an exception if it the parameter value isn't a boolean.
+	 * Throws an exception if the parameter value isn't a boolean.
 	 * <p>Accepts "true", "on", "yes" (any case) and "1" as values for true;
 	 * treats every other non-empty value as false (i.e. parses leniently).
 	 * @param request current HTTP request

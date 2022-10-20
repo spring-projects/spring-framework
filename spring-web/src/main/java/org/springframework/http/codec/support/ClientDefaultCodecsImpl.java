@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerSentEventHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
+import org.springframework.http.codec.multipart.PartEventHttpMessageWriter;
 import org.springframework.lang.Nullable;
 
 /**
@@ -68,6 +69,7 @@ class ClientDefaultCodecsImpl extends BaseDefaultCodecs implements ClientCodecCo
 	 */
 	void setPartWritersSupplier(Supplier<List<HttpMessageWriter<?>>> supplier) {
 		this.partWritersSupplier = supplier;
+		initTypedWriters();
 	}
 
 
@@ -82,23 +84,16 @@ class ClientDefaultCodecsImpl extends BaseDefaultCodecs implements ClientCodecCo
 	@Override
 	public void serverSentEventDecoder(Decoder<?> decoder) {
 		this.sseDecoder = decoder;
-	}
-
-	@Override
-	public ClientDefaultCodecsImpl clone() {
-		ClientDefaultCodecsImpl codecs = new ClientDefaultCodecsImpl();
-		codecs.multipartCodecs = this.multipartCodecs;
-		codecs.sseDecoder = this.sseDecoder;
-		codecs.partWritersSupplier = this.partWritersSupplier;
-		return codecs;
+		initObjectReaders();
 	}
 
 	@Override
 	protected void extendObjectReaders(List<HttpMessageReader<?>> objectReaders) {
 
-		Decoder<?> decoder = (this.sseDecoder != null ?
-				this.sseDecoder :
-				jackson2Present ? getJackson2JsonDecoder() : null);
+		Decoder<?> decoder = (this.sseDecoder != null ? this.sseDecoder :
+				jackson2Present ? getJackson2JsonDecoder() :
+				kotlinSerializationJsonPresent ? getKotlinSerializationJsonDecoder() :
+				null);
 
 		addCodec(objectReaders, new ServerSentEventHttpMessageReader(decoder));
 	}
@@ -106,6 +101,7 @@ class ClientDefaultCodecsImpl extends BaseDefaultCodecs implements ClientCodecCo
 	@Override
 	protected void extendTypedWriters(List<HttpMessageWriter<?>> typedWriters) {
 		addCodec(typedWriters, new MultipartHttpMessageWriter(getPartWriters(), new FormHttpMessageWriter()));
+		addCodec(typedWriters, new PartEventHttpMessageWriter());
 	}
 
 	private List<HttpMessageWriter<?>> getPartWriters() {
@@ -124,7 +120,7 @@ class ClientDefaultCodecsImpl extends BaseDefaultCodecs implements ClientCodecCo
 	/**
 	 * Default implementation of {@link ClientCodecConfigurer.MultipartCodecs}.
 	 */
-	private static class DefaultMultipartCodecs implements ClientCodecConfigurer.MultipartCodecs {
+	private class DefaultMultipartCodecs implements ClientCodecConfigurer.MultipartCodecs {
 
 		private final List<HttpMessageWriter<?>> writers = new ArrayList<>();
 
@@ -140,12 +136,14 @@ class ClientDefaultCodecsImpl extends BaseDefaultCodecs implements ClientCodecCo
 		@Override
 		public ClientCodecConfigurer.MultipartCodecs encoder(Encoder<?> encoder) {
 			writer(new EncoderHttpMessageWriter<>(encoder));
+			initTypedWriters();
 			return this;
 		}
 
 		@Override
 		public ClientCodecConfigurer.MultipartCodecs writer(HttpMessageWriter<?> writer) {
 			this.writers.add(writer);
+			initTypedWriters();
 			return this;
 		}
 

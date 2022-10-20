@@ -21,7 +21,6 @@ import java.net.URI;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -59,17 +58,8 @@ public class HttpRequestWrapper implements HttpRequest {
 	 * Return the method of the wrapped request.
 	 */
 	@Override
-	@Nullable
 	public HttpMethod getMethod() {
 		return this.request.getMethod();
-	}
-
-	/**
-	 * Return the method value of the wrapped request.
-	 */
-	@Override
-	public String getMethodValue() {
-		return this.request.getMethodValue();
 	}
 
 	/**

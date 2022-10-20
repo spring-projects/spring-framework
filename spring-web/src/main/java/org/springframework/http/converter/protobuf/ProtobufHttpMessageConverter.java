@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,8 +105,18 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	 */
 	public static final String X_PROTOBUF_MESSAGE_HEADER = "X-Protobuf-Message";
 
+	private static final boolean protobufFormatFactoryPresent;
+
+	private static final boolean protobufJsonFormatPresent;
 
 	private static final Map<Class<?>, Method> methodCache = new ConcurrentReferenceHashMap<>();
+
+	static {
+		ClassLoader classLoader = ProtobufHttpMessageConverter.class.getClassLoader();
+		protobufFormatFactoryPresent = ClassUtils.isPresent("com.googlecode.protobuf.format.FormatFactory", classLoader);
+		protobufJsonFormatPresent = ClassUtils.isPresent("com.google.protobuf.util.JsonFormat", classLoader);
+	}
+
 
 	final ExtensionRegistry extensionRegistry;
 
@@ -119,20 +129,6 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	 */
 	public ProtobufHttpMessageConverter() {
 		this(null, null);
-	}
-
-	/**
-	 * Construct a new {@code ProtobufHttpMessageConverter} with an
-	 * initializer that allows the registration of message extensions.
-	 * @param registryInitializer an initializer for message extensions
-	 * @deprecated as of Spring Framework 5.1, use {@link #ProtobufHttpMessageConverter(ExtensionRegistry)} instead
-	 */
-	@Deprecated
-	public ProtobufHttpMessageConverter(@Nullable ExtensionRegistryInitializer registryInitializer) {
-		this(null, null);
-		if (registryInitializer != null) {
-			registryInitializer.initializeExtensionRegistry(this.extensionRegistry);
-		}
 	}
 
 	/**
@@ -150,10 +146,10 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		if (formatSupport != null) {
 			this.protobufFormatSupport = formatSupport;
 		}
-		else if (ClassUtils.isPresent("com.googlecode.protobuf.format.FormatFactory", getClass().getClassLoader())) {
+		else if (protobufFormatFactoryPresent) {
 			this.protobufFormatSupport = new ProtobufJavaFormatSupport();
 		}
-		else if (ClassUtils.isPresent("com.google.protobuf.util.JsonFormat", getClass().getClassLoader())) {
+		else if (protobufJsonFormatPresent) {
 			this.protobufFormatSupport = new ProtobufJavaUtilSupport(null, null);
 		}
 		else {

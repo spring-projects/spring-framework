@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.http.server.PathContainer;
 import org.springframework.lang.Nullable;
@@ -53,7 +53,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  */
 public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource {
 
-	private static PathMatcher defaultPathMatcher = new AntPathMatcher();
+	private static final PathMatcher defaultPathMatcher = new AntPathMatcher();
 
 
 	private final PathPatternParser patternParser;
@@ -157,7 +157,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	 * pattern matching with {@link PathMatcher} or with parsed {@link PathPattern}s.
 	 * <p>In Spring MVC, either a resolved String lookupPath or a parsed
 	 * {@code RequestPath} is always available within {@code DispatcherServlet}
-	 * processing. However in a Servlet {@code Filter} such as {@code CorsFilter}
+	 * processing. However, in a Servlet {@code Filter} such as {@code CorsFilter}
 	 * that may or may not be the case.
 	 * <p>By default this is set to {@code true} in which case lazy lookupPath
 	 * initialization is allowed. Set this to {@code false} when an

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.security.Principal;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
@@ -28,7 +29,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
@@ -39,9 +39,11 @@ import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
 
 /**
  * Base class for SockJS client implementations of {@link WebSocketSession}.
- * Provides processing of incoming SockJS message frames and delegates lifecycle
+ *
+ * <p>Provides processing of incoming SockJS message frames and delegates lifecycle
  * events and messages to the (application) {@link WebSocketHandler}.
- * Sub-classes implement actual send as well as disconnect logic.
+ *
+ * <p>Subclasses implement actual send as well as disconnect logic.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -55,7 +57,7 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 
 	private final WebSocketHandler webSocketHandler;
 
-	private final SettableListenableFuture<WebSocketSession> connectFuture;
+	private final CompletableFuture<WebSocketSession> connectFuture;
 
 	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
@@ -65,9 +67,18 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 	@Nullable
 	private volatile CloseStatus closeStatus;
 
+	/**
+	 * Create a new {@code AbstractClientSockJsSession}.
+	 * @deprecated as of 6.0, in favor of {@link #AbstractClientSockJsSession(TransportRequest, WebSocketHandler, CompletableFuture)}
+	 */
+	@Deprecated(since = "6.0")
+	protected AbstractClientSockJsSession(TransportRequest request, WebSocketHandler handler,
+			org.springframework.util.concurrent.SettableListenableFuture<WebSocketSession> connectFuture) {
+		this(request, handler, connectFuture.completable());
+	}
 
 	protected AbstractClientSockJsSession(TransportRequest request, WebSocketHandler handler,
-			SettableListenableFuture<WebSocketSession> connectFuture) {
+			CompletableFuture<WebSocketSession> connectFuture) {
 
 		Assert.notNull(request, "'request' is required");
 		Assert.notNull(handler, "'handler' is required");
@@ -242,7 +253,7 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 			this.state = State.OPEN;
 			try {
 				this.webSocketHandler.afterConnectionEstablished(this);
-				this.connectFuture.set(this);
+				this.connectFuture.complete(this);
 			}
 			catch (Exception ex) {
 				if (logger.isErrorEnabled()) {

@@ -98,7 +98,7 @@ class RowsFetchSpecExtensionsTests {
 		every { spec.first() } returns Mono.just("foo")
 
 		runBlocking {
-			assertThat(spec.awaitFirst()).isEqualTo("foo")
+			assertThat(spec.awaitSingle()).isEqualTo("foo")
 		}
 
 		verify {
@@ -112,7 +112,7 @@ class RowsFetchSpecExtensionsTests {
 		every { spec.first() } returns Mono.empty()
 
 		assertThatExceptionOfType(EmptyResultDataAccessException::class.java).isThrownBy {
-			runBlocking { spec.awaitFirst() }
+			runBlocking { spec.awaitSingle() }
 		}
 
 		verify {
@@ -121,12 +121,12 @@ class RowsFetchSpecExtensionsTests {
 	}
 
 	@Test
-	fun awaitFirstOrNullWithValue() {
+	fun awaitSingleOrNullWithValue() {
 		val spec = mockk<RowsFetchSpec<String>>()
 		every { spec.first() } returns Mono.just("foo")
 
 		runBlocking {
-			assertThat(spec.awaitFirstOrNull()).isEqualTo("foo")
+			assertThat(spec.awaitSingleOrNull()).isEqualTo("foo")
 		}
 
 		verify {
@@ -135,12 +135,12 @@ class RowsFetchSpecExtensionsTests {
 	}
 
 	@Test
-	fun awaitFirstOrNullWithNull() {
+	fun awaitSingleOrNullWithNull() {
 		val spec = mockk<RowsFetchSpec<String>>()
 		every { spec.first() } returns Mono.empty()
 
 		runBlocking {
-			assertThat(spec.awaitFirstOrNull()).isNull()
+			assertThat(spec.awaitSingleOrNull()).isNull()
 		}
 
 		verify {

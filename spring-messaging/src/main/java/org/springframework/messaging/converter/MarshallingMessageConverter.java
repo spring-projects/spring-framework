@@ -46,6 +46,8 @@ import org.springframework.util.MimeType;
  *
  * @author Arjen Poutsma
  * @since 4.2
+ * @see Marshaller
+ * @see Unmarshaller
  */
 public class MarshallingMessageConverter extends AbstractMessageConverter {
 
@@ -61,7 +63,8 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 	 * {@link #setUnmarshaller(Unmarshaller)} to be invoked separately.
 	 */
 	public MarshallingMessageConverter() {
-		this(new MimeType("application", "xml"), new MimeType("text", "xml"), new MimeType("application", "*+xml"));
+		this(new MimeType("application", "xml"), new MimeType("text", "xml"),
+				new MimeType("application", "*+xml"));
 	}
 
 	/**
@@ -160,7 +163,7 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 			return new StreamSource(new ByteArrayInputStream((byte[]) payload));
 		}
 		else {
-			return new StreamSource(new StringReader((String) payload));
+			return new StreamSource(new StringReader(payload.toString()));
 		}
 	}
 

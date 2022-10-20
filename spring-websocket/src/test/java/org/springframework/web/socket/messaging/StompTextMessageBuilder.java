@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,15 +56,15 @@ public class StompTextMessageBuilder {
 	}
 
 	public TextMessage build() {
-		StringBuilder sb = new StringBuilder(this.command.name()).append("\n");
+		StringBuilder sb = new StringBuilder(this.command.name()).append('\n');
 		for (String line : this.headerLines) {
-			sb.append(line).append("\n");
+			sb.append(line).append('\n');
 		}
-		sb.append("\n");
+		sb.append('\n');
 		if (this.body != null) {
 			sb.append(this.body);
 		}
-		sb.append("\u0000");
+		sb.append('\u0000');
 		return new TextMessage(sb.toString());
 	}
 

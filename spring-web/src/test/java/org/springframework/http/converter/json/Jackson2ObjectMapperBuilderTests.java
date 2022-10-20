@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,11 +79,10 @@ import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import kotlin.ranges.IntRange;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.FatalBeanException;
+import org.springframework.http.ProblemDetail;
 import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -242,6 +241,16 @@ class Jackson2ObjectMapperBuilderTests {
 	}
 
 	@Test
+	void modulesWithConsumer() {
+		NumberSerializer serializer1 = new NumberSerializer(Integer.class);
+		SimpleModule module = new SimpleModule();
+		module.addSerializer(Integer.class, serializer1);
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().modules(list -> list.add(module) ).build();
+		Serializers serializers = getSerializerFactoryConfig(objectMapper).serializers().iterator().next();
+		assertThat(serializers.findSerializer(null, SimpleType.construct(Integer.class), null)).isSameAs(serializer1);
+	}
+
+	@Test
 	void modulesToInstallByClass() {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
 				.modulesToInstall(CustomIntegerModule.class)
@@ -260,12 +269,17 @@ class Jackson2ObjectMapperBuilderTests {
 	}
 
 	@Test
+	void modulesToInstallWithConsumer() {
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
+				.modulesToInstall(list -> list.add(new CustomIntegerModule()))
+				.build();
+		Serializers serializers = getSerializerFactoryConfig(objectMapper).serializers().iterator().next();
+		assertThat(serializers.findSerializer(null, SimpleType.construct(Integer.class), null).getClass()).isSameAs(CustomIntegerSerializer.class);
+	}
+
+	@Test
 	void wellKnownModules() throws JsonProcessingException, UnsupportedEncodingException {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
-
-		Long timestamp = 1322903730000L;
-		DateTime dateTime = new DateTime(timestamp, DateTimeZone.UTC);
-		assertThat(new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8")).isEqualTo(timestamp.toString());
 
 		Path file = Paths.get("foo");
 		assertThat(new String(objectMapper.writeValueAsBytes(file), "UTF-8").endsWith("foo\"")).isTrue();
@@ -275,42 +289,8 @@ class Jackson2ObjectMapperBuilderTests {
 
 		// Kotlin module
 		IntRange range = new IntRange(1, 3);
-		assertThat(new String(objectMapper.writeValueAsBytes(range), "UTF-8")).isEqualTo("{\"start\":1,\"end\":3}");
-	}
-
-	@Test  // SPR-12634
-	void customizeWellKnownModulesWithModule()
-			throws JsonProcessingException, UnsupportedEncodingException {
-
-		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
-				.modulesToInstall(new CustomIntegerModule())
-				.build();
-		DateTime dateTime = new DateTime(1322903730000L, DateTimeZone.UTC);
-		assertThat(new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8")).isEqualTo("1322903730000");
-		assertThat(new String(objectMapper.writeValueAsBytes(4), "UTF-8")).contains("customid");
-	}
-
-	@Test  // SPR-12634
-	void customizeWellKnownModulesWithModuleClass()
-			throws JsonProcessingException, UnsupportedEncodingException {
-
-		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
-				.modulesToInstall(CustomIntegerModule.class)
-				.build();
-		DateTime dateTime = new DateTime(1322903730000L, DateTimeZone.UTC);
-		assertThat(new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8")).isEqualTo("1322903730000");
-		assertThat(new String(objectMapper.writeValueAsBytes(4), "UTF-8")).contains("customid");
-	}
-
-	@Test  // SPR-12634
-	void customizeWellKnownModulesWithSerializer()
-			throws JsonProcessingException, UnsupportedEncodingException {
-
-		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
-				.serializerByType(Integer.class, new CustomIntegerSerializer()).build();
-		DateTime dateTime = new DateTime(1322903730000L, DateTimeZone.UTC);
-		assertThat(new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8")).isEqualTo("1322903730000");
-		assertThat(new String(objectMapper.writeValueAsBytes(4), "UTF-8")).contains("customid");
+		// temporarily change the assertion, see https://github.com/FasterXML/jackson-module-kotlin/issues/582
+		assertThat(new String(objectMapper.writeValueAsBytes(range), "UTF-8")).isEqualTo("{\"start\":1,\"end\":3,\"endExclusive\":4}");
 	}
 
 	@Test  // gh-22576
@@ -354,7 +334,7 @@ class Jackson2ObjectMapperBuilderTests {
 
 	@Test
 	void propertyNamingStrategy() {
-		PropertyNamingStrategy strategy = new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy();
+		PropertyNamingStrategy strategy = new PropertyNamingStrategy.SnakeCaseStrategy();
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().propertyNamingStrategy(strategy).build();
 		assertThat(objectMapper.getSerializationConfig().getPropertyNamingStrategy()).isSameAs(strategy);
 		assertThat(objectMapper.getDeserializationConfig().getPropertyNamingStrategy()).isSameAs(strategy);
@@ -389,12 +369,13 @@ class Jackson2ObjectMapperBuilderTests {
 		Class<?> target = String.class;
 		Class<?> mixInSource = Object.class;
 
-		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
+		ObjectMapper mapper = Jackson2ObjectMapperBuilder.json()
 				.modules().mixIn(target, mixInSource)
 				.build();
 
-		assertThat(objectMapper.mixInCount()).isEqualTo(1);
-		assertThat(objectMapper.findMixInClassFor(target)).isSameAs(mixInSource);
+		assertThat(mapper.mixInCount()).isEqualTo(2);
+		assertThat(mapper.findMixInClassFor(ProblemDetail.class)).isAssignableFrom(ProblemDetailJacksonMixin.class);
+		assertThat(mapper.findMixInClassFor(target)).isSameAs(mixInSource);
 	}
 
 	@Test
@@ -404,12 +385,13 @@ class Jackson2ObjectMapperBuilderTests {
 		Map<Class<?>, Class<?>> mixIns = new HashMap<>();
 		mixIns.put(target, mixInSource);
 
-		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
+		ObjectMapper mapper = Jackson2ObjectMapperBuilder.json()
 				.modules().mixIns(mixIns)
 				.build();
 
-		assertThat(objectMapper.mixInCount()).isEqualTo(1);
-		assertThat(objectMapper.findMixInClassFor(target)).isSameAs(mixInSource);
+		assertThat(mapper.mixInCount()).isEqualTo(2);
+		assertThat(mapper.findMixInClassFor(ProblemDetail.class)).isAssignableFrom(ProblemDetailJacksonMixin.class);
+		assertThat(mapper.findMixInClassFor(target)).isSameAs(mixInSource);
 	}
 
 	@Test
@@ -430,9 +412,8 @@ class Jackson2ObjectMapperBuilderTests {
 		assertThat(output).doesNotContain("value2");
 	}
 
-	@Test // gh-23017
+	@Test  // gh-23017
 	void postConfigurer() {
-
 		JacksonAnnotationIntrospector introspector1 = new JacksonAnnotationIntrospector();
 		JacksonAnnotationIntrospector introspector2 = new JacksonAnnotationIntrospector();
 
@@ -456,7 +437,7 @@ class Jackson2ObjectMapperBuilderTests {
 		JsonSerializer<Number> serializer2 = new NumberSerializer(Integer.class);
 
 		Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.json()
-				.modules(new ArrayList<>()) // Disable well-known modules detection
+				.modules(new ArrayList<>())  // Disable well-known modules detection
 				.serializers(serializer1)
 				.serializersByType(Collections.singletonMap(Boolean.class, serializer2))
 				.deserializersByType(deserializerMap)
@@ -564,7 +545,6 @@ class Jackson2ObjectMapperBuilderTests {
 		assertThat(objectMapper.getFactory().getClass()).isEqualTo(SmileFactory.class);
 	}
 
-
 	@Test
 	void visibility() throws JsonProcessingException {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
@@ -577,6 +557,7 @@ class Jackson2ObjectMapperBuilderTests {
 		assertThat(json).contains("property2");
 		assertThat(json).doesNotContain("property3");
 	}
+
 
 	static class CustomIntegerModule extends Module {
 
@@ -664,6 +645,7 @@ class Jackson2ObjectMapperBuilderTests {
 		}
 	}
 
+
 	static class JacksonVisibilityBean {
 
 		@SuppressWarnings("unused")
@@ -674,8 +656,8 @@ class Jackson2ObjectMapperBuilderTests {
 		public String getProperty3() {
 			return null;
 		}
-
 	}
+
 
 	static class OffsetDateTimeDeserializer extends JsonDeserializer<OffsetDateTime> {
 
@@ -683,19 +665,19 @@ class Jackson2ObjectMapperBuilderTests {
 
 		@Override
 		public OffsetDateTime deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
-			final String value = jsonParser.getValueAsString();
-			if (StringUtils.isEmpty(value)) {
+			String value = jsonParser.getValueAsString();
+			if (!StringUtils.hasLength(value)) {
 				return null;
 			}
 			try {
 				return OffsetDateTime.parse(value);
-
 			}
 			catch (DateTimeParseException exception) {
 				return OffsetDateTime.parse(value + CURRENT_ZONE_OFFSET);
 			}
 		}
 	}
+
 
 	@JsonDeserialize
 	static class DemoPojo {
@@ -709,12 +691,13 @@ class Jackson2ObjectMapperBuilderTests {
 		public void setOffsetDateTime(OffsetDateTime offsetDateTime) {
 			this.offsetDateTime = offsetDateTime;
 		}
-
 	}
+
 
 	@SuppressWarnings("serial")
 	public static class MyXmlFactory extends XmlFactory {
 	}
+
 
 	static class Foo {}
 

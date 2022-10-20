@@ -48,7 +48,7 @@ import org.springframework.util.StringUtils;
  *   &lt;property name="targetDataSource" ref="myTargetDataSource"/&gt;
  *   &lt;property name="username" value="myusername"/&gt;
  *   &lt;property name="password" value="mypassword"/&gt;
- * &lt;/bean></pre>
+ * &lt;/bean&gt;</pre>
  *
  * <p>If the "username" is empty, this proxy will simply delegate to the
  * standard {@code getConnection()} method of the target DataSource.
@@ -122,7 +122,7 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 
 
 	/**
-	 * Set user credententials for this proxy and the current thread.
+	 * Set user credentials for this proxy and the current thread.
 	 * The given username and password will be applied to all subsequent
 	 * {@code getConnection()} calls on this DataSource proxy.
 	 * <p>This will override any statically specified user credentials,

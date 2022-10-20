@@ -112,9 +112,8 @@ public interface HandlerFilterFunction<T extends ServerResponse, R extends Serve
 		return (request, next) -> {
 			try {
 				T t = next.handle(request);
-				if (t instanceof DefaultServerResponseBuilder.AbstractServerResponse) {
-					((DefaultServerResponseBuilder.AbstractServerResponse) t)
-							.addErrorHandler(predicate, errorHandler);
+				if (t instanceof ErrorHandlingServerResponse) {
+					((ErrorHandlingServerResponse) t).addErrorHandler(predicate, errorHandler);
 				}
 				return t;
 			}

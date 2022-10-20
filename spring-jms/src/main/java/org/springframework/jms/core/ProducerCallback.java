@@ -16,9 +16,9 @@
 
 package org.springframework.jms.core;
 
-import javax.jms.JMSException;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
+import jakarta.jms.JMSException;
+import jakarta.jms.MessageProducer;
+import jakarta.jms.Session;
 
 import org.springframework.lang.Nullable;
 
@@ -36,7 +36,7 @@ import org.springframework.lang.Nullable;
  * @since 1.1
  * @param <T> the result type
  * @see JmsTemplate#execute(ProducerCallback)
- * @see JmsTemplate#execute(javax.jms.Destination, ProducerCallback)
+ * @see JmsTemplate#execute(jakarta.jms.Destination, ProducerCallback)
  * @see JmsTemplate#execute(String, ProducerCallback)
  */
 @FunctionalInterface
@@ -50,7 +50,7 @@ public interface ProducerCallback<T> {
 	 * @param producer the JMS {@code MessageProducer} object to use
 	 * @return a result object from working with the {@code Session}, if any
 	 * (or {@code null} if none)
-	 * @throws javax.jms.JMSException if thrown by JMS API methods
+	 * @throws jakarta.jms.JMSException if thrown by JMS API methods
 	 */
 	@Nullable
 	T doInJms(Session session, MessageProducer producer) throws JMSException;

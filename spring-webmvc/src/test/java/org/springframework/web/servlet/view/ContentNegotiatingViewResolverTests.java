@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,9 +85,16 @@ public class ContentNegotiatingViewResolverTests {
 
 	@Test
 	public void resolveViewNameWithPathExtension() throws Exception {
-		request.setRequestURI("/test.xls");
+		request.setRequestURI("/test");
+		request.setParameter("format", "xls");
+
+		String mediaType = "application/vnd.ms-excel";
+		ContentNegotiationManager manager = new ContentNegotiationManager(
+				new ParameterContentNegotiationStrategy(
+						Collections.singletonMap("xls", MediaType.parseMediaType(mediaType))));
 
 		ViewResolver viewResolverMock = mock(ViewResolver.class);
+		viewResolver.setContentNegotiationManager(manager);
 		viewResolver.setViewResolvers(Collections.singletonList(viewResolverMock));
 		viewResolver.afterPropertiesSet();
 
@@ -98,7 +105,7 @@ public class ContentNegotiatingViewResolverTests {
 
 		given(viewResolverMock.resolveViewName(viewName, locale)).willReturn(null);
 		given(viewResolverMock.resolveViewName(viewName + ".xls", locale)).willReturn(viewMock);
-		given(viewMock.getContentType()).willReturn("application/vnd.ms-excel");
+		given(viewMock.getContentType()).willReturn(mediaType);
 
 		View result = viewResolver.resolveViewName(viewName, locale);
 		assertThat(result).as("Invalid view").isSameAs(viewMock);
@@ -304,11 +311,16 @@ public class ContentNegotiatingViewResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void resolveViewNameFilename() throws Exception {
 		request.setRequestURI("/test.html");
 
+		ContentNegotiationManager manager =
+				new ContentNegotiationManager(new org.springframework.web.accept.PathExtensionContentNegotiationStrategy());
+
 		ViewResolver viewResolverMock1 = mock(ViewResolver.class, "viewResolver1");
 		ViewResolver viewResolverMock2 = mock(ViewResolver.class, "viewResolver2");
+		viewResolver.setContentNegotiationManager(manager);
 		viewResolver.setViewResolvers(Arrays.asList(viewResolverMock1, viewResolverMock2));
 
 		viewResolver.afterPropertiesSet();
@@ -336,7 +348,8 @@ public class ContentNegotiatingViewResolverTests {
 		request.setRequestURI("/test.json");
 
 		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
-		org.springframework.web.accept.PathExtensionContentNegotiationStrategy pathStrategy = new org.springframework.web.accept.PathExtensionContentNegotiationStrategy(mapping);
+		org.springframework.web.accept.PathExtensionContentNegotiationStrategy pathStrategy =
+				new org.springframework.web.accept.PathExtensionContentNegotiationStrategy(mapping);
 		viewResolver.setContentNegotiationManager(new ContentNegotiationManager(pathStrategy));
 
 		ViewResolver viewResolverMock1 = mock(ViewResolver.class);
@@ -486,6 +499,28 @@ public class ContentNegotiatingViewResolverTests {
 
 		View result = viewResolver.resolveViewName(viewName, locale);
 		assertThat(result).as("Invalid view").isNotNull();
+	}
+
+	@Test
+	public void resolveQualityValue() throws Exception {
+		request.addHeader("Accept", "text/html;q=0.9");
+
+		ViewResolver viewResolverMock = mock(ViewResolver.class);
+		viewResolver.setViewResolvers(Collections.singletonList(viewResolverMock));
+
+		viewResolver.afterPropertiesSet();
+
+		View viewMock = mock(View.class, "text_html");
+
+		String viewName = "view";
+		Locale locale = Locale.ENGLISH;
+
+		given(viewResolverMock.resolveViewName(viewName, locale)).willReturn(viewMock);
+		given(viewMock.getContentType()).willReturn("text/html");
+
+		viewResolver.resolveViewName(viewName, locale);
+
+		assertThat(request.getAttribute(View.SELECTED_CONTENT_TYPE)).isEqualTo(MediaType.TEXT_HTML);
 	}
 
 }

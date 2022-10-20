@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.handler;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.HandlerMapping;
@@ -46,7 +46,7 @@ public interface MatchableHandlerMapping extends HandlerMapping {
 	/**
 	 * Determine whether the request matches the given pattern. Use this method
 	 * when {@link #getPatternParser()} returns {@code null} which means that the
-	 * {@code HandlerMapping} is uses String pattern matching.
+	 * {@code HandlerMapping} is using String pattern matching.
 	 * @param request the current request
 	 * @param pattern the pattern to match
 	 * @return the result from request matching, or {@code null} if none

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Marcel Overdijk
  * @author Kazuki Shimizu
  */
-public class ResponseEntityTests {
+class ResponseEntityTests {
 
 	@Test
-	public void normal() {
+	void normal() {
 		String headerName = "My-Custom-Header";
 		String headerValue1 = "HeaderValue1";
 		String headerValue2 = "HeaderValue2";
@@ -54,7 +54,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void okNoBody() {
+	void okNoBody() {
 		ResponseEntity<Void> responseEntity = ResponseEntity.ok().build();
 
 		assertThat(responseEntity).isNotNull();
@@ -63,7 +63,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void okEntity() {
+	void okEntity() {
 		Integer entity = 42;
 		ResponseEntity<Integer> responseEntity = ResponseEntity.ok(entity);
 
@@ -73,7 +73,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void ofOptional() {
+	void ofOptional() {
 		Integer entity = 42;
 		ResponseEntity<Integer> responseEntity = ResponseEntity.of(Optional.of(entity));
 
@@ -83,7 +83,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void ofEmptyOptional() {
+	void ofEmptyOptional() {
 		ResponseEntity<Integer> responseEntity = ResponseEntity.of(Optional.empty());
 
 		assertThat(responseEntity).isNotNull();
@@ -92,7 +92,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void createdLocation() throws URISyntaxException {
+	void createdLocation() throws URISyntaxException {
 		URI location = new URI("location");
 		ResponseEntity<Void> responseEntity = ResponseEntity.created(location).build();
 
@@ -106,7 +106,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void acceptedNoBody() throws URISyntaxException {
+	void acceptedNoBody() throws URISyntaxException {
 		ResponseEntity<Void> responseEntity = ResponseEntity.accepted().build();
 
 		assertThat(responseEntity).isNotNull();
@@ -115,7 +115,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test // SPR-14939
-	public void acceptedNoBodyWithAlternativeBodyType() throws URISyntaxException {
+	void acceptedNoBodyWithAlternativeBodyType() throws URISyntaxException {
 		ResponseEntity<String> responseEntity = ResponseEntity.accepted().build();
 
 		assertThat(responseEntity).isNotNull();
@@ -124,7 +124,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void noContent() throws URISyntaxException {
+	void noContent() throws URISyntaxException {
 		ResponseEntity<Void> responseEntity = ResponseEntity.noContent().build();
 
 		assertThat(responseEntity).isNotNull();
@@ -133,7 +133,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void badRequest() throws URISyntaxException {
+	void badRequest() throws URISyntaxException {
 		ResponseEntity<Void> responseEntity = ResponseEntity.badRequest().build();
 
 		assertThat(responseEntity).isNotNull();
@@ -142,7 +142,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void notFound() throws URISyntaxException {
+	void notFound() throws URISyntaxException {
 		ResponseEntity<Void> responseEntity = ResponseEntity.notFound().build();
 
 		assertThat(responseEntity).isNotNull();
@@ -151,7 +151,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void unprocessableEntity() throws URISyntaxException {
+	void unprocessableEntity() throws URISyntaxException {
 		ResponseEntity<String> responseEntity = ResponseEntity.unprocessableEntity().body("error");
 
 		assertThat(responseEntity).isNotNull();
@@ -160,7 +160,16 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void headers() throws URISyntaxException {
+	void internalServerError() throws URISyntaxException {
+		ResponseEntity<String> responseEntity = ResponseEntity.internalServerError().body("error");
+
+		assertThat(responseEntity).isNotNull();
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+		assertThat(responseEntity.getBody()).isEqualTo("error");
+	}
+
+	@Test
+	void headers() throws URISyntaxException {
 		URI location = new URI("location");
 		long contentLength = 67890;
 		MediaType contentType = MediaType.TEXT_PLAIN;
@@ -188,7 +197,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void Etagheader() throws URISyntaxException {
+	void Etagheader() throws URISyntaxException {
 
 		ResponseEntity<Void> responseEntity = ResponseEntity.ok().eTag("\"foo\"").build();
 		assertThat(responseEntity.getHeaders().getETag()).isEqualTo("\"foo\"");
@@ -198,10 +207,13 @@ public class ResponseEntityTests {
 
 		responseEntity = ResponseEntity.ok().eTag("W/\"foo\"").build();
 		assertThat(responseEntity.getHeaders().getETag()).isEqualTo("W/\"foo\"");
+
+		responseEntity = ResponseEntity.ok().eTag(null).build();
+		assertThat(responseEntity.getHeaders().getETag()).isNull();
 	}
 
 	@Test
-	public void headersCopy() {
+	void headersCopy() {
 		HttpHeaders customHeaders = new HttpHeaders();
 		customHeaders.set("X-CustomHeader", "vale");
 
@@ -216,7 +228,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test  // SPR-12792
-	public void headersCopyWithEmptyAndNull() {
+	void headersCopyWithEmptyAndNull() {
 		ResponseEntity<Void> responseEntityWithEmptyHeaders =
 				ResponseEntity.ok().headers(new HttpHeaders()).build();
 		ResponseEntity<Void> responseEntityWithNullHeaders =
@@ -228,7 +240,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void emptyCacheControl() {
+	void emptyCacheControl() {
 		Integer entity = 42;
 
 		ResponseEntity<Integer> responseEntity =
@@ -243,7 +255,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void cacheControl() {
+	void cacheControl() {
 		Integer entity = 42;
 
 		ResponseEntity<Integer> responseEntity =
@@ -262,7 +274,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void cacheControlNoCache() {
+	void cacheControlNoCache() {
 		Integer entity = 42;
 
 		ResponseEntity<Integer> responseEntity =
@@ -280,7 +292,7 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void statusCodeAsInt() {
+	void statusCodeAsInt() {
 		Integer entity = 42;
 		ResponseEntity<Integer> responseEntity = ResponseEntity.status(200).body(entity);
 
@@ -289,7 +301,8 @@ public class ResponseEntityTests {
 	}
 
 	@Test
-	public void customStatusCode() {
+	@SuppressWarnings("deprecation")
+	void customStatusCode() {
 		Integer entity = 42;
 		ResponseEntity<Integer> responseEntity = ResponseEntity.status(299).body(entity);
 

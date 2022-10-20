@@ -44,10 +44,9 @@ public class NestedTestBean implements INestedTestBean {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof NestedTestBean)) {
+		if (!(obj instanceof NestedTestBean ntb)) {
 			return false;
 		}
-		NestedTestBean ntb = (NestedTestBean) obj;
 		return this.company.equals(ntb.company);
 	}
 

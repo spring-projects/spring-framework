@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -103,7 +104,7 @@ class RequestMappingExceptionHandlingIntegrationTests extends AbstractRequestMap
 		assertThatExceptionOfType(HttpStatusCodeException.class).isThrownBy(() ->
 				performGet("/SPR-16318", headers, String.class).getBody())
 			.satisfies(ex -> {
-				assertThat(ex.getRawStatusCode()).isEqualTo(500);
+				assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
 				assertThat(ex.getResponseHeaders().getContentType().toString()).isEqualTo("application/problem+json");
 				assertThat(ex.getResponseBodyAsString()).isEqualTo("{\"reason\":\"error\"}");
 			});
@@ -138,7 +139,7 @@ class RequestMappingExceptionHandlingIntegrationTests extends AbstractRequestMap
 
 		@GetMapping("/thrown-exception-with-cause-to-handle")
 		public Publisher<String> handleAndThrowExceptionWithCauseToHandle() {
-			throw new RuntimeException("State", new IOException("IO"));
+			throw new RuntimeException("State1", new RuntimeException("State2", new IOException("IO")));
 		}
 
 		@GetMapping(path = "/mono-error")

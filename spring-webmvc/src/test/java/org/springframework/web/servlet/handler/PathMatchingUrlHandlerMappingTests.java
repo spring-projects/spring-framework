@@ -155,13 +155,15 @@ public class PathMatchingUrlHandlerMappingTests {
 		chain = getHandler(mapping, wac, request);
 		assertThat(chain.getHandler()).isSameAs(defaultBean);
 
-		request = new MockHttpServletRequest("GET", "/administrator/testing/longer/bla");
-		chain = getHandler(mapping, wac, request);
-		assertThat(chain.getHandler()).isSameAs(bean);
+		if (mapping.getPatternParser() != null) {
+			request = new MockHttpServletRequest("GET", "/administrator/testing/longer/bla");
+			chain = getHandler(mapping, wac, request);
+			assertThat(chain.getHandler()).isSameAs(bean);
 
-		request = new MockHttpServletRequest("GET", "/administrator/testing/longer/test.jsp");
-		chain = getHandler(mapping, wac, request);
-		assertThat(chain.getHandler()).isSameAs(bean);
+			request = new MockHttpServletRequest("GET", "/administrator/testing/longer/test.jsp");
+			chain = getHandler(mapping, wac, request);
+			assertThat(chain.getHandler()).isSameAs(bean);
+		}
 
 		request = new MockHttpServletRequest("GET", "/administrator/testing/longer2/notmatching/notmatching");
 		chain = getHandler(mapping, wac, request);

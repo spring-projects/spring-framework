@@ -16,8 +16,8 @@
 
 package org.springframework.test.util.subpackage;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
@@ -68,16 +68,16 @@ public class Component {
 
 	int add(int... args) {
 		int sum = 0;
-		for (int i = 0; i < args.length; i++) {
-			sum += args[i];
+		for (int arg : args) {
+			sum += arg;
 		}
 		return sum;
 	}
 
 	int multiply(Integer... args) {
 		int product = 1;
-		for (int i = 0; i < args.length; i++) {
-			product *= args[i];
+		for (Integer arg : args) {
+			product *= arg;
 		}
 		return product;
 	}

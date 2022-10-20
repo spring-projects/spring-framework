@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -66,7 +66,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * mapping and for content negotiation (with similar deprecations in
  * {@link org.springframework.web.accept.ContentNegotiationManagerFactoryBean
  * ContentNegotiationManagerFactoryBean}). For further context, please read issue
- * <a href="https://github.com/spring-projects/spring-framework/issues/24179">#24719</a>.
+ * <a href="https://github.com/spring-projects/spring-framework/issues/24179">#24179</a>.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -76,11 +76,13 @@ import org.springframework.web.util.pattern.PathPatternParser;
 public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMapping
 		implements MatchableHandlerMapping, EmbeddedValueResolverAware {
 
+	private boolean defaultPatternParser = true;
+
 	private boolean useSuffixPatternMatch = false;
 
 	private boolean useRegisteredSuffixPatternMatch = false;
 
-	private boolean useTrailingSlashMatch = true;
+	private boolean useTrailingSlashMatch = false;
 
 	private Map<String, Predicate<Class<?>>> pathPrefixes = Collections.emptyMap();
 
@@ -91,6 +93,14 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	private RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
 
+
+	@Override
+	public void setPatternParser(@Nullable PathPatternParser patternParser) {
+		if (patternParser != null) {
+			this.defaultPatternParser = false;
+		}
+		super.setPatternParser(patternParser);
+	}
 
 	/**
 	 * Whether to use suffix pattern match (".*") when matching patterns to
@@ -130,8 +140,12 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	/**
 	 * Whether to match to URLs irrespective of the presence of a trailing slash.
 	 * If enabled a method mapped to "/users" also matches to "/users/".
-	 * <p>The default value is {@code true}.
+	 * <p>The default was changed in 6.0 from {@code true} to {@code false} in
+	 * order to support the deprecation of the property.
+	 * @deprecated as of 6.0, see
+	 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
 	 */
+	@Deprecated(since = "6.0")
 	public void setUseTrailingSlashMatch(boolean useTrailingSlashMatch) {
 		this.useTrailingSlashMatch = useTrailingSlashMatch;
 		if (getPatternParser() != null) {
@@ -187,10 +201,15 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	@Override
 	@SuppressWarnings("deprecation")
 	public void afterPropertiesSet() {
-
 		this.config = new RequestMappingInfo.BuilderConfiguration();
 		this.config.setTrailingSlashMatch(useTrailingSlashMatch());
 		this.config.setContentNegotiationManager(getContentNegotiationManager());
+
+		if (getPatternParser() != null && this.defaultPatternParser &&
+				(this.useSuffixPatternMatch || this.useRegisteredSuffixPatternMatch)) {
+
+			setPatternParser(null);
+		}
 
 		if (getPatternParser() != null) {
 			this.config.setPatternParser(getPatternParser());
@@ -246,16 +265,27 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		return this.config.getFileExtensions();
 	}
 
+	/**
+	 * Obtain a {@link RequestMappingInfo.BuilderConfiguration} that can reflects
+	 * the internal configuration of this {@code HandlerMapping} and can be used
+	 * to set {@link RequestMappingInfo.Builder#options(RequestMappingInfo.BuilderConfiguration)}.
+	 * <p>This is useful for programmatic registration of request mappings via
+	 * {@link #registerHandlerMethod(Object, Method, RequestMappingInfo)}.
+	 * @return the builder configuration that reflects the internal state
+	 * @since 5.3.14
+	 */
+	public RequestMappingInfo.BuilderConfiguration getBuilderConfiguration() {
+		return this.config;
+	}
+
 
 	/**
 	 * {@inheritDoc}
-	 * <p>Expects a handler to have either a type-level @{@link Controller}
-	 * annotation or a type-level @{@link RequestMapping} annotation.
+	 * <p>Expects a handler to have a type-level @{@link Controller} annotation.
 	 */
 	@Override
 	protected boolean isHandler(Class<?> beanType) {
-		return (AnnotatedElementUtils.hasAnnotation(beanType, Controller.class) ||
-				AnnotatedElementUtils.hasAnnotation(beanType, RequestMapping.class));
+		return AnnotatedElementUtils.hasAnnotation(beanType, Controller.class);
 	}
 
 	/**
@@ -390,6 +420,19 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		updateConsumesCondition(mapping, method);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p><strong>Note:</strong> To create the {@link RequestMappingInfo},
+	 * please use {@link #getBuilderConfiguration()} and set the options on
+	 * {@link RequestMappingInfo.Builder#options(RequestMappingInfo.BuilderConfiguration)}
+	 * to match how this {@code HandlerMapping} is configured. This
+	 * is important for example to ensure use of
+	 * {@link org.springframework.web.util.pattern.PathPattern} or
+	 * {@link org.springframework.util.PathMatcher} based matching.
+	 * @param handler the bean name of the handler or the handler instance
+	 * @param method the method to register
+	 * @param mapping the mapping conditions associated with the handler method
+	 */
 	@Override
 	protected void registerHandlerMethod(Object handler, Method method, RequestMappingInfo mapping) {
 		super.registerHandlerMethod(handler, method, mapping);
@@ -476,7 +519,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 					"or an empty string (\"\"): current value is [" + allowCredentials + "]");
 		}
 
-		if (annotation.maxAge() >= 0 && config.getMaxAge() == null) {
+		if (annotation.maxAge() >= 0 ) {
 			config.setMaxAge(annotation.maxAge());
 		}
 	}

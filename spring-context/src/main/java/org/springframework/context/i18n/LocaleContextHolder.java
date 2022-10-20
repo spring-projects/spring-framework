@@ -295,7 +295,7 @@ public final class LocaleContextHolder {
 	 * <p>Note: This method has a fallback to the shared default TimeZone,
 	 * either at the framework level or at the JVM-wide system level.
 	 * If you'd like to check for the raw LocaleContext content
-	 * (which may indicate no specific time zone through {@code null}, use
+	 * (which may indicate no specific time zone through {@code null}), use
 	 * {@link #getLocaleContext()} and call {@link TimeZoneAwareLocaleContext#getTimeZone()}
 	 * after downcasting to {@link TimeZoneAwareLocaleContext}.
 	 * @return the current TimeZone, or the system default TimeZone if no

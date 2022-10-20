@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.http.client.ClientHttpRequest;
@@ -33,13 +35,11 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
-import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.client.UnknownHttpStatusCodeException;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
@@ -99,7 +99,7 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 	@Override
 	protected void connectInternal(final TransportRequest transportRequest, final WebSocketHandler handler,
 			final URI receiveUrl, final HttpHeaders handshakeHeaders, final XhrClientSockJsSession session,
-			final SettableListenableFuture<WebSocketSession> connectFuture) {
+			final CompletableFuture<WebSocketSession> connectFuture) {
 
 		getTaskExecutor().execute(() -> {
 			HttpHeaders httpHeaders = transportRequest.getHttpRequestHeaders();
@@ -120,7 +120,7 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 				}
 				catch (Exception ex) {
 					if (!connectFuture.isDone()) {
-						connectFuture.setException(ex);
+						connectFuture.completeExceptionally(ex);
 					}
 					else {
 						session.handleTransportError(ex);
@@ -156,7 +156,7 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 	private static final ResponseExtractor<ResponseEntity<String>> textResponseExtractor =
 			response -> {
 				String body = StreamUtils.copyToString(response.getBody(), SockJsFrame.CHARSET);
-				return ResponseEntity.status(response.getRawStatusCode()).headers(response.getHeaders()).body(body);
+				return ResponseEntity.status(response.getStatusCode()).headers(response.getHeaders()).body(body);
 			};
 
 
@@ -208,11 +208,7 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 
 		@Override
 		public Object extractData(ClientHttpResponse response) throws IOException {
-			HttpStatus httpStatus = HttpStatus.resolve(response.getRawStatusCode());
-			if (httpStatus == null) {
-				throw new UnknownHttpStatusCodeException(
-						response.getRawStatusCode(), response.getStatusText(), response.getHeaders(), null, null);
-			}
+			HttpStatusCode httpStatus = response.getStatusCode();
 			if (httpStatus != HttpStatus.OK) {
 				throw new HttpServerErrorException(
 						httpStatus, response.getStatusText(), response.getHeaders(), null, null);
@@ -252,8 +248,8 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 			return null;
 		}
 
-		private void handleFrame(ByteArrayOutputStream os) throws IOException {
-			String content = os.toString(SockJsFrame.CHARSET.name());
+		private void handleFrame(ByteArrayOutputStream os) {
+			String content = os.toString(SockJsFrame.CHARSET);
 			os.reset();
 			if (logger.isTraceEnabled()) {
 				logger.trace("XHR receive content: " + content);

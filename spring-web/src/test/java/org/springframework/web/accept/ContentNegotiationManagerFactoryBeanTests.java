@@ -72,8 +72,8 @@ class ContentNegotiationManagerFactoryBeanTests {
 		this.servletRequest.setRequestURI("/flower.gif");
 
 		assertThat(manager.resolveMediaTypes(this.webRequest))
-				.as("Should be able to resolve file extensions by default")
-				.isEqualTo(Collections.singletonList(MediaType.IMAGE_GIF));
+				.as("Should not resolve file extensions by default")
+				.containsExactly(MediaType.ALL);
 
 		this.servletRequest.setRequestURI("/flower.foobarbaz");
 
@@ -226,6 +226,7 @@ class ContentNegotiationManagerFactoryBeanTests {
 	@Test
 	void ignoreAcceptHeader() throws Exception {
 		this.factoryBean.setIgnoreAcceptHeader(true);
+		this.factoryBean.setFavorParameter(true);
 		this.factoryBean.afterPropertiesSet();
 		ContentNegotiationManager manager = this.factoryBean.getObject();
 

@@ -52,8 +52,8 @@ import static org.springframework.test.context.cache.ContextCacheTestUtils.reset
  */
 class ClassLevelDirtiesContextTestNGTests {
 
-	private static final AtomicInteger cacheHits = new AtomicInteger(0);
-	private static final AtomicInteger cacheMisses = new AtomicInteger(0);
+	private static final AtomicInteger cacheHits = new AtomicInteger();
+	private static final AtomicInteger cacheMisses = new AtomicInteger();
 
 
 	@BeforeAll

@@ -16,13 +16,11 @@
 
 package org.springframework.r2dbc.core;
 
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.Result;
-import io.r2dbc.spi.Row;
-import io.r2dbc.spi.RowMetadata;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -43,20 +41,21 @@ class DefaultFetchSpec<T> implements FetchSpec<T> {
 
 	private final Function<Connection, Flux<Result>> resultFunction;
 
-	private final Function<Connection, Mono<Integer>> updatedRowsFunction;
+	private final Function<Connection, Mono<Long>> updatedRowsFunction;
 
-	private final BiFunction<Row, RowMetadata, T> mappingFunction;
+	private final Function<Result, Publisher<T>> resultAdapter;
 
 
 	DefaultFetchSpec(ConnectionAccessor connectionAccessor, String sql,
 			Function<Connection, Flux<Result>> resultFunction,
-			Function<Connection, Mono<Integer>> updatedRowsFunction,
-			BiFunction<Row, RowMetadata, T> mappingFunction) {
+			Function<Connection, Mono<Long>> updatedRowsFunction,
+			Function<Result, Publisher<T>> resultAdapter) {
+
 		this.sql = sql;
 		this.connectionAccessor = connectionAccessor;
 		this.resultFunction = resultFunction;
 		this.updatedRowsFunction = updatedRowsFunction;
-		this.mappingFunction = mappingFunction;
+		this.resultAdapter = resultAdapter;
 	}
 
 
@@ -64,18 +63,14 @@ class DefaultFetchSpec<T> implements FetchSpec<T> {
 	public Mono<T> one() {
 		return all().buffer(2)
 				.flatMap(list -> {
-
 					if (list.isEmpty()) {
 						return Mono.empty();
 					}
-
 					if (list.size() > 1) {
 						return Mono.error(new IncorrectResultSizeDataAccessException(
-								String.format("Query [%s] returned non unique result.",
-										this.sql),
+								String.format("Query [%s] returned non unique result.", this.sql),
 								1));
 					}
-
 					return Mono.just(list.get(0));
 				}).next();
 	}
@@ -89,11 +84,11 @@ class DefaultFetchSpec<T> implements FetchSpec<T> {
 	public Flux<T> all() {
 		return this.connectionAccessor.inConnectionMany(new ConnectionFunction<>(this.sql,
 				connection -> this.resultFunction.apply(connection)
-						.flatMap(result -> result.map(this.mappingFunction))));
+						.flatMap(this.resultAdapter)));
 	}
 
 	@Override
-	public Mono<Integer> rowsUpdated() {
+	public Mono<Long> rowsUpdated() {
 		return this.connectionAccessor.inConnection(this.updatedRowsFunction);
 	}
 

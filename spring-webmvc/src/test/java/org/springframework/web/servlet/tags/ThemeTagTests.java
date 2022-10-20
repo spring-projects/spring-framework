@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,11 @@ package org.springframework.web.servlet.tags;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.tagext.Tag;
-
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.tagext.Tag;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.MessageSourceResolvable;
@@ -37,13 +36,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Alef Arendsen
  */
-public class ThemeTagTests extends AbstractTagTests {
+@SuppressWarnings("deprecation")
+class ThemeTagTests extends AbstractTagTests {
 
 	@Test
 	@SuppressWarnings("serial")
-	public void themeTag() throws JspException {
+	void themeTag() throws JspException {
 		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
+		final StringBuilder message = new StringBuilder();
 		ThemeTag tag = new ThemeTag() {
 			@Override
 			protected void writeMessage(String msg) {
@@ -59,7 +59,7 @@ public class ThemeTagTests extends AbstractTagTests {
 
 	@Test
 	@SuppressWarnings("rawtypes")
-	public void requestContext() throws ServletException {
+	void requestContext() throws ServletException {
 		PageContext pc = createPageContext();
 		RequestContext rc = new RequestContext((HttpServletRequest) pc.getRequest());
 		assertThat(rc.getThemeMessage("themetest")).isEqualTo("theme test message");

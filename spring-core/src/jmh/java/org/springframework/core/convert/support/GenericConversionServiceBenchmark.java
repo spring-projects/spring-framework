@@ -66,7 +66,7 @@ public class GenericConversionServiceBenchmark {
 
 		@Setup(Level.Trial)
 		public void setup() throws Exception {
-			this.source = IntStream.rangeClosed(1, collectionSize).mapToObj(String::valueOf).collect(Collectors.toList());
+			this.source = IntStream.rangeClosed(1, collectionSize).mapToObj(String::valueOf).toList();
 			List<Integer> target = new ArrayList<>();
 			this.targetTypeDesc = TypeDescriptor.forObject(target);
 		}

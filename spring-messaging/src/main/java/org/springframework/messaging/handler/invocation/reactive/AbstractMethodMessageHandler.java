@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.RouteMatcher;
+import org.springframework.util.StringUtils;
 
 /**
  * Abstract base class for reactive HandlerMethod-based message handling.
@@ -112,7 +113,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	/**
 	 * Configure a predicate for selecting which Spring beans to check for the
 	 * presence of message handler methods.
-	 * <p>This is not set by default. However sub-classes may initialize it to
+	 * <p>This is not set by default. However, subclasses may initialize it to
 	 * some default strategy (e.g. {@code @Controller} classes).
 	 * @see #setHandlers(List)
 	 */
@@ -234,7 +235,7 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	/**
 	 * Return the argument resolvers initialized during {@link #afterPropertiesSet()}.
-	 * Primarily for internal use in sub-classes.
+	 * Primarily for internal use in subclasses.
 	 * @since 5.2.2
 	 */
 	protected HandlerMethodArgumentResolverComposite getArgumentResolvers() {
@@ -341,9 +342,12 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	private String formatMappings(Class<?> userType, Map<Method, T> methods) {
-		String formattedType = Arrays.stream(ClassUtils.getPackageName(userType).split("\\."))
-				.map(p -> p.substring(0, 1))
-				.collect(Collectors.joining(".", "", "." + userType.getSimpleName()));
+		String packageName = ClassUtils.getPackageName(userType);
+		String formattedType = (StringUtils.hasText(packageName) ?
+				Arrays.stream(packageName.split("\\."))
+						.map(packageSegment -> packageSegment.substring(0, 1))
+						.collect(Collectors.joining(".", "", "." + userType.getSimpleName())) :
+				userType.getSimpleName());
 		Function<Method, String> methodFormatter = method -> Arrays.stream(method.getParameterTypes())
 				.map(Class::getSimpleName)
 				.collect(Collectors.joining(",", "(", ")"));
@@ -358,7 +362,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	/**
 	 * Obtain the mapping for the given method, if any.
 	 * @param method the method to check
-	 * @param handlerType the handler type, possibly a sub-type of the method's declaring class
+	 * @param handlerType the handler type, possibly a subtype of the method's declaring class
 	 * @return the mapping, or {@code null} if the method is not mapped
 	 */
 	@Nullable
@@ -414,7 +418,7 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	/**
 	 * This method is invoked just before mappings are added. It allows
-	 * sub-classes to update the mapping with the {@link HandlerMethod} in mind.
+	 * subclasses to update the mapping with the {@link HandlerMethod} in mind.
 	 * This can be useful when the method signature is used to refine the
 	 * mapping, e.g. based on the cardinality of input and output.
 	 * <p>By default this method returns the mapping that is passed in.
@@ -508,7 +512,7 @@ public abstract class AbstractMethodMessageHandler<T>
 		for (T mapping : mappingsToCheck) {
 			T match = getMatchingMapping(mapping, message);
 			if (match != null) {
-				matches.add(new Match<T>(match, this.handlerMethods.get(mapping)));
+				matches.add(new Match<>(match, this.handlerMethods.get(mapping)));
 			}
 		}
 	}

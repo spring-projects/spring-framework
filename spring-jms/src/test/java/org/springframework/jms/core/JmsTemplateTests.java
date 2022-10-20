@@ -20,20 +20,20 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.DeliveryMode;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.TemporaryQueue;
-import javax.jms.TextMessage;
 import javax.naming.Context;
 
+import jakarta.jms.Connection;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.DeliveryMode;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.MessageConsumer;
+import jakarta.jms.MessageProducer;
+import jakarta.jms.Queue;
+import jakarta.jms.Session;
+import jakarta.jms.TemporaryQueue;
+import jakarta.jms.TextMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -200,12 +200,9 @@ class JmsTemplateTests {
 		JmsTemplate template = createTemplate();
 		template.setConnectionFactory(this.connectionFactory);
 
-		template.execute(new SessionCallback<Void>() {
-			@Override
-			public Void doInJms(Session session) throws JMSException {
-				session.getTransacted();
-				return null;
-			}
+		template.execute((SessionCallback<Void>) session -> {
+			session.getTransacted();
+			return null;
 		});
 
 		verify(this.session).close();
@@ -220,19 +217,13 @@ class JmsTemplateTests {
 
 		TransactionSynchronizationManager.initSynchronization();
 		try {
-			template.execute(new SessionCallback<Void>() {
-				@Override
-				public Void doInJms(Session session) throws JMSException {
-					session.getTransacted();
-					return null;
-				}
+			template.execute((SessionCallback<Void>) session -> {
+				session.getTransacted();
+				return null;
 			});
-			template.execute(new SessionCallback<Void>() {
-				@Override
-				public Void doInJms(Session session) throws JMSException {
-					session.getTransacted();
-					return null;
-				}
+			template.execute((SessionCallback<Void>) session -> {
+				session.getTransacted();
+				return null;
 			});
 
 			assertThat(ConnectionFactoryUtils.getTransactionalSession(scf, null, false)).isSameAs(this.session);
@@ -279,7 +270,7 @@ class JmsTemplateTests {
 
 	/**
 	 * Test sending to a destination using the method
-	 * send(String d, MessageCreator messageCreator)
+	 * {@code send(String d, MessageCreator messageCreator)}
 	 */
 	@Test
 	void testSendDestinationName() throws Exception {
@@ -288,7 +279,7 @@ class JmsTemplateTests {
 
 	/**
 	 * Test sending to a destination using the method
-	 * send(Destination d, MessageCreator messageCreator) using QOS parameters.
+	 * {@code send(Destination d, MessageCreator messageCreator)} using QOS parameters.
 	 */
 	@Test
 	void testSendDestinationWithQOS() throws Exception {
@@ -297,7 +288,7 @@ class JmsTemplateTests {
 
 	/**
 	 * Test sending to a destination using the method
-	 * send(String d, MessageCreator messageCreator) using QOS parameters.
+	 * {@code send(String d, MessageCreator messageCreator)} using QOS parameters.
 	 */
 	@Test
 	void testSendDestinationNameWithQOS() throws Exception {
@@ -374,29 +365,14 @@ class JmsTemplateTests {
 		}
 
 		if (useDefaultDestination) {
-			template.send(new MessageCreator() {
-				@Override
-				public Message createMessage(Session session) throws JMSException {
-					return session.createTextMessage("just testing");
-				}
-			});
+			template.send(session -> session.createTextMessage("just testing"));
 		}
 		else {
 			if (explicitDestination) {
-				template.send(this.queue, new MessageCreator() {
-					@Override
-					public Message createMessage(Session session) throws JMSException {
-						return session.createTextMessage("just testing");
-					}
-				});
+				template.send(this.queue, (MessageCreator) session -> session.createTextMessage("just testing"));
 			}
 			else {
-				template.send(destinationName, new MessageCreator() {
-					@Override
-					public Message createMessage(Session session) throws JMSException {
-						return session.createTextMessage("just testing");
-					}
-				});
+				template.send(destinationName, (MessageCreator) session -> session.createTextMessage("just testing"));
 			}
 		}
 
@@ -721,67 +697,67 @@ class JmsTemplateTests {
 
 	@Test
 	void testIllegalStateException() throws Exception {
-		doTestJmsException(new javax.jms.IllegalStateException(""), org.springframework.jms.IllegalStateException.class);
+		doTestJmsException(new jakarta.jms.IllegalStateException(""), org.springframework.jms.IllegalStateException.class);
 	}
 
 	@Test
 	void testInvalidClientIDException() throws Exception {
-		doTestJmsException(new javax.jms.InvalidClientIDException(""), InvalidClientIDException.class);
+		doTestJmsException(new jakarta.jms.InvalidClientIDException(""), InvalidClientIDException.class);
 	}
 
 	@Test
 	void testInvalidDestinationException() throws Exception {
-		doTestJmsException(new javax.jms.InvalidDestinationException(""), InvalidDestinationException.class);
+		doTestJmsException(new jakarta.jms.InvalidDestinationException(""), InvalidDestinationException.class);
 	}
 
 	@Test
 	void testInvalidSelectorException() throws Exception {
-		doTestJmsException(new javax.jms.InvalidSelectorException(""), InvalidSelectorException.class);
+		doTestJmsException(new jakarta.jms.InvalidSelectorException(""), InvalidSelectorException.class);
 	}
 
 	@Test
 	void testJmsSecurityException() throws Exception {
-		doTestJmsException(new javax.jms.JMSSecurityException(""), JmsSecurityException.class);
+		doTestJmsException(new jakarta.jms.JMSSecurityException(""), JmsSecurityException.class);
 	}
 
 	@Test
 	void testMessageEOFException() throws Exception {
-		doTestJmsException(new javax.jms.MessageEOFException(""), MessageEOFException.class);
+		doTestJmsException(new jakarta.jms.MessageEOFException(""), MessageEOFException.class);
 	}
 
 	@Test
 	void testMessageFormatException() throws Exception {
-		doTestJmsException(new javax.jms.MessageFormatException(""), MessageFormatException.class);
+		doTestJmsException(new jakarta.jms.MessageFormatException(""), MessageFormatException.class);
 	}
 
 	@Test
 	void testMessageNotReadableException() throws Exception {
-		doTestJmsException(new javax.jms.MessageNotReadableException(""), MessageNotReadableException.class);
+		doTestJmsException(new jakarta.jms.MessageNotReadableException(""), MessageNotReadableException.class);
 	}
 
 	@Test
 	void testMessageNotWriteableException() throws Exception {
-		doTestJmsException(new javax.jms.MessageNotWriteableException(""), MessageNotWriteableException.class);
+		doTestJmsException(new jakarta.jms.MessageNotWriteableException(""), MessageNotWriteableException.class);
 	}
 
 	@Test
 	void testResourceAllocationException() throws Exception {
-		doTestJmsException(new javax.jms.ResourceAllocationException(""), ResourceAllocationException.class);
+		doTestJmsException(new jakarta.jms.ResourceAllocationException(""), ResourceAllocationException.class);
 	}
 
 	@Test
 	void testTransactionInProgressException() throws Exception {
-		doTestJmsException(new javax.jms.TransactionInProgressException(""), TransactionInProgressException.class);
+		doTestJmsException(new jakarta.jms.TransactionInProgressException(""), TransactionInProgressException.class);
 	}
 
 	@Test
 	void testTransactionRolledBackException() throws Exception {
-		doTestJmsException(new javax.jms.TransactionRolledBackException(""), TransactionRolledBackException.class);
+		doTestJmsException(new jakarta.jms.TransactionRolledBackException(""), TransactionRolledBackException.class);
 	}
 
 	@Test
 	void testUncategorizedJmsException() throws Exception {
-		doTestJmsException(new javax.jms.JMSException(""), UncategorizedJmsException.class);
+		doTestJmsException(new jakarta.jms.JMSException(""), UncategorizedJmsException.class);
 	}
 
 	protected void doTestJmsException(JMSException original, Class<? extends JmsException> thrownExceptionClass) throws Exception {

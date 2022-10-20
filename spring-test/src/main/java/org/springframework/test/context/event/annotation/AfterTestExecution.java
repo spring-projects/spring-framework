@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * {@link EventListener @EventListener} annotation used to consume a
+ * {@link EventListener @EventListener} annotation used to consume an
  * {@link AfterTestExecutionEvent} published by the
  * {@link org.springframework.test.context.event.EventPublishingTestExecutionListener
  * EventPublishingTestExecutionListener}.
@@ -49,6 +49,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * <p>The {@code EventPublishingTestExecutionListener} must be registered in order
  * for this annotation to have an effect &mdash; for example, via
  * {@link org.springframework.test.context.TestExecutionListeners @TestExecutionListeners}.
+ * Note, however, that the {@code EventPublishingTestExecutionListener} is registered
+ * by default.
  *
  * @author Frank Scheffler
  * @author Sam Brannen

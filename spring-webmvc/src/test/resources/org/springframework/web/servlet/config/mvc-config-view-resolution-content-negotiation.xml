@@ -21,15 +21,10 @@
 		</mvc:content-negotiation>
 		<mvc:bean-name/>
 		<mvc:jsp/>
-		<mvc:tiles/>
 		<mvc:freemarker/>
 		<mvc:groovy/>
 		<mvc:script-template/>
 	</mvc:view-resolvers>
-
-	<mvc:tiles-configurer check-refresh="true">
-		<mvc:definitions location="/org/springframework/web/servlet/resource/tiles/tiles1.xml"/>
-	</mvc:tiles-configurer>
 
 	<mvc:freemarker-configurer>
 		<mvc:template-loader-path location="/org/springframework/web/servlet/view"/>

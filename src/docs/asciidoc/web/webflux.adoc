@@ -1,19 +1,18 @@
 [[webflux]]
 = Spring WebFlux
-:doc-spring-security: {doc-root}/spring-security/site/docs/current/reference
+:doc-spring-security: {doc-root}/spring-security/reference
 
 The original web framework included in the Spring Framework, Spring Web MVC, was
 purpose-built for the Servlet API and Servlet containers. The reactive-stack web framework,
 Spring WebFlux, was added later in version 5.0. It is fully non-blocking, supports
 https://www.reactive-streams.org/[Reactive Streams] back pressure, and runs on such servers as
-Netty, Undertow, and Servlet 3.1+ containers.
+Netty, Undertow, and Servlet containers.
 
 Both web frameworks mirror the names of their source modules
-(https://github.com/spring-projects/spring-framework/tree/master/spring-webmvc[spring-webmvc] and
-https://github.com/spring-projects/spring-framework/tree/master/spring-webflux[spring-webflux])
-and co-exist side by side in the Spring Framework. Each module is optional.
-Applications can use one or the other module or, in some cases, both --
-for example, Spring MVC controllers with the reactive `WebClient`.
+({spring-framework-main-code}/spring-webmvc[spring-webmvc] and
+{spring-framework-main-code}/spring-webflux[spring-webflux]) and co-exist side by side in the
+Spring Framework. Each module is optional. Applications can use one or the other module or,
+in some cases, both -- for example, Spring MVC controllers with the reactive `WebClient`.
 
 
 
@@ -24,18 +23,18 @@ for example, Spring MVC controllers with the reactive `WebClient`.
 Why was Spring WebFlux created?
 
 Part of the answer is the need for a non-blocking web stack to handle concurrency with a
-small number of threads and scale with fewer hardware resources. Servlet 3.1 did provide
-an API for non-blocking I/O. However, using it leads away from the rest of the Servlet API,
-where contracts are synchronous (`Filter`, `Servlet`) or blocking (`getParameter`,
-`getPart`). This was the motivation for a new common API to serve as a foundation across
-any non-blocking runtime. That is important because of servers (such as Netty) that are
-well-established in the async, non-blocking space.
+small number of threads and scale with fewer hardware resources. Servlet non-blocking I/O
+leads away from the rest of the Servlet API, where contracts are synchronous
+(`Filter`, `Servlet`) or blocking (`getParameter`, `getPart`). This was the motivation
+for a new common API to serve as a foundation across any non-blocking runtime. That is
+important because of servers (such as Netty) that are well-established in the async,
+non-blocking space.
 
 The other part of the answer is functional programming. Much as the addition of annotations
-in Java 5 created opportunities (such as annotated REST controllers or unit tests), the addition
-of lambda expressions in Java 8 created opportunities for functional APIs in Java.
+in Java 5 created opportunities (such as annotated REST controllers or unit tests), the
+addition of lambda expressions in Java 8 created opportunities for functional APIs in Java.
 This is a boon for non-blocking applications and continuation-style APIs (as popularized
-by `CompletableFuture` and http://reactivex.io/[ReactiveX]) that allow declarative
+by `CompletableFuture` and https://reactivex.io/[ReactiveX]) that allow declarative
 composition of asynchronous logic. At the programming-model level, Java 8 enabled Spring
 WebFlux to offer functional web endpoints alongside annotated controllers.
 
@@ -88,7 +87,7 @@ Spring WebFlux. It provides the
 https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html[`Mono`] and
 https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html[`Flux`] API types
 to work on data sequences of 0..1 (`Mono`) and 0..N (`Flux`) through a rich set of operators aligned with the
-ReactiveX http://reactivex.io/documentation/operators.html[vocabulary of operators].
+ReactiveX https://reactivex.io/documentation/operators.html[vocabulary of operators].
 Reactor is a Reactive Streams library and, therefore, all of its operators support non-blocking back pressure.
 Reactor has a strong focus on server-side Java. It is developed in close collaboration
 with Spring.
@@ -150,7 +149,7 @@ You have maximum choice of libraries, since, historically, most are blocking.
 
 * If you are already shopping for a non-blocking web stack, Spring WebFlux offers the same
 execution model benefits as others in this space and also provides a choice of servers
-(Netty, Tomcat, Jetty, Undertow, and Servlet 3.1+ containers), a choice of programming models
+(Netty, Tomcat, Jetty, Undertow, and Servlet containers), a choice of programming models
 (annotated controllers and functional web endpoints), and a choice of reactive libraries
 (Reactor, RxJava, or other).
 
@@ -188,7 +187,7 @@ unsure what benefits to look for, start by learning about how non-blocking I/O w
 [[webflux-server-choice]]
 === Servers
 
-Spring WebFlux is supported on Tomcat, Jetty, Servlet 3.1+ containers, as well as on
+Spring WebFlux is supported on Tomcat, Jetty, Servlet containers, as well as on
 non-Servlet runtimes such as Netty and Undertow. All servers are adapted to a low-level,
 <<webflux-httphandler, common API>> so that higher-level
 <<webflux-programming-models, programming models>> can be supported across servers.
@@ -206,7 +205,7 @@ used in the asynchronous, non-blocking space and lets a client and a server shar
 Tomcat and Jetty can be used with both Spring MVC and WebFlux. Keep in mind, however, that
 the way they are used is very different. Spring MVC relies on Servlet blocking I/O and
 lets applications use the Servlet API directly if they need to. Spring WebFlux
-relies on Servlet 3.1 non-blocking I/O and uses the Servlet API behind a low-level
+relies on Servlet non-blocking I/O and uses the Servlet API behind a low-level
 adapter. It is not exposed for direct use.
 
 For Undertow, Spring WebFlux uses Undertow APIs directly without the Servlet API.
@@ -306,7 +305,7 @@ applications:
 * For server request processing there are two levels of support.
 ** <<webflux-httphandler, HttpHandler>>: Basic contract for HTTP request handling with
 non-blocking I/O and Reactive Streams back pressure, along with adapters for Reactor Netty,
-Undertow, Tomcat, Jetty, and any Servlet 3.1+ container.
+Undertow, Tomcat, Jetty, and any Servlet container.
 ** <<webflux-web-handler-api>>: Slightly higher level, general-purpose web API for
 request handling, on top of which concrete programming models such as annotated
 controllers and functional endpoints are built.
@@ -345,16 +344,16 @@ The following table describes the supported server APIs:
 | spring-web: Undertow to Reactive Streams bridge
 
 | Tomcat
-| Servlet 3.1 non-blocking I/O; Tomcat API to read and write ByteBuffers vs byte[]
-| spring-web: Servlet 3.1 non-blocking I/O to Reactive Streams bridge
+| Servlet non-blocking I/O; Tomcat API to read and write ByteBuffers vs byte[]
+| spring-web: Servlet non-blocking I/O to Reactive Streams bridge
 
 | Jetty
-| Servlet 3.1 non-blocking I/O; Jetty API to write ByteBuffers vs byte[]
-| spring-web: Servlet 3.1 non-blocking I/O to Reactive Streams bridge
+| Servlet non-blocking I/O; Jetty API to write ByteBuffers vs byte[]
+| spring-web: Servlet non-blocking I/O to Reactive Streams bridge
 
-| Servlet 3.1 container
-| Servlet 3.1 non-blocking I/O
-| spring-web: Servlet 3.1 non-blocking I/O to Reactive Streams bridge
+| Servlet container
+| Servlet non-blocking I/O
+| spring-web: Servlet non-blocking I/O to Reactive Streams bridge
 |===
 
 The following table describes server dependencies (also see
@@ -485,9 +484,9 @@ The code snippets below show using the `HttpHandler` adapters with each server A
 	server.start()
 ----
 
-*Servlet 3.1+ Container*
+*Servlet Container*
 
-To deploy as a WAR to any Servlet 3.1+ container, you can extend and include
+To deploy as a WAR to any Servlet container, you can extend and include
 {api-spring-framework}/web/server/adapter/AbstractReactiveWebInitializer.html[`AbstractReactiveWebInitializer`]
 in the WAR. That class wraps an `HttpHandler` with `ServletHttpHandlerAdapter` and registers
 that as a `Servlet`.
@@ -612,17 +611,19 @@ The `DefaultServerWebExchange` uses the configured `HttpMessageReader` to parse 
 
 The `DefaultServerWebExchange` uses the configured
 `HttpMessageReader<MultiValueMap<String, Part>>` to parse `multipart/form-data` content
-into a `MultiValueMap`. At present,
-https://github.com/synchronoss/nio-multipart[Synchronoss NIO Multipart] is the only
-third-party library supported and the only library we know for non-blocking parsing of
-multipart requests. It is enabled through the `ServerCodecConfigurer` bean
+into a `MultiValueMap`.
+By default, this is the `DefaultPartHttpMessageReader`, which does not have any third-party
+dependencies.
+Alternatively, the `SynchronossPartHttpMessageReader` can be used, which is based on the
+https://github.com/synchronoss/nio-multipart[Synchronoss NIO Multipart] library.
+Both are configured through the `ServerCodecConfigurer` bean
 (see the <<webflux-web-handler-api, Web Handler API>>).
 
-To parse multipart data in streaming fashion, you can use the `Flux<Part>` returned from an
-`HttpMessageReader<Part>` instead. For example, in an annotated controller, use of
-`@RequestPart` implies `Map`-like access to individual parts by name and, hence, requires
-parsing multipart data in full. By contrast, you can use `@RequestBody` to decode the
-content to `Flux<Part>` without collecting to a `MultiValueMap`.
+To parse multipart data in streaming fashion, you can use the `Flux<PartEvent>` returned from the
+`PartEventHttpMessageReader` instead of using `@RequestPart`, as that  implies `Map`-like access
+to individual parts by name and, hence, requires parsing multipart data in full.
+By contrast, you can use `@RequestBody` to decode the content to `Flux<PartEvent>` without
+collecting to a `MultiValueMap`.
 
 
 [[webflux-forwarded-headers]]
@@ -649,7 +650,7 @@ a proxy at the boundary of trust should be configured to remove untrusted forwar
 from the outside. You can also configure the `ForwardedHeaderTransformer` with
 `removeOnly=true`, in which case it removes but does not use the headers.
 
-NOTE: In 5.1 `ForwardedHeaderFilter` was deprecated and superceded by
+NOTE: In 5.1 `ForwardedHeaderFilter` was deprecated and superseded by
 `ForwardedHeaderTransformer` so forwarded headers can be processed earlier, before the
 exchange is created. If the filter is configured anyway, it is taken out of the list of
 filters, and `ForwardedHeaderTransformer` is used instead.
@@ -675,8 +676,7 @@ Spring WebFlux provides fine-grained support for CORS configuration through anno
 controllers. However, when you use it with Spring Security, we advise relying on the built-in
 `CorsFilter`, which must be ordered ahead of Spring Security's chain of filters.
 
-See the section on <<webflux-cors>> and the <<webflux-cors.adoc#webflux-cors-webfilter>> for more details.
-
+See the section on <<webflux-cors>> and the <<webflux-cors-webfilter>> for more details.
 
 
 [[webflux-exception-handler]]
@@ -804,9 +804,11 @@ consistently for access to the cached form data versus reading from the raw requ
 `MultipartHttpMessageReader` and `MultipartHttpMessageWriter` support decoding and
 encoding "multipart/form-data" content. In turn `MultipartHttpMessageReader` delegates to
 another `HttpMessageReader` for the actual parsing to a `Flux<Part>` and then simply
-collects the parts into a `MultiValueMap`. At present
-https://github.com/synchronoss/nio-multipart[Synchronoss NIO Multipart] is used for the
-actual parsing.
+collects the parts into a `MultiValueMap`.
+By default, the `DefaultPartHttpMessageReader` is used, but this can be changed through the
+`ServerCodecConfigurer`.
+For more information about the `DefaultPartHttpMessageReader`, refer to to the
+{api-spring-framework}/http/codec/multipart/DefaultPartHttpMessageReader.html[javadoc of `DefaultPartHttpMessageReader`].
 
 On the server side where multipart form content may need to be accessed from multiple
 places, `ServerWebExchange` provides a dedicated `getMultipartData()` method that parses
@@ -964,6 +966,17 @@ The following example shows how to do so for client-side requests:
 			.exchangeStrategies({ strategies -> strategies.codecs(consumer) })
 			.build()
 ----
+
+
+[[webflux-logging-appenders]]
+==== Appenders
+
+Logging libraries such as SLF4J and Log4J 2 provide asynchronous loggers that avoid
+blocking. While those have their own drawbacks such as potentially dropping messages
+that could not be queued for logging, they are the best available options currently
+for use in a reactive, non-blocking application.
+
+
 
 [[webflux-codecs-custom]]
 ==== Custom codecs
@@ -1334,6 +1347,29 @@ directly to the response body versus view resolution and rendering with an HTML 
 
 
 
+[[webflux-ann-requestmapping-proxying]]
+==== AOP Proxies
+[.small]#<<web.adoc#mvc-ann-requestmapping-proxying, Web MVC>>#
+
+In some cases, you may need to decorate a controller with an AOP proxy at runtime.
+One example is if you choose to have `@Transactional` annotations directly on the
+controller. When this is the case, for controllers specifically, we recommend
+using class-based proxying. This is automatically the case with such annotations
+directly on the controller.
+
+If the controller implements an interface, and needs AOP proxying, you may need to
+explicitly configure class-based proxying. For example, with `@EnableTransactionManagement`
+you can change to `@EnableTransactionManagement(proxyTargetClass = true)`, and with
+`<tx:annotation-driven/>` you can change to `<tx:annotation-driven proxy-target-class="true"/>`.
+
+NOTE: Keep in mind that as of 6.0, with interface proxying, Spring WebFlux no longer detects
+controllers based solely on a type-level `@RequestMapping` annotation on the interface.
+Please, enable class based proxying, or otherwise the interface must also have an
+`@Controller` annotation.
+
+
+
+
 [[webflux-ann-requestmapping]]
 === Request Mapping
 [.small]#<<web.adoc#mvc-ann-requestmapping, Web MVC>>#
@@ -1434,7 +1470,7 @@ You can map requests by using glob patterns and wildcards:
 
 | `+{*path}+`
 | Matches zero or more path segments until the end of the path and captures it as a variable named "path"
-| `+"/resources/{*file}"+` matches `+"/resources/images/file.png"+` and captures `+file=images/file.png+`
+| `+"/resources/{*file}"+` matches `+"/resources/images/file.png"+` and captures `+file=/images/file.png+`
 
 |===
 
@@ -1503,10 +1539,10 @@ information or with the `-parameters` compiler flag on Java 8.
 
 The syntax `{*varName}` declares a URI variable that matches zero or more remaining path
 segments. For example `/resources/{*path}` matches all files under `/resources/`, and the
-`"path"` variable captures the complete relative path.
+`"path"` variable captures the complete path under `/resources`.
 
 The syntax `{varName:regex}` declares a URI variable with a regular expression that has the
-syntax: `{varName:regex}`. For example, given a URL of `/spring-web-3.0.5 .jar`, the following method
+syntax: `{varName:regex}`. For example, given a URL of `/spring-web-3.0.5.jar`, the following method
 extracts the name, version, and file extension:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -1527,9 +1563,9 @@ extracts the name, version, and file extension:
 ----
 
 URI path patterns can also have embedded `${...}` placeholders that are resolved on startup
-through `PropertyPlaceHolderConfigurer` against local, system, environment, and other property
-sources. You ca use this to, for example, parameterize a base URL based on some external
-configuration.
+through `PropertySourcesPlaceholderConfigurer` against local, system, environment, and
+other property sources. You ca use this to, for example, parameterize a base URL based on
+some external configuration.
 
 NOTE: Spring WebFlux uses `PathPattern` and the `PathPatternParser` for URI path matching support.
 Both classes are located in `spring-web` and are expressly designed for use with HTTP URL
@@ -1656,7 +1692,7 @@ specific value (`myParam=myValue`). The following examples tests for a parameter
 ----
 <1> Check that `myParam` equals `myValue`.
 
-You can also use the same with request header conditions, as the follwing example shows:
+You can also use the same with request header conditions, as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1838,8 +1874,8 @@ and others) and is equivalent to `required=false`.
 | For access to name-value pairs in URI path segments. See <<webflux-ann-matrix-variables>>.
 
 | `@RequestParam`
-| For access to Servlet request parameters. Parameter values are converted to the declared
-  method argument type. See <<webflux-ann-requestparam>>.
+| For access to query parameters. Parameter values are converted to the declared method argument
+  type. See <<webflux-ann-requestparam>>.
 
   Note that use of `@RequestParam` is optional -- for example, to set its attributes.
   See "`Any other argument`" later in this table.
@@ -1888,8 +1924,8 @@ and others) and is equivalent to `required=false`.
   See <<webflux-ann-sessionattributes>> for more details.
 
 | `UriComponentsBuilder`
-| For preparing a URL relative to the current request's host, port, scheme, and path.
-  See <<webflux-uri-building>>.
+| For preparing a URL relative to the current request's host, port, scheme, and
+  context path. See <<webflux-uri-building>>.
 
 | `@SessionAttribute`
 | For access to any session attribute -- in contrast to model attributes stored in the session
@@ -1930,6 +1966,14 @@ generally supported for all return values.
 
 | `HttpHeaders`
 | For returning a response with headers and no body.
+
+| `ErrorResponse`
+| To render an RFC 7807 error response with details in the body,
+  see <<webflux-ann-rest-exceptions>>
+
+| `ProblemDetail`
+| To render an RFC 7807 error response with details in the body,
+  see <<webflux-ann-rest-exceptions>>
 
 | `String`
 | A view name to be resolved with `ViewResolver` instances and used together with the implicit
@@ -1993,6 +2037,12 @@ For such cases, type conversion is automatically applied based on the configured
 By default, simple types (such as `int`, `long`, `Date`, and others) are supported. Type conversion
 can be customized through a `WebDataBinder` (see <<webflux-ann-initbinder>>) or by registering
 `Formatters` with the `FormattingConversionService` (see <<core.adoc#format, Spring Field Formatting>>).
+
+A practical issue in type conversion is the treatment of an empty String source value.
+Such a value is treated as missing if it becomes `null` as a result of type conversion.
+This can be the case for `Long`, `UUID`, and other target types. If you want to allow `null`
+to be injected, either use the `required` flag on the argument annotation, or declare the
+argument as `@Nullable`.
 
 
 [[webflux-ann-matrix-variables]]
@@ -2237,7 +2287,7 @@ The following example gets the value of the `Accept-Encoding` and `Keep-Alive` h
 		//...
 	}
 ----
-<1> Get the value of the `Accept-Encoging` header.
+<1> Get the value of the `Accept-Encoding` header.
 <2> Get the value of the `Keep-Alive` header.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -2250,7 +2300,7 @@ The following example gets the value of the `Accept-Encoding` and `Keep-Alive` h
 		//...
 	}
 ----
-<1> Get the value of the `Accept-Encoging` header.
+<1> Get the value of the `Accept-Encoding` header.
 <2> Get the value of the `Keep-Alive` header.
 
 Type conversion is applied automatically if the target method parameter type is not
@@ -2312,7 +2362,7 @@ Type conversion is applied automatically if the target method parameter type is 
 [.small]#<<web.adoc#mvc-ann-modelattrib-method-args, Web MVC>>#
 
 You can use the `@ModelAttribute` annotation on a method argument to access an attribute from the
-model or have it instantiated if not present. The model attribute is also overlain with
+model or have it instantiated if not present. The model attribute is also overlaid with
 the values of query parameters and form fields whose names match to field names. This is
 referred to as data binding, and it saves you from having to deal with parsing and
 converting individual query parameters and form fields. The following example binds an instance of `Pet`:
@@ -2380,7 +2430,7 @@ immediately next to the `@ModelAttribute`, as the following example shows:
 <1> Adding a `BindingResult`.
 
 You can automatically apply validation after data binding by adding the
-`javax.validation.Valid` annotation or Spring's `@Validated` annotation (see also
+`jakarta.validation.Valid` annotation or Spring's `@Validated` annotation (see also
 <<core.adoc#validation-beanvalidation, Bean Validation>> and
 <<core.adoc#validation, Spring validation>>). The following example uses the `@Valid` annotation:
 
@@ -2727,7 +2777,7 @@ you can declare a concrete target `Object`, instead of `Part`, as the following 
 ----
 <1> Using `@RequestPart` to get the metadata.
 
-You can use `@RequestPart` in combination with `javax.validation.Valid` or Spring's
+You can use `@RequestPart` in combination with `jakarta.validation.Valid` or Spring's
 `@Validated` annotation, which causes Standard Bean Validation to be applied. Validation
 errors lead to a `WebExchangeBindException` that results in a 400 (BAD_REQUEST) response.
 The exception contains a `BindingResult` with the error details and can also be handled
@@ -2775,29 +2825,98 @@ as the following example shows:
 ----
 <1> Using `@RequestBody`.
 
+===== `PartEvent`
 
-To access multipart data sequentially, in streaming fashion, you can use `@RequestBody` with
-`Flux<Part>` (or `Flow<Part>` in Kotlin) instead, as the following example shows:
+To access multipart data sequentially, in a streaming fashion, you can use `@RequestBody` with
+`Flux<PartEvent>` (or `Flow<PartEvent>` in Kotlin).
+Each part in a multipart HTTP message will produce at
+least one `PartEvent` containing both headers and a buffer with the contents of the part.
+
+- Form fields will produce a *single* `FormPartEvent`, containing the value of the field.
+- File uploads will produce *one or more* `FilePartEvent` objects, containing the filename used
+when uploading. If the file is large enough to be split across multiple buffers, the first
+`FilePartEvent` will be followed by subsequent events.
+
+
+For example:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@PostMapping("/")
-	public String handle(@RequestBody Flux<Part> parts) { <1>
-		// ...
-	}
+  @PostMapping("/")
+  public void handle(@RequestBody Flux<PartEvent> allPartsEvents) { <1>
+      allPartsEvents.windowUntil(PartEvent::isLast) <2>
+              .concatMap(p -> p.switchOnFirst((signal, partEvents) -> { <3>
+                  if (signal.hasValue()) {
+                      PartEvent event = signal.get();
+                      if (event instanceof FormPartEvent formEvent) { <4>
+                          String value = formEvent.value();
+                          // handle form field
+                      }
+                      else if (event instanceof FilePartEvent fileEvent) { <5>
+                          String filename = fileEvent.filename();
+                          Flux<DataBuffer> contents = partEvents.map(PartEvent::content);
+                          // handle file upload
+                      }
+                      else {
+                          return Mono.error(new RuntimeException("Unexpected event: " + event));
+                      }
+                  }
+                  else {
+                      return partEvents; // either complete or error signal
+                  }
+              }));
+  }
 ----
 <1> Using `@RequestBody`.
+<2> The final `PartEvent` for a particular part will have `isLast()` set to `true`, and can be
+followed by additional events belonging to subsequent parts.
+This makes the `isLast` property suitable as a predicate for the `Flux::windowUntil` operator, to
+split events from all parts into windows that each belong to a single part.
+<3> The `Flux::switchOnFirst` operator allows you to see whether you are handling a form field or
+file upload.
+<4> Handling the form field.
+<5> Handling the file upload.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	@PostMapping("/")
-	fun handle(@RequestBody parts: Flow<Part>): String { // <1>
-		// ...
-	}
+	fun handle(@RequestBody allPartsEvents: Flux<PartEvent>) = { // <1>
+      allPartsEvents.windowUntil(PartEvent::isLast) <2>
+          .concatMap {
+              it.switchOnFirst { signal, partEvents -> <3>
+                  if (signal.hasValue()) {
+                      val event = signal.get()
+                      if (event is FormPartEvent) { <4>
+                          val value: String = event.value();
+                          // handle form field
+                      } else if (event is FilePartEvent) { <5>
+                          val filename: String = event.filename();
+                          val contents: Flux<DataBuffer> = partEvents.map(PartEvent::content);
+                          // handle file upload
+                      } else {
+                          return Mono.error(RuntimeException("Unexpected event: " + event));
+                      }
+                  } else {
+                      return partEvents; // either complete or error signal
+                  }
+              }
+          }
+}
 ----
 <1> Using `@RequestBody`.
+<2> The final `PartEvent` for a particular part will have `isLast()` set to `true`, and can be
+followed by additional events belonging to subsequent parts.
+This makes the `isLast` property suitable as a predicate for the `Flux::windowUntil` operator, to
+split events from all parts into windows that each belong to a single part.
+<3> The `Flux::switchOnFirst` operator allows you to see whether you are handling a form field or
+file upload.
+<4> Handling the form field.
+<5> Handling the file upload.
+
+Received part events can also be relayed to another service by using the `WebClient`.
+See <<webflux-client-body-multipart>>.
 
 
 [[webflux-ann-requestbody]]
@@ -2849,7 +2968,7 @@ and fully non-blocking reading and (client-to-server) streaming.
 You can use the <<webflux-config-message-codecs>> option of the <<webflux-config>> to
 configure or customize message readers.
 
-You can use `@RequestBody` in combination with `javax.validation.Valid` or Spring's
+You can use `@RequestBody` in combination with `jakarta.validation.Valid` or Spring's
 `@Validated` annotation, which causes Standard Bean Validation to be applied. Validation
 errors cause a `WebExchangeBindException`, which results in a 400 (BAD_REQUEST) response.
 The exception contains a `BindingResult` with error details and can be handled in the
@@ -2956,7 +3075,7 @@ configure or customize message writing.
 	public ResponseEntity<String> handle() {
 		String body = ... ;
 		String etag = ... ;
-		return ResponseEntity.ok().eTag(etag).build(body);
+		return ResponseEntity.ok().eTag(etag).body(body);
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -2972,7 +3091,17 @@ configure or customize message writing.
 
 WebFlux supports using a single value <<webflux-reactive-libraries, reactive type>> to
 produce the `ResponseEntity` asynchronously, and/or single and multi-value reactive types
-for the body.
+for the body. This allows a variety of async responses with `ResponseEntity` as follows:
+
+* `ResponseEntity<Mono<T>>` or `ResponseEntity<Flux<T>>` make the response status and
+  headers known immediately while the body is provided asynchronously at a later point.
+  Use `Mono` if the body consists of 0..1 values or `Flux` if it can produce multiple values.
+* `Mono<ResponseEntity<T>>` provides all three -- response status, headers, and body,
+  asynchronously at a later point. This allows the response status and headers to vary
+  depending on the outcome of asynchronous request handling.
+* `Mono<ResponseEntity<Mono<T>>>` or `Mono<ResponseEntity<Flux<T>>>` are yet another
+  possible, albeit less common alternative. They provide the response status and headers
+  asynchronously first and then the response body, also asynchronously, second.
 
 
 [[webflux-ann-jackson]]
@@ -3209,7 +3338,7 @@ initialize instances of `WebDataBinder`. Those, in turn, are used to:
 headers, cookies, and others) to the target type of controller method arguments.
 * Format model object values as `String` values when rendering HTML forms.
 
-`@InitBinder` methods can register controller-specific `java.bean.PropertyEditor` or
+`@InitBinder` methods can register controller-specific `java.beans.PropertyEditor` or
 Spring `Converter` and `Formatter` components. In addition, you can use the
 <<webflux-config-conversion, WebFlux Java configuration>> to register `Converter` and
 `Formatter` types in a globally shared `FormattingConversionService`.
@@ -3290,10 +3419,15 @@ controller-specific `Formatter` instances, as the following example shows:
 ----
 <1> Adding a custom formatter (a `DateFormatter`, in this case).
 
+[[webflux-ann-initbinder-model-design]]
+==== Model Design
+[.small]#<<web.adoc#mvc-ann-initbinder-model-design, Web MVC>>#
+
+include::web-data-binding-model-design.adoc[]
 
 
 [[webflux-ann-controller-exceptions]]
-=== Managing Exceptions
+=== Exceptions
 [.small]#<<web.adoc#mvc-ann-exceptionhandler, Web MVC>>#
 
 `@Controller` and <<webflux-ann-controller-advice, @ControllerAdvice>> classes can have
@@ -3353,21 +3487,22 @@ Support for `@ExceptionHandler` methods in Spring WebFlux is provided by the
 for more detail.
 
 
-[[webflux-ann-rest-exceptions]]
-==== REST API exceptions
-[.small]#<<web.adoc#mvc-ann-rest-exceptions, Web MVC>>#
 
-A common requirement for REST services is to include error details in the body of the
-response. The Spring Framework does not automatically do so, because the representation
-of error details in the response body is application-specific. However, a
-`@RestController` can use `@ExceptionHandler` methods with a `ResponseEntity` return
-value to set the status and the body of the response. Such methods can also be declared
-in `@ControllerAdvice` classes to apply them globally.
+[[webflux-ann-exceptionhandler-args]]
+==== Method Arguments
+[.small]#<<web.adoc#mvc-ann-exceptionhandler-args, Web MVC>>#
 
-NOTE: Note that Spring WebFlux does not have an equivalent for the Spring MVC
-`ResponseEntityExceptionHandler`, because WebFlux raises only `ResponseStatusException`
-(or subclasses thereof), and those do not need to be translated to
-an HTTP status code.
+`@ExceptionHandler` methods support the same <<webflux-ann-arguments,method arguments>>
+as `@RequestMapping` methods, except the request body might have been consumed already.
+
+
+
+[[webflux-ann-exceptionhandler-return-values]]
+==== Return Values
+[.small]#<<web.adoc#mvc-ann-exceptionhandler-return-values, Web MVC>>#
+
+`@ExceptionHandler` methods support the same <<webflux-ann-return-types,return values>>
+as `@RequestMapping` methods.
 
 
 
@@ -3450,22 +3585,162 @@ include::web-uris.adoc[leveloffset=+2]
 include::webflux-cors.adoc[leveloffset=+1]
 
 
+[[webflux-ann-rest-exceptions]]
+== Error Responses
+[.small]#<<webmvc.adoc#mvc-ann-rest-exceptions, Web MVC>>#
+
+A common requirement for REST services is to include details in the body of error
+responses. The Spring Framework supports the "Problem Details for HTTP APIs"
+specification, https://www.rfc-editor.org/rfc/rfc7807.html[RFC 7807].
+
+The following are the main abstractions for this support:
+
+- `ProblemDetail` -- representation for an RFC 7807 problem detail; a simple container
+for both standard fields defined in the spec, and for non-standard ones.
+- `ErrorResponse` -- contract to expose HTTP error response details including HTTP
+status, response headers, and a body in the format of RFC 7807; this allows exceptions to
+encapsulate and expose the details of how they map to an HTTP response. All Spring WebFlux
+exceptions implement this.
+- `ErrorResponseException` -- basic `ErrorResponse` implementation that others
+can use as a convenient base class.
+- `ResponseEntityExceptionHandler` -- convenient base class for an
+<<webflux-ann-controller-advice,@ControllerAdvice>> that handles all Spring WebFlux exceptions,
+and any `ErrorResponseException`, and renders an error response with a body.
+
+
+
+[[webflux-ann-rest-exceptions-render]]
+=== Render
+[.small]#<<webmvc.adoc#mvc-ann-rest-exceptions-render, Web MVC>>#
+
+You can return `ProblemDetail` or `ErrorResponse` from any `@ExceptionHandler` or from
+any `@RequestMapping` method to render an RFC 7807 response as follows:
+
+- The `status` property of `ProblemDetail` determines the HTTP status.
+- The `instance` property of `ProblemDetail` is set from the current URL path, if not
+already set.
+- For content negotiation, the Jackson `HttpMessageConverter` prefers
+"application/problem+json" over "application/json" when rendering a `ProblemDetail`,
+and also falls back on it if no compatible media type is found.
+
+To enable RFC 7807 responses for Spring WebFlux exceptions and for any
+`ErrorResponseException`, extend `ResponseEntityExceptionHandler` and declare it as an
+<<webflux-ann-controller-advice,@ControllerAdvice>> in Spring configuration. The handler
+obtains HTTP status, headers, and error details from each exception and prepares a
+`ResponseEntity`.
+
+
+
+[[webflux-ann-rest-exceptions-non-standard]]
+=== Non-Standard Fields
+[.small]#<<webmvc.adoc#mvc-ann-rest-exceptions-non-standard, Web MVC>>#
+
+You can extend an RFC 7807 response with non-standard fields in one of two ways.
+
+One, insert into the "properties" `Map` of `ProblemDetail`. When using the Jackson
+library, the Spring Framework registers `ProblemDetailJacksonMixin` that ensures this
+"properties" `Map` is unwrapped and rendered as top level JSON properties in the
+response, and likewise any unknown property during deserialization is inserted into
+this `Map`.
+
+You can also extend `ProblemDetail` to add dedicated non-standard properties.
+The copy constructor in `ProblemDetail` allows a sub-class to make it easy to be created
+from an existing `ProblemDetail`. This could be done centrally, e.g. from an
+`@ControllerAdvice` such as `ResponseEntityExceptionHandler` that re-creates the
+`ProblemDetail` of an exception into a subclass with the additional non-standard fields.
+
+
+
+[[webflux-ann-rest-exceptions-i8n]]
+=== Internationalization
+[.small]#<<webmvc.adoc#mvc-ann-rest-exceptions-i8n, Web MVC>>#
+
+It is a common requirement to internationalize error response details, and good practice
+to customize the problem details for Spring WebFlux exceptions. This is supported as follows:
+
+- Each `ErrorResponse` exposes a message code and message code arguments to resolve the
+problem "detail" field through a <<core.adoc#context-functionality-messagesource,MessageSource>>.
+The actual message code value is parameterized with placeholders, e.g.
+`"HTTP method {0} not supported"` to be expanded from the arguments.
+- `ResponseEntityExceptionHandler` uses the message code and the message arguments
+to resolve the problem "detail" field.
+
+Message codes default to "problemDetail." + the fully qualified exception class name. Some
+exceptions may expose additional message codes in which case a suffix is added to
+the default message code. The table below lists message arguments and codes for Spring
+WebFlux exceptions:
+
+[[webflux-ann-rest-exceptions-codes]]
+[cols="1,1,2", options="header"]
+|===
+| Exception | Message Code | Message Code Arguments
+
+| `UnsupportedMediaTypeStatusException`
+| (default)
+| `{0}` the media type that is not supported, `{1}` list of supported media types
+
+| `UnsupportedMediaTypeStatusException`
+| (default) + ".parseError"
+|
+
+| `MissingRequestValueException`
+| (default)
+| `{0}` a label for the value (e.g. "request header", "cookie value", ...), `{1}` the value name
+
+| `UnsatisfiedRequestParameterException`
+| (default)
+| `{0}` the list of parameter conditions
+
+| `WebExchangeBindException`
+| (default)
+| `{0}` the list of global errors, `{1}` the list of field errors.
+Message codes and arguments for each error within the `BindingResult` are also resolved
+via `MessageSource`.
+
+| `NotAcceptableStatusException`
+| (default)
+| `{0}` list of supported media types
+
+| `NotAcceptableStatusException`
+| (default) + ".parseError"
+|
+
+| `ServerErrorException`
+| (default)
+| `{0}` the failure reason provided to the class constructor
+
+| `MethodNotAllowedException`
+| (default)
+| `{0}` the current HTTP method, `{1}` the list of supported HTTP methods
+
+|===
+
+
+
+[[webflux-ann-rest-exceptions-client]]
+=== Client Handling
+[.small]#<<webmvc.adoc#mvc-ann-rest-exceptions-client, Web MVC>>#
+
+A client application can catch `WebClientResponseException`, when using the `WebClient`,
+or `RestClientResponseException` when using the `RestTemplate`, and use their
+`getResponseBodyAs` methods to decode the error response body to any target type such as
+`ProblemDetail`, or a subclass of `ProblemDetail`.
+
+
 
 
 [[webflux-web-security]]
 == Web Security
 [.small]#<<web.adoc#mvc-web-security, Web MVC>>#
 
-The https://projects.spring.io/spring-security/[Spring Security] project provides support
+The https://spring.io/projects/spring-security[Spring Security] project provides support
 for protecting web applications from malicious exploits. See the Spring Security
 reference documentation, including:
 
-* {doc-spring-security}/html5/#jc-webflux[WebFlux Security]
-* {doc-spring-security}/html5/#test-webflux[WebFlux Testing Support]
-* {doc-spring-security}/html5/#csrf[CSRF Protection]
-* {doc-spring-security}/html5/#headers[Security Response Headers]
-
-include::webflux-view.adoc[leveloffset=+1]
+* {doc-spring-security}/reactive/configuration/webflux.html[WebFlux Security]
+* {doc-spring-security}/reactive/test/index.html[WebFlux Testing Support]
+* {doc-spring-security}/features/exploits/csrf.html#csrf-protection[CSRF protection]
+* {doc-spring-security}/features/exploits/headers.html[Security Response Headers]
 
 
 
@@ -3639,6 +3914,7 @@ You should serve static resources with a `Cache-Control` and conditional respons
 for optimal performance. See the section on configuring <<webflux-config-static-resources>>.
 
 
+include::webflux-view.adoc[leveloffset=+1]
 
 
 [[webflux-config]]
@@ -3815,7 +4091,7 @@ as the following example shows:
 	public class WebConfig implements WebFluxConfigurer {
 
 		@Override
-		public Validator getValidator(); {
+		public Validator getValidator() {
 			// ...
 		}
 
@@ -4140,8 +4416,8 @@ the example:
 		@Override
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
 			registry.addResourceHandler("/resources/**")
-				.addResourceLocations("/public", "classpath:/static/")
-				.setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS));
+					.addResourceLocations("/public", "classpath:/static/")
+					.setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS));
 		}
 
 	}
@@ -4222,12 +4498,21 @@ Note that, when using both `EncodedResourceResolver` (for example, Gzip, Brotli 
 `VersionedResourceResolver`, they must be registered in that order, to ensure content-based
 versions are always computed reliably based on the unencoded file.
 
-https://www.webjars.org/documentation[WebJars] are also supported through the
+For https://www.webjars.org/documentation[WebJars], versioned URLs like
+`/webjars/jquery/1.2.0/jquery.min.js` are the recommended and most efficient way to use them.
+The related resource location is configured out of the box with Spring Boot (or can be configured
+manually via `ResourceHandlerRegistry`) and does not require to add the
+`org.webjars:webjars-locator-core` dependency.
+
+Version-less URLs like `/webjars/jquery/jquery.min.js` are supported through the
 `WebJarsResourceResolver` which is automatically registered when the
-`org.webjars:webjars-locator-core` library is present on the classpath. The resolver can
-re-write URLs to include the version of the jar and can also match against incoming URLs
-without versions -- for example, from `/jquery/jquery.min.js` to
-`/jquery/1.2.0/jquery.min.js`.
+`org.webjars:webjars-locator-core` library is present on the classpath, at the cost of a
+classpath scanning that could slow down application startup. The resolver can re-write URLs to
+include the version of the jar and can also match against incoming URLs without versions
+-- for example, from `/webjars/jquery/jquery.min.js` to `/webjars/jquery/1.2.0/jquery.min.js`.
+
+TIP: The Java configuration based on `ResourceHandlerRegistry` provides further options
+for fine-grained control, e.g. last-modified behavior and optimized resource resolution.
 
 
 
@@ -4250,9 +4535,7 @@ The following example shows how to use `PathMatchConfigurer`:
 		public void configurePathMatch(PathMatchConfigurer configurer) {
 			configurer
 				.setUseCaseSensitiveMatch(true)
-				.setUseTrailingSlashMatch(false)
-				.addPathPrefix("/api",
-						HandlerTypePredicate.forAnnotation(RestController.class));
+				.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController.class));
 		}
 	}
 ----
@@ -4267,9 +4550,7 @@ The following example shows how to use `PathMatchConfigurer`:
 		fun configurePathMatch(configurer: PathMatchConfigurer) {
 			configurer
 				.setUseCaseSensitiveMatch(true)
-				.setUseTrailingSlashMatch(false)
-				.addPathPrefix("/api",
-						HandlerTypePredicate.forAnnotation(RestController::class.java))
+				.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController::class.java))
 		}
 	}
 ----

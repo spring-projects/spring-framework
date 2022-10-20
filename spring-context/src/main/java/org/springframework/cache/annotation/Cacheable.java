@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.concurrent.Callable;
 
+import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.core.annotation.AliasFor;
 
 /**
@@ -38,9 +39,11 @@ import org.springframework.core.annotation.AliasFor;
  * replace the default one (see {@link #keyGenerator}).
  *
  * <p>If no value is found in the cache for the computed key, the target method
- * will be invoked and the returned value stored in the associated cache. Note
- * that Java8's {@code Optional} return types are automatically handled and its
- * content is stored in the cache if present.
+ * will be invoked and the returned value will be stored in the associated cache.
+ * Note that {@link java.util.Optional} return types are unwrapped automatically.
+ * If an {@code Optional} value is {@linkplain java.util.Optional#isPresent()
+ * present}, it will be stored in the associated cache. If an {@code Optional}
+ * value is not present, {@code null} will be stored in the associated cache.
  *
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em> with attribute overrides.
@@ -56,6 +59,7 @@ import org.springframework.core.annotation.AliasFor;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
+@Reflective
 public @interface Cacheable {
 
 	/**
@@ -121,7 +125,8 @@ public @interface Cacheable {
 
 	/**
 	 * Spring Expression Language (SpEL) expression used for making the method
-	 * caching conditional.
+	 * caching conditional. Cache the result if the condition evaluates to
+	 * {@code true}.
 	 * <p>Default is {@code ""}, meaning the method result is always cached.
 	 * <p>The SpEL expression evaluates against a dedicated context that provides the
 	 * following meta-data:
@@ -140,6 +145,7 @@ public @interface Cacheable {
 
 	/**
 	 * Spring Expression Language (SpEL) expression used to veto method caching.
+	 * Veto caching the result if the condition evaluates to {@code true}.
 	 * <p>Unlike {@link #condition}, this expression is evaluated after the method
 	 * has been called and can therefore refer to the {@code result}.
 	 * <p>Default is {@code ""}, meaning that caching is never vetoed.

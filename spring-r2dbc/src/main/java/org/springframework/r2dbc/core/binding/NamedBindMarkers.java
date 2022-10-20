@@ -29,8 +29,8 @@ import org.springframework.util.Assert;
  */
 class NamedBindMarkers implements BindMarkers {
 
-	private static final AtomicIntegerFieldUpdater<NamedBindMarkers> COUNTER_INCREMENTER = AtomicIntegerFieldUpdater
-			.newUpdater(NamedBindMarkers.class, "counter");
+	private static final AtomicIntegerFieldUpdater<NamedBindMarkers> COUNTER_INCREMENTER =
+			AtomicIntegerFieldUpdater.newUpdater(NamedBindMarkers.class, "counter");
 
 
 	private final String prefix;
@@ -88,7 +88,6 @@ class NamedBindMarkers implements BindMarkers {
 		private final String identifier;
 
 		NamedBindMarker(String placeholder, String identifier) {
-
 			this.placeholder = placeholder;
 			this.identifier = identifier;
 		}
@@ -107,7 +106,6 @@ class NamedBindMarkers implements BindMarkers {
 		public void bindNull(BindTarget target, Class<?> valueType) {
 			target.bindNull(this.identifier, valueType);
 		}
-
 	}
 
 }

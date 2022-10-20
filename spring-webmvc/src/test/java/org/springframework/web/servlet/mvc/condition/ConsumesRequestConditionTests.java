@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,6 +86,27 @@ public class ConsumesRequestConditionTests {
 		request.setContentType("application/xml");
 
 		assertThat(condition.getMatchingCondition(request)).isNull();
+	}
+
+	@Test // gh-28024
+	public void matchWithParameters() {
+		String base = "application/hal+json";
+		ConsumesRequestCondition condition = new ConsumesRequestCondition(base + ";profile=\"a\"");
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setContentType(base + ";profile=\"a\"");
+		assertThat(condition.getMatchingCondition(request)).isNotNull();
+
+		condition = new ConsumesRequestCondition(base + ";profile=\"a\"");
+		request.setContentType(base + ";profile=\"b\"");
+		assertThat(condition.getMatchingCondition(request)).isNull();
+
+		condition = new ConsumesRequestCondition(base + ";profile=\"a\"");
+		request.setContentType(base);
+		assertThat(condition.getMatchingCondition(request)).isNotNull();
+
+		condition = new ConsumesRequestCondition(base);
+		request.setContentType(base + ";profile=\"a\"");
+		assertThat(condition.getMatchingCondition(request)).isNotNull();
 	}
 
 	@Test

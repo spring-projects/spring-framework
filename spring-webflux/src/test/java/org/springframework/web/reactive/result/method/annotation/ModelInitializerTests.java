@@ -21,7 +21,6 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import io.reactivex.rxjava3.core.Single;
 import org.junit.jupiter.api.BeforeEach;
@@ -208,7 +207,7 @@ public class ModelInitializerTests {
 				MethodIntrospector.selectMethods(controller.getClass(), BINDER_METHODS)
 						.stream()
 						.map(method -> new SyncInvocableHandlerMethod(controller, method))
-						.collect(Collectors.toList());
+						.toList();
 
 		WebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
 		return new InitBinderBindingContext(bindingInitializer, binderMethods);

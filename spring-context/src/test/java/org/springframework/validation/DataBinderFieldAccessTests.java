@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,17 +36,17 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Stephane Nicoll
  * @since 07.03.2006
  */
-public class DataBinderFieldAccessTests {
+class DataBinderFieldAccessTests {
 
 	@Test
-	public void bindingNoErrors() throws Exception {
+	void bindingNoErrors() throws Exception {
 		FieldAccessBean rod = new FieldAccessBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		assertThat(binder.isIgnoreUnknownFields()).isTrue();
 		binder.initDirectFieldAccess();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
-		pvs.addPropertyValue(new PropertyValue("age", new Integer(32)));
+		pvs.addPropertyValue(new PropertyValue("age", 32));
 		pvs.addPropertyValue(new PropertyValue("nonExisting", "someValue"));
 
 		binder.bind(pvs);
@@ -62,21 +62,21 @@ public class DataBinderFieldAccessTests {
 	}
 
 	@Test
-	public void bindingNoErrorsNotIgnoreUnknown() throws Exception {
+	void bindingNoErrorsNotIgnoreUnknown() throws Exception {
 		FieldAccessBean rod = new FieldAccessBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		binder.initDirectFieldAccess();
 		binder.setIgnoreUnknownFields(false);
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
-		pvs.addPropertyValue(new PropertyValue("age", new Integer(32)));
+		pvs.addPropertyValue(new PropertyValue("age", 32));
 		pvs.addPropertyValue(new PropertyValue("nonExisting", "someValue"));
 		assertThatExceptionOfType(NotWritablePropertyException.class).isThrownBy(() ->
 				binder.bind(pvs));
 	}
 
 	@Test
-	public void bindingWithErrors() throws Exception {
+	void bindingWithErrors() throws Exception {
 		FieldAccessBean rod = new FieldAccessBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		binder.initDirectFieldAccess();
@@ -105,7 +105,7 @@ public class DataBinderFieldAccessTests {
 	}
 
 	@Test
-	public void nestedBindingWithDefaultConversionNoErrors() throws Exception {
+	void nestedBindingWithDefaultConversionNoErrors() throws Exception {
 		FieldAccessBean rod = new FieldAccessBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		assertThat(binder.isIgnoreUnknownFields()).isTrue();
@@ -122,7 +122,7 @@ public class DataBinderFieldAccessTests {
 	}
 
 	@Test
-	public void nestedBindingWithDisabledAutoGrow() throws Exception {
+	void nestedBindingWithDisabledAutoGrow() throws Exception {
 		FieldAccessBean rod = new FieldAccessBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		binder.setAutoGrowNestedPaths(false);
@@ -135,7 +135,7 @@ public class DataBinderFieldAccessTests {
 	}
 
 	@Test
-	public void bindingWithErrorsAndCustomEditors() throws Exception {
+	void bindingWithErrorsAndCustomEditors() throws Exception {
 		FieldAccessBean rod = new FieldAccessBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		binder.initDirectFieldAccess();

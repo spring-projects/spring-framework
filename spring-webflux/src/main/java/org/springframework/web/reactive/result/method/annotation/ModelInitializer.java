@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import reactor.core.publisher.Mono;
 
@@ -112,7 +111,7 @@ class ModelInitializer {
 				.zip(resultList, objectArray ->
 						Arrays.stream(objectArray)
 								.map(object -> handleResult(((HandlerResult) object), bindingContext))
-								.collect(Collectors.toList()))
+								.toList())
 				.flatMap(Mono::when);
 	}
 

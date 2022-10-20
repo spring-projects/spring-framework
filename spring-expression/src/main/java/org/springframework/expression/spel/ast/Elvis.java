@@ -24,11 +24,11 @@ import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 /**
- * Represents the elvis operator ?:. For an expression "a?:b" if a is not null, the value
- * of the expression is "a", if a is null then the value of the expression is "b".
+ * Represents the elvis operator <code>?:</code>. For an expression <code>a?:b</code> if <code>a</code> is not null,
+ * the value of the expression is <code>a</code>, if <code>a</code> is null then the value of the expression is
+ * <code>b</code>.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -52,7 +52,7 @@ public class Elvis extends SpelNodeImpl {
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		TypedValue value = this.children[0].getValueInternal(state);
 		// If this check is changed, the generateCode method will need changing too
-		if (!StringUtils.isEmpty(value.getValue())) {
+		if (value.getValue() != null && !"".equals(value.getValue())) {
 			return value;
 		}
 		else {
@@ -118,7 +118,7 @@ public class Elvis extends SpelNodeImpl {
 				this.exitTypeDescriptor = conditionDescriptor;
 			}
 			else {
-				// Use the easiest to compute common super type
+				// Use the easiest to compute common supertype
 				this.exitTypeDescriptor = "Ljava/lang/Object";
 			}
 		}

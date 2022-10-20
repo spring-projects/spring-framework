@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 package org.springframework.http.client.reactive;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.ResponseCookie;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Represents a client-side reactive HTTP response.
@@ -31,23 +32,31 @@ import org.springframework.util.MultiValueMap;
 public interface ClientHttpResponse extends ReactiveHttpInputMessage {
 
 	/**
-	 * Return the HTTP status code as an {@link HttpStatus} enum value.
-	 * @return the HTTP status as an HttpStatus enum value (never {@code null})
-	 * @throws IllegalArgumentException in case of an unknown HTTP status code
-	 * @since #getRawStatusCode()
-	 * @see HttpStatus#valueOf(int)
+	 * Return an id that represents the underlying connection, if available,
+	 * or the request for the purpose of correlating log messages.
+	 * @since 5.3.5
 	 */
-	HttpStatus getStatusCode();
+	default String getId() {
+		return ObjectUtils.getIdentityHexString(this);
+	}
 
 	/**
-	 * Return the HTTP status code (potentially non-standard and not
-	 * resolvable through the {@link HttpStatus} enum) as an integer.
+	 * Return the HTTP status code as an {@link HttpStatusCode}.
+	 * @return the HTTP status as {@code HttpStatusCode} value (never {@code null})
+	 */
+	HttpStatusCode getStatusCode();
+
+	/**
+	 * Return the HTTP status code as an integer.
 	 * @return the HTTP status as an integer value
 	 * @since 5.0.6
 	 * @see #getStatusCode()
-	 * @see HttpStatus#resolve(int)
+	 * @deprecated as of 6.0, in favor of {@link #getStatusCode()}
 	 */
-	int getRawStatusCode();
+	@Deprecated(since = "6.0", forRemoval = true)
+	default int getRawStatusCode() {
+		return getStatusCode().value();
+	}
 
 	/**
 	 * Return a read-only map of response cookies received from the server.

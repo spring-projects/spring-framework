@@ -84,7 +84,7 @@ public class SetValueTests extends AbstractExpressionTests {
 		StandardEvaluationContext lContext = TestScenarioCreator.getTestEvaluationContext();
 
 		// PROPERTYORFIELDREFERENCE
-		// Non existent field (or property):
+		// Non-existent field (or property):
 		Expression e1 = parser.parseExpression("arrayContainer.wibble");
 		assertThat(e1.isWritable(lContext)).as("Should not be writable!").isFalse();
 
@@ -103,12 +103,12 @@ public class SetValueTests extends AbstractExpressionTests {
 		assertThat(e4.isWritable(lContext)).as("Should not be writable!").isFalse();
 
 		// INDEXER
-		// non existent indexer (wibble made up)
+		// non-existent indexer (wibble made up)
 		Expression e5 = parser.parseExpression("arrayContainer.wibble[99]");
 		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
 				e5.isWritable(lContext));
 
-		// non existent indexer (index via a string)
+		// non-existent indexer (index via a string)
 		Expression e6 = parser.parseExpression("arrayContainer.ints['abc']");
 		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
 				e6.isWritable(lContext));
@@ -139,13 +139,13 @@ public class SetValueTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testSetGenericListElementValueTypeCoersion() {
+	public void testSetGenericListElementValueTypeCoercion() {
 		// TODO currently failing since setValue does a getValue and "Wien" string != PlaceOfBirth - check with andy
 		setValue("placesLivedList[0]", "Wien");
 	}
 
 	@Test
-	public void testSetGenericListElementValueTypeCoersionOK() {
+	public void testSetGenericListElementValueTypeCoercionOK() {
 		setValue("booleanList[0]", "true", Boolean.TRUE);
 	}
 
@@ -171,12 +171,12 @@ public class SetValueTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testSetPropertyTypeCoersion() {
+	public void testSetPropertyTypeCoercion() {
 		setValue("publicBoolean", "true", Boolean.TRUE);
 	}
 
 	@Test
-	public void testSetPropertyTypeCoersionThroughSetter() {
+	public void testSetPropertyTypeCoercionThroughSetter() {
 		setValue("SomeProperty", "true", Boolean.TRUE);
 	}
 

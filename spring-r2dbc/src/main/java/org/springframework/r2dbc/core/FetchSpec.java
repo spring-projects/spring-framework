@@ -25,4 +25,6 @@ package org.springframework.r2dbc.core;
  * @see RowsFetchSpec
  * @see UpdatedRowsFetchSpec
  */
-public interface FetchSpec<T> extends RowsFetchSpec<T>, UpdatedRowsFetchSpec {}
+public interface FetchSpec<T> extends RowsFetchSpec<T>, UpdatedRowsFetchSpec {
+
+}

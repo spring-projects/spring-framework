@@ -3,7 +3,7 @@
 
 <beans>
 
-	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
+	<bean id="multipartResolver" class="org.springframework.web.multipart.support.StandardServletMultipartResolver"/>
 
 	<bean id="servletContextAwareBean" class="org.springframework.web.context.ServletContextAwareBean"/>
 

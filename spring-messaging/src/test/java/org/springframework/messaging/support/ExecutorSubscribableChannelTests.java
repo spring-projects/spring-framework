@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,8 +98,8 @@ public class ExecutorSubscribableChannelTests {
 
 	@Test
 	public void subscribeTwice()  {
-		assertThat(this.channel.subscribe(this.handler)).isEqualTo(true);
-		assertThat(this.channel.subscribe(this.handler)).isEqualTo(false);
+		assertThat(this.channel.subscribe(this.handler)).isTrue();
+		assertThat(this.channel.subscribe(this.handler)).isFalse();
 		this.channel.send(this.message);
 		verify(this.handler, times(1)).handleMessage(this.message);
 	}
@@ -107,8 +107,8 @@ public class ExecutorSubscribableChannelTests {
 	@Test
 	public void unsubscribeTwice()  {
 		this.channel.subscribe(this.handler);
-		assertThat(this.channel.unsubscribe(this.handler)).isEqualTo(true);
-		assertThat(this.channel.unsubscribe(this.handler)).isEqualTo(false);
+		assertThat(this.channel.unsubscribe(this.handler)).isTrue();
+		assertThat(this.channel.unsubscribe(this.handler)).isFalse();
 		this.channel.send(this.message);
 		verify(this.handler, never()).handleMessage(this.message);
 	}

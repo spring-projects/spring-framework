@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 
 package org.springframework.transaction.support;
 
-import javax.transaction.TransactionManager;
-import javax.transaction.UserTransaction;
-
+import jakarta.transaction.TransactionManager;
+import jakarta.transaction.UserTransaction;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.testfixture.jndi.SimpleNamingContextBuilder;
@@ -56,7 +55,7 @@ public class JtaTransactionManagerSerializationTests {
 				.getUserTransaction() == ut2).as("UserTransaction looked up on client").isTrue();
 		assertThat(serializedJtatm
 				.getTransactionManager()).as("TransactionManager didn't survive").isNull();
-		assertThat(serializedJtatm.isRollbackOnCommitFailure()).isEqualTo(true);
+		assertThat(serializedJtatm.isRollbackOnCommitFailure()).isTrue();
 	}
 
 }

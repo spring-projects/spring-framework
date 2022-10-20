@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 	}
 
 	@Test
-	void perTargetAspect() throws SecurityException, NoSuchMethodException {
+	void perTargetAspect() throws Exception {
 		TestBean target = new TestBean();
 		int realAge = 65;
 		target.setAge(realAge);
@@ -130,7 +130,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 	}
 
 	@Test
-	void multiplePerTargetAspects() throws SecurityException, NoSuchMethodException {
+	void multiplePerTargetAspects() throws Exception {
 		TestBean target = new TestBean();
 		int realAge = 65;
 		target.setAge(realAge);
@@ -158,7 +158,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 	}
 
 	@Test
-	void multiplePerTargetAspectsWithOrderAnnotation() throws SecurityException, NoSuchMethodException {
+	void multiplePerTargetAspectsWithOrderAnnotation() throws Exception {
 		TestBean target = new TestBean();
 		int realAge = 65;
 		target.setAge(realAge);
@@ -184,7 +184,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 	}
 
 	@Test
-	void perThisAspect() throws SecurityException, NoSuchMethodException {
+	void perThisAspect() throws Exception {
 		TestBean target = new TestBean();
 		int realAge = 65;
 		target.setAge(realAge);
@@ -220,7 +220,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 	}
 
 	@Test
-	void perTypeWithinAspect() throws SecurityException, NoSuchMethodException {
+	void perTypeWithinAspect() throws Exception {
 		TestBean target = new TestBean();
 		int realAge = 65;
 		target.setAge(realAge);
@@ -322,7 +322,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		int b = 12;
 		int c = 25;
 		String d = "d";
-		StringBuffer e = new StringBuffer("stringbuf");
+		StringBuilder e = new StringBuilder("stringbuf");
 		String expectedResult = a + b+ c + d + e;
 		assertThat(mva.mungeArgs(a, b, c, d, e)).isEqualTo(expectedResult);
 	}
@@ -728,12 +728,12 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 	@Aspect
 	static class ManyValuedArgs {
 
-		String mungeArgs(String a, int b, int c, String d, StringBuffer e) {
+		String mungeArgs(String a, int b, int c, String d, StringBuilder e) {
 			return a + b + c + d + e;
 		}
 
 		@Around(value="execution(String mungeArgs(..)) && args(a, b, c, d, e)", argNames="b,c,d,e,a")
-		String reverseAdvice(ProceedingJoinPoint pjp, int b, int c, String d, StringBuffer e, String a) throws Throwable {
+		String reverseAdvice(ProceedingJoinPoint pjp, int b, int c, String d, StringBuilder e, String a) throws Throwable {
 			assertThat(pjp.proceed()).isEqualTo(a + b+ c+ d+ e);
 			return a + b + c + d + e;
 		}
@@ -931,7 +931,7 @@ abstract class AbstractMakeModifiable {
 			return setter.getDeclaringClass().getMethod(getterName);
 		}
 		catch (NoSuchMethodException ex) {
-			// must be write only
+			// must be write-only
 			return null;
 		}
 	}

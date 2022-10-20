@@ -43,6 +43,7 @@ public final class CallMetaDataProviderFactory {
 			"Apache Derby",
 			"DB2",
 			"Informix Dynamic Server",
+			"MariaDB",
 			"Microsoft SQL Server",
 			"MySQL",
 			"Oracle",
@@ -52,6 +53,7 @@ public final class CallMetaDataProviderFactory {
 
 	/** List of supported database products for function calls. */
 	public static final List<String> supportedDatabaseProductsForFunctions = Arrays.asList(
+			"MariaDB",
 			"Microsoft SQL Server",
 			"MySQL",
 			"Oracle",

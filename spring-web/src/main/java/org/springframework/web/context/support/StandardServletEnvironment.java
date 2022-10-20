@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.web.context.support;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
 
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
@@ -27,6 +27,7 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.jndi.JndiLocatorDelegate;
 import org.springframework.jndi.JndiPropertySource;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.context.ConfigurableWebEnvironment;
 
 /**
@@ -39,6 +40,7 @@ import org.springframework.web.context.ConfigurableWebEnvironment;
  * documentation for details.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see StandardEnvironment
  */
@@ -52,6 +54,27 @@ public class StandardServletEnvironment extends StandardEnvironment implements C
 
 	/** JNDI property source name: {@value}. */
 	public static final String JNDI_PROPERTY_SOURCE_NAME = "jndiProperties";
+
+
+	// Defensive reference to JNDI API for JDK 9+ (optional java.naming module)
+	private static final boolean jndiPresent = ClassUtils.isPresent(
+			"javax.naming.InitialContext", StandardServletEnvironment.class.getClassLoader());
+
+
+	/**
+	 * Create a new {@code StandardServletEnvironment} instance.
+	 */
+	public StandardServletEnvironment() {
+	}
+
+	/**
+	 * Create a new {@code StandardServletEnvironment} instance with a specific {@link MutablePropertySources} instance.
+	 * @param propertySources property sources to use
+	 * @since 5.3.4
+	 */
+	protected StandardServletEnvironment(MutablePropertySources propertySources) {
+		super(propertySources);
+	}
 
 
 	/**
@@ -72,6 +95,8 @@ public class StandardServletEnvironment extends StandardEnvironment implements C
 	 * {@link StubPropertySource stubs} at this stage, and will be
 	 * {@linkplain #initPropertySources(ServletContext, ServletConfig) fully initialized}
 	 * once the actual {@link ServletContext} object becomes available.
+	 * <p>Addition of {@value #JNDI_PROPERTY_SOURCE_NAME} can be disabled with
+	 * {@link JndiLocatorDelegate#IGNORE_JNDI_PROPERTY_NAME}.
 	 * @see StandardEnvironment#customizePropertySources
 	 * @see org.springframework.core.env.AbstractEnvironment#customizePropertySources
 	 * @see ServletConfigPropertySource
@@ -84,7 +109,7 @@ public class StandardServletEnvironment extends StandardEnvironment implements C
 	protected void customizePropertySources(MutablePropertySources propertySources) {
 		propertySources.addLast(new StubPropertySource(SERVLET_CONFIG_PROPERTY_SOURCE_NAME));
 		propertySources.addLast(new StubPropertySource(SERVLET_CONTEXT_PROPERTY_SOURCE_NAME));
-		if (JndiLocatorDelegate.isDefaultJndiEnvironmentAvailable()) {
+		if (jndiPresent && JndiLocatorDelegate.isDefaultJndiEnvironmentAvailable()) {
 			propertySources.addLast(new JndiPropertySource(JNDI_PROPERTY_SOURCE_NAME));
 		}
 		super.customizePropertySources(propertySources);

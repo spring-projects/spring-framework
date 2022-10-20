@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,7 +104,7 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 
 
 	/**
-	 * Adapts a {@link ConversionService} and <tt>targetType</tt> to a {@link Converter}.
+	 * Adapts a {@link ConversionService} and {@code targetType} to a {@link Converter}.
 	 */
 	private static class ConversionServiceConverter<S, T> implements Converter<S, T> {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,13 +72,15 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * {@link org.springframework.scheduling.concurrent.ConcurrentTaskExecutor} adapter.
  *
  * @author Juergen Hoeller
+ * @author Rémy Guihard
+ * @author Sam Brannen
  * @since 2.0
  * @see org.springframework.core.task.TaskExecutor
  * @see java.util.concurrent.ThreadPoolExecutor
  * @see ThreadPoolExecutorFactoryBean
  * @see ConcurrentTaskExecutor
  */
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial", "deprecation"})
 public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 		implements AsyncListenableTaskExecutor, SchedulingTaskExecutor {
 
@@ -93,6 +95,8 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	private int queueCapacity = Integer.MAX_VALUE;
 
 	private boolean allowCoreThreadTimeOut = false;
+
+	private boolean prestartAllCoreThreads = false;
 
 	@Nullable
 	private TaskDecorator taskDecorator;
@@ -112,10 +116,10 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	 */
 	public void setCorePoolSize(int corePoolSize) {
 		synchronized (this.poolSizeMonitor) {
-			this.corePoolSize = corePoolSize;
 			if (this.threadPoolExecutor != null) {
 				this.threadPoolExecutor.setCorePoolSize(corePoolSize);
 			}
+			this.corePoolSize = corePoolSize;
 		}
 	}
 
@@ -135,10 +139,10 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	 */
 	public void setMaxPoolSize(int maxPoolSize) {
 		synchronized (this.poolSizeMonitor) {
-			this.maxPoolSize = maxPoolSize;
 			if (this.threadPoolExecutor != null) {
 				this.threadPoolExecutor.setMaximumPoolSize(maxPoolSize);
 			}
+			this.maxPoolSize = maxPoolSize;
 		}
 	}
 
@@ -153,15 +157,15 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 
 	/**
 	 * Set the ThreadPoolExecutor's keep-alive seconds.
-	 * Default is 60.
+	 * <p>Default is 60.
 	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
 	 */
 	public void setKeepAliveSeconds(int keepAliveSeconds) {
 		synchronized (this.poolSizeMonitor) {
-			this.keepAliveSeconds = keepAliveSeconds;
 			if (this.threadPoolExecutor != null) {
 				this.threadPoolExecutor.setKeepAliveTime(keepAliveSeconds, TimeUnit.SECONDS);
 			}
+			this.keepAliveSeconds = keepAliveSeconds;
 		}
 	}
 
@@ -176,7 +180,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 
 	/**
 	 * Set the capacity for the ThreadPoolExecutor's BlockingQueue.
-	 * Default is {@code Integer.MAX_VALUE}.
+	 * <p>Default is {@code Integer.MAX_VALUE}.
 	 * <p>Any positive value will lead to a LinkedBlockingQueue instance;
 	 * any other value will lead to a SynchronousQueue instance.
 	 * @see java.util.concurrent.LinkedBlockingQueue
@@ -184,6 +188,15 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	 */
 	public void setQueueCapacity(int queueCapacity) {
 		this.queueCapacity = queueCapacity;
+	}
+
+	/**
+	 * Return the capacity for the ThreadPoolExecutor's BlockingQueue.
+	 * @since 5.3.21
+	 * @see #setQueueCapacity(int)
+	 */
+	public int getQueueCapacity() {
+		return this.queueCapacity;
 	}
 
 	/**
@@ -195,6 +208,16 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	 */
 	public void setAllowCoreThreadTimeOut(boolean allowCoreThreadTimeOut) {
 		this.allowCoreThreadTimeOut = allowCoreThreadTimeOut;
+	}
+
+	/**
+	 * Specify whether to start all core threads, causing them to idly wait for work.
+	 * <p>Default is "false".
+	 * @since 5.3.14
+	 * @see java.util.concurrent.ThreadPoolExecutor#prestartAllCoreThreads
+	 */
+	public void setPrestartAllCoreThreads(boolean prestartAllCoreThreads) {
+		this.prestartAllCoreThreads = prestartAllCoreThreads;
 	}
 
 	/**
@@ -256,6 +279,9 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 		if (this.allowCoreThreadTimeOut) {
 			executor.allowCoreThreadTimeOut(true);
 		}
+		if (this.prestartAllCoreThreads) {
+			executor.prestartAllCoreThreads();
+		}
 
 		this.threadPoolExecutor = executor;
 		return executor;
@@ -302,6 +328,19 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	}
 
 	/**
+	 * Return the current queue size.
+	 * @since 5.3.21
+	 * @see java.util.concurrent.ThreadPoolExecutor#getQueue()
+	 */
+	public int getQueueSize() {
+		if (this.threadPoolExecutor == null) {
+			// Not initialized yet: assume no queued tasks.
+			return 0;
+		}
+		return this.threadPoolExecutor.getQueue().size();
+	}
+
+	/**
 	 * Return the number of currently active threads.
 	 * @see java.util.concurrent.ThreadPoolExecutor#getActiveCount()
 	 */
@@ -325,6 +364,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 		}
 	}
 
+	@Deprecated
 	@Override
 	public void execute(Runnable task, long startTimeout) {
 		execute(task);

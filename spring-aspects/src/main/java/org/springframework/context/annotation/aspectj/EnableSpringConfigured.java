@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Import;
 
 /**
  * Signals the current application context to apply dependency injection to
- * non-managed classes that are instantiated outside of the Spring bean factory
+ * non-managed classes that are instantiated outside the Spring bean factory
  * (typically classes annotated with the
  * {@link org.springframework.beans.factory.annotation.Configurable @Configurable}
  * annotation).

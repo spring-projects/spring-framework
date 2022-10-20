@@ -16,13 +16,13 @@
 
 package org.springframework.web.servlet;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
 
 /**
  * Strategy interface for translating an incoming
- * {@link javax.servlet.http.HttpServletRequest} into a
+ * {@link jakarta.servlet.http.HttpServletRequest} into a
  * logical view name when no view name is explicitly supplied.
  *
  * @author Rob Harrop

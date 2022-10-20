@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,12 @@ import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.server.HttpOutput;
 import org.eclipse.jetty.server.Request;
@@ -59,7 +60,8 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 			throws IOException, URISyntaxException {
 
 		Assert.notNull(getServletPath(), "Servlet path is not initialized");
-		return new JettyServerHttpRequest(request, context, getServletPath(), getDataBufferFactory(), getBufferSize());
+		return new JettyServerHttpRequest(
+				request, context, getServletPath(), getDataBufferFactory(), getBufferSize());
 	}
 
 	@Override
@@ -80,9 +82,24 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 			super(createHeaders(request), request, asyncContext, servletPath, bufferFactory, bufferSize);
 		}
 
-		private static MultiValueMap<String, String> createHeaders(HttpServletRequest request) {
-			HttpFields fields = ((Request) request).getMetaData().getFields();
+		private static MultiValueMap<String, String> createHeaders(HttpServletRequest servletRequest) {
+			Request request = getRequest(servletRequest);
+			HttpFields.Mutable fields = HttpFields.build(request.getHttpFields());
 			return new JettyHeadersAdapter(fields);
+		}
+
+		private static Request getRequest(HttpServletRequest request) {
+			if (request instanceof Request jettyRequest) {
+				return jettyRequest;
+			}
+			else if (request instanceof HttpServletRequestWrapper wrapper) {
+				HttpServletRequest wrappedRequest = (HttpServletRequest) wrapper.getRequest();
+				return getRequest(wrappedRequest);
+			}
+			else {
+				throw new IllegalArgumentException("Cannot convert [" + request.getClass() +
+						"] to org.eclipse.jetty.server.Request");
+			}
 		}
 	}
 
@@ -96,9 +113,33 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 			super(createHeaders(response), response, asyncContext, bufferFactory, bufferSize, request);
 		}
 
-		private static HttpHeaders createHeaders(HttpServletResponse response) {
-			HttpFields fields = ((Response) response).getHttpFields();
+		private static HttpHeaders createHeaders(HttpServletResponse servletResponse) {
+			Response response = getResponse(servletResponse);
+			HttpFields.Mutable fields = response.getHttpFields();
 			return new HttpHeaders(new JettyHeadersAdapter(fields));
+		}
+
+		private static Response getResponse(HttpServletResponse response) {
+			if (response instanceof Response jettyResponse) {
+				return jettyResponse;
+			}
+			else if (response instanceof HttpServletResponseWrapper wrapper) {
+				HttpServletResponse wrappedResponse = (HttpServletResponse) wrapper.getResponse();
+				return getResponse(wrappedResponse);
+			}
+			else {
+				throw new IllegalArgumentException("Cannot convert [" + response.getClass() +
+						"] to org.eclipse.jetty.server.Response");
+			}
+		}
+
+		@Override
+		protected int writeToOutputStream(DataBuffer dataBuffer) throws IOException {
+			ByteBuffer input = dataBuffer.toByteBuffer();
+			int len = input.remaining();
+			ServletResponse response = getNativeResponse();
+			((HttpOutput) response.getOutputStream()).write(input);
+			return len;
 		}
 
 		@Override
@@ -123,15 +164,6 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 			if (contentLength != -1) {
 				response.setContentLengthLong(contentLength);
 			}
-		}
-
-		@Override
-		protected int writeToOutputStream(DataBuffer dataBuffer) throws IOException {
-			ByteBuffer input = dataBuffer.asByteBuffer();
-			int len = input.remaining();
-			ServletResponse response = getNativeResponse();
-			((HttpOutput) response.getOutputStream()).write(input);
-			return len;
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,9 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.support.MessageHeaderInitializer;
+import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -258,7 +260,7 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 				return message;
 			}
 			SimpMessageHeaderAccessor accessor =
-					SimpMessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
+					MessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
 			Assert.state(accessor != null, "No SimpMessageHeaderAccessor");
 			if (accessor.getSessionId() == null) {
 				// Our own broadcast
@@ -284,7 +286,7 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 
 		public void handleUnresolved(Message<?> message) {
 			MessageHeaders headers = message.getHeaders();
-			if (SimpMessageHeaderAccessor.getFirstNativeHeader(
+			if (NativeMessageHeaderAccessor.getFirstNativeHeader(
 					SimpMessageHeaderAccessor.ORIGINAL_DESTINATION, headers) != null) {
 				// Re-broadcast
 				return;

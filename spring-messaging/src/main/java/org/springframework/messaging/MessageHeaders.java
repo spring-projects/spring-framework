@@ -115,7 +115,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	@Nullable
 	private static volatile IdGenerator idGenerator;
 
-
+	@SuppressWarnings("serial")
 	private final Map<String, Object> headers;
 
 

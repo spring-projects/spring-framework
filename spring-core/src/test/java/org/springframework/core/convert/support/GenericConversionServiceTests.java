@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ class GenericConversionServiceTests {
 
 	@Test
 	void convertNullSource() {
-		assertThat(conversionService.convert(null, Integer.class)).isEqualTo(null);
+		assertThat(conversionService.convert(null, Integer.class)).isNull();
 	}
 
 	@Test
@@ -190,12 +190,7 @@ class GenericConversionServiceTests {
 
 	@Test
 	void convertSuperSourceType() {
-		conversionService.addConverter(new Converter<CharSequence, Integer>() {
-			@Override
-			public Integer convert(CharSequence source) {
-				return Integer.valueOf(source.toString());
-			}
-		});
+		conversionService.addConverter(CharSequence.class, Integer.class, source -> Integer.valueOf(source.toString()));
 		Integer result = conversionService.convert("3", Integer.class);
 		assertThat((int) result).isEqualTo((int) Integer.valueOf(3));
 	}
@@ -753,7 +748,7 @@ class GenericConversionServiceTests {
 		}
 	}
 
-	private static interface MyEnumBaseInterface {
+	private interface MyEnumBaseInterface {
 		String getBaseCode();
 	}
 

@@ -110,7 +110,7 @@ public final class MessageBuilder<T> {
 
 	/**
 	 * Copy the name-value pairs from the provided Map. This operation will overwrite any
-	 * existing values. Use { {@link #copyHeadersIfAbsent(Map)} to avoid overwriting
+	 * existing values. Use {@link #copyHeadersIfAbsent(Map)} to avoid overwriting
 	 * values. Note that the 'id' and 'timestamp' header values will never be overwritten.
 	 */
 	public MessageBuilder<T> copyHeaders(@Nullable Map<String, ?> headersToCopy) {
@@ -169,7 +169,7 @@ public final class MessageBuilder<T> {
 
 
 	/**
-	 * Create a builder for a new {@link Message} instance pre-populated with all of the
+	 * Create a builder for a new {@link Message} instance pre-populated with all the
 	 * headers copied from the provided message. The payload of the provided Message will
 	 * also be used as the payload for the new message.
 	 * <p>If the provided message is an {@link ErrorMessage}, the

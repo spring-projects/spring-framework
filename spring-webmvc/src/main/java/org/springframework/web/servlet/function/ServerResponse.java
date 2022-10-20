@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,28 +18,31 @@ package org.springframework.web.servlet.function;
 
 import java.io.IOException;
 import java.net.URI;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.reactivestreams.Publisher;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.Nullable;
@@ -58,18 +61,16 @@ public interface ServerResponse {
 
 	/**
 	 * Return the status code of this response.
-	 * @return the status as an HttpStatus enum value
-	 * @throws IllegalArgumentException in case of an unknown HTTP status code
-	 * @see HttpStatus#valueOf(int)
+	 * @return the status as an HttpStatusCode value
 	 */
-	HttpStatus statusCode();
+	HttpStatusCode statusCode();
 
 	/**
-	 * Return the (potentially non-standard) status code of this response.
+	 * Return the status code of this response as integer.
 	 * @return the status as an integer
-	 * @see #statusCode()
-	 * @see HttpStatus#valueOf(int)
+	 * @deprecated as of 6.0, in favor of {@link #statusCode()}
 	 */
+	@Deprecated(since = "6.0")
 	int rawStatusCode();
 
 	/**
@@ -110,7 +111,7 @@ public interface ServerResponse {
 	 * @param status the response status
 	 * @return the created builder
 	 */
-	static BodyBuilder status(HttpStatus status) {
+	static BodyBuilder status(HttpStatusCode status) {
 		return new DefaultServerResponseBuilder(status);
 	}
 
@@ -120,7 +121,7 @@ public interface ServerResponse {
 	 * @return the created builder
 	 */
 	static BodyBuilder status(int status) {
-		return new DefaultServerResponseBuilder(status);
+		return new DefaultServerResponseBuilder(HttpStatusCode.valueOf(status));
 	}
 
 	/**
@@ -216,6 +217,106 @@ public interface ServerResponse {
 		return status(HttpStatus.UNPROCESSABLE_ENTITY);
 	}
 
+	/**
+	 * Create a (built) response with the given asynchronous response.
+	 * Parameter {@code asyncResponse} can be a
+	 * {@link CompletableFuture CompletableFuture&lt;ServerResponse&gt;} or
+	 * {@link Publisher Publisher&lt;ServerResponse&gt;} (or any
+	 * asynchronous producer of a single {@code ServerResponse} that can be
+	 * adapted via the {@link ReactiveAdapterRegistry}).
+	 *
+	 * <p>This method can be used to set the response status code, headers, and
+	 * body based on an asynchronous result. If only the body is asynchronous,
+	 * {@link BodyBuilder#body(Object)} can be used instead.
+	 * @param asyncResponse a {@code CompletableFuture<ServerResponse>} or
+	 * {@code Publisher<ServerResponse>}
+	 * @return the asynchronous response
+	 * @since 5.3
+	 */
+	static ServerResponse async(Object asyncResponse) {
+		return DefaultAsyncServerResponse.create(asyncResponse, null);
+	}
+
+	/**
+	 * Create a (built) response with the given asynchronous response.
+	 * Parameter {@code asyncResponse} can be a
+	 * {@link CompletableFuture CompletableFuture&lt;ServerResponse&gt;} or
+	 * {@link Publisher Publisher&lt;ServerResponse&gt;} (or any
+	 * asynchronous producer of a single {@code ServerResponse} that can be
+	 * adapted via the {@link ReactiveAdapterRegistry}).
+	 *
+	 * <p>This method can be used to set the response status code, headers, and
+	 * body based on an asynchronous result. If only the body is asynchronous,
+	 * {@link BodyBuilder#body(Object)} can be used instead.
+	 * @param asyncResponse a {@code CompletableFuture<ServerResponse>} or
+	 * {@code Publisher<ServerResponse>}
+	 * @param timeout maximum time period to wait for before timing out
+	 * @return the asynchronous response
+	 * @since 5.3.2
+	 */
+	static ServerResponse async(Object asyncResponse, Duration timeout) {
+		return DefaultAsyncServerResponse.create(asyncResponse, timeout);
+	}
+
+	/**
+	 * Create a server-sent event response. The {@link SseBuilder} provided to
+	 * {@code consumer} can be used to build and send events.
+	 *
+	 * <p>For example:
+	 * <pre class="code">
+	 * public ServerResponse handleSse(ServerRequest request) {
+	 *     return ServerResponse.sse(sse -&gt; sse.send("Hello World!"));
+	 * }
+	 * </pre>
+	 *
+	 * <p>or, to set both the id and event type:
+	 * <pre class="code">
+	 * public ServerResponse handleSse(ServerRequest request) {
+	 *     return ServerResponse.sse(sse -&gt; sse
+	 *         .id("42)
+	 *         .event("event")
+	 *         .send("Hello World!"));
+	 * }
+	 * </pre>
+	 * @param consumer consumer that will be provided with an event builder
+	 * @return the server-side event response
+	 * @since 5.3.2
+	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events</a>
+	 */
+	static ServerResponse sse(Consumer<SseBuilder> consumer) {
+		return SseServerResponse.create(consumer, null);
+	}
+
+	/**
+	 * Create a server-sent event response. The {@link SseBuilder} provided to
+	 * {@code consumer} can be used to build and send events.
+	 *
+	 * <p>For example:
+	 * <pre class="code">
+	 * public ServerResponse handleSse(ServerRequest request) {
+	 *     return ServerResponse.sse(sse -&gt; sse.send("Hello World!"));
+	 * }
+	 * </pre>
+	 *
+	 * <p>or, to set both the id and event type:
+	 * <pre class="code">
+	 * public ServerResponse handleSse(ServerRequest request) {
+	 *     return ServerResponse.sse(sse -&gt; sse
+	 *         .id("42)
+	 *         .event("event")
+	 *         .send("Hello World!"));
+	 * }
+	 * </pre>
+	 * @param consumer consumer that will be provided with an event builder
+	 * @param timeout  maximum time period to wait before timing out
+	 * @return the server-side event response
+	 * @since 5.3.2
+	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events</a>
+	 */
+	static ServerResponse sse(Consumer<SseBuilder> consumer, Duration timeout) {
+		return SseServerResponse.create(consumer, timeout);
+	}
+
 
 	/**
 	 * Defines a builder that adds headers to the response.
@@ -264,7 +365,6 @@ public interface ServerResponse {
 		/**
 		 * Set the set of allowed {@link HttpMethod HTTP methods}, as specified
 		 * by the {@code Allow} header.
-		 *
 		 * @param allowedMethods the allowed methods
 		 * @return this builder
 		 * @see HttpHeaders#setAllow(Set)
@@ -374,10 +474,13 @@ public interface ServerResponse {
 		BodyBuilder contentType(MediaType contentType);
 
 		/**
-		 * Set the body of the response to the given {@code Object} and return it.
+		 * Set the body of the response to the given {@code Object} and return
+		 * it.
 		 *
-		 * <p>Asynchronous response bodies are supported by providing a {@link CompletionStage} or
-		 * {@link Publisher} as body.
+		 * <p>Asynchronous response bodies are supported by providing a
+		 * {@link CompletionStage} or {@link Publisher} as body (or any
+		 * asynchronous producer of a single entity that can be adapted via the
+		 * {@link ReactiveAdapterRegistry}).
 		 * @param body the body of the response
 		 * @return the built response
 		 */
@@ -386,7 +489,6 @@ public interface ServerResponse {
 		/**
 		 * Set the body of the response to the given {@code Object} and return it. The parameter
 		 * {@code bodyType} is used to capture the generic type.
-		 *
 		 * @param body the body of the response
 		 * @param bodyType the type of the body, used to capture the generic type
 		 * @return the built response
@@ -413,6 +515,105 @@ public interface ServerResponse {
 		 * @return the built response
 		 */
 		ServerResponse render(String name, Map<String, ?> model);
+	}
+
+
+	/**
+	 * Defines a builder for a body that sends server-sent events.
+	 *
+	 * @since 5.3.2
+	 */
+	interface SseBuilder {
+
+		/**
+		 * Sends the given object as a server-sent event.
+		 * Strings will be sent as UTF-8 encoded bytes, and other objects will
+		 * be converted into JSON using
+		 * {@linkplain HttpMessageConverter message converters}.
+		 *
+		 * <p>This convenience method has the same effect as
+		 * {@link #data(Object)}.
+		 * @param object the object to send
+		 * @throws IOException in case of I/O errors
+		 */
+		void send(Object object) throws IOException;
+
+		/**
+		 * Add an SSE "id" line.
+		 * @param id the event identifier
+		 * @return this builder
+		 */
+		SseBuilder id(String id);
+
+		/**
+		 * Add an SSE "event" line.
+		 * @param eventName the event name
+		 * @return this builder
+		 */
+		SseBuilder event(String eventName);
+
+		/**
+		 * Add an SSE "retry" line.
+		 * @param duration the duration to convert into millis
+		 * @return this builder
+		 */
+		SseBuilder retry(Duration duration);
+
+		/**
+		 * Add an SSE comment.
+		 * @param comment the comment
+		 * @return this builder
+		 */
+		SseBuilder comment(String comment);
+
+		/**
+		 * Add an SSE "data" line for the given object and sends the built
+		 * server-sent event to the client.
+		 * Strings will be sent as UTF-8 encoded bytes, and other objects will
+		 * be converted into JSON using
+		 * {@linkplain HttpMessageConverter message converters}.
+		 * @param object the object to send as data
+		 * @throws IOException in case of I/O errors
+		 */
+		void data(Object object) throws IOException;
+
+		/**
+		 * Completes the event stream with the given error.
+		 *
+		 * <p>The throwable is dispatched back into Spring MVC, and passed to
+		 * its exception handling mechanism. Since the response has
+		 * been committed by this point, the response status can not change.
+ 		 * @param t the throwable to dispatch
+		 */
+		void error(Throwable t);
+
+		/**
+		 * Completes the event stream.
+		 */
+		void complete();
+
+		/**
+		 * Register a callback to be invoked when an SSE request times
+		 * out.
+		 * @param onTimeout the callback to invoke on timeout
+		 * @return this builder
+		 */
+		SseBuilder onTimeout(Runnable onTimeout);
+
+		/**
+		 * Register a callback to be invoked when an error occurs during SSE
+		 * processing.
+		 * @param onError  the callback to invoke on error
+		 * @return this builder
+		 */
+		SseBuilder onError(Consumer<Throwable> onError);
+
+		/**
+		 * Register a callback to be invoked when the SSE request completes.
+		 * @param onCompletion the callback to invoked on completion
+		 * @return this builder
+		 */
+		SseBuilder onComplete(Runnable onCompletion);
 	}
 
 

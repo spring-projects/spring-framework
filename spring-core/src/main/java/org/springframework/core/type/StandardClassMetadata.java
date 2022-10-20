@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.util.StringUtils;
  * to introspect a given {@code Class}.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.5
  */
 public class StandardClassMetadata implements ClassMetadata {
@@ -117,6 +118,22 @@ public class StandardClassMetadata implements ClassMetadata {
 			memberClassNames.add(nestedClass.getName());
 		}
 		return StringUtils.toStringArray(memberClassNames);
+	}
+
+	@Override
+	public boolean equals(@Nullable Object obj) {
+		return ((this == obj) || ((obj instanceof StandardClassMetadata) &&
+				getIntrospectedClass().equals(((StandardClassMetadata) obj).getIntrospectedClass())));
+	}
+
+	@Override
+	public int hashCode() {
+		return getIntrospectedClass().hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return getClassName();
 	}
 
 }

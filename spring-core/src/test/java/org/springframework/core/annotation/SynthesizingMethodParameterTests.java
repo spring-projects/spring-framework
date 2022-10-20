@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ class SynthesizingMethodParameterTests {
 		Method method = getClass().getMethod("method", String.class, Long.TYPE);
 		SynthesizingMethodParameter methodParameter = new SynthesizingMethodParameter(method, 0);
 		assertThat(methodParameter.hashCode()).isEqualTo(stringParameter.hashCode());
-		assertThat(methodParameter.hashCode()).isNotEqualTo((long) longParameter.hashCode());
+		assertThat(methodParameter.hashCode()).isNotEqualTo(longParameter.hashCode());
 	}
 
 	@Test

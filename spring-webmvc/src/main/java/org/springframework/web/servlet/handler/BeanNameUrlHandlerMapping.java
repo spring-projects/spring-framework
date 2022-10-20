@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,11 +37,9 @@ import org.springframework.util.StringUtils;
  * a single handler.
  *
  * <p>Supports direct matches (given "/test" -&gt; registered "/test") and "*"
- * matches (given "/test" -&gt; registered "/t*"). Note that the default is
- * to map within the current servlet mapping if applicable; see the
- * {@link #setAlwaysUseFullPath "alwaysUseFullPath"} property for details.
- * For details on the pattern options, see the
- * {@link org.springframework.util.AntPathMatcher} javadoc.
+ * matches (given "/test" -&gt; registered "/t*"). For details on the pattern
+ * options, see the {@link org.springframework.web.util.pattern.PathPattern}
+ * javadoc.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class SimpleIdGenerator implements IdGenerator {
 
-	private final AtomicLong leastSigBits = new AtomicLong(0);
+	private final AtomicLong leastSigBits = new AtomicLong();
 
 
 	@Override

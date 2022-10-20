@@ -41,7 +41,7 @@ public class RecoverableDataAccessException extends DataAccessException {
 	/**
 	 * Constructor for RecoverableDataAccessException.
 	 * @param msg the detail message
-	 * @param cause the root cause (usually from using a underlying
+	 * @param cause the root cause (usually from using an underlying
 	 * data access API such as JDBC)
 	 */
 	public RecoverableDataAccessException(String msg, Throwable cause) {

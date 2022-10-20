@@ -16,9 +16,9 @@
 
 package org.springframework.transaction.support;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
@@ -50,7 +50,14 @@ public class SimpleTransactionScope implements Scope {
 			TransactionSynchronizationManager.registerSynchronization(new CleanupSynchronization(scopedObjects));
 			TransactionSynchronizationManager.bindResource(this, scopedObjects);
 		}
-		return scopedObjects.scopedInstances.computeIfAbsent(name, k -> objectFactory.getObject());
+		// NOTE: Do NOT modify the following to use Map::computeIfAbsent. For details,
+		// see https://github.com/spring-projects/spring-framework/issues/25801.
+		Object scopedObject = scopedObjects.scopedInstances.get(name);
+		if (scopedObject == null) {
+			scopedObject = objectFactory.getObject();
+			scopedObjects.scopedInstances.put(name, scopedObject);
+		}
+		return scopedObject;
 	}
 
 	@Override
@@ -92,7 +99,7 @@ public class SimpleTransactionScope implements Scope {
 	 */
 	static class ScopedObjectsHolder {
 
-		final Map<String, Object> scopedInstances = new ConcurrentHashMap<>();
+		final Map<String, Object> scopedInstances = new HashMap<>();
 
 		final Map<String, Runnable> destructionCallbacks = new LinkedHashMap<>();
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.http.codec.multipart;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,7 +38,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -146,15 +144,6 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 		return this.formWriter;
 	}
 
-	/**
-	 * Set the character set to use for part headers such as
-	 * "Content-Disposition" (and its filename parameter).
-	 * <p>By default this is set to "UTF-8".
-	 */
-	public void setCharset(Charset charset) {
-		Assert.notNull(charset, "Charset must not be null");
-		this.charset = charset;
-	}
 
 
 	@Override
@@ -207,7 +196,11 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 		Flux<DataBuffer> body = Flux.fromIterable(map.entrySet())
 				.concatMap(entry -> encodePartValues(boundary, entry.getKey(), entry.getValue(), bufferFactory))
 				.concatWith(generateLastLine(boundary, bufferFactory))
-				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
+				.doOnDiscard(DataBuffer.class, DataBufferUtils::release);
+
+		if (logger.isDebugEnabled()) {
+			body = body.doOnNext(buffer -> Hints.touchDataBuffer(buffer, hints, logger));
+		}
 
 		return outputMessage.writeWith(body);
 	}

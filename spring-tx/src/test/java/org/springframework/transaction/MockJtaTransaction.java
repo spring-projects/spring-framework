@@ -16,15 +16,16 @@
 
 package org.springframework.transaction;
 
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
 import javax.transaction.xa.XAResource;
+
+import jakarta.transaction.Status;
+import jakarta.transaction.Synchronization;
 
 /**
  * @author Juergen Hoeller
  * @since 31.08.2004
  */
-public class MockJtaTransaction implements javax.transaction.Transaction {
+public class MockJtaTransaction implements jakarta.transaction.Transaction {
 
 	private Synchronization synchronization;
 

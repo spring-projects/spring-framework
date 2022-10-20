@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests for {@link ServerSentEventHttpMessageReader}.
  *
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
  */
 public class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingTests {
 
@@ -66,7 +67,7 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingT
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")
 				.body(Mono.just(stringBuffer(
 						"id:c42\nevent:foo\nretry:123\n:bla\n:bla bla\n:bla bla bla\ndata:bar\n\n" +
-						"id:c43\nevent:bar\nretry:456\ndata:baz\n\n")));
+						"id:c43\nevent:bar\nretry:456\ndata:baz\n\ndata:\n\ndata: \n\n")));
 
 		Flux<ServerSentEvent> events = this.reader
 				.read(ResolvableType.forClassWithGenerics(ServerSentEvent.class, String.class),
@@ -87,6 +88,8 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingT
 					assertThat(event.comment()).isNull();
 					assertThat(event.data()).isEqualTo("baz");
 				})
+				.consumeNextWith(event -> assertThat(event.data()).isNull())
+				.consumeNextWith(event -> assertThat(event.data()).isNull())
 				.expectComplete()
 				.verify();
 	}
@@ -139,6 +142,20 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingT
 	}
 
 	@Test
+	public void trimWhitespace() {
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.body(Mono.just(stringBuffer("data: \tfoo \ndata:bar\t\n\n")));
+
+		Flux<String> data = reader.read(ResolvableType.forClass(String.class),
+				request, Collections.emptyMap()).cast(String.class);
+
+		StepVerifier.create(data)
+				.expectNext("\tfoo \nbar\t")
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
 	public void readPojo() {
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")
 				.body(Mono.just(stringBuffer(
@@ -161,7 +178,7 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingT
 				.verify();
 	}
 
-	@Test // gh-24389
+	@Test  // gh-24389
 	void readPojoWithCommentOnly() {
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")
 				.body(Flux.just(stringBuffer(":ping\n"), stringBuffer("\n")));
@@ -207,7 +224,6 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingT
 
 	@Test
 	public void maxInMemoryLimit() {
-
 		this.reader.setMaxInMemorySize(17);
 
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")
@@ -221,9 +237,8 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingT
 				.verify();
 	}
 
-	@Test // gh-24312
+	@Test  // gh-24312
 	public void maxInMemoryLimitAllowsReadingPojoLargerThanDefaultSize() {
-
 		int limit = this.jsonDecoder.getMaxInMemorySize();
 
 		String fooValue = getStringOfSize(limit) + "and then some more";
@@ -245,19 +260,20 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingT
 				.verify();
 	}
 
-	private static String getStringOfSize(long size) {
-		StringBuilder content = new StringBuilder("Aa");
-		while (content.length() < size) {
-			content.append(content);
-		}
-		return content.toString();
-	}
 
 	private DataBuffer stringBuffer(String value) {
 		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
 		DataBuffer buffer = this.bufferFactory.allocateBuffer(bytes.length);
 		buffer.write(bytes);
 		return buffer;
+	}
+
+	private static String getStringOfSize(long size) {
+		StringBuilder content = new StringBuilder("Aa");
+		while (content.length() < size) {
+			content.append(content);
+		}
+		return content.toString();
 	}
 
 }

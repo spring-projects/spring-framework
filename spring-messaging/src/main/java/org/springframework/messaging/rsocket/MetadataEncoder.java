@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.rsocket;
 
 import java.util.ArrayList;
@@ -101,7 +102,7 @@ final class MetadataEncoder {
 		if (ObjectUtils.isEmpty(routeVars)) {
 			return route;
 		}
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		int index = 0;
 		Matcher matcher = VARS_PATTERN.matcher(route);
 		while (matcher.find()) {

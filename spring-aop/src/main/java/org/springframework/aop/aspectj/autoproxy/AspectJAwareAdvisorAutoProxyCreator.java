@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,8 +60,8 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 	 * <li>Otherwise the advice declared first gets highest precedence (i.e., runs
 	 * first).</li>
 	 * </ul>
-	 * <p><b>Important:</b> Advisors are sorted in precedence order, from highest
-	 * precedence to lowest. "On the way in" to a join point, the highest precedence
+	 * <p><b>Important:</b> Advisors are sorted in precedence order, from the highest
+	 * precedence to the lowest. "On the way in" to a join point, the highest precedence
 	 * advisor should run first. "On the way out" of a join point, the highest
 	 * precedence advisor should run last.
 	 */
@@ -100,8 +100,8 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 		// TODO: Consider optimization by caching the list of the aspect names
 		List<Advisor> candidateAdvisors = findCandidateAdvisors();
 		for (Advisor advisor : candidateAdvisors) {
-			if (advisor instanceof AspectJPointcutAdvisor &&
-					((AspectJPointcutAdvisor) advisor).getAspectName().equals(beanName)) {
+			if (advisor instanceof AspectJPointcutAdvisor pointcutAdvisor &&
+					pointcutAdvisor.getAspectName().equals(beanName)) {
 				return true;
 			}
 		}
@@ -143,13 +143,12 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 			Advice advice = this.advisor.getAdvice();
 			StringBuilder sb = new StringBuilder(ClassUtils.getShortName(advice.getClass()));
 			boolean appended = false;
-			if (this.advisor instanceof Ordered) {
-				sb.append(": order = ").append(((Ordered) this.advisor).getOrder());
+			if (this.advisor instanceof Ordered ordered) {
+				sb.append(": order = ").append(ordered.getOrder());
 				appended = true;
 			}
-			if (advice instanceof AbstractAspectJAdvice) {
+			if (advice instanceof AbstractAspectJAdvice ajAdvice) {
 				sb.append(!appended ? ": " : ", ");
-				AbstractAspectJAdvice ajAdvice = (AbstractAspectJAdvice) advice;
 				sb.append("aspect name = ");
 				sb.append(ajAdvice.getAspectName());
 				sb.append(", declaration order = ");

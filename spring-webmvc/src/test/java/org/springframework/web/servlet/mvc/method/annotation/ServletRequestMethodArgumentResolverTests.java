@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,19 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.security.Principal;
 import java.time.ZoneId;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.PushBuilder;
-
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.PushBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -120,6 +123,16 @@ public class ServletRequestMethodArgumentResolverTests {
 
 		Object result = resolver.resolveArgument(principalParameter, null, webRequest, null);
 		assertThat(result).as("Invalid result").isNull();
+	}
+
+	@Test // gh-25780
+	public void annotatedPrincipal() throws Exception {
+		Principal principal = () -> "Foo";
+		servletRequest.setUserPrincipal(principal);
+		Method principalMethod = getClass().getMethod("supportedParamsWithAnnotatedPrincipal", Principal.class);
+
+		MethodParameter principalParameter = new MethodParameter(principalMethod, 0);
+		assertThat(resolver.supportsParameter(principalParameter)).as("Principal not supported").isFalse();
 	}
 
 	@Test
@@ -258,7 +271,13 @@ public class ServletRequestMethodArgumentResolverTests {
 								TimeZone p8,
 								ZoneId p9,
 								HttpMethod p10,
-								PushBuilder p11) {
-	}
+								PushBuilder p11) {}
+
+	@Target({ ElementType.PARAMETER })
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface AuthenticationPrincipal {}
+
+	@SuppressWarnings("unused")
+	public void supportedParamsWithAnnotatedPrincipal(@AuthenticationPrincipal Principal p) {}
 
 }
