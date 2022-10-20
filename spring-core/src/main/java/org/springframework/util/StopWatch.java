@@ -16,12 +16,12 @@
 
 package org.springframework.util;
 
+import org.springframework.lang.Nullable;
+
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Simple stop watch, allowing for timing of a number of tasks, exposing total
@@ -385,24 +385,15 @@ public class StopWatch {
 	}
 
 	private static String getTimeUnitAbbreviation(TimeUnit timeUnit) {
-		switch (timeUnit.name()) {
-			case "NANOSECONDS":
-				return "ns";
-			case "MICROSECONDS":
-				return "μs";
-			case "MILLISECONDS":
-				return "ms";
-			case "SECONDS":
-				return "sec";
-			case "MINUTES":
-				return "min";
-			case "HOURS":
-				return "hrs";
-			case "DAYS":
-				return "days";
-			default:
-				throw new IllegalArgumentException("No TimeUnit equivalent for " + timeUnit);
-		}
+		return switch (timeUnit) {
+			case NANOSECONDS -> "ns";
+			case MICROSECONDS -> "μs";
+			case MILLISECONDS -> "ms";
+			case SECONDS -> "sec";
+			case MINUTES -> "min";
+			case HOURS -> "hrs";
+			case DAYS -> "days";
+		};
 	}
 
 	/**
