@@ -530,6 +530,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 		DataBuffer buffer = createDataBuffer(3);
 		buffer.write(new byte[]{'a', 'b'});
 
+		@SuppressWarnings("deprecation")
 		ByteBuffer result = buffer.asByteBuffer(1, 2);
 		assertThat(result.capacity()).isEqualTo(2);
 
