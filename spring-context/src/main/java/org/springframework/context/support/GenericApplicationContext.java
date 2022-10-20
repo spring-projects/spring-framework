@@ -117,8 +117,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 					MemberCategory.DECLARED_FIELDS);
 
 	private static final Consumer<Builder> asProxiedUserClass = hint ->
-			hint.withMembers(MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
-					MemberCategory.INVOKE_DECLARED_METHODS);
+			hint.withMembers(MemberCategory.INVOKE_PUBLIC_METHODS);
 
 
 	private final DefaultListableBeanFactory beanFactory;
