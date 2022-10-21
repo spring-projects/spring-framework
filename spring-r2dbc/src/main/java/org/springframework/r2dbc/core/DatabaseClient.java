@@ -144,7 +144,7 @@ public interface DatabaseClient extends ConnectionAccessor {
 		Builder apply(Consumer<Builder> builderConsumer);
 
 		/**
-		 * Builder the {@link DatabaseClient} instance.
+		 * Build the {@link DatabaseClient} instance.
 		 */
 		DatabaseClient build();
 	}
