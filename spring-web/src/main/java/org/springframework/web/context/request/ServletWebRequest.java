@@ -220,6 +220,12 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 			if (this.notModified && response != null) {
 				response.setStatus(HttpStatus.PRECONDITION_FAILED.value());
 			}
+			if (SAFE_METHODS.contains(getRequest().getMethod())) {
+				if (StringUtils.hasLength(etag) && response.getHeader(HttpHeaders.ETAG) == null) {
+					response.setHeader(HttpHeaders.ETAG, padEtagIfNecessary(etag));
+				}
+				response.setDateHeader(HttpHeaders.LAST_MODIFIED, lastModifiedTimestamp);
+			}
 			return this.notModified;
 		}
 

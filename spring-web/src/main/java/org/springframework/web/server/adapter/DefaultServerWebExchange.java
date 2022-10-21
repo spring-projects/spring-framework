@@ -56,6 +56,7 @@ import org.springframework.web.server.session.WebSessionManager;
  * Default implementation of {@link ServerWebExchange}.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  */
 public class DefaultServerWebExchange implements ServerWebExchange {
@@ -260,6 +261,12 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		if (validateIfUnmodifiedSince(lastModified)) {
 			if (this.notModified) {
 				getResponse().setStatusCode(HttpStatus.PRECONDITION_FAILED);
+			}
+			if (SAFE_METHODS.contains(getRequest().getMethod())) {
+				if (StringUtils.hasLength(etag) && getResponseHeaders().getETag() == null) {
+					getResponseHeaders().setETag(padEtagIfNecessary(etag));
+				}
+				getResponseHeaders().setLastModified(lastModified.toEpochMilli());
 			}
 			return this.notModified;
 		}

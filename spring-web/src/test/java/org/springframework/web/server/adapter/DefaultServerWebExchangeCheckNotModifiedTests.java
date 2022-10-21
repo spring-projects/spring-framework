@@ -307,4 +307,17 @@ class DefaultServerWebExchangeCheckNotModifiedTests {
 		assertThat(exchange.getResponse().getHeaders().getLastModified()).isEqualTo(-1);
 	}
 
+	@Test
+	void checkNotModifiedTimestampConditionalGet() throws Exception {
+		String eTag = "\"Test\"";
+		Instant oneMinuteAgo = currentDate.minusSeconds(60);
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").ifUnmodifiedSince(currentDate.toEpochMilli()).build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+
+		assertThat(exchange.checkNotModified(eTag, oneMinuteAgo)).isFalse();
+		assertThat(exchange.getResponse().getStatusCode()).isNull();
+		assertThat(exchange.getResponse().getHeaders().getLastModified()).isEqualTo(oneMinuteAgo.toEpochMilli());
+		assertThat(exchange.getResponse().getHeaders().getETag()).isEqualTo(eTag);
+	}
+
 }
