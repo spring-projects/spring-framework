@@ -369,7 +369,7 @@ public final class HttpRequestValues {
 		}
 
 		/**
-		 * Builder the {@link HttpRequestValues} instance.
+		 * Build the {@link HttpRequestValues} instance.
 		 */
 		public HttpRequestValues build() {
 
