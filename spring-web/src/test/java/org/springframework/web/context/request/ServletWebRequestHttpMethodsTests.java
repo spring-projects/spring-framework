@@ -127,6 +127,16 @@ class ServletWebRequestHttpMethodsTests {
 	}
 
 	@SafeHttpMethodsTest
+	void ifUnModifiedSinceShouldSetHeadersWithSafeMethod(String method) {
+		setUpRequest(method);
+		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
+		servletRequest.addHeader(HttpHeaders.IF_UNMODIFIED_SINCE, now.toEpochMilli());
+		assertThat(request.checkNotModified(oneMinuteAgo.toEpochMilli())).isFalse();
+		assertOkWithLastModified(oneMinuteAgo);
+	}
+
+	@SafeHttpMethodsTest
 	void ifNoneMatchShouldMatchIdenticalETagValue(String method) {
 		setUpRequest(method);
 		String etag = "\"spring\"";
