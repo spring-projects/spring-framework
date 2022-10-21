@@ -367,7 +367,7 @@ public interface WebClient {
 		Builder clone();
 
 		/**
-		 * Builder the {@link WebClient} instance.
+		 * Build the {@link WebClient} instance.
 		 */
 		WebClient build();
 	}
