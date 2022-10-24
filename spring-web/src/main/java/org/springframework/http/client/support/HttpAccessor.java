@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.http.client.support;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -49,7 +48,7 @@ import org.springframework.util.Assert;
  * @see ClientHttpRequestFactory
  * @see org.springframework.web.client.RestTemplate
  */
-public abstract class HttpAccessor implements Closeable {
+public abstract class HttpAccessor {
 
 	/** Logger available to subclasses. */
 	protected final Log logger = HttpLogging.forLogName(getClass());
@@ -67,7 +66,7 @@ public abstract class HttpAccessor implements Closeable {
 	 * Configure the Apache HttpComponents or OkHttp request factory to enable PATCH.</b>
 	 * @see #createRequest(URI, HttpMethod)
 	 * @see SimpleClientHttpRequestFactory
-	 * @see org.springframework.http.client.HttpComponentsClientHttpRequestFactory
+	 * @see org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory
 	 * @see org.springframework.http.client.OkHttp3ClientHttpRequestFactory
 	 */
 	public void setRequestFactory(ClientHttpRequestFactory requestFactory) {
@@ -132,17 +131,6 @@ public abstract class HttpAccessor implements Closeable {
 
 	private void initialize(ClientHttpRequest request) {
 		this.clientHttpRequestInitializers.forEach(initializer -> initializer.initialize(request));
-	}
-
-	/**
-	 * Close the underlying {@link ClientHttpRequestFactory}.
-	 * <p>This should not be called if the factory has been {@link #setRequestFactory(ClientHttpRequestFactory) set}
-	 * and is externally managed.
-	 * @throws IOException if the request factory cannot be closed properly
-	 */
-	@Override
-	public void close() throws IOException {
-		this.requestFactory.close();
 	}
 
 }

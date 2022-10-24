@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -46,15 +47,17 @@ abstract class AbstractHttpRequestFactoryTests extends AbstractMockWebServerTest
 
 	@BeforeEach
 	final void createFactory() throws Exception {
-		this.factory = createRequestFactory();
-		if (this.factory instanceof InitializingBean) {
-			((InitializingBean) this.factory).afterPropertiesSet();
+		factory = createRequestFactory();
+		if (factory instanceof InitializingBean) {
+			((InitializingBean) factory).afterPropertiesSet();
 		}
 	}
 
 	@AfterEach
 	final void destroyFactory() throws Exception {
-		this.factory.close();
+		if (factory instanceof DisposableBean) {
+			((DisposableBean) factory).destroy();
+		}
 	}
 
 
