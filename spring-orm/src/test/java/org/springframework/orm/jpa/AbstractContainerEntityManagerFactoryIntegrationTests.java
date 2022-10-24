@@ -166,14 +166,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 
 	@Test
 	public void testInstantiateAndSaveWithSharedEmProxy() {
-		assertThat(countRowsInTable("person")).as("Should be no people from previous transactions").isEqualTo(0);
-		Person p = new Person();
-		p.setFirstName("Tony");
-		p.setLastName("Blair");
-		sharedEntityManager.persist(p);
-
-		sharedEntityManager.flush();
-		assertThat(countRowsInTable("person")).as("1 row must have been inserted").isEqualTo(1);
+		testInstantiateAndSave(sharedEntityManager);
 	}
 
 	protected void testInstantiateAndSave(EntityManager em) {

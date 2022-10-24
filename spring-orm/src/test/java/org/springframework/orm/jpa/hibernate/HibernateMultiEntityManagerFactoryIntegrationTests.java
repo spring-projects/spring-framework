@@ -34,6 +34,7 @@ import org.springframework.transaction.TransactionStatus;
  * Hibernate-specific JPA tests with multiple EntityManagerFactory instances.
  *
  * @author Juergen Hoeller
+ * @author Réda Housni Alaoui
  */
 public class HibernateMultiEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
 
