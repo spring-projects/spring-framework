@@ -29,6 +29,9 @@ import org.springframework.orm.jpa.domain.Person;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+
 /**
  * Hibernate-specific JPA tests with multiple EntityManagerFactory instances.
  *
