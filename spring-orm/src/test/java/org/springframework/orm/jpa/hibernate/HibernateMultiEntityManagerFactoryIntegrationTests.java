@@ -70,7 +70,8 @@ public class HibernateMultiEntityManagerFactoryIntegrationTests extends Abstract
 		try {
 			assertThatIllegalArgumentException().isThrownBy(() ->
 					em.createQuery("select tb from TestBean"));
-		} finally {
+		}
+		finally {
 			em.close();
 		}
 	}
