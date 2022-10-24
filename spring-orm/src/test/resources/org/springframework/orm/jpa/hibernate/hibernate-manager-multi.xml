@@ -27,4 +27,8 @@
 		<property name="entityManagerFactory" ref="entityManagerFactory"/>
 	</bean>
 
+	<bean id="transactionManager2" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory2"/>
+	</bean>
+
 </beans>
