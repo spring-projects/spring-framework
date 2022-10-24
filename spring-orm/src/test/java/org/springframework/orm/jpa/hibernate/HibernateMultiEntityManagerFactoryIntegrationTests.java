@@ -16,8 +16,6 @@
 
 package org.springframework.orm.jpa.hibernate;
 
-import static org.assertj.core.api.Assertions.*;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.Test;
@@ -31,6 +29,7 @@ import org.springframework.transaction.TransactionStatus;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Hibernate-specific JPA tests with multiple EntityManagerFactory instances.
