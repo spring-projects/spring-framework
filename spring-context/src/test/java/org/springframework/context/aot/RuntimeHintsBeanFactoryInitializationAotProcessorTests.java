@@ -46,6 +46,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * Tests for {@link RuntimeHintsBeanFactoryInitializationAotProcessor}.
  *
  * @author Brian Clozel
+ * @author Sebastien Deleuze
  */
 class RuntimeHintsBeanFactoryInitializationAotProcessorTests {
 
@@ -66,6 +67,15 @@ class RuntimeHintsBeanFactoryInitializationAotProcessorTests {
 		this.generator.processAheadOfTime(applicationContext,
 				this.generationContext);
 		assertThatSampleRegistrarContributed();
+	}
+
+	@Test
+	void shouldProcessRegistrarsOnInheritedConfiguration() {
+		GenericApplicationContext applicationContext = createApplicationContext(
+				ExtendedConfigurationWithHints.class);
+		this.generator.processAheadOfTime(applicationContext,
+				this.generationContext);
+		assertThatInheritedSampleRegistrarContributed();
 	}
 
 	@Test
@@ -121,6 +131,14 @@ class RuntimeHintsBeanFactoryInitializationAotProcessorTests {
 				.anyMatch(bundleHint -> "sample".equals(bundleHint.getBaseName()));
 	}
 
+	private void assertThatInheritedSampleRegistrarContributed() {
+		assertThatSampleRegistrarContributed();
+		Stream<ResourceBundleHint> bundleHints = this.generationContext.getRuntimeHints()
+				.resources().resourceBundleHints();
+		assertThat(bundleHints)
+				.anyMatch(bundleHint -> "extendedSample".equals(bundleHint.getBaseName()));
+	}
+
 	private GenericApplicationContext createApplicationContext(
 			Class<?>... configClasses) {
 		GenericApplicationContext applicationContext = new GenericApplicationContext();
@@ -138,6 +156,10 @@ class RuntimeHintsBeanFactoryInitializationAotProcessorTests {
 	static class ConfigurationWithHints {
 	}
 
+	@Configuration(proxyBeanMethods = false)
+	@ImportRuntimeHints(ExtendedSampleRuntimeHintsRegistrar.class)
+	static class ExtendedConfigurationWithHints extends ConfigurationWithHints {
+	}
 
 	@Configuration(proxyBeanMethods = false)
 	static class ConfigurationWithBeanDeclaringHints {
@@ -155,6 +177,15 @@ class RuntimeHintsBeanFactoryInitializationAotProcessorTests {
 		@Override
 		public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
 			hints.resources().registerResourceBundle("sample");
+		}
+
+	}
+
+	public static class ExtendedSampleRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
+
+		@Override
+		public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+			hints.resources().registerResourceBundle("extendedSample");
 		}
 
 	}
