@@ -57,6 +57,7 @@ dependencies {
 	optional("org.jetbrains.kotlinx:kotlinx-serialization-cbor")
 	optional("org.jetbrains.kotlinx:kotlinx-serialization-json")
 	optional("org.jetbrains.kotlinx:kotlinx-serialization-protobuf")
+	testImplementation(project(":spring-core-test"))
 	testImplementation(testFixtures(project(":spring-beans")))
 	testImplementation(testFixtures(project(":spring-context")))
 	testImplementation(testFixtures(project(":spring-core")))
