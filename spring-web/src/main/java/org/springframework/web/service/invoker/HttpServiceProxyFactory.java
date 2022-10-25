@@ -131,8 +131,9 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 	@Deprecated(since = "6.0.0-RC2", forRemoval = true)
 	@Override
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
-		Assert.state(this.beanStyleFactory != null, "HttpServiceProxyFactory was created through the builder");
-		this.beanStyleFactory.setEmbeddedValueResolver(resolver);
+		if (this.beanStyleFactory != null) {
+			this.beanStyleFactory.setEmbeddedValueResolver(resolver);
+		}
 	}
 
 	/**
