@@ -148,28 +148,28 @@ public abstract class AbstractDelegatingSmartContextLoader implements AotContext
 			boolean xmlLoaderDetectedDefaults = configAttributes.hasLocations();
 
 			if (xmlLoaderDetectedDefaults) {
-				if (logger.isInfoEnabled()) {
-					logger.info(String.format("%s detected default locations for context configuration %s.",
+				if (logger.isTraceEnabled()) {
+					logger.trace(String.format("%s detected default locations for context configuration %s",
 							name(getXmlLoader()), configAttributes));
 				}
 			}
 
 			Assert.state(!configAttributes.hasClasses(), () -> String.format(
-					"%s should NOT have detected default configuration classes for context configuration %s.",
+					"%s should NOT have detected default configuration classes for context configuration %s",
 					name(getXmlLoader()), configAttributes));
 
 			// Now let the annotation config loader process the configuration.
 			delegateProcessing(getAnnotationConfigLoader(), configAttributes);
 
 			if (configAttributes.hasClasses()) {
-				if (logger.isInfoEnabled()) {
-					logger.info(String.format("%s detected default configuration classes for context configuration %s.",
+				if (logger.isTraceEnabled()) {
+					logger.trace(String.format("%s detected default configuration classes for context configuration %s",
 							name(getAnnotationConfigLoader()), configAttributes));
 				}
 			}
 
 			Assert.state(xmlLoaderDetectedDefaults || !configAttributes.hasLocations(), () -> String.format(
-					"%s should NOT have detected default locations for context configuration %s.",
+					"%s should NOT have detected default locations for context configuration %s",
 					name(getAnnotationConfigLoader()), configAttributes));
 
 			if (configAttributes.hasLocations() && configAttributes.hasClasses()) {
@@ -206,8 +206,8 @@ public abstract class AbstractDelegatingSmartContextLoader implements AotContext
 	@Override
 	public final ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
 		SmartContextLoader loader = getContextLoader(mergedConfig);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Delegating to %s to load context for %s".formatted(name(loader), mergedConfig));
+		if (logger.isTraceEnabled()) {
+			logger.trace("Delegating to %s to load context for %s".formatted(name(loader), mergedConfig));
 		}
 		return loader.loadContext(mergedConfig);
 	}
@@ -229,8 +229,8 @@ public abstract class AbstractDelegatingSmartContextLoader implements AotContext
 	@Override
 	public final ApplicationContext loadContextForAotProcessing(MergedContextConfiguration mergedConfig) throws Exception {
 		AotContextLoader loader = getAotContextLoader(mergedConfig);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Delegating to %s to load context for AOT processing for %s"
+		if (logger.isTraceEnabled()) {
+			logger.trace("Delegating to %s to load context for AOT processing for %s"
 					.formatted(name(loader), mergedConfig));
 		}
 		return loader.loadContextForAotProcessing(mergedConfig);
@@ -256,8 +256,8 @@ public abstract class AbstractDelegatingSmartContextLoader implements AotContext
 			ApplicationContextInitializer<ConfigurableApplicationContext> initializer) throws Exception {
 
 		AotContextLoader loader = getAotContextLoader(mergedConfig);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Delegating to %s to load context for AOT execution for %s"
+		if (logger.isTraceEnabled()) {
+			logger.trace("Delegating to %s to load context for AOT execution for %s"
 					.formatted(name(loader), mergedConfig));
 		}
 		return loader.loadContextForAotRuntime(mergedConfig, initializer);
@@ -310,8 +310,9 @@ public abstract class AbstractDelegatingSmartContextLoader implements AotContext
 
 
 	private static void delegateProcessing(SmartContextLoader loader, ContextConfigurationAttributes configAttributes) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Delegating to %s to process context configuration %s.".formatted(name(loader), configAttributes));
+		if (logger.isTraceEnabled()) {
+			logger.trace("Delegating to %s to process context configuration %s"
+					.formatted(name(loader), configAttributes));
 		}
 		loader.processContextConfiguration(configAttributes);
 	}

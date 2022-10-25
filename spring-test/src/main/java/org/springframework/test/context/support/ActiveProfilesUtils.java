@@ -76,10 +76,9 @@ abstract class ActiveProfilesUtils {
 		AnnotationDescriptor<ActiveProfiles> descriptor = findAnnotationDescriptor(testClass, ActiveProfiles.class);
 		List<String[]> profileArrays = new ArrayList<>();
 
-		if (descriptor == null && logger.isDebugEnabled()) {
-			logger.debug(String.format(
-					"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
-					ActiveProfiles.class.getName(), testClass.getName()));
+		if (descriptor == null && logger.isTraceEnabled()) {
+			logger.trace("Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]"
+					.formatted(ActiveProfiles.class.getName(), testClass.getName()));
 		}
 
 		while (descriptor != null) {
@@ -87,8 +86,8 @@ abstract class ActiveProfilesUtils {
 			ActiveProfiles annotation = descriptor.getAnnotation();
 
 			if (logger.isTraceEnabled()) {
-				logger.trace(String.format("Retrieved @ActiveProfiles [%s] for declaring class [%s]",
-						annotation, descriptor.getDeclaringClass().getName()));
+				logger.trace("Retrieved @ActiveProfiles [%s] for declaring class [%s]"
+						.formatted(annotation, descriptor.getDeclaringClass().getName()));
 			}
 
 			ActiveProfilesResolver resolver;
@@ -101,8 +100,8 @@ abstract class ActiveProfilesUtils {
 					resolver = BeanUtils.instantiateClass(resolverClass, ActiveProfilesResolver.class);
 				}
 				catch (Exception ex) {
-					String msg = String.format("Could not instantiate ActiveProfilesResolver of type [%s] " +
-							"for test class [%s]", resolverClass.getName(), rootDeclaringClass.getName());
+					String msg = "Could not instantiate ActiveProfilesResolver of type [%s] for test class [%s]"
+							.formatted(resolverClass.getName(), rootDeclaringClass.getName());
 					logger.error(msg);
 					throw new IllegalStateException(msg, ex);
 				}

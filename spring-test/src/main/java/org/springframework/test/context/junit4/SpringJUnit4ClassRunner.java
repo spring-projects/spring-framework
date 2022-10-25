@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,8 +135,9 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 */
 	public SpringJUnit4ClassRunner(Class<?> clazz) throws InitializationError {
 		super(clazz);
-		if (logger.isDebugEnabled()) {
-			logger.debug("SpringJUnit4ClassRunner constructor called with [" + clazz + "]");
+		if (logger.isTraceEnabled()) {
+			logger.trace("SpringJUnit4ClassRunner constructor called with [%s]"
+					.formatted((clazz != null ? clazz.getName() : null)));
 		}
 		ensureSpringRulesAreNotPresent(clazz);
 		this.testContextManager = createTestContextManager(clazz);

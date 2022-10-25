@@ -23,7 +23,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.log.LogMessage;
 import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.ApplicationContextFailureProcessor;
@@ -108,8 +107,8 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 					else {
 						context = loadContextInternal(mergedContextConfiguration);
 					}
-					if (logger.isDebugEnabled()) {
-						logger.debug("Storing ApplicationContext [%s] in cache under key %s".formatted(
+					if (logger.isTraceEnabled()) {
+						logger.trace("Storing ApplicationContext [%s] in cache under key %s".formatted(
 								System.identityHashCode(context), mergedContextConfiguration));
 					}
 					this.contextCache.put(mergedContextConfiguration, context);
@@ -135,8 +134,8 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 				}
 			}
 			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Retrieved ApplicationContext [%s] from cache with key %s".formatted(
+				if (logger.isTraceEnabled()) {
+					logger.trace("Retrieved ApplicationContext [%s] from cache with key %s".formatted(
 							System.identityHashCode(context), mergedContextConfiguration));
 				}
 			}
@@ -198,7 +197,15 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 				() -> "Failed to load AOT ApplicationContextInitializer for test class [%s]"
 						.formatted(testClass.getName()));
 		ContextLoader contextLoader = getContextLoader(aotMergedConfig);
-		logger.info(LogMessage.format("Loading ApplicationContext in AOT mode for %s", aotMergedConfig.getOriginal()));
+
+		if (logger.isTraceEnabled()) {
+			logger.trace("Loading ApplicationContext for AOT runtime for " + aotMergedConfig.getOriginal());
+		}
+		else if (logger.isDebugEnabled()) {
+			logger.debug("Loading ApplicationContext for AOT runtime for test class " +
+					aotMergedConfig.getTestClass().getName());
+		}
+
 		if (!((contextLoader instanceof AotContextLoader aotContextLoader) &&
 				(aotContextLoader.loadContextForAotRuntime(aotMergedConfig.getOriginal(), contextInitializer)
 						instanceof GenericApplicationContext gac))) {

@@ -19,13 +19,14 @@ package org.springframework.test.context.web;
 import java.util.Set;
 
 import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.core.style.DefaultToStringStyler;
+import org.springframework.core.style.SimpleValueStyler;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -197,17 +198,17 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 */
 	@Override
 	public String toString() {
-		return new ToStringCreator(this)
+		return new ToStringCreator(this, new DefaultToStringStyler(new SimpleValueStyler()))
 				.append("testClass", getTestClass())
-				.append("locations", ObjectUtils.nullSafeToString(getLocations()))
-				.append("classes", ObjectUtils.nullSafeToString(getClasses()))
-				.append("contextInitializerClasses", ObjectUtils.nullSafeToString(getContextInitializerClasses()))
-				.append("activeProfiles", ObjectUtils.nullSafeToString(getActiveProfiles()))
-				.append("propertySourceLocations", ObjectUtils.nullSafeToString(getPropertySourceLocations()))
-				.append("propertySourceProperties", ObjectUtils.nullSafeToString(getPropertySourceProperties()))
+				.append("locations", getLocations())
+				.append("classes", getClasses())
+				.append("contextInitializerClasses", getContextInitializerClasses())
+				.append("activeProfiles", getActiveProfiles())
+				.append("propertySourceLocations", getPropertySourceLocations())
+				.append("propertySourceProperties", getPropertySourceProperties())
 				.append("contextCustomizers", getContextCustomizers())
 				.append("resourceBasePath", getResourceBasePath())
-				.append("contextLoader", nullSafeClassName(getContextLoader()))
+				.append("contextLoader", (getContextLoader() != null ? getContextLoader().getClass() : null))
 				.append("parent", getParent())
 				.toString();
 	}

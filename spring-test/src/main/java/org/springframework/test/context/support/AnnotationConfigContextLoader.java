@@ -17,6 +17,7 @@
 package org.springframework.test.context.support;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -183,9 +184,13 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	protected void loadBeanDefinitions(GenericApplicationContext context, MergedContextConfiguration mergedConfig) {
 		Class<?>[] componentClasses = mergedConfig.getClasses();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Registering component classes: " + Arrays.toString(componentClasses));
+			logger.debug("Registering component classes: " + classNames(componentClasses));
 		}
 		new AnnotatedBeanDefinitionReader(context).register(componentClasses);
+	}
+
+	private static List<String> classNames(Class<?>... classes) {
+		return Arrays.stream(classes).map(Class::getName).toList();
 	}
 
 	/**

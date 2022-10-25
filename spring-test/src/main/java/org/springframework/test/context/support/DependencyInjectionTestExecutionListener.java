@@ -84,8 +84,11 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	 */
 	@Override
 	public void prepareTestInstance(TestContext testContext) throws Exception {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Performing dependency injection for test context " + testContext);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Performing dependency injection for test context " + testContext);
+		}
+		else if (logger.isDebugEnabled()) {
+			logger.debug("Performing dependency injection for test class " + testContext.getTestClass().getName());
 		}
 		if (runningInAotMode(testContext.getTestClass())) {
 			injectDependenciesInAotMode(testContext);
@@ -105,8 +108,11 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	@Override
 	public void beforeTestMethod(TestContext testContext) throws Exception {
 		if (Boolean.TRUE.equals(testContext.getAttribute(REINJECT_DEPENDENCIES_ATTRIBUTE))) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Reinjecting dependencies for test context [" + testContext + "].");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Reinjecting dependencies for test context " + testContext);
+			}
+			else if (logger.isDebugEnabled()) {
+				logger.debug("Reinjecting dependencies for test class " + testContext.getTestClass().getName());
 			}
 			if (runningInAotMode(testContext.getTestClass())) {
 				injectDependenciesInAotMode(testContext);

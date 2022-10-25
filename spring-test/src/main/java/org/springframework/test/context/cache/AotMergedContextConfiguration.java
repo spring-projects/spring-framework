@@ -19,6 +19,8 @@ package org.springframework.test.context.cache;
 import java.util.Collections;
 
 import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.core.style.DefaultToStringStyler;
+import org.springframework.core.style.SimpleValueStyler;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
@@ -82,9 +84,9 @@ final class AotMergedContextConfiguration extends MergedContextConfiguration {
 
 	@Override
 	public String toString() {
-		return new ToStringCreator(this)
-				.append("testClass", getTestClass().getName())
-				.append("contextInitializerClass", this.contextInitializerClass.getName())
+		return new ToStringCreator(this, new DefaultToStringStyler(new SimpleValueStyler()))
+				.append("testClass", getTestClass())
+				.append("contextInitializerClass", this.contextInitializerClass)
 				.append("original", this.original)
 				.toString();
 	}

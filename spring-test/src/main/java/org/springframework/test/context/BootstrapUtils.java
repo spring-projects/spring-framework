@@ -82,7 +82,7 @@ public abstract class BootstrapUtils {
 					ClassUtils.forName(className, BootstrapUtils.class.getClassLoader());
 			Constructor<? extends BootstrapContext> constructor =
 					clazz.getConstructor(Class.class, CacheAwareContextLoaderDelegate.class);
-			logger.debug(LogMessage.format("Instantiating BootstrapContext using constructor [%s]", constructor));
+			logger.trace(LogMessage.format("Instantiating BootstrapContext using constructor [%s]", constructor));
 			return BeanUtils.instantiateClass(constructor, testClass, cacheAwareContextLoaderDelegate);
 		}
 		catch (Throwable ex) {
@@ -97,7 +97,7 @@ public abstract class BootstrapUtils {
 		try {
 			clazz = (Class<? extends CacheAwareContextLoaderDelegate>)
 					ClassUtils.forName(className, BootstrapUtils.class.getClassLoader());
-			logger.debug(LogMessage.format("Instantiating CacheAwareContextLoaderDelegate from class [%s]", className));
+			logger.trace(LogMessage.format("Instantiating CacheAwareContextLoaderDelegate from class [%s]", className));
 			return BeanUtils.instantiateClass(clazz, CacheAwareContextLoaderDelegate.class);
 		}
 		catch (Throwable ex) {
@@ -151,7 +151,7 @@ public abstract class BootstrapUtils {
 			if (clazz == null) {
 				clazz = resolveDefaultTestContextBootstrapper(testClass);
 			}
-			logger.debug(LogMessage.format("Instantiating TestContextBootstrapper for test class [%s] from class [%s]",
+			logger.trace(LogMessage.format("Instantiating TestContextBootstrapper for test class [%s] from class [%s]",
 					testClass.getName(), clazz.getName()));
 			TestContextBootstrapper testContextBootstrapper =
 					BeanUtils.instantiateClass(clazz, TestContextBootstrapper.class);

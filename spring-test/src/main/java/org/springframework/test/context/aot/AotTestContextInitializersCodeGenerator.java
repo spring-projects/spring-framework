@@ -123,7 +123,7 @@ class AotTestContextInitializersCodeGenerator {
 		code.addStatement("$T map = new $T<>()", CONTEXT_INITIALIZER_SUPPLIER_MAP, HashMap.class);
 		this.initializerClassMappings.forEach((className, testClasses) -> {
 			List<String> testClassNames = testClasses.stream().map(Class::getName).toList();
-			logger.debug(LogMessage.format(
+			logger.trace(LogMessage.format(
 					"Generating mapping from AOT context initializer supplier [%s] to test classes %s",
 					className.reflectionName(), testClassNames));
 			testClassNames.forEach(testClassName ->
@@ -146,7 +146,7 @@ class AotTestContextInitializersCodeGenerator {
 		code.addStatement("$T map = new $T<>()", CONTEXT_INITIALIZER_CLASS_MAP, HashMap.class);
 		this.initializerClassMappings.forEach((className, testClasses) -> {
 			List<String> testClassNames = testClasses.stream().map(Class::getName).toList();
-			logger.debug(LogMessage.format(
+			logger.trace(LogMessage.format(
 					"Generating mapping from AOT context initializer class [%s] to test classes %s",
 					className.reflectionName(), testClassNames));
 			testClassNames.forEach(testClassName ->

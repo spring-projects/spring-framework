@@ -26,6 +26,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.log.LogMessage;
+import org.springframework.core.style.DefaultToStringStyler;
+import org.springframework.core.style.SimpleValueStyler;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestPropertySource;
@@ -159,8 +161,8 @@ class TestPropertySourceAttributes {
 			throw new IllegalStateException(msg);
 		}
 		String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + SLASH + resourcePath;
-		if (logger.isInfoEnabled()) {
-			logger.info(String.format("Detected default properties file \"%s\" for test class [%s]",
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("Detected default properties file \"%s\" for test class [%s]",
 					prefixedResourcePath, testClass.getName()));
 		}
 		return prefixedResourcePath;
@@ -262,8 +264,8 @@ class TestPropertySourceAttributes {
 	 */
 	@Override
 	public String toString() {
-		return new ToStringCreator(this)
-				.append("declaringClass", this.declaringClass.getName())
+		return new ToStringCreator(this, new DefaultToStringStyler(new SimpleValueStyler()))
+				.append("declaringClass", this.declaringClass)
 				.append("locations", this.locations)
 				.append("inheritLocations", this.inheritLocations)
 				.append("properties", this.properties)

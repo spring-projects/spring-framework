@@ -247,9 +247,13 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		}
 
 		MergedSqlConfig mergedSqlConfig = new MergedSqlConfig(sql.config(), testContext.getTestClass());
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Processing %s for execution phase [%s] and test context %s.",
-					mergedSqlConfig, executionPhase, testContext));
+		if (logger.isTraceEnabled()) {
+			logger.trace("Processing %s for execution phase [%s] and test context %s"
+					.formatted(mergedSqlConfig, executionPhase, testContext));
+		}
+		else if (logger.isDebugEnabled()) {
+			logger.debug("Processing merged @SqlConfig attributes for execution phase [%s] and test class [%s]"
+					.formatted(executionPhase, testContext.getTestClass().getName()));
 		}
 
 		String[] scripts = getScripts(sql, testContext.getTestClass(), testContext.getTestMethod(), classLevel);
@@ -265,7 +269,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		ResourceDatabasePopulator populator = createDatabasePopulator(mergedSqlConfig);
 		populator.setScripts(scriptResources.toArray(new Resource[0]));
 		if (logger.isDebugEnabled()) {
-			logger.debug("Executing SQL scripts: " + ObjectUtils.nullSafeToString(scriptResources));
+			logger.debug("Executing SQL scripts: " + scriptResources);
 		}
 
 		String dsName = mergedSqlConfig.getDataSource();
@@ -372,9 +376,9 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		ClassPathResource classPathResource = new ClassPathResource(resourcePath);
 
 		if (classPathResource.exists()) {
-			if (logger.isInfoEnabled()) {
-				logger.info(String.format("Detected default SQL script \"%s\" for test %s [%s]",
-						prefixedResourcePath, elementType, elementName));
+			if (logger.isDebugEnabled()) {
+				logger.debug("Detected default SQL script \"%s\" for test %s [%s]"
+						.formatted(prefixedResourcePath, elementType, elementName));
 			}
 			return prefixedResourcePath;
 		}

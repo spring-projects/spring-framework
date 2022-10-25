@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,8 +59,8 @@ public class DefaultActiveProfilesResolver implements ActiveProfilesResolver {
 		AnnotationDescriptor<ActiveProfiles> descriptor = findAnnotationDescriptor(testClass, ActiveProfiles.class);
 
 		if (descriptor == null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug(String.format(
+			if (logger.isTraceEnabled()) {
+				logger.trace(String.format(
 					"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
 					ActiveProfiles.class.getName(), testClass.getName()));
 			}

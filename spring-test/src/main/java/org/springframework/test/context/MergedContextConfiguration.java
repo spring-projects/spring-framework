@@ -24,6 +24,8 @@ import java.util.Set;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.core.style.DefaultToStringStyler;
+import org.springframework.core.style.SimpleValueStyler;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -495,16 +497,16 @@ public class MergedContextConfiguration implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return new ToStringCreator(this)
+		return new ToStringCreator(this, new DefaultToStringStyler(new SimpleValueStyler()))
 				.append("testClass", this.testClass)
-				.append("locations", ObjectUtils.nullSafeToString(this.locations))
-				.append("classes", ObjectUtils.nullSafeToString(this.classes))
-				.append("contextInitializerClasses", ObjectUtils.nullSafeToString(this.contextInitializerClasses))
-				.append("activeProfiles", ObjectUtils.nullSafeToString(this.activeProfiles))
-				.append("propertySourceLocations", ObjectUtils.nullSafeToString(this.propertySourceLocations))
-				.append("propertySourceProperties", ObjectUtils.nullSafeToString(this.propertySourceProperties))
+				.append("locations", this.locations)
+				.append("classes", this.classes)
+				.append("contextInitializerClasses", this.contextInitializerClasses)
+				.append("activeProfiles", this.activeProfiles)
+				.append("propertySourceLocations", this.propertySourceLocations)
+				.append("propertySourceProperties", this.propertySourceProperties)
 				.append("contextCustomizers", this.contextCustomizers)
-				.append("contextLoader", nullSafeClassName(this.contextLoader))
+				.append("contextLoader", (this.contextLoader != null ? this.contextLoader.getClass() : null))
 				.append("parent", this.parent)
 				.toString();
 	}

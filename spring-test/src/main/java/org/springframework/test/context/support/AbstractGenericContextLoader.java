@@ -153,8 +153,12 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 		Assert.notNull(mergedConfig, "MergedContextConfiguration must not be null");
 		Assert.notNull(initializer, "ApplicationContextInitializer must not be null");
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Loading ApplicationContext for AOT runtime for merged context configuration " + mergedConfig);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Loading ApplicationContext for AOT runtime for " + mergedConfig);
+		}
+		else if (logger.isDebugEnabled()) {
+			logger.debug("Loading ApplicationContext for AOT runtime for test class " +
+					mergedConfig.getTestClass().getName());
 		}
 
 		validateMergedContextConfiguration(mergedConfig);
@@ -187,9 +191,13 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	private final GenericApplicationContext loadContext(
 			MergedContextConfiguration mergedConfig, boolean forAotProcessing) throws Exception {
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Loading ApplicationContext %sfor merged context configuration %s"
-					.formatted((forAotProcessing ? "for AOT processing " : ""), mergedConfig));
+		if (logger.isTraceEnabled()) {
+			logger.trace("Loading ApplicationContext %sfor %s".formatted(
+					(forAotProcessing ? "for AOT processing " : ""), mergedConfig));
+		}
+		else if (logger.isDebugEnabled()) {
+			logger.debug("Loading ApplicationContext %sfor test class %s".formatted(
+					(forAotProcessing ? "for AOT processing " : ""), mergedConfig.getTestClass().getName()));
 		}
 
 		validateMergedContextConfiguration(mergedConfig);

@@ -154,6 +154,14 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 						.formatted(mergedConfig));
 		}
 
+		if (logger.isTraceEnabled()) {
+			logger.trace("Loading WebApplicationContext for AOT runtime for " + mergedConfig);
+		}
+		else if (logger.isDebugEnabled()) {
+			logger.debug("Loading WebApplicationContext for AOT runtime for test class " +
+					mergedConfig.getTestClass().getName());
+		}
+
 		validateMergedContextConfiguration(webMergedConfig);
 
 		GenericWebApplicationContext context = createContext();
@@ -192,9 +200,13 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 						.formatted(mergedConfig));
 		}
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Loading WebApplicationContext %sfor merged context configuration %s"
-					.formatted((forAotProcessing ? "for AOT processing " : ""), mergedConfig));
+		if (logger.isTraceEnabled()) {
+			logger.trace("Loading WebApplicationContext %sfor %s".formatted(
+					(forAotProcessing ? "for AOT processing " : ""), mergedConfig));
+		}
+		else if (logger.isDebugEnabled()) {
+			logger.debug("Loading WebApplicationContext %sfor test class %s".formatted(
+					(forAotProcessing ? "for AOT processing " : ""), mergedConfig.getTestClass().getName()));
 		}
 
 		validateMergedContextConfiguration(webMergedConfig);

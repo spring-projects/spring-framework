@@ -31,6 +31,8 @@ import org.springframework.core.annotation.MergedAnnotationPredicates;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.annotation.RepeatableContainers;
+import org.springframework.core.style.DefaultToStringStyler;
+import org.springframework.core.style.SimpleValueStyler;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration;
@@ -585,9 +587,9 @@ public abstract class TestContextAnnotationUtils {
 		 */
 		@Override
 		public String toString() {
-			return new ToStringCreator(this)
-					.append("rootDeclaringClass", this.rootDeclaringClass.getName())
-					.append("declaringClass", this.declaringClass.getName())
+			return new ToStringCreator(this, new DefaultToStringStyler(new SimpleValueStyler()))
+					.append("rootDeclaringClass", this.rootDeclaringClass)
+					.append("declaringClass", this.declaringClass)
 					.append("annotation", this.annotation)
 					.toString();
 		}
