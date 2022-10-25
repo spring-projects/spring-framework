@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,7 @@
 
 package org.springframework.core.style;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,51 +41,38 @@ class DefaultValueStylerTests {
 		assertThat(styler.style("str")).isEqualTo("'str'");
 		assertThat(styler.style(String.class)).isEqualTo("String");
 		assertThat(styler.style(String.class.getMethod("toString"))).isEqualTo("toString@String");
+		assertThat(styler.style(String.class.getMethod("getBytes", Charset.class))).isEqualTo("getBytes@String");
 	}
 
 	@Test
 	void stylePlainObject() {
 		Object obj = new Object();
-
 		assertThat(styler.style(obj)).isEqualTo(String.valueOf(obj));
 	}
 
 	@Test
 	void styleMaps() {
-		Map<String, Integer> map = Collections.emptyMap();
-		assertThat(styler.style(map)).isEqualTo("map[[empty]]");
+		assertThat(styler.style(Map.of())).isEqualTo("map[[empty]]");
+		assertThat(styler.style(Map.of("key", 1))).isEqualTo("map['key' -> 1]");
 
-		map = Collections.singletonMap("key", 1);
-		assertThat(styler.style(map)).isEqualTo("map['key' -> 1]");
-
-		map = new HashMap<>();
-		map.put("key1", 1);
-		map.put("key2", 2);
+		Map<String, Integer> map = new LinkedHashMap<>() {{
+			put("key1", 1);
+			put("key2", 2);
+		}};
 		assertThat(styler.style(map)).isEqualTo("map['key1' -> 1, 'key2' -> 2]");
 	}
 
 	@Test
 	void styleMapEntries() {
-		Map<String, Integer> map = new LinkedHashMap<>();
-		map.put("key1", 1);
-		map.put("key2", 2);
-
-		Iterator<Map.Entry<String, Integer>> entries = map.entrySet().iterator();
-
-		assertThat(styler.style(entries.next())).isEqualTo("'key1' -> 1");
-		assertThat(styler.style(entries.next())).isEqualTo("'key2' -> 2");
+		Map<String, Integer> map = Map.of("key1", 1, "key2", 2);
+		assertThat(map.entrySet()).map(styler::style).containsExactlyInAnyOrder("'key1' -> 1", "'key2' -> 2");
 	}
 
 	@Test
-	void styleCollections() {
-		List<Integer> list = Collections.emptyList();
-		assertThat(styler.style(list)).isEqualTo("list[[empty]]");
-
-		list = Collections.singletonList(1);
-		assertThat(styler.style(list)).isEqualTo("list[1]");
-
-		list = Arrays.asList(1, 2);
-		assertThat(styler.style(list)).isEqualTo("list[1, 2]");
+	void styleLists() {
+		assertThat(styler.style(List.of())).isEqualTo("list[[empty]]");
+		assertThat(styler.style(List.of(1))).isEqualTo("list[1]");
+		assertThat(styler.style(List.of(1, 2))).isEqualTo("list[1, 2]");
 	}
 
 	@Test
