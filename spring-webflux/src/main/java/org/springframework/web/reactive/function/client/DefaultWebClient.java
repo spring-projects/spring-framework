@@ -75,6 +75,11 @@ class DefaultWebClient implements WebClient {
 
 	private static final DefaultClientRequestObservationConvention DEFAULT_OBSERVATION_CONVENTION = new DefaultClientRequestObservationConvention();
 
+	/**
+	 * Aligned with ObservationThreadLocalAccessor#KEY from micrometer-core.
+	 */
+	private static final String MICROMETER_OBSERVATION = "micrometer.observation";
+
 	private final ExchangeFunction exchangeFunction;
 
 	private final UriBuilderFactory uriBuilderFactory;
@@ -450,14 +455,19 @@ class DefaultWebClient implements WebClient {
 		@SuppressWarnings("deprecation")
 		public Mono<ClientResponse> exchange() {
 			ClientRequestObservationContext observationContext = new ClientRequestObservationContext();
-			ClientRequest request = (this.inserter != null ?
-					initRequestBuilder().body(this.inserter).build() :
-					initRequestBuilder().build());
-			return Mono.defer(() -> {
+			ClientRequest.Builder requestBuilder = this.inserter != null ?
+					initRequestBuilder().body(this.inserter) :
+					initRequestBuilder();
+			return Mono.deferContextual(contextView -> {
 				Observation observation = ClientHttpObservationDocumentation.HTTP_REQUEST.observation(observationConvention,
-						DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, observationRegistry).start();
-				observationContext.setCarrier(request);
+						DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, observationRegistry);
+				observationContext.setCarrier(requestBuilder);
+				observation
+						.parentObservation(contextView.getOrDefault(MICROMETER_OBSERVATION, null))
+						.start();
+				ClientRequest request = requestBuilder.build();
 				observationContext.setUriTemplate((String) request.attribute(URI_TEMPLATE_ATTRIBUTE).orElse(null));
+				observationContext.setBuiltRequest(request);
 				Mono<ClientResponse> responseMono = exchangeFunction.exchange(request)
 						.checkpoint("Request to " + this.httpMethod.name() + " " + this.uri + " [DefaultWebClient]")
 						.switchIfEmpty(NO_HTTP_CLIENT_RESPONSE_ERROR);

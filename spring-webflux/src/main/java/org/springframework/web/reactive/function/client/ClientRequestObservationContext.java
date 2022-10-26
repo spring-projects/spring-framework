@@ -27,21 +27,24 @@ import org.springframework.lang.Nullable;
  * @author Brian Clozel
  * @since 6.0
  */
-public class ClientRequestObservationContext extends RequestReplySenderContext<ClientRequest, ClientResponse> {
+public class ClientRequestObservationContext extends RequestReplySenderContext<ClientRequest.Builder, ClientResponse> {
 
 	@Nullable
 	private String uriTemplate;
 
 	private boolean aborted;
 
+	@Nullable
+	private ClientRequest builtRequest;
+
 
 	public ClientRequestObservationContext() {
 		super(ClientRequestObservationContext::setRequestHeader);
 	}
 
-	private static void setRequestHeader(@Nullable ClientRequest request, String name, String value) {
+	private static void setRequestHeader(@Nullable ClientRequest.Builder request, String name, String value) {
 		if (request != null) {
-			request.headers().set(name, value);
+			request.header(name, value);
 		}
 	}
 
@@ -74,5 +77,19 @@ public class ClientRequestObservationContext extends RequestReplySenderContext<C
 	 */
 	void setAborted(boolean aborted) {
 		this.aborted = aborted;
+	}
+
+	/**
+	 * Return the built request.
+	 */
+	public ClientRequest getBuiltRequest() {
+		return this.builtRequest;
+	}
+
+	/**
+	 * Set the built request.
+	 */
+	public void setBuiltRequest(ClientRequest builtRequest) {
+		this.builtRequest = builtRequest;
 	}
 }

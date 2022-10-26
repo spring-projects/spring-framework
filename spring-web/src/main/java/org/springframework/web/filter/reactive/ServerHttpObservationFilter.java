@@ -59,6 +59,11 @@ public class ServerHttpObservationFilter implements WebFilter {
 	private static final Set<String> DISCONNECTED_CLIENT_EXCEPTIONS = Set.of("AbortedException",
 			"ClientAbortException", "EOFException", "EofException");
 
+	/**
+	 * Aligned with ObservationThreadLocalAccessor#KEY from micrometer-core.
+	 */
+	private static final String MICROMETER_OBSERVATION_KEY = "micrometer.observation";
+
 	private final ObservationRegistry observationRegistry;
 
 	private final ServerRequestObservationConvention observationConvention;
@@ -117,7 +122,8 @@ public class ServerHttpObservationFilter implements WebFilter {
 				.doOnCancel(() -> {
 					observationContext.setConnectionAborted(true);
 					observation.stop();
-				});
+				})
+				.contextWrite(context -> context.put(MICROMETER_OBSERVATION_KEY, observation));
 	}
 
 	private void onTerminalSignal(Observation observation, ServerWebExchange exchange) {
