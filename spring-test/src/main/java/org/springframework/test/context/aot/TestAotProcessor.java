@@ -79,16 +79,27 @@ public abstract class TestAotProcessor extends AbstractAotProcessor<Void> {
 	 * output directories. In addition, run-time hints are registered for the
 	 * application contexts used by the test classes as well as test infrastructure
 	 * components used by the tests.
+	 * @see #scanClasspathRoots()
+	 * @see #createFileSystemGeneratedFiles()
+	 * @see TestContextAotGenerator#processAheadOfTime(Stream)
+	 * @see #writeHints(org.springframework.aot.hint.RuntimeHints)
 	 */
 	protected void performAotProcessing() {
-		TestClassScanner scanner = new TestClassScanner(getClasspathRoots());
-		Stream<Class<?>> testClasses = scanner.scan();
-
+		Stream<Class<?>> testClasses = scanClasspathRoots();
 		GeneratedFiles generatedFiles = createFileSystemGeneratedFiles();
 		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
 		generator.processAheadOfTime(testClasses);
-
 		writeHints(generator.getRuntimeHints());
+	}
+
+	/**
+	 * Scan the configured {@linkplain #getClasspathRoots() classpath roots} for
+	 * Spring integration test classes.
+	 * @return a stream of Spring integration test classes
+	 */
+	protected Stream<Class<?>> scanClasspathRoots() {
+		TestClassScanner scanner = new TestClassScanner(getClasspathRoots());
+		return scanner.scan();
 	}
 
 }
