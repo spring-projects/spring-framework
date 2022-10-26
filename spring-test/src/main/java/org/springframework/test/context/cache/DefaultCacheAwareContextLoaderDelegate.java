@@ -16,6 +16,10 @@
 
 package org.springframework.test.context.cache;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -23,6 +27,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.ApplicationContextFailureProcessor;
@@ -44,12 +49,20 @@ import org.springframework.util.Assert;
  * invoke the {@link #DefaultCacheAwareContextLoaderDelegate(ContextCache)}
  * and provide a custom {@link ContextCache} implementation.
  *
+ * <p>As of Spring Framework 6.0, this class loads {@link ApplicationContextFailureProcessor}
+ * implementations via the {@link SpringFactoriesLoader} mechanism and delegates to
+ * them in {@link #loadContext(MergedContextConfiguration)} to process context
+ * load failures.
+ *
  * @author Sam Brannen
  * @since 4.1
  */
 public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContextLoaderDelegate {
 
 	private static final Log logger = LogFactory.getLog(DefaultCacheAwareContextLoaderDelegate.class);
+
+	private static List<ApplicationContextFailureProcessor> contextFailureProcessors =
+			getApplicationContextFailureProcessors();
 
 	/**
 	 * Default static cache of Spring application contexts.
@@ -59,9 +72,6 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	private final AotTestContextInitializers aotTestContextInitializers = new AotTestContextInitializers();
 
 	private final ContextCache contextCache;
-
-	@Nullable
-	private ApplicationContextFailureProcessor contextFailureProcessor;
 
 
 	/**
@@ -117,14 +127,14 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 					Throwable cause = ex;
 					if (ex instanceof ContextLoadException cle) {
 						cause = cle.getCause();
-						if (this.contextFailureProcessor != null) {
+						for (ApplicationContextFailureProcessor contextFailureProcessor : contextFailureProcessors) {
 							try {
-								this.contextFailureProcessor.processLoadFailure(cle.getApplicationContext(), cause);
+								contextFailureProcessor.processLoadFailure(cle.getApplicationContext(), cause);
 							}
 							catch (Throwable throwable) {
 								if (logger.isDebugEnabled()) {
 									logger.debug("Ignoring exception thrown from ApplicationContextFailureProcessor [%s]: %s"
-											.formatted(this.contextFailureProcessor, throwable));
+											.formatted(contextFailureProcessor, throwable));
 								}
 							}
 						}
@@ -152,12 +162,6 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 			this.contextCache.remove(replaceIfNecessary(mergedContextConfiguration), hierarchyMode);
 		}
 	}
-
-	@Override
-	public void setContextFailureProcessor(ApplicationContextFailureProcessor contextFailureProcessor) {
-		this.contextFailureProcessor = contextFailureProcessor;
-	}
-
 
 	/**
 	 * Get the {@link ContextCache} used by this context loader delegate.
@@ -236,6 +240,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	 * unmodified.
 	 * <p>This allows for transparent {@link org.springframework.test.context.cache.ContextCache ContextCache}
 	 * support for AOT-optimized application contexts.
+	 * @since 6.0
 	 */
 	@SuppressWarnings("unchecked")
 	private MergedContextConfiguration replaceIfNecessary(MergedContextConfiguration mergedConfig) {
@@ -246,6 +251,73 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 			return new AotMergedContextConfiguration(testClass, contextInitializerClass, mergedConfig, this);
 		}
 		return mergedConfig;
+	}
+
+	/**
+	 * Get the {@link ApplicationContextFailureProcessor} implementations to use,
+	 * loaded via the {@link SpringFactoriesLoader} mechanism.
+	 * @return the context failure processors to use
+	 * @since 6.0
+	 */
+	private static List<ApplicationContextFailureProcessor> getApplicationContextFailureProcessors() {
+		SpringFactoriesLoader loader = SpringFactoriesLoader.forDefaultResourceLocation(
+				DefaultCacheAwareContextLoaderDelegate.class.getClassLoader());
+		List<ApplicationContextFailureProcessor> processors = loader.load(ApplicationContextFailureProcessor.class,
+				DefaultCacheAwareContextLoaderDelegate::handleInstantiationFailure);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Loaded default ApplicationContextFailureProcessor implementations from location [%s]: %s"
+					.formatted(SpringFactoriesLoader.FACTORIES_RESOURCE_LOCATION, classNames(processors)));
+		}
+		else if (logger.isDebugEnabled()) {
+			logger.debug("Loaded default ApplicationContextFailureProcessor implementations from location [%s]: %s"
+					.formatted(SpringFactoriesLoader.FACTORIES_RESOURCE_LOCATION, classSimpleNames(processors)));
+		}
+		return processors;
+	}
+
+	private static void handleInstantiationFailure(
+			Class<?> factoryType, String factoryImplementationName, Throwable failure) {
+
+		Throwable ex = (failure instanceof InvocationTargetException ite ?
+				ite.getTargetException() : failure);
+		if (ex instanceof ClassNotFoundException || ex instanceof NoClassDefFoundError) {
+			logSkippedComponent(factoryType, factoryImplementationName, ex);
+		}
+		else if (ex instanceof LinkageError) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("""
+						Could not load %1$s [%2$s]. Specify custom %1$s classes or make the default %1$s classes \
+						available.""".formatted(factoryType.getSimpleName(), factoryImplementationName), ex);
+			}
+		}
+		else {
+			if (ex instanceof RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			if (ex instanceof Error error) {
+				throw error;
+			}
+			throw new IllegalStateException(
+				"Failed to load %s [%s].".formatted(factoryType.getSimpleName(), factoryImplementationName), ex);
+		}
+	}
+
+	private static void logSkippedComponent(Class<?> factoryType, String factoryImplementationName, Throwable ex) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("""
+					Skipping candidate %1$s [%2$s] due to a missing dependency. \
+					Specify custom %1$s classes or make the default %1$s classes \
+					and their required dependencies available. Offending class: [%3$s]"""
+						.formatted(factoryType.getSimpleName(), factoryImplementationName, ex.getMessage()));
+		}
+	}
+
+	private static List<String> classNames(Collection<?> components) {
+		return components.stream().map(Object::getClass).map(Class::getName).toList();
+	}
+
+	private static List<String> classSimpleNames(Collection<?> components) {
+		return components.stream().map(Object::getClass).map(Class::getSimpleName).toList();
 	}
 
 }

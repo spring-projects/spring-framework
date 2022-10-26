@@ -35,7 +35,6 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.core.io.support.SpringFactoriesLoader.FailureHandler;
 import org.springframework.lang.Nullable;
-import org.springframework.test.context.ApplicationContextFailureProcessor;
 import org.springframework.test.context.BootstrapContext;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.test.context.ContextConfiguration;
@@ -523,29 +522,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * @see #getApplicationContextFailureProcessor()
 	 */
 	protected CacheAwareContextLoaderDelegate getCacheAwareContextLoaderDelegate() {
-		CacheAwareContextLoaderDelegate delegate = getBootstrapContext().getCacheAwareContextLoaderDelegate();
-		ApplicationContextFailureProcessor contextFailureProcessor = getApplicationContextFailureProcessor();
-		if (contextFailureProcessor != null) {
-			delegate.setContextFailureProcessor(contextFailureProcessor);
-		}
-		return delegate;
-	}
-
-	/**
-	 * Get the {@link ApplicationContextFailureProcessor} to use.
-	 * <p>The default implementation returns {@code null}.
-	 * <p>Concrete subclasses may choose to override this method to provide an
-	 * {@code ApplicationContextFailureProcessor} that will be supplied to the
-	 * configured {@code CacheAwareContextLoaderDelegate} in
-	 * {@link #getCacheAwareContextLoaderDelegate()}.
-	 * @return the context failure processor to use, or {@code null} if no processor
-	 * should be used
-	 * @since 6.0
-	 * @see #getCacheAwareContextLoaderDelegate()
-	 */
-	@Nullable
-	protected ApplicationContextFailureProcessor getApplicationContextFailureProcessor() {
-		return null;
+		return getBootstrapContext().getCacheAwareContextLoaderDelegate();
 	}
 
 	/**

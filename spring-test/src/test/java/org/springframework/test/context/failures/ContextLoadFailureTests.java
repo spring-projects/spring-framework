@@ -16,9 +16,6 @@
 
 package org.springframework.test.context.failures;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,11 +27,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.test.context.ApplicationContextFailureProcessor;
-import org.springframework.test.context.BootstrapWith;
+import org.springframework.test.context.failures.TrackingApplicationContextFailureProcessor.LoadFailure;
 import org.springframework.test.context.junit.jupiter.FailingTestCase;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.test.context.support.DefaultTestContextBootstrapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
@@ -47,18 +42,15 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass
  */
 class ContextLoadFailureTests {
 
-	static List<LoadFailure> loadFailures = new ArrayList<>();
-
-
 	@BeforeEach
 	@AfterEach
 	void clearFailures() {
-		loadFailures.clear();
+		TrackingApplicationContextFailureProcessor.loadFailures.clear();
 	}
 
 	@Test
 	void customBootstrapperAppliesApplicationContextFailureProcessor() {
-		assertThat(loadFailures).isEmpty();
+		assertThat(TrackingApplicationContextFailureProcessor.loadFailures).isEmpty();
 
 		EngineTestKit.engine("junit-jupiter")
 				.selectors(selectClass(ExplosiveContextTestCase.class))//
@@ -66,8 +58,8 @@ class ContextLoadFailureTests {
 				.testEvents()
 				.assertStatistics(stats -> stats.started(1).succeeded(0).failed(1));
 
-		assertThat(loadFailures).hasSize(1);
-		LoadFailure loadFailure = loadFailures.get(0);
+		assertThat(TrackingApplicationContextFailureProcessor.loadFailures).hasSize(1);
+		LoadFailure loadFailure = TrackingApplicationContextFailureProcessor.loadFailures.get(0);
 		assertThat(loadFailure.context()).isExactlyInstanceOf(GenericApplicationContext.class);
 		assertThat(loadFailure.exception())
 				.isInstanceOf(BeanCreationException.class)
@@ -78,7 +70,6 @@ class ContextLoadFailureTests {
 
 	@FailingTestCase
 	@SpringJUnitConfig
-	@BootstrapWith(CustomTestContextBootstrapper.class)
 	static class ExplosiveContextTestCase {
 
 		@Test
@@ -95,15 +86,5 @@ class ContextLoadFailureTests {
 			}
 		}
 	}
-
-	static class CustomTestContextBootstrapper extends DefaultTestContextBootstrapper {
-
-		@Override
-		protected ApplicationContextFailureProcessor getApplicationContextFailureProcessor() {
-			return (context, exception) -> loadFailures.add(new LoadFailure(context, exception));
-		}
-	}
-
-	record LoadFailure(ApplicationContext context, Throwable exception) {}
 
 }
