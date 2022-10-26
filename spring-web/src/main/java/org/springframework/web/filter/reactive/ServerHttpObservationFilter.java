@@ -21,6 +21,7 @@ import java.util.Set;
 
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
+import io.micrometer.observation.contextpropagation.ObservationThreadLocalAccessor;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -117,7 +118,8 @@ public class ServerHttpObservationFilter implements WebFilter {
 				.doOnCancel(() -> {
 					observationContext.setConnectionAborted(true);
 					observation.stop();
-				});
+				})
+				.contextWrite(context -> context.put(ObservationThreadLocalAccessor.KEY, observation));  // TODO: Will Context-Propagation always be there on the classpath? If not - just pass the string and add context-propagation to the test scope and test it there
 	}
 
 	private void onTerminalSignal(Observation observation, ServerWebExchange exchange) {
