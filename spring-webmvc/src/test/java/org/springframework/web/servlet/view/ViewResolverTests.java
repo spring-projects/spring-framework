@@ -99,6 +99,33 @@ public class ViewResolverTests {
 	}
 
 	@Test
+	public void beanNameViewResolverWithProvidedContext() {
+		StaticWebApplicationContext providedWac = new StaticWebApplicationContext();
+		MutablePropertyValues pvs1 = new MutablePropertyValues();
+		pvs1.addPropertyValue(new PropertyValue("url", "/example1.jsp"));
+		providedWac.registerSingleton("example1", InternalResourceView.class, pvs1);
+		MutablePropertyValues pvs2 = new MutablePropertyValues();
+		pvs2.addPropertyValue(new PropertyValue("url", "/example2.jsp"));
+		providedWac.registerSingleton("example2", JstlView.class, pvs2);
+		BeanNameViewResolver vr = new BeanNameViewResolver(providedWac);
+		vr.setApplicationContext(this.wac);
+		providedWac.refresh();
+		this.wac.refresh();
+
+		View view = vr.resolveViewName("example1", Locale.getDefault());
+		assertThat(view.getClass()).as("Correct view class").isEqualTo(InternalResourceView.class);
+		assertThat(((InternalResourceView) view).getUrl()).as("Correct URL").isEqualTo("/example1.jsp");
+
+		view = vr.resolveViewName("example2", Locale.getDefault());
+		assertThat(view).isInstanceOf(JstlView.class);
+		assertThat(((JstlView) view).getUrl()).as("Correct URL").isEqualTo("/example2.jsp");
+
+		assertThat(providedWac.getParent()).isEqualTo(this.wac);
+		assertThat(providedWac.getServletContext()).isEqualTo(this.wac.getServletContext());
+	}
+
+
+	@Test
 	public void urlBasedViewResolverOverridesCustomRequestContextAttributeWithNonNullValue() throws Exception {
 		assertThat(new TestView().getRequestContextAttribute())
 			.as("requestContextAttribute when instantiated directly")
