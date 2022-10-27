@@ -16,7 +16,6 @@
 
 package org.springframework.test.context.support;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,8 +31,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.core.io.support.SpringFactoriesLoader;
-import org.springframework.core.io.support.SpringFactoriesLoader.FailureHandler;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.BootstrapContext;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
@@ -52,6 +49,7 @@ import org.springframework.test.context.TestContextBootstrapper;
 import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestExecutionListeners.MergeMode;
+import org.springframework.test.context.util.TestContextSpringFactoriesUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -189,30 +187,15 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	/**
 	 * Get the default {@link TestExecutionListener TestExecutionListeners} for
 	 * this bootstrapper.
+	 * <p>The default implementation delegates to
+	 * {@link TestContextSpringFactoriesUtils#loadFactoryImplementations(Class)}.
 	 * <p>This method is invoked by {@link #getTestExecutionListeners()}.
-	 * <p>The default implementation looks up and instantiates all
-	 * {@code org.springframework.test.context.TestExecutionListener} entries
-	 * configured in all {@code META-INF/spring.factories} files on the classpath.
-	 * <p>If a particular listener cannot be loaded due to a {@link LinkageError}
-	 * or {@link ClassNotFoundException}, a {@code DEBUG} message will be logged,
-	 * but the associated exception will not be rethrown. A {@link RuntimeException}
-	 * or any other {@link Error} will be rethrown. Any other exception will be
-	 * thrown wrapped in an {@link IllegalStateException}.
 	 * @return an <em>unmodifiable</em> list of default {@code TestExecutionListener}
 	 * instances
 	 * @since 6.0
-	 * @see SpringFactoriesLoader#forDefaultResourceLocation()
-	 * @see SpringFactoriesLoader#load(Class, FailureHandler)
 	 */
 	protected List<TestExecutionListener> getDefaultTestExecutionListeners() {
-		SpringFactoriesLoader loader = SpringFactoriesLoader.forDefaultResourceLocation(getClass().getClassLoader());
-		List<TestExecutionListener> listeners =
-				loader.load(TestExecutionListener.class, this::handleInstantiationFailure);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Loaded default TestExecutionListener implementations from location [%s]: %s"
-					.formatted(SpringFactoriesLoader.FACTORIES_RESOURCE_LOCATION, classNames(listeners)));
-		}
-		return Collections.unmodifiableList(listeners);
+		return TestContextSpringFactoriesUtils.loadFactoryImplementations(TestExecutionListener.class);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -225,7 +208,14 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			catch (BeanInstantiationException ex) {
 				Throwable cause = ex.getCause();
 				if (cause instanceof ClassNotFoundException || cause instanceof NoClassDefFoundError) {
-					logSkippedComponent(TestExecutionListener.class, listenerClass.getName(), cause);
+					if (logger.isDebugEnabled()) {
+						logger.debug("""
+								Skipping candidate %1$s [%2$s] due to a missing dependency. \
+								Specify custom %1$s classes or make the default %1$s classes \
+								and their required dependencies available. Offending class: [%3$s]"""
+									.formatted(TestExecutionListener.class.getSimpleName(), listenerClass.getName(),
+										cause.getMessage()));
+					}
 				}
 				else {
 					throw ex;
@@ -409,21 +399,12 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 
 	/**
 	 * Get the {@link ContextCustomizerFactory} instances for this bootstrapper.
-	 * <p>The default implementation uses the {@link SpringFactoriesLoader} mechanism
-	 * for loading factories configured in all {@code META-INF/spring.factories}
-	 * files on the classpath.
+	 * <p>The default implementation delegates to
+	 * {@link TestContextSpringFactoriesUtils#loadFactoryImplementations(Class)}.
 	 * @since 4.3
-	 * @see SpringFactoriesLoader#loadFactories
 	 */
 	protected List<ContextCustomizerFactory> getContextCustomizerFactories() {
-		SpringFactoriesLoader loader = SpringFactoriesLoader.forDefaultResourceLocation(getClass().getClassLoader());
-		List<ContextCustomizerFactory> factories =
-				loader.load(ContextCustomizerFactory.class, this::handleInstantiationFailure);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Loaded ContextCustomizerFactory implementations from location [%s]: %s"
-					.formatted(SpringFactoriesLoader.FACTORIES_RESOURCE_LOCATION, classNames(factories)));
-		}
-		return factories;
+		return TestContextSpringFactoriesUtils.loadFactoryImplementations(ContextCustomizerFactory.class);
 	}
 
 	/**
@@ -552,51 +533,8 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	}
 
 
-	private void handleInstantiationFailure(
-			Class<?> factoryType, String factoryImplementationName, Throwable failure) {
-
-		Throwable ex = (failure instanceof InvocationTargetException ite ?
-				ite.getTargetException() : failure);
-		if (ex instanceof ClassNotFoundException || ex instanceof NoClassDefFoundError) {
-			logSkippedComponent(factoryType, factoryImplementationName, ex);
-		}
-		else if (ex instanceof LinkageError) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("""
-						Could not load %1$s [%2$s]. Specify custom %1$s classes or make the default %1$s classes \
-						available.""".formatted(factoryType.getSimpleName(), factoryImplementationName), ex);
-			}
-		}
-		else {
-			if (ex instanceof RuntimeException runtimeException) {
-				throw runtimeException;
-			}
-			if (ex instanceof Error error) {
-				throw error;
-			}
-			throw new IllegalStateException(
-				"Failed to load %s [%s].".formatted(factoryType.getSimpleName(), factoryImplementationName), ex);
-		}
-	}
-
-	private void logSkippedComponent(Class<?> factoryType, String factoryImplementationName, Throwable ex) {
-		// TestExecutionListener/ContextCustomizerFactory not applicable due to a missing dependency
-		if (logger.isDebugEnabled()) {
-			logger.debug("""
-					Skipping candidate %1$s [%2$s] due to a missing dependency. \
-					Specify custom %1$s classes or make the default %1$s classes \
-					and their required dependencies available. Offending class: [%3$s]"""
-						.formatted(factoryType.getSimpleName(), factoryImplementationName, ex.getMessage()));
-		}
-	}
-
-
 	private static List<String> classSimpleNames(Collection<?> components) {
 		return components.stream().map(Object::getClass).map(Class::getSimpleName).toList();
-	}
-
-	private static List<String> classNames(Collection<?> components) {
-		return components.stream().map(Object::getClass).map(Class::getName).toList();
 	}
 
 	private static boolean areAllEmpty(Collection<?>... collections) {

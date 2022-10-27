@@ -71,7 +71,7 @@ public interface CacheAwareContextLoaderDelegate {
 	 * {@link org.springframework.core.io.support.SpringFactoriesLoader SpringFactoriesLoader}
 	 * mechanism, catch any exception thrown by the {@link ContextLoader}, and
 	 * delegate to each of the configured failure processors to process the context
-	 * load failure if the thrown exception is an instance of {@link ContextLoadException}.
+	 * load failure if the exception is an instance of {@link ContextLoadException}.
 	 * <p>The cache statistics should be logged by invoking
 	 * {@link org.springframework.test.context.cache.ContextCache#logStatistics()}.
 	 * @param mergedContextConfiguration the merged context configuration to use
