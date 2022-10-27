@@ -229,6 +229,7 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 		if (upstream() != null &&
 				!this.sink.isCancelled() &&
 				this.sink.requestedFromDownstream() > 0 &&
+				this.state.get().canRequest() &&
 				this.requestOutstanding.compareAndSet(false, true)) {
 			request(1);
 		}
@@ -289,6 +290,13 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 		 * Invoked when an error has been received.
 		 */
 		default void error(Throwable throwable) {
+		}
+
+		/**
+		 * Indicates whether the current state is ready to accept a new token.
+		 */
+		default boolean canRequest() {
+			return true;
 		}
 
 		/**
@@ -812,6 +820,11 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 			finally {
 				DataBufferUtils.release(dataBuffer);
 			}
+		}
+
+		@Override
+		public boolean canRequest() {
+			return false;
 		}
 
 		@Override
