@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -48,17 +47,17 @@ public class MethodNotAllowedException extends ResponseStatusException {
 	}
 
 	public MethodNotAllowedException(String method, @Nullable Collection<HttpMethod> supportedMethods) {
-		super(HttpStatus.METHOD_NOT_ALLOWED, "Request method '" + method + "' is not supported.");
+		super(HttpStatus.METHOD_NOT_ALLOWED, "Request method '" + method + "' is not supported.",
+				null, null, new Object[] {method, supportedMethods});
+
 		Assert.notNull(method, "'method' is required");
 		if (supportedMethods == null) {
 			supportedMethods = Collections.emptySet();
 		}
 		this.method = method;
 		this.httpMethods = Collections.unmodifiableSet(new LinkedHashSet<>(supportedMethods));
-
-		getBody().setDetail(this.httpMethods.isEmpty() ? getReason() :
-				"Supported methods: " + this.httpMethods.stream()
-						.map(HttpMethod::toString).collect(Collectors.joining("', '", "'", "'")));
+		getBody().setDetail(this.httpMethods.isEmpty() ?
+				getReason() : "Supported methods: " + this.httpMethods);
 	}
 
 
@@ -81,7 +80,7 @@ public class MethodNotAllowedException extends ResponseStatusException {
 	 * @since 5.1.13
 	 * @deprecated as of 6.0 in favor of {@link #getHeaders()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	@Override
 	public HttpHeaders getResponseHeaders() {
 		return getHeaders();

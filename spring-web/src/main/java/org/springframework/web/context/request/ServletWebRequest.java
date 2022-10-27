@@ -214,12 +214,12 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		// Evaluate conditions in order of precedence.
 		// See https://datatracker.ietf.org/doc/html/rfc9110#section-13.2.2
 		if (validateIfMatch(eTag)) {
-			updateResponseStateChanging();
+			updateResponseStateChanging(eTag, lastModifiedTimestamp);
 			return this.notModified;
 		}
 		// 2) If-Unmodified-Since
 		else if (validateIfUnmodifiedSince(lastModifiedTimestamp)) {
-			updateResponseStateChanging();
+			updateResponseStateChanging(eTag, lastModifiedTimestamp);
 			return this.notModified;
 		}
 		// 3) If-None-Match
@@ -309,9 +309,12 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return first.equals(second);
 	}
 
-	private void updateResponseStateChanging() {
+	private void updateResponseStateChanging(String eTag, long lastModifiedTimestamp) {
 		if (this.notModified && getResponse() != null) {
 			getResponse().setStatus(HttpStatus.PRECONDITION_FAILED.value());
+		}
+		else {
+			addCachingResponseHeaders(eTag, lastModifiedTimestamp);
 		}
 	}
 
@@ -347,13 +350,17 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 				getResponse().setStatus(isHttpGetOrHead ?
 						HttpStatus.NOT_MODIFIED.value() : HttpStatus.PRECONDITION_FAILED.value());
 			}
-			if (isHttpGetOrHead) {
-				if (lastModifiedTimestamp > 0 && parseDateValue(getResponse().getHeader(HttpHeaders.LAST_MODIFIED)) == -1) {
-					getResponse().setDateHeader(HttpHeaders.LAST_MODIFIED, lastModifiedTimestamp);
-				}
-				if (StringUtils.hasLength(eTag) && getResponse().getHeader(HttpHeaders.ETAG) == null) {
-					getResponse().setHeader(HttpHeaders.ETAG, padEtagIfNecessary(eTag));
-				}
+			addCachingResponseHeaders(eTag, lastModifiedTimestamp);
+		}
+	}
+
+	private void addCachingResponseHeaders(String eTag, long lastModifiedTimestamp) {
+		if (SAFE_METHODS.contains(getRequest().getMethod())) {
+			if (lastModifiedTimestamp > 0 && parseDateValue(getResponse().getHeader(HttpHeaders.LAST_MODIFIED)) == -1) {
+				getResponse().setDateHeader(HttpHeaders.LAST_MODIFIED, lastModifiedTimestamp);
+			}
+			if (StringUtils.hasLength(eTag) && getResponse().getHeader(HttpHeaders.ETAG) == null) {
+				getResponse().setHeader(HttpHeaders.ETAG, padEtagIfNecessary(eTag));
 			}
 		}
 	}

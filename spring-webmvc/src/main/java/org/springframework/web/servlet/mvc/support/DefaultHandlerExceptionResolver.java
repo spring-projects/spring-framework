@@ -574,7 +574,10 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @param handler the executed handler
 	 * @return an empty {@code ModelAndView} indicating the exception was handled
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
+	 * @deprecated as of 6.0 since {@link org.springframework.web.method.annotation.ModelAttributeMethodProcessor}
+	 * now raises the {@link MethodArgumentNotValidException} subclass instead.
 	 */
+	@Deprecated(since = "6.0", forRemoval = true)
 	protected ModelAndView handleBindException(BindException ex, HttpServletRequest request,
 			HttpServletResponse response, @Nullable Object handler) throws IOException {
 

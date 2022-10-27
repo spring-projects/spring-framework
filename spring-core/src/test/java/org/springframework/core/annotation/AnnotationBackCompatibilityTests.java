@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ class AnnotationBackCompatibilityTests {
 
 	@Test
 	void multiplRoutesToMetaAnnotation() {
-		Class<WithMetaMetaTestAnnotation1AndMetaTestAnnotation2> source = WithMetaMetaTestAnnotation1AndMetaTestAnnotation2.class;
+		Class<?> source = WithMetaMetaTestAnnotation1AndMetaTestAnnotation2.class;
 		// Merged annotation chooses lowest depth
 		MergedAnnotation<TestAnnotation> mergedAnnotation = MergedAnnotations.from(source).get(TestAnnotation.class);
 		assertThat(mergedAnnotation.getString("value")).isEqualTo("testAndMetaTest");
@@ -45,7 +45,7 @@ class AnnotationBackCompatibilityTests {
 	@Test
 	void defaultValue() {
 		DefaultValueAnnotation synthesized = MergedAnnotations.from(WithDefaultValue.class).get(DefaultValueAnnotation.class).synthesize();
-		assertThat(synthesized).isInstanceOf(SynthesizedAnnotation.class);
+		assertThat(AnnotationUtils.isSynthesizedAnnotation(synthesized)).as("synthesized annotation").isTrue();
 		Object defaultValue = AnnotationUtils.getDefaultValue(synthesized, "enumValue");
 		assertThat(defaultValue).isEqualTo(TestEnum.ONE);
 	}
@@ -60,14 +60,12 @@ class AnnotationBackCompatibilityTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@TestAnnotation("metaTest")
 	@interface MetaTestAnnotation {
-
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@TestAnnotation("testAndMetaTest")
 	@MetaTestAnnotation
 	@interface TestAndMetaTestAnnotation {
-
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -78,7 +76,6 @@ class AnnotationBackCompatibilityTests {
 	@MetaMetaTestAnnotation
 	@TestAndMetaTestAnnotation
 	static class WithMetaMetaTestAnnotation1AndMetaTestAnnotation2 {
-
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -94,7 +91,6 @@ class AnnotationBackCompatibilityTests {
 
 	@DefaultValueAnnotation
 	static class WithDefaultValue {
-
 	}
 
 	enum TestEnum {

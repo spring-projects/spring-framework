@@ -57,7 +57,7 @@ public interface ContextLoader {
 	 * @deprecated as of Spring Framework 6.0, in favor of methods defined in the
 	 * {@link SmartContextLoader} SPI
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	String[] processLocations(Class<?> clazz, String... locations);
 
 	/**
@@ -84,7 +84,7 @@ public interface ContextLoader {
 	 * @deprecated as of Spring Framework 6.0, in favor of methods defined in the
 	 * {@link SmartContextLoader} SPI
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	ApplicationContext loadContext(String... locations) throws Exception;
 
 }

@@ -17,6 +17,7 @@
 package org.springframework.beans.testfixture.beans.factory.aot;
 
 /**
+ * A sample configuration.
  *
  * @author Stephane Nicoll
  */

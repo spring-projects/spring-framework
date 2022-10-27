@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.support;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -71,7 +72,7 @@ public class DefaultHandlerExceptionResolverTests {
 	@Test
 	public void handleHttpRequestMethodNotSupported() {
 		HttpRequestMethodNotSupportedException ex =
-				new HttpRequestMethodNotSupportedException("GET", new String[]{"POST", "PUT"});
+				new HttpRequestMethodNotSupportedException("GET", Arrays.asList("POST", "PUT"));
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
 		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();

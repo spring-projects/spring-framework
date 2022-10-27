@@ -40,7 +40,6 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.MethodIntrospector;
-import org.springframework.core.SpringProperties;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -65,14 +64,6 @@ import org.springframework.util.CollectionUtils;
 public class EventListenerMethodProcessor
 		implements SmartInitializingSingleton, ApplicationContextAware, BeanFactoryPostProcessor {
 
-	/**
-	 * Boolean flag controlled by a {@code spring.spel.ignore} system property that instructs Spring to
-	 * ignore SpEL, i.e. to not initialize the SpEL infrastructure.
-	 * <p>The default is "false".
-	 */
-	private static final boolean shouldIgnoreSpel = SpringProperties.getFlag("spring.spel.ignore");
-
-
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	@Nullable
@@ -91,12 +82,7 @@ public class EventListenerMethodProcessor
 
 
 	public EventListenerMethodProcessor() {
-		if (shouldIgnoreSpel) {
-			this.evaluator = null;
-		}
-		else {
-			this.evaluator = new EventExpressionEvaluator();
-		}
+		this.evaluator = new EventExpressionEvaluator();
 	}
 
 	@Override

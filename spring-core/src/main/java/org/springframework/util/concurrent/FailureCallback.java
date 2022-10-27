@@ -26,7 +26,7 @@ import java.util.function.BiConsumer;
  * @deprecated as of 6.0, in favor of
  * {@link java.util.concurrent.CompletableFuture#whenComplete(BiConsumer)}
  */
-@Deprecated
+@Deprecated(since = "6.0")
 @FunctionalInterface
 public interface FailureCallback {
 

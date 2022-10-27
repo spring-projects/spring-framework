@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
  * @param <S> the type of the adaptee's {@code Future}
  * @deprecated as of 6.0, with no concrete replacement
  */
-@Deprecated
+@Deprecated(since = "6.0")
 public abstract class FutureAdapter<T, S> implements Future<T> {
 
 	private final Future<S> adaptee;

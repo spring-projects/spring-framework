@@ -84,7 +84,7 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 
 	@Override
 	protected boolean sendMessage(WebSocketMessage message) throws IOException {
-		ByteBuffer buffer = message.getPayload().asByteBuffer();
+		ByteBuffer buffer = message.getPayload().toByteBuffer();
 		if (WebSocketMessage.Type.TEXT.equals(message.getType())) {
 			getSendProcessor().setReadyToSend(false);
 			String text = new String(buffer.array(), StandardCharsets.UTF_8);

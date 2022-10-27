@@ -138,7 +138,7 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 	 * @deprecated in favor of {@link #valueOf(String)}
 	 */
 	@Nullable
-	@Deprecated
+	@Deprecated(since = "6.0", forRemoval = true)
 	public static HttpMethod resolve(@Nullable String method) {
 		return (method != null ? valueOf(method) : null);
 	}

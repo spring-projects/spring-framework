@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,8 +122,10 @@ import org.springframework.context.NoSuchMessageException;
  * @see HtmlEscapeTag#setDefaultHtmlEscape
  * @see org.springframework.web.util.WebUtils#HTML_ESCAPE_CONTEXT_PARAM
  * @see ArgumentTag
+ * @deprecated as of 6.0, with no direct replacement
  */
 @SuppressWarnings("serial")
+@Deprecated(since = "6.0")
 public class ThemeTag extends MessageTag {
 
 	/**

@@ -42,6 +42,7 @@ public class SingletonTargetSource implements TargetSource, Serializable {
 
 
 	/** Target cached and invoked using reflection. */
+	@SuppressWarnings("serial")
 	private final Object target;
 
 

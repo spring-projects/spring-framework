@@ -44,7 +44,7 @@ public interface WebSocketClient {
 	 * @return a future that completes when the session is available
 	 * @deprecated as of 6.0, in favor of {@link #execute(WebSocketHandler, String, Object...)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	default org.springframework.util.concurrent.ListenableFuture<WebSocketSession> doHandshake(
 			WebSocketHandler webSocketHandler, String uriTemplate, Object... uriVariables) {
 		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(
@@ -71,7 +71,7 @@ public interface WebSocketClient {
 	 * @return a future that completes when the session is available
 	 * @deprecated as of 6.0, in favor of {@link #execute(WebSocketHandler, WebSocketHttpHeaders, URI)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	default org.springframework.util.concurrent.ListenableFuture<WebSocketSession> doHandshake(
 			WebSocketHandler webSocketHandler, @Nullable WebSocketHttpHeaders headers, URI uri) {
 		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(

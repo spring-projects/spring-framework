@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.transaction.jta.JtaTransactionManager;
  * @since 4.1.1
  * @deprecated as of 6.0, in favor of a straight {@link JtaTransactionManager} definition
  */
-@Deprecated
+@Deprecated(since = "6.0")
 public class JtaTransactionManagerFactoryBean implements FactoryBean<JtaTransactionManager>, InitializingBean {
 
 	private final JtaTransactionManager transactionManager = new JtaTransactionManager();

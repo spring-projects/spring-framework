@@ -1052,6 +1052,9 @@ application, thereby enhancing user experience. A theme is a collection of stati
 resources, typically style sheets and images, that affect the visual style of the
 application.
 
+WARNING: as of 6.0 support for themes has been deprecated theme in favor of using CSS,
+and without any special support on the server side.
+
 
 [[mvc-themeresolver-defining]]
 ==== Defining a theme
@@ -2211,6 +2214,14 @@ supported for all return values.
 
 | `HttpHeaders`
 | For returning a response with headers and no body.
+
+| `ErrorResponse`
+| To render an RFC 7807 error response with details in the body,
+  see <<mvc-ann-rest-exceptions>>
+
+| `ProblemDetail`
+| To render an RFC 7807 error response with details in the body,
+  see <<mvc-ann-rest-exceptions>>
 
 | `String`
 | A view name to be resolved with `ViewResolver` implementations and used together with the implicit
@@ -3895,6 +3906,7 @@ level, <<mvc-exceptionhandlers, HandlerExceptionResolver>> mechanism.
 
 [[mvc-ann-exceptionhandler-args]]
 ==== Method Arguments
+[.small]#<<webflux.adoc#webflux-ann-exceptionhandler-args, WebFlux>>#
 
 `@ExceptionHandler` methods support the following arguments:
 
@@ -3959,6 +3971,7 @@ level, <<mvc-exceptionhandlers, HandlerExceptionResolver>> mechanism.
 
 [[mvc-ann-exceptionhandler-return-values]]
 ==== Return Values
+[.small]#<<webflux.adoc#webflux-ann-exceptionhandler-return-values, WebFlux>>#
 
 `@ExceptionHandler` methods support the following return values:
 
@@ -3974,6 +3987,14 @@ level, <<mvc-exceptionhandlers, HandlerExceptionResolver>> mechanism.
 | The return value specifies that the full response (including the HTTP headers and the body)
   be converted through `HttpMessageConverter` instances and written to the response.
   See <<mvc-ann-responseentity>>.
+
+| `ErrorResponse`
+| To render an RFC 7807 error response with details in the body,
+see <<mvc-ann-rest-exceptions>>
+
+| `ProblemDetail`
+| To render an RFC 7807 error response with details in the body,
+see <<mvc-ann-rest-exceptions>>
 
 | `String`
 | A view name to be resolved with `ViewResolver` implementations and used together with the
@@ -4753,6 +4774,46 @@ suitable under load. If you plan to stream with a reactive type, you should use 
 
 
 
+[[mvc-ann-async-context-propagation]]
+=== Context Propagation
+
+It is common to propagate context via `java.lang.ThreadLocal`. This works transparently
+for handling on the same thread, but requires additional work for asynchronous handling
+across multiple threads. The Micrometer
+https://github.com/micrometer-metrics/context-propagation#context-propagation-library[Context Propagation]
+library simplifies context propagation across threads, and across context mechanisms such
+as `ThreadLocal` values,
+Reactor https://projectreactor.io/docs/core/release/reference/#context[context],
+GraphQL Java https://www.graphql-java.com/documentation/concerns/#context-objects[context],
+and others.
+
+If Micrometer Context Propagation is present on the classpath, when a controller method
+returns a <<mvc-ann-async-reactive-types,reactive type>> such as `Flux` or `Mono`, all
+`ThreadLocal` values, for which there is a registered `io.micrometer.ThreadLocalAccessor`,
+are written to the Reactor `Context` as key-value pairs, using the key assigned by the
+`ThreadLocalAccessor`.
+
+For other asynchronous handling scenarios, you can use the Context Propagation library
+directly. For example:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	// Capture ThreadLocal values from the main thread ...
+	ContextSnapshot snapshot = ContextSnapshot.captureAll();
+
+	// On a different thread: restore ThreadLocal values
+	try (ContextSnapshot.Scope scoped = snapshot.setThreadLocals()) {
+		// ...
+	}
+----
+
+For more details, see the
+https://micrometer.io/docs/contextPropagation[documentation] of the Micrometer Context
+Propagation library.
+
+
+
 [[mvc-ann-async-disconnects]]
 === Disconnects
 [.small]#<<web-reactive.adoc#webflux-codecs-streaming, WebFlux>>#
@@ -4821,50 +4882,188 @@ include::webmvc-cors.adoc[leveloffset=+1]
 
 
 [[mvc-ann-rest-exceptions]]
-== REST API exceptions
+== Error Responses
 [.small]#<<web-reactive.adoc#webflux-ann-rest-exceptions, WebFlux>>#
 
-A common requirement for REST services is to include error details in the body of the
-response. The Spring Framework provides support for
-https://www.rfc-editor.org/rfc/rfc7807.html[RFC 7807] formatted error responses.
+A common requirement for REST services is to include details in the body of error
+responses. The Spring Framework supports the "Problem Details for HTTP APIs"
+specification, https://www.rfc-editor.org/rfc/rfc7807.html[RFC 7807].
 
-Main abstractions and supporting infrastructure:
+The following are the main abstractions for this support:
 
-- `ProblemDetail` in the `spring-web` module is the core abstraction that represents an
-RFC 7807 problem detail. It helps to enable a range of features in Spring MVC for the
-handling and rendering of such responses.
-- `ErrorResponse` is an interface that defines an error response, including status, headers,
-and `ProblemDetail` as its body. All Spring web exceptions implement this interface, and
-thus encapsulate a default opinion on how they map to an RFC 7807 error response.
-- `ErrorResponseException` is a `RuntimeException` that implements `ErrorResponse`, which
-can be raised directly or serve as a base class for other exceptions.
-- {api-spring-framework}/web/servlet/mvc/method/annotation/ResponseEntityExceptionHandler.html[`ResponseEntityExceptionHandler`]
-provides handling for Spring MVC exceptions and for any `ErrorResponseException`.
-Applications can extend this as an <<mvc-ann-controller-advice>> to enable RFC 7807 support.
+- `ProblemDetail` -- representation for an RFC 7807 problem detail; a simple container
+for both standard fields defined in the spec, and for non-standard ones.
+- `ErrorResponse` -- contract to expose HTTP error response details including HTTP
+status, response headers, and a body in the format of RFC 7807; this allows exceptions to
+encapsulate and expose the details of how they map to an HTTP response. All Spring MVC
+exceptions implement this.
+- `ErrorResponseException` -- basic `ErrorResponse` implementation that others
+can use as a convenient base class.
+- `ResponseEntityExceptionHandler` -- convenient base class for an
+<<mvc-ann-controller-advice,@ControllerAdvice>> that handles all Spring MVC exceptions,
+and any `ErrorResponseException`, and renders an error response with a body.
 
-`ProblemDetail` and `ErrorResponse` are supported as return values from
-`@ExceptionHandler` and `@RequestMapping` controller methods. The `status` property of
-`ProblemDetail` is used to set the response status, while the `instance` property is set
-from the current URL path, if not already set.
 
-The Jackson `HttpMessageConverter` returns "application/problem+json" as a preferred
-choice to serialize `ProblemDetail` to JSON as part of content negotiation. If no suitable
-media type is found to render a `ProblemDetail` response body, content negotiation falls
-back on "application/problem+json".
 
-Applications can extend `ProblemDetail` with non-standard fields in one of two ways:
+[[mvc-ann-rest-exceptions-render]]
+=== Render
+[.small]#<<web-reactive.adoc#webflux-ann-rest-exceptions-render, WebFlux>>#
 
-. Add properties to the generic `properties` map in `ProblemDetail`. When using
-the Jackson library, this `properties` map is unwrapped and as top level JSON
-properties with the help of `ProblemDetailJacksonMixin`.
-. Create a `ProblemDetail` subclass that defines the extra, non-standard fields.
-Subclasses can use a protected copy constructor in order to re-create an existing
-`ProblemDetail` as a subclass. This can be done centrally from an `@ControllerAdvice`
-such as `ResponseEntityExceptionHandler`.
+You can return `ProblemDetail` or `ErrorResponse` from any `@ExceptionHandler` or from
+any `@RequestMapping` method to render an RFC 7807 response as follows:
 
-On the client side, `WebClientResponseException` and `RestClientResponseException` provide
-methods that decode the response body to some target type. This is useful to decode to a
-`ProblemDetail`, or to any other class, including subclasses of `ProblemDetail`.
+- The `status` property of `ProblemDetail` determines the HTTP status.
+- The `instance` property of `ProblemDetail` is set from the current URL path, if not
+already set.
+- For content negotiation, the Jackson `HttpMessageConverter` prefers
+"application/problem+json" over "application/json" when rendering a `ProblemDetail`,
+and also falls back on it if no compatible media type is found.
+
+To enable RFC 7807 responses for Spring MVC exceptions and for any
+`ErrorResponseException`, extend `ResponseEntityExceptionHandler` and declare it as an
+<<mvc-ann-controller-advice,@ControllerAdvice>> in Spring configuration. The handler
+obtains HTTP status, headers, and error details from each exception and prepares a
+`ResponseEntity`.
+
+
+
+[[mvc-ann-rest-exceptions-non-standard]]
+=== Non-Standard Fields
+[.small]#<<web-reactive.adoc#webflux-ann-rest-exceptions-non-standard, WebFlux>>#
+
+You can extend an RFC 7807 response with non-standard fields in one of two ways.
+
+One, insert into the "properties" `Map` of `ProblemDetail`. When using the Jackson
+library, the Spring Framework registers `ProblemDetailJacksonMixin` that ensures this
+"properties" `Map` is unwrapped and rendered as top level JSON properties in the
+response, and likewise any unknown property during deserialization is inserted into
+this `Map`.
+
+You can also extend `ProblemDetail` to add dedicated non-standard properties.
+The copy constructor in `ProblemDetail` allows a sub-class to make it easy to be created
+from an existing `ProblemDetail`. This could be done centrally, e.g. from an
+`@ControllerAdvice` such as `ResponseEntityExceptionHandler` that re-creates the
+`ProblemDetail` of an exception into a subclass with the additional non-standard fields.
+
+
+
+[[mvc-ann-rest-exceptions-i8n]]
+=== Internationalization
+[.small]#<<web-reactive.adoc#webflux-ann-rest-exceptions-i8n, WebFlux>>#
+
+It is a common requirement to internationalize error response details, and good practice
+to customize the problem details for Spring MVC exceptions. This is supported as follows:
+
+- Each `ErrorResponse` exposes a message code and message code arguments to resolve the
+problem "detail" field through a <<core.adoc#context-functionality-messagesource,MessageSource>>.
+The actual message code value is parameterized with placeholders, e.g.
+`"HTTP method {0} not supported"` to be expanded from the arguments.
+- `ResponseEntityExceptionHandler` uses the message code and the message arguments
+to resolve the problem "detail" field.
+- Lower level exceptions that cannot implement `ErrorResponse`, e.g. `TypeMismatchException`,
+have their problem detail, including message code and arguments set in
+`ResponseEntityExceptionHandler`.
+
+Message codes default to "problemDetail." + the fully qualified exception class name. Some
+exceptions may expose additional message codes in which case a suffix is added to
+the default message code. The table below lists message arguments and codes for Spring
+MVC exceptions:
+
+[[mvc-ann-rest-exceptions-codes]]
+[cols="1,1,2", options="header"]
+|===
+| Exception | Message Code | Message Code Arguments
+
+| `AsyncRequestTimeoutException`
+| (default)
+|
+
+| `ConversionNotSupportedException`
+| (default)
+| `{0}` property name, `{1}` property value
+
+| `HttpMediaTypeNotAcceptableException`
+| (default)
+| `{0}` list of supported media types
+
+| `HttpMediaTypeNotAcceptableException`
+| (default) + ".parseError"
+|
+
+| `HttpMediaTypeNotSupportedException`
+| (default)
+| `{0}` the media type that is not supported, `{1}` list of supported media types
+
+| `HttpMediaTypeNotSupportedException`
+| (default) + ".parseError"
+|
+
+| `HttpMessageNotReadableException`
+| (default)
+|
+
+| `HttpMessageNotWritableException`
+| (default)
+|
+
+| `HttpRequestMethodNotSupportedException`
+| (default)
+| `{0}` the current HTTP method, `{1}` the list of supported HTTP methods
+
+| `MethodArgumentNotValidException`
+| (default)
+| `{0}` the list of global errors, `{1}` the list of field errors.
+  Message codes and arguments for each error within the `BindingResult` are also resolved
+  via `MessageSource`.
+
+| `MissingRequestHeaderException`
+| (default)
+| `{0}` the header name
+
+| `MissingServletRequestParameterException`
+| (default)
+| `{0}` the request parameter name
+
+| `MissingMatrixVariableException`
+| (default)
+| `{0}` the matrix variable name
+
+| `MissingPathVariableException`
+| (default)
+| `{0}` the path variable name
+
+| `MissingRequestCookieException`
+| (default)
+| `{0}` the cookie name
+
+| `MissingServletRequestPartException`
+| (default)
+| `{0}` the part name
+
+| `NoHandlerFoundException`
+| (default)
+|
+
+| `TypeMismatchException`
+| (default)
+| `{0}` property name, `{1}` property value
+
+| `UnsatisfiedServletRequestParameterException`
+| (default)
+| `{0}` the list of parameter conditions
+
+|===
+
+
+
+[[mvc-ann-rest-exceptions-client]]
+=== Client Handling
+[.small]#<<web-reactive.adoc#webflux-ann-rest-exceptions-client, WebFlux>>#
+
+A client application can catch `WebClientResponseException`, when using the `WebClient`,
+or `RestClientResponseException` when using the `RestTemplate`, and use their
+`getResponseBodyAs` methods to decode the error response body to any target type such as
+`ProblemDetail`, or a subclass of `ProblemDetail`.
 
 
 
@@ -5905,12 +6104,18 @@ Note that, when using both `EncodedResourceResolver` (for example, for serving g
 brotli-encoded resources) and `VersionResourceResolver`, you must register them in this order.
 That ensures content-based versions are always computed reliably, based on the unencoded file.
 
-https://www.webjars.org/documentation[WebJars] are also supported through the
+For https://www.webjars.org/documentation[WebJars], versioned URLs like
+`/webjars/jquery/1.2.0/jquery.min.js` are the recommended and most efficient way to use them.
+The related resource location is configured out of the box with Spring Boot (or can be configured
+manually via `ResourceHandlerRegistry`) and does not require to add the
+`org.webjars:webjars-locator-core` dependency.
+
+Version-less URLs like `/webjars/jquery/jquery.min.js` are supported through the
 `WebJarsResourceResolver` which is automatically registered when the
-`org.webjars:webjars-locator-core` library is present on the classpath. The resolver can
-re-write URLs to include the version of the jar and can also match against incoming URLs
-without versions -- for example, from `/jquery/jquery.min.js` to
-`/jquery/1.2.0/jquery.min.js`.
+`org.webjars:webjars-locator-core` library is present on the classpath, at the cost of a
+classpath scanning that could slow down application startup. The resolver can re-write URLs to
+include the version of the jar and can also match against incoming URLs without versions
+-- for example, from `/webjars/jquery/jquery.min.js` to `/webjars/jquery/1.2.0/jquery.min.js`.
 
 TIP: The Java configuration based on `ResourceHandlerRegistry` provides further options
 for fine-grained control, e.g. last-modified behavior and optimized resource resolution.

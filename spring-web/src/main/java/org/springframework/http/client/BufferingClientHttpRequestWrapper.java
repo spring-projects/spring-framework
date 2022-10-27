@@ -45,12 +45,6 @@ final class BufferingClientHttpRequestWrapper extends AbstractBufferingClientHtt
 	}
 
 	@Override
-	@Deprecated
-	public String getMethodValue() {
-		return this.request.getMethodValue();
-	}
-
-	@Override
 	public URI getURI() {
 		return this.request.getURI();
 	}

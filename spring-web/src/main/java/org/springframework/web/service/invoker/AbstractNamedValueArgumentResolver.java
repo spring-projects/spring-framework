@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -40,6 +41,8 @@ import org.springframework.web.bind.annotation.ValueConstants;
  * @since 6.0
  */
 public abstract class AbstractNamedValueArgumentResolver implements HttpServiceArgumentResolver {
+
+	private static final TypeDescriptor STRING_TARGET_TYPE = TypeDescriptor.valueOf(String.class);
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -83,13 +86,13 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 			for (Map.Entry<String, ?> entry : ((Map<String, ?>) argument).entrySet()) {
 				addSingleOrMultipleValues(
 						entry.getKey(), entry.getValue(), false, null, info.label, info.multiValued,
-						requestValues);
+						null, requestValues);
 			}
 		}
 		else {
 			addSingleOrMultipleValues(
 					info.name, argument, info.required, info.defaultValue, info.label, info.multiValued,
-					requestValues);
+					parameter, requestValues);
 		}
 
 		return true;
@@ -133,7 +136,8 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 
 	private void addSingleOrMultipleValues(
 			String name, @Nullable Object value, boolean required, @Nullable Object defaultValue,
-			String valueLabel, boolean supportsMultiValues, HttpRequestValues.Builder requestValues) {
+			String valueLabel, boolean supportsMultiValues, @Nullable MethodParameter parameter,
+			HttpRequestValues.Builder requestValues) {
 
 		if (supportsMultiValues) {
 			value = (ObjectUtils.isArray(value) ? Arrays.asList((Object[]) value) : value);
@@ -142,7 +146,7 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 				for (Object element : elements) {
 					if (element != null) {
 						hasValues = true;
-						addSingleValue(name, element, false, null, valueLabel, requestValues);
+						addSingleValue(name, element, false, null, valueLabel, null, requestValues);
 					}
 				}
 				if (hasValues) {
@@ -152,12 +156,12 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 			}
 		}
 
-		addSingleValue(name, value, required, defaultValue, valueLabel, requestValues);
+		addSingleValue(name, value, required, defaultValue, valueLabel, parameter, requestValues);
 	}
 
 	private void addSingleValue(
 			String name, @Nullable Object value, boolean required, @Nullable Object defaultValue, String valueLabel,
-			HttpRequestValues.Builder requestValues) {
+			@Nullable MethodParameter parameter, HttpRequestValues.Builder requestValues) {
 
 		if (value instanceof Optional<?> optionalValue) {
 			value = optionalValue.orElse(null);
@@ -168,7 +172,13 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 		}
 
 		if (this.conversionService != null && !(value instanceof String)) {
-			value = this.conversionService.convert(value, String.class);
+			parameter = (parameter != null ? parameter.nestedIfOptional() : null);
+			if (parameter != null && parameter.getNestedParameterType() != Object.class) {
+				value = this.conversionService.convert(value, new TypeDescriptor(parameter), STRING_TARGET_TYPE);
+			}
+			else {
+				value = this.conversionService.convert(value, String.class);
+			}
 		}
 
 		if (value == null) {

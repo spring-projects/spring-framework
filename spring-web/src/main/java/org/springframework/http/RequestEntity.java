@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,11 +158,23 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Return the URL of the request.
+	 * Return the {@link URI} for the target HTTP endpoint.
+	 * <p><strong>Note:</strong> This method raises
+	 * {@link UnsupportedOperationException} if the {@code RequestEntity} was
+	 * created with a URI template and variables rather than with a {@link URI}
+	 * instance. This is because a URI cannot be created without further input
+	 * on how to expand template and encode the URI. In such cases, the
+	 * {@code URI} is prepared by the
+	 * {@link org.springframework.web.client.RestTemplate} with the help of the
+	 * {@link org.springframework.web.util.UriTemplateHandler} it is configured with.
 	 */
 	public URI getUrl() {
 		if (this.url == null) {
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException(
+					"The RequestEntity was created with a URI template and variables, " +
+							"and there is not enough information on how to correctly expand and " +
+							"encode the URI template. This will be done by the RestTemplate instead " +
+							"with help from the UriTemplateHandler it is configured with.");
 		}
 		return this.url;
 	}

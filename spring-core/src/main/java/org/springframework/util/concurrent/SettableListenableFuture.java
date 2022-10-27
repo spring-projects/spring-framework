@@ -38,7 +38,7 @@ import org.springframework.util.Assert;
  * @param <T> the result type returned by this Future's {@code get} method
  * @deprecated as of 6.0, in favor of {@link CompletableFuture}
  */
-@Deprecated
+@Deprecated(since = "6.0")
 public class SettableListenableFuture<T> implements ListenableFuture<T> {
 
 	private static final Callable<Object> DUMMY_CALLABLE = () -> {
@@ -116,6 +116,7 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 	 * {@link java.util.concurrent.CancellationException} if the future has been cancelled.
 	 * @return the value associated with this future
 	 */
+	@Nullable
 	@Override
 	public T get() throws InterruptedException, ExecutionException {
 		return this.settableTask.get();
@@ -131,6 +132,7 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 	 * @param unit the unit of the timeout argument
 	 * @return the value associated with this future
 	 */
+	@Nullable
 	@Override
 	public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 		return this.settableTask.get(timeout, unit);

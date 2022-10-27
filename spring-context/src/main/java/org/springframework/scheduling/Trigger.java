@@ -40,7 +40,7 @@ public interface Trigger {
 	 * or {@code null} if the trigger won't fire anymore
 	 * @deprecated as of 6.0, in favor of {@link #nextExecution(TriggerContext)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	@Nullable
 	default Date nextExecutionTime(TriggerContext triggerContext) {
 		Instant instant = nextExecution(triggerContext);

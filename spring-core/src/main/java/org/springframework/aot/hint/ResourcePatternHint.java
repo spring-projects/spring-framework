@@ -22,13 +22,14 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * A hint that describes resources that should be made available at runtime.
  *
- * <p>The patterns may be a simple path which has a one-to-one mapping to a
+ * <p>Each pattern may be a simple path which has a one-to-one mapping to a
  * resource on the classpath, or alternatively may contain the special
- * {@code *} character to indicate a wildcard search. For example:
+ * {@code *} character to indicate a wildcard match. For example:
  * <ul>
  *     <li>{@code file.properties}: matches just the {@code file.properties}
  *         file at the root of the classpath.</li>
@@ -42,9 +43,12 @@ import org.springframework.lang.Nullable;
  *         and its child directories at any depth.</li>
  * </ul>
  *
+ * <p>A resource pattern must not start with a slash ({@code /}).
+ *
  * @author Stephane Nicoll
  * @author Brian Clozel
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  * @since 6.0
  */
 public final class ResourcePatternHint implements ConditionalHint {
@@ -55,6 +59,8 @@ public final class ResourcePatternHint implements ConditionalHint {
 	private final TypeReference reachableType;
 
 	ResourcePatternHint(String pattern, @Nullable TypeReference reachableType) {
+		Assert.isTrue(!pattern.startsWith("/"),
+				() -> "Resource pattern [%s] must not start with a '/'".formatted(pattern));
 		this.pattern = pattern;
 		this.reachableType = reachableType;
 	}
@@ -104,4 +110,5 @@ public final class ResourcePatternHint implements ConditionalHint {
 	public int hashCode() {
 		return Objects.hash(this.pattern, this.reachableType);
 	}
+
 }

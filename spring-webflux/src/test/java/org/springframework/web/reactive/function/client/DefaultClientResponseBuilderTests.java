@@ -106,7 +106,7 @@ class DefaultClientResponseBuilderTests {
 		ClientResponse other = ClientResponse.create(499, ExchangeStrategies.withDefaults()).build();
 		ClientResponse result = other.mutate().build();
 
-		assertThat(result.rawStatusCode()).isEqualTo(499);
+		assertThat(result.statusCode().value()).isEqualTo(499);
 		assertThat(result.statusCode()).isEqualTo(HttpStatusCode.valueOf(499));
 	}
 

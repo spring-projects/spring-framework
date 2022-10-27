@@ -57,6 +57,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 25.01.2005
  */
+@SuppressWarnings("deprecation")
 public class FreeMarkerMacroTests {
 
 	private static final String TEMPLATE_FILE = "test.ftl";

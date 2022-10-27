@@ -46,8 +46,10 @@ public class ComposablePointcut implements Pointcut, Serializable {
 	/** use serialVersionUID from Spring 1.2 for interoperability. */
 	private static final long serialVersionUID = -2743223737633663832L;
 
+	@SuppressWarnings("serial")
 	private ClassFilter classFilter;
 
+	@SuppressWarnings("serial")
 	private MethodMatcher methodMatcher;
 
 

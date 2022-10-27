@@ -58,7 +58,7 @@ public class XhrClientSockJsSession extends AbstractClientSockJsSession {
 	 * @deprecated as of 6.0, in favor of
 	 * {@link #XhrClientSockJsSession(TransportRequest, WebSocketHandler, XhrTransport, CompletableFuture)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public XhrClientSockJsSession(
 			TransportRequest request, WebSocketHandler handler, XhrTransport transport,
 			org.springframework.util.concurrent.SettableListenableFuture<WebSocketSession> connectFuture) {

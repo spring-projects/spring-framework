@@ -16,7 +16,6 @@
 
 package org.springframework.util;
 
-import java.beans.Introspector;
 import java.io.Closeable;
 import java.io.Externalizable;
 import java.io.Serializable;
@@ -997,13 +996,13 @@ public abstract class ClassUtils {
 	 * property format. Strips the outer class name in case of a nested class.
 	 * @param clazz the class
 	 * @return the short name rendered in a standard JavaBeans property format
-	 * @see java.beans.Introspector#decapitalize(String)
+	 * @see StringUtils#uncapitalizeAsProperty(String)
 	 */
 	public static String getShortNameAsProperty(Class<?> clazz) {
 		String shortName = getShortName(clazz);
 		int dotIndex = shortName.lastIndexOf(PACKAGE_SEPARATOR);
 		shortName = (dotIndex != -1 ? shortName.substring(dotIndex + 1) : shortName);
-		return Introspector.decapitalize(shortName);
+		return StringUtils.uncapitalizeAsProperty(shortName);
 	}
 
 	/**

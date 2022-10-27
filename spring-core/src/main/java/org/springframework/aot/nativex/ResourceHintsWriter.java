@@ -47,15 +47,15 @@ class ResourceHintsWriter {
 	public void write(BasicJsonWriter writer, ResourceHints hints) {
 		Map<String, Object> attributes = new LinkedHashMap<>();
 		addIfNotEmpty(attributes, "resources", toAttributes(hints));
-		handleResourceBundles(attributes, hints.resourceBundles());
+		handleResourceBundles(attributes, hints.resourceBundleHints());
 		writer.writeObject(attributes);
 	}
 
 	private Map<String, Object> toAttributes(ResourceHints hint) {
 		Map<String, Object> attributes = new LinkedHashMap<>();
-		addIfNotEmpty(attributes, "includes", hint.resourcePatterns().map(ResourcePatternHints::getIncludes)
+		addIfNotEmpty(attributes, "includes", hint.resourcePatternHints().map(ResourcePatternHints::getIncludes)
 				.flatMap(List::stream).distinct().map(this::toAttributes).toList());
-		addIfNotEmpty(attributes, "excludes", hint.resourcePatterns().map(ResourcePatternHints::getExcludes)
+		addIfNotEmpty(attributes, "excludes", hint.resourcePatternHints().map(ResourcePatternHints::getExcludes)
 				.flatMap(List::stream).distinct().map(this::toAttributes).toList());
 		return attributes;
 	}

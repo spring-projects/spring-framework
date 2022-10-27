@@ -119,12 +119,6 @@ class DefaultClientResponse implements ClientResponse {
 	}
 
 	@Override
-	@Deprecated
-	public int rawStatusCode() {
-		return this.response.getRawStatusCode();
-	}
-
-	@Override
 	public Headers headers() {
 		return this.headers;
 	}

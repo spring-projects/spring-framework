@@ -208,7 +208,7 @@ public class SessionLocaleResolver extends AbstractLocaleContextResolver {
 	 * @see jakarta.servlet.http.HttpServletRequest#getLocale()
 	 * @deprecated as of 6.0, in favor of {@link #setDefaultLocaleFunction(Function)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	protected Locale determineDefaultLocale(HttpServletRequest request) {
 		return this.defaultLocaleFunction.apply(request);
 	}
@@ -223,7 +223,7 @@ public class SessionLocaleResolver extends AbstractLocaleContextResolver {
 	 * @see #setDefaultTimeZone
 	 * @deprecated as of 6.0, in favor of {@link #setDefaultTimeZoneFunction(Function)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	@Nullable
 	protected TimeZone determineDefaultTimeZone(HttpServletRequest request) {
 		return this.defaultTimeZoneFunction.apply(request);

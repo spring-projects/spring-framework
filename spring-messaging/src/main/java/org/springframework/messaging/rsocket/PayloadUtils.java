@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,13 +96,12 @@ public abstract class PayloadUtils {
 
 
 	static ByteBuf asByteBuf(DataBuffer buffer) {
-		return buffer instanceof NettyDataBuffer ?
-				((NettyDataBuffer) buffer).getNativeBuffer() : Unpooled.wrappedBuffer(buffer.asByteBuffer());
+		return NettyDataBufferFactory.toByteBuf(buffer);
 	}
 
 	private static ByteBuffer asByteBuffer(DataBuffer buffer) {
 		return buffer instanceof DefaultDataBuffer ?
-				((DefaultDataBuffer) buffer).getNativeBuffer() : buffer.asByteBuffer();
+				((DefaultDataBuffer) buffer).getNativeBuffer() : buffer.toByteBuffer();
 	}
 
 }

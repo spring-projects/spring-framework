@@ -24,6 +24,7 @@ import java.util.function.Consumer;
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.JavaFile;
 import org.springframework.javapoet.TypeSpec;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -36,13 +37,18 @@ import org.springframework.util.Assert;
  */
 public final class GeneratedClass {
 
+	@Nullable
+	private final GeneratedClass enclosingClass;
+
 	private final ClassName name;
 
 	private final GeneratedMethods methods;
 
 	private final Consumer<TypeSpec.Builder> type;
 
-	private final Map<MethodName, AtomicInteger> methodNameSequenceGenerator = new ConcurrentHashMap<>();
+	private final Map<ClassName, GeneratedClass> declaredClasses;
+
+	private final Map<MethodName, AtomicInteger> methodNameSequenceGenerator;
 
 
 	/**
@@ -53,9 +59,17 @@ public final class GeneratedClass {
 	 * @param type a {@link Consumer} used to build the type
 	 */
 	GeneratedClass(ClassName name, Consumer<TypeSpec.Builder> type) {
+		this(null, name, type);
+	}
+
+	private GeneratedClass(@Nullable GeneratedClass enclosingClass, ClassName name,
+			Consumer<TypeSpec.Builder> type) {
+		this.enclosingClass = enclosingClass;
 		this.name = name;
 		this.type = type;
-		this.methods = new GeneratedMethods(this::generateSequencedMethodName);
+		this.methods = new GeneratedMethods(name, this::generateSequencedMethodName);
+		this.declaredClasses = new ConcurrentHashMap<>();
+		this.methodNameSequenceGenerator = new ConcurrentHashMap<>();
 	}
 
 
@@ -80,6 +94,16 @@ public final class GeneratedClass {
 	}
 
 	/**
+	 * Return the enclosing {@link GeneratedClass} or {@code null} if this
+	 * instance represents a top-level class.
+	 * @return the enclosing generated class, if any
+	 */
+	@Nullable
+	public GeneratedClass getEnclosingClass() {
+		return this.enclosingClass;
+	}
+
+	/**
 	 * Return the name of the generated class.
 	 * @return the name of the generated class
 	 */
@@ -95,10 +119,33 @@ public final class GeneratedClass {
 		return this.methods;
 	}
 
+	/**
+	 * Get or add a nested generated class with the specified name. If this method
+	 * has previously been called with the given {@code name}, the existing class
+	 * will be returned, otherwise a new class will be generated.
+	 * @param name the name of the nested class
+	 * @param type a {@link Consumer} used to build the type
+	 * @return an existing or newly generated class whose enclosing class is this class
+	 */
+	public GeneratedClass getOrAdd(String name, Consumer<TypeSpec.Builder> type) {
+		ClassName className = this.name.nestedClass(name);
+		return this.declaredClasses.computeIfAbsent(className,
+				key -> new GeneratedClass(this, className, type));
+	}
+
 	JavaFile generateJavaFile() {
+		Assert.state(getEnclosingClass() == null,
+				"Java file cannot be generated for an inner class");
+		TypeSpec.Builder type = apply();
+		return JavaFile.builder(this.name.packageName(), type.build()).build();
+	}
+
+	private TypeSpec.Builder apply() {
 		TypeSpec.Builder type = getBuilder(this.type);
 		this.methods.doWithMethodSpecs(type::addMethod);
-		return JavaFile.builder(this.name.packageName(), type.build()).build();
+		this.declaredClasses.values().forEach(declaredClass ->
+				type.addType(declaredClass.apply().build()));
+		return type;
 	}
 
 	private TypeSpec.Builder getBuilder(Consumer<TypeSpec.Builder> type) {

@@ -685,6 +685,7 @@ class UriComponentsBuilderTests {
 				return HttpMethod.GET;
 			}
 
+			@SuppressWarnings("removal")
 			@Override
 			@Deprecated
 			public String getMethodValue() {

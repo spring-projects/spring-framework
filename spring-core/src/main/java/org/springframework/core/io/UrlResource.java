@@ -26,10 +26,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -228,7 +229,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	@Override
 	public InputStream getInputStream() throws IOException {
 		URLConnection con = this.url.openConnection();
-		ResourceUtils.useCachesIfNecessary(con);
+		customizeConnection(con);
 		try {
 			return con.getInputStream();
 		}
@@ -317,12 +318,15 @@ public class UrlResource extends AbstractFileResolvingResource {
 	}
 
 	/**
-	 * This implementation returns the name of the file that this URL refers to.
+	 * This implementation returns the URL-decoded name of the file that this URL
+	 * refers to.
 	 * @see java.net.URL#getPath()
+	 * @see java.net.URLDecoder#decode(String, java.nio.charset.Charset)
 	 */
 	@Override
 	public String getFilename() {
-		return StringUtils.getFilename(getCleanedUrl().getPath());
+		String filename = StringUtils.getFilename(getCleanedUrl().getPath());
+		return URLDecoder.decode(filename, StandardCharsets.UTF_8);
 	}
 
 	/**

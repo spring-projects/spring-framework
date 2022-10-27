@@ -19,84 +19,15 @@ package org.springframework.aot.hint;
 import java.lang.reflect.Field;
 
 /**
- * A hint that describes the need of reflection on a {@link Field}.
+ * A hint that describes the need for reflection on a {@link Field}.
  *
  * @author Stephane Nicoll
  * @since 6.0
  */
 public final class FieldHint extends MemberHint {
 
-	private final boolean allowWrite;
-
-	private final boolean allowUnsafeAccess;
-
-
-	private FieldHint(Builder builder) {
-		super(builder.name);
-		this.allowWrite = builder.allowWrite;
-		this.allowUnsafeAccess = builder.allowUnsafeAccess;
+	FieldHint(String name) {
+		super(name);
 	}
 
-	/**
-	 * Return whether setting the value of the field should be allowed.
-	 * @return {@code true} to allow {@link Field#set(Object, Object)}.
-	 */
-	public boolean isAllowWrite() {
-		return this.allowWrite;
-	}
-
-	/**
-	 * Return whether if using {@code Unsafe} on the field should be allowed.
-	 * @return {@code true} to allow unsafe access
-	 */
-	public boolean isAllowUnsafeAccess() {
-		return this.allowUnsafeAccess;
-	}
-
-
-	/**
-	 * Builder for {@link FieldHint}.
-	 */
-	public static class Builder {
-
-		private final String name;
-
-		private boolean allowWrite;
-
-		private boolean allowUnsafeAccess;
-
-
-		Builder(String name) {
-			this.name = name;
-		}
-
-		/**
-		 * Specify if setting the value of the field should be allowed.
-		 * @param allowWrite {@code true} to allow {@link Field#set(Object, Object)}
-		 * @return {@code this}, to facilitate method chaining
-		 */
-		public Builder allowWrite(boolean allowWrite) {
-			this.allowWrite = allowWrite;
-			return this;
-		}
-
-		/**
-		 * Specify if using {@code Unsafe} on the field should be allowed.
-		 * @param allowUnsafeAccess {@code true} to allow unsafe access
-		 * @return {@code this}, to facilitate method chaining
-		 */
-		public Builder allowUnsafeAccess(boolean allowUnsafeAccess) {
-			this.allowUnsafeAccess = allowUnsafeAccess;
-			return this;
-		}
-
-		/**
-		 * Create a {@link FieldHint} based on the state of this builder.
-		 * @return a field hint
-		 */
-		FieldHint build() {
-			return new FieldHint(this);
-		}
-
-	}
 }

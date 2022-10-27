@@ -21,6 +21,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.JRE;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -38,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Sebastien Deleuze
  */
+@DisabledOnJre(value = JRE.JAVA_19, disabledReason = "Kotlin doesn't support Java 19 yet")
 public class KotlinScriptTemplateTests {
 
 	@Test

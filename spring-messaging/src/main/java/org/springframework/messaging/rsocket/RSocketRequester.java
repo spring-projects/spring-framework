@@ -84,6 +84,11 @@ public interface RSocketRequester extends Disposable {
 	MimeType metadataMimeType();
 
 	/**
+	 * Return the configured {@link RSocketStrategies}.
+	 */
+	RSocketStrategies strategies();
+
+	/**
 	 * Begin to specify a new request with the given route to a remote handler.
 	 * <p>The route can be a template with placeholders, e.g.
 	 * {@code "flight.{code}"} in which case the supplied route variables are

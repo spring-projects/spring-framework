@@ -68,7 +68,6 @@ class RequestMappingIntegrationTests extends AbstractRequestMappingIntegrationTe
 		HttpHeaders headers = getRestTemplate().headForHeaders(url);
 		String contentType = headers.getFirst("Content-Type");
 		assertThat(contentType).isNotNull();
-		assertThat(contentType.toLowerCase()).isEqualTo("text/html;charset=utf-8");
 		assertThat(headers.getContentLength()).isEqualTo(3);
 	}
 

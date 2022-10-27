@@ -37,7 +37,7 @@ class InvocationsRecorderClassTransformer implements ClassFileTransformer {
 
 	private static final String AGENT_PACKAGE = InvocationsRecorderClassTransformer.class.getPackageName().replace('.', '/');
 
-	private static final String AOT_DYNAMIC_CLASSLOADER = "org/springframework/aot/test/generator/compile/DynamicClassLoader";
+	private static final String AOT_DYNAMIC_CLASSLOADER = "org/springframework/aot/test/generate/compile/DynamicClassLoader";
 
 	private final String[] instrumentedPackages;
 

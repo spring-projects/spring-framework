@@ -61,12 +61,6 @@ final class SimpleStreamingClientHttpRequest extends AbstractClientHttpRequest {
 	}
 
 	@Override
-	@Deprecated
-	public String getMethodValue() {
-		return this.connection.getRequestMethod();
-	}
-
-	@Override
 	public URI getURI() {
 		try {
 			return this.connection.getURL().toURI();

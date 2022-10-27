@@ -380,6 +380,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 				Class<?> deserializationView = mappingJacksonInputMessage.getDeserializationView();
 				if (deserializationView != null) {
 					ObjectReader objectReader = objectMapper.readerWithView(deserializationView).forType(javaType);
+					objectReader = customizeReader(objectReader, javaType);
 					if (isUnicode) {
 						return objectReader.readValue(inputStream);
 					}
@@ -389,12 +390,15 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 					}
 				}
 			}
+
+			ObjectReader objectReader = objectMapper.reader().forType(javaType);
+			objectReader = customizeReader(objectReader, javaType);
 			if (isUnicode) {
-				return objectMapper.readValue(inputStream, javaType);
+				return objectReader.readValue(inputStream);
 			}
 			else {
 				Reader reader = new InputStreamReader(inputStream, charset);
-				return objectMapper.readValue(reader, javaType);
+				return objectReader.readValue(reader);
 			}
 		}
 		catch (InvalidDefinitionException ex) {
@@ -403,6 +407,18 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		catch (JsonProcessingException ex) {
 			throw new HttpMessageNotReadableException("JSON parse error: " + ex.getOriginalMessage(), ex, inputMessage);
 		}
+	}
+
+	/**
+	 * Subclasses can use this method to customize {@link ObjectReader} used
+	 * for reading values.
+	 * @param reader the reader instance to customize
+	 * @param javaType the target type of element values to read to
+	 * @return the customized {@link ObjectReader}
+	 * @since 6.0
+	 */
+	protected ObjectReader customizeReader(ObjectReader reader, JavaType javaType) {
+		return reader;
 	}
 
 	/**
@@ -465,6 +481,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 					config.isEnabled(SerializationFeature.INDENT_OUTPUT)) {
 				objectWriter = objectWriter.with(this.ssePrettyPrinter);
 			}
+			objectWriter = customizeWriter(objectWriter, javaType, contentType);
 			objectWriter.writeValue(generator, value);
 
 			writeSuffix(generator, object);
@@ -476,6 +493,21 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		catch (JsonProcessingException ex) {
 			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getOriginalMessage(), ex);
 		}
+	}
+
+	/**
+	 * Subclasses can use this method to customize {@link ObjectWriter} used
+	 * for writing values.
+	 * @param writer the writer instance to customize
+	 * @param javaType the type of element values to write
+	 * @param contentType the selected media type
+	 * @return the customized {@link ObjectWriter}
+	 * @since 6.0
+	 */
+	protected ObjectWriter customizeWriter(
+			ObjectWriter writer, @Nullable JavaType javaType, @Nullable MediaType contentType) {
+
+		return writer;
 	}
 
 	/**

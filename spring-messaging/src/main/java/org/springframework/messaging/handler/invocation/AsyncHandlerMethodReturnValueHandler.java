@@ -67,7 +67,7 @@ public interface AsyncHandlerMethodReturnValueHandler extends HandlerMethodRetur
 	 * @deprecated as of 6.0, in favor of
 	 * {@link #toCompletableFuture(Object, MethodParameter)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	@Nullable
 	default org.springframework.util.concurrent.ListenableFuture<?> toListenableFuture(
 			Object returnValue, MethodParameter returnType) {

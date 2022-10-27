@@ -161,8 +161,11 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 	@Override
 	public void afterTestMethod(TestContext testContext) throws Exception {
 		if (Boolean.TRUE.equals(testContext.getAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE))) {
-			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Resetting RequestContextHolder for test context %s.", testContext));
+			if (logger.isTraceEnabled()) {
+				logger.trace("Resetting RequestContextHolder for test context " + testContext);
+			}
+			else if (logger.isDebugEnabled()) {
+				logger.debug("Resetting RequestContextHolder for test class " + testContext.getTestClass().getName());
 			}
 			RequestContextHolder.resetRequestAttributes();
 			testContext.setAttribute(DependencyInjectionTestExecutionListener.REINJECT_DEPENDENCIES_ATTRIBUTE,
@@ -194,10 +197,13 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 						"The WebApplicationContext for test context %s must be configured with a MockServletContext.",
 						testContext));
 
-			if (logger.isDebugEnabled()) {
-				logger.debug(String.format(
-						"Setting up MockHttpServletRequest, MockHttpServletResponse, ServletWebRequest, and RequestContextHolder for test context %s.",
-						testContext));
+			if (logger.isTraceEnabled()) {
+				logger.trace("Setting up MockHttpServletRequest, MockHttpServletResponse, ServletWebRequest, " +
+						"and RequestContextHolder for test context " + testContext);
+			}
+			else if (logger.isDebugEnabled()) {
+				logger.debug("Setting up MockHttpServletRequest, MockHttpServletResponse, ServletWebRequest, " +
+						"and RequestContextHolder for test class " + testContext.getTestClass().getName());
 			}
 
 			MockServletContext mockServletContext = (MockServletContext) servletContext;

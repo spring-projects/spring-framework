@@ -18,6 +18,8 @@ package org.springframework.aot.hint;
 
 import java.lang.reflect.Executable;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Represent the need of reflection for a given {@link Executable}.
  *
@@ -36,5 +38,14 @@ public enum ExecutableMode {
 	 * the {@link Executable}.
 	 */
 	INVOKE;
+
+	/**
+	 * Specify if this mode already includes the specified {@code other} mode.
+	 * @param other the other mode to check
+	 * @return {@code true} if this mode includes the other mode
+	 */
+	boolean includes(@Nullable ExecutableMode other) {
+		return (other == null || this.ordinal() >= other.ordinal());
+	}
 
 }

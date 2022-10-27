@@ -16,6 +16,10 @@
 
 package org.springframework.context.annotation;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +28,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import javax.lang.model.element.Modifier;
 
@@ -33,8 +39,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.framework.autoproxy.AutoProxyUtils;
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.generate.MethodReference;
+import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.ResourceHints;
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -44,6 +51,11 @@ import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotProcessor;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
+import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
+import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
+import org.springframework.beans.factory.aot.BeanRegistrationCode;
+import org.springframework.beans.factory.aot.BeanRegistrationCodeFragments;
+import org.springframework.beans.factory.aot.BeanRegistrationCodeFragmentsDecorator;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -59,18 +71,21 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationStartupAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ConfigurationClassEnhancer.EnhancedConfiguration;
-import org.springframework.core.NativeDetector;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.PropertySourceDescriptor;
+import org.springframework.core.io.support.PropertySourceProcessor;
 import org.springframework.core.metrics.ApplicationStartup;
 import org.springframework.core.metrics.StartupStep;
 import org.springframework.core.type.AnnotationMetadata;
@@ -78,11 +93,13 @@ import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.javapoet.CodeBlock;
+import org.springframework.javapoet.CodeBlock.Builder;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 
 /**
  * {@link BeanFactoryPostProcessor} used for bootstrapping processing of
@@ -104,8 +121,8 @@ import org.springframework.util.ClassUtils;
  * @since 3.0
  */
 public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor,
-		BeanFactoryInitializationAotProcessor, PriorityOrdered, ResourceLoaderAware, ApplicationStartupAware,
-		BeanClassLoaderAware, EnvironmentAware {
+		BeanRegistrationAotProcessor, BeanFactoryInitializationAotProcessor, PriorityOrdered,
+		ResourceLoaderAware, ApplicationStartupAware, BeanClassLoaderAware, EnvironmentAware {
 
 	/**
 	 * A {@code BeanNameGenerator} using fully qualified class names as default bean names.
@@ -157,6 +174,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	private BeanNameGenerator importBeanNameGenerator = IMPORT_BEAN_NAME_GENERATOR;
 
 	private ApplicationStartup applicationStartup = ApplicationStartup.DEFAULT;
+
+	@Nullable
+	private List<PropertySourceDescriptor> propertySourceDescriptors;
 
 
 	@Override
@@ -285,12 +305,34 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		beanFactory.addBeanPostProcessor(new ImportAwareBeanPostProcessor(beanFactory));
 	}
 
+	@Nullable
 	@Override
-	public BeanFactoryInitializationAotContribution processAheadOfTime(
-			ConfigurableListableBeanFactory beanFactory) {
+	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+		Object configClassAttr = registeredBean.getMergedBeanDefinition()
+				.getAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE);
+		if (ConfigurationClassUtils.CONFIGURATION_CLASS_FULL.equals(configClassAttr)) {
+			Class<?> proxyClass = registeredBean.getBeanType().toClass();
+			return BeanRegistrationAotContribution.withCustomCodeFragments(codeFragments ->
+					new ConfigurationClassProxyBeanRegistrationCodeFragments(codeFragments, proxyClass));
+		}
+		return null;
+	}
 
-		return (beanFactory.containsBean(IMPORT_REGISTRY_BEAN_NAME)
-				? new AotContribution(beanFactory) : null);
+	@Override
+	public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
+		boolean hasPropertySourceDescriptors = !CollectionUtils.isEmpty(this.propertySourceDescriptors);
+		boolean hasImportRegistry = beanFactory.containsBean(IMPORT_REGISTRY_BEAN_NAME);
+		if (hasPropertySourceDescriptors || hasImportRegistry) {
+			return (generationContext, code) -> {
+				if (hasPropertySourceDescriptors) {
+					new PropertySourcesAotContribution(this.propertySourceDescriptors).applyTo(generationContext, code);
+				}
+				if (hasImportRegistry) {
+					new ImportAwareAotContribution(beanFactory).applyTo(generationContext, code);
+				}
+			};
+		}
+		return null;
 	}
 
 	/**
@@ -395,6 +437,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			sbr.registerSingleton(IMPORT_REGISTRY_BEAN_NAME, parser.getImportRegistry());
 		}
 
+		// Store the PropertySourceDescriptors to contribute them Ahead-of-time if necessary
+		this.propertySourceDescriptors = parser.getPropertySourceDescriptors();
+
 		if (this.metadataReaderFactory instanceof CachingMetadataReaderFactory cachingMetadataReaderFactory) {
 			// Clear cache in externally provided MetadataReaderFactory; this is a no-op
 			// for a shared cache since it'll be cleared by the ApplicationContext.
@@ -452,7 +497,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				configBeanDefs.put(beanName, abd);
 			}
 		}
-		if (configBeanDefs.isEmpty() || NativeDetector.inNativeImage()) {
+		if (configBeanDefs.isEmpty()) {
 			// nothing to enhance -> return immediately
 			enhanceConfigClasses.end();
 			return;
@@ -510,12 +555,12 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	}
 
 
-	private static class AotContribution implements BeanFactoryInitializationAotContribution {
+	private static class ImportAwareAotContribution implements BeanFactoryInitializationAotContribution {
 
 		private static final String BEAN_FACTORY_VARIABLE = BeanFactoryInitializationCode.BEAN_FACTORY_VARIABLE;
 
-		private static final ParameterizedTypeName STRING_STRING_MAP = ParameterizedTypeName
-				.get(Map.class, String.class, String.class);
+		private static final ParameterizedTypeName STRING_STRING_MAP =
+				ParameterizedTypeName.get(Map.class, String.class, String.class);
 
 		private static final String MAPPINGS_VARIABLE = "mappings";
 
@@ -523,14 +568,11 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 		private static final String BEAN_NAME = "org.springframework.context.annotation.internalImportAwareAotProcessor";
 
-
 		private final ConfigurableListableBeanFactory beanFactory;
 
-
-		public AotContribution(ConfigurableListableBeanFactory beanFactory) {
+		public ImportAwareAotContribution(ConfigurableListableBeanFactory beanFactory) {
 			this.beanFactory = beanFactory;
 		}
-
 
 		@Override
 		public void applyTo(GenerationContext generationContext,
@@ -543,36 +585,35 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 						.add("addImportAwareBeanPostProcessors", method ->
 								generateAddPostProcessorMethod(method, mappings));
 				beanFactoryInitializationCode
-						.addInitializer(MethodReference.of(generatedMethod.getName()));
+						.addInitializer(generatedMethod.toMethodReference());
 				ResourceHints hints = generationContext.getRuntimeHints().resources();
 				mappings.forEach(
 						(target, from) -> hints.registerType(TypeReference.of(from)));
 			}
 		}
 
-		private void generateAddPostProcessorMethod(MethodSpec.Builder method,
-				Map<String, String> mappings) {
-
-			method.addJavadoc(
-					"Add ImportAwareBeanPostProcessor to support ImportAware beans");
+		private void generateAddPostProcessorMethod(MethodSpec.Builder method, Map<String, String> mappings) {
+			method.addJavadoc("Add ImportAwareBeanPostProcessor to support ImportAware beans");
 			method.addModifiers(Modifier.PRIVATE);
 			method.addParameter(DefaultListableBeanFactory.class, BEAN_FACTORY_VARIABLE);
 			method.addCode(generateAddPostProcessorCode(mappings));
 		}
 
 		private CodeBlock generateAddPostProcessorCode(Map<String, String> mappings) {
-			CodeBlock.Builder builder = CodeBlock.builder();
-			builder.addStatement("$T $L = new $T<>()", STRING_STRING_MAP,
+			CodeBlock.Builder code = CodeBlock.builder();
+			code.addStatement("$T $L = new $T<>()", STRING_STRING_MAP,
 					MAPPINGS_VARIABLE, HashMap.class);
-			mappings.forEach((type, from) -> builder.addStatement("$L.put($S, $S)",
+			mappings.forEach((type, from) -> code.addStatement("$L.put($S, $S)",
 					MAPPINGS_VARIABLE, type, from));
-			builder.addStatement("$T $L = new $T($T.class)", RootBeanDefinition.class,
+			code.addStatement("$T $L = new $T($T.class)", RootBeanDefinition.class,
 					BEAN_DEFINITION_VARIABLE, RootBeanDefinition.class, ImportAwareAotBeanPostProcessor.class);
-			builder.addStatement("$L.getConstructorArgumentValues().addIndexedArgumentValue(0, $L)",
-					BEAN_DEFINITION_VARIABLE, MAPPINGS_VARIABLE);
-			builder.addStatement("$L.registerBeanDefinition($S, $L)",
+			code.addStatement("$L.setRole($T.ROLE_INFRASTRUCTURE)",
+					BEAN_DEFINITION_VARIABLE, BeanDefinition.class);
+			code.addStatement("$L.setInstanceSupplier(() -> new $T($L))",
+					BEAN_DEFINITION_VARIABLE, ImportAwareAotBeanPostProcessor.class, MAPPINGS_VARIABLE);
+			code.addStatement("$L.registerBeanDefinition($S, $L)",
 					BEAN_FACTORY_VARIABLE, BEAN_NAME, BEAN_DEFINITION_VARIABLE);
-			return builder.build();
+			return code.build();
 		}
 
 		private Map<String, String> buildImportAwareMappings() {
@@ -590,6 +631,132 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				}
 			}
 			return mappings;
+		}
+
+	}
+
+	private static class PropertySourcesAotContribution implements BeanFactoryInitializationAotContribution {
+
+		private static final String ENVIRONMENT_VARIABLE = "environment";
+
+		private static final String RESOURCE_LOADER_VARIABLE = "resourceLoader";
+
+		private final List<PropertySourceDescriptor> descriptors;
+
+		PropertySourcesAotContribution(List<PropertySourceDescriptor> descriptors) {
+			this.descriptors = descriptors;
+		}
+
+		@Override
+		public void applyTo(GenerationContext generationContext, BeanFactoryInitializationCode beanFactoryInitializationCode) {
+			GeneratedMethod generatedMethod = beanFactoryInitializationCode
+					.getMethods()
+					.add("processPropertySources", this::generateAddPropertySourceProcessorMethod);
+			beanFactoryInitializationCode
+					.addInitializer(generatedMethod.toMethodReference());
+		}
+
+		private void generateAddPropertySourceProcessorMethod(MethodSpec.Builder method) {
+			method.addJavadoc("Apply known @PropertySources to the environment.");
+			method.addModifiers(Modifier.PRIVATE);
+			method.addParameter(ConfigurableEnvironment.class, ENVIRONMENT_VARIABLE);
+			method.addParameter(ResourceLoader.class, RESOURCE_LOADER_VARIABLE);
+			method.addCode(generateAddPropertySourceProcessorCode());
+		}
+
+		private CodeBlock generateAddPropertySourceProcessorCode() {
+			Builder code = CodeBlock.builder();
+			String processorVariable = "processor";
+			code.addStatement("$T $L = new $T($L, $L)", PropertySourceProcessor.class,
+					processorVariable, PropertySourceProcessor.class, ENVIRONMENT_VARIABLE,
+					RESOURCE_LOADER_VARIABLE);
+			code.beginControlFlow("try");
+			for (PropertySourceDescriptor descriptor : this.descriptors) {
+				code.addStatement("$L.processPropertySource($L)", processorVariable,
+						generatePropertySourceDescriptorCode(descriptor));
+			}
+			code.nextControlFlow("catch ($T ex)", IOException.class);
+			code.addStatement("throw new $T(ex)", UncheckedIOException.class);
+			code.endControlFlow();
+			return code.build();
+		}
+
+		private CodeBlock generatePropertySourceDescriptorCode(PropertySourceDescriptor descriptor) {
+			CodeBlock.Builder code = CodeBlock.builder();
+			code.add("new $T(", PropertySourceDescriptor.class);
+			CodeBlock values = descriptor.locations().stream()
+					.map(value -> CodeBlock.of("$S", value)).collect(CodeBlock.joining(", "));
+			if (descriptor.name() == null && descriptor.propertySourceFactory() == null
+					&& descriptor.encoding() == null && !descriptor.ignoreResourceNotFound()) {
+				code.add("$L)", values);
+			}
+			else {
+				List<CodeBlock> arguments = new ArrayList<>();
+				arguments.add(CodeBlock.of("$T.of($L)", List.class, values));
+				arguments.add(CodeBlock.of("$L", descriptor.ignoreResourceNotFound()));
+				arguments.add(handleNull(descriptor.name(), () -> CodeBlock.of("$S", descriptor.name())));
+				arguments.add(handleNull(descriptor.propertySourceFactory(),
+						() -> CodeBlock.of("$T.class", descriptor.propertySourceFactory())));
+				arguments.add(handleNull(descriptor.encoding(),
+						() -> CodeBlock.of("$S", descriptor.encoding())));
+				code.add(CodeBlock.join(arguments, ", "));
+				code.add(")");
+			}
+			return code.build();
+		}
+
+		private CodeBlock handleNull(@Nullable Object value, Supplier<CodeBlock> nonNull) {
+			if (value == null) {
+				return CodeBlock.of("null");
+			}
+			else {
+				return nonNull.get();
+			}
+		}
+
+	}
+
+	private static class ConfigurationClassProxyBeanRegistrationCodeFragments extends BeanRegistrationCodeFragmentsDecorator {
+
+		private final Class<?> proxyClass;
+
+		public ConfigurationClassProxyBeanRegistrationCodeFragments(BeanRegistrationCodeFragments codeFragments,
+				Class<?> proxyClass) {
+			super(codeFragments);
+			this.proxyClass = proxyClass;
+		}
+
+		@Override
+		public CodeBlock generateSetBeanDefinitionPropertiesCode(GenerationContext generationContext,
+				BeanRegistrationCode beanRegistrationCode, RootBeanDefinition beanDefinition, Predicate<String> attributeFilter) {
+			CodeBlock.Builder code = CodeBlock.builder();
+			code.add(super.generateSetBeanDefinitionPropertiesCode(generationContext,
+					beanRegistrationCode, beanDefinition, attributeFilter));
+			code.addStatement("$T.initializeConfigurationClass($T.class)",
+					ConfigurationClassUtils.class, ClassUtils.getUserClass(this.proxyClass));
+			return code.build();
+		}
+
+		@Override
+		public CodeBlock generateInstanceSupplierCode(GenerationContext generationContext,
+				BeanRegistrationCode beanRegistrationCode, Executable constructorOrFactoryMethod,
+				boolean allowDirectSupplierShortcut) {
+			Executable executableToUse = proxyExecutable(generationContext.getRuntimeHints(), constructorOrFactoryMethod);
+			return super.generateInstanceSupplierCode(generationContext, beanRegistrationCode,
+					executableToUse, allowDirectSupplierShortcut);
+		}
+
+		private Executable proxyExecutable(RuntimeHints runtimeHints, Executable userExecutable) {
+			if (userExecutable instanceof Constructor<?> userConstructor) {
+				try {
+					runtimeHints.reflection().registerConstructor(userConstructor, ExecutableMode.INTROSPECT);
+					return this.proxyClass.getConstructor(userExecutable.getParameterTypes());
+				}
+				catch (NoSuchMethodException ex) {
+					throw new IllegalStateException("No matching constructor found on proxy " + this.proxyClass, ex);
+				}
+			}
+			return userExecutable;
 		}
 
 	}

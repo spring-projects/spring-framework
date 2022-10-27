@@ -575,22 +575,30 @@ public class DefaultStompSessionTests {
 		this.session.setTaskScheduler(mock(TaskScheduler.class));
 
 		AtomicReference<Boolean> received = new AtomicReference<>();
+		AtomicReference<StompHeaders> receivedHeaders = new AtomicReference<>();
 
 		StompHeaders headers = new StompHeaders();
 		headers.setDestination("/topic/foo");
 		headers.setReceipt("my-receipt");
 		Subscription subscription = this.session.subscribe(headers, mock(StompFrameHandler.class));
-		subscription.addReceiptTask(() -> received.set(true));
+		subscription.addReceiptTask(receiptHeaders -> {
+			received.set(true);
+			receivedHeaders.set(receiptHeaders);
+		});
 
 		assertThat((Object) received.get()).isNull();
 
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
 		accessor.setReceiptId("my-receipt");
+		accessor.setNativeHeader("foo", "bar");
 		accessor.setLeaveMutable(true);
 		this.session.handleMessage(MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders()));
 
 		assertThat(received.get()).isNotNull();
 		assertThat(received.get()).isTrue();
+		assertThat(receivedHeaders.get()).isNotNull();
+		assertThat(receivedHeaders.get().get("foo").size()).isEqualTo(1);
+		assertThat(receivedHeaders.get().get("foo").get(0)).isEqualTo("bar");
 	}
 
 	@Test
@@ -599,6 +607,7 @@ public class DefaultStompSessionTests {
 		this.session.setTaskScheduler(mock(TaskScheduler.class));
 
 		AtomicReference<Boolean> received = new AtomicReference<>();
+		AtomicReference<StompHeaders> receivedHeaders = new AtomicReference<>();
 
 		StompHeaders headers = new StompHeaders();
 		headers.setDestination("/topic/foo");
@@ -607,13 +616,20 @@ public class DefaultStompSessionTests {
 
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
 		accessor.setReceiptId("my-receipt");
+		accessor.setNativeHeader("foo", "bar");
 		accessor.setLeaveMutable(true);
 		this.session.handleMessage(MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders()));
 
-		subscription.addReceiptTask(() -> received.set(true));
+		subscription.addReceiptTask(receiptHeaders -> {
+			received.set(true);
+			receivedHeaders.set(receiptHeaders);
+		});
 
 		assertThat(received.get()).isNotNull();
 		assertThat(received.get()).isTrue();
+		assertThat(receivedHeaders.get()).isNotNull();
+		assertThat(receivedHeaders.get().get("foo").size()).isEqualTo(1);
+		assertThat(receivedHeaders.get().get("foo").get(0)).isEqualTo("bar");
 	}
 
 	@Test

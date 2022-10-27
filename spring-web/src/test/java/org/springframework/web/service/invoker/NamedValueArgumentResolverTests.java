@@ -21,6 +21,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AliasFor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
@@ -58,9 +60,11 @@ class NamedValueArgumentResolverTests {
 
 
 	@BeforeEach
+	@SuppressWarnings("deprecation")
 	void setUp() throws Exception {
-		HttpServiceProxyFactory proxyFactory = new HttpServiceProxyFactory(this.client);
-		proxyFactory.addCustomArgumentResolver(this.argumentResolver);
+		HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builder(this.client)
+				.customArgumentResolver(this.argumentResolver)
+				.build();
 		proxyFactory.afterPropertiesSet();
 
 		this.service = proxyFactory.createClient(Service.class);
@@ -71,6 +75,12 @@ class NamedValueArgumentResolverTests {
 	void stringTestValue() {
 		this.service.executeString("test");
 		assertTestValue("value", "test");
+	}
+
+	@Test // gh-29095
+	void dateTestValue() {
+		this.service.executeDate(LocalDate.of(2022, 9, 16));
+		assertTestValue("value", "2022-09-16");
 	}
 
 	@Test
@@ -173,6 +183,9 @@ class NamedValueArgumentResolverTests {
 
 		@GetExchange
 		void executeString(@TestValue String value);
+
+		@GetExchange
+		void executeDate(@TestValue @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate value);
 
 		@GetExchange
 		void execute(@TestValue Object value);

@@ -41,6 +41,7 @@ import org.springframework.core.task.support.TaskExecutorAdapter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.StringValueResolver;
 import org.springframework.util.function.SingletonSupplier;
 
 /**
@@ -56,6 +57,7 @@ import org.springframework.util.function.SingletonSupplier;
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author He Bo
  * @since 3.1.2
  */
 public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
@@ -80,6 +82,8 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	@Nullable
 	private BeanFactory beanFactory;
 
+	@Nullable
+	private StringValueResolver embeddedValueResolver;
 
 	/**
 	 * Create a new instance with a default {@link AsyncUncaughtExceptionHandler}.
@@ -150,6 +154,9 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
+		if (beanFactory instanceof ConfigurableBeanFactory configurableBeanFactory) {
+			this.embeddedValueResolver = new EmbeddedValueResolver(configurableBeanFactory);
+		}
 	}
 
 
@@ -163,6 +170,9 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 		if (executor == null) {
 			Executor targetExecutor;
 			String qualifier = getExecutorQualifier(method);
+			if (this.embeddedValueResolver != null && StringUtils.hasLength(qualifier)) {
+				qualifier = this.embeddedValueResolver.resolveStringValue(qualifier);
+			}
 			if (StringUtils.hasLength(qualifier)) {
 				targetExecutor = findQualifiedExecutor(this.beanFactory, qualifier);
 			}
@@ -205,10 +215,6 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 		if (beanFactory == null) {
 			throw new IllegalStateException("BeanFactory must be set on " + getClass().getSimpleName() +
 					" to access qualified executor '" + qualifier + "'");
-		}
-		if (beanFactory instanceof ConfigurableBeanFactory configurableBeanFactory) {
-			EmbeddedValueResolver embeddedValueResolver = new EmbeddedValueResolver(configurableBeanFactory);
-			qualifier = embeddedValueResolver.resolveStringValue(qualifier);
 		}
 		return BeanFactoryAnnotationUtils.qualifiedBeanOfType(beanFactory, Executor.class, qualifier);
 	}

@@ -20,7 +20,6 @@ import java.util.stream.Stream;
 
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
-import org.springframework.aot.hint.support.RuntimeHintsUtils;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -35,7 +34,7 @@ class JakartaAnnotationsRuntimeHints implements RuntimeHintsRegistrar {
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
 		if (ClassUtils.isPresent("jakarta.inject.Inject", classLoader)) {
 			Stream.of("jakarta.inject.Inject", "jakarta.inject.Qualifier").forEach(annotationType ->
-					RuntimeHintsUtils.registerAnnotation(hints, ClassUtils.resolveClassName(annotationType, classLoader)));
+					hints.reflection().registerType(ClassUtils.resolveClassName(annotationType, classLoader)));
 		}
 	}
 

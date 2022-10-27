@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,8 @@ public final class TemporalAccessorParser implements Parser<TemporalAccessor> {
 	}
 
 	TemporalAccessorParser(Class<? extends TemporalAccessor> temporalAccessorType, DateTimeFormatter formatter,
-		@Nullable String[] fallbackPatterns, @Nullable Object source) {
+			@Nullable String[] fallbackPatterns, @Nullable Object source) {
+
 		this.temporalAccessorType = temporalAccessorType;
 		this.formatter = formatter;
 		this.fallbackPatterns = fallbackPatterns;
@@ -104,10 +105,19 @@ public final class TemporalAccessorParser implements Parser<TemporalAccessor> {
 					}
 				}
 			}
+			else {
+				// Fallback to ISO-based default java.time type parsing
+				try {
+					return defaultParse(text);
+				}
+				catch (DateTimeParseException ignoredException) {
+					// Ignore fallback parsing exception like above
+				}
+			}
 			if (this.source != null) {
 				throw new DateTimeParseException(
-					String.format("Unable to parse date time value \"%s\" using configuration from %s", text, this.source),
-					text, ex.getErrorIndex(), ex);
+						String.format("Unable to parse date time value \"%s\" using configuration from %s", text, this.source),
+						text, ex.getErrorIndex(), ex);
 			}
 			// else rethrow original exception
 			throw ex;
@@ -142,6 +152,39 @@ public final class TemporalAccessorParser implements Parser<TemporalAccessor> {
 		}
 		else if (MonthDay.class == this.temporalAccessorType) {
 			return MonthDay.parse(text, formatterToUse);
+		}
+		else {
+			throw new IllegalStateException("Unsupported TemporalAccessor type: " + this.temporalAccessorType);
+		}
+	}
+
+	private TemporalAccessor defaultParse(String text) throws DateTimeParseException {
+		if (Instant.class == this.temporalAccessorType) {
+			return Instant.parse(text);
+		}
+		else if (LocalDate.class == this.temporalAccessorType) {
+			return LocalDate.parse(text);
+		}
+		else if (LocalTime.class == this.temporalAccessorType) {
+			return LocalTime.parse(text);
+		}
+		else if (LocalDateTime.class == this.temporalAccessorType) {
+			return LocalDateTime.parse(text);
+		}
+		else if (ZonedDateTime.class == this.temporalAccessorType) {
+			return ZonedDateTime.parse(text);
+		}
+		else if (OffsetDateTime.class == this.temporalAccessorType) {
+			return OffsetDateTime.parse(text);
+		}
+		else if (OffsetTime.class == this.temporalAccessorType) {
+			return OffsetTime.parse(text);
+		}
+		else if (YearMonth.class == this.temporalAccessorType) {
+			return YearMonth.parse(text);
+		}
+		else if (MonthDay.class == this.temporalAccessorType) {
+			return MonthDay.parse(text);
 		}
 		else {
 			throw new IllegalStateException("Unsupported TemporalAccessor type: " + this.temporalAccessorType);

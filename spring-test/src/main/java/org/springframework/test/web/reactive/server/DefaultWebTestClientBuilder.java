@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.HttpComponentsClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.http.client.reactive.ReactorNetty2ClientHttpConnector;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -51,7 +52,9 @@ import org.springframework.web.util.UriBuilderFactory;
  */
 class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 
-	private static final boolean reactorClientPresent;
+	private static final boolean reactorNettyClientPresent;
+
+	private static final boolean reactorNetty2ClientPresent;
 
 	private static final boolean jettyClientPresent;
 
@@ -61,7 +64,8 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 
 	static {
 		ClassLoader loader = DefaultWebTestClientBuilder.class.getClassLoader();
-		reactorClientPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", loader);
+		reactorNettyClientPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", loader);
+		reactorNetty2ClientPresent = ClassUtils.isPresent("reactor.netty5.http.client.HttpClient", loader);
 		jettyClientPresent = ClassUtils.isPresent("org.eclipse.jetty.client.HttpClient", loader);
 		httpComponentsClientPresent =
 				ClassUtils.isPresent("org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient", loader) &&
@@ -301,8 +305,11 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 	}
 
 	private static ClientHttpConnector initConnector() {
-		if (reactorClientPresent) {
+		if (reactorNettyClientPresent) {
 			return new ReactorClientHttpConnector();
+		}
+		else if (reactorNetty2ClientPresent) {
+			return new ReactorNetty2ClientHttpConnector();
 		}
 		else if (jettyClientPresent) {
 			return new JettyClientHttpConnector();

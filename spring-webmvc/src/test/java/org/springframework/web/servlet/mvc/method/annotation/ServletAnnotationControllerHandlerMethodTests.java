@@ -2765,6 +2765,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 	@Controller
 	@RequestMapping("/myPath.do")
+	@SuppressWarnings("serial")
 	static class MyParameterDispatchingController implements Serializable {
 
 		private static final long serialVersionUID = 1L;

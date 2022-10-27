@@ -30,15 +30,29 @@ import org.springframework.core.annotation.AliasFor;
  * which {@link TestExecutionListener TestExecutionListeners} should be
  * registered with a {@link TestContextManager}.
  *
- * <p>Typically, {@code @TestExecutionListeners} will be used in conjunction
- * with {@link ContextConfiguration @ContextConfiguration}.
+ * <p>{@code @TestExecutionListeners} is used to register listeners for a
+ * particular test class, its subclasses, and its nested classes. If you wish to
+ * register a listener globally, you should register it via the automatic discovery
+ * mechanism described in {@link TestExecutionListener}.
  *
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
- * <em>composed annotations</em>.
- *
- * <p>As of Spring Framework 5.3, this annotation will be inherited from an
- * enclosing test class by default. See
+ * <em>composed annotations</em>. As of Spring Framework 5.3, this annotation will
+ * be inherited from an enclosing test class by default. See
  * {@link NestedTestConfiguration @NestedTestConfiguration} for details.
+ *
+ * <h3>Switching to default {@code TestExecutionListener} implementations</h3>
+ *
+ * <p>If you extend a class that is annotated with {@code @TestExecutionListeners}
+ * and you need to switch to using the <em>default</em> set of listeners, you
+ * can annotate your class with the following.
+ *
+ * <pre class="code">
+ * // Switch to default listeners
+ * &#064;TestExecutionListeners(listeners = {}, inheritListeners = false, mergeMode = MERGE_WITH_DEFAULTS)
+ * class MyTests extends BaseTests {
+ *     // ...
+ * }
+ * </pre>
  *
  * @author Sam Brannen
  * @since 2.5

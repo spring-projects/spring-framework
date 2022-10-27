@@ -60,7 +60,7 @@ class SimpleReflectiveProcessorTests {
 			assertThat(typeHint.getMemberCategories()).isEmpty();
 			assertThat(typeHint.constructors()).singleElement().satisfies(constructorHint -> {
 				assertThat(constructorHint.getName()).isEqualTo("<init>");
-				assertThat(constructorHint.getModes()).containsExactly(ExecutableMode.INVOKE);
+				assertThat(constructorHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
 				assertThat(constructorHint.getParameterTypes()).containsExactly(TypeReference.of(String.class));
 			});
 			assertThat(typeHint.fields()).isEmpty();
@@ -93,7 +93,7 @@ class SimpleReflectiveProcessorTests {
 			assertThat(typeHint.fields()).isEmpty();
 			assertThat(typeHint.methods()).singleElement().satisfies(methodHint -> {
 				assertThat(methodHint.getName()).isEqualTo("setName");
-				assertThat(methodHint.getModes()).containsExactly(ExecutableMode.INVOKE);
+				assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
 				assertThat(methodHint.getParameterTypes()).containsExactly(TypeReference.of(String.class));
 			});
 		});

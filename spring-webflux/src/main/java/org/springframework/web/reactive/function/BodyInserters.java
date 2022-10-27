@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.function;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -386,7 +385,7 @@ public abstract class BodyInserters {
 
 		List<MediaType> supportedMediaTypes = context.messageWriters().stream()
 				.flatMap(reader -> reader.getWritableMediaTypes(bodyType).stream())
-				.collect(Collectors.toList());
+				.toList();
 
 		return new UnsupportedMediaTypeException(mediaType, supportedMediaTypes, bodyType);
 	}

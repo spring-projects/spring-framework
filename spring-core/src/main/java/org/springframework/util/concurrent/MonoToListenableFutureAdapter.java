@@ -29,7 +29,7 @@ import reactor.core.publisher.Mono;
  * @param <T> the object type
  * @deprecated as of 6.0, in favor of {@link Mono#toFuture()}
  */
-@Deprecated
+@Deprecated(since = "6.0")
 public class MonoToListenableFutureAdapter<T> extends CompletableToListenableFutureAdapter<T> {
 
 	public MonoToListenableFutureAdapter(Mono<T> mono) {

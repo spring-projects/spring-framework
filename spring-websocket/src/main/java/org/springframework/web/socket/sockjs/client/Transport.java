@@ -45,7 +45,7 @@ public interface Transport {
 	 * @return a future to indicate success or failure to connect
 	 * @deprecated as of 6.0, in favor of {@link #connectAsync(TransportRequest, WebSocketHandler)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	default org.springframework.util.concurrent.ListenableFuture<WebSocketSession> connect(
 			TransportRequest request, WebSocketHandler webSocketHandler) {
 		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(

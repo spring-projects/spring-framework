@@ -16,6 +16,7 @@
 
 package org.springframework.web;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.http.HttpHeaders;
@@ -37,6 +38,10 @@ import org.springframework.util.CollectionUtils;
 @SuppressWarnings("serial")
 public class HttpMediaTypeNotSupportedException extends HttpMediaTypeException {
 
+	private static final String PARSE_ERROR_DETAIL_CODE =
+			ErrorResponse.getDefaultDetailMessageCode(HttpMediaTypeNotSupportedException.class, "parseError");
+
+
 	@Nullable
 	private final MediaType contentType;
 
@@ -49,7 +54,7 @@ public class HttpMediaTypeNotSupportedException extends HttpMediaTypeException {
 	 * @param message the exception message
 	 */
 	public HttpMediaTypeNotSupportedException(String message) {
-		super(message);
+		super(message, Collections.emptyList(), PARSE_ERROR_DETAIL_CODE, null);
 		this.contentType = null;
 		this.httpMethod = null;
 		getBody().setDetail("Could not parse Content-Type.");
@@ -89,7 +94,7 @@ public class HttpMediaTypeNotSupportedException extends HttpMediaTypeException {
 	public HttpMediaTypeNotSupportedException(@Nullable MediaType contentType,
 			List<MediaType> supportedMediaTypes, @Nullable HttpMethod httpMethod, String message) {
 
-		super(message, supportedMediaTypes);
+		super(message, supportedMediaTypes, null, new Object[] {contentType, supportedMediaTypes});
 		this.contentType = contentType;
 		this.httpMethod = httpMethod;
 		getBody().setDetail("Content-Type '" + this.contentType + "' is not supported.");

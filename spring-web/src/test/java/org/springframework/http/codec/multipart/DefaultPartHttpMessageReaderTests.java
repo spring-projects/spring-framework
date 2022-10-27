@@ -418,16 +418,15 @@ class DefaultPartHttpMessageReaderTests  {
 	@interface ParameterizedDefaultPartHttpMessageReaderTest {
 	}
 
+	@SuppressWarnings("removal")
 	static Stream<Arguments> messageReaders() {
 		DefaultPartHttpMessageReader streaming = new DefaultPartHttpMessageReader();
 		streaming.setStreaming(true);
 
 		DefaultPartHttpMessageReader inMemory = new DefaultPartHttpMessageReader();
-		inMemory.setStreaming(false);
 		inMemory.setMaxInMemorySize(1000);
 
 		DefaultPartHttpMessageReader onDisk = new DefaultPartHttpMessageReader();
-		onDisk.setStreaming(false);
 		onDisk.setMaxInMemorySize(100);
 
 		return Stream.of(

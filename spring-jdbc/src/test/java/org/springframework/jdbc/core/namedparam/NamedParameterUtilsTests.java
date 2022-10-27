@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -325,6 +325,37 @@ public class NamedParameterUtilsTests {
 		ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);
 		assertThat(psql.getNamedParameterCount()).isEqualTo(1);
 		assertThat(psql.getParameterNames()).containsExactly("ext");
+
+		String sqlToUse = NamedParameterUtils.substituteNamedParameters(psql, null);
+		assertThat(sqlToUse).isEqualTo("SELECT ARRAY[?]");
+	}
+
+	@Test  // gh-27925
+	void namedParamMapReference() {
+		String sql = "insert into foos (id) values (:headers[id])";
+		ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);
+		assertThat(psql.getNamedParameterCount()).isEqualTo(1);
+		assertThat(psql.getParameterNames()).containsExactly("headers[id]");
+
+		class Foo {
+			final Map<String, Object> headers = new HashMap<>();
+			public Foo() {
+				this.headers.put("id", 1);
+			}
+			public Map<String, Object> getHeaders() {
+				return this.headers;
+			}
+		}
+
+		Foo foo = new Foo();
+		SqlParameterSource paramSource = new BeanPropertySqlParameterSource(foo);
+		Object[] params = NamedParameterUtils.buildValueArray(psql, paramSource, null);
+
+		assertThat(params[0]).isInstanceOf(SqlParameterValue.class);
+		assertThat(((SqlParameterValue) params[0]).getValue()).isEqualTo(foo.getHeaders().get("id"));
+
+		String sqlToUse = NamedParameterUtils.substituteNamedParameters(psql, paramSource);
+		assertThat(sqlToUse).isEqualTo("insert into foos (id) values (?)");
 	}
 
 }

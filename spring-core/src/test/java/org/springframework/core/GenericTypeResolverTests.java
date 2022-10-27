@@ -173,6 +173,17 @@ class GenericTypeResolverTests {
 		assertThat(resolved[1]).isEqualTo(Long.class);
 	}
 
+	@Test
+	public void resolvePartiallySpecializedTypeVariables() {
+		Type resolved = resolveType(BiGenericClass.class.getTypeParameters()[0], TypeFixedBiGenericClass.class);
+		assertThat(resolved).isEqualTo(D.class);
+	}
+
+	@Test
+	public void resolveTransitiveTypeVariableWithDifferentName() {
+		Type resolved = resolveType(BiGenericClass.class.getTypeParameters()[1], TypeFixedBiGenericClass.class);
+		assertThat(resolved).isEqualTo(E.class);
+	}
 
 	public interface MyInterfaceType<T> {
 	}
@@ -293,10 +304,22 @@ class GenericTypeResolverTests {
 
 	class B<T>{}
 
+	class C extends A {}
+
+	class D extends B<Long> {}
+
+	class E extends C {}
+
 	class TestIfc<T>{}
 
 	class TestImpl<I extends A, T extends B<I>> extends TestIfc<T>{
 	}
+
+	static abstract class BiGenericClass<T extends B<?>, V extends A> {}
+
+	static abstract class SpecializedBiGenericClass<U extends C> extends BiGenericClass<D, U>{}
+
+	static class TypeFixedBiGenericClass extends SpecializedBiGenericClass<E> {}
 
 	static class TopLevelClass<T> {
 		class Nested<X> {

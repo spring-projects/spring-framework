@@ -54,7 +54,7 @@ public class MissingRequestHeaderException extends MissingRequestValueException 
 	public MissingRequestHeaderException(
 			String headerName, MethodParameter parameter, boolean missingAfterConversion) {
 
-		super("", missingAfterConversion);
+		super("", missingAfterConversion, null, new Object[] {headerName});
 		this.headerName = headerName;
 		this.parameter = parameter;
 		getBody().setDetail("Required header '" + this.headerName + "' is not present.");

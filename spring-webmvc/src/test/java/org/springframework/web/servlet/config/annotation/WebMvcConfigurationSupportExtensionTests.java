@@ -199,7 +199,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void requestMappingHandlerAdapter() throws Exception {
+	public void requestMappingHandlerAdapter() {
 		RequestMappingHandlerAdapter adapter = this.config.requestMappingHandlerAdapter(
 				this.config.mvcContentNegotiationManager(), this.config.mvcConversionService(),
 				this.config.mvcValidator());
@@ -241,7 +241,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 				(DeferredResultProcessingInterceptor[]) fieldAccessor.getPropertyValue("deferredResultInterceptors");
 		assertThat(deferredResultInterceptors.length).isEqualTo(1);
 
-		assertThat(fieldAccessor.getPropertyValue("ignoreDefaultModelOnRedirect")).asInstanceOf(BOOLEAN).isFalse();
+		assertThat(fieldAccessor.getPropertyValue("ignoreDefaultModelOnRedirect")).asInstanceOf(BOOLEAN).isTrue();
 	}
 
 	@Test

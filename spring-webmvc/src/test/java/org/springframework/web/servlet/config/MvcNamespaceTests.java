@@ -161,6 +161,8 @@ import static org.assertj.core.api.InstanceOfAssertFactories.BOOLEAN;
  * @author Sam Brannen
  * @author Marten Deinum
  */
+
+@SuppressWarnings("deprecation")
 public class MvcNamespaceTests {
 
 	public static final String VIEWCONTROLLER_BEAN_NAME =
@@ -209,7 +211,8 @@ public class MvcNamespaceTests {
 
 		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
 		assertThat(adapter).isNotNull();
-		assertThat(new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect")).asInstanceOf(BOOLEAN).isFalse();
+		assertThat(new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect"))
+				.asInstanceOf(BOOLEAN).isTrue();
 
 		List<HttpMessageConverter<?>> converters = adapter.getMessageConverters();
 		assertThat(converters.size() > 0).isTrue();

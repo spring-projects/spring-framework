@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -149,7 +148,7 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 		}
 
 		List<? extends Publisher<Void>> actions = this.commitActions.stream()
-				.map(Supplier::get).collect(Collectors.toList());
+				.map(Supplier::get).toList();
 
 		return Flux.concat(actions).then();
 	}

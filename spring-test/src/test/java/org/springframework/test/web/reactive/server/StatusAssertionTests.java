@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import static org.mockito.Mockito.mock;
  * Unit tests for {@link StatusAssertions}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 class StatusAssertionTests {
 
@@ -56,9 +57,20 @@ class StatusAssertionTests {
 				assertions.isEqualTo(408));
 	}
 
-	@Test  // gh-23630
+	@Test  // gh-23630, gh-29283
 	void isEqualToWithCustomStatus() {
-		statusAssertions(600).isEqualTo(600);
+		StatusAssertions assertions = statusAssertions(600);
+
+		// Success
+		// assertions.isEqualTo(600);
+
+		// Wrong status
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				assertions.isEqualTo(HttpStatus.REQUEST_TIMEOUT));
+
+		// Wrong status value
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				assertions.isEqualTo(408));
 	}
 
 	@Test

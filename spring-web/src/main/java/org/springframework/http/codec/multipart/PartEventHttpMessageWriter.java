@@ -28,7 +28,6 @@ import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.codec.HttpMessageWriter;
@@ -91,7 +90,7 @@ public class PartEventHttpMessageWriter extends MultipartWriterSupport implement
 					}
 				}))
 				.concatWith(generateLastLine(boundary, outputMessage.bufferFactory()))
-				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
+				.doOnDiscard(DataBuffer.class, DataBufferUtils::release);
 
 		if (logger.isDebugEnabled()) {
 			body = body.doOnNext(buffer -> Hints.touchDataBuffer(buffer, hints, logger));

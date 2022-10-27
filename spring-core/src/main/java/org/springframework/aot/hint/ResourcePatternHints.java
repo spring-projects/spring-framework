@@ -25,9 +25,9 @@ import java.util.Set;
 import org.springframework.lang.Nullable;
 
 /**
- * A collection of {@link ResourcePatternHint} describing whether
- * resources should be made available at runtime through a matching
- * mechanism or inclusion/exclusion.
+ * A collection of {@link ResourcePatternHint} describing whether resources should
+ * be made available at runtime using a matching algorithm based on include/exclude
+ * patterns.
  *
  * @author Stephane Nicoll
  * @author Brian Clozel
@@ -75,7 +75,7 @@ public final class ResourcePatternHints {
 		}
 
 		/**
-		 * Includes the resources matching the specified pattern.
+		 * Include resources matching the specified patterns.
 		 * @param reachableType the type that should be reachable for this hint to apply
 		 * @param includes the include patterns (see {@link ResourcePatternHint} documentation)
 		 * @return {@code this}, to facilitate method chaining
@@ -88,7 +88,7 @@ public final class ResourcePatternHints {
 		}
 
 		/**
-		 * Includes the resources matching the specified pattern.
+		 * Include resources matching the specified patterns.
 		 * @param includes the include patterns (see {@link ResourcePatternHint} documentation)
 		 * @return {@code this}, to facilitate method chaining
 		 */
@@ -97,9 +97,9 @@ public final class ResourcePatternHints {
 		}
 
 		/**
-		 * Exclude resources matching the specified pattern.
+		 * Exclude resources matching the specified patterns.
 		 * @param reachableType the type that should be reachable for this hint to apply
-		 * @param excludes the excludes pattern (see {@link ResourcePatternHint} documentation)
+		 * @param excludes the exclude patterns (see {@link ResourcePatternHint} documentation)
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder excludes(TypeReference reachableType, String... excludes) {
@@ -110,8 +110,8 @@ public final class ResourcePatternHints {
 		}
 
 		/**
-		 * Exclude resources matching the specified pattern.
-		 * @param excludes the excludes pattern (see {@link ResourcePatternHint} documentation)
+		 * Exclude resources matching the specified patterns.
+		 * @param excludes the exclude patterns (see {@link ResourcePatternHint} documentation)
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder excludes(String... excludes) {
@@ -119,13 +119,14 @@ public final class ResourcePatternHints {
 		}
 
 		/**
-		 * Creates a {@link ResourcePatternHints} based on the state of this
+		 * Create {@link ResourcePatternHints} based on the state of this
 		 * builder.
-		 * @return a resource pattern hint
+		 * @return resource pattern hints
 		 */
 		ResourcePatternHints build() {
 			return new ResourcePatternHints(this);
 		}
 
 	}
+
 }

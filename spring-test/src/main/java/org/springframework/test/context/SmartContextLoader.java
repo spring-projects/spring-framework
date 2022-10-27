@@ -25,15 +25,15 @@ import org.springframework.lang.Nullable;
  *
  * <p>The {@code SmartContextLoader} SPI supersedes the {@link ContextLoader} SPI
  * introduced in Spring 2.5: a {@code SmartContextLoader} can choose to process
- * resource locations, annotated classes, or a combination of both. Furthermore, a
+ * resource locations, component classes, or a combination of both. Furthermore, a
  * {@code SmartContextLoader} can configure the context that it
  * {@linkplain #loadContext(MergedContextConfiguration) loads} based on any
- * properties available in the provided {@link MergedContextConfiguration}. For
- * example, active bean definition profiles can be configured for the context
+ * properties available in the provided {@link MergedContextConfiguration}.
+ * For example, active bean definition profiles can be configured for the context
  * based on {@link MergedContextConfiguration#getActiveProfiles()}.
  *
  * <p>See the Javadoc for {@link ContextConfiguration @ContextConfiguration}
- * for a definition of <em>annotated class</em>.
+ * for a definition of <em>component classes</em>.
  *
  * <p>Clients of a {@code SmartContextLoader} should call
  * {@link #processContextConfiguration(ContextConfigurationAttributes)
@@ -52,7 +52,7 @@ import org.springframework.lang.Nullable;
  *
  * <p>Concrete implementations must provide a {@code public} no-args constructor.
  *
- * <p>Spring provides the following out-of-the-box implementations:
+ * <p>Spring provides the following {@code SmartContextLoader} implementations.
  * <ul>
  * <li>{@link org.springframework.test.context.support.DelegatingSmartContextLoader DelegatingSmartContextLoader}</li>
  * <li>{@link org.springframework.test.context.support.AnnotationConfigContextLoader AnnotationConfigContextLoader}</li>
@@ -92,10 +92,9 @@ public interface SmartContextLoader extends ContextLoader {
 	void processContextConfiguration(ContextConfigurationAttributes configAttributes);
 
 	/**
-	 * Load a new {@linkplain ApplicationContext context} based on the supplied
-	 * {@link MergedContextConfiguration merged context configuration},
-	 * configure the context, and return the context in a fully <em>refreshed</em>
-	 * state.
+	 * Load a new {@link ApplicationContext} based on the supplied
+	 * {@link MergedContextConfiguration}, configure the context, and return the
+	 * context in a fully <em>refreshed</em> state.
 	 * <p>Concrete implementations should register annotation configuration
 	 * processors with bean factories of
 	 * {@link ApplicationContext application contexts} loaded by this
@@ -127,11 +126,25 @@ public interface SmartContextLoader extends ContextLoader {
 	 * closed on JVM shutdown. This allows for freeing of external resources held
 	 * by beans within the context &mdash; for example, temporary files.</li>
 	 * </ul>
+	 * <p>As of Spring Framework 6.0, any exception thrown while attempting to
+	 * load an {@code ApplicationContext} should be wrapped in a
+	 * {@link ContextLoadException}. Concrete implementations should therefore
+	 * contain a try-catch block similar to the following.
+	 * <pre style="code">
+	 * ApplicationContext context = // create context
+	 * try {
+	 *     // configure and refresh context
+	 * }
+	 * catch (Exception ex) {
+	 *     throw new ContextLoadException(context, ex);
+	 * }
+	 * </pre>
 	 * @param mergedConfig the merged context configuration to use to load the
 	 * application context
 	 * @return a new application context
-	 * @throws Exception if context loading failed
+	 * @throws ContextLoadException if context loading failed
 	 * @see #processContextConfiguration(ContextConfigurationAttributes)
+	 * @see #loadContextForAotProcessing(MergedContextConfiguration)
 	 * @see org.springframework.context.annotation.AnnotationConfigUtils#registerAnnotationConfigProcessors(org.springframework.beans.factory.support.BeanDefinitionRegistry)
 	 * @see org.springframework.context.ConfigurableApplicationContext#getEnvironment()
 	 */

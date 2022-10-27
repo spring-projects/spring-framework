@@ -56,7 +56,7 @@ public class SerializationHintsPredicates {
 	 */
 	public Predicate<RuntimeHints> onType(TypeReference typeReference) {
 		Assert.notNull(typeReference, "'typeReference' should not be null");
-		return hints -> hints.serialization().javaSerialization().anyMatch(
+		return hints -> hints.serialization().javaSerializationHints().anyMatch(
 				hint -> hint.getType().equals(typeReference));
 	}
 

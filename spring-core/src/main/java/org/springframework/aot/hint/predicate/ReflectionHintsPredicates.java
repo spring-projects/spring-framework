@@ -28,7 +28,6 @@ import java.util.function.Predicate;
 
 import org.springframework.aot.hint.ExecutableHint;
 import org.springframework.aot.hint.ExecutableMode;
-import org.springframework.aot.hint.FieldHint;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
@@ -50,7 +49,6 @@ import org.springframework.util.ReflectionUtils;
 public class ReflectionHintsPredicates {
 
 	ReflectionHintsPredicates() {
-
 	}
 
 	/**
@@ -111,8 +109,25 @@ public class ReflectionHintsPredicates {
 	 */
 	public MethodHintPredicate onMethod(Class<?> type, String methodName) {
 		Assert.notNull(type, "'type' should not be null");
-		Assert.hasText(methodName, "'methodName' should not be null");
+		Assert.hasText(methodName, "'methodName' should not be empty");
 		return new MethodHintPredicate(getMethod(type, methodName));
+	}
+
+	/**
+	 * Return a predicate that checks whether a reflection hint is registered for the method that matches the given selector.
+	 * This looks up a method on the given type with the expected name, if unique.
+	 * By default, both introspection and invocation hints match.
+	 * <p>The returned type exposes additional methods that refine the predicate behavior.
+	 * @param className the name of the class holding the method
+	 * @param methodName the method name
+	 * @return the {@link RuntimeHints} predicate
+	 * @throws ClassNotFoundException if the class cannot be resolved.
+	 * @throws IllegalArgumentException if the method cannot be found or if multiple methods are found with the same name.
+	 */
+	public MethodHintPredicate onMethod(String className, String methodName) throws ClassNotFoundException {
+		Assert.hasText(className, "'className' should not be empty");
+		Assert.hasText(methodName, "'methodName' should not be empty");
+		return onMethod(Class.forName(className), methodName);
 	}
 
 	private Method getMethod(Class<?> type, String methodName) {
@@ -122,17 +137,17 @@ public class ReflectionHintsPredicates {
 			return methods.iterator().next();
 		}
 		else if (methods.size() > 1) {
-			throw new IllegalArgumentException(String.format("Found multiple methods named '%s' on class %s", methodName, type.getName()));
+			throw new IllegalArgumentException("Found multiple methods named '%s' on class %s".formatted(methodName, type.getName()));
 		}
 		else {
-			throw new IllegalArgumentException("No method named '" + methodName + "' on class " + type.getName());
+			throw new IllegalArgumentException("No method named '%s' on class %s".formatted(methodName, type.getName()));
 		}
 	}
 
 	/**
 	 * Return a predicate that checks whether a reflection hint is registered for the field that matches the given selector.
 	 * This looks up a field on the given type with the expected name, if present.
-	 * By default, unsafe or write access are not considered.
+	 * By default, unsafe or write access is not considered.
 	 * <p>The returned type exposes additional methods that refine the predicate behavior.
 	 * @param type the type holding the field
 	 * @param fieldName the field name
@@ -144,14 +159,31 @@ public class ReflectionHintsPredicates {
 		Assert.hasText(fieldName, "'fieldName' should not be empty");
 		Field field = ReflectionUtils.findField(type, fieldName);
 		if (field == null) {
-			throw new IllegalArgumentException("No field named '" + fieldName + "' on class " + type.getName());
+			throw new IllegalArgumentException("No field named '%s' on class %s".formatted(fieldName, type.getName()));
 		}
 		return new FieldHintPredicate(field);
 	}
 
 	/**
+	 * Return a predicate that checks whether a reflection hint is registered for the field that matches the given selector.
+	 * This looks up a field on the given type with the expected name, if present.
+	 * By default, unsafe or write access is not considered.
+	 * <p>The returned type exposes additional methods that refine the predicate behavior.
+	 * @param className the name of the class holding the field
+	 * @param fieldName the field name
+	 * @return the {@link RuntimeHints} predicate
+	 * @throws ClassNotFoundException if the class cannot be resolved.
+	 * @throws IllegalArgumentException if a field cannot be found with the given name.
+	 */
+	public FieldHintPredicate onField(String className, String fieldName) throws ClassNotFoundException {
+		Assert.hasText(className, "'className' should not be empty");
+		Assert.hasText(fieldName, "'fieldName' should not be empty");
+		return onField(Class.forName(className), fieldName);
+	}
+
+	/**
 	 * Return a predicate that checks whether a reflection hint is registered for the given field.
-	 * By default, unsafe or write access are not considered.
+	 * By default, unsafe or write access is not considered.
 	 * <p>The returned type exposes additional methods that refine the predicate behavior.
 	 * @param field the field
 	 * @return the {@link RuntimeHints} predicate
@@ -259,15 +291,13 @@ public class ReflectionHintsPredicates {
 		/**
 		 * Indicate whether the specified {@code ExecutableHint} covers the
 		 * reflection needs of the specified executable definition.
-		 * @return {@code true} if the member matches (same type, name and parameters),
-		 * and the configured {@code ExecutableMode} is compatibe
+		 * @return {@code true} if the member matches (same type, name, and parameters),
+		 * and the configured {@code ExecutableMode} is compatible
 		 */
 		static boolean includes(ExecutableHint hint, String name,
-				List<TypeReference> parameterTypes, List<ExecutableMode> executableModes) {
-			return hint.getName().equals(name)
-					&& hint.getParameterTypes().equals(parameterTypes)
-					&& (hint.getModes().contains(ExecutableMode.INVOKE)
-					|| !executableModes.contains(ExecutableMode.INVOKE));
+				List<TypeReference> parameterTypes, ExecutableMode executableModes) {
+			return hint.getName().equals(name) && hint.getParameterTypes().equals(parameterTypes) &&
+					(hint.getMode().equals(ExecutableMode.INVOKE) || !executableModes.equals(ExecutableMode.INVOKE));
 		}
 	}
 
@@ -299,17 +329,14 @@ public class ReflectionHintsPredicates {
 		Predicate<RuntimeHints> exactMatch() {
 			return hints -> (hints.reflection().getTypeHint(this.executable.getDeclaringClass()) != null) &&
 					hints.reflection().getTypeHint(this.executable.getDeclaringClass()).constructors().anyMatch(executableHint -> {
-						List<TypeReference> parameters = Arrays.stream(this.executable.getParameterTypes())
-								.map(TypeReference::of).toList();
-						return includes(executableHint, "<init>",
-								parameters, List.of(this.executableMode));
+						List<TypeReference> parameters = TypeReference.listOf(this.executable.getParameterTypes());
+						return includes(executableHint, "<init>", parameters, this.executableMode);
 					});
 		}
 
 	}
 
 	public static class MethodHintPredicate extends ExecutableHintPredicate<Method> {
-
 
 		MethodHintPredicate(Method method) {
 			super(method);
@@ -338,10 +365,8 @@ public class ReflectionHintsPredicates {
 		Predicate<RuntimeHints> exactMatch() {
 			return hints -> (hints.reflection().getTypeHint(this.executable.getDeclaringClass()) != null) &&
 					hints.reflection().getTypeHint(this.executable.getDeclaringClass()).methods().anyMatch(executableHint -> {
-						List<TypeReference> parameters = Arrays.stream(this.executable.getParameterTypes())
-								.map(TypeReference::of).toList();
-						return includes(executableHint, this.executable.getName(),
-								parameters, List.of(this.executableMode));
+						List<TypeReference> parameters = TypeReference.listOf(this.executable.getParameterTypes());
+						return includes(executableHint, this.executable.getName(), parameters, this.executableMode);
 					});
 		}
 
@@ -351,32 +376,8 @@ public class ReflectionHintsPredicates {
 
 		private final Field field;
 
-		private boolean allowWrite;
-
-		private boolean allowUnsafeAccess;
-
 		FieldHintPredicate(Field field) {
 			this.field = field;
-		}
-
-		/**
-		 * Refine the current predicate to match if write access is allowed on the field.
-		 * @return the refined {@link RuntimeHints} predicate
-		 * @see FieldHint#isAllowWrite()
-		 */
-		public FieldHintPredicate allowWrite() {
-			this.allowWrite = true;
-			return this;
-		}
-
-		/**
-		 * Refine the current predicate to match if unsafe access is allowed on the field.
-		 * @return the refined {@link RuntimeHints} predicate
-		 * @see FieldHint#isAllowUnsafeAccess() ()
-		 */
-		public FieldHintPredicate allowUnsafeAccess() {
-			this.allowUnsafeAccess = true;
-			return this;
 		}
 
 		@Override
@@ -390,8 +391,8 @@ public class ReflectionHintsPredicates {
 
 		private boolean memberCategoryMatch(TypeHint typeHint) {
 			if (Modifier.isPublic(this.field.getModifiers())) {
-				return typeHint.getMemberCategories().contains(MemberCategory.PUBLIC_FIELDS)
-						|| typeHint.getMemberCategories().contains(MemberCategory.DECLARED_FIELDS);
+				return typeHint.getMemberCategories().contains(MemberCategory.PUBLIC_FIELDS) ||
+						typeHint.getMemberCategories().contains(MemberCategory.DECLARED_FIELDS);
 			}
 			else {
 				return typeHint.getMemberCategories().contains(MemberCategory.DECLARED_FIELDS);
@@ -400,10 +401,9 @@ public class ReflectionHintsPredicates {
 
 		private boolean exactMatch(TypeHint typeHint) {
 			return typeHint.fields().anyMatch(fieldHint ->
-					this.field.getName().equals(fieldHint.getName())
-							&& (!this.allowWrite || this.allowWrite == fieldHint.isAllowWrite())
-							&& (!this.allowUnsafeAccess || this.allowUnsafeAccess == fieldHint.isAllowUnsafeAccess()));
+					this.field.getName().equals(fieldHint.getName()));
 		}
+
 	}
 
 }

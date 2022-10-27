@@ -19,13 +19,22 @@ package org.springframework.aot.hint;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Tests for {@link ResourcePatternHint}.
  *
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  */
-public class ResourcePatternHintTests {
+class ResourcePatternHintTests {
+
+	@Test
+	void patternWithLeadingSlashIsRejected() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> new ResourcePatternHint("/file.properties", null))
+				.withMessage("Resource pattern [/file.properties] must not start with a '/'");
+	}
 
 	@Test
 	void fileAtRoot() {
@@ -66,4 +75,5 @@ public class ResourcePatternHintTests {
 				.accepts("com/example/file.properties", "com/example/another/file.properties", "com/example/another")
 				.rejects("file.properties", "com/file.properties");
 	}
+
 }

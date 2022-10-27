@@ -61,15 +61,6 @@ class ClientResponseWrapperTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	void rawStatusCode() {
-		int status = 999;
-		given(mockResponse.rawStatusCode()).willReturn(status);
-
-		assertThat(wrapper.rawStatusCode()).isEqualTo(status);
-	}
-
-	@Test
 	void headers() {
 		ClientResponse.Headers headers = mock(ClientResponse.Headers.class);
 		given(mockResponse.headers()).willReturn(headers);

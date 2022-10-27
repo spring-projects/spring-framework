@@ -30,8 +30,7 @@ import org.springframework.aot.hint.ExecutableHint;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.TypeHint;
-import org.springframework.aot.test.generator.compile.Compiled;
-import org.springframework.aot.test.generator.compile.TestCompiler;
+import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -50,7 +49,8 @@ import org.springframework.beans.testfixture.beans.factory.generator.factory.Num
 import org.springframework.beans.testfixture.beans.factory.generator.factory.SampleFactory;
 import org.springframework.beans.testfixture.beans.factory.generator.injection.InjectionComponent;
 import org.springframework.core.env.StandardEnvironment;
-import org.springframework.core.testfixture.aot.generate.TestGenerationContext;
+import org.springframework.core.test.tools.Compiled;
+import org.springframework.core.test.tools.TestCompiler;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
@@ -283,7 +283,7 @@ class InstanceSupplierCodeGeneratorTests {
 	}
 
 	private ThrowingConsumer<ExecutableHint> hasMode(ExecutableMode mode) {
-		return hint -> assertThat(hint.getModes()).containsExactly(mode);
+		return hint -> assertThat(hint.getMode()).isEqualTo(mode);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -294,9 +294,9 @@ class InstanceSupplierCodeGeneratorTests {
 		return (T) beanFactory.getBean("testBean");
 	}
 
-	private void compile(DefaultListableBeanFactory beanFactory,
-			BeanDefinition beanDefinition,
+	private void compile(DefaultListableBeanFactory beanFactory, BeanDefinition beanDefinition,
 			BiConsumer<InstanceSupplier<?>, Compiled> result) {
+
 		DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory(beanFactory);
 		freshBeanFactory.registerBeanDefinition("testBean", beanDefinition);
 		RegisteredBean registeredBean = RegisteredBean.of(freshBeanFactory, "testBean");
@@ -305,7 +305,7 @@ class InstanceSupplierCodeGeneratorTests {
 		InstanceSupplierCodeGenerator generator = new InstanceSupplierCodeGenerator(
 				this.generationContext, generateClass.getName(),
 				generateClass.getMethods(), false);
-		Executable constructorOrFactoryMethod = ConstructorOrFactoryMethodResolver.resolve(registeredBean);
+		Executable constructorOrFactoryMethod = registeredBean.resolveConstructorOrFactoryMethod();
 		assertThat(constructorOrFactoryMethod).isNotNull();
 		CodeBlock generatedCode = generator.generateCode(registeredBean, constructorOrFactoryMethod);
 		typeBuilder.set(type -> {
@@ -317,7 +317,7 @@ class InstanceSupplierCodeGeneratorTests {
 					.addStatement("return $L", generatedCode).build());
 		});
 		this.generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(this.generationContext.getGeneratedFiles()).compile(compiled ->
+		TestCompiler.forSystem().with(this.generationContext).compile(compiled ->
 				result.accept((InstanceSupplier<?>) compiled.getInstance(Supplier.class).get(), compiled));
 	}
 

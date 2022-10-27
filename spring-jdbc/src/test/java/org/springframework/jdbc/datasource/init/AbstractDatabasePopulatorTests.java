@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
 
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -173,17 +172,6 @@ abstract class AbstractDatabasePopulatorTests extends AbstractDatabaseInitializa
 		DatabasePopulator populator = mock(DatabasePopulator.class);
 		DatabasePopulatorUtils.execute(populator, db);
 		verify(populator).populate(connection);
-	}
-
-	/**
-	 * See SPR-9781
-	 */
-	@Test
-	@Timeout(1)
-	void executesHugeScriptInReasonableTime() throws SQLException {
-		databasePopulator.addScript(defaultSchema());
-		databasePopulator.addScript(resource("db-test-data-huge.sql"));
-		DatabasePopulatorUtils.execute(databasePopulator, db);
 	}
 
 	private void assertTestDatabaseCreated() {

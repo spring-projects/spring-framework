@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -52,10 +53,15 @@ final class AnnotationTypeMapping {
 
 	private static final Log logger = LogFactory.getLog(AnnotationTypeMapping.class);
 
+	private static final Predicate<? super Annotation> isBeanValidationConstraint = annotation ->
+			annotation.annotationType().getName().equals("jakarta.validation.Constraint");
+
 	/**
-	 * Set of fully qualified class names concatenated with attribute names for
-	 * annotations which we have already checked for use of convention-based
-	 * annotation attribute overrides.
+	 * Set used to track which convention-based annotation attribute overrides
+	 * have already been checked. Each key is the combination of the fully
+	 * qualified class names of a composed annotation and a meta-annotation
+	 * that it is either present or meta-present on the composed annotation,
+	 * separated by a dash.
 	 * @since 6.0
 	 * @see #addConventionMappings()
 	 */
@@ -284,21 +290,12 @@ final class AnnotationTypeMapping {
 		}
 		AttributeMethods rootAttributes = this.root.getAttributes();
 		int[] mappings = this.conventionMappings;
+		Set<String> conventionMappedAttributes = new HashSet<>();
 		for (int i = 0; i < mappings.length; i++) {
 			String name = this.attributes.get(i).getName();
 			int mapped = rootAttributes.indexOf(name);
 			if (!MergedAnnotation.VALUE.equals(name) && mapped != -1 && !isExplicitAttributeOverride(name)) {
-				String rootAnnotationTypeName = this.root.annotationType.getName();
-				String cacheKey = rootAnnotationTypeName + "." + name;
-				// We want to avoid duplicate log warnings as much as possible, without full synchronization.
-				if (conventionBasedOverrideCheckCache.add(cacheKey) && logger.isWarnEnabled()) {
-					logger.warn("""
-							Support for convention-based annotation attribute overrides is \
-							deprecated and will be removed in Spring Framework 6.1. Please \
-							annotate the '%s' attribute in @%s with an appropriate @AliasFor \
-							declaration -- for example, @AliasFor(annotation = %s.class)."""
-								.formatted(name, rootAnnotationTypeName, this.annotationType.getName()));
-				}
+				conventionMappedAttributes.add(name);
 				mappings[i] = mapped;
 				MirrorSet mirrors = getMirrorSets().getAssigned(i);
 				if (mirrors != null) {
@@ -307,6 +304,25 @@ final class AnnotationTypeMapping {
 					}
 				}
 			}
+		}
+		String rootAnnotationTypeName = this.root.annotationType.getName();
+		String cacheKey = rootAnnotationTypeName + '-' + this.annotationType.getName();
+		// We want to avoid duplicate log warnings as much as possible, without full synchronization,
+		// and we intentionally invoke add() before checking if any convention-based overrides were
+		// actually encountered in order to ensure that we add a "tracked" entry for the current cache
+		// key in any case.
+		// In addition, we do NOT want to log warnings for custom Java Bean Validation constraint
+		// annotations that are meta-annotated with other constraint annotations -- for example,
+		// @org.hibernate.validator.constraints.URL which overrides attributes in
+		// @jakarta.validation.constraints.Pattern.
+		if (conventionBasedOverrideCheckCache.add(cacheKey) && !conventionMappedAttributes.isEmpty() &&
+				Arrays.stream(this.annotationType.getAnnotations()).noneMatch(isBeanValidationConstraint) &&
+				logger.isWarnEnabled()) {
+			logger.warn("""
+					Support for convention-based annotation attribute overrides is deprecated \
+					and will be removed in Spring Framework 6.1. Please annotate the following \
+					attributes in @%s with appropriate @AliasFor declarations: %s"""
+						.formatted(rootAnnotationTypeName, conventionMappedAttributes));
 		}
 	}
 

@@ -29,8 +29,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
-import org.springframework.aot.test.generator.compile.Compiled;
-import org.springframework.aot.test.generator.compile.TestCompiler;
+import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanReference;
@@ -43,7 +42,8 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.factory.aot.DeferredTypeBuilder;
-import org.springframework.core.testfixture.aot.generate.TestGenerationContext;
+import org.springframework.core.test.tools.Compiled;
+import org.springframework.core.test.tools.TestCompiler;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
@@ -429,7 +429,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 					.addStatement("return beanDefinition").build());
 		});
 		this.generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(this.generationContext.getGeneratedFiles()).compile(compiled -> {
+		TestCompiler.forSystem().with(this.generationContext).compile(compiled -> {
 			RootBeanDefinition suppliedBeanDefinition = (RootBeanDefinition) compiled
 					.getInstance(Supplier.class).get();
 			result.accept(suppliedBeanDefinition, compiled);
@@ -478,15 +478,15 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 
 	static class PropertyValuesFactoryBean implements FactoryBean<String> {
 
-		private Class<?> prefix;
+		private String prefix;
 
 		private String name;
 
-		public Class<?> getPrefix() {
+		public String getPrefix() {
 			return this.prefix;
 		}
 
-		public void setPrefix(Class<?> prefix) {
+		public void setPrefix(String prefix) {
 			this.prefix = prefix;
 		}
 

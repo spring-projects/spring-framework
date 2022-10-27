@@ -158,7 +158,7 @@ public final class JdkProxyHint implements ConditionalHint {
 			if (!invalidTypes.isEmpty()) {
 				throw new IllegalArgumentException("The following must be non-sealed interfaces: " + invalidTypes);
 			}
-			return Arrays.stream(proxiedInterfaces).map(TypeReference::of).toList();
+			return TypeReference.listOf(proxiedInterfaces);
 		}
 
 	}

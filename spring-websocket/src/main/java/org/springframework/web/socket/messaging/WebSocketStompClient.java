@@ -211,7 +211,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @return a {@code ListenableFuture} for access to the session when ready for use
 	 * @deprecated as of 6.0, in favor of {@link #connectAsync(String, StompSessionHandler, Object...)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public org.springframework.util.concurrent.ListenableFuture<StompSession> connect(
 			String url, StompSessionHandler handler, Object... uriVars) {
 
@@ -244,7 +244,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @return a {@code ListenableFuture} for access to the session when ready for use
 	 * @deprecated as of 6.0, in favor of {@link #connectAsync(String, WebSocketHttpHeaders, StompSessionHandler, Object...)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public org.springframework.util.concurrent.ListenableFuture<StompSession> connect(
 			String url, @Nullable WebSocketHttpHeaders handshakeHeaders,
 			StompSessionHandler handler, Object... uriVariables) {
@@ -283,7 +283,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @return a {@code ListenableFuture} for access to the session when ready for use
 	 * @deprecated as of 6.0, in favor of {@link #connectAsync(String, WebSocketHttpHeaders, StompHeaders, StompSessionHandler, Object...)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public org.springframework.util.concurrent.ListenableFuture<StompSession> connect(
 			String url, @Nullable WebSocketHttpHeaders handshakeHeaders,
 			@Nullable StompHeaders connectHeaders, StompSessionHandler handler, Object... uriVariables) {
@@ -324,7 +324,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @return a {@code ListenableFuture} for access to the session when ready for use
 	 * @deprecated as of 6.0, in favor of {@link #connectAsync(URI, WebSocketHttpHeaders, StompHeaders, StompSessionHandler)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public org.springframework.util.concurrent.ListenableFuture<StompSession> connect(
 			URI url, @Nullable WebSocketHttpHeaders handshakeHeaders,
 			@Nullable StompHeaders connectHeaders, StompSessionHandler sessionHandler) {

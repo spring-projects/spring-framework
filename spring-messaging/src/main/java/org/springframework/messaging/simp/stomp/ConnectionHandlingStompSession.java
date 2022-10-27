@@ -35,7 +35,7 @@ public interface ConnectionHandlingStompSession extends StompSession, StompTcpCo
 	 * Return a future that will complete when the session is ready for use.
 	 * @deprecated as of 6.0, in favor of {@link #getSession()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	default org.springframework.util.concurrent.ListenableFuture<StompSession> getSessionFuture() {
 		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(
 				getSession());

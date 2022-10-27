@@ -45,7 +45,7 @@ public class IntervalTask extends Task {
 	 * @param initialDelay the initial delay before first execution of the task
 	 * @deprecated as of 6.0, in favor on {@link #IntervalTask(Runnable, Duration, Duration)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public IntervalTask(Runnable runnable, long interval, long initialDelay) {
 		this(runnable, Duration.ofMillis(interval), Duration.ofMillis(initialDelay));
 	}
@@ -56,7 +56,7 @@ public class IntervalTask extends Task {
 	 * @param interval how often in milliseconds the task should be executed
 	 * @deprecated as of 6.0, in favor on {@link #IntervalTask(Runnable, Duration)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public IntervalTask(Runnable runnable, long interval) {
 		this(runnable, Duration.ofMillis(interval), Duration.ZERO);
 	}
@@ -105,7 +105,7 @@ public class IntervalTask extends Task {
 	 * Return how often in milliseconds the task should be executed.
 	 * @deprecated as of 6.0, in favor of {@link #getIntervalDuration()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public long getInterval() {
 		return this.interval.toMillis();
 	}
@@ -122,7 +122,7 @@ public class IntervalTask extends Task {
 	 * Return the initial delay before first execution of the task.
 	 * @deprecated as of 6.0, in favor of {@link #getInitialDelayDuration()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public long getInitialDelay() {
 		return this.initialDelay.toMillis();
 	}

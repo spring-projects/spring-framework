@@ -88,15 +88,6 @@ class DefaultClientResponseTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	void rawStatusCode() {
-		int status = 999;
-		given(mockResponse.getRawStatusCode()).willReturn(status);
-
-		assertThat(defaultClientResponse.rawStatusCode()).isEqualTo(status);
-	}
-
-	@Test
 	void header() {
 		long contentLength = 42L;
 		httpHeaders.setContentLength(contentLength);
@@ -342,7 +333,6 @@ class DefaultClientResponseTests {
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
 		given(mockResponse.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
-		given(mockResponse.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
 		given(mockResponse.getBody()).willReturn(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections.singletonList(
@@ -366,7 +356,6 @@ class DefaultClientResponseTests {
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
 		given(mockResponse.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
-		given(mockResponse.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
 		given(mockResponse.getBody()).willReturn(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections.singletonList(
@@ -393,7 +382,6 @@ class DefaultClientResponseTests {
 	private void mockTextPlainResponse(Flux<DataBuffer> body) {
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
 		given(mockResponse.getStatusCode()).willReturn(HttpStatus.OK);
-		given(mockResponse.getRawStatusCode()).willReturn(HttpStatus.OK.value());
 		given(mockResponse.getBody()).willReturn(body);
 	}
 

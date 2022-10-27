@@ -23,7 +23,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.core.Ordered;
-import org.springframework.core.mock.MockSpringFactoriesLoader;
+import org.springframework.core.test.io.support.MockSpringFactoriesLoader;
 import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -66,8 +66,7 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 		RegisteredBean registeredBean = registerTestBean(beanFactory);
 		BeanDefinitionMethodGeneratorFactory methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
 				AotServices.factoriesAndBeans(springFactoriesLoader, beanFactory));
-		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean,
-				null)).isNull();
+		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean)).isNull();
 	}
 
 	@Test
@@ -79,8 +78,7 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 				new MockBeanRegistrationExcludeFilter(true, 0));
 		BeanDefinitionMethodGeneratorFactory methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
 				AotServices.factoriesAndBeans(springFactoriesLoader, beanFactory));
-		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean,
-				null)).isNull();
+		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean)).isNull();
 	}
 
 	@Test
@@ -100,8 +98,7 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 		RegisteredBean registeredBean = registerTestBean(beanFactory);
 		BeanDefinitionMethodGeneratorFactory methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
 				AotServices.factoriesAndBeans(springFactoriesLoader, beanFactory));
-		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean,
-				null)).isNull();
+		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean)).isNull();
 		assertThat(filter1.wasCalled()).isTrue();
 		assertThat(filter2.wasCalled()).isTrue();
 		assertThat(filter3.wasCalled()).isTrue();
@@ -127,7 +124,7 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 		BeanDefinitionMethodGeneratorFactory methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
 				AotServices.factoriesAndBeans(springFactoriesLoader, beanFactory));
 		BeanDefinitionMethodGenerator methodGenerator = methodGeneratorFactory
-				.getBeanDefinitionMethodGenerator(registeredBean, null);
+				.getBeanDefinitionMethodGenerator(registeredBean);
 		assertThat(methodGenerator).extracting("aotContributions").asList()
 				.containsExactly(beanContribution, loaderContribution);
 	}
@@ -144,8 +141,8 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 		RegisteredBean registeredBean2 = RegisteredBean.of(beanFactory, "test2");
 		BeanDefinitionMethodGeneratorFactory methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
 				AotServices.factoriesAndBeans(springFactoriesLoader, beanFactory));
-		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean1, null)).isNull();
-		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean2, null)).isNull();
+		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean1)).isNull();
+		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean2)).isNull();
 	}
 
 	@Test
@@ -157,7 +154,7 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 		RegisteredBean registeredBean1 = RegisteredBean.of(beanFactory, "test");
 		BeanDefinitionMethodGeneratorFactory methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
 				AotServices.factoriesAndBeans(springFactoriesLoader, beanFactory));
-		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean1, null)).isNotNull();
+		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean1)).isNotNull();
 	}
 
 	private RegisteredBean registerTestBean(DefaultListableBeanFactory beanFactory) {
@@ -165,6 +162,7 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 				.rootBeanDefinition(TestBean.class).getBeanDefinition());
 		return RegisteredBean.of(beanFactory, "test");
 	}
+
 
 	static class MockBeanRegistrationExcludeFilter implements
 			BeanRegistrationAotProcessor, BeanRegistrationExcludeFilter, Ordered {
@@ -182,8 +180,7 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 		}
 
 		@Override
-		public BeanRegistrationAotContribution processAheadOfTime(
-				RegisteredBean registeredBean) {
+		public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 			return null;
 		}
 

@@ -28,6 +28,7 @@ import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.mock;
@@ -99,7 +100,10 @@ public class SimpleClientHttpResponseTests {
 		InputStream is = mock(InputStream.class);
 		given(this.connection.getErrorStream()).willReturn(is);
 		willDoNothing().given(is).close();
-		given(is.read(any())).willThrow(new NullPointerException("from HttpURLConnection#ErrorStream"));
+		given(is.transferTo(any())).willCallRealMethod();
+		given(is.read(any(), anyInt(), anyInt())).willThrow(new NullPointerException("from HttpURLConnection#ErrorStream"));
+
+		is.readAllBytes();
 
 		InputStream responseStream = this.response.getBody();
 		responseStream.close();

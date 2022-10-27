@@ -22,7 +22,6 @@ import jakarta.inject.Qualifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
@@ -49,14 +48,12 @@ class JakartaAnnotationsRuntimeHintsTests {
 
 	@Test
 	void jakartaInjectAnnotationHasHints() {
-		assertThat(RuntimeHintsPredicates.reflection().onType(Inject.class)
-				.withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(this.hints);
+		assertThat(RuntimeHintsPredicates.reflection().onType(Inject.class)).accepts(this.hints);
 	}
 
 	@Test
 	void jakartaQualifierAnnotationHasHints() {
-		assertThat(RuntimeHintsPredicates.reflection().onType(Qualifier.class)
-				.withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(this.hints);
+		assertThat(RuntimeHintsPredicates.reflection().onType(Qualifier.class)).accepts(this.hints);
 	}
 
 }

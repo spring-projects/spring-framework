@@ -57,6 +57,7 @@ import org.springframework.web.context.ServletContextAware;
  * {@link org.springframework.context.support.AbstractApplicationContext},
  * this class detects a bean of type {@link org.springframework.ui.context.ThemeSource}
  * in the context, under the special bean name "themeSource".
+ * Theme support is deprecated as of 6.0 with no direct replacement.
  *
  * <p><b>This is the web context to be subclassed for a different bean definition format.</b>
  * Such a context implementation can be specified as "contextClass" context-param
@@ -75,9 +76,9 @@ import org.springframework.web.context.ServletContextAware;
  * @since 1.1.3
  * @see #loadBeanDefinitions
  * @see org.springframework.web.context.ConfigurableWebApplicationContext#setConfigLocations
- * @see org.springframework.ui.context.ThemeSource
  * @see XmlWebApplicationContext
  */
+@SuppressWarnings("deprecation")
 public abstract class AbstractRefreshableWebApplicationContext extends AbstractRefreshableConfigApplicationContext
 		implements ConfigurableWebApplicationContext, ThemeSource {
 
@@ -215,6 +216,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 
 	@Override
 	@Nullable
+	@Deprecated
 	public Theme getTheme(String themeName) {
 		Assert.state(this.themeSource != null, "No ThemeSource available");
 		return this.themeSource.getTheme(themeName);

@@ -131,7 +131,7 @@ Typically, you need an application server's JTA capability only if your applicat
 to handle transactions across multiple resources, which is not a requirement for many
 applications. Many high-end applications use a single, highly scalable database (such as
 Oracle RAC) instead. Stand-alone transaction managers (such as
-https://www.atomikos.com/[Atomikos Transactions] and http://jotm.objectweb.org/[JOTM])
+https://www.atomikos.com/[Atomikos Transactions] and https://jotm.ow2.org/[JOTM])
 are other options. Of course, you may need other application server capabilities, such as
 Java Message Service (JMS) and Jakarta EE Connector Architecture (JCA).
 
@@ -1525,7 +1525,7 @@ programming arrangements as the following listing shows:
 
 Note that there are special considerations for the returned `Publisher` with regards to
 Reactive Streams cancellation signals. See the <<tx-prog-operator-cancel>> section under
-"Using the TransactionOperator" for more details.
+"Using the TransactionalOperator" for more details.
 
 
 [[transaction-declarative-annotations-method-visibility]]
@@ -2479,32 +2479,32 @@ different settings (for example, a different isolation level), you need to creat
 two distinct `TransactionTemplate` instances.
 
 [[tx-prog-operator]]
-==== Using the `TransactionOperator`
+==== Using the `TransactionalOperator`
 
-The `TransactionOperator` follows an operator design that is similar to other reactive
+The `TransactionalOperator` follows an operator design that is similar to other reactive
 operators. It uses a callback approach (to free application code from having to do the
 boilerplate acquisition and release transactional resources) and results in code that is
 intention driven, in that your code focuses solely on what you want to do.
 
-NOTE: As the examples that follow show, using the `TransactionOperator` absolutely
+NOTE: As the examples that follow show, using the `TransactionalOperator` absolutely
 couples you to Spring's transaction infrastructure and APIs. Whether or not programmatic
 transaction management is suitable for your development needs is a decision that you have
 to make yourself.
 
 Application code that must run in a transactional context and that explicitly uses
-the `TransactionOperator` resembles the next example:
+the `TransactionalOperator` resembles the next example:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
 	public class SimpleService implements Service {
 
-		// single TransactionOperator shared amongst all methods in this instance
+		// single TransactionalOperator shared amongst all methods in this instance
 		private final TransactionalOperator transactionalOperator;
 
 		// use constructor-injection to supply the ReactiveTransactionManager
 		public SimpleService(ReactiveTransactionManager transactionManager) {
-			this.transactionOperator = TransactionalOperator.create(transactionManager);
+			this.transactionalOperator = TransactionalOperator.create(transactionManager);
 		}
 
 		public Mono<Object> someServiceMethod() {
@@ -2880,7 +2880,7 @@ treats them as errors.
 
 For more information about the Spring Framework's transaction support, see:
 
-* https://www.javaworld.com/javaworld/jw-01-2009/jw-01-spring-transactions.html[Distributed
+* https://www.infoworld.com/article/2077963/distributed-transactions-in-spring--with-and-without-xa.html[Distributed
   transactions in Spring, with and without XA] is a JavaWorld presentation in which
   Spring's David Syer guides you through seven patterns for distributed
   transactions in Spring applications, three of them with XA and four without.
@@ -6229,7 +6229,7 @@ it with values from the Java `ARRAY`, as the following example shows:
 === Embedded Database Support
 
 The `org.springframework.jdbc.datasource.embedded` package provides support for embedded
-Java database engines. Support for http://www.hsqldb.org[HSQL],
+Java database engines. Support for https://www.hsqldb.org[HSQL],
 https://www.h2database.com[H2], and https://db.apache.org/derby[Derby] is provided
 natively. You can also use an extensible API to plug in new embedded database types and
 `DataSource` implementations.

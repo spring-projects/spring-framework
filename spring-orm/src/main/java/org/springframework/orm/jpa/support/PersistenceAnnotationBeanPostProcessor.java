@@ -43,7 +43,6 @@ import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.PropertyValues;
@@ -795,17 +794,17 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 				method.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER);
 				method.addParameter(this.target, INSTANCE_PARAMETER);
 				method.returns(this.target);
-				method.addCode(generateMethodCode(generationContext.getRuntimeHints(), generatedClass.getMethods()));
+				method.addCode(generateMethodCode(generationContext.getRuntimeHints(), generatedClass));
 			});
-			beanRegistrationCode.addInstancePostProcessor(MethodReference
-					.ofStatic(generatedClass.getName(), generatedMethod.getName()));
+			beanRegistrationCode.addInstancePostProcessor(generatedMethod.toMethodReference());
 		}
 
-		private CodeBlock generateMethodCode(RuntimeHints hints, GeneratedMethods generatedMethods) {
+		private CodeBlock generateMethodCode(RuntimeHints hints, GeneratedClass generatedClass) {
 			CodeBlock.Builder code = CodeBlock.builder();
-			InjectionCodeGenerator injectionCodeGenerator = new InjectionCodeGenerator(hints);
+			InjectionCodeGenerator injectionCodeGenerator = new InjectionCodeGenerator(
+					generatedClass.getName(), hints);
 			for (InjectedElement injectedElement : this.injectedElements) {
-				CodeBlock resourceToInject = generateResourceToInjectCode(generatedMethods,
+				CodeBlock resourceToInject = generateResourceToInjectCode(generatedClass.getMethods(),
 						(PersistenceElement) injectedElement);
 				code.add(injectionCodeGenerator.generateInjectionCode(
 						injectedElement.getMember(), INSTANCE_PARAMETER,
@@ -825,9 +824,9 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 						EntityManagerFactoryUtils.class, ListableBeanFactory.class,
 						REGISTERED_BEAN_PARAMETER, unitName);
 			}
-			String[] methodNameParts = { "get" , unitName, "EntityManager" };
+			String[] methodNameParts = { "get", unitName, "EntityManager" };
 			GeneratedMethod generatedMethod = generatedMethods.add(methodNameParts, method ->
-							generateGetEntityManagerMethod(method, injectedElement));
+					generateGetEntityManagerMethod(method, injectedElement));
 			return CodeBlock.of("$L($L)", generatedMethod.getName(), REGISTERED_BEAN_PARAMETER);
 		}
 

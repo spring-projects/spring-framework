@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package org.springframework.aot.hint;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
@@ -48,16 +48,15 @@ class ReflectionHintsTests {
 	}
 
 	@Test
-	void registerTypeIfPresentRegisterExistingClass() {
-		this.reflectionHints.registerTypeIfPresent(null, String.class.getName(),
-				hint -> hint.withMembers(MemberCategory.DECLARED_FIELDS));
+	void registerTypeIfPresentRegistersExistingClass() {
+		this.reflectionHints.registerTypeIfPresent(null, String.class.getName(), MemberCategory.DECLARED_FIELDS);
 		assertThat(this.reflectionHints.typeHints()).singleElement().satisfies(
 				typeWithMemberCategories(String.class, MemberCategory.DECLARED_FIELDS));
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
-	void registerTypeIfPresentIgnoreMissingClass() {
+	void registerTypeIfPresentIgnoresMissingClass() {
 		Consumer<TypeHint.Builder> hintBuilder = mock(Consumer.class);
 		this.reflectionHints.registerTypeIfPresent(null, "com.example.DoesNotExist", hintBuilder);
 		assertThat(this.reflectionHints.typeHints()).isEmpty();
@@ -74,8 +73,7 @@ class ReflectionHintsTests {
 
 	@Test
 	void getTypeUsingTypeReference() {
-		this.reflectionHints.registerType(String.class,
-				hint -> hint.withMembers(MemberCategory.DECLARED_FIELDS));
+		this.reflectionHints.registerType(String.class, MemberCategory.DECLARED_FIELDS);
 		assertThat(this.reflectionHints.getTypeHint(TypeReference.of(String.class))).satisfies(
 				typeWithMemberCategories(String.class, MemberCategory.DECLARED_FIELDS));
 	}
@@ -86,9 +84,9 @@ class ReflectionHintsTests {
 	}
 
 	@Test
-	void registerTypeReuseBuilder() {
+	void registerTypeReusesBuilder() {
 		this.reflectionHints.registerType(TypeReference.of(String.class),
-				typeHint -> typeHint.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
+				MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 		Field field = ReflectionUtils.findField(String.class, "value");
 		assertThat(field).isNotNull();
 		this.reflectionHints.registerField(field);
@@ -101,23 +99,27 @@ class ReflectionHintsTests {
 
 	@Test
 	void registerClass() {
-		this.reflectionHints.registerType(Integer.class,
-				hint -> hint.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
+		this.reflectionHints.registerType(Integer.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
 		assertThat(this.reflectionHints.typeHints()).singleElement().satisfies(
 				typeWithMemberCategories(Integer.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
 	}
 
 	@Test
-	void registerTypesApplyTheSameHints() {
-		this.reflectionHints.registerTypes(Stream.of(Integer.class, String.class, Double.class)
-				.map(TypeReference::of).toList(), hint -> hint.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
+	void registerClassWithCustomizer() {
+		this.reflectionHints.registerType(Integer.class,
+				typeHint -> typeHint.withMembers(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
+		assertThat(this.reflectionHints.typeHints()).singleElement().satisfies(
+				typeWithMemberCategories(Integer.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
+	}
+
+	@Test
+	void registerTypesAppliesTheSameHints() {
+		this.reflectionHints.registerTypes(TypeReference.listOf(Integer.class, String.class, Double.class),
+				TypeHint.builtWith(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS));
 		assertThat(this.reflectionHints.typeHints())
-				.anySatisfy(
-						typeWithMemberCategories(Integer.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS))
-				.anySatisfy(
-						typeWithMemberCategories(String.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS))
-				.anySatisfy(
-						typeWithMemberCategories(Double.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS))
+				.anySatisfy(typeWithMemberCategories(Integer.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS))
+				.anySatisfy(typeWithMemberCategories(String.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS))
+				.anySatisfy(typeWithMemberCategories(Double.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS))
 				.hasSize(3);
 	}
 
@@ -126,10 +128,14 @@ class ReflectionHintsTests {
 		Field field = ReflectionUtils.findField(TestType.class, "field");
 		assertThat(field).isNotNull();
 		this.reflectionHints.registerField(field);
+		assertTestTypeFieldHint(fieldHint ->
+				assertThat(fieldHint.getName()).isEqualTo("field"));
+	}
+
+	private void assertTestTypeFieldHint(Consumer<FieldHint> fieldHint) {
 		assertThat(this.reflectionHints.typeHints()).singleElement().satisfies(typeHint -> {
 			assertThat(typeHint.getType().getCanonicalName()).isEqualTo(TestType.class.getCanonicalName());
-			assertThat(typeHint.fields()).singleElement().satisfies(fieldHint ->
-					assertThat(fieldHint.getName()).isEqualTo("field"));
+			assertThat(typeHint.fields()).singleElement().satisfies(fieldHint);
 			assertThat(typeHint.constructors()).isEmpty();
 			assertThat(typeHint.methods()).isEmpty();
 			assertThat(typeHint.getMemberCategories()).isEmpty();
@@ -138,15 +144,31 @@ class ReflectionHintsTests {
 
 	@Test
 	void registerConstructor() {
-		this.reflectionHints.registerConstructor(TestType.class.getDeclaredConstructors()[0]);
+		this.reflectionHints.registerConstructor(
+				TestType.class.getDeclaredConstructors()[0], ExecutableMode.INTROSPECT);
+		assertTestTypeConstructorHint(constructorHint -> {
+			assertThat(constructorHint.getParameterTypes()).isEmpty();
+			assertThat(constructorHint.getMode()).isEqualTo(ExecutableMode.INTROSPECT);
+		});
+	}
+
+	@Test
+	void registerConstructorTwiceUpdatesExistingEntry() {
+		Constructor<?> constructor = TestType.class.getDeclaredConstructors()[0];
+		this.reflectionHints.registerConstructor(constructor, ExecutableMode.INTROSPECT);
+		this.reflectionHints.registerConstructor(constructor, ExecutableMode.INVOKE);
+		assertTestTypeConstructorHint(constructorHint -> {
+			assertThat(constructorHint.getParameterTypes()).isEmpty();
+			assertThat(constructorHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
+		});
+	}
+
+	private void assertTestTypeConstructorHint(Consumer<ExecutableHint> constructorHint) {
 		assertThat(this.reflectionHints.typeHints()).singleElement().satisfies(typeHint -> {
 			assertThat(typeHint.getMemberCategories()).isEmpty();
 			assertThat(typeHint.getType().getCanonicalName()).isEqualTo(TestType.class.getCanonicalName());
 			assertThat(typeHint.fields()).isEmpty();
-			assertThat(typeHint.constructors()).singleElement().satisfies(constructorHint -> {
-				assertThat(constructorHint.getParameterTypes()).isEmpty();
-				assertThat(constructorHint.getModes()).containsOnly(ExecutableMode.INVOKE);
-			});
+			assertThat(typeHint.constructors()).singleElement().satisfies(constructorHint);
 			assertThat(typeHint.methods()).isEmpty();
 			assertThat(typeHint.getMemberCategories()).isEmpty();
 		});
@@ -156,16 +178,33 @@ class ReflectionHintsTests {
 	void registerMethod() {
 		Method method = ReflectionUtils.findMethod(TestType.class, "setName", String.class);
 		assertThat(method).isNotNull();
-		this.reflectionHints.registerMethod(method);
+		this.reflectionHints.registerMethod(method, ExecutableMode.INTROSPECT);
+		assertTestTypeMethodHints(methodHint -> {
+			assertThat(methodHint.getName()).isEqualTo("setName");
+			assertThat(methodHint.getParameterTypes()).containsOnly(TypeReference.of(String.class));
+			assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INTROSPECT);
+		});
+	}
+
+	@Test
+	void registerMethodTwiceUpdatesExistingEntry() {
+		Method method = ReflectionUtils.findMethod(TestType.class, "setName", String.class);
+		assertThat(method).isNotNull();
+		this.reflectionHints.registerMethod(method, ExecutableMode.INTROSPECT);
+		this.reflectionHints.registerMethod(method, ExecutableMode.INVOKE);
+		assertTestTypeMethodHints(methodHint -> {
+			assertThat(methodHint.getName()).isEqualTo("setName");
+			assertThat(methodHint.getParameterTypes()).containsOnly(TypeReference.of(String.class));
+			assertThat(methodHint.getMode()).isEqualTo(ExecutableMode.INVOKE);
+		});
+	}
+
+	private void assertTestTypeMethodHints(Consumer<ExecutableHint> methodHint) {
 		assertThat(this.reflectionHints.typeHints()).singleElement().satisfies(typeHint -> {
 			assertThat(typeHint.getType().getCanonicalName()).isEqualTo(TestType.class.getCanonicalName());
 			assertThat(typeHint.fields()).isEmpty();
 			assertThat(typeHint.constructors()).isEmpty();
-			assertThat(typeHint.methods()).singleElement().satisfies(methodHint -> {
-				assertThat(methodHint.getName()).isEqualTo("setName");
-				assertThat(methodHint.getParameterTypes()).containsOnly(TypeReference.of(String.class));
-				assertThat(methodHint.getModes()).containsOnly(ExecutableMode.INVOKE);
-			});
+			assertThat(typeHint.methods()).singleElement().satisfies(methodHint);
 		});
 	}
 

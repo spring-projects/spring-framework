@@ -31,17 +31,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aot.generate.ClassNameGenerator;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
-import org.springframework.aot.test.generator.compile.Compiled;
-import org.springframework.aot.test.generator.compile.TestCompiler;
-import org.springframework.aot.test.generator.file.SourceFile;
+import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
+import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.beans.testfixture.beans.factory.aot.MockBeanFactoryInitializationCode;
-import org.springframework.core.mock.MockSpringFactoriesLoader;
-import org.springframework.core.testfixture.aot.generate.TestGenerationContext;
-import org.springframework.core.testfixture.aot.generate.TestTarget;
+import org.springframework.core.test.io.support.MockSpringFactoriesLoader;
+import org.springframework.core.test.tools.Compiled;
+import org.springframework.core.test.tools.SourceFile;
+import org.springframework.core.test.tools.TestCompiler;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
@@ -96,7 +96,7 @@ class BeanRegistrationsAotContributionTests {
 	@Test
 	void applyToWhenHasNameGeneratesPrefixedFeatureName() {
 		this.generationContext = new TestGenerationContext(
-				new ClassNameGenerator(TestTarget.class, "Management"));
+				new ClassNameGenerator(TestGenerationContext.TEST_TARGET, "Management"));
 		this.beanFactoryInitializationCode = new MockBeanFactoryInitializationCode(this.generationContext);
 		Map<String, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
 		RegisteredBean registeredBean = registerBean(
@@ -155,15 +155,18 @@ class BeanRegistrationsAotContributionTests {
 		MethodReference methodReference = this.beanFactoryInitializationCode
 				.getInitializers().get(0);
 		this.beanFactoryInitializationCode.getTypeBuilder().set(type -> {
+			CodeBlock methodInvocation = methodReference.toInvokeCodeBlock(
+					ArgumentCodeGenerator.of(DefaultListableBeanFactory.class, "beanFactory"),
+					this.beanFactoryInitializationCode.getClassName());
 			type.addModifiers(Modifier.PUBLIC);
 			type.addSuperinterface(ParameterizedTypeName.get(Consumer.class, DefaultListableBeanFactory.class));
 			type.addMethod(MethodSpec.methodBuilder("accept").addModifiers(Modifier.PUBLIC)
 					.addParameter(DefaultListableBeanFactory.class, "beanFactory")
-					.addStatement(methodReference.toInvokeCodeBlock(CodeBlock.of("beanFactory")))
+					.addStatement(methodInvocation)
 					.build());
 		});
 		this.generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(this.generationContext.getGeneratedFiles()).compile(compiled ->
+		TestCompiler.forSystem().with(this.generationContext).compile(compiled ->
 				result.accept(compiled.getInstance(Consumer.class), compiled));
 	}
 

@@ -259,12 +259,12 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		// See https://datatracker.ietf.org/doc/html/rfc9110#section-13.2.2
 		// 1) If-Match
 		if (validateIfMatch(eTag)) {
-			updateResponseStateChanging();
+			updateResponseStateChanging(eTag, lastModified);
 			return this.notModified;
 		}
 		// 2) If-Unmodified-Since
 		else if (validateIfUnmodifiedSince(lastModified)) {
-			updateResponseStateChanging();
+			updateResponseStateChanging(eTag, lastModified);
 			return this.notModified;
 		}
 		// 3) If-None-Match
@@ -346,9 +346,12 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		return first.equals(second);
 	}
 
-	private void updateResponseStateChanging() {
+	private void updateResponseStateChanging(String eTag, Instant lastModified) {
 		if (this.notModified) {
 			getResponse().setStatusCode(HttpStatus.PRECONDITION_FAILED);
+		}
+		else {
+			addCachingResponseHeaders(eTag, lastModified);
 		}
 	}
 
@@ -371,7 +374,11 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 			getResponse().setStatusCode(isSafeMethod ?
 					HttpStatus.NOT_MODIFIED : HttpStatus.PRECONDITION_FAILED);
 		}
-		if (isSafeMethod) {
+		addCachingResponseHeaders(eTag, lastModified);
+	}
+
+	private void addCachingResponseHeaders(@Nullable String eTag, Instant lastModified) {
+		if (SAFE_METHODS.contains(getRequest().getMethod())) {
 			if (lastModified.isAfter(Instant.EPOCH) && getResponseHeaders().getLastModified() == -1) {
 				getResponseHeaders().setLastModified(lastModified.toEpochMilli());
 			}

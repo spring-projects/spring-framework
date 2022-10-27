@@ -54,7 +54,7 @@ public class WebClientRequestException extends WebClientException {
 
 	/**
 	 * Not all {@code HttpHeaders} implementations are serializable, so we
-	 * make a copy to ensure that {@code WebClientResponseException} is.
+	 * make a copy to ensure that {@code WebClientRequestException} is.
 	 */
 	private static HttpHeaders copy(HttpHeaders headers) {
 		HttpHeaders result = new HttpHeaders();

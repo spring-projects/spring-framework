@@ -125,6 +125,15 @@ public final class WebClientAdapter implements HttpClientAdapter {
 
 
 	/**
+	 * Create a {@link WebClientAdapter} for the given {@code WebClient} instance.
+	 * @param webClient the client to use
+	 * @return the created adapter instance
+	 */
+	public static WebClientAdapter forClient(WebClient webClient) {
+		return new WebClientAdapter(webClient);
+	}
+
+	/**
 	 * Static method to create a {@link HttpServiceProxyFactory} configured to
 	 * use the given {@link WebClient} instance. Effectively a shortcut for:
 	 * <pre>
@@ -133,7 +142,11 @@ public final class WebClientAdapter implements HttpClientAdapter {
 	 * </pre>
 	 * @param webClient the client to use
 	 * @return the created {@code HttpServiceProxyFactory} instance
+	 * @deprecated in favor of using {@link #forClient(WebClient)} and
+	 * {@link HttpServiceProxyFactory#builder(HttpClientAdapter)}
 	 */
+	@SuppressWarnings("removal")
+	@Deprecated(since = "6.0.0-RC1", forRemoval = true)
 	public static HttpServiceProxyFactory createHttpServiceProxyFactory(WebClient webClient) {
 		return new HttpServiceProxyFactory(new WebClientAdapter(webClient));
 	}
@@ -143,18 +156,12 @@ public final class WebClientAdapter implements HttpClientAdapter {
 	 * a {@link WebClient.Builder} and uses it to create the client.
 	 * @param webClientBuilder a builder to create the client to use with
 	 * @return the created {@code HttpServiceProxyFactory} instance
+	 * @deprecated in favor of using {@link #forClient(WebClient)} and
+	 * {@link HttpServiceProxyFactory#builder(HttpClientAdapter)}
 	 */
+	@Deprecated(since = "6.0.0-RC1", forRemoval = true)
 	public static HttpServiceProxyFactory createHttpServiceProxyFactory(WebClient.Builder webClientBuilder) {
 		return createHttpServiceProxyFactory(webClientBuilder.build());
-	}
-
-	/**
-	 * Create a {@link WebClientAdapter} for the given {@code WebClient} instance.
-	 * @param webClient the client to use
-	 * @return the created adapter instance
-	 */
-	public static WebClientAdapter forClient(WebClient webClient) {
-		return new WebClientAdapter(webClient);
 	}
 
 }

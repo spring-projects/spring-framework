@@ -46,7 +46,7 @@ public class WebSocketClientSockJsSession extends AbstractClientSockJsSession im
 	 * Create a new {@code WebSocketClientSockJsSession}.
 	 * @deprecated as of 6.0, in favor of {@link #WebSocketClientSockJsSession(TransportRequest, WebSocketHandler, CompletableFuture)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public WebSocketClientSockJsSession(TransportRequest request, WebSocketHandler handler,
 			org.springframework.util.concurrent.SettableListenableFuture<WebSocketSession> connectFuture) {
 

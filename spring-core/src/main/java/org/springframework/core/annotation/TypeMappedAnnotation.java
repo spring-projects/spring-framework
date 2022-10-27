@@ -353,7 +353,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	 */
 	private boolean isSynthesizable(Annotation annotation) {
 		// Already synthesized?
-		if (annotation instanceof SynthesizedAnnotation) {
+		if (AnnotationUtils.isSynthesizedAnnotation(annotation)) {
 			return false;
 		}
 		// Is this a mapped annotation for a composed annotation, and are there

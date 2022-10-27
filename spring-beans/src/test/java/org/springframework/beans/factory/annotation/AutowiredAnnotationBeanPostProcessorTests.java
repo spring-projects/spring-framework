@@ -37,7 +37,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -3016,11 +3015,11 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		}
 
 		public List<TestBean> streamTestBeans() {
-			return this.testBeanProvider.stream().collect(Collectors.toList());
+			return this.testBeanProvider.stream().toList();
 		}
 
 		public List<TestBean> sortedTestBeans() {
-			return this.testBeanProvider.orderedStream().collect(Collectors.toList());
+			return this.testBeanProvider.orderedStream().toList();
 		}
 	}
 

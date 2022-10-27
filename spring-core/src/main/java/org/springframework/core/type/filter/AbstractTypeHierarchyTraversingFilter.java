@@ -86,7 +86,7 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 					}
 					catch (IOException ex) {
 						if (logger.isDebugEnabled()) {
-							logger.debug("Could not read super class [" + metadata.getSuperClassName() +
+							logger.debug("Could not read superclass [" + metadata.getSuperClassName() +
 									"] of type-filtered class [" + metadata.getClassName() + "]");
 						}
 					}

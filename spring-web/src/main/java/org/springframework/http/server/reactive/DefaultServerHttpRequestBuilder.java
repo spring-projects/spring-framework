@@ -208,12 +208,6 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		}
 
 		@Override
-		@Deprecated
-		public String getMethodValue() {
-			return this.method.name();
-		}
-
-		@Override
 		protected MultiValueMap<String, HttpCookie> initCookies() {
 			return this.originalRequest.getCookies();
 		}

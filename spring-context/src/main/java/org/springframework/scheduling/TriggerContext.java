@@ -47,7 +47,7 @@ public interface TriggerContext {
 	 * @deprecated as of 6.0, in favor on {@link #lastScheduledExecution()}
 	 */
 	@Nullable
-	@Deprecated
+	@Deprecated(since = "6.0")
 	default Date lastScheduledExecutionTime() {
 		Instant instant = lastScheduledExecution();
 		return instant != null ? Date.from(instant) : null;
@@ -66,7 +66,7 @@ public interface TriggerContext {
 	 * or {@code null} if not scheduled before.
 	 * @deprecated as of 6.0, in favor on {@link #lastActualExecution()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	@Nullable
 	default Date lastActualExecutionTime() {
 		Instant instant = lastActualExecution();
@@ -85,7 +85,7 @@ public interface TriggerContext {
 	 * or {@code null} if not scheduled before.
 	 * @deprecated as of 6.0, in favor on {@link #lastCompletion()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	@Nullable
 	default Date lastCompletionTime() {
 		Instant instant = lastCompletion();

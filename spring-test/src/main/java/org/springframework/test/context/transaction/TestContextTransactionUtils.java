@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -218,9 +218,9 @@ public abstract class TestContextTransactionUtils {
 	}
 
 	private static void logBeansException(TestContext testContext, BeansException ex, Class<?> beanType) {
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Caught exception while retrieving %s for test context %s",
-				beanType.getSimpleName(), testContext), ex);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Caught exception while retrieving %s for test context %s"
+					.formatted(beanType.getSimpleName(), testContext), ex);
 		}
 	}
 

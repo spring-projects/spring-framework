@@ -40,7 +40,7 @@ public abstract class NestedExceptionUtils {
 	 * @deprecated as of 6.0, in favor of custom exception messages
 	 * with selective inclusion of cause messages
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	@Nullable
 	public static String buildMessage(@Nullable String message, @Nullable Throwable cause) {
 		if (cause == null) {

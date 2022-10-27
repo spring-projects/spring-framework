@@ -28,7 +28,7 @@ import org.junit.jupiter.api.condition.EnabledIf;
 import org.springframework.aot.agent.RuntimeHintsAgent;
 
 /**
- * {@code @EneabledIfRuntimeHintsAgent} signals that the annotated test class or test method
+ * {@code @EnabledIfRuntimeHintsAgent} signals that the annotated test class or test method
  * is only enabled if the {@link RuntimeHintsAgent} is loaded on the current JVM.
  * <p>This is meta-annotated with {@code @Tag("RuntimeHintsTests")} so that test suites
  * can choose to target or ignore those tests.

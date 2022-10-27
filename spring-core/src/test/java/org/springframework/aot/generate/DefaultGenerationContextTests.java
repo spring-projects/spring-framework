@@ -16,14 +16,13 @@
 
 package org.springframework.aot.generate;
 
-import java.io.IOException;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.GeneratedFiles.Kind;
 import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.core.testfixture.aot.generate.TestTarget;
+import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.TypeSpec;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,10 +36,12 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  */
 class DefaultGenerationContextTests {
 
+	private static final ClassName SAMPLE_TARGET = ClassName.get("com.example", "SampleTarget");
+
 	private static final Consumer<TypeSpec.Builder> typeSpecCustomizer = type -> {};
 
 	private final GeneratedClasses generatedClasses = new GeneratedClasses(
-			new ClassNameGenerator(TestTarget.class));
+			new ClassNameGenerator(SAMPLE_TARGET));
 
 	private final InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
 
@@ -50,7 +51,7 @@ class DefaultGenerationContextTests {
 	@Test
 	void createWithOnlyGeneratedFilesCreatesContext() {
 		DefaultGenerationContext context = new DefaultGenerationContext(
-				new ClassNameGenerator(TestTarget.class), this.generatedFiles);
+				new ClassNameGenerator(SAMPLE_TARGET), this.generatedFiles);
 		assertThat(context.getGeneratedFiles()).isSameAs(this.generatedFiles);
 		assertThat(context.getRuntimeHints()).isInstanceOf(RuntimeHints.class);
 	}
@@ -66,8 +67,8 @@ class DefaultGenerationContextTests {
 	@Test
 	void createWhenGeneratedClassesIsNullThrowsException() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> new DefaultGenerationContext(null, this.generatedFiles,
-						this.runtimeHints))
+				.isThrownBy(() -> new DefaultGenerationContext((GeneratedClasses) null,
+						this.generatedFiles, this.runtimeHints))
 				.withMessage("'generatedClasses' must not be null");
 	}
 
@@ -111,7 +112,7 @@ class DefaultGenerationContextTests {
 	@Test
 	void withNameUpdateNamingConvention() {
 		DefaultGenerationContext context = new DefaultGenerationContext(
-				new ClassNameGenerator(TestTarget.class), this.generatedFiles);
+				new ClassNameGenerator(SAMPLE_TARGET), this.generatedFiles);
 		GenerationContext anotherContext = context.withName("Another");
 		GeneratedClass generatedClass = anotherContext.getGeneratedClasses()
 				.addForFeature("Test", typeSpecCustomizer);
@@ -119,9 +120,9 @@ class DefaultGenerationContextTests {
 	}
 
 	@Test
-	void withNameKeepsTrackOfAllGeneratedFiles() throws IOException {
+	void withNameKeepsTrackOfAllGeneratedFiles() {
 		DefaultGenerationContext context = new DefaultGenerationContext(
-				new ClassNameGenerator(TestTarget.class), this.generatedFiles);
+				new ClassNameGenerator(SAMPLE_TARGET), this.generatedFiles);
 		context.getGeneratedClasses().addForFeature("Test", typeSpecCustomizer);
 		GenerationContext anotherContext = context.withName("Another");
 		assertThat(anotherContext.getGeneratedClasses()).isNotSameAs(context.getGeneratedClasses());
@@ -133,9 +134,9 @@ class DefaultGenerationContextTests {
 	}
 
 	@Test
-	void withNameGeneratesUniqueName() throws IOException {
+	void withNameGeneratesUniqueName() {
 		DefaultGenerationContext context = new DefaultGenerationContext(
-				new ClassNameGenerator(Object.class), this.generatedFiles);
+				new ClassNameGenerator(SAMPLE_TARGET), this.generatedFiles);
 		context.withName("Test").getGeneratedClasses()
 				.addForFeature("Feature", typeSpecCustomizer);
 		context.withName("Test").getGeneratedClasses()
@@ -144,9 +145,9 @@ class DefaultGenerationContextTests {
 				.addForFeature("Feature", typeSpecCustomizer);
 		context.writeGeneratedContent();
 		assertThat(this.generatedFiles.getGeneratedFiles(Kind.SOURCE)).containsOnlyKeys(
-				"java/lang/Object__TestFeature.java",
-				"java/lang/Object__Test1Feature.java",
-				"java/lang/Object__Test2Feature.java");
+				"com/example/SampleTarget__TestFeature.java",
+				"com/example/SampleTarget__Test1Feature.java",
+				"com/example/SampleTarget__Test2Feature.java");
 	}
 
 }

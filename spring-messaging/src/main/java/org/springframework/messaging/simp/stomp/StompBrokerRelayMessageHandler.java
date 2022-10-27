@@ -43,10 +43,13 @@ import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.messaging.tcp.FixedIntervalReconnectStrategy;
 import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.messaging.tcp.TcpOperations;
+import org.springframework.messaging.tcp.reactor.ReactorNetty2TcpClient;
 import org.springframework.messaging.tcp.reactor.ReactorNettyCodec;
 import org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient;
+import org.springframework.messaging.tcp.reactor.TcpMessageCodec;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * A {@link org.springframework.messaging.MessageHandler} that handles messages by
@@ -101,10 +104,18 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	private static final Message<byte[]> HEARTBEAT_MESSAGE;
 
+	private static final boolean reactorNettyClientPresent;
+
+	private static final boolean reactorNetty2ClientPresent;
+
 	static {
 		HEART_BEAT_ACCESSOR = StompHeaderAccessor.createForHeartbeat();
 		HEARTBEAT_MESSAGE = MessageBuilder.createMessage(
 				StompDecoder.HEARTBEAT_PAYLOAD, HEART_BEAT_ACCESSOR.getMessageHeaders());
+
+		ClassLoader classLoader = StompBrokerRelayMessageHandler.class.getClassLoader();
+		reactorNettyClientPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", classLoader);
+		reactorNetty2ClientPresent = ClassUtils.isPresent("reactor.netty5.http.client.HttpClient", classLoader);
 	}
 
 
@@ -345,7 +356,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	/**
 	 * Configure a TCP client for managing TCP connections to the STOMP broker.
-	 * <p>By default {@link ReactorNettyTcpClient} is used.
+	 * <p>By default {@link ReactorNettyTcpClient} or
+	 * {@link ReactorNetty2TcpClient} is used.
 	 * <p><strong>Note:</strong> when this property is used, any
 	 * {@link #setRelayHost(String) host} or {@link #setRelayPort(int) port}
 	 * specified are effectively ignored.
@@ -458,15 +470,24 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 	}
 
-	private ReactorNettyTcpClient<byte[]> initTcpClient() {
+	private TcpOperations<byte[]> initTcpClient() {
 		StompDecoder decoder = new StompDecoder();
 		if (this.headerInitializer != null) {
 			decoder.setHeaderInitializer(this.headerInitializer);
 		}
-		ReactorNettyCodec<byte[]> codec = new StompReactorNettyCodec(decoder);
-		ReactorNettyTcpClient<byte[]> client = new ReactorNettyTcpClient<>(this.relayHost, this.relayPort, codec);
-		client.setLogger(SimpLogging.forLog(client.getLogger()));
-		return client;
+		if (reactorNettyClientPresent) {
+			ReactorNettyCodec<byte[]> codec = new StompReactorNettyCodec(decoder);
+			ReactorNettyTcpClient<byte[]> client = new ReactorNettyTcpClient<>(this.relayHost, this.relayPort, codec);
+			client.setLogger(SimpLogging.forLog(client.getLogger()));
+			return client;
+		}
+		else if (reactorNetty2ClientPresent) {
+			TcpMessageCodec<byte[]> codec = new StompTcpMessageCodec(decoder);
+			ReactorNetty2TcpClient<byte[]> client = new ReactorNetty2TcpClient<>(this.relayHost, this.relayPort, codec);
+			client.setLogger(SimpLogging.forLog(client.getLogger()));
+			return client;
+		}
+		throw new IllegalStateException("No compatible version of Reactor Netty");
 	}
 
 	@Override

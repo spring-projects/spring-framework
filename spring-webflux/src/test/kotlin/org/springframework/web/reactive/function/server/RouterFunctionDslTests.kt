@@ -24,11 +24,13 @@ import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod.*
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.*
+import org.springframework.web.reactive.function.server.support.ServerRequestWrapper
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.*
 import org.springframework.web.testfixture.server.MockServerWebExchange
 import org.springframework.web.reactive.function.server.AttributesTestVisitor
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
+import java.security.Principal
 
 /**
  * Tests for [RouterFunctionDsl].
@@ -167,6 +169,53 @@ class RouterFunctionDslTests {
 			listOf(mapOf("foo" to "n3"), mapOf("foo" to "n2"), mapOf("foo" to "n1"))
 		);
 		assertThat(visitor.visitCount()).isEqualTo(7);
+	}
+
+	@Test
+	fun acceptFilterAndPOST() {
+		val mockRequest = post("https://example.com/filter")
+			.header(ACCEPT, APPLICATION_JSON_VALUE)
+			.build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
+		StepVerifier.create(filteredRouter.route(request).flatMap { it.handle(request) })
+			.expectNextCount(1)
+			.verifyComplete()
+	}
+
+	private val filteredRouter = router {
+		POST("/filter", ::handleRequestWrapper)
+
+		filter (TestFilterProvider.provide())
+		before {
+			it
+		}
+		after { _, response ->
+			response
+		}
+		onError({it is IllegalStateException}) { _, _ ->
+			ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+		}
+		onError<IllegalStateException> { _, _ ->
+			ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+		}
+	}
+
+	private class TestServerRequestWrapper(delegate: ServerRequest, private val principalOverride: String = "foo"): ServerRequestWrapper(delegate) {
+		override fun principal(): Mono<out Principal> = Mono.just(Principal { principalOverride })
+	}
+
+	private object TestFilterProvider {
+		fun provide(): (ServerRequest, (ServerRequest) -> Mono<ServerResponse>) -> Mono<ServerResponse> = { request, next ->
+			next(TestServerRequestWrapper(request))
+		}
+	}
+
+	private fun handleRequestWrapper(req: ServerRequest): Mono<ServerResponse> {
+		return req.principal()
+			.flatMap {
+				assertThat(it.name).isEqualTo("foo")
+				ServerResponse.ok().build()
+			}
 	}
 
 	private fun sampleRouter() = router {

@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.aot;
 
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,6 +30,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 import org.springframework.aot.generate.GeneratedMethod;
@@ -60,32 +63,61 @@ class BeanDefinitionPropertyValueCodeGenerator {
 
 	private final GeneratedMethods generatedMethods;
 
-	private final List<Delegate> delegates = List.of(
-			new PrimitiveDelegate(),
-			new StringDelegate(),
-			new EnumDelegate(),
-			new ClassDelegate(),
-			new ResolvableTypeDelegate(),
-			new ArrayDelegate(),
-			new ManagedListDelegate(),
-			new ManagedSetDelegate(),
-			new ManagedMapDelegate(),
-			new ListDelegate(),
-			new SetDelegate(),
-			new MapDelegate(),
-			new BeanReferenceDelegate()
-	);
+	private final List<Delegate> delegates;
 
 
-	BeanDefinitionPropertyValueCodeGenerator(GeneratedMethods generatedMethods) {
+	BeanDefinitionPropertyValueCodeGenerator(GeneratedMethods generatedMethods,
+			@Nullable BiFunction<Object, ResolvableType, CodeBlock> customValueGenerator) {
 		this.generatedMethods = generatedMethods;
+		this.delegates = new ArrayList<>();
+		if (customValueGenerator != null) {
+			this.delegates.add(customValueGenerator::apply);
+		}
+		this.delegates.addAll(List.of(
+				new PrimitiveDelegate(),
+				new StringDelegate(),
+				new CharsetDelegate(),
+				new EnumDelegate(),
+				new ClassDelegate(),
+				new ResolvableTypeDelegate(),
+				new ArrayDelegate(),
+				new ManagedListDelegate(),
+				new ManagedSetDelegate(),
+				new ManagedMapDelegate(),
+				new ListDelegate(),
+				new SetDelegate(),
+				new MapDelegate(),
+				new BeanReferenceDelegate()
+		));
 	}
 
 
 	CodeBlock generateCode(@Nullable Object value) {
-		ResolvableType type = (value != null) ? ResolvableType.forInstance(value)
-				: ResolvableType.NONE;
-		return generateCode(value, type);
+		ResolvableType type = ResolvableType.forInstance(value);
+		try {
+			return generateCode(value, type);
+		}
+		catch (Exception ex) {
+			throw new IllegalArgumentException(buildErrorMessage(value, type), ex);
+		}
+	}
+
+	private CodeBlock generateCodeForElement(@Nullable Object value, ResolvableType type) {
+		try {
+			return generateCode(value, type);
+		}
+		catch (Exception ex) {
+			throw new IllegalArgumentException(buildErrorMessage(value, type), ex);
+		}
+	}
+
+	private static String buildErrorMessage(@Nullable Object value, ResolvableType type) {
+		StringBuilder message = new StringBuilder("Failed to generate code for '");
+		message.append(value).append("'");
+		if (type != ResolvableType.NONE) {
+			message.append(" with type ").append(type);
+		}
+		return message.toString();
 	}
 
 	private CodeBlock generateCode(@Nullable Object value, ResolvableType type) {
@@ -98,8 +130,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 				return code;
 			}
 		}
-		throw new IllegalArgumentException(
-				"'type' " + type + " must be supported for instance code generation");
+		throw new IllegalArgumentException("Code generation does not support " + type);
 	}
 
 
@@ -183,6 +214,22 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			}
 			return null;
 		}
+	}
+
+
+	/**
+	 * {@link Delegate} for {@link Charset} types.
+	 */
+	private static class CharsetDelegate implements Delegate {
+
+		@Override
+		@Nullable
+		public CodeBlock generateCode(Object value, ResolvableType type) {
+			if (value instanceof Charset charset) {
+				return CodeBlock.of("$T.forName($S)", Charset.class, charset.name());
+			}
+			return null;
+		}
 
 	}
 
@@ -201,7 +248,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			}
 			return null;
 		}
-
 	}
 
 
@@ -218,7 +264,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			}
 			return null;
 		}
-
 	}
 
 
@@ -235,7 +280,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			}
 			return null;
 		}
-
 	}
 
 
@@ -251,15 +295,14 @@ class BeanDefinitionPropertyValueCodeGenerator {
 				ResolvableType componentType = type.getComponentType();
 				Stream<CodeBlock> elements = Arrays.stream(ObjectUtils.toObjectArray(value)).map(component ->
 						BeanDefinitionPropertyValueCodeGenerator.this.generateCode(component, componentType));
-				CodeBlock.Builder builder = CodeBlock.builder();
-				builder.add("new $T {", type.toClass());
-				builder.add(elements.collect(CodeBlock.joining(", ")));
-				builder.add("}");
-				return builder.build();
+				CodeBlock.Builder code = CodeBlock.builder();
+				code.add("new $T {", type.toClass());
+				code.add(elements.collect(CodeBlock.joining(", ")));
+				code.add("}");
+				return code.build();
 			}
 			return null;
 		}
-
 	}
 
 
@@ -298,21 +341,20 @@ class BeanDefinitionPropertyValueCodeGenerator {
 
 		protected final CodeBlock generateCollectionOf(Collection<?> collection,
 				Class<?> collectionType, ResolvableType elementType) {
-			Builder builder = CodeBlock.builder();
-			builder.add("$T.of(", collectionType);
+			Builder code = CodeBlock.builder();
+			code.add("$T.of(", collectionType);
 			Iterator<?> iterator = collection.iterator();
 			while (iterator.hasNext()) {
 				Object element = iterator.next();
-				builder.add("$L", BeanDefinitionPropertyValueCodeGenerator.this
-						.generateCode(element, elementType));
+				code.add("$L", BeanDefinitionPropertyValueCodeGenerator.this
+						.generateCodeForElement(element, elementType));
 				if (iterator.hasNext()) {
-					builder.add(", ");
+					code.add(", ");
 				}
 			}
-			builder.add(")");
-			return builder.build();
+			code.add(")");
+			return code.build();
 		}
-
 	}
 
 
@@ -324,7 +366,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 		public ManagedListDelegate() {
 			super(ManagedList.class, CodeBlock.of("new $T()", ManagedList.class));
 		}
-
 	}
 
 
@@ -336,7 +377,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 		public ManagedSetDelegate() {
 			super(ManagedSet.class, CodeBlock.of("new $T()", ManagedSet.class));
 		}
-
 	}
 
 
@@ -345,8 +385,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 	 */
 	private class ManagedMapDelegate implements Delegate {
 
-		private static final CodeBlock EMPTY_RESULT = CodeBlock.of("$T.ofEntries()",
-				ManagedMap.class);
+		private static final CodeBlock EMPTY_RESULT = CodeBlock.of("$T.ofEntries()", ManagedMap.class);
 
 		@Override
 		@Nullable
@@ -357,31 +396,29 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			return null;
 		}
 
-		private <K, V> CodeBlock generateManagedMapCode(ResolvableType type,
-				ManagedMap<K, V> managedMap) {
+		private <K, V> CodeBlock generateManagedMapCode(ResolvableType type, ManagedMap<K, V> managedMap) {
 			if (managedMap.isEmpty()) {
 				return EMPTY_RESULT;
 			}
 			ResolvableType keyType = type.as(Map.class).getGeneric(0);
 			ResolvableType valueType = type.as(Map.class).getGeneric(1);
-			CodeBlock.Builder builder = CodeBlock.builder();
-			builder.add("$T.ofEntries(", ManagedMap.class);
+			CodeBlock.Builder code = CodeBlock.builder();
+			code.add("$T.ofEntries(", ManagedMap.class);
 			Iterator<Map.Entry<K, V>> iterator = managedMap.entrySet().iterator();
 			while (iterator.hasNext()) {
 				Entry<?, ?> entry = iterator.next();
-				builder.add("$T.entry($L,$L)", Map.class,
+				code.add("$T.entry($L,$L)", Map.class,
 						BeanDefinitionPropertyValueCodeGenerator.this
-								.generateCode(entry.getKey(), keyType),
+								.generateCodeForElement(entry.getKey(), keyType),
 						BeanDefinitionPropertyValueCodeGenerator.this
-								.generateCode(entry.getValue(), valueType));
+								.generateCodeForElement(entry.getValue(), valueType));
 				if (iterator.hasNext()) {
-					builder.add(", ");
+					code.add(", ");
 				}
 			}
-			builder.add(")");
-			return builder.build();
+			code.add(")");
+			return code.build();
 		}
-
 	}
 
 
@@ -393,7 +430,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 		ListDelegate() {
 			super(List.class, CodeBlock.of("$T.emptyList()", Collections.class));
 		}
-
 	}
 
 
@@ -419,7 +455,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 		private Set<?> orderForCodeConsistency(Set<?> set) {
 			return new TreeSet<Object>(set);
 		}
-
 	}
 
 
@@ -428,8 +463,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 	 */
 	private class MapDelegate implements Delegate {
 
-		private static final CodeBlock EMPTY_RESULT = CodeBlock.of("$T.emptyMap()",
-				Collections.class);
+		private static final CodeBlock EMPTY_RESULT = CodeBlock.of("$T.emptyMap()", Collections.class);
 
 		@Override
 		@Nullable
@@ -451,27 +485,27 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			}
 			map = orderForCodeConsistency(map);
 			boolean useOfEntries = map.size() > 10;
-			CodeBlock.Builder builder = CodeBlock.builder();
-			builder.add("$T" + ((!useOfEntries) ? ".of(" : ".ofEntries("), Map.class);
+			CodeBlock.Builder code = CodeBlock.builder();
+			code.add("$T" + ((!useOfEntries) ? ".of(" : ".ofEntries("), Map.class);
 			Iterator<Map.Entry<K, V>> iterator = map.entrySet().iterator();
 			while (iterator.hasNext()) {
 				Entry<K, V> entry = iterator.next();
 				CodeBlock keyCode = BeanDefinitionPropertyValueCodeGenerator.this
-						.generateCode(entry.getKey(), keyType);
+						.generateCodeForElement(entry.getKey(), keyType);
 				CodeBlock valueCode = BeanDefinitionPropertyValueCodeGenerator.this
-						.generateCode(entry.getValue(), valueType);
+						.generateCodeForElement(entry.getValue(), valueType);
 				if (!useOfEntries) {
-					builder.add("$L, $L", keyCode, valueCode);
+					code.add("$L, $L", keyCode, valueCode);
 				}
 				else {
-					builder.add("$T.entry($L,$L)", Map.class, keyCode, valueCode);
+					code.add("$T.entry($L,$L)", Map.class, keyCode, valueCode);
 				}
 				if (iterator.hasNext()) {
-					builder.add(", ");
+					code.add(", ");
 				}
 			}
-			builder.add(")");
-			return builder.build();
+			code.add(")");
+			return code.build();
 		}
 
 		private <K, V> Map<K, V> orderForCodeConsistency(Map<K, V> map) {
@@ -480,6 +514,8 @@ class BeanDefinitionPropertyValueCodeGenerator {
 
 		private <K, V> CodeBlock generateLinkedHashMapCode(Map<K, V> map,
 				ResolvableType keyType, ResolvableType valueType) {
+
+			GeneratedMethods generatedMethods = BeanDefinitionPropertyValueCodeGenerator.this.generatedMethods;
 			GeneratedMethod generatedMethod = generatedMethods.add("getMap", method -> {
 				method.addAnnotation(AnnotationSpec
 						.builder(SuppressWarnings.class)
@@ -490,14 +526,13 @@ class BeanDefinitionPropertyValueCodeGenerator {
 						LinkedHashMap.class, map.size());
 				map.forEach((key, value) -> method.addStatement("map.put($L, $L)",
 						BeanDefinitionPropertyValueCodeGenerator.this
-								.generateCode(key, keyType),
+								.generateCodeForElement(key, keyType),
 						BeanDefinitionPropertyValueCodeGenerator.this
-								.generateCode(value, valueType)));
+								.generateCodeForElement(value, valueType)));
 				method.addStatement("return map");
 			});
 			return CodeBlock.of("$L()", generatedMethod.getName());
 		}
-
 	}
 
 
@@ -509,8 +544,8 @@ class BeanDefinitionPropertyValueCodeGenerator {
 		@Override
 		@Nullable
 		public CodeBlock generateCode(Object value, ResolvableType type) {
-			if (value instanceof RuntimeBeanReference runtimeBeanReference
-					&& runtimeBeanReference.getBeanType() != null) {
+			if (value instanceof RuntimeBeanReference runtimeBeanReference &&
+					runtimeBeanReference.getBeanType() != null) {
 				return CodeBlock.of("new $T($T.class)", RuntimeBeanReference.class,
 						runtimeBeanReference.getBeanType());
 			}
@@ -520,7 +555,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			}
 			return null;
 		}
-
 	}
 
 }

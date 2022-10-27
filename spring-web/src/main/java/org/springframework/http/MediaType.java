@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -218,6 +218,18 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_PROBLEM_XML_VALUE = "application/problem+xml";
 
 	/**
+	 * Public constant media type for {@code application/x-protobuf}.
+	 * @since 6.0
+	 */
+	public static final MediaType APPLICATION_PROTOBUF;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_PROTOBUF}.
+	 * @since 6.0
+	 */
+	public static final String APPLICATION_PROTOBUF_VALUE = "application/x-protobuf";
+
+	/**
 	 * Public constant media type for {@code application/rss+xml}.
 	 * @since 4.3.6
 	 */
@@ -418,6 +430,7 @@ public class MediaType extends MimeType implements Serializable {
 		APPLICATION_PROBLEM_JSON = new MediaType("application", "problem+json");
 		APPLICATION_PROBLEM_JSON_UTF8 = new MediaType("application", "problem+json", StandardCharsets.UTF_8);
 		APPLICATION_PROBLEM_XML = new MediaType("application", "problem+xml");
+		APPLICATION_PROTOBUF = new MediaType("application", "x-protobuf");
 		APPLICATION_RSS_XML = new MediaType("application", "rss+xml");
 		APPLICATION_STREAM_JSON = new MediaType("application", "stream+json");
 		APPLICATION_XHTML_XML = new MediaType("application", "xhtml+xml");
@@ -823,7 +836,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * @param mediaTypes the list of media types to be sorted
 	 * @deprecated As of 6.0, in favor of {@link MimeTypeUtils#sortBySpecificity(List)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public static void sortBySpecificity(List<MediaType> mediaTypes) {
 		Assert.notNull(mediaTypes, "'mediaTypes' must not be null");
 		if (mediaTypes.size() > 1) {
@@ -852,7 +865,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * @see #getQualityValue()
 	 * @deprecated As of 6.0, with no direct replacement
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public static void sortByQualityValue(List<MediaType> mediaTypes) {
 		Assert.notNull(mediaTypes, "'mediaTypes' must not be null");
 		if (mediaTypes.size() > 1) {
@@ -865,7 +878,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * primary criteria and quality value the secondary.
 	 * @deprecated As of 6.0, in favor of {@link MimeTypeUtils#sortBySpecificity(List)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public static void sortBySpecificityAndQuality(List<MediaType> mediaTypes) {
 		Assert.notNull(mediaTypes, "'mediaTypes' must not be null");
 		if (mediaTypes.size() > 1) {
@@ -878,7 +891,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * Comparator used by {@link #sortByQualityValue(List)}.
 	 * @deprecated As of 6.0, with no direct replacement
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public static final Comparator<MediaType> QUALITY_VALUE_COMPARATOR = (mediaType1, mediaType2) -> {
 		double quality1 = mediaType1.getQualityValue();
 		double quality2 = mediaType2.getQualityValue();
@@ -918,7 +931,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * Comparator used by {@link #sortBySpecificity(List)}.
 	 * @deprecated As of 6.0, with no direct replacement
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public static final Comparator<MediaType> SPECIFICITY_COMPARATOR = new SpecificityComparator<>() {
 
 		@Override

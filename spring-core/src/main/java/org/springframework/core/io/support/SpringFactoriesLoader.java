@@ -97,10 +97,6 @@ public class SpringFactoriesLoader {
 	 */
 	public static final String FACTORIES_RESOURCE_LOCATION = "META-INF/spring.factories";
 
-	private static final ArgumentResolver NO_ARGUMENT_RESOLVER = null;
-
-	private static final FailureHandler NO_FAILURE_HANDLER = null;
-
 	private static final FailureHandler THROWING_FAILURE_HANDLER = FailureHandler.throwing();
 
 	private static final Log logger = LogFactory.getLog(SpringFactoriesLoader.class);
@@ -143,7 +139,7 @@ public class SpringFactoriesLoader {
 	 * @since 6.0
 	 */
 	public <T> List<T> load(Class<T> factoryType) {
-		return load(factoryType, NO_ARGUMENT_RESOLVER, NO_FAILURE_HANDLER);
+		return load(factoryType, null, null);
 	}
 
 	/**
@@ -161,7 +157,7 @@ public class SpringFactoriesLoader {
 	 * @since 6.0
 	 */
 	public <T> List<T> load(Class<T> factoryType, @Nullable ArgumentResolver argumentResolver) {
-		return load(factoryType, argumentResolver, NO_FAILURE_HANDLER);
+		return load(factoryType, argumentResolver, null);
 	}
 
 	/**
@@ -179,7 +175,7 @@ public class SpringFactoriesLoader {
 	 * @since 6.0
 	 */
 	public <T> List<T> load(Class<T> factoryType, @Nullable FailureHandler failureHandler) {
-		return load(factoryType, NO_ARGUMENT_RESOLVER, failureHandler);
+		return load(factoryType, null, failureHandler);
 	}
 
 	/**
@@ -198,7 +194,9 @@ public class SpringFactoriesLoader {
 	 * @param failureHandler strategy used to handle factory instantiation failures
 	 * @since 6.0
 	 */
-	public <T> List<T> load(Class<T> factoryType, @Nullable ArgumentResolver argumentResolver, @Nullable FailureHandler failureHandler) {
+	public <T> List<T> load(Class<T> factoryType, @Nullable ArgumentResolver argumentResolver,
+			@Nullable FailureHandler failureHandler) {
+
 		Assert.notNull(factoryType, "'factoryType' must not be null");
 		List<String> implementationNames = loadFactoryNames(factoryType);
 		logger.trace(LogMessage.format("Loaded [%s] names: %s", factoryType.getName(), implementationNames));
@@ -224,8 +222,8 @@ public class SpringFactoriesLoader {
 
 		try {
 			Class<?> factoryImplementationClass = ClassUtils.forName(implementationName, this.classLoader);
-			Assert.isTrue(type.isAssignableFrom(factoryImplementationClass),
-					() -> "Class [%s] is not assignable to factory type [%s]".formatted(implementationName, type.getName()));
+			Assert.isTrue(type.isAssignableFrom(factoryImplementationClass), () ->
+					"Class [%s] is not assignable to factory type [%s]".formatted(implementationName, type.getName()));
 			FactoryInstantiator<T> factoryInstantiator = FactoryInstantiator.forClass(factoryImplementationClass);
 			return factoryInstantiator.instantiate(argumentResolver);
 		}
@@ -270,7 +268,7 @@ public class SpringFactoriesLoader {
 	 * @see #loadFactories
 	 * @deprecated as of 6.0 in favor of {@link #load(Class, ArgumentResolver, FailureHandler)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public static List<String> loadFactoryNames(Class<?> factoryType, @Nullable ClassLoader classLoader) {
 		return forDefaultResourceLocation(classLoader).loadFactoryNames(factoryType);
 	}
@@ -303,8 +301,8 @@ public class SpringFactoriesLoader {
 
 	/**
 	 * Create a {@link SpringFactoriesLoader} instance that will load and
-	 * instantiate the factory implementations from the given location, using
-	 * the default class loader.
+	 * instantiate the factory implementations from the given location,
+	 * using the default class loader.
 	 * @param resourceLocation the resource location to look for factories
 	 * @return a {@link SpringFactoriesLoader} instance
 	 * @since 6.0
@@ -316,11 +314,11 @@ public class SpringFactoriesLoader {
 
 	/**
 	 * Create a {@link SpringFactoriesLoader} instance that will load and
-	 * instantiate the factory implementations from the given location, using
-	 * the given class loader.
+	 * instantiate the factory implementations from the given location,
+	 * using the given class loader.
 	 * @param resourceLocation the resource location to look for factories
-	 * @param classLoader the ClassLoader to use for loading resources; can be
-	 * {@code null} to use the default
+	 * @param classLoader the ClassLoader to use for loading resources;
+	 * can be {@code null} to use the default
 	 * @return a {@link SpringFactoriesLoader} instance
 	 * @since 6.0
 	 * @see #forResourceLocation(String)
@@ -329,7 +327,7 @@ public class SpringFactoriesLoader {
 		Assert.hasText(resourceLocation, "'resourceLocation' must not be empty");
 		ClassLoader resourceClassLoader = (classLoader != null ? classLoader :
 				SpringFactoriesLoader.class.getClassLoader());
-		Map<String, SpringFactoriesLoader> loaders = SpringFactoriesLoader.cache.computeIfAbsent(
+		Map<String, SpringFactoriesLoader> loaders = cache.computeIfAbsent(
 				resourceClassLoader, key -> new ConcurrentReferenceHashMap<>());
 		return loaders.computeIfAbsent(resourceLocation, key ->
 				new SpringFactoriesLoader(classLoader, loadFactoriesResource(resourceClassLoader, resourceLocation)));
@@ -345,7 +343,7 @@ public class SpringFactoriesLoader {
 				properties.forEach((name, value) -> {
 					List<String> implementations = result.computeIfAbsent(((String) name).trim(), key -> new ArrayList<>());
 					Arrays.stream(StringUtils.commaDelimitedListToStringArray((String) value))
-						.map(String::trim).forEach(implementations::add);
+							.map(String::trim).forEach(implementations::add);
 				});
 			}
 			result.replaceAll(SpringFactoriesLoader::toDistinctUnmodifiableList);
@@ -370,12 +368,10 @@ public class SpringFactoriesLoader {
 
 		private final Constructor<T> constructor;
 
-
 		private FactoryInstantiator(Constructor<T> constructor) {
 			ReflectionUtils.makeAccessible(constructor);
 			this.constructor = constructor;
 		}
-
 
 		T instantiate(@Nullable ArgumentResolver argumentResolver) throws Exception {
 			Object[] args = resolveArgs(argumentResolver);
@@ -437,7 +433,6 @@ public class SpringFactoriesLoader {
 				return null;
 			}
 		}
-
 	}
 
 
@@ -497,7 +492,6 @@ public class SpringFactoriesLoader {
 		private static <T> T instantiate(KFunction<T> kotlinConstructor, Map<KParameter, Object> args) {
 			return kotlinConstructor.callBy(args);
 		}
-
 	}
 
 
@@ -609,7 +603,6 @@ public class SpringFactoriesLoader {
 
 			};
 		}
-
 	}
 
 
@@ -681,7 +674,6 @@ public class SpringFactoriesLoader {
 				messageHandler.accept(messageSupplier, failure);
 			};
 		}
-
 	}
 
 }

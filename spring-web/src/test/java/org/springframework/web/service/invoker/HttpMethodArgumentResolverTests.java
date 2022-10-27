@@ -42,8 +42,9 @@ public class HttpMethodArgumentResolverTests {
 
 
 	@BeforeEach
+	@SuppressWarnings("deprecation")
 	void setUp() throws Exception {
-		HttpServiceProxyFactory proxyFactory = new HttpServiceProxyFactory(this.client);
+		HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builder(this.client).build();
 		proxyFactory.afterPropertiesSet();
 		this.service = proxyFactory.createClient(Service.class);
 	}

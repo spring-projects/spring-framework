@@ -20,7 +20,6 @@ import java.io.Serializable;
 import java.lang.reflect.Proxy;
 
 import org.springframework.aop.SpringProxy;
-import org.springframework.core.NativeDetector;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -62,9 +61,6 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 			}
 			if (targetClass.isInterface() || Proxy.isProxyClass(targetClass) || ClassUtils.isLambdaClass(targetClass)) {
 				return new JdkDynamicAopProxy(config);
-			}
-			if (NativeDetector.inNativeImage()) {
-				throw new AopConfigException("Subclass-based proxies are not support yet in native images");
 			}
 			return new ObjenesisCglibAopProxy(config);
 		}

@@ -28,8 +28,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
 import org.springframework.lang.Nullable;
-import org.springframework.ui.context.Theme;
-import org.springframework.ui.context.ThemeSource;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.ContextLoader;
@@ -40,7 +38,6 @@ import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.LocaleResolver;
-import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -185,10 +182,12 @@ public abstract class RequestContextUtils {
 	 * DispatcherServlet.
 	 * @param request current HTTP request
 	 * @return the current ThemeResolver, or {@code null} if not found
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Nullable
-	public static ThemeResolver getThemeResolver(HttpServletRequest request) {
-		return (ThemeResolver) request.getAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE);
+	@Deprecated(since = "6.0")
+	public static org.springframework.web.servlet.ThemeResolver getThemeResolver(HttpServletRequest request) {
+		return (org.springframework.web.servlet.ThemeResolver) request.getAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE);
 	}
 
 	/**
@@ -196,10 +195,12 @@ public abstract class RequestContextUtils {
 	 * DispatcherServlet.
 	 * @param request current HTTP request
 	 * @return the current ThemeSource
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Nullable
-	public static ThemeSource getThemeSource(HttpServletRequest request) {
-		return (ThemeSource) request.getAttribute(DispatcherServlet.THEME_SOURCE_ATTRIBUTE);
+	@Deprecated(since = "6.0")
+	public static org.springframework.ui.context.ThemeSource getThemeSource(HttpServletRequest request) {
+		return (org.springframework.ui.context.ThemeSource) request.getAttribute(DispatcherServlet.THEME_SOURCE_ATTRIBUTE);
 	}
 
 	/**
@@ -208,11 +209,13 @@ public abstract class RequestContextUtils {
 	 * @param request current HTTP request
 	 * @return the current theme, or {@code null} if not found
 	 * @see #getThemeResolver
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Nullable
-	public static Theme getTheme(HttpServletRequest request) {
-		ThemeResolver themeResolver = getThemeResolver(request);
-		ThemeSource themeSource = getThemeSource(request);
+	@Deprecated(since = "6.0")
+	public static org.springframework.ui.context.Theme getTheme(HttpServletRequest request) {
+		org.springframework.web.servlet.ThemeResolver themeResolver = getThemeResolver(request);
+		org.springframework.ui.context.ThemeSource themeSource = getThemeSource(request);
 		if (themeResolver != null && themeSource != null) {
 			String themeName = themeResolver.resolveThemeName(request);
 			return themeSource.getTheme(themeName);

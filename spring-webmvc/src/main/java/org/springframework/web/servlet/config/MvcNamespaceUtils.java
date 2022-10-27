@@ -37,7 +37,6 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
-import org.springframework.web.servlet.theme.FixedThemeResolver;
 import org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -236,9 +235,10 @@ public abstract class MvcNamespaceUtils {
 	 * Registers an {@link FixedThemeResolver} under a well-known name
 	 * unless already registered.
 	 */
+	@SuppressWarnings("deprecation")
 	private static void registerThemeResolver(ParserContext context, @Nullable Object source) {
 		if (!containsBeanInHierarchy(context, DispatcherServlet.THEME_RESOLVER_BEAN_NAME)) {
-			RootBeanDefinition beanDef = new RootBeanDefinition(FixedThemeResolver.class);
+			RootBeanDefinition beanDef = new RootBeanDefinition(org.springframework.web.servlet.theme.FixedThemeResolver.class);
 			beanDef.setSource(source);
 			beanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			context.getRegistry().registerBeanDefinition(DispatcherServlet.THEME_RESOLVER_BEAN_NAME, beanDef);

@@ -104,7 +104,7 @@ public interface TaskScheduler {
 	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
 	 * @deprecated as of 6.0, in favor of {@link #schedule(Runnable, Instant)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	default ScheduledFuture<?> schedule(Runnable task, Date startTime) {
 		return schedule(task, startTime.toInstant());
 	}
@@ -139,7 +139,7 @@ public interface TaskScheduler {
 	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
 	 * @deprecated as of 6.0, in favor of {@link #scheduleAtFixedRate(Runnable, Instant, Duration)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	default ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Date startTime, long period) {
 		return scheduleAtFixedRate(task, startTime.toInstant(), Duration.ofMillis(period));
 	}
@@ -170,7 +170,7 @@ public interface TaskScheduler {
 	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
 	 * @deprecated as of 6.0, in favor of {@link #scheduleAtFixedRate(Runnable, Duration)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	default ScheduledFuture<?> scheduleAtFixedRate(Runnable task, long period) {
 		return scheduleAtFixedRate(task, Duration.ofMillis(period));
 	}
@@ -208,7 +208,7 @@ public interface TaskScheduler {
 	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
 	 * @deprecated as of 6.0, in favor of {@link #scheduleWithFixedDelay(Runnable, Instant, Duration)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	default ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
 		return scheduleWithFixedDelay(task, startTime.toInstant(), Duration.ofMillis(delay));
 	}
@@ -240,7 +240,7 @@ public interface TaskScheduler {
 	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
 	 * @deprecated as of 6.0, in favor of {@link #scheduleWithFixedDelay(Runnable, Duration)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	default ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, long delay) {
 		return scheduleWithFixedDelay(task, Duration.ofMillis(delay));
 	}

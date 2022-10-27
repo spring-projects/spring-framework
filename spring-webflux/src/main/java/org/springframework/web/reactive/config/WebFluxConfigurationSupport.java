@@ -22,13 +22,11 @@ import java.util.function.Predicate;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.converter.Converter;
@@ -45,8 +43,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
+import org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.WebAnnotationsRuntimeHintsRegistrar;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.reactive.DispatcherHandler;
@@ -85,8 +83,11 @@ import org.springframework.web.server.i18n.LocaleContextResolver;
  * @author Brian Clozel
  * @since 5.0
  */
-@ImportRuntimeHints(WebAnnotationsRuntimeHintsRegistrar.class)
 public class WebFluxConfigurationSupport implements ApplicationContextAware {
+
+	private static final boolean jakartaValidatorPresent =
+			ClassUtils.isPresent("jakarta.validation.Validator", WebFluxConfigurationSupport.class.getClassLoader());
+
 
 	@Nullable
 	private Map<String, CorsConfiguration> corsConfigurations;
@@ -387,16 +388,13 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	public Validator webFluxValidator() {
 		Validator validator = getValidator();
 		if (validator == null) {
-			if (ClassUtils.isPresent("jakarta.validation.Validator", getClass().getClassLoader())) {
-				Class<?> clazz;
+			if (jakartaValidatorPresent) {
 				try {
-					String name = "org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean";
-					clazz = ClassUtils.forName(name, getClass().getClassLoader());
+					validator = new OptionalValidatorFactoryBean();
 				}
-				catch (ClassNotFoundException | LinkageError ex) {
-					throw new BeanInitializationException("Failed to resolve default validator class", ex);
+				catch (Throwable ex) {
+					throw new BeanInitializationException("Failed to create default validator", ex);
 				}
-				validator = (Validator) BeanUtils.instantiateClass(clazz);
 			}
 			else {
 				validator = new NoOpValidator();

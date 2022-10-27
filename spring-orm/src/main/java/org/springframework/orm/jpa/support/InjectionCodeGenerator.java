@@ -20,8 +20,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 
-import org.springframework.aot.generate.AccessVisibility;
+import org.springframework.aot.generate.AccessControl;
+import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -44,11 +46,15 @@ import org.springframework.util.ReflectionUtils;
  */
 class InjectionCodeGenerator {
 
+	private final ClassName targetClassName;
+
 	private final RuntimeHints hints;
 
 
-	InjectionCodeGenerator(RuntimeHints hints) {
+	InjectionCodeGenerator(ClassName targetClassName, RuntimeHints hints) {
+		Assert.notNull(hints, "TargetClassName must not be null");
 		Assert.notNull(hints, "Hints must not be null");
+		this.targetClassName = targetClassName;
 		this.hints = hints;
 	}
 
@@ -70,22 +76,21 @@ class InjectionCodeGenerator {
 	private CodeBlock generateFieldInjectionCode(Field field, String instanceVariable,
 			CodeBlock resourceToInject) {
 
-		CodeBlock.Builder builder = CodeBlock.builder();
-		AccessVisibility visibility = AccessVisibility.forMember(field);
-		if (visibility == AccessVisibility.PRIVATE
-				|| visibility == AccessVisibility.PROTECTED) {
+		CodeBlock.Builder code = CodeBlock.builder();
+		AccessControl accessControl = AccessControl.forMember(field);
+		if (!accessControl.isAccessibleFrom(this.targetClassName)) {
 			this.hints.reflection().registerField(field);
-			builder.addStatement("$T field = $T.findField($T.class, $S)", Field.class,
+			code.addStatement("$T field = $T.findField($T.class, $S)", Field.class,
 					ReflectionUtils.class, field.getDeclaringClass(), field.getName());
-			builder.addStatement("$T.makeAccessible($L)", ReflectionUtils.class, "field");
-			builder.addStatement("$T.setField($L, $L, $L)", ReflectionUtils.class,
+			code.addStatement("$T.makeAccessible($L)", ReflectionUtils.class, "field");
+			code.addStatement("$T.setField($L, $L, $L)", ReflectionUtils.class,
 					"field", instanceVariable, resourceToInject);
 		}
 		else {
-			builder.addStatement("$L.$L = $L", instanceVariable, field.getName(),
+			code.addStatement("$L.$L = $L", instanceVariable, field.getName(),
 					resourceToInject);
 		}
-		return builder.build();
+		return code.build();
 	}
 
 	private CodeBlock generateMethodInjectionCode(Method method, String instanceVariable,
@@ -93,24 +98,23 @@ class InjectionCodeGenerator {
 
 		Assert.isTrue(method.getParameterCount() == 1,
 				"Method '" + method.getName() + "' must declare a single parameter");
-		CodeBlock.Builder builder = CodeBlock.builder();
-		AccessVisibility visibility = AccessVisibility.forMember(method);
-		if (visibility == AccessVisibility.PRIVATE
-				|| visibility == AccessVisibility.PROTECTED) {
-			this.hints.reflection().registerMethod(method);
-			builder.addStatement("$T method = $T.findMethod($T.class, $S, $T.class)",
+		CodeBlock.Builder code = CodeBlock.builder();
+		AccessControl accessControl = AccessControl.forMember(method);
+		if (!accessControl.isAccessibleFrom(this.targetClassName)) {
+			this.hints.reflection().registerMethod(method, ExecutableMode.INVOKE);
+			code.addStatement("$T method = $T.findMethod($T.class, $S, $T.class)",
 					Method.class, ReflectionUtils.class, method.getDeclaringClass(),
 					method.getName(), method.getParameterTypes()[0]);
-			builder.addStatement("$T.makeAccessible($L)", ReflectionUtils.class,
+			code.addStatement("$T.makeAccessible($L)", ReflectionUtils.class,
 					"method");
-			builder.addStatement("$T.invokeMethod($L, $L, $L)", ReflectionUtils.class,
+			code.addStatement("$T.invokeMethod($L, $L, $L)", ReflectionUtils.class,
 					"method", instanceVariable, resourceToInject);
 		}
 		else {
-			builder.addStatement("$L.$L($L)", instanceVariable, method.getName(),
+			code.addStatement("$L.$L($L)", instanceVariable, method.getName(),
 					resourceToInject);
 		}
-		return builder.build();
+		return code.build();
 	}
 
 }

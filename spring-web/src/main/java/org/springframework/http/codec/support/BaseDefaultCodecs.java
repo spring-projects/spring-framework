@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import org.springframework.core.SpringProperties;
 import org.springframework.core.codec.AbstractDataBufferDecoder;
 import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.ByteArrayEncoder;
@@ -33,6 +32,8 @@ import org.springframework.core.codec.DataBufferDecoder;
 import org.springframework.core.codec.DataBufferEncoder;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
+import org.springframework.core.codec.Netty5BufferDecoder;
+import org.springframework.core.codec.Netty5BufferEncoder;
 import org.springframework.core.codec.NettyByteBufDecoder;
 import org.springframework.core.codec.NettyByteBufEncoder;
 import org.springframework.core.codec.ResourceDecoder;
@@ -48,6 +49,8 @@ import org.springframework.http.codec.ResourceHttpMessageReader;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.ServerSentEventHttpMessageReader;
 import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
+import org.springframework.http.codec.cbor.KotlinSerializationCborDecoder;
+import org.springframework.http.codec.cbor.KotlinSerializationCborEncoder;
 import org.springframework.http.codec.json.AbstractJackson2Decoder;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
@@ -59,6 +62,8 @@ import org.springframework.http.codec.multipart.DefaultPartHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
 import org.springframework.http.codec.multipart.PartEventHttpMessageReader;
+import org.springframework.http.codec.protobuf.KotlinSerializationProtobufDecoder;
+import org.springframework.http.codec.protobuf.KotlinSerializationProtobufEncoder;
 import org.springframework.http.codec.protobuf.ProtobufDecoder;
 import org.springframework.http.codec.protobuf.ProtobufEncoder;
 import org.springframework.http.codec.protobuf.ProtobufHttpMessageWriter;
@@ -77,13 +82,6 @@ import org.springframework.util.ObjectUtils;
  */
 class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigurer.DefaultCodecConfig {
 
-	/**
-	 * Boolean flag controlled by a {@code spring.xml.ignore} system property that instructs Spring to
-	 * ignore XML, i.e. to not initialize the XML-related infrastructure.
-	 * <p>The default is "false".
-	 */
-	private static final boolean shouldIgnoreXml = SpringProperties.getFlag("spring.xml.ignore");
-
 	static final boolean jackson2Present;
 
 	private static final boolean jackson2SmilePresent;
@@ -96,7 +94,13 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 
 	static final boolean nettyByteBufPresent;
 
+	static final boolean netty5BufferPresent;
+
+	static final boolean kotlinSerializationCborPresent;
+
 	static final boolean kotlinSerializationJsonPresent;
+
+	static final boolean kotlinSerializationProtobufPresent;
 
 	static {
 		ClassLoader classLoader = BaseCodecConfigurer.class.getClassLoader();
@@ -107,7 +111,10 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		protobufPresent = ClassUtils.isPresent("com.google.protobuf.Message", classLoader);
 		synchronossMultipartPresent = ClassUtils.isPresent("org.synchronoss.cloud.nio.multipart.NioMultipartParser", classLoader);
 		nettyByteBufPresent = ClassUtils.isPresent("io.netty.buffer.ByteBuf", classLoader);
+		netty5BufferPresent = ClassUtils.isPresent("io.netty5.buffer.Buffer", classLoader);
+		kotlinSerializationCborPresent = ClassUtils.isPresent("kotlinx.serialization.cbor.Cbor", classLoader);
 		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
+		kotlinSerializationProtobufPresent = ClassUtils.isPresent("kotlinx.serialization.protobuf.ProtoBuf", classLoader);
 	}
 
 
@@ -136,10 +143,22 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	private Encoder<?> jaxb2Encoder;
 
 	@Nullable
+	private Decoder<?> kotlinSerializationCborDecoder;
+
+	@Nullable
+	private Encoder<?> kotlinSerializationCborEncoder;
+
+	@Nullable
 	private Decoder<?> kotlinSerializationJsonDecoder;
 
 	@Nullable
 	private Encoder<?> kotlinSerializationJsonEncoder;
+
+	@Nullable
+	private Decoder<?> kotlinSerializationProtobufDecoder;
+
+	@Nullable
+	private Encoder<?> kotlinSerializationProtobufEncoder;
 
 	@Nullable
 	private Consumer<Object> codecConsumer;
@@ -199,8 +218,12 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		this.protobufEncoder = other.protobufEncoder;
 		this.jaxb2Decoder = other.jaxb2Decoder;
 		this.jaxb2Encoder = other.jaxb2Encoder;
+		this.kotlinSerializationCborDecoder = other.kotlinSerializationCborDecoder;
+		this.kotlinSerializationCborEncoder = other.kotlinSerializationCborEncoder;
 		this.kotlinSerializationJsonDecoder = other.kotlinSerializationJsonDecoder;
 		this.kotlinSerializationJsonEncoder = other.kotlinSerializationJsonEncoder;
+		this.kotlinSerializationProtobufDecoder = other.kotlinSerializationProtobufDecoder;
+		this.kotlinSerializationProtobufEncoder = other.kotlinSerializationProtobufEncoder;
 		this.codecConsumer = other.codecConsumer;
 		this.maxInMemorySize = other.maxInMemorySize;
 		this.enableLoggingRequestDetails = other.enableLoggingRequestDetails;
@@ -262,6 +285,18 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	}
 
 	@Override
+	public void kotlinSerializationCborDecoder(Decoder<?> decoder) {
+		this.kotlinSerializationCborDecoder = decoder;
+		initObjectReaders();
+	}
+
+	@Override
+	public void kotlinSerializationCborEncoder(Encoder<?> encoder) {
+		this.kotlinSerializationCborEncoder = encoder;
+		initObjectWriters();
+	}
+
+	@Override
 	public void kotlinSerializationJsonDecoder(Decoder<?> decoder) {
 		this.kotlinSerializationJsonDecoder = decoder;
 		initObjectReaders();
@@ -270,6 +305,18 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	@Override
 	public void kotlinSerializationJsonEncoder(Encoder<?> encoder) {
 		this.kotlinSerializationJsonEncoder = encoder;
+		initObjectWriters();
+	}
+
+	@Override
+	public void kotlinSerializationProtobufDecoder(Decoder<?> decoder) {
+		this.kotlinSerializationProtobufDecoder = decoder;
+		initObjectReaders();
+	}
+
+	@Override
+	public void kotlinSerializationProtobufEncoder(Encoder<?> encoder) {
+		this.kotlinSerializationProtobufEncoder = encoder;
 		initObjectWriters();
 	}
 
@@ -344,11 +391,18 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		if (nettyByteBufPresent) {
 			addCodec(this.typedReaders, new DecoderHttpMessageReader<>(new NettyByteBufDecoder()));
 		}
+		if (netty5BufferPresent) {
+			addCodec(this.typedReaders, new DecoderHttpMessageReader<>(new Netty5BufferDecoder()));
+		}
 		addCodec(this.typedReaders, new ResourceHttpMessageReader(new ResourceDecoder()));
 		addCodec(this.typedReaders, new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly()));
 		if (protobufPresent) {
 			addCodec(this.typedReaders, new DecoderHttpMessageReader<>(this.protobufDecoder != null ?
 					(ProtobufDecoder) this.protobufDecoder : new ProtobufDecoder()));
+		}
+		else if (kotlinSerializationProtobufPresent) {
+			addCodec(this.typedReaders, new DecoderHttpMessageReader<>(this.kotlinSerializationProtobufDecoder != null ?
+					(KotlinSerializationProtobufDecoder) this.kotlinSerializationProtobufDecoder : new KotlinSerializationProtobufDecoder()));
 		}
 		addCodec(this.typedReaders, new FormHttpMessageReader());
 
@@ -393,9 +447,19 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 					((ProtobufDecoder) codec).setMaxMessageSize(size);
 				}
 			}
+			if (kotlinSerializationCborPresent) {
+				if (codec instanceof KotlinSerializationCborDecoder) {
+					((KotlinSerializationCborDecoder) codec).setMaxInMemorySize(size);
+				}
+			}
 			if (kotlinSerializationJsonPresent) {
 				if (codec instanceof KotlinSerializationJsonDecoder) {
 					((KotlinSerializationJsonDecoder) codec).setMaxInMemorySize(size);
+				}
+			}
+			if (kotlinSerializationProtobufPresent) {
+				if (codec instanceof KotlinSerializationProtobufDecoder) {
+					((KotlinSerializationProtobufDecoder) codec).setMaxInMemorySize(size);
 				}
 			}
 			if (jackson2Present) {
@@ -403,7 +467,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 					((AbstractJackson2Decoder) codec).setMaxInMemorySize(size);
 				}
 			}
-			if (jaxb2Present && !shouldIgnoreXml) {
+			if (jaxb2Present) {
 				if (codec instanceof Jaxb2XmlDecoder) {
 					((Jaxb2XmlDecoder) codec).setMaxInMemorySize(size);
 				}
@@ -485,8 +549,19 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		if (!this.registerDefaults) {
 			return;
 		}
+		if (kotlinSerializationCborPresent) {
+			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(this.kotlinSerializationCborDecoder != null ?
+					(KotlinSerializationCborDecoder) this.kotlinSerializationCborDecoder :
+					new KotlinSerializationCborDecoder()));
+		}
 		if (kotlinSerializationJsonPresent) {
 			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(getKotlinSerializationJsonDecoder()));
+		}
+		if (kotlinSerializationProtobufPresent) {
+			addCodec(this.objectReaders,
+					new DecoderHttpMessageReader<>(this.kotlinSerializationProtobufDecoder != null ?
+							(KotlinSerializationProtobufDecoder) this.kotlinSerializationProtobufDecoder :
+							new KotlinSerializationProtobufDecoder()));
 		}
 		if (jackson2Present) {
 			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(getJackson2JsonDecoder()));
@@ -495,7 +570,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(this.jackson2SmileDecoder != null ?
 					(Jackson2SmileDecoder) this.jackson2SmileDecoder : new Jackson2SmileDecoder()));
 		}
-		if (jaxb2Present && !shouldIgnoreXml) {
+		if (jaxb2Present) {
 			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(this.jaxb2Decoder != null ?
 					(Jaxb2XmlDecoder) this.jaxb2Decoder : new Jaxb2XmlDecoder()));
 		}
@@ -525,7 +600,6 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	/**
 	 * Return all writers that support specific types.
 	 */
-	@SuppressWarnings({"rawtypes" })
 	final List<HttpMessageWriter<?>> getTypedWriters() {
 		return this.typedWriters;
 	}
@@ -556,6 +630,9 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		addCodec(writers, new EncoderHttpMessageWriter<>(new DataBufferEncoder()));
 		if (nettyByteBufPresent) {
 			addCodec(writers, new EncoderHttpMessageWriter<>(new NettyByteBufEncoder()));
+		}
+		if (netty5BufferPresent) {
+			addCodec(writers, new EncoderHttpMessageWriter<>(new Netty5BufferEncoder()));
 		}
 		addCodec(writers, new ResourceHttpMessageWriter());
 		addCodec(writers, new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()));
@@ -597,8 +674,18 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	 */
 	final List<HttpMessageWriter<?>> getBaseObjectWriters() {
 		List<HttpMessageWriter<?>> writers = new ArrayList<>();
+		if (kotlinSerializationCborPresent) {
+			addCodec(writers, new EncoderHttpMessageWriter<>(this.kotlinSerializationCborEncoder != null ?
+					(KotlinSerializationCborEncoder) this.kotlinSerializationCborEncoder :
+					new KotlinSerializationCborEncoder()));
+		}
 		if (kotlinSerializationJsonPresent) {
 			addCodec(writers, new EncoderHttpMessageWriter<>(getKotlinSerializationJsonEncoder()));
+		}
+		if (kotlinSerializationProtobufPresent) {
+			addCodec(writers, new EncoderHttpMessageWriter<>(this.kotlinSerializationProtobufEncoder != null ?
+					(KotlinSerializationProtobufEncoder) this.kotlinSerializationProtobufEncoder :
+					new KotlinSerializationProtobufEncoder()));
 		}
 		if (jackson2Present) {
 			addCodec(writers, new EncoderHttpMessageWriter<>(getJackson2JsonEncoder()));
@@ -607,7 +694,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			addCodec(writers, new EncoderHttpMessageWriter<>(this.jackson2SmileEncoder != null ?
 					(Jackson2SmileEncoder) this.jackson2SmileEncoder : new Jackson2SmileEncoder()));
 		}
-		if (jaxb2Present && !shouldIgnoreXml) {
+		if (jaxb2Present) {
 			addCodec(writers, new EncoderHttpMessageWriter<>(this.jaxb2Encoder != null ?
 					(Jaxb2XmlEncoder) this.jaxb2Encoder : new Jaxb2XmlEncoder()));
 		}

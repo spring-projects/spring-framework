@@ -26,7 +26,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * {@link RuntimeException} that implements {@link ErrorResponse} to expose
- * an HTTP status, response headers, and a body formatted as an RFC 7808
+ * an HTTP status, response headers, and a body formatted as an RFC 7807
  * {@link ProblemDetail}.
  *
  * <p>The exception can be used as is, or it can be extended as a more specific
@@ -45,6 +45,11 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 	private final HttpHeaders headers = new HttpHeaders();
 
 	private final ProblemDetail body;
+
+	private final String messageDetailCode;
+
+	@Nullable
+	private final Object[] messageDetailArguments;
 
 
 	/**
@@ -66,10 +71,31 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 	 * subclass of {@code ProblemDetail} with extended fields.
 	 */
 	public ErrorResponseException(HttpStatusCode status, ProblemDetail body, @Nullable Throwable cause) {
+		this(status, body, cause, null, null);
+	}
+
+	/**
+	 * Constructor with a given {@link ProblemDetail}, and a
+	 * {@link org.springframework.context.MessageSource} code and arguments to
+	 * resolve the detail message with.
+	 * @since 6.0
+	 */
+	public ErrorResponseException(
+			HttpStatusCode status, ProblemDetail body, @Nullable Throwable cause,
+			@Nullable String messageDetailCode, @Nullable Object[] messageDetailArguments) {
+
 		super(null, cause);
 		this.status = status;
 		this.body = body;
+		this.messageDetailCode = initMessageDetailCode(messageDetailCode);
+		this.messageDetailArguments = messageDetailArguments;
 	}
+
+	private String initMessageDetailCode(@Nullable String messageDetailCode) {
+		return (messageDetailCode != null ?
+				messageDetailCode : ErrorResponse.getDefaultDetailMessageCode(getClass(), null));
+	}
+
 
 	@Override
 	public HttpStatusCode getStatusCode() {
@@ -131,6 +157,16 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 	@Override
 	public final ProblemDetail getBody() {
 		return this.body;
+	}
+
+	@Override
+	public String getDetailMessageCode() {
+		return this.messageDetailCode;
+	}
+
+	@Override
+	public Object[] getDetailMessageArguments() {
+		return this.messageDetailArguments;
 	}
 
 	@Override
