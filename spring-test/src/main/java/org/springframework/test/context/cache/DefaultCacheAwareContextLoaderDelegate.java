@@ -61,13 +61,14 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 
 	private static final Log logger = LogFactory.getLog(DefaultCacheAwareContextLoaderDelegate.class);
 
-	private static List<ApplicationContextFailureProcessor> contextFailureProcessors =
-			getApplicationContextFailureProcessors();
 
 	/**
 	 * Default static cache of Spring application contexts.
 	 */
 	static final ContextCache defaultContextCache = new DefaultContextCache();
+
+	private List<ApplicationContextFailureProcessor> contextFailureProcessors =
+			loadApplicationContextFailureProcessors();
 
 	private final AotTestContextInitializers aotTestContextInitializers = new AotTestContextInitializers();
 
@@ -127,7 +128,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 					Throwable cause = ex;
 					if (ex instanceof ContextLoadException cle) {
 						cause = cle.getCause();
-						for (ApplicationContextFailureProcessor contextFailureProcessor : contextFailureProcessors) {
+						for (ApplicationContextFailureProcessor contextFailureProcessor : this.contextFailureProcessors) {
 							try {
 								contextFailureProcessor.processLoadFailure(cle.getApplicationContext(), cause);
 							}
@@ -259,7 +260,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	 * @return the context failure processors to use
 	 * @since 6.0
 	 */
-	private static List<ApplicationContextFailureProcessor> getApplicationContextFailureProcessors() {
+	private static List<ApplicationContextFailureProcessor> loadApplicationContextFailureProcessors() {
 		SpringFactoriesLoader loader = SpringFactoriesLoader.forDefaultResourceLocation(
 				DefaultCacheAwareContextLoaderDelegate.class.getClassLoader());
 		List<ApplicationContextFailureProcessor> processors = loader.load(ApplicationContextFailureProcessor.class,
