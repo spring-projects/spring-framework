@@ -49,3 +49,6 @@ atlassian-ide-plugin.xml
 
 # VS Code
 .vscode/
+
+spring-core/graalvm/
+spring-core/kotlin-coroutines/
