@@ -19,6 +19,7 @@ package org.springframework.core.io.support;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -129,8 +130,16 @@ class PathMatchingResourcePatternResolverTests {
 
 				List<String> actualSubPaths = getSubPathsIgnoringClassFilesEtc(pattern, pathPrefix);
 
-				// We do NOT find "support" if the pattern ENDS with a slash.
-				assertThat(actualSubPaths).isEmpty();
+				URL url = getClass().getClassLoader().getResource("org/springframework/core/io/support/EncodedResource.class");
+				if (!url.getProtocol().equals("jar")) {
+					// We do NOT find "support" if the pattern ENDS with a slash if org/springframework/core/io/support
+					// is in the local file system.
+					assertThat(actualSubPaths).isEmpty();
+				}
+				else {
+					// But we do find "support/" if org/springframework/core/io/support is found in a JAR on the classpath.
+					assertThat(actualSubPaths).containsExactly("support/");
+				}
 			}
 
 			@Test
@@ -258,6 +267,7 @@ class PathMatchingResourcePatternResolverTests {
 		try {
 			Resource[] resources = resolver.getResources(pattern);
 			List<String> actualNames = Arrays.stream(resources)
+					.peek(resource -> assertThat(resource.exists()).as(resource + " exists").isTrue())
 					.map(Resource::getFilename)
 					.sorted()
 					.toList();
@@ -304,7 +314,16 @@ class PathMatchingResourcePatternResolverTests {
 		// GraalVM native image which cannot support Path#toFile.
 		//
 		// See: https://github.com/spring-projects/spring-framework/issues/29243
-		return ((FileSystemResource) resource).getPath();
+		if (resource instanceof FileSystemResource fileSystemResource) {
+			return fileSystemResource.getPath();
+		}
+		try {
+			// Fall back to URL in case the resource came from a JAR
+			return resource.getURL().getPath();
+		}
+		catch (IOException ex) {
+			throw new UncheckedIOException(ex);
+		}
 	}
 
 }
