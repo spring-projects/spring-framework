@@ -46,16 +46,16 @@ public final class ResourcePatternHints {
 	}
 
 	/**
-	 * Return the include patterns to use to identify the resources to match.
-	 * @return the include patterns
+	 * Return the included patterns to use to identify the resources to match.
+	 * @return the included patterns
 	 */
 	public List<ResourcePatternHint> getIncludes() {
 		return this.includes;
 	}
 
 	/**
-	 * Return the exclude patterns to use to identify the resources to match.
-	 * @return the exclude patterns
+	 * Return the excluded patterns to use to identify the resources to match.
+	 * @return the excluded patterns
 	 */
 	public List<ResourcePatternHint> getExcludes() {
 		return this.excludes;
@@ -77,7 +77,7 @@ public final class ResourcePatternHints {
 		/**
 		 * Include resources matching the specified patterns.
 		 * @param reachableType the type that should be reachable for this hint to apply
-		 * @param includes the include patterns (see {@link ResourcePatternHint} documentation)
+		 * @param includes the included patterns (see {@link ResourcePatternHint} documentation)
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder includes(@Nullable TypeReference reachableType, String... includes) {
@@ -89,7 +89,7 @@ public final class ResourcePatternHints {
 
 		/**
 		 * Include resources matching the specified patterns.
-		 * @param includes the include patterns (see {@link ResourcePatternHint} documentation)
+		 * @param includes the included patterns (see {@link ResourcePatternHint} documentation)
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder includes(String... includes) {

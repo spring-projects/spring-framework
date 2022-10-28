@@ -39,7 +39,7 @@ import org.springframework.lang.Nullable;
  *
  * <p>Allows to use standard XML entities to include XML snippets into an
  * application context definition, for example to split a large XML file
- * into various modules. The include paths can be relative to the
+ * into various modules. The included paths can be relative to the
  * application context's resource base as usual, instead of relative
  * to the JVM working directory (the XML parser's default).
  *
