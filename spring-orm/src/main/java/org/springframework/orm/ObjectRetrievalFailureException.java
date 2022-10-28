@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	 * @param cause the source exception
 	 */
 	public ObjectRetrievalFailureException(
-			Class<?> persistentClass, Object identifier, String msg, @Nullable Throwable cause) {
+			Class<?> persistentClass, @Nullable Object identifier, String msg, @Nullable Throwable cause) {
 
 		super(msg, cause);
 		this.persistentClass = persistentClass;
@@ -97,7 +97,7 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	 * @param cause the source exception
 	 */
 	public ObjectRetrievalFailureException(
-			String persistentClassName, Object identifier, String msg, @Nullable Throwable cause) {
+			String persistentClassName, @Nullable Object identifier, String msg, @Nullable Throwable cause) {
 
 		super(msg, cause);
 		this.persistentClass = persistentClassName;

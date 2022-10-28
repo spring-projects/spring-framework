@@ -1,6 +1,3 @@
-:doc-root: https://docs.spring.io
-:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
-
 = Appendix
 
 
@@ -128,7 +125,7 @@ The following example enumeration shows how easy injecting an enum value is:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	package javax.persistence;
+	package jakarta.persistence;
 
 	public enum PersistenceContextType {
 
@@ -139,7 +136,7 @@ The following example enumeration shows how easy injecting an enum value is:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	package javax.persistence
+	package jakarta.persistence
 
 	enum class PersistenceContextType {
 
@@ -568,8 +565,9 @@ is a convenience mechanism that sets up a <<core.adoc#beans-factory-placeholderc
 This element activates the Spring infrastructure to detect annotations in bean classes:
 
 * Spring's <<core.adoc#beans-factory-metadata, `@Configuration`>> model
-* <<core.adoc#beans-annotation-config, `@Autowired`/`@Inject`>> and `@Value`
-* JSR-250's `@Resource`, `@PostConstruct` and `@PreDestroy` (if available)
+* <<core.adoc#beans-annotation-config, `@Autowired`/`@Inject`>>, `@Value`, and `@Lookup`
+* JSR-250's `@Resource`, `@PostConstruct`, and `@PreDestroy` (if available)
+* JAX-WS's `@WebServiceRef` and EJB 3's `@EJB` (if available)
 * JPA's `@PersistenceContext` and `@PersistenceUnit` (if available)
 * Spring's <<core.adoc#context-functionality-events-annotation, `@EventListener`>>
 
@@ -751,7 +749,7 @@ essentially the same as the following XML snippet:
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="dateFormat" class="java.text.SimpleDateFormat">
-		<constructor-arg value="yyyy-HH-dd HH:mm"/>
+		<constructor-arg value="yyyy-MM-dd HH:mm"/>
 		<property name="lenient" value="true"/>
 	</bean>
 ----

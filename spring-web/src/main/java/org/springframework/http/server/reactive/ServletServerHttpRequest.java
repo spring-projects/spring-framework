@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,13 @@ import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.AsyncEvent;
-import javax.servlet.AsyncListener;
-import javax.servlet.ReadListener;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.AsyncEvent;
+import jakarta.servlet.AsyncListener;
+import jakarta.servlet.ReadListener;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import reactor.core.publisher.Flux;
 
@@ -42,6 +41,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -159,10 +159,9 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		return (headers != null ? headers : headerValues);
 	}
 
-
 	@Override
-	public String getMethodValue() {
-		return this.request.getMethod();
+	public HttpMethod getMethod() {
+		return HttpMethod.valueOf(this.request.getMethod());
 	}
 
 	@Override
@@ -198,18 +197,17 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	@Nullable
 	protected SslInfo initSslInfo() {
 		X509Certificate[] certificates = getX509Certificates();
-		return certificates != null ? new DefaultSslInfo(getSslSessionId(), certificates) : null;
+		return (certificates != null ? new DefaultSslInfo(getSslSessionId(), certificates) : null);
 	}
 
 	@Nullable
 	private String getSslSessionId() {
-		return (String) this.request.getAttribute("javax.servlet.request.ssl_session_id");
+		return (String) this.request.getAttribute("jakarta.servlet.request.ssl_session_id");
 	}
 
 	@Nullable
 	private X509Certificate[] getX509Certificates() {
-		String name = "javax.servlet.request.X509Certificate";
-		return (X509Certificate[]) this.request.getAttribute(name);
+		return (X509Certificate[]) this.request.getAttribute("jakarta.servlet.request.X509Certificate");
 	}
 
 	@Override
@@ -236,10 +234,10 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	/**
 	 * Read from the request body InputStream and return a DataBuffer.
 	 * Invoked only when {@link ServletInputStream#isReady()} returns "true".
-	 * @return a DataBuffer with data read, or {@link #EOF_BUFFER} if the input
-	 * stream returned -1, or null if 0 bytes were read.
+	 * @return a DataBuffer with data read, or
+	 * {@link AbstractListenerReadPublisher#EMPTY_BUFFER} if 0 bytes were read,
+	 * or {@link #EOF_BUFFER} if the input stream returned -1.
 	 */
-	@Nullable
 	DataBuffer readFromInputStream() throws IOException {
 		int read = this.request.getInputStream().read(this.buffer);
 		logBytesRead(read);
@@ -254,7 +252,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 			return EOF_BUFFER;
 		}
 
-		return null;
+		return AbstractListenerReadPublisher.EMPTY_BUFFER;
 	}
 
 	protected final void logBytesRead(int read) {

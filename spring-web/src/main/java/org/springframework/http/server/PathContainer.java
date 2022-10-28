@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,6 +124,7 @@ public interface PathContainer {
 
 		/**
 		 * Path parameters associated with this path segment.
+		 * @return an unmodifiable map containing the parameters
 		 */
 		MultiValueMap<String, String> parameters();
 	}
@@ -136,15 +137,16 @@ public interface PathContainer {
 	class Options {
 
 		/**
-		 * Options for HTTP URL paths:
-		 * <p>Separator '/' with URL decoding and parsing of path params.
+		 * Options for HTTP URL paths.
+		 * <p>Separator '/' with URL decoding and parsing of path parameters.
 		 */
 		public final static Options HTTP_PATH = Options.create('/', true);
 
 		/**
-		 * Options for a message route:
-		 * <p>Separator '.' without URL decoding nor parsing of params. Escape
-		 * sequences for the separator char in segment values are still decoded.
+		 * Options for a message route.
+		 * <p>Separator '.' with neither URL decoding nor parsing of path parameters.
+		 * Escape sequences for the separator character in segment values are still
+		 * decoded.
 		 */
 		public final static Options MESSAGE_ROUTE = Options.create('.', false);
 

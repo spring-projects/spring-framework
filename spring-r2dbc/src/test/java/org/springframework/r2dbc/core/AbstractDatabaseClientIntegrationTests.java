@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public abstract class AbstractDatabaseClientIntegrationTests {
 	protected abstract ConnectionFactory createConnectionFactory();
 
 	/**
-	 * Return the the CREATE TABLE statement for table {@code legoset} with the following
+	 * Return the CREATE TABLE statement for table {@code legoset} with the following
 	 * three columns:
 	 * <ul>
 	 * <li>id integer (primary key), not null</li>
@@ -81,7 +81,7 @@ public abstract class AbstractDatabaseClientIntegrationTests {
 				.bindNull("manual", Integer.class)
 				.fetch().rowsUpdated()
 				.as(StepVerifier::create)
-				.expectNext(1)
+				.expectNext(1L)
 				.verifyComplete();
 
 		databaseClient.sql("SELECT id FROM legoset")
@@ -123,7 +123,7 @@ public abstract class AbstractDatabaseClientIntegrationTests {
 				.bindNull("manual", Integer.class)
 				.fetch().rowsUpdated()
 				.as(StepVerifier::create)
-				.expectNext(1)
+				.expectNext(1L)
 				.verifyComplete();
 
 		databaseClient.sql("SELECT id FROM legoset")

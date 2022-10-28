@@ -1,20 +1,24 @@
 apply plugin: 'java-library'
-apply plugin: 'org.springframework.build.compile'
+apply plugin: 'org.springframework.build.conventions'
 apply plugin: 'org.springframework.build.optional-dependencies'
 // Uncomment the following for Shadow support in the jmhJar block.
 // Currently commented out due to ZipException: archive is not a ZIP archive
 // apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'me.champeau.gradle.jmh'
+apply plugin: 'me.champeau.jmh'
 apply from: "$rootDir/gradle/publications.gradle"
 
 dependencies {
-	jmh 'org.openjdk.jmh:jmh-core:1.25'
-	jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.25'
-	jmh 'net.sf.jopt-simple:jopt-simple:4.6'
+	jmh 'org.openjdk.jmh:jmh-core:1.32'
+	jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.32'
+	jmh 'net.sf.jopt-simple:jopt-simple'
 }
 
 jmh {
 	duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.findByName("processJmhResources").configure {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 jmhJar {

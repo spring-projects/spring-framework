@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,6 +86,8 @@ import org.springframework.web.util.UriBuilderFactory;
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Sam Brannen
+ * @author Michał Rowicki
  * @since 5.0
  * @see StatusAssertions
  * @see HeaderAssertions
@@ -178,7 +180,7 @@ public interface WebTestClient {
 	 * There are builder methods to customize the Java config. The resulting
 	 * WebFlux application will be tested without an HTTP server using a mock
 	 * request and response.
-	 * @param controllers one or more controller instances to tests
+	 * @param controllers one or more controller instances to test
 	 * (specified {@code Class} will be turned into instance)
 	 * @return chained API to customize server and client config; use
 	 * {@link MockServerSpec#configureClient()} to transition to client config
@@ -201,7 +203,7 @@ public interface WebTestClient {
 	}
 
 	/**
-	 * Use this option to setup a server from the Spring configuration of your
+	 * Use this option to set up a server from the Spring configuration of your
 	 * application, or some subset of it. Internally the provided configuration
 	 * is passed to {@code WebHttpHandlerBuilder} to set up the request
 	 * processing chain. The resulting WebFlux application will be tested
@@ -446,15 +448,15 @@ public interface WebTestClient {
 		 * <pre>
 		 * client.get().uri("/accounts/1")
 		 *         .exchange()
-		 *         .expectBody(Person.class).consumeWith(exchangeResult -> ... ));
+		 *         .expectBody(Person.class).consumeWith(exchangeResult -&gt; ... ));
 		 *
 		 * client.get().uri("/accounts")
 		 *         .exchange()
-		 *         .expectBodyList(Person.class).consumeWith(exchangeResult -> ... ));
+		 *         .expectBodyList(Person.class).consumeWith(exchangeResult -&gt; ... ));
 		 *
 		 * client.get().uri("/accounts/1")
 		 *         .exchange()
-		 *         .expectBody().consumeWith(exchangeResult -> ... ));
+		 *         .expectBody().consumeWith(exchangeResult -&gt; ... ));
 		 * </pre>
 		 * <p>Note that the configured consumer does not apply to responses
 		 * decoded to {@code Flux<T>} which can be consumed outside the workflow
@@ -524,14 +526,19 @@ public interface WebTestClient {
 	interface UriSpec<S extends RequestHeadersSpec<?>> {
 
 		/**
-		 * Specify the URI using an absolute, fully constructed {@link URI}.
+		 * Specify the URI using an absolute, fully constructed {@link java.net.URI}.
+		 * <p>If a {@link UriBuilderFactory} was configured for the client with
+		 * a base URI, that base URI will <strong>not</strong> be applied to the
+		 * supplied {@code java.net.URI}. If you wish to have a base URI applied to a
+		 * {@code java.net.URI} you must invoke either {@link #uri(String, Object...)}
+		 * or {@link #uri(String, Map)} &mdash; for example, {@code uri(myUri.toString())}.
 		 * @return spec to add headers or perform the exchange
 		 */
 		S uri(URI uri);
 
 		/**
 		 * Specify the URI for the request using a URI template and URI variables.
-		 * If a {@link UriBuilderFactory} was configured for the client (e.g.
+		 * <p>If a {@link UriBuilderFactory} was configured for the client (e.g.
 		 * with a base URI) it will be used to expand the URI template.
 		 * @return spec to add headers or perform the exchange
 		 */
@@ -539,7 +546,7 @@ public interface WebTestClient {
 
 		/**
 		 * Specify the URI for the request using a URI template and URI variables.
-		 * If a {@link UriBuilderFactory} was configured for the client (e.g.
+		 * <p>If a {@link UriBuilderFactory} was configured for the client (e.g.
 		 * with a base URI) it will be used to expand the URI template.
 		 * @return spec to add headers or perform the exchange
 		 */
@@ -782,6 +789,34 @@ public interface WebTestClient {
 	interface ResponseSpec {
 
 		/**
+		 * Apply multiple assertions to a response with the given
+		 * {@linkplain ResponseSpecConsumer consumers}, with the guarantee that
+		 * all assertions will be applied even if one or more assertions fails
+		 * with an exception.
+		 * <p>If a single {@link Error} or {@link RuntimeException} is thrown,
+		 * it will be rethrown.
+		 * <p>If multiple exceptions are thrown, this method will throw an
+		 * {@link AssertionError} whose error message is a summary of all the
+		 * exceptions. In addition, each exception will be added as a
+		 * {@linkplain Throwable#addSuppressed(Throwable) suppressed exception} to
+		 * the {@code AssertionError}.
+		 * <p>This feature is similar to the {@code SoftAssertions} support in
+		 * AssertJ and the {@code assertAll()} support in JUnit Jupiter.
+		 *
+		 * <h4>Example</h4>
+		 * <pre class="code">
+		 * webTestClient.get().uri("/hello").exchange()
+		 *     .expectAll(
+		 *         responseSpec -&gt; responseSpec.expectStatus().isOk(),
+		 *         responseSpec -&gt; responseSpec.expectBody(String.class).isEqualTo("Hello, World!")
+		 *     );
+		 * </pre>
+		 * @param consumers the list of {@code ResponseSpec} consumers
+		 * @since 5.3.10
+		 */
+		ResponseSpec expectAll(ResponseSpecConsumer... consumers);
+
+		/**
 		 * Assertions on the response status.
 		 */
 		StatusAssertions expectStatus();
@@ -832,7 +867,6 @@ public interface WebTestClient {
 		/**
 		 * Exit the chained flow in order to consume the response body
 		 * externally, e.g. via {@link reactor.test.StepVerifier}.
-		 *
 		 * <p>Note that when {@code Void.class} is passed in, the response body
 		 * is consumed and released. If no content is expected, then consider
 		 * using {@code .expectBody().isEmpty()} instead which asserts that
@@ -845,6 +879,16 @@ public interface WebTestClient {
 		 * about a target type with generics.
 		 */
 		<T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementTypeRef);
+
+		/**
+		 * {@link Consumer} of a {@link ResponseSpec}.
+		 * @since 5.3.10
+		 * @see ResponseSpec#expectAll(ResponseSpecConsumer...)
+		 */
+		@FunctionalInterface
+		interface ResponseSpecConsumer extends Consumer<ResponseSpec> {
+		}
+
 	}
 
 
@@ -934,13 +978,37 @@ public interface WebTestClient {
 
 		/**
 		 * Parse the expected and actual response content as JSON and perform a
-		 * "lenient" comparison verifying the same attribute-value pairs.
-		 * <p>Use of this option requires the
+		 * comparison verifying that they contain the same attribute-value pairs
+		 * regardless of formatting with <em>lenient</em> checking (extensible
+		 * and non-strict array ordering).
+		 * <p>Use of this method requires the
 		 * <a href="https://jsonassert.skyscreamer.org/">JSONassert</a> library
-		 * on to be on the classpath.
-		 * @param expectedJson the expected JSON content.
+		 * to be on the classpath.
+		 * @param expectedJson the expected JSON content
+		 * @see #json(String, boolean)
 		 */
-		BodyContentSpec json(String expectedJson);
+		default BodyContentSpec json(String expectedJson) {
+			return json(expectedJson, false);
+		}
+
+		/**
+		 * Parse the expected and actual response content as JSON and perform a
+		 * comparison verifying that they contain the same attribute-value pairs
+		 * regardless of formatting.
+		 * <p>Can compare in two modes, depending on the {@code strict} parameter value:
+		 * <ul>
+		 * <li>{@code true}: strict checking. Not extensible and strict array ordering.</li>
+		 * <li>{@code false}: lenient checking. Extensible and non-strict array ordering.</li>
+		 * </ul>
+		 * <p>Use of this method requires the
+		 * <a href="https://jsonassert.skyscreamer.org/">JSONassert</a> library
+		 * to be on the classpath.
+		 * @param expectedJson the expected JSON content
+		 * @param strict enables strict checking if {@code true}
+		 * @since 5.3.16
+		 * @see #json(String)
+		 */
+		BodyContentSpec json(String expectedJson, boolean strict);
 
 		/**
 		 * Parse expected and actual response content as XML and assert that

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpLogging;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
@@ -141,7 +140,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 				writeField("retry", retry.toMillis(), sb);
 			}
 			if (comment != null) {
-				sb.append(':').append(StringUtils.replace(comment, "\n", "\n:")).append("\n");
+				sb.append(':').append(StringUtils.replace(comment, "\n", "\n:")).append('\n');
 			}
 			if (data != null) {
 				sb.append("data:");
@@ -159,7 +158,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 				result = encodeEvent(sb, data, dataType, mediaType, factory, hints);
 			}
 
-			return result.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
+			return result.doOnDiscard(DataBuffer.class, DataBufferUtils::release);
 		});
 	}
 
@@ -181,7 +180,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	}
 
 	private void writeField(String fieldName, Object fieldValue, StringBuilder sb) {
-		sb.append(fieldName).append(':').append(fieldValue).append("\n");
+		sb.append(fieldName).append(':').append(fieldValue).append('\n');
 	}
 
 	private DataBuffer encodeText(CharSequence text, MediaType mediaType, DataBufferFactory bufferFactory) {

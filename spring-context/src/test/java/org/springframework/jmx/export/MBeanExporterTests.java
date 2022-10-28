@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ import org.springframework.jmx.support.RegistrationPolicy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
  * Integration tests for the {@link MBeanExporter} class.
@@ -90,11 +91,8 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	@Test
 	void testRegisterNotificationListenerForNonExistentMBean() throws Exception {
 		Map<String, NotificationListener> listeners = new HashMap<>();
-		NotificationListener dummyListener = new NotificationListener() {
-			@Override
-			public void handleNotification(Notification notification, Object handback) {
-				throw new UnsupportedOperationException();
-			}
+		NotificationListener dummyListener = (notification, handback) -> {
+			throw new UnsupportedOperationException();
 		};
 		// the MBean with the supplied object name does not exist...
 		listeners.put("spring:type=Test", dummyListener);
@@ -341,10 +339,10 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 
 		assertIsRegistered("Bean instance not registered", objectName);
 
-		Object result = server.invoke(objectName, "add", new Object[] {new Integer(2), new Integer(3)}, new String[] {
+		Object result = server.invoke(objectName, "add", new Object[] {2, 3}, new String[] {
 				int.class.getName(), int.class.getName()});
 
-		assertThat(new Integer(5)).as("Incorrect result return from add").isEqualTo(result);
+		assertThat(Integer.valueOf(5)).as("Incorrect result return from add").isEqualTo(result);
 		assertThat(server.getAttribute(objectName, "Name")).as("Incorrect attribute value").isEqualTo(name);
 
 		server.setAttribute(objectName, new Attribute("Name", otherName));
@@ -352,7 +350,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
-	void testBonaFideMBeanIsNotExportedWhenAutodetectIsTotallyTurnedOff() throws Exception {
+	void testBonaFideMBeanIsNotExportedWhenAutodetectIsTotallyTurnedOff() {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(Person.class);
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.registerBeanDefinition("^&_invalidObjectName_(*", builder.getBeanDefinition());
@@ -592,8 +590,8 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		exporter.setBeans(beansToExport);
 		exporter.setBeanFactory(factory);
 
-		assertThatExceptionOfType(RuntimeException.class).as("failed during creation of RuntimeExceptionThrowingConstructorBean").isThrownBy(() ->
-				start(exporter));
+		assertThatRuntimeException().as("failed during creation of RuntimeExceptionThrowingConstructorBean")
+			.isThrownBy(() -> start(exporter));
 
 		assertIsNotRegistered("Must have unregistered all previously registered MBeans due to RuntimeException",
 				ObjectNameManager.getInstance(objectName1));
@@ -726,7 +724,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 
-	public static interface PersonMBean {
+	public interface PersonMBean {
 
 		String getName();
 	}

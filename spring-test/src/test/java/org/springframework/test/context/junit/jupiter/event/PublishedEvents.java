@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.test.context.junit.jupiter.event;
 
-import java.util.Arrays;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -29,16 +28,6 @@ import java.util.function.Predicate;
  * @since 5.3.3
  */
 public interface PublishedEvents {
-
-	/**
-	 * Creates a new {@link PublishedEvents} instance for the given events.
-	 *
-	 * @param events must not be {@literal null}
-	 * @return will never be {@literal null}
-	 */
-	public static PublishedEvents of(Object... events) {
-		return of(Arrays.asList(events));
-	}
 
 	/**
 	 * Returns all application events of the given type that were fired during the test execution.
@@ -58,7 +47,7 @@ public interface PublishedEvents {
 		/**
 		 * Further constrain the event type for downstream assertions.
 		 *
-		 * @param subType the sub type
+		 * @param subType the subtype
 		 * @return will never be {@literal null}
 		 */
 		<S extends T> TypedPublishedEvents<S> ofSubType(Class<S> subType);

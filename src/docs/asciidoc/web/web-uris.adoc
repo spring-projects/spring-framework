@@ -95,8 +95,8 @@ You can shorten it further still with a full URI template, as the following exam
 .Kotlin
 ----
 	val uri = UriComponentsBuilder
-		.fromUriString("https://example.com/hotels/{hotel}?q={q}")
-		.build("Westin", "123")
+			.fromUriString("https://example.com/hotels/{hotel}?q={q}")
+			.build("Westin", "123")
 ----
 
 
@@ -278,7 +278,7 @@ You can shorten it further still with a full URI template, as the following exam
 ----
 
 The `WebClient` and the `RestTemplate` expand and encode URI templates internally through
-the `UriBuilderFactory` strategy. Both can be configured with a custom strategy.
+the `UriBuilderFactory` strategy. Both can be configured with a custom strategy,
 as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]

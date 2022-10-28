@@ -141,6 +141,7 @@ class YamlProcessorTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void standardTypesSupportedByDefault() throws Exception {
 		setYaml("value: !!set\n  ? first\n  ? second");
 		this.processor.process((properties, map) -> {

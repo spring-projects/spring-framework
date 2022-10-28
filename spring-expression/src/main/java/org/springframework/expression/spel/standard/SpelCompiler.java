@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,8 @@ public final class SpelCompiler implements Opcodes {
 					return ReflectionUtils.accessibleConstructor(clazz).newInstance();
 				}
 				catch (Throwable ex) {
-					throw new IllegalStateException("Failed to instantiate CompiledExpression", ex);
+					throw new IllegalStateException("Failed to instantiate CompiledExpression for expression: " +
+							expression.toStringAST(), ex);
 				}
 			}
 		}
@@ -136,6 +137,7 @@ public final class SpelCompiler implements Opcodes {
 	private Class<? extends CompiledExpression> createExpressionClass(SpelNodeImpl expressionToCompile) {
 		// Create class outline 'spel/ExNNN extends org.springframework.expression.spel.CompiledExpression'
 		String className = "spel/Ex" + getNextSuffix();
+		String evaluationContextClass = "org/springframework/expression/EvaluationContext";
 		ClassWriter cw = new ExpressionClassWriter();
 		cw.visit(V1_8, ACC_PUBLIC, className, null, "org/springframework/expression/spel/CompiledExpression", null);
 
@@ -151,7 +153,7 @@ public final class SpelCompiler implements Opcodes {
 
 		// Create getValue() method
 		mv = cw.visitMethod(ACC_PUBLIC, "getValue",
-				"(Ljava/lang/Object;Lorg/springframework/expression/EvaluationContext;)Ljava/lang/Object;", null,
+				"(Ljava/lang/Object;L" + evaluationContextClass + ";)Ljava/lang/Object;", null,
 				new String[] {"org/springframework/expression/EvaluationException"});
 		mv.visitCode();
 
@@ -272,7 +274,7 @@ public final class SpelCompiler implements Opcodes {
 
 		private static final URL[] NO_URLS = new URL[0];
 
-		private final AtomicInteger classesDefinedCount = new AtomicInteger(0);
+		private final AtomicInteger classesDefinedCount = new AtomicInteger();
 
 		public ChildClassLoader(@Nullable ClassLoader classLoader) {
 			super(NO_URLS, classLoader);

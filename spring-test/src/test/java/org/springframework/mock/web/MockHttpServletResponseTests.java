@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Locale;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -35,6 +34,7 @@ import org.springframework.web.util.WebUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.InstanceOfAssertFactories.type;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.springframework.http.HttpHeaders.CONTENT_LANGUAGE;
 import static org.springframework.http.HttpHeaders.CONTENT_LENGTH;
@@ -196,6 +196,36 @@ class MockHttpServletResponseTests {
 	}
 
 	@Test
+	void defaultCharacterEncoding() {
+		assertThat(response.isCharset()).isFalse();
+		assertThat(response.getContentType()).isNull();
+		assertThat(response.getCharacterEncoding()).isEqualTo("ISO-8859-1");
+
+		response.setDefaultCharacterEncoding("UTF-8");
+		assertThat(response.isCharset()).isFalse();
+		assertThat(response.getContentType()).isNull();
+		assertThat(response.getCharacterEncoding()).isEqualTo("UTF-8");
+
+		response.setContentType("text/plain;charset=UTF-16");
+		assertThat(response.isCharset()).isTrue();
+		assertThat(response.getContentType()).isEqualTo("text/plain;charset=UTF-16");
+		assertThat(response.getCharacterEncoding()).isEqualTo("UTF-16");
+
+		response.reset();
+		assertThat(response.isCharset()).isFalse();
+		assertThat(response.getContentType()).isNull();
+		assertThat(response.getCharacterEncoding()).isEqualTo("UTF-8");
+
+		response.setCharacterEncoding("FOXTROT");
+		assertThat(response.isCharset()).isTrue();
+		assertThat(response.getContentType()).isNull();
+		assertThat(response.getCharacterEncoding()).isEqualTo("FOXTROT");
+
+		response.setDefaultCharacterEncoding("ENIGMA");
+		assertThat(response.getCharacterEncoding()).isEqualTo("FOXTROT");
+	}
+
+	@Test
 	void contentLength() {
 		response.setContentLength(66);
 		assertThat(response.getContentLength()).isEqualTo(66);
@@ -228,7 +258,7 @@ class MockHttpServletResponseTests {
 
 	@Test
 	void cookies() {
-		Cookie cookie = new Cookie("foo", "bar");
+		Cookie cookie = new MockCookie("foo", "bar");
 		cookie.setPath("/path");
 		cookie.setDomain("example.com");
 		cookie.setMaxAge(0);
@@ -444,6 +474,23 @@ class MockHttpServletResponseTests {
 		assertThat(header).startsWith("SESSION=123; Path=/; Max-Age=100; Expires=");
 	}
 
+	/**
+	 * @since 5.3.22
+	 */
+	@Test
+	void setCookieHeaderWithComment() {
+		response.setHeader(SET_COOKIE, "SESSION=123;Comment=Test Comment;Path=/");
+
+		assertThat(response.getHeader(SET_COOKIE)).isEqualTo(("SESSION=123; Path=/; Comment=Test Comment"));
+
+		assertNumCookies(1);
+		assertThat(response.getCookies()[0]).isInstanceOf(MockCookie.class).satisfies(mockCookie -> {
+			assertThat(mockCookie.getName()).isEqualTo("SESSION");
+			assertThat(mockCookie.getPath()).isEqualTo("/");
+			assertThat(mockCookie.getComment()).isEqualTo("Test Comment");
+		});
+	}
+
 	@Test
 	void addCookieHeader() {
 		response.addHeader(SET_COOKIE, "SESSION=123; Path=/; Secure; HttpOnly; SameSite=Lax");
@@ -455,6 +502,26 @@ class MockHttpServletResponseTests {
 		assertNumCookies(2);
 		assertPrimarySessionCookie("123");
 		assertCookieValues("123", "999");
+	}
+
+	@Test
+	void addCookieHeaderWithComment() {
+		response.addHeader(SET_COOKIE, "SESSION=123; Path=/; Secure; HttpOnly; SameSite=Lax");
+		assertNumCookies(1);
+		assertPrimarySessionCookie("123");
+
+		// Adding a 2nd cookie header should result in 2 cookies.
+		response.addHeader(SET_COOKIE, "SESSION=999; Comment=Test Comment; Path=/; Secure; HttpOnly; SameSite=Lax");
+		assertNumCookies(2);
+		assertPrimarySessionCookie("123");
+		assertThat(response.getCookies()[1]).isInstanceOf(MockCookie.class).satisfies(mockCookie -> {
+			assertThat(mockCookie.getName()).isEqualTo("SESSION");
+			assertThat(mockCookie.getValue()).isEqualTo("999");
+			assertThat(mockCookie.getComment()).isEqualTo("Test Comment");
+			assertThat(mockCookie.getPath()).isEqualTo("/");
+			assertThat(mockCookie.getSecure()).isTrue();
+			assertThat(mockCookie.isHttpOnly()).isTrue();
+		});
 	}
 
 	/**
@@ -496,7 +563,6 @@ class MockHttpServletResponseTests {
 		String expiryDate = "Tue, 8 Oct 2019 19:50:00 GMT";
 		String cookieValue = "SESSION=123; Path=/; Expires=" + expiryDate;
 		response.addHeader(SET_COOKIE, cookieValue);
-		System.err.println(response.getCookie("SESSION"));
 		assertThat(response.getHeader(SET_COOKIE)).isEqualTo(cookieValue);
 
 		assertNumCookies(1);
@@ -541,17 +607,22 @@ class MockHttpServletResponseTests {
 
 	private void assertPrimarySessionCookie(String expectedValue) {
 		Cookie cookie = this.response.getCookie("SESSION");
-		assertThat(cookie).isInstanceOf(MockCookie.class);
-		assertThat(cookie.getName()).isEqualTo("SESSION");
-		assertThat(cookie.getValue()).isEqualTo(expectedValue);
-		assertThat(cookie.getPath()).isEqualTo("/");
-		assertThat(cookie.getSecure()).isTrue();
-		assertThat(cookie.isHttpOnly()).isTrue();
-		assertThat(((MockCookie) cookie).getSameSite()).isEqualTo("Lax");
+		assertThat(cookie).asInstanceOf(type(MockCookie.class)).satisfies(mockCookie -> {
+			assertThat(mockCookie.getName()).isEqualTo("SESSION");
+			assertThat(mockCookie.getValue()).isEqualTo(expectedValue);
+			assertThat(mockCookie.getPath()).isEqualTo("/");
+			assertThat(mockCookie.getSecure()).isTrue();
+			assertThat(mockCookie.isHttpOnly()).isTrue();
+			assertThat(mockCookie.getComment()).isNull();
+			assertThat(mockCookie.getExpires()).isNull();
+			assertThat(mockCookie.getSameSite()).isEqualTo("Lax");
+		});
 	}
 
 	@Test  // gh-25501
 	void resetResetsCharset() {
+		assertThat(response.getContentType()).isNull();
+		assertThat(response.getCharacterEncoding()).isEqualTo("ISO-8859-1");
 		assertThat(response.isCharset()).isFalse();
 		response.setCharacterEncoding("UTF-8");
 		assertThat(response.isCharset()).isTrue();
@@ -563,6 +634,8 @@ class MockHttpServletResponseTests {
 
 		response.reset();
 
+		assertThat(response.getContentType()).isNull();
+		assertThat(response.getCharacterEncoding()).isEqualTo("ISO-8859-1");
 		assertThat(response.isCharset()).isFalse();
 		// Do not invoke setCharacterEncoding() since that sets the charset flag to true.
 		// response.setCharacterEncoding("UTF-8");

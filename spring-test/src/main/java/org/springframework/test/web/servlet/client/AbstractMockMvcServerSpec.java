@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.servlet.client;
 
-import javax.servlet.Filter;
+import jakarta.servlet.Filter;
 
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -29,11 +30,11 @@ import org.springframework.test.web.servlet.setup.MockMvcConfigurer;
 /**
  * Base class for implementations of {@link MockMvcWebTestClient.MockMvcServerSpec}
  * that simply delegates to a {@link ConfigurableMockMvcBuilder} supplied by
- * the concrete sub-classes.
+ * the concrete subclasses.
  *
  * @author Rossen Stoyanchev
  * @since 5.3
- * @param <B> the type of the concrete sub-class spec
+ * @param <B> the type of the concrete subclass spec
  */
 abstract class AbstractMockMvcServerSpec<B extends MockMvcWebTestClient.MockMvcServerSpec<B>>
 		implements MockMvcWebTestClient.MockMvcServerSpec<B> {
@@ -44,6 +45,7 @@ abstract class AbstractMockMvcServerSpec<B extends MockMvcWebTestClient.MockMvcS
 		return self();
 	}
 
+	@Override
 	public final <T extends B> T filter(Filter filter, String... urlPatterns) {
 		getMockMvcBuilder().addFilter(filter, urlPatterns);
 		return self();

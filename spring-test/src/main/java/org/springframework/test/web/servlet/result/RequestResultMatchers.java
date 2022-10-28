@@ -18,9 +18,8 @@ package org.springframework.test.web.servlet.result;
 
 import java.util.concurrent.Callable;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.hamcrest.Matcher;
 
 import org.springframework.lang.Nullable;

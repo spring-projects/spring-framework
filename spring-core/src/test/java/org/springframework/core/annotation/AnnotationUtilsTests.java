@@ -417,7 +417,7 @@ class AnnotationUtilsTests {
 		// inherited class-level annotation; note: @Transactional is inherited
 		assertThat(isAnnotationInherited(Transactional.class, InheritedAnnotationInterface.class)).isFalse();
 		// isAnnotationInherited() does not currently traverse interface hierarchies.
-		// Thus the following, though perhaps counter intuitive, must be false:
+		// Thus the following, though perhaps counterintuitive, must be false:
 		assertThat(isAnnotationInherited(Transactional.class, SubInheritedAnnotationInterface.class)).isFalse();
 		assertThat(isAnnotationInherited(Transactional.class, InheritedAnnotationClass.class)).isFalse();
 		assertThat(isAnnotationInherited(Transactional.class, SubInheritedAnnotationClass.class)).isTrue();
@@ -1367,6 +1367,8 @@ class AnnotationUtilsTests {
 	@WebMapping(method = RequestMethod.POST, name = "")
 	@interface Post {
 
+		// Do NOT use @AliasFor here until Spring 6.1
+		// @AliasFor(annotation = WebMapping.class)
 		String path() default "";
 	}
 

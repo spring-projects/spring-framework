@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -154,25 +155,25 @@ class ClassUtilsTests {
 		assertThat(ClassUtils.isCacheSafe(composite, childLoader3)).isTrue();
 	}
 
-	@ParameterizedTest
-	@CsvSource({
-		"boolean, boolean",
-		"byte, byte",
-		"char, char",
-		"short, short",
-		"int, int",
-		"long, long",
-		"float, float",
-		"double, double",
-		"[Z, boolean[]",
-		"[B, byte[]",
-		"[C, char[]",
-		"[S, short[]",
-		"[I, int[]",
-		"[J, long[]",
-		"[F, float[]",
-		"[D, double[]"
-	})
+	@ParameterizedTest(name = "''{0}'' -> {1}")
+	@CsvSource(textBlock = """
+		boolean, boolean
+		byte, byte
+		char, char
+		short, short
+		int, int
+		long, long
+		float, float
+		double, double
+		[Z, boolean[]
+		[B, byte[]
+		[C, char[]
+		[S, short[]
+		[I, int[]
+		[J, long[]
+		[F, float[]
+		[D, double[]
+		""")
 	void resolvePrimitiveClassName(String input, Class<?> output) {
 		assertThat(ClassUtils.resolvePrimitiveClassName(input)).isEqualTo(output);
 	}
@@ -408,6 +409,29 @@ class ClassUtilsTests {
 		assertThat(ClassUtils.isPrimitiveOrWrapper(type)).isTrue();
 	}
 
+	@Test
+	void isLambda() {
+		assertIsLambda(ClassUtilsTests.staticLambdaExpression);
+		assertIsLambda(ClassUtilsTests::staticStringFactory);
+
+		assertIsLambda(this.instanceLambdaExpression);
+		assertIsLambda(this::instanceStringFactory);
+	}
+
+	@Test
+	void isNotLambda() {
+		assertIsNotLambda(new EnigmaSupplier());
+
+		assertIsNotLambda(new Supplier<String>() {
+			@Override
+			public String get() {
+				return "anonymous inner class";
+			}
+		});
+
+		assertIsNotLambda(new Fake$$LambdaSupplier());
+	}
+
 
 	@Nested
 	class GetStaticMethodTests {
@@ -497,6 +521,40 @@ class ClassUtilsTests {
 
 		void print(String header, String[] messages, String footer) {
 			/* no-op */
+		}
+	}
+
+	private static void assertIsLambda(Supplier<String> supplier) {
+		assertThat(ClassUtils.isLambdaClass(supplier.getClass())).isTrue();
+	}
+
+	private static void assertIsNotLambda(Supplier<String> supplier) {
+		assertThat(ClassUtils.isLambdaClass(supplier.getClass())).isFalse();
+	}
+
+	private static final Supplier<String> staticLambdaExpression = () -> "static lambda expression";
+
+	private final Supplier<String> instanceLambdaExpression = () -> "instance lambda expressions";
+
+	private static String staticStringFactory() {
+		return "static string factory";
+	}
+
+	private String instanceStringFactory() {
+		return "instance string factory";
+	}
+
+	private static class EnigmaSupplier implements Supplier<String> {
+		@Override
+		public String get() {
+			return "enigma";
+		}
+	}
+
+	private static class Fake$$LambdaSupplier implements Supplier<String> {
+		@Override
+		public String get() {
+			return "fake lambda";
 		}
 	}
 

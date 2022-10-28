@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.HttpFields;
@@ -39,14 +38,15 @@ import org.springframework.util.MultiValueMap;
  * <p>There is a duplicate of this class in the client package!
  *
  * @author Brian Clozel
+ * @author Juergen Hoeller
  * @since 5.1.1
  */
 class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
-	private final HttpFields headers;
+	private final HttpFields.Mutable headers;
 
 
-	JettyHeadersAdapter(HttpFields headers) {
+	JettyHeadersAdapter(HttpFields.Mutable headers) {
 		this.headers = headers;
 	}
 
@@ -105,7 +105,7 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public boolean containsKey(Object key) {
-		return (key instanceof String && this.headers.containsKey((String) key));
+		return (key instanceof String && this.headers.contains((String) key));
 	}
 
 	@Override
@@ -160,12 +160,12 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 	@Override
 	public Collection<List<String>> values() {
 		return this.headers.getFieldNamesCollection().stream()
-				.map(this.headers::getValuesList).collect(Collectors.toList());
+				.map(this.headers::getValuesList).toList();
 	}
 
 	@Override
 	public Set<Entry<String, List<String>>> entrySet() {
-		return new AbstractSet<Entry<String, List<String>>>() {
+		return new AbstractSet<>() {
 			@Override
 			public Iterator<Entry<String, List<String>>> iterator() {
 				return new EntryIterator();
@@ -187,7 +187,7 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	private class EntryIterator implements Iterator<Entry<String, List<String>>> {
 
-		private Enumeration<String> names = headers.getFieldNames();
+		private final Enumeration<String> names = headers.getFieldNames();
 
 		@Override
 		public boolean hasNext() {
@@ -241,6 +241,7 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 		}
 	}
 
+
 	private final class HeaderNamesIterator implements Iterator<String> {
 
 		private final Iterator<String> iterator;
@@ -268,7 +269,7 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 			if (this.currentName == null) {
 				throw new IllegalStateException("No current Header in iterator");
 			}
-			if (!headers.containsKey(this.currentName)) {
+			if (!headers.contains(this.currentName)) {
 				throw new IllegalStateException("Header not present: " + this.currentName);
 			}
 			headers.remove(this.currentName);

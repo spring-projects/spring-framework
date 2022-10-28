@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test.web.reactive.server.samples;
 
-import javax.xml.bind.annotation.XmlRootElement;
+package org.springframework.test.web.reactive.server.samples;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 class Person {
@@ -45,8 +45,12 @@ class Person {
 
 	@Override
 	public boolean equals(Object other) {
-		if (this == other) return true;
-		if (other == null || getClass() != other.getClass()) return false;
+		if (this == other) {
+			return true;
+		}
+		if (other == null || getClass() != other.getClass()) {
+			return false;
+		}
 		Person person = (Person) other;
 		return getName().equals(person.getName());
 	}

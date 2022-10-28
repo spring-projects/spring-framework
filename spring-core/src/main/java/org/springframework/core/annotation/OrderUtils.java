@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,20 +25,20 @@ import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
  * General utility for determining the order of an object based on its type declaration.
- * Handles Spring's {@link Order} annotation as well as {@link javax.annotation.Priority}.
+ * Handles Spring's {@link Order} annotation as well as {@link jakarta.annotation.Priority}.
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
  * @since 4.1
  * @see Order
- * @see javax.annotation.Priority
+ * @see jakarta.annotation.Priority
  */
 public abstract class OrderUtils {
 
 	/** Cache marker for a non-annotated Class. */
 	private static final Object NOT_ANNOTATED = new Object();
 
-	private static final String JAVAX_PRIORITY_ANNOTATION = "javax.annotation.Priority";
+	private static final String JAVAX_PRIORITY_ANNOTATION = "jakarta.annotation.Priority";
 
 	/** Cache for @Order value (or NOT_ANNOTATED marker) per Class. */
 	private static final Map<AnnotatedElement, Object> orderCache = new ConcurrentReferenceHashMap<>(64);
@@ -47,7 +47,7 @@ public abstract class OrderUtils {
 	/**
 	 * Return the order on the specified {@code type}, or the specified
 	 * default value if none can be found.
-	 * <p>Takes care of {@link Order @Order} and {@code @javax.annotation.Priority}.
+	 * <p>Takes care of {@link Order @Order} and {@code @jakarta.annotation.Priority}.
 	 * @param type the type to handle
 	 * @return the priority value, or the specified default order if none can be found
 	 * @since 5.0
@@ -61,7 +61,7 @@ public abstract class OrderUtils {
 	/**
 	 * Return the order on the specified {@code type}, or the specified
 	 * default value if none can be found.
-	 * <p>Takes care of {@link Order @Order} and {@code @javax.annotation.Priority}.
+	 * <p>Takes care of {@link Order @Order} and {@code @jakarta.annotation.Priority}.
 	 * @param type the type to handle
 	 * @return the priority value, or the specified default order if none can be found
 	 * @see #getPriority(Class)
@@ -74,7 +74,7 @@ public abstract class OrderUtils {
 
 	/**
 	 * Return the order on the specified {@code type}.
-	 * <p>Takes care of {@link Order @Order} and {@code @javax.annotation.Priority}.
+	 * <p>Takes care of {@link Order @Order} and {@code @jakarta.annotation.Priority}.
 	 * @param type the type to handle
 	 * @return the order value, or {@code null} if none can be found
 	 * @see #getPriority(Class)
@@ -86,7 +86,7 @@ public abstract class OrderUtils {
 
 	/**
 	 * Return the order declared on the specified {@code element}.
-	 * <p>Takes care of {@link Order @Order} and {@code @javax.annotation.Priority}.
+	 * <p>Takes care of {@link Order @Order} and {@code @jakarta.annotation.Priority}.
 	 * @param element the annotated element (e.g. type or method)
 	 * @return the order value, or {@code null} if none can be found
 	 * @since 5.3
@@ -99,7 +99,7 @@ public abstract class OrderUtils {
 	/**
 	 * Return the order from the specified annotations collection.
 	 * <p>Takes care of {@link Order @Order} and
-	 * {@code @javax.annotation.Priority}.
+	 * {@code @jakarta.annotation.Priority}.
 	 * @param element the source element
 	 * @param annotations the annotation to consider
 	 * @return the order value, or {@code null} if none can be found
@@ -111,7 +111,7 @@ public abstract class OrderUtils {
 		}
 		Object cached = orderCache.get(element);
 		if (cached != null) {
-			return (cached instanceof Integer ? (Integer) cached : null);
+			return (cached instanceof Integer integer ? integer : null);
 		}
 		Integer result = findOrder(annotations);
 		orderCache.put(element, result != null ? result : NOT_ANNOTATED);
@@ -132,7 +132,7 @@ public abstract class OrderUtils {
 	}
 
 	/**
-	 * Return the value of the {@code javax.annotation.Priority} annotation
+	 * Return the value of the {@code jakarta.annotation.Priority} annotation
 	 * declared on the specified type, or {@code null} if none.
 	 * @param type the type to handle
 	 * @return the priority value if the annotation is declared, or {@code null} if none

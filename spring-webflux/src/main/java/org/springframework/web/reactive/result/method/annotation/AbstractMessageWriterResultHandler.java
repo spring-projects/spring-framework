@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,12 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.KotlinDetector;
@@ -29,8 +31,9 @@ import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.lang.Nullable;
@@ -52,9 +55,12 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public abstract class AbstractMessageWriterResultHandler extends HandlerResultHandlerSupport {
 
-	private static final String COROUTINES_FLOW_CLASS_NAME = "kotlinx.coroutines.flow.Flow";
+	protected static final String COROUTINES_FLOW_CLASS_NAME = "kotlinx.coroutines.flow.Flow";
 
 	private final List<HttpMessageWriter<?>> messageWriters;
+
+	private final List<MediaType> problemMediaTypes =
+			Arrays.asList(MediaType.APPLICATION_PROBLEM_JSON, MediaType.APPLICATION_PROBLEM_XML);
 
 
 	/**
@@ -130,7 +136,8 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 		if (adapter != null) {
 			publisher = adapter.toPublisher(body);
 			boolean isUnwrapped = KotlinDetector.isSuspendingFunction(bodyParameter.getMethod()) &&
-					!COROUTINES_FLOW_CLASS_NAME.equals(bodyType.toClass().getName());
+					!COROUTINES_FLOW_CLASS_NAME.equals(bodyType.toClass().getName()) &&
+					!Flux.class.equals(bodyType.toClass());
 			ResolvableType genericType = isUnwrapped ? bodyType : bodyType.getGeneric();
 			elementType = getElementType(adapter, genericType);
 			actualElementType = elementType;
@@ -150,7 +157,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 			bestMediaType = selectMediaType(exchange, () -> getMediaTypesFor(elementType));
 		}
 		catch (NotAcceptableStatusException ex) {
-			HttpStatus statusCode = exchange.getResponse().getStatusCode();
+			HttpStatusCode statusCode = exchange.getResponse().getStatusCode();
 			if (statusCode != null && statusCode.isError()) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Ignoring error response content (if any). " + ex.getReason());
@@ -159,6 +166,12 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 			}
 			throw ex;
 		}
+
+		// For ProblemDetail, fall back on RFC 7807 format
+		if (bestMediaType == null && elementType.toClass().equals(ProblemDetail.class)) {
+			bestMediaType = selectMediaType(exchange, () -> getMediaTypesFor(elementType), this.problemMediaTypes);
+		}
+
 		if (bestMediaType != null) {
 			String logPrefix = exchange.getLogPrefix();
 			if (logger.isDebugEnabled()) {

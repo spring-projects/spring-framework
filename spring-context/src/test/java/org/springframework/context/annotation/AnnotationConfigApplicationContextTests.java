@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,10 @@ import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.TypeReference;
+import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +34,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation6.ComponentForScanning;
 import org.springframework.context.annotation6.ConfigForScanning;
 import org.springframework.context.annotation6.Jsr330NamedForScanning;
+import org.springframework.context.testfixture.context.annotation.CglibConfiguration;
+import org.springframework.context.testfixture.context.annotation.LambdaBeanConfiguration;
 import org.springframework.core.ResolvableType;
 import org.springframework.util.ObjectUtils;
 
@@ -148,25 +154,51 @@ class AnnotationConfigApplicationContextTests {
 	void nullReturningBeanPostProcessor() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(AutowiredConfig.class);
+		// 1st BPP always gets invoked
+		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
+			@Override
+			public Object postProcessBeforeInitialization(Object bean, String beanName) {
+				if (bean instanceof TestBean testBean) {
+					testBean.name = testBean.name + "-before";
+				}
+				return bean;
+			}
+			@Override
+			public Object postProcessAfterInitialization(Object bean, String beanName) {
+				if (bean instanceof TestBean testBean) {
+					testBean.name = testBean.name + "-after";
+				}
+				return bean;
+			}
+		});
+		// 2nd BPP always returns null for a TestBean
 		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
 			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
 				return (bean instanceof TestBean ? null : bean);
 			}
+			@Override
+			public Object postProcessAfterInitialization(Object bean, String beanName) {
+				return (bean instanceof TestBean ? null : bean);
+			}
 		});
+		// 3rd BPP never gets invoked with a TestBean
 		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
 			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
-				bean.getClass().getName();
+				assertThat(bean).isNotInstanceOf(TestBean.class);
 				return bean;
 			}
 			@Override
 			public Object postProcessAfterInitialization(Object bean, String beanName) {
-				bean.getClass().getName();
+				assertThat(bean).isNotInstanceOf(TestBean.class);
 				return bean;
 			}
 		});
 		context.refresh();
+		TestBean testBean = context.getBean(TestBean.class);
+		assertThat(testBean).isNotNull();
+		assertThat(testBean.name).isEqualTo("foo-before-after");
 	}
 
 	@Test
@@ -396,6 +428,66 @@ class AnnotationConfigApplicationContextTests {
 		assertThat(context.getBeanNamesForType(TypedFactoryBean.class)).hasSize(1);
 	}
 
+	@Test
+	void refreshForAotProcessingWithConfiguration() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(Config.class);
+		context.refreshForAotProcessing(new RuntimeHints());
+		assertThat(context.getBeanFactory().getBeanDefinitionNames()).contains(
+				"annotationConfigApplicationContextTests.Config", "testBean");
+	}
+
+	@Test
+	void refreshForAotCanInstantiateBeanWithAutowiredApplicationContext() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(BeanD.class);
+		context.refreshForAotProcessing(new RuntimeHints());
+		BeanD bean = context.getBean(BeanD.class);
+		assertThat(bean.applicationContext).isSameAs(context);
+	}
+
+	@Test
+	void refreshForAotCanInstantiateBeanWithFieldAutowiredApplicationContext() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(BeanB.class);
+		context.refreshForAotProcessing(new RuntimeHints());
+		BeanB bean = context.getBean(BeanB.class);
+		assertThat(bean.applicationContext).isSameAs(context);
+	}
+
+	@Test
+	void refreshForAotRegisterHintsForCglibProxy() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(CglibConfiguration.class);
+		RuntimeHints runtimeHints = new RuntimeHints();
+		context.refreshForAotProcessing(runtimeHints);
+		TypeReference cglibType = TypeReference.of(CglibConfiguration.class.getName() + "$$SpringCGLIB$$0");
+		assertThat(RuntimeHintsPredicates.reflection().onType(cglibType)
+				.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+						MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.DECLARED_FIELDS))
+				.accepts(runtimeHints);
+	}
+
+	@Test
+	void refreshForAotRegisterHintsForTargetOfCglibProxy() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(CglibConfiguration.class);
+		RuntimeHints runtimeHints = new RuntimeHints();
+		context.refreshForAotProcessing(runtimeHints);
+		assertThat(RuntimeHintsPredicates.reflection().onType(TypeReference.of(CglibConfiguration.class))
+				.withMemberCategories(MemberCategory.INVOKE_PUBLIC_METHODS))
+				.accepts(runtimeHints);
+	}
+
+	@Test
+	void refreshForAotRegisterDoesNotConsiderLambdaBeanAsCglibProxy() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(LambdaBeanConfiguration.class);
+		RuntimeHints runtimeHints = new RuntimeHints();
+		context.refreshForAotProcessing(runtimeHints);
+		assertThat(runtimeHints.reflection().typeHints()).isEmpty();
+	}
+
 
 	@Configuration
 	static class Config {
@@ -471,6 +563,16 @@ class AnnotationConfigApplicationContextTests {
 
 	static class BeanC {}
 
+	static class BeanD {
+
+		private final ApplicationContext applicationContext;
+
+		public BeanD(ApplicationContext applicationContext) {
+			this.applicationContext = applicationContext;
+		}
+
+	}
+
 	static class NonInstantiatedFactoryBean implements FactoryBean<String> {
 
 		NonInstantiatedFactoryBean() {
@@ -544,19 +646,24 @@ class TestBean {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		TestBean other = (TestBean) obj;
 		if (name == null) {
-			if (other.name != null)
+			if (other.name != null) {
 				return false;
+			}
 		}
-		else if (!name.equals(other.name))
+		else if (!name.equals(other.name)) {
 			return false;
+		}
 		return true;
 	}
 

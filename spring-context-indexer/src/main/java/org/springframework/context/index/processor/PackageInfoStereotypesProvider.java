@@ -24,7 +24,7 @@ import javax.lang.model.element.ElementKind;
 
 /**
  * A {@link StereotypesProvider} implementation that provides the
- * {@value STEREOTYPE} stereotype for each package-info.
+ * {@value #STEREOTYPE} stereotype for each package-info.
  *
  * @author Stephane Nicoll
  * @since 5.0

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,9 @@ import org.springframework.util.ObjectUtils;
  * @author Mark Paluch
  * @author Juergen Hoeller
  * @since 5.3
+ * @deprecated since 6.0, use {@code io.r2dbc.spi.Parameter} instead.
  */
+@Deprecated(since = "6.0")
 public final class Parameter {
 
 	@Nullable
@@ -100,7 +102,7 @@ public final class Parameter {
 	}
 
 	/**
-	 * Return whether this {@link Parameter} has a empty.
+	 * Return whether this {@link Parameter} has an empty value.
 	 * @return {@code true} if {@link #getValue()} is {@code null}
 	 */
 	public boolean isEmpty() {
@@ -113,10 +115,9 @@ public final class Parameter {
 		if (this == obj) {
 			return true;
 		}
-		if (!(obj instanceof Parameter)) {
+		if (!(obj instanceof Parameter other)) {
 			return false;
 		}
-		Parameter other = (Parameter) obj;
 		return (ObjectUtils.nullSafeEquals(this.value, other.value) &&
 				ObjectUtils.nullSafeEquals(this.type, other.type));
 	}

@@ -70,7 +70,7 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 		if (this.considerInherited) {
 			String superClassName = metadata.getSuperClassName();
 			if (superClassName != null) {
-				// Optimization to avoid creating ClassReader for super class.
+				// Optimization to avoid creating ClassReader for superclass.
 				Boolean superClassMatch = matchSuperClass(superClassName);
 				if (superClassMatch != null) {
 					if (superClassMatch.booleanValue()) {
@@ -78,7 +78,7 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 					}
 				}
 				else {
-					// Need to read super class to determine a match...
+					// Need to read superclass to determine a match...
 					try {
 						if (match(metadata.getSuperClassName(), metadataReaderFactory)) {
 							return true;
@@ -86,7 +86,7 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 					}
 					catch (IOException ex) {
 						if (logger.isDebugEnabled()) {
-							logger.debug("Could not read super class [" + metadata.getSuperClassName() +
+							logger.debug("Could not read superclass [" + metadata.getSuperClassName() +
 									"] of type-filtered class [" + metadata.getClassName() + "]");
 						}
 					}
@@ -96,7 +96,7 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 
 		if (this.considerInterfaces) {
 			for (String ifc : metadata.getInterfaceNames()) {
-				// Optimization to avoid creating ClassReader for super class
+				// Optimization to avoid creating ClassReader for superclass
 				Boolean interfaceMatch = matchInterface(ifc);
 				if (interfaceMatch != null) {
 					if (interfaceMatch.booleanValue()) {
@@ -144,7 +144,7 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 	}
 
 	/**
-	 * Override this to match on super type name.
+	 * Override this to match on supertype name.
 	 */
 	@Nullable
 	protected Boolean matchSuperClass(String superClassName) {

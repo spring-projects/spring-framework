@@ -21,12 +21,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.function.Function;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.MarshalException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.MarshalException;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -48,8 +47,8 @@ import org.springframework.util.MimeTypeUtils;
 /**
  * Encode from single value to a byte stream containing XML elements.
  *
- * <p>{@link javax.xml.bind.annotation.XmlElements @XmlElements} and
- * {@link javax.xml.bind.annotation.XmlElement @XmlElement} can be used
+ * <p>{@link jakarta.xml.bind.annotation.XmlElements @XmlElements} and
+ * {@link jakarta.xml.bind.annotation.XmlElement @XmlElement} can be used
  * to specify how collections should be marshalled.
  *
  * @author Sebastien Deleuze

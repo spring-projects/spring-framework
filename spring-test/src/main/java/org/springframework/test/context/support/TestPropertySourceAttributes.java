@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.log.LogMessage;
+import org.springframework.core.style.DefaultToStringStyler;
+import org.springframework.core.style.SimpleValueStyler;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestPropertySource;
@@ -49,6 +51,8 @@ import org.springframework.util.StringUtils;
  * @see MergedTestPropertySources
  */
 class TestPropertySourceAttributes {
+
+	private static final String SLASH = "/";
 
 	private static final Log logger = LogFactory.getLog(TestPropertySourceAttributes.class);
 
@@ -132,9 +136,9 @@ class TestPropertySourceAttributes {
 	}
 
 	/**
-	 * Add all of the supplied elements to the provided list, honoring the
+	 * Add all the supplied elements to the provided list, honoring the
 	 * {@code prepend} flag.
-	 * <p>If the {@code prepend} flag is {@code false}, the elements will appended
+	 * <p>If the {@code prepend} flag is {@code false}, the elements will be appended
 	 * to the list.
 	 * @param prepend whether the elements should be prepended to the list
 	 * @param list the list to which to add the elements
@@ -156,9 +160,9 @@ class TestPropertySourceAttributes {
 			logger.error(msg);
 			throw new IllegalStateException(msg);
 		}
-		String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + resourcePath;
-		if (logger.isInfoEnabled()) {
-			logger.info(String.format("Detected default properties file \"%s\" for test class [%s]",
+		String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + SLASH + resourcePath;
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("Detected default properties file \"%s\" for test class [%s]",
 					prefixedResourcePath, testClass.getName()));
 		}
 		return prefixedResourcePath;
@@ -260,8 +264,8 @@ class TestPropertySourceAttributes {
 	 */
 	@Override
 	public String toString() {
-		return new ToStringCreator(this)
-				.append("declaringClass", this.declaringClass.getName())
+		return new ToStringCreator(this, new DefaultToStringStyler(new SimpleValueStyler()))
+				.append("declaringClass", this.declaringClass)
 				.append("locations", this.locations)
 				.append("inheritLocations", this.inheritLocations)
 				.append("properties", this.properties)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatException;
 
 /**
  * Tests invocation of constructors.
@@ -127,8 +127,8 @@ public class ConstructorInvocationTests extends AbstractExpressionTests {
 		// 4 will make it throw a checked exception - this will be wrapped by spel on the
 		// way out
 		eContext.setVariable("bar", 4);
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-				expr.getValue(eContext))
+		assertThatException()
+			.isThrownBy(() -> expr.getValue(eContext))
 			.withMessageContaining("Tester");
 		// A problem occurred whilst attempting to construct an object of type
 		// 'org.springframework.expression.spel.ConstructorInvocationTests$Tester'
@@ -139,7 +139,7 @@ public class ConstructorInvocationTests extends AbstractExpressionTests {
 
 		// 1 will make it throw a RuntimeException - SpEL will let this through
 		eContext.setVariable("bar", 1);
-		assertThatExceptionOfType(Exception.class)
+		assertThatException()
 			.isThrownBy(() -> expr.getValue(eContext))
 			.isNotInstanceOf(SpelEvaluationException.class);
 		// A problem occurred whilst attempting to construct an object of type

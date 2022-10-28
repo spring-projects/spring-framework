@@ -38,7 +38,7 @@ public class BeanWrapperAutoGrowingTests {
 
 
 	@BeforeEach
-	public void setUp() {
+	public void setup() {
 		wrapper.setAutoGrowNestedPaths(true);
 	}
 

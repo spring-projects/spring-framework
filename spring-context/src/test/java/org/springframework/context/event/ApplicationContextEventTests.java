@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executor;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.jupiter.api.Test;
@@ -53,7 +52,7 @@ import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
@@ -141,12 +140,9 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
 
 		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
-		smc.setTaskExecutor(new Executor() {
-			@Override
-			public void execute(Runnable command) {
-				command.run();
-				command.run();
-			}
+		smc.setTaskExecutor(command -> {
+			command.run();
+			command.run();
 		});
 		smc.addApplicationListener(listener);
 
@@ -165,8 +161,8 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		RuntimeException thrown = new RuntimeException();
 		willThrow(thrown).given(listener).onApplicationEvent(evt);
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
-				smc.multicastEvent(evt))
+		assertThatRuntimeException()
+			.isThrownBy(() -> smc.multicastEvent(evt))
 			.satisfies(ex -> assertThat(ex).isSameAs(thrown));
 	}
 
@@ -429,12 +425,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	public void anonymousClassAsListener() {
 		final Set<MyEvent> seenEvents = new HashSet<>();
 		StaticApplicationContext context = new StaticApplicationContext();
-		context.addApplicationListener(new ApplicationListener<MyEvent>() {
-			@Override
-			public void onApplicationEvent(MyEvent event) {
-				seenEvents.add(event);
-			}
-		});
+		context.addApplicationListener((MyEvent event) -> seenEvents.add(event));
 		context.refresh();
 
 		MyEvent event1 = new MyEvent(context);

@@ -235,7 +235,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	 * {@code CacheResolver} from a custom {@code CacheResolver} implementation so we have to
 	 * fall back on the {@code CacheManager}.
 	 * <p>This gives this weird situation of a perfectly valid configuration that breaks all
-	 * the sudden because the JCache support is enabled. To avoid this we resolve the default
+	 * of a sudden because the JCache support is enabled. To avoid this we resolve the default
 	 * exception {@code CacheResolver} as late as possible to avoid such hard requirement
 	 * in other cases.
 	 */

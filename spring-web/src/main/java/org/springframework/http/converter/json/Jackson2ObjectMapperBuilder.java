@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,13 +55,12 @@ import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
 import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import org.apache.commons.logging.Log;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.KotlinDetector;
-import org.springframework.http.HttpLogging;
+import org.springframework.http.ProblemDetail;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -85,9 +84,7 @@ import org.springframework.util.xml.StaxUtils;
  * <li><a href="https://github.com/FasterXML/jackson-datatype-jdk8">jackson-datatype-jdk8</a>:
  * support for other Java 8 types like {@link java.util.Optional}</li>
  * <li><a href="https://github.com/FasterXML/jackson-datatype-jsr310">jackson-datatype-jsr310</a>:
- * support for Java 8 Date & Time API types</li>
- * <li><a href="https://github.com/FasterXML/jackson-datatype-joda">jackson-datatype-joda</a>:
- * support for Joda-Time types</li>
+ * support for Java 8 Date &amp; Time API types</li>
  * <li><a href="https://github.com/FasterXML/jackson-module-kotlin">jackson-module-kotlin</a>:
  * support for Kotlin classes and data classes</li>
  * </ul>
@@ -104,10 +101,6 @@ import org.springframework.util.xml.StaxUtils;
  * @see Jackson2ObjectMapperFactoryBean
  */
 public class Jackson2ObjectMapperBuilder {
-
-	private static volatile boolean kotlinWarningLogged;
-
-	private final Log logger = HttpLogging.forLogName(getClass());
 
 	private final Map<Class<?>, Class<?>> mixIns = new LinkedHashMap<>();
 
@@ -527,7 +520,7 @@ public class Jackson2ObjectMapperBuilder {
 	}
 
 	/**
-	 * Specify one or more modules to be registered with the {@link ObjectMapper}.
+	 * Specify the modules to be registered with the {@link ObjectMapper}.
 	 * <p>Multiple invocations are not additive, the last one defines the modules to
 	 * register.
 	 * <p>Note: If this is set, no finding of modules is going to happen - not by
@@ -544,21 +537,31 @@ public class Jackson2ObjectMapperBuilder {
 	}
 
 	/**
-	 * Set a complete list of modules to be registered with the {@link ObjectMapper}.
-	 * <p>Multiple invocations are not additive, the last one defines the modules to
-	 * register.
-	 * <p>Note: If this is set, no finding of modules is going to happen - not by
-	 * Jackson, and not by Spring either (see {@link #findModulesViaServiceLoader}).
-	 * As a consequence, specifying an empty list here will suppress any kind of
-	 * module detection.
-	 * <p>Specify either this or {@link #modulesToInstall}, not both.
+	 * Variant of {@link #modules(Module...)} with a {@link List}.
 	 * @see #modules(Module...)
+	 * @see #modules(Consumer)
 	 * @see com.fasterxml.jackson.databind.Module
 	 */
 	public Jackson2ObjectMapperBuilder modules(List<Module> modules) {
 		this.modules = new ArrayList<>(modules);
 		this.findModulesViaServiceLoader = false;
 		this.findWellKnownModules = false;
+		return this;
+	}
+
+	/**
+	 * Variant of {@link #modules(Module...)} with a {@link Consumer} for full
+	 * control over the underlying list of modules.
+	 * @since 5.3.22
+	 * @see #modules(Module...)
+	 * @see #modules(List)
+	 * @see com.fasterxml.jackson.databind.Module
+	 */
+	public Jackson2ObjectMapperBuilder modules(Consumer<List<Module>> consumer) {
+		this.modules = (this.modules != null ? this.modules : new ArrayList<>());
+		this.findModulesViaServiceLoader = false;
+		this.findWellKnownModules = false;
+		consumer.accept(this.modules);
 		return this;
 	}
 
@@ -572,12 +575,28 @@ public class Jackson2ObjectMapperBuilder {
 	 * allowing to eventually override their configuration.
 	 * <p>Specify either this or {@link #modules(Module...)}, not both.
 	 * @since 4.1.5
+	 * @see #modulesToInstall(Consumer)
 	 * @see #modulesToInstall(Class...)
 	 * @see com.fasterxml.jackson.databind.Module
 	 */
 	public Jackson2ObjectMapperBuilder modulesToInstall(Module... modules) {
 		this.modules = Arrays.asList(modules);
 		this.findWellKnownModules = true;
+		return this;
+	}
+
+	/**
+	 * Variant of {@link #modulesToInstall(Module...)} with a {@link Consumer}
+	 * for full control over the underlying list of modules.
+	 * @since 5.3.22
+	 * @see #modulesToInstall(Module...)
+	 * @see #modulesToInstall(Class...)
+	 * @see com.fasterxml.jackson.databind.Module
+	 */
+	public Jackson2ObjectMapperBuilder modulesToInstall(Consumer<List<Module>> consumer) {
+		this.modules = (this.modules != null ? this.modules : new ArrayList<>());
+		this.findWellKnownModules = true;
+		consumer.accept(this.modules);
 		return this;
 	}
 
@@ -592,6 +611,7 @@ public class Jackson2ObjectMapperBuilder {
 	 * allowing to eventually override their configuration.
 	 * <p>Specify either this or {@link #modules(Module...)}, not both.
 	 * @see #modulesToInstall(Module...)
+	 * @see #modulesToInstall(Consumer)
 	 * @see com.fasterxml.jackson.databind.Module
 	 */
 	@SafeVarargs
@@ -738,6 +758,7 @@ public class Jackson2ObjectMapperBuilder {
 			objectMapper.setFilterProvider(this.filters);
 		}
 
+		objectMapper.addMixIn(ProblemDetail.class, ProblemDetailJacksonMixin.class);
 		this.mixIns.forEach(objectMapper::addMixIn);
 
 		if (!this.serializers.isEmpty() || !this.deserializers.isEmpty()) {
@@ -798,6 +819,7 @@ public class Jackson2ObjectMapperBuilder {
 				module.addDeserializer((Class<T>) type, (JsonDeserializer<? extends T>) deserializer));
 	}
 
+	@SuppressWarnings("deprecation")  // on Jackson 2.13: configure(MapperFeature, boolean)
 	private void configureFeature(ObjectMapper objectMapper, Object feature, boolean enabled) {
 		if (feature instanceof JsonParser.Feature) {
 			objectMapper.configure((JsonParser.Feature) feature, enabled);
@@ -841,19 +863,6 @@ public class Jackson2ObjectMapperBuilder {
 			// jackson-datatype-jsr310 not available
 		}
 
-		// Joda-Time 2.x present?
-		if (ClassUtils.isPresent("org.joda.time.YearMonth", this.moduleClassLoader)) {
-			try {
-				Class<? extends Module> jodaModuleClass = (Class<? extends Module>)
-						ClassUtils.forName("com.fasterxml.jackson.datatype.joda.JodaModule", this.moduleClassLoader);
-				Module jodaModule = BeanUtils.instantiateClass(jodaModuleClass);
-				modulesToRegister.set(jodaModule.getTypeId(), jodaModule);
-			}
-			catch (ClassNotFoundException ex) {
-				// jackson-datatype-joda not available
-			}
-		}
-
 		// Kotlin present?
 		if (KotlinDetector.isKotlinPresent()) {
 			try {
@@ -863,11 +872,7 @@ public class Jackson2ObjectMapperBuilder {
 				modulesToRegister.set(kotlinModule.getTypeId(), kotlinModule);
 			}
 			catch (ClassNotFoundException ex) {
-				if (!kotlinWarningLogged) {
-					kotlinWarningLogged = true;
-					logger.warn("For Jackson Kotlin classes support please add " +
-							"\"com.fasterxml.jackson.module:jackson-module-kotlin\" to the classpath");
-				}
+				// jackson-module-kotlin not available
 			}
 		}
 	}

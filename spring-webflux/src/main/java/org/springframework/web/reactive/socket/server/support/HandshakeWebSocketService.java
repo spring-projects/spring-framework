@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,19 +70,19 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 
 	private static final boolean jettyPresent;
 
-	private static final boolean jetty10Present;
-
 	private static final boolean undertowPresent;
 
 	private static final boolean reactorNettyPresent;
 
+	private static final boolean reactorNetty2Present;
+
 	static {
 		ClassLoader loader = HandshakeWebSocketService.class.getClassLoader();
 		tomcatPresent = ClassUtils.isPresent("org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", loader);
-		jettyPresent = ClassUtils.isPresent("org.eclipse.jetty.websocket.server.WebSocketServerFactory", loader);
-		jetty10Present = ClassUtils.isPresent("org.eclipse.jetty.websocket.server.JettyWebSocketServerContainer", loader);
+		jettyPresent = ClassUtils.isPresent("org.eclipse.jetty.websocket.server.JettyWebSocketServerContainer", loader);
 		undertowPresent = ClassUtils.isPresent("io.undertow.websockets.WebSocketProtocolHandshakeHandler", loader);
 		reactorNettyPresent = ClassUtils.isPresent("reactor.netty.http.server.HttpServerResponse", loader);
+		reactorNetty2Present = ClassUtils.isPresent("reactor.netty5.http.server.HttpServerResponse", loader);
 	}
 
 
@@ -114,7 +114,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		this.upgradeStrategy = upgradeStrategy;
 	}
 
-	private static RequestUpgradeStrategy initUpgradeStrategy() {
+	static RequestUpgradeStrategy initUpgradeStrategy() {
 		String className;
 		if (tomcatPresent) {
 			className = "TomcatRequestUpgradeStrategy";
@@ -122,15 +122,16 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		else if (jettyPresent) {
 			className = "JettyRequestUpgradeStrategy";
 		}
-		else if (jetty10Present) {
-			className = "Jetty10RequestUpgradeStrategy";
-		}
 		else if (undertowPresent) {
 			className = "UndertowRequestUpgradeStrategy";
 		}
 		else if (reactorNettyPresent) {
 			// As late as possible (Reactor Netty commonly used for WebClient)
 			className = "ReactorNettyRequestUpgradeStrategy";
+		}
+		else if (reactorNetty2Present) {
+			// As late as possible (Reactor Netty commonly used for WebClient)
+			className = "ReactorNetty2RequestUpgradeStrategy";
 		}
 		else {
 			throw new IllegalStateException("No suitable default RequestUpgradeStrategy found");
@@ -220,7 +221,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 
 		if (HttpMethod.GET != method) {
 			return Mono.error(new MethodNotAllowedException(
-					request.getMethodValue(), Collections.singleton(HttpMethod.GET)));
+					request.getMethod(), Collections.singleton(HttpMethod.GET)));
 		}
 
 		if (!"WebSocket".equalsIgnoreCase(headers.getUpgrade())) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElements;
-import javax.xml.bind.annotation.XmlRootElement;
-
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElements;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -71,8 +70,8 @@ public class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> 
 		Mono<Pojo> input = Mono.just(new Pojo("foofoo", "barbar"));
 
 		testEncode(input, Pojo.class, step -> step
-				.consumeNextWith(
-						expectXml("<?xml version='1.0' encoding='UTF-8' standalone='yes'?>" +
+				.consumeNextWith(expectXml(
+						"<?xml version='1.0' encoding='UTF-8' standalone='yes'?>" +
 								"<pojo><bar>barbar</bar><foo>foofoo</foo></pojo>"))
 				.verifyComplete());
 	}
@@ -80,10 +79,7 @@ public class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> 
 	@Test
 	public void encodeError() {
 		Flux<Pojo> input = Flux.error(RuntimeException::new);
-
-		testEncode(input, Pojo.class, step -> step
-				.expectError(RuntimeException.class)
-				.verify());
+		testEncode(input, Pojo.class, step -> step.expectError(RuntimeException.class).verify());
 	}
 
 	@Test
@@ -91,9 +87,11 @@ public class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> 
 		Mono<Container> input = Mono.just(new Container());
 
 		testEncode(input, Pojo.class, step -> step
-				.consumeNextWith(
-						expectXml("<?xml version='1.0' encoding='UTF-8' standalone='yes'?>" +
-								"<container><foo><name>name1</name></foo><bar><title>title1</title></bar></container>"))
+				.consumeNextWith(expectXml(
+						"<?xml version='1.0' encoding='UTF-8' standalone='yes'?>" +
+								"<container>" +
+								"<foo><name>name1</name></foo><bar><title>title1</title></bar>" +
+								"</container>"))
 				.verifyComplete());
 	}
 

@@ -57,11 +57,11 @@ The `MethodMatcher` interface is normally more important. The complete interface
 ----
 	public interface MethodMatcher {
 
-		boolean matches(Method m, Class targetClass);
+		boolean matches(Method m, Class<?> targetClass);
 
 		boolean isRuntime();
 
-		boolean matches(Method m, Class targetClass, Object[] args);
+		boolean matches(Method m, Class<?> targetClass, Object... args);
 	}
 ----
 
@@ -1637,7 +1637,7 @@ The following listing shows an example configuration:
 
 Note that the target object (`businessObjectTarget` in the preceding example) must be a
 prototype. This lets the `PoolingTargetSource` implementation create new instances
-of the target to grow the pool as necessary. See the {api-spring-framework}aop/target/AbstractPoolingTargetSource.html[javadoc of
+of the target to grow the pool as necessary. See the {api-spring-framework}/aop/target/AbstractPoolingTargetSource.html[javadoc of
 `AbstractPoolingTargetSource`] and the concrete subclass you wish to use for information
 about its properties. `maxSize` is the most basic and is always guaranteed to be present.
 

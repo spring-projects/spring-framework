@@ -1,7 +1,5 @@
 [[webtestclient]]
 = WebTestClient
-:doc-root: https://docs.spring.io
-:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 
 `WebTestClient` is an HTTP client designed for testing server applications. It wraps
 Spring's <<web-reactive.adoc#webflux-client, WebClient>> and uses it to perform requests
@@ -47,7 +45,7 @@ to handle requests:
 ----
 
 For Spring MVC, use the following which delegates to the
-{api-spring-framework}/https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/test/web/servlet/setup/StandaloneMockMvcBuilder.html[StandaloneMockMvcBuilder]
+{api-spring-framework}/test/web/servlet/setup/StandaloneMockMvcBuilder.html[StandaloneMockMvcBuilder]
 to load infrastructure equivalent to the <<web.adoc#mvc-config, WebMvc Java config>>,
 registers the given controller(s), and creates an instance of
 <<testing.adoc#spring-mvc-test-framework, MockMvc>> to handle requests:
@@ -264,19 +262,36 @@ To assert the response status and headers, use the following:
 .Java
 ----
 	client.get().uri("/persons/1")
-				.accept(MediaType.APPLICATION_JSON)
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader().contentType(MediaType.APPLICATION_JSON)
+		.accept(MediaType.APPLICATION_JSON)
+		.exchange()
+		.expectStatus().isOk()
+		.expectHeader().contentType(MediaType.APPLICATION_JSON);
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	client.get().uri("/persons/1")
-			.accept(MediaType.APPLICATION_JSON)
-			.exchange()
-			.expectStatus().isOk()
-			.expectHeader().contentType(MediaType.APPLICATION_JSON)
+		.accept(MediaType.APPLICATION_JSON)
+		.exchange()
+		.expectStatus().isOk()
+		.expectHeader().contentType(MediaType.APPLICATION_JSON)
+----
+
+If you would like for all expectations to be asserted even if one of them fails, you can
+use `expectAll(..)` instead of multiple chained `expect*(..)` calls. This feature is
+similar to the _soft assertions_ support in AssertJ and the `assertAll()` support in
+JUnit Jupiter.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	client.get().uri("/persons/1")
+		.accept(MediaType.APPLICATION_JSON)
+		.exchange()
+		.expectAll(
+			spec -> spec.expectStatus().isOk(),
+			spec -> spec.expectHeader().contentType(MediaType.APPLICATION_JSON)
+		);
 ----
 
 You can then choose to decode the response body through one of the following:

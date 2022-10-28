@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,32 +144,32 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 	private int getValueHashCode(Object value) {
 		// Use Arrays.hashCode(...) since Spring's ObjectUtils doesn't comply
 		// with the requirements specified in Annotation#hashCode().
-		if (value instanceof boolean[]) {
-			return Arrays.hashCode((boolean[]) value);
+		if (value instanceof boolean[] booleans) {
+			return Arrays.hashCode(booleans);
 		}
-		if (value instanceof byte[]) {
-			return Arrays.hashCode((byte[]) value);
+		if (value instanceof byte[] bytes) {
+			return Arrays.hashCode(bytes);
 		}
-		if (value instanceof char[]) {
-			return Arrays.hashCode((char[]) value);
+		if (value instanceof char[] chars) {
+			return Arrays.hashCode(chars);
 		}
-		if (value instanceof double[]) {
-			return Arrays.hashCode((double[]) value);
+		if (value instanceof double[] doubles) {
+			return Arrays.hashCode(doubles);
 		}
-		if (value instanceof float[]) {
-			return Arrays.hashCode((float[]) value);
+		if (value instanceof float[] floats) {
+			return Arrays.hashCode(floats);
 		}
-		if (value instanceof int[]) {
-			return Arrays.hashCode((int[]) value);
+		if (value instanceof int[] ints) {
+			return Arrays.hashCode(ints);
 		}
-		if (value instanceof long[]) {
-			return Arrays.hashCode((long[]) value);
+		if (value instanceof long[] longs) {
+			return Arrays.hashCode(longs);
 		}
-		if (value instanceof short[]) {
-			return Arrays.hashCode((short[]) value);
+		if (value instanceof short[] shorts) {
+			return Arrays.hashCode(shorts);
 		}
-		if (value instanceof Object[]) {
-			return Arrays.hashCode((Object[]) value);
+		if (value instanceof Object[] objects) {
+			return Arrays.hashCode(objects);
 		}
 		return value.hashCode();
 	}
@@ -177,36 +177,70 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 	private String annotationToString() {
 		String string = this.string;
 		if (string == null) {
-			StringBuilder builder = new StringBuilder("@").append(this.type.getName()).append("(");
+			StringBuilder builder = new StringBuilder("@").append(getName(this.type)).append('(');
 			for (int i = 0; i < this.attributes.size(); i++) {
 				Method attribute = this.attributes.get(i);
 				if (i > 0) {
 					builder.append(", ");
 				}
 				builder.append(attribute.getName());
-				builder.append("=");
+				builder.append('=');
 				builder.append(toString(getAttributeValue(attribute)));
 			}
-			builder.append(")");
+			builder.append(')');
 			string = builder.toString();
 			this.string = string;
 		}
 		return string;
 	}
 
+	/**
+	 * This method currently does not address the following issues which we may
+	 * choose to address at a later point in time.
+	 *
+	 * <ul>
+	 * <li>non-ASCII, non-visible, and non-printable characters within a character
+	 * or String literal are not escaped.</li>
+	 * <li>formatting for float and double values does not take into account whether
+	 * a value is not a number (NaN) or infinite.</li>
+	 * </ul>
+	 * @param value the attribute value to format
+	 * @return the formatted string representation
+	 */
 	private String toString(Object value) {
-		if (value instanceof Class) {
-			return ((Class<?>) value).getName();
+		if (value instanceof String str) {
+			return '"' + str + '"';
+		}
+		if (value instanceof Character) {
+			return '\'' + value.toString() + '\'';
+		}
+		if (value instanceof Byte) {
+			return String.format("(byte) 0x%02X", value);
+		}
+		if (value instanceof Long longValue) {
+			return Long.toString(longValue) + 'L';
+		}
+		if (value instanceof Float floatValue) {
+			return Float.toString(floatValue) + 'f';
+		}
+		if (value instanceof Double doubleValue) {
+			return Double.toString(doubleValue) + 'd';
+		}
+		if (value instanceof Enum<?> e) {
+			return e.name();
+		}
+		if (value instanceof Class<?> clazz) {
+			return getName(clazz) + ".class";
 		}
 		if (value.getClass().isArray()) {
-			StringBuilder builder = new StringBuilder("[");
+			StringBuilder builder = new StringBuilder("{");
 			for (int i = 0; i < Array.getLength(value); i++) {
 				if (i > 0) {
 					builder.append(", ");
 				}
 				builder.append(toString(Array.get(value, i)));
 			}
-			builder.append("]");
+			builder.append('}');
 			return builder.toString();
 		}
 		return String.valueOf(value);
@@ -233,29 +267,29 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 	 * @param array the array to clone
 	 */
 	private Object cloneArray(Object array) {
-		if (array instanceof boolean[]) {
-			return ((boolean[]) array).clone();
+		if (array instanceof boolean[] booleans) {
+			return booleans.clone();
 		}
-		if (array instanceof byte[]) {
-			return ((byte[]) array).clone();
+		if (array instanceof byte[] bytes) {
+			return bytes.clone();
 		}
-		if (array instanceof char[]) {
-			return ((char[]) array).clone();
+		if (array instanceof char[] chars) {
+			return chars.clone();
 		}
-		if (array instanceof double[]) {
-			return ((double[]) array).clone();
+		if (array instanceof double[] doubles) {
+			return doubles.clone();
 		}
-		if (array instanceof float[]) {
-			return ((float[]) array).clone();
+		if (array instanceof float[] floats) {
+			return floats.clone();
 		}
-		if (array instanceof int[]) {
-			return ((int[]) array).clone();
+		if (array instanceof int[] ints) {
+			return ints.clone();
 		}
-		if (array instanceof long[]) {
-			return ((long[]) array).clone();
+		if (array instanceof long[] longs) {
+			return longs.clone();
 		}
-		if (array instanceof short[]) {
-			return ((short[]) array).clone();
+		if (array instanceof short[] shorts) {
+			return shorts.clone();
 		}
 
 		// else
@@ -265,23 +299,14 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 	@SuppressWarnings("unchecked")
 	static <A extends Annotation> A createProxy(MergedAnnotation<A> annotation, Class<A> type) {
 		ClassLoader classLoader = type.getClassLoader();
+		Class<?>[] interfaces = new Class<?>[] {type};
 		InvocationHandler handler = new SynthesizedMergedAnnotationInvocationHandler<>(annotation, type);
-		Class<?>[] interfaces = isVisible(classLoader, SynthesizedAnnotation.class) ?
-				new Class<?>[] {type, SynthesizedAnnotation.class} : new Class<?>[] {type};
 		return (A) Proxy.newProxyInstance(classLoader, interfaces, handler);
 	}
 
-
-	private static boolean isVisible(ClassLoader classLoader, Class<?> interfaceClass) {
-		if (classLoader == interfaceClass.getClassLoader()) {
-			return true;
-		}
-		try {
-			return Class.forName(interfaceClass.getName(), false, classLoader) == interfaceClass;
-		}
-		catch (ClassNotFoundException ex) {
-			return false;
-		}
+	private static String getName(Class<?> clazz) {
+		String canonicalName = clazz.getCanonicalName();
+		return (canonicalName != null ? canonicalName : clazz.getName());
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,16 +49,12 @@ public class HeuristicCompletionException extends TransactionException {
 
 
 	public static String getStateString(int state) {
-		switch (state) {
-			case STATE_COMMITTED:
-				return "committed";
-			case STATE_ROLLED_BACK:
-				return "rolled back";
-			case STATE_MIXED:
-				return "mixed";
-			default:
-				return "unknown";
-		}
+		return switch (state) {
+			case STATE_COMMITTED -> "committed";
+			case STATE_ROLLED_BACK -> "rolled back";
+			case STATE_MIXED -> "mixed";
+			default -> "unknown";
+		};
 	}
 
 

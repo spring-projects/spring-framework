@@ -63,7 +63,7 @@ class ResourceRegionEncoderTests extends AbstractLeakCheckingTests {
 	}
 
 	@Test
-	void shouldEncodeResourceRegionFileResource() throws Exception {
+	void shouldEncodeResourceRegionFileResource() {
 		ResourceRegion region = new ResourceRegion(
 				new ClassPathResource("ResourceRegionEncoderTests.txt", getClass()), 0, 6);
 		Flux<DataBuffer> result = this.encoder.encode(Mono.just(region), this.bufferFactory,

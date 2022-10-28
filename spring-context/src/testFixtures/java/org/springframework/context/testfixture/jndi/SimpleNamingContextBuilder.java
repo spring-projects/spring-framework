@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.util.ReflectionUtils;
  * configure JNDI appropriately, so that {@code new InitialContext()}
  * will expose the required objects. Also usable for standalone applications,
  * e.g. for binding a JDBC DataSource to a well-known JNDI location, to be
- * able to use traditional Java EE data access code outside of a Java EE
+ * able to use traditional Jakarta EE data access code outside a Jakarta EE
  * container.
  *
  * <p>There are various choices for DataSource implementations:
@@ -61,7 +61,7 @@ import org.springframework.util.ReflectionUtils;
  * builder.activate();</pre>
  *
  * Note that it's impossible to activate multiple builders within the same JVM,
- * due to JNDI restrictions. Thus to configure a fresh builder repeatedly, use
+ * due to JNDI restrictions. Thus, to configure a fresh builder repeatedly, use
  * the following code to get a reference to either an already activated builder
  * or a newly activated one:
  *
@@ -108,7 +108,7 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 
 	/**
 	 * If no SimpleNamingContextBuilder is already configuring JNDI,
-	 * create and activate one. Otherwise take the existing activated
+	 * create and activate one. Otherwise, take the existing activated
 	 * SimpleNamingContextBuilder, clear it and return it.
 	 * <p>This is mainly intended for test suites that want to
 	 * reinitialize JNDI bindings from scratch repeatedly.

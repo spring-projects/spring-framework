@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.reactive.awaitSingleOrNull
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.asFlux
 import kotlinx.coroutines.reactor.mono
 import org.reactivestreams.Publisher
@@ -92,6 +91,15 @@ suspend fun <T: Any> RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchange
 		exchangeToMono { mono(Dispatchers.Unconfined) { responseHandler.invoke(it) } }.awaitSingle()
 
 /**
+ * Variant of [WebClient.RequestHeadersSpec.awaitExchange] that allows a nullable return
+ *
+ * @since 5.3.8
+ */
+@Suppress("DEPRECATION")
+suspend fun <T: Any> RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchangeOrNull(responseHandler: suspend (ClientResponse) -> T?): T? =
+		exchangeToMono { mono(Dispatchers.Unconfined) { responseHandler.invoke(it) } }.awaitSingleOrNull()
+
+/**
  * Coroutines variant of [WebClient.RequestHeadersSpec.exchangeToFlux].
  *
  * @author Sebastien Deleuze
@@ -150,6 +158,7 @@ suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitBody() : T =
  * @author Valentin Shakhov
  * @since 5.3.6
  */
+@Suppress("DEPRECATION")
 suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitBodyOrNull() : T? =
 	when (T::class) {
 		Unit::class -> awaitBodilessEntity().let { Unit as T? }

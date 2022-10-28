@@ -2,7 +2,7 @@ anchors:
   git-repo-resource-source: &git-repo-resource-source
     uri: ((github-repo))
     username: ((github-username))
-    password: ((github-password))
+    password: ((github-ci-release-token))
     branch: ((branch))
   gradle-enterprise-task-params: &gradle-enterprise-task-params
     GRADLE_ENTERPRISE_ACCESS_KEY: ((gradle_enterprise_secret_access_key))
@@ -12,21 +12,22 @@ anchors:
     SONATYPE_USERNAME: ((sonatype-username))
     SONATYPE_PASSWORD: ((sonatype-password))
     SONATYPE_URL: ((sonatype-url))
-    SONATYPE_STAGING_PROFILE_ID: ((sonatype-staging-profile-id))
+    SONATYPE_STAGING_PROFILE: ((sonatype-staging-profile))
   artifactory-task-params: &artifactory-task-params
     ARTIFACTORY_SERVER: ((artifactory-server))
     ARTIFACTORY_USERNAME: ((artifactory-username))
     ARTIFACTORY_PASSWORD: ((artifactory-password))
   build-project-task-params: &build-project-task-params
-    privileged: true
-    timeout: ((task-timeout))
-    params:
       BRANCH: ((branch))
       <<: *gradle-enterprise-task-params
   docker-resource-source: &docker-resource-source
     username: ((docker-hub-username))
     password: ((docker-hub-password))
     tag: ((milestone))
+  registry-mirror-vars: &registry-mirror-vars
+    registry-mirror-host: ((registry-mirror-host))
+    registry-mirror-username: ((registry-mirror-username))
+    registry-mirror-password: ((registry-mirror-password))
   slack-fail-params: &slack-fail-params
     text: >
       :concourse-failed: <https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} failed!>
@@ -44,16 +45,31 @@ anchors:
     GITHUB_TOKEN: ((github-ci-release-token))
 
 resource_types:
+- name: registry-image
+  type: registry-image
+  source:
+    repository: concourse/registry-image-resource
+    tag: 1.5.0
 - name: artifactory-resource
   type: registry-image
   source:
     repository: springio/artifactory-resource
-    tag: 0.0.13
+    tag: 0.0.17
+- name: github-release
+  type: registry-image
+  source:
+    repository: concourse/github-release-resource
+    tag: 1.5.5
 - name: github-status-resource
   type: registry-image
   source:
     repository: dpb587/github-status-resource
     tag: master
+- name: pull-request
+  type: registry-image
+  source:
+    repository: teliaoss/github-pr-resource
+    tag: v0.23.0
 - name: slack-notification
   type: registry-image
   source:
@@ -65,13 +81,6 @@ resources:
   icon: github
   source:
     <<: *git-repo-resource-source
-- name: every-morning
-  type: time
-  icon: alarm
-  source:
-    start: 8:00 AM
-    stop: 9:00 AM
-    location: Europe/Vienna
 - name: ci-images-git-repo
   type: git
   icon: github
@@ -80,11 +89,18 @@ resources:
     branch: ((branch))
     paths: ["ci/images/*"]
 - name: ci-image
-  type: docker-image
+  type: registry-image
   icon: docker
   source:
     <<: *docker-resource-source
     repository: ((docker-hub-organization))/spring-framework-ci
+- name: every-morning
+  type: time
+  icon: alarm
+  source:
+    start: 8:00 AM
+    stop: 9:00 AM
+    location: Europe/Vienna
 - name: artifactory-repo
   type: artifactory-resource
   icon: package-variant
@@ -93,6 +109,14 @@ resources:
     username: ((artifactory-username))
     password: ((artifactory-password))
     build_name: ((build-name))
+- name: git-pull-request
+  type: pull-request
+  icon: source-pull
+  source:
+    access_token: ((github-ci-pull-request-token))
+    repository: ((github-repo-name))
+    base_branch: ((branch))
+    ignore_paths: ["ci/*"]
 - name: repo-status-build
   type: github-status-resource
   icon: eye-check-outline
@@ -101,22 +125,22 @@ resources:
     access_token: ((github-ci-status-token))
     branch: ((branch))
     context: build
-- name: repo-status-jdk11-build
+- name: repo-status-jdk18-build
   type: github-status-resource
   icon: eye-check-outline
   source:
     repository: ((github-repo-name))
     access_token: ((github-ci-status-token))
     branch: ((branch))
-    context: jdk11-build
-- name: repo-status-jdk15-build
+    context: jdk18-build
+- name: repo-status-jdk19-build
   type: github-status-resource
   icon: eye-check-outline
   source:
     repository: ((github-repo-name))
     access_token: ((github-ci-status-token))
     branch: ((branch))
-    context: jdk15-build
+    context: jdk19-build
 - name: slack-alert
   type: slack-notification
   icon: slack
@@ -142,13 +166,20 @@ resources:
 jobs:
 - name: build-ci-images
   plan:
-  - get: ci-images-git-repo
-    trigger: true
-  - in_parallel:
+    - get: git-repo
+    - get: ci-images-git-repo
+      trigger: true
+    - task: build-ci-image
+      privileged: true
+      file: git-repo/ci/tasks/build-ci-image.yml
+      output_mapping:
+        image: ci-image
+      vars:
+        ci-image-name: ci-image
+        <<: *registry-mirror-vars
     - put: ci-image
       params:
-        build: ci-images-git-repo/ci/images
-        dockerfile: ci-images-git-repo/ci/images/ci-image/Dockerfile
+        image: ci-image/image.tar
 - name: build
   serial: true
   public: true
@@ -162,7 +193,10 @@ jobs:
     - task: build-project
       image: ci-image
       file: git-repo/ci/tasks/build-project.yml
-      <<: *build-project-task-params
+      privileged: true
+      timeout: ((task-timeout))
+      params:
+        <<: *build-project-task-params
     on_failure:
       do:
       - put: repo-status-build
@@ -203,34 +237,7 @@ jobs:
           "zip.type": "schema"
     get_params:
       threads: 8
-- name: jdk11-build
-  serial: true
-  public: true
-  plan:
-  - get: ci-image
-  - get: git-repo
-  - get: every-morning
-    trigger: true
-  - put: repo-status-jdk11-build
-    params: { state: "pending", commit: "git-repo" }
-  - do:
-    - task: check-project
-      image: ci-image
-      file: git-repo/ci/tasks/check-project.yml
-      params:
-        MAIN_TOOLCHAIN: 8
-        TEST_TOOLCHAIN: 11
-      <<: *build-project-task-params
-    on_failure:
-      do:
-      - put: repo-status-jdk11-build
-        params: { state: "failure", commit: "git-repo" }
-      - put: slack-alert
-        params:
-          <<: *slack-fail-params
-  - put: repo-status-jdk11-build
-    params: { state: "success", commit: "git-repo" }
-- name: jdk15-build
+- name: jdk18-build
   serial: true
   public: true
   plan:
@@ -238,25 +245,85 @@ jobs:
     - get: git-repo
     - get: every-morning
       trigger: true
-    - put: repo-status-jdk15-build
+    - put: repo-status-jdk18-build
       params: { state: "pending", commit: "git-repo" }
     - do:
-      - task: check-project
-        image: ci-image
-        file: git-repo/ci/tasks/check-project.yml
-        params:
-          MAIN_TOOLCHAIN: 8
-          TEST_TOOLCHAIN: 15
-        <<: *build-project-task-params
+        - task: check-project
+          image: ci-image
+          file: git-repo/ci/tasks/check-project.yml
+          privileged: true
+          timeout: ((task-timeout))
+          params:
+            TEST_TOOLCHAIN: 18
+            <<: *build-project-task-params
       on_failure:
         do:
-          - put: repo-status-jdk15-build
+          - put: repo-status-jdk18-build
             params: { state: "failure", commit: "git-repo" }
           - put: slack-alert
             params:
               <<: *slack-fail-params
-    - put: repo-status-jdk15-build
+    - put: repo-status-jdk18-build
       params: { state: "success", commit: "git-repo" }
+- name: jdk19-build
+  serial: true
+  public: true
+  plan:
+    - get: ci-image
+    - get: git-repo
+    - get: every-morning
+      trigger: true
+    - put: repo-status-jdk19-build
+      params: { state: "pending", commit: "git-repo" }
+    - do:
+        - task: check-project
+          image: ci-image
+          file: git-repo/ci/tasks/check-project.yml
+          privileged: true
+          timeout: ((task-timeout))
+          params:
+            TEST_TOOLCHAIN: 19
+            <<: *build-project-task-params
+      on_failure:
+        do:
+          - put: repo-status-jdk19-build
+            params: { state: "failure", commit: "git-repo" }
+          - put: slack-alert
+            params:
+              <<: *slack-fail-params
+    - put: repo-status-jdk19-build
+      params: { state: "success", commit: "git-repo" }
+- name: build-pull-requests
+  serial: true
+  public: true
+  plan:
+    - get: ci-image
+    - get: git-repo
+      resource: git-pull-request
+      trigger: true
+      version: every
+    - do:
+      - put: git-pull-request
+        params:
+          path: git-repo
+          status: pending
+      - task: build-pr
+        image: ci-image
+        file: git-repo/ci/tasks/build-pr.yml
+        privileged: true
+        timeout: ((task-timeout))
+        params:
+          BRANCH: ((branch))
+      on_success:
+        put: git-pull-request
+        params:
+          path: git-repo
+          status: success
+      on_failure:
+        put: git-pull-request
+        params:
+          path: git-repo
+          status: failure
 - name: stage-milestone
   serial: true
   plan:
@@ -289,7 +356,6 @@ jobs:
         download_artifacts: false
         save_build_info: true
     - task: promote
-      image: ci-image
       file: git-repo/ci/tasks/promote-version.yml
       params:
         RELEASE_TYPE: M
@@ -334,7 +400,6 @@ jobs:
         download_artifacts: false
         save_build_info: true
     - task: promote
-      image: ci-image
       file: git-repo/ci/tasks/promote-version.yml
       params:
         RELEASE_TYPE: RC
@@ -379,7 +444,6 @@ jobs:
         download_artifacts: true
         save_build_info: true
     - task: promote
-      image: ci-image
       file: git-repo/ci/tasks/promote-version.yml
       params:
         RELEASE_TYPE: RELEASE
@@ -407,8 +471,10 @@ jobs:
 
 groups:
 - name: "builds"
-  jobs: ["build", "jdk11-build", "jdk15-build"]
+  jobs: ["build", "jdk18-build", "jdk19-build"]
 - name: "releases"
   jobs: ["stage-milestone", "stage-rc", "stage-release", "promote-milestone", "promote-rc", "promote-release", "create-github-release"]
 - name: "ci-images"
   jobs: ["build-ci-images"]
+- name: "pull-requests"
+  jobs: [ "build-pull-requests" ]

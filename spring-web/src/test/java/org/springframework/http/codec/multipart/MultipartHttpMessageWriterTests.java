@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -105,7 +106,7 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 		FilePart mockPart = mock(FilePart.class);
 		HttpHeaders partHeaders = new HttpHeaders();
 		partHeaders.setContentType(MediaType.TEXT_PLAIN);
-		partHeaders.setContentDispositionFormData("filePublisher", "file.txt");
+		partHeaders.setContentDispositionFormData("foo", "file.txt");
 		partHeaders.add("foo", "bar");
 		given(mockPart.headers()).willReturn(partHeaders);
 		given(mockPart.content()).willReturn(bufferPublisher);
@@ -159,17 +160,20 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 		assertThat(part.headers().getContentLength()).isEqualTo(utf8.getFile().length());
 
 		part = requestParts.getFirst("json");
+		assertThat(part).isNotNull();
 		assertThat(part.name()).isEqualTo("json");
 		assertThat(part.headers().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
 		String value = decodeToString(part);
 		assertThat(value).isEqualTo("{\"bar\":\"bar\"}");
 
 		part = requestParts.getFirst("publisher");
+		assertThat(part).isNotNull();
 		assertThat(part.name()).isEqualTo("publisher");
 		value = decodeToString(part);
 		assertThat(value).isEqualTo("foobarbaz");
 
 		part = requestParts.getFirst("filePublisher");
+		assertThat(part).isNotNull();
 		assertThat(part.name()).isEqualTo("filePublisher");
 		assertThat(part.headers()).containsEntry("foo", Collections.singletonList("bar"));
 		assertThat(((FilePart) part).filename()).isEqualTo("file.txt");
@@ -177,9 +181,8 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 		assertThat(value).isEqualTo("AaBbCc");
 	}
 
-	@Test // gh-24582
+	@Test  // gh-24582
 	public void writeMultipartRelated() {
-
 		MediaType mediaType = MediaType.parseMediaType("multipart/related;type=foo");
 
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
@@ -238,12 +241,13 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 
 	@Test // SPR-16402
 	public void singleSubscriberWithStrings() {
-		@SuppressWarnings("deprecation")
-		reactor.core.publisher.UnicastProcessor<String> processor = reactor.core.publisher.UnicastProcessor.create();
-		Flux.just("foo", "bar", "baz").subscribe(processor);
+		AtomicBoolean subscribed = new AtomicBoolean();
+		Flux<String> publisher = Flux.just("foo", "bar", "baz")
+				.doOnSubscribe(subscription ->
+						assertThat(subscribed.compareAndSet(false, true)).isTrue());
 
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
-		bodyBuilder.asyncPart("name", processor, String.class);
+		bodyBuilder.asyncPart("name", publisher, String.class);
 
 		Mono<MultiValueMap<String, HttpEntity<?>>> result = Mono.just(bodyBuilder.build());
 
@@ -294,9 +298,9 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 		MediaType contentType = response.getHeaders().getContentType();
 		assertThat(contentType.getParameter("boundary")).as("No boundary found").isNotNull();
 
-		// see if Synchronoss NIO Multipart can read what we wrote
-		SynchronossPartHttpMessageReader synchronossReader = new SynchronossPartHttpMessageReader();
-		MultipartHttpMessageReader reader = new MultipartHttpMessageReader(synchronossReader);
+		// see if we can read what we wrote
+		DefaultPartHttpMessageReader partReader = new DefaultPartHttpMessageReader();
+		MultipartHttpMessageReader reader = new MultipartHttpMessageReader(partReader);
 
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")
 				.contentType(MediaType.parseMediaType(contentType.toString()))

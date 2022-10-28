@@ -18,8 +18,8 @@ package org.springframework.web.servlet.handler;
 
 import java.util.Arrays;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.server.PathContainer;
 import org.springframework.lang.Nullable;
@@ -48,7 +48,7 @@ import org.springframework.web.util.pattern.PatternParseException;
  * parsed} {@code RequestPath} which in turn depends on the
  * {@link HandlerMapping} that matched the current request.
  *
- * <p>{@code MappedInterceptor} is supported by sub-classes of
+ * <p>{@code MappedInterceptor} is supported by subclasses of
  * {@link org.springframework.web.servlet.handler.AbstractHandlerMethodMapping
  * AbstractHandlerMethodMapping} which detect beans of type
  * {@code MappedInterceptor} and also check if interceptors directly registered

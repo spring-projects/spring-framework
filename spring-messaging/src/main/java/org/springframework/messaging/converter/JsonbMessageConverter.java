@@ -21,20 +21,20 @@ import java.io.Writer;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.json.bind.JsonbConfig;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
+import jakarta.json.bind.JsonbConfig;
 
 import org.springframework.util.Assert;
 
 /**
  * Implementation of {@link MessageConverter} that can read and write JSON
- * using the <a href="http://json-b.net/">JSON Binding API</a>.
+ * using the <a href="https://javaee.github.io/jsonb-spec/">JSON Binding API</a>.
  *
  * @author Juergen Hoeller
  * @since 5.3
- * @see javax.json.bind.Jsonb
- * @see javax.json.bind.JsonbBuilder
+ * @see jakarta.json.bind.Jsonb
+ * @see jakarta.json.bind.JsonbBuilder
  * @see #setJsonb
  */
 public class JsonbMessageConverter extends AbstractJsonMessageConverter {

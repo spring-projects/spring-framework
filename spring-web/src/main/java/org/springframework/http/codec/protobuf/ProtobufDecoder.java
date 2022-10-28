@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,7 +151,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 
 		try {
 			Message.Builder builder = getMessageBuilder(targetType.toClass());
-			ByteBuffer buffer = dataBuffer.asByteBuffer();
+			ByteBuffer buffer = dataBuffer.toByteBuffer();
 			builder.mergeFrom(CodedInputStream.newInstance(buffer), this.extensionRegistry);
 			return builder.build();
 		}
@@ -236,7 +236,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 					this.messageBytesToRead -= chunkBytesToRead;
 
 					if (this.messageBytesToRead == 0) {
-						CodedInputStream stream = CodedInputStream.newInstance(this.output.asByteBuffer());
+						CodedInputStream stream = CodedInputStream.newInstance(this.output.toByteBuffer());
 						DataBufferUtils.release(this.output);
 						this.output = null;
 						Message message = getMessageBuilder(this.elementType.toClass())
@@ -265,7 +265,6 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 		 * Parse message size as a varint from the input stream, updating {@code messageBytesToRead} and
 		 * {@code offset} fields if needed to allow processing of upcoming chunks.
 		 * Inspired from {@link CodedInputStream#readRawVarint32(int, java.io.InputStream)}
-		 *
 		 * @return {code true} when the message size is parsed successfully, {code false} when the message size is
 		 * truncated
 		 * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding#varints">Base 128 Varints</a>
@@ -290,7 +289,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 						return false;
 					}
 					final int b = input.read();
-					this.messageBytesToRead |= (b & 0x7f) << offset;
+					this.messageBytesToRead |= (b & 0x7f) << this.offset;
 					if ((b & 0x80) == 0) {
 						this.offset = 0;
 						return true;

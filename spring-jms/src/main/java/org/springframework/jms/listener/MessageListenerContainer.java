@@ -33,14 +33,14 @@ import org.springframework.lang.Nullable;
 public interface MessageListenerContainer extends SmartLifecycle {
 
 	/**
-	 * Setup the message listener to use. Throws an {@link IllegalArgumentException}
+	 * Set up the message listener to use. Throws an {@link IllegalArgumentException}
 	 * if that message listener type is not supported.
 	 */
 	void setupMessageListener(Object messageListener);
 
 	/**
 	 * Return the {@link MessageConverter} that can be used to
-	 * convert {@link javax.jms.Message}, if any.
+	 * convert {@link jakarta.jms.Message}, if any.
 	 */
 	@Nullable
 	MessageConverter getMessageConverter();
@@ -53,15 +53,15 @@ public interface MessageListenerContainer extends SmartLifecycle {
 	DestinationResolver getDestinationResolver();
 
 	/**
-	 * Return whether the Publish/Subscribe domain ({@link javax.jms.Topic Topics}) is used.
-	 * Otherwise, the Point-to-Point domain ({@link javax.jms.Queue Queues}) is used.
+	 * Return whether the Publish/Subscribe domain ({@link jakarta.jms.Topic Topics}) is used.
+	 * Otherwise, the Point-to-Point domain ({@link jakarta.jms.Queue Queues}) is used.
 	 */
 	boolean isPubSubDomain();
 
 	/**
 	 * Return whether the reply destination uses Publish/Subscribe domain
-	 * ({@link javax.jms.Topic Topics}). Otherwise, the Point-to-Point domain
-	 * ({@link javax.jms.Queue Queues}) is used.
+	 * ({@link jakarta.jms.Topic Topics}). Otherwise, the Point-to-Point domain
+	 * ({@link jakarta.jms.Queue Queues}) is used.
 	 * <p>By default, the value is identical to {@link #isPubSubDomain()}.
 	 */
 	boolean isReplyPubSubDomain();

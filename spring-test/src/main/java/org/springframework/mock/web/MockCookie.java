@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.time.DateTimeException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-import javax.servlet.http.Cookie;
+import jakarta.servlet.http.Cookie;
 
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
@@ -68,8 +68,8 @@ public class MockCookie extends Cookie {
 
 	/**
 	 * Get the "Expires" attribute for this cookie.
-	 * @since 5.1.11
 	 * @return the "Expires" attribute for this cookie, or {@code null} if not set
+	 * @since 5.1.11
 	 */
 	@Nullable
 	public ZonedDateTime getExpires() {
@@ -141,6 +141,9 @@ public class MockCookie extends Cookie {
 			}
 			else if (StringUtils.startsWithIgnoreCase(attribute, "SameSite")) {
 				cookie.setSameSite(extractAttributeValue(attribute, setCookieHeader));
+			}
+			else if (StringUtils.startsWithIgnoreCase(attribute, "Comment")) {
+				cookie.setComment(extractAttributeValue(attribute, setCookieHeader));
 			}
 		}
 		return cookie;

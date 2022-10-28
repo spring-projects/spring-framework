@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,8 +66,8 @@ public class NettyByteBufEncoder extends AbstractEncoder<ByteBuf> {
 			String logPrefix = Hints.getLogPrefix(hints);
 			logger.debug(logPrefix + "Writing " + byteBuf.readableBytes() + " bytes");
 		}
-		if (bufferFactory instanceof NettyDataBufferFactory) {
-			return ((NettyDataBufferFactory) bufferFactory).wrap(byteBuf);
+		if (bufferFactory instanceof NettyDataBufferFactory nettyDataBufferFactory) {
+			return nettyDataBufferFactory.wrap(byteBuf);
 		}
 		byte[] bytes = new byte[byteBuf.readableBytes()];
 		byteBuf.readBytes(bytes);

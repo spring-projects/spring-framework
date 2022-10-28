@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,9 +86,42 @@ class ContentDispositionTests {
 		assertThat(parse(input).getFilename()).isEqualTo("日本語.csv");
 	}
 
+	@Test
+	void parseBase64EncodedFilenameMultipleSegments() {
+		String input =
+				"attachment; filename=\"=?utf-8?B?U3ByaW5n5qGG5p625Li65Z+65LqOSmF2YeeahOeOsOS7o+S8geS4muW6lA==?= " +
+				"=?utf-8?B?55So56iL5bqP5o+Q5L6b5LqG5YWo6Z2i55qE57yW56iL5ZKM6YWN572u5qih?= " +
+				"=?utf-8?B?5Z6LLnR4dA==?=\"";
+		assertThat(parse(input).getFilename()).isEqualTo("Spring框架为基于Java的现代企业应用程序提供了全面的编程和配置模型.txt");
+	}
+
 	@Test // gh-26463
 	void parseBase64EncodedShiftJISFilename() {
 		String input = "attachment; filename=\"=?SHIFT_JIS?B?k/qWe4zqLmNzdg==?=\"";
+		assertThat(parse(input).getFilename()).isEqualTo("日本語.csv");
+	}
+
+	@Test
+	void parseQuotedPrintableFilename() {
+		String input = "attachment; filename=\"=?UTF-8?Q?=E6=97=A5=E6=9C=AC=E8=AA=9E.csv?=\"";
+		assertThat(parse(input).getFilename()).isEqualTo("日本語.csv");
+	}
+
+	@Test
+	void parseQuotedPrintableFilenameMultipleSegments() {
+		String input =
+				"attachment; filename=\"=?utf-8?Q?Spring=E6=A1=86=E6=9E=B6=E4=B8=BA=E5=9F=BA=E4=BA=8E?=" +
+						"=?utf-8?Q?Java=E7=9A=84=E7=8E=B0=E4=BB=A3=E4=BC=81=E4=B8=9A=E5=BA=94?=" +
+						"=?utf-8?Q?=E7=94=A8=E7=A8=8B=E5=BA=8F=E6=8F=90=E4=BE=9B=E4=BA=86=E5=85=A8?=" +
+						"=?utf-8?Q?=E9=9D=A2=E7=9A=84=E7=BC=96=E7=A8=8B=E5=92=8C=E9=85=8D=E7=BD=AE?=" +
+						"=?utf-8?Q?=E6=A8=A1=E5=9E=8B.txt?=\"";
+		assertThat(parse(input).getFilename()).isEqualTo("Spring框架为基于Java的现代企业应用程序提供了全面的编程和配置模型.txt");
+
+	}
+
+	@Test
+	void parseQuotedPrintableShiftJISFilename() {
+		String input = "attachment; filename=\"=?SHIFT_JIS?Q?=93=FA=96{=8C=EA.csv?=\"";
 		assertThat(parse(input).getFilename()).isEqualTo("日本語.csv");
 	}
 
@@ -116,26 +149,24 @@ class ContentDispositionTests {
 				.isThrownBy(() -> parse("form-data; name=\"name\"; filename*=UTF-8''%A.txt"));
 	}
 
-	@Test // gh-23077
-	@SuppressWarnings("deprecation")
-	void parseWithEscapedQuote() {
-		BiConsumer<String, String> tester = (description, filename) ->
-			assertThat(parse("form-data; name=\"file\"; filename=\"" + filename + "\"; size=123"))
-					.as(description)
-					.isEqualTo(ContentDisposition.formData().name("file").filename(filename).size(123L).build());
-
-		tester.accept("Escaped quotes should be ignored",
-				"\\\"The Twilight Zone\\\".txt");
-
-		tester.accept("Escaped quotes preceded by escaped backslashes should be ignored",
-				"\\\\\\\"The Twilight Zone\\\\\\\".txt");
-
-		tester.accept("Escaped backslashes should not suppress quote",
-				"The Twilight Zone \\\\");
-
-		tester.accept("Escaped backslashes should not suppress quote",
-				"The Twilight Zone \\\\\\\\");
+	@Test
+	void parseBackslash() {
+		String s = "form-data; name=\"foo\"; filename=\"foo\\\\bar \\\"baz\\\" qux \\\\\\\" quux.txt\"";
+		ContentDisposition cd = ContentDisposition.parse(
+				s);
+		assertThat(cd.getName()).isEqualTo("foo");
+		assertThat(cd.getFilename()).isEqualTo("foo\\bar \"baz\" qux \\\" quux.txt");
+		assertThat(cd.toString()).isEqualTo(s);
 	}
+
+	@Test
+	void parseBackslashInLastPosition() {
+		ContentDisposition cd = ContentDisposition.parse("form-data; name=\"foo\"; filename=\"bar\\\"");
+		assertThat(cd.getName()).isEqualTo("foo");
+		assertThat(cd.getFilename()).isEqualTo("bar\\");
+		assertThat(cd.toString()).isEqualTo("form-data; name=\"foo\"; filename=\"bar\\\\\"");
+	}
+
 
 	@Test
 	@SuppressWarnings("deprecation")
@@ -248,26 +279,26 @@ class ContentDispositionTests {
 		};
 
 		String filename = "\"foo.txt";
-		tester.accept(filename, "\\" + filename);
+		tester.accept(filename, "\\\"foo.txt");
 
 		filename = "\\\"foo.txt";
-		tester.accept(filename, filename);
+		tester.accept(filename, "\\\\\\\"foo.txt");
 
 		filename = "\\\\\"foo.txt";
-		tester.accept(filename, "\\" + filename);
+		tester.accept(filename, "\\\\\\\\\\\"foo.txt");
 
 		filename = "\\\\\\\"foo.txt";
-		tester.accept(filename, filename);
+		tester.accept(filename, "\\\\\\\\\\\\\\\"foo.txt");
 
 		filename = "\\\\\\\\\"foo.txt";
-		tester.accept(filename, "\\" + filename);
+		tester.accept(filename, "\\\\\\\\\\\\\\\\\\\"foo.txt");
 
 		tester.accept("\"\"foo.txt", "\\\"\\\"foo.txt");
 		tester.accept("\"\"\"foo.txt", "\\\"\\\"\\\"foo.txt");
 
-		tester.accept("foo.txt\\", "foo.txt");
-		tester.accept("foo.txt\\\\", "foo.txt\\\\");
-		tester.accept("foo.txt\\\\\\", "foo.txt\\\\");
+		tester.accept("foo.txt\\", "foo.txt\\\\");
+		tester.accept("foo.txt\\\\", "foo.txt\\\\\\\\");
+		tester.accept("foo.txt\\\\\\", "foo.txt\\\\\\\\\\\\");
 	}
 
 	@Test
@@ -278,6 +309,16 @@ class ContentDispositionTests {
 						.filename("test.txt", StandardCharsets.UTF_16)
 						.build()
 						.toString());
+	}
+
+	@Test
+	void parseFormatted() {
+		ContentDisposition cd = ContentDisposition.builder("form-data")
+				.name("foo")
+				.filename("foo\\bar \"baz\" qux \\\" quux.txt").build();
+		ContentDisposition parsed = ContentDisposition.parse(cd.toString());
+		assertThat(parsed).isEqualTo(cd);
+		assertThat(parsed.toString()).isEqualTo(cd.toString());
 	}
 
 }

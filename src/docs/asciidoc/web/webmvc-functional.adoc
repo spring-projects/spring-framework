@@ -103,7 +103,7 @@ as the following example shows:
 
 
 If you register the `RouterFunction` as a bean, for instance by exposing it in a
-@Configuration class, it will be auto-detected by the servlet, as explained in <<webmvc-fn-running>>.
+`@Configuration` class, it will be auto-detected by the servlet, as explained in <<webmvc-fn-running>>.
 
 
 
@@ -475,7 +475,7 @@ For instance, the router function builder offers the method `GET(String, Handler
 Besides HTTP method-based mapping, the route builder offers a way to introduce additional
 predicates when mapping to requests.
 For each HTTP method there is an overloaded variant that takes a `RequestPredicate` as a
-parameter, though which additional constraints can be expressed.
+parameter, through which additional constraints can be expressed.
 
 
 [[webmvc-fn-predicates]]
@@ -612,7 +612,7 @@ RouterFunction<ServerResponse> route = route()
 	.path("/person", builder -> builder // <1>
 		.GET("/{id}", accept(APPLICATION_JSON), handler::getPerson)
 		.GET(accept(APPLICATION_JSON), handler::listPeople)
-		.POST("/person", handler::createPerson))
+		.POST(handler::createPerson))
 	.build();
 ----
 <1> Note that second parameter of `path` is a consumer that takes the router builder.
@@ -626,7 +626,7 @@ RouterFunction<ServerResponse> route = route()
 		"/person".nest {
 			GET("/{id}", accept(APPLICATION_JSON), handler::getPerson)
 			GET(accept(APPLICATION_JSON), handler::listPeople)
-			POST("/person", handler::createPerson)
+			POST(handler::createPerson)
 		}
 	}
 ----
@@ -644,7 +644,7 @@ We can further improve by using the `nest` method together with `accept`:
 			.nest(accept(APPLICATION_JSON), b2 -> b2
 				.GET("/{id}", handler::getPerson)
 				.GET(handler::listPeople))
-			.POST("/person", handler::createPerson))
+			.POST(handler::createPerson))
 		.build();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -657,7 +657,7 @@ We can further improve by using the `nest` method together with `accept`:
 			accept(APPLICATION_JSON).nest {
 				GET("/{id}", handler::getPerson)
 				GET("", handler::listPeople)
-				POST("/person", handler::createPerson)
+				POST(handler::createPerson)
 			}
 		}
 	}
@@ -779,7 +779,7 @@ For instance, consider the following example:
 				.before(request -> ServerRequest.from(request) // <1>
 					.header("X-RequestHeader", "Value")
 					.build()))
-			.POST("/person", handler::createPerson))
+			.POST(handler::createPerson))
 		.after((request, response) -> logResponse(response)) // <2>
 		.build();
 ----
@@ -799,10 +799,10 @@ For instance, consider the following example:
 				ServerRequest.from(it)
 						.header("X-RequestHeader", "Value").build()
 			}
-			POST("/person", handler::createPerson)
-			after { _, response -> // <2>
-				logResponse(response)
-			}
+		}
+		POST(handler::createPerson)
+		after { _, response -> // <2>
+			logResponse(response)
 		}
 	}
 ----
@@ -830,7 +830,7 @@ The following example shows how to do so:
 			.nest(accept(APPLICATION_JSON), b2 -> b2
 				.GET("/{id}", handler::getPerson)
 				.GET(handler::listPeople))
-			.POST("/person", handler::createPerson))
+			.POST(handler::createPerson))
 		.filter((request, next) -> {
 			if (securityManager.allowAccessTo(request.path())) {
 				return next.handle(request);
@@ -852,7 +852,7 @@ The following example shows how to do so:
 		("/person" and accept(APPLICATION_JSON)).nest {
 			GET("/{id}", handler::getPerson)
 			GET("", handler::listPeople)
-			POST("/person", handler::createPerson)
+			POST(handler::createPerson)
 			filter { request, next ->
 				if (securityManager.allowAccessTo(request.path())) {
 					next(request)

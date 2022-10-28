@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,7 +171,7 @@ public class CodeFlow implements Opcodes {
 
 	/**
 	 * Called after the main expression evaluation method has been generated, this
-	 * method will callback any registered FieldAdders or ClinitAdders to add any
+	 * method will call back any registered FieldAdders or ClinitAdders to add any
 	 * extra information to the class representing the compiled expression.
 	 */
 	public void finish() {
@@ -432,11 +432,11 @@ public class CodeFlow implements Opcodes {
 	public static String createSignatureDescriptor(Method method) {
 		Class<?>[] params = method.getParameterTypes();
 		StringBuilder sb = new StringBuilder();
-		sb.append("(");
+		sb.append('(');
 		for (Class<?> param : params) {
 			sb.append(toJvmDescriptor(param));
 		}
-		sb.append(")");
+		sb.append(')');
 		sb.append(toJvmDescriptor(method.getReturnType()));
 		return sb.toString();
 	}
@@ -453,7 +453,7 @@ public class CodeFlow implements Opcodes {
 	public static String createSignatureDescriptor(Constructor<?> ctor) {
 		Class<?>[] params = ctor.getParameterTypes();
 		StringBuilder sb = new StringBuilder();
-		sb.append("(");
+		sb.append('(');
 		for (Class<?> param : params) {
 			sb.append(toJvmDescriptor(param));
 		}
@@ -473,7 +473,7 @@ public class CodeFlow implements Opcodes {
 		StringBuilder sb = new StringBuilder();
 		if (clazz.isArray()) {
 			while (clazz.isArray()) {
-				sb.append("[");
+				sb.append('[');
 				clazz = clazz.getComponentType();
 			}
 		}
@@ -507,9 +507,9 @@ public class CodeFlow implements Opcodes {
 			}
 		}
 		else {
-			sb.append("L");
+			sb.append('L');
 			sb.append(clazz.getName().replace('.', '/'));
-			sb.append(";");
+			sb.append(';');
 		}
 		return sb.toString();
 	}
@@ -1008,7 +1008,7 @@ public class CodeFlow implements Opcodes {
 	/**
 	 * For use in mathematical operators, handles converting from a (possibly boxed)
 	 * number on the stack to a primitive numeric type.
-	 * <p>For example, from a Integer to a double, just need to call 'Number.doubleValue()'
+	 * <p>For example, from an Integer to a double, just need to call 'Number.doubleValue()'
 	 * but from an int to a double, need to use the bytecode 'i2d'.
 	 * @param mv the method visitor when instructions should be appended
 	 * @param stackDescriptor a descriptor of the operand on the stack

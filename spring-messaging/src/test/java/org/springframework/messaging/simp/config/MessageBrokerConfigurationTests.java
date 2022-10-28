@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.ContentTypeResolver;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
+import org.springframework.messaging.converter.KotlinSerializationJsonMessageConverter;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
@@ -282,12 +283,13 @@ public class MessageBrokerConfigurationTests {
 		CompositeMessageConverter compositeConverter = config.brokerMessageConverter();
 
 		List<MessageConverter> converters = compositeConverter.getConverters();
-		assertThat(converters).hasSize(3);
+		assertThat(converters).hasSize(4);
 		assertThat(converters.get(0)).isInstanceOf(StringMessageConverter.class);
 		assertThat(converters.get(1)).isInstanceOf(ByteArrayMessageConverter.class);
-		assertThat(converters.get(2)).isInstanceOf(MappingJackson2MessageConverter.class);
+		assertThat(converters.get(2)).isInstanceOf(KotlinSerializationJsonMessageConverter.class);
+		assertThat(converters.get(3)).isInstanceOf(MappingJackson2MessageConverter.class);
 
-		ContentTypeResolver resolver = ((MappingJackson2MessageConverter) converters.get(2)).getContentTypeResolver();
+		ContentTypeResolver resolver = ((MappingJackson2MessageConverter) converters.get(3)).getContentTypeResolver();
 		assertThat(((DefaultContentTypeResolver) resolver).getDefaultMimeType()).isEqualTo(MimeTypeUtils.APPLICATION_JSON);
 	}
 
@@ -340,11 +342,12 @@ public class MessageBrokerConfigurationTests {
 		};
 		CompositeMessageConverter compositeConverter = config.brokerMessageConverter();
 
-		assertThat(compositeConverter.getConverters()).hasSize(4);
+		assertThat(compositeConverter.getConverters()).hasSize(5);
 		Iterator<MessageConverter> iterator = compositeConverter.getConverters().iterator();
 		assertThat(iterator.next()).isEqualTo(testConverter);
 		assertThat(iterator.next()).isInstanceOf(StringMessageConverter.class);
 		assertThat(iterator.next()).isInstanceOf(ByteArrayMessageConverter.class);
+		assertThat(iterator.next()).isInstanceOf(KotlinSerializationJsonMessageConverter.class);
 		assertThat(iterator.next()).isInstanceOf(MappingJackson2MessageConverter.class);
 	}
 
@@ -422,7 +425,7 @@ public class MessageBrokerConfigurationTests {
 
 		DefaultUserDestinationResolver resolver = context.getBean(DefaultUserDestinationResolver.class);
 		assertThat(resolver).isNotNull();
-		assertThat(resolver.isRemoveLeadingSlash()).isEqualTo(false);
+		assertThat(resolver.isRemoveLeadingSlash()).isFalse();
 	}
 
 	@Test

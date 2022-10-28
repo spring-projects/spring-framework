@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
@@ -63,8 +62,8 @@ class RequestMappingInfoTests {
 		assertThat(info.getMethodsCondition().getMethods().size()).isEqualTo(0);
 		assertThat(info.getParamsCondition()).isNotNull();
 		assertThat(info.getHeadersCondition()).isNotNull();
-		assertThat(info.getConsumesCondition().isEmpty()).isEqualTo(true);
-		assertThat(info.getProducesCondition().isEmpty()).isEqualTo(true);
+		assertThat(info.getConsumesCondition().isEmpty()).isTrue();
+		assertThat(info.getProducesCondition().isEmpty()).isTrue();
 		assertThat(info.getCustomCondition()).isNull();
 
 		RequestMappingInfo anotherInfo = infoBuilder.build();
@@ -185,7 +184,7 @@ class RequestMappingInfoTests {
 	}
 
 	@Test
-	void compareToWithImpicitVsExplicitHttpMethodDeclaration() {
+	void compareToWithImplicitVsExplicitHttpMethodDeclaration() {
 		RequestMappingInfo noMethods = RequestMappingInfo.paths().build();
 		RequestMappingInfo oneMethod = RequestMappingInfo.paths().methods(GET).build();
 		RequestMappingInfo oneMethodOneParam = RequestMappingInfo.paths().methods(GET).params("foo").build();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 package org.springframework.messaging.tcp;
 
 import java.io.Closeable;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.messaging.Message;
-import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * A contract for sending messages and managing a TCP connection.
@@ -35,8 +35,22 @@ public interface TcpConnection<P> extends Closeable {
 	 * @param message the message
 	 * @return a ListenableFuture that can be used to determine when and if the
 	 * message was successfully sent
+	 * @deprecated as of 6.0, in favor of {@link #sendAsync(Message)}
 	 */
-	ListenableFuture<Void> send(Message<P> message);
+	@Deprecated(since = "6.0")
+	default org.springframework.util.concurrent.ListenableFuture<Void> send(Message<P> message) {
+		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(
+				sendAsync(message));
+	}
+
+	/**
+	 * Send the given message.
+	 * @param message the message
+	 * @return a CompletableFuture that can be used to determine when and if the
+	 * message was successfully sent
+	 * @since 6.0
+	 */
+	CompletableFuture<Void> sendAsync(Message<P> message);
 
 	/**
 	 * Register a task to invoke after a period of read inactivity.

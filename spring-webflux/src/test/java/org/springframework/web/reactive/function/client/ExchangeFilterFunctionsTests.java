@@ -30,6 +30,7 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.web.reactive.function.BodyExtractors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -170,7 +171,7 @@ public class ExchangeFilterFunctionsTests {
 		ExchangeFunction exchange = r -> Mono.just(response);
 
 		ExchangeFilterFunction errorHandler = ExchangeFilterFunctions.statusError(
-				HttpStatus::is4xxClientError, r -> new MyException());
+				HttpStatusCode::is4xxClientError, r -> new MyException());
 
 		Mono<ClientResponse> result = errorHandler.filter(request, exchange);
 
@@ -186,7 +187,7 @@ public class ExchangeFilterFunctionsTests {
 		given(response.statusCode()).willReturn(HttpStatus.NOT_FOUND);
 
 		Mono<ClientResponse> result = ExchangeFilterFunctions
-				.statusError(HttpStatus::is5xxServerError, req -> new MyException())
+				.statusError(HttpStatusCode::is5xxServerError, req -> new MyException())
 				.filter(request, req -> Mono.just(response));
 
 		StepVerifier.create(result)

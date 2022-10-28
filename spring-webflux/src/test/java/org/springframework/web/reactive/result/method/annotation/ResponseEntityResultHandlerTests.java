@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
@@ -54,6 +55,8 @@ import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.ErrorResponse;
+import org.springframework.web.ErrorResponseException;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
@@ -80,7 +83,7 @@ import static org.springframework.web.testfixture.method.ResolvableMethod.on;
  */
 public class ResponseEntityResultHandlerTests {
 
-	private static final String NEWLINE_SYSTEM_PROPERTY = System.getProperty("line.separator");
+	private static final String NEWLINE_SYSTEM_PROPERTY = System.lineSeparator();
 
 
 	private ResponseEntityResultHandler resultHandler;
@@ -127,6 +130,12 @@ public class ResponseEntityResultHandlerTests {
 		assertThat(this.resultHandler.supports(handlerResult(value, returnType))).isTrue();
 
 		returnType = on(TestController.class).resolveReturnType(HttpHeaders.class);
+		assertThat(this.resultHandler.supports(handlerResult(value, returnType))).isTrue();
+
+		returnType = on(TestController.class).resolveReturnType(ErrorResponse.class);
+		assertThat(this.resultHandler.supports(handlerResult(value, returnType))).isTrue();
+
+		returnType = on(TestController.class).resolveReturnType(ProblemDetail.class);
 		assertThat(this.resultHandler.supports(handlerResult(value, returnType))).isTrue();
 
 		// SPR-15785
@@ -230,6 +239,46 @@ public class ResponseEntityResultHandlerTests {
 		returnValue = Mono.just(ResponseEntity.ok("abc"));
 		returnType = on(TestController.class).resolveReturnType(CompletableFuture.class, entity(String.class));
 		testHandle(returnValue, returnType);
+	}
+
+	@Test
+	public void handleErrorResponse() {
+		ErrorResponseException ex = new ErrorResponseException(HttpStatus.BAD_REQUEST);
+		ex.getHeaders().add("foo", "bar");
+		MethodParameter returnType = on(TestController.class).resolveReturnType(ErrorResponse.class);
+		HandlerResult result = handlerResult(ex, returnType);
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path"));
+		exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_PROBLEM_JSON);
+		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
+
+		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+		assertThat(exchange.getResponse().getHeaders()).hasSize(3);
+		assertThat(exchange.getResponse().getHeaders().get("foo")).containsExactly("bar");
+		assertThat(exchange.getResponse().getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_PROBLEM_JSON);
+		assertResponseBody(exchange,
+				"{\"type\":\"about:blank\"," +
+						"\"title\":\"Bad Request\"," +
+						"\"status\":400," +
+						"\"instance\":\"/path\"}");
+	}
+
+	@Test
+	public void handleProblemDetail() {
+		ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+		MethodParameter returnType = on(TestController.class).resolveReturnType(ProblemDetail.class);
+		HandlerResult result = handlerResult(problemDetail, returnType);
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path"));
+		exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_PROBLEM_JSON);
+		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
+
+		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+		assertThat(exchange.getResponse().getHeaders().size()).isEqualTo(2);
+		assertThat(exchange.getResponse().getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_PROBLEM_JSON);
+		assertResponseBody(exchange,
+				"{\"type\":\"about:blank\"," +
+						"\"title\":\"Bad Request\"," +
+						"\"status\":400," +
+						"\"instance\":\"/path\"}");
 	}
 
 	@Test
@@ -504,6 +553,10 @@ public class ResponseEntityResultHandlerTests {
 		ResponseEntity<Void> responseEntityVoid() { return null; }
 
 		ResponseEntity<Person> responseEntityPerson() { return null; }
+
+		ErrorResponse errorResponse() { return null; }
+
+		ProblemDetail problemDetail() { return null; }
 
 		HttpHeaders httpHeaders() { return null; }
 

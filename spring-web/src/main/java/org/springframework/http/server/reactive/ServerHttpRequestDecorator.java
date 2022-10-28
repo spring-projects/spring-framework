@@ -32,7 +32,7 @@ import org.springframework.util.MultiValueMap;
 
 /**
  * Wraps another {@link ServerHttpRequest} and delegates all methods to it.
- * Sub-classes can override specific methods selectively.
+ * Subclasses can override specific methods selectively.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -61,14 +61,8 @@ public class ServerHttpRequestDecorator implements ServerHttpRequest {
 	}
 
 	@Override
-	@Nullable
 	public HttpMethod getMethod() {
 		return getDelegate().getMethod();
-	}
-
-	@Override
-	public String getMethodValue() {
-		return getDelegate().getMethodValue();
 	}
 
 	@Override

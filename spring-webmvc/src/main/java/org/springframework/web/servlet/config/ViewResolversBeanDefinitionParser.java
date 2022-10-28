@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,10 +37,9 @@ import org.springframework.web.servlet.view.ViewResolverComposite;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.servlet.view.groovy.GroovyMarkupViewResolver;
 import org.springframework.web.servlet.view.script.ScriptTemplateViewResolver;
-import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
 
 /**
- * Parse the {@code view-resolvers} MVC namespace element and register
+ * Parses the {@code view-resolvers} MVC namespace element and registers
  * {@link org.springframework.web.servlet.ViewResolver} bean definitions.
  *
  * <p>All registered resolvers are wrapped in a single (composite) ViewResolver
@@ -50,13 +49,12 @@ import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
  * <p>When content negotiation is enabled the order property is set to highest priority
  * instead with the ContentNegotiatingViewResolver encapsulating all other registered
  * view resolver instances. That way the resolvers registered through the MVC namespace
- * form self-encapsulated resolver chain.
+ * form a self-encapsulated resolver chain.
  *
  * @author Sivaprasad Valluru
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @since 4.1
- * @see TilesConfigurerBeanDefinitionParser
  * @see FreeMarkerConfigurerBeanDefinitionParser
  * @see GroovyMarkupConfigurerBeanDefinitionParser
  * @see ScriptTemplateConfigurerBeanDefinitionParser
@@ -90,10 +88,6 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 				resolverBeanDef = new RootBeanDefinition(InternalResourceViewResolver.class);
 				resolverBeanDef.getPropertyValues().add("prefix", "/WEB-INF/");
 				resolverBeanDef.getPropertyValues().add("suffix", ".jsp");
-				addUrlBasedViewResolverProperties(resolverElement, resolverBeanDef);
-			}
-			else if ("tiles".equals(name)) {
-				resolverBeanDef = new RootBeanDefinition(TilesViewResolver.class);
 				addUrlBasedViewResolverProperties(resolverElement, resolverBeanDef);
 			}
 			else if ("freemarker".equals(name)) {

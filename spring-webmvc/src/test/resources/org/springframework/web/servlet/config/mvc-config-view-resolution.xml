@@ -8,7 +8,6 @@
 	<mvc:view-resolvers>
 		<mvc:bean-name/>
 		<mvc:jsp view-class="org.springframework.web.servlet.view.InternalResourceView"/>
-		<mvc:tiles/>
 		<mvc:freemarker prefix="freemarker-" suffix=".freemarker" view-names="my*,*Report"/>
 		<mvc:groovy/>
 		<mvc:script-template/>
@@ -17,13 +16,6 @@
 	</mvc:view-resolvers>
 
 	<bean id="customResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"/>
-
-	<mvc:tiles-configurer check-refresh="true" validate-definitions="true"
-			definitions-factory="org.apache.tiles.definition.UnresolvingLocaleDefinitionsFactory"
-			preparer-factory="org.springframework.web.servlet.view.tiles3.SpringBeanPreparerFactory">
-		<mvc:definitions location="/org/springframework/web/servlet/resource/tiles/tiles1.xml"/>
-		<mvc:definitions location="/org/springframework/web/servlet/resource/tiles/tiles2.xml"/>
-	</mvc:tiles-configurer>
 
 	<mvc:freemarker-configurer>
 		<mvc:template-loader-path location="/"/>

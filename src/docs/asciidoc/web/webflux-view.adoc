@@ -26,7 +26,7 @@ configuration involves a few bean declarations, such as
 `SpringResourceTemplateResolver`, `SpringWebFluxTemplateEngine`, and
 `ThymeleafReactiveViewResolver`. For more details, see
 https://www.thymeleaf.org/documentation.html[Thymeleaf+Spring] and the WebFlux integration
-http://forum.thymeleaf.org/Thymeleaf-3-0-8-JUST-PUBLISHED-td4030687.html[announcement].
+https://web.archive.org/web/20210623051330/http%3A//forum.thymeleaf.org/Thymeleaf-3-0-8-JUST-PUBLISHED-td4030687.html[announcement].
 
 
 
@@ -232,7 +232,7 @@ Java 8+. Using the latest update release available is highly recommended.
  line should be added for Kotlin script support. See
  https://github.com/sdeleuze/kotlin-script-templating[this example] for more detail.
 
-You need to have the script templating library. One way to do that for Javascript is
+You need to have the script templating library. One way to do that for JavaScript is
 through https://www.webjars.org/[WebJars].
 
 
@@ -380,8 +380,8 @@ The following example shows how compile a template:
 ----
 
 Check out the Spring Framework unit tests,
-https://github.com/spring-projects/spring-framework/tree/master/spring-webflux/src/test/java/org/springframework/web/reactive/result/view/script[Java], and
-https://github.com/spring-projects/spring-framework/tree/master/spring-webflux/src/test/resources/org/springframework/web/reactive/result/view/script[resources],
+{spring-framework-main-code}/spring-webflux/src/test/java/org/springframework/web/reactive/result/view/script[Java], and
+{spring-framework-main-code}/spring-webflux/src/test/resources/org/springframework/web/reactive/result/view/script[resources],
 for more configuration examples.
 
 

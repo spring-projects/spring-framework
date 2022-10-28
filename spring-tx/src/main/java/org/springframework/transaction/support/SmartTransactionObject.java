@@ -20,7 +20,7 @@ import java.io.Flushable;
 
 /**
  * Interface to be implemented by transaction objects that are able to
- * return an internal rollback-only marker, typically from a another
+ * return an internal rollback-only marker, typically from another
  * transaction that has participated and marked it as rollback-only.
  *
  * <p>Autodetected by DefaultTransactionStatus, to always return a
@@ -36,8 +36,8 @@ public interface SmartTransactionObject extends Flushable {
 	/**
 	 * Return whether the transaction is internally marked as rollback-only.
 	 * Can, for example, check the JTA UserTransaction.
-	 * @see javax.transaction.UserTransaction#getStatus
-	 * @see javax.transaction.Status#STATUS_MARKED_ROLLBACK
+	 * @see jakarta.transaction.UserTransaction#getStatus
+	 * @see jakarta.transaction.Status#STATUS_MARKED_ROLLBACK
 	 */
 	boolean isRollbackOnly();
 

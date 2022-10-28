@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,7 +30,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -45,7 +43,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.validation.Validator;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.annotation.ValidationAnnotationUtils;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.reactive.BindingContext;
@@ -59,10 +57,10 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  * Abstract base class for argument resolvers that resolve method arguments
  * by reading the request body with an {@link HttpMessageReader}.
  *
- * <p>Applies validation if the method argument is annotated with
- * {@code @javax.validation.Valid} or
- * {@link org.springframework.validation.annotation.Validated}. Validation
- * failure results in an {@link ServerWebInputException}.
+ * <p>Applies validation if the method argument is annotated with any
+ * {@linkplain org.springframework.validation.annotation.ValidationAnnotationUtils#determineValidationHints
+ * annotations that trigger validation}. Validation failure results in a
+ * {@link ServerWebInputException}.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
@@ -71,7 +69,7 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 public abstract class AbstractMessageReaderArgumentResolver extends HandlerMethodArgumentResolverSupport {
 
 	private static final Set<HttpMethod> SUPPORTED_METHODS =
-			EnumSet.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
+			Set.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
 
 
 	private final List<HttpMessageReader<?>> messageReaders;
@@ -201,10 +199,10 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 			}
 		}
 
-		// No compatible reader but body may be empty..
+		// No compatible reader but body may be empty.
 
 		HttpMethod method = request.getMethod();
-		if (contentType == null && method != null && SUPPORTED_METHODS.contains(method)) {
+		if (contentType == null && SUPPORTED_METHODS.contains(method)) {
 			Flux<DataBuffer> body = request.getBody().doOnNext(buffer -> {
 				DataBufferUtils.release(buffer);
 				// Body not empty, back toy 415..
@@ -227,8 +225,14 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	}
 
 	private ServerWebInputException handleMissingBody(MethodParameter parameter) {
-		String paramInfo = parameter.getExecutable().toGenericString();
-		return new ServerWebInputException("Request body is missing: " + paramInfo, parameter);
+
+		DecodingException cause = new DecodingException(
+				"No request body for: " + parameter.getExecutable().toGenericString());
+
+		ServerWebInputException ex = new ServerWebInputException("No request body", parameter, cause);
+		ex.setDetail("Invalid request content");
+
+		return ex;
 	}
 
 	/**
@@ -240,10 +244,9 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	private Object[] extractValidationHints(MethodParameter parameter) {
 		Annotation[] annotations = parameter.getParameterAnnotations();
 		for (Annotation ann : annotations) {
-			Validated validatedAnn = AnnotationUtils.getAnnotation(ann, Validated.class);
-			if (validatedAnn != null || ann.annotationType().getSimpleName().startsWith("Valid")) {
-				Object hints = (validatedAnn != null ? validatedAnn.value() : AnnotationUtils.getValue(ann));
-				return (hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
+			Object[] hints = ValidationAnnotationUtils.determineValidationHints(ann);
+			if (hints != null) {
+				return hints;
 			}
 		}
 		return null;

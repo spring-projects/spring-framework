@@ -18,11 +18,10 @@ package org.springframework.jms.support.converter;
 
 import java.io.Serializable;
 
-import javax.jms.JMSException;
-import javax.jms.ObjectMessage;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-
+import jakarta.jms.JMSException;
+import jakarta.jms.ObjectMessage;
+import jakarta.jms.Session;
+import jakarta.jms.TextMessage;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.jms.StubTextMessage;
@@ -75,7 +74,7 @@ public class MessagingMessageConverterTests {
 		private boolean called;
 
 		@Override
-		public Object fromMessage(javax.jms.Message message) throws JMSException, MessageConversionException {
+		public Object fromMessage(jakarta.jms.Message message) throws JMSException, MessageConversionException {
 			if (this.called) {
 				throw new java.lang.IllegalStateException("Converter called twice");
 			}

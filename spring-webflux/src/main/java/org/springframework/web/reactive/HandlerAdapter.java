@@ -35,7 +35,7 @@ public interface HandlerAdapter {
 	/**
 	 * Whether this {@code HandlerAdapter} supports the given {@code handler}.
 	 * @param handler the handler object to check
-	 * @return whether or not the handler is supported
+	 * @return whether the handler is supported
 	 */
 	boolean supports(Object handler);
 

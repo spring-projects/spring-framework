@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,9 +178,9 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 	static {
 		ClassLoader classLoader = AnnotationDrivenBeanDefinitionParser.class.getClassLoader();
-		javaxValidationPresent = ClassUtils.isPresent("javax.validation.Validator", classLoader);
+		javaxValidationPresent = ClassUtils.isPresent("jakarta.validation.Validator", classLoader);
 		romePresent = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", classLoader);
-		jaxb2Present = ClassUtils.isPresent("javax.xml.bind.Binder", classLoader);
+		jaxb2Present = ClassUtils.isPresent("jakarta.xml.bind.Binder", classLoader);
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 						ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
 		jackson2XmlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
@@ -405,22 +405,28 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		if (pathMatchingElement != null) {
 			Object source = context.extractSource(element);
 
-			if (pathMatchingElement.hasAttribute("suffix-pattern")) {
-				Boolean useSuffixPatternMatch = Boolean.valueOf(pathMatchingElement.getAttribute("suffix-pattern"));
-				handlerMappingDef.getPropertyValues().add("useSuffixPatternMatch", useSuffixPatternMatch);
-			}
 			if (pathMatchingElement.hasAttribute("trailing-slash")) {
-				Boolean useTrailingSlashMatch = Boolean.valueOf(pathMatchingElement.getAttribute("trailing-slash"));
+				boolean useTrailingSlashMatch = Boolean.parseBoolean(pathMatchingElement.getAttribute("trailing-slash"));
 				handlerMappingDef.getPropertyValues().add("useTrailingSlashMatch", useTrailingSlashMatch);
 			}
+
+			boolean preferPathMatcher = false;
+
+			if (pathMatchingElement.hasAttribute("suffix-pattern")) {
+				boolean useSuffixPatternMatch = Boolean.parseBoolean(pathMatchingElement.getAttribute("suffix-pattern"));
+				handlerMappingDef.getPropertyValues().add("useSuffixPatternMatch", useSuffixPatternMatch);
+				preferPathMatcher |= useSuffixPatternMatch;
+			}
 			if (pathMatchingElement.hasAttribute("registered-suffixes-only")) {
-				Boolean useRegisteredSuffixPatternMatch = Boolean.valueOf(pathMatchingElement.getAttribute("registered-suffixes-only"));
+				boolean useRegisteredSuffixPatternMatch = Boolean.parseBoolean(pathMatchingElement.getAttribute("registered-suffixes-only"));
 				handlerMappingDef.getPropertyValues().add("useRegisteredSuffixPatternMatch", useRegisteredSuffixPatternMatch);
+				preferPathMatcher |= useRegisteredSuffixPatternMatch;
 			}
 
 			RuntimeBeanReference pathHelperRef = null;
 			if (pathMatchingElement.hasAttribute("path-helper")) {
 				pathHelperRef = new RuntimeBeanReference(pathMatchingElement.getAttribute("path-helper"));
+				preferPathMatcher = true;
 			}
 			pathHelperRef = MvcNamespaceUtils.registerUrlPathHelper(pathHelperRef, context, source);
 			handlerMappingDef.getPropertyValues().add("urlPathHelper", pathHelperRef);
@@ -428,10 +434,16 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			RuntimeBeanReference pathMatcherRef = null;
 			if (pathMatchingElement.hasAttribute("path-matcher")) {
 				pathMatcherRef = new RuntimeBeanReference(pathMatchingElement.getAttribute("path-matcher"));
+				preferPathMatcher = true;
 			}
 			pathMatcherRef = MvcNamespaceUtils.registerPathMatcher(pathMatcherRef, context, source);
 			handlerMappingDef.getPropertyValues().add("pathMatcher", pathMatcherRef);
+
+			if (preferPathMatcher) {
+				handlerMappingDef.getPropertyValues().add("patternParser", null);
+			}
 		}
+
 	}
 
 	private Properties getDefaultMediaTypes() {
@@ -514,8 +526,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	private ManagedList<Object> wrapLegacyResolvers(List<Object> list, ParserContext context) {
 		ManagedList<Object> result = new ManagedList<>();
 		for (Object object : list) {
-			if (object instanceof BeanDefinitionHolder) {
-				BeanDefinitionHolder beanDef = (BeanDefinitionHolder) object;
+			if (object instanceof BeanDefinitionHolder beanDef) {
 				String className = beanDef.getBeanDefinition().getBeanClassName();
 				Assert.notNull(className, "No resolver class");
 				Class<?> clazz = ClassUtils.resolveClassName(className, context.getReaderContext().getBeanClassLoader());

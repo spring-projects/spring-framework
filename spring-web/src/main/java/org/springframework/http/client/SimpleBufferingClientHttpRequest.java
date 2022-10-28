@@ -47,10 +47,9 @@ final class SimpleBufferingClientHttpRequest extends AbstractBufferingClientHttp
 		this.outputStreaming = outputStreaming;
 	}
 
-
 	@Override
-	public String getMethodValue() {
-		return this.connection.getRequestMethod();
+	public HttpMethod getMethod() {
+		return HttpMethod.valueOf(this.connection.getRequestMethod());
 	}
 
 	@Override

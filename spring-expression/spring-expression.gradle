@@ -3,8 +3,8 @@ description = "Spring Expression Language (SpEL)"
 apply plugin: "kotlin"
 
 dependencies {
-	compile(project(":spring-core"))
-	testCompile(testFixtures(project(":spring-core")))
-	testCompile("org.jetbrains.kotlin:kotlin-reflect")
-	testCompile("org.jetbrains.kotlin:kotlin-stdlib")
+	api(project(":spring-core"))
+	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation("org.jetbrains.kotlin:kotlin-reflect")
+	testImplementation("org.jetbrains.kotlin:kotlin-stdlib")
 }

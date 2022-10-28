@@ -483,6 +483,7 @@ public class BeanFactoryUtilsTests {
 			return TestBean.class;
 		}
 
+		@Override
 		public TestBean getObject() {
 			// We don't really care if the actual instance is a singleton or prototype
 			// for the tests that use this factory.

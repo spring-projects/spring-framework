@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import io.netty.buffer.PoolArenaMetric;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.PooledByteBufAllocatorMetric;
 import io.netty.buffer.UnpooledByteBufAllocator;
+import io.netty5.buffer.BufferAllocator;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -45,10 +46,12 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.io.buffer.Netty5DataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
@@ -161,20 +164,31 @@ public abstract class AbstractDataBufferAllocatingTests {
 	@SuppressWarnings("deprecation") // PooledByteBufAllocator no longer supports tinyCacheSize.
 	public static Stream<Arguments> dataBufferFactories() {
 		return Stream.of(
-			arguments("NettyDataBufferFactory - UnpooledByteBufAllocator - preferDirect = true",
-					new NettyDataBufferFactory(new UnpooledByteBufAllocator(true))),
-			arguments("NettyDataBufferFactory - UnpooledByteBufAllocator - preferDirect = false",
-					new NettyDataBufferFactory(new UnpooledByteBufAllocator(false))),
+			// Netty 4
+			arguments(named("NettyDataBufferFactory - UnpooledByteBufAllocator - preferDirect = true",
+					new NettyDataBufferFactory(new UnpooledByteBufAllocator(true)))),
+			arguments(named("NettyDataBufferFactory - UnpooledByteBufAllocator - preferDirect = false",
+					new NettyDataBufferFactory(new UnpooledByteBufAllocator(false)))),
 			// 1) Disable caching for reliable leak detection, see https://github.com/netty/netty/issues/5275
 			// 2) maxOrder is 4 (vs default 11) but can be increased if necessary
-			arguments("NettyDataBufferFactory - PooledByteBufAllocator - preferDirect = true",
-					new NettyDataBufferFactory(new PooledByteBufAllocator(true, 1, 1, 4096, 4, 0, 0, 0, true))),
-			arguments("NettyDataBufferFactory - PooledByteBufAllocator - preferDirect = false",
-					new NettyDataBufferFactory(new PooledByteBufAllocator(false, 1, 1, 4096, 4, 0, 0, 0, true))),
-			arguments("DefaultDataBufferFactory - preferDirect = true",
-					new DefaultDataBufferFactory(true)),
-			arguments("DefaultDataBufferFactory - preferDirect = false",
-					new DefaultDataBufferFactory(false))
+			arguments(named("NettyDataBufferFactory - PooledByteBufAllocator - preferDirect = true",
+					new NettyDataBufferFactory(new PooledByteBufAllocator(true, 1, 1, 4096, 4, 0, 0, 0, true)))),
+			arguments(named("NettyDataBufferFactory - PooledByteBufAllocator - preferDirect = false",
+					new NettyDataBufferFactory(new PooledByteBufAllocator(false, 1, 1, 4096, 4, 0, 0, 0, true)))),
+			// Netty 5
+			arguments(named("Netty5DataBufferFactory - BufferAllocator.onHeapUnpooled()",
+					new Netty5DataBufferFactory(BufferAllocator.onHeapUnpooled()))),
+			arguments(named("Netty5DataBufferFactory - BufferAllocator.offHeapUnpooled()",
+					new Netty5DataBufferFactory(BufferAllocator.offHeapUnpooled()))),
+			arguments(named("Netty5DataBufferFactory - BufferAllocator.onHeapPooled()",
+					new Netty5DataBufferFactory(BufferAllocator.onHeapPooled()))),
+			arguments(named("Netty5DataBufferFactory - BufferAllocator.offHeapPooled()",
+					new Netty5DataBufferFactory(BufferAllocator.offHeapPooled()))),
+			// Default
+			arguments(named("DefaultDataBufferFactory - preferDirect = true",
+					new DefaultDataBufferFactory(true))),
+			arguments(named("DefaultDataBufferFactory - preferDirect = false",
+					new DefaultDataBufferFactory(false)))
 		);
 	}
 

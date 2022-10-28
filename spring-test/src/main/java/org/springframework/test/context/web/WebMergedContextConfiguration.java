@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,26 +19,29 @@ package org.springframework.test.context.web;
 import java.util.Set;
 
 import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.core.style.DefaultToStringStyler;
+import org.springframework.core.style.SimpleValueStyler;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * {@code WebMergedContextConfiguration} encapsulates the <em>merged</em>
- * context configuration declared on a test class and all of its superclasses
- * via {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration},
- * {@link WebAppConfiguration @WebAppConfiguration}, and
- * {@link org.springframework.test.context.ActiveProfiles @ActiveProfiles}.
+ * {@code WebMergedContextConfiguration} encapsulates the <em>merged</em> context
+ * configuration declared on a test class and all of its superclasses and
+ * enclosing classes via
+ * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration},
+ * {@link WebAppConfiguration @WebAppConfiguration},
+ * {@link org.springframework.test.context.ActiveProfiles @ActiveProfiles}, and
+ * {@link org.springframework.test.context.TestPropertySource @TestPropertySource}.
  *
  * <p>{@code WebMergedContextConfiguration} extends the contract of
- * {@link MergedContextConfiguration} by adding support for the {@link
+ * {@link MergedContextConfiguration} by adding support for the {@linkplain
  * #getResourceBasePath() resource base path} configured via {@code @WebAppConfiguration}.
- * This allows the {@link org.springframework.test.context.TestContext TestContext}
+ * This allows the {@link org.springframework.test.context.cache.ContextCache ContextCache}
  * to properly cache the corresponding {@link
  * org.springframework.web.context.WebApplicationContext WebApplicationContext}
  * that was loaded using properties of this {@code WebMergedContextConfiguration}.
@@ -69,7 +72,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 */
 	public WebMergedContextConfiguration(MergedContextConfiguration mergedConfig, String resourceBasePath) {
 		super(mergedConfig);
-		this.resourceBasePath = !StringUtils.hasText(resourceBasePath) ? "" : resourceBasePath;
+		this.resourceBasePath = (StringUtils.hasText(resourceBasePath) ? resourceBasePath : "");
 	}
 
 	/**
@@ -195,17 +198,17 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 */
 	@Override
 	public String toString() {
-		return new ToStringCreator(this)
+		return new ToStringCreator(this, new DefaultToStringStyler(new SimpleValueStyler()))
 				.append("testClass", getTestClass())
-				.append("locations", ObjectUtils.nullSafeToString(getLocations()))
-				.append("classes", ObjectUtils.nullSafeToString(getClasses()))
-				.append("contextInitializerClasses", ObjectUtils.nullSafeToString(getContextInitializerClasses()))
-				.append("activeProfiles", ObjectUtils.nullSafeToString(getActiveProfiles()))
-				.append("propertySourceLocations", ObjectUtils.nullSafeToString(getPropertySourceLocations()))
-				.append("propertySourceProperties", ObjectUtils.nullSafeToString(getPropertySourceProperties()))
+				.append("locations", getLocations())
+				.append("classes", getClasses())
+				.append("contextInitializerClasses", getContextInitializerClasses())
+				.append("activeProfiles", getActiveProfiles())
+				.append("propertySourceLocations", getPropertySourceLocations())
+				.append("propertySourceProperties", getPropertySourceProperties())
 				.append("contextCustomizers", getContextCustomizers())
 				.append("resourceBasePath", getResourceBasePath())
-				.append("contextLoader", nullSafeClassName(getContextLoader()))
+				.append("contextLoader", (getContextLoader() != null ? getContextLoader().getClass() : null))
 				.append("parent", getParent())
 				.toString();
 	}

@@ -58,11 +58,9 @@ public interface MultipartFile extends InputStreamSource {
 	 * the directory portion, the file name could also contain characters such
 	 * as ".." and others that can be used maliciously. It is recommended to not
 	 * use this filename directly. Preferably generate a unique one and save
-	 * this one one somewhere for reference, if necessary.
+	 * this one somewhere for reference, if necessary.
 	 * @return the original filename, or the empty String if no file has been chosen
 	 * in the multipart form, or {@code null} if not defined or not available
-	 * @see org.apache.commons.fileupload.FileItem#getName()
-	 * @see org.springframework.web.multipart.commons.CommonsMultipartFile#setPreserveFilename
 	 * @see <a href="https://tools.ietf.org/html/rfc7578#section-4.2">RFC 7578, Section 4.2</a>
 	 * @see <a href="https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload">Unrestricted File Upload</a>
 	 */
@@ -126,15 +124,14 @@ public interface MultipartFile extends InputStreamSource {
 	 * in order to work with any storage mechanism.
 	 * <p><b>NOTE:</b> Depending on the underlying provider, temporary storage
 	 * may be container-dependent, including the base directory for relative
-	 * destinations specified here (e.g. with Servlet 3.0 multipart handling).
+	 * destinations specified here (e.g. with Servlet multipart handling).
 	 * For absolute destinations, the target file may get renamed/moved from its
 	 * temporary location or newly copied, even if a temporary copy already exists.
 	 * @param dest the destination file (typically absolute)
 	 * @throws IOException in case of reading or writing errors
 	 * @throws IllegalStateException if the file has already been moved
 	 * in the filesystem and is not available anymore for another transfer
-	 * @see org.apache.commons.fileupload.FileItem#write(File)
-	 * @see javax.servlet.http.Part#write(String)
+	 * @see jakarta.servlet.http.Part#write(String)
 	 */
 	void transferTo(File dest) throws IOException, IllegalStateException;
 

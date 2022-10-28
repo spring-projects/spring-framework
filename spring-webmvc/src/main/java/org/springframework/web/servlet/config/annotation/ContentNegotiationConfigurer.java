@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
@@ -102,7 +102,7 @@ public class ContentNegotiationConfigurer {
 
 
 	/**
-	 * Class constructor with {@link javax.servlet.ServletContext}.
+	 * Class constructor with {@link jakarta.servlet.ServletContext}.
 	 */
 	public ContentNegotiationConfigurer(@Nullable ServletContext servletContext) {
 		if (servletContext != null) {

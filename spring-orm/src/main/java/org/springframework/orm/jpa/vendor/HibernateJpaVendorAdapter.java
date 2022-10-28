@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,11 @@ package org.springframework.orm.jpa.vendor;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.spi.PersistenceProvider;
-import javax.persistence.spi.PersistenceUnitInfo;
-import javax.persistence.spi.PersistenceUnitTransactionType;
-
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.spi.PersistenceProvider;
+import jakarta.persistence.spi.PersistenceUnitInfo;
+import jakarta.persistence.spi.PersistenceUnitTransactionType;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AvailableSettings;
@@ -44,9 +43,8 @@ import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 import org.springframework.lang.Nullable;
 
 /**
- * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Hibernate
- * EntityManager. Developed and tested against Hibernate 5.3 and 5.4;
- * backwards-compatible with Hibernate 5.2 at runtime on a best-effort basis.
+ * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Hibernate.
+ * Compatible with Hibernate ORM 5.5/5.6 as well as 6.0/6.1.
  *
  * <p>Exposes Hibernate's persistence provider and Hibernate's Session as extended
  * EntityManager interface, and adapts {@link AbstractJpaVendorAdapter}'s common
@@ -171,20 +169,20 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	 */
 	@Nullable
 	protected Class<?> determineDatabaseDialectClass(Database database) {
-		switch (database) {
-			case DB2: return DB2Dialect.class;
-			case DERBY: return DerbyTenSevenDialect.class;
-			case H2: return H2Dialect.class;
-			case HANA: return HANAColumnStoreDialect.class;
-			case HSQL: return HSQLDialect.class;
-			case INFORMIX: return Informix10Dialect.class;
-			case MYSQL: return MySQL57Dialect.class;
-			case ORACLE: return Oracle12cDialect.class;
-			case POSTGRESQL: return PostgreSQL95Dialect.class;
-			case SQL_SERVER: return SQLServer2012Dialect.class;
-			case SYBASE: return SybaseDialect.class;
-			default: return null;
-		}
+		return switch (database) {
+			case DB2 -> DB2Dialect.class;
+			case DERBY -> DerbyTenSevenDialect.class;
+			case H2 -> H2Dialect.class;
+			case HANA -> HANAColumnStoreDialect.class;
+			case HSQL -> HSQLDialect.class;
+			case INFORMIX -> Informix10Dialect.class;
+			case MYSQL -> MySQL57Dialect.class;
+			case ORACLE -> Oracle12cDialect.class;
+			case POSTGRESQL -> PostgreSQL95Dialect.class;
+			case SQL_SERVER -> SQLServer2012Dialect.class;
+			case SYBASE -> SybaseDialect.class;
+			default -> null;
+		};
 	}
 
 	@Override

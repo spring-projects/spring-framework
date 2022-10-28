@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,24 +20,21 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
@@ -169,23 +166,23 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	 */
 	private static class ForwardedHeaderRemovingRequest extends HttpServletRequestWrapper {
 
-		private final Map<String, List<String>> headers;
+		private final Set<String> headerNames;
 
 		public ForwardedHeaderRemovingRequest(HttpServletRequest request) {
 			super(request);
-			this.headers = initHeaders(request);
+			this.headerNames = headerNames(request);
 		}
 
-		private static Map<String, List<String>> initHeaders(HttpServletRequest request) {
-			Map<String, List<String>> headers = new LinkedCaseInsensitiveMap<>(Locale.ENGLISH);
+		private static Set<String> headerNames(HttpServletRequest request) {
+			Set<String> headerNames = Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(Locale.ENGLISH));
 			Enumeration<String> names = request.getHeaderNames();
 			while (names.hasMoreElements()) {
 				String name = names.nextElement();
 				if (!FORWARDED_HEADER_NAMES.contains(name)) {
-					headers.put(name, Collections.list(request.getHeaders(name)));
+					headerNames.add(name);
 				}
 			}
-			return headers;
+			return Collections.unmodifiableSet(headerNames);
 		}
 
 		// Override header accessors to not expose forwarded headers
@@ -193,19 +190,23 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		@Override
 		@Nullable
 		public String getHeader(String name) {
-			List<String> value = this.headers.get(name);
-			return (CollectionUtils.isEmpty(value) ? null : value.get(0));
+			if (FORWARDED_HEADER_NAMES.contains(name)) {
+				return null;
+			}
+			return super.getHeader(name);
 		}
 
 		@Override
 		public Enumeration<String> getHeaders(String name) {
-			List<String> value = this.headers.get(name);
-			return (Collections.enumeration(value != null ? value : Collections.emptySet()));
+			if (FORWARDED_HEADER_NAMES.contains(name)) {
+				return Collections.emptyEnumeration();
+			}
+			return super.getHeaders(name);
 		}
 
 		@Override
 		public Enumeration<String> getHeaderNames() {
-			return Collections.enumeration(this.headers.keySet());
+			return Collections.enumeration(this.headerNames);
 		}
 	}
 
@@ -239,7 +240,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			int port = uriComponents.getPort();
 
 			this.scheme = uriComponents.getScheme();
-			this.secure = "https".equals(this.scheme);
+			this.secure = "https".equals(this.scheme) || "wss".equals(this.scheme);
 			this.host = uriComponents.getHost();
 			this.port = (port == -1 ? (this.secure ? 443 : 80) : port);
 

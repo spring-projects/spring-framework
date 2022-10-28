@@ -121,7 +121,7 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 	/**
 	 * Create a message listener container for the given {@link JmsListenerEndpoint}.
 	 * <p>This create the necessary infrastructure to honor that endpoint
-	 * with regards to its configuration.
+	 * with regard to its configuration.
 	 * <p>The {@code startImmediately} flag determines if the container should be
 	 * started immediately.
 	 * @param endpoint the endpoint to add
@@ -153,7 +153,7 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 	/**
 	 * Create a message listener container for the given {@link JmsListenerEndpoint}.
 	 * <p>This create the necessary infrastructure to honor that endpoint
-	 * with regards to its configuration.
+	 * with regard to its configuration.
 	 * @param endpoint the endpoint to add
 	 * @param factory the listener factory to use
 	 * @see #registerListenerContainer(JmsListenerEndpoint, JmsListenerContainerFactory, boolean)

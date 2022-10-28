@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
  *
  * <p>Supports formatting by style pattern, ISO date time pattern, or custom format pattern string.
  * Can be applied to {@link java.util.Date}, {@link java.util.Calendar}, {@link Long} (for
- * millisecond timestamps) as well as JSR-310 {@code java.time} and Joda-Time value types.
+ * millisecond timestamps) as well as JSR-310 {@code java.time} value types.
  *
  * <p>For style-based formatting, set the {@link #style} attribute to the desired style pattern code.
  * The first character of the code is the date style, and the second character is the time style.
@@ -66,7 +66,6 @@ import java.lang.annotation.Target;
  * @author Sam Brannen
  * @since 3.0
  * @see java.time.format.DateTimeFormatter
- * @see org.joda.time.format.DateTimeFormat
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

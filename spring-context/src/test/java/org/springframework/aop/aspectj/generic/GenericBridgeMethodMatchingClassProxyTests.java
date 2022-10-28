@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,21 +25,21 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * <p>This class focuses on class proxying.
  *
- * <p>See GenericBridgeMethodMatchingTests for more details.
+ * <p>See {@link GenericBridgeMethodMatchingTests} for more details.
  *
  * @author Ramnivas Laddad
  * @author Chris Beams
  */
-public class GenericBridgeMethodMatchingClassProxyTests extends GenericBridgeMethodMatchingTests {
+class GenericBridgeMethodMatchingClassProxyTests extends GenericBridgeMethodMatchingTests {
 
 	@Test
-	public void testGenericDerivedInterfaceMethodThroughClass() {
+	void testGenericDerivedInterfaceMethodThroughClass() {
 		((DerivedStringParameterizedClass) testBean).genericDerivedInterfaceMethod("");
 		assertThat(counterAspect.count).isEqualTo(1);
 	}
 
 	@Test
-	public void testGenericBaseInterfaceMethodThroughClass() {
+	void testGenericBaseInterfaceMethodThroughClass() {
 		((DerivedStringParameterizedClass) testBean).genericBaseInterfaceMethod("");
 		assertThat(counterAspect.count).isEqualTo(1);
 	}

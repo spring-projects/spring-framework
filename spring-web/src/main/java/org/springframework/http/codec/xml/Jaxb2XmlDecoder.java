@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.http.codec.xml;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -24,19 +25,19 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.UnmarshalException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSchema;
-import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.UnmarshalException;
+import jakarta.xml.bind.Unmarshaller;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlSchema;
+import jakarta.xml.bind.annotation.XmlType;
 import org.reactivestreams.Publisher;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
@@ -175,7 +176,6 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	}
 
 	@Override
-	@SuppressWarnings({"rawtypes", "unchecked", "cast"})  // XMLEventReader is Iterator<Object> on JDK 9
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
@@ -184,12 +184,12 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	}
 
 	@Override
-	@SuppressWarnings({"rawtypes", "unchecked", "cast"})  // XMLEventReader is Iterator<Object> on JDK 9
 	public Object decode(DataBuffer dataBuffer, ResolvableType targetType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) throws DecodingException {
 
 		try {
-			Iterator eventReader = inputFactory.createXMLEventReader(dataBuffer.asInputStream());
+			Iterator<Object> eventReader = inputFactory.createXMLEventReader(dataBuffer.asInputStream(),
+					encoding(mimeType));
 			List<XMLEvent> events = new ArrayList<>();
 			eventReader.forEachRemaining(event -> events.add((XMLEvent) event));
 			return unmarshal(events, targetType.toClass());
@@ -208,6 +208,20 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 		}
 		finally {
 			DataBufferUtils.release(dataBuffer);
+		}
+	}
+
+	@Nullable
+	private static String encoding(@Nullable MimeType mimeType) {
+		if (mimeType == null) {
+			return null;
+		}
+		Charset charset = mimeType.getCharset();
+		if (charset == null) {
+			return null;
+		}
+		else {
+			return charset.name();
 		}
 	}
 

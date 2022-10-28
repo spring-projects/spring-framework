@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.orm.hibernate5;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.engine.spi.SessionImplementor;
 
 import org.springframework.core.Ordered;
 import org.springframework.dao.DataAccessException;
@@ -69,7 +70,10 @@ public class SpringSessionSynchronization implements TransactionSynchronization,
 		if (this.holderActive) {
 			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
 			// Eagerly disconnect the Session here, to make release mode "on_close" work on JBoss.
-			getCurrentSession().disconnect();
+			Session session = getCurrentSession();
+			if (session instanceof SessionImplementor sessionImpl) {
+				sessionImpl.getJdbcCoordinator().getLogicalConnection().manualDisconnect();
+			}
 		}
 	}
 
@@ -106,7 +110,9 @@ public class SpringSessionSynchronization implements TransactionSynchronization,
 				session.setHibernateFlushMode(this.sessionHolder.getPreviousFlushMode());
 			}
 			// Eagerly disconnect the Session here, to make release mode "on_close" work nicely.
-			session.disconnect();
+			if (session instanceof SessionImplementor sessionImpl) {
+				sessionImpl.getJdbcCoordinator().getLogicalConnection().manualDisconnect();
+			}
 		}
 		finally {
 			// Unbind at this point if it's a new Session...

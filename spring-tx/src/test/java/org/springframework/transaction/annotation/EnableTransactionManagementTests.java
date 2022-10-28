@@ -45,7 +45,7 @@ import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatException;
 
 /**
  * Tests demonstrating use of @EnableTransactionManagement @Configuration classes.
@@ -207,8 +207,8 @@ public class EnableTransactionManagementTests {
 	public void proxyTypeAspectJCausesRegistrationOfAnnotationTransactionAspect() {
 		// should throw CNFE when trying to load AnnotationTransactionAspect.
 		// Do you actually have org.springframework.aspects on the classpath?
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-				new AnnotationConfigApplicationContext(EnableAspectjTxConfig.class, TxManagerConfig.class))
+		assertThatException()
+			.isThrownBy(() -> new AnnotationConfigApplicationContext(EnableAspectjTxConfig.class, TxManagerConfig.class))
 			.withMessageContaining("AspectJJtaTransactionManagementConfiguration");
 	}
 

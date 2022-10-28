@@ -29,8 +29,8 @@ import org.springframework.core.Ordered;
  *
  * <p>The {@link #value} is optional and represents an order value as defined in the
  * {@link Ordered} interface. Lower values have higher priority. The default value is
- * {@code Ordered.LOWEST_PRECEDENCE}, indicating lowest priority (losing to any other
- * specified order value).
+ * {@code Ordered.LOWEST_PRECEDENCE}, indicating the lowest priority (losing to any
+ * other specified order value).
  *
  * <p><b>NOTE:</b> Since Spring 4.0, annotation-based ordering is supported for many
  * kinds of components in Spring, even for collection injection where the order values
@@ -40,7 +40,7 @@ import org.springframework.core.Ordered;
  * order which is an orthogonal concern determined by dependency relationships and
  * {@code @DependsOn} declarations (influencing a runtime-determined dependency graph).
  *
- * <p>Since Spring 4.1, the standard {@link javax.annotation.Priority} annotation
+ * <p>Since Spring 4.1, the standard {@link jakarta.annotation.Priority} annotation
  * can be used as a drop-in replacement for this annotation in ordering scenarios.
  * Note that {@code @Priority} may have additional semantics when a single element
  * has to be picked (see {@link AnnotationAwareOrderComparator#getPriority}).
@@ -58,7 +58,7 @@ import org.springframework.core.Ordered;
  * @see org.springframework.core.Ordered
  * @see AnnotationAwareOrderComparator
  * @see OrderUtils
- * @see javax.annotation.Priority
+ * @see jakarta.annotation.Priority
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})

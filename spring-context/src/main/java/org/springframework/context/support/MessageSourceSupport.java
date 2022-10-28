@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,17 +57,18 @@ public abstract class MessageSourceSupport {
 
 
 	/**
-	 * Set whether to always apply the {@code MessageFormat} rules,
-	 * parsing even messages without arguments.
-	 * <p>Default is "false": Messages without arguments are by default
-	 * returned as-is, without parsing them through MessageFormat.
-	 * Set this to "true" to enforce MessageFormat for all messages,
-	 * expecting all message texts to be written with MessageFormat escaping.
-	 * <p>For example, MessageFormat expects a single quote to be escaped
-	 * as "''". If your message texts are all written with such escaping,
-	 * even when not defining argument placeholders, you need to set this
-	 * flag to "true". Else, only message texts with actual arguments
-	 * are supposed to be written with MessageFormat escaping.
+	 * Set whether to always apply the {@code MessageFormat} rules, parsing even
+	 * messages without arguments.
+	 * <p>Default is {@code false}: Messages without arguments are by default
+	 * returned as-is, without parsing them through {@code MessageFormat}.
+	 * Set this to {@code true} to enforce {@code MessageFormat} for all messages,
+	 * expecting all message texts to be written with {@code MessageFormat} escaping.
+	 * <p>For example, {@code MessageFormat} expects a single quote to be escaped
+	 * as two adjacent single quotes ({@code "''"}). If your message texts are all
+	 * written with such escaping, even when not defining argument placeholders,
+	 * you need to set this flag to {@code true}. Otherwise, only message texts
+	 * with actual arguments are supposed to be written with {@code MessageFormat}
+	 * escaping.
 	 * @see java.text.MessageFormat
 	 */
 	public void setAlwaysUseMessageFormat(boolean alwaysUseMessageFormat) {
@@ -75,7 +76,7 @@ public abstract class MessageSourceSupport {
 	}
 
 	/**
-	 * Return whether to always apply the MessageFormat rules, parsing even
+	 * Return whether to always apply the {@code MessageFormat} rules, parsing even
 	 * messages without arguments.
 	 */
 	protected boolean isAlwaysUseMessageFormat() {
@@ -150,10 +151,10 @@ public abstract class MessageSourceSupport {
 	}
 
 	/**
-	 * Create a MessageFormat for the given message and Locale.
-	 * @param msg the message to create a MessageFormat for
-	 * @param locale the Locale to create a MessageFormat for
-	 * @return the MessageFormat instance
+	 * Create a {@code MessageFormat} for the given message and Locale.
+	 * @param msg the message to create a {@code MessageFormat} for
+	 * @param locale the Locale to create a {@code MessageFormat} for
+	 * @return the {@code MessageFormat} instance
 	 */
 	protected MessageFormat createMessageFormat(String msg, Locale locale) {
 		return new MessageFormat(msg, locale);

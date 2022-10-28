@@ -35,7 +35,7 @@ public abstract aspect AbstractDependencyInjectionAspect {
 			mostSpecificSubTypeConstruction() && !preConstructionConfiguration();
 
 	/**
-	 * Select least specific super type that is marked for DI
+	 * Select least specific supertype that is marked for DI
 	 * (so that injection occurs only once with pre-construction injection).
 	 */
 	public abstract pointcut leastSpecificSuperTypeConstruction();

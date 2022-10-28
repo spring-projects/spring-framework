@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -153,7 +153,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	 * However, it can also be set to point to a URL served by the application.
 	 * <p>Note that it's possible to specify a relative URL in which case the URL
 	 * must be relative to the iframe URL. For example assuming a SockJS endpoint
-	 * mapped to "/sockjs", and resulting iframe URL "/sockjs/iframe.html", then the
+	 * mapped to "/sockjs", and resulting iframe URL "/sockjs/iframe.html", then
 	 * the relative URL must start with "../../" to traverse up to the location
 	 * above the SockJS mapping. In case of a prefix-based Servlet mapping one more
 	 * traversal may be needed.
@@ -310,17 +310,23 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	}
 
 	/**
-	 * Configure allowed {@code Origin} header values. This check is mostly
-	 * designed for browsers. There is nothing preventing other types of client
-	 * to modify the {@code Origin} header value.
-	 * <p>When SockJS is enabled and origins are restricted, transport types
-	 * that do not allow to check request origin (Iframe based transports)
-	 * are disabled. As a consequence, IE 6 to 9 are not supported when origins
-	 * are restricted.
-	 * <p>Each provided allowed origin must have a scheme, and optionally a port
-	 * (e.g. "https://example.org", "https://example.org:9090"). An allowed origin
-	 * string may also be "*" in which case all origins are allowed.
+	 * Set the origins for which cross-origin requests are allowed from a browser.
+	 * Please, refer to {@link CorsConfiguration#setAllowedOrigins(List)} for
+	 * format details and considerations, and keep in mind that the CORS spec
+	 * does not allow use of {@code "*"} with {@code allowCredentials=true}.
+	 * For more flexible origin patterns use {@link #setAllowedOriginPatterns}
+	 * instead.
+	 *
+	 * <p>By default, no origins are allowed. When
+	 * {@link #setAllowedOriginPatterns(Collection) allowedOriginPatterns} is also
+	 * set, then that takes precedence over this property.
+	 *
+	 * <p>Note when SockJS is enabled and origins are restricted, transport types
+	 * that do not allow to check request origin (Iframe based transports) are
+	 * disabled. As a consequence, IE 6 to 9 are not supported when origins are
+	 * restricted.
 	 * @since 4.1.2
+	 * @see #setAllowedOriginPatterns(Collection)
 	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
 	 * @see <a href="https://github.com/sockjs/sockjs-client#supported-transports-by-browser-html-served-from-http-or-https">SockJS supported transports by browser</a>
 	 */
@@ -330,19 +336,19 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	}
 
 	/**
-	 * Return configure allowed {@code Origin} header values.
+	 * Return the {@link #setAllowedOrigins(Collection) configured} allowed origins.
 	 * @since 4.1.2
-	 * @see #setAllowedOrigins
 	 */
 	@SuppressWarnings("ConstantConditions")
 	public Collection<String> getAllowedOrigins() {
 		return this.corsConfiguration.getAllowedOrigins();
 	}
 	/**
-	 * A variant of {@link #setAllowedOrigins(Collection)} that accepts flexible
-	 * domain patterns, e.g. {@code "https://*.domain1.com"}. Furthermore it
-	 * always sets the {@code Access-Control-Allow-Origin} response header to
-	 * the matched origin and never to {@code "*"}, nor to any other pattern.
+	 * Alternative to {@link #setAllowedOrigins(Collection)} that supports more
+	 * flexible patterns for specifying the origins for which cross-origin
+	 * requests are allowed from a browser. Please, refer to
+	 * {@link CorsConfiguration#setAllowedOriginPatterns(List)} for format
+	 * details and other considerations.
 	 * <p>By default this is not set.
 	 * @since 5.2.3
 	 */
@@ -354,7 +360,6 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	/**
 	 * Return {@link #setAllowedOriginPatterns(Collection) configured} origin patterns.
 	 * @since 5.3.2
-	 * @see #setAllowedOriginPatterns
 	 */
 	@SuppressWarnings("ConstantConditions")
 	public Collection<String> getAllowedOriginPatterns() {
@@ -372,7 +377,8 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 		if (sockJsPath == null) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Expected SockJS path. Failing request: " + request.getURI());
+				logger.warn(LogFormatUtils.formatValue(
+						"Expected SockJS path. Failing request: " + request.getURI(), -1, true));
 			}
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
@@ -391,6 +397,10 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 			if (sockJsPath.isEmpty() || sockJsPath.equals("/")) {
 				if (requestInfo != null) {
 					logger.debug("Processing transport request: " + requestInfo);
+				}
+				if ("websocket".equalsIgnoreCase(request.getHeaders().getUpgrade())) {
+					response.setStatusCode(HttpStatus.BAD_REQUEST);
+					return;
 				}
 				response.getHeaders().setContentType(new MediaType("text", "plain", StandardCharsets.UTF_8));
 				response.getBody().write("Welcome to SockJS!\n".getBytes(StandardCharsets.UTF_8));
@@ -438,7 +448,8 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 				String[] pathSegments = StringUtils.tokenizeToStringArray(sockJsPath.substring(1), "/");
 				if (pathSegments.length != 3) {
 					if (logger.isWarnEnabled()) {
-						logger.warn("Invalid SockJS path '" + sockJsPath + "' - required to have 3 path segments");
+						logger.warn(LogFormatUtils.formatValue("Invalid SockJS path '" + sockJsPath + "' - " +
+								"required to have 3 path segments", -1, true));
 					}
 					if (requestInfo != null) {
 						logger.debug("Ignoring transport request: " + requestInfo);

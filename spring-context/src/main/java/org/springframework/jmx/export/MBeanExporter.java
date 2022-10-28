@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,7 +165,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	private boolean exposeManagedResourceClassLoader = true;
 
 	/** A set of bean names that should be excluded from autodetection. */
-	private Set<String> excludedBeans = new HashSet<>();
+	private final Set<String> excludedBeans = new HashSet<>();
 
 	/** The MBeanExporterListeners registered with this exporter. */
 	@Nullable
@@ -306,7 +306,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	}
 
 	/**
-	 * Indicates whether or not the managed resource should be exposed on the
+	 * Indicates whether the managed resource should be exposed on the
 	 * {@link Thread#getContextClassLoader() thread context ClassLoader} before
 	 * allowing any invocations on the MBean to occur.
 	 * <p>The default value is {@code true}, exposing a {@link SpringModelMBean}
@@ -513,7 +513,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * {@code ModelMBean}. The actual implementation of the
 	 * {@code ModelMBean} interface used depends on the implementation of
 	 * the {@code ModelMBeanProvider} interface that is configured. By
-	 * default the {@code RequiredModelMBean} class that is supplied with
+	 * default, the {@code RequiredModelMBean} class that is supplied with
 	 * all JMX implementations is used.
 	 * <p>The management interface produced for each bean is dependent on the
 	 * {@code MBeanInfoAssembler} implementation being used. The
@@ -762,7 +762,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * <p>The default implementation delegates to {@link JmxUtils#isMBean},
 	 * which checks for {@link javax.management.DynamicMBean} classes as well
 	 * as classes with corresponding "*MBean" interface (Standard MBeans)
-	 * or corresponding "*MXBean" interface (Java 6 MXBeans).
+	 * or corresponding "*MXBean" interface (Java MXBeans).
 	 * @param beanClass the bean class to analyze
 	 * @return whether the class qualifies as an MBean
 	 * @see org.springframework.jmx.support.JmxUtils#isMBean(Class)
@@ -914,7 +914,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	}
 
 	/**
-	 * Indicates whether or not a particular bean name is present in the excluded beans list.
+	 * Indicates whether a particular bean name is present in the excluded beans list.
 	 */
 	private boolean isExcluded(String beanName) {
 		return (this.excludedBeans.contains(beanName) ||
@@ -1067,7 +1067,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 
 		/**
 		 * Called during the autodetection process to decide whether
-		 * or not a bean should be included.
+		 * a bean should be included.
 		 * @param beanClass the class of the bean
 		 * @param beanName the name of the bean
 		 */

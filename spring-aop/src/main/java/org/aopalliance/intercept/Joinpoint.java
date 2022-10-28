@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import javax.annotation.Nullable;
  * terminology).
  *
  * <p>A runtime joinpoint is an <i>event</i> that occurs on a static
- * joinpoint (i.e. a location in a the program). For instance, an
+ * joinpoint (i.e. a location in a program). For instance, an
  * invocation is the runtime joinpoint on a method (static joinpoint).
  * The static part of a given joinpoint can be generically retrieved
  * using the {@link #getStaticPart()} method.
@@ -63,7 +63,7 @@ public interface Joinpoint {
 	/**
 	 * Return the static part of this joinpoint.
 	 * <p>The static part is an accessible object on which a chain of
-	 * interceptors are installed.
+	 * interceptors is installed.
 	 */
 	@Nonnull
 	AccessibleObject getStaticPart();

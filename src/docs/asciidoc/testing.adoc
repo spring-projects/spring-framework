@@ -1,7 +1,5 @@
 [[testing]]
 = Testing
-:doc-root: https://docs.spring.io
-:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :doc-spring-boot: {doc-root}/spring-boot/docs/current/reference
 :toc: left
 :toclevels: 4
@@ -34,8 +32,8 @@ manual.)
 == Unit Testing
 
 Dependency injection should make your code less dependent on the container than it would
-be with traditional Java EE development. The POJOs that make up your application should
-be testable in JUnit or TestNG tests, with objects instantiated by using the `new`
+be with traditional J2EE / Java EE development. The POJOs that make up your application
+should be testable in JUnit or TestNG tests, with objects instantiated by using the `new`
 operator, without Spring or any other container. You can use <<mock-objects, mock objects>>
 (in conjunction with other valuable testing techniques) to test your code in isolation.
 If you follow the architecture recommendations for Spring, the resulting clean layering
@@ -80,7 +78,7 @@ out-of-container tests for code that depends on environment-specific properties.
 The `org.springframework.mock.jndi` package contains a partial implementation of the JNDI
 SPI, which you can use to set up a simple JNDI environment for test suites or stand-alone
 applications. If, for example, JDBC `DataSource` instances get bound to the same JNDI
-names in test code as they do in a Java EE container, you can reuse both application code
+names in test code as they do in a Jakarta EE container, you can reuse both application code
 and configuration in testing scenarios without modification.
 
 WARNING: The mock JNDI support in the `org.springframework.mock.jndi` package is
@@ -94,7 +92,7 @@ parties such as https://github.com/h-thurow/Simple-JNDI[Simple-JNDI].
 The `org.springframework.mock.web` package contains a comprehensive set of Servlet API
 mock objects that are useful for testing web contexts, controllers, and filters. These
 mock objects are targeted at usage with Spring's Web MVC framework and are generally more
-convenient to use than dynamic mock objects (such as http://easymock.org/[EasyMock])
+convenient to use than dynamic mock objects (such as https://easymock.org/[EasyMock])
 or alternative Servlet API mock objects (such as http://www.mockobjects.com[MockObjects]).
 
 TIP: Since Spring Framework 5.0, the mock objects in `org.springframework.mock.web` are
@@ -500,16 +498,17 @@ The following example shows such a case:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@ContextConfiguration(initializers = CustomContextIntializer.class) // <1>
+	@ContextConfiguration(initializers = CustomContextInitializer.class) // <1>
 	class ContextInitializerTests {
 		// class body...
 	}
 ----
+<1> Declaring an initializer class.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@ContextConfiguration(initializers = [CustomContextIntializer::class]) // <1>
+	@ContextConfiguration(initializers = [CustomContextInitializer::class]) // <1>
 	class ContextInitializerTests {
 		// class body...
 	}
@@ -1099,10 +1098,10 @@ javadoc.
 [[spring-testing-annotation-testexecutionlisteners]]
 ===== `@TestExecutionListeners`
 
-`@TestExecutionListeners` defines class-level metadata for configuring the
-`TestExecutionListener` implementations that should be registered with the
-`TestContextManager`. Typically, `@TestExecutionListeners` is used in conjunction with
-`@ContextConfiguration`.
+`@TestExecutionListeners` is used to register listeners for a particular test class, its
+subclasses, and its nested classes. If you wish to register a listener globally, you
+should register it via the automatic discovery mechanism described in
+<<testcontext-tel-config>>.
 
 The following example shows how to register two `TestExecutionListener` implementations:
 
@@ -1133,7 +1132,9 @@ By default, `@TestExecutionListeners` provides support for inheriting listeners 
 superclasses or enclosing classes. See
 <<testcontext-junit-jupiter-nested-test-configuration>> and the 
 {api-spring-framework}/test/context/TestExecutionListeners.html[`@TestExecutionListeners`
-javadoc] for an example and further details.
+javadoc] for an example and further details. If you discover that you need to switch
+back to using the default `TestExecutionListener` implementations, see the note
+in <<testcontext-tel-config-registering-tels>>.
 
 [[spring-testing-annotation-recordapplicationevents]]
 ===== `@RecordApplicationEvents`
@@ -1477,13 +1478,12 @@ and can be used anywhere in the Spring Framework.
 * `@Autowired`
 * `@Qualifier`
 * `@Value`
-* `@Resource` (javax.annotation) if JSR-250 is present
-* `@ManagedBean` (javax.annotation) if JSR-250 is present
-* `@Inject` (javax.inject) if JSR-330 is present
-* `@Named` (javax.inject) if JSR-330 is present
-* `@PersistenceContext` (javax.persistence) if JPA is present
-* `@PersistenceUnit` (javax.persistence) if JPA is present
-* `@Required`
+* `@Resource` (jakarta.annotation) if JSR-250 is present
+* `@ManagedBean` (jakarta.annotation) if JSR-250 is present
+* `@Inject` (jakarta.inject) if JSR-330 is present
+* `@Named` (jakarta.inject) if JSR-330 is present
+* `@PersistenceContext` (jakarta.persistence) if JPA is present
+* `@PersistenceUnit` (jakarta.persistence) if JPA is present
 * `@Transactional` (org.springframework.transaction.annotation)
   _with <<testcontext-tx-attribute-support, limited attribute support>>_
 
@@ -1659,8 +1659,10 @@ before failing.
 times that the test method is to be run is specified in the annotation.
 
 The scope of execution to be repeated includes execution of the test method itself as
-well as any setting up or tearing down of the test fixture. The following example shows
-how to use the `@Repeat` annotation:
+well as any setting up or tearing down of the test fixture. When used with the
+<<testcontext-junit4-rules, `SpringMethodRule`>>, the scope additionally includes
+preparation of the test instance by `TestExecutionListener` implementations. The
+following example shows how to use the `@Repeat` annotation:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1870,7 +1872,7 @@ Spring test configuration annotations are processed within enclosing class hiera
 for inner test classes.
 
 If `@NestedTestConfiguration` is not present or meta-present on a test class, in its
-super type hierarchy, or in its enclosing class hierarchy, the default _enclosing
+supertype hierarchy, or in its enclosing class hierarchy, the default _enclosing
 configuration inheritance mode_ will be used. See the tip below for details on how to
 change the default mode.
 
@@ -1959,6 +1961,19 @@ example, you can create a custom `@EnabledOnMac` annotation as follows:
 	annotation class EnabledOnMac {}
 ----
 
+[NOTE]
+====
+`@EnabledOnMac` is meant only as an example of what is possible. If you have that exact
+use case, please use the built-in `@EnabledOnOs(MAC)` support in JUnit Jupiter.
+====
+
+[WARNING]
+====
+Since JUnit 5.7, JUnit Jupiter also has a condition annotation named `@EnabledIf`. Thus,
+if you wish to use Spring's `@EnabledIf` support make sure you import the annotation type
+from the correct package.
+====
+
 [[integration-testing-annotations-junit-jupiter-disabledif]]
 ===== `@DisabledIf`
 
@@ -2006,6 +2021,19 @@ example, you can create a custom `@DisabledOnMac` annotation as follows:
 	)
 	annotation class DisabledOnMac {}
 ----
+
+[NOTE]
+====
+`@DisabledOnMac` is meant only as an example of what is possible. If you have that exact
+use case, please use the built-in `@DisabledOnOs(MAC)` support in JUnit Jupiter.
+====
+
+[WARNING]
+====
+Since JUnit 5.7, JUnit Jupiter also has a condition annotation named `@DisabledIf`. Thus,
+if you wish to use Spring's `@DisabledIf` support make sure you import the annotation type
+from the correct package.
+====
 
 [[integration-testing-annotations-meta]]
 ==== Meta-Annotation Support for Testing
@@ -2433,11 +2461,45 @@ by default, exactly in the following order:
 [[testcontext-tel-config-registering-tels]]
 ===== Registering `TestExecutionListener` Implementations
 
-You can register `TestExecutionListener` implementations for a test class and its
-subclasses by using the `@TestExecutionListeners` annotation. See
+You can register `TestExecutionListener` implementations explicitly for a test class, its
+subclasses, and its nested classes by using the `@TestExecutionListeners` annotation. See
 <<integration-testing-annotations, annotation support>> and the javadoc for
 {api-spring-framework}/test/context/TestExecutionListeners.html[`@TestExecutionListeners`]
 for details and examples.
+
+.Switching to default `TestExecutionListener` implementations
+[NOTE]
+====
+If you extend a class that is annotated with `@TestExecutionListeners` and you need to
+switch to using the default set of listeners, you can annotate your class with the
+following.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	// Switch to default listeners
+	@TestExecutionListeners(
+		listeners = {},
+		inheritListeners = false,
+		mergeMode = MERGE_WITH_DEFAULTS)
+	class MyTest extends BaseTest {
+		// class body...
+	}
+----
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// Switch to default listeners
+	@TestExecutionListeners(
+		listeners = [],
+		inheritListeners = false,
+		mergeMode = MERGE_WITH_DEFAULTS)
+	class MyTest : BaseTest {
+		// class body...
+	}
+----
+====
 
 [[testcontext-tel-config-automatic-discovery]]
 ===== Automatic Discovery of Default `TestExecutionListener` Implementations
@@ -2496,7 +2558,7 @@ listeners. The following listing demonstrates this style of configuration:
 	}
 ----
 
-[source,java,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	@ContextConfiguration
@@ -2613,7 +2675,7 @@ published while invoking a method in a Spring-managed component:
 			// Invoke method in OrderService that publishes an event
 			orderService.submitOrder(new Order(/* ... */));
 			// Verify that an OrderSubmitted event was published
-			int numEvents = events.stream(OrderSubmitted.class).count(); // <3>
+			long numEvents = events.stream(OrderSubmitted.class).count(); // <3>
 			assertThat(numEvents).isEqualTo(1);
 		}
 	}
@@ -2671,14 +2733,38 @@ test's `ApplicationContext` can listen to the following events published by the
 * `AfterTestMethodEvent`
 * `AfterTestClassEvent`
 
-NOTE: These events are only published if the `ApplicationContext` has already been loaded.
-
 These events may be consumed for various reasons, such as resetting mock beans or tracing
 test execution. One advantage of consuming test execution events rather than implementing
 a custom `TestExecutionListener` is that test execution events may be consumed by any
 Spring bean registered in the test `ApplicationContext`, and such beans may benefit
 directly from dependency injection and other features of the `ApplicationContext`. In
 contrast, a `TestExecutionListener` is not a bean in the `ApplicationContext`.
+
+[NOTE]
+====
+The `EventPublishingTestExecutionListener` is registered by default; however, it only
+publishes events if the `ApplicationContext` has _already been loaded_. This prevents the
+`ApplicationContext` from being loaded unnecessarily or too early.
+
+Consequently, a `BeforeTestClassEvent` will not be published until after the
+`ApplicationContext` has been loaded by another `TestExecutionListener`. For example, with
+the default set of `TestExecutionListener` implementations registered, a
+`BeforeTestClassEvent` will not be published for the first test class that uses a
+particular test `ApplicationContext`, but a `BeforeTestClassEvent` _will_ be published for
+any subsequent test class in the same test suite that uses the same test
+`ApplicationContext` since the context will already have been loaded when subsequent test
+classes run (as long as the context has not been removed from the `ContextCache` via
+`@DirtiesContext` or the max-size eviction policy).
+
+If you wish to ensure that a `BeforeTestClassEvent` is always published for every test
+class, you need to register a `TestExecutionListener` that loads the `ApplicationContext`
+in the `beforeTestClass` callback, and that `TestExecutionListener` must be registered
+_before_ the `EventPublishingTestExecutionListener`.
+
+Similarly, if `@DirtiesContext` is used to remove the `ApplicationContext` from the
+context cache after the last test method in a given test class, the `AfterTestClassEvent`
+will not be published for that test class.
+====
 
 In order to listen to test execution events, a Spring bean may choose to implement the
 `org.springframework.context.ApplicationListener` interface. Alternatively, listener
@@ -3087,7 +3173,7 @@ The term "`component class`" can refer to any of the following:
 
 * A class annotated with `@Configuration`.
 * A component (that is, a class annotated with `@Component`, `@Service`, `@Repository`, or other stereotype annotations).
-* A JSR-330 compliant class that is annotated with `javax.inject` annotations.
+* A JSR-330 compliant class that is annotated with `jakarta.inject` annotations.
 * Any class that contains `@Bean`-methods.
 * Any other class that is intended to be registered as a Spring component (i.e., a Spring
   bean in the `ApplicationContext`), potentially taking advantage of automatic autowiring
@@ -4244,7 +4330,7 @@ properties.
 
 		@DynamicPropertySource
 		static void redisProperties(DynamicPropertyRegistry registry) {
-			registry.add("redis.host", redis::getContainerIpAddress);
+			registry.add("redis.host", redis::getHost);
 			registry.add("redis.port", redis::getMappedPort);
 		}
 
@@ -4268,7 +4354,7 @@ properties.
 			@DynamicPropertySource
 			@JvmStatic
 			fun redisProperties(registry: DynamicPropertyRegistry) {
-				registry.add("redis.host", redis::getContainerIpAddress)
+				registry.add("redis.host", redis::getHost)
 				registry.add("redis.port", redis::getMappedPort)
 			}
 		}
@@ -5623,7 +5709,6 @@ following example shows the relevant annotations:
 
 [[testcontext-tx-false-positives]]
 .Avoid false positives when testing ORM code
-
 [NOTE]
 =====
 When you test application code that manipulates the state of a Hibernate session or JPA
@@ -5743,6 +5828,86 @@ The following example shows matching methods for JPA:
 
 	// ...
 ----
+=====
+
+[[testcontext-tx-orm-lifecycle-callbacks]]
+.Testing ORM entity lifecycle callbacks
+[NOTE]
+=====
+Similar to the note about avoiding <<testcontext-tx-false-positives, false positives>>
+when testing ORM code, if your application makes use of entity lifecycle callbacks (also
+known as entity listeners), make sure to flush the underlying unit of work within test
+methods that run that code. Failing to _flush_ or _clear_ the underlying unit of work can
+result in certain lifecycle callbacks not being invoked.
+
+For example, when using JPA, `@PostPersist`, `@PreUpdate`, and `@PostUpdate` callbacks
+will not be called unless `entityManager.flush()` is invoked after an entity has been
+saved or updated. Similarly, if an entity is already attached to the current unit of work
+(associated with the current persistence context), an attempt to reload the entity will
+not result in a `@PostLoad` callback unless `entityManager.clear()` is invoked before the
+attempt to reload the entity.
+
+The following example shows how to flush the `EntityManager` to ensure that
+`@PostPersist` callbacks are invoked when an entity is persisted. An entity listener with
+a `@PostPersist` callback method has been registered for the `Person` entity used in the
+example.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	// ...
+
+	@Autowired
+	JpaPersonRepository repo;
+
+	@PersistenceContext
+	EntityManager entityManager;
+
+	@Transactional
+	@Test
+	void savePerson() {
+		// EntityManager#persist(...) results in @PrePersist but not @PostPersist
+		repo.save(new Person("Jane"));
+
+		// Manual flush is required for @PostPersist callback to be invoked
+		entityManager.flush();
+
+		// Test code that relies on the @PostPersist callback
+		// having been invoked...
+	}
+
+	// ...
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// ...
+
+	@Autowired
+	lateinit var repo: JpaPersonRepository
+
+	@PersistenceContext
+	lateinit var entityManager: EntityManager
+
+	@Transactional
+	@Test
+	fun savePerson() {
+		// EntityManager#persist(...) results in @PrePersist but not @PostPersist
+		repo.save(Person("Jane"))
+
+		// Manual flush is required for @PostPersist callback to be invoked
+		entityManager.flush()
+
+		// Test code that relies on the @PostPersist callback
+		// having been invoked...
+	}
+
+	// ...
+----
+
+See
+https://github.com/spring-projects/spring-framework/blob/main/spring-test/src/test/java/org/springframework/test/context/junit/jupiter/orm/JpaEntityListenerTests.java[JpaEntityListenerTests]
+in the Spring Framework test suite for working examples using all JPA lifecycle callbacks.
 =====
 
 
@@ -6834,7 +6999,7 @@ do they involve any of the supporting `@InitBinder`, `@ModelAttribute`, or
 
 The Spring MVC Test framework, also known as `MockMvc`, aims to provide more complete
 testing for Spring MVC controllers without a running server. It does that by invoking
-the `DispacherServlet` and passing
+the `DispatcherServlet` and passing
 <<mock-objects-servlet, "`mock`" implementations of the Servlet API>> from the
 `spring-test` module which replicates the full Spring MVC request handling without
 a running server.
@@ -6922,7 +7087,7 @@ To set up MockMvc through Spring configuration, use the following:
 
 		@BeforeEach
 		void setup(WebApplicationContext wac) {
-			this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
 		}
 
 		// ...
@@ -7219,8 +7384,9 @@ they must be specified on every request.
 [[spring-mvc-test-server-defining-expectations]]
 ===== Defining Expectations
 
-You can define expectations by appending one or more `.andExpect(..)` calls after
-performing a request, as the following example shows:
+You can define expectations by appending one or more `andExpect(..)` calls after
+performing a request, as the following example shows. As soon as one expectation fails,
+no other expectations will be asserted.
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -7236,8 +7402,23 @@ performing a request, as the following example shows:
 	import org.springframework.test.web.servlet.get
 
 	mockMvc.get("/accounts/1").andExpect {
-		status().isOk()
+		status { isOk() }
 	}
+----
+
+You can define multiple expectations by appending `andExpectAll(..)` after performing a
+request, as the following example shows. In contrast to `andExpect(..)`,
+`andExpectAll(..)` guarantees that all supplied expectations will be asserted and that
+all failures will be tracked and reported.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	// static import of MockMvcRequestBuilders.* and MockMvcResultMatchers.*
+
+	mockMvc.perform(get("/accounts/1")).andExpectAll(
+		status().isOk(),
+		content().contentType("application/json;charset=UTF-8"));
 ----
 
 `MockMvcResultMatchers.*` provides a number of expectations, some of which are further
@@ -7269,7 +7450,7 @@ The following test asserts that binding or validation failed:
 	import org.springframework.test.web.servlet.post
 
 	mockMvc.post("/persons").andExpect {
-		status().isOk()
+		status { isOk() }
 		model {
 			attributeHasErrors("person")
 		}
@@ -7297,7 +7478,7 @@ request. You can do so as follows, where `print()` is a static import from
 	mockMvc.post("/persons").andDo {
 			print()
 		}.andExpect {
-			status().isOk()
+			status { isOk() }
 			model {
 				attributeHasErrors("person")
 			}
@@ -7327,7 +7508,7 @@ other expectations, as the following example shows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	var mvcResult = mockMvc.post("/persons").andExpect { status().isOk() }.andReturn()
+	var mvcResult = mockMvc.post("/persons").andExpect { status { isOk() } }.andReturn()
 	// ...
 ----
 
@@ -7407,10 +7588,10 @@ If using MockMvc through the <<webtestclient>>, there is nothing special to do t
 asynchronous requests work as the `WebTestClient` automatically does what is described
 in this section.
 
-Servlet 3.0 asynchronous requests,
-<<web.adoc#mvc-ann-async,supported in Spring MVC>>, work by exiting the Servlet container
-thread and allowing the application to compute the response asynchronously, after which
-an async dispatch is made to complete processing on a Servlet container thread.
+Servlet asynchronous requests, <<web.adoc#mvc-ann-async,supported in Spring MVC>>,
+work by exiting the Servlet container thread and allowing the application to compute
+the response asynchronously, after which an async dispatch is made to complete
+processing on a Servlet container thread.
 
 In Spring MVC Test, async requests can be tested by asserting the produced async value
 first, then manually performing the async dispatch, and finally verifying the response.
@@ -7447,7 +7628,7 @@ or reactive type such as Reactor `Mono`:
 	@Test
 	fun test() {
 		var mvcResult = mockMvc.get("/path").andExpect {
-			status().isOk() // <1>
+			status { isOk() } // <1>
 			request { asyncStarted() } // <2>
 			// TODO Remove unused generic parameter
 			request { asyncResult<Nothing>("body") } // <3>
@@ -7456,7 +7637,7 @@ or reactive type such as Reactor `Mono`:
 
 		mockMvc.perform(asyncDispatch(mvcResult)) // <4>
 				.andExpect {
-					status().isOk() // <5>
+					status { isOk() } // <5>
 					content().string("body")
 				}
 	}
@@ -7573,9 +7754,9 @@ of testing even within the same project.
 ===== Further Examples
 
 The framework's own tests include
-https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/servlet/samples[
+{spring-framework-main-code}/spring-test/src/test/java/org/springframework/test/web/servlet/samples[
 many sample tests] intended to show how to use MockMvc on its own or through the
-https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/servlet/samples/client[
+{spring-framework-main-code}/spring-test/src/test/java/org/springframework/test/web/servlet/samples/client[
 WebTestClient]. Browse these examples for further ideas.
 
 
@@ -7583,13 +7764,13 @@ WebTestClient]. Browse these examples for further ideas.
 ==== HtmlUnit Integration
 
 Spring provides integration between <<spring-mvc-test-server, MockMvc>> and
-http://htmlunit.sourceforge.net/[HtmlUnit]. This simplifies performing end-to-end testing
+https://htmlunit.sourceforge.io/[HtmlUnit]. This simplifies performing end-to-end testing
 when using HTML-based views. This integration lets you:
 
 * Easily test HTML pages by using tools such as
-  http://htmlunit.sourceforge.net/[HtmlUnit],
+  https://htmlunit.sourceforge.io/[HtmlUnit],
   https://www.seleniumhq.org[WebDriver], and
-  http://www.gebish.org/manual/current/#spock-junit-testng[Geb] without the need to
+  https://www.gebish.org/manual/current/#spock-junit-testng[Geb] without the need to
   deploy to a Servlet container.
 * Test JavaScript within pages.
 * Optionally, test using mock services to speed up testing.
@@ -7916,11 +8097,11 @@ First, we no longer have to explicitly verify our form and then create a request
 looks like the form. Instead, we request the form, fill it out, and submit it, thereby
 significantly reducing the overhead.
 
-Another important factor is that http://htmlunit.sourceforge.net/javascript.html[HtmlUnit
+Another important factor is that https://htmlunit.sourceforge.io/javascript.html[HtmlUnit
 uses the Mozilla Rhino engine] to evaluate JavaScript. This means that we can also test
 the behavior of JavaScript within our pages.
 
-See the http://htmlunit.sourceforge.net/gettingStarted.html[HtmlUnit documentation] for
+See the https://htmlunit.sourceforge.io/gettingStarted.html[HtmlUnit documentation] for
 additional information about using HtmlUnit.
 
 [[spring-mvc-test-server-htmlunit-mah-advanced-builder]]
@@ -8527,7 +8708,7 @@ TIP: For additional information on creating a `MockMvc` instance, see
 ===== MockMvc and Geb
 
 In the previous section, we saw how to use MockMvc with WebDriver. In this section, we
-use http://www.gebish.org/[Geb] to make our tests even Groovy-er.
+use https://www.gebish.org/[Geb] to make our tests even Groovy-er.
 
 [[spring-mvc-test-server-htmlunit-geb-why]]
 ====== Why Geb and MockMvc?
@@ -8630,7 +8811,7 @@ if we were at the wrong page.
 
 Next, we create a `content` closure that specifies all the areas of interest within the
 page. We can use a
-http://www.gebish.org/manual/current/#the-jquery-ish-navigator-api[jQuery-ish Navigator
+https://www.gebish.org/manual/current/#the-jquery-ish-navigator-api[jQuery-ish Navigator
 API] to select the content in which we are interested.
 
 Finally, we can verify that a new message was created successfully, as follows:
@@ -8647,7 +8828,7 @@ message == expectedMessage
 ----
 
 For further details on how to get the most out of Geb, see
-http://www.gebish.org/manual/current/[The Book of Geb] user's manual.
+https://www.gebish.org/manual/current/[The Book of Geb] user's manual.
 
 
 [[spring-mvc-test-client]]
@@ -8784,7 +8965,7 @@ configuration. Check for the support for code completion on static members.
 ==== Further Examples of Client-side REST Tests
 
 Spring MVC Test's own tests include
-https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/client/samples[example
+{spring-framework-main-code}/spring-test/src/test/java/org/springframework/test/web/client/samples[example
 tests] of client-side REST tests.
 
 

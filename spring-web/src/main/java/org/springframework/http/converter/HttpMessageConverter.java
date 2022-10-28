@@ -92,7 +92,7 @@ public interface HttpMessageConverter<T> {
 			throws IOException, HttpMessageNotReadableException;
 
 	/**
-	 * Write an given object to the given output message.
+	 * Write a given object to the given output message.
 	 * @param t the object to write to the output message. The type of this object must have previously been
 	 * passed to the {@link #canWrite canWrite} method of this interface, which must have returned {@code true}.
 	 * @param contentType the content type to use when writing. May be {@code null} to indicate that the

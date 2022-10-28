@@ -22,13 +22,16 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
-import javax.servlet.FilterChain;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AliasFor;
@@ -47,12 +50,14 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.RequestParamMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.testfixture.method.ResolvableMethod;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
@@ -178,6 +183,38 @@ public class ServletInvocableHandlerMethodTests {
 		assertThat(this.response.getErrorMessage()).isEqualTo("400 Bad Request");
 		assertThat(this.mavContainer.isRequestHandled())
 				.as("When a status reason w/ used, the request is handled").isTrue();
+	}
+
+	@Test
+	public void invokeAndHandle_responseStatusAndReasonCode() throws Exception {
+		Locale locale = Locale.ENGLISH;
+
+		String beanName = "handler";
+		StaticApplicationContext context = new StaticApplicationContext();
+		context.registerBean(beanName, Handler.class);
+		context.addMessage("BadRequest.error", locale, "Bad request message");
+		context.refresh();
+
+		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
+
+		LocaleContextHolder.setLocale(locale);
+		try {
+			Method method = ResolvableMethod.on(Handler.class)
+					.named("responseStatusWithReasonCode")
+					.resolveMethod();
+
+			HandlerMethod handlerMethod = new HandlerMethod(beanName, beanFactory, context, method);
+			handlerMethod = handlerMethod.createWithResolvedBean();
+
+			new ServletInvocableHandlerMethod(handlerMethod)
+					.invokeAndHandle(this.webRequest, this.mavContainer);
+		}
+		finally {
+			LocaleContextHolder.resetLocaleContext();
+		}
+
+		assertThat(this.response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+		assertThat(this.response.getErrorMessage()).isEqualTo("Bad request message");
 	}
 
 	@Test // gh-23775, gh-24635
@@ -414,6 +451,11 @@ public class ServletInvocableHandlerMethodTests {
 
 		@ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "400 Bad Request")
 		public String responseStatusWithReason() {
+			return "foo";
+		}
+
+		@ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "BadRequest.error")
+		public String responseStatusWithReasonCode() {
 			return "foo";
 		}
 

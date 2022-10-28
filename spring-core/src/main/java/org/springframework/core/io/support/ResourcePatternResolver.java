@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,17 +36,19 @@ import org.springframework.core.io.ResourceLoader;
  * {@link ResourceArrayPropertyEditor} for populating {@code Resource} array bean
  * properties.
  *
- * <p>Can be used with any sort of location pattern (e.g. "/WEB-INF/*-context.xml"):
- * Input patterns have to match the strategy implementation. This interface just
- * specifies the conversion method rather than a specific pattern format.
+ * <p>Can be used with any sort of location pattern &mdash; for example,
+ * {@code "/WEB-INF/*-context.xml"}. However, input patterns have to match the
+ * strategy implementation. This interface just specifies the conversion method
+ * rather than a specific pattern format.
  *
- * <p>This interface also suggests a new resource prefix "classpath*:" for all
- * matching resources from the class path. Note that the resource location is
- * expected to be a path without placeholders in this case (e.g. "/beans.xml");
- * JAR files or different directories in the class path can contain multiple files
- * of the same name.
+ * <p>This interface also defines a {@value #CLASSPATH_ALL_URL_PREFIX} resource
+ * prefix for all matching resources from the module path and the class path. Note
+ * that the resource location may also contain placeholders &mdash; for example
+ * {@code "/beans-*.xml"}. JAR files or different directories in the module path
+ * or class path can contain multiple files of the same name.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 1.0.2
  * @see org.springframework.core.io.Resource
  * @see org.springframework.core.io.ResourceLoader
@@ -56,10 +58,13 @@ import org.springframework.core.io.ResourceLoader;
 public interface ResourcePatternResolver extends ResourceLoader {
 
 	/**
-	 * Pseudo URL prefix for all matching resources from the class path: "classpath*:"
-	 * <p>This differs from ResourceLoader's classpath URL prefix in that it
-	 * retrieves all matching resources for a given name (e.g. "/beans.xml"),
-	 * for example in the root of all deployed JAR files.
+	 * Pseudo URL prefix for all matching resources from the class path: {@code "classpath*:"}.
+	 * <p>This differs from ResourceLoader's {@code "classpath:"} URL prefix in
+	 * that it retrieves all matching resources for a given path &mdash; for
+	 * example, to locate all "beans.xml" files in the root of all deployed JAR
+	 * files you can use the location pattern {@code "classpath*:/beans.xml"}.
+	 * <p>As of Spring Framework 6.0, the semantics for the {@code "classpath*:"}
+	 * prefix have been expanded to include the module path as well as the class path.
 	 * @see org.springframework.core.io.ResourceLoader#CLASSPATH_URL_PREFIX
 	 */
 	String CLASSPATH_ALL_URL_PREFIX = "classpath*:";

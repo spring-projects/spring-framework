@@ -22,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.SpringProperties;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -40,13 +39,6 @@ import org.springframework.util.Assert;
  * @see org.springframework.jdbc.core.JdbcTemplate
  */
 public abstract class JdbcAccessor implements InitializingBean {
-
-	/**
-	 * Boolean flag controlled by a {@code spring.xml.ignore} system property that instructs Spring to
-	 * ignore XML, i.e. to not initialize the XML-related infrastructure.
-	 * <p>The default is "false".
-	 */
-	private static final boolean shouldIgnoreXml = SpringProperties.getFlag("spring.xml.ignore");
 
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -96,8 +88,11 @@ public abstract class JdbcAccessor implements InitializingBean {
 	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
 	 */
 	public void setDatabaseProductName(String dbName) {
-		if (!shouldIgnoreXml) {
+		if (SQLErrorCodeSQLExceptionTranslator.hasUserProvidedErrorCodesFile()) {
 			this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dbName);
+		}
+		else {
+			this.exceptionTranslator = new SQLExceptionSubclassTranslator();
 		}
 	}
 
@@ -128,15 +123,11 @@ public abstract class JdbcAccessor implements InitializingBean {
 		synchronized (this) {
 			exceptionTranslator = this.exceptionTranslator;
 			if (exceptionTranslator == null) {
-				DataSource dataSource = getDataSource();
-				if (shouldIgnoreXml) {
-					exceptionTranslator = new SQLExceptionSubclassTranslator();
-				}
-				else if (dataSource != null) {
-					exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dataSource);
+				if (SQLErrorCodeSQLExceptionTranslator.hasUserProvidedErrorCodesFile()) {
+					exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(obtainDataSource());
 				}
 				else {
-					exceptionTranslator = new SQLStateSQLExceptionTranslator();
+					exceptionTranslator = new SQLExceptionSubclassTranslator();
 				}
 				this.exceptionTranslator = exceptionTranslator;
 			}

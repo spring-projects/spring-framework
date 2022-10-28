@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,13 +153,13 @@ class CommonsPool2TargetSourceTests {
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(
 				targetSource::getTarget);
 
-		// lets now release an object and try to acquire a new one
+		// let's now release an object and try to acquire a new one
 		targetSource.releaseTarget(pooledInstances[9]);
 		pooledInstances[9] = targetSource.getTarget();
 
 		// release all objects
-		for (int i = 0; i < pooledInstances.length; i++) {
-			targetSource.releaseTarget(pooledInstances[i]);
+		for (Object element : pooledInstances) {
+			targetSource.releaseTarget(element);
 		}
 	}
 
@@ -181,7 +181,7 @@ class CommonsPool2TargetSourceTests {
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(
 				targetSource::getTarget);
 
-		// lets now release an object and try to acquire a new one
+		// let's now release an object and try to acquire a new one
 		targetSource.releaseTarget(pooledInstances[9]);
 		pooledInstances[9] = targetSource.getTarget();
 
@@ -196,7 +196,7 @@ class CommonsPool2TargetSourceTests {
 	void testSetWhenExhaustedAction() {
 		CommonsPool2TargetSource targetSource = new CommonsPool2TargetSource();
 		targetSource.setBlockWhenExhausted(true);
-		assertThat(targetSource.isBlockWhenExhausted()).isEqualTo(true);
+		assertThat(targetSource.isBlockWhenExhausted()).isTrue();
 	}
 
 	@Test

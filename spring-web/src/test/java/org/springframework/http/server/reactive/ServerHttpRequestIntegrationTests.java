@@ -46,6 +46,7 @@ class ServerHttpRequestIntegrationTests extends AbstractHttpHandlerIntegrationTe
 
 		URI url = new URI("http://localhost:" + port + "/foo?param=bar");
 		RequestEntity<Void> request = RequestEntity.post(url).build();
+		@SuppressWarnings("resource")
 		ResponseEntity<Void> response = new RestTemplate().exchange(request, Void.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}

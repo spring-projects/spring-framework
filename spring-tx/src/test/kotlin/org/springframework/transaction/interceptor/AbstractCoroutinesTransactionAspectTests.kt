@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.transaction.interceptor
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Fail
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -28,7 +28,7 @@ import org.springframework.transaction.*
 import org.springframework.transaction.reactive.TransactionContext
 import reactor.core.publisher.Mono
 import reactor.core.publisher.SynchronousSink
-import reactor.util.context.Context
+import reactor.util.context.ContextView
 import java.lang.reflect.Method
 import kotlin.coroutines.Continuation
 
@@ -188,7 +188,7 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 			ex: Exception, shouldRollback: Boolean, rollbackException: Boolean) {
 		val txatt: TransactionAttribute = object : DefaultTransactionAttribute() {
 			override fun rollbackOn(t: Throwable): Boolean {
-				Assertions.assertThat(t).isSameAs(ex)
+				assertThat(t).isSameAs(ex)
 				return shouldRollback
 			}
 		}
@@ -218,9 +218,9 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 			}
 			catch (actual: Exception) {
 				if (rollbackException) {
-					Assertions.assertThat(actual).hasMessage(tex.message).isInstanceOf(tex::class.java)
+					assertThat(actual).hasMessage(tex.message).isInstanceOf(tex::class.java)
 				} else {
-					Assertions.assertThat(actual).hasMessage(ex.message).isInstanceOf(ex::class.java)
+					assertThat(actual).hasMessage(ex.message).isInstanceOf(ex::class.java)
 				}
 			}
 		}
@@ -259,7 +259,7 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 				itb.getName()
 			}
 			catch (actual: Exception) {
-				Assertions.assertThat(actual).isInstanceOf(CannotCreateTransactionException::class.java)
+				assertThat(actual).isInstanceOf(CannotCreateTransactionException::class.java)
 			}
 		}
 	}
@@ -291,22 +291,23 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 				itb.setName(name)
 			}
 			catch (ex: Exception) {
-				Assertions.assertThat(ex).isInstanceOf(RuntimeException::class.java)
-				Assertions.assertThat(ex.cause).hasMessage(ex.message).isInstanceOf(ex::class.java)
+				assertThat(ex).isInstanceOf(RuntimeException::class.java)
+				assertThat(ex.cause).hasMessage(ex.message).isInstanceOf(ex::class.java)
 			}
 			// Should have invoked target and changed name
-			Assertions.assertThat(itb.getName()).isEqualTo(name)
+			assertThat(itb.getName()).isEqualTo(name)
 		}
 	}
 
-	@Suppress("DEPRECATION")
 	private fun checkReactiveTransaction(expected: Boolean) {
-		Mono.subscriberContext().handle { context: Context, sink: SynchronousSink<Any?> ->
-			if (context.hasKey(TransactionContext::class.java) != expected) {
-				Fail.fail<Any>("Should have thrown NoTransactionException")
-			}
-			sink.complete()
-		}.block()
+		Mono.deferContextual{context -> Mono.just(context)}
+				.handle { context: ContextView, sink: SynchronousSink<Any?> ->
+					if (context.hasKey(TransactionContext::class.java) != expected) {
+						Fail.fail<Any>("Should have thrown NoTransactionException")
+					}
+					sink.complete()
+				}
+				.block()
 	}
 
 	protected open fun advised(target: Any, rtm: ReactiveTransactionManager, tas: Array<TransactionAttributeSource>): Any {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.jms.Connection;
-import javax.jms.JMSException;
+import jakarta.jms.Connection;
+import jakarta.jms.JMSException;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
@@ -94,7 +94,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * <p>Note that client IDs need to be unique among all active Connections
 	 * of the underlying JMS provider. Furthermore, a client ID can only be
 	 * assigned if the original ConnectionFactory hasn't already assigned one.
-	 * @see javax.jms.Connection#setClientID
+	 * @see jakarta.jms.Connection#setClientID
 	 * @see #setConnectionFactory
 	 */
 	public void setClientId(@Nullable String clientId) {
@@ -191,7 +191,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	/**
 	 * Initialize this container.
-	 * <p>Creates a JMS Connection, starts the {@link javax.jms.Connection}
+	 * <p>Creates a JMS Connection, starts the {@link jakarta.jms.Connection}
 	 * (if {@link #setAutoStartup(boolean) "autoStartup"} hasn't been turned off),
 	 * and calls {@link #doInitialize()}.
 	 * @throws org.springframework.jms.JmsException if startup failed
@@ -439,7 +439,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	/**
 	 * Start the shared Connection.
 	 * @throws JMSException if thrown by JMS API methods
-	 * @see javax.jms.Connection#start()
+	 * @see jakarta.jms.Connection#start()
 	 */
 	protected void startSharedConnection() throws JMSException {
 		synchronized (this.sharedConnectionMonitor) {
@@ -448,7 +448,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 				try {
 					this.sharedConnection.start();
 				}
-				catch (javax.jms.IllegalStateException ex) {
+				catch (jakarta.jms.IllegalStateException ex) {
 					logger.debug("Ignoring Connection start exception - assuming already started: " + ex);
 				}
 			}
@@ -458,7 +458,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	/**
 	 * Stop the shared Connection.
 	 * @throws JMSException if thrown by JMS API methods
-	 * @see javax.jms.Connection#start()
+	 * @see jakarta.jms.Connection#start()
 	 */
 	protected void stopSharedConnection() throws JMSException {
 		synchronized (this.sharedConnectionMonitor) {
@@ -467,7 +467,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 				try {
 					this.sharedConnection.stop();
 				}
-				catch (javax.jms.IllegalStateException ex) {
+				catch (jakarta.jms.IllegalStateException ex) {
 					logger.debug("Ignoring Connection stop exception - assuming already stopped: " + ex);
 				}
 			}
@@ -582,13 +582,13 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	/**
 	 * Log a task that has been rejected by {@link #doRescheduleTask}.
 	 * <p>The default implementation simply logs a corresponding message
-	 * at debug level.
+	 * at warn level.
 	 * @param task the rejected task object
 	 * @param ex the exception thrown from {@link #doRescheduleTask}
 	 */
 	protected void logRejectedTask(Object task, RuntimeException ex) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Listener container task [" + task + "] has been rejected and paused: " + ex);
+		if (logger.isWarnEnabled()) {
+			logger.warn("Listener container task [" + task + "] has been rejected and paused: " + ex);
 		}
 	}
 

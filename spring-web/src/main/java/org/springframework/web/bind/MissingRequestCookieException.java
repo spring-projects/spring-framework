@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,9 +54,10 @@ public class MissingRequestCookieException extends MissingRequestValueException 
 	public MissingRequestCookieException(
 			String cookieName, MethodParameter parameter, boolean missingAfterConversion) {
 
-		super("", missingAfterConversion);
+		super("", missingAfterConversion, null, new Object[] {cookieName});
 		this.cookieName = cookieName;
 		this.parameter = parameter;
+		getBody().setDetail("Required cookie '" + this.cookieName + "' is not present.");
 	}
 
 

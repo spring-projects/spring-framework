@@ -280,7 +280,7 @@ public class TableMetaDataContext {
 		insertStatement.append("INSERT INTO ");
 		if (getSchemaName() != null) {
 			insertStatement.append(getSchemaName());
-			insertStatement.append(".");
+			insertStatement.append('.');
 		}
 		insertStatement.append(getTableName());
 		insertStatement.append(" (");
@@ -313,7 +313,7 @@ public class TableMetaDataContext {
 		}
 		String params = String.join(", ", Collections.nCopies(columnCount, "?"));
 		insertStatement.append(params);
-		insertStatement.append(")");
+		insertStatement.append(')');
 		return insertStatement.toString();
 	}
 
@@ -363,18 +363,6 @@ public class TableMetaDataContext {
 	 */
 	public boolean isGetGeneratedKeysSimulated() {
 		return obtainMetaDataProvider().isGetGeneratedKeysSimulated();
-	}
-
-	/**
-	 * Does this database support a simple query to retrieve generated keys
-	 * when the JDBC 3.0 feature is not supported:
-	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
-	 * @deprecated as of 4.3.15, in favor of {@link #getSimpleQueryForGetGeneratedKey}
-	 */
-	@Deprecated
-	@Nullable
-	public String getSimulationQueryForGetGeneratedKey(String tableName, String keyColumnName) {
-		return getSimpleQueryForGetGeneratedKey(tableName, keyColumnName);
 	}
 
 	/**

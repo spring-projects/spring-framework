@@ -75,7 +75,7 @@ class CustomEnvironmentTests {
 			@Override
 			@SuppressWarnings("serial")
 			protected Set<String> getReservedDefaultProfiles() {
-				return new HashSet<String>() {{
+				return new HashSet<>() {{
 						add("rd1");
 						add("rd2");
 				}};

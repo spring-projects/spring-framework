@@ -104,7 +104,7 @@ class MessagingRSocket implements RSocket {
 	 */
 	public Mono<Void> handleConnectionSetupPayload(ConnectionSetupPayload payload) {
 		// frameDecoder does not apply to connectionSetupPayload
-		// so retain here since handle expects it..
+		// so retain here since handle expects it.
 		payload.retain();
 		return handle(payload, FrameType.SETUP);
 	}

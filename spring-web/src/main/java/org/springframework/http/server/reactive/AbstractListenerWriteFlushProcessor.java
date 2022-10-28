@@ -122,7 +122,7 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 
 	/**
 	 * Error signal from the upstream, write Publisher. This is also used by
-	 * sub-classes to delegate error notifications from the container.
+	 * subclasses to delegate error notifications from the container.
 	 */
 	@Override
 	public final void onError(Throwable ex) {
@@ -135,7 +135,7 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 
 	/**
 	 * Completion signal from the upstream, write Publisher. This is also used
-	 * by sub-classes to delegate completion notifications from the container.
+	 * by subclasses to delegate completion notifications from the container.
 	 */
 	@Override
 	public final void onComplete() {
@@ -329,7 +329,7 @@ public abstract class AbstractListenerWriteFlushProcessor<T> implements Processo
 			public <T> void onComplete(AbstractListenerWriteFlushProcessor<T> processor) {
 				processor.sourceCompleted = true;
 				// A competing write might have completed very quickly
-				if (processor.state.get().equals(State.REQUESTED)) {
+				if (processor.state.get() == State.REQUESTED) {
 					handleSourceCompleted(processor);
 				}
 			}

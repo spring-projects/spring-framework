@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,10 +73,10 @@ import org.springframework.util.StringUtils;
  * to be run within a transaction that will, by default, be automatically
  * <em>rolled back</em> after completion of the test. If a test class is
  * annotated with {@code @Transactional}, each test method within that class
- * hierarchy will be run within a transaction. Test methods that are
- * <em>not</em> annotated with {@code @Transactional} (at the class or method
- * level) will not be run within a transaction. Furthermore, tests that
- * <em>are</em> annotated with {@code @Transactional} but have the
+ * hierarchy or nested class hierarchy will be run within a transaction. Test
+ * methods that are <em>not</em> annotated with {@code @Transactional} (at the
+ * class or method level) will not be run within a transaction. Furthermore,
+ * tests that <em>are</em> annotated with {@code @Transactional} but have the
  * {@link Transactional#propagation propagation} type set to
  * {@link org.springframework.transaction.annotation.Propagation#NOT_SUPPORTED NOT_SUPPORTED}
  * or {@link org.springframework.transaction.annotation.Propagation#NEVER NEVER}
@@ -97,7 +97,7 @@ import org.springframework.util.StringUtils;
  *
  * <h3>Executing Code outside of a Transaction</h3>
  * <p>When executing transactional tests, it is sometimes useful to be able to
- * execute certain <em>set up</em> or <em>tear down</em> code outside of a
+ * execute certain <em>set up</em> or <em>tear down</em> code outside a
  * transaction. {@code TransactionalTestExecutionListener} provides such
  * support for methods annotated with {@link BeforeTransaction @BeforeTransaction}
  * or {@link AfterTransaction @AfterTransaction}. As of Spring Framework 4.3,
@@ -210,9 +210,13 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 			transactionAttribute = TestContextTransactionUtils.createDelegatingTransactionAttribute(testContext,
 				transactionAttribute);
 
-			if (logger.isDebugEnabled()) {
-				logger.debug("Explicit transaction definition [" + transactionAttribute +
-						"] found for test context " + testContext);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Explicit transaction definition [%s] found for test context %s"
+						.formatted(transactionAttribute, testContext));
+			}
+			else if (logger.isDebugEnabled()) {
+				logger.debug("Explicit transaction definition [%s] found for test class [%s] and test method [%s]"
+						.formatted(transactionAttribute, testClass.getName(), testMethod.getName()));
 			}
 
 			if (transactionAttribute.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NOT_SUPPORTED ||
@@ -271,11 +275,17 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 */
 	protected void runBeforeTransactionMethods(TestContext testContext) throws Exception {
 		try {
-			List<Method> methods = getAnnotatedMethods(testContext.getTestClass(), BeforeTransaction.class);
+			Class<?> testClass = testContext.getTestClass();
+			List<Method> methods = getAnnotatedMethods(testClass, BeforeTransaction.class);
 			Collections.reverse(methods);
 			for (Method method : methods) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Executing @BeforeTransaction method [" + method + "] for test context " + testContext);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Executing @BeforeTransaction method [%s] for test context %s"
+							.formatted(method, testContext));
+				}
+				else if (logger.isDebugEnabled()) {
+					logger.debug("Executing @BeforeTransaction method [%s] for test class [%s]"
+							.formatted(method, testClass.getName()));
 				}
 				ReflectionUtils.makeAccessible(method);
 				method.invoke(testContext.getTestInstance());
@@ -284,7 +294,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 		catch (InvocationTargetException ex) {
 			if (logger.isErrorEnabled()) {
 				logger.error("Exception encountered while executing @BeforeTransaction methods for test context " +
-						testContext + ".", ex.getTargetException());
+						testContext, ex.getTargetException());
 			}
 			ReflectionUtils.rethrowException(ex.getTargetException());
 		}
@@ -301,11 +311,17 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	protected void runAfterTransactionMethods(TestContext testContext) throws Exception {
 		Throwable afterTransactionException = null;
 
-		List<Method> methods = getAnnotatedMethods(testContext.getTestClass(), AfterTransaction.class);
+		Class<?> testClass = testContext.getTestClass();
+		List<Method> methods = getAnnotatedMethods(testClass, AfterTransaction.class);
 		for (Method method : methods) {
 			try {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Executing @AfterTransaction method [" + method + "] for test context " + testContext);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Executing @AfterTransaction method [%s] for test context %s"
+							.formatted(method, testContext));
+				}
+				else if (logger.isDebugEnabled()) {
+					logger.debug("Executing @AfterTransaction method [%s] for test class [%s]"
+							.formatted(method, testClass.getName()));
 				}
 				ReflectionUtils.makeAccessible(method);
 				method.invoke(testContext.getTestInstance());
@@ -390,7 +406,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	}
 
 	/**
-	 * Determine whether or not to rollback transactions by default for the
+	 * Determine whether to rollback transactions by default for the
 	 * supplied {@linkplain TestContext test context}.
 	 * <p>Supports {@link Rollback @Rollback} or {@link Commit @Commit} at the
 	 * class-level.
@@ -418,7 +434,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	}
 
 	/**
-	 * Determine whether or not to rollback transactions for the supplied
+	 * Determine whether to rollback transactions for the supplied
 	 * {@linkplain TestContext test context} by taking into consideration the
 	 * {@linkplain #isDefaultRollback(TestContext) default rollback} flag and a
 	 * possible method-level override via the {@link Rollback @Rollback}
@@ -430,22 +446,28 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 */
 	protected final boolean isRollback(TestContext testContext) throws Exception {
 		boolean rollback = isDefaultRollback(testContext);
-		Rollback rollbackAnnotation =
-				AnnotatedElementUtils.findMergedAnnotation(testContext.getTestMethod(), Rollback.class);
+		Method testMethod = testContext.getTestMethod();
+		Rollback rollbackAnnotation = AnnotatedElementUtils.findMergedAnnotation(testMethod, Rollback.class);
 		if (rollbackAnnotation != null) {
 			boolean rollbackOverride = rollbackAnnotation.value();
-			if (logger.isDebugEnabled()) {
-				logger.debug(String.format(
-						"Method-level @Rollback(%s) overrides default rollback [%s] for test context %s.",
-						rollbackOverride, rollback, testContext));
+			if (logger.isTraceEnabled()) {
+				logger.trace("Method-level @Rollback(%s) overrides default rollback [%s] for test context %s"
+						.formatted(rollbackOverride, rollback, testContext));
+			}
+			else if (logger.isDebugEnabled()) {
+				logger.debug("Method-level @Rollback(%s) overrides default rollback [%s] for test method [%s]"
+						.formatted(rollbackOverride, rollback, testMethod));
 			}
 			rollback = rollbackOverride;
 		}
 		else {
-			if (logger.isDebugEnabled()) {
-				logger.debug(String.format(
-						"No method-level @Rollback override: using default rollback [%s] for test context %s.",
-						rollback, testContext));
+			if (logger.isTraceEnabled()) {
+				logger.trace("No method-level @Rollback override: using default rollback [%s] for test context %s"
+						.formatted(rollback, testContext));
+			}
+			else if (logger.isDebugEnabled()) {
+				logger.debug("No method-level @Rollback override: using default rollback [%s] for test method [%s]"
+						.formatted(rollback, testMethod));
 			}
 		}
 		return rollback;

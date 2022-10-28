@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.test.util.AssertionErrors;
+import org.springframework.test.util.ExceptionCollector;
 import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.test.util.XmlExpectationsHelper;
 import org.springframework.util.Assert;
@@ -63,6 +64,8 @@ import org.springframework.web.util.UriBuilderFactory;
  * Default implementation of {@link WebTestClient}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
+ * @author Michał Rowicki
  * @since 5.0
  */
 class DefaultWebTestClient implements WebTestClient {
@@ -507,6 +510,30 @@ class DefaultWebTestClient implements WebTestClient {
 			Flux<T> body = this.response.bodyToFlux(elementTypeRef);
 			return new FluxExchangeResult<>(this.exchangeResult, body);
 		}
+
+		@Override
+		public ResponseSpec expectAll(ResponseSpecConsumer... consumers) {
+			ExceptionCollector exceptionCollector = new ExceptionCollector();
+			for (ResponseSpecConsumer consumer : consumers) {
+				exceptionCollector.execute(() -> consumer.accept(this));
+			}
+			try {
+				exceptionCollector.assertEmpty();
+			}
+			catch (RuntimeException ex) {
+				throw ex;
+			}
+			catch (Exception ex) {
+				// In theory, a ResponseSpecConsumer should never throw an Exception
+				// that is not a RuntimeException, but since ExceptionCollector may
+				// throw a checked Exception, we handle this to appease the compiler
+				// and in case someone uses a "sneaky throws" technique.
+				AssertionError assertionError = new AssertionError(ex.getMessage());
+				assertionError.initCause(ex);
+				throw assertionError;
+			}
+			return this;
+		}
 	}
 
 
@@ -632,10 +659,10 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public BodyContentSpec json(String json) {
+		public BodyContentSpec json(String json, boolean strict) {
 			this.result.assertWithDiagnostics(() -> {
 				try {
-					new JsonExpectationsHelper().assertJsonEqual(json, getBodyAsString());
+					new JsonExpectationsHelper().assertJsonEqual(json, getBodyAsString(), strict);
 				}
 				catch (Exception ex) {
 					throw new AssertionError("JSON parsing error", ex);

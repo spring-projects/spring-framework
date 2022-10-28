@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ import org.springframework.core.annotation.AliasFor;
  * {@link org.springframework.stereotype.Component @Component},
  * {@link org.springframework.stereotype.Service @Service},
  * {@link org.springframework.stereotype.Repository @Repository}, etc.)</li>
- * <li>A JSR-330 compliant class that is annotated with {@code javax.inject} annotations</li>
+ * <li>A JSR-330 compliant class that is annotated with {@code jakarta.inject} annotations</li>
  * <li>Any class that contains {@link org.springframework.context.annotation.Bean @Bean}-methods</li>
  * <li>Any other class that is intended to be registered as a Spring component (i.e., a Spring bean
  * in the {@code ApplicationContext}), potentially taking advantage of automatic autowiring of a
@@ -169,20 +169,21 @@ public @interface ContextConfiguration {
 	Class<? extends ApplicationContextInitializer<?>>[] initializers() default {};
 
 	/**
-	 * Whether or not {@linkplain #locations resource locations} or
+	 * Whether {@linkplain #locations resource locations} or
 	 * {@linkplain #classes <em>component classes</em>} from test superclasses
-	 * should be <em>inherited</em>.
+	 * and enclosing classes should be <em>inherited</em>.
 	 * <p>The default value is {@code true}. This means that an annotated test
 	 * class will <em>inherit</em> the resource locations or component classes
-	 * defined by test superclasses. Specifically, the resource locations or
-	 * component classes for a given test class will be appended to the list of
-	 * resource locations or component classes defined by test superclasses.
-	 * Thus, subclasses have the option of <em>extending</em> the list of resource
+	 * defined by test superclasses and enclosing classes. Specifically, the
+	 * resource locations or component classes for a given test class will be
+	 * appended to the list of resource locations or component classes defined
+	 * by test superclasses and enclosing classes. Thus, subclasses and nested
+	 * classes have the option of <em>extending</em> the list of resource
 	 * locations or component classes.
 	 * <p>If {@code inheritLocations} is set to {@code false}, the
 	 * resource locations or component classes for the annotated test class
 	 * will <em>shadow</em> and effectively replace any resource locations
-	 * or component classes defined by superclasses.
+	 * or component classes defined by superclasses and enclosing classes.
 	 * <p>In the following example that uses path-based resource locations, the
 	 * {@link org.springframework.context.ApplicationContext ApplicationContext}
 	 * for {@code ExtendedTest} will be loaded from
@@ -224,17 +225,17 @@ public @interface ContextConfiguration {
 	boolean inheritLocations() default true;
 
 	/**
-	 * Whether or not {@linkplain #initializers context initializers} from test
-	 * superclasses should be <em>inherited</em>.
+	 * Whether {@linkplain #initializers context initializers} from test
+	 * superclasses and enclosing classes should be <em>inherited</em>.
 	 * <p>The default value is {@code true}. This means that an annotated test
 	 * class will <em>inherit</em> the application context initializers defined
-	 * by test superclasses. Specifically, the initializers for a given test
-	 * class will be added to the set of initializers defined by test
-	 * superclasses. Thus, subclasses have the option of <em>extending</em> the
-	 * set of initializers.
+	 * by test superclasses and enclosing classes. Specifically, the initializers
+	 * for a given test class will be added to the set of initializers defined by
+	 * test superclasses and enclosing classes. Thus, subclasses and nested classes
+	 * have the option of <em>extending</em> the set of initializers.
 	 * <p>If {@code inheritInitializers} is set to {@code false}, the initializers
 	 * for the annotated test class will <em>shadow</em> and effectively replace
-	 * any initializers defined by superclasses.
+	 * any initializers defined by superclasses and enclosing classes.
 	 * <p>In the following example, the
 	 * {@link org.springframework.context.ApplicationContext ApplicationContext}
 	 * for {@code ExtendedTest} will be initialized using
@@ -263,9 +264,10 @@ public @interface ContextConfiguration {
 	 * for loading an {@link org.springframework.context.ApplicationContext
 	 * ApplicationContext}.
 	 * <p>If not specified, the loader will be inherited from the first superclass
-	 * that is annotated or meta-annotated with {@code @ContextConfiguration} and
-	 * specifies an explicit loader. If no class in the hierarchy specifies an
-	 * explicit loader, a default loader will be used instead.
+	 * or enclosing class that is annotated or meta-annotated with
+	 * {@code @ContextConfiguration} and specifies an explicit loader. If no class
+	 * in the type hierarchy or enclosing class hierarchy specifies an explicit
+	 * loader, a default loader will be used instead.
 	 * <p>The default concrete implementation chosen at runtime will be either
 	 * {@link org.springframework.test.context.support.DelegatingSmartContextLoader
 	 * DelegatingSmartContextLoader} or
@@ -290,10 +292,12 @@ public @interface ContextConfiguration {
 	 * <p>If not specified the name will be inferred based on the numerical level
 	 * within all declared contexts within the hierarchy.
 	 * <p>This attribute is only applicable when used within a test class hierarchy
-	 * that is configured using {@code @ContextHierarchy}, in which case the name
-	 * can be used for <em>merging</em> or <em>overriding</em> this configuration
-	 * with configuration of the same name in hierarchy levels defined in superclasses.
-	 * See the Javadoc for {@link ContextHierarchy @ContextHierarchy} for details.
+	 * or enclosing class hierarchy that is configured using
+	 * {@code @ContextHierarchy}, in which case the name can be used for
+	 * <em>merging</em> or <em>overriding</em> this configuration with configuration
+	 * of the same name in hierarchy levels defined in superclasses or enclosing
+	 * classes. See the Javadoc for {@link ContextHierarchy @ContextHierarchy} for
+	 * details.
 	 * @since 3.2.2
 	 */
 	String name() default "";

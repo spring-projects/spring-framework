@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,23 +54,6 @@ import org.springframework.web.cors.CorsConfiguration;
 @Documented
 public @interface CrossOrigin {
 
-	/** @deprecated as of Spring 5.0, in favor of {@link CorsConfiguration#applyPermitDefaultValues} */
-	@Deprecated
-	String[] DEFAULT_ORIGINS = {"*"};
-
-	/** @deprecated as of Spring 5.0, in favor of {@link CorsConfiguration#applyPermitDefaultValues} */
-	@Deprecated
-	String[] DEFAULT_ALLOWED_HEADERS = {"*"};
-
-	/** @deprecated as of Spring 5.0, in favor of {@link CorsConfiguration#applyPermitDefaultValues} */
-	@Deprecated
-	boolean DEFAULT_ALLOW_CREDENTIALS = false;
-
-	/** @deprecated as of Spring 5.0, in favor of {@link CorsConfiguration#applyPermitDefaultValues} */
-	@Deprecated
-	long DEFAULT_MAX_AGE = 1800;
-
-
 	/**
 	 * Alias for {@link #origins}.
 	 */
@@ -80,16 +63,16 @@ public @interface CrossOrigin {
 	/**
 	 * A list of origins for which cross-origin requests are allowed. Please,
 	 * see {@link CorsConfiguration#setAllowedOrigins(List)} for details.
-	 * <p>By default all origins are allowed unless {@code originPatterns} is
+	 * <p>By default all origins are allowed unless {@link #originPatterns} is
 	 * also set in which case {@code originPatterns} is used instead.
 	 */
 	@AliasFor("value")
 	String[] origins() default {};
 
 	/**
-	 * Alternative to {@link #origins()} that supports origins declared via
-	 * wildcard patterns. Please, see
-	 * @link CorsConfiguration#setAllowedOriginPatterns(List)} for details.
+	 * Alternative to {@link #origins} that supports more flexible origin
+	 * patterns. Please, see {@link CorsConfiguration#setAllowedOriginPatterns(List)}
+	 * for details.
 	 * <p>By default this is not set.
 	 * @since 5.3
 	 */

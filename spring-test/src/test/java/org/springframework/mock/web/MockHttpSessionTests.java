@@ -18,9 +18,8 @@ package org.springframework.mock.web;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.servlet.http.HttpSessionBindingEvent;
-import javax.servlet.http.HttpSessionBindingListener;
-
+import jakarta.servlet.http.HttpSessionBindingEvent;
+import jakarta.servlet.http.HttpSessionBindingListener;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  */
 class MockHttpSessionTests {
 
-	private MockHttpSession session = new MockHttpSession();
+	private final MockHttpSession session = new MockHttpSession();
 
 
 	@Test

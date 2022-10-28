@@ -12,6 +12,7 @@ decode request and response content on the server side.
 support for the following:
 
 * https://github.com/reactor/reactor-netty[Reactor Netty]
+* https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html[JDK HttpClient]
 * https://github.com/jetty-project/jetty-reactive-httpclient[Jetty Reactive HttpClient]
 * https://hc.apache.org/index.html[Apache HttpComponents]
 * Others can be plugged via `ClientHttpConnector`.
@@ -89,7 +90,7 @@ modified copy as follows:
 === MaxInMemorySize
 
 Codecs have <<web-reactive.adoc#webflux-codecs-limits,limits>> for buffering data in
-memory to avoid application memory issues. By the default those are set to 256KB.
+memory to avoid application memory issues. By default those are set to 256KB.
 If that's not enough you'll get the following error:
 
 ----
@@ -335,6 +336,40 @@ To configure a response timeout for a specific request:
 
 
 
+[[webflux-client-builder-jdk-httpclient]]
+=== JDK HttpClient
+
+The following example shows how to customize the JDK `HttpClient`:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+    HttpClient httpClient = HttpClient.newBuilder()
+        .followRedirects(Redirect.NORMAL)
+        .connectTimeout(Duration.ofSeconds(20))
+        .build();
+
+    ClientHttpConnector connector =
+            new JdkClientHttpConnector(httpClient, new DefaultDataBufferFactory());
+
+    WebClient webClient = WebClient.builder().clientConnector(connector).build();
+----
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+    val httpClient = HttpClient.newBuilder()
+        .followRedirects(Redirect.NORMAL)
+        .connectTimeout(Duration.ofSeconds(20))
+        .build()
+
+    val connector = JdkClientHttpConnector(httpClient, DefaultDataBufferFactory())
+
+    val webClient = WebClient.builder().clientConnector(connector).build()
+----
+
+
+
 [[webflux-client-builder-jetty]]
 === Jetty
 
@@ -382,7 +417,7 @@ shows:
 
 		HttpClient httpClient = new HttpClient();
 		// Further customizations...
-		
+
 		ClientHttpConnector connector =
 				new JettyClientHttpConnector(httpClient, resourceFactory()); <1>
 
@@ -403,7 +438,7 @@ shows:
 
 		val httpClient = HttpClient()
 		// Further customizations...
-			
+
 		val connector = JettyClientHttpConnector(httpClient, resourceFactory()) // <1>
 
 		return WebClient.builder().clientConnector(connector).build() // <2>
@@ -425,6 +460,7 @@ The following example shows how to customize Apache HttpComponents `HttpClient` 
 	HttpAsyncClientBuilder clientBuilder = HttpAsyncClients.custom();
 	clientBuilder.setDefaultRequestConfig(...);
 	CloseableHttpAsyncClient client = clientBuilder.build();
+
 	ClientHttpConnector connector = new HttpComponentsClientHttpConnector(client);
 
 	WebClient webClient = WebClient.builder().clientConnector(connector).build();
@@ -546,20 +582,16 @@ depending on the response status:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	Mono<Object> entityMono = client.get()
+	Mono<Person> entityMono = client.get()
 			.uri("/persons/1")
 			.accept(MediaType.APPLICATION_JSON)
 			.exchangeToMono(response -> {
 				if (response.statusCode().equals(HttpStatus.OK)) {
 					return response.bodyToMono(Person.class);
 				}
-				else if (response.statusCode().is4xxClientError()) {
-					// Suppress error status code
-					return response.bodyToMono(ErrorContainer.class);
-				}
 				else {
 					// Turn to error
-					return response.createException().flatMap(Mono::error);
+					return response.createError();
 				}
 			});
 ----
@@ -572,9 +604,6 @@ val entity = client.get()
   .awaitExchange {
 		if (response.statusCode() == HttpStatus.OK) {
 			 return response.awaitBody<Person>()
-		}
-		else if (response.statusCode().is4xxClientError) {
-			 return response.awaitBody<ErrorContainer>()
 		}
 		else {
 			 throw response.createExceptionAndAwait()
@@ -761,9 +790,9 @@ multipart request. The following example shows how to create a `MultiValueMap<St
 		part("fieldPart", "fieldValue")
 		part("filePart1", new FileSystemResource("...logo.png"))
 		part("jsonPart", new Person("Jason"))
-		part("myPart", part) // Part from a server request	
+		part("myPart", part) // Part from a server request
 	}
-	
+
 	val parts = builder.build()
 ----
 
@@ -830,6 +859,54 @@ inline-style, through the built-in `BodyInserters`, as the following example sho
 			.awaitBody<Unit>()
 ----
 
+==== `PartEvent`
+
+To stream multipart data sequentially, you can provide multipart content through `PartEvent`
+objects.
+
+- Form fields can be created via `FormPartEvent::create`.
+- File uploads can be created via `FilePartEvent::create`.
+
+You can concatenate the streams returned from methods via `Flux::concat`, and create a request for
+the `WebClient`.
+
+For instance, this sample will POST a multipart form containing a form field and a file.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+Resource resource = ...
+Mono<String> result = webClient
+    .post()
+    .uri("https://example.com")
+    .body(Flux.concat(
+            FormPartEvent.create("field", "field value"),
+            FilePartEvent.create("file", resource)
+    ), PartEvent.class)
+    .retrieve()
+    .bodyToMono(String.class);
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+var resource: Resource = ...
+var result: Mono<String> = webClient
+	.post()
+	.uri("https://example.com")
+	.body(
+		Flux.concat(
+			FormPartEvent.create("field", "field value"),
+			FilePartEvent.create("file", resource)
+		)
+	)
+	.retrieve()
+	.bodyToMono()
+----
+
+On the server side, `PartEvent` objects that are received via `@RequestBody` or
+`ServerRequest::bodyToFlux(PartEvent.class)` can be relayed to another service
+via the `WebClient`.
+
 
 
 [[webflux-client-filter]]
@@ -889,9 +966,8 @@ a filter for basic authentication through a static factory method:
 			.build()
 ----
 
-You can create a new `WebClient` instance by using another as a starting point. This allows
-insert or removing filters without affecting the original `WebClient`. Below is an example
-that inserts a basic authentication filter at index 0:
+Filters can be added or removed by mutating an existing `WebClient` instance, resulting
+in a new `WebClient` instance that does not affect the original one. For example:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -911,6 +987,54 @@ that inserts a basic authentication filter at index 0:
 			.filters { it.add(0, basicAuthentication("user", "password")) }
 			.build()
 ----
+
+`WebClient` is a thin facade around the chain of filters followed by an
+`ExchangeFunction`. It provides a workflow to make requests, to encode to and from higher
+level objects, and it helps to ensure that response content is always consumed.
+When filters handle the response in some way, extra care must be taken to always consume
+its content or to otherwise propagate it downstream to the `WebClient` which will ensure
+the same. Below is a filter that handles the `UNAUTHORIZED` status code but ensures that
+any response content, whether expected or not, is released:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	public ExchangeFilterFunction renewTokenFilter() {
+		return (request, next) -> next.exchange(request).flatMap(response -> {
+			if (response.statusCode().value() == HttpStatus.UNAUTHORIZED.value()) {
+				return response.releaseBody()
+						.then(renewToken())
+						.flatMap(token -> {
+							ClientRequest newRequest = ClientRequest.from(request).build();
+							return next.exchange(newRequest);
+						});
+			} else {
+				return Mono.just(response);
+			}
+		});
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	fun renewTokenFilter(): ExchangeFilterFunction? {
+		return ExchangeFilterFunction { request: ClientRequest?, next: ExchangeFunction ->
+			next.exchange(request!!).flatMap { response: ClientResponse ->
+				if (response.statusCode().value() == HttpStatus.UNAUTHORIZED.value()) {
+					return@flatMap response.releaseBody()
+							.then(renewToken())
+							.flatMap { token: String? ->
+								val newRequest = ClientRequest.from(request).build()
+								next.exchange(newRequest)
+							}
+				} else {
+					return@flatMap Mono.just(response)
+				}
+			}
+		}
+	}
+----
+
 
 
 [[webflux-client-attributes]]
@@ -1016,7 +1140,7 @@ apply to all operations. For example:
 		client.get().uri("/person/{id}", i).retrieve()
 				.awaitBody<Person>()
 	}
-	
+
 	val persons = runBlocking {
 		client.get().uri("/persons").retrieve()
 				.bodyToFlow<Person>()
@@ -1071,7 +1195,7 @@ inter-dependent, without ever blocking until the end.
 With `Flux` or `Mono`, you should never have to block in a Spring MVC or Spring WebFlux controller.
 Simply return the resulting reactive type from the controller method. The same principle apply to
 Kotlin Coroutines and Spring WebFlux, just use suspending function or return `Flow` in your
-controller method . 
+controller method .
 ====
 
 
@@ -1083,7 +1207,7 @@ controller method .
 To test code that uses the `WebClient`, you can use a mock web server, such as the
 https://github.com/square/okhttp#mockwebserver[OkHttp MockWebServer]. To see an example
 of its use, check out
-https://github.com/spring-projects/spring-framework/blob/master/spring-webflux/src/test/java/org/springframework/web/reactive/function/client/WebClientIntegrationTests.java[`WebClientIntegrationTests`]
+{spring-framework-main-code}/spring-webflux/src/test/java/org/springframework/web/reactive/function/client/WebClientIntegrationTests.java[`WebClientIntegrationTests`]
 in the Spring Framework test suite or the
 https://github.com/square/okhttp/tree/master/samples/static-server[`static-server`]
 sample in the OkHttp repository.

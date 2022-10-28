@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,17 +27,14 @@ import org.springframework.beans.factory.config.BeanDefinition;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
-
-
 /**
  * @author Phillip Webb
  * @author Juergen Hoeller
  */
-public class BeanMethodMetadataTests {
+class BeanMethodMetadataTests {
 
 	@Test
-	public void providesBeanMethodBeanDefinition() throws Exception {
+	void providesBeanMethodBeanDefinition() throws Exception {
 		AnnotationConfigApplicationContext context= new AnnotationConfigApplicationContext(Conf.class);
 		BeanDefinition beanDefinition = context.getBeanDefinition("myBean");
 		assertThat(beanDefinition).as("should provide AnnotatedBeanDefinition").isInstanceOf(AnnotatedBeanDefinition.class);
@@ -53,7 +50,7 @@ public class BeanMethodMetadataTests {
 
 		@Bean
 		@MyAnnotation("test")
-		public MyBean myBean() {
+		MyBean myBean() {
 			return new MyBean();
 		}
 	}
@@ -64,7 +61,7 @@ public class BeanMethodMetadataTests {
 
 
 	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface MyAnnotation {
+	@interface MyAnnotation {
 
 		String value();
 	}

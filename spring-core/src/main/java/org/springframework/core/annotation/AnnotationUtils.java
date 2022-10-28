@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -754,7 +755,7 @@ public abstract class AnnotationUtils {
 	/**
 	 * Check the declared attributes of the given annotation, in particular covering
 	 * Google App Engine's late arrival of {@code TypeNotPresentExceptionProxy} for
-	 * {@code Class} values (instead of early {@code Class.getAnnotations() failure}.
+	 * {@code Class} values (instead of early {@code Class.getAnnotations() failure}).
 	 * <p>This method not failing indicates that {@link #getAnnotationAttributes(Annotation)}
 	 * won't failure either (when attempted later on).
 	 * @param annotation the annotation to validate
@@ -976,8 +977,8 @@ public abstract class AnnotationUtils {
 		for (Map.Entry<String, Object> attributeEntry : attributes.entrySet()) {
 			String attributeName = attributeEntry.getKey();
 			Object value = attributeEntry.getValue();
-			if (value instanceof DefaultValueHolder) {
-				value = ((DefaultValueHolder) value).defaultValue;
+			if (value instanceof DefaultValueHolder defaultValueHolder) {
+				value = defaultValueHolder.defaultValue;
 				attributes.put(attributeName,
 						adaptValue(annotatedElement, value, classValuesAsString));
 			}
@@ -986,7 +987,7 @@ public abstract class AnnotationUtils {
 
 	private static Object getAttributeValueForMirrorResolution(Method attribute, Object attributes) {
 		Object result = ((AnnotationAttributes) attributes).get(attribute.getName());
-		return (result instanceof DefaultValueHolder ? ((DefaultValueHolder) result).defaultValue : result);
+		return (result instanceof DefaultValueHolder defaultValueHolder ? defaultValueHolder.defaultValue : result);
 	}
 
 	@Nullable
@@ -994,11 +995,10 @@ public abstract class AnnotationUtils {
 			@Nullable Object annotatedElement, @Nullable Object value, boolean classValuesAsString) {
 
 		if (classValuesAsString) {
-			if (value instanceof Class) {
-				return ((Class<?>) value).getName();
+			if (value instanceof Class<?> clazz) {
+				return clazz.getName();
 			}
-			if (value instanceof Class[]) {
-				Class<?>[] classes = (Class<?>[]) value;
+			if (value instanceof Class<?>[] classes) {
 				String[] names = new String[classes.length];
 				for (int i = 0; i < classes.length; i++) {
 					names[i] = classes[i].getName();
@@ -1006,12 +1006,10 @@ public abstract class AnnotationUtils {
 				return names;
 			}
 		}
-		if (value instanceof Annotation) {
-			Annotation annotation = (Annotation) value;
+		if (value instanceof Annotation annotation) {
 			return MergedAnnotation.from(annotatedElement, annotation).synthesize();
 		}
-		if (value instanceof Annotation[]) {
-			Annotation[] annotations = (Annotation[]) value;
+		if (value instanceof Annotation[] annotations) {
 			Annotation[] synthesized = (Annotation[]) Array.newInstance(
 					annotations.getClass().getComponentType(), annotations.length);
 			for (int i = 0; i < annotations.length; i++) {
@@ -1077,8 +1075,8 @@ public abstract class AnnotationUtils {
 	 * @param ex the throwable to inspect
 	 */
 	static void rethrowAnnotationConfigurationException(Throwable ex) {
-		if (ex instanceof AnnotationConfigurationException) {
-			throw (AnnotationConfigurationException) ex;
+		if (ex instanceof AnnotationConfigurationException exception) {
+			throw exception;
 		}
 	}
 
@@ -1101,7 +1099,7 @@ public abstract class AnnotationUtils {
 		rethrowAnnotationConfigurationException(ex);
 		IntrospectionFailureLogger logger = IntrospectionFailureLogger.INFO;
 		boolean meta = false;
-		if (element instanceof Class && Annotation.class.isAssignableFrom((Class<?>) element)) {
+		if (element instanceof Class<?> clazz && Annotation.class.isAssignableFrom(clazz)) {
 			// Meta-annotation or (default) value lookup on an annotation type
 			logger = IntrospectionFailureLogger.DEBUG;
 			meta = true;
@@ -1188,7 +1186,7 @@ public abstract class AnnotationUtils {
 	public static <A extends Annotation> A synthesizeAnnotation(
 			A annotation, @Nullable AnnotatedElement annotatedElement) {
 
-		if (annotation instanceof SynthesizedAnnotation || AnnotationFilter.PLAIN.matches(annotation)) {
+		if (isSynthesizedAnnotation(annotation) || AnnotationFilter.PLAIN.matches(annotation)) {
 			return annotation;
 		}
 		return MergedAnnotation.from(annotatedElement, annotation).synthesize();
@@ -1280,6 +1278,26 @@ public abstract class AnnotationUtils {
 			synthesized[i] = synthesizeAnnotation(annotations[i], annotatedElement);
 		}
 		return synthesized;
+	}
+
+	/**
+	 * Determine if the supplied {@link Annotation} has been <em>synthesized</em>
+	 * by Spring (i.e. wrapped in a dynamic proxy) with additional functionality
+	 * such as attribute alias handling.
+	 * @param annotation the annotation to check
+	 * @return {@code true} if the supplied annotation is a synthesized annotation
+	 * @since 5.3.23
+	 */
+	public static boolean isSynthesizedAnnotation(@Nullable Annotation annotation) {
+		try {
+			return ((annotation != null) && Proxy.isProxyClass(annotation.getClass()) &&
+					(Proxy.getInvocationHandler(annotation) instanceof SynthesizedMergedAnnotationInvocationHandler));
+		}
+		catch (SecurityException ex) {
+			// Security settings disallow reflective access to the InvocationHandler:
+			// assume the annotation has not been synthesized by Spring.
+			return false;
+		}
 	}
 
 	/**

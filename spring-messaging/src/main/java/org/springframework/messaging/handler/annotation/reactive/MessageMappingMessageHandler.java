@@ -65,7 +65,7 @@ import org.springframework.validation.Validator;
 /**
  * Extension of {@link AbstractMethodMessageHandler} for reactive, non-blocking
  * handling of messages via {@link MessageMapping @MessageMapping} methods.
- * By default such methods are detected in {@code @Controller} Spring beans but
+ * By default, such methods are detected in {@code @Controller} Spring beans but
  * that can be changed via {@link #setHandlerPredicate(Predicate)}.
  *
  * <p>Payloads for incoming messages are decoded through the configured
@@ -74,7 +74,7 @@ import org.springframework.validation.Validator;
  *
  * <p>There is no default handling for return values but
  * {@link #setReturnValueHandlerConfigurer} can be used to configure custom
- * return value handlers. Sub-classes may also override
+ * return value handlers. Subclasses may also override
  * {@link #initReturnValueHandlers()} to set up default return value handlers.
  *
  * @author Rossen Stoyanchev
@@ -200,7 +200,7 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	 * {@code @ControllerAdvice} bean. You can use the following adapter code
 	 * to register {@code @ControllerAdvice} beans here:
 	 * <pre>
-	 * ControllerAdviceBean.findAnnotatedBeans(context).forEach(bean ->
+	 * ControllerAdviceBean.findAnnotatedBeans(context).forEach(bean -&gt;
 	 *         messageHandler.registerMessagingAdvice(new ControllerAdviceWrapper(bean));
 	 *
 	 * public class ControllerAdviceWrapper implements MessagingAdviceBean {
@@ -208,7 +208,6 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	 *     // delegate all methods
 	 * }
 	 * </pre>
-	 *
 	 * @param bean the bean to check for {@code @MessageExceptionHandler} methods
 	 * @since 5.3.5
 	 */

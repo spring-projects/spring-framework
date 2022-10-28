@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package org.springframework.web.servlet.handler;
 
-import javax.servlet.ServletException;
-
+import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,6 +27,7 @@ import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockServletContext;
+import org.springframework.web.util.UrlPathHelper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -38,8 +38,6 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  */
 public class BeanNameUrlHandlerMappingTests {
 
-	public static final String CONF = "/org/springframework/web/servlet/handler/map1.xml";
-
 	private ConfigurableWebApplicationContext wac;
 
 
@@ -48,7 +46,7 @@ public class BeanNameUrlHandlerMappingTests {
 		MockServletContext sc = new MockServletContext("");
 		wac = new XmlWebApplicationContext();
 		wac.setServletContext(sc);
-		wac.setConfigLocations(new String[] {CONF});
+		wac.setConfigLocations("/org/springframework/web/servlet/handler/map1.xml");
 		wac.refresh();
 	}
 
@@ -56,7 +54,7 @@ public class BeanNameUrlHandlerMappingTests {
 	public void requestsWithoutHandlers() throws Exception {
 		HandlerMapping hm = (HandlerMapping) wac.getBean("handlerMapping");
 
-		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/mypath/nonsense.html");
+		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/myapp/mypath/nonsense.html");
 		req.setContextPath("/myapp");
 		Object h = hm.getHandler(req);
 		assertThat(h == null).as("Handler is null").isTrue();
@@ -121,8 +119,13 @@ public class BeanNameUrlHandlerMappingTests {
 
 	@Test
 	public void requestsWithFullPaths() throws Exception {
+
+		UrlPathHelper pathHelper = new UrlPathHelper();
+		pathHelper.setAlwaysUseFullPath(true);
+
 		BeanNameUrlHandlerMapping hm = new BeanNameUrlHandlerMapping();
-		hm.setAlwaysUseFullPath(true);
+		hm.setPatternParser(null);  // the test targets AntPathPatcher-specific feature
+		hm.setUrlPathHelper(pathHelper);
 		hm.setApplicationContext(wac);
 		Object bean = wac.getBean("godCtrl");
 

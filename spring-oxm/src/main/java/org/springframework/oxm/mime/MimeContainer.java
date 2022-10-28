@@ -16,7 +16,7 @@
 
 package org.springframework.oxm.mime;
 
-import javax.activation.DataHandler;
+import jakarta.activation.DataHandler;
 
 import org.springframework.lang.Nullable;
 

@@ -29,8 +29,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * The operator 'instanceof' checks if an object is of the class specified in the right
- * hand operand, in the same way that {@code instanceof} does in Java.
+ * The operator 'instanceof' checks if an object is of the class specified in the
+ * right-hand operand, in the same way that {@code instanceof} does in Java.
  *
  * @author Andy Clement
  * @since 3.0

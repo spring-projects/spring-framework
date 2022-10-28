@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,8 +70,8 @@ import org.springframework.core.annotation.AliasFor;
  * <ul>
  * <li>Typically, {@code @TestPropertySource} will be used in conjunction with
  * {@link ContextConfiguration @ContextConfiguration}.</li>
- * <li>As of Spring Framework 5.2, {@code @TestPropertySource} can be used as a
- * <em>{@linkplain Repeatable repeatable}</em> annotation.</li>
+ * <li>{@code @TestPropertySource} can be used as a <em>{@linkplain Repeatable
+ * repeatable}</em> annotation.</li>
  * <li>This annotation may be used as a <em>meta-annotation</em> to create
  * custom <em>composed annotations</em>; however, caution should be taken if
  * this annotation and {@code @ContextConfiguration} are combined on a composed
@@ -150,17 +150,19 @@ public @interface TestPropertySource {
 	String[] locations() default {};
 
 	/**
-	 * Whether or not test property source {@link #locations} from superclasses
-	 * should be <em>inherited</em>.
+	 * Whether test property source {@link #locations} from superclasses
+	 * and enclosing classes should be <em>inherited</em>.
 	 * <p>The default value is {@code true}, which means that a test class will
-	 * <em>inherit</em> property source locations defined by a superclass.
-	 * Specifically, the property source locations for a test class will be
-	 * appended to the list of property source locations defined by a superclass.
-	 * Thus, subclasses have the option of <em>extending</em> the list of test
-	 * property source locations.
+	 * <em>inherit</em> property source locations defined by a superclass or
+	 * enclosing class. Specifically, the property source locations for a test
+	 * class will be appended to the list of property source locations defined
+	 * by a superclass or enclosing class. Thus, subclasses and nested classes
+	 * have the option of <em>extending</em> the list of test property source
+	 * locations.
 	 * <p>If {@code inheritLocations} is set to {@code false}, the property
 	 * source locations for the test class will <em>shadow</em> and effectively
-	 * replace any property source locations defined by a superclass.
+	 * replace any property source locations defined by a superclass or
+	 * enclosing class.
 	 * <p>In the following example, the {@code ApplicationContext} for
 	 * {@code BaseTest} will be loaded using only the {@code "base.properties"}
 	 * file as a test property source. In contrast, the {@code ApplicationContext}
@@ -228,16 +230,17 @@ public @interface TestPropertySource {
 	String[] properties() default {};
 
 	/**
-	 * Whether or not inlined test {@link #properties} from superclasses should
-	 * be <em>inherited</em>.
+	 * Whether inlined test {@link #properties} from superclasses and
+	 * enclosing classes should be <em>inherited</em>.
 	 * <p>The default value is {@code true}, which means that a test class will
-	 * <em>inherit</em> inlined properties defined by a superclass. Specifically,
-	 * the inlined properties for a test class will be appended to the list of
-	 * inlined properties defined by a superclass. Thus, subclasses have the
-	 * option of <em>extending</em> the list of inlined test properties.
+	 * <em>inherit</em> inlined properties defined by a superclass or enclosing
+	 * class. Specifically, the inlined properties for a test class will be
+	 * appended to the list of inlined properties defined by a superclass or
+	 * enclosing class. Thus, subclasses and nested classes have the option of
+	 * <em>extending</em> the list of inlined test properties.
 	 * <p>If {@code inheritProperties} is set to {@code false}, the inlined
 	 * properties for the test class will <em>shadow</em> and effectively
-	 * replace any inlined properties defined by a superclass.
+	 * replace any inlined properties defined by a superclass or enclosing class.
 	 * <p>In the following example, the {@code ApplicationContext} for
 	 * {@code BaseTest} will be loaded using only the inlined {@code key1}
 	 * property. In contrast, the {@code ApplicationContext} for
@@ -261,7 +264,7 @@ public @interface TestPropertySource {
 	 * test class hierarchy (i.e., directly present or meta-present on a test
 	 * class) are considered to be <em>local</em> annotations, in contrast to
 	 * {@code @TestPropertySource} annotations that are inherited from a
-	 * superclass.</li>
+	 * superclass or enclosing class.</li>
 	 * <li>All local {@code @TestPropertySource} annotations must declare the
 	 * same value for the {@code inheritProperties} flag.</li>
 	 * <li>The {@code inheritProperties} flag is not taken into account between

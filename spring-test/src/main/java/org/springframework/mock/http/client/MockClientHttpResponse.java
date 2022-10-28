@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.mock.http.MockHttpInputMessage;
 import org.springframework.util.Assert;
@@ -32,41 +33,65 @@ import org.springframework.util.Assert;
  */
 public class MockClientHttpResponse extends MockHttpInputMessage implements ClientHttpResponse {
 
-	private final HttpStatus status;
+	private final HttpStatusCode statusCode;
 
 
 	/**
 	 * Constructor with response body as a byte array.
 	 */
-	public MockClientHttpResponse(byte[] body, HttpStatus statusCode) {
+	public MockClientHttpResponse(byte[] body, HttpStatusCode statusCode) {
 		super(body);
-		Assert.notNull(statusCode, "HttpStatus is required");
-		this.status = statusCode;
+		Assert.notNull(statusCode, "HttpStatusCode is required");
+		this.statusCode = statusCode;
+	}
+
+	/**
+	 * Variant of {@link #MockClientHttpResponse(byte[], HttpStatusCode)} with a
+	 * custom HTTP status code.
+	 * @since 5.3.17
+	 */
+	public MockClientHttpResponse(byte[] body, int statusCode) {
+		this(body, HttpStatusCode.valueOf(statusCode));
 	}
 
 	/**
 	 * Constructor with response body as InputStream.
 	 */
-	public MockClientHttpResponse(InputStream body, HttpStatus statusCode) {
+	public MockClientHttpResponse(InputStream body, HttpStatusCode statusCode) {
 		super(body);
 		Assert.notNull(statusCode, "HttpStatus is required");
-		this.status = statusCode;
+		this.statusCode = statusCode;
+	}
+
+	/**
+	 * Variant of {@link #MockClientHttpResponse(InputStream, HttpStatusCode)} with a
+	 * custom HTTP status code.
+	 * @since 5.3.17
+	 */
+	public MockClientHttpResponse(InputStream body, int statusCode) {
+		this(body, HttpStatusCode.valueOf(statusCode));
 	}
 
 
 	@Override
-	public HttpStatus getStatusCode() throws IOException {
-		return this.status;
+	public HttpStatusCode getStatusCode() {
+		return this.statusCode;
 	}
 
 	@Override
-	public int getRawStatusCode() throws IOException {
-		return this.status.value();
+	@Deprecated
+	public int getRawStatusCode() {
+		return this.statusCode.value();
 	}
 
 	@Override
-	public String getStatusText() throws IOException {
-		return this.status.getReasonPhrase();
+	public String getStatusText() {
+		if (this.statusCode instanceof HttpStatus status) {
+			return status.getReasonPhrase();
+		}
+		else {
+			return "";
+		}
 	}
 
 	@Override

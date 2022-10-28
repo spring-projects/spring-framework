@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import org.springframework.lang.Nullable;
  * <li>Catch-all readers or writers, e.g. String with any media type.
  * </ol>
  *
- * <p>Typed and object readers are further sub-divided and ordered as follows:
+ * <p>Typed and object readers are further subdivided and ordered as follows:
  * <ol>
  * <li>Default HTTP reader and writer registrations.
  * <li>Custom readers and writers.
@@ -177,6 +177,22 @@ public interface CodecConfigurer {
 		void jaxb2Encoder(Encoder<?> encoder);
 
 		/**
+		 * Override the default Kotlin Serialization CBOR {@code Decoder}.
+		 * @param decoder the decoder instance to use
+		 * @since 6.0
+		 * @see org.springframework.http.codec.cbor.KotlinSerializationCborDecoder
+		 */
+		void kotlinSerializationCborDecoder(Decoder<?> decoder);
+
+		/**
+		 * Override the default Kotlin Serialization CBOR {@code Encoder}.
+		 * @param encoder the encoder instance to use
+		 * @since 6.0
+		 * @see org.springframework.http.codec.cbor.KotlinSerializationCborDecoder
+		 */
+		void kotlinSerializationCborEncoder(Encoder<?> encoder);
+
+		/**
 		 * Override the default Kotlin Serialization JSON {@code Decoder}.
 		 * @param decoder the decoder instance to use
 		 * @since 5.3
@@ -191,6 +207,22 @@ public interface CodecConfigurer {
 		 * @see org.springframework.http.codec.json.KotlinSerializationJsonEncoder
 		 */
 		void kotlinSerializationJsonEncoder(Encoder<?> encoder);
+
+		/**
+		 * Override the default Kotlin Serialization Protobuf {@code Decoder}.
+		 * @param decoder the decoder instance to use
+		 * @since 6.0
+		 * @see org.springframework.http.codec.protobuf.KotlinSerializationProtobufDecoder
+		 */
+		void kotlinSerializationProtobufDecoder(Decoder<?> decoder);
+
+		/**
+		 * Override the default Kotlin Serialization Protobuf {@code Encoder}.
+		 * @param encoder the encoder instance to use
+		 * @since 6.0
+		 * @see org.springframework.http.codec.protobuf.KotlinSerializationProtobufEncoder
+		 */
+		void kotlinSerializationProtobufEncoder(Encoder<?> encoder);
 
 		/**
 		 * Register a consumer to apply to default config instances. This can be

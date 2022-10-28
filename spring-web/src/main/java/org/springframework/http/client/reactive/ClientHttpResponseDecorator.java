@@ -20,14 +20,14 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
 /**
  * Wraps another {@link ClientHttpResponse} and delegates all methods to it.
- * Sub-classes can override specific methods selectively.
+ * Subclasses can override specific methods selectively.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -56,13 +56,8 @@ public class ClientHttpResponseDecorator implements ClientHttpResponse {
 	}
 
 	@Override
-	public HttpStatus getStatusCode() {
+	public HttpStatusCode getStatusCode() {
 		return this.delegate.getStatusCode();
-	}
-
-	@Override
-	public int getRawStatusCode() {
-		return this.delegate.getRawStatusCode();
 	}
 
 	@Override

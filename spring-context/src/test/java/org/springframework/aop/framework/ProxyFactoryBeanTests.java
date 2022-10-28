@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,14 +61,15 @@ import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIOException;
 
 /**
- * @since 13.03.2003
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @since 13.03.2003
  */
 public class ProxyFactoryBeanTests {
 
@@ -91,7 +92,7 @@ public class ProxyFactoryBeanTests {
 
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
 		parent.registerBeanDefinition("target2", new RootBeanDefinition(TestApplicationListener.class));
 		this.factory = new DefaultListableBeanFactory(parent);
@@ -304,16 +305,13 @@ public class ProxyFactoryBeanTests {
 
 		final Exception ex = new UnsupportedOperationException("invoke");
 		// Add evil interceptor to head of list
-		config.addAdvice(0, new MethodInterceptor() {
-			@Override
-			public Object invoke(MethodInvocation invocation) throws Throwable {
-				throw ex;
-			}
+		config.addAdvice(0, (MethodInterceptor) invocation -> {
+			throw ex;
 		});
 		assertThat(config.getAdvisors().length).as("Have correct advisor count").isEqualTo(2);
 
 		ITestBean tb1 = (ITestBean) factory.getBean("test1");
-		assertThatExceptionOfType(Exception.class)
+		assertThatException()
 			.isThrownBy(tb1::toString)
 			.isSameAs(ex);
 	}
@@ -441,8 +439,7 @@ public class ProxyFactoryBeanTests {
 		assertThat(cba.getCalls()).isEqualTo(2);
 		assertThat(th.getCalls()).isEqualTo(0);
 		Exception expected = new Exception();
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-				echo.echoException(1, expected))
+		assertThatException().isThrownBy(() -> echo.echoException(1, expected))
 			.matches(expected::equals);
 		// No throws handler method: count should still be 0
 		assertThat(th.getCalls()).isEqualTo(0);
@@ -476,8 +473,8 @@ public class ProxyFactoryBeanTests {
 	public void testEmptyInterceptorNames() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(INVALID_CONTEXT, CLASS));
-		assertThatExceptionOfType(BeanCreationException.class).as("Interceptor names cannot be empty").isThrownBy(() ->
-				bf.getBean("emptyInterceptorNames"));
+		assertThat(bf.getBean("emptyInterceptorNames")).isInstanceOf(ITestBean.class);
+		assertThat(Proxy.isProxyClass(bf.getBean("emptyInterceptorNames").getClass())).isTrue();
 	}
 
 	/**
@@ -513,7 +510,7 @@ public class ProxyFactoryBeanTests {
 		agi = (AddedGlobalInterface) l;
 		assertThat(agi.globalsAdded() == -1).isTrue();
 
-		assertThat(factory.getBean("test1")).as("Aspect interface should't be implemeneted without globals")
+		assertThat(factory.getBean("test1")).as("Aspect interface shouldn't be implemented without globals")
 				.isNotInstanceOf(AddedGlobalInterface.class);
 	}
 
@@ -589,10 +586,9 @@ public class ProxyFactoryBeanTests {
 
 		((Lockable) bean1).lock();
 
-		assertThatExceptionOfType(LockedException.class).isThrownBy(() ->
-				bean1.setAge(5));
+		assertThatExceptionOfType(LockedException.class).isThrownBy(() -> bean1.setAge(5));
 
-		bean2.setAge(6); //do not expect LockedException"
+		bean2.setAge(6); //do not expect LockedException
 	}
 
 	@Test
@@ -610,8 +606,7 @@ public class ProxyFactoryBeanTests {
 
 		((Lockable) bean1).lock();
 
-		assertThatExceptionOfType(LockedException.class).isThrownBy(() ->
-				bean1.setAge(5));
+		assertThatExceptionOfType(LockedException.class).isThrownBy(() -> bean1.setAge(5));
 
 		// do not expect LockedException
 		bean2.setAge(6);
@@ -633,18 +628,48 @@ public class ProxyFactoryBeanTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(FROZEN_CONTEXT, CLASS));
 
-		Advised advised = (Advised)bf.getBean("frozen");
+		Advised advised = (Advised) bf.getBean("frozen");
 		assertThat(advised.isFrozen()).as("The proxy should be frozen").isTrue();
 	}
 
 	@Test
-	public void testDetectsInterfaces() throws Exception {
+	public void testDetectsInterfaces() {
 		ProxyFactoryBean fb = new ProxyFactoryBean();
 		fb.setTarget(new TestBean());
 		fb.addAdvice(new DebugInterceptor());
 		fb.setBeanFactory(new DefaultListableBeanFactory());
+
 		ITestBean proxy = (ITestBean) fb.getObject();
 		assertThat(AopUtils.isJdkDynamicProxy(proxy)).isTrue();
+	}
+
+	@Test
+	public void testWithInterceptorNames() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerSingleton("debug", new DebugInterceptor());
+
+		ProxyFactoryBean fb = new ProxyFactoryBean();
+		fb.setTarget(new TestBean());
+		fb.setInterceptorNames("debug");
+		fb.setBeanFactory(bf);
+
+		Advised proxy = (Advised) fb.getObject();
+		assertThat(proxy.getAdvisorCount()).isEqualTo(1);
+	}
+
+	@Test
+	public void testWithLateInterceptorNames() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerSingleton("debug", new DebugInterceptor());
+
+		ProxyFactoryBean fb = new ProxyFactoryBean();
+		fb.setTarget(new TestBean());
+		fb.setBeanFactory(bf);
+		fb.getObject();
+
+		fb.setInterceptorNames("debug");
+		Advised proxy = (Advised) fb.getObject();
+		assertThat(proxy.getAdvisorCount()).isEqualTo(1);
 	}
 
 
@@ -661,12 +686,9 @@ public class ProxyFactoryBeanTests {
 		}
 
 		public PointcutForVoid() {
-			setAdvice(new MethodInterceptor() {
-				@Override
-				public Object invoke(MethodInvocation invocation) throws Throwable {
-					methodNames.add(invocation.getMethod().getName());
-					return invocation.proceed();
-				}
+			setAdvice((MethodInterceptor) invocation -> {
+				methodNames.add(invocation.getMethod().getName());
+				return invocation.proceed();
 			});
 			setPointcut(new DynamicMethodMatcherPointcut() {
 				@Override
@@ -686,6 +708,7 @@ public class ProxyFactoryBeanTests {
 			this.tb = tb;
 		}
 	}
+
 
 	/**
 	 * Aspect interface

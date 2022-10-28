@@ -5,11 +5,13 @@
  * One can choose the toolchain to use for compiling the MAIN sources and/or compiling
  * and running the TEST sources. These options apply to Java, Kotlin and Groovy sources
  * when available.
- * {@code "./gradlew check -PmainToolchain=8 -PtestToolchain=11"} will use:
+ * {@code "./gradlew check -PmainToolchain=17 -PtestToolchain=18"} will use:
  * <ul>
- *     <li>a JDK8 toolchain for compiling the main SourceSet
- *     <li>a JDK11 toolchain for compiling and running the test SourceSet
+ *     <li>a JDK17 toolchain for compiling the main SourceSet
+ *     <li>a JDK18 toolchain for compiling and running the test SourceSet
  * </ul>
+ *
+ * By default, the build will fall back to using the current JDK and 17 language level for all sourceSets.
  *
  * Gradle will automatically detect JDK distributions in well-known locations.
  * The following command will list the detected JDKs on the host.
@@ -19,35 +21,57 @@
  *
  * We can also configure ENV variables and let Gradle know about them:
  * {@code
- * $ echo JDK11
- * /opt/openjdk/java11
- * $ echo JDK15
- * /opt/openjdk/java15
- * $ ./gradlew -Dorg.gradle.java.installations.fromEnv=JDK11,JDK15 check
+ * $ echo JDK17
+ * /opt/openjdk/java17
+ * $ echo JDK18
+ * /opt/openjdk/java18
+ * $ ./gradlew -Porg.gradle.java.installations.fromEnv=JDK17,JDK18 check
  * }
  *
  * @author Brian Clozel
+ * @author Sam Brannen
  */
 
+def mainToolchainConfigured() {
+	return project.hasProperty('mainToolchain') && project.mainToolchain
+}
+
+def testToolchainConfigured() {
+	return project.hasProperty('testToolchain') && project.testToolchain
+}
+
+def mainToolchainLanguageVersion() {
+	if (mainToolchainConfigured()) {
+		return JavaLanguageVersion.of(project.mainToolchain.toString())
+	}
+	return JavaLanguageVersion.of(17)
+}
+
+def testToolchainLanguageVersion() {
+	if (testToolchainConfigured()) {
+		return JavaLanguageVersion.of(project.testToolchain.toString())
+	}
+	return mainToolchainLanguageVersion()
+}
+
 plugins.withType(JavaPlugin) {
-	// Configure the Java Toolchain if the 'mainToolchain' property is defined
-	if (project.hasProperty('mainToolchain') && project.mainToolchain) {
-		def mainLanguageVersion = JavaLanguageVersion.of(project.mainToolchain.toString())
+	// Configure the Java Toolchain if the 'mainToolchain' is configured
+	if (mainToolchainConfigured()) {
 		java {
 			toolchain {
-				languageVersion = mainLanguageVersion
+				languageVersion = mainToolchainLanguageVersion()
 			}
 		}
 	}
 	else {
-		// Fallback to JDK8
+		// Fallback to JDK17
 		java {
-			sourceCompatibility = JavaVersion.VERSION_1_8
+			sourceCompatibility = JavaVersion.VERSION_17
 		}
 	}
 	// Configure a specific Java Toolchain for compiling and running tests if the 'testToolchain' property is defined
-	if (project.hasProperty('testToolchain') && project.testToolchain) {
-		def testLanguageVersion = JavaLanguageVersion.of(project.testToolchain.toString());
+	if (testToolchainConfigured()) {
+		def testLanguageVersion = testToolchainLanguageVersion()
 		tasks.withType(JavaCompile).matching { it.name.contains("Test") }.configureEach {
 			javaCompiler = javaToolchains.compilerFor {
 				languageVersion = testLanguageVersion
@@ -62,63 +86,58 @@ plugins.withType(JavaPlugin) {
 }
 
 plugins.withType(GroovyPlugin) {
-	// Fallback to JDK8
-	if (!project.hasProperty('mainToolchain')) {
+	// Fallback to JDK17
+	if (!mainToolchainConfigured()) {
 		compileGroovy {
-			sourceCompatibility = JavaVersion.VERSION_1_8
+			sourceCompatibility = JavaVersion.VERSION_17
 		}
 	}
 }
 
-// Configure the Kotlin compiler if the 'mainToolchain' property is defined
 pluginManager.withPlugin("kotlin") {
-	if (project.hasProperty('mainToolchain') && project.mainToolchain) {
-		def mainLanguageVersion = JavaLanguageVersion.of(project.mainToolchain.toString());
-		def compiler = javaToolchains.compilerFor {
-			languageVersion = mainLanguageVersion
+	// Fallback to JDK17
+	compileKotlin {
+		kotlinOptions {
+			jvmTarget = '17'
 		}
-		// See https://kotlinlang.org/docs/gradle.html#attributes-specific-for-jvm
-		def javaVersion = mainLanguageVersion.toString() == '8' ? '1.8' : mainLanguageVersion.toString()
-		compileKotlin {
-			kotlinOptions {
-				jvmTarget = javaVersion
-				jdkHome = compiler.get().metadata.installationPath.asFile.absolutePath
-			}
+	}
+	compileTestKotlin {
+		kotlinOptions {
+			jvmTarget = '17'
 		}
-		// Compile the test classes with the same version, 'testToolchain' will override if defined
-		compileTestKotlin {
-			kotlinOptions {
-				jvmTarget = javaVersion
-				jdkHome = compiler.get().metadata.installationPath.asFile.absolutePath
+	}
+}
+
+// Configure the JMH plugin to use the toolchain for generating and running JMH bytecode
+pluginManager.withPlugin("me.champeau.jmh") {
+	if (mainToolchainConfigured() || testToolchainConfigured()) {
+		tasks.matching { it.name.contains('jmh') && it.hasProperty('javaLauncher') }.configureEach {
+			javaLauncher.set(javaToolchains.launcherFor {
+				languageVersion.set(testToolchainLanguageVersion())
+			})
+		}
+		tasks.withType(JavaCompile).matching { it.name.contains("Jmh") }.configureEach {
+			javaCompiler = javaToolchains.compilerFor {
+				languageVersion = testToolchainLanguageVersion()
 			}
 		}
 	}
-	else {
-		// Fallback to JDK8
-		compileKotlin {
-			kotlinOptions {
-				jvmTarget = '1.8'
-			}
-		}
-		compileTestKotlin {
-			kotlinOptions {
-				jvmTarget = '1.8'
-			}
-		}
+}
+
+// Store resolved Toolchain JVM information as custom values in the build scan.
+rootProject.ext {
+	resolvedMainToolchain = false
+	resolvedTestToolchain = false
+}
+gradle.taskGraph.afterTask { Task task, TaskState state ->
+	if (mainToolchainConfigured() && !resolvedMainToolchain && task instanceof JavaCompile && task.javaCompiler.isPresent()) {
+		def metadata = task.javaCompiler.get().metadata
+		task.project.buildScan.value('Main toolchain', "$metadata.vendor $metadata.languageVersion ($metadata.installationPath)")
+		resolvedMainToolchain = true
 	}
-	
-	if (project.hasProperty('testToolchain')  && project.testToolchain) {
-		def testLanguageVersion = JavaLanguageVersion.of(project.testToolchain.toString());
-		def compiler = javaToolchains.compilerFor {
-			languageVersion = testLanguageVersion
-		}
-		// See https://kotlinlang.org/docs/gradle.html#attributes-specific-for-jvm
-		def javaVersion = testLanguageVersion.toString() == '8' ? '1.8' : testLanguageVersion.toString()
-		compileTestKotlin {
-			kotlinOptions {
-				jvmTarget = javaVersion
-				jdkHome = compiler.get().metadata.installationPath.asFile.absolutePath
-			}
-		}
+	if (testToolchainConfigured() && !resolvedTestToolchain && task instanceof Test && task.javaLauncher.isPresent()) {
+		def metadata = task.javaLauncher.get().metadata
+		task.project.buildScan.value('Test toolchain', "$metadata.vendor $metadata.languageVersion ($metadata.installationPath)")
+		resolvedTestToolchain = true
 	}
 }

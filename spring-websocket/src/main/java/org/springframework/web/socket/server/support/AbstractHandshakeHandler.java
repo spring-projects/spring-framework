@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.Lifecycle;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
@@ -48,7 +49,7 @@ import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 
 /**
- * A base class for {@link HandshakeHandler} implementations, independent from the Servlet API.
+ * A base class for {@link HandshakeHandler} implementations, independent of the Servlet API.
  *
  * <p>Performs initial validation of the WebSocket handshake request - possibly rejecting it
  * through the appropriate HTTP status code - while also allowing its subclasses to override
@@ -57,7 +58,7 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
  *
  * <p>If the negotiation succeeds, the actual upgrade is delegated to a server-specific
  * {@link org.springframework.web.socket.server.RequestUpgradeStrategy}, which will update
- * the response as necessary and initialize the WebSocket. Currently supported servers are
+ * the response as necessary and initialize the WebSocket. Currently, supported servers are
  * Jetty 9.0-9.3, Tomcat 7.0.47+ and 8.x, Undertow 1.0-1.3, GlassFish 4.1+, WebLogic 12.1.3+.
  *
  * @author Rossen Stoyanchev
@@ -67,15 +68,12 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
  * @see org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy
  * @see org.springframework.web.socket.server.standard.UndertowRequestUpgradeStrategy
  * @see org.springframework.web.socket.server.standard.GlassFishRequestUpgradeStrategy
- * @see org.springframework.web.socket.server.standard.WebLogicRequestUpgradeStrategy
  */
 public abstract class AbstractHandshakeHandler implements HandshakeHandler, Lifecycle {
 
 	private static final boolean tomcatWsPresent;
 
 	private static final boolean jettyWsPresent;
-
-	private static final boolean jetty10WsPresent;
 
 	private static final boolean undertowWsPresent;
 
@@ -89,10 +87,8 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 		ClassLoader classLoader = AbstractHandshakeHandler.class.getClassLoader();
 		tomcatWsPresent = ClassUtils.isPresent(
 				"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", classLoader);
-		jetty10WsPresent = ClassUtils.isPresent(
-				"org.eclipse.jetty.websocket.server.JettyWebSocketServerContainer", classLoader);
 		jettyWsPresent = ClassUtils.isPresent(
-				"org.eclipse.jetty.websocket.server.WebSocketServerFactory", classLoader);
+				"org.eclipse.jetty.websocket.server.JettyWebSocketServerContainer", classLoader);
 		undertowWsPresent = ClassUtils.isPresent(
 				"io.undertow.websockets.jsr.ServerWebSocketContainer", classLoader);
 		glassfishWsPresent = ClassUtils.isPresent(
@@ -140,9 +136,6 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 		else if (jettyWsPresent) {
 			className = "org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy";
 		}
-		else if (jetty10WsPresent) {
-			className = "org.springframework.web.socket.server.jetty.Jetty10RequestUpgradeStrategy";
-		}
 		else if (undertowWsPresent) {
 			className = "org.springframework.web.socket.server.standard.UndertowRequestUpgradeStrategy";
 		}
@@ -183,9 +176,9 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	 * is accepted. If there are no matches the response will not contain a
 	 * {@literal Sec-WebSocket-Protocol} header.
 	 * <p>Note that if the WebSocketHandler passed in at runtime is an instance of
-	 * {@link SubProtocolCapable} then there is not need to explicitly configure
+	 * {@link SubProtocolCapable} then there is no need to explicitly configure
 	 * this property. That is certainly the case with the built-in STOMP over
-	 * WebSocket support. Therefore this property should be configured explicitly
+	 * WebSocket support. Therefore, this property should be configured explicitly
 	 * only if the WebSocketHandler does not implement {@code SubProtocolCapable}.
 	 */
 	public void setSupportedProtocols(String... protocols) {
@@ -299,7 +292,8 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 
 	protected void handleInvalidUpgradeHeader(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
 		if (logger.isErrorEnabled()) {
-			logger.error("Handshake failed due to invalid Upgrade header: " + request.getHeaders().getUpgrade());
+			logger.error(LogFormatUtils.formatValue(
+					"Handshake failed due to invalid Upgrade header: " + request.getHeaders().getUpgrade(), -1, true));
 		}
 		response.setStatusCode(HttpStatus.BAD_REQUEST);
 		response.getBody().write("Can \"Upgrade\" only to \"WebSocket\".".getBytes(StandardCharsets.UTF_8));
@@ -307,7 +301,8 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 
 	protected void handleInvalidConnectHeader(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
 		if (logger.isErrorEnabled()) {
-			logger.error("Handshake failed due to invalid Connection header " + request.getHeaders().getConnection());
+			logger.error(LogFormatUtils.formatValue(
+					"Handshake failed due to invalid Connection header" + request.getHeaders().getConnection(), -1, true));
 		}
 		response.setStatusCode(HttpStatus.BAD_REQUEST);
 		response.getBody().write("\"Connection\" must be \"upgrade\".".getBytes(StandardCharsets.UTF_8));
@@ -331,8 +326,9 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	protected void handleWebSocketVersionNotSupported(ServerHttpRequest request, ServerHttpResponse response) {
 		if (logger.isErrorEnabled()) {
 			String version = request.getHeaders().getFirst("Sec-WebSocket-Version");
-			logger.error("Handshake failed due to unsupported WebSocket version: " + version +
-					". Supported versions: " + Arrays.toString(getSupportedVersions()));
+			logger.error(LogFormatUtils.formatValue(
+					"Handshake failed due to unsupported WebSocket version: " + version +
+							". Supported versions: " + Arrays.toString(getSupportedVersions()), -1, true));
 		}
 		response.setStatusCode(HttpStatus.UPGRADE_REQUIRED);
 		response.getHeaders().set(WebSocketHttpHeaders.SEC_WEBSOCKET_VERSION,

@@ -89,7 +89,7 @@ public abstract class AbstractTransactionalDatabaseClientIntegrationTests  {
 	protected abstract ConnectionFactory createConnectionFactory();
 
 	/**
-	 * Return the the CREATE TABLE statement for table {@code legoset} with the following three columns:
+	 * Return the CREATE TABLE statement for table {@code legoset} with the following three columns:
 	 * <ul>
 	 * <li>id integer (primary key), not null</li>
 	 * <li>name varchar(255), nullable</li>
@@ -109,15 +109,15 @@ public abstract class AbstractTransactionalDatabaseClientIntegrationTests  {
 
 	@Test
 	public void executeInsertInTransaction() {
-		Flux<Integer> integerFlux = databaseClient
+		Flux<Long> longFlux = databaseClient
 				.sql(getInsertIntoLegosetStatement())
 				.bind(0, 42055)
 				.bind(1, "SCHAUFELRADBAGGER")
 				.bindNull(2, Integer.class)
 				.fetch().rowsUpdated().flux().as(rxtx::transactional);
 
-		integerFlux.as(StepVerifier::create)
-				.expectNext(1)
+		longFlux.as(StepVerifier::create)
+				.expectNext(1L)
 				.verifyComplete();
 
 		databaseClient

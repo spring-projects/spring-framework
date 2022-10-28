@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -128,10 +127,14 @@ public class PathPatternsRequestConditionTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void matchTrailingSlash() {
 		MockHttpServletRequest request = createRequest("/foo/");
 
-		PathPatternsRequestCondition condition = createCondition("/foo");
+		PathPatternParser patternParser = new PathPatternParser();
+		patternParser.setMatchOptionalTrailingSeparator(true);
+
+		PathPatternsRequestCondition condition = new PathPatternsRequestCondition(patternParser, "/foo");
 		PathPatternsRequestCondition match = condition.getMatchingCondition(request);
 
 		assertThat(match).isNotNull();

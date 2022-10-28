@@ -181,7 +181,7 @@ public class DateFormatter implements Formatter<Date> {
 	}
 
 	/**
-	 * Specify whether or not parsing is to be lenient. Default is false.
+	 * Specify whether parsing is to be lenient. Default is {@code false}.
 	 * <p>With lenient parsing, the parser may allow inputs that do not precisely match the format.
 	 * With strict parsing, inputs must match the format exactly.
 	 */
@@ -219,9 +219,11 @@ public class DateFormatter implements Formatter<Date> {
 				}
 			}
 			if (this.source != null) {
-				throw new ParseException(
+				ParseException parseException = new ParseException(
 					String.format("Unable to parse date time value \"%s\" using configuration from %s", text, this.source),
 					ex.getErrorOffset());
+				parseException.initCause(ex);
+				throw parseException;
 			}
 			// else rethrow original exception
 			throw ex;

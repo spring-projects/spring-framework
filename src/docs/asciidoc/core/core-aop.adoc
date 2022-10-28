@@ -316,17 +316,17 @@ other class. They can also contain pointcut, advice, and introduction (inter-typ
 declarations.
 
 .Autodetecting aspects through component scanning
-NOTE: You can register aspect classes as regular beans in your Spring XML configuration or
-autodetect them through classpath scanning -- the same as any other Spring-managed bean.
-However, note that the `@Aspect` annotation is not sufficient for autodetection in
-the classpath. For that purpose, you need to add a separate `@Component` annotation
-(or, alternatively, a custom stereotype annotation that qualifies, as per the rules of
-Spring's component scanner).
+NOTE: You can register aspect classes as regular beans in your Spring XML configuration,
+via `@Bean` methods in `@Configuration` classes, or have Spring autodetect them through
+classpath scanning -- the same as any other Spring-managed bean. However, note that the
+`@Aspect` annotation is not sufficient for autodetection in the classpath. For that
+purpose, you need to add a separate `@Component` annotation (or, alternatively, a custom
+stereotype annotation that qualifies, as per the rules of Spring's component scanner).
 
 .Advising aspects with other aspects?
-NOTE: In Spring AOP, aspects themselves cannot be the targets of advice
-from other aspects. The `@Aspect` annotation on a class marks it as an aspect and,
-hence, excludes it from auto-proxying.
+NOTE: In Spring AOP, aspects themselves cannot be the targets of advice from other
+aspects. The `@Aspect` annotation on a class marks it as an aspect and, hence, excludes
+it from auto-proxying.
 
 
 
@@ -361,12 +361,12 @@ matches the execution of any method named `transfer`:
 ----
 
 The pointcut expression that forms the value of the `@Pointcut` annotation is a regular
-AspectJ 5 pointcut expression. For a full discussion of AspectJ's pointcut language, see
+AspectJ pointcut expression. For a full discussion of AspectJ's pointcut language, see
 the https://www.eclipse.org/aspectj/doc/released/progguide/index.html[AspectJ
 Programming Guide] (and, for extensions, the
 https://www.eclipse.org/aspectj/doc/released/adk15notebook/index.html[AspectJ 5
 Developer's Notebook]) or one of the books on AspectJ (such as _Eclipse AspectJ_, by Colyer
-et. al., or _AspectJ in Action_, by Ramnivas Laddad).
+et al., or _AspectJ in Action_, by Ramnivas Laddad).
 
 
 [[aop-pointcuts-designators]]
@@ -770,7 +770,7 @@ sub-packages:
 	this(com.xyz.service.AccountService)
 ----
 +
-NOTE: 'this' is more commonly used in a binding form. See the section on <<aop-advice>>
+NOTE: `this` is more commonly used in a binding form. See the section on <<aop-advice>>
 for how to make the proxy object available in the advice body.
 
 * Any join point (method execution only in Spring AOP) where the target object
@@ -781,7 +781,7 @@ implements the `AccountService` interface:
 	target(com.xyz.service.AccountService)
 ----
 +
-NOTE: 'target' is more commonly used in a binding form. See the <<aop-advice>> section
+NOTE: `target` is more commonly used in a binding form. See the <<aop-advice>> section
 for how to make the target object available in the advice body.
 
 * Any join point (method execution only in Spring AOP) that takes a single parameter
@@ -792,7 +792,7 @@ and where the argument passed at runtime is `Serializable`:
 	args(java.io.Serializable)
 ----
 +
-NOTE: 'args' is more commonly used in a binding form. See the <<aop-advice>> section
+NOTE: `args` is more commonly used in a binding form. See the <<aop-advice>> section
 for how to make the method arguments available in the advice body.
 +
 Note that the pointcut given in this example is different from `execution(*
@@ -808,7 +808,7 @@ parameter of type `Serializable`.
 	@target(org.springframework.transaction.annotation.Transactional)
 ----
 +
-NOTE: You can also use '@target' in a binding form. See the <<aop-advice>> section for
+NOTE: You can also use `@target` in a binding form. See the <<aop-advice>> section for
 how to make the annotation object available in the advice body.
 
 * Any join point (method execution only in Spring AOP) where the declared type of the
@@ -819,7 +819,7 @@ target object has an `@Transactional` annotation:
 	@within(org.springframework.transaction.annotation.Transactional)
 ----
 +
-NOTE: You can also use '@within' in a binding form. See the <<aop-advice>> section for
+NOTE: You can also use `@within` in a binding form. See the <<aop-advice>> section for
 how to make the annotation object available in the advice body.
 
 * Any join point (method execution only in Spring AOP) where the executing method has an
@@ -830,7 +830,7 @@ how to make the annotation object available in the advice body.
 	@annotation(org.springframework.transaction.annotation.Transactional)
 ----
 +
-NOTE: You can also use '@annotation' in a binding form. See the <<aop-advice>> section
+NOTE: You can also use `@annotation` in a binding form. See the <<aop-advice>> section
 for how to make the annotation object available in the advice body.
 
 * Any join point (method execution only in Spring AOP) which takes a single parameter,
@@ -841,7 +841,7 @@ and where the runtime type of the argument passed has the `@Classified` annotati
 	@args(com.xyz.security.Classified)
 ----
 +
-NOTE: You can also use '@args' in a binding form. See the <<aop-advice>> section
+NOTE: You can also use `@args` in a binding form. See the <<aop-advice>> section
 how to make the annotation object(s) available in the advice body.
 
 * Any join point (method execution only in Spring AOP) on a Spring bean named
@@ -893,7 +893,7 @@ scoping). You can include the contextual designators to match based on
 join point context or bind that context for use in the advice. Supplying only a
 kinded designator or only a contextual designator works but could affect weaving
 performance (time and memory used), due to extra processing and analysis. Scoping
-designators are very fast to match, and using them usage means AspectJ can very quickly
+designators are very fast to match, and using them means AspectJ can very quickly
 dismiss groups of join points that should not be further processed. A good
 pointcut should always include one if possible.
 
@@ -1213,33 +1213,60 @@ in contrast to `@AfterReturning` which only applies to successful normal returns
 [[aop-ataspectj-around-advice]]
 ==== Around Advice
 
-The last kind of advice is around advice. Around advice runs "`around`" a matched
+The last kind of advice is _around_ advice. Around advice runs "around" a matched
 method's execution. It has the opportunity to do work both before and after the method
 runs and to determine when, how, and even if the method actually gets to run at all.
 Around advice is often used if you need to share state before and after a method
-execution in a thread-safe manner (starting and stopping a timer, for example).
-Always use the least powerful form of advice that meets your requirements (that is,
-do not use around advice if before advice would do).
+execution in a thread-safe manner – for example, starting and stopping a timer.
 
-Around advice is declared by using the `@Around` annotation. The first parameter of the
-advice method must be of type `ProceedingJoinPoint`. Within the body of the advice,
-calling `proceed()` on the `ProceedingJoinPoint` causes the underlying method to run.
-The `proceed` method can also pass in an `Object[]`. The values in the array are used
-as the arguments to the method execution when it proceeds.
+[TIP]
+====
+Always use the least powerful form of advice that meets your requirements.
 
-NOTE: The behavior of `proceed` when called with an `Object[]` is a little different than
-the behavior of `proceed` for around advice compiled by the AspectJ compiler. For around
+For example, do not use _around_ advice if _before_ advice is sufficient for your needs.
+====
+
+Around advice is declared by annotating a method with the `@Around` annotation. The
+method should declare `Object` as its return type, and the first parameter of the method
+must be of type `ProceedingJoinPoint`. Within the body of the advice method, you must
+invoke `proceed()` on the `ProceedingJoinPoint` in order for the underlying method to
+run. Invoking `proceed()` without arguments will result in the caller's original
+arguments being supplied to the underlying method when it is invoked. For advanced use
+cases, there is an overloaded variant of the `proceed()` method which accepts an array of
+arguments (`Object[]`). The values in the array will be used as the arguments to the
+underlying method when it is invoked.
+
+[NOTE]
+====
+The behavior of `proceed` when called with an `Object[]` is a little different than the
+behavior of `proceed` for around advice compiled by the AspectJ compiler. For around
 advice written using the traditional AspectJ language, the number of arguments passed to
 `proceed` must match the number of arguments passed to the around advice (not the number
 of arguments taken by the underlying join point), and the value passed to proceed in a
-given argument position supplants the original value at the join point for the entity
-the value was bound to (do not worry if this does not make sense right now). The approach
-taken by Spring is simpler and a better match to its proxy-based, execution-only
-semantics. You only need to be aware of this difference if you compile @AspectJ
-aspects written for Spring and use `proceed` with arguments with the AspectJ compiler
-and weaver. There is a way to write such aspects that is 100% compatible across both
-Spring AOP and AspectJ, and this is discussed in the
-<<aop-ataspectj-advice-params, following section on advice parameters>>.
+given argument position supplants the original value at the join point for the entity the
+value was bound to (do not worry if this does not make sense right now).
+
+The approach taken by Spring is simpler and a better match to its proxy-based,
+execution-only semantics. You only need to be aware of this difference if you compile
+`@AspectJ` aspects written for Spring and use `proceed` with arguments with the AspectJ
+compiler and weaver. There is a way to write such aspects that is 100% compatible across
+both Spring AOP and AspectJ, and this is discussed in the
+<<aop-ataspectj-advice-proceeding-with-the-call, following section on advice parameters>>.
+====
+
+The value returned by the around advice is the return value seen by the caller of the
+method. For example, a simple caching aspect could return a value from a cache if it has
+one or invoke `proceed()` (and return that value) if it does not. Note that `proceed`
+may be invoked once, many times, or not at all within the body of the around advice. All
+of these are legal.
+
+WARNING: If you declare the return type of your around advice method as `void`, `null`
+will always be returned to the caller, effectively ignoring the result of any invocation
+of `proceed()`. It is therefore recommended that an around advice method declare a return
+type of `Object`. The advice method should typically return the value returned from an
+invocation of `proceed()`, even if the underlying method has a `void` return type.
+However, the advice may optionally return a cached value, a wrapped value, or some other
+value depending on the use case.
 
 The following example shows how to use around advice:
 
@@ -1282,12 +1309,6 @@ The following example shows how to use around advice:
 	}
 ----
 
-The value returned by the around advice is the return value seen by the caller of the
-method. For example, a simple caching aspect could return a value from a cache if it
-has one and invoke `proceed()` if it does not. Note that `proceed` may be invoked once,
-many times, or not at all within the body of the around advice. All of these are legal.
-
-
 [[aop-ataspectj-advice-params]]
 ==== Advice Parameters
 
@@ -1301,8 +1322,9 @@ write generic advice that can find out about the method the advice is currently 
 ===== Access to the Current `JoinPoint`
 
 Any advice method may declare, as its first parameter, a parameter of type
-`org.aspectj.lang.JoinPoint` (note that around advice is required to declare a first
+`org.aspectj.lang.JoinPoint`. Note that around advice is required to declare a first
 parameter of type `ProceedingJoinPoint`, which is a subclass of `JoinPoint`.
+
 The `JoinPoint` interface provides a number of useful methods:
 
 * `getArgs()`: Returns the method arguments.
@@ -1319,7 +1341,7 @@ See the https://www.eclipse.org/aspectj/doc/released/runtime-api/org/aspectj/lan
 We have already seen how to bind the returned value or exception value (using after
 returning and after throwing advice). To make argument values available to the advice
 body, you can use the binding form of `args`. If you use a parameter name in place of a
-type name in an args expression, the value of the corresponding argument is passed as
+type name in an `args` expression, the value of the corresponding argument is passed as
 the parameter value when the advice is invoked. An example should make this clearer.
 Suppose you want to advise the execution of DAO operations that take an `Account`
 object as the first parameter, and you need access to the account in the advice body.
@@ -1348,7 +1370,7 @@ parameter, and the argument passed to that parameter is an instance of `Account`
 Second, it makes the actual `Account` object available to the advice through the `account`
 parameter.
 
-Another way of writing this is to declare a pointcut that "`provides`" the `Account`
+Another way of writing this is to declare a pointcut that "provides" the `Account`
 object value when it matches a join point, and then refer to the named pointcut
 from the advice. This would look as follows:
 
@@ -1376,13 +1398,12 @@ from the advice. This would look as follows:
 	}
 ----
 
-See the AspectJ programming guide for more
-details.
+See the AspectJ programming guide for more details.
 
-The proxy object ( `this`), target object ( `target`), and annotations ( `@within`,
-`@target`, `@annotation`, and `@args`) can all be bound in a similar fashion. The next two
-examples show how to match the execution of methods annotated with an
-`@Auditable` annotation and extract the audit code:
+The proxy object (`this`), target object (`target`), and annotations (`@within`,
+`@target`, `@annotation`, and `@args`) can all be bound in a similar fashion. The next
+two examples show how to match the execution of methods annotated with an `@Auditable`
+annotation and extract the audit code:
 
 The first of the two examples shows the definition of the `@Auditable` annotation:
 
@@ -1448,7 +1469,7 @@ you have a generic type like the following:
 ----
 
 You can restrict interception of method types to certain parameter types by
-typing the advice parameter to the parameter type for which you want to intercept the method:
+tying the advice parameter to the parameter type for which you want to intercept the method:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1575,18 +1596,18 @@ the `argNames` attribute:
 	}
 ----
 
-* Using the `'argNames'` attribute is a little clumsy, so if the `'argNames'` attribute
+* Using the `argNames` attribute is a little clumsy, so if the `argNames` attribute
   has not been specified,  Spring AOP looks at the debug information for the
   class and tries to determine the parameter names from the local variable table. This
   information is present as long as the classes have been compiled with debug
-  information ( `'-g:vars'` at a minimum). The consequences of compiling with this flag
+  information (`-g:vars` at a minimum). The consequences of compiling with this flag
   on are: (1) your code is slightly easier to understand (reverse engineer), (2)
   the class file sizes are very slightly bigger (typically inconsequential), (3) the
-  optimization to remove unused local variables is not  applied by your compiler. In
+  optimization to remove unused local variables is not applied by your compiler. In
   other words, you should encounter no difficulties by building with this flag on.
 +
-NOTE: If an @AspectJ aspect has been compiled by the AspectJ compiler (ajc) even without the
-debug information, you need not add the `argNames` attribute, as the compiler
+NOTE: If an @AspectJ aspect has been compiled by the AspectJ compiler (`ajc`) even
+without the debug information, you need not add the `argNames` attribute, as the compiler
 retain the needed information.
 
 * If the code has been compiled without the necessary debug information, Spring AOP
@@ -2315,20 +2336,30 @@ You can declare it by using the `after` element, as the following example shows:
 [[aop-schema-advice-around]]
 ==== Around Advice
 
-The last kind of advice is around advice. Around advice runs "around" a matched method
-execution. It has the opportunity to do work both before and after the method runs
-and to determine when, how, and even if the method actually gets to run at all.
-Around advice is often used to share state before and after a method execution in a
-thread-safe manner (starting and stopping a timer, for example). Always use the least
-powerful form of advice that meets your requirements. Do not use around advice if
-before advice can do the job.
+The last kind of advice is _around_ advice. Around advice runs "around" a matched
+method's execution. It has the opportunity to do work both before and after the method
+runs and to determine when, how, and even if the method actually gets to run at all.
+Around advice is often used if you need to share state before and after a method
+execution in a thread-safe manner – for example, starting and stopping a timer.
 
-You can declare around advice by using the `aop:around` element. The first parameter of
-the advice method must be of type `ProceedingJoinPoint`. Within the body of the advice,
-calling `proceed()` on the `ProceedingJoinPoint` causes the underlying method to run.
-The `proceed` method may also be called with an `Object[]`. The values in the array
-are used as the arguments to the method execution when it proceeds.
-See <<aop-ataspectj-around-advice>> for notes on calling `proceed` with an `Object[]`.
+[TIP]
+====
+Always use the least powerful form of advice that meets your requirements.
+
+For example, do not use _around_ advice if _before_ advice is sufficient for your needs.
+====
+
+You can declare around advice by using the `aop:around` element. The advice method should
+declare `Object` as its return type, and the first parameter of the method must be of
+type `ProceedingJoinPoint`. Within the body of the advice method, you must invoke
+`proceed()` on the `ProceedingJoinPoint` in order for the underlying method to run.
+Invoking `proceed()` without arguments will result in the caller's original arguments
+being supplied to the underlying method when it is invoked. For advanced use cases, there
+is an overloaded variant of the `proceed()` method which accepts an array of arguments
+(`Object[]`). The values in the array will be used as the arguments to the underlying
+method when it is invoked. See <<aop-ataspectj-around-advice>> for notes on calling
+`proceed` with an `Object[]`.
+
 The following example shows how to declare around advice in XML:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -2542,7 +2573,7 @@ With such a Boot class, we would get output similar to the following on standard
 
 [literal,subs="verbatim,quotes"]
 ----
-StopWatch 'Profiling for 'Pengo' and '12'': running time (millis) = 0
+StopWatch 'Profiling for 'Pengo' and '12': running time (millis) = 0
 -----------------------------------------
 ms     %     Task name
 -----------------------------------------
@@ -2830,7 +2861,7 @@ The corresponding Spring configuration is as follows:
 	</bean>
 ----
 
-Notice that, for the time, being we assume that all business services are idempotent. If
+Notice that, for the time being, we assume that all business services are idempotent. If
 this is not the case, we can refine the aspect so that it retries only genuinely
 idempotent operations, by introducing an `Idempotent` annotation and using the annotation
 to annotate the implementation of service operations, as the following example shows:
@@ -3540,7 +3571,7 @@ with references to beans defined in the child (servlet-specific) contexts by usi
 
 When deploying multiple web applications within the same container, ensure that each
 web application loads the types in `spring-aspects.jar` by using its own classloader
-(for example, by placing `spring-aspects.jar` in `'WEB-INF/lib'`). If `spring-aspects.jar`
+(for example, by placing `spring-aspects.jar` in `WEB-INF/lib`). If `spring-aspects.jar`
 is added only to the container-wide classpath (and hence loaded by the shared parent
 classloader), all web applications share the same aspect instance (which is probably
 not what you want).
@@ -3570,7 +3601,7 @@ visibility may be annotated, including private methods. Annotating non-public me
 directly is the only way to get transaction demarcation for the execution of such methods.
 
 TIP: Since Spring Framework 4.2, `spring-aspects` provides a similar aspect that offers the
-exact same features for the standard `javax.transaction.Transactional` annotation. Check
+exact same features for the standard `jakarta.transaction.Transactional` annotation. Check
 `JtaAnnotationTransactionAspect` for more details.
 
 For AspectJ programmers who want to use the Spring configuration and transaction

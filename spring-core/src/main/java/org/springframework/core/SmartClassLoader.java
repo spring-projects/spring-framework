@@ -26,7 +26,7 @@ import org.springframework.lang.Nullable;
  * Spring's CGLIB proxy factory for making a caching decision.
  *
  * <p>If a ClassLoader does <i>not</i> implement this interface,
- * then all of the classes obtained from it should be considered
+ * then all the classes obtained from it should be considered
  * as not reloadable (i.e. cacheable).
  *
  * @author Juergen Hoeller
@@ -91,7 +91,6 @@ public interface SmartClassLoader {
 	 * not being possible (thrown by the default implementation in this interface)
 	 * @since 5.3.4
 	 * @see ClassLoader#defineClass(String, byte[], int, int, ProtectionDomain)
-	 * @see java.lang.invoke.MethodHandles.Lookup#defineClass(byte[])
 	 */
 	default Class<?> publicDefineClass(String name, byte[] b, @Nullable ProtectionDomain protectionDomain) {
 		throw new UnsupportedOperationException();

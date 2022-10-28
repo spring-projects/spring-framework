@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,7 +139,7 @@ public final class CloseStatus implements Serializable {
 	public static final CloseStatus TLS_HANDSHAKE_FAILURE = new CloseStatus(1015);
 
 	/**
-	 * A status code for use within the framework the indicate a session has
+	 * A status code for use within the framework that indicates a session has
 	 * become unreliable (e.g. timed out while sending a message) and extra
 	 * care should be exercised, e.g. avoid sending any further data to the
 	 * client that may be done during normal shutdown.
@@ -209,10 +209,9 @@ public final class CloseStatus implements Serializable {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof CloseStatus)) {
+		if (!(other instanceof CloseStatus otherStatus)) {
 			return false;
 		}
-		CloseStatus otherStatus = (CloseStatus) other;
 		return (this.code == otherStatus.code && ObjectUtils.nullSafeEquals(this.reason, otherStatus.reason));
 	}
 

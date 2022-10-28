@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -225,14 +225,38 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 		for (PropertyDescriptor pd : BeanUtils.getPropertyDescriptors(mappedClass)) {
 			if (pd.getWriteMethod() != null) {
-				this.mappedFields.put(lowerCaseName(pd.getName()), pd);
-				String underscoredName = underscoreName(pd.getName());
-				if (!lowerCaseName(pd.getName()).equals(underscoredName)) {
-					this.mappedFields.put(underscoredName, pd);
+				String lowerCaseName = lowerCaseName(pd.getName());
+				this.mappedFields.put(lowerCaseName, pd);
+				String underscoreName = underscoreName(pd.getName());
+				if (!lowerCaseName.equals(underscoreName)) {
+					this.mappedFields.put(underscoreName, pd);
 				}
 				this.mappedProperties.add(pd.getName());
 			}
 		}
+	}
+
+	/**
+	 * Remove the specified property from the mapped fields.
+	 * @param propertyName the property name (as used by property descriptors)
+	 * @since 5.3.9
+	 */
+	protected void suppressProperty(String propertyName) {
+		if (this.mappedFields != null) {
+			this.mappedFields.remove(lowerCaseName(propertyName));
+			this.mappedFields.remove(underscoreName(propertyName));
+		}
+	}
+
+	/**
+	 * Convert the given name to lower case.
+	 * By default, conversions will happen within the US locale.
+	 * @param name the original name
+	 * @return the converted name
+	 * @since 4.2
+	 */
+	protected String lowerCaseName(String name) {
+		return name.toLowerCase(Locale.US);
 	}
 
 	/**
@@ -249,7 +273,8 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 		}
 
 		StringBuilder result = new StringBuilder();
-		for (int i = 0; i < name.length(); i++) {
+		result.append(Character.toLowerCase(name.charAt(0)));
+		for (int i = 1; i < name.length(); i++) {
 			char c = name.charAt(i);
 			if (Character.isUpperCase(c)) {
 				result.append('_').append(Character.toLowerCase(c));
@@ -259,17 +284,6 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 			}
 		}
 		return result.toString();
-	}
-
-	/**
-	 * Convert the given name to lower case.
-	 * By default, conversions will happen within the US locale.
-	 * @param name the original name
-	 * @return the converted name
-	 * @since 4.2
-	 */
-	protected String lowerCaseName(String name) {
-		return name.toLowerCase(Locale.US);
 	}
 
 
@@ -325,12 +339,6 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 				catch (NotWritablePropertyException ex) {
 					throw new DataRetrievalFailureException(
 							"Unable to map column '" + column + "' to property '" + pd.getName() + "'", ex);
-				}
-			}
-			else {
-				// No PropertyDescriptor found
-				if (rowNumber == 0 && logger.isDebugEnabled()) {
-					logger.debug("No property found for column '" + column + "' mapped to field '" + field + "'");
 				}
 			}
 		}

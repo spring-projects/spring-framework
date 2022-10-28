@@ -55,6 +55,8 @@ public class ResourceHandlerRegistration {
 
 	private boolean useLastModified = true;
 
+	private boolean optimizeLocations = false;
+
 
 	/**
 	 * Create a {@link ResourceHandlerRegistration} instance.
@@ -130,12 +132,30 @@ public class ResourceHandlerRegistration {
 	/**
 	 * Set whether the {@link Resource#lastModified()} information should be used to drive HTTP responses.
 	 * <p>This configuration is set to {@code true} by default.
-	 * @param useLastModified whether the "last modified" resource information should be used.
+	 * @param useLastModified whether the "last modified" resource information should be used
 	 * @return the same {@link ResourceHandlerRegistration} instance, for chained method invocation
 	 * @since 5.3
+	 * @see ResourceHttpRequestHandler#setUseLastModified
 	 */
 	public ResourceHandlerRegistration setUseLastModified(boolean useLastModified) {
 		this.useLastModified = useLastModified;
+		return this;
+	}
+
+	/**
+	 * Set whether to optimize the specified locations through an existence check on startup,
+	 * filtering non-existing directories upfront so that they do not have to be checked
+	 * on every resource access.
+	 * <p>The default is {@code false}, for defensiveness against zip files without directory
+	 * entries which are unable to expose the existence of a directory upfront. Switch this flag to
+	 * {@code true} for optimized access in case of a consistent jar layout with directory entries.
+	 * @param optimizeLocations whether to optimize the locations through an existence check on startup
+	 * @return the same {@link ResourceHandlerRegistration} instance, for chained method invocation
+	 * @since 5.3.13
+	 * @see ResourceHttpRequestHandler#setOptimizeLocations
+	 */
+	public ResourceHandlerRegistration setOptimizeLocations(boolean optimizeLocations) {
+		this.optimizeLocations = optimizeLocations;
 		return this;
 	}
 
@@ -204,6 +224,7 @@ public class ResourceHandlerRegistration {
 			handler.setCacheSeconds(this.cachePeriod);
 		}
 		handler.setUseLastModified(this.useLastModified);
+		handler.setOptimizeLocations(this.optimizeLocations);
 		return handler;
 	}
 
