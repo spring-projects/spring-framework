@@ -82,6 +82,13 @@ class ResourceHintsTests {
 	}
 
 	@Test
+	void registerRootDirectory() {
+		this.resourceHints.registerPattern("/");
+		assertThat(this.resourceHints.resourcePatternHints()).singleElement().satisfies(
+				patternOf("/"));
+	}
+
+	@Test
 	void registerPattern() {
 		this.resourceHints.registerPattern("com/example/*.properties");
 		assertThat(this.resourceHints.resourcePatternHints()).singleElement().satisfies(
