@@ -33,7 +33,7 @@ import org.springframework.web.socket.handler.BeanCreatingHandlerProvider;
 /**
  * WebSocket {@link ConnectionManagerSupport connection manager} that connects
  * to the server via {@link WebSocketContainer} and handles the session with an
- * {@link javax.websocket.ClientEndpoint @ClientEndpoint} endpoint.
+ * {@link jakarta.websocket.ClientEndpoint @ClientEndpoint} endpoint.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
