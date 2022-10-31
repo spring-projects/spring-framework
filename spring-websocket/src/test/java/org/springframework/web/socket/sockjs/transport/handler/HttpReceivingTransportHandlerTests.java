@@ -26,6 +26,8 @@ import org.springframework.web.socket.sockjs.transport.session.AbstractSockJsSes
 import org.springframework.web.socket.sockjs.transport.session.StubSockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.session.TestHttpSockJsSession;
 
+import java.nio.charset.StandardCharsets;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -44,7 +46,7 @@ public class HttpReceivingTransportHandlerTests extends AbstractHttpRequestTests
 
 	@Test
 	public void readMessagesXhr() throws Exception {
-		this.servletRequest.setContent("[\"x\"]".getBytes("UTF-8"));
+		this.servletRequest.setContent("[\"x\"]".getBytes(StandardCharsets.UTF_8));
 		handleRequest(new XhrReceivingTransportHandler());
 
 		assertThat(this.servletResponse.getStatus()).isEqualTo(204);
@@ -52,10 +54,10 @@ public class HttpReceivingTransportHandlerTests extends AbstractHttpRequestTests
 
 	@Test
 	public void readMessagesBadContent() throws Exception {
-		this.servletRequest.setContent("".getBytes("UTF-8"));
+		this.servletRequest.setContent("".getBytes(StandardCharsets.UTF_8));
 		handleRequestAndExpectFailure();
 
-		this.servletRequest.setContent("[\"x]".getBytes("UTF-8"));
+		this.servletRequest.setContent("[\"x]".getBytes(StandardCharsets.UTF_8));
 		handleRequestAndExpectFailure();
 	}
 
@@ -69,7 +71,7 @@ public class HttpReceivingTransportHandlerTests extends AbstractHttpRequestTests
 	@Test
 	public void delegateMessageException() throws Exception {
 		StubSockJsServiceConfig sockJsConfig = new StubSockJsServiceConfig();
-		this.servletRequest.setContent("[\"x\"]".getBytes("UTF-8"));
+		this.servletRequest.setContent("[\"x\"]".getBytes(StandardCharsets.UTF_8));
 
 		WebSocketHandler wsHandler = mock(WebSocketHandler.class);
 		TestHttpSockJsSession session = new TestHttpSockJsSession("1", sockJsConfig, wsHandler, null);
