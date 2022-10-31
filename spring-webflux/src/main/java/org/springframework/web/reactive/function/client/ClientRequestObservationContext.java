@@ -83,7 +83,7 @@ public class ClientRequestObservationContext extends RequestReplySenderContext<C
 	 * Return the built request.
 	 */
 	public ClientRequest getBuiltRequest() {
-		return builtRequest;
+		return this.builtRequest;
 	}
 
 	/**

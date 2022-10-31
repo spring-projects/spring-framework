@@ -87,7 +87,8 @@ class WebClientObservationTests {
 
 			assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS")
 					.hasParentObservationEqualTo(parent);
-		} finally {
+		}
+		finally {
 			parent.stop();
 		}
 	}
