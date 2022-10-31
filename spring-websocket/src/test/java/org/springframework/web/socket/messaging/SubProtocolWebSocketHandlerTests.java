@@ -17,6 +17,7 @@
 package org.springframework.web.socket.messaging;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -70,7 +71,7 @@ public class SubProtocolWebSocketHandlerTests {
 	public void setup() {
 		this.webSocketHandler = new SubProtocolWebSocketHandler(this.inClientChannel, this.outClientChannel);
 		given(stompHandler.getSupportedProtocols()).willReturn(Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp"));
-		given(mqttHandler.getSupportedProtocols()).willReturn(Arrays.asList("MQTT"));
+		given(mqttHandler.getSupportedProtocols()).willReturn(List.of("MQTT"));
 		this.session = new TestWebSocketSession();
 		this.session.setId("1");
 		this.session.setOpen(true);
@@ -133,7 +134,7 @@ public class SubProtocolWebSocketHandlerTests {
 
 	@Test
 	public void noSubProtocolOneHandler() throws Exception {
-		this.webSocketHandler.setProtocolHandlers(Arrays.asList(stompHandler));
+		this.webSocketHandler.setProtocolHandlers(List.of(stompHandler));
 		this.webSocketHandler.afterConnectionEstablished(session);
 
 		verify(this.stompHandler).afterSessionStarted(
@@ -164,7 +165,7 @@ public class SubProtocolWebSocketHandlerTests {
 		session1.setAcceptedProtocol("v12.stomp");
 		session2.setAcceptedProtocol("v12.stomp");
 
-		this.webSocketHandler.setProtocolHandlers(Arrays.asList(this.stompHandler));
+		this.webSocketHandler.setProtocolHandlers(List.of(this.stompHandler));
 		this.webSocketHandler.afterConnectionEstablished(session1);
 		this.webSocketHandler.afterConnectionEstablished(session2);
 

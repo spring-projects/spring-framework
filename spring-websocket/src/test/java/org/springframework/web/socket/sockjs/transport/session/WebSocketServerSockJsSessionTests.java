@@ -79,7 +79,7 @@ public class WebSocketServerSockJsSessionTests extends AbstractSockJsSessionTest
 	public void afterSessionInitialized() throws Exception {
 		this.session.initializeDelegateSession(this.webSocketSession);
 		assertThat(this.webSocketSession.getSentMessages()).isEqualTo(Collections.singletonList(new TextMessage("o")));
-		assertThat(this.session.heartbeatSchedulingEvents).isEqualTo(Arrays.asList("schedule"));
+		assertThat(this.session.heartbeatSchedulingEvents).isEqualTo(List.of("schedule"));
 		verify(this.webSocketHandler).afterConnectionEstablished(this.session);
 		verifyNoMoreInteractions(this.taskScheduler, this.webSocketHandler);
 	}

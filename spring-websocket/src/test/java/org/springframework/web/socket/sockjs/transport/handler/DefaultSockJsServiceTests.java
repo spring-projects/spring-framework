@@ -187,7 +187,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	public void handleTransportRequestXhrSameOrigin() throws Exception {
 		String sockJsPath = sessionUrlPrefix + "xhr";
 		setRequest("POST", sockJsPrefix + sockJsPath);
-		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.example"));
+		this.service.setAllowedOrigins(List.of("https://mydomain1.example"));
 		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain1.example");
 		this.servletRequest.setServerName("mydomain2.example");
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
@@ -199,7 +199,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	public void handleInvalidTransportType() throws Exception {
 		String sockJsPath = sessionUrlPrefix + "invalid";
 		setRequest("POST", sockJsPrefix + sockJsPath);
-		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.example"));
+		this.service.setAllowedOrigins(List.of("https://mydomain1.example"));
 		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain2.example");
 		this.servletRequest.setServerName("mydomain2.example");
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
