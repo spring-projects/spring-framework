@@ -75,7 +75,10 @@ public class RestTemplateXhrTransportTests {
 
 	@Test
 	public void connectReceiveAndClose() throws Exception {
-		String body = "o\n" + "a[\"foo\"]\n" + "c[3000,\"Go away!\"]";
+		String body = """
+				o
+				a["foo"]
+				c[3000,"Go away!"]""";
 		ClientHttpResponse response = response(HttpStatus.OK, body);
 		connect(response);
 
@@ -157,7 +160,11 @@ public class RestTemplateXhrTransportTests {
 
 	@Test
 	public void responseClosedAfterDisconnected() throws Exception {
-		String body = "o\n" + "c[3000,\"Go away!\"]\n" + "a[\"foo\"]\n";
+		String body = """
+				o
+				c[3000,"Go away!"]
+				a["foo"]
+				""";
 		ClientHttpResponse response = response(HttpStatus.OK, body);
 		connect(response);
 
