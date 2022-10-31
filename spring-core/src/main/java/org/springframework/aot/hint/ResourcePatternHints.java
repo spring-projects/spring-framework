@@ -98,20 +98,15 @@ public final class ResourcePatternHints {
 		 * @see <a href="https://github.com/spring-projects/spring-framework/issues/29403">gh-29403</a>
 		 */
 		private List<String> expandToIncludeDirectories(String includePattern) {
-			// Root resource or no explicit subdirectories?
+			// Resource in root or no explicit subdirectories?
 			if (!includePattern.contains("/")) {
-				if (includePattern.contains("*")) {
-					// If it's a root pattern, include the root directory as well as the pattern
-					return List.of("/", includePattern);
-				}
-				else {
-					// Include only the root resource
-					return List.of(includePattern);
-				}
+				// Include the root directory as well as the pattern
+				return List.of("/", includePattern);
 			}
 
 			List<String> includePatterns = new ArrayList<>();
-			// Ensure the original pattern is always included
+			// Ensure the root directory and original pattern are always included
+			includePatterns.add("/");
 			includePatterns.add(includePattern);
 			StringBuilder path = new StringBuilder();
 			for (String pathElement : includePattern.split("/")) {

@@ -50,6 +50,7 @@ class ResourceHintsWriterTests {
 					"resources": {
 						"includes": [
 							{ "pattern": "\\\\Qcom/example/test.properties\\\\E"},
+							{ "pattern": "\\\\Q/\\\\E" },
 							{ "pattern": "\\\\Qcom\\\\E"},
 							{ "pattern": "\\\\Qcom/example\\\\E"},
 							{ "pattern": "\\\\Qcom/example/another.properties\\\\E"}
@@ -82,6 +83,7 @@ class ResourceHintsWriterTests {
 					"resources": {
 						"includes": [
 							{ "pattern": "\\\\Qcom/example/\\\\E.*\\\\Q.properties\\\\E"},
+							{ "pattern": "\\\\Q/\\\\E" },
 							{ "pattern": "\\\\Qcom\\\\E"},
 							{ "pattern": "\\\\Qcom/example\\\\E"}
 						]
@@ -98,6 +100,7 @@ class ResourceHintsWriterTests {
 					"resources": {
 						"includes": [
 							{ "pattern": "\\\\Qstatic/\\\\E.*"},
+							{ "pattern": "\\\\Q/\\\\E" },
 							{ "pattern": "\\\\Qstatic\\\\E"}
 						]
 					}
@@ -114,6 +117,7 @@ class ResourceHintsWriterTests {
 					"resources": {
 						"includes": [
 							{ "pattern": "\\\\Qcom/example/\\\\E.*\\\\Q.properties\\\\E"},
+							{ "pattern": "\\\\Q/\\\\E"},
 							{ "pattern": "\\\\Qcom\\\\E"},
 							{ "pattern": "\\\\Qcom/example\\\\E"},
 							{ "pattern": "\\\\Qorg/other/\\\\E.*\\\\Q.properties\\\\E"},
@@ -137,6 +141,7 @@ class ResourceHintsWriterTests {
 					"resources": {
 						"includes": [
 							{ "condition": { "typeReachable": "com.example.Test"}, "pattern": "\\\\Qcom/example/test.properties\\\\E"},
+							{ "condition": { "typeReachable": "com.example.Test"}, "pattern": "\\\\Q/\\\\E"},
 							{ "condition": { "typeReachable": "com.example.Test"}, "pattern": "\\\\Qcom\\\\E"},
 							{ "condition": { "typeReachable": "com.example.Test"}, "pattern": "\\\\Qcom/example\\\\E"}
 						]
@@ -153,6 +158,7 @@ class ResourceHintsWriterTests {
 					"resources": {
 						"includes": [
 							{ "pattern": "\\\\Qjava/lang/String.class\\\\E" },
+							{ "pattern": "\\\\Q/\\\\E" },
 							{ "pattern": "\\\\Qjava\\\\E" },
 							{ "pattern": "\\\\Qjava/lang\\\\E" }
 						]

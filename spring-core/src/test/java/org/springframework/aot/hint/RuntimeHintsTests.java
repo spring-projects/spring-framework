@@ -49,7 +49,7 @@ class RuntimeHintsTests {
 		this.hints.resources().registerType(String.class);
 		assertThat(this.hints.resources().resourcePatternHints()).singleElement().satisfies(resourceHint -> {
 			assertThat(resourceHint.getIncludes()).map(ResourcePatternHint::getPattern)
-					.containsExactlyInAnyOrder("java", "java/lang", "java/lang/String.class");
+					.containsExactlyInAnyOrder("/", "java", "java/lang", "java/lang/String.class");
 			assertThat(resourceHint.getExcludes()).isEmpty();
 		});
 	}

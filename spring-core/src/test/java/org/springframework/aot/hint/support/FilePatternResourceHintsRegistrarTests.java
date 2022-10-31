@@ -89,7 +89,7 @@ class FilePatternResourceHintsRegistrarTests {
 		new FilePatternResourceHintsRegistrar(List.of("test"), List.of("META-INF"), List.of(".txt"))
 				.registerHints(this.hints, null);
 		assertThat(this.hints.resourcePatternHints()).singleElement()
-				.satisfies(includes("META-INF", "META-INF/test*.txt"));
+				.satisfies(includes("/", "META-INF", "META-INF/test*.txt"));
 	}
 
 	@Test
@@ -105,7 +105,7 @@ class FilePatternResourceHintsRegistrarTests {
 		new FilePatternResourceHintsRegistrar(List.of("test"), List.of("classpath:META-INF"), List.of(".txt"))
 				.registerHints(this.hints, null);
 		assertThat(this.hints.resourcePatternHints()).singleElement()
-				.satisfies(includes("META-INF", "META-INF/test*.txt"));
+				.satisfies(includes("/", "META-INF", "META-INF/test*.txt"));
 	}
 
 	@Test
@@ -113,7 +113,7 @@ class FilePatternResourceHintsRegistrarTests {
 		new FilePatternResourceHintsRegistrar(List.of("test"), List.of("classpath:/META-INF"), List.of(".txt"))
 				.registerHints(this.hints, null);
 		assertThat(this.hints.resourcePatternHints()).singleElement()
-				.satisfies(includes("META-INF", "META-INF/test*.txt"));
+				.satisfies(includes("/", "META-INF", "META-INF/test*.txt"));
 	}
 
 	@Test

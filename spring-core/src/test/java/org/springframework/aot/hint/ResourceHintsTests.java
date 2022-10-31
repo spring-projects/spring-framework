@@ -46,14 +46,14 @@ class ResourceHintsTests {
 	void registerType() {
 		this.resourceHints.registerType(String.class);
 		assertThat(this.resourceHints.resourcePatternHints()).singleElement().satisfies(
-				patternOf("java", "java/lang", "java/lang/String.class"));
+				patternOf("/", "java", "java/lang", "java/lang/String.class"));
 	}
 
 	@Test
 	void registerTypeWithNestedType() {
 		this.resourceHints.registerType(TypeReference.of(Nested.class));
 		assertThat(this.resourceHints.resourcePatternHints()).singleElement().satisfies(
-				patternOf("org", "org/springframework", "org/springframework/aot", "org/springframework/aot/hint",
+				patternOf("/", "org", "org/springframework", "org/springframework/aot", "org/springframework/aot/hint",
 						"org/springframework/aot/hint/ResourceHintsTests$Nested.class"));
 	}
 
@@ -61,7 +61,7 @@ class ResourceHintsTests {
 	void registerTypeWithInnerNestedType() {
 		this.resourceHints.registerType(TypeReference.of(Inner.class));
 		assertThat(this.resourceHints.resourcePatternHints()).singleElement().satisfies(
-				patternOf("org", "org/springframework", "org/springframework/aot", "org/springframework/aot/hint",
+				patternOf("/", "org", "org/springframework", "org/springframework/aot", "org/springframework/aot/hint",
 						"org/springframework/aot/hint/ResourceHintsTests$Nested$Inner.class"));
 	}
 
@@ -70,7 +70,7 @@ class ResourceHintsTests {
 		this.resourceHints.registerType(String.class);
 		this.resourceHints.registerType(TypeReference.of(String.class));
 		assertThat(this.resourceHints.resourcePatternHints()).singleElement().satisfies(
-				patternOf("java", "java/lang", "java/lang/String.class"));
+				patternOf("/", "java", "java/lang", "java/lang/String.class"));
 	}
 
 	@Test
@@ -78,8 +78,18 @@ class ResourceHintsTests {
 		this.resourceHints.registerPattern("com/example/test.properties");
 		this.resourceHints.registerPattern("com/example/another.properties");
 		assertThat(this.resourceHints.resourcePatternHints())
-				.anySatisfy(patternOf("com", "com/example", "com/example/test.properties"))
-				.anySatisfy(patternOf("com", "com/example", "com/example/another.properties"))
+				.anySatisfy(patternOf("/", "com", "com/example", "com/example/test.properties"))
+				.anySatisfy(patternOf("/", "com", "com/example", "com/example/another.properties"))
+				.hasSize(2);
+	}
+
+	@Test
+	void registerExactMatchesInRootDirectory() {
+		this.resourceHints.registerPattern("test.properties");
+		this.resourceHints.registerPattern("another.properties");
+		assertThat(this.resourceHints.resourcePatternHints())
+				.anySatisfy(patternOf("/", "test.properties"))
+				.anySatisfy(patternOf("/", "another.properties"))
 				.hasSize(2);
 	}
 
@@ -101,7 +111,7 @@ class ResourceHintsTests {
 	void registerPattern() {
 		this.resourceHints.registerPattern("com/example/*.properties");
 		assertThat(this.resourceHints.resourcePatternHints()).singleElement().satisfies(
-				patternOf("com", "com/example", "com/example/*.properties"));
+				patternOf("/", "com", "com/example", "com/example/*.properties"));
 	}
 
 	@Test
@@ -109,7 +119,7 @@ class ResourceHintsTests {
 		this.resourceHints.registerPattern(resourceHint ->
 				resourceHint.includes("com/example/*.properties").excludes("com/example/to-ignore.properties"));
 		assertThat(this.resourceHints.resourcePatternHints()).singleElement().satisfies(patternOf(
-				List.of("com", "com/example", "com/example/*.properties"),
+				List.of("/", "com", "com/example", "com/example/*.properties"),
 				List.of("com/example/to-ignore.properties")));
 	}
 
@@ -118,7 +128,7 @@ class ResourceHintsTests {
 		this.resourceHints.registerPatternIfPresent(null, "META-INF/",
 				resourceHint -> resourceHint.includes("com/example/*.properties"));
 		assertThat(this.resourceHints.resourcePatternHints()).singleElement().satisfies(
-				patternOf("com", "com/example", "com/example/*.properties"));
+				patternOf("/", "com", "com/example", "com/example/*.properties"));
 	}
 
 	@Test
@@ -152,7 +162,7 @@ class ResourceHintsTests {
 		ClassPathResource resource = new ClassPathResource(path);
 		this.resourceHints.registerResource(resource);
 		assertThat(this.resourceHints.resourcePatternHints()).singleElement().satisfies(
-				patternOf("org", "org/springframework", "org/springframework/aot", "org/springframework/aot/hint", path));
+				patternOf("/", "org", "org/springframework", "org/springframework/aot", "org/springframework/aot/hint", path));
 	}
 
 	@Test
@@ -161,7 +171,7 @@ class ResourceHintsTests {
 		ClassPathResource resource = new ClassPathResource("support", RuntimeHints.class);
 		this.resourceHints.registerResource(resource);
 		assertThat(this.resourceHints.resourcePatternHints()).singleElement().satisfies(
-				patternOf("org", "org/springframework", "org/springframework/aot", "org/springframework/aot/hint", path));
+				patternOf("/", "org", "org/springframework", "org/springframework/aot", "org/springframework/aot/hint", path));
 	}
 
 	@Test
@@ -197,8 +207,7 @@ class ResourceHintsTests {
 
 	static class Nested {
 
-		static class Inner {
-
+		class Inner {
 		}
 	}
 

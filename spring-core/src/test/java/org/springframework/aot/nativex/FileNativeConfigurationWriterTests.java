@@ -176,6 +176,7 @@ class FileNativeConfigurationWriterTests {
 					"resources": {
 						"includes": [
 							{"pattern": "\\\\Qcom/example/test.properties\\\\E"},
+							{"pattern": "\\\\Q/\\\\E"},
 							{"pattern": "\\\\Qcom\\\\E"},
 							{"pattern": "\\\\Qcom/example\\\\E"},
 							{"pattern": "\\\\Qcom/example/another.properties\\\\E"}

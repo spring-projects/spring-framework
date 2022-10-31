@@ -150,6 +150,7 @@ class ConfigurationClassPostProcessorAotContributionTests {
 					.satisfies(resourceHint -> assertThat(resourceHint.getIncludes())
 							.map(ResourcePatternHint::getPattern)
 							.containsExactlyInAnyOrder(
+									"/",
 									"org",
 									"org/springframework",
 									"org/springframework/context",
