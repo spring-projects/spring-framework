@@ -91,7 +91,7 @@ public class RestTemplateXhrTransportTests {
 		for (int i = 0; i < 2048; i++) {
 			sb.append('h');
 		}
-		String body = sb.toString() + "\n" + "o\n" + "a[\"foo\"]\n" + "c[3000,\"Go away!\"]";
+		String body = sb + "\n" + "o\n" + "a[\"foo\"]\n" + "c[3000,\"Go away!\"]";
 		ClientHttpResponse response = response(HttpStatus.OK, body);
 		connect(response);
 
