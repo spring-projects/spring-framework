@@ -289,8 +289,7 @@ class Jackson2ObjectMapperBuilderTests {
 
 		// Kotlin module
 		IntRange range = new IntRange(1, 3);
-		// temporarily change the assertion, see https://github.com/FasterXML/jackson-module-kotlin/issues/582
-		assertThat(new String(objectMapper.writeValueAsBytes(range), "UTF-8")).isEqualTo("{\"start\":1,\"end\":3,\"endExclusive\":4}");
+		assertThat(new String(objectMapper.writeValueAsBytes(range), "UTF-8")).isEqualTo("{\"start\":1,\"end\":3}");
 	}
 
 	@Test  // gh-22576

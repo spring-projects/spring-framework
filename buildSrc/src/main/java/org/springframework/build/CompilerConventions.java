@@ -41,7 +41,7 @@ public class CompilerConventions {
 
 	static {
 		List<String> commonCompilerArgs = Arrays.asList(
-				"-Xlint:serial", "-Xlint:cast", "-Xlint:-classfile", "-Xlint:dep-ann",
+				"-Xlint:serial", "-Xlint:cast", "-Xlint:classfile", "-Xlint:dep-ann",
 				"-Xlint:divzero", "-Xlint:empty", "-Xlint:finally", "-Xlint:overrides",
 				"-Xlint:path", "-Xlint:processing", "-Xlint:static", "-Xlint:try", "-Xlint:-options",
 				"-parameters"
