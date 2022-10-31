@@ -17,7 +17,6 @@
 package org.springframework.web.socket.client;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -45,7 +44,7 @@ public class WebSocketConnectionManagerTests {
 
 	@Test
 	public void openConnection() throws Exception {
-		List<String> subprotocols = Arrays.asList("abc");
+		List<String> subprotocols = List.of("abc");
 
 		TestLifecycleWebSocketClient client = new TestLifecycleWebSocketClient(false);
 		WebSocketHandler handler = new TextWebSocketHandler();

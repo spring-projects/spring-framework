@@ -16,7 +16,6 @@
 
 package org.springframework.web.socket.config.annotation;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -72,7 +71,7 @@ public class WebMvcStompWebSocketEndpointRegistrationTests {
 		Map.Entry<HttpRequestHandler, List<String>> entry = mappings.entrySet().iterator().next();
 		assertThat(((WebSocketHttpRequestHandler) entry.getKey()).getWebSocketHandler()).isNotNull();
 		assertThat(((WebSocketHttpRequestHandler) entry.getKey()).getHandshakeInterceptors().size()).isEqualTo(1);
-		assertThat(entry.getValue()).isEqualTo(Arrays.asList("/foo"));
+		assertThat(entry.getValue()).isEqualTo(List.of("/foo"));
 	}
 
 	@Test
@@ -190,7 +189,7 @@ public class WebMvcStompWebSocketEndpointRegistrationTests {
 		assertThat(mappings.size()).isEqualTo(1);
 
 		Map.Entry<HttpRequestHandler, List<String>> entry = mappings.entrySet().iterator().next();
-		assertThat(entry.getValue()).isEqualTo(Arrays.asList("/foo"));
+		assertThat(entry.getValue()).isEqualTo(List.of("/foo"));
 
 		WebSocketHttpRequestHandler requestHandler = (WebSocketHttpRequestHandler) entry.getKey();
 		assertThat(requestHandler.getWebSocketHandler()).isNotNull();
@@ -214,7 +213,7 @@ public class WebMvcStompWebSocketEndpointRegistrationTests {
 		assertThat(mappings.size()).isEqualTo(1);
 
 		Map.Entry<HttpRequestHandler, List<String>> entry = mappings.entrySet().iterator().next();
-		assertThat(entry.getValue()).isEqualTo(Arrays.asList("/foo"));
+		assertThat(entry.getValue()).isEqualTo(List.of("/foo"));
 
 		WebSocketHttpRequestHandler requestHandler = (WebSocketHttpRequestHandler) entry.getKey();
 		assertThat(requestHandler.getWebSocketHandler()).isNotNull();
@@ -238,7 +237,7 @@ public class WebMvcStompWebSocketEndpointRegistrationTests {
 		assertThat(mappings.size()).isEqualTo(1);
 
 		Map.Entry<HttpRequestHandler, List<String>> entry = mappings.entrySet().iterator().next();
-		assertThat(entry.getValue()).isEqualTo(Arrays.asList("/foo/**"));
+		assertThat(entry.getValue()).isEqualTo(List.of("/foo/**"));
 
 		SockJsHttpRequestHandler requestHandler = (SockJsHttpRequestHandler) entry.getKey();
 		assertThat(requestHandler.getWebSocketHandler()).isNotNull();
@@ -270,7 +269,7 @@ public class WebMvcStompWebSocketEndpointRegistrationTests {
 		assertThat(mappings.size()).isEqualTo(1);
 
 		Map.Entry<HttpRequestHandler, List<String>> entry = mappings.entrySet().iterator().next();
-		assertThat(entry.getValue()).isEqualTo(Arrays.asList("/foo/**"));
+		assertThat(entry.getValue()).isEqualTo(List.of("/foo/**"));
 
 		SockJsHttpRequestHandler requestHandler = (SockJsHttpRequestHandler) entry.getKey();
 		assertThat(requestHandler.getWebSocketHandler()).isNotNull();
