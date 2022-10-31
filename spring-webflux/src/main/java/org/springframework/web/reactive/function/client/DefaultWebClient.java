@@ -33,7 +33,6 @@ import java.util.function.Supplier;
 
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
-import io.micrometer.observation.contextpropagation.ObservationThreadLocalAccessor;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -75,6 +74,11 @@ class DefaultWebClient implements WebClient {
 			() -> new IllegalStateException("The underlying HTTP client completed without emitting a response."));
 
 	private static final DefaultClientRequestObservationConvention DEFAULT_OBSERVATION_CONVENTION = new DefaultClientRequestObservationConvention();
+
+	/**
+	 * Aligned with ObservationThreadLocalAccessor#KEY from micrometer-core.
+	 */
+	private static final String MICROMETER_OBSERVATION = "micrometer.observation";
 
 	private final ExchangeFunction exchangeFunction;
 
@@ -459,7 +463,7 @@ class DefaultWebClient implements WebClient {
 						DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, observationRegistry);
 				observationContext.setCarrier(requestBuilder);
 				observation
-						.parentObservation(contextView.getOrDefault(ObservationThreadLocalAccessor.KEY, null)) // TODO: Will Context-Propagation always be there on the classpath? If not - just pass the string and add context-propagation to the test scope and test it there
+						.parentObservation(contextView.getOrDefault(MICROMETER_OBSERVATION, null))
 						.start();
 				ClientRequest request = requestBuilder.build();
 				observationContext.setUriTemplate((String) request.attribute(URI_TEMPLATE_ATTRIBUTE).orElse(null));
