@@ -89,7 +89,7 @@ public class SessionDisconnectEvent extends AbstractSubProtocolEvent {
 
 	@Override
 	public String toString() {
-		return "SessionDisconnectEvent[sessionId=" + this.sessionId + ", " + this.status.toString() + "]";
+		return "SessionDisconnectEvent[sessionId=" + this.sessionId + ", " + this.status + "]";
 	}
 
 }
