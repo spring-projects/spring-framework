@@ -159,6 +159,13 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 					URI path = URI.create(exchange.getRequest().getPath().value());
 					detail.setInstance(path);
 				}
+				if (logger.isWarnEnabled() && httpEntity instanceof ResponseEntity<?> responseEntity) {
+					if (responseEntity.getStatusCode().value() != detail.getStatus()) {
+						logger.warn(actualParameter.getExecutable().toGenericString() +
+								" returned ResponseEntity: " + responseEntity + ", but its status" +
+								" doesn't match the ProblemDetail status: " + detail.getStatus());
+					}
+				}
 			}
 
 			if (httpEntity instanceof ResponseEntity<?> responseEntity) {
