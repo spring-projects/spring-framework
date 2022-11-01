@@ -279,7 +279,7 @@ public class ResponseEntityExceptionHandlerTests {
 
 		public Mono<ResponseEntity<Object>> handleException(IllegalStateException ex, ServerWebExchange exchange) {
 			HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
-			ProblemDetail body = createProblemDetail(ex, status, null, ex.getMessage(), null, new Object[] {"A"}, exchange);
+			ProblemDetail body = createProblemDetail(ex, status, ex.getMessage(), null, new Object[] {"A"}, exchange);
 			return handleExceptionInternal(ex, body, null, status, exchange);
 		}
 	}

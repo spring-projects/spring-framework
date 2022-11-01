@@ -306,12 +306,11 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	 * @return the created {@code ProblemDetail} instance
 	 */
 	protected ProblemDetail createProblemDetail(
-			Exception ex, HttpStatusCode status, @Nullable HttpHeaders headers,
-			String defaultDetail, @Nullable String detailMessageCode, @Nullable Object[] detailMessageArguments,
-			ServerWebExchange exchange) {
+			Exception ex, HttpStatusCode status, String defaultDetail, @Nullable String detailMessageCode,
+			@Nullable Object[] detailMessageArguments, ServerWebExchange exchange) {
 
 		ErrorResponse response = ErrorResponse.createFor(
-				ex, status, headers, defaultDetail, detailMessageCode, detailMessageArguments);
+				ex, status, null, defaultDetail, detailMessageCode, detailMessageArguments);
 
 		return response.updateAndGetBody(this.messageSource, getLocale(exchange));
 	}

@@ -100,14 +100,15 @@ public interface ErrorResponse {
 	 * <p>By default this is initialized via
 	 * {@link #getDefaultDetailMessageCode(Class, String)}.
 	 */
-	default String getTitleCode() {
+	default String getTitleMessageCode() {
 		return getDefaultTitleMessageCode(getClass());
 	}
 
 	/**
 	 * Resolve the {@link #getDetailMessageCode() detailMessageCode} and the
-	 * {@link #getTitleCode() titleCode} through the given {@link MessageSource},
-	 * and if found, update the "detail" and "title!" fields respectively.
+	 * {@link #getTitleMessageCode() titleCode} through the given
+	 * {@link MessageSource}, and if found, update the "detail" and "title!"
+	 * fields respectively.
 	 * @param messageSource the {@code MessageSource} to use for the lookup
 	 * @param locale the {@code Locale} to use for the lookup
 	 */
@@ -118,7 +119,7 @@ public interface ErrorResponse {
 			if (detail != null) {
 				getBody().setDetail(detail);
 			}
-			String title = messageSource.getMessage(getTitleCode(), null, null, locale);
+			String title = messageSource.getMessage(getTitleMessageCode(), null, null, locale);
 			if (title != null) {
 				getBody().setTitle(title);
 			}
