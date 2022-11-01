@@ -259,6 +259,8 @@ allPartsEvents.windowUntil(PartEvent::isLast)
 }
 ----
 
+Note that the body contents of the `PartEvent` objects must be completely consumed, relayed, or released to avoid memory leaks.
+
 [[webflux-fn-response]]
 === ServerResponse
 

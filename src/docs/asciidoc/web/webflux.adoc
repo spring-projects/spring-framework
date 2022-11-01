@@ -2855,7 +2855,7 @@ For example:
                       }
                       else if (event instanceof FilePartEvent fileEvent) { <5>
                           String filename = fileEvent.filename();
-                          Flux<DataBuffer> contents = partEvents.map(PartEvent::content);
+                          Flux<DataBuffer> contents = partEvents.map(PartEvent::content); <6>
                           // handle file upload
                       }
                       else {
@@ -2877,6 +2877,7 @@ split events from all parts into windows that each belong to a single part.
 file upload.
 <4> Handling the form field.
 <5> Handling the file upload.
+<6> The body contents must be completely consumed, relayed, or released to avoid memory leaks.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -2893,7 +2894,7 @@ file upload.
                           // handle form field
                       } else if (event is FilePartEvent) { <5>
                           val filename: String = event.filename();
-                          val contents: Flux<DataBuffer> = partEvents.map(PartEvent::content);
+                          val contents: Flux<DataBuffer> = partEvents.map(PartEvent::content); <6>
                           // handle file upload
                       } else {
                           return Mono.error(RuntimeException("Unexpected event: " + event));
@@ -2914,6 +2915,7 @@ split events from all parts into windows that each belong to a single part.
 file upload.
 <4> Handling the form field.
 <5> Handling the file upload.
+<6> The body contents must be completely consumed, relayed, or released to avoid memory leaks.
 
 Received part events can also be relayed to another service by using the `WebClient`.
 See <<webflux-client-body-multipart>>.
