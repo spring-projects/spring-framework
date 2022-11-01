@@ -173,14 +173,11 @@ class ExceptionHandlerTests {
 
 		@GetMapping("/person/{name}")
 		Person get(@PathVariable String name) {
-			switch (name) {
-				case "Luke":
-					throw new IllegalArgumentException();
-				case "Leia":
-					throw new IllegalStateException();
-				default:
-					return new Person("Yoda");
-			}
+			return switch (name) {
+				case "Luke" -> throw new IllegalArgumentException();
+				case "Leia" -> throw new IllegalStateException();
+				default -> new Person("Yoda");
+			};
 		}
 
 		@ExceptionHandler

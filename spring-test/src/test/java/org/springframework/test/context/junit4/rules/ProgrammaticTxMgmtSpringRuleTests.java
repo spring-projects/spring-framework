@@ -97,24 +97,11 @@ public class ProgrammaticTxMgmtSpringRuleTests {
 	void afterTransaction() {
 		String method = this.testName.getMethodName();
 		switch (method) {
-			case "commitTxAndStartNewTx":
-			case "commitTxButDoNotStartNewTx": {
-				assertUsers("Dogbert");
-				break;
-			}
-			case "rollbackTxAndStartNewTx":
-			case "rollbackTxButDoNotStartNewTx":
-			case "startTxWithExistingTransaction": {
-				assertUsers("Dilbert");
-				break;
-			}
-			case "rollbackTxAndStartNewTxWithDefaultCommitSemantics": {
-				assertUsers("Dilbert", "Dogbert");
-				break;
-			}
-			default: {
-				fail("missing 'after transaction' assertion for test method: " + method);
-			}
+			case "commitTxAndStartNewTx", "commitTxButDoNotStartNewTx" -> assertUsers("Dogbert");
+			case "rollbackTxAndStartNewTx", "rollbackTxButDoNotStartNewTx", "startTxWithExistingTransaction" ->
+					assertUsers("Dilbert");
+			case "rollbackTxAndStartNewTxWithDefaultCommitSemantics" -> assertUsers("Dilbert", "Dogbert");
+			default -> fail("missing 'after transaction' assertion for test method: " + method);
 		}
 	}
 

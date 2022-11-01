@@ -85,23 +85,12 @@ public class StatusResultMatchersTests {
 			response.setStatus(status.value());
 			MvcResult mvcResult = new StubMvcResult(request, null, null, null, null, null, response);
 			switch (status.series().value()) {
-				case 1:
-					this.matchers.is1xxInformational().match(mvcResult);
-					break;
-				case 2:
-					this.matchers.is2xxSuccessful().match(mvcResult);
-					break;
-				case 3:
-					this.matchers.is3xxRedirection().match(mvcResult);
-					break;
-				case 4:
-					this.matchers.is4xxClientError().match(mvcResult);
-					break;
-				case 5:
-					this.matchers.is5xxServerError().match(mvcResult);
-					break;
-				default:
-					fail("Unexpected range for status code value " + status);
+				case 1 -> this.matchers.is1xxInformational().match(mvcResult);
+				case 2 -> this.matchers.is2xxSuccessful().match(mvcResult);
+				case 3 -> this.matchers.is3xxRedirection().match(mvcResult);
+				case 4 -> this.matchers.is4xxClientError().match(mvcResult);
+				case 5 -> this.matchers.is5xxServerError().match(mvcResult);
+				default -> fail("Unexpected range for status code value " + status);
 			}
 		}
 	}
