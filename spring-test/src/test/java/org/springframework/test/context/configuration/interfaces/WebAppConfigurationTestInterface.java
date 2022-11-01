@@ -30,7 +30,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 interface WebAppConfigurationTestInterface {
 
 	@Configuration
-	static class Config {
+	class Config {
 		/* no user beans required for these tests */
 	}
 
