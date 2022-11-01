@@ -141,9 +141,12 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		exchange.getAttributes().put(URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriVariables);
 		exchange.getAttributes().put(MATRIX_VARIABLES_ATTRIBUTE, matrixVariables);
 
-		if (!info.getProducesCondition().getProducibleMediaTypes().isEmpty()) {
-			Set<MediaType> mediaTypes = info.getProducesCondition().getProducibleMediaTypes();
-			exchange.getAttributes().put(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, mediaTypes);
+		ProducesRequestCondition producesCondition = info.getProducesCondition();
+		if (!producesCondition.isEmpty()) {
+			Set<MediaType> mediaTypes = producesCondition.getProducibleMediaTypes();
+			if (!mediaTypes.isEmpty()) {
+				exchange.getAttributes().put(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, mediaTypes);
+			}
 		}
 	}
 
