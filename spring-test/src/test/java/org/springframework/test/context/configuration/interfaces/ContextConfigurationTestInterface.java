@@ -28,7 +28,7 @@ import org.springframework.test.context.configuration.interfaces.ContextConfigur
 @ContextConfiguration(classes = Config.class)
 interface ContextConfigurationTestInterface {
 
-	static class Config {
+	class Config {
 
 		@Bean
 		Employee employee() {

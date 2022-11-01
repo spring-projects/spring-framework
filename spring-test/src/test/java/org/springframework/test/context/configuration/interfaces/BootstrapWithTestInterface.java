@@ -34,7 +34,7 @@ import static java.util.Collections.singletonList;
 @BootstrapWith(CustomTestContextBootstrapper.class)
 interface BootstrapWithTestInterface {
 
-	static class CustomTestContextBootstrapper extends DefaultTestContextBootstrapper {
+	class CustomTestContextBootstrapper extends DefaultTestContextBootstrapper {
 
 		@Override
 		protected List<ContextCustomizerFactory> getContextCustomizerFactories() {

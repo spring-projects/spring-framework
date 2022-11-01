@@ -56,9 +56,10 @@ class SoftAssertionTests {
 										responseSpec -> responseSpec.expectBody(String.class).isEqualTo("bogus")
 								)
 				)
-				.withMessage("Multiple Exceptions (2):\n" +
-						"Status expected:<400 BAD_REQUEST> but was:<200 OK>\n" +
-						"Response body expected:<bogus> but was:<hello>");
+				.withMessage("""
+						Multiple Exceptions (2):
+						Status expected:<400 BAD_REQUEST> but was:<200 OK>
+						Response body expected:<bogus> but was:<hello>""");
 	}
 
 

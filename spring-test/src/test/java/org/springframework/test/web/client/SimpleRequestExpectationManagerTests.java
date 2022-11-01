@@ -55,8 +55,10 @@ public class SimpleRequestExpectationManagerTests {
 			this.manager.validateRequest(createRequest(GET, "/foo"));
 		}
 		catch (AssertionError error) {
-			assertThat(error.getMessage()).isEqualTo(("No further requests expected: HTTP GET /foo\n" +
-						"0 request(s) executed.\n"));
+			assertThat(error.getMessage()).isEqualTo(("""
+					No further requests expected: HTTP GET /foo
+					0 request(s) executed.
+					"""));
 		}
 	}
 
@@ -83,10 +85,12 @@ public class SimpleRequestExpectationManagerTests {
 		this.manager.validateRequest(createRequest(GET, "/bar"));
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.manager.validateRequest(createRequest(GET, "/baz")))
-			.withMessage("No further requests expected: HTTP GET /baz\n" +
-					"2 request(s) executed:\n" +
-					"GET /foo\n" +
-					"GET /bar\n");
+			.withMessage("""
+					No further requests expected: HTTP GET /baz
+					2 request(s) executed:
+					GET /foo
+					GET /bar
+					""");
 	}
 
 	@Test
@@ -96,8 +100,11 @@ public class SimpleRequestExpectationManagerTests {
 		this.manager.validateRequest(createRequest(GET, "/foo"));
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.manager.verify())
-			.withMessage("Further request(s) expected leaving 1 unsatisfied expectation(s).\n" +
-				"1 request(s) executed:\nGET /foo\n");
+			.withMessage("""
+					Further request(s) expected leaving 1 unsatisfied expectation(s).
+					1 request(s) executed:
+					GET /foo
+					""");
 	}
 
 	@Test
@@ -124,12 +131,14 @@ public class SimpleRequestExpectationManagerTests {
 		this.manager.validateRequest(createRequest(GET, "/bar"));
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.manager.validateRequest(createRequest(GET, "/foo")))
-			.withMessage("No further requests expected: HTTP GET /foo\n" +
-					"4 request(s) executed:\n" +
-					"GET /foo\n" +
-					"GET /bar\n" +
-					"GET /foo\n" +
-					"GET /bar\n");
+			.withMessage("""
+					No further requests expected: HTTP GET /foo
+					4 request(s) executed:
+					GET /foo
+					GET /bar
+					GET /foo
+					GET /bar
+					""");
 	}
 
 	@Test
@@ -141,10 +150,12 @@ public class SimpleRequestExpectationManagerTests {
 		this.manager.validateRequest(createRequest(GET, "/foo"));
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.manager.verify())
-			.withMessageContaining("3 request(s) executed:\n" +
-				"GET /foo\n" +
-				"GET /bar\n" +
-				"GET /foo\n");
+			.withMessageContaining("""
+					3 request(s) executed:
+					GET /foo
+					GET /bar
+					GET /foo
+					""");
 	}
 
 	@Test

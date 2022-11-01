@@ -68,7 +68,7 @@ public class PrintingResultHandlerSmokeTests {
 
 		System.out.println();
 		System.out.println("===============================================================");
-		System.out.println(writer.toString());
+		System.out.println(writer);
 	}
 
 

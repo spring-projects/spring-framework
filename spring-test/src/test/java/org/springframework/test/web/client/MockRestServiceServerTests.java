@@ -183,9 +183,11 @@ public class MockRestServiceServerTests {
 		this.restTemplate.getForObject("/foo", Void.class);
 
 		assertThatThrownBy(() -> server1.verify(Duration.ofMillis(100))).hasMessage(
-				"Further request(s) expected leaving 1 unsatisfied expectation(s).\n" +
-						"1 request(s) executed:\n" +
-						"GET /foo, headers: [Accept:\"application/json, application/*+json\"]\n");
+				"""
+						Further request(s) expected leaving 1 unsatisfied expectation(s).
+						1 request(s) executed:
+						GET /foo, headers: [Accept:"application/json, application/*+json"]
+						""");
 
 		MockRestServiceServer server2 = builder.build();
 		server2.expect(requestTo("/foo")).andRespond(withSuccess());

@@ -52,7 +52,7 @@ public @interface ConfigClassesAndProfileResolverWithCustomDefaultsMetaConfig {
 
 	@Configuration
 	@Profile("dev")
-	static class DevConfig {
+	class DevConfig {
 
 		@Bean
 		public String foo() {
@@ -62,7 +62,7 @@ public @interface ConfigClassesAndProfileResolverWithCustomDefaultsMetaConfig {
 
 	@Configuration
 	@Profile("prod")
-	static class ProductionConfig {
+	class ProductionConfig {
 
 		@Bean
 		public String foo() {
@@ -72,7 +72,7 @@ public @interface ConfigClassesAndProfileResolverWithCustomDefaultsMetaConfig {
 
 	@Configuration
 	@Profile("resolver")
-	static class ResolverConfig {
+	class ResolverConfig {
 
 		@Bean
 		public String foo() {
@@ -80,7 +80,7 @@ public @interface ConfigClassesAndProfileResolverWithCustomDefaultsMetaConfig {
 		}
 	}
 
-	static class CustomResolver implements ActiveProfilesResolver {
+	class CustomResolver implements ActiveProfilesResolver {
 
 		@Override
 		public String[] resolve(Class<?> testClass) {

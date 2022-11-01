@@ -88,24 +88,11 @@ class ProgrammaticTxMgmtTests {
 	@AfterTransaction
 	void afterTransaction() {
 		switch (this.methodName) {
-			case "commitTxAndStartNewTx":
-			case "commitTxButDoNotStartNewTx": {
-				assertUsers("Dogbert");
-				break;
-			}
-			case "rollbackTxAndStartNewTx":
-			case "rollbackTxButDoNotStartNewTx":
-			case "startTxWithExistingTransaction": {
-				assertUsers("Dilbert");
-				break;
-			}
-			case "rollbackTxAndStartNewTxWithDefaultCommitSemantics": {
-				assertUsers("Dilbert", "Dogbert");
-				break;
-			}
-			default: {
-				fail("missing 'after transaction' assertion for test method: " + this.methodName);
-			}
+			case "commitTxAndStartNewTx", "commitTxButDoNotStartNewTx" -> assertUsers("Dogbert");
+			case "rollbackTxAndStartNewTx", "rollbackTxButDoNotStartNewTx", "startTxWithExistingTransaction" ->
+					assertUsers("Dilbert");
+			case "rollbackTxAndStartNewTxWithDefaultCommitSemantics" -> assertUsers("Dilbert", "Dogbert");
+			default -> fail("missing 'after transaction' assertion for test method: " + this.methodName);
 		}
 	}
 
