@@ -93,7 +93,7 @@ abstract class AbstractExpressionEvaluatingCondition implements ExecutionConditi
 		AnnotatedElement element = context.getElement().get();
 		Optional<A> annotation = findMergedAnnotation(element, annotationType);
 
-		if (!annotation.isPresent()) {
+		if (annotation.isEmpty()) {
 			String reason = String.format("%s is enabled since @%s is not present", element,
 					annotationType.getSimpleName());
 			if (logger.isDebugEnabled()) {

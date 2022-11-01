@@ -201,7 +201,7 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	private Throwable getTestResultException(ITestResult testResult) {
 		Throwable testResultException = testResult.getThrowable();
 		if (testResultException instanceof InvocationTargetException) {
-			testResultException = ((InvocationTargetException) testResultException).getCause();
+			testResultException = testResultException.getCause();
 		}
 		return testResultException;
 	}
