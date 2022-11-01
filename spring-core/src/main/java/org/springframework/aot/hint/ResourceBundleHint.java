@@ -100,7 +100,7 @@ public final class ResourceBundleHint implements ConditionalHint {
 		}
 
 		/**
-		 * Use the the {@code baseName} of the resource bundle.
+		 * Use the {@code baseName} of the resource bundle.
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder baseName(String baseName) {

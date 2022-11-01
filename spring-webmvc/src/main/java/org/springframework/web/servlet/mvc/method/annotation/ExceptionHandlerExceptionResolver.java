@@ -88,7 +88,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	@Nullable
 	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
 
-	private List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
+	private final List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
 
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
