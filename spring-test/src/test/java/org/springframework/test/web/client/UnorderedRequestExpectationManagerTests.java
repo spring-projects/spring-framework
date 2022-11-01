@@ -52,8 +52,10 @@ public class UnorderedRequestExpectationManagerTests {
 			this.manager.validateRequest(createRequest(GET, "/foo"));
 		}
 		catch (AssertionError error) {
-			assertThat(error.getMessage()).isEqualTo(("No further requests expected: HTTP GET /foo\n" +
-						"0 request(s) executed.\n"));
+			assertThat(error.getMessage()).isEqualTo(("""
+					No further requests expected: HTTP GET /foo
+					0 request(s) executed.
+					"""));
 		}
 	}
 
@@ -94,12 +96,14 @@ public class UnorderedRequestExpectationManagerTests {
 		this.manager.validateRequest(createRequest(GET, "/foo"));
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.manager.validateRequest(createRequest(GET, "/foo")))
-			.withMessage("No further requests expected: HTTP GET /foo\n" +
-				"4 request(s) executed:\n" +
-				"GET /bar\n" +
-				"GET /foo\n" +
-				"GET /bar\n" +
-				"GET /foo\n");
+			.withMessage("""
+					No further requests expected: HTTP GET /foo
+					4 request(s) executed:
+					GET /bar
+					GET /foo
+					GET /bar
+					GET /foo
+					""");
 	}
 
 	@Test
@@ -111,10 +115,12 @@ public class UnorderedRequestExpectationManagerTests {
 		this.manager.validateRequest(createRequest(GET, "/foo"));
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(this.manager::verify)
-				.withMessageContaining("3 request(s) executed:\n" +
-						"GET /bar\n" +
-						"GET /foo\n" +
-						"GET /foo\n");
+				.withMessageContaining("""
+						3 request(s) executed:
+						GET /bar
+						GET /foo
+						GET /foo
+						""");
 	}
 
 
