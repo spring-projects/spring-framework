@@ -59,7 +59,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ResponseEntityExceptionHandlerTests {
 
-	private final ResponseEntityExceptionHandler exceptionHandler = new GlobalExceptionHandler();
+	private final GlobalExceptionHandler exceptionHandler = new GlobalExceptionHandler();
 
 	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
 
@@ -147,6 +147,29 @@ public class ResponseEntityExceptionHandlerTests {
 		ProblemDetail body = (ProblemDetail) responseEntity.getBody();
 		assertThat(body.getDetail()).isEqualTo(
 				"Content-Type application/json not supported. Supported: [application/atom+xml, application/xml]");
+	}
+
+	@Test
+	void customExceptionToProblemDetailViaMessageSource() {
+
+		Locale locale = Locale.UK;
+		LocaleContextHolder.setLocale(locale);
+
+		StaticMessageSource messageSource = new StaticMessageSource();
+		messageSource.addMessage(
+				"problemDetail." + IllegalStateException.class.getName(), locale,
+				"Invalid state: {0}");
+
+		this.exceptionHandler.setMessageSource(messageSource);
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/")
+				.acceptLanguageAsLocales(locale).build());
+
+		ResponseEntity<?> responseEntity =
+				this.exceptionHandler.handleException(new IllegalStateException(), exchange).block();
+
+		ProblemDetail body = (ProblemDetail) responseEntity.getBody();
+		assertThat(body.getDetail()).isEqualTo("Invalid state: A");
 	}
 
 
@@ -246,6 +269,12 @@ public class ResponseEntityExceptionHandlerTests {
 				ServerWebExchange exchange) {
 
 			return handleAndSetTypeToExceptionName(ex, headers, status, exchange);
+		}
+
+		public Mono<ResponseEntity<Object>> handleException(IllegalStateException ex, ServerWebExchange exchange) {
+			HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+			ProblemDetail body = createProblemDetail(ex, status, null, ex.getMessage(), null, new Object[] {"A"}, exchange);
+			return handleExceptionInternal(ex, body, null, status, exchange);
 		}
 	}
 

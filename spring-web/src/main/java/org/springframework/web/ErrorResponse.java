@@ -95,6 +95,24 @@ public interface ErrorResponse {
 	}
 
 	/**
+	 * Resolve the {@link #getDetailMessageCode() detailMessageCode} through the
+	 * given {@link MessageSource}, and if found, update the "detail" field.
+	 * @param messageSource the {@code MessageSource} to use for the lookup
+	 * @param locale the {@code Locale} to use for the lookup
+	 */
+	default ProblemDetail updateAndGetBody(@Nullable MessageSource messageSource, Locale locale) {
+		if (messageSource != null) {
+			Object[] arguments = getDetailMessageArguments(messageSource, locale);
+			String detail = messageSource.getMessage(getDetailMessageCode(), arguments, null, locale);
+			if (detail != null) {
+				getBody().setDetail(detail);
+			}
+		}
+		return getBody();
+	}
+
+
+	/**
 	 * Build a message code for the given exception type, which consists of
 	 * {@code "problemDetail."} followed by the full {@link Class#getName() class name}.
 	 * @param exceptionType the exception type for which to build a code
@@ -103,6 +121,37 @@ public interface ErrorResponse {
 	 */
 	static String getDefaultDetailMessageCode(Class<?> exceptionType, @Nullable String suffix) {
 		return "problemDetail." + exceptionType.getName() + (suffix != null ? "." + suffix : "");
+	}
+
+	/**
+	 * Map the given Exception to an {@link ErrorResponse}.
+	 * @param ex the Exception, mostly to derive message codes, if not provided
+	 * @param status the response status to use
+	 * @param headers optional headers to add to the response
+	 * @param defaultDetail default value for the "detail" field
+	 * @param detailMessageCode the code to use to look up the "detail" field
+	 * through a {@code MessageSource}, falling back on
+	 * {@link #getDefaultDetailMessageCode(Class, String)}
+	 * @param detailMessageArguments the arguments to go with the detailMessageCode
+	 * @return the created {@code ErrorResponse} instance
+	 */
+	static ErrorResponse createFor(
+			Exception ex, HttpStatusCode status, @Nullable HttpHeaders headers,
+			String defaultDetail, @Nullable String detailMessageCode, @Nullable Object[] detailMessageArguments) {
+
+		if (detailMessageCode == null) {
+			detailMessageCode = ErrorResponse.getDefaultDetailMessageCode(ex.getClass(), null);
+		}
+
+		ErrorResponseException errorResponse = new ErrorResponseException(
+				status, ProblemDetail.forStatusAndDetail(status, defaultDetail), null,
+				detailMessageCode, detailMessageArguments);
+
+		if (headers != null) {
+			errorResponse.getHeaders().putAll(headers);
+		}
+
+		return errorResponse;
 	}
 
 }

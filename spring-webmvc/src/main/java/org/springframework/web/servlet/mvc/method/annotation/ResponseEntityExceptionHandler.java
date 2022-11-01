@@ -16,8 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.util.Locale;
-
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -395,9 +393,8 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 			ConversionNotSupportedException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
 		Object[] args = {ex.getPropertyName(), ex.getValue()};
-
-		ProblemDetail body = resolveDetailViaMessageSource(
-				status, args, "Failed to convert '" + args[0] + "' with value: '" + args[1] + "'");
+		String defaultDetail = "Failed to convert '" + args[0] + "' with value: '" + args[1] + "'";
+		ProblemDetail body = createProblemDetail(ex, status, headers, defaultDetail, null, args, request);
 
 		return handleExceptionInternal(ex, body, headers, status, request);
 	}
@@ -420,9 +417,9 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 			TypeMismatchException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
 		Object[] args = {ex.getPropertyName(), ex.getValue()};
-
-		ProblemDetail body = resolveDetailViaMessageSource(
-				status, args, "Failed to convert '" + args[0] + "' with value: '" + args[1] + "'");
+		String defaultDetail = "Failed to convert '" + args[0] + "' with value: '" + args[1] + "'";
+		String messageCode = ErrorResponse.getDefaultDetailMessageCode(TypeMismatchException.class, null);
+		ProblemDetail body = createProblemDetail(ex, status, headers, defaultDetail, messageCode, args, request);
 
 		return handleExceptionInternal(ex, body, headers, status, request);
 	}
@@ -444,7 +441,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	protected ResponseEntity<Object> handleHttpMessageNotReadable(
 			HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
-		ProblemDetail body = resolveDetailViaMessageSource(status, null, "Failed to read request");
+		ProblemDetail body = createProblemDetail(ex, status, headers, "Failed to read request", null, null, request);
 		return handleExceptionInternal(ex, body, headers, status, request);
 	}
 
@@ -465,7 +462,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	protected ResponseEntity<Object> handleHttpMessageNotWritable(
 			HttpMessageNotWritableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
-		ProblemDetail body = resolveDetailViaMessageSource(status, null, "Failed to write request");
+		ProblemDetail body = createProblemDetail(ex, status, headers, "Failed to write request", null, null, request);
 		return handleExceptionInternal(ex, body, headers, status, request);
 	}
 
@@ -490,6 +487,32 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 
 		ProblemDetail body = ProblemDetail.forStatusAndDetail(status, "Failed to bind request");
 		return handleExceptionInternal(ex, body, headers, status, request);
+	}
+
+	/**
+	 * Convenience method to create a {@link ProblemDetail} for any exception
+	 * that doesn't implement {@link ErrorResponse}, also performing a
+	 * {@link MessageSource} lookup for the "detail" field.
+	 * @param ex the exception being handled
+	 * @param status the status to associate with the exception
+	 * @param defaultDetail default value for the "detail" field
+	 * @param detailMessageCode the code to use to look up the "detail" field
+	 * through a {@code MessageSource}, falling back on
+	 * {@link ErrorResponse#getDefaultDetailMessageCode(Class, String)}
+	 * @param detailMessageArguments the arguments to go with the detailMessageCode
+	 * @param request the current request
+	 * @return the created {@code ProblemDetail} instance
+	 * @since 6.0
+	 */
+	protected ProblemDetail createProblemDetail(
+			Exception ex, HttpStatusCode status, @Nullable HttpHeaders headers,
+			String defaultDetail, @Nullable String detailMessageCode, @Nullable Object[] detailMessageArguments,
+			WebRequest request) {
+
+		ErrorResponse errorResponse = ErrorResponse.createFor(
+				ex, status, headers, defaultDetail, detailMessageCode, detailMessageArguments);
+
+		return errorResponse.updateAndGetBody(this.messageSource, LocaleContextHolder.getLocale());
 	}
 
 	/**
@@ -530,34 +553,10 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 		}
 
 		if (body == null && ex instanceof ErrorResponse errorResponse) {
-			body = resolveDetailViaMessageSource(errorResponse);
+			body = errorResponse.updateAndGetBody(this.messageSource, LocaleContextHolder.getLocale());
 		}
 
 		return createResponseEntity(body, headers, statusCode, request);
-	}
-
-	// For non-Web exceptions
-	private ProblemDetail resolveDetailViaMessageSource(
-			HttpStatusCode status, @Nullable Object[] arguments, String defaultDetail) {
-
-		ProblemDetail body = ProblemDetail.forStatusAndDetail(status, defaultDetail);
-		ErrorResponseException errorResponseEx = new ErrorResponseException(status, body, null, null, arguments);
-		body = resolveDetailViaMessageSource(errorResponseEx);
-		return body;
-	}
-
-	// For ErrorResponse exceptions
-	private ProblemDetail resolveDetailViaMessageSource(ErrorResponse response) {
-		ProblemDetail body = response.getBody();
-		if (this.messageSource != null) {
-			Locale locale = LocaleContextHolder.getLocale();
-			Object[] arguments = response.getDetailMessageArguments(this.messageSource, locale);
-			String detail = this.messageSource.getMessage(response.getDetailMessageCode(), arguments, null, locale);
-			if (detail != null) {
-				body.setDetail(detail);
-			}
-		}
-		return body;
 	}
 
 	/**

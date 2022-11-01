@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.beans.PropertyChangeEvent;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -190,6 +191,30 @@ public class ResponseEntityExceptionHandlerTests {
 	@Test
 	public void typeMismatch() {
 		testException(new TypeMismatchException("foo", String.class));
+	}
+
+	@Test
+	public void typeMismatchWithProblemDetailViaMessageSource() {
+		Locale locale = Locale.UK;
+		LocaleContextHolder.setLocale(locale);
+
+		try {
+			StaticMessageSource messageSource = new StaticMessageSource();
+			messageSource.addMessage(
+					"problemDetail." + TypeMismatchException.class.getName(), locale,
+					"Failed to set {0} to value: {1}");
+
+			this.exceptionHandler.setMessageSource(messageSource);
+
+			ResponseEntity<?> entity = testException(
+					new TypeMismatchException(new PropertyChangeEvent(this, "name", "John", "James"), String.class));
+
+			ProblemDetail body = (ProblemDetail) entity.getBody();
+			assertThat(body.getDetail()).isEqualTo("Failed to set name to value: James");
+		}
+		finally {
+			LocaleContextHolder.resetLocaleContext();
+		}
 	}
 
 	@Test
