@@ -159,7 +159,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 								testClass.getName(), Arrays.toString(methodsWithErrors)));
 			}, String.class);
 
-		if (errorMessage != NO_AUTOWIRED_VIOLATIONS_DETECTED) {
+		if (!NO_AUTOWIRED_VIOLATIONS_DETECTED.equals(errorMessage)) {
 			throw new IllegalStateException(errorMessage);
 		}
 	}
