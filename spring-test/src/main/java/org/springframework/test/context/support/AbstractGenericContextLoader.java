@@ -188,7 +188,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * register a JVM shutdown hook for it
 	 * @return a new application context
 	 */
-	private final GenericApplicationContext loadContext(
+	private GenericApplicationContext loadContext(
 			MergedContextConfiguration mergedConfig, boolean forAotProcessing) throws Exception {
 
 		if (logger.isTraceEnabled()) {
