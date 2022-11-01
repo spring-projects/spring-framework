@@ -82,7 +82,7 @@ public class XmlExpectationsHelper {
 	public void assertXmlEqual(String expected, String actual) throws Exception {
 		XmlUnitDiff diff = new XmlUnitDiff(expected, actual);
 		if (diff.hasDifferences()) {
-			AssertionErrors.fail("Body content " + diff.toString());
+			AssertionErrors.fail("Body content " + diff);
 		}
 	}
 
