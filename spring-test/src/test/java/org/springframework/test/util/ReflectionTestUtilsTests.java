@@ -46,7 +46,7 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
  */
 class ReflectionTestUtilsTests {
 
-	private static final Float PI = Float.valueOf((float) 22 / 7);
+	private static final Float PI = (float) 22 / 7;
 
 	private final Person person = new PersonEntity();
 
@@ -64,7 +64,7 @@ class ReflectionTestUtilsTests {
 	@Test
 	void setFieldWithNullTargetObject() throws Exception {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> setField((Object) null, "id", Long.valueOf(99)))
+			.isThrownBy(() -> setField((Object) null, "id", 99L))
 			.withMessageStartingWith("Either targetObject or targetClass");
 	}
 
@@ -78,7 +78,7 @@ class ReflectionTestUtilsTests {
 	@Test
 	void setFieldWithNullTargetClass() throws Exception {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> setField((Class<?>) null, "id", Long.valueOf(99)))
+			.isThrownBy(() -> setField((Class<?>) null, "id", 99L))
 			.withMessageStartingWith("Either targetObject or targetClass");
 	}
 
@@ -92,21 +92,21 @@ class ReflectionTestUtilsTests {
 	@Test
 	void setFieldWithNullNameAndNullType() throws Exception {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> setField(person, null, Long.valueOf(99), null))
+			.isThrownBy(() -> setField(person, null, 99L, null))
 			.withMessageStartingWith("Either name or type");
 	}
 
 	@Test
 	void setFieldWithBogusName() throws Exception {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> setField(person, "bogus", Long.valueOf(99), long.class))
+			.isThrownBy(() -> setField(person, "bogus", 99L, long.class))
 			.withMessageStartingWith("Could not find field 'bogus'");
 	}
 
 	@Test
 	void setFieldWithWrongType() throws Exception {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> setField(person, "id", Long.valueOf(99), String.class))
+			.isThrownBy(() -> setField(person, "id", 99L, String.class))
 			.withMessageStartingWith("Could not find field");
 	}
 
@@ -135,17 +135,17 @@ class ReflectionTestUtilsTests {
 
 	private static void assertSetFieldAndGetFieldBehavior(Person person) {
 		// Set reflectively
-		setField(person, "id", Long.valueOf(99), long.class);
+		setField(person, "id", 99L, long.class);
 		setField(person, "name", "Tom");
-		setField(person, "age", Integer.valueOf(42));
+		setField(person, "age", 42);
 		setField(person, "eyeColor", "blue", String.class);
 		setField(person, "likesPets", Boolean.TRUE);
 		setField(person, "favoriteNumber", PI, Number.class);
 
 		// Get reflectively
-		assertThat(getField(person, "id")).isEqualTo(Long.valueOf(99));
+		assertThat(getField(person, "id")).isEqualTo(99L);
 		assertThat(getField(person, "name")).isEqualTo("Tom");
-		assertThat(getField(person, "age")).isEqualTo(Integer.valueOf(42));
+		assertThat(getField(person, "age")).isEqualTo(42);
 		assertThat(getField(person, "eyeColor")).isEqualTo("blue");
 		assertThat(getField(person, "likesPets")).isEqualTo(Boolean.TRUE);
 		assertThat(getField(person, "favoriteNumber")).isEqualTo(PI);
@@ -249,33 +249,33 @@ class ReflectionTestUtilsTests {
 
 	@Test
 	void invokeSetterMethodAndInvokeGetterMethodWithExplicitMethodNames() throws Exception {
-		invokeSetterMethod(person, "setId", Long.valueOf(1), long.class);
+		invokeSetterMethod(person, "setId", 1L, long.class);
 		invokeSetterMethod(person, "setName", "Jerry", String.class);
-		invokeSetterMethod(person, "setAge", Integer.valueOf(33), int.class);
+		invokeSetterMethod(person, "setAge", 33, int.class);
 		invokeSetterMethod(person, "setEyeColor", "green", String.class);
 		invokeSetterMethod(person, "setLikesPets", Boolean.FALSE, boolean.class);
-		invokeSetterMethod(person, "setFavoriteNumber", Integer.valueOf(42), Number.class);
+		invokeSetterMethod(person, "setFavoriteNumber", 42, Number.class);
 
 		assertThat(person.getId()).as("ID (protected method in a superclass)").isEqualTo(1);
 		assertThat(person.getName()).as("name (private method)").isEqualTo("Jerry");
 		assertThat(person.getAge()).as("age (protected method)").isEqualTo(33);
 		assertThat(person.getEyeColor()).as("eye color (package private method)").isEqualTo("green");
 		assertThat(person.likesPets()).as("'likes pets' flag (protected method for a boolean)").isFalse();
-		assertThat(person.getFavoriteNumber()).as("'favorite number' (protected method for a Number)").isEqualTo(Integer.valueOf(42));
+		assertThat(person.getFavoriteNumber()).as("'favorite number' (protected method for a Number)").isEqualTo(42);
 
-		assertThat(invokeGetterMethod(person, "getId")).isEqualTo(Long.valueOf(1));
+		assertThat(invokeGetterMethod(person, "getId")).isEqualTo(1L);
 		assertThat(invokeGetterMethod(person, "getName")).isEqualTo("Jerry");
-		assertThat(invokeGetterMethod(person, "getAge")).isEqualTo(Integer.valueOf(33));
+		assertThat(invokeGetterMethod(person, "getAge")).isEqualTo(33);
 		assertThat(invokeGetterMethod(person, "getEyeColor")).isEqualTo("green");
 		assertThat(invokeGetterMethod(person, "likesPets")).isEqualTo(Boolean.FALSE);
-		assertThat(invokeGetterMethod(person, "getFavoriteNumber")).isEqualTo(Integer.valueOf(42));
+		assertThat(invokeGetterMethod(person, "getFavoriteNumber")).isEqualTo(42);
 	}
 
 	@Test
 	void invokeSetterMethodAndInvokeGetterMethodWithJavaBeanPropertyNames() throws Exception {
-		invokeSetterMethod(person, "id", Long.valueOf(99), long.class);
+		invokeSetterMethod(person, "id", 99L, long.class);
 		invokeSetterMethod(person, "name", "Tom");
-		invokeSetterMethod(person, "age", Integer.valueOf(42));
+		invokeSetterMethod(person, "age", 42);
 		invokeSetterMethod(person, "eyeColor", "blue", String.class);
 		invokeSetterMethod(person, "likesPets", Boolean.TRUE);
 		invokeSetterMethod(person, "favoriteNumber", PI, Number.class);
@@ -287,9 +287,9 @@ class ReflectionTestUtilsTests {
 		assertThat(person.likesPets()).as("'likes pets' flag (protected method for a boolean)").isTrue();
 		assertThat(person.getFavoriteNumber()).as("'favorite number' (protected method for a Number)").isEqualTo(PI);
 
-		assertThat(invokeGetterMethod(person, "id")).isEqualTo(Long.valueOf(99));
+		assertThat(invokeGetterMethod(person, "id")).isEqualTo(99L);
 		assertThat(invokeGetterMethod(person, "name")).isEqualTo("Tom");
-		assertThat(invokeGetterMethod(person, "age")).isEqualTo(Integer.valueOf(42));
+		assertThat(invokeGetterMethod(person, "age")).isEqualTo(42);
 		assertThat(invokeGetterMethod(person, "eyeColor")).isEqualTo("blue");
 		assertThat(invokeGetterMethod(person, "likesPets")).isEqualTo(Boolean.TRUE);
 		assertThat(invokeGetterMethod(person, "favoriteNumber")).isEqualTo(PI);
@@ -349,7 +349,7 @@ class ReflectionTestUtilsTests {
 		assertThat(component.getText()).as("text").isNull();
 
 		// Simulate autowiring a configuration method
-		invokeMethod(component, "configure", Integer.valueOf(42), "enigma");
+		invokeMethod(component, "configure", 42, "enigma");
 		assertThat(component.getNumber()).as("number should have been configured").isEqualTo(Integer.valueOf(42));
 		assertThat(component.getText()).as("text should have been configured").isEqualTo("enigma");
 
@@ -380,14 +380,14 @@ class ReflectionTestUtilsTests {
 	@Test
 	void invokeMethodWithTooFewArguments() {
 		assertThatIllegalStateException()
-			.isThrownBy(() -> invokeMethod(component, "configure", Integer.valueOf(42)))
+			.isThrownBy(() -> invokeMethod(component, "configure", 42))
 			.withMessageStartingWith("Method not found");
 	}
 
 	@Test
 	void invokeMethodWithTooManyArguments() {
 		assertThatIllegalStateException()
-			.isThrownBy(() -> invokeMethod(component, "configure", Integer.valueOf(42), "enigma", "baz", "quux"))
+			.isThrownBy(() -> invokeMethod(component, "configure", 42, "enigma", "baz", "quux"))
 			.withMessageStartingWith("Method not found");
 	}
 
@@ -406,7 +406,7 @@ class ReflectionTestUtilsTests {
 
 	@Test // SPR-14363
 	void invokeMethodOnLegacyEntityWithSideEffectsInToString() {
-		invokeMethod(entity, "configure", Integer.valueOf(42), "enigma");
+		invokeMethod(entity, "configure", 42, "enigma");
 		assertThat(entity.getNumber()).as("number should have been configured").isEqualTo(Integer.valueOf(42));
 		assertThat(entity.getText()).as("text should have been configured").isEqualTo("enigma");
 	}
