@@ -17,6 +17,7 @@
 package org.springframework.test.web.servlet.result;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -74,7 +75,7 @@ public class PrintingResultHandlerTests {
 		this.request.addHeader("header", "headerValue");
 		this.request.setCharacterEncoding("UTF-16");
 		String palindrome = "ablE was I ere I saw Elba";
-		byte[] bytes = palindrome.getBytes("UTF-16");
+		byte[] bytes = palindrome.getBytes(StandardCharsets.UTF_16);
 		this.request.setContent(bytes);
 		this.request.getSession().setAttribute("foo", "bar");
 
@@ -100,7 +101,7 @@ public class PrintingResultHandlerTests {
 		this.request.addHeader("header", "headerValue");
 		this.request.setCharacterEncoding("UTF-16");
 		String palindrome = "ablE was I ere I saw Elba";
-		byte[] bytes = palindrome.getBytes("UTF-16");
+		byte[] bytes = palindrome.getBytes(StandardCharsets.UTF_16);
 		this.request.setContent(bytes);
 
 		this.handler.handle(this.mvcResult);
@@ -124,7 +125,7 @@ public class PrintingResultHandlerTests {
 		this.request.addHeader("header", "headerValue");
 		this.request.setCharacterEncoding("UTF-16");
 		String palindrome = "ablE was I ere I saw Elba";
-		byte[] bytes = palindrome.getBytes("UTF-16");
+		byte[] bytes = palindrome.getBytes(StandardCharsets.UTF_16);
 		this.request.setContent(bytes);
 		this.request.setSession(Mockito.mock(HttpSession.class));
 
@@ -205,7 +206,7 @@ public class PrintingResultHandlerTests {
 	@Test
 	public void printRequestWithCharacterEncoding() throws Exception {
 		this.request.setCharacterEncoding("UTF-8");
-		this.request.setContent("text".getBytes("UTF-8"));
+		this.request.setContent("text".getBytes(StandardCharsets.UTF_8));
 
 		this.handler.handle(this.mvcResult);
 

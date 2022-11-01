@@ -17,6 +17,7 @@
 package org.springframework.test.web.servlet.htmlunit;
 
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
 import com.gargoylesoftware.htmlunit.HttpWebConnection;
@@ -79,7 +80,7 @@ public class DelegatingWebConnectionTests {
 	@BeforeEach
 	public void setup() throws Exception {
 		request = new WebRequest(new URL("http://localhost/"));
-		WebResponseData data = new WebResponseData("".getBytes("UTF-8"), 200, "", Collections.emptyList());
+		WebResponseData data = new WebResponseData("".getBytes(StandardCharsets.UTF_8), 200, "", Collections.emptyList());
 		expectedResponse = new WebResponse(data, request, 100L);
 		webConnection = new DelegatingWebConnection(defaultConnection,
 				new DelegateWebConnection(matcher1, connection1), new DelegateWebConnection(matcher2, connection2));

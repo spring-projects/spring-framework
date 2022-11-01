@@ -46,7 +46,7 @@ public class ContentResultMatchersTests {
 
 	@Test
 	public void string() throws Exception {
-		new ContentResultMatchers().string(new String(CONTENT.getBytes("UTF-8"))).match(getStubMvcResult(CONTENT));
+		new ContentResultMatchers().string(new String(CONTENT.getBytes(StandardCharsets.UTF_8))).match(getStubMvcResult(CONTENT));
 	}
 
 	@Test
@@ -57,7 +57,7 @@ public class ContentResultMatchersTests {
 
 	@Test
 	public void stringMatcher() throws Exception {
-		String content = new String(CONTENT.getBytes("UTF-8"));
+		String content = new String(CONTENT.getBytes(StandardCharsets.UTF_8));
 		new ContentResultMatchers().string(Matchers.equalTo(content)).match(getStubMvcResult(CONTENT));
 	}
 
@@ -69,7 +69,7 @@ public class ContentResultMatchersTests {
 
 	@Test
 	public void bytes() throws Exception {
-		new ContentResultMatchers().bytes(CONTENT.getBytes("UTF-8")).match(getStubMvcResult(CONTENT));
+		new ContentResultMatchers().bytes(CONTENT.getBytes(StandardCharsets.UTF_8)).match(getStubMvcResult(CONTENT));
 	}
 
 	@Test

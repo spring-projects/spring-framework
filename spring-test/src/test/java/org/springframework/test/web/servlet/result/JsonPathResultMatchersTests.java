@@ -302,7 +302,7 @@ public class JsonPathResultMatchersTests {
 	public void prefixWithPayloadNotLongEnough() throws Exception {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.addHeader("Content-Type", "application/json");
-		response.getWriter().print(new String("test".getBytes("ISO-8859-1")));
+		response.getWriter().print(new String("test".getBytes(StandardCharsets.ISO_8859_1)));
 		StubMvcResult result =  new StubMvcResult(null, null, null, null, null, null, response);
 
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
@@ -312,7 +312,7 @@ public class JsonPathResultMatchersTests {
 	private StubMvcResult createPrefixedStubMvcResult(String jsonPrefix) throws Exception {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.addHeader("Content-Type", "application/json");
-		response.getWriter().print(jsonPrefix + new String(RESPONSE_CONTENT.getBytes("ISO-8859-1")));
+		response.getWriter().print(jsonPrefix + new String(RESPONSE_CONTENT.getBytes(StandardCharsets.ISO_8859_1)));
 		return new StubMvcResult(null, null, null, null, null, null, response);
 	}
 
