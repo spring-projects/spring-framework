@@ -36,6 +36,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.server.MethodNotAllowedException;
@@ -131,8 +132,11 @@ public class ResponseEntityExceptionHandlerTests {
 
 		StaticMessageSource messageSource = new StaticMessageSource();
 		messageSource.addMessage(
-				"problemDetail." + UnsupportedMediaTypeStatusException.class.getName(), locale,
+				ErrorResponse.getDefaultDetailMessageCode(UnsupportedMediaTypeStatusException.class, null), locale,
 				"Content-Type {0} not supported. Supported: {1}");
+		messageSource.addMessage(
+				ErrorResponse.getDefaultTitleMessageCode(UnsupportedMediaTypeStatusException.class), locale,
+				"Media type is not valid or not supported");
 
 		this.exceptionHandler.setMessageSource(messageSource);
 
@@ -147,6 +151,8 @@ public class ResponseEntityExceptionHandlerTests {
 		ProblemDetail body = (ProblemDetail) responseEntity.getBody();
 		assertThat(body.getDetail()).isEqualTo(
 				"Content-Type application/json not supported. Supported: [application/atom+xml, application/xml]");
+		assertThat(body.getTitle()).isEqualTo(
+				"Media type is not valid or not supported");
 	}
 
 	@Test

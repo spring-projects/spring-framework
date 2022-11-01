@@ -95,8 +95,19 @@ public interface ErrorResponse {
 	}
 
 	/**
-	 * Resolve the {@link #getDetailMessageCode() detailMessageCode} through the
-	 * given {@link MessageSource}, and if found, update the "detail" field.
+	 * Return a code to use to resolve the problem "detail" for this exception
+	 * through a {@link MessageSource}.
+	 * <p>By default this is initialized via
+	 * {@link #getDefaultDetailMessageCode(Class, String)}.
+	 */
+	default String getTitleCode() {
+		return getDefaultTitleMessageCode(getClass());
+	}
+
+	/**
+	 * Resolve the {@link #getDetailMessageCode() detailMessageCode} and the
+	 * {@link #getTitleCode() titleCode} through the given {@link MessageSource},
+	 * and if found, update the "detail" and "title!" fields respectively.
 	 * @param messageSource the {@code MessageSource} to use for the lookup
 	 * @param locale the {@code Locale} to use for the lookup
 	 */
@@ -107,20 +118,33 @@ public interface ErrorResponse {
 			if (detail != null) {
 				getBody().setDetail(detail);
 			}
+			String title = messageSource.getMessage(getTitleCode(), null, null, locale);
+			if (title != null) {
+				getBody().setTitle(title);
+			}
 		}
 		return getBody();
 	}
 
 
 	/**
-	 * Build a message code for the given exception type, which consists of
-	 * {@code "problemDetail."} followed by the full {@link Class#getName() class name}.
-	 * @param exceptionType the exception type for which to build a code
+	 * Build a message code for the "detail" field, for the given exception type.
+	 * @param exceptionType the exception type associated with the problem
 	 * @param suffix an optional suffix, e.g. for exceptions that may have multiple
 	 * error message with different arguments.
+	 * @return {@code "problemDetail."} followed by the full {@link Class#getName() class name}
 	 */
 	static String getDefaultDetailMessageCode(Class<?> exceptionType, @Nullable String suffix) {
 		return "problemDetail." + exceptionType.getName() + (suffix != null ? "." + suffix : "");
+	}
+
+	/**
+	 * Build a message code for the "title" field, for the given exception type.
+	 * @param exceptionType the exception type associated with the problem
+	 * @return {@code "problemDetail.title."} followed by the full {@link Class#getName() class name}
+	 */
+	static String getDefaultTitleMessageCode(Class<?> exceptionType) {
+		return "problemDetail.title." + exceptionType.getName();
 	}
 
 	/**

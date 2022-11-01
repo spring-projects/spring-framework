@@ -42,6 +42,7 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindException;
 import org.springframework.validation.MapBindingResult;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -166,8 +167,11 @@ public class ResponseEntityExceptionHandlerTests {
 		try {
 			StaticMessageSource messageSource = new StaticMessageSource();
 			messageSource.addMessage(
-					"problemDetail." + HttpMediaTypeNotSupportedException.class.getName(), locale,
+					ErrorResponse.getDefaultDetailMessageCode(HttpMediaTypeNotSupportedException.class, null), locale,
 					"Content-Type {0} not supported. Supported: {1}");
+			messageSource.addMessage(
+					ErrorResponse.getDefaultTitleMessageCode(HttpMediaTypeNotSupportedException.class), locale,
+					"Media type is not valid or not supported");
 
 			this.exceptionHandler.setMessageSource(messageSource);
 
@@ -177,6 +181,8 @@ public class ResponseEntityExceptionHandlerTests {
 			ProblemDetail body = (ProblemDetail) entity.getBody();
 			assertThat(body.getDetail()).isEqualTo(
 					"Content-Type application/json not supported. Supported: [application/atom+xml, application/xml]");
+			assertThat(body.getTitle()).isEqualTo(
+					"Media type is not valid or not supported");
 		}
 		finally {
 			LocaleContextHolder.resetLocaleContext();
@@ -201,7 +207,7 @@ public class ResponseEntityExceptionHandlerTests {
 		try {
 			StaticMessageSource messageSource = new StaticMessageSource();
 			messageSource.addMessage(
-					"problemDetail." + TypeMismatchException.class.getName(), locale,
+					ErrorResponse.getDefaultDetailMessageCode(TypeMismatchException.class, null), locale,
 					"Failed to set {0} to value: {1}");
 
 			this.exceptionHandler.setMessageSource(messageSource);

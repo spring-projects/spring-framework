@@ -4910,7 +4910,7 @@ and any `ErrorResponseException`, and renders an error response with a body.
 [.small]#<<web-reactive.adoc#webflux-ann-rest-exceptions-render, WebFlux>>#
 
 You can return `ProblemDetail` or `ErrorResponse` from any `@ExceptionHandler` or from
-any `@RequestMapping` method to render an RFC 7807 response as follows:
+any `@RequestMapping` method to render an RFC 7807 response. This is processed as follows:
 
 - The `status` property of `ProblemDetail` determines the HTTP status.
 - The `instance` property of `ProblemDetail` is set from the current URL path, if not
@@ -4919,11 +4919,12 @@ already set.
 "application/problem+json" over "application/json" when rendering a `ProblemDetail`,
 and also falls back on it if no compatible media type is found.
 
-To enable RFC 7807 responses for Spring MVC exceptions and for any
+To enable RFC 7807 responses for Spring WebFlux exceptions and for any
 `ErrorResponseException`, extend `ResponseEntityExceptionHandler` and declare it as an
 <<mvc-ann-controller-advice,@ControllerAdvice>> in Spring configuration. The handler
-obtains HTTP status, headers, and error details from each exception and prepares a
-`ResponseEntity`.
+has an `@ExceptionHandler` method that handles any `ErrorResponse` exception, which
+includes all built-in web exceptions. You can add more exception handling methods, and
+use a protected method to map any exception to a `ProblemDetail`.
 
 
 
@@ -4940,7 +4941,7 @@ response, and likewise any unknown property during deserialization is inserted i
 this `Map`.
 
 You can also extend `ProblemDetail` to add dedicated non-standard properties.
-The copy constructor in `ProblemDetail` allows a sub-class to make it easy to be created
+The copy constructor in `ProblemDetail` allows a subclass to make it easy to be created
 from an existing `ProblemDetail`. This could be done centrally, e.g. from an
 `@ControllerAdvice` such as `ResponseEntityExceptionHandler` that re-creates the
 `ProblemDetail` of an exception into a subclass with the additional non-standard fields.
@@ -4954,20 +4955,18 @@ from an existing `ProblemDetail`. This could be done centrally, e.g. from an
 It is a common requirement to internationalize error response details, and good practice
 to customize the problem details for Spring MVC exceptions. This is supported as follows:
 
-- Each `ErrorResponse` exposes a message code and message code arguments to resolve the
-problem "detail" field through a <<core.adoc#context-functionality-messagesource,MessageSource>>.
+- Each `ErrorResponse` exposes a message code and arguments to resolve the "detail" field
+through a <<core.adoc#context-functionality-messagesource,MessageSource>>.
 The actual message code value is parameterized with placeholders, e.g.
 `"HTTP method {0} not supported"` to be expanded from the arguments.
-- `ResponseEntityExceptionHandler` uses the message code and the message arguments
-to resolve the problem "detail" field.
-- Lower level exceptions that cannot implement `ErrorResponse`, e.g. `TypeMismatchException`,
-have their problem detail, including message code and arguments set in
-`ResponseEntityExceptionHandler`.
+- Each `ErrorResponse` also exposes a message code to resolve the "title" field.
+- `ResponseEntityExceptionHandler` uses the message code and arguments to resolve the
+"detail" and the "title" fields.
 
-Message codes default to "problemDetail." + the fully qualified exception class name. Some
-exceptions may expose additional message codes in which case a suffix is added to
-the default message code. The table below lists message arguments and codes for Spring
-MVC exceptions:
+By default, the message code for the "detail" field is "problemDetail." + the fully
+qualified exception class name. Some exceptions may expose additional message codes in
+which case a suffix is added to the default message code. The table below lists message
+arguments and codes for Spring MVC exceptions:
 
 [[mvc-ann-rest-exceptions-codes]]
 [cols="1,1,2", options="header"]
@@ -5053,6 +5052,9 @@ MVC exceptions:
 | `{0}` the list of parameter conditions
 
 |===
+
+By default, the message code for the "title" field is "problemDetail.title." + the fully
+qualified exception class name.
 
 
 
