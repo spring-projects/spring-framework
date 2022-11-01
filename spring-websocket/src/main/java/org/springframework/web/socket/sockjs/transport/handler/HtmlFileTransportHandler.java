@@ -61,18 +61,18 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 	static {
 		StringBuilder sb = new StringBuilder(
 				"""
-						<!doctype html>
+						<!DOCTYPE html>
 						<html><head>
-						  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-						  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+							<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+							<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 						</head><body><h2>Don't panic!</h2>
-						  <script>
-						    document.domain = document.domain;
-						    var c = parent.%s;
-						    c.start();
-						    function p(d) {c.message(d);};
-						    window.onload = function() {c.stop();};
-						  </script>"""
+							<script>
+								document.domain = document.domain;
+								var c = parent.%s;
+								c.start();
+								function p(d) {c.message(d);};
+								window.onload = function() {c.stop();};
+							</script>"""
 				);
 
 		while (sb.length() < MINIMUM_PARTIAL_HTML_CONTENT_LENGTH) {
