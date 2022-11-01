@@ -780,7 +780,7 @@ public abstract class AnnotatedElementUtils {
 		if (containerType == null) {
 			// Invoke RepeatableContainers.of() in order to adhere to the contract of
 			// getMergedRepeatableAnnotations() which states that an IllegalArgumentException
-			// will be thrown if the the container cannot be resolved.
+			// will be thrown if the container cannot be resolved.
 			//
 			// In any case, we use standardRepeatables() in order to support repeatable
 			// annotations on other types of repeatable annotations (i.e., nested repeatable
@@ -807,7 +807,7 @@ public abstract class AnnotatedElementUtils {
 		if (containerType == null) {
 			// Invoke RepeatableContainers.of() in order to adhere to the contract of
 			// findMergedRepeatableAnnotations() which states that an IllegalArgumentException
-			// will be thrown if the the container cannot be resolved.
+			// will be thrown if the container cannot be resolved.
 			//
 			// In any case, we use standardRepeatables() in order to support repeatable
 			// annotations on other types of repeatable annotations (i.e., nested repeatable

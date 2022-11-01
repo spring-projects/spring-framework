@@ -150,7 +150,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
-	private List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
+	private final List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
 
 	private final List<Object> requestResponseBodyAdvice = new ArrayList<>();
 

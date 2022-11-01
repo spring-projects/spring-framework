@@ -3652,9 +3652,9 @@ from an existing `ProblemDetail`. This could be done centrally, e.g. from an
 
 
 
-[[webflux-ann-rest-exceptions-i8n]]
+[[webflux-ann-rest-exceptions-i18n]]
 === Internationalization
-[.small]#<<webmvc.adoc#mvc-ann-rest-exceptions-i8n, Web MVC>>#
+[.small]#<<webmvc.adoc#mvc-ann-rest-exceptions-i18n, Web MVC>>#
 
 It is a common requirement to internationalize error response details, and good practice
 to customize the problem details for Spring WebFlux exceptions. This is supported as follows:
