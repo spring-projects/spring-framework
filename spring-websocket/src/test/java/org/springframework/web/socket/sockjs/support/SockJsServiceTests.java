@@ -238,14 +238,14 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 
 		assertThat(this.servletResponse.getContentType()).isEqualTo("text/html;charset=UTF-8");
 		assertThat(this.servletResponse.getContentAsString().startsWith("<!DOCTYPE html>\n")).isTrue();
-		assertThat(this.servletResponse.getContentLength()).isEqualTo(490);
+		assertThat(this.servletResponse.getContentLength()).isEqualTo(479);
 		assertThat(this.response.getHeaders().getCacheControl()).isEqualTo("no-store, no-cache, must-revalidate, max-age=0");
-		assertThat(this.response.getHeaders().getETag()).isEqualTo("\"0096cbd37f2a5218c33bb0826a7c74cbf\"");
+		assertThat(this.response.getHeaders().getETag()).isEqualTo("\"096aaf2482e2a85effc0ab65a61993ae0\"");
 	}
 
 	@Test
 	public void handleIframeRequestNotModified() {
-		this.servletRequest.addHeader("If-None-Match", "\"0096cbd37f2a5218c33bb0826a7c74cbf\"");
+		this.servletRequest.addHeader("If-None-Match", "\"096aaf2482e2a85effc0ab65a61993ae0\"");
 		resetResponseAndHandleRequest("GET", "/echo/iframe.html", HttpStatus.NOT_MODIFIED);
 	}
 
