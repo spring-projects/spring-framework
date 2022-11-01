@@ -169,6 +169,28 @@ class DataFieldMaxValueIncrementerTests {
 	}
 
 	@Test
+	void mariaDBSequenceMaxValueIncrementer() throws SQLException {
+		given(dataSource.getConnection()).willReturn(connection);
+		given(connection.createStatement()).willReturn(statement);
+		given(statement.executeQuery("select next value for myseq")).willReturn(resultSet);
+		given(resultSet.next()).willReturn(true);
+		given(resultSet.getLong(1)).willReturn(10L, 12L);
+
+		MariaDBSequenceMaxValueIncrementer incrementer = new MariaDBSequenceMaxValueIncrementer();
+		incrementer.setDataSource(dataSource);
+		incrementer.setIncrementerName("myseq");
+		incrementer.setPaddingLength(5);
+		incrementer.afterPropertiesSet();
+
+		assertThat(incrementer.nextStringValue()).isEqualTo("00010");
+		assertThat(incrementer.nextIntValue()).isEqualTo(12);
+
+		verify(resultSet, times(2)).close();
+		verify(statement, times(2)).close();
+		verify(connection, times(2)).close();
+	}
+
+	@Test
 	void oracleSequenceMaxValueIncrementer() throws SQLException {
 		given(dataSource.getConnection()).willReturn(connection);
 		given(connection.createStatement()).willReturn(statement);
@@ -199,28 +221,6 @@ class DataFieldMaxValueIncrementerTests {
 		given(resultSet.getLong(1)).willReturn(10L, 12L);
 
 		PostgresSequenceMaxValueIncrementer incrementer = new PostgresSequenceMaxValueIncrementer();
-		incrementer.setDataSource(dataSource);
-		incrementer.setIncrementerName("myseq");
-		incrementer.setPaddingLength(5);
-		incrementer.afterPropertiesSet();
-
-		assertThat(incrementer.nextStringValue()).isEqualTo("00010");
-		assertThat(incrementer.nextIntValue()).isEqualTo(12);
-
-		verify(resultSet, times(2)).close();
-		verify(statement, times(2)).close();
-		verify(connection, times(2)).close();
-	}
-
-	@Test
-	void mariaDBSequenceMaxValueIncrementer() throws SQLException {
-		given(dataSource.getConnection()).willReturn(connection);
-		given(connection.createStatement()).willReturn(statement);
-		given(statement.executeQuery("select next value for myseq")).willReturn(resultSet);
-		given(resultSet.next()).willReturn(true);
-		given(resultSet.getLong(1)).willReturn(10L, 12L);
-
-		MariaDBSequenceMaxValueIncrementer incrementer = new MariaDBSequenceMaxValueIncrementer();
 		incrementer.setDataSource(dataSource);
 		incrementer.setIncrementerName("myseq");
 		incrementer.setPaddingLength(5);

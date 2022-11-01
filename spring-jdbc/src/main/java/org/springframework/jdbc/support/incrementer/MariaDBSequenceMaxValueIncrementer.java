@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ package org.springframework.jdbc.support.incrementer;
 import javax.sql.DataSource;
 
 /**
- * {@link DataFieldMaxValueIncrementer} that retrieves the next value
- * of a given MariaDB sequence.
+ * {@link DataFieldMaxValueIncrementer} that retrieves the next value of a given
+ * MariaDB sequence.
  *
  * @author Mahmoud Ben Hassine
- * @since 6.0.0
+ * @since 6.0
  */
 public class MariaDBSequenceMaxValueIncrementer extends AbstractSequenceMaxValueIncrementer {
 
