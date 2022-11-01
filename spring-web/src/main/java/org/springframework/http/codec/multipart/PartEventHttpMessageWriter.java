@@ -28,6 +28,7 @@ import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.codec.HttpMessageWriter;
@@ -83,7 +84,9 @@ public class PartEventHttpMessageWriter extends MultipartWriterSupport implement
 					if (signal.hasValue()) {
 						PartEvent value = signal.get();
 						Assert.state(value != null, "Null value");
-						return encodePartData(boundary, outputMessage.bufferFactory(), value, flux);
+						Flux<DataBuffer> dataBuffers = flux.map(PartEvent::content)
+								.filter(buffer -> buffer.readableByteCount() > 0);
+						return encodePartData(boundary, outputMessage.bufferFactory(), value.headers(), dataBuffers);
 					}
 					else {
 						return flux.cast(DataBuffer.class);
@@ -99,11 +102,11 @@ public class PartEventHttpMessageWriter extends MultipartWriterSupport implement
 		return outputMessage.writeWith(body);
 	}
 
-	private Flux<DataBuffer> encodePartData(byte[] boundary, DataBufferFactory bufferFactory, PartEvent first, Flux<? extends PartEvent> flux) {
+	private Flux<DataBuffer> encodePartData(byte[] boundary, DataBufferFactory bufferFactory, HttpHeaders headers, Flux<DataBuffer> body) {
 		return Flux.concat(
 				generateBoundaryLine(boundary, bufferFactory),
-				generatePartHeaders(first.headers(), bufferFactory),
-				flux.map(PartEvent::content),
+				generatePartHeaders(headers, bufferFactory),
+				body,
 				generateNewLine(bufferFactory));
 	}
 
