@@ -24,6 +24,7 @@ import java.lang.annotation.Target;
 
 import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.core.annotation.AliasFor;
+import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.Mapping;
 
 /**
@@ -90,6 +91,17 @@ import org.springframework.web.bind.annotation.Mapping;
  * {@code "application/x-www-form-urlencoded"} or query params otherwise</td>
  * <td>{@link org.springframework.web.service.invoker.RequestParamArgumentResolver
  * RequestParamArgumentResolver}</td>
+ * </tr>
+ * <tr>
+ * <td>{@link org.springframework.web.bind.annotation.RequestPart @RequestPart}</td>
+ * <td>Add a request part, which may be a String (form field),
+ * {@link org.springframework.core.io.Resource} (file part), Object (entity to be
+ * encoded, e.g. as JSON), {@link HttpEntity} (part content and headers), a
+ * {@link org.springframework.http.codec.multipart.Part}, or a
+ * {@link org.reactivestreams.Publisher} of any of the above.
+ * (</td>
+ * <td>{@link org.springframework.web.service.invoker.RequestPartArgumentResolver
+ * RequestPartArgumentResolver}</td>
  * </tr>
  * <tr>
  * <td>{@link org.springframework.web.bind.annotation.CookieValue @CookieValue}</td>

@@ -29,9 +29,11 @@ import java.util.function.Function;
 import org.reactivestreams.Publisher;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.codec.FormHttpMessageWriter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -223,6 +225,9 @@ public final class HttpRequestValues {
 		private MultiValueMap<String, String> requestParams;
 
 		@Nullable
+		private MultipartBodyBuilder multipartBuilder;
+
+		@Nullable
 		private Map<String, Object> attributes;
 
 		@Nullable
@@ -336,6 +341,26 @@ public final class HttpRequestValues {
 		}
 
 		/**
+		 * Add a part to a multipart request. The part value may be as described
+		 * in {@link MultipartBodyBuilder#part(String, Object)}.
+		 */
+		public Builder addRequestPart(String name, Object part) {
+			this.multipartBuilder = (this.multipartBuilder != null ? this.multipartBuilder : new MultipartBodyBuilder());
+			this.multipartBuilder.part(name, part);
+			return this;
+		}
+
+		/**
+		 * Variant of {@link #addRequestPart(String, Object)} that allows the
+		 * part value to be produced by a {@link Publisher}.
+		 */
+		public <T, P extends Publisher<T>> Builder addRequestPart(String name, P publisher, ResolvableType type) {
+			this.multipartBuilder = (this.multipartBuilder != null ? this.multipartBuilder : new MultipartBodyBuilder());
+			this.multipartBuilder.asyncPart(name, publisher, ParameterizedTypeReference.forType(type.getType()));
+			return this;
+		}
+
+		/**
 		 * Configure an attribute to associate with the request.
 		 * @param name the attribute name
 		 * @param value the attribute value
@@ -398,6 +423,10 @@ public final class HttpRequestValues {
 					uriVars = (uriVars.isEmpty() ? new HashMap<>() : uriVars);
 					uriTemplate = appendQueryParams(uriTemplate, uriVars, this.requestParams);
 				}
+			}
+			else if (this.multipartBuilder != null) {
+				Assert.isTrue(bodyValue == null && this.body == null, "Expected body or request parts, not both");
+				bodyValue = this.multipartBuilder.build();
 			}
 
 			HttpHeaders headers = HttpHeaders.EMPTY;

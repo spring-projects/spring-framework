@@ -323,6 +323,7 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 			resolvers.add(new RequestBodyArgumentResolver(this.reactiveAdapterRegistry));
 			resolvers.add(new PathVariableArgumentResolver(service));
 			resolvers.add(new RequestParamArgumentResolver(service));
+			resolvers.add(new RequestPartArgumentResolver(this.reactiveAdapterRegistry));
 			resolvers.add(new CookieValueArgumentResolver(service));
 			resolvers.add(new RequestAttributeArgumentResolver());
 
@@ -497,6 +498,7 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 			resolvers.add(new RequestBodyArgumentResolver(this.reactiveAdapterRegistry));
 			resolvers.add(new PathVariableArgumentResolver(conversionService));
 			resolvers.add(new RequestParamArgumentResolver(conversionService));
+			resolvers.add(new RequestPartArgumentResolver(this.reactiveAdapterRegistry));
 			resolvers.add(new CookieValueArgumentResolver(conversionService));
 			resolvers.add(new RequestAttributeArgumentResolver());
 

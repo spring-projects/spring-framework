@@ -453,6 +453,11 @@ method parameters:
   parameters are encoded in the request body. Otherwise, they are added as URL query
   parameters.
 
+| `@RequestPart`
+| Add a request part, which may be a String (form field), `Resource` (file part),
+  Object (entity to be encoded, e.g. as JSON), `HttpEntity` (part content and headers),
+  a Spring `Part`, or Reactive Streams `Publisher` of any of the above.
+
 | `@CookieValue`
 | Add a cookie or mutliple cookies. The argument may be a `Map<String, ?>` or
   `MultiValueMap<String, ?>` with multiple cookies, a `Collection<?>` of values, or an
