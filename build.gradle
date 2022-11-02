@@ -1,11 +1,11 @@
 plugins {
 	id 'io.spring.nohttp' version '0.0.10'
 	id 'io.freefair.aspectj' version '6.5.0.3' apply false
-	id 'org.jetbrains.dokka' version '1.7.20' apply false
 	id 'org.jetbrains.kotlin.jvm' version '1.7.20' apply false
 	id 'org.jetbrains.kotlin.plugin.serialization' version '1.7.20' apply false
-	id 'org.asciidoctor.jvm.convert' version '3.3.2'
-	id 'org.asciidoctor.jvm.pdf' version '3.3.2'
+	id 'org.jetbrains.dokka' version '1.7.20'
+	id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
+	id 'org.asciidoctor.jvm.pdf' version '3.3.2'  apply false
 	id 'org.unbroken-dome.xjc' version '2.0.0' apply false
 	id 'com.github.ben-manes.versions' version '0.42.0'
 	id 'com.github.johnrengelman.shadow' version '7.1.2' apply false
@@ -60,8 +60,6 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	pluginManager.withPlugin("kotlin") {
-		apply plugin: "org.jetbrains.dokka"
-		apply from: "${rootDir}/gradle/docs-dokka.gradle"
 
 		compileKotlin {
 			kotlinOptions {
@@ -170,8 +168,6 @@ configure(rootProject) {
 	apply plugin: "kotlin"
 	apply plugin: "io.spring.nohttp"
 	apply plugin: 'org.springframework.build.api-diff'
-	apply from: "${rootDir}/gradle/publications.gradle"
-	apply from: "${rootDir}/gradle/docs.gradle"
 
 	nohttp {
 		source.exclude "**/test-output/**"
@@ -192,13 +188,4 @@ configure(rootProject) {
 		maxHeapSize = "1g"
 	}
 
-	publishing {
-		publications {
-			mavenJava(MavenPublication) {
-				artifact docsZip
-				artifact schemaZip
-				artifact distZip
-			}
-		}
-	}
 }
