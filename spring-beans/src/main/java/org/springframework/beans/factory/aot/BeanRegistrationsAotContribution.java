@@ -30,12 +30,14 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
+import org.springframework.util.MultiValueMap;
 
 /**
  * AOT contribution from a {@link BeanRegistrationsAotProcessor} used to
- * register bean definitions.
+ * register bean definitions and aliases.
  *
  * @author Phillip Webb
+ * @author Sebastien Deleuze
  * @since 6.0
  * @see BeanRegistrationsAotProcessor
  */
@@ -46,11 +48,14 @@ class BeanRegistrationsAotContribution
 
 	private final Map<String, BeanDefinitionMethodGenerator> registrations;
 
+	private final MultiValueMap<String, String> aliases;
+
 
 	BeanRegistrationsAotContribution(
-			Map<String, BeanDefinitionMethodGenerator> registrations) {
+			Map<String, BeanDefinitionMethodGenerator> registrations, MultiValueMap<String, String> aliases) {
 
 		this.registrations = registrations;
+		this.aliases = aliases;
 	}
 
 
@@ -64,12 +69,15 @@ class BeanRegistrationsAotContribution
 					type.addModifiers(Modifier.PUBLIC);
 				});
 		BeanRegistrationsCodeGenerator codeGenerator = new BeanRegistrationsCodeGenerator(generatedClass);
-		GeneratedMethod generatedMethod = codeGenerator.getMethods().add("registerBeanDefinitions", method ->
-				generateRegisterMethod(method, generationContext, codeGenerator));
-		beanFactoryInitializationCode.addInitializer(generatedMethod.toMethodReference());
+		GeneratedMethod generatedBeanDefinitionsMethod = codeGenerator.getMethods().add("registerBeanDefinitions", method ->
+				generateRegisterBeanDefinitionsMethod(method, generationContext, codeGenerator));
+		beanFactoryInitializationCode.addInitializer(generatedBeanDefinitionsMethod.toMethodReference());
+		GeneratedMethod generatedAliasesMethod = codeGenerator.getMethods().add("registerAliases",
+				this::generateRegisterAliasesMethod);
+		beanFactoryInitializationCode.addInitializer(generatedAliasesMethod.toMethodReference());
 	}
 
-	private void generateRegisterMethod(MethodSpec.Builder method,
+	private void generateRegisterBeanDefinitionsMethod(MethodSpec.Builder method,
 			GenerationContext generationContext,
 			BeanRegistrationsCode beanRegistrationsCode) {
 
@@ -88,6 +96,18 @@ class BeanRegistrationsAotContribution
 					BEAN_FACTORY_PARAMETER_NAME, beanName,
 					methodInvocation);
 		});
+		method.addCode(code.build());
+	}
+
+	private void generateRegisterAliasesMethod(MethodSpec.Builder method) {
+		method.addJavadoc("Register the aliases.");
+		method.addModifiers(Modifier.PUBLIC);
+		method.addParameter(DefaultListableBeanFactory.class,
+				BEAN_FACTORY_PARAMETER_NAME);
+		CodeBlock.Builder code = CodeBlock.builder();
+		this.aliases.forEach((beanName, beanAliases) ->
+				beanAliases.forEach(alias -> code.addStatement("$L.registerAlias($S, $S)", BEAN_FACTORY_PARAMETER_NAME,
+						beanName, alias)));
 		method.addCode(code.build());
 	}
 

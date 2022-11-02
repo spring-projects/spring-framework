@@ -21,12 +21,15 @@ import java.util.Map;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 /**
  * {@link BeanFactoryInitializationAotProcessor} that contributes code to
  * register beans.
  *
  * @author Phillip Webb
+ * @author Sebastien Deleuze
  * @since 6.0
  */
 class BeanRegistrationsAotProcessor implements BeanFactoryInitializationAotProcessor {
@@ -36,6 +39,7 @@ class BeanRegistrationsAotProcessor implements BeanFactoryInitializationAotProce
 		BeanDefinitionMethodGeneratorFactory beanDefinitionMethodGeneratorFactory =
 				new BeanDefinitionMethodGeneratorFactory(beanFactory);
 		Map<String, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
+		MultiValueMap<String, String> aliases = new LinkedMultiValueMap<>();
 		for (String beanName : beanFactory.getBeanDefinitionNames()) {
 			RegisteredBean registeredBean = RegisteredBean.of(beanFactory, beanName);
 			BeanDefinitionMethodGenerator beanDefinitionMethodGenerator = beanDefinitionMethodGeneratorFactory
@@ -43,11 +47,14 @@ class BeanRegistrationsAotProcessor implements BeanFactoryInitializationAotProce
 			if (beanDefinitionMethodGenerator != null) {
 				registrations.put(beanName, beanDefinitionMethodGenerator);
 			}
+			for (String alias : beanFactory.getAliases(beanName)) {
+				aliases.add(beanName, alias);
+			}
 		}
 		if (registrations.isEmpty()) {
 			return null;
 		}
-		return new BeanRegistrationsAotContribution(registrations);
+		return new BeanRegistrationsAotContribution(registrations, aliases);
 	}
 
 }
