@@ -167,14 +167,14 @@ class ProceedTestingAspect implements Ordered {
 	}
 
 	public Object doubleOrQuits(ProceedingJoinPoint pjp) throws Throwable {
-		int value = ((Integer) pjp.getArgs()[0]).intValue();
-		pjp.getArgs()[0] = Integer.valueOf(value * 2);
+		int value = (Integer) pjp.getArgs()[0];
+		pjp.getArgs()[0] = value * 2;
 		return pjp.proceed();
 	}
 
 	public Object addOne(ProceedingJoinPoint pjp, Float value) throws Throwable {
-		float fv = value.floatValue();
-		return pjp.proceed(new Object[] {Float.valueOf(fv + 1.0F)});
+		float fv = value;
+		return pjp.proceed(new Object[] {fv + 1.0F});
 	}
 
 	public void captureStringArgument(JoinPoint tjp, String arg) {
@@ -198,7 +198,7 @@ class ProceedTestingAspect implements Ordered {
 	}
 
 	public void captureFloatArgument(JoinPoint tjp, float arg) {
-		float tjpArg = ((Float) tjp.getArgs()[0]).floatValue();
+		float tjpArg = (Float) tjp.getArgs()[0];
 		if (Math.abs(tjpArg - arg) > 0.000001) {
 			throw new IllegalStateException(
 					"argument is '" + arg + "', " +

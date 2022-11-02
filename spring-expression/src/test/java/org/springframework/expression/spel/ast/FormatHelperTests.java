@@ -37,7 +37,7 @@ public class FormatHelperTests {
 
 	@Test
 	public void formatMethodWithMultipleArgumentsForMessage() {
-		String message = FormatHelper.formatMethodForMessage("foo", Arrays.asList(TypeDescriptor.forObject("a string"), TypeDescriptor.forObject(Integer.valueOf(5))));
+		String message = FormatHelper.formatMethodForMessage("foo", Arrays.asList(TypeDescriptor.forObject("a string"), TypeDescriptor.forObject(5)));
 		assertThat(message).isEqualTo("foo(java.lang.String,java.lang.Integer)");
 	}
 

@@ -6203,7 +6203,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		public Reg(int v) {
 			this._value  = v;
-			this._valueL = Long.valueOf(v);
+			this._valueL = (long) v;
 			this._valueD = (double) v;
 			this._valueF = (float) v;
 		}

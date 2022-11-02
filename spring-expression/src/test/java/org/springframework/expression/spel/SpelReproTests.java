@@ -637,7 +637,7 @@ class SpelReproTests extends AbstractExpressionTests {
 		ConversionPriority1 target = new ConversionPriority1();
 		MethodExecutor me = new ReflectiveMethodResolver(true).resolve(emptyEvalContext, target, "getX", args);
 		// MethodInvoker chooses getX(int i) when passing Integer
-		final int actual = (Integer) me.execute(emptyEvalContext, target, Integer.valueOf(42)).getValue();
+		final int actual = (Integer) me.execute(emptyEvalContext, target, 42).getValue();
 		// Compiler chooses getX(Number i) when passing Integer
 		final int compiler = target.getX(INTEGER);
 		// Fails!
@@ -646,7 +646,7 @@ class SpelReproTests extends AbstractExpressionTests {
 		ConversionPriority2 target2 = new ConversionPriority2();
 		MethodExecutor me2 = new ReflectiveMethodResolver(true).resolve(emptyEvalContext, target2, "getX", args);
 		// MethodInvoker chooses getX(int i) when passing Integer
-		int actual2 = (Integer) me2.execute(emptyEvalContext, target2, Integer.valueOf(42)).getValue();
+		int actual2 = (Integer) me2.execute(emptyEvalContext, target2, 42).getValue();
 		// Compiler chooses getX(Number i) when passing Integer
 		int compiler2 = target2.getX(INTEGER);
 		// Fails!

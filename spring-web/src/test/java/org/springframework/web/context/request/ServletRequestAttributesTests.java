@@ -152,7 +152,7 @@ public class ServletRequestAttributesTests {
 
 	@Test
 	public void skipImmutableCharacter() {
-		doSkipImmutableValue(Character.valueOf('x'));
+		doSkipImmutableValue('x');
 	}
 
 	@Test

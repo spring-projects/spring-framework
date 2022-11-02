@@ -265,7 +265,7 @@ public class NamedParameterQueryTests {
 
 		MapSqlParameterSource params = new MapSqlParameterSource();
 		params.addValue("id", 3);
-		int i = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id", params, Integer.class).intValue();
+		int i = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id", params, Integer.class);
 
 		assertThat(i).as("Return of an int").isEqualTo(22);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
@@ -279,7 +279,7 @@ public class NamedParameterQueryTests {
 		given(resultSet.getLong(1)).willReturn(87L);
 
 		BeanPropertySqlParameterSource params = new BeanPropertySqlParameterSource(new ParameterBean(3));
-		long l = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id", params, Long.class).longValue();
+		long l = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id", params, Long.class);
 
 		assertThat(l).as("Return of a long").isEqualTo(87);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
@@ -293,7 +293,7 @@ public class NamedParameterQueryTests {
 		given(resultSet.getLong(1)).willReturn(87L);
 
 		BeanPropertySqlParameterSource params = new BeanPropertySqlParameterSource(new ParameterCollectionBean(3, 5));
-		long l = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID IN (:ids)", params, Long.class).longValue();
+		long l = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID IN (:ids)", params, Long.class);
 
 		assertThat(l).as("Return of a long").isEqualTo(87);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID IN (?, ?)");

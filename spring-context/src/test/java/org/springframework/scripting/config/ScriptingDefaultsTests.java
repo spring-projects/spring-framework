@@ -50,7 +50,7 @@ public class ScriptingDefaultsTests {
 				((AbstractRefreshableTargetSource) advised.getTargetSource());
 		Field field = AbstractRefreshableTargetSource.class.getDeclaredField("refreshCheckDelay");
 		field.setAccessible(true);
-		long delay = ((Long) field.get(targetSource)).longValue();
+		long delay = (Long) field.get(targetSource);
 		assertThat(delay).isEqualTo(5000L);
 	}
 

@@ -214,13 +214,13 @@ public class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate();
 		template.setDataSource(this.dataSource);
 		if (fetchSize != null) {
-			template.setFetchSize(fetchSize.intValue());
+			template.setFetchSize(fetchSize);
 		}
 		if (maxRows != null) {
-			template.setMaxRows(maxRows.intValue());
+			template.setMaxRows(maxRows);
 		}
 		if (queryTimeout != null) {
-			template.setQueryTimeout(queryTimeout.intValue());
+			template.setQueryTimeout(queryTimeout);
 		}
 		jdbcTemplateCallback.doInJdbcTemplate(template, sql, sh);
 
@@ -232,13 +232,13 @@ public class JdbcTemplateTests {
 		}
 
 		if (fetchSize != null) {
-			verify(this.preparedStatement).setFetchSize(fetchSize.intValue());
+			verify(this.preparedStatement).setFetchSize(fetchSize);
 		}
 		if (maxRows != null) {
-			verify(this.preparedStatement).setMaxRows(maxRows.intValue());
+			verify(this.preparedStatement).setMaxRows(maxRows);
 		}
 		if (queryTimeout != null) {
-			verify(this.preparedStatement).setQueryTimeout(queryTimeout.intValue());
+			verify(this.preparedStatement).setQueryTimeout(queryTimeout);
 		}
 		if (argument != null) {
 			verify(this.preparedStatement).setObject(1, argument);
@@ -362,10 +362,10 @@ public class JdbcTemplateTests {
 		given(this.preparedStatement.executeUpdate()).willReturn(rowsAffected);
 
 		int actualRowsAffected = this.template.update(sql,
-				4, new SqlParameterValue(Types.NUMERIC, 2, Float.valueOf(1.4142f)));
+				4, new SqlParameterValue(Types.NUMERIC, 2, 1.4142f));
 		assertThat(actualRowsAffected == rowsAffected).as("Actual rows affected is correct").isTrue();
 		verify(this.preparedStatement).setObject(1, 4);
-		verify(this.preparedStatement).setObject(2, Float.valueOf(1.4142f), Types.NUMERIC, 2);
+		verify(this.preparedStatement).setObject(2, 1.4142f, Types.NUMERIC, 2);
 		verify(this.preparedStatement).close();
 		verify(this.connection).close();
 	}
@@ -759,7 +759,7 @@ public class JdbcTemplateTests {
 		given(this.preparedStatement.executeBatch()).willReturn(rowsAffected1, rowsAffected2);
 		mockDatabaseMetaData(true);
 
-		ParameterizedPreparedStatementSetter<Integer> setter = (ps, argument) -> ps.setInt(1, argument.intValue());
+		ParameterizedPreparedStatementSetter<Integer> setter = (ps, argument) -> ps.setInt(1, argument);
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[][] actualRowsAffected = template.batchUpdate(sql, ids, 2, setter);

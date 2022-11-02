@@ -121,7 +121,7 @@ public class DataAccessUtilsTests {
 
 	@Test
 	public void withEquivalentIntegerInstanceTwice() {
-		Collection<Integer> col = Arrays.asList(Integer.valueOf(555), Integer.valueOf(555));
+		Collection<Integer> col = Arrays.asList(555, 555);
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class)
 			.isThrownBy(() -> DataAccessUtils.uniqueResult(col))

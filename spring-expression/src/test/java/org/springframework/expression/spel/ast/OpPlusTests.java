@@ -108,7 +108,7 @@ public class OpPlusTests {
 
 			assertThat(value.getTypeDescriptor().getObjectType()).isEqualTo(Double.class);
 			assertThat(value.getTypeDescriptor().getType()).isEqualTo(Double.class);
-			assertThat(value.getValue()).isEqualTo(Double.valueOf(123.0 + 456.0));
+			assertThat(value.getValue()).isEqualTo(123.0 + 456.0);
 		}
 
 		{
@@ -119,7 +119,7 @@ public class OpPlusTests {
 
 			assertThat(value.getTypeDescriptor().getObjectType()).isEqualTo(Long.class);
 			assertThat(value.getTypeDescriptor().getType()).isEqualTo(Long.class);
-			assertThat(value.getValue()).isEqualTo(Long.valueOf(123L + 456L));
+			assertThat(value.getValue()).isEqualTo(123L + 456L);
 		}
 
 		{
@@ -130,7 +130,7 @@ public class OpPlusTests {
 
 			assertThat(value.getTypeDescriptor().getObjectType()).isEqualTo(Integer.class);
 			assertThat(value.getTypeDescriptor().getType()).isEqualTo(Integer.class);
-			assertThat(value.getValue()).isEqualTo(Integer.valueOf(123 + 456));
+			assertThat(value.getValue()).isEqualTo(123 + 456);
 		}
 	}
 
