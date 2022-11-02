@@ -218,21 +218,21 @@ jobs:
       threads: 8
       artifact_set:
       - include:
-        - "/**/spring-*.zip"
+        - "/**/framework-docs-*.zip"
         properties:
           "zip.name": "spring-framework"
           "zip.displayname": "Spring Framework"
           "zip.deployed": "false"
       - include:
-        - "/**/spring-*-docs.zip"
+        - "/**/framework-docs-*-docs.zip"
         properties:
           "zip.type": "docs"
       - include:
-        - "/**/spring-*-dist.zip"
+        - "/**/framework-docs-*-dist.zip"
         properties:
           "zip.type": "dist"
       - include:
-        - "/**/spring-*-schema.zip"
+        - "/**/framework-docs-*-schema.zip"
         properties:
           "zip.type": "schema"
     get_params:
