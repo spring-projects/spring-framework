@@ -59,6 +59,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
@@ -70,6 +71,7 @@ import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
 
 /**
  * @author Juergen Hoeller
+ * @author Réda Housni Alaoui
  * @since 5.3
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManagerTests
  */
@@ -1110,6 +1112,40 @@ public class JdbcTransactionManagerTests {
 		ordered.verify(con).commit();
 		ordered.verify(con).setAutoCommit(true);
 		verify(con, times(2)).close();
+	}
+
+	@Test
+	public void testTransactionAwareDataSourceProxyWithObtainTransactionalConnectionEagerly() throws SQLException {
+		given(con.getAutoCommit()).willReturn(true);
+		given(con.getWarnings()).willThrow(new SQLException());
+
+		TransactionTemplate tt = new TransactionTemplate(tm);
+		boolean condition1 = !TransactionSynchronizationManager.hasResource(ds);
+		assertThat(condition1).as("Hasn't thread connection").isTrue();
+		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				// something transactional
+				assertThat(DataSourceUtils.getConnection(ds)).isEqualTo(con);
+				TransactionAwareDataSourceProxy dsProxy = new TransactionAwareDataSourceProxy(ds);
+				dsProxy.setObtainTransactionalConnectionEagerly(true);
+				try {
+					Connection connection = dsProxy.getConnection();
+					assertThatThrownBy(connection::getWarnings).isInstanceOf(SQLException.class);
+				}
+				catch (SQLException ex) {
+					throw new UncategorizedSQLException("", "", ex);
+				}
+			}
+		});
+
+		boolean condition = !TransactionSynchronizationManager.hasResource(ds);
+		assertThat(condition).as("Hasn't thread connection").isTrue();
+		InOrder ordered = inOrder(con);
+		ordered.verify(con).setAutoCommit(false);
+		ordered.verify(con).commit();
+		ordered.verify(con).setAutoCommit(true);
+		verify(con).close();
 	}
 
 	/**

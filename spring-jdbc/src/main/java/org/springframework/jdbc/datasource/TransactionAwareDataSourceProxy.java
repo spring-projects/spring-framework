@@ -67,6 +67,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * properly. Use {@link Connection#unwrap} to retrieve the native JDBC Connection.
  *
  * @author Juergen Hoeller
+ * @author Réda Housni Alaoui
  * @since 1.1
  * @see javax.sql.DataSource#getConnection()
  * @see java.sql.Connection#close()
@@ -77,6 +78,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 
 	private boolean reobtainTransactionalConnections = false;
+	private boolean obtainTransactionalConnectionEagerly = false;
 
 
 	/**
@@ -107,6 +109,15 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 		this.reobtainTransactionalConnections = reobtainTransactionalConnections;
 	}
 
+	/**
+	 * Specify whether to obtain the transactional connection as soon as possible.
+	 * <p>The default is "false".
+	 * <p>Turning this to "true" allows to obtain the transactional connection during {@link #getConnection()}
+	 * <p>This setting has no effect if {@link #reobtainTransactionalConnections} is set to "true".
+	 */
+	public void setObtainTransactionalConnectionEagerly(boolean obtainTransactionalConnectionEagerly) {
+		this.obtainTransactionalConnectionEagerly = obtainTransactionalConnectionEagerly;
+	}
 
 	/**
 	 * Delegates to DataSourceUtils for automatically participating in Spring-managed
@@ -130,7 +141,7 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 	 * @see java.sql.Connection#close()
 	 * @see DataSourceUtils#doReleaseConnection
 	 */
-	protected Connection getTransactionAwareConnectionProxy(DataSource targetDataSource) {
+	protected Connection getTransactionAwareConnectionProxy(DataSource targetDataSource) throws SQLException {
 		return (Connection) Proxy.newProxyInstance(
 				ConnectionProxy.class.getClassLoader(),
 				new Class<?>[] {ConnectionProxy.class},
@@ -166,8 +177,11 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 
 		private boolean closed = false;
 
-		public TransactionAwareInvocationHandler(DataSource targetDataSource) {
+		public TransactionAwareInvocationHandler(DataSource targetDataSource) throws SQLException {
 			this.targetDataSource = targetDataSource;
+			if (obtainTransactionalConnectionEagerly && shouldObtainFixedConnection(this.targetDataSource)) {
+				this.target = DataSourceUtils.doGetConnection(this.targetDataSource);
+			}
 		}
 
 		@Override
