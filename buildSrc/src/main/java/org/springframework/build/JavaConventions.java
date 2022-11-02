@@ -33,7 +33,7 @@ import org.gradle.api.tasks.compile.JavaCompile;
  * @author Sam Brannen
  * @author Sebastien Deleuze
  */
-public class CompilerConventions {
+public class JavaConventions {
 
 	private static final List<String> COMPILER_ARGS;
 

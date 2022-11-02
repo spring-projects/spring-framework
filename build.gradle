@@ -1,8 +1,8 @@
 plugins {
 	id 'io.spring.nohttp' version '0.0.10'
 	id 'io.freefair.aspectj' version '6.5.0.3' apply false
-	id 'org.jetbrains.kotlin.jvm' version '1.7.20' apply false
-	id 'org.jetbrains.kotlin.plugin.serialization' version '1.7.20' apply false
+	// kotlinVersion is managed in gradle.properties
+	id 'org.jetbrains.kotlin.plugin.serialization' version "${kotlinVersion}" apply false
 	id 'org.jetbrains.dokka' version '1.7.20'
 	id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
 	id 'org.asciidoctor.jvm.pdf' version '3.3.2'  apply false
@@ -16,9 +16,6 @@ plugins {
 ext {
 	moduleProjects = subprojects.findAll { it.name.startsWith("spring-") }
 	javaProjects = subprojects - project(":framework-bom") - project(":framework-platform")
-	withoutJclOverSlf4j = {
-		exclude group: "org.slf4j", name: "jcl-over-slf4j"
-	}
 }
 
 configure(allprojects) { project ->
@@ -57,23 +54,6 @@ configure([rootProject] + javaProjects) { project ->
 			visible = false
 		}
 		matching { it.name.endsWith("Classpath") }.all { it.extendsFrom(dependencyManagement) }
-	}
-
-	pluginManager.withPlugin("kotlin") {
-
-		compileKotlin {
-			kotlinOptions {
-				languageVersion = "1.7"
-				apiVersion = "1.7"
-				freeCompilerArgs = ["-Xjsr305=strict", "-Xsuppress-version-warnings", "-opt-in=kotlin.RequiresOptIn"]
-				allWarningsAsErrors = true
-			}
-		}
-		compileTestKotlin {
-			kotlinOptions {
-				freeCompilerArgs = ["-Xjsr305=strict", "-opt-in=kotlin.RequiresOptIn"]
-			}
-		}
 	}
 
 	test {
@@ -165,7 +145,6 @@ configure(moduleProjects) { project ->
 configure(rootProject) {
 	description = "Spring Framework"
 
-	apply plugin: "kotlin"
 	apply plugin: "io.spring.nohttp"
 	apply plugin: 'org.springframework.build.api-diff'
 
@@ -188,4 +167,4 @@ configure(rootProject) {
 		maxHeapSize = "1g"
 	}
 
-}
+}                                         

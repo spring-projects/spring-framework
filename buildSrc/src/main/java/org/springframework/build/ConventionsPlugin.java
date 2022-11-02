@@ -19,6 +19,7 @@ package org.springframework.build;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaBasePlugin;
+import org.jetbrains.kotlin.gradle.plugin.KotlinBasePlugin;
 
 /**
  * Plugin to apply conventions to projects that are part of Spring Framework's build.
@@ -26,7 +27,9 @@ import org.gradle.api.plugins.JavaBasePlugin;
  *
  * When the {@link JavaBasePlugin} is applied, the conventions in {@link TestConventions}
  * are applied.
- * When the {@link JavaBasePlugin} is applied, the conventions in {@link CompilerConventions}
+ * When the {@link JavaBasePlugin} is applied, the conventions in {@link JavaConventions}
+ * are applied.
+ * When the {@link KotlinBasePlugin} is applied, the conventions in {@link KotlinConventions}
  * are applied.
  *
  * @author Brian Clozel
@@ -35,7 +38,8 @@ public class ConventionsPlugin implements Plugin<Project> {
 
 	@Override
 	public void apply(Project project) {
+		new JavaConventions().apply(project);
+		new KotlinConventions().apply(project);
 		new TestConventions().apply(project);
-		new CompilerConventions().apply(project);
 	}
 }

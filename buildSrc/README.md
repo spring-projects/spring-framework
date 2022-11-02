@@ -7,7 +7,8 @@ They are declared in the `build.gradle` file in this folder.
 
 The `org.springframework.build.conventions` plugin applies all conventions to the Framework build:
 
-* Configuring the Java compiler, see `CompilerConventions`
+* Configuring the Java compiler, see `JavaConventions`
+* Configuring the Kotlin compiler, see `KotlinConventions`
 * Configuring testing in the build with `TestConventions` 
 
 
