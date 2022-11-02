@@ -64,7 +64,7 @@ class PreComputeFieldFeature implements Feature {
 							System.out.println("Field " + fieldIdentifier + " set to " + fieldValue + " at build time");
 						}
 						catch (Throwable ex) {
-							System.out.println("Processing of field " + fieldIdentifier + " skipped due the following error : " + ex.getMessage());
+							System.out.println("Field " + fieldIdentifier + " will be evaluated at runtime due to this error during build time evaluation: " + ex.getMessage());
 						}
 					}
 				}
