@@ -20,7 +20,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
@@ -54,6 +53,7 @@ import org.springframework.web.socket.sockjs.frame.Jackson2SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -66,7 +66,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  *
  * @author Rossen Stoyanchev
  */
-public class RestTemplateXhrTransportTests {
+class RestTemplateXhrTransportTests {
 
 	private static final Jackson2SockJsMessageCodec CODEC = new Jackson2SockJsMessageCodec();
 
@@ -74,7 +74,7 @@ public class RestTemplateXhrTransportTests {
 
 
 	@Test
-	public void connectReceiveAndClose() throws Exception {
+	void connectReceiveAndClose() throws Exception {
 		String body = """
 				o
 				a["foo"]
@@ -89,12 +89,13 @@ public class RestTemplateXhrTransportTests {
 	}
 
 	@Test
-	public void connectReceiveAndCloseWithPrelude() throws Exception {
-		StringBuilder sb = new StringBuilder(2048);
-		for (int i = 0; i < 2048; i++) {
-			sb.append('h');
-		}
-		String body = sb + "\n" + "o\n" + "a[\"foo\"]\n" + "c[3000,\"Go away!\"]";
+	void connectReceiveAndCloseWithPrelude() throws Exception {
+		String prelude = "h".repeat(2048);
+		String body = """
+				%s
+				o
+				a["foo"]
+				c[3000,"Go away!"]""".formatted(prelude);
 		ClientHttpResponse response = response(HttpStatus.OK, body);
 		connect(response);
 
@@ -105,16 +106,19 @@ public class RestTemplateXhrTransportTests {
 	}
 
 	@Test
-	public void connectReceiveAndCloseWithStompFrame() throws Exception {
+	void connectReceiveAndCloseWithStompFrame() throws Exception {
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SEND);
 		accessor.setDestination("/destination");
 		MessageHeaders headers = accessor.getMessageHeaders();
-		Message<byte[]> message = MessageBuilder.createMessage("body".getBytes(StandardCharsets.UTF_8), headers);
+		Message<byte[]> message = MessageBuilder.createMessage("body".getBytes(UTF_8), headers);
 		byte[] bytes = new StompEncoder().encode(message);
 		TextMessage textMessage = new TextMessage(bytes);
 		SockJsFrame frame = SockJsFrame.messageFrame(new Jackson2SockJsMessageCodec(), textMessage.getPayload());
 
-		String body = "o\n" + frame.getContent() + "\n" + "c[3000,\"Go away!\"]";
+		String body = """
+				o
+				%s
+				c[3000,"Go away!"]""".formatted(frame.getContent());
 		ClientHttpResponse response = response(HttpStatus.OK, body);
 		connect(response);
 
@@ -126,7 +130,7 @@ public class RestTemplateXhrTransportTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void connectFailure() throws Exception {
+	void connectFailure() throws Exception {
 		final HttpServerErrorException expected = new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
 		RestOperations restTemplate = mock(RestOperations.class);
 		given(restTemplate.execute((URI) any(), eq(HttpMethod.POST), any(), any())).willThrow(expected);
@@ -149,7 +153,7 @@ public class RestTemplateXhrTransportTests {
 	}
 
 	@Test
-	public void errorResponseStatus() throws Exception {
+	void errorResponseStatus() throws Exception {
 		connect(response(HttpStatus.OK, "o\n"), response(HttpStatus.INTERNAL_SERVER_ERROR, "Oops"));
 
 		verify(this.webSocketHandler).afterConnectionEstablished(any());
@@ -159,7 +163,7 @@ public class RestTemplateXhrTransportTests {
 	}
 
 	@Test
-	public void responseClosedAfterDisconnected() throws Exception {
+	void responseClosedAfterDisconnected() throws Exception {
 		String body = """
 				o
 				c[3000,"Go away!"]
@@ -205,7 +209,7 @@ public class RestTemplateXhrTransportTests {
 	}
 
 	private InputStream getInputStream(String content) {
-		byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
+		byte[] bytes = content.getBytes(UTF_8);
 		return new ByteArrayInputStream(bytes);
 	}
 

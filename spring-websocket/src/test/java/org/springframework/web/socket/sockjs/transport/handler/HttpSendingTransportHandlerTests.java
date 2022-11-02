@@ -40,7 +40,7 @@ import static org.mockito.Mockito.verify;
  *
  * @author Rossen Stoyanchev
  */
-public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests {
+class HttpSendingTransportHandlerTests extends AbstractHttpRequestTests {
 
 	private WebSocketHandler webSocketHandler;
 
@@ -51,7 +51,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 
 	@Override
 	@BeforeEach
-	public void setup() {
+	protected void setup() {
 		super.setup();
 
 		this.webSocketHandler = mock(WebSocketHandler.class);
@@ -65,7 +65,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 
 
 	@Test
-	public void handleRequestXhr() throws Exception {
+	void handleRequestXhr() throws Exception {
 		XhrPollingTransportHandler transportHandler = new XhrPollingTransportHandler();
 		transportHandler.initialize(this.sockJsConfig);
 
@@ -91,7 +91,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 	}
 
 	@Test
-	public void handleRequestXhrStreaming() throws Exception {
+	void handleRequestXhrStreaming() throws Exception {
 		XhrStreamingTransportHandler transportHandler = new XhrStreamingTransportHandler();
 		transportHandler.initialize(this.sockJsConfig);
 		AbstractSockJsSession session = transportHandler.createSession("1", this.webSocketHandler, null);
@@ -104,7 +104,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 	}
 
 	@Test
-	public void htmlFileTransport() throws Exception {
+	void htmlFileTransport() throws Exception {
 		HtmlFileTransportHandler transportHandler = new HtmlFileTransportHandler();
 		transportHandler.initialize(this.sockJsConfig);
 		StreamingSockJsSession session = transportHandler.createSession("1", this.webSocketHandler, null);
@@ -126,7 +126,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 	}
 
 	@Test
-	public void eventSourceTransport() throws Exception {
+	void eventSourceTransport() throws Exception {
 		EventSourceTransportHandler transportHandler = new EventSourceTransportHandler();
 		transportHandler.initialize(this.sockJsConfig);
 		StreamingSockJsSession session = transportHandler.createSession("1", this.webSocketHandler, null);
@@ -139,7 +139,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 	}
 
 	@Test
-	public void frameFormats() throws Exception {
+	void frameFormats() throws Exception {
 		this.servletRequest.setQueryString("c=callback");
 		this.servletRequest.addParameter("c", "callback");
 

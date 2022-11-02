@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,26 +59,22 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 
 
 	static {
-		StringBuilder sb = new StringBuilder(
-				"""
-						<!DOCTYPE html>
-						<html><head>
-							<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-							<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-						</head><body><h2>Don't panic!</h2>
-							<script>
-								document.domain = document.domain;
-								var c = parent.%s;
-								c.start();
-								function p(d) {c.message(d);};
-								window.onload = function() {c.stop();};
-							</script>"""
-				);
+		StringBuilder sb = new StringBuilder("""
+				<!DOCTYPE html>
+				<html><head>
+					<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+					<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+				</head><body><h2>Don't panic!</h2>
+					<script>
+						document.domain = document.domain;
+						var c = parent.%s;
+						c.start();
+						function p(d) {c.message(d);};
+						window.onload = function() {c.stop();};
+					</script>""");
 
-		while (sb.length() < MINIMUM_PARTIAL_HTML_CONTENT_LENGTH) {
-			sb.append(' ');
-		}
-		PARTIAL_HTML_CONTENT = sb.toString();
+		sb.append(" ".repeat(MINIMUM_PARTIAL_HTML_CONTENT_LENGTH - sb.length()));
+		PARTIAL_HTML_CONTENT = sb.append('\n').toString();
 	}
 
 
