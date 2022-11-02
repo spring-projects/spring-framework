@@ -282,7 +282,7 @@ class BeanWrapperGenericsTests {
 		gb.setMapOfMaps(map);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("mapOfMaps[mykey][10]", "5");
-		assertThat(bw.getPropertyValue("mapOfMaps[mykey][10]")).isEqualTo(Long.valueOf(5));
+		assertThat(bw.getPropertyValue("mapOfMaps[mykey][10]")).isEqualTo(5L);
 		assertThat(gb.getMapOfMaps().get("mykey").get(10)).isEqualTo(Long.valueOf(5));
 	}
 

@@ -74,7 +74,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	private Date date = new Date();
 
-	private Float myFloat = Float.valueOf(0.0f);
+	private Float myFloat = 0.0f;
 
 	private Collection<? super Object> friends = new ArrayList<>();
 

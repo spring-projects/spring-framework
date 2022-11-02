@@ -104,7 +104,7 @@ class GenericConversionServiceTests {
 	@Test
 	void convert() {
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		assertThat(conversionService.convert("3", Integer.class)).isEqualTo((int) Integer.valueOf(3));
+		assertThat(conversionService.convert("3", Integer.class)).isEqualTo((int) 3);
 	}
 
 	@Test
@@ -192,7 +192,7 @@ class GenericConversionServiceTests {
 	void convertSuperSourceType() {
 		conversionService.addConverter(CharSequence.class, Integer.class, source -> Integer.valueOf(source.toString()));
 		Integer result = conversionService.convert("3", Integer.class);
-		assertThat((int) result).isEqualTo((int) Integer.valueOf(3));
+		assertThat((int) result).isEqualTo((int) 3);
 	}
 
 	// SPR-8718

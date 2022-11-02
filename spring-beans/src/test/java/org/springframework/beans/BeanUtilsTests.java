@@ -273,7 +273,7 @@ class BeanUtilsTests {
 		BeanUtils.copyProperties(integerListHolder1, numberListHolder);
 		assertThat(integerListHolder1.getList()).containsOnly(42);
 		assertThat(numberListHolder.getList()).hasSize(1);
-		assertThat(numberListHolder.getList().contains(Integer.valueOf(42))).isTrue();
+		assertThat(numberListHolder.getList().contains(42)).isTrue();
 	}
 
 	/**
@@ -282,7 +282,7 @@ class BeanUtilsTests {
 	@Test
 	void copyPropertiesDoesNotCopyFromSuperTypeToSubType() {
 		NumberHolder numberHolder = new NumberHolder();
-		numberHolder.setNumber(Integer.valueOf(42));
+		numberHolder.setNumber(42);
 		IntegerHolder integerHolder = new IntegerHolder();
 
 		BeanUtils.copyProperties(numberHolder, integerHolder);

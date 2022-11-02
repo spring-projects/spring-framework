@@ -677,7 +677,7 @@ abstract class AbstractPropertyAccessorTests {
 		assertThat(target.getMyLong().longValue()).isEqualTo(Long.MAX_VALUE);
 
 		assertThat((double) target.getMyPrimitiveFloat()).isCloseTo(Float.MAX_VALUE, within(0.001));
-		assertThat((double) target.getMyFloat().floatValue()).isCloseTo(Float.MAX_VALUE, within(0.001));
+		assertThat((double) target.getMyFloat()).isCloseTo(Float.MAX_VALUE, within(0.001));
 
 		assertThat(target.getMyPrimitiveDouble()).isCloseTo(Double.MAX_VALUE, within(0.001));
 		assertThat(target.getMyDouble().doubleValue()).isCloseTo(Double.MAX_VALUE, within(0.001));

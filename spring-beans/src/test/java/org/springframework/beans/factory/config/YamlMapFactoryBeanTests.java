@@ -120,7 +120,7 @@ public class YamlMapFactoryBeanTests {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> sub = (Map<String, Object>) object;
 		assertThat(sub.size()).isEqualTo(1);
-		assertThat(sub.get("key1.key2")).isEqualTo(Integer.valueOf(3));
+		assertThat(sub.get("key1.key2")).isEqualTo(3);
 	}
 
 	@Test

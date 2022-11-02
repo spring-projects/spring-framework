@@ -983,7 +983,7 @@ class DefaultListableBeanFactoryTests {
 		bd.setPropertyValues(pvs);
 		lbf.registerBeanDefinition("testBean", bd);
 		TestBean testBean = (TestBean) lbf.getBean("testBean");
-		assertThat(testBean.getMyFloat().floatValue() == 1.1f).isTrue();
+		assertThat(testBean.getMyFloat() == 1.1f).isTrue();
 	}
 
 	@Test
@@ -1005,7 +1005,7 @@ class DefaultListableBeanFactoryTests {
 		bd.setPropertyValues(pvs);
 		lbf.registerBeanDefinition("testBean", bd);
 		TestBean testBean = (TestBean) lbf.getBean("testBean");
-		assertThat(testBean.getMyFloat().floatValue() == 1.1f).isTrue();
+		assertThat(testBean.getMyFloat() == 1.1f).isTrue();
 	}
 
 	@Test
@@ -1021,7 +1021,7 @@ class DefaultListableBeanFactoryTests {
 		lbf.registerBeanDefinition("testBean", bd);
 		lbf.registerSingleton("myFloat", "1,1");
 		TestBean testBean = (TestBean) lbf.getBean("testBean");
-		assertThat(testBean.getMyFloat().floatValue() == 1.1f).isTrue();
+		assertThat(testBean.getMyFloat() == 1.1f).isTrue();
 	}
 
 	@Test
@@ -1037,7 +1037,7 @@ class DefaultListableBeanFactoryTests {
 		TestBean testBean = (TestBean) lbf.getBean("testBean");
 		assertThat(testBean.getName()).isEqualTo("myName");
 		assertThat(testBean.getAge()).isEqualTo(5);
-		assertThat(testBean.getMyFloat().floatValue() == 1.1f).isTrue();
+		assertThat(testBean.getMyFloat() == 1.1f).isTrue();
 	}
 
 	@Test
@@ -1054,7 +1054,7 @@ class DefaultListableBeanFactoryTests {
 		TestBean testBean = (TestBean) lbf.getBean("testBean");
 		assertThat(testBean.getName()).isEqualTo("myName");
 		assertThat(testBean.getAge()).isEqualTo(5);
-		assertThat(testBean.getMyFloat().floatValue() == 1.1f).isTrue();
+		assertThat(testBean.getMyFloat() == 1.1f).isTrue();
 	}
 
 	@Test
