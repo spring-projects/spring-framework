@@ -467,7 +467,7 @@ class DefaultWebClient implements WebClient {
 						.start();
 				ClientRequest request = requestBuilder.build();
 				observationContext.setUriTemplate((String) request.attribute(URI_TEMPLATE_ATTRIBUTE).orElse(null));
-				observationContext.setBuiltRequest(request);
+				observationContext.setRequest(request);
 				Mono<ClientResponse> responseMono = exchangeFunction.exchange(request)
 						.checkpoint("Request to " + this.httpMethod.name() + " " + this.uri + " [DefaultWebClient]")
 						.switchIfEmpty(NO_HTTP_CLIENT_RESPONSE_ERROR);

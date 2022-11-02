@@ -79,7 +79,7 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 
 	@Override
 	public String getContextualName(ClientRequestObservationContext context) {
-		return "http " + context.getBuiltRequest().method().name().toLowerCase();
+		return "http " + context.getRequest().method().name().toLowerCase();
 	}
 
 	@Override
@@ -95,8 +95,8 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 	}
 
 	protected KeyValue method(ClientRequestObservationContext context) {
-		if (context.getBuiltRequest() != null) {
-			return KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.METHOD, context.getBuiltRequest().method().name());
+		if (context.getRequest() != null) {
+			return KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.METHOD, context.getRequest().method().name());
 		}
 		else {
 			return METHOD_NONE;
@@ -143,15 +143,15 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 	}
 
 	protected KeyValue httpUrl(ClientRequestObservationContext context) {
-		if (context.getBuiltRequest() != null) {
-			return KeyValue.of(ClientHttpObservationDocumentation.HighCardinalityKeyNames.HTTP_URL, context.getBuiltRequest().url().toASCIIString());
+		if (context.getRequest() != null) {
+			return KeyValue.of(ClientHttpObservationDocumentation.HighCardinalityKeyNames.HTTP_URL, context.getRequest().url().toASCIIString());
 		}
 		return HTTP_URL_NONE;
 	}
 
 	protected KeyValue clientName(ClientRequestObservationContext context) {
-		if (context.getBuiltRequest() != null && context.getBuiltRequest().url().getHost() != null) {
-			return KeyValue.of(ClientHttpObservationDocumentation.HighCardinalityKeyNames.CLIENT_NAME, context.getBuiltRequest().url().getHost());
+		if (context.getRequest() != null && context.getRequest().url().getHost() != null) {
+			return KeyValue.of(ClientHttpObservationDocumentation.HighCardinalityKeyNames.CLIENT_NAME, context.getRequest().url().getHost());
 		}
 		return CLIENT_NAME_NONE;
 	}

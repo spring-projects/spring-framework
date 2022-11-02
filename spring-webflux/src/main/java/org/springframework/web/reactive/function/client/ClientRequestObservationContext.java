@@ -23,6 +23,9 @@ import org.springframework.lang.Nullable;
 /**
  * Context that holds information for metadata collection
  * during the {@link ClientHttpObservationDocumentation#HTTP_REQUEST HTTP client exchange observations}.
+ * <p>The {@link #getCarrier() tracing context carrier} is a {@link ClientRequest.Builder request builder},
+ * since the actual request is immutable. For {@code KeyValue} extraction, the {@link #getRequest() actual request}
+ * should be used instead.
  *
  * @author Brian Clozel
  * @since 6.0
@@ -35,7 +38,7 @@ public class ClientRequestObservationContext extends RequestReplySenderContext<C
 	private boolean aborted;
 
 	@Nullable
-	private ClientRequest builtRequest;
+	private ClientRequest request;
 
 
 	public ClientRequestObservationContext() {
@@ -44,7 +47,7 @@ public class ClientRequestObservationContext extends RequestReplySenderContext<C
 
 	private static void setRequestHeader(@Nullable ClientRequest.Builder request, String name, String value) {
 		if (request != null) {
-			request.header(name, value);
+			request.headers(headers -> headers.set(name, value));
 		}
 	}
 
@@ -80,16 +83,17 @@ public class ClientRequestObservationContext extends RequestReplySenderContext<C
 	}
 
 	/**
-	 * Return the built request.
+	 * Return the immutable client request.
 	 */
-	public ClientRequest getBuiltRequest() {
-		return this.builtRequest;
+	@Nullable
+	public ClientRequest getRequest() {
+		return this.request;
 	}
 
 	/**
-	 * Set the built request.
+	 * Set the client request.
 	 */
-	public void setBuiltRequest(ClientRequest builtRequest) {
-		this.builtRequest = builtRequest;
+	public void setRequest(ClientRequest request) {
+		this.request = request;
 	}
 }

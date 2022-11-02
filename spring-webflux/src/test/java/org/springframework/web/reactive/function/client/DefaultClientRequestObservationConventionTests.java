@@ -45,7 +45,7 @@ class DefaultClientRequestObservationConventionTests {
 	void shouldHaveContextualName() {
 		ClientRequestObservationContext context = new ClientRequestObservationContext();
 		context.setCarrier(ClientRequest.create(HttpMethod.GET, URI.create("/test")));
-		context.setBuiltRequest(context.getCarrier().build());
+		context.setRequest(context.getCarrier().build());
 		assertThat(this.observationConvention.getContextualName(context)).isEqualTo("http get");
 	}
 
@@ -82,7 +82,7 @@ class DefaultClientRequestObservationConventionTests {
 				.attribute(WebClient.class.getName() + ".uriTemplate", "/resource/{id}");
 		ClientRequestObservationContext context = createContext(request);
 		context.setUriTemplate("/resource/{id}");
-		context.setBuiltRequest(context.getCarrier().build());
+		context.setRequest(context.getCarrier().build());
 		assertThat(this.observationConvention.getLowCardinalityKeyValues(context))
 				.contains(KeyValue.of("exception", "none"), KeyValue.of("method", "GET"), KeyValue.of("uri", "/resource/{id}"),
 						KeyValue.of("status", "200"), KeyValue.of("outcome", "SUCCESS"));
@@ -93,7 +93,7 @@ class DefaultClientRequestObservationConventionTests {
 	@Test
 	void shouldAddKeyValuesForRequestWithoutUriTemplate() {
 		ClientRequestObservationContext context = createContext(ClientRequest.create(HttpMethod.GET, URI.create("/resource/42")));
-		context.setBuiltRequest(context.getCarrier().build());
+		context.setRequest(context.getCarrier().build());
 		assertThat(this.observationConvention.getLowCardinalityKeyValues(context))
 				.contains(KeyValue.of("method", "GET"), KeyValue.of("uri", "none"));
 		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).hasSize(2).contains(KeyValue.of("http.url", "/resource/42"));
@@ -102,7 +102,7 @@ class DefaultClientRequestObservationConventionTests {
 	@Test
 	void shouldAddClientNameKeyValueForRequestWithHost() {
 		ClientRequestObservationContext context = createContext(ClientRequest.create(HttpMethod.GET, URI.create("https://localhost:8080/resource/42")));
-		context.setBuiltRequest(context.getCarrier().build());
+		context.setRequest(context.getCarrier().build());
 		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).contains(KeyValue.of("client.name", "localhost"));
 	}
 
