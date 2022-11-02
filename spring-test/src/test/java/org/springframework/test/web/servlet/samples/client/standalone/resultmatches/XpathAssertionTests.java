@@ -225,13 +225,11 @@ public class XpathAssertionTests {
 		@ResponseBody
 		public String listPublishedPosts() {
 			return """
-					<?xml version="1.0" encoding="UTF-8"?>\r
-					<feed xmlns="http://www.w3.org/2005/Atom">\r
-						<title>Test Feed</title>\r
-						<icon>https://www.example.com/favicon.ico</icon>\r
-					</feed>\r
-					\r
-					""";
+					<?xml version="1.0" encoding="UTF-8"?>
+					<feed xmlns="http://www.w3.org/2005/Atom">
+						<title>Test Feed</title>
+						<icon>https://www.example.com/favicon.ico</icon>
+					</feed>""".replaceAll("\n", "\r\n");
 		}
 	}
 
