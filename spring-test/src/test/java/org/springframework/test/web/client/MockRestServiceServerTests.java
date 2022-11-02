@@ -186,8 +186,7 @@ public class MockRestServiceServerTests {
 				"""
 						Further request(s) expected leaving 1 unsatisfied expectation(s).
 						1 request(s) executed:
-						GET /foo, headers: [Accept:"application/json, application/*+json"]
-						""");
+						GET /foo, headers: [Accept:"application/json, application/*+json"]""");
 
 		MockRestServiceServer server2 = builder.build();
 		server2.expect(requestTo("/foo")).andRespond(withSuccess());
