@@ -51,6 +51,12 @@ class DefaultServerRequestObservationConventionTests {
 	}
 
 	@Test
+	void contextualNameShouldUsePathPatternWhenAvailable() {
+		this.context.setPathPattern("/test/{name}");
+		assertThat(convention.getContextualName(this.context)).isEqualTo("http get /test/{name}");
+	}
+
+	@Test
 	void supportsOnlyHttpRequestsObservationContext() {
 		assertThat(this.convention.supportsContext(this.context)).isTrue();
 		assertThat(this.convention.supportsContext(new Observation.Context())).isFalse();

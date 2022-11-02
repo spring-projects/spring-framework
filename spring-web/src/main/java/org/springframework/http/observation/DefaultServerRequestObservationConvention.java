@@ -76,6 +76,10 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 
 	@Override
 	public String getContextualName(ServerRequestObservationContext context) {
+		if (context.getPathPattern() != null) {
+			return String.format("http %s %s", context.getCarrier().getMethod().toLowerCase(),
+					context.getPathPattern());
+		}
 		return "http " + context.getCarrier().getMethod().toLowerCase();
 	}
 

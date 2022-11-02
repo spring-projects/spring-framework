@@ -50,6 +50,14 @@ class DefaultServerRequestObservationConventionTests {
 	}
 
 	@Test
+	void contextualNameShouldUsePathPatternWhenAvailable() {
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/test/resource"));
+		ServerRequestObservationContext context = new ServerRequestObservationContext(exchange);
+		context.setPathPattern(PathPatternParser.defaultInstance.parse("/test/{name}"));
+		assertThat(convention.getContextualName(context)).isEqualTo("http get /test/{name}");
+	}
+
+	@Test
 	void supportsOnlyHttpRequestsObservationContext() {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post("/test/resource"));
 		ServerRequestObservationContext context = new ServerRequestObservationContext(exchange);
