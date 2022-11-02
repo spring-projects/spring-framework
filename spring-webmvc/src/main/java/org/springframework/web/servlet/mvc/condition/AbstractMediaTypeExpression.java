@@ -85,7 +85,7 @@ abstract class AbstractMediaTypeExpression implements MediaTypeExpression, Compa
 		for (Map.Entry<String, String> entry : getMediaType().getParameters().entrySet()) {
 			if (StringUtils.hasText(entry.getValue())) {
 				String value = contentType.getParameter(entry.getKey());
-				if (StringUtils.hasText(value) && !entry.getValue().equals(value)) {
+				if (StringUtils.hasText(value) && !entry.getValue().equalsIgnoreCase(value)) {
 					return false;
 				}
 			}

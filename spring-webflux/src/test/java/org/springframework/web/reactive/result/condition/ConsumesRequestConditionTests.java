@@ -98,6 +98,10 @@ public class ConsumesRequestConditionTests {
 		condition = new ConsumesRequestCondition(base);
 		exchange = postExchange(base + ";profile=\"a\"");
 		assertThat(condition.getMatchingCondition(exchange)).isNotNull();
+
+		condition = new ConsumesRequestCondition(base + ";profile=\"a\"");
+		exchange = postExchange(base + ";profile=\"A\"");
+		assertThat(condition.getMatchingCondition(exchange)).isNotNull();
 	}
 
 	@Test
