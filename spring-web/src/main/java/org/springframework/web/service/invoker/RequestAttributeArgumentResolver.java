@@ -47,7 +47,9 @@ public class RequestAttributeArgumentResolver extends AbstractNamedValueArgument
 	}
 
 	@Override
-	protected void addRequestValue(String name, Object value, HttpRequestValues.Builder requestValues) {
+	protected void addRequestValue(
+			String name, Object value, MethodParameter parameter, HttpRequestValues.Builder requestValues) {
+
 		requestValues.addAttribute(name, value);
 	}
 

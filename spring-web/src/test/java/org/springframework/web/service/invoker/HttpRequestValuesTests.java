@@ -22,8 +22,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -104,6 +107,23 @@ public class HttpRequestValuesTests {
 
 		assertThat(requestValues.getUri().toString())
 				.isEqualTo("/path?param1=1st%20value&param2=2nd%20value%20A&param2=2nd%20value%20B");
+	}
+
+	@Test
+	void requestPart() {
+		HttpHeaders entityHeaders = new HttpHeaders();
+		entityHeaders.add("foo", "bar");
+		HttpEntity<String> entity = new HttpEntity<>("body", entityHeaders);
+
+		HttpRequestValues requestValues = HttpRequestValues.builder()
+				.addRequestPart("form field", "form value")
+				.addRequestPart("entity", entity)
+				.build();
+
+		MultiValueMap<String, HttpEntity<?>> map = (MultiValueMap<String, HttpEntity<?>>) requestValues.getBodyValue();
+		assertThat(map).hasSize(2);
+		assertThat(map.getFirst("form field").getBody()).isEqualTo("form value");
+		assertThat(map.getFirst("entity")).isEqualTo(entity);
 	}
 
 }
