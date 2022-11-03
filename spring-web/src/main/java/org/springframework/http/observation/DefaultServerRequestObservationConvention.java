@@ -21,10 +21,13 @@ import io.micrometer.common.KeyValues;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.observation.ServerHttpObservationDocumentation.HighCardinalityKeyNames;
+import org.springframework.http.observation.ServerHttpObservationDocumentation.LowCardinalityKeyNames;
 import org.springframework.util.StringUtils;
 
 /**
  * Default {@link ServerRequestObservationConvention}.
+ *
  * @author Brian Clozel
  * @since 6.0
  */
@@ -32,27 +35,29 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 
 	private static final String DEFAULT_NAME = "http.server.requests";
 
-	private static final KeyValue METHOD_UNKNOWN = KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.METHOD, "UNKNOWN");
+	private static final KeyValue METHOD_UNKNOWN = KeyValue.of(LowCardinalityKeyNames.METHOD, "UNKNOWN");
 
-	private static final KeyValue STATUS_UNKNOWN = KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.STATUS, "UNKNOWN");
+	private static final KeyValue STATUS_UNKNOWN = KeyValue.of(LowCardinalityKeyNames.STATUS, "UNKNOWN");
 
-	private static final KeyValue HTTP_OUTCOME_SUCCESS = KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.OUTCOME, "SUCCESS");
+	private static final KeyValue HTTP_OUTCOME_SUCCESS = KeyValue.of(LowCardinalityKeyNames.OUTCOME, "SUCCESS");
 
-	private static final KeyValue HTTP_OUTCOME_UNKNOWN = KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.OUTCOME, "UNKNOWN");
+	private static final KeyValue HTTP_OUTCOME_UNKNOWN = KeyValue.of(LowCardinalityKeyNames.OUTCOME, "UNKNOWN");
 
-	private static final KeyValue URI_UNKNOWN = KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.URI, "UNKNOWN");
+	private static final KeyValue URI_UNKNOWN = KeyValue.of(LowCardinalityKeyNames.URI, "UNKNOWN");
 
-	private static final KeyValue URI_ROOT = KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.URI, "root");
+	private static final KeyValue URI_ROOT = KeyValue.of(LowCardinalityKeyNames.URI, "root");
 
-	private static final KeyValue URI_NOT_FOUND = KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.URI, "NOT_FOUND");
+	private static final KeyValue URI_NOT_FOUND = KeyValue.of(LowCardinalityKeyNames.URI, "NOT_FOUND");
 
-	private static final KeyValue URI_REDIRECTION = KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.URI, "REDIRECTION");
+	private static final KeyValue URI_REDIRECTION = KeyValue.of(LowCardinalityKeyNames.URI, "REDIRECTION");
 
-	private static final KeyValue EXCEPTION_NONE = KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.EXCEPTION, KeyValue.NONE_VALUE);
+	private static final KeyValue EXCEPTION_NONE = KeyValue.of(LowCardinalityKeyNames.EXCEPTION, KeyValue.NONE_VALUE);
 
-	private static final KeyValue HTTP_URL_UNKNOWN = KeyValue.of(ServerHttpObservationDocumentation.HighCardinalityKeyNames.HTTP_URL, "UNKNOWN");
+	private static final KeyValue HTTP_URL_UNKNOWN = KeyValue.of(HighCardinalityKeyNames.HTTP_URL, "UNKNOWN");
+
 
 	private final String name;
+
 
 	/**
 	 * Create a convention with the default name {@code "http.server.requests"}.
@@ -69,6 +74,7 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 		this.name = name;
 	}
 
+
 	@Override
 	public String getName() {
 		return this.name;
@@ -76,11 +82,11 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 
 	@Override
 	public String getContextualName(ServerRequestObservationContext context) {
+		String httpMethod = context.getCarrier().getMethod().toLowerCase();
 		if (context.getPathPattern() != null) {
-			return String.format("http %s %s", context.getCarrier().getMethod().toLowerCase(),
-					context.getPathPattern());
+			return "http %s %s".formatted(httpMethod, context.getPathPattern());
 		}
-		return "http " + context.getCarrier().getMethod().toLowerCase();
+		return "http " + httpMethod;
 	}
 
 	@Override
@@ -94,11 +100,15 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 	}
 
 	protected KeyValue method(ServerRequestObservationContext context) {
-		return (context.getCarrier() != null) ? KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.METHOD, context.getCarrier().getMethod()) : METHOD_UNKNOWN;
+		return (context.getCarrier() != null) ?
+				KeyValue.of(LowCardinalityKeyNames.METHOD, context.getCarrier().getMethod()) :
+				METHOD_UNKNOWN;
 	}
 
 	protected KeyValue status(ServerRequestObservationContext context) {
-		return (context.getResponse() != null) ? KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.STATUS, Integer.toString(context.getResponse().getStatus())) : STATUS_UNKNOWN;
+		return (context.getResponse() != null) ?
+				KeyValue.of(LowCardinalityKeyNames.STATUS, Integer.toString(context.getResponse().getStatus())) :
+				STATUS_UNKNOWN;
 	}
 
 	protected KeyValue uri(ServerRequestObservationContext context) {
@@ -108,7 +118,7 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 				if (pattern.isEmpty()) {
 					return URI_ROOT;
 				}
-				return KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.URI, pattern);
+				return KeyValue.of(LowCardinalityKeyNames.URI, pattern);
 			}
 			if (context.getResponse() != null) {
 				HttpStatus status = HttpStatus.resolve(context.getResponse().getStatus());
@@ -129,7 +139,7 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 		Throwable error = context.getError();
 		if (error != null) {
 			String simpleName = error.getClass().getSimpleName();
-			return KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.EXCEPTION,
+			return KeyValue.of(LowCardinalityKeyNames.EXCEPTION,
 					StringUtils.hasText(simpleName) ? simpleName : error.getClass().getName());
 		}
 		return EXCEPTION_NONE;
@@ -145,7 +155,7 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 
 	protected KeyValue httpUrl(ServerRequestObservationContext context) {
 		if (context.getCarrier() != null) {
-			return KeyValue.of(ServerHttpObservationDocumentation.HighCardinalityKeyNames.HTTP_URL, context.getCarrier().getRequestURI());
+			return KeyValue.of(HighCardinalityKeyNames.HTTP_URL, context.getCarrier().getRequestURI());
 		}
 		return HTTP_URL_UNKNOWN;
 	}
@@ -158,7 +168,7 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 				return HTTP_OUTCOME_SUCCESS;
 			}
 			else if (statusCode instanceof HttpStatus status) {
-				return KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.OUTCOME, status.series().name());
+				return KeyValue.of(LowCardinalityKeyNames.OUTCOME, status.series().name());
 			}
 			else {
 				return HTTP_OUTCOME_UNKNOWN;
