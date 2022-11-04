@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -195,7 +195,7 @@ public final class WebAsyncManager {
 	 */
 	public void registerCallableInterceptor(Object key, CallableProcessingInterceptor interceptor) {
 		Assert.notNull(key, "Key is required");
-		Assert.notNull(interceptor, "CallableProcessingInterceptor  is required");
+		Assert.notNull(interceptor, "CallableProcessingInterceptor is required");
 		this.callableInterceptors.put(key, interceptor);
 	}
 

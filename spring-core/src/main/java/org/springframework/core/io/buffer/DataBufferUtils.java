@@ -712,7 +712,7 @@ public abstract class DataBufferUtils {
 
 		@Override
 		public byte[] delimiter() {
-			Assert.state(this.longestDelimiter != NO_DELIMITER, "Illegal state!");
+			Assert.state(this.longestDelimiter != NO_DELIMITER, "'delimiter' not set");
 			return this.longestDelimiter;
 		}
 

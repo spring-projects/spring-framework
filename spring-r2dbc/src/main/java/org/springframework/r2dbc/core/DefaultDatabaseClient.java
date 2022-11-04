@@ -282,7 +282,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 		public DefaultGenericExecuteSpec bind(String name, Object value) {
 			assertNotPreparedOperation();
 
-			Assert.hasText(name, "Parameter name must not be null or empty!");
+			Assert.hasText(name, "Parameter name must not be null or empty");
 			Assert.notNull(value, () -> String.format(
 					"Value for parameter %s must not be null. Use bindNull(…) instead.", name));
 
@@ -303,7 +303,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 		@Override
 		public DefaultGenericExecuteSpec bindNull(String name, Class<?> type) {
 			assertNotPreparedOperation();
-			Assert.hasText(name, "Parameter name must not be null or empty!");
+			Assert.hasText(name, "Parameter name must not be null or empty");
 
 			Map<String, Parameter> byName = new LinkedHashMap<>(this.byName);
 			byName.put(name, Parameters.in(type));
@@ -313,7 +313,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 
 		@Override
 		public DefaultGenericExecuteSpec filter(StatementFilterFunction filter) {
-			Assert.notNull(filter, "Statement FilterFunction must not be null");
+			Assert.notNull(filter, "StatementFilterFunction must not be null");
 			return new DefaultGenericExecuteSpec(
 					this.byIndex, this.byName, this.sqlSupplier, this.filterFunction.andThen(filter));
 		}
@@ -471,7 +471,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 
 		private String getRequiredSql(Supplier<String> sqlSupplier) {
 			String sql = sqlSupplier.get();
-			Assert.state(StringUtils.hasText(sql), "SQL returned by SQL supplier must not be empty!");
+			Assert.state(StringUtils.hasText(sql), "SQL returned by supplier must not be empty");
 			return sql;
 		}
 
