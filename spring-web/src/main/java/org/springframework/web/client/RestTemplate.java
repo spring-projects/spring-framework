@@ -855,7 +855,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 		ClientRequestObservationContext observationContext = new ClientRequestObservationContext(request);
 		observationContext.setUriTemplate(uriTemplate);
-		Observation observation = ClientHttpObservationDocumentation.HTTP_REQUEST.observation(this.observationConvention,
+		Observation observation = ClientHttpObservationDocumentation.HTTP_CLIENT_EXCHANGES.observation(this.observationConvention,
 				DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, this.observationRegistry).start();
 		ClientHttpResponse response = null;
 		try {

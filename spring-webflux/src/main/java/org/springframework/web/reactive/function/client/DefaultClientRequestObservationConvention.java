@@ -25,6 +25,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.util.StringUtils;
 
+import static org.springframework.web.reactive.function.client.ClientHttpObservationDocumentation.HighCardinalityKeyNames;
+import static org.springframework.web.reactive.function.client.ClientHttpObservationDocumentation.LowCardinalityKeyNames;
+
 /**
  * Default implementation for a {@link ClientRequestObservationConvention},
  * extracting information from the {@link ClientRequestObservationContext}.
@@ -36,23 +39,23 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 
 	private static final String DEFAULT_NAME = "http.client.requests";
 
-	private static final KeyValue URI_NONE = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.URI, KeyValue.NONE_VALUE);
+	private static final KeyValue URI_NONE = KeyValue.of(LowCardinalityKeyNames.URI, KeyValue.NONE_VALUE);
 
-	private static final KeyValue METHOD_NONE = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.METHOD, KeyValue.NONE_VALUE);
+	private static final KeyValue METHOD_NONE = KeyValue.of(LowCardinalityKeyNames.METHOD, KeyValue.NONE_VALUE);
 
-	private static final KeyValue STATUS_IO_ERROR = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.STATUS, "IO_ERROR");
+	private static final KeyValue STATUS_IO_ERROR = KeyValue.of(LowCardinalityKeyNames.STATUS, "IO_ERROR");
 
-	private static final KeyValue STATUS_CLIENT_ERROR = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.STATUS, "CLIENT_ERROR");
+	private static final KeyValue STATUS_CLIENT_ERROR = KeyValue.of(LowCardinalityKeyNames.STATUS, "CLIENT_ERROR");
 
-	private static final KeyValue HTTP_OUTCOME_SUCCESS = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.OUTCOME, "SUCCESS");
+	private static final KeyValue HTTP_OUTCOME_SUCCESS = KeyValue.of(LowCardinalityKeyNames.OUTCOME, "SUCCESS");
 
-	private static final KeyValue HTTP_OUTCOME_UNKNOWN = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.OUTCOME, "UNKNOWN");
+	private static final KeyValue HTTP_OUTCOME_UNKNOWN = KeyValue.of(LowCardinalityKeyNames.OUTCOME, "UNKNOWN");
 
-	private static final KeyValue EXCEPTION_NONE = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.EXCEPTION, KeyValue.NONE_VALUE);
+	private static final KeyValue EXCEPTION_NONE = KeyValue.of(LowCardinalityKeyNames.EXCEPTION, KeyValue.NONE_VALUE);
 
-	private static final KeyValue HTTP_URL_NONE = KeyValue.of(ClientHttpObservationDocumentation.HighCardinalityKeyNames.HTTP_URL, KeyValue.NONE_VALUE);
+	private static final KeyValue HTTP_URL_NONE = KeyValue.of(HighCardinalityKeyNames.HTTP_URL, KeyValue.NONE_VALUE);
 
-	private static final KeyValue CLIENT_NAME_NONE = KeyValue.of(ClientHttpObservationDocumentation.HighCardinalityKeyNames.CLIENT_NAME, KeyValue.NONE_VALUE);
+	private static final KeyValue CLIENT_NAME_NONE = KeyValue.of(HighCardinalityKeyNames.CLIENT_NAME, KeyValue.NONE_VALUE);
 
 	private final String name;
 
@@ -89,14 +92,14 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 
 	protected KeyValue uri(ClientRequestObservationContext context) {
 		if (context.getUriTemplate() != null) {
-			return KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.URI, context.getUriTemplate());
+			return KeyValue.of(LowCardinalityKeyNames.URI, context.getUriTemplate());
 		}
 		return URI_NONE;
 	}
 
 	protected KeyValue method(ClientRequestObservationContext context) {
 		if (context.getRequest() != null) {
-			return KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.METHOD, context.getRequest().method().name());
+			return KeyValue.of(LowCardinalityKeyNames.METHOD, context.getRequest().method().name());
 		}
 		else {
 			return METHOD_NONE;
@@ -109,7 +112,7 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 		}
 		ClientResponse response = context.getResponse();
 		if (response != null) {
-			return KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.STATUS, String.valueOf(response.statusCode().value()));
+			return KeyValue.of(LowCardinalityKeyNames.STATUS, String.valueOf(response.statusCode().value()));
 		}
 		if (context.getError() != null && context.getError() instanceof IOException) {
 			return STATUS_IO_ERROR;
@@ -121,7 +124,7 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 		Throwable error = context.getError();
 		if (error != null) {
 			String simpleName = error.getClass().getSimpleName();
-			return KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.EXCEPTION,
+			return KeyValue.of(LowCardinalityKeyNames.EXCEPTION,
 					StringUtils.hasText(simpleName) ? simpleName : error.getClass().getName());
 		}
 		return EXCEPTION_NONE;
@@ -144,14 +147,14 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 
 	protected KeyValue httpUrl(ClientRequestObservationContext context) {
 		if (context.getRequest() != null) {
-			return KeyValue.of(ClientHttpObservationDocumentation.HighCardinalityKeyNames.HTTP_URL, context.getRequest().url().toASCIIString());
+			return KeyValue.of(HighCardinalityKeyNames.HTTP_URL, context.getRequest().url().toASCIIString());
 		}
 		return HTTP_URL_NONE;
 	}
 
 	protected KeyValue clientName(ClientRequestObservationContext context) {
 		if (context.getRequest() != null && context.getRequest().url().getHost() != null) {
-			return KeyValue.of(ClientHttpObservationDocumentation.HighCardinalityKeyNames.CLIENT_NAME, context.getRequest().url().getHost());
+			return KeyValue.of(HighCardinalityKeyNames.CLIENT_NAME, context.getRequest().url().getHost());
 		}
 		return CLIENT_NAME_NONE;
 	}
@@ -163,7 +166,7 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 				return HTTP_OUTCOME_SUCCESS;
 			}
 			else if (statusCode instanceof HttpStatus status) {
-				return KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.OUTCOME, status.series().name());
+				return KeyValue.of(LowCardinalityKeyNames.OUTCOME, status.series().name());
 			}
 			else {
 				return HTTP_OUTCOME_UNKNOWN;

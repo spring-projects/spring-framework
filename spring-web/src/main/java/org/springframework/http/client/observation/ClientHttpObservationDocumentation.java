@@ -35,9 +35,9 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 public enum ClientHttpObservationDocumentation implements ObservationDocumentation {
 
 	/**
-	 * Observation created for a client HTTP exchange.
+	 * HTTP exchanges observations for clients.
 	 */
-	HTTP_REQUEST {
+	HTTP_CLIENT_EXCHANGES {
 		@Override
 		public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
 			return DefaultClientRequestObservationConvention.class;

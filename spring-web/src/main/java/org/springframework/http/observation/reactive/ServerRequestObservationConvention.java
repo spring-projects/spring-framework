@@ -20,7 +20,7 @@ import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
 
 /**
- * Interface for an {@link ObservationConvention} for {@link ServerHttpObservationDocumentation#HTTP_REQUESTS reactive HTTP exchanges}.
+ * Interface for an {@link ObservationConvention} for {@link ServerHttpObservationDocumentation#HTTP_REACTIVE_SERVER_EXCHANGES reactive HTTP exchanges}.
  *
  * @author Brian Clozel
  * @since 6.0

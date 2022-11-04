@@ -32,9 +32,9 @@ import io.micrometer.observation.docs.ObservationDocumentation;
 public enum ClientHttpObservationDocumentation implements ObservationDocumentation {
 
 	/**
-	 * Observation created for an HTTP client exchange.
+	 * HTTP exchanges observations for reactive clients.
 	 */
-	HTTP_REQUEST {
+	HTTP_REACTIVE_CLIENT_EXCHANGES {
 		@Override
 		public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
 			return DefaultClientRequestObservationConvention.class;
@@ -42,12 +42,12 @@ public enum ClientHttpObservationDocumentation implements ObservationDocumentati
 
 		@Override
 		public KeyName[] getLowCardinalityKeyNames() {
-			return ClientHttpObservationDocumentation.LowCardinalityKeyNames.values();
+			return LowCardinalityKeyNames.values();
 		}
 
 		@Override
 		public KeyName[] getHighCardinalityKeyNames() {
-			return ClientHttpObservationDocumentation.HighCardinalityKeyNames.values();
+			return HighCardinalityKeyNames.values();
 		}
 
 	};

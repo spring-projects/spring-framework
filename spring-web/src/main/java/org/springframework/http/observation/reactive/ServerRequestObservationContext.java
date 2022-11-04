@@ -26,7 +26,7 @@ import org.springframework.web.util.pattern.PathPattern;
 
 /**
  * Context that holds information for metadata collection during observations
- * for {@link ServerHttpObservationDocumentation#HTTP_REQUESTS reactive HTTP exchanges}.
+ * for {@link ServerHttpObservationDocumentation#HTTP_REACTIVE_SERVER_EXCHANGES reactive HTTP exchanges}.
  * <p>This context also extends {@link RequestReplyReceiverContext} for propagating
  * tracing information with the HTTP server exchange.
  *

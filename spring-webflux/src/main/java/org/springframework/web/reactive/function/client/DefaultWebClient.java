@@ -459,7 +459,7 @@ class DefaultWebClient implements WebClient {
 					initRequestBuilder().body(this.inserter) :
 					initRequestBuilder();
 			return Mono.deferContextual(contextView -> {
-				Observation observation = ClientHttpObservationDocumentation.HTTP_REQUEST.observation(observationConvention,
+				Observation observation = ClientHttpObservationDocumentation.HTTP_REACTIVE_CLIENT_EXCHANGES.observation(observationConvention,
 						DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, observationRegistry);
 				observationContext.setCarrier(requestBuilder);
 				observation
