@@ -476,7 +476,6 @@ class DefaultDatabaseClient implements DatabaseClient {
 		}
 
 		record ResultFunction(Function<Connection, Flux<Result>> function, String sql){}
-
 	}
 
 
