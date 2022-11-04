@@ -42,6 +42,7 @@ import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -417,9 +418,9 @@ public class JpaTransactionManagerTests {
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 
 		Object result = tt.execute(status -> {
-			EntityManagerFactoryUtils.getTransactionalEntityManager(factory);
+			assertThat(EntityManagerFactoryUtils.getTransactionalEntityManager(factory)).isNull();
 
-			assertThat(TransactionSynchronizationManager.hasResource(factory)).isTrue();
+			assertThat(TransactionSynchronizationManager.hasResource(factory)).isFalse();
 			TransactionTemplate tt2 = new TransactionTemplate(tm);
 			tt2.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 			return tt2.execute(status1 -> {
@@ -432,9 +433,10 @@ public class JpaTransactionManagerTests {
 		assertThat(TransactionSynchronizationManager.hasResource(factory)).isFalse();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 
+		//Only inner transaction does these
 		verify(tx).commit();
 		verify(manager).flush();
-		verify(manager, times(2)).close();
+		verify(manager).close();
 	}
 
 	@Test
@@ -479,7 +481,7 @@ public class JpaTransactionManagerTests {
 	}
 
 	@Test
-	public void testTransactionCommitWithPropagationSupports() {
+	public void testNoTransactionWithPropagationSupportsAndNoPrebound() {
 		given(manager.isOpen()).willReturn(true);
 
 		final List<String> l = new ArrayList<>();
@@ -494,7 +496,7 @@ public class JpaTransactionManagerTests {
 			assertThat(TransactionSynchronizationManager.hasResource(factory)).isFalse();
 			assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isTrue();
 			assertThat(status.isNewTransaction()).isFalse();
-			EntityManagerFactoryUtils.getTransactionalEntityManager(factory).flush();
+			assertThat(EntityManagerFactoryUtils.getTransactionalEntityManager(factory)).isNull();
 			return l;
 		});
 		assertThat(result).isSameAs(l);
@@ -502,8 +504,8 @@ public class JpaTransactionManagerTests {
 		assertThat(TransactionSynchronizationManager.hasResource(factory)).isFalse();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 
-		verify(manager).flush();
-		verify(manager).close();
+		verify(manager, never()).flush();
+		verify(manager, never()).close();
 	}
 
 	@Test
@@ -519,7 +521,7 @@ public class JpaTransactionManagerTests {
 			assertThat(TransactionSynchronizationManager.hasResource(factory)).isFalse();
 			assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isTrue();
 			assertThat(status.isNewTransaction()).isFalse();
-			EntityManagerFactoryUtils.getTransactionalEntityManager(factory).flush();
+			assertThat(EntityManagerFactoryUtils.getTransactionalEntityManager(factory)).isNull();
 			status.setRollbackOnly();
 			return null;
 		});
@@ -527,8 +529,8 @@ public class JpaTransactionManagerTests {
 		assertThat(TransactionSynchronizationManager.hasResource(factory)).isFalse();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 
-		verify(manager).flush();
-		verify(manager).close();
+		verify(manager, never()).flush();
+		verify(manager, never()).close();
 	}
 
 	@Test

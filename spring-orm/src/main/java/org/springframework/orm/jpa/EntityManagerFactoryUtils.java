@@ -245,7 +245,7 @@ public abstract class EntityManagerFactoryUtils {
 				}
 			}
 		}
-		else if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+		else if (!TransactionSynchronizationManager.isActualTransactionActive()) {
 			// Indicate that we can't obtain a transactional EntityManager.
 			return null;
 		}

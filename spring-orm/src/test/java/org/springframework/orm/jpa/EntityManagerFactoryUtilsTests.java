@@ -69,6 +69,7 @@ public class EntityManagerFactoryUtilsTests {
 			EntityManagerFactory factory = mock();
 			EntityManager manager = mock();
 
+			TransactionSynchronizationManager.setActualTransactionActive(true);
 			TransactionSynchronizationManager.initSynchronization();
 			given(factory.createEntityManager()).willReturn(manager);
 
@@ -77,6 +78,7 @@ public class EntityManagerFactoryUtilsTests {
 			assertThat(((EntityManagerHolder) TransactionSynchronizationManager.unbindResource(factory)).getEntityManager()).isSameAs(manager);
 		}
 		finally {
+			TransactionSynchronizationManager.setActualTransactionActive(false);
 			TransactionSynchronizationManager.clearSynchronization();
 		}
 
