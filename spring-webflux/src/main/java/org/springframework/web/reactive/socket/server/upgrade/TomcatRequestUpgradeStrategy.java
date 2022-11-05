@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,8 +121,6 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		return this.maxBinaryMessageBufferSize;
 	}
 
-
-	@SuppressWarnings("deprecation")  // for old doUpgrade variant in Tomcat 9.0.55
 	@Override
 	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler,
 			@Nullable String subProtocol, Supplier<HandshakeInfo> handshakeInfoFactory){
@@ -150,7 +148,7 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 					WsServerContainer container = getContainer(servletRequest);
 					try {
-						container.doUpgrade(servletRequest, servletResponse, config, Collections.emptyMap());
+						container.upgradeHttpToWebSocket(servletRequest, servletResponse, config, Collections.emptyMap());
 					}
 					catch (Exception ex) {
 						return Mono.error(ex);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,10 @@
 
 package org.springframework.web.socket.server.standard;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.websocket.Endpoint;
@@ -35,7 +33,7 @@ import org.springframework.web.socket.server.HandshakeFailureException;
 
 /**
  * A WebSocket {@code RequestUpgradeStrategy} for Apache Tomcat. Compatible with
- * all versions of Tomcat that support JSR-356, i.e. Tomcat 7.0.47+ and higher.
+ * Tomcat 10 and higher.
  *
  * <p>To modify properties of the underlying {@link jakarta.websocket.server.ServerContainer}
  * you can use {@link ServletServerContainerFactoryBean} in XML configuration or,
@@ -52,7 +50,6 @@ public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrateg
 		return new String[] {"13"};
 	}
 
-	@SuppressWarnings("deprecation")  // for old doUpgrade variant in Tomcat 9.0.55
 	@Override
 	public void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
 			@Nullable String selectedProtocol, List<Extension> selectedExtensions, Endpoint endpoint)
@@ -70,15 +67,11 @@ public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrateg
 		endpointConfig.setExtensions(selectedExtensions);
 
 		try {
-			getContainer(servletRequest).doUpgrade(servletRequest, servletResponse, endpointConfig, pathParams);
+			getContainer(servletRequest).upgradeHttpToWebSocket(servletRequest, servletResponse, endpointConfig, pathParams);
 		}
-		catch (ServletException ex) {
+		catch (Exception ex) {
 			throw new HandshakeFailureException(
 					"Servlet request failed to upgrade to WebSocket: " + requestUrl, ex);
-		}
-		catch (IOException ex) {
-			throw new HandshakeFailureException(
-					"Response update failed during upgrade to WebSocket: " + requestUrl, ex);
 		}
 	}
 
