@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -209,7 +209,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	 * @since 3.0
 	 */
 	public void setMaxPayloadLength(int maxPayloadLength) {
-		Assert.isTrue(maxPayloadLength >= 0, "'maxPayloadLength' should be larger than or equal to 0");
+		Assert.isTrue(maxPayloadLength >= 0, "'maxPayloadLength' must be greater than or equal to 0");
 		this.maxPayloadLength = maxPayloadLength;
 	}
 

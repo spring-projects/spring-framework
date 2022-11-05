@@ -168,7 +168,7 @@ public final class CloseStatus implements Serializable {
 	 * @param reason the reason
 	 */
 	public CloseStatus(int code, @Nullable String reason) {
-		Assert.isTrue((code >= 1000 && code < 5000), "Invalid status code");
+		Assert.isTrue((code >= 1000 && code < 5000), () -> "Invalid status code: " + code);
 		this.code = code;
 		this.reason = reason;
 	}
