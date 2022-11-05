@@ -507,10 +507,9 @@ public final class ContentDisposition {
 	 * @return the encoded header field param
 	 * @see <a href="https://tools.ietf.org/html/rfc5987">RFC 5987</a>
 	 */
-	private static String decodeRfc5987Filename(String filename, Charset charset) {
-		Assert.notNull(filename, "'filename' must not be null");
-		Assert.notNull(charset, "'charset' must not be null");
-
+	private static String decodeFilename(String filename, Charset charset) {
+		Assert.notNull(filename, "'input' String should not be null");
+		Assert.notNull(charset, "'charset' should not be null");
 		byte[] value = filename.getBytes(charset);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		int index = 0;
@@ -666,12 +665,11 @@ public final class ContentDisposition {
 	 * @return the encoded header field param
 	 * @see <a href="https://tools.ietf.org/html/rfc5987">RFC 5987</a>
 	 */
-	private static String encodeRfc5987Filename(String input, Charset charset) {
-		Assert.notNull(input, "'input' must not be null");
-		Assert.notNull(charset, "'charset' must not be null");
+	private static String encodeFilename(String input, Charset charset) {
+		Assert.notNull(input, "'input' is required");
+		Assert.notNull(charset, "'charset' is required");
 		Assert.isTrue(!StandardCharsets.US_ASCII.equals(charset), "ASCII does not require encoding");
 		Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset), "Only UTF-8 and ISO-8859-1 are supported");
-
 		byte[] source = input.getBytes(charset);
 		StringBuilder sb = new StringBuilder(source.length << 1);
 		sb.append(charset.name());
