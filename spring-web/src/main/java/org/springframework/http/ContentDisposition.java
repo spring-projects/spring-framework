@@ -534,7 +534,7 @@ public final class ContentDisposition {
 	 * @see <a href="https://tools.ietf.org/html/rfc2047">RFC 2047</a>
 	 */
 	private static String decodeQuotedPrintableFilename(String filename, Charset charset) {
-		Assert.notNull(filename, "'input' String` should not be null");
+		Assert.notNull(filename, "'input' String should not be null");
 		Assert.notNull(charset, "'charset' should not be null");
 
 		byte[] value = filename.getBytes(US_ASCII);

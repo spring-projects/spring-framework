@@ -241,12 +241,12 @@ public final class RSocketRequestValues {
 		private final List<MimeType> mimeTypes = new ArrayList<>();
 
 		public void addMetadata(Object metadata) {
-			Assert.isTrue(this.metadata.size() == this.mimeTypes.size(), "Invalid state: " + this);
+			Assert.isTrue(this.metadata.size() == this.mimeTypes.size(), () -> "Invalid state: " + this);
 			this.metadata.add(metadata);
 		}
 
 		public void addMimeType(MimeType mimeType) {
-			Assert.isTrue(this.metadata.size() == (this.mimeTypes.size() + 1), "Invalid state: " + this);
+			Assert.isTrue(this.metadata.size() == (this.mimeTypes.size() + 1), () -> "Invalid state: " + this);
 			this.mimeTypes.add(mimeType);
 		}
 

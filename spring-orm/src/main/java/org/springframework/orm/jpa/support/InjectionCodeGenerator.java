@@ -52,8 +52,8 @@ class InjectionCodeGenerator {
 
 
 	InjectionCodeGenerator(ClassName targetClassName, RuntimeHints hints) {
-		Assert.notNull(hints, "TargetClassName must not be null");
-		Assert.notNull(hints, "Hints must not be null");
+		Assert.notNull(hints, "ClassName must not be null");
+		Assert.notNull(hints, "RuntimeHints must not be null");
 		this.targetClassName = targetClassName;
 		this.hints = hints;
 	}
@@ -97,7 +97,7 @@ class InjectionCodeGenerator {
 			CodeBlock resourceToInject) {
 
 		Assert.isTrue(method.getParameterCount() == 1,
-				"Method '" + method.getName() + "' must declare a single parameter");
+				() -> "Method '" + method.getName() + "' must declare a single parameter");
 		CodeBlock.Builder code = CodeBlock.builder();
 		AccessControl accessControl = AccessControl.forMember(method);
 		if (!accessControl.isAccessibleFrom(this.targetClassName)) {

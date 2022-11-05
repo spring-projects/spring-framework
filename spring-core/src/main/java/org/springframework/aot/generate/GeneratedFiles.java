@@ -161,8 +161,7 @@ public interface GeneratedFiles {
 
 	private static String getClassNamePath(String className) {
 		Assert.hasLength(className, "'className' must not be empty");
-		Assert.isTrue(isJavaIdentifier(className),
-				"'className' must be a valid identifier");
+		Assert.isTrue(isJavaIdentifier(className), "'className' must be a valid identifier");
 		return ClassUtils.convertClassNameToResourcePath(className) + ".java";
 	}
 
