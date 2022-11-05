@@ -65,6 +65,7 @@ public class RequestPartArgumentResolverTests {
 
 		Object body = this.client.getRequestValues().getBodyValue();
 		assertThat(body).isNotNull().isInstanceOf(MultiValueMap.class);
+		@SuppressWarnings("unchecked")
 		MultiValueMap<String, HttpEntity<?>> map = (MultiValueMap<String, HttpEntity<?>>) body;
 
 		assertThat(map.getFirst("part1").getBody()).isEqualTo("part 1");

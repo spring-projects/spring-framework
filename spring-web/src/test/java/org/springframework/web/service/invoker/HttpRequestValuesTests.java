@@ -120,6 +120,7 @@ public class HttpRequestValuesTests {
 				.addRequestPart("entity", entity)
 				.build();
 
+		@SuppressWarnings("unchecked")
 		MultiValueMap<String, HttpEntity<?>> map = (MultiValueMap<String, HttpEntity<?>>) requestValues.getBodyValue();
 		assertThat(map).hasSize(2);
 		assertThat(map.getFirst("form field").getBody()).isEqualTo("form value");
