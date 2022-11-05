@@ -415,7 +415,7 @@ configure(rootProject) {
 		source.exclude "**/test-output/**"
 		allowlistFile = project.file("src/nohttp/allowlist.lines")
 		def rootPath = file(rootDir).toPath()
-		def projectDirs = allprojects.collect { it.projectDir } + "${rootDir}/buildSrc" + "${rootDir}/framework-docs" 
+		def projectDirs = allprojects.collect { it.projectDir } + "${rootDir}/spring-core-test" + "${rootDir}/buildSrc" + "${rootDir}/framework-docs"
 		projectDirs.forEach { dir ->
 			[ 'bin', 'build', 'out', '.settings' ]
 				.collect { rootPath.relativize(new File(dir, it).toPath()) }
