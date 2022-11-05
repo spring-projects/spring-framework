@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ import org.springframework.web.server.ServerWebExchange;
  * ensure all conditions match a given request.
  *
  * <p>When {@code CompositeRequestCondition} instances are combined or compared
- * they are expected to (a) contain the same number of conditions and (b) that
- * conditions in the respective index are of the same type. It is acceptable to
+ * is expected that (a) they contain the same number of conditions and (b)
+ * conditions at the same index are of the same type. It is acceptable to
  * provide {@code null} conditions or no conditions at all to the constructor.
  *
  * @author Rossen Stoyanchev
@@ -105,7 +105,7 @@ public class CompositeRequestCondition extends AbstractRequestCondition<Composit
 
 	/**
 	 * If one instance is empty, return the other.
-	 * If both instances have conditions, combine the individual conditions
+	 * <p>If both instances have conditions, combine the individual conditions
 	 * after ensuring they are of the same type and number.
 	 */
 	@Override
@@ -131,8 +131,8 @@ public class CompositeRequestCondition extends AbstractRequestCondition<Composit
 
 	private void assertNumberOfConditions(CompositeRequestCondition other) {
 		Assert.isTrue(getLength() == other.getLength(),
-				"Cannot combine CompositeRequestConditions with a different number of conditions. " +
-				ObjectUtils.nullSafeToString(this.requestConditions) + " and  " +
+				() -> "Cannot combine CompositeRequestConditions with a different number of conditions. " +
+				ObjectUtils.nullSafeToString(this.requestConditions) + " and " +
 				ObjectUtils.nullSafeToString(other.requestConditions));
 	}
 

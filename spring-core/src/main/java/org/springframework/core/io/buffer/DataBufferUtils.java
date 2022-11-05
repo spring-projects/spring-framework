@@ -177,7 +177,7 @@ public abstract class DataBufferUtils {
 		if (options.length > 0) {
 			for (OpenOption option : options) {
 				Assert.isTrue(!(option == StandardOpenOption.APPEND || option == StandardOpenOption.WRITE),
-						"'" + option + "' not allowed");
+						() -> "'" + option + "' not allowed");
 			}
 		}
 

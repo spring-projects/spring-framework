@@ -432,7 +432,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		StringBuilder builder = new StringBuilder();
 		formData.forEach((name, values) -> {
 				if (name == null) {
-					Assert.isTrue(CollectionUtils.isEmpty(values), "Null name in form data: " + formData);
+					Assert.isTrue(CollectionUtils.isEmpty(values), () -> "Null name in form data: " + formData);
 					return;
 				}
 				values.forEach(value -> {

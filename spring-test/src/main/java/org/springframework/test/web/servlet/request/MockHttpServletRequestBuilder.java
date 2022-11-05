@@ -148,7 +148,7 @@ public class MockHttpServletRequestBuilder
 	private static URI initUri(String url, Object[] vars) {
 		Assert.notNull(url, "'url' must not be null");
 		Assert.isTrue(url.isEmpty() || url.startsWith("/") || url.startsWith("http://") || url.startsWith("https://"),
-				"'url' should start with a path or be a complete HTTP URL: " + url);
+				() -> "'url' should start with a path or be a complete HTTP URL: " + url);
 		return UriComponentsBuilder.fromUriString(url).buildAndExpand(vars).encode().toUri();
 	}
 

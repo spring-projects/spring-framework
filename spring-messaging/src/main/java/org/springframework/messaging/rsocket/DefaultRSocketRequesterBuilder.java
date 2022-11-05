@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,7 +103,7 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 
 	@Override
 	public RSocketRequester.Builder metadataMimeType(MimeType mimeType) {
-		Assert.notNull(mimeType, "`metadataMimeType` is required");
+		Assert.notNull(mimeType, "'metadataMimeType' is required");
 		this.metadataMimeType = mimeType;
 		return this;
 	}
@@ -281,7 +281,7 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 		Mono<DataBuffer> dataMono = Mono.empty();
 		if (data != null) {
 			ReactiveAdapter adapter = strategies.reactiveAdapterRegistry().getAdapter(data.getClass());
-			Assert.isTrue(adapter == null || !adapter.isMultiValue(), "Expected single value: " + data);
+			Assert.isTrue(adapter == null || !adapter.isMultiValue(), () -> "Expected single value: " + data);
 			Mono<?> mono = (adapter != null ? Mono.from(adapter.toPublisher(data)) : Mono.just(data));
 			dataMono = mono.map(value -> {
 				ResolvableType type = ResolvableType.forClass(value.getClass());
