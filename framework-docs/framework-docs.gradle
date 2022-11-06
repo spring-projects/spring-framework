@@ -130,7 +130,7 @@ asciidoctorPdf {
 	baseDirFollowsSourceDir()
 	configurations 'asciidoctorExtensions'
 	sources {
-		include '*.adoc'
+		include 'spring-framework.adocbook'
 	}
 	outputDir "$buildDir/docs/ref-docs/pdf"
 	forkOptions {

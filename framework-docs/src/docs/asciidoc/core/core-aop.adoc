@@ -262,8 +262,8 @@ element, as the following example shows:
 ----
 
 This assumes that you use schema support as described in
-<<core.adoc#xsd-schemas, XML Schema-based configuration>>.
-See <<core.adoc#xsd-schemas-aop, the AOP schema>> for how to
+<<core.adoc#core.appendix.xsd-schemas, XML Schema-based configuration>>.
+See <<core.adoc#core.appendix.xsd-schemas-aop, the AOP schema>> for how to
 import the tags in the `aop` namespace.
 
 
@@ -1991,8 +1991,8 @@ that syntax and refer the reader to the discussion in the previous section
 of advice parameters.
 
 To use the aop namespace tags described in this section, you need to import the
-`spring-aop` schema, as described in <<core.adoc#xsd-schemas,
-XML Schema-based configuration>>. See <<core.adoc#xsd-schemas-aop, the AOP schema>>
+`spring-aop` schema, as described in <<core.adoc#core.appendix.xsd-schemas,
+XML Schema-based configuration>>. See <<core.adoc#core.appendix.xsd-schemas-aop, the AOP schema>>
 for how to import the tags in the `aop` namespace.
 
 Within your Spring configurations, all aspect and advisor elements must be placed within
@@ -3502,7 +3502,7 @@ use Java-based configuration, you can add `@EnableSpringConfigured` to any
 ----
 
 If you prefer XML based configuration, the Spring
-<<core.adoc#xsd-schemas-context, `context` namespace>>
+<<core.adoc#core.appendix.xsd-schemas-context, `context` namespace>>
 defines a convenient `context:spring-configured` element, which you can use as follows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]

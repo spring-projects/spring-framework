@@ -1,4 +1,4 @@
-[[testing]]
+[[webmvc.test]]
 = Testing
 [.small]#<<web-reactive.adoc#webflux-test, Same in Spring WebFlux>>#
 

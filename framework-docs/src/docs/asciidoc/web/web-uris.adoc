@@ -1,4 +1,4 @@
-[[web-uricomponents]]
+[id={chapter}.web-uricomponents]
 = UriComponents
 [.small]#Spring MVC and Spring WebFlux#
 
@@ -101,12 +101,11 @@ You can shorten it further still with a full URI template, as the following exam
 
 
 
-
-[[web-uribuilder]]
+[id={chapter}.web-uribuilder]
 = UriBuilder
 [.small]#Spring MVC and Spring WebFlux#
 
-<<web-uricomponents, `UriComponentsBuilder`>> implements `UriBuilder`. You can create a
+<<{chapter}.web-uricomponents, `UriComponentsBuilder`>> implements `UriBuilder`. You can create a
 `UriBuilder`, in turn, with a `UriBuilderFactory`. Together, `UriBuilderFactory` and
 `UriBuilder` provide a pluggable mechanism to build URIs from URI templates, based on
 shared configuration, such as a base URL, encoding preferences, and other details.
@@ -194,8 +193,7 @@ that holds configuration and preferences, as the following example shows:
 ----
 
 
-
-[[web-uri-encoding]]
+[id={chapter}.web-uri-encoding]
 = URI Encoding
 [.small]#Spring MVC and Spring WebFlux#
 
