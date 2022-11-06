@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,20 +80,6 @@ class MockHttpSessionTests {
 	}
 
 	@Test
-	void getValueOnInvalidatedSession() {
-		session.invalidate();
-		assertThatIllegalStateException().isThrownBy(() ->
-				session.getValue("foo"));
-	}
-
-	@Test
-	void getValueNamesOnInvalidatedSession() {
-		session.invalidate();
-		assertThatIllegalStateException().isThrownBy(
-				session::getValueNames);
-	}
-
-	@Test
 	void setAttributeOnInvalidatedSession() {
 		session.invalidate();
 		assertThatIllegalStateException().isThrownBy(() ->
@@ -101,24 +87,10 @@ class MockHttpSessionTests {
 	}
 
 	@Test
-	void putValueOnInvalidatedSession() {
-		session.invalidate();
-		assertThatIllegalStateException().isThrownBy(() ->
-				session.putValue("name", "value"));
-	}
-
-	@Test
 	void removeAttributeOnInvalidatedSession() {
 		session.invalidate();
 		assertThatIllegalStateException().isThrownBy(() ->
 				session.removeAttribute("name"));
-	}
-
-	@Test
-	void removeValueOnInvalidatedSession() {
-		session.invalidate();
-		assertThatIllegalStateException().isThrownBy(() ->
-				session.removeValue("name"));
 	}
 
 	@Test

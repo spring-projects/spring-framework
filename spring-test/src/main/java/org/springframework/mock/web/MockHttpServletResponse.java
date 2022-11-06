@@ -53,7 +53,7 @@ import org.springframework.web.util.WebUtils;
 /**
  * Mock implementation of the {@link jakarta.servlet.http.HttpServletResponse} interface.
  *
- * <p>As of Spring Framework 5.0, this set of mocks is designed on a Servlet 4.0 baseline.
+ * <p>As of Spring 6.0, this set of mocks is designed on a Servlet 6.0 baseline.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -413,6 +413,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		doAddHeaderValue(HttpHeaders.SET_COOKIE, getCookieHeader(cookie), false);
 	}
 
+	@SuppressWarnings("removal")
 	private String getCookieHeader(Cookie cookie) {
 		StringBuilder buf = new StringBuilder();
 		buf.append(cookie.getName()).append('=').append(cookie.getValue() == null ? "" : cookie.getValue());
@@ -570,18 +571,6 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	@Override
 	public String encodeRedirectURL(String url) {
 		return encodeURL(url);
-	}
-
-	@Override
-	@Deprecated
-	public String encodeUrl(String url) {
-		return encodeURL(url);
-	}
-
-	@Override
-	@Deprecated
-	public String encodeRedirectUrl(String url) {
-		return encodeRedirectURL(url);
 	}
 
 	@Override
@@ -755,15 +744,6 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	public void setStatus(int status) {
 		if (!this.isCommitted()) {
 			this.status = status;
-		}
-	}
-
-	@Override
-	@Deprecated
-	public void setStatus(int status, String errorMessage) {
-		if (!this.isCommitted()) {
-			this.status = status;
-			this.errorMessage = errorMessage;
 		}
 	}
 

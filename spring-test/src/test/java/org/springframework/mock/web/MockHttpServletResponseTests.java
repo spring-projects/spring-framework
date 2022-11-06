@@ -421,10 +421,9 @@ class MockHttpServletResponseTests {
 	}
 
 	@Test  // SPR-10414
-	@SuppressWarnings("deprecation")
 	void modifyStatusMessageAfterSendError() throws IOException {
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
-		response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error");
+		response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_NOT_FOUND);
 	}
 
@@ -474,23 +473,6 @@ class MockHttpServletResponseTests {
 		assertThat(header).startsWith("SESSION=123; Path=/; Max-Age=100; Expires=");
 	}
 
-	/**
-	 * @since 5.3.22
-	 */
-	@Test
-	void setCookieHeaderWithComment() {
-		response.setHeader(SET_COOKIE, "SESSION=123;Comment=Test Comment;Path=/");
-
-		assertThat(response.getHeader(SET_COOKIE)).isEqualTo(("SESSION=123; Path=/; Comment=Test Comment"));
-
-		assertNumCookies(1);
-		assertThat(response.getCookies()[0]).isInstanceOf(MockCookie.class).satisfies(mockCookie -> {
-			assertThat(mockCookie.getName()).isEqualTo("SESSION");
-			assertThat(mockCookie.getPath()).isEqualTo("/");
-			assertThat(mockCookie.getComment()).isEqualTo("Test Comment");
-		});
-	}
-
 	@Test
 	void addCookieHeader() {
 		response.addHeader(SET_COOKIE, "SESSION=123; Path=/; Secure; HttpOnly; SameSite=Lax");
@@ -502,26 +484,6 @@ class MockHttpServletResponseTests {
 		assertNumCookies(2);
 		assertPrimarySessionCookie("123");
 		assertCookieValues("123", "999");
-	}
-
-	@Test
-	void addCookieHeaderWithComment() {
-		response.addHeader(SET_COOKIE, "SESSION=123; Path=/; Secure; HttpOnly; SameSite=Lax");
-		assertNumCookies(1);
-		assertPrimarySessionCookie("123");
-
-		// Adding a 2nd cookie header should result in 2 cookies.
-		response.addHeader(SET_COOKIE, "SESSION=999; Comment=Test Comment; Path=/; Secure; HttpOnly; SameSite=Lax");
-		assertNumCookies(2);
-		assertPrimarySessionCookie("123");
-		assertThat(response.getCookies()[1]).isInstanceOf(MockCookie.class).satisfies(mockCookie -> {
-			assertThat(mockCookie.getName()).isEqualTo("SESSION");
-			assertThat(mockCookie.getValue()).isEqualTo("999");
-			assertThat(mockCookie.getComment()).isEqualTo("Test Comment");
-			assertThat(mockCookie.getPath()).isEqualTo("/");
-			assertThat(mockCookie.getSecure()).isTrue();
-			assertThat(mockCookie.isHttpOnly()).isTrue();
-		});
 	}
 
 	/**
@@ -605,6 +567,7 @@ class MockHttpServletResponseTests {
 		assertThat(response.getCookies()).extracting(Cookie::getValue).containsExactly(expected);
 	}
 
+	@SuppressWarnings("removal")
 	private void assertPrimarySessionCookie(String expectedValue) {
 		Cookie cookie = this.response.getCookie("SESSION");
 		assertThat(cookie).asInstanceOf(type(MockCookie.class)).satisfies(mockCookie -> {

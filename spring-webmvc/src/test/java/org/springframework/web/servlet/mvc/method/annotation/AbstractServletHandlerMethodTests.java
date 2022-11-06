@@ -110,7 +110,9 @@ public abstract class AbstractServletHandlerMethodTests {
 			}
 		};
 
-		servlet.init(new MockServletConfig());
+		MockServletConfig config = new MockServletConfig();
+		config.addInitParameter("jakarta.servlet.http.legacyDoHead", "true");
+		servlet.init(config);
 
 		return wac;
 	}

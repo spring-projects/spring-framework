@@ -47,6 +47,7 @@ import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
 import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
+import org.springframework.web.socket.server.standard.StandardWebSocketUpgradeStrategy;
 
 /**
  * A base class for {@link HandshakeHandler} implementations, independent of the Servlet API.
@@ -149,7 +150,8 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 			className = "org.springframework.web.socket.server.standard.WebSphereRequestUpgradeStrategy";
 		}
 		else {
-			throw new IllegalStateException("No suitable default RequestUpgradeStrategy found");
+			// Let's assume Jakarta WebSocket API 2.1+
+			return new StandardWebSocketUpgradeStrategy();
 		}
 
 		try {

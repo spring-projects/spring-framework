@@ -24,7 +24,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.websocket.Endpoint;
 import jakarta.websocket.Extension;
-import org.apache.tomcat.websocket.server.WsServerContainer;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -32,19 +31,18 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.socket.server.HandshakeFailureException;
 
 /**
- * A WebSocket {@code RequestUpgradeStrategy} for Apache Tomcat. Compatible with
- * Tomcat 10 and higher.
+ * A WebSocket {@code RequestUpgradeStrategy} for the Jakarta WebSocket API 2.1+.
  *
  * <p>To modify properties of the underlying {@link jakarta.websocket.server.ServerContainer}
  * you can use {@link ServletServerContainerFactoryBean} in XML configuration or,
  * when using Java configuration, access the container instance through the
  * "jakarta.websocket.server.ServerContainer" ServletContext attribute.
  *
- * @author Rossen Stoyanchev
- * @since 4.0
- * @see WsServerContainer#upgradeHttpToWebSocket
+ * @author Juergen Hoeller
+ * @since 6.0
+ * @see jakarta.websocket.server.ServerContainer#upgradeHttpToWebSocket
  */
-public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrategy {
+public class StandardWebSocketUpgradeStrategy extends AbstractStandardUpgradeStrategy {
 
 	@Override
 	public String[] getSupportedVersions() {
@@ -74,11 +72,6 @@ public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrateg
 			throw new HandshakeFailureException(
 					"Servlet request failed to upgrade to WebSocket: " + requestUrl, ex);
 		}
-	}
-
-	@Override
-	public WsServerContainer getContainer(HttpServletRequest request) {
-		return (WsServerContainer) super.getContainer(request);
 	}
 
 }

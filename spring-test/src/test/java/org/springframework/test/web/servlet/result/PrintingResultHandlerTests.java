@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,17 +144,16 @@ public class PrintingResultHandlerTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	public void printResponse() throws Exception {
 		Cookie enigmaCookie = new Cookie("enigma", "42");
-		enigmaCookie.setComment("This is a comment");
 		enigmaCookie.setHttpOnly(true);
 		enigmaCookie.setMaxAge(1234);
 		enigmaCookie.setDomain(".example.com");
 		enigmaCookie.setPath("/crumbs");
 		enigmaCookie.setSecure(true);
 
-		this.response.setStatus(400, "error");
+		this.response.setStatus(400);
 		this.response.addHeader("header", "headerValue");
 		this.response.setContentType("text/plain");
 		this.response.getWriter().print("content");
@@ -197,7 +196,7 @@ public class PrintingResultHandlerTests {
 		assertThat(cookie1.endsWith("]")).isTrue();
 		assertThat(cookie2.startsWith("[" + Cookie.class.getSimpleName())).isTrue();
 		assertThat(cookie2.contains("name = 'enigma', value = '42', " +
-				"comment = 'This is a comment', domain = '.example.com', maxAge = 1234, " +
+				"comment = [null], domain = '.example.com', maxAge = 1234, " +
 				"path = '/crumbs', secure = true, version = 0, httpOnly = true")).isTrue();
 		assertThat(cookie2.endsWith("]")).isTrue();
 	}

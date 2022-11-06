@@ -508,12 +508,6 @@ class DefaultServerRequest implements ServerRequest {
 		}
 
 		@Override
-		@Deprecated
-		public void setStatus(int sc, String sm) {
-			this.status = sc;
-		}
-
-		@Override
 		public int getStatus() {
 			return this.status;
 		}
@@ -550,18 +544,6 @@ class DefaultServerRequest implements ServerRequest {
 
 		@Override
 		public String encodeRedirectURL(String url) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		@Deprecated
-		public String encodeUrl(String url) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		@Deprecated
-		public String encodeRedirectUrl(String url) {
 			throw new UnsupportedOperationException();
 		}
 

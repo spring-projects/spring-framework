@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletConnection;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletInputStream;
@@ -79,7 +80,7 @@ import org.springframework.web.util.UrlPathHelper;
  * is {@link Locale#ENGLISH}. This value can be changed via {@link #addPreferredLocale}
  * or {@link #setPreferredLocales}.
  *
- * <p>As of Spring Framework 5.0, this set of mocks is designed on a Servlet 4.0 baseline.
+ * <p>As of Spring 6.0, this set of mocks is designed on a Servlet 6.0 baseline.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -878,12 +879,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return new MockRequestDispatcher(path);
 	}
 
-	@Override
-	@Deprecated
-	public String getRealPath(String path) {
-		return this.servletContext.getRealPath(path);
-	}
-
 	public void setRemotePort(int remotePort) {
 		this.remotePort = remotePort;
 	}
@@ -968,6 +963,38 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	@Override
 	public DispatcherType getDispatcherType() {
 		return this.dispatcherType;
+	}
+
+	@Override
+	public String getRequestId() {
+		return "";
+	}
+
+	@Override
+	public String getProtocolRequestId() {
+		return "";
+	}
+
+	@Override
+	public ServletConnection getServletConnection() {
+		return new ServletConnection() {
+			@Override
+			public String getConnectionId() {
+				return MockHttpServletRequest.this.getRequestId();
+			}
+			@Override
+			public String getProtocol() {
+				return MockHttpServletRequest.this.getProtocol();
+			}
+			@Override
+			public String getProtocolConnectionId() {
+				return MockHttpServletRequest.this.getProtocolRequestId();
+			}
+			@Override
+			public boolean isSecure() {
+				return MockHttpServletRequest.this.isSecure();
+			}
+		};
 	}
 
 
@@ -1183,7 +1210,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	@Override
 	@Nullable
 	public String getPathTranslated() {
-		return (this.pathInfo != null ? getRealPath(this.pathInfo) : null);
+		return (this.pathInfo != null ? this.servletContext.getRealPath(this.pathInfo) : null);
 	}
 
 	public void setContextPath(String contextPath) {
@@ -1350,12 +1377,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	@Override
 	public boolean isRequestedSessionIdFromURL() {
 		return this.requestedSessionIdFromURL;
-	}
-
-	@Override
-	@Deprecated
-	public boolean isRequestedSessionIdFromUrl() {
-		return isRequestedSessionIdFromURL();
 	}
 
 	@Override
