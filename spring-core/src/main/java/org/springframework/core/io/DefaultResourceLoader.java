@@ -143,20 +143,22 @@ public class DefaultResourceLoader implements ResourceLoader {
 	@Override
 	public Resource getResource(String location) {
 		Assert.notNull(location, "Location must not be null");
-
+		// 首先，通过 ProtocolResolver 来加载资源
 		for (ProtocolResolver protocolResolver : getProtocolResolvers()) {
 			Resource resource = protocolResolver.resolve(location, this);
 			if (resource != null) {
 				return resource;
 			}
 		}
-
+		// 其次，以 / 开头，返回 ClassPathContextResource 类型的资源
 		if (location.startsWith("/")) {
 			return getResourceByPath(location);
 		}
+		// 再次，以 classpath: 开头，返回 ClassPathResource 类型的资源
 		else if (location.startsWith(CLASSPATH_URL_PREFIX)) {
 			return new ClassPathResource(location.substring(CLASSPATH_URL_PREFIX.length()), getClassLoader());
 		}
+		// 然后，根据是否为文件 URL ，是则返回 FileUrlResource 类型的资源，否则返回 UrlResource 类型的资源
 		else {
 			try {
 				// Try to parse the location as a URL...
@@ -165,10 +167,26 @@ public class DefaultResourceLoader implements ResourceLoader {
 			}
 			catch (MalformedURLException ex) {
 				// No URL -> resolve as resource path.
+				// 最后，返回 ClassPathContextResource 类型的资源
 				return getResourceByPath(location);
 			}
 		}
 	}
+	/*
+	ResourceLoader resourceLoader = new DefaultResourceLoader();
+
+	Resource fileResource1 = resourceLoader.getResource("D:/Users/chosen/Documents/spark.txt");
+	System.out.println("fileResource1 is FileSystemResource:" + (fileResource1 instanceof FileSystemResource));
+
+	Resource fileResource2 = resourceLoader.getResource("/Users/chosen/Documents/spark.txt");
+	System.out.println("fileResource2 is ClassPathResource:" + (fileResource2 instanceof ClassPathResource));
+
+	Resource urlResource1 = resourceLoader.getResource("file:/Users/chosen/Documents/spark.txt");
+	System.out.println("urlResource1 is UrlResource:" + (urlResource1 instanceof UrlResource));
+
+	Resource urlResource2 = resourceLoader.getResource("http://www.baidu.com");
+	System.out.println("urlResource1 is urlResource:" + (urlResource2 instanceof  UrlResource));
+	*/
 
 	/**
 	 * Return a Resource handle for the resource at the given path.

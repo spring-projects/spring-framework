@@ -36,6 +36,8 @@ import java.util.Map;
 public interface PathMatcher {
 
 	/**
+	 * 判断路径是否带有通配符
+	 * 只要路径中拥有 *、? 以及 {}，则认为true
 	 * Does the given {@code path} represent a pattern that can be matched
 	 * by an implementation of this interface?
 	 * <p>If the return value is {@code false}, then the {@link #match}
@@ -47,6 +49,7 @@ public interface PathMatcher {
 	boolean isPattern(String path);
 
 	/**
+	 * 判断 path 是否完全匹配 pattern
 	 * Match the given {@code path} against the given {@code pattern},
 	 * according to this PathMatcher's matching strategy.
 	 * @param pattern the pattern to match against
@@ -57,6 +60,7 @@ public interface PathMatcher {
 	boolean match(String pattern, String path);
 
 	/**
+	 * 判断 path 是否前缀匹配 pattern
 	 * Match the given {@code path} against the corresponding part of the given
 	 * {@code pattern}, according to this PathMatcher's matching strategy.
 	 * <p>Determines whether the pattern at least matches as far as the given base
@@ -69,6 +73,8 @@ public interface PathMatcher {
 	boolean matchStart(String pattern, String path);
 
 	/**
+	 * 去掉路径开头的静态部分，得到匹配到的动态路径
+	 * 例如：myroot/*.html 匹配 myroot/myfile.html 路径，结果为 myfile.html
 	 * Given a pattern and a full path, determine the pattern-mapped part.
 	 * <p>This method is supposed to find out which part of the path is matched
 	 * dynamically through an actual pattern, that is, it strips off a statically
@@ -91,6 +97,8 @@ public interface PathMatcher {
 	String extractPathWithinPattern(String pattern, String path);
 
 	/**
+	 * 匹配路径中的变量
+	 * 例如：/hotels/{hotel} 匹配 /hotels/1 路径，结果为 hotel -> 1
 	 * Given a pattern and a full path, extract the URI template variables. URI template
 	 * variables are expressed through curly brackets ('{' and '}').
 	 * <p>For example: For pattern "/hotels/{hotel}" and path "/hotels/1", this method will
@@ -102,6 +110,7 @@ public interface PathMatcher {
 	Map<String, String> extractUriTemplateVariables(String pattern, String path);
 
 	/**
+	 * 返回一个排序比较器，用于对匹配到的所有路径进行排序
 	 * Given a full path, returns a {@link Comparator} suitable for sorting patterns
 	 * in order of explicitness for that path.
 	 * <p>The full algorithm used depends on the underlying implementation,
@@ -114,6 +123,7 @@ public interface PathMatcher {
 	Comparator<String> getPatternComparator(String path);
 
 	/**
+	 * 合并两个模式
 	 * Combines two patterns into a new pattern that is returned.
 	 * <p>The full algorithm used for combining the two pattern depends on the underlying implementation.
 	 * @param pattern1 the first pattern

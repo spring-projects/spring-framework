@@ -166,7 +166,7 @@ public class AntPathMatcher implements PathMatcher {
 		this.stringMatcherCache.clear();
 	}
 
-
+	//只要路径中拥有 *、? 以及 {}，则认为true
 	@Override
 	public boolean isPattern(@Nullable String path) {
 		if (path == null) {
@@ -182,13 +182,13 @@ public class AntPathMatcher implements PathMatcher {
 				uriVar = true;
 				continue;
 			}
-			if (c == '}' && uriVar) {
+			if (c == '}' && uriVar) {//{}成对出现
 				return true;
 			}
 		}
 		return false;
 	}
-
+	//match 匹配，matchStart 前缀匹配，extractUriTemplateVariables 参数匹配，三个方法最终都是走的 doMatch 方法
 	@Override
 	public boolean match(String pattern, String path) {
 		return doMatch(pattern, path, true, null);
