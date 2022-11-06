@@ -48,7 +48,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	/**
 	 * The default charset used by the converter.
 	 */
-	public static final Charset DEFAULT_CHARSET = StandardCharsets.ISO_8859_1;
+	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 
 	@Nullable
