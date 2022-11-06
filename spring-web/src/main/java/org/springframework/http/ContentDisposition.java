@@ -363,7 +363,7 @@ public final class ContentDisposition {
 					if (idx1 != -1 && idx2 != -1) {
 						charset = Charset.forName(value.substring(0, idx1).trim());
 						Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
-								"Charset should be UTF-8 or ISO-8859-1");
+								"Charset must be UTF-8 or ISO-8859-1");
 						filename = decodeFilename(value.substring(idx2 + 1), charset);
 					}
 					else {
@@ -604,10 +604,11 @@ public final class ContentDisposition {
 	 * @see <a href="https://tools.ietf.org/html/rfc5987">RFC 5987</a>
 	 */
 	private static String encodeFilename(String input, Charset charset) {
-		Assert.notNull(input, "'input' is required");
-		Assert.notNull(charset, "'charset' is required");
+		Assert.notNull(input, "'input' must not be null");
+		Assert.notNull(charset, "'charset' must not be null");
 		Assert.isTrue(!StandardCharsets.US_ASCII.equals(charset), "ASCII does not require encoding");
 		Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset), "Only UTF-8 and ISO-8859-1 are supported");
+
 		byte[] source = input.getBytes(charset);
 		int len = source.length;
 		StringBuilder sb = new StringBuilder(len << 1);

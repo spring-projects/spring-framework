@@ -64,10 +64,10 @@ public abstract class AbstractWebSocketSession<T> implements WebSocketSession {
 	 * Create a new WebSocket session.
 	 */
 	protected AbstractWebSocketSession(T delegate, String id, HandshakeInfo info, DataBufferFactory bufferFactory) {
-		Assert.notNull(delegate, "Native session is required.");
-		Assert.notNull(id, "Session id is required.");
-		Assert.notNull(info, "HandshakeInfo is required.");
-		Assert.notNull(bufferFactory, "DataBuffer factory is required.");
+		Assert.notNull(delegate, "Native session is required");
+		Assert.notNull(id, "Session id is required");
+		Assert.notNull(info, "HandshakeInfo is required");
+		Assert.notNull(bufferFactory, "DataBuffer factory is required");
 
 		this.delegate = delegate;
 		this.id = id;

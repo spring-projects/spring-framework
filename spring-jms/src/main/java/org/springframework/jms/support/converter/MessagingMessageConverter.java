@@ -70,8 +70,8 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 	 * header mapper.
 	 */
 	public MessagingMessageConverter(MessageConverter payloadConverter, JmsHeaderMapper headerMapper) {
-		Assert.notNull(payloadConverter, "PayloadConverter must not be null");
-		Assert.notNull(headerMapper, "HeaderMapper must not be null");
+		Assert.notNull(payloadConverter, "'payloadConverter' must not be null");
+		Assert.notNull(headerMapper, "'headerMapper' must not be null");
 		this.payloadConverter = payloadConverter;
 		this.headerMapper = headerMapper;
 	}

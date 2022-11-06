@@ -1054,7 +1054,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	@Override
 	public void setApplicationStartup(ApplicationStartup applicationStartup) {
-		Assert.notNull(applicationStartup, "applicationStartup should not be null");
+		Assert.notNull(applicationStartup, "applicationStartup must not be null");
 		this.applicationStartup = applicationStartup;
 	}
 

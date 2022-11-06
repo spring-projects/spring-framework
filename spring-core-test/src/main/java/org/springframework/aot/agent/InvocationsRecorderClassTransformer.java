@@ -44,8 +44,8 @@ class InvocationsRecorderClassTransformer implements ClassFileTransformer {
 	private final String[] ignoredPackages;
 
 	public InvocationsRecorderClassTransformer(String[] instrumentedPackages, String[] ignoredPackages) {
-		Assert.notNull(instrumentedPackages, "instrumentedPackages should not be null");
-		Assert.notNull(ignoredPackages, "ignoredPackages should not be null");
+		Assert.notNull(instrumentedPackages, "instrumentedPackages must not be null");
+		Assert.notNull(ignoredPackages, "ignoredPackages must not be null");
 		this.instrumentedPackages = rewriteToAsmFormat(instrumentedPackages);
 		this.ignoredPackages = rewriteToAsmFormat(ignoredPackages);
 	}

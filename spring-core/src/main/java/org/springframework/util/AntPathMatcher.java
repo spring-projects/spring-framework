@@ -113,7 +113,7 @@ public class AntPathMatcher implements PathMatcher {
 	 * @since 4.1
 	 */
 	public AntPathMatcher(String pathSeparator) {
-		Assert.notNull(pathSeparator, "'pathSeparator' is required");
+		Assert.notNull(pathSeparator, "'pathSeparator' must not be null");
 		this.pathSeparator = pathSeparator;
 		this.pathSeparatorPatternCache = new PathSeparatorPatternCache(pathSeparator);
 	}

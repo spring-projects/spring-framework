@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,11 +62,11 @@ public class JmsResponse<T> {
 
 	/**
 	 * Create a new {@link JmsResponse} instance.
-	 * @param response the content of the result
+	 * @param response the content of the response
 	 * @param destination the destination
 	 */
 	protected JmsResponse(T response, Object destination) {
-		Assert.notNull(response, "Result must not be null");
+		Assert.notNull(response, "'response' must not be null");
 		this.response = response;
 		this.destination = destination;
 	}
