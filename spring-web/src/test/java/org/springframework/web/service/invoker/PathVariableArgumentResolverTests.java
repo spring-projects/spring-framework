@@ -40,10 +40,8 @@ class PathVariableArgumentResolverTests {
 
 
 	@BeforeEach
-	@SuppressWarnings("deprecation")
 	void setUp() throws Exception {
 		HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builder(this.client).build();
-		proxyFactory.afterPropertiesSet();
 		this.service = proxyFactory.createClient(Service.class);
 	}
 
