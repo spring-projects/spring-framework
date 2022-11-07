@@ -42,7 +42,7 @@ import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * A {@link RequestUpgradeStrategy} for use with Undertow.
+ * A WebSocket {@code RequestUpgradeStrategy} for Undertow.
  *
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev

@@ -16,24 +16,16 @@
 
 package org.springframework.web.socket.server.standard;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.websocket.Endpoint;
-import jakarta.websocket.Extension;
+import jakarta.websocket.server.ServerEndpointConfig;
 import org.apache.tomcat.websocket.server.WsServerContainer;
 
-import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.lang.Nullable;
-import org.springframework.web.socket.server.HandshakeFailureException;
-
 /**
- * A WebSocket {@code RequestUpgradeStrategy} for Apache Tomcat. Compatible with
- * Tomcat 10 and higher.
+ * A WebSocket {@code RequestUpgradeStrategy} for Apache Tomcat. Compatible with Tomcat 10
+ * and higher, in particular with Tomcat 10.0 (not based on Jakarta WebSocket 2.1 yet).
  *
  * <p>To modify properties of the underlying {@link jakarta.websocket.server.ServerContainer}
  * you can use {@link ServletServerContainerFactoryBean} in XML configuration or,
@@ -41,44 +33,18 @@ import org.springframework.web.socket.server.HandshakeFailureException;
  * "jakarta.websocket.server.ServerContainer" ServletContext attribute.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0
- * @see WsServerContainer#upgradeHttpToWebSocket
+ * @see org.apache.tomcat.websocket.server.WsServerContainer#upgradeHttpToWebSocket
  */
-public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrategy {
+public class TomcatRequestUpgradeStrategy extends StandardWebSocketUpgradeStrategy {
 
 	@Override
-	public String[] getSupportedVersions() {
-		return new String[] {"13"};
-	}
+	protected void upgradeHttpToWebSocket(HttpServletRequest request, HttpServletResponse response,
+			ServerEndpointConfig endpointConfig, Map<String, String> pathParams) throws Exception {
 
-	@Override
-	public void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
-			@Nullable String selectedProtocol, List<Extension> selectedExtensions, Endpoint endpoint)
-			throws HandshakeFailureException {
-
-		HttpServletRequest servletRequest = getHttpServletRequest(request);
-		HttpServletResponse servletResponse = getHttpServletResponse(response);
-
-		StringBuffer requestUrl = servletRequest.getRequestURL();
-		String path = servletRequest.getRequestURI();  // shouldn't matter
-		Map<String, String> pathParams = Collections.<String, String> emptyMap();
-
-		ServerEndpointRegistration endpointConfig = new ServerEndpointRegistration(path, endpoint);
-		endpointConfig.setSubprotocols(Collections.singletonList(selectedProtocol));
-		endpointConfig.setExtensions(selectedExtensions);
-
-		try {
-			getContainer(servletRequest).upgradeHttpToWebSocket(servletRequest, servletResponse, endpointConfig, pathParams);
-		}
-		catch (Exception ex) {
-			throw new HandshakeFailureException(
-					"Servlet request failed to upgrade to WebSocket: " + requestUrl, ex);
-		}
-	}
-
-	@Override
-	public WsServerContainer getContainer(HttpServletRequest request) {
-		return (WsServerContainer) super.getContainer(request);
+		((WsServerContainer) getContainer(request)).upgradeHttpToWebSocket(
+				request, response, endpointConfig, pathParams);
 	}
 
 }

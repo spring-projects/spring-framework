@@ -49,7 +49,7 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
  */
 public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
-	private static final String[] SUPPORTED_VERSIONS = new String[] { String.valueOf(13) };
+	private static final String[] SUPPORTED_VERSIONS = new String[] {"13"};
 
 
 	@Override
