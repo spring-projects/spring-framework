@@ -26,10 +26,12 @@ import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -60,6 +62,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * Default {@link ServerRequest.Builder} implementation.
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  * @since 5.2
  */
 class DefaultServerRequestBuilder implements ServerRequest.Builder {
@@ -211,6 +214,8 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 		private final List<HttpMessageConverter<?>> messageConverters;
 
+		private final Set<Class<?>> genericConverterClasses = new HashSet<>();
+
 		private final MultiValueMap<String, String> params;
 
 		@Nullable
@@ -231,6 +236,13 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 			this.remoteAddress = remoteAddress;
 			this.body = body;
 			this.messageConverters = messageConverters;
+
+			// Precompute costly instanceof GenericHttpMessageConverter checks
+			for (HttpMessageConverter<?> messageConverter : messageConverters) {
+				if (messageConverter instanceof GenericHttpMessageConverter<?>) {
+					this.genericConverterClasses.add(messageConverter.getClass());
+				}
+			}
 		}
 
 		@Override
@@ -299,7 +311,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 			MediaType contentType = headers().contentType().orElse(MediaType.APPLICATION_OCTET_STREAM);
 
 			for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
-				if (messageConverter instanceof GenericHttpMessageConverter) {
+				if (this.genericConverterClasses.contains(messageConverter)) {
 					GenericHttpMessageConverter<T> genericMessageConverter =
 							(GenericHttpMessageConverter<T>) messageConverter;
 					if (genericMessageConverter.canRead(bodyType, bodyClass, contentType)) {

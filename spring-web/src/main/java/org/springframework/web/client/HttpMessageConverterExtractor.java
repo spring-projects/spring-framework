@@ -18,7 +18,9 @@ package org.springframework.web.client;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,6 +41,7 @@ import org.springframework.util.FileCopyUtils;
  *
  * @author Arjen Poutsma
  * @author Sam Brannen
+ * @author Sebastien Deleuze
  * @since 3.0
  * @param <T> the data type
  * @see RestTemplate
@@ -51,6 +54,8 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 	private final Class<T> responseClass;
 
 	private final List<HttpMessageConverter<?>> messageConverters;
+
+	private final Set<Class<?>> genericConverterClasses = new HashSet<>();
 
 	private final Log logger;
 
@@ -80,8 +85,14 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 		this.responseClass = (responseType instanceof Class ? (Class<T>) responseType : null);
 		this.messageConverters = messageConverters;
 		this.logger = logger;
-	}
 
+		// Precompute costly instanceof GenericHttpMessageConverter checks
+		for (HttpMessageConverter<?> messageConverter : messageConverters) {
+			if (messageConverter instanceof GenericHttpMessageConverter<?>) {
+				this.genericConverterClasses.add(messageConverter.getClass());
+			}
+		}
+	}
 
 	@Override
 	@SuppressWarnings({"unchecked", "rawtypes", "resource"})
@@ -94,7 +105,7 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 
 		try {
 			for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
-				if (messageConverter instanceof GenericHttpMessageConverter) {
+				if (this.genericConverterClasses.contains(messageConverter.getClass())) {
 					GenericHttpMessageConverter<?> genericMessageConverter =
 							(GenericHttpMessageConverter<?>) messageConverter;
 					if (genericMessageConverter.canRead(this.responseType, null, contentType)) {

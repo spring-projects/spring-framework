@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -73,6 +74,7 @@ import org.springframework.web.util.UriBuilder;
  *
  * @author Arjen Poutsma
  * @author Sam Brannen
+ * @author Sebastien Deleuze
  * @since 5.2
  */
 class DefaultServerRequest implements ServerRequest {
@@ -84,6 +86,8 @@ class DefaultServerRequest implements ServerRequest {
 	private final Headers headers;
 
 	private final List<HttpMessageConverter<?>> messageConverters;
+
+	private final Set<Class<?>> genericConverterClasses = new HashSet<>();
 
 	private final MultiValueMap<String, String> params;
 
@@ -102,10 +106,16 @@ class DefaultServerRequest implements ServerRequest {
 		this.attributes = new ServletAttributesMap(servletRequest);
 
 		// DispatcherServlet parses the path but for other scenarios (e.g. tests) we might need to
-
 		this.requestPath = (ServletRequestPathUtils.hasParsedRequestPath(servletRequest) ?
 				ServletRequestPathUtils.getParsedRequestPath(servletRequest) :
 				ServletRequestPathUtils.parseAndCache(servletRequest));
+
+		// Precompute costly instanceof GenericHttpMessageConverter checks
+		for (HttpMessageConverter<?> messageConverter : messageConverters) {
+			if (messageConverter instanceof GenericHttpMessageConverter<?>) {
+				this.genericConverterClasses.add(messageConverter.getClass());
+			}
+		}
 	}
 
 	@Override
@@ -194,7 +204,8 @@ class DefaultServerRequest implements ServerRequest {
 		MediaType contentType = this.headers.contentType().orElse(MediaType.APPLICATION_OCTET_STREAM);
 
 		for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
-			if (messageConverter instanceof GenericHttpMessageConverter<?> genericMessageConverter) {
+			if (this.genericConverterClasses.contains(messageConverter)) {
+				GenericHttpMessageConverter<?> genericMessageConverter = (GenericHttpMessageConverter<?>) messageConverter;
 				if (genericMessageConverter.canRead(bodyType, bodyClass, contentType)) {
 					return (T) genericMessageConverter.read(bodyType, bodyClass, this.serverHttpRequest);
 				}

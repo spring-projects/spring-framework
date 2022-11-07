@@ -22,6 +22,7 @@ import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -146,6 +147,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 	private final List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
 
+	private final Set<Class<?>> genericConverterClasses = new HashSet<>();
+
 	private ResponseErrorHandler errorHandler = new DefaultResponseErrorHandler();
 
 	private UriTemplateHandler uriTemplateHandler;
@@ -216,7 +219,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			this.messageConverters.add(new KotlinSerializationCborHttpMessageConverter());
 		}
 
-		updateErrorHandlerConverters();
+		postProcessConverters();
 		this.uriTemplateHandler = initUriTemplateHandler();
 	}
 
@@ -241,13 +244,20 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		validateConverters(messageConverters);
 		this.messageConverters.addAll(messageConverters);
 		this.uriTemplateHandler = initUriTemplateHandler();
-		updateErrorHandlerConverters();
+		postProcessConverters();
 	}
 
 
-	private void updateErrorHandlerConverters() {
+	private void postProcessConverters() {
 		if (this.errorHandler instanceof DefaultResponseErrorHandler handler) {
 			handler.setMessageConverters(this.messageConverters);
+		}
+
+		// Precompute costly instanceof GenericHttpMessageConverter checks
+		for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
+			if (messageConverter instanceof GenericHttpMessageConverter<?>) {
+				this.genericConverterClasses.add(messageConverter.getClass());
+			}
 		}
 	}
 
@@ -269,7 +279,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			this.messageConverters.clear();
 			this.messageConverters.addAll(messageConverters);
 		}
-		updateErrorHandlerConverters();
+		postProcessConverters();
 	}
 
 	private void validateConverters(List<HttpMessageConverter<?>> messageConverters) {
@@ -292,7 +302,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	public void setErrorHandler(ResponseErrorHandler errorHandler) {
 		Assert.notNull(errorHandler, "ResponseErrorHandler must not be null");
 		this.errorHandler = errorHandler;
-		updateErrorHandlerConverters();
+		postProcessConverters();
 	}
 
 	/**
@@ -1001,9 +1011,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			if (responseClass != null) {
 				return converter.canRead(responseClass, null);
 			}
-			else if (converter instanceof GenericHttpMessageConverter) {
-				GenericHttpMessageConverter<?> genericConverter = (GenericHttpMessageConverter<?>) converter;
-				return genericConverter.canRead(responseType, null, null);
+			else if (genericConverterClasses.contains(converter.getClass())) {
+				return ((GenericHttpMessageConverter<?>) converter).canRead(responseType, null, null);
 			}
 			return false;
 		}
@@ -1070,7 +1079,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				HttpHeaders requestHeaders = this.requestEntity.getHeaders();
 				MediaType requestContentType = requestHeaders.getContentType();
 				for (HttpMessageConverter<?> messageConverter : getMessageConverters()) {
-					if (messageConverter instanceof GenericHttpMessageConverter) {
+					if (genericConverterClasses.contains(messageConverter.getClass())) {
 						GenericHttpMessageConverter<Object> genericConverter =
 								(GenericHttpMessageConverter<Object>) messageConverter;
 						if (genericConverter.canWrite(requestBodyType, requestBodyClass, requestContentType)) {

@@ -73,6 +73,7 @@ import org.springframework.web.util.UrlPathHelper;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 3.1
  */
 public abstract class AbstractMessageConverterMethodProcessor extends AbstractMessageConverterMethodArgumentResolver
@@ -280,7 +281,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		if (selectedMediaType != null) {
 			selectedMediaType = selectedMediaType.removeQualityValue();
 			for (HttpMessageConverter<?> converter : this.messageConverters) {
-				GenericHttpMessageConverter genericConverter = (converter instanceof GenericHttpMessageConverter ?
+				GenericHttpMessageConverter genericConverter = (this.genericConverterClasses.contains(converter.getClass()) ?
 						(GenericHttpMessageConverter<?>) converter : null);
 				if (genericConverter != null ?
 						((GenericHttpMessageConverter) converter).canWrite(targetType, valueType, selectedMediaType) :
@@ -383,7 +384,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		}
 		Set<MediaType> result = new LinkedHashSet<>();
 		for (HttpMessageConverter<?> converter : this.messageConverters) {
-			if (converter instanceof GenericHttpMessageConverter && targetType != null) {
+			if (this.genericConverterClasses.contains(converter.getClass()) && targetType != null) {
 				if (((GenericHttpMessageConverter<?>) converter).canWrite(targetType, valueClass, null)) {
 					result.addAll(converter.getSupportedMediaTypes(valueClass));
 				}

@@ -23,6 +23,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -62,6 +63,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 3.1
  */
 public abstract class AbstractMessageConverterMethodArgumentResolver implements HandlerMethodArgumentResolver {
@@ -74,6 +76,8 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	protected final List<HttpMessageConverter<?>> messageConverters;
+
+	protected final Set<Class<?>> genericConverterClasses = new HashSet<>();
 
 	private final RequestResponseBodyAdviceChain advice;
 
@@ -95,6 +99,13 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 		Assert.notEmpty(converters, "'messageConverters' must not be empty");
 		this.messageConverters = converters;
 		this.advice = new RequestResponseBodyAdviceChain(requestResponseBodyAdvice);
+
+		// Precompute costly instanceof GenericHttpMessageConverter checks
+		for (HttpMessageConverter<?> converter : converters) {
+			if (converter instanceof GenericHttpMessageConverter<?>) {
+				this.genericConverterClasses.add(converter.getClass());
+			}
+		}
 	}
 
 
@@ -173,7 +184,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 			for (HttpMessageConverter<?> converter : this.messageConverters) {
 				Class<HttpMessageConverter<?>> converterType = (Class<HttpMessageConverter<?>>) converter.getClass();
 				GenericHttpMessageConverter<?> genericConverter =
-						(converter instanceof GenericHttpMessageConverter ? (GenericHttpMessageConverter<?>) converter : null);
+						(this.genericConverterClasses.contains(converter.getClass()) ? (GenericHttpMessageConverter<?>) converter : null);
 				if (genericConverter != null ? genericConverter.canRead(targetType, contextClass, contentType) :
 						(targetClass != null && converter.canRead(targetClass, contentType))) {
 					if (message.hasBody()) {
