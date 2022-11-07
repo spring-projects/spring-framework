@@ -92,13 +92,13 @@ public class StringHttpMessageConverterTests {
 
 	@Test
 	public void writeDefaultCharset() throws IOException {
-		String body = "H\u00e9llo W\u00f6rld";
+		String body = "H\u0065llo W\u006frld";
 		this.converter.write(body, null, this.outputMessage);
 
 		HttpHeaders headers = this.outputMessage.getHeaders();
-		assertThat(this.outputMessage.getBodyAsString(StandardCharsets.ISO_8859_1)).isEqualTo(body);
-		assertThat(headers.getContentType()).isEqualTo(new MediaType("text", "plain", StandardCharsets.ISO_8859_1));
-		assertThat(headers.getContentLength()).isEqualTo(body.getBytes(StandardCharsets.ISO_8859_1).length);
+		assertThat(this.outputMessage.getBodyAsString(StringHttpMessageConverter.DEFAULT_CHARSET)).isEqualTo(body);
+		assertThat(headers.getContentType()).isEqualTo(new MediaType("text", "plain", StringHttpMessageConverter.DEFAULT_CHARSET));
+		assertThat(headers.getContentLength()).isEqualTo(body.getBytes(StringHttpMessageConverter.DEFAULT_CHARSET).length);
 		assertThat(headers.getAcceptCharset().isEmpty()).isTrue();
 	}
 

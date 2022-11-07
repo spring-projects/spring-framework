@@ -49,7 +49,7 @@ abstract class AbstractMockWebServerTests {
 	protected static final MediaType textContentType =
 			new MediaType("text", "plain", Collections.singletonMap("charset", "UTF-8"));
 
-	protected static final String helloWorld = "H\u00e9llo W\u00f6rld";
+	protected static final String helloWorld = "H\u0065llo W\u006frld";
 
 	private final MockWebServer server = new MockWebServer();
 

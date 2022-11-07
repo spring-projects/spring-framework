@@ -46,16 +46,16 @@ public class ContentAssertionTests {
 		testClient.get().uri("/handle").accept(MediaType.TEXT_PLAIN)
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().contentType(MediaType.valueOf("text/plain;charset=ISO-8859-1"))
-				.expectHeader().contentType("text/plain;charset=ISO-8859-1")
+				.expectHeader().contentType(MediaType.valueOf("text/plain;charset=UTF-8"))
+				.expectHeader().contentType("text/plain;charset=UTF-8")
 				.expectHeader().contentTypeCompatibleWith("text/plain")
 				.expectHeader().contentTypeCompatibleWith(MediaType.TEXT_PLAIN);
 
-		testClient.get().uri("/handleUtf8")
+		testClient.get().uri("/handleIso8859-1")
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().contentType(MediaType.valueOf("text/plain;charset=UTF-8"))
-				.expectHeader().contentType("text/plain;charset=UTF-8")
+				.expectHeader().contentType(MediaType.valueOf("text/plain;charset=ISO-8859-1"))
+				.expectHeader().contentType("text/plain;charset=ISO-8859-1")
 				.expectHeader().contentTypeCompatibleWith("text/plain")
 				.expectHeader().contentTypeCompatibleWith(MediaType.TEXT_PLAIN);
 	}
@@ -66,22 +66,23 @@ public class ContentAssertionTests {
 		testClient.get().uri("/handle").accept(MediaType.TEXT_PLAIN)
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(String.class).isEqualTo("Hello world!");
+				.expectBody(String.class).isEqualTo("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01");
 
-		testClient.get().uri("/handleUtf8").accept(MediaType.TEXT_PLAIN)
+		testClient.get().uri("/handleIso8859-1").accept(MediaType.TEXT_PLAIN)
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(String.class).isEqualTo("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01");
+				.expectBody(String.class).isEqualTo("Hello world!");
 
 		// Hamcrest matchers...
 		testClient.get().uri("/handle").accept(MediaType.TEXT_PLAIN)
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(String.class).value(equalTo("Hello world!"));
-		testClient.get().uri("/handleUtf8")
+				.expectBody(String.class).value(equalTo("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01"));
+
+		testClient.get().uri("/handleIso8859-1")
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(String.class).value(equalTo("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01"));
+				.expectBody(String.class).value(equalTo("Hello world!"));
 	}
 
 	@Test
@@ -93,7 +94,7 @@ public class ContentAssertionTests {
 				.expectBody(byte[].class).isEqualTo(
 				"Hello world!".getBytes(StandardCharsets.ISO_8859_1));
 
-		testClient.get().uri("/handleUtf8")
+		testClient.get().uri("/handleIso8859-1")
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody(byte[].class).isEqualTo(
@@ -114,15 +115,15 @@ public class ContentAssertionTests {
 		testClient.get().uri("/handle").accept(MediaType.TEXT_PLAIN)
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().contentType("text/plain;charset=ISO-8859-1")
-				.expectBody(String.class).value(containsString("world"));
-
-		testClient.get().uri("/handleUtf8")
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader().contentType("text/plain;charset=UTF-8")
+				.expectHeader().contentType("text/plain")
 				.expectBody(byte[].class)
 				.isEqualTo("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01".getBytes(StandardCharsets.UTF_8));
+
+		testClient.get().uri("/handleIso8859-1")
+				.exchange()
+				.expectStatus().isOk()
+				.expectHeader().contentType("text/plain;charset=ISO-8859-1")
+				.expectBody(String.class).value(containsString("world"));
 	}
 
 
@@ -132,13 +133,13 @@ public class ContentAssertionTests {
 		@RequestMapping(value="/handle", produces="text/plain")
 		@ResponseBody
 		public String handle() {
-			return "Hello world!";
+			return "\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01";	// "Hello world! (Japanese)
 		}
 
-		@RequestMapping(value="/handleUtf8", produces="text/plain;charset=UTF-8")
+		@RequestMapping(value="/handleIso8859-1", produces="text/plain;charset=ISO-8859-1")
 		@ResponseBody
 		public String handleWithCharset() {
-			return "\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01";	// "Hello world! (Japanese)
+			return "Hello world!";
 		}
 	}
 
