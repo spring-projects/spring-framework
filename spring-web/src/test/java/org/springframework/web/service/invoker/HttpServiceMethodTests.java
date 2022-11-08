@@ -63,10 +63,8 @@ public class HttpServiceMethodTests {
 
 
 	@BeforeEach
-	@SuppressWarnings("deprecation")
 	void setUp() throws Exception {
 		this.proxyFactory = HttpServiceProxyFactory.builder(this.client).build();
-		this.proxyFactory.afterPropertiesSet();
 	}
 
 

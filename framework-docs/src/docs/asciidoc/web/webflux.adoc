@@ -1,4 +1,5 @@
 [[webflux]]
+:chapter: webflux
 = Spring WebFlux
 :doc-spring-security: {doc-root}/spring-security/reference
 
@@ -1199,7 +1200,7 @@ instance. The `View` is then used to render the response.
 
 [[webflux-viewresolution-handling]]
 ==== Handling
-[.small]#<<web.adoc#mvc-handling, Web MVC>>#
+[.small]#<<web.adoc#mvc-viewresolver-handling, Web MVC>>#
 
 The `HandlerResult` passed into `ViewResolutionResultHandler` contains the return value
 from the handler and the model that contains attributes added during request

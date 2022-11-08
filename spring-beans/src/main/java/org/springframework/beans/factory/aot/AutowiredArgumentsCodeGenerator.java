@@ -28,14 +28,11 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Code generator to apply {@link AutowiredArguments}.
- * <p>
- * Generates code in the form:<pre class="code">{@code
- * args.get(0), args.get(1)
- * }</pre> or <pre class="code">{@code
- * args.get(0, String.class), args.get(1, Integer.class)
- * }</pre>
- * <p>
- * The simpler form is only used if the target method or constructor is
+ *
+ * <p>Generates code in the form: {@code args.get(0), args.get(1)} or
+ * {@code args.get(0, String.class), args.get(1, Integer.class)}
+ *
+ * <p>The simpler form is only used if the target method or constructor is
  * unambiguous.
  *
  * @author Phillip Webb

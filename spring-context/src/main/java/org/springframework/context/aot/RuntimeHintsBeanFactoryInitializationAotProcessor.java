@@ -16,12 +16,8 @@
 
 package org.springframework.context.aot;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,12 +32,8 @@ import org.springframework.beans.factory.aot.AotServices;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotProcessor;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.ImportRuntimeHints;
-import org.springframework.core.annotation.MergedAnnotation;
-import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.log.LogMessage;
 import org.springframework.lang.Nullable;
 
@@ -54,6 +46,8 @@ import org.springframework.lang.Nullable;
  *
  * @author Brian Clozel
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
+ * @since 6.0
  */
 class RuntimeHintsBeanFactoryInitializationAotProcessor implements BeanFactoryInitializationAotProcessor {
 
@@ -67,56 +61,16 @@ class RuntimeHintsBeanFactoryInitializationAotProcessor implements BeanFactoryIn
 				.collect(LinkedHashMap::new, (map, item) -> map.put(item.getClass(), item), Map::putAll);
 		extractFromBeanFactory(beanFactory).forEach(registrarClass ->
 				registrars.computeIfAbsent(registrarClass, BeanUtils::instantiateClass));
-		return new RuntimeHintsRegistrarContribution(registrars.values(),
-				beanFactory.getBeanClassLoader());
+		return new RuntimeHintsRegistrarContribution(registrars.values(), beanFactory.getBeanClassLoader());
 	}
 
 	private Set<Class<? extends RuntimeHintsRegistrar>> extractFromBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		Set<Class<? extends RuntimeHintsRegistrar>> registrarClasses = new LinkedHashSet<>();
-		for (String beanName : beanFactory
-				.getBeanNamesForAnnotation(ImportRuntimeHints.class)) {
-			findAnnotationsOnBean(beanFactory, beanName,
-					ImportRuntimeHints.class).forEach(annotation ->
-					registrarClasses.addAll(extractFromBeanDefinition(beanName, annotation)));
+		for (String beanName : beanFactory.getBeanDefinitionNames()) {
+			beanFactory.findAllAnnotationsOnBean(beanName, ImportRuntimeHints.class, true)
+					.forEach(annotation -> registrarClasses.addAll(extractFromBeanDefinition(beanName, annotation)));
 		}
 		return registrarClasses;
-	}
-
-	private <A extends Annotation> List<A> findAnnotationsOnBean(ConfigurableListableBeanFactory beanFactory,
-			String beanName, Class<A> annotationType) {
-
-		List<A> annotations = new ArrayList<>();
-		Class<?> beanType = beanFactory.getType(beanName, true);
-		if (beanType != null) {
-				MergedAnnotations.from(beanType, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY)
-						.stream(annotationType)
-						.filter(MergedAnnotation::isPresent)
-						.forEach(mergedAnnotation -> annotations.add(mergedAnnotation.synthesize()));
-		}
-		if (beanFactory.containsBeanDefinition(beanName)) {
-			BeanDefinition bd = beanFactory.getBeanDefinition(beanName);
-			if (bd instanceof RootBeanDefinition rbd) {
-				// Check raw bean class, e.g. in case of a proxy.
-				if (rbd.hasBeanClass() && rbd.getFactoryMethodName() == null) {
-					Class<?> beanClass = rbd.getBeanClass();
-					if (beanClass != beanType) {
-						MergedAnnotations.from(beanClass, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY)
-								.stream(annotationType)
-								.filter(MergedAnnotation::isPresent)
-								.forEach(mergedAnnotation -> annotations.add(mergedAnnotation.synthesize()));
-					}
-				}
-				// Check annotations declared on factory method, if any.
-				Method factoryMethod = rbd.getResolvedFactoryMethod();
-				if (factoryMethod != null) {
-					MergedAnnotations.from(factoryMethod, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY)
-							.stream(annotationType)
-							.filter(MergedAnnotation::isPresent)
-							.forEach(mergedAnnotation -> annotations.add(mergedAnnotation.synthesize()));
-				}
-			}
-		}
-		return annotations;
 	}
 
 	private Set<Class<? extends RuntimeHintsRegistrar>> extractFromBeanDefinition(String beanName,
@@ -125,9 +79,8 @@ class RuntimeHintsBeanFactoryInitializationAotProcessor implements BeanFactoryIn
 		Set<Class<? extends RuntimeHintsRegistrar>> registrars = new LinkedHashSet<>();
 		for (Class<? extends RuntimeHintsRegistrar> registrarClass : annotation.value()) {
 			if (logger.isTraceEnabled()) {
-				logger.trace(
-						LogMessage.format("Loaded [%s] registrar from annotated bean [%s]",
-								registrarClass.getCanonicalName(), beanName));
+				logger.trace(LogMessage.format("Loaded [%s] registrar from annotated bean [%s]",
+						registrarClass.getCanonicalName(), beanName));
 			}
 			registrars.add(registrarClass);
 		}
@@ -135,26 +88,24 @@ class RuntimeHintsBeanFactoryInitializationAotProcessor implements BeanFactoryIn
 	}
 
 
-	static class RuntimeHintsRegistrarContribution
-			implements BeanFactoryInitializationAotContribution {
-
+	static class RuntimeHintsRegistrarContribution implements BeanFactoryInitializationAotContribution {
 
 		private final Iterable<RuntimeHintsRegistrar> registrars;
 
 		@Nullable
 		private final ClassLoader beanClassLoader;
 
-
 		RuntimeHintsRegistrarContribution(Iterable<RuntimeHintsRegistrar> registrars,
 				@Nullable ClassLoader beanClassLoader) {
+
 			this.registrars = registrars;
 			this.beanClassLoader = beanClassLoader;
 		}
 
-
 		@Override
 		public void applyTo(GenerationContext generationContext,
 				BeanFactoryInitializationCode beanFactoryInitializationCode) {
+
 			RuntimeHints hints = generationContext.getRuntimeHints();
 			this.registrars.forEach(registrar -> {
 				if (logger.isTraceEnabled()) {
@@ -165,7 +116,6 @@ class RuntimeHintsBeanFactoryInitializationAotProcessor implements BeanFactoryIn
 				registrar.registerHints(hints, this.beanClassLoader);
 			});
 		}
-
 	}
 
 }

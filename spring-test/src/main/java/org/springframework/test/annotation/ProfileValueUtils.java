@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -187,7 +187,7 @@ public abstract class ProfileValueUtils {
 		String environmentValue = profileValueSource.get(ifProfileValue.name());
 		String[] annotatedValues = ifProfileValue.values();
 		if (StringUtils.hasLength(ifProfileValue.value())) {
-			Assert.isTrue(annotatedValues.length == 0, () -> "Setting both the 'value' and 'values' attributes " +
+			Assert.isTrue(annotatedValues.length == 0, "Setting both the 'value' and 'values' attributes " +
 						"of @IfProfileValue is not allowed: choose one or the other.");
 			annotatedValues = new String[] { ifProfileValue.value() };
 		}

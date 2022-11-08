@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,10 +169,7 @@ public final class Conventions {
 		Assert.notNull(method, "Method must not be null");
 
 		if (Object.class == resolvedType) {
-			if (value == null) {
-				throw new IllegalArgumentException(
-						"Cannot generate variable name for an Object return type with null value");
-			}
+			Assert.notNull(value, "Cannot generate variable name for an Object return type with null value");
 			return getVariableName(value);
 		}
 

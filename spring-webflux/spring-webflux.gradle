@@ -11,6 +11,7 @@ dependencies {
 	optional(project(":spring-context-support"))  // for FreeMarker support
 	optional("jakarta.servlet:jakarta.servlet-api")
 	optional("jakarta.websocket:jakarta.websocket-api")
+	optional("jakarta.websocket:jakarta.websocket-client-api")
 	optional("org.webjars:webjars-locator-core")
 	optional("org.freemarker:freemarker")
 	optional("com.fasterxml.jackson.core:jackson-databind")
@@ -25,7 +26,7 @@ dependencies {
 		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
 	}
 	optional("org.eclipse.jetty.websocket:websocket-jetty-client")
-	optional("io.undertow:undertow-websockets-jsr-jakarta")
+	optional("io.undertow:undertow-websockets-jsr")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("com.google.protobuf:protobuf-java-util")

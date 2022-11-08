@@ -184,7 +184,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 		}
 		else {
 			String[] locations = mergedContextConfiguration.getLocations();
-			Assert.notNull(locations, """
+			Assert.notNull(locations, () -> """
 					Cannot load an ApplicationContext with a NULL 'locations' array. \
 					Consider annotating test class [%s] with @ContextConfiguration or \
 					@ContextHierarchy.""".formatted(mergedContextConfiguration.getTestClass().getName()));
@@ -224,7 +224,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 
 	private ContextLoader getContextLoader(MergedContextConfiguration mergedConfig) {
 		ContextLoader contextLoader = mergedConfig.getContextLoader();
-		Assert.notNull(contextLoader, """
+		Assert.notNull(contextLoader, () -> """
 				Cannot load an ApplicationContext with a NULL 'contextLoader'. \
 				Consider annotating test class [%s] with @ContextConfiguration or \
 				@ContextHierarchy.""".formatted(mergedConfig.getTestClass().getName()));

@@ -38,7 +38,7 @@ public interface BodyExtractor<T, M extends ReactiveHttpInputMessage> {
 
 	/**
 	 * Extract from the given input message.
-	 * @param inputMessage the request to extract from
+	 * @param inputMessage the message to extract from
 	 * @param context the configuration to use
 	 * @return the extracted data
 	 */
@@ -52,7 +52,7 @@ public interface BodyExtractor<T, M extends ReactiveHttpInputMessage> {
 
 		/**
 		 * Return the {@link HttpMessageReader HttpMessageReaders} to be used for body extraction.
-		 * @return the stream of message readers
+		 * @return the list of message readers
 		 */
 		List<HttpMessageReader<?>> messageReaders();
 

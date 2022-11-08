@@ -65,9 +65,10 @@ class MockCookieTests {
 		assertCookie(cookie, "SESSION", "123");
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void parseHeaderWithAttributes() {
-		MockCookie cookie = MockCookie.parse("SESSION=123; Comment=Session Cookie; Domain=example.com; Max-Age=60; " +
+		MockCookie cookie = MockCookie.parse("SESSION=123; Domain=example.com; Max-Age=60; " +
 				"Expires=Tue, 8 Oct 2019 19:50:00 GMT; Path=/; Secure; HttpOnly; SameSite=Lax");
 
 		assertCookie(cookie, "SESSION", "123");
@@ -79,7 +80,7 @@ class MockCookieTests {
 		assertThat(cookie.getExpires()).isEqualTo(ZonedDateTime.parse("Tue, 8 Oct 2019 19:50:00 GMT",
 				DateTimeFormatter.RFC_1123_DATE_TIME));
 		assertThat(cookie.getSameSite()).isEqualTo("Lax");
-		assertThat(cookie.getComment()).isEqualTo("Session Cookie");
+		assertThat(cookie.getComment()).isNull();
 	}
 
 	@ParameterizedTest

@@ -36,6 +36,7 @@ import org.springframework.util.StringUtils;
  * @author Sam Brannen
  * @since 5.1
  */
+@SuppressWarnings("removal")
 public class MockCookie extends Cookie {
 
 	private static final long serialVersionUID = 4312531139502726325L;

@@ -113,7 +113,7 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 	@Override
 	public DefaultClientResponseBuilder statusCode(HttpStatusCode statusCode) {
-		Assert.notNull(statusCode, "StatusCode must not be null");
+		Assert.notNull(statusCode, "HttpStatusCode must not be null");
 		this.statusCode = statusCode;
 		return this;
 	}

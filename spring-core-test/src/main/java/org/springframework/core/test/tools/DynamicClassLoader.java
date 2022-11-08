@@ -155,7 +155,7 @@ public class DynamicClassLoader extends ClassLoader {
 
 	private static Method lookupMethod(Class<?> target, String name, Class<?>... parameterTypes) {
 		Method method = ReflectionUtils.findMethod(target, name, parameterTypes);
-		Assert.notNull(method, "Expected method '" + name + "' on '" + target.getName());
+		Assert.notNull(method, () -> "Could not find method '%s' on '%s'".formatted(name, target.getName()));
 		return method;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ public class InjectionPoint {
 	 * @since 5.0
 	 */
 	protected final MethodParameter obtainMethodParameter() {
-		Assert.state(this.methodParameter != null, "Neither Field nor MethodParameter");
+		Assert.state(this.methodParameter != null, "MethodParameter is not available");
 		return this.methodParameter;
 	}
 

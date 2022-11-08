@@ -33,7 +33,7 @@ import org.springframework.util.Assert;
 /**
  * A {@link BeanRegistrationCodeFragments} decorator implementation. Typically
  * used when part of the default code fragments have to customized, by extending
- * this class and use it as part of
+ * this class and using it as part of
  * {@link BeanRegistrationAotContribution#withCustomCodeFragments(UnaryOperator)}.
  *
  * @author Phillip Webb
@@ -41,7 +41,6 @@ import org.springframework.util.Assert;
  * @since 6.0
  */
 public class BeanRegistrationCodeFragmentsDecorator implements BeanRegistrationCodeFragments {
-
 
 	private final BeanRegistrationCodeFragments delegate;
 
@@ -52,9 +51,7 @@ public class BeanRegistrationCodeFragmentsDecorator implements BeanRegistrationC
 	}
 
 	@Override
-	public ClassName getTarget(RegisteredBean registeredBean,
-			Executable constructorOrFactoryMethod) {
-
+	public ClassName getTarget(RegisteredBean registeredBean, Executable constructorOrFactoryMethod) {
 		return this.delegate.getTarget(registeredBean, constructorOrFactoryMethod);
 	}
 
@@ -64,7 +61,6 @@ public class BeanRegistrationCodeFragmentsDecorator implements BeanRegistrationC
 
 		return this.delegate.generateNewBeanDefinitionCode(generationContext,
 				beanType, beanRegistrationCode);
-
 	}
 
 	@Override
@@ -75,7 +71,6 @@ public class BeanRegistrationCodeFragmentsDecorator implements BeanRegistrationC
 
 		return this.delegate.generateSetBeanDefinitionPropertiesCode(
 				generationContext, beanRegistrationCode, beanDefinition, attributeFilter);
-
 	}
 
 	@Override
@@ -101,8 +96,7 @@ public class BeanRegistrationCodeFragmentsDecorator implements BeanRegistrationC
 	public CodeBlock generateReturnCode(GenerationContext generationContext,
 			BeanRegistrationCode beanRegistrationCode) {
 
-		return this.delegate.generateReturnCode(generationContext,
-				beanRegistrationCode);
+		return this.delegate.generateReturnCode(generationContext, beanRegistrationCode);
 	}
 
 }

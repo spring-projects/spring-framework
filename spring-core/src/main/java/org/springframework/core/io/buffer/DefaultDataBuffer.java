@@ -425,7 +425,7 @@ public class DefaultDataBuffer implements DataBuffer {
 	 * @see io.netty.buffer.AbstractByteBufAllocator#calculateNewCapacity(int, int)
 	 */
 	private int calculateCapacity(int neededCapacity) {
-		Assert.isTrue(neededCapacity >= 0, "'neededCapacity' must >= 0");
+		Assert.isTrue(neededCapacity >= 0, "'neededCapacity' must be >= 0");
 
 		if (neededCapacity == CAPACITY_THRESHOLD) {
 			return CAPACITY_THRESHOLD;
