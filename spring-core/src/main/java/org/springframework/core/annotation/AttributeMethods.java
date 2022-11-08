@@ -109,7 +109,7 @@ final class AttributeMethods {
 		for (int i = 0; i < size(); i++) {
 			if (canThrowTypeNotPresentException(i)) {
 				try {
-					get(i).invoke(annotation);
+					AnnotationUtils.invokeAnnotationMethod(get(i), annotation);
 				}
 				catch (Throwable ex) {
 					return false;
@@ -134,7 +134,7 @@ final class AttributeMethods {
 		for (int i = 0; i < size(); i++) {
 			if (canThrowTypeNotPresentException(i)) {
 				try {
-					get(i).invoke(annotation);
+					AnnotationUtils.invokeAnnotationMethod(get(i), annotation);
 				}
 				catch (Throwable ex) {
 					throw new IllegalStateException("Could not obtain annotation attribute value for " +
