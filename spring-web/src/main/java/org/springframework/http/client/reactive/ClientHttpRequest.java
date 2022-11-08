@@ -17,6 +17,7 @@
 package org.springframework.http.client.reactive;
 
 import java.net.URI;
+import java.util.Map;
 
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
@@ -53,5 +54,8 @@ public interface ClientHttpRequest extends ReactiveHttpOutputMessage {
 	 * @since 5.3
 	 */
 	<T> T getNativeRequest();
+	
+	
+	Map<String, Object> getAttributes();
 
 }

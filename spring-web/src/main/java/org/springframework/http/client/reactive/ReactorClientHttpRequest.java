@@ -133,6 +133,10 @@ class ReactorClientHttpRequest extends AbstractClientHttpRequest implements Zero
 				.map(cookie -> new DefaultCookie(cookie.getName(), cookie.getValue()))
 				.forEach(this.request::addCookie);
 	}
+	
+	@Override
+	protected void applyAttributes() {
+	}
 
 	@Override
 	protected HttpHeaders initReadOnlyHeaders() {

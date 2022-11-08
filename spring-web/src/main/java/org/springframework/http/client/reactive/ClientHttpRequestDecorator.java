@@ -17,6 +17,7 @@
 package org.springframework.http.client.reactive;
 
 import java.net.URI;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
@@ -73,6 +74,11 @@ public class ClientHttpRequestDecorator implements ClientHttpRequest {
 	@Override
 	public MultiValueMap<String, HttpCookie> getCookies() {
 		return this.delegate.getCookies();
+	}
+	
+	@Override
+	public Map<String, Object> getAttributes() {
+		return this.delegate.getAttributes();
 	}
 
 	@Override

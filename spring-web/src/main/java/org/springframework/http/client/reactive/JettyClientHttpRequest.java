@@ -146,6 +146,12 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 	protected HttpHeaders initReadOnlyHeaders() {
 		return HttpHeaders.readOnlyHttpHeaders(new JettyHeadersAdapter(this.jettyRequest.getHeaders()));
 	}
+	
+	@Override
+	protected void applyAttributes() {
+		getAttributes().forEach((key, value) -> this.jettyRequest.attribute(key, value));
+	}
+	
 
 	public ReactiveRequest toReactiveRequest() {
 		return this.builder.build();
