@@ -154,7 +154,7 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	 * @see Schedulers#newBoundedElastic
 	 */
 	public void setBlockingOperationScheduler(Scheduler blockingOperationScheduler) {
-		Assert.notNull(blockingOperationScheduler, "FileCreationScheduler must not be null");
+		Assert.notNull(blockingOperationScheduler, "'blockingOperationScheduler' must not be null");
 		this.blockingOperationScheduler = blockingOperationScheduler;
 	}
 

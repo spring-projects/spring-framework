@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,8 @@ public abstract class BodyInserters {
 	 */
 	public static <T> BodyInserter<T, ReactiveHttpOutputMessage> fromValue(T body) {
 		Assert.notNull(body, "'body' must not be null");
-		Assert.isNull(registry.getAdapter(body.getClass()), "'body' should be an object, for reactive types use a variant specifying a publisher/producer and its related element type");
+		Assert.isNull(registry.getAdapter(body.getClass()),
+				"'body' should be an object, for reactive types use a variant specifying a publisher/producer and its related element type");
 		return (message, context) ->
 				writeWithMessageWriters(message, context, Mono.just(body), ResolvableType.forInstance(body), null);
 	}

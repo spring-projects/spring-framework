@@ -424,7 +424,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			buf.append("; Domain=").append(cookie.getDomain());
 		}
 		int maxAge = cookie.getMaxAge();
-		ZonedDateTime expires = (cookie instanceof MockCookie mockCookie? mockCookie.getExpires() : null);
+		ZonedDateTime expires = (cookie instanceof MockCookie mockCookie ? mockCookie.getExpires() : null);
 		if (maxAge >= 0) {
 			buf.append("; Max-Age=").append(maxAge);
 			buf.append("; Expires=");

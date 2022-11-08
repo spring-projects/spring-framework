@@ -31,14 +31,15 @@ import org.springframework.util.ReflectionUtils;
 /**
  * Internal code generator that can inject a value into a field or single-arg
  * method.
- * <p>
- * Generates code in the form:<pre class="code">{@code
+ *
+ * <p>Generates code in the form:
+ * <pre class="code">{@code
  * instance.age = value;
  * }</pre> or <pre class="code">{@code
  * instance.setAge(value);
  * }</pre>
- * <p>
- * Will also generate reflection based injection and register hints if the
+ *
+ * <p>Will also generate reflection based injection and register hints if the
  * member is not visible.
  *
  * @author Phillip Webb
@@ -59,18 +60,14 @@ class InjectionCodeGenerator {
 	}
 
 
-	CodeBlock generateInjectionCode(Member member, String instanceVariable,
-			CodeBlock resourceToInject) {
-
+	CodeBlock generateInjectionCode(Member member, String instanceVariable, CodeBlock resourceToInject) {
 		if (member instanceof Field field) {
 			return generateFieldInjectionCode(field, instanceVariable, resourceToInject);
 		}
 		if (member instanceof Method method) {
-			return generateMethodInjectionCode(method, instanceVariable,
-					resourceToInject);
+			return generateMethodInjectionCode(method, instanceVariable, resourceToInject);
 		}
-		throw new IllegalStateException(
-				"Unsupported member type " + member.getClass().getName());
+		throw new IllegalStateException("Unsupported member type " + member.getClass().getName());
 	}
 
 	private CodeBlock generateFieldInjectionCode(Field field, String instanceVariable,
@@ -87,8 +84,7 @@ class InjectionCodeGenerator {
 					"field", instanceVariable, resourceToInject);
 		}
 		else {
-			code.addStatement("$L.$L = $L", instanceVariable, field.getName(),
-					resourceToInject);
+			code.addStatement("$L.$L = $L", instanceVariable, field.getName(), resourceToInject);
 		}
 		return code.build();
 	}
@@ -105,14 +101,12 @@ class InjectionCodeGenerator {
 			code.addStatement("$T method = $T.findMethod($T.class, $S, $T.class)",
 					Method.class, ReflectionUtils.class, method.getDeclaringClass(),
 					method.getName(), method.getParameterTypes()[0]);
-			code.addStatement("$T.makeAccessible($L)", ReflectionUtils.class,
-					"method");
+			code.addStatement("$T.makeAccessible($L)", ReflectionUtils.class, "method");
 			code.addStatement("$T.invokeMethod($L, $L, $L)", ReflectionUtils.class,
 					"method", instanceVariable, resourceToInject);
 		}
 		else {
-			code.addStatement("$L.$L($L)", instanceVariable, method.getName(),
-					resourceToInject);
+			code.addStatement("$L.$L($L)", instanceVariable, method.getName(), resourceToInject);
 		}
 		return code.build();
 	}

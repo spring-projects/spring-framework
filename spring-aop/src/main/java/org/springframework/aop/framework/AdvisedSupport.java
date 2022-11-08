@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -334,8 +334,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		}
 		if (!CollectionUtils.isEmpty(advisors)) {
 			for (Advisor advisor : advisors) {
-				if (advisor instanceof IntroductionAdvisor) {
-					validateIntroductionAdvisor((IntroductionAdvisor) advisor);
+				if (advisor instanceof IntroductionAdvisor introductionAdvisor) {
+					validateIntroductionAdvisor(introductionAdvisor);
 				}
 				Assert.notNull(advisor, "Advisor must not be null");
 				this.advisors.add(advisor);

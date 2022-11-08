@@ -549,11 +549,11 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public void setParameters(Map<String, ?> params) {
 		Assert.notNull(params, "Parameter map must not be null");
 		params.forEach((key, value) -> {
-			if (value instanceof String) {
-				setParameter(key, (String) value);
+			if (value instanceof String str) {
+				setParameter(key, str);
 			}
-			else if (value instanceof String[]) {
-				setParameter(key, (String[]) value);
+			else if (value instanceof String[] strings) {
+				setParameter(key, strings);
 			}
 			else {
 				throw new IllegalArgumentException(
@@ -598,11 +598,11 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public void addParameters(Map<String, ?> params) {
 		Assert.notNull(params, "Parameter map must not be null");
 		params.forEach((key, value) -> {
-			if (value instanceof String) {
-				addParameter(key, (String) value);
+			if (value instanceof String str) {
+				addParameter(key, str);
 			}
-			else if (value instanceof String[]) {
-				addParameter(key, (String[]) value);
+			else if (value instanceof String[] strings) {
+				addParameter(key, strings);
 			}
 			else {
 				throw new IllegalArgumentException("Parameter map value must be single value " +
@@ -1083,8 +1083,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			header = new HeaderValueHolder();
 			this.headers.put(name, header);
 		}
-		if (value instanceof Collection) {
-			header.addValues((Collection<?>) value);
+		if (value instanceof Collection<?> collection) {
+			header.addValues(collection);
 		}
 		else if (value.getClass().isArray()) {
 			header.addValueArray(value);
@@ -1119,14 +1119,14 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public long getDateHeader(String name) {
 		HeaderValueHolder header = this.headers.get(name);
 		Object value = (header != null ? header.getValue() : null);
-		if (value instanceof Date) {
-			return ((Date) value).getTime();
+		if (value instanceof Date date) {
+			return date.getTime();
 		}
-		else if (value instanceof Number) {
-			return ((Number) value).longValue();
+		else if (value instanceof Number number) {
+			return number.longValue();
 		}
-		else if (value instanceof String) {
-			return parseDateHeader(name, (String) value);
+		else if (value instanceof String str) {
+			return parseDateHeader(name, str);
 		}
 		else if (value != null) {
 			throw new IllegalArgumentException(
@@ -1173,11 +1173,11 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public int getIntHeader(String name) {
 		HeaderValueHolder header = this.headers.get(name);
 		Object value = (header != null ? header.getValue() : null);
-		if (value instanceof Number) {
-			return ((Number) value).intValue();
+		if (value instanceof Number number) {
+			return number.intValue();
 		}
-		else if (value instanceof String) {
-			return Integer.parseInt((String) value);
+		else if (value instanceof String str) {
+			return Integer.parseInt(str);
 		}
 		else if (value != null) {
 			throw new NumberFormatException("Value for header '" + name + "' is not a Number: " + value);
@@ -1248,8 +1248,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public boolean isUserInRole(String role) {
-		return (this.userRoles.contains(role) || (this.servletContext instanceof MockServletContext &&
-				((MockServletContext) this.servletContext).getDeclaredRoles().contains(role)));
+		return (this.userRoles.contains(role) ||
+				(this.servletContext instanceof MockServletContext mockContext &&
+						mockContext.getDeclaredRoles().contains(role)));
 	}
 
 	public void setUserPrincipal(@Nullable Principal userPrincipal) {
@@ -1321,7 +1322,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public HttpSession getSession(boolean create) {
 		checkActive();
 		// Reset session if invalidated.
-		if (this.session instanceof MockHttpSession && ((MockHttpSession) this.session).isInvalid()) {
+		if (this.session instanceof MockHttpSession mockSession && mockSession.isInvalid()) {
 			this.session = null;
 		}
 		// Create new session if necessary.
@@ -1346,8 +1347,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	@Override
 	public String changeSessionId() {
 		Assert.isTrue(this.session != null, "The request does not have a session");
-		if (this.session instanceof MockHttpSession) {
-			return ((MockHttpSession) this.session).changeSessionId();
+		if (this.session instanceof MockHttpSession mockSession) {
+			return mockSession.changeSessionId();
 		}
 		return this.session.getId();
 	}
