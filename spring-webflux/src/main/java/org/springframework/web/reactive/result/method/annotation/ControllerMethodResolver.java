@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -330,38 +330,47 @@ class ControllerMethodResolver {
 	}
 
 	/**
-	 * Find an {@code @ExceptionHandler} method in {@code @ControllerAdvice}
-	 * components or in the controller of the given {@code @RequestMapping} method.
+	 * Look for an {@code @ExceptionHandler} method within the class of the given
+	 * controller method, and also within {@code @ControllerAdvice} classes that
+	 * are applicable to the class of the given controller method.
+	 * @param ex the exception to find a handler for
+	 * @param handlerMethod the controller method that raised the exception, or
+	 * if {@code null}, check only {@code @ControllerAdvice} classes.
 	 */
 	@Nullable
-	public InvocableHandlerMethod getExceptionHandlerMethod(Throwable ex, HandlerMethod handlerMethod) {
-		Class<?> handlerType = handlerMethod.getBeanType();
+	public InvocableHandlerMethod getExceptionHandlerMethod(Throwable ex, @Nullable HandlerMethod handlerMethod) {
 
-		// Controller-local first...
-		Object targetBean = handlerMethod.getBean();
-		Method targetMethod = this.exceptionHandlerCache
-				.computeIfAbsent(handlerType, ExceptionHandlerMethodResolver::new)
-				.resolveMethodByThrowable(ex);
+		Class<?> handlerType = (handlerMethod != null ? handlerMethod.getBeanType() : null);
+		Object exceptionHandlerObject = null;
+		Method exceptionHandlerMethod = null;
 
-		if (targetMethod == null) {
+		if (handlerType != null) {
+			// Controller-local first...
+			exceptionHandlerObject = handlerMethod.getBean();
+			exceptionHandlerMethod = this.exceptionHandlerCache
+					.computeIfAbsent(handlerType, ExceptionHandlerMethodResolver::new)
+					.resolveMethodByThrowable(ex);
+		}
+
+		if (exceptionHandlerMethod == null) {
 			// Global exception handlers...
 			for (Map.Entry<ControllerAdviceBean, ExceptionHandlerMethodResolver> entry : this.exceptionHandlerAdviceCache.entrySet()) {
 				ControllerAdviceBean advice = entry.getKey();
 				if (advice.isApplicableToBeanType(handlerType)) {
-					targetBean = advice.resolveBean();
-					targetMethod = entry.getValue().resolveMethodByThrowable(ex);
-					if (targetMethod != null) {
+					exceptionHandlerMethod = entry.getValue().resolveMethodByThrowable(ex);
+					if (exceptionHandlerMethod != null) {
+						exceptionHandlerObject = advice.resolveBean();
 						break;
 					}
 				}
 			}
 		}
 
-		if (targetMethod == null) {
+		if (exceptionHandlerObject == null || exceptionHandlerMethod == null) {
 			return null;
 		}
 
-		InvocableHandlerMethod invocable = new InvocableHandlerMethod(targetBean, targetMethod);
+		InvocableHandlerMethod invocable = new InvocableHandlerMethod(exceptionHandlerObject, exceptionHandlerMethod);
 		invocable.setArgumentResolvers(this.exceptionHandlerResolvers);
 		return invocable;
 	}

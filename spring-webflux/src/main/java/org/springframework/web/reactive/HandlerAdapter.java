@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,14 @@ import org.springframework.web.server.ServerWebExchange;
 /**
  * Contract that decouples the {@link DispatcherHandler} from the details of
  * invoking a handler and makes it possible to support any handler type.
+ *
+ * <p>A {@code HandlerAdapter} can implement {@link DispatchExceptionHandler}
+ * if it wants to handle an exception that occured before the request is mapped
+ * to a handler. This allows the {@code HandlerAdapter} to expose a consistent
+ * exception handling mechanism for any request handling error.
+ * In Reactive Streams terms, {@link #handle} processes the onNext, while
+ * {@link DispatchExceptionHandler#handleError} processes the onError signal
+ * from the upstream.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze

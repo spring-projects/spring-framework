@@ -150,8 +150,8 @@ public class DispatcherHandler implements WebHandler, PreFlightRequestHandler, A
 				.concatMap(mapping -> mapping.getHandler(exchange))
 				.next()
 				.switchIfEmpty(createNotFoundError())
-				.flatMap(handler -> invokeHandler(exchange, handler))
-				.flatMap(result -> handleResult(exchange, result));
+				.onErrorResume(ex -> handleDispatchError(exchange, ex))
+				.flatMap(handler -> handleRequestWith(exchange, handler));
 	}
 
 	private <R> Mono<R> createNotFoundError() {
@@ -161,14 +161,27 @@ public class DispatcherHandler implements WebHandler, PreFlightRequestHandler, A
 		});
 	}
 
-	private Mono<HandlerResult> invokeHandler(ServerWebExchange exchange, Object handler) {
+	private Mono<Void> handleDispatchError(ServerWebExchange exchange, Throwable ex) {
+		Mono<HandlerResult> resultMono = Mono.error(ex);
+		if (this.handlerAdapters != null) {
+			for (HandlerAdapter adapter : this.handlerAdapters) {
+				if (adapter instanceof DispatchExceptionHandler exceptionHandler) {
+					resultMono = resultMono.onErrorResume(ex2 -> exceptionHandler.handleError(exchange, ex2));
+				}
+			}
+		}
+		return resultMono.flatMap(result -> handleResult(exchange, result));
+	}
+
+	private Mono<Void> handleRequestWith(ServerWebExchange exchange, Object handler) {
 		if (ObjectUtils.nullSafeEquals(exchange.getResponse().getStatusCode(), HttpStatus.FORBIDDEN)) {
 			return Mono.empty();  // CORS rejection
 		}
 		if (this.handlerAdapters != null) {
-			for (HandlerAdapter handlerAdapter : this.handlerAdapters) {
-				if (handlerAdapter.supports(handler)) {
-					return handlerAdapter.handle(exchange, handler);
+			for (HandlerAdapter adapter : this.handlerAdapters) {
+				if (adapter.supports(handler)) {
+					return adapter.handle(exchange, handler)
+							.flatMap(result -> handleResult(exchange, result));
 				}
 			}
 		}
@@ -179,11 +192,10 @@ public class DispatcherHandler implements WebHandler, PreFlightRequestHandler, A
 		return getResultHandler(result).handleResult(exchange, result)
 				.checkpoint("Handler " + result.getHandler() + " [DispatcherHandler]")
 				.onErrorResume(ex ->
-						result.applyExceptionHandler(ex).flatMap(exResult -> {
-							String text = "Exception handler " + exResult.getHandler() +
-									", error=\"" + ex.getMessage() + "\" [DispatcherHandler]";
-							return getResultHandler(exResult).handleResult(exchange, exResult).checkpoint(text);
-						}));
+						result.applyExceptionHandler(ex).flatMap(exResult ->
+								getResultHandler(exResult).handleResult(exchange, exResult)
+										.checkpoint("Exception handler " + exResult.getHandler() + ", " +
+												"error=\"" + ex.getMessage() + "\" [DispatcherHandler]")));
 	}
 
 	private HandlerResultHandler getResultHandler(HandlerResult handlerResult) {
