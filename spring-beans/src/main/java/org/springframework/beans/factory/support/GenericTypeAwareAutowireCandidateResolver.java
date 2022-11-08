@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,6 +99,17 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 						if (targetType == null) {
 							targetType = getReturnTypeForFactoryMethod(dbd, descriptor);
 						}
+					}
+				}
+			}
+			else {
+				// Pre-existing target type: In case of a generic FactoryBean type,
+				// unwrap nested generic type when matching a non-FactoryBean type.
+				Class<?> resolvedClass = targetType.resolve();
+				if (resolvedClass != null && FactoryBean.class.isAssignableFrom(resolvedClass)) {
+					Class<?> typeToBeMatched = dependencyType.resolve();
+					if (typeToBeMatched != null && !FactoryBean.class.isAssignableFrom(typeToBeMatched)) {
+						targetType = targetType.getGeneric();
 					}
 				}
 			}
