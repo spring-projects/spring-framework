@@ -323,7 +323,8 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * (at class, interface or factory method level of the specified bean)
 	 * @return the names of all matching beans
 	 * @since 4.0
-	 * @see #findAnnotationOnBean
+	 * @see #getBeansWithAnnotation(Class)
+	 * @see #findAnnotationOnBean(String, Class)
 	 */
 	String[] getBeanNamesForAnnotation(Class<? extends Annotation> annotationType);
 
@@ -338,8 +339,8 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * keys and the corresponding bean instances as values
 	 * @throws BeansException if a bean could not be created
 	 * @since 3.0
-	 * @see #findAnnotationOnBean
-	 * @see #findAllAnnotationsOnBean(String, Class, boolean)
+	 * @see #findAnnotationOnBean(String, Class)
+	 * @see #findAnnotationOnBean(String, Class, boolean)
 	 * @see #findAllAnnotationsOnBean(String, Class, boolean)
 	 */
 	Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) throws BeansException;
@@ -354,8 +355,10 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * @return the annotation of the given type if found, or {@code null} otherwise
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * @since 3.0
-	 * @see #getBeanNamesForAnnotation
-	 * @see #getBeansWithAnnotation
+	 * @see #findAnnotationOnBean(String, Class, boolean)
+	 * @see #findAllAnnotationsOnBean(String, Class, boolean)
+	 * @see #getBeanNamesForAnnotation(Class)
+	 * @see #getBeansWithAnnotation(Class)
 	 * @see #getType(String)
 	 */
 	@Nullable
@@ -374,8 +377,10 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * @return the annotation of the given type if found, or {@code null} otherwise
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * @since 5.3.14
-	 * @see #getBeanNamesForAnnotation
-	 * @see #getBeansWithAnnotation
+	 * @see #findAnnotationOnBean(String, Class)
+	 * @see #findAllAnnotationsOnBean(String, Class, boolean)
+	 * @see #getBeanNamesForAnnotation(Class)
+	 * @see #getBeansWithAnnotation(Class)
 	 * @see #getType(String, boolean)
 	 */
 	@Nullable
@@ -395,7 +400,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * @return the set of annotations of the given type found (potentially empty)
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * @since 6.0
-	 * @see #getBeanNamesForAnnotation
+	 * @see #getBeanNamesForAnnotation(Class)
 	 * @see #findAnnotationOnBean(String, Class, boolean)
 	 * @see #getType(String, boolean)
 	 */
