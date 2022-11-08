@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive;
 
-import java.util.function.Function;
-
 import reactor.core.publisher.Mono;
 
 import org.springframework.web.server.ServerWebExchange;
@@ -27,7 +25,7 @@ import org.springframework.web.server.ServerWebExchange;
  * invoking a handler and makes it possible to support any handler type.
  *
  * <p>A {@code HandlerAdapter} can implement {@link DispatchExceptionHandler}
- * if it wants to handle an exception that occured before the request is mapped
+ * if it wants to handle an exception that occurred before the request is mapped
  * to a handler. This allows the {@code HandlerAdapter} to expose a consistent
  * exception handling mechanism for any request handling error.
  * In Reactive Streams terms, {@link #handle} processes the onNext, while
@@ -54,9 +52,9 @@ public interface HandlerAdapter {
 	 * result that represents an error response.
 	 * <p>Furthermore since an async {@code HandlerResult} may produce an error
 	 * later during result handling implementations are also encouraged to
-	 * {@link HandlerResult#setExceptionHandler(Function) set an exception
-	 * handler} on the {@code HandlerResult} so that may also be applied later
-	 * after result handling.
+	 * {@link HandlerResult#setExceptionHandler(DispatchExceptionHandler)  set
+	 * an exception handler} on the {@code HandlerResult} so that may also be
+	 * applied later after result handling.
 	 * @param exchange current server exchange
 	 * @param handler the selected handler which must have been previously
 	 * checked via {@link #supports(Object)}

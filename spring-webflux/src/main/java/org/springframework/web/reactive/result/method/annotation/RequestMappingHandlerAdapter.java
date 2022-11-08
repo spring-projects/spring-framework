@@ -19,7 +19,6 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -194,15 +193,15 @@ public class RequestMappingHandlerAdapter
 
 		InvocableHandlerMethod invocableMethod = this.methodResolver.getRequestMappingMethod(handlerMethod);
 
-		Function<Throwable, Mono<HandlerResult>> exceptionHandler =
-				ex -> handleException(exchange, ex, handlerMethod, bindingContext);
+		DispatchExceptionHandler exceptionHandler =
+				(exchange2, ex) -> handleException(exchange, ex, handlerMethod, bindingContext);
 
 		return this.modelInitializer
 				.initModel(handlerMethod, bindingContext, exchange)
 				.then(Mono.defer(() -> invocableMethod.invoke(exchange, bindingContext)))
 				.doOnNext(result -> result.setExceptionHandler(exceptionHandler))
 				.doOnNext(result -> bindingContext.saveModel())
-				.onErrorResume(exceptionHandler);
+				.onErrorResume(ex -> exceptionHandler.handleError(exchange, ex));
 	}
 
 	private Mono<HandlerResult> handleException(

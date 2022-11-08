@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,10 @@ public class HandlerResult {
 	private final BindingContext bindingContext;
 
 	@Nullable
-	private Function<Throwable, Mono<HandlerResult>> exceptionHandler;
+	private DispatchExceptionHandler exceptionHandler;
+
+	@Nullable
+	private Function<Throwable, Mono<HandlerResult>> exceptionHandlerFunction;
 
 
 	/**
@@ -125,20 +128,49 @@ public class HandlerResult {
 	}
 
 	/**
+	 * A {@link HandlerAdapter} may use this to provide an exception handler
+	 * to use to map exceptions from handling this result into an alternative
+	 * one. Especially when the return value is asynchronous, an exception is
+	 * not be produced at the point of handler invocation, but rather later when
+	 * result handling causes the actual value or an exception to be produced.
+	 * @param exceptionHandler the exception handler to use
+	 * @since 6.0
+	 */
+	public HandlerResult setExceptionHandler(DispatchExceptionHandler exceptionHandler) {
+		this.exceptionHandler = exceptionHandler;
+		return this;
+	}
+
+	/**
+	 * Return the {@link #setExceptionHandler(DispatchExceptionHandler)
+	 * configured} exception handler.
+	 * @since 6.0
+	 */
+	@Nullable
+	public DispatchExceptionHandler getExceptionHandler() {
+		return this.exceptionHandler;
+	}
+
+	/**
 	 * Configure an exception handler that may be used to produce an alternative
 	 * result when result handling fails. Especially for an async return value
 	 * errors may occur after the invocation of the handler.
 	 * @param function the error handler
 	 * @return the current instance
+	 * @deprecated in favor of {@link #setExceptionHandler(DispatchExceptionHandler)}
 	 */
+	@Deprecated(since = "6.0", forRemoval = true)
 	public HandlerResult setExceptionHandler(Function<Throwable, Mono<HandlerResult>> function) {
-		this.exceptionHandler = function;
+		this.exceptionHandler = (exchange, ex) -> function.apply(ex);
+		this.exceptionHandlerFunction = function;
 		return this;
 	}
 
 	/**
 	 * Whether there is an exception handler.
+	 * @deprecated in favor of checking via {@link #getExceptionHandler()}
 	 */
+	@Deprecated(since = "6.0", forRemoval = true)
 	public boolean hasExceptionHandler() {
 		return (this.exceptionHandler != null);
 	}
@@ -147,9 +179,12 @@ public class HandlerResult {
 	 * Apply the exception handler and return the alternative result.
 	 * @param failure the exception
 	 * @return the new result or the same error if there is no exception handler
+	 * @deprecated without a replacement; for internal invocation only, not used as of 6.0
 	 */
+	@Deprecated(since = "6.0", forRemoval = true)
 	public Mono<HandlerResult> applyExceptionHandler(Throwable failure) {
-		return (this.exceptionHandler != null ? this.exceptionHandler.apply(failure) : Mono.error(failure));
+		return (this.exceptionHandlerFunction != null ?
+				this.exceptionHandlerFunction.apply(failure) : Mono.error(failure));
 	}
 
 }

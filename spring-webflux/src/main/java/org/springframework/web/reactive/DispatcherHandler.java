@@ -189,24 +189,29 @@ public class DispatcherHandler implements WebHandler, PreFlightRequestHandler, A
 	}
 
 	private Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
-		return getResultHandler(result).handleResult(exchange, result)
-				.checkpoint("Handler " + result.getHandler() + " [DispatcherHandler]")
-				.onErrorResume(ex ->
-						result.applyExceptionHandler(ex).flatMap(exResult ->
-								getResultHandler(exResult).handleResult(exchange, exResult)
-										.checkpoint("Exception handler " + exResult.getHandler() + ", " +
-												"error=\"" + ex.getMessage() + "\" [DispatcherHandler]")));
+		Mono<Void> resultMono = doHandleResult(exchange, result, "Handler " + result.getHandler());
+		if (result.getExceptionHandler() != null) {
+			resultMono = resultMono.onErrorResume(ex ->
+					result.getExceptionHandler().handleError(exchange, ex).flatMap(result2 ->
+							doHandleResult(exchange, result2, "Exception handler " +
+									result2.getHandler() + ", error=\"" + ex.getMessage() + "\"")));
+		}
+		return resultMono;
 	}
 
-	private HandlerResultHandler getResultHandler(HandlerResult handlerResult) {
+	private Mono<Void> doHandleResult(
+			ServerWebExchange exchange, HandlerResult handlerResult, String description) {
+
 		if (this.resultHandlers != null) {
 			for (HandlerResultHandler resultHandler : this.resultHandlers) {
 				if (resultHandler.supports(handlerResult)) {
-					return resultHandler;
+					description += " [DispatcherHandler]";
+					return resultHandler.handleResult(exchange, handlerResult).checkpoint(description);
 				}
 			}
 		}
-		throw new IllegalStateException("No HandlerResultHandler for " + handlerResult.getReturnValue());
+		return Mono.error(new IllegalStateException(
+				"No HandlerResultHandler for " + handlerResult.getReturnValue()));
 	}
 
 	@Override
