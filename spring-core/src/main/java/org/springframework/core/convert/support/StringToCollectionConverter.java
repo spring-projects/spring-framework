@@ -65,7 +65,8 @@ final class StringToCollectionConverter implements ConditionalGenericConverter {
 		}
 		String string = (String) source;
 
-		String[] fields = StringUtils.commaDelimitedListToStringArray(string);
+		String[] fields = {string};
+		
 		TypeDescriptor elementDesc = targetType.getElementTypeDescriptor();
 		Collection<Object> target = CollectionFactory.createCollection(targetType.getType(),
 				(elementDesc != null ? elementDesc.getType() : null), fields.length);
