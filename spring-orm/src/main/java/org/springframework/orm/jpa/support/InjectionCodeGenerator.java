@@ -53,7 +53,7 @@ class InjectionCodeGenerator {
 
 
 	InjectionCodeGenerator(ClassName targetClassName, RuntimeHints hints) {
-		Assert.notNull(hints, "ClassName must not be null");
+		Assert.notNull(targetClassName, "ClassName must not be null");
 		Assert.notNull(hints, "RuntimeHints must not be null");
 		this.targetClassName = targetClassName;
 		this.hints = hints;
