@@ -202,7 +202,7 @@ public class HttpEntityMethodProcessorTests {
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
 		processor.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
 
-		assertThat(servletResponse.getHeader("Content-Type")).isEqualTo("text/plain;charset=ISO-8859-1");
+		assertThat(servletResponse.getHeader("Content-Type")).isEqualTo("text/plain;charset=UTF-8");
 		assertThat(servletResponse.getContentAsString()).isEqualTo("Foo");
 	}
 

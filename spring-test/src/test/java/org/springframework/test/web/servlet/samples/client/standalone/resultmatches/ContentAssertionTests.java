@@ -92,13 +92,13 @@ public class ContentAssertionTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody(byte[].class).isEqualTo(
-				"Hello world!".getBytes(StandardCharsets.ISO_8859_1));
+				"\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01".getBytes(StandardCharsets.UTF_8));
 
 		testClient.get().uri("/handleIso8859-1")
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody(byte[].class).isEqualTo(
-				"\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01".getBytes(StandardCharsets.UTF_8));
+				"Hello world!".getBytes(StandardCharsets.ISO_8859_1));
 	}
 
 	@Test
@@ -106,7 +106,7 @@ public class ContentAssertionTests {
 		testClient.get().uri("/handle").accept(MediaType.TEXT_PLAIN)
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(String.class).value(containsString("world"));
+				.expectBody(String.class).value(containsString("世界"));
 	}
 
 	@Test
@@ -115,7 +115,7 @@ public class ContentAssertionTests {
 		testClient.get().uri("/handle").accept(MediaType.TEXT_PLAIN)
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().contentType("text/plain")
+				.expectHeader().contentType("text/plain;charset=UTF-8")
 				.expectBody(byte[].class)
 				.isEqualTo("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01".getBytes(StandardCharsets.UTF_8));
 
@@ -133,7 +133,7 @@ public class ContentAssertionTests {
 		@RequestMapping(value="/handle", produces="text/plain")
 		@ResponseBody
 		public String handle() {
-			return "\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01";	// "Hello world! (Japanese)
+			return "\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01";	// "Hello world! (Japanese): こんにちは世界！
 		}
 
 		@RequestMapping(value="/handleIso8859-1", produces="text/plain;charset=ISO-8859-1")

@@ -161,7 +161,7 @@ public class StringHttpMessageConverterTests {
 
 		HttpHeaders headers = this.outputMessage.getHeaders();
 		assertThat(this.outputMessage.getBodyAsString(StandardCharsets.US_ASCII)).isEqualTo(body);
-		assertThat(headers.getContentType()).isEqualTo(new MediaType("text", "plain", StandardCharsets.ISO_8859_1));
+		assertThat(headers.getContentType()).isEqualTo(new MediaType("text", "plain", StandardCharsets.UTF_8));
 		assertThat(headers.getContentLength()).isEqualTo(body.getBytes().length);
 		assertThat(headers.getAcceptCharset().isEmpty()).isTrue();
 	}

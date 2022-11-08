@@ -51,13 +51,13 @@ public class ContentAssertionTests {
 	@Test
 	void contentType() throws Exception {
 		this.mockMvc.perform(get("/handle").accept(MediaType.TEXT_PLAIN))
-			.andExpect(content().contentType(MediaType.valueOf("text/plain;charset=ISO-8859-1")))
-			.andExpect(content().contentType("text/plain"))
-			.andExpect(content().contentTypeCompatibleWith("text/plain"))
+			.andExpect(content().contentType(MediaType.valueOf("text/plain;charset=UTF-8")))
+			.andExpect(content().contentType("text/plain;charset=UTF-8"))
+			.andExpect(content().contentTypeCompatibleWith("text/plain;charset=UTF-8"))
 			.andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN));
 
 		this.mockMvc.perform(get("/handleIso8859-1"))
-			.andExpect(content().contentType(MediaType.valueOf("text/plain;charset=UTF-8")))
+			.andExpect(content().contentType(MediaType.valueOf("text/plain;charset=ISO-8859-1")))
 			.andExpect(content().contentType("text/plain;charset=ISO-8859-1"))
 			.andExpect(content().contentTypeCompatibleWith("text/plain"))
 			.andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN));
@@ -66,48 +66,48 @@ public class ContentAssertionTests {
 	@Test
 	void contentAsString() throws Exception {
 		this.mockMvc.perform(get("/handle").accept(MediaType.TEXT_PLAIN))
-			.andExpect(content().string("Hello world!"));
-
-		this.mockMvc.perform(get("/handleIso8859-1"))
 			.andExpect(content().string("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01"));
 
+		this.mockMvc.perform(get("/handleIso8859-1"))
+			.andExpect(content().string("Hello world!"));
+
 		// Hamcrest matchers...
-		this.mockMvc.perform(get("/handle").accept(MediaType.TEXT_PLAIN)).andExpect(content().string(equalTo("Hello world!")));
-		this.mockMvc.perform(get("/handleIso8859-1")).andExpect(content().string(equalTo("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01")));
+		this.mockMvc.perform(get("/handle").accept(MediaType.TEXT_PLAIN)).andExpect(content().string(equalTo("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01")));
+		this.mockMvc.perform(get("/handleIso8859-1")).andExpect(content().string(equalTo("Hello world!")));
 	}
 
 	@Test
 	void contentAsBytes() throws Exception {
 		this.mockMvc.perform(get("/handle").accept(MediaType.TEXT_PLAIN))
-			.andExpect(content().bytes("Hello world!".getBytes("ISO-8859-1")));
+			.andExpect(content().bytes("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01".getBytes("UTF-8")));
 
 		this.mockMvc.perform(get("/handleIso8859-1"))
-			.andExpect(content().bytes("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01".getBytes("UTF-8")));
+			.andExpect(content().bytes("Hello world!".getBytes("ISO-8859-1")));
 	}
 
 	@Test
 	void contentStringMatcher() throws Exception {
 		this.mockMvc.perform(get("/handle").accept(MediaType.TEXT_PLAIN))
-			.andExpect(content().string(containsString("world")));
+			.andExpect(content().string(containsString("世界")));
 	}
 
 	@Test
 	void characterEncoding() throws Exception {
 		this.mockMvc.perform(get("/handle").accept(MediaType.TEXT_PLAIN))
-			.andExpect(content().encoding("ISO-8859-1"))
-			.andExpect(content().string(containsString("world")));
-
-		this.mockMvc.perform(get("/handle").accept(MediaType.TEXT_PLAIN))
-			.andExpect(content().encoding(StandardCharsets.ISO_8859_1))
-			.andExpect(content().string(containsString("world")));
-
-		this.mockMvc.perform(get("/handleIso8859-1"))
 			.andExpect(content().encoding("UTF-8"))
 			.andExpect(content().bytes("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01".getBytes("UTF-8")));
 
-		this.mockMvc.perform(get("/handleIso8859-1"))
+		this.mockMvc.perform(get("/handle").accept(MediaType.TEXT_PLAIN))
 			.andExpect(content().encoding(StandardCharsets.UTF_8))
 			.andExpect(content().bytes("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01".getBytes("UTF-8")));
+
+		this.mockMvc.perform(get("/handleIso8859-1"))
+			.andExpect(content().encoding("ISO-8859-1"))
+			.andExpect(content().string(containsString("world")));
+
+		this.mockMvc.perform(get("/handleIso8859-1"))
+			.andExpect(content().encoding(StandardCharsets.ISO_8859_1))
+			.andExpect(content().string(containsString("world")));
 	}
 
 
@@ -116,12 +116,12 @@ public class ContentAssertionTests {
 
 		@GetMapping(path="/handle", produces="text/plain")
 		String handle() {
-			return "Hello world!";
+			return "\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01";	// "Hello world! (Japanese):こんにちは世界！
 		}
 
-		@GetMapping(path="/handleIso8859-1", produces="text/plain;charset=UTF-8")
+		@GetMapping(path="/handleIso8859-1", produces="text/plain;charset=ISO-8859-1")
 		String handleWithCharset() {
-			return "\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01";	// "Hello world! (Japanese)
+			return "Hello world!";
 		}
 	}
 

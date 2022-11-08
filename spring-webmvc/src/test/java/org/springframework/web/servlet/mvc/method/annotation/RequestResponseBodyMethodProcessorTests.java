@@ -312,7 +312,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 		processor.handleReturnValue("Foo", returnTypeString, container, request);
 
-		assertThat(servletResponse.getHeader("Content-Type")).isEqualTo("text/plain;charset=ISO-8859-1");
+		assertThat(servletResponse.getHeader("Content-Type")).isEqualTo("text/plain;charset=UTF-8");
 		assertThat(servletResponse.getContentAsString()).isEqualTo("Foo");
 	}
 
@@ -328,7 +328,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 		processor.handleReturnValue(new StringBuilder("Foo"), returnType, container, request);
 
-		assertThat(servletResponse.getHeader("Content-Type")).isEqualTo("text/plain;charset=ISO-8859-1");
+		assertThat(servletResponse.getHeader("Content-Type")).isEqualTo("text/plain;charset=UTF-8");
 		assertThat(servletResponse.getContentAsString()).isEqualTo("Foo");
 	}
 
