@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jdbc.support;
+package org.springframework.jdbc.support.incrementer;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -24,15 +24,6 @@ import java.sql.Statement;
 import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Test;
-
-import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer;
-import org.springframework.jdbc.support.incrementer.HanaSequenceMaxValueIncrementer;
-import org.springframework.jdbc.support.incrementer.HsqlMaxValueIncrementer;
-import org.springframework.jdbc.support.incrementer.MariaDBSequenceMaxValueIncrementer;
-import org.springframework.jdbc.support.incrementer.MySQLMaxValueIncrementer;
-import org.springframework.jdbc.support.incrementer.OracleSequenceMaxValueIncrementer;
-import org.springframework.jdbc.support.incrementer.PostgresSequenceMaxValueIncrementer;
-import org.springframework.jdbc.support.incrementer.SqlServerSequenceMaxValueIncrementer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
