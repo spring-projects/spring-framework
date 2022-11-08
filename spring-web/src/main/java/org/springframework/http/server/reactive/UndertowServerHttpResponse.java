@@ -63,12 +63,12 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 			HttpServerExchange exchange, DataBufferFactory bufferFactory, UndertowServerHttpRequest request) {
 
 		super(bufferFactory, createHeaders(exchange));
-		Assert.notNull(exchange, "HttpServerExchange must not be null");
 		this.exchange = exchange;
 		this.request = request;
 	}
 
 	private static HttpHeaders createHeaders(HttpServerExchange exchange) {
+		Assert.notNull(exchange, "HttpServerExchange must not be null");
 		UndertowHeadersAdapter headersMap = new UndertowHeadersAdapter(exchange.getResponseHeaders());
 		return new HttpHeaders(headersMap);
 	}

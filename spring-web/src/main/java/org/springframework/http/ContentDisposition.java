@@ -465,8 +465,9 @@ public final class ContentDisposition {
 	 * @see <a href="https://tools.ietf.org/html/rfc5987">RFC 5987</a>
 	 */
 	private static String decodeFilename(String filename, Charset charset) {
-		Assert.notNull(filename, "'input' String should not be null");
-		Assert.notNull(charset, "'charset' should not be null");
+		Assert.notNull(filename, "'filename' must not be null");
+		Assert.notNull(charset, "'charset' must not be null");
+
 		byte[] value = filename.getBytes(charset);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		int index = 0;
