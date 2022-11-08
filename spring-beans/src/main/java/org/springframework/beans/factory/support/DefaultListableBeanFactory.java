@@ -729,19 +729,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			String beanName, Class<A> annotationType, boolean allowFactoryBeanInit)
 			throws NoSuchBeanDefinitionException {
 
-		return findMergedAnnotationOnBean(beanName, annotationType, allowFactoryBeanInit)
-				.synthesize(MergedAnnotation::isPresent).orElse(null);
-	}
-
-	private <A extends Annotation> MergedAnnotation<A> findMergedAnnotationOnBean(
-			String beanName, Class<A> annotationType, boolean allowFactoryBeanInit) {
-
 		Class<?> beanType = getType(beanName, allowFactoryBeanInit);
 		if (beanType != null) {
 			MergedAnnotation<A> annotation =
 					MergedAnnotations.from(beanType, SearchStrategy.TYPE_HIERARCHY).get(annotationType);
 			if (annotation.isPresent()) {
-				return annotation;
+				return annotation.synthesize();
 			}
 		}
 		if (containsBeanDefinition(beanName)) {
@@ -753,7 +746,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					MergedAnnotation<A> annotation =
 							MergedAnnotations.from(beanClass, SearchStrategy.TYPE_HIERARCHY).get(annotationType);
 					if (annotation.isPresent()) {
-						return annotation;
+						return annotation.synthesize();
 					}
 				}
 			}
@@ -763,11 +756,48 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				MergedAnnotation<A> annotation =
 						MergedAnnotations.from(factoryMethod, SearchStrategy.TYPE_HIERARCHY).get(annotationType);
 				if (annotation.isPresent()) {
-					return annotation;
+					return annotation.synthesize();
 				}
 			}
 		}
-		return MergedAnnotation.missing();
+		return null;
+	}
+
+	@Override
+	public <A extends Annotation> Set<A> findAllAnnotationsOnBean(
+			String beanName, Class<A> annotationType, boolean allowFactoryBeanInit)
+			throws NoSuchBeanDefinitionException {
+
+		Set<A> annotations = new LinkedHashSet<>();
+		Class<?> beanType = getType(beanName, allowFactoryBeanInit);
+		if (beanType != null) {
+			MergedAnnotations.from(beanType, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY)
+					.stream(annotationType)
+					.filter(MergedAnnotation::isPresent)
+					.forEach(mergedAnnotation -> annotations.add(mergedAnnotation.synthesize()));
+		}
+		if (containsBeanDefinition(beanName)) {
+			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
+			// Check raw bean class, e.g. in case of a proxy.
+			if (bd.hasBeanClass() && bd.getFactoryMethodName() == null) {
+				Class<?> beanClass = bd.getBeanClass();
+				if (beanClass != beanType) {
+					MergedAnnotations.from(beanClass, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY)
+							.stream(annotationType)
+							.filter(MergedAnnotation::isPresent)
+							.forEach(mergedAnnotation -> annotations.add(mergedAnnotation.synthesize()));
+				}
+			}
+			// Check annotations declared on factory method, if any.
+			Method factoryMethod = bd.getResolvedFactoryMethod();
+			if (factoryMethod != null) {
+				MergedAnnotations.from(factoryMethod, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY)
+						.stream(annotationType)
+						.filter(MergedAnnotation::isPresent)
+						.forEach(mergedAnnotation -> annotations.add(mergedAnnotation.synthesize()));
+			}
+		}
+		return annotations;
 	}
 
 
