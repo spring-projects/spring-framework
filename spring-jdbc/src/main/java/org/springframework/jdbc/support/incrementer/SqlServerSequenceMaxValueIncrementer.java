@@ -19,7 +19,8 @@ package org.springframework.jdbc.support.incrementer;
 import javax.sql.DataSource;
 
 /**
- * Incrementer for SQL Server sequences.
+ * {@link DataFieldMaxValueIncrementer} that retrieves the next value of a given
+ * SQL Server sequence.
  *
  * @author Mahmoud Ben Hassine
  * @since 6.0
