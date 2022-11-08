@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Stephane Nicoll
  */
-public class Gh29105Tests {
+class Gh29105Tests {
 
 	@Test
 	void beanProviderWithParentContextReuseOrder() {
@@ -47,6 +47,7 @@ public class Gh29105Tests {
 		List<Class<?>> orderedTypes = child.getBeanProvider(MyService.class)
 				.orderedStream().map(Object::getClass).collect(Collectors.toList());
 		assertThat(orderedTypes).containsExactly(CustomService.class, DefaultService.class);
+		child.close();
 	}
 
 
@@ -78,4 +79,5 @@ public class Gh29105Tests {
 		}
 
 	}
+
 }
