@@ -19,9 +19,9 @@ package org.springframework.web.socket.server.support;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -95,8 +95,9 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 	 * @since 4.1.5
 	 */
 	public Collection<String> getAllowedOrigins() {
-		return (CollectionUtils.isEmpty(this.corsConfiguration.getAllowedOrigins()) ? Collections.emptySet() :
-				Set.copyOf(this.corsConfiguration.getAllowedOrigins()));
+		List<String> allowedOrigins = this.corsConfiguration.getAllowedOrigins();
+		return (CollectionUtils.isEmpty(allowedOrigins) ? Collections.emptySet() :
+				Collections.unmodifiableSet(new LinkedHashSet<>(allowedOrigins)));
 	}
 
 	/**
@@ -118,8 +119,9 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 	 * @since 5.3.2
 	 */
 	public Collection<String> getAllowedOriginPatterns() {
-		return (CollectionUtils.isEmpty(this.corsConfiguration.getAllowedOriginPatterns()) ? Collections.emptySet() :
-				Set.copyOf(this.corsConfiguration.getAllowedOriginPatterns()));
+		List<String> allowedOriginPatterns = this.corsConfiguration.getAllowedOriginPatterns();
+		return (CollectionUtils.isEmpty(allowedOriginPatterns) ? Collections.emptySet() :
+				Collections.unmodifiableSet(new LinkedHashSet<>(allowedOriginPatterns)));
 	}
 
 

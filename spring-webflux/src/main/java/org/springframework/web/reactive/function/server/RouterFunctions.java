@@ -1175,7 +1175,7 @@ public abstract class RouterFunctions {
 				return Collections.emptyMap();
 			}
 			else {
-				return Map.copyOf(attributes);
+				return Collections.unmodifiableMap(new LinkedHashMap<>(attributes));
 			}
 		}
 

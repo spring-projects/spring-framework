@@ -95,7 +95,7 @@ class DefaultServerRequest implements ServerRequest {
 
 	public DefaultServerRequest(HttpServletRequest servletRequest, List<HttpMessageConverter<?>> messageConverters) {
 		this.serverHttpRequest = new ServletServerHttpRequest(servletRequest);
-		this.messageConverters = Collections.unmodifiableList(new ArrayList<>(messageConverters));
+		this.messageConverters = List.copyOf(messageConverters);
 
 		this.headers = new DefaultRequestHeaders(this.serverHttpRequest.getHeaders());
 		this.params = CollectionUtils.toMultiValueMap(new ServletParametersMap(servletRequest));
