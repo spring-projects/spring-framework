@@ -63,8 +63,8 @@ final class StringToCollectionConverter implements ConditionalGenericConverter {
 		if (source == null) {
 			return null;
 		}
-		String string = (String) source;
 
+		String string = (String) source;
 		String[] fields = {string};
 		
 		TypeDescriptor elementDesc = targetType.getElementTypeDescriptor();
