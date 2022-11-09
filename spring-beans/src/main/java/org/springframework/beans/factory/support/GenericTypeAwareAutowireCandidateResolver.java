@@ -110,6 +110,11 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 					Class<?> typeToBeMatched = dependencyType.resolve();
 					if (typeToBeMatched != null && !FactoryBean.class.isAssignableFrom(typeToBeMatched)) {
 						targetType = targetType.getGeneric();
+						if (descriptor.fallbackMatchAllowed()) {
+							// Matching the Class-based type determination for FactoryBean
+							// objects in the lazy-determination getType code path below.
+							targetType = ResolvableType.forClass(targetType.resolve());
+						}
 					}
 				}
 			}
