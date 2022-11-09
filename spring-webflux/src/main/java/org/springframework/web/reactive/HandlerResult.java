@@ -128,11 +128,9 @@ public class HandlerResult {
 	}
 
 	/**
-	 * A {@link HandlerAdapter} may use this to provide an exception handler
-	 * to use to map exceptions from handling this result into an alternative
-	 * one. Especially when the return value is asynchronous, an exception is
-	 * not be produced at the point of handler invocation, but rather later when
-	 * result handling causes the actual value or an exception to be produced.
+	 * {@link HandlerAdapter} classes can set this to have their exception
+	 * handling mechanism applied to response rendering and to deferred
+	 * exceptions when invoking a handler with an asynchronous return value.
 	 * @param exceptionHandler the exception handler to use
 	 * @since 6.0
 	 */
@@ -152,9 +150,9 @@ public class HandlerResult {
 	}
 
 	/**
-	 * Configure an exception handler that may be used to produce an alternative
-	 * result when result handling fails. Especially for an async return value
-	 * errors may occur after the invocation of the handler.
+	 * {@link HandlerAdapter} classes can set this to have their exception
+	 * handling mechanism applied to response rendering and to deferred
+	 * exceptions when invoking a handler with an asynchronous return value.
 	 * @param function the error handler
 	 * @return the current instance
 	 * @deprecated in favor of {@link #setExceptionHandler(DispatchExceptionHandler)}
