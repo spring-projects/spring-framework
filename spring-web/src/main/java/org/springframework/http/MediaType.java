@@ -547,7 +547,7 @@ public class MediaType extends MimeType implements Serializable {
 			String unquotedValue = unquote(value);
 			double d = Double.parseDouble(unquotedValue);
 			Assert.isTrue(d >= 0D && d <= 1D,
-					() -> "Invalid quality value \"" + value + "\": should be between 0.0 and 1.0");
+					() -> "Invalid quality value \"" + unquotedValue + "\": should be between 0.0 and 1.0");
 		}
 	}
 
