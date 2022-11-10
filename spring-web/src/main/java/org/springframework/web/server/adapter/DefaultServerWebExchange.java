@@ -346,7 +346,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		return first.equals(second);
 	}
 
-	private void updateResponseStateChanging(String eTag, Instant lastModified) {
+	private void updateResponseStateChanging(@Nullable String eTag, Instant lastModified) {
 		if (this.notModified) {
 			getResponse().setStatusCode(HttpStatus.PRECONDITION_FAILED);
 		}
@@ -401,17 +401,15 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		return true;
 	}
 
-	private boolean validateIfModifiedSince(Instant lastModified) {
+	private void validateIfModifiedSince(Instant lastModified) {
 		if (lastModified.isBefore(Instant.EPOCH)) {
-			return false;
+			return;
 		}
 		long ifModifiedSince = getRequestHeaders().getIfModifiedSince();
-		if (ifModifiedSince == -1) {
-			return false;
+		if (ifModifiedSince != -1) {
+			// We will perform this validation...
+			this.notModified = ChronoUnit.SECONDS.between(lastModified, Instant.ofEpochMilli(ifModifiedSince)) >= 0;
 		}
-		// We will perform this validation...
-		this.notModified = ChronoUnit.SECONDS.between(lastModified, Instant.ofEpochMilli(ifModifiedSince)) >= 0;
-		return true;
 	}
 
 	@Override

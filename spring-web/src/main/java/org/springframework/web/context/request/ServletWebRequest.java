@@ -232,10 +232,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 	private boolean validateIfMatch(@Nullable String eTag) {
 		Enumeration<String> ifMatchHeaders = getRequest().getHeaders(HttpHeaders.IF_MATCH);
-		if (SAFE_METHODS.contains(getRequest().getMethod())) {
-			return false;
-		}
-		if (!ifMatchHeaders.hasMoreElements()) {
+		if (SAFE_METHODS.contains(getRequest().getMethod()) || !ifMatchHeaders.hasMoreElements()) {
 			return false;
 		}
 		this.notModified = matchRequestedETags(ifMatchHeaders, eTag, false);
@@ -308,7 +305,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return first.equals(second);
 	}
 
-	private void updateResponseStateChanging(String eTag, long lastModifiedTimestamp) {
+	private void updateResponseStateChanging(@Nullable String eTag, long lastModifiedTimestamp) {
 		if (this.notModified && getResponse() != null) {
 			getResponse().setStatus(HttpStatus.PRECONDITION_FAILED.value());
 		}
@@ -329,20 +326,18 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return true;
 	}
 
-	private boolean validateIfModifiedSince(long lastModifiedTimestamp) {
+	private void validateIfModifiedSince(long lastModifiedTimestamp) {
 		if (lastModifiedTimestamp < 0) {
-			return false;
+			return;
 		}
 		long ifModifiedSince = parseDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
-		if (ifModifiedSince == -1) {
-			return false;
+		if (ifModifiedSince != -1) {
+			// We will perform this validation...
+			this.notModified = ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000);
 		}
-		// We will perform this validation...
-		this.notModified = ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000);
-		return true;
 	}
 
-	private void updateResponseIdempotent(String eTag, long lastModifiedTimestamp) {
+	private void updateResponseIdempotent(@Nullable String eTag, long lastModifiedTimestamp) {
 		if (getResponse() != null) {
 			boolean isHttpGetOrHead = SAFE_METHODS.contains(getRequest().getMethod());
 			if (this.notModified) {
@@ -353,7 +348,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		}
 	}
 
-	private void addCachingResponseHeaders(String eTag, long lastModifiedTimestamp) {
+	private void addCachingResponseHeaders(@Nullable String eTag, long lastModifiedTimestamp) {
 		if (SAFE_METHODS.contains(getRequest().getMethod())) {
 			if (lastModifiedTimestamp > 0 && parseDateValue(getResponse().getHeader(HttpHeaders.LAST_MODIFIED)) == -1) {
 				getResponse().setDateHeader(HttpHeaders.LAST_MODIFIED, lastModifiedTimestamp);
