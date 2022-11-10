@@ -37,14 +37,14 @@ import org.springframework.r2dbc.core.binding.BindMarkersFactory;
 import org.springframework.util.Assert;
 
 /**
- * A non-blocking, reactive client for performing database calls requests with
+ * A non-blocking, reactive client for performing database calls with
  * Reactive Streams back pressure. Provides a higher level, common API over
  * R2DBC client libraries.
  *
- * <p>Use one of the static factory methods {@link #create(ConnectionFactory)}
- * or obtain a {@link DatabaseClient#builder()} to create an instance.
+ * <p>Use the static factory method {@link #create(ConnectionFactory)} or obtain
+ * a {@linkplain DatabaseClient#builder() builder} to create an instance.
  *
- * Usage example:
+ * <p>Usage example:
  * <pre class="code">
  * ConnectionFactory factory = …
  *
@@ -52,8 +52,7 @@ import org.springframework.util.Assert;
  * Mono&lt;Actor&gt; actor = client.sql("select first_name, last_name from t_actor")
  *     .map(row -&gt; new Actor(row.get("first_name", String.class),
  *          row.get("last_name", String.class)))
- *     .first();
- * </pre>
+ *     .first();</pre>
  *
  * @author Mark Paluch
  * @since 5.3
@@ -61,13 +60,13 @@ import org.springframework.util.Assert;
 public interface DatabaseClient extends ConnectionAccessor {
 
 	/**
-	 * Return the {@link ConnectionFactory} that this client uses.
+	 * Get the {@link ConnectionFactory} that this client uses.
 	 * @return the connection factory
 	 */
 	ConnectionFactory getConnectionFactory();
 
 	/**
-	 * Specify a static {@code sql} statement to run. Contract for specifying a
+	 * Specify a static {@code sql} statement to run. Contract for specifying an
 	 * SQL call along with options leading to the execution. The SQL string can
 	 * contain either native parameter bind markers or named parameters (e.g.
 	 * {@literal :foo, :bar}) when {@link NamedParameterExpander} is enabled.
@@ -79,7 +78,7 @@ public interface DatabaseClient extends ConnectionAccessor {
 	GenericExecuteSpec sql(String sql);
 
 	/**
-	 * Specify a {@link Supplier SQL supplier} that provides SQL to run.
+	 * Specify an {@linkplain Supplier SQL supplier} that provides SQL to run.
 	 * Contract for specifying an SQL call along with options leading to
 	 * the execution. The SQL string can contain either native parameter
 	 * bind markers or named parameters (e.g. {@literal :foo, :bar}) when
@@ -99,7 +98,7 @@ public interface DatabaseClient extends ConnectionAccessor {
 	/**
 	 * Create a {@code DatabaseClient} that will use the provided {@link ConnectionFactory}.
 	 * @param factory the {@code ConnectionFactory} to use for obtaining connections
-	 * @return a new {@code DatabaseClient}. Guaranteed to be not {@code null}.
+	 * @return a new {@code DatabaseClient}; never {@code null}
 	 */
 	static DatabaseClient create(ConnectionFactory factory) {
 		return new DefaultDatabaseClientBuilder().connectionFactory(factory).build();
@@ -129,14 +128,14 @@ public interface DatabaseClient extends ConnectionAccessor {
 		Builder connectionFactory(ConnectionFactory factory);
 
 		/**
-		 * Configure a {@link ExecuteFunction} to execute {@link Statement} objects.
+		 * Configure an {@link ExecuteFunction} to execute {@link Statement} objects.
 		 * @see Statement#execute()
 		 */
 		Builder executeFunction(ExecuteFunction executeFunction);
 
 		/**
 		 * Configure whether to use named parameter expansion.
-		 * Defaults to {@code true}.
+		 * <p>Defaults to {@code true}.
 		 * @param enabled {@code true} to use named parameter expansion;
 		 * {@code false} to disable named parameter expansion
 		 * @see NamedParameterExpander
@@ -144,7 +143,7 @@ public interface DatabaseClient extends ConnectionAccessor {
 		Builder namedParameters(boolean enabled);
 
 		/**
-		 * Configures a {@link Consumer} to configure this builder.
+		 * Apply a {@link Consumer} to configure this builder.
 		 */
 		Builder apply(Consumer<Builder> builderConsumer);
 
@@ -238,7 +237,7 @@ public interface DatabaseClient extends ConnectionAccessor {
 		 * Perform the SQL call and apply {@link BiFunction function} to the {@link  Result}.
 		 * @param mappingFunction a function that maps from {@link Result} into a result publisher
 		 * @param <R> the result type
-		 * @return a {@link Flux} emitting mapped elements
+		 * @return a {@link Flux} that emits mapped elements
 		 * @since 6.0
 		 * @see Result#filter(Predicate)
 		 * @see Result#flatMap(Function)

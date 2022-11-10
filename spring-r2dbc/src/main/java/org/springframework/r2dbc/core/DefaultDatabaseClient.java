@@ -200,16 +200,15 @@ class DefaultDatabaseClient implements DatabaseClient {
 	}
 
 	/**
-	 * Determine SQL from potential provider object.
-	 * @param sqlProvider object that's potentially a SqlProvider
+	 * Get SQL from a potential provider object.
+	 * @param object an object that is potentially an SqlProvider
 	 * @return the SQL string, or {@code null}
 	 * @see SqlProvider
 	 */
 	@Nullable
-	private static String getSql(Object sqlProvider) {
-
-		if (sqlProvider instanceof SqlProvider) {
-			return ((SqlProvider) sqlProvider).getSql();
+	private static String getSql(Object object) {
+		if (object instanceof SqlProvider sqlProvider) {
+			return sqlProvider.getSql();
 		}
 		else {
 			return null;
@@ -218,7 +217,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 
 
 	/**
-	 * Base class for {@link DatabaseClient.GenericExecuteSpec} implementations.
+	 * Default {@link DatabaseClient.GenericExecuteSpec} implementation.
 	 */
 	class DefaultGenericExecuteSpec implements GenericExecuteSpec {
 
@@ -352,10 +351,10 @@ class DefaultDatabaseClient implements DatabaseClient {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Executing SQL statement [" + sql + "]");
 				}
-				if (sqlSupplier instanceof PreparedOperation<?>) {
+				if (sqlSupplier instanceof PreparedOperation<?> preparedOperation) {
 					Statement statement = connection.createStatement(sql);
 					BindTarget bindTarget = new StatementWrapper(statement);
-					((PreparedOperation<?>) sqlSupplier).bindTo(bindTarget);
+					preparedOperation.bindTo(bindTarget);
 					return statement;
 				}
 
@@ -397,7 +396,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 			Function<Connection, Flux<Result>> resultFunction = connection -> {
 				Statement statement = statementFunction.apply(connection);
 				return Flux.from(this.filterFunction.filter(statement, DefaultDatabaseClient.this.executeFunction))
-				.cast(Result.class).checkpoint("SQL \"" + sql + "\" [DatabaseClient]");
+						.cast(Result.class).checkpoint("SQL \"" + sql + "\" [DatabaseClient]");
 			};
 
 			return new ResultFunction(resultFunction, sql);
