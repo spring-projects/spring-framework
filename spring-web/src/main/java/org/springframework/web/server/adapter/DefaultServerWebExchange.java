@@ -278,10 +278,8 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 
 	private boolean validateIfMatch(@Nullable String eTag) {
 		try {
-			if (SAFE_METHODS.contains(getRequest().getMethod())) {
-				return false;
-			}
-			if (CollectionUtils.isEmpty(getRequest().getHeaders().get(HttpHeaders.IF_MATCH))) {
+			if (SAFE_METHODS.contains(getRequest().getMethod())
+					|| CollectionUtils.isEmpty(getRequest().getHeaders().get(HttpHeaders.IF_MATCH))) {
 				return false;
 			}
 			this.notModified = matchRequestedETags(getRequestHeaders().getIfMatch(), eTag, false);
@@ -389,11 +387,8 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	}
 
 	private boolean validateIfUnmodifiedSince(Instant lastModified) {
-		if (lastModified.isBefore(Instant.EPOCH)) {
-			return false;
-		}
 		long ifUnmodifiedSince = getRequestHeaders().getIfUnmodifiedSince();
-		if (ifUnmodifiedSince == -1) {
+		if (lastModified.isBefore(Instant.EPOCH) || ifUnmodifiedSince == -1) {
 			return false;
 		}
 		Instant sinceInstant = Instant.ofEpochMilli(ifUnmodifiedSince);
@@ -402,15 +397,11 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	}
 
 	private void validateIfModifiedSince(Instant lastModified) {
-		if (lastModified.isBefore(Instant.EPOCH)) {
-			return;
-		}
 		long ifModifiedSince = getRequestHeaders().getIfModifiedSince();
-		if (ifModifiedSince == -1) {
-			return;
+		if (!(lastModified.isBefore(Instant.EPOCH) || ifModifiedSince == -1)) {
+			// We will perform this validation...
+			this.notModified = ChronoUnit.SECONDS.between(lastModified, Instant.ofEpochMilli(ifModifiedSince)) >= 0;
 		}
-		// We will perform this validation...
-		this.notModified = ChronoUnit.SECONDS.between(lastModified, Instant.ofEpochMilli(ifModifiedSince)) >= 0;
 	}
 
 	@Override
