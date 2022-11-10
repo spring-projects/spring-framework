@@ -346,7 +346,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		return first.equals(second);
 	}
 
-	private void updateResponseStateChanging(String eTag, Instant lastModified) {
+	private void updateResponseStateChanging(@Nullable String eTag, Instant lastModified) {
 		if (this.notModified) {
 			getResponse().setStatusCode(HttpStatus.PRECONDITION_FAILED);
 		}
