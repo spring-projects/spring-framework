@@ -330,17 +330,16 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return true;
 	}
 
-	private boolean validateIfModifiedSince(long lastModifiedTimestamp) {
+	private void validateIfModifiedSince(long lastModifiedTimestamp) {
 		if (lastModifiedTimestamp < 0) {
-			return false;
+			return;
 		}
 		long ifModifiedSince = parseDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
 		if (ifModifiedSince == -1) {
-			return false;
+			return;
 		}
 		// We will perform this validation...
 		this.notModified = ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000);
-		return true;
 	}
 
 	private void updateResponseIdempotent(String eTag, long lastModifiedTimestamp) {

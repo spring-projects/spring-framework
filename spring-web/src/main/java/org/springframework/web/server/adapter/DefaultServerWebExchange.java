@@ -401,17 +401,16 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		return true;
 	}
 
-	private boolean validateIfModifiedSince(Instant lastModified) {
+	private void validateIfModifiedSince(Instant lastModified) {
 		if (lastModified.isBefore(Instant.EPOCH)) {
-			return false;
+			return;
 		}
 		long ifModifiedSince = getRequestHeaders().getIfModifiedSince();
 		if (ifModifiedSince == -1) {
-			return false;
+			return;
 		}
 		// We will perform this validation...
 		this.notModified = ChronoUnit.SECONDS.between(lastModified, Instant.ofEpochMilli(ifModifiedSince)) >= 0;
-		return true;
 	}
 
 	@Override
