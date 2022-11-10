@@ -200,7 +200,7 @@ public abstract class AbstractRoutingConnectionFactory implements ConnectionFact
 	 * in the {@link #setTargetConnectionFactories targetConnectionFactories} map,
 	 * falls back to the specified {@link #setDefaultTargetConnectionFactory default
 	 * target ConnectionFactory} if necessary.
-	 * @return {@link Mono} emitting the current {@link ConnectionFactory} as
+	 * @return {@link Mono} that emits the current {@link ConnectionFactory} as
 	 * per {@link #determineCurrentLookupKey()}
 	 * @see #determineCurrentLookupKey()
 	 */

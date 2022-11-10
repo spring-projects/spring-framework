@@ -45,7 +45,7 @@ public interface InstanceSupplier<T> extends ThrowingSupplier<T> {
 	}
 
 	/**
-	 * Gets the supplied instance.
+	 * Get the supplied instance.
 	 * @param registeredBean the registered bean requesting the instance
 	 * @return the supplied instance
 	 * @throws Exception on error
@@ -55,7 +55,7 @@ public interface InstanceSupplier<T> extends ThrowingSupplier<T> {
 	/**
 	 * Return the factory method that this supplier uses to create the
 	 * instance, or {@code null} if it is not known or this supplier uses
-	 * another mean.
+	 * another means.
 	 * @return the factory method used to create the instance, or {@code null}
 	 */
 	@Nullable
@@ -65,7 +65,7 @@ public interface InstanceSupplier<T> extends ThrowingSupplier<T> {
 
 	/**
 	 * Return a composed instance supplier that first obtains the instance from
-	 * this supplier, and then applied the {@code after} function to obtain the
+	 * this supplier and then applies the {@code after} function to obtain the
 	 * result.
 	 * @param <V> the type of output of the {@code after} function, and of the
 	 * composed function
@@ -74,7 +74,7 @@ public interface InstanceSupplier<T> extends ThrowingSupplier<T> {
 	 */
 	default <V> InstanceSupplier<V> andThen(
 			ThrowingBiFunction<RegisteredBean, ? super T, ? extends V> after) {
-		Assert.notNull(after, "After must not be null");
+		Assert.notNull(after, "'after' function must not be null");
 		return new InstanceSupplier<V>() {
 
 			@Override
@@ -135,10 +135,9 @@ public interface InstanceSupplier<T> extends ThrowingSupplier<T> {
 	}
 
 	/**
-	 * Lambda friendly method that can be used to create a
+	 * Lambda friendly method that can be used to create an
 	 * {@link InstanceSupplier} and add post processors in a single call. For
-	 * example: {@code
-	 * InstanceSupplier.of(registeredBean -> ...).andThen(...)}.
+	 * example: {@code InstanceSupplier.of(registeredBean -> ...).andThen(...)}.
 	 * @param <T> the type of instance supplied by this supplier
 	 * @param instanceSupplier the source instance supplier
 	 * @return a new {@link InstanceSupplier}

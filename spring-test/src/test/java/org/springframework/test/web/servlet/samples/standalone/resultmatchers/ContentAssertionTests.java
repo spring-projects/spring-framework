@@ -79,10 +79,10 @@ public class ContentAssertionTests {
 	@Test
 	void contentAsBytes() throws Exception {
 		this.mockMvc.perform(get("/handle").accept(MediaType.TEXT_PLAIN))
-			.andExpect(content().bytes("Hello world!".getBytes("ISO-8859-1")));
+			.andExpect(content().bytes("Hello world!".getBytes(StandardCharsets.ISO_8859_1)));
 
 		this.mockMvc.perform(get("/handleUtf8"))
-			.andExpect(content().bytes("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01".getBytes("UTF-8")));
+			.andExpect(content().bytes("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01".getBytes(StandardCharsets.UTF_8)));
 	}
 
 	@Test
@@ -103,11 +103,11 @@ public class ContentAssertionTests {
 
 		this.mockMvc.perform(get("/handleUtf8"))
 			.andExpect(content().encoding("UTF-8"))
-			.andExpect(content().bytes("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01".getBytes("UTF-8")));
+			.andExpect(content().bytes("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01".getBytes(StandardCharsets.UTF_8)));
 
 		this.mockMvc.perform(get("/handleUtf8"))
 			.andExpect(content().encoding(StandardCharsets.UTF_8))
-			.andExpect(content().bytes("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01".getBytes("UTF-8")));
+			.andExpect(content().bytes("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01".getBytes(StandardCharsets.UTF_8)));
 	}
 
 

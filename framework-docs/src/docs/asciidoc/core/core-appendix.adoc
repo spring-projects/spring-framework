@@ -1,16 +1,17 @@
+[[core.appendix]]
 = Appendix
 
 
 
 
-[[xsd-schemas]]
+[[core.appendix.xsd-schemas]]
 == XML Schemas
 
 This part of the appendix lists XML schemas related to the core container.
 
 
 
-[[xsd-schemas-util]]
+[[core.appendix.xsd-schemas-util]]
 === The `util` Schema
 
 As the name implies, the `util` tags deal with common, utility configuration
@@ -35,7 +36,7 @@ correct schema so that the tags in the `util` namespace are available to you):
 ----
 
 
-[[xsd-schemas-util-constant]]
+[[core.appendix.xsd-schemas-util-constant]]
 ==== Using `<util:constant/>`
 
 Consider the following bean definition:
@@ -68,7 +69,7 @@ developer's intent ("`inject this constant value`"), and it reads better:
 	</bean>
 ----
 
-[[xsd-schemas-util-frfb]]
+[[core.appendix.xsd-schemas-util-frfb]]
 ===== Setting a Bean Property or Constructor Argument from a Field Value
 
 {api-spring-framework}/beans/factory/config/FieldRetrievingFactoryBean.html[`FieldRetrievingFactoryBean`]
@@ -180,7 +181,7 @@ Now consider the following setter of type `PersistenceContextType` and the corre
 ----
 
 
-[[xsd-schemas-util-property-path]]
+[[core.appendix.xsd-schemas-util-property-path]]
 ==== Using `<util:property-path/>`
 
 Consider the following example:
@@ -227,7 +228,7 @@ The value of the `path` attribute of the `<property-path/>` element follows the 
 `beanName.beanProperty`. In this case, it picks up the `age` property of the bean named
 `testBean`. The value of that `age` property is `10`.
 
-[[xsd-schemas-util-property-path-dependency]]
+[[core.appendix.xsd-schemas-util-property-path-dependency]]
 ===== Using `<util:property-path/>` to Set a Bean Property or Constructor Argument
 
 `PropertyPathFactoryBean` is a `FactoryBean` that evaluates a property path on a given
@@ -302,7 +303,7 @@ for most use cases, but it can sometimes be useful. See the javadoc for more inf
 this feature.
 
 
-[[xsd-schemas-util-properties]]
+[[core.appendix.xsd-schemas-util-properties]]
 ==== Using `<util:properties/>`
 
 Consider the following example:
@@ -328,7 +329,7 @@ The following example uses a `util:properties` element to make a more concise re
 ----
 
 
-[[xsd-schemas-util-list]]
+[[core.appendix.xsd-schemas-util-list]]
 ==== Using `<util:list/>`
 
 Consider the following example:
@@ -383,7 +384,7 @@ following configuration:
 If no `list-class` attribute is supplied, the container chooses a `List` implementation.
 
 
-[[xsd-schemas-util-map]]
+[[core.appendix.xsd-schemas-util-map]]
 ==== Using `<util:map/>`
 
 Consider the following example:
@@ -438,7 +439,7 @@ following configuration:
 If no `'map-class'` attribute is supplied, the container chooses a `Map` implementation.
 
 
-[[xsd-schemas-util-set]]
+[[core.appendix.xsd-schemas-util-set]]
 ==== Using `<util:set/>`
 
 Consider the following example:
@@ -494,7 +495,7 @@ If no `set-class` attribute is supplied, the container chooses a `Set` implement
 
 
 
-[[xsd-schemas-aop]]
+[[core.appendix.xsd-schemas-aop]]
 === The `aop` Schema
 
 The `aop` tags deal with configuring all things AOP in Spring, including Spring's
@@ -524,7 +525,7 @@ are available to you):
 
 
 
-[[xsd-schemas-context]]
+[[core.appendix.xsd-schemas-context]]
 === The `context` Schema
 
 The `context` tags deal with `ApplicationContext` configuration that relates to plumbing
@@ -549,7 +550,7 @@ available to you:
 ----
 
 
-[[xsd-schemas-context-pphc]]
+[[core.appendix.xsd-schemas-context-pphc]]
 ==== Using `<property-placeholder/>`
 
 This element activates the replacement of `${...}` placeholders, which are resolved against a
@@ -559,7 +560,7 @@ is a convenience mechanism that sets up a <<core.adoc#beans-factory-placeholderc
 `PropertySourcesPlaceholderConfigurer` setup, you can explicitly define it as a bean yourself.
 
 
-[[xsd-schemas-context-ac]]
+[[core.appendix.xsd-schemas-context-ac]]
 ==== Using `<annotation-config/>`
 
 This element activates the Spring infrastructure to detect annotations in bean classes:
@@ -582,28 +583,28 @@ element for that purpose. Similarly, Spring's
 <<integration.adoc#cache-annotation-enable, enabled>> as well.
 
 
-[[xsd-schemas-context-component-scan]]
+[[core.appendix.xsd-schemas-context-component-scan]]
 ==== Using `<component-scan/>`
 
 This element is detailed in the section on <<core.adoc#beans-annotation-config,
 annotation-based container configuration>>.
 
 
-[[xsd-schemas-context-ltw]]
+[[core.appendix.xsd-schemas-context-ltw]]
 ==== Using `<load-time-weaver/>`
 
 This element is detailed in the section on <<core.adoc#aop-aj-ltw,
 load-time weaving with AspectJ in the Spring Framework>>.
 
 
-[[xsd-schemas-context-sc]]
+[[core.appendix.xsd-schemas-context-sc]]
 ==== Using `<spring-configured/>`
 
 This element is detailed in the section on <<core.adoc#aop-atconfigurable,
 using AspectJ to dependency inject domain objects with Spring>>.
 
 
-[[xsd-schemas-context-mbe]]
+[[core.appendix.xsd-schemas-context-mbe]]
 ==== Using `<mbean-export/>`
 
 This element is detailed in the section on <<integration.adoc#jmx-context-mbeanexport,
@@ -611,7 +612,7 @@ configuring annotation-based MBean export>>.
 
 
 
-[[xsd-schemas-beans]]
+[[core.appendix.xsd-schemas-beans]]
 === The Beans Schema
 
 Last but not least, we have the elements in the `beans` schema. These elements
@@ -623,7 +624,7 @@ in <<core.adoc#beans-factory-properties-detailed, dependencies and configuration
 Note that you can add zero or more key-value pairs to `<bean/>` XML definitions.
 What, if anything, is done with this extra metadata is totally up to your own custom
 logic (and so is typically only of use if you write your own custom elements as described
-in the appendix entitled <<xml-custom>>).
+in the appendix entitled <<core.appendix.xml-custom>>).
 
 The following example shows the `<meta/>` element in the context of a surrounding `<bean/>`
 (note that, without any logic to interpret it, the metadata is effectively useless
@@ -652,10 +653,10 @@ the bean definition and sets up some caching infrastructure that uses the suppli
 
 
 
-[[xml-custom]]
+[[core.appendix.xml-custom]]
 == XML Schema Authoring
 
-[[xsd-custom-introduction]]
+[[core.appendix.xsd-custom-introduction]]
 Since version 2.0, Spring has featured a mechanism for adding schema-based extensions to the
 basic Spring XML format for defining and configuring beans. This section covers
 how to write your own custom XML bean definition parsers and
@@ -664,16 +665,16 @@ integrate such parsers into the Spring IoC container.
 To facilitate authoring configuration files that use a schema-aware XML editor,
 Spring's extensible XML configuration mechanism is based on XML Schema. If you are not
 familiar with Spring's current XML configuration extensions that come with the standard
-Spring distribution, you should first read the previous section on <<xsd-schemas>>.
+Spring distribution, you should first read the previous section on <<core.appendix.xsd-schemas>>.
 
 
 To create new XML configuration extensions:
 
-. <<xsd-custom-schema, Author>> an XML schema to describe your custom element(s).
-. <<xsd-custom-namespacehandler, Code>> a custom `NamespaceHandler` implementation.
-. <<xsd-custom-parser, Code>> one or more `BeanDefinitionParser` implementations
+. <<core.appendix.xsd-custom-schema, Author>> an XML schema to describe your custom element(s).
+. <<core.appendix.xsd-custom-namespacehandler, Code>> a custom `NamespaceHandler` implementation.
+. <<core.appendix.xsd-custom-parser, Code>> one or more `BeanDefinitionParser` implementations
   (this is where the real work is done).
-. <<xsd-custom-registration, Register>> your new artifacts with Spring.
+. <<core.appendix.xsd-custom-registration, Register>> your new artifacts with Spring.
 
 For a unified example, we create an
 XML extension (a custom XML element) that lets us configure objects of the type
@@ -693,7 +694,7 @@ through the basic steps of making a custom extension.)
 
 
 
-[[xsd-custom-schema]]
+[[core.appendix.xsd-custom-schema]]
 === Authoring the Schema
 
 Creating an XML configuration extension for use with Spring's IoC container starts with
@@ -765,7 +766,7 @@ defined in the enumeration.
 
 
 
-[[xsd-custom-namespacehandler]]
+[[core.appendix.xsd-custom-namespacehandler]]
 === Coding a `NamespaceHandler`
 
 In addition to the schema, we need a `NamespaceHandler` to parse all elements of
@@ -836,7 +837,7 @@ custom element, as we can see in the next step.
 
 
 
-[[xsd-custom-parser]]
+[[core.appendix.xsd-custom-parser]]
 === Using `BeanDefinitionParser`
 
 A `BeanDefinitionParser` is used if the `NamespaceHandler` encounters an XML
@@ -926,7 +927,7 @@ is the extraction and setting of the bean definition's unique identifier.
 
 
 
-[[xsd-custom-registration]]
+[[core.appendix.xsd-custom-registration]]
 === Registering the Handler and the Schema
 
 The coding is finished. All that remains to be done is to make the Spring XML
@@ -938,7 +939,7 @@ XML parsing infrastructure automatically picks up your new extension by consumin
 these special properties files, the formats of which are detailed in the next two sections.
 
 
-[[xsd-custom-registration-spring-handlers]]
+[[core.appendix.xsd-custom-registration-spring-handlers]]
 ==== Writing `META-INF/spring.handlers`
 
 The properties file called `spring.handlers` contains a mapping of XML Schema URIs to
@@ -957,7 +958,7 @@ namespace extension and needs to exactly match exactly the value of the `targetN
 attribute, as specified in your custom XSD schema.
 
 
-[[xsd-custom-registration-spring-schemas]]
+[[core.appendix.xsd-custom-registration-spring-schemas]]
 ==== Writing 'META-INF/spring.schemas'
 
 The properties file called `spring.schemas` contains a mapping of XML Schema locations
@@ -981,7 +982,7 @@ the `NamespaceHandler` and `BeanDefinitionParser` classes on the classpath.
 
 
 
-[[xsd-custom-using]]
+[[core.appendix.xsd-custom-using]]
 === Using a Custom Extension in Your Spring XML Configuration
 
 Using a custom extension that you yourself have implemented is no different from using
@@ -1015,13 +1016,13 @@ in a Spring XML configuration file:
 
 
 
-[[xsd-custom-meat]]
+[[core.appendix.xsd-custom-meat]]
 === More Detailed Examples
 
 This section presents some more detailed examples of custom XML extensions.
 
 
-[[xsd-custom-custom-nested]]
+[[core.appendix.xsd-custom-custom-nested]]
 ==== Nesting Custom Elements within Custom Elements
 
 The example presented in this section shows how you to write the various artifacts required
@@ -1195,7 +1196,7 @@ setter property for the `components` property. The following listing shows such 
 
 This works nicely, but it exposes a lot of Spring plumbing to the end user. What we are
 going to do is write a custom extension that hides away all of this Spring plumbing.
-If we stick to <<xsd-custom-introduction, the steps described previously>>, we start off
+If we stick to <<core.appendix.xsd-custom-introduction, the steps described previously>>, we start off
 by creating the XSD schema to define the structure of our custom tag, as the following
 listing shows:
 
@@ -1222,7 +1223,7 @@ listing shows:
 	</xsd:schema>
 ----
 
-Again following <<xsd-custom-introduction, the process described earlier>>,
+Again following <<core.appendix.xsd-custom-introduction, the process described earlier>>,
 we then create a custom `NamespaceHandler`:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -1373,7 +1374,7 @@ http\://www.foo.example/schema/component/component.xsd=com/foo/component.xsd
 ----
 
 
-[[xsd-custom-custom-just-attributes]]
+[[core.appendix.xsd-custom-custom-just-attributes]]
 ==== Custom Attributes on "`Normal`" Elements
 
 Writing your own custom parser and the associated artifacts is not hard. However,
@@ -1610,7 +1611,7 @@ http\://www.foo.example/schema/jcache/jcache.xsd=com/foo/jcache.xsd
 ----
 
 
-[[application-startup-steps]]
+[[core.appendix.application-startup-steps]]
 == Application Startup Steps
 
 This part of the appendix lists the existing `StartupSteps` that the core container is instrumented with.

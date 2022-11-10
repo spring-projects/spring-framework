@@ -186,7 +186,7 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 		}
 
 		if (value == null) {
-			Assert.isTrue(!required, "Missing " + valueLabel + " value '" + name + "'");
+			Assert.isTrue(!required, () -> "Missing " + valueLabel + " value '" + name + "'");
 			return;
 		}
 

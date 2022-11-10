@@ -200,12 +200,12 @@ public class UrlPathHelper {
 	 * Return a previously {@link #getLookupPathForRequest resolved} lookupPath.
 	 * @param request the current request
 	 * @return the previously resolved lookupPath
-	 * @throws IllegalArgumentException if the not found
+	 * @throws IllegalArgumentException if the lookup path is not found
 	 * @since 5.3
 	 */
 	public static String getResolvedLookupPath(ServletRequest request) {
 		String lookupPath = (String) request.getAttribute(PATH_ATTRIBUTE);
-		Assert.notNull(lookupPath, "Expected lookupPath in request attribute \"" + PATH_ATTRIBUTE + "\".");
+		Assert.notNull(lookupPath, () -> "Expected lookupPath in request attribute \"" + PATH_ATTRIBUTE + "\".");
 		return lookupPath;
 	}
 

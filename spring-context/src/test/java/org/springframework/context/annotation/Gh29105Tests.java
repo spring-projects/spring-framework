@@ -16,8 +16,7 @@
 
 package org.springframework.context.annotation;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
@@ -30,25 +29,23 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Stephane Nicoll
  */
-public class Gh29105Tests {
+class Gh29105Tests {
 
 	@Test
 	void beanProviderWithParentContextReuseOrder() {
-		AnnotationConfigApplicationContext parent = new AnnotationConfigApplicationContext();
-		parent.register(DefaultConfiguration.class);
-		parent.register(CustomConfiguration.class);
-		parent.refresh();
+		AnnotationConfigApplicationContext parent =
+				new AnnotationConfigApplicationContext(DefaultConfiguration.class, CustomConfiguration.class);
 
 		AnnotationConfigApplicationContext child = new AnnotationConfigApplicationContext();
 		child.setParent(parent);
 		child.register(DefaultConfiguration.class);
 		child.refresh();
 
-		List<Class<?>> orderedTypes = child.getBeanProvider(MyService.class)
-				.orderedStream().map(Object::getClass).collect(Collectors.toList());
+		Stream<Class<?>> orderedTypes = child.getBeanProvider(MyService.class).orderedStream().map(Object::getClass);
 		assertThat(orderedTypes).containsExactly(CustomService.class, DefaultService.class);
-		parent.close();
+
 		child.close();
+		parent.close();
 	}
 
 

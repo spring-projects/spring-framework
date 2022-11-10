@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,11 @@ import jakarta.servlet.http.HttpSessionBindingListener;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * Mock implementation of the {@link jakarta.servlet.http.HttpSession} interface.
  *
- * <p>As of Spring 5.0, this set of mocks is designed on a Servlet 4.0 baseline.
+ * <p>As of Spring 6.0, this set of mocks is designed on a Servlet 6.0 baseline.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -149,11 +148,6 @@ public class MockHttpSession implements HttpSession {
 	}
 
 	@Override
-	public jakarta.servlet.http.HttpSessionContext getSessionContext() {
-		throw new UnsupportedOperationException("getSessionContext");
-	}
-
-	@Override
 	public Object getAttribute(String name) {
 		assertIsValid();
 		Assert.notNull(name, "Attribute name must not be null");
@@ -161,20 +155,9 @@ public class MockHttpSession implements HttpSession {
 	}
 
 	@Override
-	public Object getValue(String name) {
-		return getAttribute(name);
-	}
-
-	@Override
 	public Enumeration<String> getAttributeNames() {
 		assertIsValid();
 		return Collections.enumeration(new LinkedHashSet<>(this.attributes.keySet()));
-	}
-
-	@Override
-	public String[] getValueNames() {
-		assertIsValid();
-		return StringUtils.toStringArray(this.attributes.keySet());
 	}
 
 	@Override
@@ -198,11 +181,6 @@ public class MockHttpSession implements HttpSession {
 	}
 
 	@Override
-	public void putValue(String name, Object value) {
-		setAttribute(name, value);
-	}
-
-	@Override
 	public void removeAttribute(String name) {
 		assertIsValid();
 		Assert.notNull(name, "Attribute name must not be null");
@@ -210,11 +188,6 @@ public class MockHttpSession implements HttpSession {
 		if (value instanceof HttpSessionBindingListener) {
 			((HttpSessionBindingListener) value).valueUnbound(new HttpSessionBindingEvent(this, name, value));
 		}
-	}
-
-	@Override
-	public void removeValue(String name) {
-		removeAttribute(name);
 	}
 
 	/**

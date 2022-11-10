@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jdbc.support;
+package org.springframework.jdbc.support.incrementer;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -24,14 +24,6 @@ import java.sql.Statement;
 import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Test;
-
-import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer;
-import org.springframework.jdbc.support.incrementer.HanaSequenceMaxValueIncrementer;
-import org.springframework.jdbc.support.incrementer.HsqlMaxValueIncrementer;
-import org.springframework.jdbc.support.incrementer.MariaDBSequenceMaxValueIncrementer;
-import org.springframework.jdbc.support.incrementer.MySQLMaxValueIncrementer;
-import org.springframework.jdbc.support.incrementer.OracleSequenceMaxValueIncrementer;
-import org.springframework.jdbc.support.incrementer.PostgresSequenceMaxValueIncrementer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -221,6 +213,28 @@ class DataFieldMaxValueIncrementerTests {
 		given(resultSet.getLong(1)).willReturn(10L, 12L);
 
 		PostgresSequenceMaxValueIncrementer incrementer = new PostgresSequenceMaxValueIncrementer();
+		incrementer.setDataSource(dataSource);
+		incrementer.setIncrementerName("myseq");
+		incrementer.setPaddingLength(5);
+		incrementer.afterPropertiesSet();
+
+		assertThat(incrementer.nextStringValue()).isEqualTo("00010");
+		assertThat(incrementer.nextIntValue()).isEqualTo(12);
+
+		verify(resultSet, times(2)).close();
+		verify(statement, times(2)).close();
+		verify(connection, times(2)).close();
+	}
+
+	@Test
+	void sqlServerSequenceMaxValueIncrementer() throws SQLException {
+		given(dataSource.getConnection()).willReturn(connection);
+		given(connection.createStatement()).willReturn(statement);
+		given(statement.executeQuery("select next value for myseq")).willReturn(resultSet);
+		given(resultSet.next()).willReturn(true);
+		given(resultSet.getLong(1)).willReturn(10L, 12L);
+
+		SqlServerSequenceMaxValueIncrementer incrementer = new SqlServerSequenceMaxValueIncrementer();
 		incrementer.setDataSource(dataSource);
 		incrementer.setIncrementerName("myseq");
 		incrementer.setPaddingLength(5);

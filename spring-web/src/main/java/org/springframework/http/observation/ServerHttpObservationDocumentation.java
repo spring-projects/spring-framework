@@ -33,9 +33,9 @@ import io.micrometer.observation.docs.ObservationDocumentation;
 public enum ServerHttpObservationDocumentation implements ObservationDocumentation {
 
 	/**
-	 * HTTP server request observations.
+	 * HTTP exchanges observations for Servlet-based servers.
 	 */
-	HTTP_REQUESTS {
+	HTTP_SERVLET_SERVER_EXCHANGES {
 		@Override
 		public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
 			return DefaultServerRequestObservationConvention.class;

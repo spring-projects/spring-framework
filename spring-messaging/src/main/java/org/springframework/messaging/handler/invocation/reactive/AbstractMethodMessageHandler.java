@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,7 +146,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * Configure custom resolvers for handler method arguments.
 	 */
 	public void setArgumentResolverConfigurer(ArgumentResolverConfigurer configurer) {
-		Assert.notNull(configurer, "HandlerMethodArgumentResolver is required");
+		Assert.notNull(configurer, "ArgumentResolverConfigurer is required");
 		this.argumentResolverConfigurer = configurer;
 	}
 

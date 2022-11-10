@@ -16,6 +16,7 @@
 
 package org.springframework.aot.hint;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.RecordComponent;
 import java.lang.reflect.Type;
@@ -28,8 +29,11 @@ import kotlin.reflect.KClass;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Register the necessary reflection hints so that the specified type can be
@@ -44,6 +48,11 @@ import org.springframework.util.ClassUtils;
 public class BindingReflectionHintsRegistrar {
 
 	private static final String KOTLIN_COMPANION_SUFFIX = "$Companion";
+
+	private static final String JACKSON_ANNOTATION = "com.fasterxml.jackson.annotation.JacksonAnnotation";
+
+	private static final boolean jacksonAnnotationPresent = ClassUtils.isPresent(JACKSON_ANNOTATION,
+			BindingReflectionHintsRegistrar.class.getClassLoader());
 
 	/**
 	 * Register the necessary reflection hints to bind the specified types.
@@ -97,6 +106,9 @@ public class BindingReflectionHintsRegistrar {
 							}
 						}
 					}
+					if (jacksonAnnotationPresent) {
+						registerJacksonHints(hints, clazz);
+					}
 				}
 				if (KotlinDetector.isKotlinType(clazz)) {
 					KotlinDelegate.registerComponentHints(hints, clazz);
@@ -145,6 +157,31 @@ public class BindingReflectionHintsRegistrar {
 				collectReferencedTypes(types, genericResolvableType);
 			}
 		}
+	}
+
+	private void registerJacksonHints(ReflectionHints hints, Class<?> clazz) {
+		ReflectionUtils.doWithFields(clazz, field ->
+				MergedAnnotations
+						.from(field, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY)
+						.stream(JACKSON_ANNOTATION)
+						.filter(MergedAnnotation::isMetaPresent)
+						.forEach(annotation -> {
+							Field sourceField = (Field) annotation.getSource();
+							if (sourceField != null) {
+								hints.registerField(sourceField);
+							}
+						}));
+		ReflectionUtils.doWithMethods(clazz, method ->
+				MergedAnnotations
+						.from(method, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY)
+						.stream(JACKSON_ANNOTATION)
+						.filter(MergedAnnotation::isMetaPresent)
+						.forEach(annotation -> {
+							Method sourceMethod = (Method) annotation.getSource();
+							if (sourceMethod != null) {
+								hints.registerMethod(sourceMethod, ExecutableMode.INVOKE);
+							}
+						}));
 	}
 
 	/**

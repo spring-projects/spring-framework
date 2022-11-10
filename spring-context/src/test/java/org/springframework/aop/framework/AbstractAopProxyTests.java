@@ -1353,7 +1353,7 @@ public abstract class AbstractAopProxyTests {
 			public int sum;
 			@Override
 			public void afterReturning(@Nullable Object returnValue, Method m, Object[] args, @Nullable Object target) throws Throwable {
-				sum += ((Integer) returnValue).intValue();
+				sum += (Integer) returnValue;
 			}
 		}
 		SummingAfterAdvice aa = new SummingAfterAdvice();

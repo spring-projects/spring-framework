@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,7 +120,7 @@ public class YamlMapFactoryBeanTests {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> sub = (Map<String, Object>) object;
 		assertThat(sub.size()).isEqualTo(1);
-		assertThat(sub.get("key1.key2")).isEqualTo(Integer.valueOf(3));
+		assertThat(sub.get("key1.key2")).isEqualTo(3);
 	}
 
 	@Test

@@ -19,7 +19,7 @@ package org.springframework.core.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
@@ -1050,21 +1050,40 @@ public abstract class AnnotationUtils {
 		}
 		try {
 			Method method = annotation.annotationType().getDeclaredMethod(attributeName);
-			ReflectionUtils.makeAccessible(method);
-			return method.invoke(annotation);
+			return invokeAnnotationMethod(method, annotation);
 		}
 		catch (NoSuchMethodException ex) {
 			return null;
 		}
-		catch (InvocationTargetException ex) {
-			rethrowAnnotationConfigurationException(ex.getTargetException());
-			throw new IllegalStateException("Could not obtain value for annotation attribute '" +
-					attributeName + "' in " + annotation, ex);
-		}
 		catch (Throwable ex) {
+			rethrowAnnotationConfigurationException(ex);
 			handleIntrospectionFailure(annotation.getClass(), ex);
 			return null;
 		}
+	}
+
+	/**
+	 * Invoke the supplied annotation attribute {@link Method} on the supplied
+	 * {@link Annotation}.
+	 * <p>An attempt will first be made to invoke the method via the annotation's
+	 * {@link InvocationHandler} (if the annotation instance is a JDK dynamic proxy).
+	 * If that fails, an attempt will be made to invoke the method via reflection.
+	 * @param method the method to invoke
+	 * @param annotation the annotation on which to invoke the method
+	 * @return the value returned from the method invocation
+	 * @since 5.3.24
+	 */
+	static Object invokeAnnotationMethod(Method method, Object annotation) {
+		if (Proxy.isProxyClass(annotation.getClass())) {
+			try {
+				InvocationHandler handler = Proxy.getInvocationHandler(annotation);
+				return handler.invoke(annotation, method, null);
+			}
+			catch (Throwable ex) {
+				// ignore and fall back to reflection below
+			}
+		}
+		return ReflectionUtils.invokeMethod(method, annotation);
 	}
 
 	/**

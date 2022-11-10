@@ -150,8 +150,8 @@ public class DispatcherHandler implements WebHandler, PreFlightRequestHandler, A
 				.concatMap(mapping -> mapping.getHandler(exchange))
 				.next()
 				.switchIfEmpty(createNotFoundError())
-				.flatMap(handler -> invokeHandler(exchange, handler))
-				.flatMap(result -> handleResult(exchange, result));
+				.onErrorResume(ex -> handleDispatchError(exchange, ex))
+				.flatMap(handler -> handleRequestWith(exchange, handler));
 	}
 
 	private <R> Mono<R> createNotFoundError() {
@@ -161,14 +161,27 @@ public class DispatcherHandler implements WebHandler, PreFlightRequestHandler, A
 		});
 	}
 
-	private Mono<HandlerResult> invokeHandler(ServerWebExchange exchange, Object handler) {
+	private Mono<Void> handleDispatchError(ServerWebExchange exchange, Throwable ex) {
+		Mono<HandlerResult> resultMono = Mono.error(ex);
+		if (this.handlerAdapters != null) {
+			for (HandlerAdapter adapter : this.handlerAdapters) {
+				if (adapter instanceof DispatchExceptionHandler exceptionHandler) {
+					resultMono = resultMono.onErrorResume(ex2 -> exceptionHandler.handleError(exchange, ex2));
+				}
+			}
+		}
+		return resultMono.flatMap(result -> handleResult(exchange, result));
+	}
+
+	private Mono<Void> handleRequestWith(ServerWebExchange exchange, Object handler) {
 		if (ObjectUtils.nullSafeEquals(exchange.getResponse().getStatusCode(), HttpStatus.FORBIDDEN)) {
 			return Mono.empty();  // CORS rejection
 		}
 		if (this.handlerAdapters != null) {
-			for (HandlerAdapter handlerAdapter : this.handlerAdapters) {
-				if (handlerAdapter.supports(handler)) {
-					return handlerAdapter.handle(exchange, handler);
+			for (HandlerAdapter adapter : this.handlerAdapters) {
+				if (adapter.supports(handler)) {
+					return adapter.handle(exchange, handler)
+							.flatMap(result -> handleResult(exchange, result));
 				}
 			}
 		}
@@ -176,25 +189,29 @@ public class DispatcherHandler implements WebHandler, PreFlightRequestHandler, A
 	}
 
 	private Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
-		return getResultHandler(result).handleResult(exchange, result)
-				.checkpoint("Handler " + result.getHandler() + " [DispatcherHandler]")
-				.onErrorResume(ex ->
-						result.applyExceptionHandler(ex).flatMap(exResult -> {
-							String text = "Exception handler " + exResult.getHandler() +
-									", error=\"" + ex.getMessage() + "\" [DispatcherHandler]";
-							return getResultHandler(exResult).handleResult(exchange, exResult).checkpoint(text);
-						}));
+		Mono<Void> resultMono = doHandleResult(exchange, result, "Handler " + result.getHandler());
+		if (result.getExceptionHandler() != null) {
+			resultMono = resultMono.onErrorResume(ex ->
+					result.getExceptionHandler().handleError(exchange, ex).flatMap(result2 ->
+							doHandleResult(exchange, result2, "Exception handler " +
+									result2.getHandler() + ", error=\"" + ex.getMessage() + "\"")));
+		}
+		return resultMono;
 	}
 
-	private HandlerResultHandler getResultHandler(HandlerResult handlerResult) {
+	private Mono<Void> doHandleResult(
+			ServerWebExchange exchange, HandlerResult handlerResult, String description) {
+
 		if (this.resultHandlers != null) {
 			for (HandlerResultHandler resultHandler : this.resultHandlers) {
 				if (resultHandler.supports(handlerResult)) {
-					return resultHandler;
+					description += " [DispatcherHandler]";
+					return resultHandler.handleResult(exchange, handlerResult).checkpoint(description);
 				}
 			}
 		}
-		throw new IllegalStateException("No HandlerResultHandler for " + handlerResult.getReturnValue());
+		return Mono.error(new IllegalStateException(
+				"No HandlerResultHandler for " + handlerResult.getReturnValue()));
 	}
 
 	@Override

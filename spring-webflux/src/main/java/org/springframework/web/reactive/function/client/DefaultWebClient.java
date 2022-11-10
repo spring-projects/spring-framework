@@ -33,6 +33,7 @@ import java.util.function.Supplier;
 
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
+import io.micrometer.observation.contextpropagation.ObservationThreadLocalAccessor;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -74,11 +75,6 @@ class DefaultWebClient implements WebClient {
 			() -> new IllegalStateException("The underlying HTTP client completed without emitting a response."));
 
 	private static final DefaultClientRequestObservationConvention DEFAULT_OBSERVATION_CONVENTION = new DefaultClientRequestObservationConvention();
-
-	/**
-	 * Aligned with ObservationThreadLocalAccessor#KEY from micrometer-core.
-	 */
-	private static final String MICROMETER_OBSERVATION = "micrometer.observation";
 
 	private final ExchangeFunction exchangeFunction;
 
@@ -459,11 +455,11 @@ class DefaultWebClient implements WebClient {
 					initRequestBuilder().body(this.inserter) :
 					initRequestBuilder();
 			return Mono.deferContextual(contextView -> {
-				Observation observation = ClientHttpObservationDocumentation.HTTP_REQUEST.observation(observationConvention,
+				Observation observation = ClientHttpObservationDocumentation.HTTP_REACTIVE_CLIENT_EXCHANGES.observation(observationConvention,
 						DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, observationRegistry);
 				observationContext.setCarrier(requestBuilder);
 				observation
-						.parentObservation(contextView.getOrDefault(MICROMETER_OBSERVATION, null))
+						.parentObservation(contextView.getOrDefault(ObservationThreadLocalAccessor.KEY, null))
 						.start();
 				ClientRequest request = requestBuilder.build();
 				observationContext.setUriTemplate((String) request.attribute(URI_TEMPLATE_ATTRIBUTE).orElse(null));

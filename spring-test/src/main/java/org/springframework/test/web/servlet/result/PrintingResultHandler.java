@@ -263,6 +263,7 @@ public class PrintingResultHandler implements ResultHandler {
 	 * {@link Cookie} implementation does not provide its own {@code toString()}.
 	 * @since 4.2
 	 */
+	@SuppressWarnings("removal")
 	private void printCookies(Cookie[] cookies) {
 		String[] cookieStrings = new String[cookies.length];
 		for (int i = 0; i < cookies.length; i++) {

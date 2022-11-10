@@ -332,9 +332,9 @@ public class XmlBeanCollectionTests {
 	public void testIntegerArray() throws Exception {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("integerArray");
 		assertThat(hasMap.getIntegerArray().length == 3).isTrue();
-		assertThat(hasMap.getIntegerArray()[0].intValue() == 0).isTrue();
-		assertThat(hasMap.getIntegerArray()[1].intValue() == 1).isTrue();
-		assertThat(hasMap.getIntegerArray()[2].intValue() == 2).isTrue();
+		assertThat(hasMap.getIntegerArray()[0] == 0).isTrue();
+		assertThat(hasMap.getIntegerArray()[1] == 1).isTrue();
+		assertThat(hasMap.getIntegerArray()[2] == 2).isTrue();
 	}
 
 	@Test

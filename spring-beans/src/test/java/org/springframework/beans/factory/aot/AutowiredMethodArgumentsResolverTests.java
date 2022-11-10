@@ -74,12 +74,11 @@ class AutowiredMethodArgumentsResolverTests {
 	@Test
 	void resolveWhenMethodIsMissingThrowsException() {
 		RegisteredBean registeredBean = registerTestBean(this.beanFactory);
+		AutowiredMethodArgumentsResolver resolver = AutowiredMethodArgumentsResolver.forMethod("missing", InputStream.class);
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> AutowiredMethodArgumentsResolver
-						.forMethod("missing", InputStream.class).resolve(registeredBean))
-				.withMessage(
-						"Method 'missing' with parameter types [java.io.InputStream] declared on "
-								+ TestBean.class.getName());
+				.isThrownBy(() -> resolver.resolve(registeredBean))
+				.withMessage("Method 'missing' with parameter types [java.io.InputStream] declared on %s could not be found.",
+						TestBean.class.getName());
 	}
 
 	@Test

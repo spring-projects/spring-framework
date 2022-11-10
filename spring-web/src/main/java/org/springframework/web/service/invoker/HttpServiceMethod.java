@@ -116,7 +116,8 @@ final class HttpServiceMethod {
 					break;
 				}
 			}
-			Assert.state(resolved, formatArgumentError(this.parameters[i], "No suitable resolver"));
+			int index = i;
+			Assert.state(resolved, () -> formatArgumentError(this.parameters[index], "No suitable resolver"));
 		}
 	}
 

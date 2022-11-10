@@ -882,7 +882,7 @@ public abstract class BeanUtils {
 			List<KParameter> parameters = kotlinConstructor.getParameters();
 
 			Assert.isTrue(args.length <= parameters.size(),
-					"Number of provided arguments should be less of equals than number of constructor parameters");
+					"Number of provided arguments must be less than or equal to the number of constructor parameters");
 			if (parameters.isEmpty()) {
 				return kotlinConstructor.call();
 			}

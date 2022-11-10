@@ -167,4 +167,4 @@ configure(rootProject) {
 		maxHeapSize = "1g"
 	}
 
-}                                         
+}

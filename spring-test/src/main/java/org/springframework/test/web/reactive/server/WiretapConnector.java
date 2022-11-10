@@ -89,10 +89,8 @@ class WiretapConnector implements ClientHttpConnector {
 	 */
 	ExchangeResult getExchangeResult(String requestId, @Nullable String uriTemplate, Duration timeout) {
 		ClientExchangeInfo clientInfo = this.exchanges.remove(requestId);
-		Assert.state(clientInfo != null, () -> {
-			String header = WebTestClient.WEBTESTCLIENT_REQUEST_ID;
-			return "No match for " + header + "=" + requestId;
-		});
+		Assert.state(clientInfo != null, () -> "No match for %s=%s".formatted(
+				WebTestClient.WEBTESTCLIENT_REQUEST_ID, requestId));
 		return new ExchangeResult(clientInfo.getRequest(), clientInfo.getResponse(),
 				clientInfo.getRequest().getRecorder().getContent(),
 				clientInfo.getResponse().getRecorder().getContent(),

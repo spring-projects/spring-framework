@@ -234,7 +234,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 
 	@Override
 	public WebTestClient.Builder entityExchangeResultConsumer(Consumer<EntityExchangeResult<?>> entityResultConsumer) {
-		Assert.notNull(entityResultConsumer, "`entityResultConsumer` is required");
+		Assert.notNull(entityResultConsumer, "'entityResultConsumer' is required");
 		this.entityResultConsumer = this.entityResultConsumer.andThen(entityResultConsumer);
 		return this;
 	}

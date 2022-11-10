@@ -23,9 +23,10 @@ dependencies {
 	optional("jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api")
 	optional("jakarta.xml.bind:jakarta.xml.bind-api")
 	optional("jakarta.websocket:jakarta.websocket-api")
+	optional("jakarta.websocket:jakarta.websocket-client-api")
 	optional("junit:junit")
 	optional("org.apache.tomcat.embed:tomcat-embed-core")
-	optional("org.junit.platform:junit-platform-launcher") // for AOT processing
+	optional("org.junit.platform:junit-platform-launcher")  // for AOT processing
 	optional("org.junit.jupiter:junit-jupiter-api")
 	optional("org.testng:testng")
 	optional("org.aspectj:aspectjweaver")

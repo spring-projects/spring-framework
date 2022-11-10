@@ -372,8 +372,8 @@ class AnnotationConfigApplicationContextTests {
 		context.registerBean("fb", NonInstantiatedFactoryBean.class, NonInstantiatedFactoryBean::new, bd -> bd.setLazyInit(true));
 		context.refresh();
 
-		assertThat(context.getType("fb")).isEqualTo(String.class);
 		assertThat(context.getType("&fb")).isEqualTo(NonInstantiatedFactoryBean.class);
+		assertThat(context.getType("fb")).isEqualTo(String.class);
 		assertThat(context.getBeanNamesForType(FactoryBean.class)).hasSize(1);
 		assertThat(context.getBeanNamesForType(NonInstantiatedFactoryBean.class)).hasSize(1);
 	}
@@ -388,25 +388,77 @@ class AnnotationConfigApplicationContextTests {
 		context.registerBeanDefinition("fb", bd);
 		context.refresh();
 
-		assertThat(context.getType("fb")).isEqualTo(String.class);
 		assertThat(context.getType("&fb")).isEqualTo(FactoryBean.class);
+		assertThat(context.getType("fb")).isEqualTo(String.class);
 		assertThat(context.getBeanNamesForType(FactoryBean.class)).hasSize(1);
 		assertThat(context.getBeanNamesForType(NonInstantiatedFactoryBean.class)).isEmpty();
 	}
 
 	@Test
-	void individualBeanWithFactoryBeanObjectTypeAsTargetType() {
+	void individualBeanWithFactoryBeanTypeAsTargetType() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		RootBeanDefinition bd = new RootBeanDefinition();
-		bd.setBeanClass(TypedFactoryBean.class);
-		bd.setTargetType(String.class);
-		context.registerBeanDefinition("fb", bd);
+		RootBeanDefinition bd1 = new RootBeanDefinition();
+		bd1.setBeanClass(GenericHolderFactoryBean.class);
+		bd1.setTargetType(ResolvableType.forClassWithGenerics(FactoryBean.class, ResolvableType.forClassWithGenerics(GenericHolder.class, String.class)));
+		bd1.setLazyInit(true);
+		context.registerBeanDefinition("fb1", bd1);
+		RootBeanDefinition bd2 = new RootBeanDefinition();
+		bd2.setBeanClass(UntypedFactoryBean.class);
+		bd2.setTargetType(ResolvableType.forClassWithGenerics(FactoryBean.class, ResolvableType.forClassWithGenerics(GenericHolder.class, Integer.class)));
+		bd2.setLazyInit(true);
+		context.registerBeanDefinition("fb2", bd2);
+		context.registerBeanDefinition("ip", new RootBeanDefinition(FactoryBeanInjectionPoints.class));
 		context.refresh();
 
-		assertThat(context.getType("&fb")).isEqualTo(TypedFactoryBean.class);
-		assertThat(context.getType("fb")).isEqualTo(String.class);
-		assertThat(context.getBeanNamesForType(FactoryBean.class)).hasSize(1);
-		assertThat(context.getBeanNamesForType(TypedFactoryBean.class)).hasSize(1);
+		assertThat(context.getType("&fb1")).isEqualTo(GenericHolderFactoryBean.class);
+		assertThat(context.getType("fb1")).isEqualTo(GenericHolder.class);
+		assertThat(context.getBeanNamesForType(FactoryBean.class)).hasSize(2);
+		assertThat(context.getBeanNamesForType(GenericHolderFactoryBean.class)).hasSize(1);
+		assertThat(context.getBean("ip", FactoryBeanInjectionPoints.class).factoryBean).isSameAs(context.getBean("&fb1"));
+		assertThat(context.getBean("ip", FactoryBeanInjectionPoints.class).factoryResult).isSameAs(context.getBean("fb1"));
+	}
+
+	@Test
+	void individualBeanWithUnresolvedFactoryBeanTypeAsTargetType() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		RootBeanDefinition bd1 = new RootBeanDefinition();
+		bd1.setBeanClass(GenericHolderFactoryBean.class);
+		bd1.setTargetType(ResolvableType.forClassWithGenerics(FactoryBean.class, ResolvableType.forClassWithGenerics(GenericHolder.class, Object.class)));
+		bd1.setLazyInit(true);
+		context.registerBeanDefinition("fb1", bd1);
+		RootBeanDefinition bd2 = new RootBeanDefinition();
+		bd2.setBeanClass(UntypedFactoryBean.class);
+		bd2.setTargetType(ResolvableType.forClassWithGenerics(FactoryBean.class, ResolvableType.forClassWithGenerics(GenericHolder.class, Integer.class)));
+		bd2.setLazyInit(true);
+		context.registerBeanDefinition("fb2", bd2);
+		context.registerBeanDefinition("ip", new RootBeanDefinition(FactoryResultInjectionPoint.class));
+		context.refresh();
+
+		assertThat(context.getType("&fb1")).isEqualTo(GenericHolderFactoryBean.class);
+		assertThat(context.getType("fb1")).isEqualTo(GenericHolder.class);
+		assertThat(context.getBeanNamesForType(FactoryBean.class)).hasSize(2);
+		assertThat(context.getBean("ip", FactoryResultInjectionPoint.class).factoryResult).isSameAs(context.getBean("fb1"));
+	}
+
+	@Test
+	void individualBeanWithFactoryBeanObjectTypeAsTargetType() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		RootBeanDefinition bd1 = new RootBeanDefinition();
+		bd1.setBeanClass(GenericHolderFactoryBean.class);
+		bd1.setTargetType(ResolvableType.forClassWithGenerics(GenericHolder.class, String.class));
+		context.registerBeanDefinition("fb1", bd1);
+		RootBeanDefinition bd2 = new RootBeanDefinition();
+		bd2.setBeanClass(UntypedFactoryBean.class);
+		bd2.setTargetType(ResolvableType.forClassWithGenerics(GenericHolder.class, Integer.class));
+		context.registerBeanDefinition("fb2", bd2);
+		context.registerBeanDefinition("ip", new RootBeanDefinition(FactoryResultInjectionPoint.class));
+		context.refresh();
+
+		assertThat(context.getType("&fb1")).isEqualTo(GenericHolderFactoryBean.class);
+		assertThat(context.getType("fb1")).isEqualTo(GenericHolder.class);
+		assertThat(context.getBeanNamesForType(FactoryBean.class)).hasSize(2);
+		assertThat(context.getBeanNamesForType(GenericHolderFactoryBean.class)).hasSize(1);
+		assertThat(context.getBean("ip", FactoryResultInjectionPoint.class).factoryResult).isSameAs(context.getBean("fb1"));
 	}
 
 	@Test
@@ -629,6 +681,38 @@ class AnnotationConfigApplicationContextTests {
 		public boolean isSingleton() {
 			return false;
 		}
+	}
+
+	static class GenericHolder<T> {}
+
+	static class GenericHolderFactoryBean implements FactoryBean<GenericHolder<?>> {
+
+		@Override
+		public GenericHolder<?> getObject() {
+			return new GenericHolder<>();
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return GenericHolder.class;
+		}
+
+		@Override
+		public boolean isSingleton() {
+			return true;
+		}
+	}
+
+	static class FactoryResultInjectionPoint {
+
+		@Autowired
+		GenericHolder<String> factoryResult;
+	}
+
+	static class FactoryBeanInjectionPoints extends FactoryResultInjectionPoint {
+
+		@Autowired
+		FactoryBean<GenericHolder<String>> factoryBean;
 	}
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,13 +38,13 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  *
  * @author Rossen Stoyanchev
  */
-public class MockRestServiceServerTests {
+class MockRestServiceServerTests {
 
 	private final RestTemplate restTemplate = new RestTemplate();
 
 
 	@Test
-	public void buildMultipleTimes() {
+	void buildMultipleTimes() {
 		MockRestServiceServerBuilder builder = MockRestServiceServer.bindTo(this.restTemplate);
 
 		MockRestServiceServer server = builder.build();
@@ -66,7 +66,7 @@ public class MockRestServiceServerTests {
 	}
 
 	@Test
-	public void exactExpectOrder() {
+	void exactExpectOrder() {
 		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate)
 				.ignoreExpectOrder(false).build();
 
@@ -77,7 +77,7 @@ public class MockRestServiceServerTests {
 	}
 
 	@Test
-	public void ignoreExpectOrder() {
+	void ignoreExpectOrder() {
 		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate)
 				.ignoreExpectOrder(true).build();
 
@@ -89,7 +89,7 @@ public class MockRestServiceServerTests {
 	}
 
 	@Test
-	public void resetAndReuseServer() {
+	void resetAndReuseServer() {
 		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate).build();
 
 		server.expect(requestTo("/foo")).andRespond(withSuccess());
@@ -103,7 +103,7 @@ public class MockRestServiceServerTests {
 	}
 
 	@Test
-	public void resetAndReuseServerWithUnorderedExpectationManager() {
+	void resetAndReuseServerWithUnorderedExpectationManager() {
 		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate)
 				.ignoreExpectOrder(true).build();
 
@@ -120,7 +120,7 @@ public class MockRestServiceServerTests {
 	}
 
 	@Test  // gh-24486
-	public void resetClearsRequestFailures() {
+	void resetClearsRequestFailures() {
 		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate).build();
 		server.expect(once(), requestTo("/remoteurl")).andRespond(withSuccess());
 		this.restTemplate.postForEntity("/remoteurl", null, String.class);
@@ -138,7 +138,7 @@ public class MockRestServiceServerTests {
 	}
 
 	@Test  // SPR-16132
-	public void followUpRequestAfterFailure() {
+	void followUpRequestAfterFailure() {
 		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate).build();
 
 		server.expect(requestTo("/some-service/some-endpoint"))
@@ -159,7 +159,7 @@ public class MockRestServiceServerTests {
 	}
 
 	@Test  // gh-21799
-	public void verifyShouldFailIfRequestsFailed() {
+	void verifyShouldFailIfRequestsFailed() {
 		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate).build();
 		server.expect(once(), requestTo("/remoteurl")).andRespond(withSuccess());
 
@@ -174,7 +174,7 @@ public class MockRestServiceServerTests {
 	}
 
 	@Test
-	public void verifyWithTimeout() {
+	void verifyWithTimeout() {
 		MockRestServiceServerBuilder builder = MockRestServiceServer.bindTo(this.restTemplate);
 
 		MockRestServiceServer server1 = builder.build();
@@ -182,10 +182,11 @@ public class MockRestServiceServerTests {
 		server1.expect(requestTo("/bar")).andRespond(withSuccess());
 		this.restTemplate.getForObject("/foo", Void.class);
 
-		assertThatThrownBy(() -> server1.verify(Duration.ofMillis(100))).hasMessage(
-				"Further request(s) expected leaving 1 unsatisfied expectation(s).\n" +
-						"1 request(s) executed:\n" +
-						"GET /foo, headers: [Accept:\"application/json, application/*+json\"]\n");
+		assertThatThrownBy(() -> server1.verify(Duration.ofMillis(100))).hasMessage("""
+				Further request(s) expected leaving 1 unsatisfied expectation(s).
+				1 request(s) executed:
+				GET /foo, headers: [Accept:"application/json, application/*+json"]
+				""");
 
 		MockRestServiceServer server2 = builder.build();
 		server2.expect(requestTo("/foo")).andRespond(withSuccess());

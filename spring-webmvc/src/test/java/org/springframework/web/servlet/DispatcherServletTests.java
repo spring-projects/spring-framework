@@ -98,6 +98,7 @@ public class DispatcherServletTests {
 		complexConfig.addInitParameter("publishContext", "false");
 		complexConfig.addInitParameter("class", "notWritable");
 		complexConfig.addInitParameter("unknownParam", "someValue");
+		complexConfig.addInitParameter("jakarta.servlet.http.legacyDoHead", "true");
 
 		simpleDispatcherServlet = new DispatcherServlet();
 		simpleDispatcherServlet.setContextClass(SimpleWebApplicationContext.class);

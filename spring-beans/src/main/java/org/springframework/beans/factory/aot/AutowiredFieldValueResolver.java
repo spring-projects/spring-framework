@@ -39,8 +39,8 @@ import org.springframework.util.function.ThrowingConsumer;
  * AOT-processed applications as a targeted alternative to the
  * {@link org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor
  * AutowiredAnnotationBeanPostProcessor}.
- * <p>
- * When resolving arguments in a native image, the {@link Field} being used must
+ *
+ * <p>When resolving arguments in a native image, the {@link Field} being used must
  * be marked with an {@link ExecutableMode#INTROSPECT introspection} hint so
  * that field annotations can be read. Full {@link ExecutableMode#INVOKE
  * invocation} hints are only required if the

@@ -20,8 +20,10 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.core.ResolvableType;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -219,6 +221,24 @@ public class BindingReflectionHintsRegistrarTests {
 				});
 	}
 
+	@Test
+	void registerTypeForJacksonAnnotations() {
+		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleClassWithJsonProperty.class);
+		assertThat(RuntimeHintsPredicates.reflection().onField(SampleClassWithJsonProperty.class, "privateField"))
+				.accepts(this.hints);
+		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleClassWithJsonProperty.class, "packagePrivateMethod").invoke())
+				.accepts(this.hints);
+	}
+
+	@Test
+	void registerTypeForInheritedJacksonAnnotations() {
+		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleClassWithInheritedJsonProperty.class);
+		assertThat(RuntimeHintsPredicates.reflection().onField(SampleClassWithJsonProperty.class, "privateField"))
+				.accepts(this.hints);
+		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleClassWithJsonProperty.class, "packagePrivateMethod").invoke())
+				.accepts(this.hints);
+	}
+
 
 	static class SampleEmptyClass {
 	}
@@ -291,7 +311,7 @@ public class BindingReflectionHintsRegistrarTests {
 		}
 	}
 
-	class SampleClassC {
+	static class SampleClassC {
 		public String getString() {
 			return "";
 		}
@@ -302,5 +322,18 @@ public class BindingReflectionHintsRegistrarTests {
 	}
 
 	record SampleRecord(String name) {}
+
+	static class SampleClassWithJsonProperty {
+
+		@JsonProperty
+		private String privateField = "";
+
+		@JsonProperty
+		String packagePrivateMethod() {
+			return "";
+		}
+	}
+
+	static class SampleClassWithInheritedJsonProperty extends SampleClassWithJsonProperty {}
 
 }

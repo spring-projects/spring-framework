@@ -19,7 +19,6 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,6 +37,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
+import org.springframework.web.reactive.DispatchExceptionHandler;
 import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
@@ -52,7 +52,8 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class RequestMappingHandlerAdapter implements HandlerAdapter, ApplicationContextAware, InitializingBean {
+public class RequestMappingHandlerAdapter
+		implements HandlerAdapter, DispatchExceptionHandler, ApplicationContextAware, InitializingBean {
 
 	private static final Log logger = LogFactory.getLog(RequestMappingHandlerAdapter.class);
 
@@ -192,19 +193,20 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 
 		InvocableHandlerMethod invocableMethod = this.methodResolver.getRequestMappingMethod(handlerMethod);
 
-		Function<Throwable, Mono<HandlerResult>> exceptionHandler =
-				ex -> handleException(ex, handlerMethod, bindingContext, exchange);
+		DispatchExceptionHandler exceptionHandler =
+				(exchange2, ex) -> handleException(exchange, ex, handlerMethod, bindingContext);
 
 		return this.modelInitializer
 				.initModel(handlerMethod, bindingContext, exchange)
 				.then(Mono.defer(() -> invocableMethod.invoke(exchange, bindingContext)))
 				.doOnNext(result -> result.setExceptionHandler(exceptionHandler))
 				.doOnNext(result -> bindingContext.saveModel())
-				.onErrorResume(exceptionHandler);
+				.onErrorResume(ex -> exceptionHandler.handleError(exchange, ex));
 	}
 
-	private Mono<HandlerResult> handleException(Throwable exception, HandlerMethod handlerMethod,
-			BindingContext bindingContext, ServerWebExchange exchange) {
+	private Mono<HandlerResult> handleException(
+			ServerWebExchange exchange, Throwable exception,
+			@Nullable HandlerMethod handlerMethod, @Nullable BindingContext bindingContext) {
 
 		Assert.state(this.methodResolver != null, "Not initialized");
 
@@ -212,14 +214,21 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 		exchange.getAttributes().remove(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 		exchange.getResponse().getHeaders().clearContentHeaders();
 
-		InvocableHandlerMethod invocable = this.methodResolver.getExceptionHandlerMethod(exception, handlerMethod);
+		InvocableHandlerMethod invocable =
+				this.methodResolver.getExceptionHandlerMethod(exception, handlerMethod);
+
 		if (invocable != null) {
 			ArrayList<Throwable> exceptions = new ArrayList<>();
 			try {
 				if (logger.isDebugEnabled()) {
 					logger.debug(exchange.getLogPrefix() + "Using @ExceptionHandler " + invocable);
 				}
-				bindingContext.getModel().asMap().clear();
+				if (bindingContext != null) {
+					bindingContext.getModel().asMap().clear();
+				}
+				else {
+					bindingContext = new BindingContext();
+				}
 
 				// Expose causes as provided arguments as well
 				Throwable exToExpose = exception;
@@ -243,6 +252,11 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 			}
 		}
 		return Mono.error(exception);
+	}
+
+	@Override
+	public Mono<HandlerResult> handleError(ServerWebExchange exchange, Throwable ex) {
+		return handleException(exchange, ex, null, null);
 	}
 
 }

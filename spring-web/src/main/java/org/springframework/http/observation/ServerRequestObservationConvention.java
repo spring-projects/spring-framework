@@ -20,7 +20,7 @@ import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
 
 /**
- * Interface for an {@link ObservationConvention} for {@link ServerHttpObservationDocumentation#HTTP_REQUESTS Servlet HTTP exchanges}.
+ * Interface for an {@link ObservationConvention} for {@link ServerHttpObservationDocumentation#HTTP_SERVLET_SERVER_EXCHANGES Servlet HTTP exchanges}.
  *
  * @author Brian Clozel
  * @since 6.0

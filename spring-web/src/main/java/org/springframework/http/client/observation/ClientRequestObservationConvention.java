@@ -21,7 +21,7 @@ import io.micrometer.observation.ObservationConvention;
 
 /**
  * Interface for an {@link ObservationConvention} for
- * {@link ClientHttpObservationDocumentation#HTTP_REQUEST client HTTP exchanges}.
+ * {@link ClientHttpObservationDocumentation#HTTP_CLIENT_EXCHANGES client HTTP exchanges}.
  *
  * @author Brian Clozel
  * @since 6.0

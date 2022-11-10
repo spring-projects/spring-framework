@@ -177,7 +177,7 @@ public abstract class DataBufferUtils {
 		if (options.length > 0) {
 			for (OpenOption option : options) {
 				Assert.isTrue(!(option == StandardOpenOption.APPEND || option == StandardOpenOption.WRITE),
-						"'" + option + "' not allowed");
+						() -> "'" + option + "' not allowed");
 			}
 		}
 
@@ -712,7 +712,7 @@ public abstract class DataBufferUtils {
 
 		@Override
 		public byte[] delimiter() {
-			Assert.state(this.longestDelimiter != NO_DELIMITER, "Illegal state!");
+			Assert.state(this.longestDelimiter != NO_DELIMITER, "'delimiter' not set");
 			return this.longestDelimiter;
 		}
 

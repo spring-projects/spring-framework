@@ -829,8 +829,7 @@ public abstract class AnnotatedElementUtils {
 	}
 
 	private static <A extends Annotation> Comparator<MergedAnnotation<A>> highAggregateIndexesFirst() {
-		return Comparator.<MergedAnnotation<A>> comparingInt(
-				MergedAnnotation::getAggregateIndex).reversed();
+		return Comparator.<MergedAnnotation<A>> comparingInt(MergedAnnotation::getAggregateIndex).reversed();
 	}
 
 	@Nullable
@@ -840,8 +839,7 @@ public abstract class AnnotatedElementUtils {
 		if (!annotation.isPresent()) {
 			return null;
 		}
-		return annotation.asAnnotationAttributes(
-				Adapt.values(classValuesAsString, nestedAnnotationsAsMap));
+		return annotation.asAnnotationAttributes(Adapt.values(classValuesAsString, nestedAnnotationsAsMap));
 	}
 
 

@@ -61,7 +61,7 @@ import org.springframework.aot.hint.RuntimeHintsRegistrar;
  * @since 6.0
  * @see org.springframework.aot.hint.RuntimeHints
  */
-@Target({ ElementType.TYPE, ElementType.METHOD })
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface ImportRuntimeHints {

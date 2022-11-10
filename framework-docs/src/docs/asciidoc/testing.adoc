@@ -214,7 +214,7 @@ Doing so lets you test things such as:
 The Spring Framework provides first-class support for integration testing in the
 `spring-test` module. The name of the actual JAR file might include the release version
 and might also be in the long `org.springframework.test` form, depending on where you get
-it from (see the <<core.adoc#dependency-management, section on Dependency Management>>
+it from (see the <<core.adoc#beans-dependencies, section on Dependency Management>>
 for an explanation). This library includes the `org.springframework.test` package, which
 contains valuable classes for integration testing with a Spring container. This testing
 does not rely on an application server or other deployment environment. Such tests are

@@ -54,8 +54,10 @@ import org.springframework.context.annotation.CommonAnnotationBeanPostProcessor;
 import org.springframework.context.annotation.ContextAnnotationAutowireCandidateResolver;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.testfixture.context.annotation.AutowiredComponent;
+import org.springframework.context.testfixture.context.annotation.AutowiredGenericTemplate;
 import org.springframework.context.testfixture.context.annotation.CglibConfiguration;
 import org.springframework.context.testfixture.context.annotation.ConfigurableCglibConfiguration;
+import org.springframework.context.testfixture.context.annotation.GenericTemplateConfiguration;
 import org.springframework.context.testfixture.context.annotation.InitDestroyComponent;
 import org.springframework.context.testfixture.context.annotation.LazyAutowiredFieldComponent;
 import org.springframework.context.testfixture.context.annotation.LazyAutowiredMethodComponent;
@@ -111,6 +113,18 @@ class ApplicationContextAotGeneratorTests {
 			AutowiredComponent bean = freshApplicationContext.getBean(AutowiredComponent.class);
 			assertThat(bean.getEnvironment()).isSameAs(freshApplicationContext.getEnvironment());
 			assertThat(bean.getCounter()).isEqualTo(42);
+		});
+	}
+
+	@Test
+	void processAheadOfTimeWhenHasAutowiringOnUnresolvedGeneric() {
+		GenericApplicationContext applicationContext = new AnnotationConfigApplicationContext();
+		applicationContext.registerBean(GenericTemplateConfiguration.class);
+		applicationContext.registerBean("autowiredComponent", AutowiredGenericTemplate.class);
+		testCompiledResult(applicationContext, (initializer, compiled) -> {
+			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+			AutowiredGenericTemplate bean = freshApplicationContext.getBean(AutowiredGenericTemplate.class);
+			assertThat(bean).hasFieldOrPropertyWithValue("genericTemplate", applicationContext.getBean("genericTemplate"));
 		});
 	}
 

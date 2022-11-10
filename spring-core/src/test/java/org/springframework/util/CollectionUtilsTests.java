@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,12 +70,12 @@ class CollectionUtilsTests {
 	void mergePrimitiveArrayIntoCollection() {
 		int[] arr = new int[] {1, 2};
 		List<Comparable<?>> list = new ArrayList<>();
-		list.add(Integer.valueOf(3));
+		list.add(3);
 
 		CollectionUtils.mergeArrayIntoCollection(arr, list);
-		assertThat(list.get(0)).isEqualTo(Integer.valueOf(3));
-		assertThat(list.get(1)).isEqualTo(Integer.valueOf(1));
-		assertThat(list.get(2)).isEqualTo(Integer.valueOf(2));
+		assertThat(list.get(0)).isEqualTo(3);
+		assertThat(list.get(1)).isEqualTo(1);
+		assertThat(list.get(2)).isEqualTo(2);
 	}
 
 	@Test
@@ -84,7 +84,7 @@ class CollectionUtilsTests {
 		defaults.setProperty("prop1", "value1");
 		Properties props = new Properties(defaults);
 		props.setProperty("prop2", "value2");
-		props.put("prop3", Integer.valueOf(3));
+		props.put("prop3", 3);
 
 		Map<String, Object> map = new HashMap<>();
 		map.put("prop4", "value4");
@@ -92,7 +92,7 @@ class CollectionUtilsTests {
 		CollectionUtils.mergePropertiesIntoMap(props, map);
 		assertThat(map.get("prop1")).isEqualTo("value1");
 		assertThat(map.get("prop2")).isEqualTo("value2");
-		assertThat(map.get("prop3")).isEqualTo(Integer.valueOf(3));
+		assertThat(map.get("prop3")).isEqualTo(3);
 		assertThat(map.get("prop4")).isEqualTo("value4");
 	}
 

@@ -219,7 +219,7 @@ class DelegatingSmartContextLoaderTests {
 
 			@Bean
 			public String foo() {
-				return new String("foo");
+				return "foo";
 			}
 		}
 

@@ -84,6 +84,8 @@ dependencies {
 	testImplementation("io.projectreactor.tools:blockhound")
 	testImplementation("org.skyscreamer:jsonassert")
 	testImplementation("com.squareup.okhttp3:mockwebserver")
+	testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
+	testImplementation("com.fasterxml.jackson.core:jackson-annotations")
 	testFixturesImplementation("com.google.code.findbugs:jsr305")
 	testFixturesImplementation("org.junit.platform:junit-platform-launcher")
 	testFixturesImplementation("org.junit.jupiter:junit-jupiter-api")
@@ -91,7 +93,6 @@ dependencies {
 	testFixturesImplementation("org.assertj:assertj-core")
 	testFixturesImplementation("org.xmlunit:xmlunit-assertj")
 	testFixturesImplementation("io.projectreactor:reactor-test")
-	testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
 }
 
 jar {
