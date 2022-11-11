@@ -84,7 +84,7 @@ public class DefaultWebSessionManager implements WebSessionManager {
 	@Override
 	public Mono<WebSession> getSession(ServerWebExchange exchange) {
 		return Mono.defer(() -> retrieveSession(exchange)
-				.switchIfEmpty(createWebSession())
+				.switchIfEmpty(Mono.defer(this::createWebSession))
 				.doOnNext(session -> exchange.getResponse().beforeCommit(() -> save(exchange, session))));
 	}
 

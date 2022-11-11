@@ -115,6 +115,16 @@ class DefaultWebSessionManagerTests {
 	}
 
 	@Test
+	void getSessionDoesNotCreateWebSessionWhenSessionIdsAreNotEmpty() {
+		String sessionId = this.updateSession.getId();
+		given(this.sessionIdResolver.resolveSessionIds(this.exchange)).willReturn(Collections.singletonList(sessionId));
+
+		this.sessionManager.getSession(this.exchange).block();
+
+		verify(this.sessionStore, never()).createWebSession();
+	}
+
+	@Test
 	void existingSession() {
 		String sessionId = this.updateSession.getId();
 		given(this.sessionIdResolver.resolveSessionIds(this.exchange)).willReturn(Collections.singletonList(sessionId));
