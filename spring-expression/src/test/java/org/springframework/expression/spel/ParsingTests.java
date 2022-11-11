@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,374 +24,380 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Parse some expressions and check we get the AST we expect. Rather than inspecting each node in the AST, we ask it to
- * write itself to a string form and check that is as expected.
+ * Parse some expressions and check we get the AST we expect.
+ *
+ * <p>Rather than inspecting each node in the AST, we ask it to write itself to
+ * a string form and check that is as expected.
  *
  * @author Andy Clement
+ * @author Sam Brannen
  */
-public class ParsingTests {
+class ParsingTests {
 
-	private SpelExpressionParser parser = new SpelExpressionParser();
+	private final SpelExpressionParser parser = new SpelExpressionParser();
+
 
 	// literals
 	@Test
-	public void testLiteralBoolean01() {
+	void literalBoolean01() {
 		parseCheck("false");
 	}
 
 	@Test
-	public void testLiteralLong01() {
+	void literalLong01() {
 		parseCheck("37L", "37");
 	}
 
 	@Test
-	public void testLiteralBoolean02() {
+	void literalBoolean02() {
 		parseCheck("true");
 	}
 
 	@Test
-	public void testLiteralBoolean03() {
+	void literalBoolean03() {
 		parseCheck("!true");
 	}
 
 	@Test
-	public void testLiteralInteger01() {
+	void literalInteger01() {
 		parseCheck("1");
 	}
 
 	@Test
-	public void testLiteralInteger02() {
+	void literalInteger02() {
 		parseCheck("1415");
 	}
 
 	@Test
-	public void testLiteralString01() {
+	void literalString01() {
 		parseCheck("'hello'");
 	}
 
 	@Test
-	public void testLiteralString02() {
+	void literalString02() {
 		parseCheck("'joe bloggs'");
 	}
 
 	@Test
-	public void testLiteralString03() {
+	void literalString03() {
 		parseCheck("'Tony''s Pizza'", "'Tony's Pizza'");
 	}
 
 	@Test
-	public void testLiteralReal01() {
+	void literalReal01() {
 		parseCheck("6.0221415E+23", "6.0221415E23");
 	}
 
 	@Test
-	public void testLiteralHex01() {
+	void literalHex01() {
 		parseCheck("0x7FFFFFFF", "2147483647");
 	}
 
 	@Test
-	public void testLiteralDate01() {
+	void literalDate01() {
 		parseCheck("date('1974/08/24')");
 	}
 
 	@Test
-	public void testLiteralDate02() {
+	void literalDate02() {
 		parseCheck("date('19740824T131030','yyyyMMddTHHmmss')");
 	}
 
 	@Test
-	public void testLiteralNull01() {
+	void literalNull01() {
 		parseCheck("null");
 	}
 
 	// boolean operators
 	@Test
-	public void testBooleanOperatorsOr01() {
+	void booleanOperatorsOr01() {
 		parseCheck("false or false", "(false or false)");
 	}
 
 	@Test
-	public void testBooleanOperatorsOr02() {
+	void booleanOperatorsOr02() {
 		parseCheck("false or true", "(false or true)");
 	}
 
 	@Test
-	public void testBooleanOperatorsOr03() {
+	void booleanOperatorsOr03() {
 		parseCheck("true or false", "(true or false)");
 	}
 
 	@Test
-	public void testBooleanOperatorsOr04() {
+	void booleanOperatorsOr04() {
 		parseCheck("true or false", "(true or false)");
 	}
 
 	@Test
-	public void testBooleanOperatorsMix01() {
+	void booleanOperatorsMix01() {
 		parseCheck("false or true and false", "(false or (true and false))");
 	}
 
 	// relational operators
 	@Test
-	public void testRelOperatorsGT01() {
+	void relOperatorsGT01() {
 		parseCheck("3>6", "(3 > 6)");
 	}
 
 	@Test
-	public void testRelOperatorsLT01() {
+	void relOperatorsLT01() {
 		parseCheck("3<6", "(3 < 6)");
 	}
 
 	@Test
-	public void testRelOperatorsLE01() {
+	void relOperatorsLE01() {
 		parseCheck("3<=6", "(3 <= 6)");
 	}
 
 	@Test
-	public void testRelOperatorsGE01() {
+	void relOperatorsGE01() {
 		parseCheck("3>=6", "(3 >= 6)");
 	}
 
 	@Test
-	public void testRelOperatorsGE02() {
+	void relOperatorsGE02() {
 		parseCheck("3>=3", "(3 >= 3)");
 	}
 
 	@Test
-	public void testElvis() {
-		parseCheck("3?:1", "3 ?: 1");
+	void elvis() {
+		parseCheck("3?:1", "(3 ?: 1)");
+		parseCheck("(2*3)?:1*10", "((2 * 3) ?: (1 * 10))");
+		parseCheck("((2*3)?:1)*10", "(((2 * 3) ?: 1) * 10)");
 	}
 
-	// public void testRelOperatorsIn01() {
+	// void relOperatorsIn01() {
 	// parseCheck("3 in {1,2,3,4,5}", "(3 in {1,2,3,4,5})");
 	// }
 	//
-	// public void testRelOperatorsBetween01() {
+	// void relOperatorsBetween01() {
 	// parseCheck("1 between {1, 5}", "(1 between {1,5})");
 	// }
 
-	// public void testRelOperatorsBetween02() {
+	// void relOperatorsBetween02() {
 	// parseCheck("'efg' between {'abc', 'xyz'}", "('efg' between {'abc','xyz'})");
 	// }// true
 
 	@Test
-	public void testRelOperatorsIs01() {
+	void relOperatorsIs01() {
 		parseCheck("'xyz' instanceof int", "('xyz' instanceof int)");
 	}// false
 
-	// public void testRelOperatorsIs02() {
+	// void relOperatorsIs02() {
 	// parseCheck("{1, 2, 3, 4, 5} instanceof List", "({1,2,3,4,5} instanceof List)");
 	// }// true
 
 	@Test
-	public void testRelOperatorsMatches01() {
+	void relOperatorsMatches01() {
 		parseCheck("'5.0067' matches '^-?\\d+(\\.\\d{2})?$'", "('5.0067' matches '^-?\\d+(\\.\\d{2})?$')");
 	}// false
 
 	@Test
-	public void testRelOperatorsMatches02() {
+	void relOperatorsMatches02() {
 		parseCheck("'5.00' matches '^-?\\d+(\\.\\d{2})?$'", "('5.00' matches '^-?\\d+(\\.\\d{2})?$')");
 	}// true
 
 	// mathematical operators
 	@Test
-	public void testMathOperatorsAdd01() {
+	void mathOperatorsAdd01() {
 		parseCheck("2+4", "(2 + 4)");
 	}
 
 	@Test
-	public void testMathOperatorsAdd02() {
+	void mathOperatorsAdd02() {
 		parseCheck("'a'+'b'", "('a' + 'b')");
 	}
 
 	@Test
-	public void testMathOperatorsAdd03() {
+	void mathOperatorsAdd03() {
 		parseCheck("'hello'+' '+'world'", "(('hello' + ' ') + 'world')");
 	}
 
 	@Test
-	public void testMathOperatorsSubtract01() {
+	void mathOperatorsSubtract01() {
 		parseCheck("5-4", "(5 - 4)");
 	}
 
 	@Test
-	public void testMathOperatorsMultiply01() {
+	void mathOperatorsMultiply01() {
 		parseCheck("7*4", "(7 * 4)");
 	}
 
 	@Test
-	public void testMathOperatorsDivide01() {
+	void mathOperatorsDivide01() {
 		parseCheck("8/4", "(8 / 4)");
 	}
 
 	@Test
-	public void testMathOperatorModulus01() {
+	void mathOperatorModulus01() {
 		parseCheck("7 % 4", "(7 % 4)");
 	}
 
 	// mixed operators
 	@Test
-	public void testMixedOperators01() {
+	void mixedOperators01() {
 		parseCheck("true and 5>3", "(true and (5 > 3))");
 	}
 
 	// collection processors
-	// public void testCollectionProcessorsCount01() {
+	// void collectionProcessorsCount01() {
 	// parseCheck("new String[] {'abc','def','xyz'}.count()");
 	// }
 
-	// public void testCollectionProcessorsCount02() {
+	// void collectionProcessorsCount02() {
 	// parseCheck("new int[] {1,2,3}.count()");
 	// }
 	//
-	// public void testCollectionProcessorsMax01() {
+	// void collectionProcessorsMax01() {
 	// parseCheck("new int[] {1,2,3}.max()");
 	// }
 	//
-	// public void testCollectionProcessorsMin01() {
+	// void collectionProcessorsMin01() {
 	// parseCheck("new int[] {1,2,3}.min()");
 	// }
 	//
-	// public void testCollectionProcessorsAverage01() {
+	// void collectionProcessorsAverage01() {
 	// parseCheck("new int[] {1,2,3}.average()");
 	// }
 	//
-	// public void testCollectionProcessorsSort01() {
+	// void collectionProcessorsSort01() {
 	// parseCheck("new int[] {3,2,1}.sort()");
 	// }
 	//
-	// public void testCollectionProcessorsNonNull01() {
+	// void collectionProcessorsNonNull01() {
 	// parseCheck("{'a','b',null,'d',null}.nonNull()");
 	// }
 	//
-	// public void testCollectionProcessorsDistinct01() {
+	// void collectionProcessorsDistinct01() {
 	// parseCheck("{'a','b','a','d','e'}.distinct()");
 	// }
 
 	// references
 	@Test
-	public void testReferences01() {
+	void references01() {
 		parseCheck("@foo");
 		parseCheck("@'foo.bar'");
-		parseCheck("@\"foo.bar.goo\"","@'foo.bar.goo'");
+		parseCheck("@\"foo.bar.goo\"" , "@'foo.bar.goo'");
 	}
 
 	@Test
-	public void testReferences03() {
+	void references03() {
 		parseCheck("@$$foo");
 	}
 
 	// properties
 	@Test
-	public void testProperties01() {
+	void properties01() {
 		parseCheck("name");
 	}
 
 	@Test
-	public void testProperties02() {
+	void properties02() {
 		parseCheck("placeofbirth.CitY");
 	}
 
 	@Test
-	public void testProperties03() {
+	void properties03() {
 		parseCheck("a.b.c.d.e");
 	}
 
 	// inline list creation
 	@Test
-	public void testInlineListCreation01() {
+	void inlineListCreation01() {
 		parseCheck("{1, 2, 3, 4, 5}", "{1,2,3,4,5}");
 	}
 
 	@Test
-	public void testInlineListCreation02() {
+	void inlineListCreation02() {
 		parseCheck("{'abc','xyz'}", "{'abc','xyz'}");
 	}
 
 	// inline map creation
 	@Test
-	public void testInlineMapCreation01() {
+	void inlineMapCreation01() {
 		parseCheck("{'key1':'Value 1','today':DateTime.Today}");
 	}
 
 	@Test
-	public void testInlineMapCreation02() {
+	void inlineMapCreation02() {
 		parseCheck("{1:'January',2:'February',3:'March'}");
 	}
 
 	// methods
 	@Test
-	public void testMethods01() {
+	void methods01() {
 		parseCheck("echo(12)");
 	}
 
 	@Test
-	public void testMethods02() {
+	void methods02() {
 		parseCheck("echo(name)");
 	}
 
 	@Test
-	public void testMethods03() {
+	void methods03() {
 		parseCheck("age.doubleItAndAdd(12)");
 	}
 
 	// constructors
 	@Test
-	public void testConstructors01() {
+	void constructors01() {
 		parseCheck("new String('hello')");
 	}
 
-	// public void testConstructors02() {
+	// void constructors02() {
 	// parseCheck("new String[3]");
 	// }
 
 	// array construction
-	// public void testArrayConstruction01() {
+	// void arrayConstruction01() {
 	// parseCheck("new int[] {1, 2, 3, 4, 5}", "new int[] {1,2,3,4,5}");
 	// }
 	//
-	// public void testArrayConstruction02() {
+	// void arrayConstruction02() {
 	// parseCheck("new String[] {'abc','xyz'}", "new String[] {'abc','xyz'}");
 	// }
 
 	// variables and functions
 	@Test
-	public void testVariables01() {
+	void variables01() {
 		parseCheck("#foo");
 	}
 
 	@Test
-	public void testFunctions01() {
+	void functions01() {
 		parseCheck("#fn(1,2,3)");
 	}
 
 	@Test
-	public void testFunctions02() {
+	void functions02() {
 		parseCheck("#fn('hello')");
 	}
 
 	// projections and selections
-	// public void testProjections01() {
+	// void projections01() {
 	// parseCheck("{1,2,3,4,5,6,7,8,9,10}.!{#isEven()}");
 	// }
 
-	// public void testSelections01() {
+	// void selections01() {
 	// parseCheck("{1,2,3,4,5,6,7,8,9,10}.?{#isEven(#this) == 'y'}",
 	// "{1,2,3,4,5,6,7,8,9,10}.?{(#isEven(#this) == 'y')}");
 	// }
 
-	// public void testSelectionsFirst01() {
+	// void selectionsFirst01() {
 	// parseCheck("{1,2,3,4,5,6,7,8,9,10}.^{#isEven(#this) == 'y'}",
 	// "{1,2,3,4,5,6,7,8,9,10}.^{(#isEven(#this) == 'y')}");
 	// }
 
-	// public void testSelectionsLast01() {
+	// void selectionsLast01() {
 	// parseCheck("{1,2,3,4,5,6,7,8,9,10}.${#isEven(#this) == 'y'}",
 	// "{1,2,3,4,5,6,7,8,9,10}.${(#isEven(#this) == 'y')}");
 	// }
 
 	// assignment
 	@Test
-	public void testAssignmentToVariables01() {
+	void assignmentToVariables01() {
 		parseCheck("#var1='value1'");
 	}
 
@@ -399,38 +405,43 @@ public class ParsingTests {
 	// ternary operator
 
 	@Test
-	public void testTernaryOperator01() {
-		parseCheck("1>2?3:4","(1 > 2) ? 3 : 4");
+	void ternaryOperator01() {
+		parseCheck("1>2?3:4", "((1 > 2) ? 3 : 4)");
+		parseCheck("(a ? 1 : 0) * 10", "((a ? 1 : 0) * 10)");
+		parseCheck("(a?1:0)*10", "((a ? 1 : 0) * 10)");
+		parseCheck("(4 % 2 == 0 ? 1 : 0) * 10", "((((4 % 2) == 0) ? 1 : 0) * 10)");
+		parseCheck("((4 % 2 == 0) ? 1 : 0) * 10", "((((4 % 2) == 0) ? 1 : 0) * 10)");
 	}
 
-	// public void testTernaryOperator01() {
-	// parseCheck("{1}.#isEven(#this) == 'y'?'it is even':'it is odd'",
-	// "({1}.#isEven(#this) == 'y') ? 'it is even' : 'it is odd'");
-	// }
+	@Test
+	void ternaryOperator02() {
+		parseCheck("{1}.#isEven(#this) == 'y'?'it is even':'it is odd'",
+				"(({1}.#isEven(#this) == 'y') ? 'it is even' : 'it is odd')");
+	}
 
 	//
-	// public void testLambdaMax() {
+	// void lambdaMax() {
 	// parseCheck("(#max = {|x,y| $x > $y ? $x : $y }; #max(5,25))", "(#max={|x,y| ($x > $y) ? $x : $y };#max(5,25))");
 	// }
 	//
-	// public void testLambdaFactorial() {
+	// void lambdaFactorial() {
 	// parseCheck("(#fact = {|n| $n <= 1 ? 1 : $n * #fact($n-1) }; #fact(5))",
 	// "(#fact={|n| ($n <= 1) ? 1 : ($n * #fact(($n - 1))) };#fact(5))");
 	// } // 120
 
 	// Type references
 	@Test
-	public void testTypeReferences01() {
+	void typeReferences01() {
 		parseCheck("T(java.lang.String)");
 	}
 
 	@Test
-	public void testTypeReferences02() {
+	void typeReferences02() {
 		parseCheck("T(String)");
 	}
 
 	@Test
-	public void testInlineList1() {
+	void inlineList1() {
 		parseCheck("{1,2,3,4}");
 	}
 
@@ -440,7 +451,7 @@ public class ParsingTests {
 	 *
 	 * @param expression the expression to parse *and* the expected value of the string form of the resultant AST
 	 */
-	public void parseCheck(String expression) {
+	private void parseCheck(String expression) {
 		parseCheck(expression, expression);
 	}
 
@@ -451,7 +462,7 @@ public class ParsingTests {
 	 * @param expression the expression to parse
 	 * @param expectedStringFormOfAST the expected string form of the AST
 	 */
-	public void parseCheck(String expression, String expectedStringFormOfAST) {
+	private void parseCheck(String expression, String expectedStringFormOfAST) {
 		SpelExpression e = parser.parseRaw(expression);
 		assertThat(e).isNotNull();
 		assertThat(e.toStringAST()).isEqualTo(expectedStringFormOfAST);

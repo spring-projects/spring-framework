@@ -4414,7 +4414,7 @@ asterisk.
 * Two numbers separated with a hyphen (`-`) express a range of numbers.
 The specified range is inclusive.
 * Following a range (or `*`) with `/` specifies the interval of the number's value through the range.
-* English names can also be used for the day-of-month and day-of-week fields.
+* English names can also be used for the month and day-of-week fields.
 Use the first three letters of the particular day or month (case does not matter).
 * The day-of-month and day-of-week fields can contain a `L` character, which has a different meaning
 ** In the day-of-month field, `L` stands for _the last day of the month_.
