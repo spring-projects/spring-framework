@@ -162,7 +162,9 @@ class ParsingTests {
 
 	@Test
 	void elvis() {
-		parseCheck("3?:1", "3 ?: 1");
+		parseCheck("3?:1", "(3 ?: 1)");
+		parseCheck("(2*3)?:1*10", "((2 * 3) ?: (1 * 10))");
+		parseCheck("((2*3)?:1)*10", "(((2 * 3) ?: 1) * 10)");
 	}
 
 	// void relOperatorsIn01() {
@@ -404,13 +406,17 @@ class ParsingTests {
 
 	@Test
 	void ternaryOperator01() {
-		parseCheck("1>2?3:4", "(1 > 2) ? 3 : 4");
+		parseCheck("1>2?3:4", "((1 > 2) ? 3 : 4)");
+		parseCheck("(a ? 1 : 0) * 10", "((a ? 1 : 0) * 10)");
+		parseCheck("(a?1:0)*10", "((a ? 1 : 0) * 10)");
+		parseCheck("(4 % 2 == 0 ? 1 : 0) * 10", "((((4 % 2) == 0) ? 1 : 0) * 10)");
+		parseCheck("((4 % 2 == 0) ? 1 : 0) * 10", "((((4 % 2) == 0) ? 1 : 0) * 10)");
 	}
 
 	@Test
 	void ternaryOperator02() {
 		parseCheck("{1}.#isEven(#this) == 'y'?'it is even':'it is odd'",
-				"({1}.#isEven(#this) == 'y') ? 'it is even' : 'it is odd'");
+				"(({1}.#isEven(#this) == 'y') ? 'it is even' : 'it is odd')");
 	}
 
 	//
