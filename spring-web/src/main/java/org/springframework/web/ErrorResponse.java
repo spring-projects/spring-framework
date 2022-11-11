@@ -16,7 +16,9 @@
 
 package org.springframework.web;
 
+import java.net.URI;
 import java.util.Locale;
+import java.util.function.Consumer;
 
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
@@ -148,35 +150,124 @@ public interface ErrorResponse {
 		return "problemDetail.title." + exceptionType.getName();
 	}
 
+
 	/**
-	 * Map the given Exception to an {@link ErrorResponse}.
-	 * @param ex the Exception, mostly to derive message codes, if not provided
-	 * @param status the response status to use
-	 * @param headers optional headers to add to the response
-	 * @param defaultDetail default value for the "detail" field
-	 * @param detailMessageCode the code to use to look up the "detail" field
-	 * through a {@code MessageSource}, falling back on
-	 * {@link #getDefaultDetailMessageCode(Class, String)}
-	 * @param detailMessageArguments the arguments to go with the detailMessageCode
-	 * @return the created {@code ErrorResponse} instance
+	 * Static factory method to build an instance via
+	 * {@link #builder(Throwable, HttpStatusCode, String)}.
 	 */
-	static ErrorResponse createFor(
-			Exception ex, HttpStatusCode status, @Nullable HttpHeaders headers,
-			String defaultDetail, @Nullable String detailMessageCode, @Nullable Object[] detailMessageArguments) {
+	static ErrorResponse create(Throwable ex, HttpStatusCode statusCode, String detail) {
+		return builder(ex, statusCode, detail).build();
+	}
 
-		if (detailMessageCode == null) {
-			detailMessageCode = ErrorResponse.getDefaultDetailMessageCode(ex.getClass(), null);
-		}
+	/**
+	 * Return a builder to create an {@code ErrorResponse} instance.
+	 * @param ex the underlying exception that lead to the error response;
+	 * mainly to derive default values for the
+	 * {@link #getDetailMessageCode() detail message code} and for the
+	 * {@link #getTitleMessageCode() title message code}.
+	 * @param statusCode the status code to set the response to
+	 * @param detail the default value for the
+	 * {@link ProblemDetail#setDetail(String) detail} field, unless overridden
+	 * by a {@link MessageSource} lookup with {@link #getDetailMessageCode()}
+	 */
+	static Builder builder(Throwable ex, HttpStatusCode statusCode, String detail) {
+		return new DefaultErrorResponseBuilder(ex, statusCode, detail);
+	}
 
-		ErrorResponseException errorResponse = new ErrorResponseException(
-				status, ProblemDetail.forStatusAndDetail(status, defaultDetail), null,
-				detailMessageCode, detailMessageArguments);
 
-		if (headers != null) {
-			errorResponse.getHeaders().putAll(headers);
-		}
+	/**
+	 * Builder for an {@code ErrorResponse}.
+	 */
+	interface Builder {
 
-		return errorResponse;
+		/**
+		 * Add the given header value(s) under the given name.
+		 * @param headerName the header name
+		 * @param headerValues the header value(s)
+		 * @return the same builder instance
+		 * @see HttpHeaders#add(String, String)
+		 */
+		Builder header(String headerName, String... headerValues);
+
+		/**
+		 * Manipulate this response's headers with the given consumer. This is
+		 * useful to {@linkplain HttpHeaders#set(String, String) overwrite} or
+		 * {@linkplain HttpHeaders#remove(Object) remove} existing values, or
+		 * use any other {@link HttpHeaders} methods.
+		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
+		 * @return the same builder instance
+		 */
+		Builder headers(Consumer<HttpHeaders> headersConsumer);
+
+		/**
+		 * Set the underlying {@link ProblemDetail#setDetail(String)}.
+		 * @return the same builder instance
+		 */
+		Builder detail(String detail);
+
+		/**
+		 * Customize the {@link MessageSource} code for looking up the value for
+		 * the underlying {@link #detail(String)}.
+		 * <p>By default, this is set to
+		 * {@link ErrorResponse#getDefaultDetailMessageCode(Class, String)} with the
+		 * associated Exception type.
+		 * @param messageCode the message code to use
+		 * @return the same builder instance
+		 * @see ErrorResponse#getDetailMessageCode()
+		 */
+		Builder detailMessageCode(String messageCode);
+
+		/**
+		 * Set the arguments to provide to the {@link MessageSource} lookup for
+		 * {@link #detailMessageCode(String)}.
+		 * @param messageArguments the arguments to provide
+		 * @return the same builder instance
+		 * @see ErrorResponse#getDetailMessageArguments()
+		 */
+		Builder detailMessageArguments(Object... messageArguments);
+
+		/**
+		 * Set the underlying {@link ProblemDetail#setTitle(String)} field.
+		 * @return the same builder instance
+		 */
+		Builder type(URI type);
+
+		/**
+		 * Set the underlying {@link ProblemDetail#setTitle(String)} field.
+		 * @return the same builder instance
+		 */
+		Builder title(@Nullable String title);
+
+		/**
+		 * Customize the {@link MessageSource} code for looking up the value for
+		 * the underlying {@link ProblemDetail#setTitle(String)}.
+		 * <p>By default, set via
+		 * {@link ErrorResponse#getDefaultTitleMessageCode(Class)} with the
+		 * associated Exception type.
+		 * @param messageCode the message code to use
+		 * @return the same builder instance
+		 * @see ErrorResponse#getTitleMessageCode()
+		 */
+		Builder titleMessageCode(String messageCode);
+
+		/**
+		 * Set the underlying {@link ProblemDetail#setInstance(URI)} field.
+		 * @return the same builder instance
+		 */
+		Builder instance(@Nullable URI instance);
+
+		/**
+		 * Set a "dynamic" {@link ProblemDetail#setProperty(String, Object)
+		 * property} on the underlying {@code ProblemDetail}.
+		 * @return the same builder instance
+		 */
+		Builder property(String name, Object value);
+
+		/**
+		 * Build the {@code ErrorResponse} instance.
+		 */
+		ErrorResponse build();
+
 	}
 
 }
