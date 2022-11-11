@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  *
  * @author Rossen Stoyanchev
  */
+@SuppressWarnings("resource")
 public class StandardWebSocketSessionTests {
 
 	private final HttpHeaders headers = new HttpHeaders();
@@ -53,7 +54,6 @@ public class StandardWebSocketSessionTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	public void getPrincipalWithNativeSession() {
 		TestPrincipal user = new TestPrincipal("joe");
 
@@ -67,7 +67,6 @@ public class StandardWebSocketSessionTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	public void getPrincipalNone() {
 		Session nativeSession = Mockito.mock(Session.class);
 		given(nativeSession.getUserPrincipal()).willReturn(null);
@@ -82,7 +81,6 @@ public class StandardWebSocketSessionTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
 	public void getAcceptedProtocol() {
 		String protocol = "foo";
 
@@ -96,6 +94,16 @@ public class StandardWebSocketSessionTests {
 
 		assertThat(session.getAcceptedProtocol()).isEqualTo(protocol);
 		verifyNoMoreInteractions(nativeSession);
+	}
+
+	@Test // gh-29315
+	public void addAttributesWithNullKeyOrValue() {
+		this.attributes.put(null, "value");
+		this.attributes.put("key", null);
+		this.attributes.put("foo", "bar");
+
+		assertThat(new StandardWebSocketSession(this.headers, this.attributes, null, null).getAttributes())
+				.hasSize(1).containsEntry("foo", "bar");
 	}
 
 }
