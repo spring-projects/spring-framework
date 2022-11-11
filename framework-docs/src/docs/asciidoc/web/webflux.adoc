@@ -1168,19 +1168,17 @@ as a `HandlerResult`, along with some additional context, and passed to the firs
 === Exceptions
 [.small]#<<web.adoc#mvc-exceptionhandlers, Web MVC>>#
 
-The `HandlerResult` returned from a `HandlerAdapter` can expose a function for error
-handling based on some handler-specific mechanism. This error function is called if:
+`HandlerAdapter` implementations can handle internally exceptions from invoking a request
+handler, such as a controller method. However, an exception may be deferred if the request
+handler returns an asynchronous value.
 
-* The handler (for example, `@Controller`) invocation fails.
-* The handling of the handler return value through a `HandlerResultHandler` fails.
+A `HandlerAdapter` may expose its exception handling mechanism as a
+`DispatchExceptionHandler` set on the `HandlerResult` it returns. When that's set,
+`DispatcherHandler` will also apply it to the handling of the result.
 
-The error function can change the response (for example, to an error status), as long as an error
-signal occurs before the reactive type returned from the handler produces any data items.
-
-This is how `@ExceptionHandler` methods in `@Controller` classes are supported.
-By contrast, support for the same in Spring MVC is built on a `HandlerExceptionResolver`.
-This generally should not matter. However, keep in mind that, in WebFlux, you cannot use a
-`@ControllerAdvice` to handle exceptions that occur before a handler is chosen.
+A `HandlerAdapter` may also choose to implement `DispatchExceptionHandler`. Inn that case
+`DispatcherHandler` will apply it to exceptions that arise before a handler is mapped,
+e.g. during handler mapping, or earlier, e.g. in a `WebFilter`.
 
 See also <<webflux-ann-controller-exceptions>> in the "`Annotated Controller`" section or
 <<webflux-exception-handler>> in the WebHandler API section.
