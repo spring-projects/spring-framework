@@ -50,7 +50,7 @@ dependencies {
 		api("io.mockk:mockk:1.12.1")
 		api("io.projectreactor.netty:reactor-netty5-http:2.0.0-M3")
 		api("io.projectreactor.tools:blockhound:1.0.6.RELEASE")
-		api("io.r2dbc:r2dbc-h2:1.0.0.RC1")
+		api("io.r2dbc:r2dbc-h2:1.0.0.RELEASE")
 		api("io.r2dbc:r2dbc-spi-test:1.0.0.RELEASE")
 		api("io.r2dbc:r2dbc-spi:1.0.0.RELEASE")
 		api("io.reactivex.rxjava3:rxjava:3.1.5")
