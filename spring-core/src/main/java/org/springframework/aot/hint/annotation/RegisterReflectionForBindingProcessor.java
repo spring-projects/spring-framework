@@ -30,6 +30,7 @@ import org.springframework.util.Assert;
  *
  * @author Sebastien Deleuze
  * @since 6.0
+ * @see RegisterReflectionForBinding @RegisterReflectionForBinding
  */
 public class RegisterReflectionForBindingProcessor implements ReflectiveProcessor {
 
