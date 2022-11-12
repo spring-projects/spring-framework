@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.convert.support;
+package org.springframework.aot.hint.support;
 
 import java.time.LocalDate;
 

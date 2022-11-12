@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.convert.support;
+package org.springframework.aot.hint.support;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -27,8 +27,8 @@ import org.springframework.aot.hint.TypeReference;
 import org.springframework.lang.Nullable;
 
 /**
- * {@link RuntimeHintsRegistrar} to register hints for {@link ObjectToObjectConverter}
- * popular conventions.
+ * {@link RuntimeHintsRegistrar} to register hints for popular conventions in
+ * {@code org.springframework.core.convert.support.ObjectToObjectConverter}.
  *
  * @author Sebastien Deleuze
  * @since 6.0
@@ -44,4 +44,5 @@ class ObjectToObjectConverterRuntimeHints implements RuntimeHintsRegistrar {
 				.withMethod("valueOf", List.of(TypeReference.of(LocalDate.class)), ExecutableMode.INVOKE)
 				.onReachableType(sqlDateTypeReference));
 	}
+
 }
