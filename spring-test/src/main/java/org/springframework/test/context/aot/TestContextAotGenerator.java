@@ -137,15 +137,20 @@ public class TestContextAotGenerator {
 				mergedConfigMappings.add(mergedConfig, testClass);
 				collectRuntimeHintsRegistrarClasses(testClass, coreRuntimeHintsRegistrarClasses);
 				reflectiveRuntimeHintsRegistrar.registerRuntimeHints(this.runtimeHints, testClass);
-				this.testRuntimeHintsRegistrars.forEach(registrar ->
-						registrar.registerHints(this.runtimeHints, testClass, classLoader));
+				this.testRuntimeHintsRegistrars.forEach(registrar -> {
+					if (logger.isTraceEnabled()) {
+						logger.trace("Processing RuntimeHints contribution from class [%s]"
+								.formatted(registrar.getClass().getCanonicalName()));
+					}
+					registrar.registerHints(this.runtimeHints, testClass, classLoader);
+				});
 			});
 
 			coreRuntimeHintsRegistrarClasses.stream()
 					.map(BeanUtils::instantiateClass)
 					.forEach(registrar -> {
 						if (logger.isTraceEnabled()) {
-							logger.trace("Processing RuntimeHints contribution from test class [%s]"
+							logger.trace("Processing RuntimeHints contribution from class [%s]"
 									.formatted(registrar.getClass().getCanonicalName()));
 						}
 						registrar.registerHints(this.runtimeHints, classLoader);

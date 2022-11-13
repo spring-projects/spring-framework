@@ -36,9 +36,11 @@ public class RegisterReflectionForBindingProcessor implements ReflectiveProcesso
 
 	private final BindingReflectionHintsRegistrar bindingRegistrar = new BindingReflectionHintsRegistrar();
 
+
 	@Override
 	public void registerReflectionHints(ReflectionHints hints, AnnotatedElement element) {
-		RegisterReflectionForBinding registerReflection = AnnotationUtils.getAnnotation(element, RegisterReflectionForBinding.class);
+		RegisterReflectionForBinding registerReflection =
+				AnnotationUtils.getAnnotation(element, RegisterReflectionForBinding.class);
 		if (registerReflection != null) {
 			Class<?>[] classes = registerReflection.classes();
 			Assert.state(classes.length != 0, () -> "A least one class should be specified in " +

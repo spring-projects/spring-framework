@@ -34,12 +34,13 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 
 /**
  * {@link ReflectiveProcessor} implementation for {@link MessageMapping}
- * annotated types. On top of registering reflection hints for invoking
+ * annotated types. In addition to registering reflection hints for invoking
  * the annotated method, this implementation handles:
+ *
  * <ul>
- *     <li>Return types.</li>
- *     <li>Parameters identified as potential payload.</li>
- *     <li>{@link Message} parameters.</li>
+ *     <li>Return types</li>
+ *     <li>Parameters identified as potential payloads</li>
+ *     <li>{@link Message} parameters</li>
  * </ul>
  *
  * @author Sebastien Deleuze
@@ -48,6 +49,7 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 class MessageMappingReflectiveProcessor implements ReflectiveProcessor {
 
 	private final BindingReflectionHintsRegistrar bindingRegistrar = new BindingReflectionHintsRegistrar();
+
 
 	@Override
 	public void registerReflectionHints(ReflectionHints hints, AnnotatedElement element) {
@@ -99,6 +101,8 @@ class MessageMappingReflectiveProcessor implements ReflectiveProcessor {
 	@Nullable
 	protected Type getMessageType(MethodParameter parameter) {
 		MethodParameter nestedParameter = parameter.nested();
-		return (nestedParameter.getNestedParameterType() == nestedParameter.getParameterType() ? null : nestedParameter.getNestedParameterType());
+		return (nestedParameter.getNestedParameterType() == nestedParameter.getParameterType() ?
+				null : nestedParameter.getNestedParameterType());
 	}
+
 }

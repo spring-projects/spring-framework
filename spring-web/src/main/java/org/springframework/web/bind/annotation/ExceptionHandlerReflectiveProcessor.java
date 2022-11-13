@@ -37,4 +37,5 @@ class ExceptionHandlerReflectiveProcessor extends ControllerMappingReflectivePro
 		}
 		super.registerReturnTypeHints(hints, returnTypeParameter);
 	}
+
 }
