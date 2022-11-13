@@ -16,11 +16,13 @@
 
 package org.springframework.core.convert.converter;
 
-import java.util.Set;
-
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Set;
 
 /**
  * Generic converter interface for converting between two or more types.
@@ -39,11 +41,11 @@ import org.springframework.util.Assert;
  *
  * @author Keith Donald
  * @author Juergen Hoeller
- * @since 3.0
  * @see TypeDescriptor
  * @see Converter
  * @see ConverterFactory
  * @see ConditionalConverter
+ * @since 3.0
  */
 public interface GenericConverter {
 
@@ -58,7 +60,8 @@ public interface GenericConverter {
 
 	/**
 	 * Convert the source object to the targetType described by the {@code TypeDescriptor}.
-	 * @param source the source object to convert (may be {@code null})
+	 *
+	 * @param source     the source object to convert (may be {@code null})
 	 * @param sourceType the type descriptor of the field we are converting from
 	 * @param targetType the type descriptor of the field we are converting to
 	 * @return the converted object
@@ -76,8 +79,11 @@ public interface GenericConverter {
 
 		private final Class<?> targetType;
 
+		private final Annotation[] annotations;
+
 		/**
 		 * Create a new source-to-target pair.
+		 *
 		 * @param sourceType the source type
 		 * @param targetType the target type
 		 */
@@ -86,6 +92,23 @@ public interface GenericConverter {
 			Assert.notNull(targetType, "Target type must not be null");
 			this.sourceType = sourceType;
 			this.targetType = targetType;
+			this.annotations = new Annotation[]{};
+		}
+
+		/**
+		 * Create a new source-to-target pair.
+		 *
+		 * @param sourceType  the source type
+		 * @param targetType  the target type
+		 * @param annotations annotations assigned to target
+		 */
+		public ConvertiblePair(Class<?> sourceType, Class<?> targetType, Annotation[] annotations) {
+			Assert.notNull(sourceType, "Source type must not be null");
+			Assert.notNull(targetType, "Target type must not be null");
+			Assert.notNull(annotations, "Annotations must not be null");
+			this.sourceType = sourceType;
+			this.targetType = targetType;
+			this.annotations = annotations;
 		}
 
 		public Class<?> getSourceType() {
@@ -94,6 +117,10 @@ public interface GenericConverter {
 
 		public Class<?> getTargetType() {
 			return this.targetType;
+		}
+
+		public Annotation[] getAnnotations() {
+			return annotations;
 		}
 
 		@Override
@@ -105,17 +132,24 @@ public interface GenericConverter {
 				return false;
 			}
 			ConvertiblePair otherPair = (ConvertiblePair) other;
-			return (this.sourceType == otherPair.sourceType && this.targetType == otherPair.targetType);
+			return (this.sourceType == otherPair.sourceType &&
+					this.targetType == otherPair.targetType &&
+					Arrays.equals(this.annotations, otherPair.annotations));
 		}
 
 		@Override
 		public int hashCode() {
-			return (this.sourceType.hashCode() * 31 + this.targetType.hashCode());
+			return (this.sourceType.hashCode() * 31
+					+ this.targetType.hashCode()
+					+ Arrays.hashCode(this.annotations)
+			);
 		}
 
 		@Override
 		public String toString() {
-			return (this.sourceType.getName() + " -> " + this.targetType.getName());
+			return (this.sourceType.getName() + " -> "
+					+ this.targetType.getName() + "Annotations: "
+					+ Arrays.toString(annotations));
 		}
 	}
 

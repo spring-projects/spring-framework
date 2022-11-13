@@ -124,6 +124,7 @@ public class DefaultConversionService extends GenericConversionService {
 
 		converterRegistry.addConverter(new CollectionToStringConverter(conversionService));
 		converterRegistry.addConverter(new StringToCollectionConverter(conversionService));
+		converterRegistry.addConverter(new StringToSingletonCollectionConverter(conversionService));
 
 		converterRegistry.addConverter(new CollectionToObjectConverter(conversionService));
 		converterRegistry.addConverter(new ObjectToCollectionConverter(conversionService));

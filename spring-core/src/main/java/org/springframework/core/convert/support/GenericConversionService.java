@@ -16,15 +16,9 @@
 
 package org.springframework.core.convert.support;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -453,9 +447,12 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 		private final TypeDescriptor targetType;
 
+		private final Annotation[] annotations;
+
 		public ConverterCacheKey(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			this.sourceType = sourceType;
 			this.targetType = targetType;
+			this.annotations = targetType.getAnnotations();
 		}
 
 		@Override
@@ -467,18 +464,22 @@ public class GenericConversionService implements ConfigurableConversionService {
 				return false;
 			}
 			return (this.sourceType.equals(otherKey.sourceType)) &&
-					this.targetType.equals(otherKey.targetType);
+					this.targetType.equals(otherKey.targetType) &&
+					Arrays.equals(this.annotations, otherKey.annotations);
 		}
 
 		@Override
 		public int hashCode() {
-			return (this.sourceType.hashCode() * 29 + this.targetType.hashCode());
+			return (this.sourceType.hashCode() * 29 +
+					this.targetType.hashCode() +
+					Arrays.hashCode(this.annotations));
 		}
 
 		@Override
 		public String toString() {
 			return ("ConverterCacheKey [sourceType = " + this.sourceType +
-					", targetType = " + this.targetType + "]");
+					", targetType = " + this.targetType + ", " +
+					"annotations = " + Arrays.toString(this.annotations) + "]");
 		}
 
 		@Override
@@ -540,7 +541,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 			List<Class<?>> targetCandidates = getClassHierarchy(targetType.getType());
 			for (Class<?> sourceCandidate : sourceCandidates) {
 				for (Class<?> targetCandidate : targetCandidates) {
-					ConvertiblePair convertiblePair = new ConvertiblePair(sourceCandidate, targetCandidate);
+					ConvertiblePair convertiblePair = new ConvertiblePair(sourceCandidate, targetCandidate,
+							targetType.getAnnotations());
 					GenericConverter converter = getRegisteredConverter(sourceType, targetType, convertiblePair);
 					if (converter != null) {
 						return converter;
