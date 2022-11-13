@@ -79,7 +79,7 @@ public interface GenericConverter {
 
 		private final Class<?> targetType;
 
-		private final Annotation[] annotations;
+		private final Class<?>[] annotations;
 
 		/**
 		 * Create a new source-to-target pair.
@@ -92,7 +92,7 @@ public interface GenericConverter {
 			Assert.notNull(targetType, "Target type must not be null");
 			this.sourceType = sourceType;
 			this.targetType = targetType;
-			this.annotations = new Annotation[]{};
+			this.annotations = new Class<?>[]{};
 		}
 
 		/**
@@ -102,7 +102,7 @@ public interface GenericConverter {
 		 * @param targetType  the target type
 		 * @param annotations annotations assigned to target
 		 */
-		public ConvertiblePair(Class<?> sourceType, Class<?> targetType, Annotation[] annotations) {
+		public ConvertiblePair(Class<?> sourceType, Class<?> targetType, Class<?>[] annotations) {
 			Assert.notNull(sourceType, "Source type must not be null");
 			Assert.notNull(targetType, "Target type must not be null");
 			Assert.notNull(annotations, "Annotations must not be null");
@@ -119,7 +119,7 @@ public interface GenericConverter {
 			return this.targetType;
 		}
 
-		public Annotation[] getAnnotations() {
+		public Class<?>[] getAnnotations() {
 			return annotations;
 		}
 

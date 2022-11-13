@@ -233,6 +233,12 @@ public class TypeDescriptor implements Serializable {
 		return this.annotatedElement.getAnnotations();
 	}
 
+	public Class<?>[] getAnnotationsClass() {
+		return Arrays.stream(getAnnotations())
+				.map(Annotation::getClass)
+				.toArray(value -> new Class<?>[]{});
+	}
+
 	/**
 	 * Determine if this type descriptor has the specified annotation.
 	 * <p>As of Spring Framework 4.2, this method supports arbitrary levels

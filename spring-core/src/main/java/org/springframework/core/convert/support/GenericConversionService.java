@@ -447,12 +447,12 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 		private final TypeDescriptor targetType;
 
-		private final Annotation[] annotations;
+		private final Class<?>[] annotations;
 
 		public ConverterCacheKey(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			this.sourceType = sourceType;
 			this.targetType = targetType;
-			this.annotations = targetType.getAnnotations();
+			this.annotations = targetType.getAnnotationsClass();
 		}
 
 		@Override
@@ -542,7 +542,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 			for (Class<?> sourceCandidate : sourceCandidates) {
 				for (Class<?> targetCandidate : targetCandidates) {
 					ConvertiblePair convertiblePair = new ConvertiblePair(sourceCandidate, targetCandidate,
-							targetType.getAnnotations());
+							targetType.getAnnotationsClass());
 					GenericConverter converter = getRegisteredConverter(sourceType, targetType, convertiblePair);
 					if (converter != null) {
 						return converter;

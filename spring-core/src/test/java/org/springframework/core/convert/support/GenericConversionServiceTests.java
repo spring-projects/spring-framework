@@ -18,6 +18,7 @@ package org.springframework.core.convert.support;
 
 import java.awt.Color;
 import java.awt.SystemColor;
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import org.junit.runner.Request;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
@@ -380,6 +382,16 @@ class GenericConversionServiceTests {
 		GenericConverter.ConvertiblePair pairEqual = new GenericConverter.ConvertiblePair(Number.class, String.class);
 		assertThat(pairEqual).isEqualTo(pair);
 		assertThat(pairEqual.hashCode()).isEqualTo(pair.hashCode());
+	}
+
+	@Test
+	void convertiblePairWithAnnotationsEqualsAndHash() {
+		GenericConverter.ConvertiblePair expected
+				= new GenericConverter.ConvertiblePair(String.class, List.class, new Class<?>[]{Test.class});
+		GenericConverter.ConvertiblePair actual
+				= new GenericConverter.ConvertiblePair(String.class, List.class, new Class<?>[]{Test.class});
+		assertThat(expected).isEqualTo(actual);
+		assertThat(expected.hashCode()).isEqualTo(actual.hashCode());
 	}
 
 	@Test
