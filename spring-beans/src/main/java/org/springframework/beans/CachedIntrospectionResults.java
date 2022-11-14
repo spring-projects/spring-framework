@@ -270,7 +270,7 @@ public final class CachedIntrospectionResults {
 					// Only allow URL attribute introspection, not content resolution
 					continue;
 				}
-				if (pd.getWriteMethod() == null && isInvalidReadOnlyPropertyType(pd.getPropertyType())) {
+				if (pd.getWriteMethod() == null && isInvalidReadOnlyPropertyType(pd.getPropertyType(), beanClass)) {
 					// Ignore read-only properties such as ClassLoader - no need to bind to those
 					continue;
 				}
@@ -320,7 +320,8 @@ public final class CachedIntrospectionResults {
 						// GenericTypeAwarePropertyDescriptor leniently resolves a set* write method
 						// against a declared read method, so we prefer read method descriptors here.
 						pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
-						if (pd.getWriteMethod() == null && isInvalidReadOnlyPropertyType(pd.getPropertyType())) {
+						if (pd.getWriteMethod() == null &&
+								isInvalidReadOnlyPropertyType(pd.getPropertyType(), beanClass)) {
 							// Ignore read-only properties such as ClassLoader - no need to bind to those
 							continue;
 						}
@@ -353,7 +354,7 @@ public final class CachedIntrospectionResults {
 		if (Modifier.isStatic(method.getModifiers()) ||
 				method.getDeclaringClass() == Object.class || method.getDeclaringClass() == Class.class ||
 				method.getParameterCount() > 0 || method.getReturnType() == void.class ||
-				isInvalidReadOnlyPropertyType(method.getReturnType())) {
+				isInvalidReadOnlyPropertyType(method.getReturnType(), method.getDeclaringClass())) {
 			return false;
 		}
 		try {
@@ -366,10 +367,11 @@ public final class CachedIntrospectionResults {
 		}
 	}
 
-	private boolean isInvalidReadOnlyPropertyType(@Nullable Class<?> returnType) {
-		return (returnType != null && (AutoCloseable.class.isAssignableFrom(returnType) ||
-				ClassLoader.class.isAssignableFrom(returnType) ||
-				ProtectionDomain.class.isAssignableFrom(returnType)));
+	private boolean isInvalidReadOnlyPropertyType(@Nullable Class<?> returnType, Class<?> beanClass) {
+		return (returnType != null && (ClassLoader.class.isAssignableFrom(returnType) ||
+				ProtectionDomain.class.isAssignableFrom(returnType) ||
+				(AutoCloseable.class.isAssignableFrom(returnType) &&
+						!AutoCloseable.class.isAssignableFrom(beanClass))));
 	}
 
 

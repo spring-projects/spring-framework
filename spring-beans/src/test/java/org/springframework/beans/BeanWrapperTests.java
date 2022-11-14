@@ -216,6 +216,10 @@ class BeanWrapperTests extends AbstractPropertyAccessorTests {
 		assertThat(accessor.isReadableProperty("inputStream")).isFalse();
 		assertThat(accessor.isReadableProperty("filename")).isTrue();
 		assertThat(accessor.isReadableProperty("description")).isTrue();
+
+		accessor = createAccessor(new ActiveResource());
+
+		assertThat(accessor.isReadableProperty("resource")).isTrue();
 	}
 
 	@Test
@@ -372,6 +376,18 @@ class BeanWrapperTests extends AbstractPropertyAccessorTests {
 
 		public String getObject() {
 			return this.value;
+		}
+	}
+
+
+	public static class ActiveResource implements AutoCloseable {
+
+		public ActiveResource getResource() {
+			return this;
+		}
+
+		@Override
+		public void close() throws Exception {
 		}
 	}
 
