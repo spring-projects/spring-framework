@@ -160,13 +160,6 @@ public class RedirectView extends AbstractUrlBasedView {
 		return this.hosts;
 	}
 
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		super.afterPropertiesSet();
-	}
-
-
 	@Override
 	public boolean isRedirectView() {
 		return true;
