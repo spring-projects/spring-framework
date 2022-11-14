@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class AutowiredGenericTemplate {
 
+	@SuppressWarnings("unused")
 	private GenericTemplate<Integer> genericTemplate;
 
 	@Autowired
