@@ -59,7 +59,7 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 	protected ServletServerHttpRequest createRequest(HttpServletRequest request, AsyncContext context)
 			throws IOException, URISyntaxException {
 
-		Assert.notNull(getServletPath(), "Servlet path is not initialized");
+		Assert.state(getServletPath() != null, "Servlet path is not initialized");
 		return new JettyServerHttpRequest(
 				request, context, getServletPath(), getDataBufferFactory(), getBufferSize());
 	}

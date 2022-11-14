@@ -42,16 +42,18 @@ public class DefaultMethodReference implements MethodReference {
 	@Nullable
 	private final ClassName declaringClass;
 
+
 	public DefaultMethodReference(MethodSpec method, @Nullable ClassName declaringClass) {
 		this.method = method;
 		this.declaringClass = declaringClass;
 	}
 
+
 	@Override
 	public CodeBlock toCodeBlock() {
 		String methodName = this.method.name;
 		if (isStatic()) {
-			Assert.notNull(this.declaringClass, "static method reference must define a declaring class");
+			Assert.state(this.declaringClass != null, "static method reference must define a declaring class");
 			return CodeBlock.of("$T::$L", this.declaringClass, methodName);
 		}
 		else {
@@ -59,12 +61,13 @@ public class DefaultMethodReference implements MethodReference {
 		}
 	}
 
+	@Override
 	public CodeBlock toInvokeCodeBlock(ArgumentCodeGenerator argumentCodeGenerator,
 			@Nullable ClassName targetClassName) {
 		String methodName = this.method.name;
 		CodeBlock.Builder code = CodeBlock.builder();
 		if (isStatic()) {
-			Assert.notNull(this.declaringClass, "static method reference must define a declaring class");
+			Assert.state(this.declaringClass != null, "static method reference must define a declaring class");
 			if (isSameDeclaringClass(targetClassName)) {
 				code.add("$L", methodName);
 			}

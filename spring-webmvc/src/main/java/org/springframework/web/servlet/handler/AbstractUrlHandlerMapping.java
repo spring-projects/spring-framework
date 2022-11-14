@@ -374,7 +374,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	@Override
 	@Nullable
 	public RequestMatchResult match(HttpServletRequest request, String pattern) {
-		Assert.isNull(getPatternParser(), "This HandlerMapping uses PathPatterns.");
+		Assert.state(getPatternParser() == null, "This HandlerMapping uses PathPatterns.");
 		String lookupPath = UrlPathHelper.getResolvedLookupPath(request);
 		if (getPathMatcher().match(pattern, lookupPath)) {
 			return new RequestMatchResult(pattern, lookupPath, getPathMatcher());

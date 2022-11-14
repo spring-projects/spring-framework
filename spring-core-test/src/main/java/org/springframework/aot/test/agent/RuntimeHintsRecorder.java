@@ -49,7 +49,7 @@ public final class RuntimeHintsRecorder {
 	 */
 	public synchronized static RuntimeHintsInvocations record(Runnable action) {
 		Assert.notNull(action, "Runnable action must not be null");
-		Assert.isTrue(RuntimeHintsAgent.isLoaded(), "RuntimeHintsAgent should be loaded in the current JVM");
+		Assert.state(RuntimeHintsAgent.isLoaded(), "RuntimeHintsAgent must be loaded in the current JVM");
 		RuntimeHintsRecorder recorder = new RuntimeHintsRecorder();
 		RecordedInvocationsPublisher.addListener(recorder.listener);
 		try {

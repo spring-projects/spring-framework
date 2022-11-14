@@ -30,6 +30,7 @@ import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Tests for {@link DefaultMethodReference}.
@@ -86,7 +87,7 @@ class DefaultMethodReferenceTests {
 	void toCodeBlockWithStaticMethodRequiresDeclaringClass() {
 		MethodSpec method = createTestMethod("methodName", new TypeName[0], Modifier.STATIC);
 		MethodReference methodReference = new DefaultMethodReference(method, null);
-		assertThatIllegalArgumentException().isThrownBy(methodReference::toCodeBlock)
+		assertThatIllegalStateException().isThrownBy(methodReference::toCodeBlock)
 				.withMessage("static method reference must define a declaring class");
 	}
 

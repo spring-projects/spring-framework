@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,7 +121,7 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 
 	@Override
 	protected Object readFromSource(Class<?> clazz, HttpHeaders headers, Source source) throws Exception {
-		Assert.notNull(this.unmarshaller, "Property 'unmarshaller' is required");
+		Assert.state(this.unmarshaller != null, "Property 'unmarshaller' is required");
 		Object result = this.unmarshaller.unmarshal(source);
 		if (!clazz.isInstance(result)) {
 			throw new TypeMismatchException(result, clazz);
@@ -131,7 +131,7 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 
 	@Override
 	protected void writeToResult(Object o, HttpHeaders headers, Result result) throws Exception {
-		Assert.notNull(this.marshaller, "Property 'marshaller' is required");
+		Assert.state(this.marshaller != null, "Property 'marshaller' is required");
 		this.marshaller.marshal(o, result);
 	}
 

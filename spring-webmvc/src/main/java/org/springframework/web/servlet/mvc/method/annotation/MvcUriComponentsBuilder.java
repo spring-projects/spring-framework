@@ -448,7 +448,7 @@ public class MvcUriComponentsBuilder {
 	 */
 	public static MethodArgumentBuilder fromMappingName(@Nullable UriComponentsBuilder builder, String name) {
 		WebApplicationContext wac = getWebApplicationContext();
-		Assert.notNull(wac, "No WebApplicationContext");
+		Assert.state(wac != null, "No WebApplicationContext");
 		Map<String, RequestMappingInfoHandlerMapping> map = wac.getBeansOfType(RequestMappingInfoHandlerMapping.class);
 		List<HandlerMethod> handlerMethods = null;
 		for (RequestMappingInfoHandlerMapping mapping : map.values()) {

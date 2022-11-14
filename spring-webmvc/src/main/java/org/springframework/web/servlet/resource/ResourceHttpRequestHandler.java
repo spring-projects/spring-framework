@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -625,8 +625,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			return null;
 		}
 
-		Assert.notNull(this.resolverChain, "ResourceResolverChain not initialized.");
-		Assert.notNull(this.transformerChain, "ResourceTransformerChain not initialized.");
+		Assert.state(this.resolverChain != null, "ResourceResolverChain not initialized.");
+		Assert.state(this.transformerChain != null, "ResourceTransformerChain not initialized.");
 
 		Resource resource = this.resolverChain.resolveResource(request, path, getLocations());
 		if (resource != null) {

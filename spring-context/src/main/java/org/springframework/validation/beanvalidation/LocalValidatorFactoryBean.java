@@ -378,43 +378,43 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 
 	@Override
 	public Validator getValidator() {
-		Assert.notNull(this.validatorFactory, "No target ValidatorFactory set");
+		Assert.state(this.validatorFactory != null, "No target ValidatorFactory set");
 		return this.validatorFactory.getValidator();
 	}
 
 	@Override
 	public ValidatorContext usingContext() {
-		Assert.notNull(this.validatorFactory, "No target ValidatorFactory set");
+		Assert.state(this.validatorFactory != null, "No target ValidatorFactory set");
 		return this.validatorFactory.usingContext();
 	}
 
 	@Override
 	public MessageInterpolator getMessageInterpolator() {
-		Assert.notNull(this.validatorFactory, "No target ValidatorFactory set");
+		Assert.state(this.validatorFactory != null, "No target ValidatorFactory set");
 		return this.validatorFactory.getMessageInterpolator();
 	}
 
 	@Override
 	public TraversableResolver getTraversableResolver() {
-		Assert.notNull(this.validatorFactory, "No target ValidatorFactory set");
+		Assert.state(this.validatorFactory != null, "No target ValidatorFactory set");
 		return this.validatorFactory.getTraversableResolver();
 	}
 
 	@Override
 	public ConstraintValidatorFactory getConstraintValidatorFactory() {
-		Assert.notNull(this.validatorFactory, "No target ValidatorFactory set");
+		Assert.state(this.validatorFactory != null, "No target ValidatorFactory set");
 		return this.validatorFactory.getConstraintValidatorFactory();
 	}
 
 	@Override
 	public ParameterNameProvider getParameterNameProvider() {
-		Assert.notNull(this.validatorFactory, "No target ValidatorFactory set");
+		Assert.state(this.validatorFactory != null, "No target ValidatorFactory set");
 		return this.validatorFactory.getParameterNameProvider();
 	}
 
 	@Override
 	public ClockProvider getClockProvider() {
-		Assert.notNull(this.validatorFactory, "No target ValidatorFactory set");
+		Assert.state(this.validatorFactory != null, "No target ValidatorFactory set");
 		return this.validatorFactory.getClockProvider();
 	}
 
