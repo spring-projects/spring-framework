@@ -6,7 +6,6 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.lang.Nullable;
-import org.springframework.util.StringUtils;
 
 import java.util.Collection;
 import java.util.Collections;
