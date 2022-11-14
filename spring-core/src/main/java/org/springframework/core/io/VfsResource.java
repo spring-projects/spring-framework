@@ -24,6 +24,7 @@ import java.net.URL;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ResourceUtils;
 
 /**
  * JBoss VFS based {@link Resource} implementation.
@@ -115,7 +116,7 @@ public class VfsResource extends AbstractResource {
 			}
 		}
 
-		return new VfsResource(VfsUtils.getRelative(new URL(getURL(), relativePath)));
+		return new VfsResource(VfsUtils.getRelative(ResourceUtils.toRelativeURL(getURL(), relativePath)));
 	}
 
 	@Override
