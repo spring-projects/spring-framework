@@ -16,13 +16,12 @@
 
 package org.springframework.core.convert.converter;
 
+import java.util.Arrays;
+import java.util.Set;
+
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.Set;
 
 /**
  * Generic converter interface for converting between two or more types.
@@ -41,11 +40,11 @@ import java.util.Set;
  *
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @since 3.0
  * @see TypeDescriptor
  * @see Converter
  * @see ConverterFactory
  * @see ConditionalConverter
- * @since 3.0
  */
 public interface GenericConverter {
 
@@ -60,7 +59,6 @@ public interface GenericConverter {
 
 	/**
 	 * Convert the source object to the targetType described by the {@code TypeDescriptor}.
-	 *
 	 * @param source     the source object to convert (may be {@code null})
 	 * @param sourceType the type descriptor of the field we are converting from
 	 * @param targetType the type descriptor of the field we are converting to
@@ -120,7 +118,7 @@ public interface GenericConverter {
 		}
 
 		public Class<?>[] getAnnotations() {
-			return annotations;
+			return this.annotations;
 		}
 
 		@Override
@@ -149,7 +147,7 @@ public interface GenericConverter {
 		public String toString() {
 			return (this.sourceType.getName() + " -> "
 					+ this.targetType.getName() + "Annotations: "
-					+ Arrays.toString(annotations));
+					+ Arrays.toString(this.annotations));
 		}
 	}
 

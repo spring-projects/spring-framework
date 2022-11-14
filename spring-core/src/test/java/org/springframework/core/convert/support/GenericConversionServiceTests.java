@@ -18,7 +18,6 @@ package org.springframework.core.convert.support;
 
 import java.awt.Color;
 import java.awt.SystemColor;
-import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -33,7 +32,6 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import org.junit.runner.Request;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
@@ -45,6 +43,7 @@ import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
+
 
 import static java.util.Comparator.naturalOrder;
 import static java.util.stream.Collectors.toList;
