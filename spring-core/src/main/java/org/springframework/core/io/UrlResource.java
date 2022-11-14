@@ -304,7 +304,8 @@ public class UrlResource extends AbstractFileResolvingResource {
 	@Override
 	@Nullable
 	public String getFilename() {
-		String filename = StringUtils.getFilename(this.uri != null ? this.uri.getPath() : this.url.getPath());
+		String originalPath = (this.uri != null ? this.uri.getPath() : this.url.getPath());
+		String filename = StringUtils.getFilename(StringUtils.cleanPath(originalPath));
 		return (filename != null ? URLDecoder.decode(filename, StandardCharsets.UTF_8) : null);
 	}
 
