@@ -22,23 +22,24 @@ import java.util.Random;
 
 import javax.net.ServerSocketFactory;
 
+import org.springframework.util.Assert;
+
 /**
- * Simple utility methods for finding available ports on {@code localhost} for
- * use in integration testing scenarios.
+ * Simple utility for finding available TCP ports on {@code localhost} for use in
+ * integration testing scenarios.
  *
- * <p>This is a limited form of {@code SocketUtils} which is deprecated in Spring
- * Framework 5.3 and removed in Spring Framework 6.0.
+ * <p>This is a limited form of {@link org.springframework.util.SocketUtils} which
+ * has been deprecated since Spring Framework 5.3.16 and removed in Spring
+ * Framework 6.0.
  *
- * <p>{@code SocketUtils} was introduced in Spring Framework 4.0, primarily to
- * assist in writing integration tests which start an external server on an
- * available random port. However, these utilities make no guarantee about the
- * subsequent availability of a given port and are therefore unreliable (the reason
- * for deprecation and removal).
- *
- * <p>Instead of using {@code TestSocketUtils} to find an available local port for a server,
- * it is recommended that you rely on a server's ability to start on a random port
- * that it selects or is assigned by the operating system. To interact with that
- * server, you should query the server for the port it is currently using.
+ * <p>{@code TestSocketUtils} can be used in integration tests which start an
+ * external server on an available random port. However, these utilities make no
+ * guarantee about the subsequent availability of a given port and are therefore
+ * unreliable. Instead of using {@code TestSocketUtils} to find an available local
+ * port for a server, it is recommended that you rely on a server's ability to
+ * start on a random <em>ephemeral</em> port that it selects or is assigned by the
+ * operating system. To interact with that server, you should query the server
+ * for the port it is currently using.
  *
  * @author Sam Brannen
  * @author Ben Hale
@@ -46,45 +47,73 @@ import javax.net.ServerSocketFactory;
  * @author Gunnar Hillert
  * @author Gary Russell
  * @author Chris Bono
- * @since 5.3
+ * @since 5.3.24
  */
-public final class TestSocketUtils {
+public class TestSocketUtils {
 
 	/**
 	 * The minimum value for port ranges used when finding an available TCP port.
 	 */
-	private static final int PORT_RANGE_MIN = 1024;
+	static final int PORT_RANGE_MIN = 1024;
 
 	/**
 	 * The maximum value for port ranges used when finding an available TCP port.
 	 */
-	private static final int PORT_RANGE_MAX = 65535;
+	static final int PORT_RANGE_MAX = 65535;
 
-	private static final int PORT_RANGE = PORT_RANGE_MAX - PORT_RANGE_MIN;
+	private static final int PORT_RANGE_PLUS_ONE = PORT_RANGE_MAX - PORT_RANGE_MIN + 1;
 
 	private static final int MAX_ATTEMPTS = 1_000;
 
 	private static final Random random = new Random(System.nanoTime());
 
-	private TestSocketUtils() {
+	private static final TestSocketUtils INSTANCE = new TestSocketUtils();
+
+
+	/**
+	 * Although {@code TestSocketUtils} consists solely of static utility methods,
+	 * this constructor is intentionally {@code public}.
+	 * <h4>Rationale</h4>
+	 * <p>Static methods from this class may be invoked from within XML
+	 * configuration files using the Spring Expression Language (SpEL) and the
+	 * following syntax.
+	 * <pre><code>
+	 * &lt;bean id="myBean" ... p:port="#{T(org.springframework.test.util.TestSocketUtils).findAvailableTcpPort()}" /&gt;</code>
+	 * </pre>
+	 * <p>If this constructor were {@code private}, you would be required to supply
+	 * the fully qualified class name to SpEL's {@code T()} function for each usage.
+	 * Thus, the fact that this constructor is {@code public} allows you to reduce
+	 * boilerplate configuration with SpEL as can be seen in the following example.
+	 * <pre><code>
+	 * &lt;bean id="socketUtils" class="org.springframework.test.util.TestSocketUtils" /&gt;
+	 * &lt;bean id="myBean" ... p:port="#{socketUtils.findAvailableTcpPort()}" /&gt;</code>
+	 * </pre>
+	 */
+	public TestSocketUtils() {
 	}
 
 	/**
 	 * Find an available TCP port randomly selected from the range [1024, 65535].
 	 * @return an available TCP port number
-	 * @throws IllegalStateException if no available port could be found within max attempts
+	 * @throws IllegalStateException if no available port could be found
 	 */
 	public static int findAvailableTcpPort() {
+		return INSTANCE.findAvailableTcpPortInternal();
+	}
+
+
+	/**
+	 * Internal implementation of {@link #findAvailableTcpPort()}.
+	 * <p>Package-private solely for testing purposes.
+	 */
+	int findAvailableTcpPortInternal() {
 		int candidatePort;
 		int searchCounter = 0;
 		do {
-			if (searchCounter > MAX_ATTEMPTS) {
-				throw new IllegalStateException(String.format(
-						"Could not find an available TCP port in the range [%d, %d] after %d attempts",
-						PORT_RANGE_MIN, PORT_RANGE_MAX, MAX_ATTEMPTS));
-			}
-			candidatePort = PORT_RANGE_MIN + random.nextInt(PORT_RANGE + 1);
-			searchCounter++;
+			Assert.state(++searchCounter <= MAX_ATTEMPTS, () -> String.format(
+					"Could not find an available TCP port in the range [%d, %d] after %d attempts",
+					PORT_RANGE_MIN, PORT_RANGE_MAX, MAX_ATTEMPTS));
+			candidatePort = PORT_RANGE_MIN + random.nextInt(PORT_RANGE_PLUS_ONE);
 		}
 		while (!isPortAvailable(candidatePort));
 
@@ -93,11 +122,12 @@ public final class TestSocketUtils {
 
 	/**
 	 * Determine if the specified TCP port is currently available on {@code localhost}.
+	 * <p>Package-private solely for testing purposes.
 	 */
-	private static boolean isPortAvailable(int port) {
+	boolean isPortAvailable(int port) {
 		try {
-			ServerSocket serverSocket = ServerSocketFactory.getDefault().createServerSocket(
-					port, 1, InetAddress.getByName("localhost"));
+			ServerSocket serverSocket = ServerSocketFactory.getDefault()
+					.createServerSocket(port, 1, InetAddress.getByName("localhost"));
 			serverSocket.close();
 			return true;
 		}

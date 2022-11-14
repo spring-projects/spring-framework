@@ -16,11 +16,8 @@
 
 package org.springframework.test.util;
 
-import javax.net.ServerSocketFactory;
-
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -30,26 +27,35 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  *
  * @author Sam Brannen
  * @author Gary Russell
- * @author Chris Bono
+ * @since 5.3.24
  */
 class TestSocketUtilsTests {
 
 	@Test
+	void canBeInstantiated() {
+		// Just making sure somebody doesn't try to make SocketUtils abstract,
+		// since that would be a breaking change due to the intentional public
+		// constructor.
+		new TestSocketUtils();
+	}
+
+	@RepeatedTest(10)
 	void findAvailableTcpPort() {
-		int port = TestSocketUtils.findAvailableTcpPort();
-		assertThat(port >= 1024).as("port [" + port + "] >= " + 1024).isTrue();
-		assertThat(port <= 65535).as("port [" + port + "] <= " + 65535).isTrue();
+		assertThat(TestSocketUtils.findAvailableTcpPort())
+			.isBetween(TestSocketUtils.PORT_RANGE_MIN, TestSocketUtils.PORT_RANGE_MAX);
 	}
 
 	@Test
-	void findAvailableTcpPortWhenNoAvailablePortFoundInMaxAttempts()  {
-		try (MockedStatic<ServerSocketFactory> mockedServerSocketFactory = Mockito.mockStatic(ServerSocketFactory.class)) {
-			mockedServerSocketFactory.when(ServerSocketFactory::getDefault).thenThrow(new RuntimeException("Boom"));
-			assertThatIllegalStateException().isThrownBy(TestSocketUtils::findAvailableTcpPort)
-					.withMessageStartingWith("Could not find an available TCP port")
-					.withMessageEndingWith("after 1000 attempts");
-
-		}
+	void findAvailableTcpPortWhenNoAvailablePortFoundInMaxAttempts() {
+		TestSocketUtils socketUtils = new TestSocketUtils() {
+			@Override
+			boolean isPortAvailable(int port) {
+				return false;
+			}
+		};
+		assertThatIllegalStateException()
+			.isThrownBy(socketUtils::findAvailableTcpPortInternal)
+			.withMessage("Could not find an available TCP port in the range [1024, 65535] after 1000 attempts");
 	}
 
 }
