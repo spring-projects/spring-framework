@@ -27,10 +27,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.springframework.http.observation.DefaultServerRequestObservationConvention;
-import org.springframework.http.observation.ServerHttpObservationDocumentation;
-import org.springframework.http.observation.ServerRequestObservationContext;
-import org.springframework.http.observation.ServerRequestObservationConvention;
+import org.springframework.http.server.observation.DefaultServerRequestObservationConvention;
+import org.springframework.http.server.observation.ServerHttpObservationDocumentation;
+import org.springframework.http.server.observation.ServerRequestObservationContext;
+import org.springframework.http.server.observation.ServerRequestObservationConvention;
 import org.springframework.lang.Nullable;
 
 
@@ -127,7 +127,7 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 		Observation observation = (Observation) request.getAttribute(CURRENT_OBSERVATION_ATTRIBUTE);
 		if (observation == null) {
 			ServerRequestObservationContext context = new ServerRequestObservationContext(request, response);
-			observation = ServerHttpObservationDocumentation.HTTP_SERVLET_SERVER_EXCHANGES.observation(this.observationConvention,
+			observation = ServerHttpObservationDocumentation.HTTP_SERVLET_SERVER_REQUESTS.observation(this.observationConvention,
 					DEFAULT_OBSERVATION_CONVENTION, () -> context, this.observationRegistry).start();
 			request.setAttribute(CURRENT_OBSERVATION_ATTRIBUTE, observation);
 			if (!observation.isNoop()) {

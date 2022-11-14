@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.observation;
+package org.springframework.http.server.observation;
 
 import io.micrometer.observation.transport.RequestReplyReceiverContext;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,10 +23,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.lang.Nullable;
 
 /**
- * Context that holds information for metadata collection during observations
- * for {@link ServerHttpObservationDocumentation#HTTP_SERVLET_SERVER_EXCHANGES Servlet HTTP exchanges}.
+ * Context that holds information for metadata collection regarding
+ * {@link ServerHttpObservationDocumentation#HTTP_SERVLET_SERVER_REQUESTS Servlet HTTP requests} observations.
  * <p>This context also extends {@link RequestReplyReceiverContext} for propagating
- * tracing information with the HTTP server exchange.
+ * tracing information during HTTP request processing.
  *
  * @author Brian Clozel
  * @since 6.0

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.observation;
+package org.springframework.http.server.observation;
 
 import io.micrometer.common.KeyValue;
 import io.micrometer.observation.Observation;

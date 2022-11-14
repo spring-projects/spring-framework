@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.http.observation.reactive;
+package org.springframework.http.server.observation;
 
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
 
 /**
- * Interface for an {@link ObservationConvention} for {@link ServerHttpObservationDocumentation#HTTP_REACTIVE_SERVER_EXCHANGES reactive HTTP exchanges}.
+ * Interface for an {@link ObservationConvention} for {@link ServerHttpObservationDocumentation#HTTP_SERVLET_SERVER_REQUESTS Servlet HTTP requests}.
  *
  * @author Brian Clozel
  * @since 6.0

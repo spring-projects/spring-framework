@@ -141,7 +141,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		exchange.getAttributes().put(BEST_MATCHING_HANDLER_ATTRIBUTE, handlerMethod);
 		exchange.getAttributes().put(BEST_MATCHING_PATTERN_ATTRIBUTE, bestPattern);
 		ServerHttpObservationFilter.findObservationContext(exchange)
-				.ifPresent(context -> context.setPathPattern(bestPattern));
+				.ifPresent(context -> context.setPathPattern(bestPattern.toString()));
 		exchange.getAttributes().put(URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriVariables);
 		exchange.getAttributes().put(MATRIX_VARIABLES_ATTRIBUTE, matrixVariables);
 

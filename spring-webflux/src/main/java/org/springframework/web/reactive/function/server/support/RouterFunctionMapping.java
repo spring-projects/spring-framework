@@ -172,7 +172,7 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 		if (matchingPattern != null) {
 			attributes.put(BEST_MATCHING_PATTERN_ATTRIBUTE, matchingPattern);
 			ServerHttpObservationFilter.findObservationContext(serverRequest.exchange())
-					.ifPresent(context -> context.setPathPattern(matchingPattern));
+					.ifPresent(context -> context.setPathPattern(matchingPattern.toString()));
 		}
 		Map<String, String> uriVariables =
 				(Map<String, String>) attributes.get(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE);

@@ -36,7 +36,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.observation.reactive.ServerRequestObservationContext;
+import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
@@ -263,12 +263,11 @@ public class RequestMappingInfoHandlerMappingTests {
 	public void handleMatchBestMatchingPatternAttributeInObservationContext() {
 		RequestMappingInfo key = paths("/{path1}/2", "/**").build();
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/1/2"));
-		ServerRequestObservationContext observationContext = new ServerRequestObservationContext(exchange);
+		ServerRequestObservationContext observationContext = new ServerRequestObservationContext(exchange.getRequest(), exchange.getResponse(), exchange.getAttributes());
 		exchange.getAttributes().put(CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
 		this.handlerMapping.handleMatch(key, handlerMethod, exchange);
 
-		assertThat(observationContext.getPathPattern()).isNotNull();
-		assertThat(observationContext.getPathPattern().toString()).isEqualTo("/{path1}/2");
+		assertThat(observationContext.getPathPattern()).isEqualTo("/{path1}/2");
 	}
 
 	@Test // gh-22543

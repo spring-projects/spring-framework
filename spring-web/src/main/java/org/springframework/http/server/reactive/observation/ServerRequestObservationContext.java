@@ -14,46 +14,47 @@
  * limitations under the License.
  */
 
-package org.springframework.http.observation.reactive;
+package org.springframework.http.server.reactive.observation;
+
+import java.util.Collections;
+import java.util.Map;
 
 import io.micrometer.observation.transport.RequestReplyReceiverContext;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.util.pattern.PathPattern;
 
 /**
- * Context that holds information for metadata collection during observations
- * for {@link ServerHttpObservationDocumentation#HTTP_REACTIVE_SERVER_EXCHANGES reactive HTTP exchanges}.
+ * Context that holds information for metadata collection regarding
+ * {@link ServerHttpObservationDocumentation#HTTP_REACTIVE_SERVER_REQUESTS reactive HTTP requests} observations.
  * <p>This context also extends {@link RequestReplyReceiverContext} for propagating
- * tracing information with the HTTP server exchange.
+ * tracing information during HTTP request processing.
  *
  * @author Brian Clozel
  * @since 6.0
  */
 public class ServerRequestObservationContext extends RequestReplyReceiverContext<ServerHttpRequest, ServerHttpResponse> {
 
-	private final ServerWebExchange serverWebExchange;
+	private final Map<String, Object> attributes;
 
 	@Nullable
-	private PathPattern pathPattern;
+	private String pathPattern;
 
 	private boolean connectionAborted;
 
-	public ServerRequestObservationContext(ServerWebExchange exchange) {
-		super((request, key) -> request.getHeaders().getFirst(key));
-		this.serverWebExchange = exchange;
-		setCarrier(exchange.getRequest());
-		setResponse(exchange.getResponse());
+	public ServerRequestObservationContext(ServerHttpRequest request, ServerHttpResponse response, Map<String, Object> attributes) {
+		super((req, key) -> req.getHeaders().getFirst(key));
+		setCarrier(request);
+		setResponse(response);
+		this.attributes = Collections.unmodifiableMap(attributes);
 	}
 
 	/**
-	 * Return the current {@link ServerWebExchange HTTP exchange}.
+	 * Return an immutable map of the current request attributes.
 	 */
-	public ServerWebExchange getServerWebExchange() {
-		return this.serverWebExchange;
+	public Map<String, Object> getAttributes() {
+		return this.attributes;
 	}
 
 	/**
@@ -63,7 +64,7 @@ public class ServerRequestObservationContext extends RequestReplyReceiverContext
 	 * @return the path pattern, or {@code null} if none found
 	 */
 	@Nullable
-	public PathPattern getPathPattern() {
+	public String getPathPattern() {
 		return this.pathPattern;
 	}
 
@@ -72,7 +73,7 @@ public class ServerRequestObservationContext extends RequestReplyReceiverContext
 	 * <p>Path patterns must have a low cardinality for the entire application.
 	 * @param pathPattern the path pattern, for example {@code "/projects/{name}"}.
 	 */
-	public void setPathPattern(@Nullable PathPattern pathPattern) {
+	public void setPathPattern(@Nullable String pathPattern) {
 		this.pathPattern = pathPattern;
 	}
 

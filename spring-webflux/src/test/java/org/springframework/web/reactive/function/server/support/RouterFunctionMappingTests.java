@@ -22,7 +22,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.http.observation.reactive.ServerRequestObservationContext;
+import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
 import org.springframework.web.filter.reactive.ServerHttpObservationFilter;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.function.server.HandlerFunction;
@@ -137,7 +137,7 @@ class RouterFunctionMappingTests {
 		assertThat(matchingPattern).isNotNull();
 		assertThat(matchingPattern.getPatternString()).isEqualTo("/match");
 		assertThat(ServerHttpObservationFilter.findObservationContext(exchange))
-				.hasValueSatisfying(context -> assertThat(context.getPathPattern()).isEqualTo(matchingPattern));
+				.hasValueSatisfying(context -> assertThat(context.getPathPattern()).isEqualTo(matchingPattern.getPatternString()));
 
 		ServerRequest serverRequest = exchange.getAttribute(RouterFunctions.REQUEST_ATTRIBUTE);
 		assertThat(serverRequest).isNotNull();
@@ -148,7 +148,7 @@ class RouterFunctionMappingTests {
 
 	private ServerWebExchange createExchange(String urlTemplate) {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(urlTemplate));
-		ServerRequestObservationContext observationContext = new ServerRequestObservationContext(exchange);
+		ServerRequestObservationContext observationContext = new ServerRequestObservationContext(exchange.getRequest(), exchange.getResponse(), exchange.getAttributes());
 		exchange.getAttributes().put(CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
 		return exchange;
 	}

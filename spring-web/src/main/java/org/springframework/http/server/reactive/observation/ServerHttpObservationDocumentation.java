@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.observation;
+package org.springframework.http.server.reactive.observation;
 
 import io.micrometer.common.KeyValue;
 import io.micrometer.common.docs.KeyName;
@@ -24,7 +24,7 @@ import io.micrometer.observation.docs.ObservationDocumentation;
 
 /**
  * Documented {@link io.micrometer.common.KeyValue KeyValues} for the HTTP server observations
- * for Servlet-based web applications.
+ * for reactive web applications.
  * <p>This class is used by automated tools to document KeyValues attached to the HTTP server observations.
  *
  * @author Brian Clozel
@@ -33,9 +33,9 @@ import io.micrometer.observation.docs.ObservationDocumentation;
 public enum ServerHttpObservationDocumentation implements ObservationDocumentation {
 
 	/**
-	 * HTTP exchanges observations for Servlet-based servers.
+	 * HTTP request observations for reactive servers.
 	 */
-	HTTP_SERVLET_SERVER_EXCHANGES {
+	HTTP_REACTIVE_SERVER_REQUESTS {
 		@Override
 		public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
 			return DefaultServerRequestObservationConvention.class;
@@ -89,7 +89,7 @@ public enum ServerHttpObservationDocumentation implements ObservationDocumentati
 		},
 
 		/**
-		 * Name of the exception thrown during the exchange, or {@value KeyValue#NONE_VALUE}} if no exception happened.
+		 * Name of the exception thrown during the exchange, or {@value KeyValue#NONE_VALUE} if no exception happened.
 		 */
 		EXCEPTION {
 			@Override

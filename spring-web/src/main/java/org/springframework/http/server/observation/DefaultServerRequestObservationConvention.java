@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.http.observation;
+package org.springframework.http.server.observation;
 
 import io.micrometer.common.KeyValue;
 import io.micrometer.common.KeyValues;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.observation.ServerHttpObservationDocumentation.HighCardinalityKeyNames;
-import org.springframework.http.observation.ServerHttpObservationDocumentation.LowCardinalityKeyNames;
+import org.springframework.http.server.observation.ServerHttpObservationDocumentation.HighCardinalityKeyNames;
+import org.springframework.http.server.observation.ServerHttpObservationDocumentation.LowCardinalityKeyNames;
 import org.springframework.util.StringUtils;
 
 /**

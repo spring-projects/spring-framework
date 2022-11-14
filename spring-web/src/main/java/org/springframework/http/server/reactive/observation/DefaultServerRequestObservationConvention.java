@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package org.springframework.http.observation.reactive;
+package org.springframework.http.server.reactive.observation;
 
 import io.micrometer.common.KeyValue;
 import io.micrometer.common.KeyValues;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.observation.reactive.ServerHttpObservationDocumentation.HighCardinalityKeyNames;
-import org.springframework.http.observation.reactive.ServerHttpObservationDocumentation.LowCardinalityKeyNames;
+import org.springframework.http.server.reactive.observation.ServerHttpObservationDocumentation.HighCardinalityKeyNames;
+import org.springframework.http.server.reactive.observation.ServerHttpObservationDocumentation.LowCardinalityKeyNames;
 import org.springframework.util.StringUtils;
-import org.springframework.web.util.pattern.PathPattern;
 
 /**
  * Default {@link ServerRequestObservationConvention}.
@@ -117,12 +116,12 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 
 	protected KeyValue uri(ServerRequestObservationContext context) {
 		if (context.getCarrier() != null) {
-			PathPattern pattern = context.getPathPattern();
+			String pattern = context.getPathPattern();
 			if (pattern != null) {
-				if (pattern.toString().isEmpty()) {
+				if (pattern.isEmpty()) {
 					return URI_ROOT;
 				}
-				return KeyValue.of(LowCardinalityKeyNames.URI, pattern.toString());
+				return KeyValue.of(LowCardinalityKeyNames.URI, pattern);
 			}
 			if (context.getResponse() != null && context.getResponse().getStatusCode() != null) {
 				HttpStatus status = HttpStatus.resolve(context.getResponse().getStatusCode().value());
