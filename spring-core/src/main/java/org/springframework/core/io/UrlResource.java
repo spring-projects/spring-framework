@@ -97,6 +97,21 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 */
 	public UrlResource(String path) throws MalformedURLException {
 		Assert.notNull(path, "Path must not be null");
+
+		// Equivalent without java.net.URL constructor - for building on JDK 20+
+		/*
+		try {
+			this.uri = ResourceUtils.toURI(StringUtils.cleanPath(path));
+			this.url = this.uri.toURL();
+			this.cleanedUrl = StringUtils.cleanPath(path);
+		}
+		catch (URISyntaxException | IllegalArgumentException ex) {
+			MalformedURLException exToThrow = new MalformedURLException(ex.getMessage());
+			exToThrow.initCause(ex);
+			throw exToThrow;
+		}
+		*/
+
 		this.uri = null;
 		this.url = ResourceUtils.toURL(path);
 		this.cleanedUrl = StringUtils.cleanPath(path);

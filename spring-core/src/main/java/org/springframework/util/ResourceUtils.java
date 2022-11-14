@@ -390,13 +390,12 @@ public abstract class ResourceUtils {
 	 * @since 6.0
 	 */
 	public static URL toURL(String location) throws MalformedURLException {
-		// Not fully equivalent - but to be moved in the given direction
-		// since JDK 20 deprecates all direct java.net.URL constructors.
+		// Equivalent without java.net.URL constructor - for building on JDK 20+
 		/*
 		try {
-			return toURI(location).toURL();
+			return toURI(StringUtils.cleanPath(location)).toURL();
 		}
-		catch (URISyntaxException ex) {
+		catch (URISyntaxException | IllegalArgumentException ex) {
 			MalformedURLException exToThrow = new MalformedURLException(ex.getMessage());
 			exToThrow.initCause(ex);
 			throw exToThrow;
@@ -419,8 +418,7 @@ public abstract class ResourceUtils {
 		// # can appear in filenames, java.net.URL should not treat it as a fragment
 		relativePath = StringUtils.replace(relativePath, "#", "%23");
 
-		// Not fully equivalent - but to be moved in the given direction
-		// since JDK 20 deprecates all direct java.net.URL constructors.
+		// Equivalent without java.net.URL constructor - for building on JDK 20+
 		/*
 		return toURL(StringUtils.applyRelativePath(root.toString(), relativePath));
 		*/
