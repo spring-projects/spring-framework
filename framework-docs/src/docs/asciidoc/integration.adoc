@@ -521,8 +521,9 @@ responses performed through the client:
 			.defaultStatusHandler(HttpStatusCode::isError, resp -> ...)
 			.build();
 
-	HttpServiceProxyFactory proxyFactory =
-			WebClientAdapter.createHttpServiceProxyFactory(webClient);
+	WebClientAdapter clientAdapter = WebClientAdapter.forClient(webClient);
+	HttpServiceProxyFactory factory = HttpServiceProxyFactory
+			.builder(clientAdapter).build();
 ----
 
 For more details and options, such as suppressing error status codes, see the Javadoc of
