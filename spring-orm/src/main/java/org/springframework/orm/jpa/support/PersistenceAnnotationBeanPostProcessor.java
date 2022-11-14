@@ -767,21 +767,17 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 
 		private static final String INSTANCE_PARAMETER = "instance";
 
-
 		private final Class<?> target;
 
 		private final Collection<InjectedElement> injectedElements;
-
 
 		AotContribution(Class<?> target, Collection<InjectedElement> injectedElements) {
 			this.target = target;
 			this.injectedElements = injectedElements;
 		}
 
-
 		@Override
-		public void applyTo(GenerationContext generationContext,
-				BeanRegistrationCode beanRegistrationCode) {
+		public void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {
 			GeneratedClass generatedClass = generationContext.getGeneratedClasses()
 					.addForFeatureComponent("PersistenceInjection", this.target, type -> {
 						type.addJavadoc("Persistence injection for {@link $T}.", this.target);
@@ -801,8 +797,8 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 
 		private CodeBlock generateMethodCode(RuntimeHints hints, GeneratedClass generatedClass) {
 			CodeBlock.Builder code = CodeBlock.builder();
-			InjectionCodeGenerator injectionCodeGenerator = new InjectionCodeGenerator(
-					generatedClass.getName(), hints);
+			InjectionCodeGenerator injectionCodeGenerator =
+					new InjectionCodeGenerator(generatedClass.getName(), hints);
 			for (InjectedElement injectedElement : this.injectedElements) {
 				CodeBlock resourceToInject = generateResourceToInjectCode(generatedClass.getMethods(),
 						(PersistenceElement) injectedElement);
@@ -814,8 +810,9 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 			return code.build();
 		}
 
-		private CodeBlock generateResourceToInjectCode(GeneratedMethods generatedMethods,
-				PersistenceElement injectedElement) {
+		private CodeBlock generateResourceToInjectCode(
+				GeneratedMethods generatedMethods, PersistenceElement injectedElement) {
+
 			String unitName = injectedElement.unitName;
 			boolean requireEntityManager = (injectedElement.type != null);
 			if (!requireEntityManager) {
@@ -824,14 +821,13 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 						EntityManagerFactoryUtils.class, ListableBeanFactory.class,
 						REGISTERED_BEAN_PARAMETER, unitName);
 			}
-			String[] methodNameParts = { "get", unitName, "EntityManager" };
+			String[] methodNameParts = {"get", unitName, "EntityManager"};
 			GeneratedMethod generatedMethod = generatedMethods.add(methodNameParts, method ->
 					generateGetEntityManagerMethod(method, injectedElement));
 			return CodeBlock.of("$L($L)", generatedMethod.getName(), REGISTERED_BEAN_PARAMETER);
 		}
 
-		private void generateGetEntityManagerMethod(MethodSpec.Builder method,
-				PersistenceElement injectedElement) {
+		private void generateGetEntityManagerMethod(MethodSpec.Builder method, PersistenceElement injectedElement) {
 			String unitName = injectedElement.unitName;
 			Properties properties = injectedElement.properties;
 			method.addJavadoc("Get the '$L' {@link $T}",
@@ -849,10 +845,8 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 			if (hasProperties) {
 				method.addStatement("$T properties = new Properties()",
 						Properties.class);
-				for (String propertyName : new TreeSet<>(
-						properties.stringPropertyNames())) {
-					method.addStatement("properties.put($S, $S)", propertyName,
-							properties.getProperty(propertyName));
+				for (String propertyName : new TreeSet<>(properties.stringPropertyNames())) {
+					method.addStatement("properties.put($S, $S)", propertyName, properties.getProperty(propertyName));
 				}
 			}
 			method.addStatement(
@@ -861,7 +855,6 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 					(hasProperties) ? "properties" : null,
 					injectedElement.synchronizedWithTransaction);
 		}
-
 	}
 
 }

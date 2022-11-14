@@ -53,7 +53,6 @@ import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
@@ -77,7 +76,6 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
@@ -613,37 +611,8 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	 * @return whether the annotation indicates that a dependency is required
 	 */
 	protected boolean determineRequiredStatus(MergedAnnotation<?> ann) {
-		return determineRequiredStatus(ann.<AnnotationAttributes> asMap(
-				mergedAnnotation -> new AnnotationAttributes(mergedAnnotation.getType())));
-	}
-
-	/**
-	 * Determine if the annotated field or method requires its dependency.
-	 * <p>A 'required' dependency means that autowiring should fail when no beans
-	 * are found. Otherwise, the autowiring process will simply bypass the field
-	 * or method when no beans are found.
-	 * @param ann the Autowired annotation
-	 * @return whether the annotation indicates that a dependency is required
-	 * @deprecated since 5.2, in favor of {@link #determineRequiredStatus(MergedAnnotation)}
-	 */
-	@Deprecated
-	protected boolean determineRequiredStatus(AnnotationAttributes ann) {
-		return (!ann.containsKey(this.requiredParameterName) ||
+		return (ann.getValue(this.requiredParameterName).isEmpty() ||
 				this.requiredParameterValue == ann.getBoolean(this.requiredParameterName));
-	}
-
-	/**
-	 * Obtain all beans of the given type as autowire candidates.
-	 * @param type the type of the bean
-	 * @return the target beans, or an empty Collection if no bean of this type is found
-	 * @throws BeansException if bean retrieval failed
-	 */
-	protected <T> Map<String, T> findAutowireCandidates(Class<T> type) throws BeansException {
-		if (this.beanFactory == null) {
-			throw new IllegalStateException("No BeanFactory configured - " +
-					"override the getBeanOfType method or specify the 'beanFactory' property");
-		}
-		return BeanFactoryUtils.beansOfTypeIncludingAncestors(this.beanFactory, type);
 	}
 
 	/**
@@ -685,11 +654,10 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 		protected final boolean required;
 
-		protected AutowiredElement(Member member, PropertyDescriptor pd, boolean required) {
+		protected AutowiredElement(Member member, @Nullable PropertyDescriptor pd, boolean required) {
 			super(member, pd);
 			this.required = required;
 		}
-
 	}
 
 
@@ -926,10 +894,8 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			this.candidateResolver = candidateResolver;
 		}
 
-
 		@Override
-		public void applyTo(GenerationContext generationContext,
-				BeanRegistrationCode beanRegistrationCode) {
+		public void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {
 			GeneratedClass generatedClass = generationContext.getGeneratedClasses()
 					.addForFeatureComponent("Autowiring", this.target, type -> {
 						type.addJavadoc("Autowiring for {@link $T}.", this.target);
@@ -1003,15 +969,13 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 					(!required) ? "forMethod" : "forRequiredMethod");
 			code.add("($S", method.getName());
 			if (method.getParameterCount() > 0) {
-				code.add(", $L",
-						generateParameterTypesCode(method.getParameterTypes()));
+				code.add(", $L", generateParameterTypesCode(method.getParameterTypes()));
 			}
 			code.add(")");
 			AccessControl accessControl = AccessControl.forMember(method);
 			if (!accessControl.isAccessibleFrom(targetClassName)) {
 				hints.reflection().registerMethod(method, ExecutableMode.INVOKE);
-				code.add(".resolveAndInvoke($L, $L)", REGISTERED_BEAN_PARAMETER,
-						INSTANCE_PARAMETER);
+				code.add(".resolveAndInvoke($L, $L)", REGISTERED_BEAN_PARAMETER, INSTANCE_PARAMETER);
 			}
 			else {
 				hints.reflection().registerMethod(method, ExecutableMode.INTROSPECT);
@@ -1038,16 +1002,14 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 				boolean required = autowiredElement.required;
 				Member member = autowiredElement.getMember();
 				if (member instanceof Field field) {
-					DependencyDescriptor dependencyDescriptor = new DependencyDescriptor(
-							field, required);
+					DependencyDescriptor dependencyDescriptor = new DependencyDescriptor(field, required);
 					registerProxyIfNecessary(runtimeHints, dependencyDescriptor);
 				}
 				if (member instanceof Method method) {
 					Class<?>[] parameterTypes = method.getParameterTypes();
 					for (int i = 0; i < parameterTypes.length; i++) {
 						MethodParameter methodParam = new MethodParameter(method, i);
-						DependencyDescriptor dependencyDescriptor = new DependencyDescriptor(
-								methodParam, required);
+						DependencyDescriptor dependencyDescriptor = new DependencyDescriptor(methodParam, required);
 						registerProxyIfNecessary(runtimeHints, dependencyDescriptor);
 					}
 				}
@@ -1055,10 +1017,12 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		}
 
 		private void registerProxyIfNecessary(RuntimeHints runtimeHints, DependencyDescriptor dependencyDescriptor) {
-			Class<?> proxyType = this.candidateResolver
-					.getLazyResolutionProxyClass(dependencyDescriptor, null);
-			if (proxyType != null && Proxy.isProxyClass(proxyType)) {
-				runtimeHints.proxies().registerJdkProxy(proxyType.getInterfaces());
+			if (this.candidateResolver != null) {
+				Class<?> proxyType =
+						this.candidateResolver.getLazyResolutionProxyClass(dependencyDescriptor, null);
+				if (proxyType != null && Proxy.isProxyClass(proxyType)) {
+					runtimeHints.proxies().registerJdkProxy(proxyType.getInterfaces());
+				}
 			}
 		}
 
