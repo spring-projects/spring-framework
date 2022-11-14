@@ -93,7 +93,7 @@ Each implementation can return an AOT contribution, based on the state of the be
 An AOT contribution is a component that contributes generated code that reproduce a particular behavior.
 It can also contribute `RuntimeHints` to indicate the need for reflection, resource loading, serialization, or JDK proxy.
 
-`BeanFactoryInitializationAotProcessor` implementation should be registered in `META-INF/aot/spring.factories` with a key matching the fully qualified name of the interface.
+`BeanFactoryInitializationAotProcessor` implementation should be registered in `META-INF/spring/aot.factories` with a key equals to the fully qualified name of the interface.
 
 It can also be implemented on a bean directly.
 In this mode, the bean provides an AOT contribution equivalent to the feature it provides with a regular runtime.
@@ -116,7 +116,7 @@ This interface is used as follows:
 
 * On a `BeanPostProcessor` bean, to replace its runtime behavior.
 For instance <<beans-factory-extension-bpp-examples-aabpp,`AutowiredAnnotationBeanPostProcessor`>> is implementing this interface to generate code that injects members annotated with `@Autowired`.
-* On a type registered in `META-INF/aot/spring.factories` with a key matching the fully qualified name of the interface.
+* On a type registered in `META-INF/spring/aot.factories` with a key equals to the fully qualified name of the interface.
 Typically used whe the bean definition needs to be tuned for specific features of the core framework.
 
 [NOTE]
@@ -189,3 +189,89 @@ The generated code above create equivalent bean definitions to the `@Configurati
 There is a bean definition for "`dataSourceConfiguration`" bean and one for "`dataSourceBean`".
 When a `datasource` instance is required, a `BeanInstanceSupplier` is called.
 This supplier invokes the `dataSource()` method on the `dataSourceConfiguration` bean.
+
+
+[[aot-hints]]
+== Runtime Hints
+Running an application as a native image requires additional information compared to a regular JVM runtime.
+For instance, GraalVM needs to know ahead of time if a component uses reflection.
+Similarly, classpath resources are not shipped in a native image unless specified explicitly.
+If the application needs to load a resource, it needs to be referenced.
+
+The {api-spring-framework}/aot/hint/RuntimeHints.html[`RuntimeHints`] API collects the need for reflection, resource loading, serialization, and JDK proxy at runtime.
+The following example makes sure that `config/app.properties` can be loaded from the classpath at runtime:
+
+[source,java,indent=0]
+----
+	runtimeHints.resources().registerPattern("config/app.properties");
+----
+
+A number of contracts are handled automatically during AOT processing.
+For instance, the return type of a `@Controller` method is inspected, and relevant reflection hints are added if we detect that the type should be serialized (typically to JSON).
+
+For the cases that the core container cannot infer, you can register such hints programmatically.
+A number of convenient annotations are also provided for common use cases.
+
+
+[[aot-hints-import-runtime-hints]]
+=== `@ImportRuntimeHints`
+`RuntimeHintsRegistrar` implementations allow you to get a callback to the `RuntimeHints` instance managed by the AOT engine.
+Implementations of this interface can be registered using `@ImportRuntimeHints` on any Spring bean, or on a `@Bean` factory method.
+`RuntimeHintsRegistrar` implementations are detected and invoked at build-time.
+
+[source,java,indent=0]
+----
+	@Component
+    @ImportRuntimeHints(MyComponentRuntimeHints.class)
+    public class MyComponent {
+
+
+	    private static class MyComponentRuntimeHints implements RuntimeHintsRegistrar {
+
+			@Override
+	        public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+
+	        }
+
+	    }
+	}
+----
+
+If at all possible, `@ImportRuntimeHints` should be used as close as possible to the component that requires the hints.
+This way, if the component is not contributed to the `BeanFactory`, the hints won't either.
+
+It is also possible to register an implementation statically by adding an entry in `META-INF/spring/aot.factories` with a key equals to the fully qualified name of the `RuntimeHintsRegistrar` interface.
+
+
+[[aot-hints-reflective]]
+=== `@Reflective`
+{api-spring-framework}/aot/hint/annotation/Reflective.html[`@Reflective`] provides an idiomatic way to flag the need for reflection on an annotated element.
+For instance, `@EventListener` is meta annotated with `@Reflective` as the underlying implementation invokes the annotated method using reflection.
+
+By default, only Spring beans are considered and an invocation hint is added on the annotated element.
+This can be tuned by specifying a different `ReflectiveProcessor` implementation.
+
+Library authors can reuse this annotation for their own use.
+If non-Spring beans need to be processed, a `BeanFactoryInitializationAotProcessor` can detect the relevant types and use `ReflectiveRuntimeHintsRegistrar` to process them.
+
+
+[[aot-hints-register-reflecting-for-binding]]
+=== `@RegisterReflectionForBinding`
+{api-spring-framework}/aot/hint/annotation/RegisterReflectionForBinding.html[`@RegisterReflectionForBinding`] is a specialization of `@Reflective` to register the need for serializing arbitrary types.
+A typical use case is the use of DTOs that the container cannot infer, such as using a web client within a method body.
+
+`@RegisterReflectionForBinding` can be added on any Spring bean at class-level, but can also be specified on a method, field, or constructor to better indicate where the hints are actually required.
+The following example registers `Account` for serialization.
+
+[source,java,indent=0]
+----
+	@Component
+	public class OrderService {
+
+	    @RegisterReflectionForBinding(Account.class)
+		public void process(Order order) {
+			...
+		}
+
+	}
+----
