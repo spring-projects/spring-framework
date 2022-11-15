@@ -16,6 +16,7 @@
 
 package org.springframework.core.convert.support;
 
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -65,7 +66,10 @@ final class StringToCollectionConverter implements ConditionalGenericConverter {
 		}
 		String string = (String) source;
 
-		String[] fields = StringUtils.commaDelimitedListToStringArray(string);
+		String[] fields = checkAnnotationsAvoidCommaDelimiter(targetType)
+				? new String[]{string}
+				: StringUtils.commaDelimitedListToStringArray(string);
+
 		TypeDescriptor elementDesc = targetType.getElementTypeDescriptor();
 		Collection<Object> target = CollectionFactory.createCollection(targetType.getType(),
 				(elementDesc != null ? elementDesc.getType() : null), fields.length);
@@ -82,6 +86,15 @@ final class StringToCollectionConverter implements ConditionalGenericConverter {
 			}
 		}
 		return target;
+	}
+
+	private boolean checkAnnotationsAvoidCommaDelimiter(TypeDescriptor targetType) {
+		for (Annotation annotation : targetType.getAnnotations()) {
+			String name = annotation.annotationType().getName();
+			if (name.equals("org.springframework.web.bind.annotation.RequestParam"))
+				return true;
+		}
+		return false;
 	}
 
 }
