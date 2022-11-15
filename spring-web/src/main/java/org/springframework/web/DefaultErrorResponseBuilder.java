@@ -53,8 +53,8 @@ final class DefaultErrorResponseBuilder implements ErrorResponse.Builder {
 
 	DefaultErrorResponseBuilder(Throwable ex, HttpStatusCode statusCode, String detail) {
 		Assert.notNull(ex, "Throwable is required");
-		Assert.notNull(ex, "HttpStatusCode is required");
-		Assert.notNull(ex, "`detail` is required");
+		Assert.notNull(statusCode, "HttpStatusCode is required");
+		Assert.notNull(detail, "`detail` is required");
 		this.exception = ex;
 		this.statusCode = statusCode;
 		this.problemDetail = ProblemDetail.forStatusAndDetail(statusCode, detail);
