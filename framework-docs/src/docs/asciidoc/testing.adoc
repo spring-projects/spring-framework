@@ -95,8 +95,8 @@ mock objects are targeted at usage with Spring's Web MVC framework and are gener
 convenient to use than dynamic mock objects (such as https://easymock.org/[EasyMock])
 or alternative Servlet API mock objects (such as http://www.mockobjects.com[MockObjects]).
 
-TIP: Since Spring Framework 5.0, the mock objects in `org.springframework.mock.web` are
-based on the Servlet 4.0 API.
+TIP: Since Spring Framework 6.0, the mock objects in `org.springframework.mock.web` are
+based on the Servlet 6.0 API.
 
 The Spring MVC Test framework builds on the mock Servlet API objects to provide an
 integration testing framework for Spring MVC. See <<spring-mvc-test-framework>>.
