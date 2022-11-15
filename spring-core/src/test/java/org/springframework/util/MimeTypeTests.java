@@ -331,6 +331,8 @@ class MimeTypeTests {
 		assertThat(type.getSubtypeSuffix()).isEqualTo("");
 		type = new MimeType("application", "vdn.some+thing+json");
 		assertThat(type.getSubtypeSuffix()).isEqualTo("json");
+		type = new MimeType("application", "+");
+		assertThat(type.getSubtypeSuffix()).isEqualTo("");
 	}
 
 	@Test  // gh-25350

@@ -301,7 +301,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	@Nullable
 	public String getSubtypeSuffix() {
 		int suffixIndex = this.subtype.lastIndexOf('+');
-		if (suffixIndex != -1 && this.subtype.length() > suffixIndex) {
+		if (suffixIndex != -1) {
 			return this.subtype.substring(suffixIndex + 1);
 		}
 		return null;
