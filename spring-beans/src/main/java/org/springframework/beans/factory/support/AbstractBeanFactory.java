@@ -274,17 +274,15 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				if (parentBeanFactory instanceof AbstractBeanFactory abf) {
 					return abf.doGetBean(nameToLookup, requiredType, args, typeCheckOnly);
 				}
-				else if (args != null) {
+				if (args != null) {
 					// Delegation to parent with explicit args.
 					return (T) parentBeanFactory.getBean(nameToLookup, args);
 				}
-				else if (requiredType != null) {
+				if (requiredType != null) {
 					// No args -> delegate to standard getBean method.
 					return parentBeanFactory.getBean(nameToLookup, requiredType);
 				}
-				else {
-					return (T) parentBeanFactory.getBean(nameToLookup);
-				}
+				return (T) parentBeanFactory.getBean(nameToLookup);
 			}
 
 			if (!typeCheckOnly) {
