@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,6 +94,7 @@ class RequestMappingViewResolutionIntegrationTests extends AbstractRequestMappin
 
 		URI uri = new URI("http://localhost:" + this.port + "/redirect");
 		RequestEntity<Void> request = RequestEntity.get(uri).accept(MediaType.ALL).build();
+		@SuppressWarnings("resource")
 		ResponseEntity<Void> response = new RestTemplate(factory).exchange(request, Void.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SEE_OTHER);

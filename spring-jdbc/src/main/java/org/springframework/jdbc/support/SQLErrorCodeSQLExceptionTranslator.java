@@ -23,6 +23,7 @@ import java.util.Arrays;
 
 import javax.sql.DataSource;
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.CannotSerializeTransactionException;
 import org.springframework.dao.DataAccessException;
@@ -50,9 +51,9 @@ import org.springframework.util.function.SupplierUtils;
  * by default. This factory loads a "sql-error-codes.xml" file from the class path,
  * defining error code mappings for database names from database meta-data.
  * <li>Fallback to a fallback translator. {@link SQLStateSQLExceptionTranslator} is the
- * default fallback translator, analyzing the exception's SQL state only. On Java 6
- * which introduces its own {@code SQLException} subclass hierarchy, we will
- * use {@link SQLExceptionSubclassTranslator} by default, which in turns falls back
+ * default fallback translator, analyzing the exception's SQL state only. Since Java 6
+ * which introduces its own {@code SQLException} subclass hierarchy, we use
+ * {@link SQLExceptionSubclassTranslator} by default, which in turns falls back
  * to Spring's own SQL state translation when not encountering specific subclasses.
  * </ul>
  *
@@ -75,6 +76,9 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	private static final int MESSAGE_SQLEX_CONSTRUCTOR = 3;
 	private static final int MESSAGE_SQL_THROWABLE_CONSTRUCTOR = 4;
 	private static final int MESSAGE_SQL_SQLEX_CONSTRUCTOR = 5;
+
+	private static final boolean USER_PROVIDED_ERROR_CODES_FILE_PRESENT =
+			new ClassPathResource(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH, SQLErrorCodesFactory.class.getClassLoader()).exists();
 
 
 	/** Error codes used by this translator. */
@@ -415,6 +419,15 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 					"', error code '" + sqlEx.getErrorCode() + "', message [" + sqlEx.getMessage() + "]" +
 					(sql != null ? "; SQL was [" + sql + "]": "") + " for task [" + task + "]");
 		}
+	}
+
+
+	/**
+	 * Check whether there is a user-provided `sql-error-codes.xml` file
+	 * in the root of the classpath.
+	 */
+	static boolean hasUserProvidedErrorCodesFile() {
+		return USER_PROVIDED_ERROR_CODES_FILE_PRESENT;
 	}
 
 }

@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.http.MappingMatch;
 import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -137,6 +138,7 @@ import org.springframework.web.servlet.view.groovy.GroovyMarkupConfigurer;
 import org.springframework.web.servlet.view.groovy.GroovyMarkupViewResolver;
 import org.springframework.web.servlet.view.script.ScriptTemplateConfigurer;
 import org.springframework.web.servlet.view.script.ScriptTemplateViewResolver;
+import org.springframework.web.testfixture.servlet.MockHttpServletMapping;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockRequestDispatcher;
@@ -159,6 +161,8 @@ import static org.assertj.core.api.InstanceOfAssertFactories.BOOLEAN;
  * @author Sam Brannen
  * @author Marten Deinum
  */
+
+@SuppressWarnings("deprecation")
 public class MvcNamespaceTests {
 
 	public static final String VIEWCONTROLLER_BEAN_NAME =
@@ -207,7 +211,8 @@ public class MvcNamespaceTests {
 
 		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
 		assertThat(adapter).isNotNull();
-		assertThat(new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect")).asInstanceOf(BOOLEAN).isFalse();
+		assertThat(new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect"))
+				.asInstanceOf(BOOLEAN).isTrue();
 
 		List<HttpMessageConverter<?>> converters = adapter.getMessageConverters();
 		assertThat(converters.size() > 0).isTrue();
@@ -688,6 +693,7 @@ public class MvcNamespaceTests {
 		request.setRequestURI("/myapp/app/");
 		request.setContextPath("/myapp");
 		request.setServletPath("/app/");
+		request.setHttpServletMapping(new MockHttpServletMapping("", "", "", MappingMatch.PATH));
 		chain = mapping2.getHandler(request);
 		assertThat(chain.getInterceptorList().size()).isEqualTo(4);
 		assertThat(chain.getInterceptorList().get(1) instanceof ConversionServiceExposingInterceptor).isTrue();

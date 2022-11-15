@@ -67,11 +67,13 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	/** use serialVersionUID from Spring 1.2 for interoperability. */
 	private static final long serialVersionUID = -4688694393146734764L;
 
-
+	@SuppressWarnings("serial")
 	private final ResultSet resultSet;
 
+	@SuppressWarnings("serial")
 	private final SqlRowSetMetaData rowSetMetaData;
 
+	@SuppressWarnings("serial")
 	private final Map<String, Integer> columnLabelMap;
 
 

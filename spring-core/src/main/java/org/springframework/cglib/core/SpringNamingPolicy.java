@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,23 +17,48 @@
 package org.springframework.cglib.core;
 
 /**
- * Custom extension of CGLIB's {@link DefaultNamingPolicy}, modifying
- * the tag in generated class names from "ByCGLIB" to "BySpringCGLIB".
+ * Custom variant of CGLIB's {@link DefaultNamingPolicy}, modifying the tag
+ * in generated class names from "EnhancerByCGLIB" etc to a "SpringCGLIB" tag
+ * and using a plain counter suffix instead of a hash code suffix (as of 6.0).
  *
- * <p>This is primarily designed to avoid clashes between a regular CGLIB
- * version (used by some other library) and Spring's embedded variant,
- * in case the same class happens to get proxied for different purposes.
+ * <p>This allows for reliably discovering pre-generated Spring proxy classes
+ * in the classpath.
  *
  * @author Juergen Hoeller
- * @since 3.2.8
+ * @since 3.2.8 / 6.0
  */
-public class SpringNamingPolicy extends DefaultNamingPolicy {
+public final class SpringNamingPolicy implements NamingPolicy {
 
 	public static final SpringNamingPolicy INSTANCE = new SpringNamingPolicy();
 
-	@Override
-	protected String getTag() {
-		return "BySpringCGLIB";
+	private static final String LABEL = "$$SpringCGLIB$$";
+
+	private SpringNamingPolicy() {
+	}
+
+	public String getClassName(String prefix, String source, Object key, Predicate names) {
+		if (prefix == null) {
+			prefix = "org.springframework.cglib.empty.Object";
+		}
+		else if (prefix.startsWith("java.") || prefix.startsWith("javax.")) {
+			prefix = "_" + prefix;
+		}
+
+		String base;
+		int existingLabel = prefix.indexOf(LABEL);
+		if (existingLabel >= 0) {
+			base = prefix.substring(0, existingLabel + LABEL.length());
+		}
+		else {
+			base = prefix + LABEL;
+		}
+
+		int index = 0;
+		String attempt = base + index;
+		while (names.evaluate(attempt)) {
+			attempt = base + index++;
+		}
+		return attempt;
 	}
 
 }

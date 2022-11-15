@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
@@ -34,6 +35,7 @@ import java.nio.file.StandardOpenOption;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -48,6 +50,7 @@ import org.springframework.util.StringUtils;
  * interactions via NIO.2, only resorting to {@link File} on {@link #getFile()}.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 28.12.2003
  * @see #FileSystemResource(String)
  * @see #FileSystemResource(File)
@@ -158,6 +161,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	/**
 	 * This implementation returns whether the underlying file exists.
 	 * @see java.io.File#exists()
+	 * @see java.nio.file.Files#exists(Path, java.nio.file.LinkOption...)
 	 */
 	@Override
 	public boolean exists() {
@@ -169,6 +173,8 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 * (and corresponds to an actual file with content, not to a directory).
 	 * @see java.io.File#canRead()
 	 * @see java.io.File#isDirectory()
+	 * @see java.nio.file.Files#isReadable(Path)
+	 * @see java.nio.file.Files#isDirectory(Path, java.nio.file.LinkOption...)
 	 */
 	@Override
 	public boolean isReadable() {
@@ -177,8 +183,8 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	}
 
 	/**
-	 * This implementation opens a NIO file stream for the underlying file.
-	 * @see java.io.FileInputStream
+	 * This implementation opens an NIO file stream for the underlying file.
+	 * @see java.nio.file.Files#newInputStream(Path, java.nio.file.OpenOption...)
 	 */
 	@Override
 	public InputStream getInputStream() throws IOException {
@@ -195,6 +201,8 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 * (and corresponds to an actual file with content, not to a directory).
 	 * @see java.io.File#canWrite()
 	 * @see java.io.File#isDirectory()
+	 * @see java.nio.file.Files#isWritable(Path)
+	 * @see java.nio.file.Files#isDirectory(Path, java.nio.file.LinkOption...)
 	 */
 	@Override
 	public boolean isWritable() {
@@ -204,7 +212,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 
 	/**
 	 * This implementation opens a FileOutputStream for the underlying file.
-	 * @see java.io.FileOutputStream
+	 * @see java.nio.file.Files#newOutputStream(Path, java.nio.file.OpenOption...)
 	 */
 	@Override
 	public OutputStream getOutputStream() throws IOException {
@@ -214,6 +222,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	/**
 	 * This implementation returns a URL for the underlying file.
 	 * @see java.io.File#toURI()
+	 * @see java.nio.file.Path#toUri()
 	 */
 	@Override
 	public URL getURL() throws IOException {
@@ -223,10 +232,27 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	/**
 	 * This implementation returns a URI for the underlying file.
 	 * @see java.io.File#toURI()
+	 * @see java.nio.file.Path#toUri()
 	 */
 	@Override
 	public URI getURI() throws IOException {
-		return (this.file != null ? this.file.toURI() : this.filePath.toUri());
+		if (this.file != null) {
+			return this.file.toURI();
+		}
+		else {
+			URI uri = this.filePath.toUri();
+			// Normalize URI? See https://github.com/spring-projects/spring-framework/issues/29275
+			String scheme = uri.getScheme();
+			if (ResourceUtils.URL_PROTOCOL_FILE.equals(scheme)) {
+				try {
+					uri = new URI(scheme, uri.getPath(), null);
+				}
+				catch (URISyntaxException ex) {
+					throw new IOException("Failed to normalize URI: " + uri, ex);
+				}
+			}
+			return uri;
+		}
 	}
 
 	/**
@@ -324,6 +350,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	/**
 	 * This implementation returns the name of the file.
 	 * @see java.io.File#getName()
+	 * @see java.nio.file.Path#getFileName()
 	 */
 	@Override
 	public String getFilename() {
@@ -334,6 +361,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 * This implementation returns a description that includes the absolute
 	 * path of the file.
 	 * @see java.io.File#getAbsolutePath()
+	 * @see java.nio.file.Path#toAbsolutePath()
 	 */
 	@Override
 	public String getDescription() {
@@ -342,16 +370,18 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 
 
 	/**
-	 * This implementation compares the underlying File references.
+	 * This implementation compares the underlying file paths.
+	 * @see #getPath()
 	 */
 	@Override
-	public boolean equals(@Nullable Object other) {
-		return (this == other || (other instanceof FileSystemResource &&
-				this.path.equals(((FileSystemResource) other).path)));
+	public boolean equals(@Nullable Object obj) {
+		return (this == obj || (obj instanceof FileSystemResource other &&
+				this.path.equals(other.path)));
 	}
 
 	/**
-	 * This implementation returns the hash code of the underlying File reference.
+	 * This implementation returns the hash code of the underlying file path.
+	 * @see #getPath()
 	 */
 	@Override
 	public int hashCode() {

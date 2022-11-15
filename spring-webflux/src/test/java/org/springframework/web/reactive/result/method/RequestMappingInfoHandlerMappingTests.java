@@ -36,6 +36,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
@@ -53,7 +54,7 @@ import org.springframework.web.reactive.result.method.RequestMappingInfo.Builder
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.ServerWebInputException;
+import org.springframework.web.server.UnsatisfiedRequestParameterException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
@@ -63,6 +64,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
 import static org.springframework.web.bind.annotation.RequestMethod.OPTIONS;
+import static org.springframework.web.filter.reactive.ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE;
 import static org.springframework.web.reactive.HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE;
 import static org.springframework.web.reactive.HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE;
 import static org.springframework.web.reactive.result.method.RequestMappingInfo.paths;
@@ -119,10 +121,6 @@ public class RequestMappingInfoHandlerMappingTests {
 		ServerWebExchange exchange = MockServerWebExchange.from(get(""));
 		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
 		assertThat(hm.getMethod()).isEqualTo(expected);
-
-		exchange = MockServerWebExchange.from(get("/"));
-		hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
-		assertThat(hm.getMethod()).isEqualTo(expected);
 	}
 
 	@Test
@@ -157,7 +155,6 @@ public class RequestMappingInfoHandlerMappingTests {
 	@Test  // SPR-8462
 	public void getHandlerMediaTypeNotSupported() {
 		testHttpMediaTypeNotSupportedException("/person/1");
-		testHttpMediaTypeNotSupportedException("/person/1/");
 		testHttpMediaTypeNotSupportedException("/person/1.json");
 	}
 
@@ -175,14 +172,13 @@ public class RequestMappingInfoHandlerMappingTests {
 	@Test  // SPR-8462
 	public void getHandlerTestMediaTypeNotAcceptable() {
 		testMediaTypeNotAcceptable("/persons");
-		testMediaTypeNotAcceptable("/persons/");
 	}
 
 	@Test  // SPR-12854
 	public void getHandlerTestRequestParamMismatch() {
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/params"));
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
-		assertError(mono, ServerWebInputException.class, ex -> {
+		assertError(mono, UnsatisfiedRequestParameterException.class, ex -> {
 			assertThat(ex.getReason()).contains("[foo=bar]");
 			assertThat(ex.getReason()).contains("[bar=baz]");
 		});
@@ -212,7 +208,9 @@ public class RequestMappingInfoHandlerMappingTests {
 		exchange = MockServerWebExchange.from(get("/content").accept(MediaType.APPLICATION_JSON));
 		this.handlerMapping.getHandler(exchange).block();
 
-		assertThat(exchange.getAttributes().get(name)).as("Negated expression shouldn't be listed as producible type").isNull();
+		assertThat(exchange.getAttributes().get(name))
+				.as("Negated expression shouldn't be listed as producible type")
+				.isNull();
 	}
 
 	@Test
@@ -259,6 +257,17 @@ public class RequestMappingInfoHandlerMappingTests {
 
 		HandlerMethod mapped = (HandlerMethod) exchange.getAttributes().get(BEST_MATCHING_HANDLER_ATTRIBUTE);
 		assertThat(mapped).isSameAs(handlerMethod);
+	}
+
+	@Test
+	public void handleMatchBestMatchingPatternAttributeInObservationContext() {
+		RequestMappingInfo key = paths("/{path1}/2", "/**").build();
+		ServerWebExchange exchange = MockServerWebExchange.from(get("/1/2"));
+		ServerRequestObservationContext observationContext = new ServerRequestObservationContext(exchange.getRequest(), exchange.getResponse(), exchange.getAttributes());
+		exchange.getAttributes().put(CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
+		this.handlerMapping.handleMatch(key, handlerMethod, exchange);
+
+		assertThat(observationContext.getPathPattern()).isEqualTo("/{path1}/2");
 	}
 
 	@Test // gh-22543
@@ -352,7 +361,9 @@ public class RequestMappingInfoHandlerMappingTests {
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
-		assertError(mono, UnsupportedMediaTypeStatusException.class, ex -> assertThat(ex.getSupportedMediaTypes()).as("Invalid supported consumable media types").isEqualTo(Collections.singletonList(new MediaType("application", "xml"))));
+		assertError(mono, UnsupportedMediaTypeStatusException.class, ex -> assertThat(ex.getSupportedMediaTypes())
+				.as("Invalid supported consumable media types")
+				.isEqualTo(Collections.singletonList(new MediaType("application", "xml"))));
 	}
 
 	private void testHttpOptions(String requestURI, Set<HttpMethod> allowedMethods, @Nullable MediaType acceptPatch) {
@@ -382,7 +393,9 @@ public class RequestMappingInfoHandlerMappingTests {
 		ServerWebExchange exchange = MockServerWebExchange.from(get(url).accept(MediaType.APPLICATION_JSON));
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
-		assertError(mono, NotAcceptableStatusException.class, ex -> assertThat(ex.getSupportedMediaTypes()).as("Invalid supported producible media types").isEqualTo(Collections.singletonList(new MediaType("application", "xml"))));
+		assertError(mono, NotAcceptableStatusException.class, ex -> assertThat(ex.getSupportedMediaTypes())
+				.as("Invalid supported producible media types")
+				.isEqualTo(Collections.singletonList(new MediaType("application", "xml"))));
 	}
 
 	private void handleMatch(ServerWebExchange exchange, String pattern) {

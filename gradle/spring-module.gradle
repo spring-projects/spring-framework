@@ -1,5 +1,5 @@
 apply plugin: 'java-library'
-apply plugin: 'org.springframework.build.compile'
+apply plugin: 'org.springframework.build.conventions'
 apply plugin: 'org.springframework.build.optional-dependencies'
 // Uncomment the following for Shadow support in the jmhJar block.
 // Currently commented out due to ZipException: archive is not a ZIP archive
@@ -11,6 +11,11 @@ dependencies {
 	jmh 'org.openjdk.jmh:jmh-core:1.32'
 	jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.32'
 	jmh 'net.sf.jopt-simple:jopt-simple'
+}
+
+pluginManager.withPlugin("kotlin") {
+	apply plugin: "org.jetbrains.dokka"
+	apply from: "${rootDir}/gradle/docs-dokka.gradle"
 }
 
 jmh {
@@ -44,7 +49,7 @@ jar {
 	manifest.attributes["Created-By"] =
 			"${System.getProperty("java.version")} (${System.getProperty("java.specification.vendor")})"
 
-	from("${rootDir}/src/docs/dist") {
+	from("${rootDir}/framework-docs/src/docs/dist") {
 		include "license.txt"
 		include "notice.txt"
 		into "META-INF"

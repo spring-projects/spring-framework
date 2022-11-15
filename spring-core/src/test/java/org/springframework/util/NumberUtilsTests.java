@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,7 +134,7 @@ class NumberUtilsTests {
 
 	@Test
 	void convertDoubleToBigInteger() {
-		Double decimal = Double.valueOf(3.14d);
+		Double decimal = 3.14d;
 		assertThat(NumberUtils.convertNumberToTargetClass(decimal, BigInteger.class)).isEqualTo(new BigInteger("3"));
 	}
 
@@ -272,48 +272,48 @@ class NumberUtilsTests {
 
 	@Test
 	void convertToInteger() {
-		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(-1), Integer.class)).isEqualTo(Integer.valueOf(Integer.valueOf(-1)));
-		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(0), Integer.class)).isEqualTo(Integer.valueOf(Integer.valueOf(0)));
-		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(1), Integer.class)).isEqualTo(Integer.valueOf(Integer.valueOf(1)));
+		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(-1), Integer.class)).isEqualTo(Integer.valueOf(-1));
+		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(0), Integer.class)).isEqualTo(Integer.valueOf(0));
+		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(1), Integer.class)).isEqualTo(Integer.valueOf(1));
 		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(Integer.MAX_VALUE), Integer.class)).isEqualTo(Integer.valueOf(Integer.MAX_VALUE));
 		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(Integer.MAX_VALUE + 1), Integer.class)).isEqualTo(Integer.valueOf(Integer.MIN_VALUE));
 		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(Integer.MIN_VALUE), Integer.class)).isEqualTo(Integer.valueOf(Integer.MIN_VALUE));
 		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(Integer.MIN_VALUE - 1), Integer.class)).isEqualTo(Integer.valueOf(Integer.MAX_VALUE));
 
-		assertThat(NumberUtils.convertNumberToTargetClass(Long.valueOf(-1), Integer.class)).isEqualTo(Integer.valueOf(Integer.valueOf(-1)));
-		assertThat(NumberUtils.convertNumberToTargetClass(Long.valueOf(0), Integer.class)).isEqualTo(Integer.valueOf(Integer.valueOf(0)));
-		assertThat(NumberUtils.convertNumberToTargetClass(Long.valueOf(1), Integer.class)).isEqualTo(Integer.valueOf(Integer.valueOf(1)));
+		assertThat(NumberUtils.convertNumberToTargetClass((long) -1, Integer.class)).isEqualTo(Integer.valueOf(-1));
+		assertThat(NumberUtils.convertNumberToTargetClass(0L, Integer.class)).isEqualTo(Integer.valueOf(0));
+		assertThat(NumberUtils.convertNumberToTargetClass(1L, Integer.class)).isEqualTo(Integer.valueOf(1));
 		assertThat(NumberUtils.convertNumberToTargetClass(Long.valueOf(Integer.MAX_VALUE), Integer.class)).isEqualTo(Integer.valueOf(Integer.MAX_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Long.valueOf(Integer.MAX_VALUE + 1), Integer.class)).isEqualTo(Integer.valueOf(Integer.MIN_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Long.valueOf(Integer.MIN_VALUE), Integer.class)).isEqualTo(Integer.valueOf(Integer.MIN_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Long.valueOf(Integer.MIN_VALUE - 1), Integer.class)).isEqualTo(Integer.valueOf(Integer.MAX_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass((long) (Integer.MAX_VALUE + 1), Integer.class)).isEqualTo(Integer.valueOf(Integer.MIN_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass((long) Integer.MIN_VALUE, Integer.class)).isEqualTo(Integer.valueOf(Integer.MIN_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass((long) (Integer.MIN_VALUE - 1), Integer.class)).isEqualTo(Integer.valueOf(Integer.MAX_VALUE));
 
-		assertThat(NumberUtils.convertNumberToTargetClass(Integer.valueOf(-1), Integer.class)).isEqualTo(Integer.valueOf(Integer.valueOf(-1)));
-		assertThat(NumberUtils.convertNumberToTargetClass(Integer.valueOf(0), Integer.class)).isEqualTo(Integer.valueOf(Integer.valueOf(0)));
-		assertThat(NumberUtils.convertNumberToTargetClass(Integer.valueOf(1), Integer.class)).isEqualTo(Integer.valueOf(Integer.valueOf(1)));
-		assertThat(NumberUtils.convertNumberToTargetClass(Integer.valueOf(Integer.MAX_VALUE), Integer.class)).isEqualTo(Integer.valueOf(Integer.MAX_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Integer.valueOf(Integer.MAX_VALUE + 1), Integer.class)).isEqualTo(Integer.valueOf(Integer.MIN_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Integer.valueOf(Integer.MIN_VALUE), Integer.class)).isEqualTo(Integer.valueOf(Integer.MIN_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Integer.valueOf(Integer.MIN_VALUE - 1), Integer.class)).isEqualTo(Integer.valueOf(Integer.MAX_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass(-1, Integer.class)).isEqualTo(Integer.valueOf(-1));
+		assertThat(NumberUtils.convertNumberToTargetClass(0, Integer.class)).isEqualTo(Integer.valueOf(0));
+		assertThat(NumberUtils.convertNumberToTargetClass(1, Integer.class)).isEqualTo(Integer.valueOf(1));
+		assertThat(NumberUtils.convertNumberToTargetClass(Integer.MAX_VALUE, Integer.class)).isEqualTo(Integer.valueOf(Integer.MAX_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass(Integer.MAX_VALUE + 1, Integer.class)).isEqualTo(Integer.valueOf(Integer.MIN_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass(Integer.MIN_VALUE, Integer.class)).isEqualTo(Integer.valueOf(Integer.MIN_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass(Integer.MIN_VALUE - 1, Integer.class)).isEqualTo(Integer.valueOf(Integer.MAX_VALUE));
 
-		assertThat(NumberUtils.convertNumberToTargetClass(Short.valueOf((short) -1), Integer.class)).isEqualTo(Integer.valueOf(Integer.valueOf(-1)));
-		assertThat(NumberUtils.convertNumberToTargetClass(Short.valueOf((short) 0), Integer.class)).isEqualTo(Integer.valueOf(Integer.valueOf(0)));
-		assertThat(NumberUtils.convertNumberToTargetClass(Short.valueOf((short) 1), Integer.class)).isEqualTo(Integer.valueOf(Integer.valueOf(1)));
-		assertThat(NumberUtils.convertNumberToTargetClass(Short.valueOf(Short.MAX_VALUE), Integer.class)).isEqualTo(Integer.valueOf(Short.MAX_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Short.valueOf((short) (Short.MAX_VALUE + 1)), Integer.class)).isEqualTo(Integer.valueOf(Short.MIN_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Short.valueOf(Short.MIN_VALUE), Integer.class)).isEqualTo(Integer.valueOf(Short.MIN_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Short.valueOf((short) (Short.MIN_VALUE - 1)), Integer.class)).isEqualTo(Integer.valueOf(Short.MAX_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass((short) -1, Integer.class)).isEqualTo(Integer.valueOf(-1));
+		assertThat(NumberUtils.convertNumberToTargetClass((short) 0, Integer.class)).isEqualTo(Integer.valueOf(0));
+		assertThat(NumberUtils.convertNumberToTargetClass((short) 1, Integer.class)).isEqualTo(Integer.valueOf(1));
+		assertThat(NumberUtils.convertNumberToTargetClass(Short.MAX_VALUE, Integer.class)).isEqualTo(Integer.valueOf(Short.MAX_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass((short) (Short.MAX_VALUE + 1), Integer.class)).isEqualTo(Integer.valueOf(Short.MIN_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass(Short.MIN_VALUE, Integer.class)).isEqualTo(Integer.valueOf(Short.MIN_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass((short) (Short.MIN_VALUE - 1), Integer.class)).isEqualTo(Integer.valueOf(Short.MAX_VALUE));
 
-		assertThat(NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) -1), Integer.class)).isEqualTo(Integer.valueOf(Integer.valueOf(-1)));
-		assertThat(NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) 0), Integer.class)).isEqualTo(Integer.valueOf(Integer.valueOf(0)));
-		assertThat(NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) 1), Integer.class)).isEqualTo(Integer.valueOf(Integer.valueOf(1)));
-		assertThat(NumberUtils.convertNumberToTargetClass(Byte.valueOf(Byte.MAX_VALUE), Integer.class)).isEqualTo(Integer.valueOf(Byte.MAX_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) (Byte.MAX_VALUE + 1)), Integer.class)).isEqualTo(Integer.valueOf(Byte.MIN_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Byte.valueOf(Byte.MIN_VALUE), Integer.class)).isEqualTo(Integer.valueOf(Byte.MIN_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) (Byte.MIN_VALUE - 1)), Integer.class)).isEqualTo(Integer.valueOf(Byte.MAX_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass((byte) -1, Integer.class)).isEqualTo(Integer.valueOf(-1));
+		assertThat(NumberUtils.convertNumberToTargetClass((byte) 0, Integer.class)).isEqualTo(Integer.valueOf(0));
+		assertThat(NumberUtils.convertNumberToTargetClass((byte) 1, Integer.class)).isEqualTo(Integer.valueOf(1));
+		assertThat(NumberUtils.convertNumberToTargetClass(Byte.MAX_VALUE, Integer.class)).isEqualTo(Integer.valueOf(Byte.MAX_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass((byte) (Byte.MAX_VALUE + 1), Integer.class)).isEqualTo(Integer.valueOf(Byte.MIN_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass(Byte.MIN_VALUE, Integer.class)).isEqualTo(Integer.valueOf(Byte.MIN_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass((byte) (Byte.MIN_VALUE - 1), Integer.class)).isEqualTo(Integer.valueOf(Byte.MAX_VALUE));
 
-		assertToNumberOverflow(Long.valueOf(Long.MAX_VALUE + 1), Integer.class);
-		assertToNumberOverflow(Long.valueOf(Long.MIN_VALUE - 1), Integer.class);
+		assertToNumberOverflow(Long.MAX_VALUE + 1, Integer.class);
+		assertToNumberOverflow(Long.MIN_VALUE - 1, Integer.class);
 		assertToNumberOverflow(BigInteger.valueOf(Integer.MAX_VALUE).add(BigInteger.ONE), Integer.class);
 		assertToNumberOverflow(BigInteger.valueOf(Integer.MIN_VALUE).subtract(BigInteger.ONE), Integer.class);
 		assertToNumberOverflow(new BigDecimal("18446744073709551611"), Integer.class);
@@ -321,45 +321,45 @@ class NumberUtilsTests {
 
 	@Test
 	void convertToLong() {
-		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(-1), Long.class)).isEqualTo(Long.valueOf(Long.valueOf(-1)));
-		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(0), Long.class)).isEqualTo(Long.valueOf(Long.valueOf(0)));
-		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(1), Long.class)).isEqualTo(Long.valueOf(Long.valueOf(1)));
+		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(-1), Long.class)).isEqualTo(Long.valueOf(-1));
+		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(0), Long.class)).isEqualTo(Long.valueOf(0));
+		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(1), Long.class)).isEqualTo(Long.valueOf(1));
 		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(Long.MAX_VALUE), Long.class)).isEqualTo(Long.valueOf(Long.MAX_VALUE));
 		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(Long.MAX_VALUE + 1), Long.class)).isEqualTo(Long.valueOf(Long.MIN_VALUE));
 		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(Long.MIN_VALUE), Long.class)).isEqualTo(Long.valueOf(Long.MIN_VALUE));
 		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(Long.MIN_VALUE - 1), Long.class)).isEqualTo(Long.valueOf(Long.MAX_VALUE));
 
-		assertThat(NumberUtils.convertNumberToTargetClass(Long.valueOf(-1), Long.class)).isEqualTo(Long.valueOf(Long.valueOf(-1)));
-		assertThat(NumberUtils.convertNumberToTargetClass(Long.valueOf(0), Long.class)).isEqualTo(Long.valueOf(Long.valueOf(0)));
-		assertThat(NumberUtils.convertNumberToTargetClass(Long.valueOf(1), Long.class)).isEqualTo(Long.valueOf(Long.valueOf(1)));
-		assertThat(NumberUtils.convertNumberToTargetClass(Long.valueOf(Long.MAX_VALUE), Long.class)).isEqualTo(Long.valueOf(Long.MAX_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Long.valueOf(Long.MAX_VALUE + 1), Long.class)).isEqualTo(Long.valueOf(Long.MIN_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Long.valueOf(Long.MIN_VALUE), Long.class)).isEqualTo(Long.valueOf(Long.MIN_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Long.valueOf(Long.MIN_VALUE - 1), Long.class)).isEqualTo(Long.valueOf(Long.MAX_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass((long) -1, Long.class)).isEqualTo(Long.valueOf(-1));
+		assertThat(NumberUtils.convertNumberToTargetClass(0L, Long.class)).isEqualTo(Long.valueOf(0));
+		assertThat(NumberUtils.convertNumberToTargetClass(1L, Long.class)).isEqualTo(Long.valueOf(1));
+		assertThat(NumberUtils.convertNumberToTargetClass(Long.MAX_VALUE, Long.class)).isEqualTo(Long.valueOf(Long.MAX_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass(Long.MAX_VALUE + 1, Long.class)).isEqualTo(Long.valueOf(Long.MIN_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass(Long.MIN_VALUE, Long.class)).isEqualTo(Long.valueOf(Long.MIN_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass(Long.MIN_VALUE - 1, Long.class)).isEqualTo(Long.valueOf(Long.MAX_VALUE));
 
-		assertThat(NumberUtils.convertNumberToTargetClass(Integer.valueOf(-1), Long.class)).isEqualTo(Long.valueOf(Integer.valueOf(-1)));
-		assertThat(NumberUtils.convertNumberToTargetClass(Integer.valueOf(0), Long.class)).isEqualTo(Long.valueOf(Integer.valueOf(0)));
-		assertThat(NumberUtils.convertNumberToTargetClass(Integer.valueOf(1), Long.class)).isEqualTo(Long.valueOf(Integer.valueOf(1)));
-		assertThat(NumberUtils.convertNumberToTargetClass(Integer.valueOf(Integer.MAX_VALUE), Long.class)).isEqualTo(Long.valueOf(Integer.MAX_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Integer.valueOf(Integer.MAX_VALUE + 1), Long.class)).isEqualTo(Long.valueOf(Integer.MIN_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Integer.valueOf(Integer.MIN_VALUE), Long.class)).isEqualTo(Long.valueOf(Integer.MIN_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Integer.valueOf(Integer.MIN_VALUE - 1), Long.class)).isEqualTo(Long.valueOf(Integer.MAX_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass(-1, Long.class)).isEqualTo(Long.valueOf(-1));
+		assertThat(NumberUtils.convertNumberToTargetClass(0, Long.class)).isEqualTo(Long.valueOf(0));
+		assertThat(NumberUtils.convertNumberToTargetClass(1, Long.class)).isEqualTo(Long.valueOf(1));
+		assertThat(NumberUtils.convertNumberToTargetClass(Integer.MAX_VALUE, Long.class)).isEqualTo(Long.valueOf(Integer.MAX_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass(Integer.MAX_VALUE + 1, Long.class)).isEqualTo(Long.valueOf(Integer.MIN_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass(Integer.MIN_VALUE, Long.class)).isEqualTo(Long.valueOf(Integer.MIN_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass(Integer.MIN_VALUE - 1, Long.class)).isEqualTo(Long.valueOf(Integer.MAX_VALUE));
 
-		assertThat(NumberUtils.convertNumberToTargetClass(Short.valueOf((short) -1), Long.class)).isEqualTo(Long.valueOf(Integer.valueOf(-1)));
-		assertThat(NumberUtils.convertNumberToTargetClass(Short.valueOf((short) 0), Long.class)).isEqualTo(Long.valueOf(Integer.valueOf(0)));
-		assertThat(NumberUtils.convertNumberToTargetClass(Short.valueOf((short) 1), Long.class)).isEqualTo(Long.valueOf(Integer.valueOf(1)));
-		assertThat(NumberUtils.convertNumberToTargetClass(Short.valueOf(Short.MAX_VALUE), Long.class)).isEqualTo(Long.valueOf(Short.MAX_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Short.valueOf((short) (Short.MAX_VALUE + 1)), Long.class)).isEqualTo(Long.valueOf(Short.MIN_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Short.valueOf(Short.MIN_VALUE), Long.class)).isEqualTo(Long.valueOf(Short.MIN_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Short.valueOf((short) (Short.MIN_VALUE - 1)), Long.class)).isEqualTo(Long.valueOf(Short.MAX_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass((short) -1, Long.class)).isEqualTo(Long.valueOf(-1));
+		assertThat(NumberUtils.convertNumberToTargetClass((short) 0, Long.class)).isEqualTo(Long.valueOf(0));
+		assertThat(NumberUtils.convertNumberToTargetClass((short) 1, Long.class)).isEqualTo(Long.valueOf(1));
+		assertThat(NumberUtils.convertNumberToTargetClass(Short.MAX_VALUE, Long.class)).isEqualTo(Long.valueOf(Short.MAX_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass((short) (Short.MAX_VALUE + 1), Long.class)).isEqualTo(Long.valueOf(Short.MIN_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass(Short.MIN_VALUE, Long.class)).isEqualTo(Long.valueOf(Short.MIN_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass((short) (Short.MIN_VALUE - 1), Long.class)).isEqualTo(Long.valueOf(Short.MAX_VALUE));
 
-		assertThat(NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) -1), Long.class)).isEqualTo(Long.valueOf(Integer.valueOf(-1)));
-		assertThat(NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) 0), Long.class)).isEqualTo(Long.valueOf(Integer.valueOf(0)));
-		assertThat(NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) 1), Long.class)).isEqualTo(Long.valueOf(Integer.valueOf(1)));
-		assertThat(NumberUtils.convertNumberToTargetClass(Byte.valueOf(Byte.MAX_VALUE), Long.class)).isEqualTo(Long.valueOf(Byte.MAX_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) (Byte.MAX_VALUE + 1)), Long.class)).isEqualTo(Long.valueOf(Byte.MIN_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Byte.valueOf(Byte.MIN_VALUE), Long.class)).isEqualTo(Long.valueOf(Byte.MIN_VALUE));
-		assertThat(NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) (Byte.MIN_VALUE - 1)), Long.class)).isEqualTo(Long.valueOf(Byte.MAX_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass((byte) -1, Long.class)).isEqualTo(Long.valueOf(-1));
+		assertThat(NumberUtils.convertNumberToTargetClass((byte) 0, Long.class)).isEqualTo(Long.valueOf(0));
+		assertThat(NumberUtils.convertNumberToTargetClass((byte) 1, Long.class)).isEqualTo(Long.valueOf(1));
+		assertThat(NumberUtils.convertNumberToTargetClass(Byte.MAX_VALUE, Long.class)).isEqualTo(Long.valueOf(Byte.MAX_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass((byte) (Byte.MAX_VALUE + 1), Long.class)).isEqualTo(Long.valueOf(Byte.MIN_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass(Byte.MIN_VALUE, Long.class)).isEqualTo(Long.valueOf(Byte.MIN_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass((byte) (Byte.MIN_VALUE - 1), Long.class)).isEqualTo(Long.valueOf(Byte.MAX_VALUE));
 
 		assertToNumberOverflow(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE), Long.class);
 		assertToNumberOverflow(BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE), Long.class);

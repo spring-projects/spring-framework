@@ -19,7 +19,6 @@ package org.springframework.core;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
@@ -77,7 +76,7 @@ public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDis
 				.stream()
 				// Extension receivers of extension methods must be included as they appear as normal method parameters in Java
 				.filter(p -> KParameter.Kind.VALUE.equals(p.getKind()) || KParameter.Kind.EXTENSION_RECEIVER.equals(p.getKind()))
-				.collect(Collectors.toList());
+				.toList();
 		String[] parameterNames = new String[filteredParameters.size()];
 		for (int i = 0; i < filteredParameters.size(); i++) {
 			KParameter parameter = filteredParameters.get(i);

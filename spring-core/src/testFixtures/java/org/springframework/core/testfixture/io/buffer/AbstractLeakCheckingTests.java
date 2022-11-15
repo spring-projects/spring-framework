@@ -16,6 +16,8 @@
 
 package org.springframework.core.testfixture.io.buffer;
 
+import java.time.Duration;
+
 import org.junit.jupiter.api.AfterEach;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -42,7 +44,7 @@ public abstract class AbstractLeakCheckingTests {
 	 */
 	@AfterEach
 	final void checkForLeaks() {
-		this.bufferFactory.checkForLeaks();
+		this.bufferFactory.checkForLeaks(Duration.ofSeconds(1));
 	}
 
 }

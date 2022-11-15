@@ -21,22 +21,45 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+
+import org.springframework.lang.Nullable;
 
 /**
- * A hint that describes the need of a JDK {@link Proxy}, that is an
- * interfaces-based proxy.
+ * A hint that describes the need for a JDK interface-based {@link Proxy}.
  *
  * @author Stephane Nicoll
+ * @author Brian Clozel
  * @since 6.0
  */
-public final class JdkProxyHint {
+public final class JdkProxyHint implements ConditionalHint {
 
 	private final List<TypeReference> proxiedInterfaces;
+
+	@Nullable
+	private final TypeReference reachableType;
 
 
 	private JdkProxyHint(Builder builder) {
 		this.proxiedInterfaces = List.copyOf(builder.proxiedInterfaces);
+		this.reachableType = builder.reachableType;
+	}
+
+	/**
+	 * Initialize a builder with the proxied interfaces to use.
+	 * @param proxiedInterfaces the interfaces the proxy should implement
+	 * @return a builder for the hint
+	 */
+	public static Builder of(TypeReference... proxiedInterfaces) {
+		return new Builder().proxiedInterfaces(proxiedInterfaces);
+	}
+
+	/**
+	 * Initialize a builder with the proxied interfaces to use.
+	 * @param proxiedInterfaces the interfaces the proxy should implement
+	 * @return a builder for the hint
+	 */
+	public static Builder of(Class<?>... proxiedInterfaces) {
+		return new Builder().proxiedInterfaces(proxiedInterfaces);
 	}
 
 	/**
@@ -45,6 +68,12 @@ public final class JdkProxyHint {
 	 */
 	public List<TypeReference> getProxiedInterfaces() {
 		return this.proxiedInterfaces;
+	}
+
+	@Nullable
+	@Override
+	public TypeReference getReachableType() {
+		return this.reachableType;
 	}
 
 	@Override
@@ -56,7 +85,8 @@ public final class JdkProxyHint {
 			return false;
 		}
 		JdkProxyHint that = (JdkProxyHint) o;
-		return this.proxiedInterfaces.equals(that.proxiedInterfaces);
+		return this.proxiedInterfaces.equals(that.proxiedInterfaces)
+				&& Objects.equals(this.reachableType, that.reachableType);
 	}
 
 	@Override
@@ -70,8 +100,15 @@ public final class JdkProxyHint {
 	 */
 	public static class Builder {
 
-		private final LinkedList<TypeReference> proxiedInterfaces = new LinkedList<>();
+		private final LinkedList<TypeReference> proxiedInterfaces;
 
+		@Nullable
+		private TypeReference reachableType;
+
+
+		Builder() {
+			this.proxiedInterfaces = new LinkedList<>();
+		}
 
 		/**
 		 * Add the specified interfaces that the proxy should implement.
@@ -89,17 +126,39 @@ public final class JdkProxyHint {
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder proxiedInterfaces(Class<?>... proxiedInterfaces) {
-			this.proxiedInterfaces.addAll(Arrays.stream(proxiedInterfaces)
-					.map(TypeReference::of).collect(Collectors.toList()));
+			this.proxiedInterfaces.addAll(toTypeReferences(proxiedInterfaces));
+			return this;
+		}
+
+		/**
+		 * Make this hint conditional on the fact that the specified type
+		 * can be resolved.
+		 * @param reachableType the type that should be reachable for this
+		 * hint to apply
+		 * @return {@code this}, to facilitate method chaining
+		 */
+		public Builder onReachableType(TypeReference reachableType) {
+			this.reachableType = reachableType;
 			return this;
 		}
 
 		/**
 		 * Create a {@link JdkProxyHint} based on the state of this builder.
-		 * @return a jdk proxy hint
+		 * @return a JDK proxy hint
 		 */
-		public JdkProxyHint build() {
+		JdkProxyHint build() {
 			return new JdkProxyHint(this);
+		}
+
+		private static List<TypeReference> toTypeReferences(Class<?>... proxiedInterfaces) {
+			List<String> invalidTypes = Arrays.stream(proxiedInterfaces)
+					.filter(candidate -> !candidate.isInterface() || candidate.isSealed())
+					.map(Class::getName)
+					.toList();
+			if (!invalidTypes.isEmpty()) {
+				throw new IllegalArgumentException("The following must be non-sealed interfaces: " + invalidTypes);
+			}
+			return TypeReference.listOf(proxiedInterfaces);
 		}
 
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
  * @author Rod Johnson
@@ -104,44 +106,44 @@ public class TransactionAspectTests {
 	@Test
 	public void defaultCommitOnAnnotatedClass() throws Throwable {
 		Exception ex = new Exception();
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-				testRollback(() -> annotationOnlyOnClassWithNoInterface.echo(ex), false))
+		assertThatException()
+			.isThrownBy(() -> testRollback(() -> annotationOnlyOnClassWithNoInterface.echo(ex), false))
 			.isSameAs(ex);
 	}
 
 	@Test
 	public void defaultRollbackOnAnnotatedClass() throws Throwable {
 		RuntimeException ex = new RuntimeException();
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
-				testRollback(() -> annotationOnlyOnClassWithNoInterface.echo(ex), true))
+		assertThatRuntimeException()
+			.isThrownBy(() -> testRollback(() -> annotationOnlyOnClassWithNoInterface.echo(ex), true))
 			.isSameAs(ex);
 	}
 
 	@Test
 	public void defaultCommitOnSubclassOfAnnotatedClass() throws Throwable {
 		Exception ex = new Exception();
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-				testRollback(() -> new SubclassOfClassWithTransactionalAnnotation().echo(ex), false))
+		assertThatException()
+			.isThrownBy(() -> testRollback(() -> new SubclassOfClassWithTransactionalAnnotation().echo(ex), false))
 			.isSameAs(ex);
 	}
 
 	@Test
 	public void defaultCommitOnSubclassOfClassWithTransactionalMethodAnnotated() throws Throwable {
 		Exception ex = new Exception();
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-				testRollback(() -> new SubclassOfClassWithTransactionalMethodAnnotation().echo(ex), false))
+		assertThatException()
+			.isThrownBy(() -> testRollback(() -> new SubclassOfClassWithTransactionalMethodAnnotation().echo(ex), false))
 			.isSameAs(ex);
 	}
 
 	@Test
 	public void noCommitOnImplementationOfAnnotatedInterface() throws Throwable {
-		final Exception ex = new Exception();
+		Exception ex = new Exception();
 		testNotTransactional(() -> new ImplementsAnnotatedInterface().echo(ex), ex);
 	}
 
 	@Test
 	public void noRollbackOnImplementationOfAnnotatedInterface() throws Throwable {
-		final Exception rollbackProvokingException = new RuntimeException();
+		Exception rollbackProvokingException = new RuntimeException();
 		testNotTransactional(() -> new ImplementsAnnotatedInterface().echo(rollbackProvokingException),
 				rollbackProvokingException);
 	}
@@ -165,8 +167,9 @@ public class TransactionAspectTests {
 	protected void testNotTransactional(TransactionOperationCallback toc, Throwable expected) throws Throwable {
 		txManager.clear();
 		assertThat(txManager.begun).isEqualTo(0);
-		assertThatExceptionOfType(Throwable.class).isThrownBy(
-				toc::performTransactionalOperation).isSameAs(expected);
+		assertThatExceptionOfType(Throwable.class)
+			.isThrownBy(toc::performTransactionalOperation)
+			.isSameAs(expected);
 		assertThat(txManager.begun).isEqualTo(0);
 	}
 

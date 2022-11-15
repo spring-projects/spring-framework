@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,16 +29,15 @@ import org.springframework.util.Assert;
  * as bean properties and being able to add and remove cookie to/from a
  * given response.
  *
- * <p>Can serve as base class for components that generate specific cookies,
- * such as CookieLocaleResolver and CookieThemeResolver.
+ * <p>Can serve as base class for components that generate specific cookies.
  *
  * @author Juergen Hoeller
  * @since 1.1.4
  * @see #addCookie
  * @see #removeCookie
- * @see org.springframework.web.servlet.i18n.CookieLocaleResolver
- * @see org.springframework.web.servlet.theme.CookieThemeResolver
+ * @deprecated as of 6.0 in favor of {@link org.springframework.http.ResponseCookie}
  */
+@Deprecated
 public class CookieGenerator {
 
 	/**

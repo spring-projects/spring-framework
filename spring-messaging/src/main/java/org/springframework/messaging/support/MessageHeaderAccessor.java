@@ -43,12 +43,12 @@ import org.springframework.util.StringUtils;
  * strongly typed accessors for specific headers, the ability to leave headers
  * in a {@link Message} mutable, and the option to suppress automatic generation
  * of {@link MessageHeaders#ID id} and {@link MessageHeaders#TIMESTAMP
- * timesteamp} headers. Sub-classes such as {@link NativeMessageHeaderAccessor}
+ * timestamp} headers. Subclasses such as {@link NativeMessageHeaderAccessor}
  * and others provide support for managing processing vs external source headers
  * as well as protocol specific headers.
  *
  * <p>Below is a workflow to initialize headers via {@code MessageHeaderAccessor},
- * or one of its sub-classes, then create a {@link Message}, and then re-obtain
+ * or one of its subclasses, then create a {@link Message}, and then re-obtain
  * the accessor possibly from a different component:
  * <pre class="code">
  * // Create a message with headers
@@ -153,7 +153,7 @@ public class MessageHeaderAccessor {
 	// Configuration properties
 
 	/**
-	 * By default when {@link #getMessageHeaders()} is called, {@code "this"}
+	 * By default, when {@link #getMessageHeaders()} is called, {@code "this"}
 	 * {@code MessageHeaderAccessor} instance can no longer be used to modify the
 	 * underlying message headers and the returned {@code MessageHeaders} is immutable.
 	 * <p>However when this is set to {@code true}, the returned (underlying)
@@ -173,7 +173,7 @@ public class MessageHeaderAccessor {
 	}
 
 	/**
-	 * By default when {@link #getMessageHeaders()} is called, {@code "this"}
+	 * By default, when {@link #getMessageHeaders()} is called, {@code "this"}
 	 * {@code MessageHeaderAccessor} instance can no longer be used to modify the
 	 * underlying message headers. However if {@link #setLeaveMutable(boolean)}
 	 * is used, this method is necessary to indicate explicitly when the

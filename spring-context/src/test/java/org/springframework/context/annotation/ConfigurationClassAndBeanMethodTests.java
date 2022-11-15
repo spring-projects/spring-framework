@@ -18,7 +18,6 @@ package org.springframework.context.annotation;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
@@ -156,7 +155,7 @@ class ConfigurationClassAndBeanMethodTests {
 	private static List<BeanMethod> getBeanMethods(ConfigurationClass configurationClass) {
 		List<BeanMethod> beanMethods = configurationClass.getBeanMethods().stream()
 				.sorted(Comparator.comparing(beanMethod -> beanMethod.getMetadata().getMethodName()))
-				.collect(Collectors.toList());
+				.toList();
 		assertThat(beanMethods).hasSize(3);
 		return beanMethods;
 	}

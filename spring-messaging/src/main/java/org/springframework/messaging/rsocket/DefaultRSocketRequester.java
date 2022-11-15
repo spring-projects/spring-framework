@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,6 +103,12 @@ final class DefaultRSocketRequester implements RSocketRequester {
 	}
 
 	@Override
+	public RSocketStrategies strategies() {
+		return this.strategies;
+	}
+
+
+	@Override
 	public RequestSpec route(String route, Object... vars) {
 		return new DefaultRequestSpec(route, vars);
 	}
@@ -165,7 +171,8 @@ final class DefaultRSocketRequester implements RSocketRequester {
 			Assert.notNull(producer, "'producer' must not be null");
 			Assert.notNull(elementClass, "'elementClass' must not be null");
 			ReactiveAdapter adapter = getAdapter(producer.getClass());
-			Assert.notNull(adapter, "'producer' type is unknown to ReactiveAdapterRegistry");
+			Assert.notNull(adapter, () -> "'producer' type is unknown to ReactiveAdapterRegistry: " +
+					producer.getClass().getName());
 			createPayload(adapter.toPublisher(producer), ResolvableType.forClass(elementClass));
 			return this;
 		}
@@ -180,7 +187,8 @@ final class DefaultRSocketRequester implements RSocketRequester {
 			Assert.notNull(producer, "'producer' must not be null");
 			Assert.notNull(elementTypeRef, "'elementTypeRef' must not be null");
 			ReactiveAdapter adapter = getAdapter(producer.getClass());
-			Assert.notNull(adapter, "'producer' type is unknown to ReactiveAdapterRegistry");
+			Assert.notNull(adapter, () -> "'producer' type is unknown to ReactiveAdapterRegistry: " +
+					producer.getClass().getName());
 			createPayload(adapter.toPublisher(producer), ResolvableType.forType(elementTypeRef));
 			return this;
 		}

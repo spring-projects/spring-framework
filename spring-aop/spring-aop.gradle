@@ -5,6 +5,7 @@ dependencies {
 	api(project(":spring-core"))
 	optional("org.aspectj:aspectjweaver")
 	optional("org.apache.commons:commons-pool2")
+	testImplementation(project(":spring-core-test"))
 	testImplementation(testFixtures(project(":spring-beans")))
 	testImplementation(testFixtures(project(":spring-core")))
 	testFixturesImplementation(testFixtures(project(":spring-beans")))

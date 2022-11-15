@@ -64,6 +64,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Sam Brannen
  * @since 18.06.2003
  */
+@SuppressWarnings("deprecation")
 public class ViewResolverTests {
 
 	private final StaticWebApplicationContext wac = new StaticWebApplicationContext();

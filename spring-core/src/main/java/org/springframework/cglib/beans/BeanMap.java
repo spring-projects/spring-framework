@@ -97,7 +97,9 @@ abstract public class BeanMap implements Map {
             this.bean = bean;
             if (bean != null) {
 				beanClass = bean.getClass();
+				// SPRING PATCH BEGIN
 				setContextClass(beanClass);
+				// SPRING PATCH END
 			}
         }
 
@@ -314,7 +316,7 @@ abstract public class BeanMap implements Map {
      */
     public String toString()
     {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append('{');
         for (Iterator it = keySet().iterator(); it.hasNext();) {
             Object key = it.next();

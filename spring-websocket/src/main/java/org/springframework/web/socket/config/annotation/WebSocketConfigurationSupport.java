@@ -18,6 +18,7 @@ package org.springframework.web.socket.config.annotation;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
@@ -39,7 +40,9 @@ public class WebSocketConfigurationSupport {
 
 
 	@Bean
-	public HandlerMapping webSocketHandlerMapping(DefaultSockJsSchedulerContainer schedulerContainer) {
+	public HandlerMapping webSocketHandlerMapping(
+		@Qualifier("defaultSockJsSchedulerContainer") DefaultSockJsSchedulerContainer schedulerContainer) {
+
 		ServletWebSocketHandlerRegistry registry = initHandlerRegistry();
 		if (registry.requiresTaskScheduler()) {
 			TaskScheduler scheduler = schedulerContainer.getScheduler();

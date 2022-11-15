@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,7 @@ import org.springframework.util.StringUtils;
  * @author Stephane Nicoll
  * @author Rod Johnson
  * @author Rob Harrop
+ * @author Sam Brannen
  * @since 4.2
  * @see #registerCustomEditor
  * @see #setPropertyValues
@@ -279,7 +280,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	private void processKeyedProperty(PropertyTokenHolder tokens, PropertyValue pv) {
 		Object propValue = getPropertyHoldingValue(tokens);
 		PropertyHandler ph = getLocalPropertyHandler(tokens.actualName);
@@ -318,9 +319,8 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			}
 		}
 
-		else if (propValue instanceof List) {
+		else if (propValue instanceof List list) {
 			Class<?> requiredType = ph.getCollectionType(tokens.keys.length);
-			List<Object> list = (List<Object>) propValue;
 			int index = Integer.parseInt(lastKey);
 			Object oldValue = null;
 			if (isExtractOldValueForEditor() && index < list.size()) {
@@ -354,10 +354,9 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			}
 		}
 
-		else if (propValue instanceof Map) {
+		else if (propValue instanceof Map map) {
 			Class<?> mapKeyType = ph.getMapKeyType(tokens.keys.length);
 			Class<?> mapValueType = ph.getMapValueType(tokens.keys.length);
-			Map<Object, Object> map = (Map<Object, Object>) propValue;
 			// IMPORTANT: Do not pass full property name in here - property editors
 			// must not kick in for map keys but rather only for map values.
 			TypeDescriptor typeDescriptor = TypeDescriptor.valueOf(mapKeyType);
@@ -446,8 +445,8 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 							oldValue = ph.getValue();
 						}
 						catch (Exception ex) {
-							if (ex instanceof PrivilegedActionException) {
-								ex = ((PrivilegedActionException) ex).getException();
+							if (ex instanceof PrivilegedActionException pae) {
+								ex = pae.getException();
 							}
 							if (logger.isDebugEnabled()) {
 								logger.debug("Could not read previous value of property '" +
@@ -617,7 +616,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		return nestedPa.getPropertyValue(tokens);
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Nullable
 	protected Object getPropertyValue(PropertyTokenHolder tokens) throws BeansException {
 		String propertyName = tokens.canonicalName;
@@ -653,15 +652,13 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 						value = growArrayIfNecessary(value, index, indexedPropertyName.toString());
 						value = Array.get(value, index);
 					}
-					else if (value instanceof List) {
+					else if (value instanceof List list) {
 						int index = Integer.parseInt(key);
-						List<Object> list = (List<Object>) value;
 						growCollectionIfNecessary(list, index, indexedPropertyName.toString(), ph, i + 1);
 						value = list.get(index);
 					}
-					else if (value instanceof Set) {
+					else if (value instanceof Set set) {
 						// Apply index to Iterator in case of a Set.
-						Set<Object> set = (Set<Object>) value;
 						int index = Integer.parseInt(key);
 						if (index < 0 || index >= set.size()) {
 							throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
@@ -677,8 +674,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 							}
 						}
 					}
-					else if (value instanceof Map) {
-						Map<Object, Object> map = (Map<Object, Object>) value;
+					else if (value instanceof Map map) {
 						Class<?> mapKeyType = ph.getResolvableType().getNested(i + 1).asMap().resolveGeneric(0);
 						// IMPORTANT: Do not pass full property name in here - property editors
 						// must not kick in for map keys but rather only for map values.
@@ -841,7 +837,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		PropertyTokenHolder tokens = getPropertyNameTokens(nestedProperty);
 		String canonicalName = tokens.canonicalName;
 		Object value = getPropertyValue(tokens);
-		if (value == null || (value instanceof Optional && !((Optional<?>) value).isPresent())) {
+		if (value == null || (value instanceof Optional<?> optional && optional.isEmpty())) {
 			if (isAutoGrowNestedPaths()) {
 				value = setDefaultValue(tokens);
 			}

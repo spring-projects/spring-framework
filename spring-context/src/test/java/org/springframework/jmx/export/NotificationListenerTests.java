@@ -455,7 +455,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 				Integer currentCount = (Integer) this.attributeCounts.get(attributeName);
 
 				if (currentCount != null) {
-					int count = currentCount.intValue() + 1;
+					int count = currentCount + 1;
 					this.attributeCounts.put(attributeName, count);
 				}
 				else {
@@ -468,7 +468,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 
 		public int getCount(String attribute) {
 			Integer count = (Integer) this.attributeCounts.get(attribute);
-			return (count == null) ? 0 : count.intValue();
+			return (count == null) ? 0 : count;
 		}
 
 		public Object getLastHandback(String attributeName) {

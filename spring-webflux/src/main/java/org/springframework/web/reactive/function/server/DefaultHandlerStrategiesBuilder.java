@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.function.server;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -126,16 +125,12 @@ class DefaultHandlerStrategiesBuilder implements HandlerStrategies.Builder {
 				List<WebExceptionHandler> exceptionHandlers,
 				LocaleContextResolver localeContextResolver) {
 
-			this.messageReaders = unmodifiableCopy(messageReaders);
-			this.messageWriters = unmodifiableCopy(messageWriters);
-			this.viewResolvers = unmodifiableCopy(viewResolvers);
-			this.webFilters = unmodifiableCopy(webFilters);
-			this.exceptionHandlers = unmodifiableCopy(exceptionHandlers);
+			this.messageReaders = List.copyOf(messageReaders);
+			this.messageWriters = List.copyOf(messageWriters);
+			this.viewResolvers = List.copyOf(viewResolvers);
+			this.webFilters = List.copyOf(webFilters);
+			this.exceptionHandlers = List.copyOf(exceptionHandlers);
 			this.localeContextResolver = localeContextResolver;
-		}
-
-		private static <T> List<T> unmodifiableCopy(List<? extends T> list) {
-			return Collections.unmodifiableList(new ArrayList<>(list));
 		}
 
 		@Override

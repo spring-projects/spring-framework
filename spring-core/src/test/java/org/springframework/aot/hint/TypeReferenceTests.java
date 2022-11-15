@@ -30,6 +30,7 @@ class TypeReferenceTests {
 	@Test
 	void typeReferenceWithClassName() {
 		TypeReference type = TypeReference.of("java.lang.String");
+		assertThat(type.getName()).isEqualTo("java.lang.String");
 		assertThat(type.getCanonicalName()).isEqualTo("java.lang.String");
 		assertThat(type.getPackageName()).isEqualTo("java.lang");
 		assertThat(type.getSimpleName()).isEqualTo("String");
@@ -39,6 +40,7 @@ class TypeReferenceTests {
 	@Test
 	void typeReferenceWithInnerClassName() {
 		TypeReference type = TypeReference.of("com.example.Example$Inner");
+		assertThat(type.getName()).isEqualTo("com.example.Example$Inner");
 		assertThat(type.getCanonicalName()).isEqualTo("com.example.Example.Inner");
 		assertThat(type.getPackageName()).isEqualTo("com.example");
 		assertThat(type.getSimpleName()).isEqualTo("Inner");
@@ -53,6 +55,7 @@ class TypeReferenceTests {
 	@Test
 	void typeReferenceWithNestedInnerClassName() {
 		TypeReference type = TypeReference.of("com.example.Example$Inner$Nested");
+		assertThat(type.getName()).isEqualTo("com.example.Example$Inner$Nested");
 		assertThat(type.getCanonicalName()).isEqualTo("com.example.Example.Inner.Nested");
 		assertThat(type.getPackageName()).isEqualTo("com.example");
 		assertThat(type.getSimpleName()).isEqualTo("Nested");

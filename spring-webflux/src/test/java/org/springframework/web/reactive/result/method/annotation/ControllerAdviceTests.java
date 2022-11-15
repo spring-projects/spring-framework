@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,9 +82,10 @@ public class ControllerAdviceTests {
 
 	@Test
 	public void resolveExceptionWithAssertionErrorAsRootCause() throws Exception {
-		AssertionError cause = new AssertionError("argh");
-		FatalBeanException exception = new FatalBeanException("wrapped", cause);
-		testException(exception, cause.toString());
+		AssertionError rootCause = new AssertionError("argh");
+		FatalBeanException cause = new FatalBeanException("wrapped", rootCause);
+		Exception exception = new Exception(cause);
+		testException(exception, rootCause.toString());
 	}
 
 	private void testException(Throwable exception, String expected) throws Exception {

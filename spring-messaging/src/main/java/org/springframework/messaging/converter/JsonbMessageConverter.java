@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
 
 /**
  * Implementation of {@link MessageConverter} that can read and write JSON
- * using the <a href="http://json-b.net/">JSON Binding API</a>.
+ * using the <a href="https://javaee.github.io/jsonb-spec/">JSON Binding API</a>.
  *
  * @author Juergen Hoeller
  * @since 5.3

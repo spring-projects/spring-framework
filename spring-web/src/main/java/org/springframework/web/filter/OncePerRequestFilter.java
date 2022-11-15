@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.web.util.WebUtils;
  * {@link jakarta.servlet.DispatcherType#ASYNC ASYNC} dispatches that occur in
  * separate threads. A filter can be configured in {@code web.xml} whether it
  * should be involved in async dispatches. However, in some cases servlet
- * containers assume different default configuration. Therefore sub-classes can
+ * containers assume different default configuration. Therefore, subclasses can
  * override the method {@link #shouldNotFilterAsyncDispatch()} to declare
  * statically if they should indeed be invoked, <em>once</em>, during both types
  * of dispatches in order to provide thread initialization, logging, security,
@@ -90,7 +90,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 			throws ServletException, IOException {
 
 		if (!((request instanceof HttpServletRequest httpRequest) && (response instanceof HttpServletResponse httpResponse))) {
-			throw new ServletException("OncePerRequestFilter just supports HTTP requests");
+			throw new ServletException("OncePerRequestFilter only supports HTTP requests");
 		}
 
 		String alreadyFilteredAttributeName = getAlreadyFilteredAttributeName();

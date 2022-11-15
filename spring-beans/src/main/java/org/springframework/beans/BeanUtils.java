@@ -191,8 +191,12 @@ public abstract class BeanUtils {
 				return KotlinDelegate.instantiateClass(ctor, args);
 			}
 			else {
+				int parameterCount = ctor.getParameterCount();
+				Assert.isTrue(args.length <= parameterCount, "Can't specify more arguments than constructor parameters");
+				if (parameterCount == 0) {
+					return ctor.newInstance();
+				}
 				Class<?>[] parameterTypes = ctor.getParameterTypes();
-				Assert.isTrue(args.length <= parameterTypes.length, "Can't specify more arguments than constructor parameters");
 				Object[] argsWithDefaultValues = new Object[args.length];
 				for (int i = 0 ; i < args.length; i++) {
 					if (args[i] == null) {
@@ -609,8 +613,8 @@ public abstract class BeanUtils {
 	 * @return a corresponding MethodParameter object
 	 */
 	public static MethodParameter getWriteMethodParameter(PropertyDescriptor pd) {
-		if (pd instanceof GenericTypeAwarePropertyDescriptor) {
-			return new MethodParameter(((GenericTypeAwarePropertyDescriptor) pd).getWriteMethodParameter());
+		if (pd instanceof GenericTypeAwarePropertyDescriptor typeAwarePd) {
+			return new MethodParameter(typeAwarePd.getWriteMethodParameter());
 		}
 		else {
 			Method writeMethod = pd.getWriteMethod();
@@ -876,9 +880,13 @@ public abstract class BeanUtils {
 			}
 
 			List<KParameter> parameters = kotlinConstructor.getParameters();
-			Map<KParameter, Object> argParameters = CollectionUtils.newHashMap(parameters.size());
+
 			Assert.isTrue(args.length <= parameters.size(),
-					"Number of provided arguments should be less of equals than number of constructor parameters");
+					"Number of provided arguments must be less than or equal to the number of constructor parameters");
+			if (parameters.isEmpty()) {
+				return kotlinConstructor.call();
+			}
+			Map<KParameter, Object> argParameters = CollectionUtils.newHashMap(parameters.size());
 			for (int i = 0 ; i < args.length ; i++) {
 				if (!(parameters.get(i).isOptional() && args[i] == null)) {
 					argParameters.put(parameters.get(i), args[i]);

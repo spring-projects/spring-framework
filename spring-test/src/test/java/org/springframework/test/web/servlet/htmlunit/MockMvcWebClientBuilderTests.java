@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,7 +103,7 @@ class MockMvcWebClientBuilderTests {
 		WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).build();
 
 		assertThat(getResponse(client, "http://localhost/").getContentAsString()).isEqualTo("NA");
-		assertThat(postResponse(client, "http://localhost/?cookie=foo").getContentAsString()).isEqualTo("Set");
+		assertThat(postResponse(client, "http://localhost/", "cookie=foo").getContentAsString()).isEqualTo("Set");
 		assertThat(getResponse(client, "http://localhost/").getContentAsString()).isEqualTo("foo");
 		assertThat(deleteResponse(client, "http://localhost/").getContentAsString()).isEqualTo("Delete");
 		assertThat(getResponse(client, "http://localhost/").getContentAsString()).isEqualTo("NA");
@@ -117,8 +117,10 @@ class MockMvcWebClientBuilderTests {
 		return createResponse(client, new WebRequest(new URL(url)));
 	}
 
-	private WebResponse postResponse(WebClient client, String url) throws IOException {
-		return createResponse(client, new WebRequest(new URL(url), HttpMethod.POST));
+	private WebResponse postResponse(WebClient client, String url, String body) throws IOException {
+		WebRequest request = new WebRequest(new URL(url), HttpMethod.POST);
+		request.setRequestBody(body);
+		return createResponse(client, request);
 	}
 
 	private WebResponse deleteResponse(WebClient client, String url) throws IOException {

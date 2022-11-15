@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public abstract class MimeTypeUtils {
 	 * Comparator formally used by {@link #sortBySpecificity(List)}.
 	 * @deprecated As of 6.0, with no direct replacement
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public static final Comparator<MimeType> SPECIFICITY_COMPARATOR = new MimeType.SpecificityComparator<>();
 
 	/**
@@ -70,18 +70,20 @@ public abstract class MimeTypeUtils {
 
 	/**
 	 * Public constant mime type for {@code application/graphql+json}.
+	 * @since 5.3.19
 	 * @see <a href="https://github.com/graphql/graphql-over-http">GraphQL over HTTP spec</a>
-	 * */
+	 */
 	public static final MimeType APPLICATION_GRAPHQL;
 
 	/**
 	 * A String equivalent of {@link MimeTypeUtils#APPLICATION_GRAPHQL}.
+	 * @since 5.3.19
 	 */
 	public static final String APPLICATION_GRAPHQL_VALUE = "application/graphql+json";
 
 	/**
 	 * Public constant mime type for {@code application/json}.
-	 * */
+	 */
 	public static final MimeType APPLICATION_JSON;
 
 	/**
@@ -278,7 +280,7 @@ public abstract class MimeTypeUtils {
 	}
 
 	/**
-	 * Parse the comma-separated string into a list of {@code MimeType} objects.
+	 * Parse the comma-separated string into a mutable list of {@code MimeType} objects.
 	 * @param mimeTypes the string to parse
 	 * @return the list of mime types
 	 * @throws InvalidMimeTypeException if the string cannot be parsed

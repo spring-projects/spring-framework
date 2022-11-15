@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -148,8 +147,8 @@ public class MockHttpServletRequestBuilder
 
 	private static URI initUri(String url, Object[] vars) {
 		Assert.notNull(url, "'url' must not be null");
-		Assert.isTrue(url.startsWith("/") || url.startsWith("http://") || url.startsWith("https://"), "" +
-				"'url' should start with a path or be a complete HTTP URL: " + url);
+		Assert.isTrue(url.isEmpty() || url.startsWith("/") || url.startsWith("http://") || url.startsWith("https://"),
+				() -> "'url' should start with a path or be a complete HTTP URL: " + url);
 		return UriComponentsBuilder.fromUriString(url).buildAndExpand(vars).encode().toUri();
 	}
 
@@ -306,7 +305,7 @@ public class MockHttpServletRequestBuilder
 
 	/**
 	 * Set the 'Content-Type' header of the request as a raw String value,
-	 * possibly not even well formed (for testing purposes).
+	 * possibly not even well-formed (for testing purposes).
 	 * @param contentType the content type
 	 * @since 4.1.2
 	 */
@@ -327,8 +326,8 @@ public class MockHttpServletRequestBuilder
 	}
 
 	/**
-	 * Set the 'Accept' header using raw String values, possibly not even well
-	 * formed (for testing purposes).
+	 * Set the {@code Accept} header using raw String values, possibly not even
+	 * well-formed (for testing purposes).
 	 * @param mediaTypes one or more media types; internally joined as
 	 * comma-separated String
 	 */
@@ -408,7 +407,7 @@ public class MockHttpServletRequestBuilder
 
 	/**
 	 * Append to the query string and also add to the
-	 * {@link #params(MultiValueMap)}  request parameters} map. The parameter
+	 * {@link #params(MultiValueMap) request parameters} map. The parameter
 	 * name and value are encoded when they are added to the query string.
 	 * @param params the parameters to add
 	 * @since 5.2.2
@@ -804,7 +803,7 @@ public class MockHttpServletRequestBuilder
 		HttpInputMessage message = new HttpInputMessage() {
 			@Override
 			public InputStream getBody() {
-				return (content != null ? new ByteArrayInputStream(content) : StreamUtils.emptyInput());
+				return (content != null ? new ByteArrayInputStream(content) : InputStream.nullInputStream());
 			}
 			@Override
 			public HttpHeaders getHeaders() {

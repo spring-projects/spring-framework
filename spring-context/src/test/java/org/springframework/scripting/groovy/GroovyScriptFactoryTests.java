@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -318,7 +319,7 @@ public class GroovyScriptFactoryTests {
 
 	@Test
 	public void testWithTwoClassesDefinedInTheOneGroovyFile_WrongClassFirst() throws Exception {
-		assertThatExceptionOfType(Exception.class).as("two classes defined in GroovyScriptFactory source, non-Messenger class defined first").isThrownBy(() -> {
+		assertThatException().as("two classes defined in GroovyScriptFactory source, non-Messenger class defined first").isThrownBy(() -> {
 				ApplicationContext ctx = new ClassPathXmlApplicationContext("twoClassesWrongOneFirst.xml", getClass());
 				ctx.getBean("messenger", Messenger.class);
 		});

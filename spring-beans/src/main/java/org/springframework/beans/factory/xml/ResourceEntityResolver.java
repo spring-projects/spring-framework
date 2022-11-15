@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.beans.factory.xml;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 
@@ -30,6 +29,7 @@ import org.xml.sax.SAXException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ResourceUtils;
 
 /**
  * {@code EntityResolver} implementation that tries to resolve entity references
@@ -82,7 +82,7 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 			String resourcePath = null;
 			try {
 				String decodedSystemId = URLDecoder.decode(systemId, StandardCharsets.UTF_8);
-				String givenUrl = new URL(decodedSystemId).toString();
+				String givenUrl = ResourceUtils.toURL(decodedSystemId).toString();
 				String systemRootUrl = new File("").toURI().toURL().toString();
 				// Try relative to resource base if currently in system root.
 				if (givenUrl.startsWith(systemRootUrl)) {
@@ -116,7 +116,7 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 					url = "https:" + url.substring(5);
 				}
 				try {
-					source = new InputSource(new URL(url).openStream());
+					source = new InputSource(ResourceUtils.toURL(url).openStream());
 					source.setPublicId(publicId);
 					source.setSystemId(systemId);
 				}

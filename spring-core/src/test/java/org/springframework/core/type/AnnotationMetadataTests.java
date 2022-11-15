@@ -408,7 +408,7 @@ class AnnotationMetadataTests {
 
 	// -------------------------------------------------------------------------
 
-	public static enum SomeEnum {
+	public enum SomeEnum {
 		LABEL1, LABEL2, DEFAULT
 	}
 
@@ -549,6 +549,8 @@ class AnnotationMetadataTests {
 	@Target(ElementType.TYPE)
 	public @interface ComposedConfigurationWithAttributeOverrides {
 
+		// Do NOT use @AliasFor here until Spring 6.1
+		// @AliasFor(annotation = TestComponentScan.class)
 		String[] basePackages() default {};
 	}
 

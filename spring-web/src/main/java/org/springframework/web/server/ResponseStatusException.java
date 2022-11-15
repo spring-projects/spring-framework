@@ -16,9 +16,9 @@
 
 package org.springframework.web.server;
 
-import org.springframework.core.NestedExceptionUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ProblemDetail;
 import org.springframework.lang.Nullable;
 import org.springframework.web.ErrorResponseException;
 
@@ -79,6 +79,22 @@ public class ResponseStatusException extends ErrorResponseException {
 		this.reason = reason;
 	}
 
+	/**
+	 * Constructor with a message code and arguments for resolving the error
+	 * "detail" via {@link org.springframework.context.MessageSource}.
+	 * @param status the HTTP status (required)
+	 * @param reason the associated reason (optional)
+	 * @param cause a nested exception (optional)
+	 * @since 6.0
+	 */
+	protected ResponseStatusException(
+			HttpStatusCode status, @Nullable String reason, @Nullable Throwable cause,
+			@Nullable String messageDetailCode, @Nullable Object[] messageDetailArguments) {
+
+		super(status, ProblemDetail.forStatus(status), cause, messageDetailCode, messageDetailArguments);
+		this.reason = reason;
+	}
+
 
 	/**
 	 * The reason explaining the exception (potentially {@code null} or empty).
@@ -105,15 +121,14 @@ public class ResponseStatusException extends ErrorResponseException {
 	 * @since 5.1.13
 	 * @deprecated as of 6.0 in favor of {@link #getHeaders()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public HttpHeaders getResponseHeaders() {
 		return HttpHeaders.EMPTY;
 	}
 
 	@Override
 	public String getMessage() {
-		String msg = getStatusCode() + (this.reason != null ? " \"" + this.reason + "\"" : "");
-		return NestedExceptionUtils.buildMessage(msg, getCause());
+		return getStatusCode() + (this.reason != null ? " \"" + this.reason + "\"" : "");
 	}
 
 }

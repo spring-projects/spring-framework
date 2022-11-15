@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,12 +90,12 @@ public abstract class MethodMatchers {
 	 * @param targetClass the target class
 	 * @param hasIntroductions {@code true} if the object on whose behalf we are
 	 * asking is the subject on one or more introductions; {@code false} otherwise
-	 * @return whether or not this method matches statically
+	 * @return whether this method matches statically
 	 */
 	public static boolean matches(MethodMatcher mm, Method method, Class<?> targetClass, boolean hasIntroductions) {
 		Assert.notNull(mm, "MethodMatcher must not be null");
-		return (mm instanceof IntroductionAwareMethodMatcher ?
-				((IntroductionAwareMethodMatcher) mm).matches(method, targetClass, hasIntroductions) :
+		return (mm instanceof IntroductionAwareMethodMatcher iamm ?
+				iamm.matches(method, targetClass, hasIntroductions) :
 				mm.matches(method, targetClass));
 	}
 

@@ -222,7 +222,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	//---------------------------------------------------------------------
 
 	/**
-	 * This implementations is empty, considering flush as a no-op.
+	 * This implementation is empty, considering flush as a no-op.
 	 */
 	@Override
 	public void flush() {

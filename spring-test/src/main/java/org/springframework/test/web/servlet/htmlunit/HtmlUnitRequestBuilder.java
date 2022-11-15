@@ -18,7 +18,6 @@ package org.springframework.test.web.servlet.htmlunit;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -159,7 +158,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		cookies(request);
 		this.webRequest.getAdditionalHeaders().forEach(request::addHeader);
 		locales(request);
-		params(request, uri);
+		params(request);
 		request.setQueryString(uri.getQuery());
 
 		return postProcess(request);
@@ -364,42 +363,36 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		}
 	}
 
-	private void params(MockHttpServletRequest request, UriComponents uriComponents) {
-		uriComponents.getQueryParams().forEach((name, values) -> {
-			String urlDecodedName = urlDecode(name);
-			values.forEach(value -> {
-				value = (value != null ? urlDecode(value) : "");
-				request.addParameter(urlDecodedName, value);
-			});
-		});
-		for (NameValuePair param : this.webRequest.getRequestParameters()) {
-			if (param instanceof KeyDataPair pair) {
-				File file = pair.getFile();
-				MockPart part;
-				if (file != null) {
-					part = new MockPart(pair.getName(), file.getName(), readAllBytes(file));
-				}
-				else {
-					// Support empty file upload OR file upload via setData().
-					// For an empty file upload, getValue() returns an empty string, and
-					// getData() returns null.
-					// For a file upload via setData(), getData() returns the file data, and
-					// getValue() returns the file name (if set) or an empty string.
-					part = new MockPart(pair.getName(), pair.getValue(), pair.getData());
-				}
-				MediaType mediaType = (pair.getMimeType() != null ? MediaType.valueOf(pair.getMimeType()) :
-						MediaType.APPLICATION_OCTET_STREAM);
-				part.getHeaders().setContentType(mediaType);
-				request.addPart(part);
-			}
-			else {
-				request.addParameter(param.getName(), param.getValue());
-			}
+	private void params(MockHttpServletRequest request) {
+		for (NameValuePair param : this.webRequest.getParameters()) {
+			addRequestParameter(request, param);
 		}
 	}
 
-	private String urlDecode(String value) {
-		return URLDecoder.decode(value, StandardCharsets.UTF_8);
+	private void addRequestParameter(MockHttpServletRequest request, NameValuePair param) {
+		if (param instanceof KeyDataPair) {
+			KeyDataPair pair = (KeyDataPair) param;
+			File file = pair.getFile();
+			MockPart part;
+			if (file != null) {
+				part = new MockPart(pair.getName(), file.getName(), readAllBytes(file));
+			}
+			else {
+				// Support empty file upload OR file upload via setData().
+				// For an empty file upload, getValue() returns an empty string, and
+				// getData() returns null.
+				// For a file upload via setData(), getData() returns the file data, and
+				// getValue() returns the file name (if set) or an empty string.
+				part = new MockPart(pair.getName(), pair.getValue(), pair.getData());
+			}
+			MediaType mediaType = (pair.getMimeType() != null ? MediaType.valueOf(pair.getMimeType()) :
+					MediaType.APPLICATION_OCTET_STREAM);
+			part.getHeaders().setContentType(mediaType);
+			request.addPart(part);
+		}
+		else {
+			request.addParameter(param.getName(), param.getValue());
+		}
 	}
 
 	private byte[] readAllBytes(File file) {

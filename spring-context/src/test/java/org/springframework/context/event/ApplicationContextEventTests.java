@@ -52,7 +52,7 @@ import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
@@ -161,8 +161,8 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		RuntimeException thrown = new RuntimeException();
 		willThrow(thrown).given(listener).onApplicationEvent(evt);
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
-				smc.multicastEvent(evt))
+		assertThatRuntimeException()
+			.isThrownBy(() -> smc.multicastEvent(evt))
 			.satisfies(ex -> assertThat(ex).isSameAs(thrown));
 	}
 

@@ -22,7 +22,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
 
 /**
- * A constructor resolver attempts locate a constructor and returns a ConstructorExecutor
+ * A constructor resolver attempts to locate a constructor and returns a ConstructorExecutor
  * that can be used to invoke that constructor. The ConstructorExecutor will be cached but
  * if it 'goes stale' the resolvers will be called again.
  *

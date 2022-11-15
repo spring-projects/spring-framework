@@ -1,0 +1,4 @@
+com.example.domain.Person=jakarta.persistence.Entity
+com.example.domain.Address=jakarta.persistence.Entity
+
+com.example.domain=package-info

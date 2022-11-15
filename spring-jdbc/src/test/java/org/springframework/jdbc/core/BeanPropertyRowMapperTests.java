@@ -141,6 +141,17 @@ class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 	}
 
 	@Test
+	void queryWithDirectNameMatchOnBirthDate() throws Exception {
+		Mock mock = new Mock(MockType.FOUR);
+		List<ConcretePerson> result = mock.getJdbcTemplate().query(
+				"select name, age, birthdate, balance from people",
+				new BeanPropertyRowMapper<>(ConcretePerson.class));
+		assertThat(result).hasSize(1);
+		verifyPerson(result.get(0));
+		mock.verifyClosed();
+	}
+
+	@Test
 	void queryWithUnderscoreInColumnNameAndPersonWithMultipleAdjacentUppercaseLettersInPropertyName() throws Exception {
 		Mock mock = new Mock();
 		List<EmailPerson> result = mock.getJdbcTemplate().query(

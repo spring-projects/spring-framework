@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -359,7 +358,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 		}
 
 		if (isOptimizeLocations()) {
-			result = result.stream().filter(Resource::exists).collect(Collectors.toList());
+			result = result.stream().filter(Resource::exists).toList();
 		}
 
 		this.locationsToUse.clear();
@@ -438,10 +437,17 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 						// Content phase
 						ResourceHttpMessageWriter writer = getResourceHttpMessageWriter();
 						Assert.state(writer != null, "No ResourceHttpMessageWriter");
-						return writer.write(Mono.just(resource),
-								null, ResolvableType.forClass(Resource.class), mediaType,
-								exchange.getRequest(), exchange.getResponse(),
-								Hints.from(Hints.LOG_PREFIX_HINT, exchange.getLogPrefix()));
+						if (HttpMethod.HEAD == httpMethod) {
+							writer.addHeaders(exchange.getResponse(), resource, mediaType,
+									Hints.from(Hints.LOG_PREFIX_HINT, exchange.getLogPrefix()));
+							return exchange.getResponse().setComplete();
+						}
+						else {
+							return writer.write(Mono.just(resource),
+									null, ResolvableType.forClass(Resource.class), mediaType,
+									exchange.getRequest(), exchange.getResponse(),
+									Hints.from(Hints.LOG_PREFIX_HINT, exchange.getLogPrefix()));
+						}
 					}
 					catch (IOException ex) {
 						return Mono.error(ex);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -629,17 +629,17 @@ public abstract class WebUtils {
 	 * following algorithm:
 	 * <ol>
 	 * <li>Try to get the parameter value using just the given <i>logical</i> name.
-	 * This handles parameters of the form <tt>logicalName = value</tt>. For normal
+	 * This handles parameters of the form {@code logicalName = value}. For normal
 	 * parameters, e.g. submitted using a hidden HTML form field, this will return
 	 * the requested value.</li>
 	 * <li>Try to obtain the parameter value from the parameter name, where the
-	 * parameter name in the request is of the form <tt>logicalName_value = xyz</tt>
+	 * parameter name in the request is of the form {@code logicalName_value = xyz}
 	 * with "_" being the configured delimiter. This deals with parameter values
 	 * submitted using an HTML form submit button.</li>
 	 * <li>If the value obtained in the previous step has a ".x" or ".y" suffix,
 	 * remove that. This handles cases where the value was submitted using an
 	 * HTML form image button. In this case the parameter in the request would
-	 * actually be of the form <tt>logicalName_value.x = 123</tt>. </li>
+	 * actually be of the form {@code logicalName_value.x = 123}.</li>
 	 * </ol>
 	 * @param parameters the available parameter map
 	 * @param name the <i>logical</i> name of the request parameter

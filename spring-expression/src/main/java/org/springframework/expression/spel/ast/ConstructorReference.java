@@ -140,7 +140,7 @@ public class ConstructorReference extends SpelNodeImpl {
 
 				// To determine which situation it is, the AccessException will contain a cause.
 				// If the cause is an InvocationTargetException, a user exception was thrown inside the constructor.
-				// Otherwise the constructor could not be invoked.
+				// Otherwise, the constructor could not be invoked.
 				if (ex.getCause() instanceof InvocationTargetException) {
 					// User exception was the root cause - exit now
 					Throwable rootCause = ex.getCause().getCause();
@@ -243,6 +243,12 @@ public class ConstructorReference extends SpelNodeImpl {
 							intendedArrayType != null ? intendedArrayType.getClass() : null));
 		}
 
+		if (state.getEvaluationContext().getConstructorResolvers().isEmpty()) {
+			// No constructor resolver -> no array construction either (as of 6.0)
+			throw new SpelEvaluationException(getStartPosition(), SpelMessage.CONSTRUCTOR_NOT_FOUND,
+					type + "[]", "[]");
+		}
+
 		Class<?> componentType;
 		TypeCode arrayTypeCode = TypeCode.forName(type);
 		if (arrayTypeCode == TypeCode.OBJECT) {
@@ -270,7 +276,7 @@ public class ConstructorReference extends SpelNodeImpl {
 					newArray = Array.newInstance(componentType, arraySize);
 				}
 				else {
-					// Multi-dimensional - hold onto your hat!
+					// Multidimensional - hold onto your hat!
 					int[] dims = new int[this.dimensions.length];
 					long numElements = 1;
 					for (int d = 0; d < this.dimensions.length; d++) {
@@ -287,8 +293,8 @@ public class ConstructorReference extends SpelNodeImpl {
 		else {
 			// There is an initializer
 			if (this.dimensions == null || this.dimensions.length > 1) {
-				// There is an initializer but this is a multi-dimensional array (e.g. new int[][]{{1,2},{3,4}}) - this
-				// is not currently supported
+				// There is an initializer but this is a multidimensional array (e.g. new int[][]{{1,2},{3,4}})
+				// - this is not currently supported
 				throw new SpelEvaluationException(getStartPosition(),
 						SpelMessage.MULTIDIM_ARRAY_INITIALIZER_NOT_SUPPORTED);
 			}

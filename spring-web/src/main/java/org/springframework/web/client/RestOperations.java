@@ -463,27 +463,27 @@ public interface RestOperations {
 	// OPTIONS
 
 	/**
-	 * Return the value of the Allow header for the given URI.
+	 * Return the value of the {@code Allow} header for the given URI.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
-	 * @return the value of the allow header
+	 * @return the value of the {@code Allow} header
 	 */
 	Set<HttpMethod> optionsForAllow(String url, Object... uriVariables) throws RestClientException;
 
 	/**
-	 * Return the value of the Allow header for the given URI.
+	 * Return the value of the {@code Allow} header for the given URI.
 	 * <p>URI Template variables are expanded using the given map.
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
-	 * @return the value of the allow header
+	 * @return the value of the {@code Allow} header
 	 */
 	Set<HttpMethod> optionsForAllow(String url, Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
-	 * Return the value of the Allow header for the given URL.
+	 * Return the value of the {@code Allow} header for the given URL.
 	 * @param url the URL
-	 * @return the value of the allow header
+	 * @return the value of the {@code Allow} header
 	 */
 	Set<HttpMethod> optionsForAllow(URI url) throws RestClientException;
 
@@ -653,7 +653,7 @@ public interface RestOperations {
 	 * Execute the HTTP method to the given URI template, preparing the request with the
 	 * {@link RequestCallback}, and reading the response with a {@link ResponseExtractor}.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param url the URL
+	 * @param uriTemplate the URI template
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param requestCallback object that prepares the request
 	 * @param responseExtractor object that extracts the return value from the response
@@ -661,7 +661,7 @@ public interface RestOperations {
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
 	@Nullable
-	<T> T execute(String url, HttpMethod method, @Nullable RequestCallback requestCallback,
+	<T> T execute(String uriTemplate, HttpMethod method, @Nullable RequestCallback requestCallback,
 			@Nullable ResponseExtractor<T> responseExtractor, Object... uriVariables)
 			throws RestClientException;
 
@@ -669,7 +669,7 @@ public interface RestOperations {
 	 * Execute the HTTP method to the given URI template, preparing the request with the
 	 * {@link RequestCallback}, and reading the response with a {@link ResponseExtractor}.
 	 * <p>URI Template variables are expanded using the given URI variables map.
-	 * @param url the URL
+	 * @param uriTemplate the URI template
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param requestCallback object that prepares the request
 	 * @param responseExtractor object that extracts the return value from the response
@@ -677,7 +677,7 @@ public interface RestOperations {
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
 	@Nullable
-	<T> T execute(String url, HttpMethod method, @Nullable RequestCallback requestCallback,
+	<T> T execute(String uriTemplate, HttpMethod method, @Nullable RequestCallback requestCallback,
 			@Nullable ResponseExtractor<T> responseExtractor, Map<String, ?> uriVariables)
 			throws RestClientException;
 

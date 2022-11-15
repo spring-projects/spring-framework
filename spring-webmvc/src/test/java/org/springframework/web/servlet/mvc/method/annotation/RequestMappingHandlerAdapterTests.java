@@ -135,7 +135,6 @@ public class RequestMappingHandlerAdapterTests {
 
 		this.handlerAdapter.setArgumentResolvers(Arrays.asList(redirectAttributesResolver, modelResolver));
 		this.handlerAdapter.setReturnValueHandlers(Collections.singletonList(viewHandler));
-		this.handlerAdapter.setIgnoreDefaultModelOnRedirect(true);
 		this.handlerAdapter.afterPropertiesSet();
 
 		this.request.setAttribute(DispatcherServlet.OUTPUT_FLASH_MAP_ATTRIBUTE, new FlashMap());

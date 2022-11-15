@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,10 +49,10 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
-import org.springframework.ui.context.ThemeSource;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
@@ -62,7 +62,6 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.util.NestedServletException;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.WebUtils;
 
@@ -130,6 +129,7 @@ import org.springframework.web.util.WebUtils;
  * Implementations for a fixed theme and for cookie and session storage are included.
  * The ThemeResolver bean name is "themeResolver"; default is
  * {@link org.springframework.web.servlet.theme.FixedThemeResolver}.
+ * Theme support is deprecated as of 6.0 with no direct replacement.
  * </ul>
  *
  * <p><b>NOTE: The {@code @RequestMapping} annotation will only be processed if a
@@ -169,7 +169,11 @@ public class DispatcherServlet extends FrameworkServlet {
 	/** Well-known name for the LocaleResolver object in the bean factory for this namespace. */
 	public static final String LOCALE_RESOLVER_BEAN_NAME = "localeResolver";
 
-	/** Well-known name for the ThemeResolver object in the bean factory for this namespace. */
+	/**
+	 * Well-known name for the ThemeResolver object in the bean factory for this namespace.
+	 * @deprecated as of 6.0, with no direct replacement
+	 */
+	@Deprecated
 	public static final String THEME_RESOLVER_BEAN_NAME = "themeResolver";
 
 	/**
@@ -226,13 +230,17 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Request attribute to hold the current ThemeResolver, retrievable by views.
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getThemeResolver
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
+	@Deprecated
 	public static final String THEME_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME_RESOLVER";
 
 	/**
 	 * Request attribute to hold the current ThemeSource, retrievable by views.
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getThemeSource
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
+	@Deprecated
 	public static final String THEME_SOURCE_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME_SOURCE";
 
 	/**
@@ -311,6 +319,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/** ThemeResolver used by this servlet. */
 	@Nullable
+	@Deprecated
 	private ThemeResolver themeResolver;
 
 	/** List of HandlerMappings used by this servlet. */
@@ -557,6 +566,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * <p>If no bean is defined with the given name in the BeanFactory for this namespace,
 	 * we default to a FixedThemeResolver.
 	 */
+	@Deprecated
 	private void initThemeResolver(ApplicationContext context) {
 		try {
 			this.themeResolver = context.getBean(THEME_RESOLVER_BEAN_NAME, ThemeResolver.class);
@@ -799,8 +809,10 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @see #getWebApplicationContext()
 	 */
 	@Nullable
-	public final ThemeSource getThemeSource() {
-		return (getWebApplicationContext() instanceof ThemeSource ? (ThemeSource) getWebApplicationContext() : null);
+	@Deprecated
+	public final org.springframework.ui.context.ThemeSource getThemeSource() {
+		return (getWebApplicationContext() instanceof org.springframework.ui.context.ThemeSource ?
+				(org.springframework.ui.context.ThemeSource) getWebApplicationContext() : null);
 	}
 
 	/**
@@ -976,7 +988,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	private void logRequest(HttpServletRequest request) {
 		LogFormatUtils.traceDebug(logger, traceOn -> {
 			String params;
-			if (StringUtils.startsWithIgnoreCase(request.getContentType(), "multipart/")) {
+			String contentType = request.getContentType();
+			if (StringUtils.startsWithIgnoreCase(contentType, "multipart/")) {
 				params = "multipart";
 			}
 			else if (isEnableLoggingRequestDetails()) {
@@ -985,7 +998,9 @@ public class DispatcherServlet extends FrameworkServlet {
 						.collect(Collectors.joining(", "));
 			}
 			else {
-				params = (request.getParameterMap().isEmpty() ? "" : "masked");
+				// Avoid request body parsing for form data
+				params = (StringUtils.startsWithIgnoreCase(contentType, MediaType.APPLICATION_FORM_URLENCODED_VALUE) ||
+						!request.getParameterMap().isEmpty() ? "masked" : "");
 			}
 
 			String queryString = request.getQueryString();
@@ -1077,7 +1092,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			catch (Throwable err) {
 				// As of 4.3, we're processing Errors thrown from handler methods as well,
 				// making them available for @ExceptionHandler methods and other scenarios.
-				dispatchException = new NestedServletException("Handler dispatch failed", err);
+				dispatchException = new ServletException("Handler dispatch failed: " + err, err);
 			}
 			processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
 		}
@@ -1086,7 +1101,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		catch (Throwable err) {
 			triggerAfterCompletion(processedRequest, response, mappedHandler,
-					new NestedServletException("Handler processing failed", err));
+					new ServletException("Handler processing failed: " + err, err));
 		}
 		finally {
 			if (asyncManager.isConcurrentHandlingStarted()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,7 @@ import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIOException;
 
@@ -91,7 +92,7 @@ public class ProxyFactoryBeanTests {
 
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
 		parent.registerBeanDefinition("target2", new RootBeanDefinition(TestApplicationListener.class));
 		this.factory = new DefaultListableBeanFactory(parent);
@@ -310,7 +311,7 @@ public class ProxyFactoryBeanTests {
 		assertThat(config.getAdvisors().length).as("Have correct advisor count").isEqualTo(2);
 
 		ITestBean tb1 = (ITestBean) factory.getBean("test1");
-		assertThatExceptionOfType(Exception.class)
+		assertThatException()
 			.isThrownBy(tb1::toString)
 			.isSameAs(ex);
 	}
@@ -438,8 +439,7 @@ public class ProxyFactoryBeanTests {
 		assertThat(cba.getCalls()).isEqualTo(2);
 		assertThat(th.getCalls()).isEqualTo(0);
 		Exception expected = new Exception();
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-				echo.echoException(1, expected))
+		assertThatException().isThrownBy(() -> echo.echoException(1, expected))
 			.matches(expected::equals);
 		// No throws handler method: count should still be 0
 		assertThat(th.getCalls()).isEqualTo(0);
@@ -473,8 +473,8 @@ public class ProxyFactoryBeanTests {
 	public void testEmptyInterceptorNames() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(INVALID_CONTEXT, CLASS));
-		assertThatExceptionOfType(BeanCreationException.class).as("Interceptor names cannot be empty").isThrownBy(() ->
-				bf.getBean("emptyInterceptorNames"));
+		assertThat(bf.getBean("emptyInterceptorNames")).isInstanceOf(ITestBean.class);
+		assertThat(Proxy.isProxyClass(bf.getBean("emptyInterceptorNames").getClass())).isTrue();
 	}
 
 	/**
@@ -510,7 +510,7 @@ public class ProxyFactoryBeanTests {
 		agi = (AddedGlobalInterface) l;
 		assertThat(agi.globalsAdded() == -1).isTrue();
 
-		assertThat(factory.getBean("test1")).as("Aspect interface should't be implemeneted without globals")
+		assertThat(factory.getBean("test1")).as("Aspect interface shouldn't be implemented without globals")
 				.isNotInstanceOf(AddedGlobalInterface.class);
 	}
 
@@ -586,10 +586,9 @@ public class ProxyFactoryBeanTests {
 
 		((Lockable) bean1).lock();
 
-		assertThatExceptionOfType(LockedException.class).isThrownBy(() ->
-				bean1.setAge(5));
+		assertThatExceptionOfType(LockedException.class).isThrownBy(() -> bean1.setAge(5));
 
-		bean2.setAge(6); //do not expect LockedException"
+		bean2.setAge(6); //do not expect LockedException
 	}
 
 	@Test
@@ -607,8 +606,7 @@ public class ProxyFactoryBeanTests {
 
 		((Lockable) bean1).lock();
 
-		assertThatExceptionOfType(LockedException.class).isThrownBy(() ->
-				bean1.setAge(5));
+		assertThatExceptionOfType(LockedException.class).isThrownBy(() -> bean1.setAge(5));
 
 		// do not expect LockedException
 		bean2.setAge(6);
@@ -710,6 +708,7 @@ public class ProxyFactoryBeanTests {
 			this.tb = tb;
 		}
 	}
+
 
 	/**
 	 * Aspect interface

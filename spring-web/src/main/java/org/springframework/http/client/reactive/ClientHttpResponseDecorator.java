@@ -27,7 +27,7 @@ import org.springframework.util.MultiValueMap;
 
 /**
  * Wraps another {@link ClientHttpResponse} and delegates all methods to it.
- * Sub-classes can override specific methods selectively.
+ * Subclasses can override specific methods selectively.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -58,12 +58,6 @@ public class ClientHttpResponseDecorator implements ClientHttpResponse {
 	@Override
 	public HttpStatusCode getStatusCode() {
 		return this.delegate.getStatusCode();
-	}
-
-	@Override
-	@Deprecated
-	public int getRawStatusCode() {
-		return this.delegate.getRawStatusCode();
 	}
 
 	@Override

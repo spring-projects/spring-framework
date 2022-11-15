@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -524,7 +524,7 @@ class TypeDescriptorTests {
 	@Test
 	void narrow() {
 		TypeDescriptor desc = TypeDescriptor.valueOf(Number.class);
-		Integer value = Integer.valueOf(3);
+		Integer value = 3;
 		desc = desc.narrow(value);
 		assertThat(desc.getType()).isEqualTo(Integer.class);
 	}
@@ -532,7 +532,7 @@ class TypeDescriptorTests {
 	@Test
 	void elementType() {
 		TypeDescriptor desc = TypeDescriptor.valueOf(List.class);
-		Integer value = Integer.valueOf(3);
+		Integer value = 3;
 		desc = desc.elementTypeDescriptor(value);
 		assertThat(desc.getType()).isEqualTo(Integer.class);
 	}
@@ -550,7 +550,7 @@ class TypeDescriptorTests {
 	@Test
 	void mapKeyType() {
 		TypeDescriptor desc = TypeDescriptor.valueOf(Map.class);
-		Integer value = Integer.valueOf(3);
+		Integer value = 3;
 		desc = desc.getMapKeyTypeDescriptor(value);
 		assertThat(desc.getType()).isEqualTo(Integer.class);
 	}
@@ -568,7 +568,7 @@ class TypeDescriptorTests {
 	@Test
 	void mapValueType() {
 		TypeDescriptor desc = TypeDescriptor.valueOf(Map.class);
-		Integer value = Integer.valueOf(3);
+		Integer value = 3;
 		desc = desc.getMapValueTypeDescriptor(value);
 		assertThat(desc.getType()).isEqualTo(Integer.class);
 	}

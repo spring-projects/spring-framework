@@ -16,7 +16,6 @@
 
 package org.springframework.util;
 
-import java.beans.Introspector;
 import java.io.Closeable;
 import java.io.Externalizable;
 import java.io.Serializable;
@@ -157,7 +156,7 @@ public abstract class ClassUtils {
 		Class<?>[] javaLanguageInterfaceArray = {Serializable.class, Externalizable.class,
 				Closeable.class, AutoCloseable.class, Cloneable.class, Comparable.class};
 		registerCommonClasses(javaLanguageInterfaceArray);
-		javaLanguageInterfaces = new HashSet<>(Arrays.asList(javaLanguageInterfaceArray));
+		javaLanguageInterfaces = Set.of(javaLanguageInterfaceArray);
 	}
 
 
@@ -855,6 +854,20 @@ public abstract class ClassUtils {
 	}
 
 	/**
+	 * Determine if the supplied {@link Class} is a JVM-generated implementation
+	 * class for a lambda expression or method reference.
+	 * <p>This method makes a best-effort attempt at determining this, based on
+	 * checks that work on modern, mainstream JVMs.
+	 * @param clazz the class to check
+	 * @return {@code true} if the class is a lambda implementation class
+	 * @since 5.3.19
+	 */
+	public static boolean isLambdaClass(Class<?> clazz) {
+		return (clazz.isSynthetic() && (clazz.getSuperclass() == Object.class) &&
+				(clazz.getInterfaces().length > 0) && clazz.getName().contains("$$Lambda"));
+	}
+
+	/**
 	 * Check whether the given object is a CGLIB proxy.
 	 * @param object the object to check
 	 * @see #isCglibProxyClass(Class)
@@ -983,13 +996,13 @@ public abstract class ClassUtils {
 	 * property format. Strips the outer class name in case of a nested class.
 	 * @param clazz the class
 	 * @return the short name rendered in a standard JavaBeans property format
-	 * @see java.beans.Introspector#decapitalize(String)
+	 * @see StringUtils#uncapitalizeAsProperty(String)
 	 */
 	public static String getShortNameAsProperty(Class<?> clazz) {
 		String shortName = getShortName(clazz);
 		int dotIndex = shortName.lastIndexOf(PACKAGE_SEPARATOR);
 		shortName = (dotIndex != -1 ? shortName.substring(dotIndex + 1) : shortName);
-		return Introspector.decapitalize(shortName);
+		return StringUtils.uncapitalizeAsProperty(shortName);
 	}
 
 	/**

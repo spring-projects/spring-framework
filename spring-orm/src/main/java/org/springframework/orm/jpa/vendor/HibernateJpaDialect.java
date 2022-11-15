@@ -70,10 +70,11 @@ import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.support.ResourceTransactionDefinition;
+import org.springframework.util.ReflectionUtils;
 
 /**
- * {@link org.springframework.orm.jpa.JpaDialect} implementation for
- * Hibernate EntityManager.
+ * {@link org.springframework.orm.jpa.JpaDialect} implementation for Hibernate.
+ * Compatible with Hibernate ORM 5.5/5.6 as well as 6.0/6.1.
  *
  * @author Juergen Hoeller
  * @author Costin Leau
@@ -295,13 +296,13 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
 		}
 		if (ex instanceof UnresolvableObjectException hibEx) {
-			return new ObjectRetrievalFailureException(hibEx.getEntityName(), hibEx.getIdentifier(), ex.getMessage(), ex);
+			return new ObjectRetrievalFailureException(hibEx.getEntityName(), getIdentifier(hibEx), ex.getMessage(), ex);
 		}
 		if (ex instanceof WrongClassException hibEx) {
-			return new ObjectRetrievalFailureException(hibEx.getEntityName(), hibEx.getIdentifier(), ex.getMessage(), ex);
+			return new ObjectRetrievalFailureException(hibEx.getEntityName(), getIdentifier(hibEx), ex.getMessage(), ex);
 		}
 		if (ex instanceof StaleObjectStateException hibEx) {
-			return new ObjectOptimisticLockingFailureException(hibEx.getEntityName(), hibEx.getIdentifier(), ex);
+			return new ObjectOptimisticLockingFailureException(hibEx.getEntityName(), getIdentifier(hibEx), ex.getMessage(), ex);
 		}
 		if (ex instanceof StaleStateException) {
 			return new ObjectOptimisticLockingFailureException(ex.getMessage(), ex);
@@ -322,6 +323,18 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 	protected SessionImplementor getSession(EntityManager entityManager) {
 		return entityManager.unwrap(SessionImplementor.class);
+	}
+
+	@Nullable
+	protected Object getIdentifier(HibernateException hibEx) {
+		try {
+			// getIdentifier declares Serializable return value on 5.x but Object on 6.x
+			// -> not binary compatible, let's invoke it reflectively for the time being
+			return ReflectionUtils.invokeMethod(hibEx.getClass().getMethod("getIdentifier"), hibEx);
+		}
+		catch (NoSuchMethodException ex) {
+			return null;
+		}
 	}
 
 

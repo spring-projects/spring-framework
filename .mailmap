@@ -1,23 +1,34 @@
-Juergen Hoeller <jhoeller@pivotal.io> jhoeller <jhoeller@vmware.com>
-<jhoeller@pivotal.io> <jhoeller@vmware.com>
-<jhoeller@pivotal.io> <jhoeller@gopivotal.com>
-<rstoyanchev@pivotal.io> <rstoyanchev@vmware.com>
-<rstoyanchev@pivotal.io> <rstoyanchev@gopivotal.com>
-<pwebb@pivotal.io> <pwebb@vmware.com>
-<pwebb@pivotal.io> <pwebb@gopivotal.com>
-<cbeams@pivotal.io> <cbeams@vmware.com>
-<cbeams@pivotal.io> <cbeams@gopivotal.com>
-<cbeams@pivotal.io> <cbeams@gmail.com>
-<apoutsma@pivotal.io> <apoutsma@vmware.com>
-<apoutsma@pivotal.io> <apoutsma@gopivotal.com>
-<apoutsma@pivotal.io> <poutsma@mac.com>
-<ogierke@pivotal.io> <ogierke@vmware.com>
-<ogierke@pivotal.io> <ogierke@gopivotal.com>
-<dsyer@pivotal.io> <dsyer@vmware.com>
-<dsyer@pivotal.io> <dsyer@gopivotal.com>
-<dsyer@pivotal.io> <david_syer@hotmail.com>
-<aclement@pivotal.io> <aclement@vmware.com>
-<aclement@pivotal.io> <aclement@gopivotal.com>
-<aclement@pivotal.io> <andrew.clement@gmail.com>
+Juergen Hoeller <jhoeller@vmware.com>
+Juergen Hoeller <jhoeller@vmware.com> <jhoeller@pivotal.io>
+Juergen Hoeller <jhoeller@vmware.com> <jhoeller@gopivotal.com>
+Rossen Stoyanchev <rstoyanchev@vmware.com>
+Rossen Stoyanchev <rstoyanchev@vmware.com> <rstoyanchev@pivotal.io>
+Rossen Stoyanchev <rstoyanchev@vmware.com> <rstoyanchev@gopivotal.com>
+Phillip Webb <pwebb@vmware.com>
+Phillip Webb <pwebb@vmware.com> <pwebb@pivotal.io>
+Phillip Webb <pwebb@vmware.com> <pwebb@gopivotal.com>
+Chris Beams <cbeams@vmware.com>
+Chris Beams <cbeams@vmware.com> <cbeams@pivotal.io>
+Chris Beams <cbeams@vmware.com> <cbeams@gopivotal.com>
+Arjen Poutsma <poutsmaa@vmware.com>
+Arjen Poutsma <poutsmaa@vmware.com> <apoutsma@pivotal.io>
+Arjen Poutsma <poutsmaa@vmware.com> <apoutsma@gopivotal.com>
+Arjen Poutsma <poutsmaa@vmware.com> <poutsma@mac.com>
+Arjen Poutsma <poutsmaa@vmware.com> <apoutsma@vmware.com>
+Oliver Drotbohm <odrotbohm@vmware.com>
+Oliver Drotbohm <odrotbohm@vmware.com> <ogierke@vmware.com>
+Oliver Drotbohm <odrotbohm@vmware.com> <ogierke@pivotal.io>
+Oliver Drotbohm <odrotbohm@vmware.com> <ogierke@gopivotal.com>
+Dave Syer <dsyer@vmware.com>
+Dave Syer <dsyer@vmware.com> <dsyer@pivotal.io>
+Dave Syer <dsyer@vmware.com> <dsyer@gopivotal.com>
+Dave Syer <dsyer@vmware.com> <david_syer@hotmail.com>
+Andy Clement <aclement@vmware.com>
+Andy Clement <aclement@vmware.com> <aclement@pivotal.io>
+Andy Clement <aclement@vmware.com> <aclement@gopivotal.com>
+Andy Clement <aclement@vmware.com> <andrew.clement@gmail.com>
+Sam Brannen <sbrannen@vmware.com>
+Sam Brannen <sbrannen@vmware.com> <sbrannen@pivotal.io>
+Sam Brannen <sbrannen@vmware.com> <sam@sambrannen.com>
 <dmitry.katsubo@gmail.com> <dmitry.katsubo@gmai.com>
-Nick Williams <nicholas@nicholaswilliams.net> Nicholas Williams <nicholas@nicholaswilliams.net>
+Nick Williams <nicholas@nicholaswilliams.net>

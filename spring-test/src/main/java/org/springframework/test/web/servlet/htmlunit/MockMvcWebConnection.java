@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.util.Assert;
 /**
  * {@code MockMvcWebConnection} enables {@link MockMvc} to transform a
  * {@link WebRequest} into a {@link WebResponse}.
- * <p>This is the core integration with <a href="http://htmlunit.sourceforge.net/">HtmlUnit</a>.
+ * <p>This is the core integration with <a href="https://htmlunit.sourceforge.io/">HtmlUnit</a>.
  * <p>Example usage can be seen below.
  *
  * <pre class="code">
@@ -173,6 +173,7 @@ public final class MockMvcWebConnection implements WebConnection {
 		}
 	}
 
+	@SuppressWarnings("removal")
 	private static com.gargoylesoftware.htmlunit.util.Cookie createCookie(jakarta.servlet.http.Cookie cookie) {
 		Date expires = null;
 		if (cookie.getMaxAge() > -1) {

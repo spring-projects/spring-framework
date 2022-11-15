@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
@@ -248,7 +249,7 @@ class DirtiesContextTestExecutionListenerTests {
 
 		@Test
 		void declaredViaMetaAnnotationWithOverriddenAttributes() throws Exception {
-			assertAfterClass(DirtiesContextViaMetaAnnotationWithOverridenAttributes.class);
+			assertAfterClass(DirtiesContextViaMetaAnnotationWithOverriddenAttributes.class);
 		}
 	}
 
@@ -403,8 +404,10 @@ class DirtiesContextTestExecutionListenerTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface MetaDirtyWithOverrides {
 
+		@AliasFor(annotation = DirtiesContext.class)
 		ClassMode classMode() default AFTER_EACH_TEST_METHOD;
 
+		@AliasFor(annotation = DirtiesContext.class)
 		HierarchyMode hierarchyMode() default HierarchyMode.CURRENT_LEVEL;
 	}
 
@@ -444,7 +447,7 @@ class DirtiesContextTestExecutionListenerTests {
 	}
 
 	@MetaDirtyWithOverrides(classMode = AFTER_CLASS, hierarchyMode = EXHAUSTIVE)
-	static class DirtiesContextViaMetaAnnotationWithOverridenAttributes {
+	static class DirtiesContextViaMetaAnnotationWithOverriddenAttributes {
 
 		void test() {
 		}

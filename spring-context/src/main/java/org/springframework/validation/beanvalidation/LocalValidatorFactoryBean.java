@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Consumer;
 
 import jakarta.validation.ClockProvider;
 import jakarta.validation.Configuration;
@@ -105,6 +106,9 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	private Resource[] mappingLocations;
 
 	private final Map<String, String> validationPropertyMap = new HashMap<>();
+
+	@Nullable
+	private Consumer<Configuration<?>> configurationInitializer;
 
 	@Nullable
 	private ApplicationContext applicationContext;
@@ -227,6 +231,18 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		return this.validationPropertyMap;
 	}
 
+	/**
+	 * Specify a callback for customizing the Bean Validation {@code Configuration} instance,
+	 * as an alternative to overriding the {@link #postProcessConfiguration(Configuration)}
+	 * method in custom {@code LocalValidatorFactoryBean} subclasses.
+	 * <p>This enables convenient customizations for application purposes. Infrastructure
+	 * extensions may keep overriding the {@link #postProcessConfiguration} template method.
+	 * @since 5.3.19
+	 */
+	public void setConfigurationInitializer(Consumer<Configuration<?>> configurationInitializer) {
+		this.configurationInitializer = configurationInitializer;
+	}
+
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
@@ -305,6 +321,9 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		this.validationPropertyMap.forEach(configuration::addProperty);
 
 		// Allow for custom post-processing before we actually build the ValidatorFactory.
+		if (this.configurationInitializer != null) {
+			this.configurationInitializer.accept(configuration);
+		}
 		postProcessConfiguration(configuration);
 
 		try {

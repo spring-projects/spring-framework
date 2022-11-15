@@ -22,19 +22,23 @@ import org.springframework.lang.Nullable;
  * A {@link TypeReference} based on a {@link Class}.
  *
  * @author Stephane Nicoll
+ * @since 6.0
  */
 final class ReflectionTypeReference extends AbstractTypeReference {
 
 	private final Class<?> type;
 
-	@Nullable
-	private final TypeReference enclosing;
-
-
 	private ReflectionTypeReference(Class<?> type) {
+		super(type.getPackageName(), type.getSimpleName(), getEnclosingClass(type));
 		this.type = type;
-		this.enclosing = (type.getEnclosingClass() != null
-				? TypeReference.of(type.getEnclosingClass()) : null);
+	}
+
+	@Nullable
+	private static TypeReference getEnclosingClass(Class<?> type) {
+		Class<?> candidate = (type.isArray()
+				? type.getComponentType().getEnclosingClass()
+				: type.getEnclosingClass());
+		return (candidate != null ? new ReflectionTypeReference(candidate) : null);
 	}
 
 	static ReflectionTypeReference of(Class<?> type) {
@@ -47,18 +51,9 @@ final class ReflectionTypeReference extends AbstractTypeReference {
 	}
 
 	@Override
-	public String getPackageName() {
-		return this.type.getPackageName();
-	}
-
-	@Override
-	public String getSimpleName() {
-		return this.type.getSimpleName();
-	}
-
-	@Override
-	public TypeReference getEnclosingType() {
-		return this.enclosing;
+	protected boolean isPrimitive() {
+		return this.type.isPrimitive() ||
+				(this.type.isArray() && this.type.getComponentType().isPrimitive());
 	}
 
 }

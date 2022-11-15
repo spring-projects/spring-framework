@@ -244,7 +244,7 @@ public class ConvertingEncoderDecoderSupportTests {
 	private static class MyTypeToStringConverter implements Converter<MyType, String> {
 		@Override
 		public String convert(MyType source) {
-			return "_" + source.toString();
+			return "_" + source;
 		}
 	}
 
@@ -252,7 +252,7 @@ public class ConvertingEncoderDecoderSupportTests {
 	private static class MyTypeToBytesConverter implements Converter<MyType, byte[]> {
 		@Override
 		public byte[] convert(MyType source) {
-			return ("~" + source.toString()).getBytes();
+			return ("~" + source).getBytes();
 		}
 	}
 

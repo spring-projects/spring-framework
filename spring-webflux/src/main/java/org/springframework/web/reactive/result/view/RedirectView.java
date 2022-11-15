@@ -98,7 +98,7 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * {@link HttpStatus#PERMANENT_REDIRECT}.
 	 */
 	public void setStatusCode(HttpStatusCode statusCode) {
-		Assert.isTrue(statusCode.is3xxRedirection(), "Not a redirect status code");
+		Assert.isTrue(statusCode.is3xxRedirection(), () -> "Not a redirect status code: " + statusCode);
 		this.statusCode = statusCode;
 	}
 
@@ -159,13 +159,6 @@ public class RedirectView extends AbstractUrlBasedView {
 	public String[] getHosts() {
 		return this.hosts;
 	}
-
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		super.afterPropertiesSet();
-	}
-
 
 	@Override
 	public boolean isRedirectView() {
@@ -298,10 +291,10 @@ public class RedirectView extends AbstractUrlBasedView {
 	/**
 	 * Whether the given targetUrl has a host that is a "foreign" system in which
 	 * case {@link jakarta.servlet.http.HttpServletResponse#encodeRedirectURL} will not be applied.
-	 * This method returns {@code true} if the {@link #setHosts(String[])}
+	 * <p>This method returns {@code true} if the {@link #setHosts(String[])}
 	 * property is configured and the target URL has a host that does not match.
 	 * @param targetUrl the target redirect URL
-	 * @return {@code true} the target URL has a remote host, {@code false} if it
+	 * @return {@code true} if the target URL has a remote host, {@code false} if
 	 * the URL does not have a host or the "host" property is not configured
 	 */
 	protected boolean isRemoteHost(String targetUrl) {

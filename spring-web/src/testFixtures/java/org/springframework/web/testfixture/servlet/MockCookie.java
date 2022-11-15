@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 
 import jakarta.servlet.http.Cookie;
 
+import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -35,6 +36,7 @@ import org.springframework.util.StringUtils;
  * @author Sam Brannen
  * @since 5.1
  */
+@SuppressWarnings("removal")
 public class MockCookie extends Cookie {
 
 	private static final long serialVersionUID = 4312531139502726325L;
@@ -67,8 +69,8 @@ public class MockCookie extends Cookie {
 
 	/**
 	 * Get the "Expires" attribute for this cookie.
-	 * @since 5.1.11
 	 * @return the "Expires" attribute for this cookie, or {@code null} if not set
+	 * @since 5.1.11
 	 */
 	@Nullable
 	public ZonedDateTime getExpires() {
@@ -141,6 +143,9 @@ public class MockCookie extends Cookie {
 			else if (StringUtils.startsWithIgnoreCase(attribute, "SameSite")) {
 				cookie.setSameSite(extractAttributeValue(attribute, setCookieHeader));
 			}
+			else if (StringUtils.startsWithIgnoreCase(attribute, "Comment")) {
+				cookie.setComment(extractAttributeValue(attribute, setCookieHeader));
+			}
 		}
 		return cookie;
 	}
@@ -150,6 +155,24 @@ public class MockCookie extends Cookie {
 		Assert.isTrue(nameAndValue.length == 2,
 				() -> "No value in attribute '" + nameAndValue[0] + "' for Set-Cookie header '" + header + "'");
 		return nameAndValue[1];
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringCreator(this)
+				.append("name", getName())
+				.append("value", getValue())
+				.append("Path", getPath())
+				.append("Domain", getDomain())
+				.append("Version", getVersion())
+				.append("Comment", getComment())
+				.append("Secure", getSecure())
+				.append("HttpOnly", isHttpOnly())
+				.append("SameSite", this.sameSite)
+				.append("Max-Age", getMaxAge())
+				.append("Expires", (this.expires != null ?
+						DateTimeFormatter.RFC_1123_DATE_TIME.format(this.expires) : null))
+				.toString();
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,8 +58,6 @@ import static org.glassfish.tyrus.spi.WebSocketEngine.UpgradeStatus.SUCCESS;
  * A base class for {@code RequestUpgradeStrategy} implementations on top of
  * JSR-356 based servers which include Tyrus as their WebSocket engine.
  *
- * <p>Works with Tyrus 1.11 (WebLogic 12.2.1) and Tyrus 1.12 (GlassFish 4.1.1).
- *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @author Juergen Hoeller
@@ -68,11 +66,15 @@ import static org.glassfish.tyrus.spi.WebSocketEngine.UpgradeStatus.SUCCESS;
  */
 public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStandardUpgradeStrategy {
 
+	private static final String[] SUPPORTED_VERSIONS =
+			StringUtils.tokenizeToStringArray(Version.getSupportedWireProtocolVersions(), ",");
+
+
 	private static final Random random = new Random();
 
 	private static final Constructor<?> constructor;
 
-	private static boolean constructorWithBooleanArgument;
+	private static final boolean constructorWithBooleanArgument;
 
 	private static final Method registerMethod;
 
@@ -111,7 +113,7 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 
 	@Override
 	public String[] getSupportedVersions() {
-		return StringUtils.tokenizeToStringArray(Version.getSupportedWireProtocolVersions(), ",");
+		return SUPPORTED_VERSIONS;
 	}
 
 	@Override

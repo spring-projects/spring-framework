@@ -21,6 +21,7 @@ import java.net.URI;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -80,6 +81,15 @@ class ResponseCreatorsTests {
 	}
 
 	@Test
+	void accepted() throws Exception {
+		DefaultResponseCreator responseCreator = MockRestResponseCreators.withAccepted();
+		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
+		assertThat(StreamUtils.copyToByteArray(response.getBody()).length).isEqualTo(0);
+	}
+
+	@Test
 	void noContent() throws Exception {
 		DefaultResponseCreator responseCreator = MockRestResponseCreators.withNoContent();
 		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
@@ -110,12 +120,86 @@ class ResponseCreatorsTests {
 	}
 
 	@Test
+	void forbiddenRequest() throws Exception {
+		DefaultResponseCreator responseCreator = MockRestResponseCreators.withForbiddenRequest();
+		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+		assertThat(StreamUtils.copyToByteArray(response.getBody()).length).isEqualTo(0);
+	}
+
+	@Test
+	void resourceNotFound() throws Exception {
+		DefaultResponseCreator responseCreator = MockRestResponseCreators.withResourceNotFound();
+		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+		assertThat(StreamUtils.copyToByteArray(response.getBody()).length).isEqualTo(0);
+	}
+
+	@Test
+	void requestConflict() throws Exception {
+		DefaultResponseCreator responseCreator = MockRestResponseCreators.withRequestConflict();
+		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+		assertThat(StreamUtils.copyToByteArray(response.getBody()).length).isEqualTo(0);
+	}
+
+	@Test
+	void tooManyRequests() throws Exception {
+		DefaultResponseCreator responseCreator = MockRestResponseCreators.withTooManyRequests();
+		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
+		assertThat(response.getHeaders()).doesNotContainKey(HttpHeaders.RETRY_AFTER);
+		assertThat(StreamUtils.copyToByteArray(response.getBody()).length).isEqualTo(0);
+	}
+
+	@Test
+	void tooManyRequestsWithRetryAfter() throws Exception {
+		DefaultResponseCreator responseCreator = MockRestResponseCreators.withTooManyRequests(512);
+		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
+		assertThat(response.getHeaders().getFirst(HttpHeaders.RETRY_AFTER)).isEqualTo("512");
+		assertThat(StreamUtils.copyToByteArray(response.getBody()).length).isEqualTo(0);
+	}
+
+	@Test
 	void serverError() throws Exception {
 		DefaultResponseCreator responseCreator = MockRestResponseCreators.withServerError();
 		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
 		assertThat(response.getHeaders().isEmpty()).isTrue();
+		assertThat(StreamUtils.copyToByteArray(response.getBody()).length).isEqualTo(0);
+	}
+
+	@Test
+	void badGateway() throws Exception {
+		DefaultResponseCreator responseCreator = MockRestResponseCreators.withBadGateway();
+		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_GATEWAY);
+		assertThat(StreamUtils.copyToByteArray(response.getBody()).length).isEqualTo(0);
+	}
+
+	@Test
+	void serviceUnavailable() throws Exception {
+		DefaultResponseCreator responseCreator = MockRestResponseCreators.withServiceUnavailable();
+		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+		assertThat(StreamUtils.copyToByteArray(response.getBody()).length).isEqualTo(0);
+	}
+
+	@Test
+	void gatewayTimeout() throws Exception {
+		DefaultResponseCreator responseCreator = MockRestResponseCreators.withGatewayTimeout();
+		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.GATEWAY_TIMEOUT);
 		assertThat(StreamUtils.copyToByteArray(response.getBody()).length).isEqualTo(0);
 	}
 

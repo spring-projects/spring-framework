@@ -144,7 +144,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 				httpEntity = new ResponseEntity<>(response.getBody(), response.getHeaders(), response.getStatusCode());
 			}
 			else if (returnValue instanceof ProblemDetail detail) {
-				httpEntity = new ResponseEntity<>(returnValue, HttpHeaders.EMPTY, detail.getStatus());
+				httpEntity = ResponseEntity.of(detail).build();
 			}
 			else if (returnValue instanceof HttpHeaders) {
 				httpEntity = new ResponseEntity<>((HttpHeaders) returnValue, HttpStatus.OK);
@@ -158,6 +158,13 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 				if (detail.getInstance() == null) {
 					URI path = URI.create(exchange.getRequest().getPath().value());
 					detail.setInstance(path);
+				}
+				if (logger.isWarnEnabled() && httpEntity instanceof ResponseEntity<?> responseEntity) {
+					if (responseEntity.getStatusCode().value() != detail.getStatus()) {
+						logger.warn(actualParameter.getExecutable().toGenericString() +
+								" returned ResponseEntity: " + responseEntity + ", but its status" +
+								" doesn't match the ProblemDetail status: " + detail.getStatus());
+					}
 				}
 			}
 

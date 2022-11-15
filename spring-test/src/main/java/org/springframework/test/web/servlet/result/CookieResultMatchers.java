@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,6 +149,7 @@ public class CookieResultMatchers {
 	/**
 	 * Assert a cookie's comment with a Hamcrest {@link Matcher}.
 	 */
+	@SuppressWarnings("removal")
 	public ResultMatcher comment(String name, Matcher<? super String> matcher) {
 		return result -> {
 			Cookie cookie = getCookie(result, name);
@@ -159,6 +160,7 @@ public class CookieResultMatchers {
 	/**
 	 * Assert a cookie's comment.
 	 */
+	@SuppressWarnings("removal")
 	public ResultMatcher comment(String name, String comment) {
 		return result -> {
 			Cookie cookie = getCookie(result, name);
@@ -169,6 +171,7 @@ public class CookieResultMatchers {
 	/**
 	 * Assert a cookie's version with a Hamcrest {@link Matcher}.
 	 */
+	@SuppressWarnings("removal")
 	public ResultMatcher version(String name, Matcher<? super Integer> matcher) {
 		return result -> {
 			Cookie cookie = getCookie(result, name);
@@ -179,6 +182,7 @@ public class CookieResultMatchers {
 	/**
 	 * Assert a cookie's version.
 	 */
+	@SuppressWarnings("removal")
 	public ResultMatcher version(String name, int version) {
 		return result -> {
 			Cookie cookie = getCookie(result, name);

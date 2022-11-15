@@ -16,6 +16,9 @@
 
 package org.springframework.aot.hint;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.lang.Nullable;
 
 /**
@@ -26,6 +29,12 @@ import org.springframework.lang.Nullable;
  * @since 6.0
  */
 public interface TypeReference {
+
+	/**
+	 * Return the fully qualified name of this type reference.
+	 * @return the reflection target name
+	 */
+	String getName();
 
 	/**
 	 * Return the {@linkplain Class#getCanonicalName() canonical name} of this
@@ -73,6 +82,16 @@ public interface TypeReference {
 	 */
 	static TypeReference of(String className) {
 		return SimpleTypeReference.of(className);
+	}
+
+	/**
+	 * Create a list of {@link TypeReference type references} mapped by the specified
+	 * types.
+	 * @param types the types to map
+	 * @return a list of type references
+	 */
+	static List<TypeReference> listOf(Class<?>... types) {
+		return Arrays.stream(types).map(TypeReference::of).toList();
 	}
 
 }

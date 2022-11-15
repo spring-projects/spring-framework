@@ -257,7 +257,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @param response current HTTP response
 	 * @param handler the executed handler, or {@code null} if none chosen
 	 * at the time of the exception (for example, if multipart resolution failed)
-	 * @return an empty ModelAndView indicating the exception was handled
+	 * @return an empty {@code ModelAndView} indicating the exception was handled, or
+	 * {@code null} indicating the exception should be handled in {@link #handleErrorResponse}
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 */
 	@Nullable
@@ -277,7 +278,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler the executed handler
-	 * @return an empty ModelAndView indicating the exception was handled
+	 * @return an empty {@code ModelAndView} indicating the exception was handled, or
+	 * {@code null} indicating the exception should be handled in {@link #handleErrorResponse}
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 */
 	@Nullable
@@ -290,14 +292,15 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	/**
 	 * Handle the case where no
 	 * {@linkplain org.springframework.http.converter.HttpMessageConverter message converters}
-	 * were found that were acceptable for the client (expressed via the {@code Accept} header.
+	 * were found that were acceptable for the client (expressed via the {@code Accept} header).
 	 * <p>The default implementation returns {@code null} in which case the
 	 * exception is handled in {@link #handleErrorResponse}.
 	 * @param ex the HttpMediaTypeNotAcceptableException to be handled
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler the executed handler
-	 * @return an empty ModelAndView indicating the exception was handled
+	 * @return an empty {@code ModelAndView} indicating the exception was handled, or
+	 * {@code null} indicating the exception should be handled in {@link #handleErrorResponse}
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 */
 	@Nullable
@@ -315,7 +318,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler the executed handler
-	 * @return an empty ModelAndView indicating the exception was handled
+	 * @return an empty {@code ModelAndView} indicating the exception was handled, or
+	 * {@code null} indicating the exception should be handled in {@link #handleErrorResponse}
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 * @since 4.2
 	 */
@@ -334,7 +338,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler the executed handler
-	 * @return an empty ModelAndView indicating the exception was handled
+	 * @return an empty {@code ModelAndView} indicating the exception was handled, or
+	 * {@code null} indicating the exception should be handled in {@link #handleErrorResponse}
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 */
 	@Nullable
@@ -351,7 +356,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler the executed handler
-	 * @return an empty ModelAndView indicating the exception was handled
+	 * @return an empty {@code ModelAndView} indicating the exception was handled, or
+	 * {@code null} indicating the exception should be handled in {@link #handleErrorResponse}
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 */
 	@Nullable
@@ -370,7 +376,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler the executed handler
-	 * @return an empty ModelAndView indicating the exception was handled
+	 * @return an empty {@code ModelAndView} indicating the exception was handled, or
+	 * {@code null} indicating the exception should be handled in {@link #handleErrorResponse}
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 */
 	@Nullable
@@ -388,7 +395,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler the executed handler
-	 * @return an empty ModelAndView indicating the exception was handled
+	 * @return an empty {@code ModelAndView} indicating the exception was handled, or
+	 * {@code null} indicating the exception should be handled in {@link #handleErrorResponse}
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 */
 	@Nullable
@@ -407,7 +415,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @param response current HTTP response
 	 * @param handler the executed handler, or {@code null} if none chosen
 	 * at the time of the exception (for example, if multipart resolution failed)
-	 * @return an empty ModelAndView indicating the exception was handled
+	 * @return an empty {@code ModelAndView} indicating the exception was handled, or
+	 * {@code null} indicating the exception should be handled in {@link #handleErrorResponse}
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 * @since 4.0
 	 */
@@ -428,7 +437,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @param response current HTTP response
 	 * @param handler the executed handler, or {@code null} if none chosen
 	 * at the time of the exception (for example, if multipart resolution failed)
-	 * @return an empty ModelAndView indicating the exception was handled
+	 * @return an empty {@code ModelAndView} indicating the exception was handled, or
+	 * {@code null} indicating the exception should be handled in {@link #handleErrorResponse}
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 * @since 4.2.8
 	 */
@@ -449,7 +459,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler the executed handler
-	 * @return an empty ModelAndView indicating the exception was handled
+	 * @return an empty {@code ModelAndView} indicating the exception was handled
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 * @since 6.0
 	 */
@@ -485,7 +495,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler the executed handler
-	 * @return an empty ModelAndView indicating the exception was handled
+	 * @return an empty {@code ModelAndView} indicating the exception was handled
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 */
 	protected ModelAndView handleConversionNotSupported(ConversionNotSupportedException ex,
@@ -503,7 +513,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler the executed handler
-	 * @return an empty ModelAndView indicating the exception was handled
+	 * @return an empty {@code ModelAndView} indicating the exception was handled
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 */
 	protected ModelAndView handleTypeMismatch(TypeMismatchException ex,
@@ -523,7 +533,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler the executed handler
-	 * @return an empty ModelAndView indicating the exception was handled
+	 * @return an empty {@code ModelAndView} indicating the exception was handled
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 */
 	protected ModelAndView handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
@@ -544,7 +554,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler the executed handler
-	 * @return an empty ModelAndView indicating the exception was handled
+	 * @return an empty {@code ModelAndView} indicating the exception was handled
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 */
 	protected ModelAndView handleHttpMessageNotWritable(HttpMessageNotWritableException ex,
@@ -562,9 +572,12 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler the executed handler
-	 * @return an empty ModelAndView indicating the exception was handled
+	 * @return an empty {@code ModelAndView} indicating the exception was handled
 	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
+	 * @deprecated as of 6.0 since {@link org.springframework.web.method.annotation.ModelAttributeMethodProcessor}
+	 * now raises the {@link MethodArgumentNotValidException} subclass instead.
 	 */
+	@Deprecated(since = "6.0", forRemoval = true)
 	protected ModelAndView handleBindException(BindException ex, HttpServletRequest request,
 			HttpServletResponse response, @Nullable Object handler) throws IOException {
 

@@ -21,7 +21,9 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 
 import kotlin.Unit;
+import kotlin.coroutines.CoroutineContext;
 import kotlin.jvm.JvmClassMappingKt;
+import kotlin.reflect.KClass;
 import kotlin.reflect.KClassifier;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.full.KCallables;
@@ -67,21 +69,53 @@ public abstract class CoroutinesUtils {
 
 	/**
 	 * Invoke a suspending function and converts it to {@link Mono} or
+	 * {@link Flux}. Uses an {@linkplain Dispatchers#getUnconfined() unconfined}
+	 * dispatcher.
+	 * @param method the suspending function to invoke
+	 * @param target the target to invoke {@code method} on
+	 * @param args the function arguments
+	 * @return the method invocation result as reactive stream
+	 */
+	public static Publisher<?> invokeSuspendingFunction(Method method, Object target,
+			Object... args) {
+		return invokeSuspendingFunction(Dispatchers.getUnconfined(), method, target, args);
+	}
+
+	/**
+	 * Invoke a suspending function and converts it to {@link Mono} or
 	 * {@link Flux}.
+	 * @param context the coroutine context to use
+	 * @param method the suspending function to invoke
+	 * @param target the target to invoke {@code method} on
+	 * @param args the function arguments
+	 * @return the method invocation result as reactive stream
+	 * @since 6.0
 	 */
 	@SuppressWarnings("deprecation")
-	public static Publisher<?> invokeSuspendingFunction(Method method, Object target, Object... args) {
+	public static Publisher<?> invokeSuspendingFunction(CoroutineContext context, Method method, Object target,
+			Object... args) {
+
 		KFunction<?> function = Objects.requireNonNull(ReflectJvmMapping.getKotlinFunction(method));
 		if (method.isAccessible() && !KCallablesJvm.isAccessible(function)) {
 			KCallablesJvm.setAccessible(function, true);
 		}
-		KClassifier classifier = function.getReturnType().getClassifier();
-		Mono<Object> mono = MonoKt.mono(Dispatchers.getUnconfined(), (scope, continuation) ->
+		Mono<Object> mono = MonoKt.mono(context, (scope, continuation) ->
 					KCallables.callSuspend(function, getSuspendedFunctionArgs(target, args), continuation))
 				.filter(result -> !Objects.equals(result, Unit.INSTANCE))
 				.onErrorMap(InvocationTargetException.class, InvocationTargetException::getTargetException);
-		if (classifier != null && classifier.equals(JvmClassMappingKt.getKotlinClass(Flow.class))) {
-			return mono.flatMapMany(CoroutinesUtils::asFlux);
+
+		KClassifier returnType = function.getReturnType().getClassifier();
+		if (returnType != null) {
+			if (returnType.equals(JvmClassMappingKt.getKotlinClass(Flow.class))) {
+				return mono.flatMapMany(CoroutinesUtils::asFlux);
+			}
+			else if (returnType.equals(JvmClassMappingKt.getKotlinClass(Mono.class))) {
+				return mono.flatMap(o -> ((Mono<?>)o));
+			}
+			else if (returnType instanceof KClass<?> kClass &&
+					Publisher.class.isAssignableFrom(JvmClassMappingKt.getJavaClass(kClass))) {
+				return mono.flatMapMany(o -> ((Publisher<?>)o));
+			}
 		}
 		return mono;
 	}

@@ -50,7 +50,7 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 	/**
 	 * Returns a structured representation of the full request path up to but
 	 * not including the {@link #getQueryParams() query}.
-	 * <p>The returned path is sub-divided into a
+	 * <p>The returned path is subdivided into a
 	 * {@link RequestPath#contextPath()} portion and the remaining
 	 * {@link RequestPath#pathWithinApplication() pathWithinApplication} portion.
 	 * The latter can be passed into methods of

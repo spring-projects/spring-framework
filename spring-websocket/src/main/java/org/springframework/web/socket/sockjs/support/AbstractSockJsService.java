@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,18 +145,19 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	/**
 	 * Transports with no native cross-domain communication (e.g. "eventsource",
 	 * "htmlfile") must get a simple page from the "foreign" domain in an invisible
-	 * iframe so that code in the iframe can run from  a domain local to the SockJS
-	 * server. Since the iframe needs to load the SockJS javascript client library,
-	 * this property allows specifying where to load it from.
+	 * {@code iframe} so that code in the {@code iframe} can run from a domain
+	 * local to the SockJS server. Since the {@code iframe} needs to load the
+	 * SockJS JavaScript client library, this property allows specifying where to
+	 * load it from.
 	 * <p>By default this is set to point to
-	 * "https://cdn.jsdelivr.net/sockjs/1.0.0/sockjs.min.js".
+	 * <a href="https://cdn.jsdelivr.net/sockjs/1.0.0/sockjs.min.js">"https://cdn.jsdelivr.net/sockjs/1.0.0/sockjs.min.js"</a>.
 	 * However, it can also be set to point to a URL served by the application.
 	 * <p>Note that it's possible to specify a relative URL in which case the URL
-	 * must be relative to the iframe URL. For example assuming a SockJS endpoint
-	 * mapped to "/sockjs", and resulting iframe URL "/sockjs/iframe.html", then
+	 * must be relative to the {@code iframe} URL. For example assuming a SockJS endpoint
+	 * mapped to "/sockjs", and resulting {@code iframe} URL "/sockjs/iframe.html", then
 	 * the relative URL must start with "../../" to traverse up to the location
 	 * above the SockJS mapping. In case of a prefix-based Servlet mapping one more
-	 * traversal may be needed.
+	 * traversals may be needed.
 	 */
 	public void setSockJsClientLibraryUrl(String clientLibraryUrl) {
 		this.clientLibraryUrl = clientLibraryUrl;
@@ -613,23 +614,23 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 	private class IframeHandler implements SockJsRequestHandler {
 
-		private static final String IFRAME_CONTENT =
-				"<!DOCTYPE html>\n" +
-				"<html>\n" +
-				"<head>\n" +
-				"  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\n" +
-				"  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n" +
-				"  <script>\n" +
-				"    document.domain = document.domain;\n" +
-				"    _sockjs_onload = function(){SockJS.bootstrap_iframe();};\n" +
-				"  </script>\n" +
-				"  <script src=\"%s\"></script>\n" +
-				"</head>\n" +
-				"<body>\n" +
-				"  <h2>Don't panic!</h2>\n" +
-				"  <p>This is a SockJS hidden iframe. It's used for cross domain magic.</p>\n" +
-				"</body>\n" +
-				"</html>";
+		private static final String IFRAME_CONTENT = """
+				<!DOCTYPE html>
+				<html>
+				<head>
+					<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+					<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+					<script>
+						document.domain = document.domain;
+						_sockjs_onload = function(){SockJS.bootstrap_iframe();};
+					</script>
+					<script src="%s"></script>
+				</head>
+				<body>
+					<h2>Don't panic!</h2>
+					<p>This is a SockJS hidden iframe. It's used for cross domain magic.</p>
+				</body>
+				</html>""";
 
 		@Override
 		public void handle(ServerHttpRequest request, ServerHttpResponse response) throws IOException {

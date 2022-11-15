@@ -22,8 +22,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -173,7 +171,7 @@ class XmlBeanFactoryTests {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
-		try (InputStream inputStream = getClass().getResourceAsStream(REFTYPES_CONTEXT.getPath())) {
+		try (InputStream inputStream = REFTYPES_CONTEXT.getInputStream()) {
 			reader.loadBeanDefinitions(new InputSource(inputStream));
 		}
 
@@ -944,8 +942,8 @@ class XmlBeanFactoryTests {
 			xbf.getBean("rod2Accessor");
 		}
 		catch (BeanCreationException ex) {
-			assertThat(ex.toString().contains("touchy")).isTrue();
 			ex.printStackTrace();
+			assertThat(ex.toString().contains("touchy")).isTrue();
 			assertThat((Object) ex.getRelatedCauses()).isNull();
 		}
 	}
@@ -1172,10 +1170,9 @@ class XmlBeanFactoryTests {
 	}
 
 	@Test
-	void urlResourceWithImport() {
-		URL url = getClass().getResource(RESOURCE_CONTEXT.getPath());
+	void urlResourceWithImport() throws Exception {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(new UrlResource(url));
+		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(new UrlResource(RESOURCE_CONTEXT.getURL()));
 		// comes from "resourceImport.xml"
 		xbf.getBean("resource1", ResourceTestBean.class);
 		// comes from "resource.xml"
@@ -1183,10 +1180,9 @@ class XmlBeanFactoryTests {
 	}
 
 	@Test
-	void fileSystemResourceWithImport() throws URISyntaxException {
-		String file = getClass().getResource(RESOURCE_CONTEXT.getPath()).toURI().getPath();
+	void fileSystemResourceWithImport() throws Exception {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(new FileSystemResource(file));
+		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(new FileSystemResource(RESOURCE_CONTEXT.getFile()));
 		// comes from "resourceImport.xml"
 		xbf.getBean("resource1", ResourceTestBean.class);
 		// comes from "resource.xml"
@@ -1370,7 +1366,7 @@ class XmlBeanFactoryTests {
 		reader.loadBeanDefinitions(INVALID_NO_SUCH_METHOD_CONTEXT);
 		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
 				xbf.getBean("constructorOverrides"))
-			.withMessageContaining("bogusMethod");
+			.satisfies(ex -> ex.getCause().getMessage().contains("bogusMethod"));
 	}
 
 	@Test

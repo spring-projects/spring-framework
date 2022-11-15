@@ -85,12 +85,6 @@ class JdkClientHttpResponse implements ClientHttpResponse {
 	}
 
 	@Override
-	@Deprecated
-	public int getRawStatusCode() {
-		return this.response.statusCode();
-	}
-
-	@Override
 	public HttpHeaders getHeaders() {
 		return this.headers;
 	}

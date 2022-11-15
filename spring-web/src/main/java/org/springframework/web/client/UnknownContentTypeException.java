@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class UnknownContentTypeException extends RestClientException {
 
 	private static final long serialVersionUID = 2759516676367274084L;
 
-
+	@SuppressWarnings("serial")
 	private final Type targetType;
 
 	private final MediaType contentType;
@@ -115,7 +115,7 @@ public class UnknownContentTypeException extends RestClientException {
 	 * Return the raw HTTP status code value.
 	 * @deprecated as of 6.0, in favor of {@link #getStatusCode()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public int getRawStatusCode() {
 		return this.statusCode.value();
 	}

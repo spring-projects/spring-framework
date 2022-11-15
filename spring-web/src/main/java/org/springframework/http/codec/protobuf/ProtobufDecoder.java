@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,7 +151,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 
 		try {
 			Message.Builder builder = getMessageBuilder(targetType.toClass());
-			ByteBuffer buffer = dataBuffer.asByteBuffer();
+			ByteBuffer buffer = dataBuffer.toByteBuffer();
 			builder.mergeFrom(CodedInputStream.newInstance(buffer), this.extensionRegistry);
 			return builder.build();
 		}
@@ -236,7 +236,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 					this.messageBytesToRead -= chunkBytesToRead;
 
 					if (this.messageBytesToRead == 0) {
-						CodedInputStream stream = CodedInputStream.newInstance(this.output.asByteBuffer());
+						CodedInputStream stream = CodedInputStream.newInstance(this.output.toByteBuffer());
 						DataBufferUtils.release(this.output);
 						this.output = null;
 						Message message = getMessageBuilder(this.elementType.toClass())

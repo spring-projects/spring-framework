@@ -133,11 +133,12 @@ class HeadersAdaptersTests {
 
 	static Stream<Arguments> headers() {
 		return Stream.of(
-			arguments(named("Map", CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH)))),
-			arguments(named("Netty", new NettyHeadersAdapter(new DefaultHttpHeaders()))),
-			arguments(named("Tomcat", new TomcatHeadersAdapter(new MimeHeaders()))),
-			arguments(named("Undertow", new UndertowHeadersAdapter(new HeaderMap()))),
-			arguments(named("Jetty", new JettyHeadersAdapter(HttpFields.build())))
+				arguments(named("Map", CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH)))),
+				arguments(named("Netty", new NettyHeadersAdapter(new DefaultHttpHeaders()))),
+				arguments(named("Netty", new Netty5HeadersAdapter(io.netty5.handler.codec.http.headers.HttpHeaders.newHeaders()))),
+				arguments(named("Tomcat", new TomcatHeadersAdapter(new MimeHeaders()))),
+				arguments(named("Undertow", new UndertowHeadersAdapter(new HeaderMap()))),
+				arguments(named("Jetty", new JettyHeadersAdapter(HttpFields.build())))
 		);
 	}
 

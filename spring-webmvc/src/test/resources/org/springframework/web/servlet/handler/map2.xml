@@ -6,7 +6,6 @@
 	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
 		<property name="defaultHandler"><ref bean="starController"/></property>
 		<property name="rootHandler"><ref bean="mainController"/></property>
-		<property name="useTrailingSlashMatch" value="true"/>
 		<property name="urlMap">
 			<map>
 				<entry key="/welcome*"><ref bean="otherController"/></entry>
@@ -23,7 +22,6 @@
 	<bean id="urlMappingWithProps" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
 		<property name="defaultHandler"><ref bean="starController"/></property>
 		<property name="rootHandler"><ref bean="mainController"/></property>
-		<property name="useTrailingSlashMatch" value="true"/>
 		<property name="mappings"><ref bean="mappings"/></property>
 	</bean>
 

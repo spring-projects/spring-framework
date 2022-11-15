@@ -200,16 +200,15 @@ class DefaultDatabaseClient implements DatabaseClient {
 	}
 
 	/**
-	 * Determine SQL from potential provider object.
-	 * @param sqlProvider object that's potentially a SqlProvider
+	 * Get SQL from a potential provider object.
+	 * @param object an object that is potentially an SqlProvider
 	 * @return the SQL string, or {@code null}
 	 * @see SqlProvider
 	 */
 	@Nullable
-	private static String getSql(Object sqlProvider) {
-
-		if (sqlProvider instanceof SqlProvider) {
-			return ((SqlProvider) sqlProvider).getSql();
+	private static String getSql(Object object) {
+		if (object instanceof SqlProvider sqlProvider) {
+			return sqlProvider.getSql();
 		}
 		else {
 			return null;
@@ -218,7 +217,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 
 
 	/**
-	 * Base class for {@link DatabaseClient.GenericExecuteSpec} implementations.
+	 * Default {@link DatabaseClient.GenericExecuteSpec} implementation.
 	 */
 	class DefaultGenericExecuteSpec implements GenericExecuteSpec {
 
@@ -282,7 +281,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 		public DefaultGenericExecuteSpec bind(String name, Object value) {
 			assertNotPreparedOperation();
 
-			Assert.hasText(name, "Parameter name must not be null or empty!");
+			Assert.hasText(name, "Parameter name must not be null or empty");
 			Assert.notNull(value, () -> String.format(
 					"Value for parameter %s must not be null. Use bindNull(…) instead.", name));
 
@@ -303,7 +302,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 		@Override
 		public DefaultGenericExecuteSpec bindNull(String name, Class<?> type) {
 			assertNotPreparedOperation();
-			Assert.hasText(name, "Parameter name must not be null or empty!");
+			Assert.hasText(name, "Parameter name must not be null or empty");
 
 			Map<String, Parameter> byName = new LinkedHashMap<>(this.byName);
 			byName.put(name, Parameters.in(type));
@@ -313,7 +312,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 
 		@Override
 		public DefaultGenericExecuteSpec filter(StatementFilterFunction filter) {
-			Assert.notNull(filter, "Statement FilterFunction must not be null");
+			Assert.notNull(filter, "StatementFilterFunction must not be null");
 			return new DefaultGenericExecuteSpec(
 					this.byIndex, this.byName, this.sqlSupplier, this.filterFunction.andThen(filter));
 		}
@@ -352,10 +351,10 @@ class DefaultDatabaseClient implements DatabaseClient {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Executing SQL statement [" + sql + "]");
 				}
-				if (sqlSupplier instanceof PreparedOperation<?>) {
+				if (sqlSupplier instanceof PreparedOperation<?> preparedOperation) {
 					Statement statement = connection.createStatement(sql);
 					BindTarget bindTarget = new StatementWrapper(statement);
-					((PreparedOperation<?>) sqlSupplier).bindTo(bindTarget);
+					preparedOperation.bindTo(bindTarget);
 					return statement;
 				}
 
@@ -397,7 +396,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 			Function<Connection, Flux<Result>> resultFunction = connection -> {
 				Statement statement = statementFunction.apply(connection);
 				return Flux.from(this.filterFunction.filter(statement, DefaultDatabaseClient.this.executeFunction))
-				.cast(Result.class).checkpoint("SQL \"" + sql + "\" [DatabaseClient]");
+						.cast(Result.class).checkpoint("SQL \"" + sql + "\" [DatabaseClient]");
 			};
 
 			return new ResultFunction(resultFunction, sql);
@@ -471,12 +470,11 @@ class DefaultDatabaseClient implements DatabaseClient {
 
 		private String getRequiredSql(Supplier<String> sqlSupplier) {
 			String sql = sqlSupplier.get();
-			Assert.state(StringUtils.hasText(sql), "SQL returned by SQL supplier must not be empty!");
+			Assert.state(StringUtils.hasText(sql), "SQL returned by supplier must not be empty");
 			return sql;
 		}
 
 		record ResultFunction(Function<Connection, Flux<Result>> function, String sql){}
-
 	}
 
 
@@ -530,9 +528,9 @@ class DefaultDatabaseClient implements DatabaseClient {
 
 		private static final long serialVersionUID = -8994138383301201380L;
 
-		final Connection connection;
+		final transient Connection connection;
 
-		final Function<Connection, Publisher<Void>> closeFunction;
+		final transient Function<Connection, Publisher<Void>> closeFunction;
 
 		ConnectionCloseHolder(Connection connection,
 				Function<Connection, Publisher<Void>> closeFunction) {

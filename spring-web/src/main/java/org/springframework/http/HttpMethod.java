@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,7 +138,7 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 	 * @deprecated in favor of {@link #valueOf(String)}
 	 */
 	@Nullable
-	@Deprecated
+	@Deprecated(since = "6.0", forRemoval = true)
 	public static HttpMethod resolve(@Nullable String method) {
 		return (method != null ? valueOf(method) : null);
 	}
@@ -177,8 +177,8 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 		if (this == o) {
 			return true;
 		}
-		else if (o instanceof HttpMethod other) {
-			return this.name.equals(other.name);
+		else if (o instanceof HttpMethod otherMethod) {
+			return this.name.equals(otherMethod.name);
 		}
 		return false;
 	}
@@ -187,4 +187,5 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 	public String toString() {
 		return this.name;
 	}
+
 }

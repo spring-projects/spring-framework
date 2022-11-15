@@ -111,7 +111,7 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 		for (int i = 0; i < this.attributes.size(); i++) {
 			Method attribute = this.attributes.get(i);
 			Object thisValue = getAttributeValue(attribute);
-			Object otherValue = ReflectionUtils.invokeMethod(attribute, other);
+			Object otherValue = AnnotationUtils.invokeAnnotationMethod(attribute, other);
 			if (!ObjectUtils.nullSafeEquals(thisValue, otherValue)) {
 				return false;
 			}
@@ -299,28 +299,14 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 	@SuppressWarnings("unchecked")
 	static <A extends Annotation> A createProxy(MergedAnnotation<A> annotation, Class<A> type) {
 		ClassLoader classLoader = type.getClassLoader();
+		Class<?>[] interfaces = new Class<?>[] {type};
 		InvocationHandler handler = new SynthesizedMergedAnnotationInvocationHandler<>(annotation, type);
-		Class<?>[] interfaces = isVisible(classLoader, SynthesizedAnnotation.class) ?
-				new Class<?>[] {type, SynthesizedAnnotation.class} : new Class<?>[] {type};
 		return (A) Proxy.newProxyInstance(classLoader, interfaces, handler);
 	}
 
 	private static String getName(Class<?> clazz) {
 		String canonicalName = clazz.getCanonicalName();
 		return (canonicalName != null ? canonicalName : clazz.getName());
-	}
-
-
-	private static boolean isVisible(ClassLoader classLoader, Class<?> interfaceClass) {
-		if (classLoader == interfaceClass.getClassLoader()) {
-			return true;
-		}
-		try {
-			return Class.forName(interfaceClass.getName(), false, classLoader) == interfaceClass;
-		}
-		catch (ClassNotFoundException ex) {
-			return false;
-		}
 	}
 
 }

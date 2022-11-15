@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.http.server.PathContainer;
  */
 public class PathPatternParser {
 
-	private boolean matchOptionalTrailingSeparator = true;
+	private boolean matchOptionalTrailingSeparator = false;
 
 	private boolean caseSensitive = true;
 
@@ -48,15 +48,22 @@ public class PathPatternParser {
 	 * will also match request paths with a trailing slash. If set to
 	 * {@code false} a {@code PathPattern} will only match request paths with
 	 * a trailing slash.
-	 * <p>The default is {@code true}.
+	 * <p>The default was changed in 6.0 from {@code true} to {@code false} in
+	 * order to support the deprecation of the property.
+	 * @deprecated transparent support for trailing slashes is deprecated as of
+	 * 6.0 in favor of configuring explicit redirects through a proxy,
+	 * Servlet/web filter, or a controller.
 	 */
+	@Deprecated(since = "6.0")
 	public void setMatchOptionalTrailingSeparator(boolean matchOptionalTrailingSeparator) {
 		this.matchOptionalTrailingSeparator = matchOptionalTrailingSeparator;
 	}
 
 	/**
 	 * Whether optional trailing slashing match is enabled.
+	 * @deprecated as of 6.0 together with {@link #setMatchOptionalTrailingSeparator(boolean)}.
 	 */
+	@Deprecated(since = "6.0")
 	public boolean isMatchOptionalTrailingSeparator() {
 		return this.matchOptionalTrailingSeparator;
 	}
@@ -121,6 +128,7 @@ public class PathPatternParser {
 	 */
 	public final static PathPatternParser defaultInstance = new PathPatternParser() {
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public void setMatchOptionalTrailingSeparator(boolean matchOptionalTrailingSeparator) {
 			raiseError();

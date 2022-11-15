@@ -35,8 +35,8 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
-import org.springframework.core.io.support.ResourcePropertiesPersister;
 import org.springframework.lang.Nullable;
+import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
 import org.springframework.util.StringUtils;
 
@@ -148,7 +148,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	@Nullable
 	private String defaultParentBean;
 
-	private PropertiesPersister propertiesPersister = ResourcePropertiesPersister.INSTANCE;
+	private PropertiesPersister propertiesPersister = DefaultPropertiesPersister.INSTANCE;
 
 
 	/**
@@ -187,12 +187,12 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 
 	/**
 	 * Set the PropertiesPersister to use for parsing properties files.
-	 * The default is ResourcePropertiesPersister.
-	 * @see ResourcePropertiesPersister#INSTANCE
+	 * The default is {@code DefaultPropertiesPersister}.
+	 * @see DefaultPropertiesPersister#INSTANCE
 	 */
 	public void setPropertiesPersister(@Nullable PropertiesPersister propertiesPersister) {
 		this.propertiesPersister =
-				(propertiesPersister != null ? propertiesPersister : ResourcePropertiesPersister.INSTANCE);
+				(propertiesPersister != null ? propertiesPersister : DefaultPropertiesPersister.INSTANCE);
 	}
 
 	/**

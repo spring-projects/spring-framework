@@ -66,7 +66,7 @@ follow-up reports will need to be created as new issues with a fresh description
 #### Submit a Pull Request
 
 1. If you have not previously done so, please sign the
-[Contributor License Agreement](https://cla.pivotal.io/sign/spring). You will be reminded
+[Contributor License Agreement](https://cla.spring.io/sign/spring). You will be reminded
 automatically when you submit the PR.
 
 1. Should you create an issue first? No, just create the pull request and use the
@@ -123,12 +123,12 @@ define the source file coding standards we use along with some IDEA editor setti
 
 ### Reference Docs
 
-The reference documentation is in the [src/docs/asciidoc](src/docs/asciidoc) directory, in
+The reference documentation is in the [framework-docs/src/docs/asciidoc](framework-docs/src/docs/asciidoc) directory, in
 [Asciidoctor](https://asciidoctor.org/) format. For trivial changes, you may be able to browse,
 edit source files, and submit directly from GitHub.
 
-When making changes locally, execute `./gradlew asciidoctor` and then browse the result under
-`build/docs/ref-docs/html5/index.html`.
+When making changes locally, execute `./gradlew :framework-docs:asciidoctor` and then browse the result under
+`framework-docs/build/docs/ref-docs/html5/index.html`.
 
 Asciidoctor also supports live editing. For more details see
 [AsciiDoc Tooling](https://docs.asciidoctor.org/asciidoctor/latest/tooling/).

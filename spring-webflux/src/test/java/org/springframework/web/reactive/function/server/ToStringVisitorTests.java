@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,10 @@ public class ToStringVisitorTests {
 		testPredicate(pathExtension("foo"), "*.foo");
 
 		testPredicate(contentType(MediaType.APPLICATION_JSON), "Content-Type: application/json");
-		testPredicate(contentType(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN), "Content-Type: [application/json, text/plain]");
+
+		ToStringVisitor visitor = new ToStringVisitor();
+		contentType(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN).accept(visitor);
+		assertThat(visitor.toString()).matches("Content-Type: \\[.+, .+\\]").contains("application/json", "text/plain");
 
 		testPredicate(accept(MediaType.APPLICATION_JSON), "Accept: application/json");
 

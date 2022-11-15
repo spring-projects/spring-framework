@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -197,11 +197,11 @@ public class OrderComparator implements Comparator<Object> {
 	 * @see java.util.Arrays#sort(Object[], java.util.Comparator)
 	 */
 	public static void sortIfNecessary(Object value) {
-		if (value instanceof Object[]) {
-			sort((Object[]) value);
+		if (value instanceof Object[] objects) {
+			sort(objects);
 		}
-		else if (value instanceof List) {
-			sort((List<?>) value);
+		else if (value instanceof List<?> list) {
+			sort(list);
 		}
 	}
 

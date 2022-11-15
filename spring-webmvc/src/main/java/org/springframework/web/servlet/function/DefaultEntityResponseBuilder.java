@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import java.util.Set;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -336,7 +335,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 			return messageConverters.stream()
 					.filter(messageConverter -> messageConverter.canWrite(entityClass, null))
 					.flatMap(messageConverter -> messageConverter.getSupportedMediaTypes(entityClass).stream())
-					.collect(Collectors.toList());
+					.toList();
 		}
 
 	}
@@ -366,7 +365,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 				Context context) {
 
 			DeferredResult<ServerResponse> result = new DeferredResult<>();
-			entity().handle((value, ex) -> {
+			entity().whenComplete((value, ex) -> {
 				if (ex != null) {
 					if (ex instanceof CompletionException && ex.getCause() != null) {
 						ex = ex.getCause();
@@ -388,7 +387,6 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 						result.setErrorResult(writeException);
 					}
 				}
-				return null;
 			});
 			return result;
 		}

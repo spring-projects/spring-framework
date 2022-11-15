@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 
 	/**
-	 * Set {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers} to use to use for resolving method argument values.
+	 * Set {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers} to use for resolving method argument values.
 	 */
 	public void setMessageMethodArgumentResolvers(HandlerMethodArgumentResolverComposite argumentResolvers) {
 		this.resolvers = argumentResolvers;
@@ -170,7 +170,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		}
 		catch (IllegalArgumentException ex) {
 			assertTargetBean(getBridgedMethod(), getBean(), args);
-			String text = (ex.getMessage() != null ? ex.getMessage() : "Illegal argument");
+			String text = (ex.getMessage() == null || ex.getCause() instanceof NullPointerException)
+					? "Illegal argument": ex.getMessage();
 			throw new IllegalStateException(formatInvokeError(text, args), ex);
 		}
 		catch (InvocationTargetException ex) {

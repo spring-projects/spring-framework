@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.web.reactive.socket.adapter;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import io.undertow.websockets.WebSocketConnectionCallback;
 import io.undertow.websockets.core.AbstractReceiveListener;
@@ -89,13 +91,14 @@ public class UndertowWebSocketHandlerAdapter extends AbstractReceiveListener {
 			byte[] bytes = ((String) message).getBytes(StandardCharsets.UTF_8);
 			return new WebSocketMessage(Type.TEXT, this.session.bufferFactory().wrap(bytes));
 		}
-		else if (Type.BINARY.equals(type)) {
-			DataBuffer buffer = this.session.bufferFactory().allocateBuffer().write((ByteBuffer[]) message);
-			return new WebSocketMessage(Type.BINARY, buffer);
-		}
-		else if (Type.PONG.equals(type)) {
-			DataBuffer buffer = this.session.bufferFactory().allocateBuffer().write((ByteBuffer[]) message);
-			return new WebSocketMessage(Type.PONG, buffer);
+		else if (Type.BINARY.equals(type) || Type.PONG.equals(type)) {
+			ByteBuffer[] byteBuffers = (ByteBuffer[]) message;
+			List<DataBuffer> dataBuffers = new ArrayList<>(byteBuffers.length);
+			for (ByteBuffer byteBuffer : byteBuffers) {
+				dataBuffers.add(this.session.bufferFactory().wrap(byteBuffer));
+			}
+			DataBuffer joined = this.session.bufferFactory().join(dataBuffers);
+			return new WebSocketMessage(type, joined);
 		}
 		else {
 			throw new IllegalArgumentException("Unexpected message type: " + message);

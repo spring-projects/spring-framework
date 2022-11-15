@@ -883,12 +883,12 @@ class BeanFactoryGenericsTests {
 		assertThat(resolved.get(0)).isSameAs(bf.getBean("store1"));
 		assertThat(resolved.get(1)).isSameAs(bf.getBean("store2"));
 
-		resolved = numberStoreProvider.stream().collect(Collectors.toList());
+		resolved = numberStoreProvider.stream().toList();
 		assertThat(resolved.size()).isEqualTo(2);
 		assertThat(resolved.get(0)).isSameAs(bf.getBean("store1"));
 		assertThat(resolved.get(1)).isSameAs(bf.getBean("store2"));
 
-		resolved = numberStoreProvider.orderedStream().collect(Collectors.toList());
+		resolved = numberStoreProvider.orderedStream().toList();
 		assertThat(resolved.size()).isEqualTo(2);
 		assertThat(resolved.get(0)).isSameAs(bf.getBean("store2"));
 		assertThat(resolved.get(1)).isSameAs(bf.getBean("store1"));
@@ -938,7 +938,7 @@ class BeanFactoryGenericsTests {
 		bf.registerBeanDefinition("store2", bd2);
 
 		ObjectProvider<NumberStore<?>> numberStoreProvider = bf.getBeanProvider(ResolvableType.forClass(NumberStore.class));
-		List<NumberStore<?>> resolved = numberStoreProvider.orderedStream().collect(Collectors.toList());
+		List<NumberStore<?>> resolved = numberStoreProvider.orderedStream().toList();
 		assertThat(resolved.size()).isEqualTo(2);
 		assertThat(resolved.get(0)).isSameAs(bf.getBean("store2"));
 		assertThat(resolved.get(1)).isSameAs(bf.getBean("store1"));

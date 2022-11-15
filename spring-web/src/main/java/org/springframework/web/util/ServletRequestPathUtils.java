@@ -249,12 +249,15 @@ public abstract class ServletRequestPathUtils {
 			if (requestUri == null) {
 				requestUri = request.getRequestURI();
 			}
-			if (UrlPathHelper.servlet4Present) {
-				String servletPathPrefix = Servlet4Delegate.getServletPathPrefix(request);
-				if (StringUtils.hasText(servletPathPrefix)) {
-					return new ServletRequestPath(requestUri, request.getContextPath(), servletPathPrefix);
+
+			String servletPathPrefix = Servlet4Delegate.getServletPathPrefix(request);
+			if (StringUtils.hasText(servletPathPrefix)) {
+				if (servletPathPrefix.endsWith("/")) {
+					servletPathPrefix = servletPathPrefix.substring(0, servletPathPrefix.length() - 1);
 				}
+				return new ServletRequestPath(requestUri, request.getContextPath(), servletPathPrefix);
 			}
+
 			return RequestPath.parse(requestUri, request.getContextPath());
 		}
 	}
@@ -272,8 +275,7 @@ public abstract class ServletRequestPathUtils {
 			if (mapping == null) {
 				mapping = request.getHttpServletMapping();
 			}
-			MappingMatch match = mapping.getMappingMatch();
-			if (!ObjectUtils.nullSafeEquals(match, MappingMatch.PATH)) {
+			if (!ObjectUtils.nullSafeEquals(mapping.getMappingMatch(), MappingMatch.PATH)) {
 				return null;
 			}
 			String servletPath = (String) request.getAttribute(WebUtils.INCLUDE_SERVLET_PATH_ATTRIBUTE);

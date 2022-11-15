@@ -88,7 +88,7 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 	/**
 	 * Set the order for this result handler relative to others.
 	 * <p>By default set to {@link Ordered#LOWEST_PRECEDENCE}, however see
-	 * Javadoc of sub-classes which may change this default.
+	 * Javadoc of subclasses which may change this default.
 	 * @param order the order
 	 */
 	public void setOrder(int order) {
@@ -111,14 +111,25 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 	}
 
 	/**
-	 * Select the best media type for the current request through a content negotiation algorithm.
+	 * Select the best media type for the current request through a content
+	 * negotiation algorithm.
 	 * @param exchange the current request
-	 * @param producibleTypesSupplier the media types that can be produced for the current request
+	 * @param producibleTypesSupplier the media types producible for the request
 	 * @return the selected media type, or {@code null} if none
 	 */
 	@Nullable
+	protected MediaType selectMediaType(ServerWebExchange exchange, Supplier<List<MediaType>> producibleTypesSupplier) {
+		return selectMediaType(exchange, producibleTypesSupplier, getAcceptableTypes(exchange));
+	}
+
+	/**
+	 * Variant of {@link #selectMediaType(ServerWebExchange, Supplier)} with a
+	 * given list of requested (acceptable) media types.
+	 */
+	@Nullable
 	protected MediaType selectMediaType(
-			ServerWebExchange exchange, Supplier<List<MediaType>> producibleTypesSupplier) {
+			ServerWebExchange exchange, Supplier<List<MediaType>> producibleTypesSupplier,
+			List<MediaType> acceptableTypes) {
 
 		MediaType contentType = exchange.getResponse().getHeaders().getContentType();
 		if (contentType != null && contentType.isConcrete()) {
@@ -128,7 +139,6 @@ public abstract class HandlerResultHandlerSupport implements Ordered {
 			return contentType;
 		}
 
-		List<MediaType> acceptableTypes = getAcceptableTypes(exchange);
 		List<MediaType> producibleTypes = getProducibleTypes(exchange, producibleTypesSupplier);
 
 		Set<MediaType> compatibleMediaTypes = new LinkedHashSet<>();

@@ -50,6 +50,7 @@ import static org.assertj.core.api.Assertions.fail;
  * @author Rossen Stoyanchev
  * @author Eko Kurniawan Khannedy
  */
+@SuppressWarnings("deprecation")
 public class InterceptorRegistryTests {
 
 	private InterceptorRegistry registry;
@@ -177,7 +178,6 @@ public class InterceptorRegistryTests {
 	}
 
 
-	@SuppressWarnings("deprecation")
 	private List<HandlerInterceptor> getInterceptorsForPath(String lookupPath) {
 		PathMatcher pathMatcher = new AntPathMatcher();
 		List<HandlerInterceptor> result = new ArrayList<>();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,11 +51,6 @@ import org.springframework.util.StringUtils;
  */
 @SuppressWarnings("serial")
 public final class DataSize implements Comparable<DataSize>, Serializable {
-
-	/**
-	 * The pattern for parsing.
-	 */
-	private static final Pattern PATTERN = Pattern.compile("^([+\\-]?\\d+)([a-zA-Z]{0,2})$");
 
 	/**
 	 * Bytes per Kilobyte.
@@ -179,20 +174,15 @@ public final class DataSize implements Comparable<DataSize>, Serializable {
 	public static DataSize parse(CharSequence text, @Nullable DataUnit defaultUnit) {
 		Assert.notNull(text, "Text must not be null");
 		try {
-			Matcher matcher = PATTERN.matcher(text);
+			Matcher matcher = DataSizeUtils.PATTERN.matcher(StringUtils.trimAllWhitespace(text));
 			Assert.state(matcher.matches(), "Does not match data size pattern");
-			DataUnit unit = determineDataUnit(matcher.group(2), defaultUnit);
+			DataUnit unit = DataSizeUtils.determineDataUnit(matcher.group(2), defaultUnit);
 			long amount = Long.parseLong(matcher.group(1));
 			return DataSize.of(amount, unit);
 		}
 		catch (Exception ex) {
 			throw new IllegalArgumentException("'" + text + "' is not a valid data size", ex);
 		}
-	}
-
-	private static DataUnit determineDataUnit(String suffix, @Nullable DataUnit defaultUnit) {
-		DataUnit defaultUnitToUse = (defaultUnit != null ? defaultUnit : DataUnit.BYTES);
-		return (StringUtils.hasLength(suffix) ? DataUnit.fromSuffix(suffix) : defaultUnitToUse);
 	}
 
 	/**
@@ -269,6 +259,25 @@ public final class DataSize implements Comparable<DataSize>, Serializable {
 	@Override
 	public int hashCode() {
 		return Long.hashCode(this.bytes);
+	}
+
+
+	/**
+	 * Static nested class to support lazy loading of the {@link #PATTERN}.
+	 * @since 5.3.21
+	 */
+	private static class DataSizeUtils {
+
+		/**
+		 * The pattern for parsing.
+		 */
+		private static final Pattern PATTERN = Pattern.compile("^([+\\-]?\\d+)([a-zA-Z]{0,2})$");
+
+		private static DataUnit determineDataUnit(String suffix, @Nullable DataUnit defaultUnit) {
+			DataUnit defaultUnitToUse = (defaultUnit != null ? defaultUnit : DataUnit.BYTES);
+			return (StringUtils.hasLength(suffix) ? DataUnit.fromSuffix(suffix) : defaultUnitToUse);
+		}
+
 	}
 
 }

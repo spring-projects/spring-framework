@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -32,7 +33,6 @@ import reactor.core.scheduler.Schedulers;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBufferLimitException;
-import org.springframework.http.HttpMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
@@ -49,9 +49,6 @@ import org.springframework.util.Assert;
  * {@link #setMaxInMemorySize(int) maxInMemorySize} in memory, and parts larger
  * than that to a temporary file in
  * {@link #setFileStorageDirectory(Path) fileStorageDirectory}.
- * <p>In {@linkplain #setStreaming(boolean) streaming} mode, the contents of the
- * part is streamed directly from the parsed input buffer stream, and not stored
- * in memory nor file.
  *
  * <p>This reader can be provided to {@link MultipartHttpMessageReader} in order
  * to aggregate all parts into a Map.
@@ -115,7 +112,7 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	 * Configure the maximum amount of disk space allowed for file parts.
 	 * <p>By default this is set to -1, meaning that there is no maximum.
 	 * <p>Note that this property is ignored when
-	 * {@linkplain #setStreaming(boolean) streaming} is enabled, , or when
+	 * {@linkplain #setStreaming(boolean) streaming} is enabled, or when
 	 * {@link #setMaxInMemorySize(int) maxInMemorySize} is set to -1.
 	 */
 	public void setMaxDiskUsagePerPart(long maxDiskUsagePerPart) {
@@ -157,7 +154,7 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	 * @see Schedulers#newBoundedElastic
 	 */
 	public void setBlockingOperationScheduler(Scheduler blockingOperationScheduler) {
-		Assert.notNull(blockingOperationScheduler, "FileCreationScheduler must not be null");
+		Assert.notNull(blockingOperationScheduler, "'blockingOperationScheduler' must not be null");
 		this.blockingOperationScheduler = blockingOperationScheduler;
 	}
 
@@ -181,7 +178,10 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	 * {@link #setMaxDiskUsagePerPart(long) maxDiskUsagePerPart},
 	 * {@link #setFileStorageDirectory(Path) fileStorageDirectory}, and
 	 * {@link #setBlockingOperationScheduler(Scheduler) fileCreationScheduler}.
+	 * @deprecated as of 6.0, in favor of {@link PartEvent} and
+	 * {@link PartEventHttpMessageReader}
 	 */
+	@Deprecated(since = "6.0", forRemoval = true)
 	public void setStreaming(boolean streaming) {
 		this.streaming = streaming;
 	}
@@ -218,33 +218,35 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	@Override
 	public Flux<Part> read(ResolvableType elementType, ReactiveHttpInputMessage message, Map<String, Object> hints) {
 		return Flux.defer(() -> {
-			byte[] boundary = boundary(message);
+			byte[] boundary = MultipartUtils.boundary(message, this.headersCharset);
 			if (boundary == null) {
 				return Flux.error(new DecodingException("No multipart boundary found in Content-Type: \"" +
 						message.getHeaders().getContentType() + "\""));
 			}
-			Flux<MultipartParser.Token> tokens = MultipartParser.parse(message.getBody(), boundary,
+			Flux<MultipartParser.Token> allPartsTokens = MultipartParser.parse(message.getBody(), boundary,
 					this.maxHeadersSize, this.headersCharset);
 
-			return PartGenerator.createParts(tokens, this.maxParts, this.maxInMemorySize, this.maxDiskUsagePerPart,
-					this.streaming, this.fileStorage.directory(), this.blockingOperationScheduler);
+			AtomicInteger partCount = new AtomicInteger();
+			return allPartsTokens
+					.windowUntil(MultipartParser.Token::isLast)
+					.concatMap(partsTokens -> {
+						if (tooManyParts(partCount)) {
+							return Mono.error(new DecodingException("Too many parts (" + partCount.get() + "/" +
+									this.maxParts + " allowed)"));
+						}
+						else {
+							return PartGenerator.createPart(partsTokens,
+									this.maxInMemorySize, this.maxDiskUsagePerPart, this.streaming,
+									this.fileStorage.directory(), this.blockingOperationScheduler);
+						}
+					});
 		});
 	}
 
-	@Nullable
-	private byte[] boundary(HttpMessage message) {
-		MediaType contentType = message.getHeaders().getContentType();
-		if (contentType != null) {
-			String boundary = contentType.getParameter("boundary");
-			if (boundary != null) {
-				int len = boundary.length();
-				if (len > 2 && boundary.charAt(0) == '"' && boundary.charAt(len - 1) == '"') {
-					boundary = boundary.substring(1, len - 1);
-				}
-				return boundary.getBytes(this.headersCharset);
-			}
-		}
-		return null;
+	private boolean tooManyParts(AtomicInteger partCount) {
+		int count = partCount.incrementAndGet();
+		return this.maxParts > 0 && count > this.maxParts;
 	}
+
 
 }

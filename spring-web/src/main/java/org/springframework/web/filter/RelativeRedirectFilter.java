@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public class RelativeRedirectFilter extends OncePerRequestFilter {
 	 */
 	public void setRedirectStatus(HttpStatusCode status) {
 		Assert.notNull(status, "Property 'redirectStatus' is required");
-		Assert.isTrue(status.is3xxRedirection(), "Not a redirect status code");
+		Assert.isTrue(status.is3xxRedirection(), () -> "Not a redirect status code: " + status);
 		this.redirectStatus = status;
 	}
 

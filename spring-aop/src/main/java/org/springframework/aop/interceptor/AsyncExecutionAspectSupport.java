@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
@@ -36,14 +35,13 @@ import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.EmbeddedValueResolver;
-import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.task.support.TaskExecutorAdapter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.StringValueResolver;
 import org.springframework.util.function.SingletonSupplier;
 
 /**
@@ -59,6 +57,7 @@ import org.springframework.util.function.SingletonSupplier;
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author He Bo
  * @since 3.1.2
  */
 public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
@@ -83,6 +82,8 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	@Nullable
 	private BeanFactory beanFactory;
 
+	@Nullable
+	private StringValueResolver embeddedValueResolver;
 
 	/**
 	 * Create a new instance with a default {@link AsyncUncaughtExceptionHandler}.
@@ -153,12 +154,14 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
+		if (beanFactory instanceof ConfigurableBeanFactory configurableBeanFactory) {
+			this.embeddedValueResolver = new EmbeddedValueResolver(configurableBeanFactory);
+		}
 	}
 
 
 	/**
 	 * Determine the specific executor to use when executing the given method.
-	 * <p>Should preferably return an {@link AsyncListenableTaskExecutor} implementation.
 	 * @return the executor to use (or {@code null}, but just if no default executor is available)
 	 */
 	@Nullable
@@ -167,6 +170,9 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 		if (executor == null) {
 			Executor targetExecutor;
 			String qualifier = getExecutorQualifier(method);
+			if (this.embeddedValueResolver != null && StringUtils.hasLength(qualifier)) {
+				qualifier = this.embeddedValueResolver.resolveStringValue(qualifier);
+			}
 			if (StringUtils.hasLength(qualifier)) {
 				targetExecutor = findQualifiedExecutor(this.beanFactory, qualifier);
 			}
@@ -176,8 +182,8 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 			if (targetExecutor == null) {
 				return null;
 			}
-			executor = (targetExecutor instanceof AsyncListenableTaskExecutor ?
-					(AsyncListenableTaskExecutor) targetExecutor : new TaskExecutorAdapter(targetExecutor));
+			executor = (targetExecutor instanceof AsyncTaskExecutor ?
+					(AsyncTaskExecutor) targetExecutor : new TaskExecutorAdapter(targetExecutor));
 			this.executors.put(method, executor);
 		}
 		return executor;
@@ -209,10 +215,6 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 		if (beanFactory == null) {
 			throw new IllegalStateException("BeanFactory must be set on " + getClass().getSimpleName() +
 					" to access qualified executor '" + qualifier + "'");
-		}
-		if (beanFactory instanceof ConfigurableBeanFactory configurableBeanFactory) {
-			EmbeddedValueResolver embeddedValueResolver = new EmbeddedValueResolver(configurableBeanFactory);
-			qualifier = embeddedValueResolver.resolveStringValue(qualifier);
 		}
 		return BeanFactoryAnnotationUtils.qualifiedBeanOfType(beanFactory, Executor.class, qualifier);
 	}
@@ -277,19 +279,13 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * @return the execution result (potentially a corresponding {@link Future} handle)
 	 */
 	@Nullable
+	@SuppressWarnings("deprecation")
 	protected Object doSubmit(Callable<Object> task, AsyncTaskExecutor executor, Class<?> returnType) {
 		if (CompletableFuture.class.isAssignableFrom(returnType)) {
-			return CompletableFuture.supplyAsync(() -> {
-				try {
-					return task.call();
-				}
-				catch (Throwable ex) {
-					throw new CompletionException(ex);
-				}
-			}, executor);
+			return executor.submitCompletable(task);
 		}
-		else if (ListenableFuture.class.isAssignableFrom(returnType)) {
-			return ((AsyncListenableTaskExecutor) executor).submitListenable(task);
+		else if (org.springframework.util.concurrent.ListenableFuture.class.isAssignableFrom(returnType)) {
+			return ((org.springframework.core.task.AsyncListenableTaskExecutor) executor).submitListenable(task);
 		}
 		else if (Future.class.isAssignableFrom(returnType)) {
 			return executor.submit(task);

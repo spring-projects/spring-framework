@@ -66,8 +66,8 @@ public class ContentResultMatchers {
 
 	/**
 	 * Assert the ServletResponse content type. The given content type must
-	 * fully match including type, sub-type, and parameters. For checking
-	 * only the type and sub-type see {@link #contentTypeCompatibleWith(String)}.
+	 * fully match including type, subtype, and parameters. For checking
+	 * only the type and subtype see {@link #contentTypeCompatibleWith(String)}.
 	 */
 	public ResultMatcher contentType(String contentType) {
 		return contentType(MediaType.parseMediaType(contentType));
@@ -75,8 +75,8 @@ public class ContentResultMatchers {
 
 	/**
 	 * Assert the ServletResponse content type after parsing it as a MediaType.
-	 * The given content type must fully match including type, sub-type, and
-	 * parameters. For checking only the type and sub-type see
+	 * The given content type must fully match including type, subtype, and
+	 * parameters. For checking only the type and subtype see
 	 * {@link #contentTypeCompatibleWith(MediaType)}.
 	 */
 	public ResultMatcher contentType(MediaType contentType) {
@@ -160,7 +160,7 @@ public class ContentResultMatchers {
 	 * are "similar" - i.e. they contain the same elements and attributes
 	 * regardless of order.
 	 * <p>Use of this matcher requires the <a
-	 * href="http://xmlunit.sourceforge.net/">XMLUnit</a> library.
+	 * href="https://www.xmlunit.org/">XMLUnit</a> library.
 	 * @param xmlContent the expected XML content
 	 * @see MockMvcResultMatchers#xpath(String, Object...)
 	 * @see MockMvcResultMatchers#xpath(String, Map, Object...)

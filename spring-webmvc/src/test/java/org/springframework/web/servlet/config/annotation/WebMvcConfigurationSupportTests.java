@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
-import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
@@ -85,7 +84,6 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
-import org.springframework.web.servlet.theme.FixedThemeResolver;
 import org.springframework.web.servlet.view.BeanNameViewResolver;
 import org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
@@ -175,7 +173,7 @@ public class WebMvcConfigurationSupportTests {
 		ApplicationContext context = initContext(WebConfig.class);
 		RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
 		List<HttpMessageConverter<?>> converters = adapter.getMessageConverters();
-		assertThat(converters.size()).isEqualTo(12);
+		assertThat(converters).hasSizeGreaterThanOrEqualTo(15);
 		converters.stream()
 				.filter(converter -> converter instanceof AbstractJackson2HttpMessageConverter)
 				.forEach(converter -> {
@@ -335,12 +333,14 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 	@Test
-	public void defaultThemeResolverfiguration() {
+	@SuppressWarnings("deprecation")
+	public void defaultThemeResolverConfiguration() {
 		ApplicationContext context = initContext(WebConfig.class);
-		ThemeResolver themeResolver = context.getBean(THEME_RESOLVER_BEAN_NAME, ThemeResolver.class);
+		org.springframework.web.servlet.ThemeResolver themeResolver =
+				context.getBean(THEME_RESOLVER_BEAN_NAME, org.springframework.web.servlet.ThemeResolver.class);
 
 		assertThat(themeResolver).isNotNull();
-		assertThat(themeResolver).isInstanceOf(FixedThemeResolver.class);
+		assertThat(themeResolver).isInstanceOf(org.springframework.web.servlet.theme.FixedThemeResolver.class);
 	}
 
 	@Test

@@ -26,7 +26,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.StreamUtils;
 
 /**
  * {@link ClientHttpResponse} implementation based on OkHttp 3.x.
@@ -69,7 +68,7 @@ class OkHttp3ClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public InputStream getBody() throws IOException {
 		ResponseBody body = this.response.body();
-		return (body != null ? body.byteStream() : StreamUtils.emptyInput());
+		return (body != null ? body.byteStream() : InputStream.nullInputStream());
 	}
 
 	@Override

@@ -94,7 +94,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_XML;
 
 /**
- * A test fixture with a sub-class of {@link WebMvcConfigurationSupport} that also
+ * A test fixture with a subclass of {@link WebMvcConfigurationSupport} that also
  * implements the various {@link WebMvcConfigurer} extension points.
  *
  * The former doesn't implement the latter but the two must have compatible
@@ -199,7 +199,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void requestMappingHandlerAdapter() throws Exception {
+	public void requestMappingHandlerAdapter() {
 		RequestMappingHandlerAdapter adapter = this.config.requestMappingHandlerAdapter(
 				this.config.mvcContentNegotiationManager(), this.config.mvcConversionService(),
 				this.config.mvcValidator());
@@ -241,7 +241,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 				(DeferredResultProcessingInterceptor[]) fieldAccessor.getPropertyValue("deferredResultInterceptors");
 		assertThat(deferredResultInterceptors.length).isEqualTo(1);
 
-		assertThat(fieldAccessor.getPropertyValue("ignoreDefaultModelOnRedirect")).asInstanceOf(BOOLEAN).isFalse();
+		assertThat(fieldAccessor.getPropertyValue("ignoreDefaultModelOnRedirect")).asInstanceOf(BOOLEAN).isTrue();
 	}
 
 	@Test

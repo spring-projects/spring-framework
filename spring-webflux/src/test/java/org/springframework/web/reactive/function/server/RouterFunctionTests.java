@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.web.reactive.function.server;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
@@ -26,7 +28,10 @@ import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRe
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
+import static org.springframework.web.reactive.function.server.RequestPredicates.method;
+import static org.springframework.web.reactive.function.server.RequestPredicates.path;
 
 /**
  * @author Arjen Poutsma
@@ -137,11 +142,28 @@ public class RouterFunctionTests {
 				.withAttributes(atts -> {
 					atts.put("foo", "bar");
 					atts.put("baz", "qux");
-				}));
+				}))
+				.and(RouterFunctions.nest(path("/atts"),
+						RouterFunctions.route(GET("/3"), request -> ServerResponse.ok().build())
+						.withAttribute("foo", "bar")
+						.and(RouterFunctions.route(GET("/4"), request -> ServerResponse.ok().build())
+						.withAttribute("baz", "qux"))
+						.and(RouterFunctions.nest(path("/5"),
+								RouterFunctions.route(method(GET), request -> ServerResponse.ok().build())
+								.withAttribute("foo", "n3"))
+						.withAttribute("foo", "n2")))
+				.withAttribute("foo", "n1"));
 
 		AttributesTestVisitor visitor = new AttributesTestVisitor();
 		route.accept(visitor);
-		assertThat(visitor.visitCount()).isEqualTo(2);
+		assertThat(visitor.routerFunctionsAttributes()).containsExactly(
+				List.of(Map.of("foo", "bar", "baz", "qux")),
+				List.of(Map.of("foo", "bar", "baz", "qux")),
+				List.of(Map.of("foo", "bar"), Map.of("foo", "n1")),
+				List.of(Map.of("baz", "qux"), Map.of("foo", "n1")),
+				List.of(Map.of("foo", "n3"), Map.of("foo", "n2"), Map.of("foo", "n1"))
+		);
+		assertThat(visitor.visitCount()).isEqualTo(7);
 	}
 
 

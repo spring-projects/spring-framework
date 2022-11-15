@@ -116,6 +116,10 @@ class EvaluationTests extends AbstractExpressionTests {
 		void elvisOperator() {
 			evaluate("'Andy'?:'Dave'", "Andy", String.class);
 			evaluate("null?:'Dave'", "Dave", String.class);
+			evaluate("3?:1", 3, Integer.class);
+			evaluate("(2*3)?:1*10", 6, Integer.class);
+			evaluate("null?:2*10", 20, Integer.class);
+			evaluate("(null?:1)*10", 10, Integer.class);
 		}
 
 		@Test
@@ -622,6 +626,24 @@ class EvaluationTests extends AbstractExpressionTests {
 			evaluate("3?:#var=5", 3, Integer.class);
 			evaluate("null?:#var=5", 5, Integer.class);
 			evaluate("2>4?(3>2?true:false):(5<3?true:false)", false, Boolean.class);
+		}
+
+		@Test
+		void ternaryOperator06() {
+			evaluate("3?:#var=5", 3, Integer.class);
+			evaluate("null?:#var=5", 5, Integer.class);
+			evaluate("2>4?(3>2?true:false):(5<3?true:false)", false, Boolean.class);
+		}
+
+		@Test
+		void ternaryExpressionWithImplicitGrouping() {
+			evaluate("4 % 2 == 0 ? 2 : 3 * 10", 2, Integer.class);
+			evaluate("4 % 2 == 1 ? 2 : 3 * 10", 30, Integer.class);
+		}
+
+		@Test
+		void ternaryExpressionWithExplicitGrouping() {
+			evaluate("((4 % 2 == 0) ? 2 : 1) * 10", 20, Integer.class);
 		}
 
 		@Test

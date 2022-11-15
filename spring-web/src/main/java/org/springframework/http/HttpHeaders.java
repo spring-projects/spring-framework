@@ -420,6 +420,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	};
 
 
+	@SuppressWarnings("serial")
 	final MultiValueMap<String, String> headers;
 
 
@@ -485,7 +486,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 						range.getWeight() == Locale.LanguageRange.MAX_WEIGHT ?
 								range.getRange() :
 								range.getRange() + ";q=" + decimal.format(range.getWeight()))
-				.collect(Collectors.toList());
+				.toList();
 		set(ACCEPT_LANGUAGE, toCommaDelimitedString(values));
 	}
 
@@ -510,7 +511,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	public void setAcceptLanguageAsLocales(List<Locale> locales) {
 		setAcceptLanguage(locales.stream()
 				.map(locale -> new Locale.LanguageRange(locale.toLanguageTag()))
-				.collect(Collectors.toList()));
+				.toList());
 	}
 
 	/**
@@ -528,7 +529,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		return ranges.stream()
 				.map(range -> Locale.forLanguageTag(range.getRange()))
 				.filter(locale -> StringUtils.hasText(locale.getDisplayName()))
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 	/**
@@ -1605,7 +1606,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Retrieve a combined result from the field values of multi-valued headers.
+	 * Retrieve a combined result from the field values of multivalued headers.
 	 * @param headerName the header name
 	 * @return the combined result
 	 * @since 4.3

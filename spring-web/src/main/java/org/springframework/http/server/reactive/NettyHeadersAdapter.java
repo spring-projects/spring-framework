@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import io.netty.handler.codec.http.HttpHeaders;
 
@@ -38,7 +37,7 @@ import org.springframework.util.MultiValueMap;
  * @author Brian Clozel
  * @since 5.1.1
  */
-class NettyHeadersAdapter implements MultiValueMap<String, String> {
+final class NettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	private final HttpHeaders headers;
 
@@ -163,7 +162,7 @@ class NettyHeadersAdapter implements MultiValueMap<String, String> {
 	@Override
 	public Collection<List<String>> values() {
 		return this.headers.names().stream()
-				.map(this.headers::getAll).collect(Collectors.toList());
+				.map(this.headers::getAll).toList();
 	}
 
 	@Override

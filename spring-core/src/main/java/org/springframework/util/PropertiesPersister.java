@@ -35,7 +35,6 @@ import java.util.Properties;
  * @author Juergen Hoeller
  * @since 10.03.2004
  * @see DefaultPropertiesPersister
- * @see org.springframework.core.io.support.ResourcePropertiesPersister
  * @see java.util.Properties
  */
 public interface PropertiesPersister {

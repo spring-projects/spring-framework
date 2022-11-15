@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,11 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
  * Unit tests for {@link InvocableHandlerMethod}.
@@ -127,23 +129,23 @@ public class InvocableHandlerMethodTests {
 	@Test
 	public void invocationTargetException() throws Exception {
 		RuntimeException runtimeException = new RuntimeException("error");
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
-				getInvocable(Throwable.class).invokeForRequest(this.request, null, runtimeException))
+		assertThatRuntimeException()
+			.isThrownBy(() -> getInvocable(Throwable.class).invokeForRequest(this.request, null, runtimeException))
 			.isSameAs(runtimeException);
 
 		Error error = new Error("error");
-		assertThatExceptionOfType(Error.class).isThrownBy(() ->
-				getInvocable(Throwable.class).invokeForRequest(this.request, null, error))
+		assertThatExceptionOfType(Error.class)
+			.isThrownBy(() -> getInvocable(Throwable.class).invokeForRequest(this.request, null, error))
 			.isSameAs(error);
 
 		Exception exception = new Exception("error");
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-				getInvocable(Throwable.class).invokeForRequest(this.request, null, exception))
+		assertThatException()
+			.isThrownBy(() -> getInvocable(Throwable.class).invokeForRequest(this.request, null, exception))
 			.isSameAs(exception);
 
 		Throwable throwable = new Throwable("error");
-		assertThatIllegalStateException().isThrownBy(() ->
-				getInvocable(Throwable.class).invokeForRequest(this.request, null, throwable))
+		assertThatIllegalStateException()
+			.isThrownBy(() -> getInvocable(Throwable.class).invokeForRequest(this.request, null, throwable))
 			.withCause(throwable)
 			.withMessageContaining("Invocation failure");
 	}
@@ -151,8 +153,8 @@ public class InvocableHandlerMethodTests {
 	@Test  // SPR-13917
 	public void invocationErrorMessage() throws Exception {
 		this.composite.addResolver(new StubArgumentResolver(double.class));
-		assertThatIllegalStateException().isThrownBy(() ->
-				getInvocable(double.class).invokeForRequest(this.request, null))
+		assertThatIllegalStateException()
+			.isThrownBy(() -> getInvocable(double.class).invokeForRequest(this.request, null))
 			.withMessageContaining("Illegal argument");
 	}
 

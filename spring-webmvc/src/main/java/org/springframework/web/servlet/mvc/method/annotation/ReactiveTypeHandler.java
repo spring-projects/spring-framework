@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,14 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.micrometer.context.ContextSnapshot;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
@@ -44,6 +47,7 @@ import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeType;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -77,6 +81,9 @@ class ReactiveTypeHandler {
 	@SuppressWarnings("deprecation")
 	private static final List<MediaType> JSON_STREAMING_MEDIA_TYPES =
 			Arrays.asList(MediaType.APPLICATION_NDJSON, MediaType.APPLICATION_STREAM_JSON);
+
+	private static final boolean isContextPropagationPresent = ClassUtils.isPresent(
+			"io.micrometer.context.ContextSnapshot", ReactiveTypeHandler.class.getClassLoader());
 
 	private static final Log logger = LogFactory.getLog(ReactiveTypeHandler.class);
 
@@ -126,8 +133,13 @@ class ReactiveTypeHandler {
 			ModelAndViewContainer mav, NativeWebRequest request) throws Exception {
 
 		Assert.notNull(returnValue, "Expected return value");
-		ReactiveAdapter adapter = this.adapterRegistry.getAdapter(returnValue.getClass());
-		Assert.state(adapter != null, () -> "Unexpected return value: " + returnValue);
+		Class<?> clazz = returnValue.getClass();
+		ReactiveAdapter adapter = this.adapterRegistry.getAdapter(clazz);
+		Assert.state(adapter != null, () -> "Unexpected return value type: " + clazz);
+
+		if (isContextPropagationPresent) {
+			returnValue = ContextSnapshotHelper.writeReactorContext(returnValue);
+		}
 
 		ResolvableType elementType = ResolvableType.forMethodParameter(returnType).getGeneric();
 		Class<?> elementClass = elementType.toClass();
@@ -496,6 +508,24 @@ class ReactiveTypeHandler {
 
 		public ResolvableType getReturnType() {
 			return ResolvableType.forClassWithGenerics(List.class, this.elementType);
+		}
+	}
+
+
+	private static class ContextSnapshotHelper {
+
+		public static Object writeReactorContext(Object returnValue) {
+			if (Mono.class.isAssignableFrom(returnValue.getClass())) {
+				ContextSnapshot snapshot = ContextSnapshot.captureAll();
+				return ((Mono<?>) returnValue).contextWrite(snapshot::updateContext);
+			}
+			else if (Flux.class.isAssignableFrom(returnValue.getClass())) {
+				ContextSnapshot snapshot = ContextSnapshot.captureAll();
+				return ((Flux<?>) returnValue).contextWrite(snapshot::updateContext);
+			}
+			else {
+				return returnValue;
+			}
 		}
 	}
 

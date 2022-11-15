@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,41 +45,45 @@ public class RelativeRedirectFilterTests {
 
 
 	@Test
-	public void sendRedirectHttpStatusWhenNullThenIllegalArgumentException() {
+	void sendRedirectHttpStatusWhenNullThenIllegalArgumentException() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.filter.setRedirectStatus(null));
 	}
 
 	@Test
-	public void sendRedirectHttpStatusWhenNot3xxThenIllegalArgumentException() {
+	void sendRedirectHttpStatusWhenNot3xxThenIllegalArgumentException() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.filter.setRedirectStatus(HttpStatus.OK));
 	}
 
 	@Test
-	public void doFilterSendRedirectWhenDefaultsThenLocationAnd303() throws Exception {
+	void doFilterSendRedirectWhenDefaultsThenLocationAnd303() throws Exception {
 		String location = "/foo";
 		sendRedirect(location);
 
 		InOrder inOrder = Mockito.inOrder(this.response);
+		inOrder.verify(this.response).resetBuffer();
 		inOrder.verify(this.response).setStatus(HttpStatus.SEE_OTHER.value());
 		inOrder.verify(this.response).setHeader(HttpHeaders.LOCATION, location);
+		inOrder.verify(this.response).flushBuffer();
 	}
 
 	@Test
-	public void doFilterSendRedirectWhenCustomSendRedirectHttpStatusThenLocationAnd301() throws Exception {
+	void doFilterSendRedirectWhenCustomSendRedirectHttpStatusThenLocationAnd301() throws Exception {
 		String location = "/foo";
 		HttpStatus status = HttpStatus.MOVED_PERMANENTLY;
 		this.filter.setRedirectStatus(status);
 		sendRedirect(location);
 
 		InOrder inOrder = Mockito.inOrder(this.response);
+		inOrder.verify(this.response).resetBuffer();
 		inOrder.verify(this.response).setStatus(status.value());
 		inOrder.verify(this.response).setHeader(HttpHeaders.LOCATION, location);
+		inOrder.verify(this.response).flushBuffer();
 	}
 
 	@Test
-	public void wrapOnceOnly() throws Exception {
+	void wrapOnceOnly() throws Exception {
 		HttpServletResponse original = new MockHttpServletResponse();
 
 		MockFilterChain chain = new MockFilterChain();

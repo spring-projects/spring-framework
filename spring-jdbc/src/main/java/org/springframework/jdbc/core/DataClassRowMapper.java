@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,9 +98,18 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 		if (this.constructorParameterNames != null && this.constructorParameterTypes != null) {
 			args = new Object[this.constructorParameterNames.length];
 			for (int i = 0; i < args.length; i++) {
-				String name = underscoreName(this.constructorParameterNames[i]);
+				String name = this.constructorParameterNames[i];
+				int index;
+				try {
+					// Try direct name match first
+					index = rs.findColumn(lowerCaseName(name));
+				}
+				catch (SQLException ex) {
+					// Try underscored name match instead
+					index = rs.findColumn(underscoreName(name));
+				}
 				TypeDescriptor td = this.constructorParameterTypes[i];
-				Object value = getColumnValue(rs, rs.findColumn(name), td.getType());
+				Object value = getColumnValue(rs, index, td.getType());
 				args[i] = tc.convertIfNecessary(value, td.getType(), td);
 			}
 		}

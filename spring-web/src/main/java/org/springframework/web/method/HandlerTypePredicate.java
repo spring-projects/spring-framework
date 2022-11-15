@@ -35,7 +35,7 @@ import org.springframework.util.StringUtils;
  * <strong>any</strong> of the following selectors match:
  * <ul>
  * <li>Base packages -- for selecting handlers by their package.
- * <li>Assignable types -- for selecting handlers by super type.
+ * <li>Assignable types -- for selecting handlers by supertype.
  * <li>Annotations -- for selecting handlers annotated in a specific way.
  * </ul>
  * <p>Composability methods on {@link Predicate} can be used :
@@ -128,7 +128,7 @@ public final class HandlerTypePredicate implements Predicate<Class<?>> {
 
 	/**
 	 * Match handlers that are assignable to a given type.
-	 * @param types one or more handler super types
+	 * @param types one or more handler supertypes
 	 */
 	public static HandlerTypePredicate forAssignableType(Class<?>... types) {
 		return new Builder().assignableType(types).build();
@@ -187,7 +187,7 @@ public final class HandlerTypePredicate implements Predicate<Class<?>> {
 
 		/**
 		 * Match handlers that are assignable to a given type.
-		 * @param types one or more handler super types
+		 * @param types one or more handler supertypes
 		 */
 		public Builder assignableType(Class<?>... types) {
 			this.assignableTypes.addAll(Arrays.asList(types));

@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.StringJoiner;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
 
@@ -232,26 +233,43 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Trim <i>all</i> whitespace from the given {@code String}:
+	 * Trim <em>all</em> whitespace from the given {@code CharSequence}:
 	 * leading, trailing, and in between characters.
-	 * @param str the {@code String} to check
-	 * @return the trimmed {@code String}
+	 * @param text the {@code CharSequence} to check
+	 * @return the trimmed {@code CharSequence}
+	 * @since 5.3.22
+	 * @see #trimAllWhitespace(String)
 	 * @see java.lang.Character#isWhitespace
 	 */
-	public static String trimAllWhitespace(String str) {
-		if (!hasLength(str)) {
-			return str;
+	public static CharSequence trimAllWhitespace(CharSequence text) {
+		if (!hasLength(text)) {
+			return text;
 		}
 
-		int len = str.length();
-		StringBuilder sb = new StringBuilder(str.length());
+		int len = text.length();
+		StringBuilder sb = new StringBuilder(text.length());
 		for (int i = 0; i < len; i++) {
-			char c = str.charAt(i);
+			char c = text.charAt(i);
 			if (!Character.isWhitespace(c)) {
 				sb.append(c);
 			}
 		}
 		return sb.toString();
+	}
+
+	/**
+	 * Trim <em>all</em> whitespace from the given {@code String}:
+	 * leading, trailing, and in between characters.
+	 * @param str the {@code String} to check
+	 * @return the trimmed {@code String}
+	 * @see #trimAllWhitespace(CharSequence)
+	 * @see java.lang.Character#isWhitespace
+	 */
+	public static String trimAllWhitespace(String str) {
+		if (str == null) {
+			return null;
+		}
+		return trimAllWhitespace((CharSequence) str).toString();
 	}
 
 	/**
@@ -536,6 +554,24 @@ public abstract class StringUtils {
 		return changeFirstCharacterCase(str, false);
 	}
 
+	/**
+	 * Uncapitalize a {@code String} in JavaBeans property format,
+	 * changing the first letter to lower case as per
+	 * {@link Character#toLowerCase(char)}, unless the initial two
+	 * letters are upper case in direct succession.
+	 * @param str the {@code String} to uncapitalize
+	 * @return the uncapitalized {@code String}
+	 * @since 6.0
+	 * @see java.beans.Introspector#decapitalize(String)
+	 */
+	public static String uncapitalizeAsProperty(String str) {
+		if (!hasLength(str) || (str.length() > 1 && Character.isUpperCase(str.charAt(0)) &&
+				Character.isUpperCase(str.charAt(1)))) {
+			return str;
+		}
+		return changeFirstCharacterCase(str, false);
+	}
+
 	private static String changeFirstCharacterCase(String str, boolean capitalize) {
 		if (!hasLength(str)) {
 			return str;
@@ -791,11 +827,11 @@ public abstract class StringUtils {
 
 	/**
 	 * Parse the given {@code String} value into a {@link Locale}, accepting
-	 * the {@link Locale#toString} format as well as BCP 47 language tags.
+	 * the {@link Locale#toString} format as well as BCP 47 language tags as
+	 * specified by {@link Locale#forLanguageTag}.
 	 * @param localeValue the locale value: following either {@code Locale's}
 	 * {@code toString()} format ("en", "en_UK", etc), also accepting spaces as
 	 * separators (as an alternative to underscores), or BCP 47 (e.g. "en-UK")
-	 * as specified by {@link Locale#forLanguageTag} on Java 7+
 	 * @return a corresponding {@code Locale} instance, or {@code null} if none
 	 * @throws IllegalArgumentException in case of an invalid locale specification
 	 * @since 5.0.4
@@ -804,15 +840,14 @@ public abstract class StringUtils {
 	 */
 	@Nullable
 	public static Locale parseLocale(String localeValue) {
-		String[] tokens = tokenizeLocaleSource(localeValue);
-		if (tokens.length == 1) {
+		if (!localeValue.contains("_") && !localeValue.contains(" ")) {
 			validateLocalePart(localeValue);
 			Locale resolved = Locale.forLanguageTag(localeValue);
 			if (resolved.getLanguage().length() > 0) {
 				return resolved;
 			}
 		}
-		return parseLocaleTokens(localeValue, tokens);
+		return parseLocaleString(localeValue);
 	}
 
 	/**
@@ -831,38 +866,35 @@ public abstract class StringUtils {
 	 */
 	@Nullable
 	public static Locale parseLocaleString(String localeString) {
-		return parseLocaleTokens(localeString, tokenizeLocaleSource(localeString));
-	}
-
-	private static String[] tokenizeLocaleSource(String localeSource) {
-		return tokenizeToStringArray(localeSource, "_ ", false, false);
-	}
-
-	@Nullable
-	private static Locale parseLocaleTokens(String localeString, String[] tokens) {
-		String language = (tokens.length > 0 ? tokens[0] : "");
-		String country = (tokens.length > 1 ? tokens[1] : "");
-		validateLocalePart(language);
-		validateLocalePart(country);
-
-		String variant = "";
-		if (tokens.length > 2) {
-			// There is definitely a variant, and it is everything after the country
-			// code sans the separator between the country code and the variant.
-			int endIndexOfCountryCode = localeString.indexOf(country, language.length()) + country.length();
-			// Strip off any leading '_' and whitespace, what's left is the variant.
-			variant = localeString.substring(endIndexOfCountryCode).stripLeading();
-			if (variant.startsWith("_")) {
-				variant = trimLeadingCharacter(variant, '_');
-			}
+		if (localeString.equals("")) {
+			return null;
 		}
-
-		if (variant.isEmpty() && country.startsWith("#")) {
-			variant = country;
-			country = "";
+		String delimiter = "_";
+		if (!localeString.contains("_") && localeString.contains(" ")) {
+			delimiter = " ";
 		}
-
-		return (language.length() > 0 ? new Locale(language, country, variant) : null);
+		final String[] tokens = localeString.split(delimiter, -1);
+		if (tokens.length == 1) {
+			final String language = tokens[0];
+			validateLocalePart(language);
+			return new Locale(language);
+		}
+		else if (tokens.length == 2) {
+			final String language = tokens[0];
+			validateLocalePart(language);
+			final String country = tokens[1];
+			validateLocalePart(country);
+			return new Locale(language, country);
+		}
+		else if (tokens.length > 2) {
+			final String language = tokens[0];
+			validateLocalePart(language);
+			final String country = tokens[1];
+			validateLocalePart(country);
+			final String variant = Arrays.stream(tokens).skip(2).collect(Collectors.joining(delimiter));
+			return new Locale(language, country, variant);
+		}
+		throw new IllegalArgumentException("Invalid locale format: '" + localeString + "'");
 	}
 
 	private static void validateLocalePart(String localePart) {
@@ -1148,7 +1180,7 @@ public abstract class StringUtils {
 	 * {@code String} array.
 	 * <p>A single {@code delimiter} may consist of more than one character,
 	 * but it will still be considered as a single delimiter string, rather
-	 * than as bunch of potential delimiter characters, in contrast to
+	 * than as a bunch of potential delimiter characters, in contrast to
 	 * {@link #tokenizeToStringArray}.
 	 * @param str the input {@code String} (potentially {@code null} or empty)
 	 * @param delimiter the delimiter between elements (this is a single delimiter,
@@ -1165,7 +1197,7 @@ public abstract class StringUtils {
 	 * a {@code String} array.
 	 * <p>A single {@code delimiter} may consist of more than one character,
 	 * but it will still be considered as a single delimiter string, rather
-	 * than as bunch of potential delimiter characters, in contrast to
+	 * than as a bunch of potential delimiter characters, in contrast to
 	 * {@link #tokenizeToStringArray}.
 	 * @param str the input {@code String} (potentially {@code null} or empty)
 	 * @param delimiter the delimiter between elements (this is a single delimiter,

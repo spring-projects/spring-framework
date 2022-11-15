@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -473,7 +473,8 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 				return this.messageConverter.toMessage(this.message, session);
 			}
 			catch (Exception ex) {
-				throw new MessageConversionException("Could not convert '" + this.message + "'", ex);
+				throw new MessageConversionException(
+						"Could not convert '" + this.message + "': " + ex.getMessage(), ex);
 			}
 		}
 	}

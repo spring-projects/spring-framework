@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,12 @@
 package org.springframework.web.socket.server.standard;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.websocket.Endpoint;
-import jakarta.websocket.Extension;
 import jakarta.websocket.server.ServerContainer;
 import jakarta.websocket.server.ServerEndpointConfig;
-
-import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.lang.Nullable;
-import org.springframework.web.socket.server.HandshakeFailureException;
 
 /**
  * WebSphere support for upgrading an {@link HttpServletRequest} during a
@@ -41,12 +32,11 @@ import org.springframework.web.socket.server.HandshakeFailureException;
  * Java configuration, access the container instance through the
  * "javax.websocket.server.ServerContainer" ServletContext attribute.
  *
- * <p>Tested with WAS Liberty beta (August 2015) for the upcoming 8.5.5.7 release.
- *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.2.1
  */
-public class WebSphereRequestUpgradeStrategy extends AbstractStandardUpgradeStrategy {
+public class WebSphereRequestUpgradeStrategy extends StandardWebSocketUpgradeStrategy {
 
 	private static final Method upgradeMethod;
 
@@ -64,34 +54,11 @@ public class WebSphereRequestUpgradeStrategy extends AbstractStandardUpgradeStra
 
 
 	@Override
-	public String[] getSupportedVersions() {
-		return new String[] {"13"};
-	}
+	protected void upgradeHttpToWebSocket(HttpServletRequest request, HttpServletResponse response,
+			ServerEndpointConfig endpointConfig, Map<String, String> pathParams) throws Exception {
 
-	@Override
-	public void upgradeInternal(ServerHttpRequest httpRequest, ServerHttpResponse httpResponse,
-			@Nullable String selectedProtocol, List<Extension> selectedExtensions, Endpoint endpoint)
-			throws HandshakeFailureException {
-
-		HttpServletRequest request = getHttpServletRequest(httpRequest);
-		HttpServletResponse response = getHttpServletResponse(httpResponse);
-
-		StringBuffer requestUrl = request.getRequestURL();
-		String path = request.getRequestURI();  // shouldn't matter
-		Map<String, String> pathParams = Collections.<String, String> emptyMap();
-
-		ServerEndpointRegistration endpointConfig = new ServerEndpointRegistration(path, endpoint);
-		endpointConfig.setSubprotocols(Collections.singletonList(selectedProtocol));
-		endpointConfig.setExtensions(selectedExtensions);
-
-		try {
-			ServerContainer container = getContainer(request);
-			upgradeMethod.invoke(container, request, response, endpointConfig, pathParams);
-		}
-		catch (Exception ex) {
-			throw new HandshakeFailureException(
-					"Servlet request failed to upgrade to WebSocket for " + requestUrl, ex);
-		}
+		ServerContainer container = getContainer(request);
+		upgradeMethod.invoke(container, request, response, endpointConfig, pathParams);
 	}
 
 }

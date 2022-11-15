@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import org.springframework.web.cors.CorsProcessor;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.cors.DefaultCorsProcessor;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
@@ -87,7 +88,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	private Object defaultHandler;
 
 	@Nullable
-	private PathPatternParser patternParser;
+	private PathPatternParser patternParser = new PathPatternParser();
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
@@ -127,43 +128,45 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
-	 * Enable use of pre-parsed {@link PathPattern}s as an alternative to
-	 * String pattern matching with {@link AntPathMatcher}. The syntax is
-	 * largely the same but the {@code PathPattern} syntax is more tailored for
-	 * web applications, and its implementation is more efficient.
-	 * <p>This property is mutually exclusive with the following others which
-	 * are effectively ignored when this is set:
+	 * Set the {@link PathPatternParser} to parse {@link PathPattern patterns}
+	 * with for URL path matching. Parsed patterns provide a more modern and
+	 * efficient alternative to String path matching via {@link AntPathMatcher}.
+	 * <p><strong>Note:</strong> This property is mutually exclusive with the
+	 * below properties, all of which are not necessary for parsed patterns and
+	 * are ignored when a {@code PathPatternParser} is available:
 	 * <ul>
-	 * <li>{@link #setAlwaysUseFullPath} -- {@code PathPatterns} always use the
-	 * full path and ignore the servletPath/pathInfo which are decoded and
-	 * partially normalized and therefore not comparable against the
-	 * {@link HttpServletRequest#getRequestURI() requestURI}.
-	 * <li>{@link #setRemoveSemicolonContent} -- {@code PathPatterns} always
+	 * <li>{@link #setAlwaysUseFullPath} -- parsed patterns always use the
+	 * full path and consider the servletPath only when a Servlet is mapped by
+	 * path prefix.
+	 * <li>{@link #setRemoveSemicolonContent} -- parsed patterns always
 	 * ignore semicolon content for path matching purposes, but path parameters
 	 * remain available for use in controllers via {@code @MatrixVariable}.
-	 * <li>{@link #setUrlDecode} -- {@code PathPatterns} match one decoded path
-	 * segment at a time and never need the full decoded path which can cause
-	 * issues due to decoded reserved characters.
-	 * <li>{@link #setUrlPathHelper} -- the request path is pre-parsed globally
-	 * by the {@link org.springframework.web.servlet.DispatcherServlet
-	 * DispatcherServlet} or by
+	 * <li>{@link #setUrlDecode} -- parsed patterns match one decoded path
+	 * segment at a time and therefore don't need to decode the full path.
+	 * <li>{@link #setUrlPathHelper} -- for parsed patterns, the request path
+	 * is parsed once in {@link org.springframework.web.servlet.DispatcherServlet
+	 * DispatcherServlet} or in
 	 * {@link org.springframework.web.filter.ServletRequestPathFilter
-	 * ServletRequestPathFilter} using {@link ServletRequestPathUtils} and saved
-	 * in a request attribute for re-use.
-	 * <li>{@link #setPathMatcher} -- patterns are parsed to {@code PathPatterns}
-	 * and used instead of String matching with {@code PathMatcher}.
+	 * ServletRequestPathFilter} using {@link ServletRequestPathUtils} and cached
+	 * in a request attribute.
+	 * <li>{@link #setPathMatcher} -- a parsed patterns encapsulates the logic
+	 * for path matching and does need a {@code PathMatcher}.
 	 * </ul>
-	 * <p>By default this is not set.
+	 * <p>By default, as of 6.0, this is set to a {@link PathPatternParser}
+	 * instance with default settings and therefore use of parsed patterns is
+	 * enabled. Set this to {@code null} to switch to String path matching
+	 * via {@link AntPathMatcher} instead.
 	 * @param patternParser the parser to use
 	 * @since 5.3
 	 */
-	public void setPatternParser(PathPatternParser patternParser) {
+	public void setPatternParser(@Nullable PathPatternParser patternParser) {
 		this.patternParser = patternParser;
 	}
 
 	/**
 	 * Return the {@link #setPatternParser(PathPatternParser) configured}
-	 * {@code PathPatternParser}, or {@code null}.
+	 * {@code PathPatternParser}, or {@code null} otherwise which indicates that
+	 * String pattern matching with {@link AntPathMatcher} is enabled instead.
 	 * @since 5.3
 	 */
 	@Nullable
@@ -176,8 +179,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * <p><strong>Note:</strong> This property is mutually exclusive with and
 	 * ignored when {@link #setPatternParser(PathPatternParser)} is set.
 	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath(boolean)
+	 * @deprecated as of 6.0, in favor of using {@link #setUrlPathHelper(UrlPathHelper)}
 	 */
-	@SuppressWarnings("deprecation")
+	@Deprecated(since = "6.0")
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
 		this.urlPathHelper.setAlwaysUseFullPath(alwaysUseFullPath);
 		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource urlConfigSource) {
@@ -190,8 +194,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * <p><strong>Note:</strong> This property is mutually exclusive with and
 	 * ignored when {@link #setPatternParser(PathPatternParser)} is set.
 	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode(boolean)
+	 * @deprecated as of 6.0, in favor of using {@link #setUrlPathHelper(UrlPathHelper)}
 	 */
-	@SuppressWarnings("deprecation")
+	@Deprecated(since = "6.0")
 	public void setUrlDecode(boolean urlDecode) {
 		this.urlPathHelper.setUrlDecode(urlDecode);
 		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource urlConfigSource) {
@@ -204,8 +209,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * <p><strong>Note:</strong> This property is mutually exclusive with and
 	 * ignored when {@link #setPatternParser(PathPatternParser)} is set.
 	 * @see org.springframework.web.util.UrlPathHelper#setRemoveSemicolonContent(boolean)
+	 * @deprecated as of 6.0, in favor of using {@link #setUrlPathHelper(UrlPathHelper)}
 	 */
-	@SuppressWarnings("deprecation")
+	@Deprecated(since = "6.0")
 	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
 		this.urlPathHelper.setRemoveSemicolonContent(removeSemicolonContent);
 		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource urlConfigSource) {
@@ -570,13 +576,21 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	protected String initLookupPath(HttpServletRequest request) {
 		if (usesPathPatterns()) {
 			request.removeAttribute(UrlPathHelper.PATH_ATTRIBUTE);
-			RequestPath requestPath = ServletRequestPathUtils.getParsedRequestPath(request);
+			RequestPath requestPath = getRequestPath(request);
 			String lookupPath = requestPath.pathWithinApplication().value();
 			return UrlPathHelper.defaultInstance.removeSemicolonContent(lookupPath);
 		}
 		else {
 			return getUrlPathHelper().resolveAndCacheLookupPath(request);
 		}
+	}
+
+	private RequestPath getRequestPath(HttpServletRequest request) {
+		// Expect pre-parsed path with DispatcherServlet,
+		// but otherwise parse per handler lookup + cache for handling
+		return request.getAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE) != null ?
+				ServletRequestPathUtils.getParsedRequestPath(request) :
+				ServletRequestPathUtils.parseAndCache(request);
 	}
 
 	/**

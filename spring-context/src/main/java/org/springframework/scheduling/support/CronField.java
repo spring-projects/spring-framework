@@ -49,7 +49,7 @@ abstract class CronField {
 	}
 
 	/**
-	 * Return a {@code CronField} enabled for 0 nano seconds.
+	 * Return a {@code CronField} enabled for 0 nanoseconds.
 	 */
 	public static CronField zeroNanos() {
 		return BitsCronField.zeroNanos();
@@ -70,7 +70,7 @@ abstract class CronField {
 	}
 
 	/**
-	 * Parse the given value into a hours {@code CronField}, the third entry of a cron expression.
+	 * Parse the given value into an hours {@code CronField}, the third entry of a cron expression.
 	 */
 	public static CronField parseHours(String value) {
 		return BitsCronField.parseHours(value);
@@ -201,7 +201,7 @@ abstract class CronField {
 		}
 
 		/**
-		 * Return the general range of this type. For instance, this methods
+		 * Return the general range of this type. For instance, this method
 		 * will return 0-31 for {@link #MONTH}.
 		 * @return the range of this field
 		 */

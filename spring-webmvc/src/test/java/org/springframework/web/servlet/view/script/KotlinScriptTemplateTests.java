@@ -23,6 +23,8 @@ import java.util.Map;
 import jakarta.servlet.ServletContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.JRE;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -41,6 +43,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Sebastien Deleuze
  */
+@DisabledOnJre(value = JRE.JAVA_19, disabledReason = "Kotlin doesn't support Java 19 yet")
 public class KotlinScriptTemplateTests {
 
 	private WebApplicationContext webAppContext;

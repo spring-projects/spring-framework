@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -388,7 +388,7 @@ public class MvcUriComponentsBuilder {
 	 * <p>The configured
 	 * {@link org.springframework.web.servlet.handler.HandlerMethodMappingNamingStrategy
 	 * HandlerMethodMappingNamingStrategy} determines the names of controller
-	 * method request mappings at startup. By default all mappings are assigned
+	 * method request mappings at startup. By default, all mappings are assigned
 	 * a name based on the capital letters of the class name, followed by "#" as
 	 * separator, and then the method name. For example "PC#getPerson"
 	 * for a class named PersonController with method getPerson. In case the
@@ -448,7 +448,7 @@ public class MvcUriComponentsBuilder {
 	 */
 	public static MethodArgumentBuilder fromMappingName(@Nullable UriComponentsBuilder builder, String name) {
 		WebApplicationContext wac = getWebApplicationContext();
-		Assert.notNull(wac, "No WebApplicationContext. ");
+		Assert.notNull(wac, "No WebApplicationContext");
 		Map<String, RequestMappingInfoHandlerMapping> map = wac.getBeansOfType(RequestMappingInfoHandlerMapping.class);
 		List<HandlerMethod> handlerMethods = null;
 		for (RequestMappingInfoHandlerMapping mapping : map.values()) {
@@ -642,7 +642,7 @@ public class MvcUriComponentsBuilder {
 			contributor.contributeMethodArgument(param, args[i], builder, uriVars);
 		}
 
-		// This may not be all the URI variables, supply what we have so far..
+		// This may not be all the URI variables, supply what we have so far.
 		return builder.uriVariables(uriVars);
 	}
 
@@ -786,6 +786,7 @@ public class MvcUriComponentsBuilder {
 				enhancer.setSuperclass(controllerType);
 				enhancer.setInterfaces(new Class<?>[] {MethodInvocationInfo.class});
 				enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
+				enhancer.setAttemptLoad(true);
 				enhancer.setCallbackType(org.springframework.cglib.proxy.MethodInterceptor.class);
 
 				Class<?> proxyClass = enhancer.createClass();

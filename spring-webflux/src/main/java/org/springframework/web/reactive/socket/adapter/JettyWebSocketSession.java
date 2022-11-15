@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 
 
 	public JettyWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory) {
-		this(session, info, factory, (Sinks.Empty<Void>) null);
+		this(session, info, factory, null);
 	}
 
 	public JettyWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory,
@@ -59,13 +59,6 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 		super(session, ObjectUtils.getIdentityHexString(session), info, factory, completionSink);
 		// TODO: suspend causes failures if invoked at this stage
 		// suspendReceiving();
-	}
-
-	@Deprecated
-	public JettyWebSocketSession(Session session, HandshakeInfo info, DataBufferFactory factory,
-			@Nullable reactor.core.publisher.MonoProcessor<Void> completionMono) {
-
-		super(session, ObjectUtils.getIdentityHexString(session), info, factory, completionMono);
 	}
 
 
@@ -91,7 +84,7 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 
 	@Override
 	protected boolean sendMessage(WebSocketMessage message) throws IOException {
-		ByteBuffer buffer = message.getPayload().asByteBuffer();
+		ByteBuffer buffer = message.getPayload().toByteBuffer();
 		if (WebSocketMessage.Type.TEXT.equals(message.getType())) {
 			getSendProcessor().setReadyToSend(false);
 			String text = new String(buffer.array(), StandardCharsets.UTF_8);

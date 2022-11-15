@@ -107,9 +107,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	public Map<T, HandlerMethod> getHandlerMethods() {
 		this.mappingRegistry.acquireReadLock();
 		try {
-			return Collections.unmodifiableMap(
-					this.mappingRegistry.getRegistrations().entrySet().stream()
-							.collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().handlerMethod)));
+			return this.mappingRegistry.getRegistrations().entrySet().stream()
+					.collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, entry -> entry.getValue().handlerMethod));
 		}
 		finally {
 			this.mappingRegistry.releaseReadLock();
@@ -427,7 +426,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * Provide the mapping for a handler method. A method for which no
 	 * mapping can be provided is not a handler method.
 	 * @param method the method to provide a mapping for
-	 * @param handlerType the handler type, possibly a sub-type of the method's
+	 * @param handlerType the handler type, possibly a subtype of the method's
 	 * declaring class
 	 * @return the mapping, or {@code null} if the method is not mapped
 	 */

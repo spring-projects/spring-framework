@@ -222,7 +222,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test
-	public void createQueryStringOneParamForExsistingQueryString() throws JspException {
+	public void createQueryStringOneParamForExistingQueryString() throws JspException {
 		List<Param> params = new ArrayList<>();
 		Set<String> usedParams = new HashSet<>();
 

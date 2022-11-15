@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonD
 
 	@Test
 	public void canDecodeWithObjectMapperRegistrationForType() {
-				MediaType halJsonMediaType = MediaType.parseMediaType("application/hal+json");
+		MediaType halJsonMediaType = MediaType.parseMediaType("application/hal+json");
 		MediaType halFormsJsonMediaType = MediaType.parseMediaType("application/prs.hal-forms+json");
 
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), halJsonMediaType)).isTrue();
@@ -130,6 +130,18 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonD
 
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
 				decoder.getMimeTypes().add(new MimeType("text", "ecmascript")));
+	}
+
+	@Test
+	public void decodableMimeTypesWithObjectMapperRegistration() {
+		MimeType mimeType1 = MediaType.parseMediaType("application/hal+json");
+		MimeType mimeType2 = new MimeType("text", "javascript", StandardCharsets.UTF_8);
+
+		Jackson2JsonDecoder decoder = new Jackson2JsonDecoder(new ObjectMapper(), mimeType2);
+		decoder.registerObjectMappersForType(Pojo.class, map -> map.put(mimeType1, new ObjectMapper()));
+
+		assertThat(decoder.getDecodableMimeTypes(ResolvableType.forClass(Pojo.class)))
+				.containsExactly(mimeType1);
 	}
 
 	@Override

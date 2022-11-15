@@ -277,6 +277,14 @@ public class NamedParameterUtilsUnitTests {
 		assertThat(psql.getParameterNames()).containsExactly("ext");
 	}
 
+	@Test  // gh-27925
+	void namedParamMapReference() {
+		String sql = "insert into foos (id) values (:headers[id])";
+		ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);
+		assertThat(psql.getNamedParameterCount()).isEqualTo(1);
+		assertThat(psql.getParameterNames()).containsExactly("headers[id]");
+	}
+
 	@Test
 	public void shouldAllowParsingMultipleUseOfParameter() {
 		String sql = "SELECT * FROM person where name = :id or lastname = :id";

@@ -34,8 +34,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
-import org.springframework.asm.Attribute;
 import org.springframework.asm.Type;
 
 /**
@@ -60,6 +61,10 @@ public class ReflectUtils {
 	private static final ProtectionDomain PROTECTION_DOMAIN;
 
 	private static final List<Method> OBJECT_METHODS = new ArrayList<Method>();
+
+	private static BiConsumer<String, byte[]> generatedClassHandler;
+
+	private static Consumer<Class<?>> loadedClassHandler;
 
 	// SPRING PATCH BEGIN
 	static {
@@ -428,6 +433,10 @@ public class ReflectUtils {
 	}
 
 	// SPRING PATCH BEGIN
+	public static void setGeneratedClassHandler(BiConsumer<String, byte[]> handler) {
+		generatedClassHandler = handler;
+	}
+
 	public static Class defineClass(String className, byte[] b, ClassLoader loader) throws Exception {
 		return defineClass(className, b, loader, null, null);
 	}
@@ -438,12 +447,17 @@ public class ReflectUtils {
 		return defineClass(className, b, loader, protectionDomain, null);
 	}
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings({"deprecation", "serial"})
 	public static Class defineClass(String className, byte[] b, ClassLoader loader,
 			ProtectionDomain protectionDomain, Class<?> contextClass) throws Exception {
 
 		Class c = null;
 		Throwable t = THROWABLE;
+
+		BiConsumer<String, byte[]> handlerToUse = generatedClassHandler;
+		if (handlerToUse != null) {
+			handlerToUse.accept(className, b);
+		}
 
 		// Preferred option: JDK 9+ Lookup.defineClass API if ClassLoader matches
 		if (contextClass != null && contextClass.getClassLoader() == loader) {
@@ -515,6 +529,16 @@ public class ReflectUtils {
 				MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(contextClass, MethodHandles.lookup());
 				c = lookup.defineClass(b);
 			}
+			catch (IllegalAccessException ex) {
+				throw new CodeGenerationException(ex) {
+					@Override
+					public String getMessage() {
+						return "ClassLoader mismatch for [" + contextClass.getName() +
+								"]: JVM should be started with --add-opens=java.base/java.lang=ALL-UNNAMED " +
+								"for ClassLoader.defineClass to be accessible on " + loader.getClass().getName();
+					}
+				};
+			}
 			catch (Throwable ex) {
 				throw new CodeGenerationException(ex);
 			}
@@ -529,6 +553,21 @@ public class ReflectUtils {
 		Class.forName(className, true, loader);
 		return c;
 	}
+
+	public static void setLoadedClassHandler(Consumer<Class<?>> loadedClassHandler) {
+		ReflectUtils.loadedClassHandler = loadedClassHandler;
+	}
+
+	public static Class<?> loadClass(String className, ClassLoader classLoader) throws ClassNotFoundException {
+		// Force static initializers to run.
+		Class<?> clazz = Class.forName(className, true, classLoader);
+		Consumer<Class<?>> handlerToUse = loadedClassHandler;
+		if (handlerToUse != null) {
+			handlerToUse.accept(clazz);
+		}
+		return clazz;
+	}
+
 	// SPRING PATCH END
 
 	public static int findPackageProtected(Class[] classes) {
@@ -561,10 +600,6 @@ public class ReflectUtils {
 
 			public Type[] getExceptionTypes() {
 				return ReflectUtils.getExceptionTypes(member);
-			}
-
-			public Attribute getAttribute() {
-				return null;
 			}
 		};
 	}

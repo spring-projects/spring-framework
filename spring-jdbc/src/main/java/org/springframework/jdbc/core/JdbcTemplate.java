@@ -111,7 +111,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	private static final String RETURN_UPDATE_COUNT_PREFIX = "#update-count-";
 
 
-	/** If this variable is false, we will throw exceptions on SQL warnings. */
+	/** If this variable is {@code false}, we will throw exceptions on SQL warnings. */
 	private boolean ignoreWarnings = true;
 
 	/**
@@ -149,7 +149,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	/**
 	 * If this variable is set to true then execution of a CallableStatement will return
-	 * the results in a Map that uses case insensitive names for the parameters.
+	 * the results in a Map that uses case-insensitive names for the parameters.
 	 */
 	private boolean resultsMapCaseInsensitive = false;
 
@@ -187,7 +187,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 
 	/**
-	 * Set whether or not we want to ignore SQLWarnings.
+	 * Set whether we want to ignore SQLWarnings.
 	 * <p>Default is "true", swallowing and logging all warnings. Switch this flag
 	 * to "false" to make the JdbcTemplate throw an SQLWarningException instead.
 	 * @see java.sql.SQLWarning
@@ -199,7 +199,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	/**
-	 * Return whether or not we ignore SQLWarnings.
+	 * Return whether we ignore SQLWarnings.
 	 */
 	public boolean isIgnoreWarnings() {
 		return this.ignoreWarnings;
@@ -303,7 +303,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	/**
 	 * Set whether execution of a CallableStatement will return the results in a Map
-	 * that uses case insensitive names for the parameters.
+	 * that uses case-insensitive names for the parameters.
 	 */
 	public void setResultsMapCaseInsensitive(boolean resultsMapCaseInsensitive) {
 		this.resultsMapCaseInsensitive = resultsMapCaseInsensitive;
@@ -311,7 +311,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	/**
 	 * Return whether execution of a CallableStatement will return the results in a Map
-	 * that uses case insensitive names for the parameters.
+	 * that uses case-insensitive names for the parameters.
 	 */
 	public boolean isResultsMapCaseInsensitive() {
 		return this.resultsMapCaseInsensitive;

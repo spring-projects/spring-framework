@@ -31,7 +31,7 @@ import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 
 /**
- * Simple JavaBean domain object representing an person.
+ * Simple JavaBean domain object representing a person.
  *
  * @author Rod Johnson
  */

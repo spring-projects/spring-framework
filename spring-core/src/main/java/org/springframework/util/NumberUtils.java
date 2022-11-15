@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,9 +106,9 @@ public abstract class NumberUtils {
 			return (T) Long.valueOf(value);
 		}
 		else if (BigInteger.class == targetClass) {
-			if (number instanceof BigDecimal) {
+			if (number instanceof BigDecimal bigDecimal) {
 				// do not lose precision - use BigDecimal's own conversion
-				return (T) ((BigDecimal) number).toBigInteger();
+				return (T) bigDecimal.toBigInteger();
 			}
 			else {
 				// original value is not a Big* number - use standard long conversion
@@ -143,11 +143,11 @@ public abstract class NumberUtils {
 	 */
 	private static long checkedLongValue(Number number, Class<? extends Number> targetClass) {
 		BigInteger bigInt = null;
-		if (number instanceof BigInteger) {
-			bigInt = (BigInteger) number;
+		if (number instanceof BigInteger bigInteger) {
+			bigInt = bigInteger;
 		}
-		else if (number instanceof BigDecimal) {
-			bigInt = ((BigDecimal) number).toBigInteger();
+		else if (number instanceof BigDecimal bigDecimal) {
+			bigInt = bigDecimal.toBigInteger();
 		}
 		// Effectively analogous to JDK 8's BigInteger.longValueExact()
 		if (bigInt != null && (bigInt.compareTo(LONG_MIN) < 0 || bigInt.compareTo(LONG_MAX) > 0)) {

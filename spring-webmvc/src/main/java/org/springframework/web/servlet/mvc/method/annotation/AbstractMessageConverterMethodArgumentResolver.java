@@ -48,7 +48,6 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeTypeUtils;
-import org.springframework.util.StreamUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.ValidationAnnotationUtils;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -346,7 +345,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 
 		@Override
 		public InputStream getBody() {
-			return (this.body != null ? this.body : StreamUtils.emptyInput());
+			return (this.body != null ? this.body : InputStream.nullInputStream());
 		}
 
 		public boolean hasBody() {

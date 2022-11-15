@@ -19,7 +19,7 @@ package org.springframework.expression;
 import org.springframework.lang.Nullable;
 
 /**
- * Super class for exceptions that can occur whilst processing expressions.
+ * Superclass for exceptions that can occur whilst processing expressions.
  *
  * @author Andy Clement
  * @author Phillip Webb

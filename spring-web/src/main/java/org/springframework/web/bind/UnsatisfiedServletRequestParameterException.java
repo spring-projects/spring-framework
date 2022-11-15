@@ -19,6 +19,7 @@ package org.springframework.web.bind;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -56,30 +57,27 @@ public class UnsatisfiedServletRequestParameterException extends ServletRequestB
 	 * @param actualParams the actual parameter Map associated with the ServletRequest
 	 * @since 4.2
 	 */
-	public UnsatisfiedServletRequestParameterException(List<String[]> paramConditions,
-			Map<String, String[]> actualParams) {
+	public UnsatisfiedServletRequestParameterException(
+			List<String[]> paramConditions, Map<String, String[]> actualParams) {
 
-		super("");
-		Assert.notEmpty(paramConditions, "Parameter conditions must not be empty");
+		super("", null, new Object[] {paramsToStringList(paramConditions)});
 		this.paramConditions = paramConditions;
 		this.actualParams = actualParams;
 		getBody().setDetail("Invalid request parameters.");
+	}
+
+	private static List<String> paramsToStringList(List<String[]> paramConditions) {
+		Assert.notEmpty(paramConditions, "Parameter conditions must not be empty");
+		return paramConditions.stream()
+				.map(condition -> "\"" + StringUtils.arrayToDelimitedString(condition, ", ") + "\"")
+				.collect(Collectors.toList());
 	}
 
 
 	@Override
 	public String getMessage() {
 		StringBuilder sb = new StringBuilder("Parameter conditions ");
-		int i = 0;
-		for (String[] conditions : this.paramConditions) {
-			if (i > 0) {
-				sb.append(" OR ");
-			}
-			sb.append('"');
-			sb.append(StringUtils.arrayToDelimitedString(conditions, ", "));
-			sb.append('"');
-			i++;
-		}
+		sb.append(String.join(" OR ", paramsToStringList(this.paramConditions)));
 		sb.append(" not met for actual request parameters: ");
 		sb.append(requestParameterMapToString(this.actualParams));
 		return sb.toString();

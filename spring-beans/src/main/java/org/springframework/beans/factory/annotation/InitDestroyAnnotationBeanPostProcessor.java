@@ -39,10 +39,11 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
+import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
-import org.springframework.beans.factory.generator.AotContributingBeanPostProcessor;
-import org.springframework.beans.factory.generator.BeanInstantiationContribution;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
+import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
@@ -77,13 +78,14 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Phillip Webb
  * @since 2.5
  * @see #setInitAnnotationType
  * @see #setDestroyAnnotationType
  */
 @SuppressWarnings("serial")
 public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareBeanPostProcessor,
-		MergedBeanDefinitionPostProcessor, AotContributingBeanPostProcessor, PriorityOrdered, Serializable {
+		MergedBeanDefinitionPostProcessor, BeanRegistrationAotProcessor, PriorityOrdered, Serializable {
 
 	private final transient LifecycleMetadata emptyLifecycleMetadata =
 			new LifecycleMetadata(Object.class, Collections.emptyList(), Collections.emptyList()) {
@@ -155,16 +157,16 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 	}
 
 	@Override
-	public BeanInstantiationContribution contribute(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
-		LifecycleMetadata metadata = findInjectionMetadata(beanDefinition, beanType);
+	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+		RootBeanDefinition beanDefinition = registeredBean.getMergedBeanDefinition();
+		beanDefinition.resolveDestroyMethodIfNecessary();
+		LifecycleMetadata metadata = findInjectionMetadata(beanDefinition, registeredBean.getBeanClass());
 		if (!CollectionUtils.isEmpty(metadata.initMethods)) {
-			String[] initMethodNames = safeMerge(
-					beanDefinition.getInitMethodNames(), metadata.initMethods);
+			String[] initMethodNames = safeMerge(beanDefinition.getInitMethodNames(), metadata.initMethods);
 			beanDefinition.setInitMethodNames(initMethodNames);
 		}
 		if (!CollectionUtils.isEmpty(metadata.destroyMethods)) {
-			String[] destroyMethodNames = safeMerge(
-					beanDefinition.getDestroyMethodNames(), metadata.destroyMethods);
+			String[] destroyMethodNames = safeMerge(beanDefinition.getDestroyMethodNames(), metadata.destroyMethods);
 			beanDefinition.setDestroyMethodNames(destroyMethodNames);
 		}
 		return null;
@@ -178,8 +180,8 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 
 	private String[] safeMerge(@Nullable String[] existingNames, Collection<LifecycleElement> detectedElements) {
 		Stream<String> detectedNames = detectedElements.stream().map(LifecycleElement::getIdentifier);
-		Stream<String> mergedNames = (existingNames != null
-				? Stream.concat(Stream.of(existingNames), detectedNames) : detectedNames);
+		Stream<String> mergedNames = (existingNames != null ?
+				Stream.concat(Stream.of(existingNames), detectedNames) : detectedNames);
 		return mergedNames.distinct().toArray(String[]::new);
 	}
 

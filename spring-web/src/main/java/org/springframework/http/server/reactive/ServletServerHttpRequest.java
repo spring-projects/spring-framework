@@ -90,7 +90,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		super(initUri(request), request.getContextPath() + servletPath, initHeaders(headers, request));
 
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
-		Assert.isTrue(bufferSize > 0, "'bufferSize' must be higher than 0");
+		Assert.isTrue(bufferSize > 0, "'bufferSize' must be greater than 0");
 
 		this.request = request;
 		this.bufferFactory = bufferFactory;
@@ -165,12 +165,6 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	@Deprecated
-	public String getMethodValue() {
-		return this.request.getMethod();
-	}
-
-	@Override
 	protected MultiValueMap<String, HttpCookie> initCookies() {
 		MultiValueMap<String, HttpCookie> httpCookies = new LinkedMultiValueMap<>();
 		Cookie[] cookies;
@@ -203,7 +197,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	@Nullable
 	protected SslInfo initSslInfo() {
 		X509Certificate[] certificates = getX509Certificates();
-		return certificates != null ? new DefaultSslInfo(getSslSessionId(), certificates) : null;
+		return (certificates != null ? new DefaultSslInfo(getSslSessionId(), certificates) : null);
 	}
 
 	@Nullable
@@ -213,8 +207,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Nullable
 	private X509Certificate[] getX509Certificates() {
-		String name = "jakarta.servlet.request.X509Certificate";
-		return (X509Certificate[]) this.request.getAttribute(name);
+		return (X509Certificate[]) this.request.getAttribute("jakarta.servlet.request.X509Certificate");
 	}
 
 	@Override

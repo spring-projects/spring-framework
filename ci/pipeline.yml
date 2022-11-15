@@ -12,7 +12,7 @@ anchors:
     SONATYPE_USERNAME: ((sonatype-username))
     SONATYPE_PASSWORD: ((sonatype-password))
     SONATYPE_URL: ((sonatype-url))
-    SONATYPE_STAGING_PROFILE_ID: ((sonatype-staging-profile-id))
+    SONATYPE_STAGING_PROFILE: ((sonatype-staging-profile))
   artifactory-task-params: &artifactory-task-params
     ARTIFACTORY_SERVER: ((artifactory-server))
     ARTIFACTORY_USERNAME: ((artifactory-username))
@@ -24,6 +24,10 @@ anchors:
     username: ((docker-hub-username))
     password: ((docker-hub-password))
     tag: ((milestone))
+  registry-mirror-vars: &registry-mirror-vars
+    registry-mirror-host: ((registry-mirror-host))
+    registry-mirror-username: ((registry-mirror-username))
+    registry-mirror-password: ((registry-mirror-password))
   slack-fail-params: &slack-fail-params
     text: >
       :concourse-failed: <https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} failed!>
@@ -41,6 +45,11 @@ anchors:
     GITHUB_TOKEN: ((github-ci-release-token))
 
 resource_types:
+- name: registry-image
+  type: registry-image
+  source:
+    repository: concourse/registry-image-resource
+    tag: 1.5.0
 - name: artifactory-resource
   type: registry-image
   source:
@@ -80,7 +89,7 @@ resources:
     branch: ((branch))
     paths: ["ci/images/*"]
 - name: ci-image
-  type: docker-image
+  type: registry-image
   icon: docker
   source:
     <<: *docker-resource-source
@@ -124,6 +133,14 @@ resources:
     access_token: ((github-ci-status-token))
     branch: ((branch))
     context: jdk18-build
+- name: repo-status-jdk19-build
+  type: github-status-resource
+  icon: eye-check-outline
+  source:
+    repository: ((github-repo-name))
+    access_token: ((github-ci-status-token))
+    branch: ((branch))
+    context: jdk19-build
 - name: slack-alert
   type: slack-notification
   icon: slack
@@ -149,13 +166,20 @@ resources:
 jobs:
 - name: build-ci-images
   plan:
-  - get: ci-images-git-repo
-    trigger: true
-  - in_parallel:
+    - get: git-repo
+    - get: ci-images-git-repo
+      trigger: true
+    - task: build-ci-image
+      privileged: true
+      file: git-repo/ci/tasks/build-ci-image.yml
+      output_mapping:
+        image: ci-image
+      vars:
+        ci-image-name: ci-image
+        <<: *registry-mirror-vars
     - put: ci-image
       params:
-        build: ci-images-git-repo/ci/images
-        dockerfile: ci-images-git-repo/ci/images/ci-image/Dockerfile
+        image: ci-image/image.tar
 - name: build
   serial: true
   public: true
@@ -194,21 +218,21 @@ jobs:
       threads: 8
       artifact_set:
       - include:
-        - "/**/spring-*.zip"
+        - "/**/framework-docs-*.zip"
         properties:
           "zip.name": "spring-framework"
           "zip.displayname": "Spring Framework"
           "zip.deployed": "false"
       - include:
-        - "/**/spring-*-docs.zip"
+        - "/**/framework-docs-*-docs.zip"
         properties:
           "zip.type": "docs"
       - include:
-        - "/**/spring-*-dist.zip"
+        - "/**/framework-docs-*-dist.zip"
         properties:
           "zip.type": "dist"
       - include:
-        - "/**/spring-*-schema.zip"
+        - "/**/framework-docs-*-schema.zip"
         properties:
           "zip.type": "schema"
     get_params:
@@ -240,6 +264,34 @@ jobs:
             params:
               <<: *slack-fail-params
     - put: repo-status-jdk18-build
+      params: { state: "success", commit: "git-repo" }
+- name: jdk19-build
+  serial: true
+  public: true
+  plan:
+    - get: ci-image
+    - get: git-repo
+    - get: every-morning
+      trigger: true
+    - put: repo-status-jdk19-build
+      params: { state: "pending", commit: "git-repo" }
+    - do:
+        - task: check-project
+          image: ci-image
+          file: git-repo/ci/tasks/check-project.yml
+          privileged: true
+          timeout: ((task-timeout))
+          params:
+            TEST_TOOLCHAIN: 19
+            <<: *build-project-task-params
+      on_failure:
+        do:
+          - put: repo-status-jdk19-build
+            params: { state: "failure", commit: "git-repo" }
+          - put: slack-alert
+            params:
+              <<: *slack-fail-params
+    - put: repo-status-jdk19-build
       params: { state: "success", commit: "git-repo" }
 - name: build-pull-requests
   serial: true
@@ -304,7 +356,6 @@ jobs:
         download_artifacts: false
         save_build_info: true
     - task: promote
-      image: ci-image
       file: git-repo/ci/tasks/promote-version.yml
       params:
         RELEASE_TYPE: M
@@ -349,7 +400,6 @@ jobs:
         download_artifacts: false
         save_build_info: true
     - task: promote
-      image: ci-image
       file: git-repo/ci/tasks/promote-version.yml
       params:
         RELEASE_TYPE: RC
@@ -394,7 +444,6 @@ jobs:
         download_artifacts: true
         save_build_info: true
     - task: promote
-      image: ci-image
       file: git-repo/ci/tasks/promote-version.yml
       params:
         RELEASE_TYPE: RELEASE
@@ -422,7 +471,7 @@ jobs:
 
 groups:
 - name: "builds"
-  jobs: ["build", "jdk18-build"]
+  jobs: ["build", "jdk18-build", "jdk19-build"]
 - name: "releases"
   jobs: ["stage-milestone", "stage-rc", "stage-release", "promote-milestone", "promote-rc", "promote-release", "create-github-release"]
 - name: "ci-images"

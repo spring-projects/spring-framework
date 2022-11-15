@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -220,7 +220,7 @@ class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 			return Mono.deferContextual(contextView -> {
 				String key = ServerWebExchangeContextFilter.EXCHANGE_CONTEXT_ATTRIBUTE;
 				assertThat(contextView.getOrEmpty(key).orElse(null)).isNotNull();
-				return session.send(session.receive().doOnNext(WebSocketMessage::retain));
+				return session.send(session.receive().map(WebSocketMessage::retain));
 			});
 		}
 	}

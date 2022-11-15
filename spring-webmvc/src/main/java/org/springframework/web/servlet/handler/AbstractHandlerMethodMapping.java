@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 
 	@Override
-	public void setPatternParser(PathPatternParser patternParser) {
+	public void setPatternParser(@Nullable PathPatternParser patternParser) {
 		Assert.state(this.mappingRegistry.getRegistrations().isEmpty(),
 				"PathPatternParser must be set before the initialization of " +
 						"request mappings through InitializingBean#afterPropertiesSet.");
@@ -147,9 +147,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	public Map<T, HandlerMethod> getHandlerMethods() {
 		this.mappingRegistry.acquireReadLock();
 		try {
-			return Collections.unmodifiableMap(
-					this.mappingRegistry.getRegistrations().entrySet().stream()
-							.collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().handlerMethod)));
+			return this.mappingRegistry.getRegistrations().entrySet().stream()
+					.collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, entry -> entry.getValue().handlerMethod));
 		}
 		finally {
 			this.mappingRegistry.releaseReadLock();
@@ -512,7 +511,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * Provide the mapping for a handler method. A method for which no
 	 * mapping can be provided is not a handler method.
 	 * @param method the method to provide a mapping for
-	 * @param handlerType the handler type, possibly a sub-type of the method's
+	 * @param handlerType the handler type, possibly a subtype of the method's
 	 * declaring class
 	 * @return the mapping, or {@code null} if the method is not mapped
 	 */

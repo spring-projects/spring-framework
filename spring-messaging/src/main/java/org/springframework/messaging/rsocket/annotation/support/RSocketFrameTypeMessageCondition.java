@@ -154,7 +154,7 @@ public class RSocketFrameTypeMessageCondition extends AbstractMessageCondition<R
 
 	/**
 	 * Return a condition for matching the RSocket request interaction type with
-	 * that is selected based on the delcared request and response cardinality
+	 * that is selected based on the declared request and response cardinality
 	 * of some handler method.
 	 * <p>The table below shows the selections made:
 	 * <table>

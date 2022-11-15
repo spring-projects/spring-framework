@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.FatalBeanException;
+import org.springframework.http.ProblemDetail;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -241,10 +242,11 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		this.factory.setModules(Collections.emptyList());
 		this.factory.setMixIns(mixIns);
 		this.factory.afterPropertiesSet();
-		ObjectMapper objectMapper = this.factory.getObject();
+		ObjectMapper mapper = this.factory.getObject();
 
-		assertThat(objectMapper.mixInCount()).isEqualTo(1);
-		assertThat(objectMapper.findMixInClassFor(target)).isSameAs(mixinSource);
+		assertThat(mapper.mixInCount()).isEqualTo(2);
+		assertThat(mapper.findMixInClassFor(ProblemDetail.class)).isAssignableFrom(ProblemDetailJacksonMixin.class);
+		assertThat(mapper.findMixInClassFor(target)).isSameAs(mixinSource);
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
 import org.springframework.lang.Nullable;
-import org.springframework.ui.context.Theme;
-import org.springframework.ui.context.ThemeSource;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.ContextLoader;
@@ -40,7 +38,6 @@ import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.LocaleResolver;
-import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -60,7 +57,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 public abstract class RequestContextUtils {
 
 	/**
-	 * The name of the bean to use to look up in an implementation of
+	 * The name of the bean to use to determine if an implementation of
 	 * {@link RequestDataValueProcessor} has been configured.
 	 * @since 4.2.1
 	 */
@@ -119,10 +116,10 @@ public abstract class RequestContextUtils {
 	}
 
 	/**
-	 * Return the LocaleResolver that has been bound to the request by the
-	 * DispatcherServlet.
+	 * Return the {@link LocaleResolver} that has been bound to the request by the
+	 * {@link DispatcherServlet}.
 	 * @param request current HTTP request
-	 * @return the current LocaleResolver, or {@code null} if not found
+	 * @return the current {@code LocaleResolver}, or {@code null} if not found
 	 */
 	@Nullable
 	public static LocaleResolver getLocaleResolver(HttpServletRequest request) {
@@ -131,8 +128,9 @@ public abstract class RequestContextUtils {
 
 	/**
 	 * Retrieve the current locale from the given request, using the
-	 * LocaleResolver bound to the request by the DispatcherServlet
-	 * (if available), falling back to the request's accept-header Locale.
+	 * {@link LocaleResolver} bound to the request by the {@link DispatcherServlet}
+	 * (if available), falling back to the request's locale based on the
+	 * {@code Accept-Language} header or the default locale for the server.
 	 * <p>This method serves as a straightforward alternative to the standard
 	 * Servlet {@link jakarta.servlet.http.HttpServletRequest#getLocale()} method,
 	 * falling back to the latter if no more specific locale has been found.
@@ -151,28 +149,29 @@ public abstract class RequestContextUtils {
 
 	/**
 	 * Retrieve the current time zone from the given request, using the
-	 * TimeZoneAwareLocaleResolver bound to the request by the DispatcherServlet
-	 * (if available), falling back to the system's default time zone.
+	 * {@link TimeZoneAwareLocaleContext} in the {@link LocaleResolver} bound to
+	 * the request by the {@link DispatcherServlet} (if available).
 	 * <p>Note: This method returns {@code null} if no specific time zone can be
 	 * resolved for the given request. This is in contrast to {@link #getLocale}
-	 * where there is always the request's accept-header locale to fall back to.
+	 * where it is always possible to fall back to the request's locale based on the
+	 * {@code Accept-Language} header or the default locale for the server.
 	 * <p>Consider using {@link org.springframework.context.i18n.LocaleContextHolder#getTimeZone()}
-	 * which will normally be populated with the same TimeZone: That method only
-	 * differs in terms of its fallback to the system time zone if the LocaleResolver
+	 * which will normally be populated with the same {@code TimeZone}: that method only
+	 * differs in terms of its fallback to the system time zone if the {@code LocaleResolver}
 	 * hasn't provided a specific time zone (instead of this method's {@code null}).
 	 * @param request current HTTP request
 	 * @return the current time zone for the given request, either from the
-	 * TimeZoneAwareLocaleResolver or {@code null} if none associated
+	 * {@code TimeZoneAwareLocaleContext} or {@code null} if none associated
 	 * @see #getLocaleResolver
 	 * @see org.springframework.context.i18n.LocaleContextHolder#getTimeZone()
 	 */
 	@Nullable
 	public static TimeZone getTimeZone(HttpServletRequest request) {
 		LocaleResolver localeResolver = getLocaleResolver(request);
-		if (localeResolver instanceof LocaleContextResolver) {
-			LocaleContext localeContext = ((LocaleContextResolver) localeResolver).resolveLocaleContext(request);
-			if (localeContext instanceof TimeZoneAwareLocaleContext) {
-				return ((TimeZoneAwareLocaleContext) localeContext).getTimeZone();
+		if (localeResolver instanceof LocaleContextResolver localeContextResolver) {
+			LocaleContext localeContext = localeContextResolver.resolveLocaleContext(request);
+			if (localeContext instanceof TimeZoneAwareLocaleContext timeZoneAwareLocaleContext) {
+				return timeZoneAwareLocaleContext.getTimeZone();
 			}
 		}
 		return null;
@@ -183,10 +182,12 @@ public abstract class RequestContextUtils {
 	 * DispatcherServlet.
 	 * @param request current HTTP request
 	 * @return the current ThemeResolver, or {@code null} if not found
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Nullable
-	public static ThemeResolver getThemeResolver(HttpServletRequest request) {
-		return (ThemeResolver) request.getAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE);
+	@Deprecated(since = "6.0")
+	public static org.springframework.web.servlet.ThemeResolver getThemeResolver(HttpServletRequest request) {
+		return (org.springframework.web.servlet.ThemeResolver) request.getAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE);
 	}
 
 	/**
@@ -194,23 +195,27 @@ public abstract class RequestContextUtils {
 	 * DispatcherServlet.
 	 * @param request current HTTP request
 	 * @return the current ThemeSource
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Nullable
-	public static ThemeSource getThemeSource(HttpServletRequest request) {
-		return (ThemeSource) request.getAttribute(DispatcherServlet.THEME_SOURCE_ATTRIBUTE);
+	@Deprecated(since = "6.0")
+	public static org.springframework.ui.context.ThemeSource getThemeSource(HttpServletRequest request) {
+		return (org.springframework.ui.context.ThemeSource) request.getAttribute(DispatcherServlet.THEME_SOURCE_ATTRIBUTE);
 	}
 
 	/**
-	 * Retrieves the current theme from the given request, using the ThemeResolver
+	 * Retrieve the current theme from the given request, using the ThemeResolver
 	 * and ThemeSource bound to the request by the DispatcherServlet.
 	 * @param request current HTTP request
 	 * @return the current theme, or {@code null} if not found
 	 * @see #getThemeResolver
+	 * @deprecated as of 6.0, with no direct replacement
 	 */
 	@Nullable
-	public static Theme getTheme(HttpServletRequest request) {
-		ThemeResolver themeResolver = getThemeResolver(request);
-		ThemeSource themeSource = getThemeSource(request);
+	@Deprecated(since = "6.0")
+	public static org.springframework.ui.context.Theme getTheme(HttpServletRequest request) {
+		org.springframework.web.servlet.ThemeResolver themeResolver = getThemeResolver(request);
+		org.springframework.ui.context.ThemeSource themeSource = getThemeSource(request);
 		if (themeResolver != null && themeSource != null) {
 			String themeName = themeResolver.resolveThemeName(request);
 			return themeSource.getTheme(themeName);
