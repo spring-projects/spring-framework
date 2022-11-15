@@ -101,9 +101,10 @@ public class UrlResource extends AbstractFileResolvingResource {
 		// Equivalent without java.net.URL constructor - for building on JDK 20+
 		/*
 		try {
-			this.uri = ResourceUtils.toURI(StringUtils.cleanPath(path));
+			String cleanedPath = StringUtils.cleanPath(path);
+			this.uri = ResourceUtils.toURI(cleanedPath);
 			this.url = this.uri.toURL();
-			this.cleanedUrl = StringUtils.cleanPath(path);
+			this.cleanedUrl = cleanedPath;
 		}
 		catch (URISyntaxException | IllegalArgumentException ex) {
 			MalformedURLException exToThrow = new MalformedURLException(ex.getMessage());
@@ -319,9 +320,14 @@ public class UrlResource extends AbstractFileResolvingResource {
 	@Override
 	@Nullable
 	public String getFilename() {
-		String originalPath = (this.uri != null ? this.uri.getPath() : this.url.getPath());
-		String filename = StringUtils.getFilename(StringUtils.cleanPath(originalPath));
-		return (filename != null ? URLDecoder.decode(filename, StandardCharsets.UTF_8) : null);
+		if (this.uri != null) {
+			// URI path is decoded and has standard separators
+			return StringUtils.getFilename(this.uri.getPath());
+		}
+		else {
+			String filename = StringUtils.getFilename(StringUtils.cleanPath(this.url.getPath()));
+			return (filename != null ? URLDecoder.decode(filename, StandardCharsets.UTF_8) : null);
+		}
 	}
 
 	/**
