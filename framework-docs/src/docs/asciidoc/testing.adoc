@@ -142,11 +142,20 @@ categories:
 The `org.springframework.test.util` package contains several general purpose utilities
 for use in unit and integration testing.
 
-`ReflectionTestUtils` is a collection of reflection-based utility methods. You can use
-these methods in testing scenarios where you need to change the value of a constant, set
-a non-`public` field, invoke a non-`public` setter method, or invoke a non-`public`
-configuration or lifecycle callback method when testing application code for use cases
-such as the following:
+{api-spring-framework}/test/util/AopTestUtils.html[`AopTestUtils`] is a collection of
+AOP-related utility methods. You can use these methods to obtain a reference to the
+underlying target object hidden behind one or more Spring proxies. For example, if you
+have configured a bean as a dynamic mock by using a library such as EasyMock or Mockito,
+and the mock is wrapped in a Spring proxy, you may need direct access to the underlying
+mock to configure expectations on it and perform verifications. For Spring's core AOP
+utilities, see {api-spring-framework}/aop/support/AopUtils.html[`AopUtils`] and
+{api-spring-framework}/aop/framework/AopProxyUtils.html[`AopProxyUtils`].
+
+{api-spring-framework}/test/util/ReflectionTestUtils.html[`ReflectionTestUtils`] is a
+collection of reflection-based utility methods. You can use these methods in testing
+scenarios where you need to change the value of a constant, set a non-`public` field,
+invoke a non-`public` setter method, or invoke a non-`public` configuration or lifecycle
+callback method when testing application code for use cases such as the following:
 
 * ORM frameworks (such as JPA and Hibernate) that condone `private` or `protected` field
   access as opposed to `public` setter methods for properties in a domain entity.
@@ -156,14 +165,20 @@ such as the following:
 * Use of annotations such as `@PostConstruct` and `@PreDestroy` for lifecycle callback
   methods.
 
-{api-spring-framework}/test/util/AopTestUtils.html[`AopTestUtils`] is a collection of
-AOP-related utility methods. You can use these methods to obtain a reference to the
-underlying target object hidden behind one or more Spring proxies. For example, if you
-have configured a bean as a dynamic mock by using a library such as EasyMock or Mockito,
-and the mock is wrapped in a Spring proxy, you may need direct access to the underlying
-mock to configure expectations on it and perform verifications. For Spring's core AOP
-utilities, see {api-spring-framework}/aop/support/AopUtils.html[`AopUtils`] and
-{api-spring-framework}/aop/framework/AopProxyUtils.html[`AopProxyUtils`].
+{api-spring-framework}/test/util/TestSocketUtils.html[`TestSocketUtils`] is a simple
+utility for finding available TCP ports on `localhost` for use in integration testing
+scenarios.
+
+[NOTE]
+====
+`TestSocketUtils` can be used in integration tests which start an external server on an
+available random port. However, these utilities make no guarantee about the subsequent
+availability of a given port and are therefore unreliable. Instead of using
+`TestSocketUtils` to find an available local port for a server, it is recommended that
+you rely on a server's ability to start on a random ephemeral port that it selects or is
+assigned by the operating system. To interact with that server, you should query the
+server for the port it is currently using.
+====
 
 
 [[unit-testing-spring-mvc]]
