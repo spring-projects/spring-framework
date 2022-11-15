@@ -172,7 +172,7 @@ public class ResponseEntityExceptionHandlerTests {
 				.acceptLanguageAsLocales(locale).build());
 
 		ResponseEntity<?> responseEntity =
-				this.exceptionHandler.handleException(new IllegalStateException(), exchange).block();
+				this.exceptionHandler.handleException(new IllegalStateException("test"), exchange).block();
 
 		ProblemDetail body = (ProblemDetail) responseEntity.getBody();
 		assertThat(body.getDetail()).isEqualTo("Invalid state: A");
