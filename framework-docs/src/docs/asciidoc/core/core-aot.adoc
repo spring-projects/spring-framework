@@ -3,6 +3,8 @@
 
 This chapter covers Spring's Ahead of Time (AOT) optimizations.
 
+For AOT support specific to integration tests, see <<testing.adoc#testcontext-aot, Ahead of Time Support for Tests>>.
+
 [[aot-introduction]]
 == Introduction to Ahead of Time Optimizations
 
