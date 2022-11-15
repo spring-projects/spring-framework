@@ -24,8 +24,7 @@ package org.springframework.core;
  *
  * <p>If a Kotlin reflection implementation is present,
  * {@link KotlinReflectionParameterNameDiscoverer} is added first in the list and
- * used for Kotlin classes and interfaces. When compiling or running as a GraalVM
- * native image, the {@code KotlinReflectionParameterNameDiscoverer} is not used.
+ * used for Kotlin classes and interfaces.
  *
  * <p>Further discoverers may be added through {@link #addDiscoverer(ParameterNameDiscoverer)}.
  *
