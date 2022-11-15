@@ -4529,8 +4529,9 @@ annotations by specifying a Spring resource prefix:
 
 Contrast the comments in this example with the previous example.
 
-.[[testcontext-ctx-management-web-mocks]]Working with Web Mocks
---
+[[testcontext-ctx-management-web-mocks]]
+===== Working with Web Mocks
+
 To provide comprehensive web testing support, the TestContext framework has a
 `ServletTestExecutionListener` that is enabled by default. When testing against a
 `WebApplicationContext`, this <<testcontext-key-abstractions, `TestExecutionListener`>>
@@ -4604,7 +4605,6 @@ managed per test method by the `ServletTestExecutionListener`.
 		//...
 	}
 ----
---
 
 [[testcontext-ctx-management-caching]]
 ===== Context Caching
@@ -4759,7 +4759,7 @@ have different levels in a context hierarchy configured using different resource
 The remaining JUnit Jupiter based examples in this section show common configuration
 scenarios for integration tests that require the use of context hierarchies.
 
-.Single test class with context hierarchy
+**Single test class with context hierarchy**
 --
 `ControllerIntegrationTests` represents a typical integration testing scenario for a
 Spring MVC web application by declaring a context hierarchy that consists of two levels,
@@ -4805,8 +4805,7 @@ lowest context in the hierarchy). The following listing shows this configuration
 ----
 --
 
-
-.Class hierarchy with implicit parent context
+**Class hierarchy with implicit parent context**
 --
 The test classes in this example define a context hierarchy within a test class
 hierarchy. `AbstractWebTests` declares the configuration for a root
@@ -4852,7 +4851,7 @@ configuration scenario:
 ----
 --
 
-.Class hierarchy with merged context hierarchy configuration
+**Class hierarchy with merged context hierarchy configuration**
 --
 The classes in this example show the use of named hierarchy levels in order to merge the
 configuration for specific levels in a context hierarchy. `BaseTests` defines two levels
@@ -4898,7 +4897,7 @@ The following listing shows this configuration scenario:
 ----
 --
 
-.Class hierarchy with overridden context hierarchy configuration
+**Class hierarchy with overridden context hierarchy configuration**
 --
 In contrast to the previous example, this example demonstrates how to override the
 configuration for a given named level in a context hierarchy by setting the
