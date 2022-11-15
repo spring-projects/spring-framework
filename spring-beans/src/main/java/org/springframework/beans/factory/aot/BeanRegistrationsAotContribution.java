@@ -30,7 +30,6 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
-import org.springframework.util.MultiValueMap;
 
 /**
  * AOT contribution from a {@link BeanRegistrationsAotProcessor} used to
@@ -38,6 +37,7 @@ import org.springframework.util.MultiValueMap;
  *
  * @author Phillip Webb
  * @author Sebastien Deleuze
+ * @author Stephane Nicoll
  * @since 6.0
  * @see BeanRegistrationsAotProcessor
  */
@@ -46,16 +46,10 @@ class BeanRegistrationsAotContribution
 
 	private static final String BEAN_FACTORY_PARAMETER_NAME = "beanFactory";
 
-	private final Map<String, BeanDefinitionMethodGenerator> registrations;
+	private final Map<String, Registration> registrations;
 
-	private final MultiValueMap<String, String> aliases;
-
-
-	BeanRegistrationsAotContribution(
-			Map<String, BeanDefinitionMethodGenerator> registrations, MultiValueMap<String, String> aliases) {
-
+	BeanRegistrationsAotContribution(Map<String, Registration> registrations) {
 		this.registrations = registrations;
-		this.aliases = aliases;
 	}
 
 
@@ -86,8 +80,8 @@ class BeanRegistrationsAotContribution
 		method.addParameter(DefaultListableBeanFactory.class,
 				BEAN_FACTORY_PARAMETER_NAME);
 		CodeBlock.Builder code = CodeBlock.builder();
-		this.registrations.forEach((beanName, beanDefinitionMethodGenerator) -> {
-			MethodReference beanDefinitionMethod = beanDefinitionMethodGenerator
+		this.registrations.forEach((beanName, registration) -> {
+			MethodReference beanDefinitionMethod = registration.methodGenerator
 					.generateBeanDefinitionMethod(generationContext,
 							beanRegistrationsCode);
 			CodeBlock methodInvocation = beanDefinitionMethod.toInvokeCodeBlock(
@@ -105,11 +99,21 @@ class BeanRegistrationsAotContribution
 		method.addParameter(DefaultListableBeanFactory.class,
 				BEAN_FACTORY_PARAMETER_NAME);
 		CodeBlock.Builder code = CodeBlock.builder();
-		this.aliases.forEach((beanName, beanAliases) ->
-				beanAliases.forEach(alias -> code.addStatement("$L.registerAlias($S, $S)", BEAN_FACTORY_PARAMETER_NAME,
-						beanName, alias)));
+		this.registrations.forEach((beanName, registration) -> {
+			for (String alias : registration.aliases) {
+				code.addStatement("$L.registerAlias($S, $S)",
+						BEAN_FACTORY_PARAMETER_NAME, beanName, alias);
+			}
+		});
 		method.addCode(code.build());
 	}
+
+	/**
+	 * Gather the necessary information to register a particular bean.
+	 * @param methodGenerator the {@link BeanDefinitionMethodGenerator} to use
+	 * @param aliases the bean aliases, if any
+	 */
+	record Registration(BeanDefinitionMethodGenerator methodGenerator, String[] aliases) {}
 
 
 	/**

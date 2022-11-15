@@ -18,7 +18,6 @@ package org.springframework.beans.factory.aot;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -46,16 +45,16 @@ import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.beans.factory.aot.BeanRegistrationsAotContribution.Registration;
 
 /**
  * Tests for {@link BeanRegistrationsAotContribution}.
  *
  * @author Phillip Webb
  * @author Sebastien Deleuze
+ * @author Stephane Nicoll
  */
 class BeanRegistrationsAotContributionTests {
 
@@ -80,15 +79,12 @@ class BeanRegistrationsAotContributionTests {
 
 	@Test
 	void applyToAppliesContribution() {
-		Map<String, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
 		RegisteredBean registeredBean = registerBean(
 				new RootBeanDefinition(TestBean.class));
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
 				this.methodGeneratorFactory, registeredBean, null,
 				Collections.emptyList());
-		registrations.put("testBean", generator);
-		BeanRegistrationsAotContribution contribution = new BeanRegistrationsAotContribution(
-				registrations, new LinkedMultiValueMap<>());
+		BeanRegistrationsAotContribution contribution = createContribution(generator);
 		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
 		compile((consumer, compiled) -> {
 			DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory();
@@ -99,17 +95,12 @@ class BeanRegistrationsAotContributionTests {
 
 	@Test
 	void applyToAppliesContributionWithAliases() {
-		Map<String, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
 		RegisteredBean registeredBean = registerBean(
 				new RootBeanDefinition(TestBean.class));
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
 				this.methodGeneratorFactory, registeredBean, null,
 				Collections.emptyList());
-		registrations.put("testBean", generator);
-		MultiValueMap<String, String> aliases = new LinkedMultiValueMap<>();
-		aliases.add("testBean", "testAlias");
-		BeanRegistrationsAotContribution contribution = new BeanRegistrationsAotContribution(
-				registrations, aliases);
+		BeanRegistrationsAotContribution contribution = createContribution(generator, "testAlias");
 		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
 		compile((consumer, compiled) -> {
 			DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory();
@@ -123,15 +114,12 @@ class BeanRegistrationsAotContributionTests {
 		this.generationContext = new TestGenerationContext(
 				new ClassNameGenerator(TestGenerationContext.TEST_TARGET, "Management"));
 		this.beanFactoryInitializationCode = new MockBeanFactoryInitializationCode(this.generationContext);
-		Map<String, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
 		RegisteredBean registeredBean = registerBean(
 				new RootBeanDefinition(TestBean.class));
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
 				this.methodGeneratorFactory, registeredBean, null,
 				Collections.emptyList());
-		registrations.put("testBean", generator);
-		BeanRegistrationsAotContribution contribution = new BeanRegistrationsAotContribution(
-				registrations, new LinkedMultiValueMap<>());
+		BeanRegistrationsAotContribution contribution = createContribution(generator);
 		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
 		compile((consumer, compiled) -> {
 			SourceFile sourceFile = compiled.getSourceFile(".*BeanDefinitions");
@@ -142,7 +130,6 @@ class BeanRegistrationsAotContributionTests {
 	@Test
 	void applyToCallsRegistrationsWithBeanRegistrationsCode() {
 		List<BeanRegistrationsCode> beanRegistrationsCodes = new ArrayList<>();
-		Map<String, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
 		RegisteredBean registeredBean = registerBean(
 				new RootBeanDefinition(TestBean.class));
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
@@ -159,9 +146,7 @@ class BeanRegistrationsAotContributionTests {
 			}
 
 		};
-		registrations.put("testBean", generator);
-		BeanRegistrationsAotContribution contribution = new BeanRegistrationsAotContribution(
-				registrations, new LinkedMultiValueMap<>());
+		BeanRegistrationsAotContribution contribution = createContribution(generator);
 		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
 		assertThat(beanRegistrationsCodes).hasSize(1);
 		BeanRegistrationsCode actual = beanRegistrationsCodes.get(0);
@@ -197,6 +182,11 @@ class BeanRegistrationsAotContributionTests {
 		this.generationContext.writeGeneratedContent();
 		TestCompiler.forSystem().with(this.generationContext).compile(compiled ->
 				result.accept(compiled.getInstance(Consumer.class), compiled));
+	}
+
+	private BeanRegistrationsAotContribution createContribution(
+			BeanDefinitionMethodGenerator methodGenerator,String... aliases) {
+		return new BeanRegistrationsAotContribution(Map.of("testBean", new Registration(methodGenerator, aliases)));
 	}
 
 }
