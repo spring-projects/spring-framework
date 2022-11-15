@@ -91,8 +91,9 @@ final class StringToCollectionConverter implements ConditionalGenericConverter {
 	private boolean checkAnnotationsAvoidCommaDelimiter(TypeDescriptor targetType) {
 		for (Annotation annotation : targetType.getAnnotations()) {
 			String name = annotation.annotationType().getName();
-			if (name.equals("org.springframework.web.bind.annotation.RequestParam"))
+			if (name.equals("org.springframework.web.bind.annotation.RequestParam")) {
 				return true;
+			}
 		}
 		return false;
 	}
