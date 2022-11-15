@@ -19,6 +19,7 @@ package org.springframework.core.convert.support;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.core.CollectionFactory;
@@ -40,7 +41,11 @@ import org.springframework.util.StringUtils;
 final class StringToCollectionConverter implements ConditionalGenericConverter {
 
 	private final ConversionService conversionService;
+	private static final Set<String> AVOID_COMMA_DELIMITER_ANNOTATIONS = new HashSet<>();
 
+	static {
+		AVOID_COMMA_DELIMITER_ANNOTATIONS.add("org.springframework.web.bind.annotation.RequestParam");
+	}
 
 	public StringToCollectionConverter(ConversionService conversionService) {
 		this.conversionService = conversionService;
@@ -91,7 +96,7 @@ final class StringToCollectionConverter implements ConditionalGenericConverter {
 	private boolean checkAnnotationsAvoidCommaDelimiter(TypeDescriptor targetType) {
 		for (Annotation annotation : targetType.getAnnotations()) {
 			String name = annotation.annotationType().getName();
-			if (name.equals("org.springframework.web.bind.annotation.RequestParam")) {
+			if (AVOID_COMMA_DELIMITER_ANNOTATIONS.contains(name)) {
 				return true;
 			}
 		}
