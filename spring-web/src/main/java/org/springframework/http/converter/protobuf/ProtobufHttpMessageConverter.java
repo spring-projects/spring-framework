@@ -26,9 +26,11 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.protobuf.CodedOutputStream;
 import com.google.protobuf.ExtensionRegistry;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.Message;
 import com.google.protobuf.TextFormat;
 import com.google.protobuf.util.JsonFormat;
@@ -78,6 +80,7 @@ import static org.springframework.http.MediaType.TEXT_PLAIN;
  * @author Brian Clozel
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
+ * @author Taejin Koo
  * @since 4.1
  * @see FormatFactory
  * @see JsonFormat
@@ -109,14 +112,15 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 
 	private static final boolean protobufJsonFormatPresent;
 
+	private static final Map<Class<?>, Boolean> isPresentParseFromMethod = new ConcurrentHashMap<>();
 	private static final Map<Class<?>, Method> methodCache = new ConcurrentReferenceHashMap<>();
+	private static final Map<Class<?>, Method> parseFromMethodCache = new ConcurrentReferenceHashMap<>();
 
 	static {
 		ClassLoader classLoader = ProtobufHttpMessageConverter.class.getClassLoader();
 		protobufFormatFactoryPresent = ClassUtils.isPresent("com.googlecode.protobuf.format.FormatFactory", classLoader);
 		protobufJsonFormatPresent = ClassUtils.isPresent("com.google.protobuf.util.JsonFormat", classLoader);
 	}
-
 
 	final ExtensionRegistry extensionRegistry;
 
@@ -186,11 +190,20 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 			charset = DEFAULT_CHARSET;
 		}
 
-		Message.Builder builder = getMessageBuilder(clazz);
 		if (PROTOBUF.isCompatibleWith(contentType)) {
-			builder.mergeFrom(inputMessage.getBody(), this.extensionRegistry);
+			final boolean presentParseFromMethod = isPresentParseFromMethod(clazz);
+			if (presentParseFromMethod) {
+				return getMessageViaParseFromMethod(clazz, inputMessage);
+			}
+			else {
+				Message.Builder builder = getMessageBuilder(clazz);
+				builder.mergeFrom(inputMessage.getBody(), this.extensionRegistry);
+				return builder.build();
+			}
 		}
-		else if (TEXT_PLAIN.isCompatibleWith(contentType)) {
+
+		Message.Builder builder = getMessageBuilder(clazz);
+		if (TEXT_PLAIN.isCompatibleWith(contentType)) {
 			InputStreamReader reader = new InputStreamReader(inputMessage.getBody(), charset);
 			TextFormat.merge(reader, this.extensionRegistry, builder);
 		}
@@ -199,6 +212,49 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 					inputMessage.getBody(), charset, contentType, this.extensionRegistry, builder);
 		}
 		return builder.build();
+	}
+
+	private boolean isPresentParseFromMethod(Class<? extends Message> clazz) {
+		final Boolean present = isPresentParseFromMethod.get(clazz);
+		if (present == null) {
+			try {
+				getParseFromMethod(clazz);
+				isPresentParseFromMethod.put(clazz, true);
+			}
+			catch (Exception ex) {
+				isPresentParseFromMethod.put(clazz, false);
+			}
+			return isPresentParseFromMethod.get(clazz);
+		}
+		else {
+			return present;
+		}
+	}
+
+	private Message getMessageViaParseFromMethod(Class<? extends Message> clazz, HttpInputMessage inputMessage) {
+		try {
+			final Method parseFromMethod = getParseFromMethod(clazz);
+			return (Message) parseFromMethod.invoke(clazz, inputMessage.getBody(), this.extensionRegistry);
+		}
+		catch (Exception ex) {
+			throw new HttpMessageConversionException(
+					"Can not find non invocable parseFrom(java.io.InputStream, com.google.protobuf.ExtensionRegistryLite) method on " + clazz, ex);
+		}
+	}
+
+	private Method getParseFromMethod(Class<? extends Message> clazz) {
+		try {
+			Method method = parseFromMethodCache.get(clazz);
+			if (method == null) {
+				method = clazz.getMethod("parseFrom", InputStream.class, ExtensionRegistryLite.class);
+				parseFromMethodCache.put(clazz, method);
+			}
+			return method;
+		}
+		catch (Exception ex) {
+			throw new HttpMessageConversionException(
+					"Can not find non invocable parseFrom(java.io.InputStream, com.google.protobuf.ExtensionRegistryLite) method on " + clazz, ex);
+		}
 	}
 
 	/**
@@ -219,7 +275,6 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 					"Invalid Protobuf Message type: no invocable newBuilder() method on " + clazz, ex);
 		}
 	}
-
 
 	@Override
 	protected boolean canWrite(@Nullable MediaType mediaType) {
