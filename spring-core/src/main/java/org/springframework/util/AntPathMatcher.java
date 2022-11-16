@@ -529,7 +529,7 @@ public class AntPathMatcher implements PathMatcher {
 	 * the first pattern contains a file extension match (e.g., {@code *.html}).
 	 * In that case, the second pattern will be merged into the first. Otherwise,
 	 * an {@code IllegalArgumentException} will be thrown.
-	 * <h3>Examples</h3>
+	 * <h4>Examples</h4>
 	 * <table border="1">
 	 * <tr><th>Pattern 1</th><th>Pattern 2</th><th>Result</th></tr>
 	 * <tr><td>{@code null}</td><td>{@code null}</td><td>&nbsp;</td></tr>

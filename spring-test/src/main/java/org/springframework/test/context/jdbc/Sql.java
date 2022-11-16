@@ -91,7 +91,7 @@ public @interface Sql {
 	 * {@link #value}, but it may be used instead of {@link #value}. Similarly,
 	 * this attribute may be used in conjunction with or instead of
 	 * {@link #statements}.
-	 * <h3>Path Resource Semantics</h3>
+	 * <h4>Path Resource Semantics</h4>
 	 * <p>Each path will be interpreted as a Spring
 	 * {@link org.springframework.core.io.Resource Resource}. A plain path
 	 * &mdash; for example, {@code "schema.sql"} &mdash; will be treated as a
@@ -103,7 +103,7 @@ public @interface Sql {
 	 * {@link org.springframework.util.ResourceUtils#CLASSPATH_URL_PREFIX classpath:},
 	 * {@link org.springframework.util.ResourceUtils#FILE_URL_PREFIX file:},
 	 * {@code http:}, etc.) will be loaded using the specified resource protocol.
-	 * <h3>Default Script Detection</h3>
+	 * <h4>Default Script Detection</h4>
 	 * <p>If no SQL scripts or {@link #statements} are specified, an attempt will
 	 * be made to detect a <em>default</em> script depending on where this
 	 * annotation is declared. If a default cannot be detected, an
@@ -127,7 +127,7 @@ public @interface Sql {
 	 * <em>Inlined SQL statements</em> to execute.
 	 * <p>This attribute may be used in conjunction with or instead of
 	 * {@link #scripts}.
-	 * <h3>Ordering</h3>
+	 * <h4>Ordering</h4>
 	 * <p>Statements declared via this attribute will be executed after
 	 * statements loaded from resource {@link #scripts}. If you wish to have
 	 * inlined statements executed before scripts, simply declare multiple
