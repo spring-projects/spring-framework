@@ -26,7 +26,7 @@ A Spring AOT processed application typically generates:
 * {api-spring-framework}/aot/hint/RuntimeHints.html[`RuntimeHints`] for the use of reflection, resource loading, serialization, and JDK proxies.
 
 NOTE: At the moment, AOT is focused on allowing Spring applications to be deployed as native images using GraalVM.
-We intend to offer more JVM-based use cases in future generations.
+We intend to support more JVM-based use cases in future generations.
 
 [[aot-basics]]
 == AOT engine overview
@@ -37,12 +37,12 @@ The entry point of the AOT engine for processing an `ApplicationContext` arrange
 * Invoke the available `BeanFactoryInitializationAotProcessor` implementations and apply their contributions against the `GenerationContext`.
 For instance, a core implementation iterates over all candidate bean definitions and generates the necessary code to restore the state of the `BeanFactory`.
 
-Once this process completes, the `GenerationContext` has been updated with the generated code, resources, and classes that are necessary for the application to run.
+Once this process completes, the `GenerationContext` will have been updated with the generated code, resources, and classes that are necessary for the application to run.
 The `RuntimeHints` instance can also be used to generate the relevant GraalVM native image configuration files.
 
 `ApplicationContextAotGenerator#processAheadOfTime` returns the class name of the `ApplicationContextInitializer` entry point that allows the context to be started with AOT optimizations.
 
-Those steps are covered in more details in the sections below.
+Those steps are covered in greater detail in the sections below.
 
 [[aot-refresh]]
 == Refresh for AOT Processing
@@ -84,9 +84,9 @@ These are:
 
 * `MergedBeanDefinitionPostProcessor` implementations post-process bean definitions to extract additional settings, such as `init` and `destroy` methods.
 * `SmartInstantiationAwareBeanPostProcessor` implementations determine a more precise bean type if necessary.
-This makes sure to create any proxy that is required at runtime.
+This makes sure to create any proxy that will be required at runtime.
 
-One this part completes, the `BeanFactory` contains the bean definitions that are necessary for the application to run. It does not trigger bean instantiation but allows the AOT engine to inspect the beans that would be created at runtime.
+One this part completes, the `BeanFactory` contains the bean definitions that are necessary for the application to run. It does not trigger bean instantiation but allows the AOT engine to inspect the beans that will be created at runtime.
 
 [[aot-bean-factory-initialization-contributions]]
 == Bean Factory Initialization AOT Contributions
