@@ -85,11 +85,7 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 	public Map<String, String> toSingleValueMap() {
 		Map<String, String> singleValueMap = CollectionUtils.newLinkedHashMap(this.headers.size());
 		Iterator<HttpField> iterator = this.headers.iterator();
-		iterator.forEachRemaining(field -> {
-			if (!singleValueMap.containsKey(field.getName())) {
-				singleValueMap.put(field.getName(), field.getValue());
-			}
-		});
+		iterator.forEachRemaining(field -> singleValueMap.putIfAbsent(field.getName(), field.getValue()));
 		return singleValueMap;
 	}
 
