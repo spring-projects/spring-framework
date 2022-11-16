@@ -101,22 +101,19 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public boolean containsKey(Object key) {
-		return (key instanceof String && this.headers.contains((String) key));
+		return (key instanceof String k && this.headers.contains(k));
 	}
 
 	@Override
 	public boolean containsValue(Object value) {
-		return (value instanceof String &&
-				this.headers.stream().anyMatch(field -> field.contains((String) value)));
+		return (value instanceof String v &&
+				this.headers.stream().anyMatch(field -> field.contains(v)));
 	}
 
 	@Nullable
 	@Override
 	public List<String> get(Object key) {
-		if (containsKey(key)) {
-			return this.headers.getValuesList((String) key);
-		}
-		return null;
+		return containsKey(key) ? this.headers.getValuesList((String) key) : null;
 	}
 
 	@Nullable
@@ -130,9 +127,9 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 	@Nullable
 	@Override
 	public List<String> remove(Object key) {
-		if (key instanceof String) {
-			List<String> oldValues = get(key);
-			this.headers.remove((String) key);
+		if (key instanceof String k) {
+			List<String> oldValues = get(k);
+			this.headers.remove(k);
 			return oldValues;
 		}
 		return null;
