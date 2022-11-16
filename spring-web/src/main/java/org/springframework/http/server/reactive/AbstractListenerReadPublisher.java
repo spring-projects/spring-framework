@@ -269,7 +269,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 
 
 		@Override
-		public final void request(long n) {
+		public void request(long n) {
 			if (rsReadLogger.isTraceEnabled()) {
 				rsReadLogger.trace(getLogPrefix() + "request " + (n != Long.MAX_VALUE ? n : "Long.MAX_VALUE"));
 			}
@@ -277,7 +277,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 		}
 
 		@Override
-		public final void cancel() {
+		public void cancel() {
 			State state = AbstractListenerReadPublisher.this.state.get();
 			if (rsReadLogger.isTraceEnabled()) {
 				rsReadLogger.trace(getLogPrefix() + "cancel [" + state + "]");
