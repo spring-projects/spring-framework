@@ -836,7 +836,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * @param mediaTypes the list of media types to be sorted
 	 * @deprecated As of 6.0, in favor of {@link MimeTypeUtils#sortBySpecificity(List)}
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
 	public static void sortBySpecificity(List<MediaType> mediaTypes) {
 		Assert.notNull(mediaTypes, "'mediaTypes' must not be null");
 		if (mediaTypes.size() > 1) {
@@ -865,7 +865,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * @see #getQualityValue()
 	 * @deprecated As of 6.0, with no direct replacement
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
 	public static void sortByQualityValue(List<MediaType> mediaTypes) {
 		Assert.notNull(mediaTypes, "'mediaTypes' must not be null");
 		if (mediaTypes.size() > 1) {
@@ -891,7 +891,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * Comparator used by {@link #sortByQualityValue(List)}.
 	 * @deprecated As of 6.0, with no direct replacement
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
 	public static final Comparator<MediaType> QUALITY_VALUE_COMPARATOR = (mediaType1, mediaType2) -> {
 		double quality1 = mediaType1.getQualityValue();
 		double quality2 = mediaType2.getQualityValue();
@@ -931,7 +931,8 @@ public class MediaType extends MimeType implements Serializable {
 	 * Comparator used by {@link #sortBySpecificity(List)}.
 	 * @deprecated As of 6.0, with no direct replacement
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	public static final Comparator<MediaType> SPECIFICITY_COMPARATOR = new SpecificityComparator<>() {
 
 		@Override

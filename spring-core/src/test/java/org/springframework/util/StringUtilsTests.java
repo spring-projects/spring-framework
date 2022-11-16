@@ -98,7 +98,7 @@ class StringUtilsTests {
 	}
 
 	@Test
-	@Deprecated
+	@SuppressWarnings("deprecation")
 	void trimLeadingWhitespace() {
 		assertThat(StringUtils.trimLeadingWhitespace(null)).isNull();
 		assertThat(StringUtils.trimLeadingWhitespace("")).isEqualTo("");
@@ -114,7 +114,7 @@ class StringUtilsTests {
 	}
 
 	@Test
-	@Deprecated
+	@SuppressWarnings("deprecation")
 	void trimTrailingWhitespace() {
 		assertThat(StringUtils.trimTrailingWhitespace(null)).isNull();
 		assertThat(StringUtils.trimTrailingWhitespace("")).isEqualTo("");
