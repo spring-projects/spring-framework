@@ -663,9 +663,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	/**
 	 * Update the HandlerExecutionChain for CORS-related handling.
-	 * <p>For pre-flight requests, the default implementation replaces the selected
-	 * handler with a simple HttpRequestHandler that invokes the configured
-	 * {@link #setCorsProcessor}.
+	 * <p>For pre-flight requests, the default implementation inserts a
+	 * HandlerInterceptor that makes CORS-related checks and adds CORS headers.
+	 * But does not abort the execution chain.
 	 * <p>For actual requests, the default implementation inserts a
 	 * HandlerInterceptor that makes CORS-related checks and adds CORS headers.
 	 * @param request the current request
@@ -675,15 +675,12 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	protected HandlerExecutionChain getCorsHandlerExecutionChain(HttpServletRequest request,
 			HandlerExecutionChain chain, @Nullable CorsConfiguration config) {
-
-		if (CorsUtils.isPreFlightRequest(request)) {
-			HandlerInterceptor[] interceptors = chain.getInterceptors();
-			return new HandlerExecutionChain(new PreFlightHandler(config), interceptors);
+		boolean isPreFlightRequest = CorsUtils.isPreFlightRequest(request);
+		if (isPreFlightRequest) {
+			chain = new HandlerExecutionChain(new PreFlightHandler(config), chain.getInterceptors());
 		}
-		else {
-			chain.addInterceptor(0, new CorsInterceptor(config));
-			return chain;
-		}
+		chain.addInterceptor(0, new CorsInterceptor(config, isPreFlightRequest));
+		return chain;
 	}
 
 
@@ -698,7 +695,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 		@Override
 		public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
-			corsProcessor.processRequest(this.config, request, response);
+			// no-op
 		}
 
 		@Override
@@ -713,9 +710,11 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 		@Nullable
 		private final CorsConfiguration config;
+		private final boolean alwaysProceed;
 
-		public CorsInterceptor(@Nullable CorsConfiguration config) {
+		public CorsInterceptor(@Nullable CorsConfiguration config, boolean alwaysProceed) {
 			this.config = config;
+			this.alwaysProceed = alwaysProceed;
 		}
 
 		@Override
@@ -728,7 +727,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 				return true;
 			}
 
-			return corsProcessor.processRequest(this.config, request, response);
+			boolean proceed = corsProcessor.processRequest(this.config, request, response);
+			return this.alwaysProceed || proceed;
 		}
 
 		@Override

@@ -39,7 +39,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.ComplexWebApplicationContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -129,7 +131,9 @@ public class HandlerMethodMappingTests {
 
 		HandlerExecutionChain chain = this.mapping.getHandler(request);
 		assertThat(chain).isNotNull();
+		assertThat(chain.getInterceptorList()).isNotEmpty();
 		assertThat(chain.getHandler()).isInstanceOf(HttpRequestHandler.class);
+		chain.getInterceptorList().get(0).preHandle(request, response, chain.getHandler());
 		new HttpRequestHandlerAdapter().handle(request, response, chain.getHandler());
 
 		assertThat(response.getStatus()).isEqualTo(403);
@@ -148,12 +152,41 @@ public class HandlerMethodMappingTests {
 
 		HandlerExecutionChain chain = this.mapping.getHandler(request);
 		assertThat(chain).isNotNull();
+		assertThat(chain.getInterceptorList()).isNotEmpty();
 		assertThat(chain.getHandler()).isInstanceOf(HttpRequestHandler.class);
+		chain.getInterceptorList().get(0).preHandle(request, response, chain.getHandler());
 		new HttpRequestHandlerAdapter().handle(request, response, chain.getHandler());
 
 		assertThat(response.getStatus()).isEqualTo(200);
 		assertThat(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isEqualTo("https://domain.com");
 		assertThat(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS)).isEqualTo("GET");
+	}
+
+	@Test
+	public void abortInterceptorInPreFlightRequestWithCorsConfig() throws Exception {
+		this.mapping.registerMapping("/foo", this.handler, this.handler.getClass().getMethod("corsHandlerMethod"));
+
+		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/foo");
+		request.addParameter("abort", "true");
+		request.addHeader(HttpHeaders.ORIGIN, "https://domain.com");
+		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		HandlerExecutionChain chain = this.mapping.getHandler(request);
+		assertThat(chain).isNotNull();
+		chain.addInterceptor(new ComplexWebApplicationContext.MyHandlerInterceptor1());
+		chain.addInterceptor(new ComplexWebApplicationContext.MyHandlerInterceptor2());
+		assertThat(chain.getInterceptorList().size()).isEqualTo(3);
+		assertThat(chain.getHandler()).isInstanceOf(HttpRequestHandler.class);
+		for (HandlerInterceptor interceptor : chain.getInterceptorList()) {
+			interceptor.preHandle(request, response, chain.getHandler());
+		}
+		new HttpRequestHandlerAdapter().handle(request, response, chain.getHandler());
+
+		assertThat(response.getStatus()).isEqualTo(200);
+		assertThat(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isEqualTo("https://domain.com");
+		assertThat(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS)).isEqualTo("GET,HEAD");
 	}
 
 	@Test
