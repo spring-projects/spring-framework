@@ -2708,7 +2708,7 @@ could load the `Account` from a data store:
 		// ...
 	}
 ----
-<1> Bind an instance of `Pet` using an explicit attribute name.
+<1> Bind an instance of `Account` using an explicit attribute name.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -2718,7 +2718,7 @@ could load the `Account` from a data store:
 		// ...
 	}
 ----
-<1> Bind an instance of `Pet` using an explicit attribute name.
+<1> Bind an instance of `Account` using an explicit attribute name.
 
 After the model attribute instance is obtained, data binding is applied. The
 `WebDataBinder` class matches Servlet request parameter names (query parameters and form
