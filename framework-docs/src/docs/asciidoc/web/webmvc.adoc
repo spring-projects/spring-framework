@@ -1938,6 +1938,7 @@ You can also use the same with request header conditions, as the following examp
 		// ...
 	}
 ----
+<1> Testing whether `myHeader` equals `myValue`.
 
 TIP: You can match `Content-Type` and `Accept` with the headers condition, but it is better to use
 <<mvc-ann-requestmapping-consumes, consumes>> and <<mvc-ann-requestmapping-produces, produces>>
@@ -2826,6 +2827,7 @@ You can automatically apply validation after data binding by adding the
 		// ...
 	}
 ----
+<1> Validate the `Pet` instance.
 
 Note that using `@ModelAttribute` is optional (for example, to set its attributes).
 By default, any argument that is not a simple value type (as determined by
@@ -2945,6 +2947,7 @@ as the following example shows:
 		// ...
 	}
 ----
+<1> Using a `@SessionAttribute` annotation.
 
 For use cases that require adding or removing session attributes, consider injecting
 `org.springframework.web.context.request.WebRequest` or
