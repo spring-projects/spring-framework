@@ -2662,19 +2662,21 @@ query parameters and form fields. The following example shows how to do so:
 .Java
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
-	public String processSubmit(@ModelAttribute Pet pet) {
+	public String processSubmit(@ModelAttribute Pet pet) { // <1>
 		// method logic...
 	}
 ----
+<1> Bind an instance of `Pet`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 @PostMapping("/owners/{ownerId}/pets/{petId}/edit")
-fun processSubmit(@ModelAttribute pet: Pet): String {
+fun processSubmit(@ModelAttribute pet: Pet): String { // <1>
 	// method logic...
 }
 ----
+<1> Bind an instance of `Pet`.
 
 The `Pet` instance above is sourced in one of the following ways:
 
@@ -2702,18 +2704,21 @@ could load the `Account` from a data store:
 .Java
 ----
 	@PutMapping("/accounts/{account}")
-	public String save(@ModelAttribute("account") Account account) {
+	public String save(@ModelAttribute("account") Account account) { // <1>
 		// ...
 	}
 ----
+<1> Bind an instance of `Pet` using an explicit attribute name.
+
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	@PutMapping("/accounts/{account}")
-	fun save(@ModelAttribute("account") account: Account): String {
+	fun save(@ModelAttribute("account") account: Account): String { // <1>
 		// ...
 	}
 ----
+<1> Bind an instance of `Pet` using an explicit attribute name.
 
 After the model attribute instance is obtained, data binding is applied. The
 `WebDataBinder` class matches Servlet request parameter names (query parameters and form
