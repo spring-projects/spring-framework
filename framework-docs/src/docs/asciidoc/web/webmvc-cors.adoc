@@ -1,6 +1,6 @@
 [[mvc-cors]]
 = CORS
-:doc-spring-security: {doc-root}/spring-security/reference
+:doc-spring-security: {docs-site}/spring-security/reference
 [.small]#<<web-reactive.adoc#webflux-cors, WebFlux>>#
 
 Spring MVC lets you handle CORS (Cross-Origin Resource Sharing). This section

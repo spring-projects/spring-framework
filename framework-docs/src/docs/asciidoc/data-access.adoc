@@ -1,9 +1,7 @@
 [[spring-data-tier]]
 = Data Access
-:toc: left
-:toclevels: 4
-:tabsize: 4
-:docinfo1:
+include::attributes.adoc[]
+include::page-layout.adoc[]
 
 This part of the reference documentation is concerned with data access and the
 interaction between the data access layer and the business or service layer.

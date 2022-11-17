@@ -1,7 +1,7 @@
 [[mvc]]
 :chapter: mvc
 = Spring Web MVC
-:doc-spring-security: {doc-root}/spring-security/reference
+:doc-spring-security: {docs-site}/spring-security/reference
 
 Spring Web MVC is the original web framework built on the Servlet API and has been included
 in the Spring Framework from the very beginning. The formal name, "`Spring Web MVC,`"

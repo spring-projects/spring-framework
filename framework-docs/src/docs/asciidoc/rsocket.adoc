@@ -1,8 +1,7 @@
 [[rsocket]]
 = RSocket
-:gh-rsocket: https://github.com/rsocket
-:gh-rsocket-java: {gh-rsocket}/rsocket-java
-:gh-rsocket-extensions: {gh-rsocket}/rsocket/blob/master/Extensions
+include::attributes.adoc[]
+include::page-layout.adoc[]
 
 This section describes Spring Framework's support for the RSocket protocol.
 

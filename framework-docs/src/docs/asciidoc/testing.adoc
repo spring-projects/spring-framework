@@ -1,10 +1,7 @@
 [[testing]]
 = Testing
-:doc-spring-boot: {doc-root}/spring-boot/docs/current/reference
-:toc: left
-:toclevels: 4
-:tabsize: 4
-:docinfo1:
+include::attributes.adoc[]
+include::page-layout.adoc[]
 
 This chapter covers Spring's support for integration testing and best practices for unit
 testing. The Spring team advocates test-driven development (TDD). The Spring team has
@@ -6988,7 +6985,7 @@ of `AbstractTestNGSpringContextTests` for an example of how to instrument your t
 This chapter covers Spring's Ahead of Time (AOT) support for integration tests using the
 Spring TestContext Framework.
 
-The testing support extends Spring's <<core.adoc#aot,core AOT support>> with the
+The testing support extends Spring's <<core.adoc#core.aot,core AOT support>> with the
 following features.
 
 * Build-time detection of all integration tests in the current project that use the
@@ -6998,7 +6995,7 @@ following features.
     testing annotations -- as long as the tests are run using a JUnit Platform
     `TestEngine` that is registered for the current project.
 * Build-time AOT processing: each unique test `ApplicationContext` in the current project
-  will be <<core.adoc#aot-refresh,refreshed for AOT processing>>.
+  will be <<core.adoc#core.aot.refresh,refreshed for AOT processing>>.
 * Runtime AOT support: when executing in AOT runtime mode, a Spring integration test will
   use an AOT-optimized `ApplicationContext` that participates transparently with the
   <<testcontext-ctx-management-caching, context cache>>.
@@ -7019,7 +7016,7 @@ the following options.
   via {api-spring-framework}/context/annotation/ImportRuntimeHints.html[`@ImportRuntimeHints`].
 * Annotate a test class with {api-spring-framework}/aot/hint/annotation/Reflective.html[`@Reflective`] or
   {api-spring-framework}/aot/hint/annotation/RegisterReflectionForBinding.html[`@RegisterReflectionForBinding`].
-* See <<core.adoc#aot-hints,Runtime Hints>> for details on Spring's core runtime hints
+* See <<core.adoc#core.aot.hints,Runtime Hints>> for details on Spring's core runtime hints
   and annotation support.
 
 [TIP]

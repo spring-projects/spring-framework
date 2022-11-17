@@ -1,9 +1,7 @@
 [[spring-web]]
 = Web on Servlet Stack
-:toc: left
-:toclevels: 4
-:tabsize: 4
-:docinfo1:
+include::attributes.adoc[]
+include::page-layout.adoc[]
 
 This part of the documentation covers support for Servlet-stack web applications built on the
 Servlet API and deployed to Servlet containers. Individual chapters include <<mvc, Spring MVC>>,

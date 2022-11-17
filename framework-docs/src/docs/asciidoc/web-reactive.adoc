@@ -1,9 +1,7 @@
 [[spring-web-reactive]]
 = Web on Reactive Stack
-:toc: left
-:toclevels: 4
-:tabsize: 4
-:docinfo1:
+include::attributes.adoc[]
+include::page-layout.adoc[]
 
 This part of the documentation covers support for reactive-stack web applications built
 on a https://www.reactive-streams.org/[Reactive Streams] API to run on non-blocking

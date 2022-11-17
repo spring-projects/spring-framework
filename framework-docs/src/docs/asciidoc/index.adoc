@@ -1,5 +1,6 @@
 :noheader:
 = Spring Framework Documentation
+include::attributes.adoc[]
 
 [horizontal]
 <<overview.adoc#overview, Overview>> :: history, design philosophy, feedback,

@@ -1,11 +1,7 @@
 [[spring-integration]]
 = Integration
-:doc-spring-amqp: {doc-root}/spring-amqp/docs/current/reference
-:doc-spring-gemfire: {doc-root}/spring-gemfire/docs/current/reference
-:toc: left
-:toclevels: 4
-:tabsize: 4
-:docinfo1:
+include::attributes.adoc[]
+include::page-layout.adoc[]
 
 This part of the reference documentation covers Spring Framework's integration with
 a number of technologies.

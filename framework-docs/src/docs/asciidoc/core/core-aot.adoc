@@ -1,4 +1,4 @@
-[[aot]]
+[[core.aot]]
 = Ahead of Time Optimizations
 
 This chapter covers Spring's Ahead of Time (AOT) optimizations.
@@ -28,7 +28,7 @@ A Spring AOT processed application typically generates:
 NOTE: At the moment, AOT is focused on allowing Spring applications to be deployed as native images using GraalVM.
 We intend to support more JVM-based use cases in future generations.
 
-[[aot-basics]]
+[[core.aot.basics]]
 == AOT engine overview
 
 The entry point of the AOT engine for processing an `ApplicationContext` arrangement is `ApplicationContextAotGenerator`. It takes care of the following steps, based on a `GenericApplicationContext` that represents the application to optimize and a {api-spring-framework}/aot/generate/GenerationContext.html[`GenerationContext`]:
@@ -44,7 +44,7 @@ The `RuntimeHints` instance can also be used to generate the relevant GraalVM na
 
 Those steps are covered in greater detail in the sections below.
 
-[[aot-refresh]]
+[[core.aot.refresh]]
 == Refresh for AOT Processing
 
 Refresh for AOT processing is supported on all `GenericApplicationContext` implementations.
@@ -88,7 +88,7 @@ This makes sure to create any proxy that will be required at runtime.
 
 One this part completes, the `BeanFactory` contains the bean definitions that are necessary for the application to run. It does not trigger bean instantiation but allows the AOT engine to inspect the beans that will be created at runtime.
 
-[[aot-bean-factory-initialization-contributions]]
+[[core.aot.bean-factory-initialization-contributions]]
 == Bean Factory Initialization AOT Contributions
 
 Components that want to participate in this step can implement the {api-spring-framework}/beans/factory/aot/BeanFactoryInitializationAotProcessor.html[`BeanFactoryInitializationAotProcessor`] interface.
@@ -111,7 +111,7 @@ If such a bean is registered using an `@Bean` factory method, ensure the method 
 ====
 
 
-[[aot-bean-registration-contributions]]
+[[core.aot.bean-registration-contributions]]
 === Bean Registration AOT Contributions
 
 A core `BeanFactoryInitializationAotProcessor` implementation is responsible for collecting the necessary contributions for each candidate `BeanDefinition`.
@@ -198,7 +198,7 @@ When a `datasource` instance is required, a `BeanInstanceSupplier` is called.
 This supplier invokes the `dataSource()` method on the `dataSourceConfiguration` bean.
 
 
-[[aot-hints]]
+[[core.aot.hints]]
 == Runtime Hints
 
 Running an application as a native image requires additional information compared to a regular JVM runtime.
@@ -222,7 +222,7 @@ For cases that the core container cannot infer, you can register such hints prog
 A number of convenient annotations are also provided for common use cases.
 
 
-[[aot-hints-import-runtime-hints]]
+[[core.aot.hints.import-runtime-hints]]
 === `@ImportRuntimeHints`
 
 `RuntimeHintsRegistrar` implementations allow you to get a callback to the `RuntimeHints` instance managed by the AOT engine.
@@ -254,7 +254,7 @@ This way, if the component is not contributed to the `BeanFactory`, the hints wo
 It is also possible to register an implementation statically by adding an entry in `META-INF/spring/aot.factories` with a key equal to the fully qualified name of the `RuntimeHintsRegistrar` interface.
 
 
-[[aot-hints-reflective]]
+[[core.aot.hints.reflective]]
 === `@Reflective`
 
 {api-spring-framework}/aot/hint/annotation/Reflective.html[`@Reflective`] provides an idiomatic way to flag the need for reflection on an annotated element.
@@ -268,7 +268,7 @@ Library authors can reuse this annotation for their own purposes.
 If components other than Spring beans need to be processed, a `BeanFactoryInitializationAotProcessor` can detect the relevant types and use `ReflectiveRuntimeHintsRegistrar` to process them.
 
 
-[[aot-hints-register-reflection-for-binding]]
+[[core.aot.hints.register-reflection-for-binding]]
 === `@RegisterReflectionForBinding`
 
 {api-spring-framework}/aot/hint/annotation/RegisterReflectionForBinding.html[`@RegisterReflectionForBinding`] is a specialization of `@Reflective` that registers the need for serializing arbitrary types.

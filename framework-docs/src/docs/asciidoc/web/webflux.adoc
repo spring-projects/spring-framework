@@ -1,7 +1,7 @@
 [[webflux]]
 :chapter: webflux
 = Spring WebFlux
-:doc-spring-security: {doc-root}/spring-security/reference
+:doc-spring-security: {docs-site}/spring-security/reference
 
 The original web framework included in the Spring Framework, Spring Web MVC, was
 purpose-built for the Servlet API and Servlet containers. The reactive-stack web framework,

@@ -1,0 +1,13 @@
+:docs-java: {docdir}/../../main/java/org/springframework/docs
+:docs-kotlin: {docdir}/../../main/kotlin/org/springframework/docs
+:docs-resources: {docdir}/../../main/resources
+:spring-framework-main-code: https://github.com/spring-projects/spring-framework/tree/main
+:docs-site: https://docs.spring.io
+:docs-spring-framework: {docs-site}/spring-framework/docs/{spring-version}
+:api-spring-framework: {docs-spring-framework}/javadoc-api/org/springframework
+:doc-spring-amqp: {docs-site}/spring-amqp/docs/current/reference
+:doc-spring-gemfire: {docs-site}/spring-gemfire/docs/current/reference
+:gh-rsocket: https://github.com/rsocket
+:gh-rsocket-java: {gh-rsocket}/rsocket-java
+:gh-rsocket-extensions: {gh-rsocket}/rsocket/blob/master/Extensions
+:doc-spring-boot: {docs-site}/spring-boot/docs/current/reference

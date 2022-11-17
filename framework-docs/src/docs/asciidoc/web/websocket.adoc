@@ -1,6 +1,6 @@
 [[websocket]]
 = WebSockets
-:doc-spring-security: {doc-root}/spring-security/reference
+:doc-spring-security: {docs-site}/spring-security/reference
 [.small]#<<web-reactive.adoc#webflux-websocket, WebFlux>>#
 
 This part of the reference documentation covers support for Servlet stack, WebSocket
