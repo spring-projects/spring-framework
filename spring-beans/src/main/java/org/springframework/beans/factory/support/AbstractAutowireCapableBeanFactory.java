@@ -598,12 +598,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			populateBean(beanName, mbd, instanceWrapper);
 			exposedObject = initializeBean(beanName, exposedObject, mbd);
 		}
-		catch (Throwable th) {
-			if (th instanceof BeanCreationException ex && beanName.equals(ex.getBeanName())) {
-				throw ex;
+		catch (Throwable ex) {
+			if (ex instanceof BeanCreationException bce && beanName.equals(bce.getBeanName())) {
+				throw bce;
 			}
 			else {
-				throw new BeanCreationException(mbd.getResourceDescription(), beanName, th.getMessage(), th);
+				throw new BeanCreationException(mbd.getResourceDescription(), beanName, ex.getMessage(), ex);
 			}
 		}
 
