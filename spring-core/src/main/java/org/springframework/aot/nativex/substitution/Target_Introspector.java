@@ -25,6 +25,8 @@ import com.oracle.svm.core.annotate.TargetClass;
  * {@link java.beans.Introspector} substitution with a refined {@code findCustomizerClass} implementation
  * designed to avoid thousands of AWT classes to be included in the native image.
  *
+ * TODO Remove once Spring Framework requires GraalVM 23.0+, see <a href="https://github.com/oracle/graal/pull/5224">graal#5224</a>.
+ *
  * @author Sebastien Deleuze
  * @since 6.0
  */
