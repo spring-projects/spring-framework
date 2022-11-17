@@ -4455,13 +4455,7 @@ as the following example shows:
 ----
 	@PostMapping
 	public Callable<String> processUpload(final MultipartFile file) {
-
-		return new Callable<String>() {
-			public String call() throws Exception {
-				// ...
-				return "someView";
-			}
-		};
+		return () -> "someView";
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
