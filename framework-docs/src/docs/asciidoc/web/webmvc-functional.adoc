@@ -623,13 +623,14 @@ RouterFunction<ServerResponse> route = route()
 	import org.springframework.web.servlet.function.router
 
 	val route = router {
-		"/person".nest {
+		"/person".nest { // <1>
 			GET("/{id}", accept(APPLICATION_JSON), handler::getPerson)
 			GET(accept(APPLICATION_JSON), handler::listPeople)
 			POST(handler::createPerson)
 		}
 	}
 ----
+<1> Using `nest` DSL.
 
 Though path-based nesting is the most common, you can nest on any kind of predicate by using
 the `nest` method on the builder.

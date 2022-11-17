@@ -640,7 +640,7 @@ RouterFunction<ServerResponse> route = route()
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	val route = coRouter {
+	val route = coRouter { // <1>
 		"/person".nest {
 			GET("/{id}", accept(APPLICATION_JSON), handler::getPerson)
 			GET(accept(APPLICATION_JSON), handler::listPeople)
@@ -648,6 +648,7 @@ RouterFunction<ServerResponse> route = route()
 		}
 	}
 ----
+<1> Create router using Coroutines router DSL; a Reactive alternative is also available via `router { }`.
 
 Though path-based nesting is the most common, you can nest on any kind of predicate by using
 the `nest` method on the builder.
