@@ -3559,8 +3559,6 @@ to the model, as the following example shows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	import org.springframework.ui.set
-
 	@Controller
 	class UserController : AbstractController() {
 
@@ -4792,7 +4790,7 @@ are written to the Reactor `Context` as key-value pairs, using the key assigned 
 For other asynchronous handling scenarios, you can use the Context Propagation library
 directly. For example:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 .Java
 ----
 	// Capture ThreadLocal values from the main thread ...
@@ -5914,7 +5912,6 @@ The MVC namespace provides dedicated elements. The following example works with 
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
-
 	<mvc:view-resolvers>
 		<mvc:content-negotiation>
 			<mvc:default-views>
@@ -5927,7 +5924,6 @@ The MVC namespace provides dedicated elements. The following example works with 
 	<mvc:freemarker-configurer>
 		<mvc:template-loader-path location="/freemarker"/>
 	</mvc:freemarker-configurer>
-
 ----
 
 In Java configuration, you can add the respective `Configurer` bean,

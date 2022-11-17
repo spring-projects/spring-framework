@@ -98,7 +98,7 @@ as the following example shows:
 		}
 	}
 ----
-<1> Create router using Coroutines router DSL, a Reactive alternative is also available via `router { }`.
+<1> Create router using Coroutines router DSL; a Reactive alternative is also available via `router { }`.
 
 One way to run a `RouterFunction` is to turn it into an `HttpHandler` and install it
 through one of the built-in <<web-reactive.adoc#webflux-httphandler, server adapters>>:
@@ -300,7 +300,6 @@ ServerResponse.created(location).build()
 Depending on the codec used, it is possible to pass hint parameters to customize how the
 body is serialized or deserialized. For example, to specify a https://www.baeldung.com/jackson-json-view-annotation[Jackson JSON view]:
 
-====
 [source,java,role="primary"]
 .Java
 ----
@@ -311,7 +310,6 @@ ServerResponse.ok().hint(Jackson2CodecSupport.JSON_VIEW_HINT, MyJacksonView.clas
 ----
 ServerResponse.ok().hint(Jackson2CodecSupport.JSON_VIEW_HINT, MyJacksonView::class.java).body(...)
 ----
-====
 
 
 [[webflux-fn-handler-classes]]
@@ -525,8 +523,8 @@ header:
 ----
 	val route = coRouter {
 		GET("/hello-world", accept(TEXT_PLAIN)) {
-            ServerResponse.ok().bodyValueAndAwait("Hello World")
-        }
+			ServerResponse.ok().bodyValueAndAwait("Hello World")
+		}
 	}
 ----
 
