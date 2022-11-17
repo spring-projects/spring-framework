@@ -35,7 +35,7 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 /**
- * Decode a byte stream into JSON and convert to Object's with Jackson 2.14,
+ * Decode a byte stream into JSON and convert to Object's with Jackson 2.x,
  * leveraging non-blocking parsing.
  *
  * @author Sebastien Deleuze

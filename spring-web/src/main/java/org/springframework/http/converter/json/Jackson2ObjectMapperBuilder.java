@@ -89,8 +89,6 @@ import org.springframework.util.xml.StaxUtils;
  * support for Kotlin classes and data classes</li>
  * </ul>
  *
- * <p>Compatible with Jackson 2.9 to 2.12, as of Spring 5.3.
- *
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
  * @author Tadaya Tsuyukubo
