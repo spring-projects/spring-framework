@@ -7750,7 +7750,7 @@ to perform tests on Spring MVC controllers without a running server. For example
 
 `WebTestClient` can also connect to a live server and perform full end-to-end integration
 tests. This is also supported in Spring Boot where you can
-{doc-spring-boot}/html/spring-boot-features.html#boot-features-testing-spring-boot-applications-testing-with-running-server[test a running server].
+{docs-spring-boot}/html/spring-boot-features.html#boot-features-testing-spring-boot-applications-testing-with-running-server[test a running server].
 
 
 [[spring-mvc-test-server-filters]]
@@ -7797,7 +7797,7 @@ for rendering JSON, XML, and other formats through `@ResponseBody` methods.
 
 Alternatively, you may consider the full end-to-end integration testing support from
 Spring Boot with `@SpringBootTest`. See the
-{doc-spring-boot}/html/spring-boot-features.html#boot-features-testing[Spring Boot Reference Guide].
+{docs-spring-boot}/html/spring-boot-features.html#boot-features-testing[Spring Boot Reference Guide].
 
 There are pros and cons for each approach. The options provided in Spring MVC Test are
 different stops on the scale from classic unit testing to full integration testing. To be

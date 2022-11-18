@@ -1,5 +1,4 @@
 [[mvc]]
-:chapter: mvc
 = Spring Web MVC
 :doc-spring-security: {docs-site}/spring-security/reference
 

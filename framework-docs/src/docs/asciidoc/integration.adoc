@@ -5647,7 +5647,7 @@ GemFire is a memory-oriented, disk-backed, elastically scalable, continuously av
 active (with built-in pattern-based subscription notifications), globally replicated
 database and provides fully-featured edge caching. For further information on how to
 use GemFire as a `CacheManager` (and more), see the
-{doc-spring-gemfire}/html/[Spring Data GemFire reference documentation].
+{docs-spring-gemfire}/html/[Spring Data GemFire reference documentation].
 
 
 [[cache-store-configuration-jsr107]]
