@@ -26,6 +26,7 @@ import java.util.WeakHashMap;
 import org.springframework.asm.ClassReader;
 import org.springframework.cglib.core.internal.Function;
 import org.springframework.cglib.core.internal.LoadingCache;
+import org.springframework.core.NativeDetector;
 
 /**
  * Abstract class for all code-generating CGLIB utilities.
@@ -359,6 +360,11 @@ abstract public class AbstractClassGenerator<T> implements ClassGenerator {
 					// ignore
 				}
 			}
+			// SPRING PATCH BEGIN
+			if (NativeDetector.inNativeImage()) {
+				throw new UnsupportedOperationException("CGLIB enhancement should not happen at runtime on native image");
+			}
+			// SPRING PATCH END
 			byte[] b = strategy.generate(this);
 			String className = ClassNameReader.getClassName(new ClassReader(b));
 			ProtectionDomain protectionDomain = getProtectionDomain();
