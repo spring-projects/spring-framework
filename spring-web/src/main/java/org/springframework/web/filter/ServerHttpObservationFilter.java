@@ -27,6 +27,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.observation.DefaultServerRequestObservationConvention;
 import org.springframework.http.server.observation.ServerHttpObservationDocumentation;
 import org.springframework.http.server.observation.ServerRequestObservationContext;
@@ -108,7 +109,8 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 			filterChain.doFilter(request, response);
 		}
 		catch (Exception ex) {
-			observation.error(unwrapServletException(ex)).stop();
+			observation.error(unwrapServletException(ex));
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 			throw ex;
 		}
 		finally {
