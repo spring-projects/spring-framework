@@ -1366,8 +1366,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Give any InstantiationAwareBeanPostProcessors the opportunity to modify the
 		// state of the bean before properties are set. This can be used, for example,
 		// to support styles of field injection.
-		boolean hasInstAwareBpps = hasInstantiationAwareBeanPostProcessors();
-		if (!mbd.isSynthetic() && hasInstAwareBpps) {
+		if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 			for (InstantiationAwareBeanPostProcessor bp : getBeanPostProcessorCache().instantiationAware) {
 				if (!bp.postProcessAfterInstantiation(bw.getWrappedInstance(), beanName)) {
 					return;
@@ -1390,7 +1389,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 			pvs = newPvs;
 		}
-		if (hasInstAwareBpps) {
+		if (hasInstantiationAwareBeanPostProcessors()) {
 			if (pvs == null) {
 				pvs = mbd.getPropertyValues();
 			}
