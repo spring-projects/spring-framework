@@ -18,6 +18,10 @@ dependencies {
 	implementation("org.assertj:assertj-core")
 }
 
+checkstyle {
+	sourceSets = []
+}
+
 jar {
 	enabled = false
 }
