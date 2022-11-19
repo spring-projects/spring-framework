@@ -4409,7 +4409,7 @@ In the next example, given a request that starts with `/resources`, the relative
 used to find and serve static resources relative to `/static` on the classpath. Resources
 are served with a one-year future expiration to ensure maximum use of the browser cache
 and a reduction in HTTP requests made by the browser. The `Last-Modified` header is also
-evaluated and, if present, a `304` status code is returned. The following list shows
+evaluated and, if present, a `304` status code is returned. The following listing shows
 the example:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
