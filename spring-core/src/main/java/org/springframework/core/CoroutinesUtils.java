@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 
 import kotlin.Unit;
+import kotlin.coroutines.Continuation;
 import kotlin.coroutines.CoroutineContext;
 import kotlin.jvm.JvmClassMappingKt;
 import kotlin.reflect.KClass;
@@ -65,6 +66,10 @@ public abstract class CoroutinesUtils {
 		return BuildersKt.async(GlobalScope.INSTANCE, Dispatchers.getUnconfined(),
 				CoroutineStart.DEFAULT,
 				(scope, continuation) -> MonoKt.awaitSingleOrNull(source, continuation));
+	}
+
+	public static <T> Object awaitSingleOrNull(Mono<T> source, Continuation<T> continuation) {
+		return MonoKt.awaitSingleOrNull(source, continuation);
 	}
 
 	/**

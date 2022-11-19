@@ -35,6 +35,8 @@ import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 
+import reactor.core.publisher.Mono;
+
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -535,7 +537,11 @@ public class MethodParameter {
 				return void.class;
 			}
 			if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(getContainingClass())) {
-				return KotlinDelegate.getReturnType(method);
+				if (KotlinDetector.isSuspendingFunction(method)) {
+					return Mono.class;
+				} else {
+					return KotlinDelegate.getReturnType(method);
+				}
 			}
 			return method.getReturnType();
 		}

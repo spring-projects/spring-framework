@@ -28,6 +28,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapter;
@@ -83,6 +84,11 @@ final class HttpServiceMethod {
 		if (count == 0) {
 			return new MethodParameter[0];
 		}
+
+		if (KotlinDetector.isSuspendingFunction(method)) {
+			count -= 1;
+		}
+
 		DefaultParameterNameDiscoverer nameDiscoverer = new DefaultParameterNameDiscoverer();
 		MethodParameter[] parameters = new MethodParameter[count];
 		for (int i = 0; i < count; i++) {
