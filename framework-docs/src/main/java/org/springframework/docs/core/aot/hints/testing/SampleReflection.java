@@ -38,4 +38,5 @@ public class SampleReflection {
 			logger.error("reflection failed", exc);
 		}
 	}
+
 }

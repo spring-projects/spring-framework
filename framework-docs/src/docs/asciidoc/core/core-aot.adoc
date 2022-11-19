@@ -5,7 +5,7 @@ This chapter covers Spring's Ahead of Time (AOT) optimizations.
 
 For AOT support specific to integration tests, see <<testing.adoc#testcontext-aot, Ahead of Time Support for Tests>>.
 
-[[aot-introduction]]
+[[core.aot.introduction]]
 == Introduction to Ahead of Time Optimizations
 
 Spring's support for AOT optimizations is meant to inspect an `ApplicationContext` at build time and apply decisions and discovery logic that usually happens at runtime.
@@ -263,30 +263,29 @@ The following example registers `Account` for serialization.
 [[core.aot.hints.testing]]
 === Testing Runtime Hints
 
-Spring Core also ships `RuntimeHintsPredicates`, an utility for checking that existing hints match a particular use case.
-This can be used in your own tests, for validating that a `RuntimeHintsRegistrar` has the expected result.
-We can write a test for our `SpellCheckService` and ensure that we can load a dictionary at runtime:
+Spring Core also ships `RuntimeHintsPredicates`, a utility for checking that existing hints match a particular use case.
+This can be used in your own tests to validate that a `RuntimeHintsRegistrar` contains the expected results.
+We can write a test for our `SpellCheckService` and ensure that we will be able to load a dictionary at runtime:
 
 include::code:SpellCheckServiceTests[tag=hintspredicates]
 
-With `RuntimeHintsPredicates`, we can check for reflection, resource, serialization or proxy generation hints.
+With `RuntimeHintsPredicates`, we can check for reflection, resource, serialization, or proxy generation hints.
 This approach works well for unit tests but implies that the runtime behavior of a component is well known.
 
 You can learn more about the global runtime behavior of an application by running its test suite (or the app itself) with the {docs-graalvm}/native-image/metadata/AutomaticMetadataCollection/[GraalVM tracing agent].
 This agent will record all relevant calls requiring GraalVM hints at runtime and write them out as JSON configuration files.
 
 For more targeted discovery and testing, Spring Framework ships a dedicated module with core AOT testing utilities, `"org.springframework:spring-core-test"`.
-This module contains the RuntimeHints Agent, a Java agent that all method invocations that are related to runtime hints and helps you to assert that a given `RuntimeHints` instance covers all recorded invocations.
-Let's consider a piece of infrastructure for which we'd like to test the hints we're contributing during the AOT phase.
-
+This module contains the RuntimeHints Agent, a Java agent that records all method invocations that are related to runtime hints and helps you to assert that a given `RuntimeHints` instance covers all recorded invocations.
+Let's consider a piece of infrastructure for which we'd like to test the hints we're contributing during the AOT processing phase.
 
 include::code:SampleReflection[]
 
-We can then write a Java test (no native compilation required!) that checks our contributed hints:
+We can then write a unit test (no native compilation required) that checks our contributed hints:
 
 include::code:SampleReflectionRuntimeHintsTests[]
 
-If you forgot to contribute a hint, the test will fail and give some details on the invocation:
+If you forgot to contribute a hint, the test will fail and provide some details about the invocation:
 
 [source,txt,indent=0,subs="verbatim,quotes"]
 ----
@@ -303,6 +302,6 @@ io.spring.runtimehintstesting.SampleReflection#performReflection, Line 19
 io.spring.runtimehintstesting.SampleReflectionRuntimeHintsTests#lambda$shouldRegisterReflectionHints$0, Line 25
 ----
 
-There are various ways to configure this Java agent into your build, please refer to your build tool and test execution plugin documentation.
-The agent itself can be configured to instrument some packages (by default, only `org.springframework` is instrumented).
-You'll find more details in the https://github.com/spring-projects/spring-framework/blob/main/buildSrc/README.md[Spring Framework buildSrc README].
+There are various ways to configure this Java agent in your build, so please refer to the documentation of your build tool and test execution plugin.
+The agent itself can be configured to instrument specific packages (by default, only `org.springframework` is instrumented).
+You'll find more details in the {spring-framework-main-code}/buildSrc/README.md[Spring Framework `buildSrc` README] file.

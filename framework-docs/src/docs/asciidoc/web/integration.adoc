@@ -23,21 +23,21 @@ first take a look at common Spring configuration that is not specific to any one
 framework. (This section is equally applicable to Spring's own web framework variants.)
 
 One of the concepts (for want of a better word) espoused by Spring's lightweight
-application model is that of a layered architecture. Remember that in a "`classic`"
+application model is that of a layered architecture. Remember that in a "classic"
 layered architecture, the web layer is but one of many layers. It serves as one of the
 entry points into a server-side application, and it delegates to service objects
 (facades) that are defined in a service layer to satisfy business-specific (and
 presentation-technology agnostic) use cases. In Spring, these service objects, any other
-business-specific objects, data-access objects, and others exist in a distinct "`business
-context`", which contains no web or presentation layer objects (presentation objects,
-such as Spring MVC controllers, are typically configured in a distinct "`presentation
-context`"). This section details how you can configure a Spring container (a
+business-specific objects, data-access objects, and others exist in a distinct "business
+context", which contains no web or presentation layer objects (presentation objects,
+such as Spring MVC controllers, are typically configured in a distinct "presentation
+context"). This section details how you can configure a Spring container (a
 `WebApplicationContext`) that contains all of the 'business beans' in your application.
 
 Moving on to specifics, all you need to do is declare a
 {api-spring-framework}/web/context/ContextLoaderListener.html[`ContextLoaderListener`]
 in the standard Jakarta EE servlet `web.xml` file of your web application and add a
-`contextConfigLocation`<context-param/> section (in the same file) that defines which
+`contextConfigLocation` `<context-param/>` section (in the same file) that defines which
 set of Spring XML configuration files to load.
 
 Consider the following `<listener/>` configuration:
@@ -67,7 +67,7 @@ object based on the bean definitions and stores it in the `ServletContext` of th
 application.
 
 All Java web frameworks are built on top of the Servlet API, so you can use the
-following code snippet to get access to this "`business context`" `ApplicationContext`
+following code snippet to get access to this "business context" `ApplicationContext`
 created by the `ContextLoaderListener`.
 
 The following example shows how to get the `WebApplicationContext`:
@@ -119,7 +119,7 @@ The key element in Spring's JSF integration is the JSF `ELResolver` mechanism.
 
 `SpringBeanFacesELResolver` is a JSF compliant `ELResolver` implementation,
 integrating with the standard Unified EL as used by JSF and JSP. It delegates to
-Spring's "`business context`" `WebApplicationContext` first and then to the
+Spring's "business context" `WebApplicationContext` first and then to the
 default resolver of the underlying JSF implementation.
 
 Configuration-wise, you can define `SpringBeanFacesELResolver` in your JSF
@@ -157,27 +157,26 @@ The following example shows how to use `FacesContextUtils`:
 
 
 [[struts]]
-== Apache Struts 2.x
+== Apache Struts
 
 Invented by Craig McClanahan, https://struts.apache.org[Struts] is an open-source project
-hosted by the Apache Software Foundation. At the time, it greatly simplified the
+hosted by the Apache Software Foundation. Struts 1.x greatly simplified the
 JSP/Servlet programming paradigm and won over many developers who were using proprietary
-frameworks. It simplified the programming model, it was open source (and thus free as in
-beer), and it had a large community, which let the project grow and become popular among
-Java web developers.
+frameworks. It simplified the programming model; it was open source; and it had a large
+community, which let the project grow and become popular among Java web developers.
 
-As a successor to the original Struts 1.x, check out Struts 2.x and the Struts-provided
-https://struts.apache.org/release/2.3.x/docs/spring-plugin.html[Spring Plugin] for the
-built-in Spring integration.
+As a successor to the original Struts 1.x, check out Struts 2.x or more recent versions
+as well as the Struts-provided
+https://struts.apache.org/plugins/spring/[Spring Plugin] for built-in Spring integration.
 
 
 
 
 [[tapestry]]
-== Apache Tapestry 5.x
+== Apache Tapestry
 
-https://tapestry.apache.org/[Tapestry] is a ""Component oriented framework for creating
-dynamic, robust, highly scalable web applications in Java.""
+https://tapestry.apache.org/[Tapestry] is a "Component oriented framework for creating
+dynamic, robust, highly scalable web applications in Java."
 
 While Spring has its own <<mvc, powerful web layer>>, there are a number of unique
 advantages to building an enterprise Java application by using a combination of Tapestry
@@ -195,6 +194,6 @@ https://tapestry.apache.org/integrating-with-spring-framework.html[integration m
 The following links go to further resources about the various web frameworks described in
 this chapter.
 
-* The https://www.oracle.com/technetwork/java/javaee/javaserverfaces-139869.html[JSF] homepage
+* The https://www.oracle.com/java/technologies/javaserverfaces.html[JSF] homepage
 * The https://struts.apache.org/[Struts] homepage
 * The https://tapestry.apache.org/[Tapestry] homepage

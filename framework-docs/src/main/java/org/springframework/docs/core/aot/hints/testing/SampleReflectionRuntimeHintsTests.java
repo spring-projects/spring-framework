@@ -29,8 +29,9 @@ import org.springframework.core.SpringVersion;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-// This annotation conditions the execution of tests only if the agent is loaded in the current JVM
-// it also tags tests with the "RuntimeHints" JUnit tag
+// @EnabledIfRuntimeHintsAgent signals that the annotated test class or test
+// method is only enabled if the RuntimeHintsAgent is loaded on the current JVM.
+// It also tags tests with the "RuntimeHints" JUnit tag.
 @EnabledIfRuntimeHintsAgent
 class SampleReflectionRuntimeHintsTests {
 

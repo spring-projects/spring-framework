@@ -44,4 +44,5 @@ public class SpellCheckServiceTests {
 			hints.resources().registerPattern("dicts/*");
 		}
 	}
+
 }

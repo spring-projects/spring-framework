@@ -107,12 +107,10 @@ configuration metadata is actually written. These days, many developers choose
 
 For information about using other forms of metadata with the Spring container, see:
 
-* <<beans-annotation-config,Annotation-based configuration>>: Spring 2.5 introduced
-  support for annotation-based configuration metadata.
-* <<beans-java, Java-based configuration>>: Starting with Spring 3.0, many features
-  provided by the Spring JavaConfig project became part of the core Spring Framework.
-  Thus, you can define beans external to your application classes by using Java rather
-  than XML files. To use these new features, see the
+* <<beans-annotation-config,Annotation-based configuration>>: define beans using
+  annotation-based configuration metadata.
+* <<beans-java, Java-based configuration>>: define beans external to your application
+  classes by using Java rather than XML files. To use these features, see the
   {api-spring-framework}/context/annotation/Configuration.html[`@Configuration`],
   {api-spring-framework}/context/annotation/Bean.html[`@Bean`],
   {api-spring-framework}/context/annotation/Import.html[`@Import`],
@@ -124,14 +122,12 @@ beans as `<bean/>` elements inside a top-level `<beans/>` element. Java
 configuration typically uses `@Bean`-annotated methods within a `@Configuration` class.
 
 These bean definitions correspond to the actual objects that make up your application.
-Typically, you define service layer objects, data access objects (DAOs), presentation
-objects such as Struts `Action` instances, infrastructure objects such as Hibernate
-`SessionFactories`, JMS `Queues`, and so forth. Typically, one does not configure
-fine-grained domain objects in the container, because it is usually the responsibility
-of DAOs and business logic to create and load domain objects. However, you can use
-Spring's integration with AspectJ to configure objects that have been created outside
-the control of an IoC container. See <<aop-atconfigurable,Using AspectJ to
-dependency-inject domain objects with Spring>>.
+Typically, you define service layer objects, persistence layer objects such as
+repositories or data access objects (DAOs), presentation objects such as Web controllers,
+infrastructure objects such as a JPA `EntityManagerFactory`, JMS queues, and so forth.
+Typically, one does not configure fine-grained domain objects in the container, because
+it is usually the responsibility of repositories and business logic to create and load
+domain objects.
 
 The following example shows the basic structure of XML-based configuration metadata:
 
@@ -157,12 +153,11 @@ The following example shows the basic structure of XML-based configuration metad
 ----
 
 <1> The `id` attribute is a string that identifies the individual bean definition.
-
 <2> The `class` attribute defines the type of the bean and uses the fully qualified
-classname.
+class name.
 
-The value of the `id` attribute refers to collaborating objects. The XML for
-referring to collaborating objects is not shown in this example. See
+The value of the `id` attribute can be used to refer to collaborating objects. The XML
+for referring to collaborating objects is not shown in this example. See
 <<beans-dependencies,Dependencies>> for more information.
 
 
@@ -2839,7 +2834,7 @@ processed by the Spring `DispatcherServlet`, no special setup is necessary.
 `DispatcherServlet` already exposes all relevant state.
 
 If you use a Servlet web container, with requests processed outside of Spring's
-`DispatcherServlet` (for example, when using JSF or Struts), you need to register the
+`DispatcherServlet` (for example, when using JSF), you need to register the
 `org.springframework.web.context.request.RequestContextListener` `ServletRequestListener`.
 This can be done programmatically by using the `WebApplicationInitializer` interface.
 Alternatively, add the following declaration to your web application's `web.xml` file:
@@ -7515,7 +7510,7 @@ container. It includes the following topics:
 [[beans-java-basic-concepts]]
 === Basic Concepts: `@Bean` and `@Configuration`
 
-The central artifacts in Spring's new Java-configuration support are
+The central artifacts in Spring's Java configuration support are
 `@Configuration`-annotated classes and `@Bean`-annotated methods.
 
 The `@Bean` annotation is used to indicate that a method instantiates, configures, and

@@ -38,15 +38,13 @@ public class AotProcessingSample {
 	@ComponentScan
 	@Import({DataSourceConfiguration.class, ContainerConfiguration.class})
 	public class MyApplication {
-
 	}
 	// end::myapplication[]
 
 	class DataSourceConfiguration {
-
 	}
 
 	class ContainerConfiguration {
-
 	}
+
 }
