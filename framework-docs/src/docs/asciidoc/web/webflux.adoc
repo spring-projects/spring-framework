@@ -2005,7 +2005,7 @@ generally supported for all return values.
   value) is considered to have fully handled the response if it also has a `ServerHttpResponse`,
   a `ServerWebExchange` argument, or an `@ResponseStatus` annotation. The same is also true
   if the controller has made a positive ETag or `lastModified` timestamp check.
-  // TODO: See <<webflux-caching-etag-lastmodified>> for details.
+  See <<webflux-caching-etag-lastmodified>> for details.
 
   If none of the above is true, a `void` return type can also indicate "`no response body`" for
   REST controllers or default view name selection for HTML controllers.
@@ -4443,7 +4443,7 @@ the example:
 	}
 ----
 
-// TODO: See also <<webflux-caching-static-resources, HTTP caching support for static resources>>.
+See also <<webflux-caching-static-resources, HTTP caching support for static resources>>.
 
 The resource handler also supports a chain of
 {api-spring-framework}/web/reactive/resource/ResourceResolver.html[`ResourceResolver`] implementations and
