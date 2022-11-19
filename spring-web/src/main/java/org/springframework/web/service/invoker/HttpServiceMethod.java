@@ -312,6 +312,10 @@ final class HttpServiceMethod {
 
 			MethodParameter returnParam = new MethodParameter(method, -1);
 			Class<?> returnType = returnParam.getParameterType();
+			if (KotlinDetector.isSuspendingFunction(method)) {
+				returnType = Mono.class;
+			}
+
 			ReactiveAdapter reactiveAdapter = reactiveRegistry.getAdapter(returnType);
 
 			MethodParameter actualParam = (reactiveAdapter != null ? returnParam.nested() : returnParam.nestedIfOptional());
