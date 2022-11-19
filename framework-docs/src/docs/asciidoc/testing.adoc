@@ -27,6 +27,4 @@ include::testing/spring-mvc-test-framework.adoc[leveloffset=+1]
 
 include::testing/spring-mvc-test-client.adoc[leveloffset=+1]
 
-include::testing/testing-annotations.adoc[leveloffset=+1]
-
-include::testing/testing-resources.adoc[leveloffset=+1]
+include::testing/testing-appendix.adoc[leveloffset=+1]
