@@ -1,6 +1,5 @@
 [[websocket]]
 = WebSockets
-:doc-spring-security: {docs-site}/spring-security/reference
 [.small]#<<web-reactive.adoc#webflux-websocket, WebFlux>>#
 
 This part of the reference documentation covers support for Servlet stack, WebSocket
@@ -627,7 +626,7 @@ response. By default, the Spring Security Java configuration sets it to `DENY`.
 In 3.2, the Spring Security XML namespace does not set that header by default
 but can be configured to do so. In the future, it may set it by default.
 
-See {doc-spring-security}/features/exploits/headers.html#headers-default[Default Security Headers]
+See {docs-spring-security}/features/exploits/headers.html#headers-default[Default Security Headers]
 of the Spring Security documentation for details on how to configure the
 setting of the `X-Frame-Options` header. You can also see
 https://github.com/spring-projects/spring-security/issues/2718[gh-2718]
@@ -1811,7 +1810,7 @@ its own implementation of `WebSocketMessageBrokerConfigurer` that is marked with
 === Authorization
 
 Spring Security provides
-{doc-spring-security}/servlet/integrations/websocket.html#websocket-authorization[WebSocket sub-protocol authorization]
+{docs-spring-security}/servlet/integrations/websocket.html#websocket-authorization[WebSocket sub-protocol authorization]
 that uses a `ChannelInterceptor` to authorize messages based on the user header in them.
 Also, Spring Session provides
 https://docs.spring.io/spring-session/reference/web-socket.html[WebSocket integration]

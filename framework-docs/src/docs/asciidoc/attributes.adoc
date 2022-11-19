@@ -1,4 +1,4 @@
-:chomp: default headers packages
+:chomp:                         default headers packages
 :docs-site:                     https://docs.spring.io
 // Spring Framework
 :docs-spring-framework:         {docs-site}/spring-framework/docs/{spring-version}
@@ -10,8 +10,9 @@
 // Spring portfolio Links
 :docs-spring-boot:              {docs-site}/spring-boot/docs/current/reference
 :docs-spring-gemfire:           {docs-site}/spring-gemfire/docs/current/reference
+:docs-spring-security:          {docs-site}/spring-security/reference
 // Third-party Links
+:docs-graalvm:                  https://www.graalvm.org/22.3/reference-manual
 :gh-rsocket:                    https://github.com/rsocket
 :gh-rsocket-extensions:         {gh-rsocket}/rsocket/blob/master/Extensions
 :gh-rsocket-java:               {gh-rsocket}/rsocket-java
-:doc-graalvm: https://www.graalvm.org/22.3/reference-manual

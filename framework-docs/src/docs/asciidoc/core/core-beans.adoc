@@ -113,10 +113,10 @@ For information about using other forms of metadata with the Spring container, s
   provided by the Spring JavaConfig project became part of the core Spring Framework.
   Thus, you can define beans external to your application classes by using Java rather
   than XML files. To use these new features, see the
-  https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/Configuration.html[`@Configuration`],
-  https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/Bean.html[`@Bean`],
-  https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/Import.html[`@Import`],
-  and https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/DependsOn.html[`@DependsOn`] annotations.
+  {api-spring-framework}/context/annotation/Configuration.html[`@Configuration`],
+  {api-spring-framework}/context/annotation/Bean.html[`@Bean`],
+  {api-spring-framework}/context/annotation/Import.html[`@Import`],
+  and {api-spring-framework}/context/annotation/DependsOn.html[`@DependsOn`] annotations.
 
 Spring configuration consists of at least one and typically more than one bean
 definition that the container must manage. XML-based configuration metadata configures these

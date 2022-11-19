@@ -272,7 +272,7 @@ include::code:SpellCheckServiceTests[tag=hintspredicates]
 With `RuntimeHintsPredicates`, we can check for reflection, resource, serialization or proxy generation hints.
 This approach works well for unit tests but implies that the runtime behavior of a component is well known.
 
-You can learn more about the global runtime behavior of an application by running its test suite (or the app itself) with the {doc-graalvm}/native-image/metadata/AutomaticMetadataCollection/[GraalVM tracing agent].
+You can learn more about the global runtime behavior of an application by running its test suite (or the app itself) with the {docs-graalvm}/native-image/metadata/AutomaticMetadataCollection/[GraalVM tracing agent].
 This agent will record all relevant calls requiring GraalVM hints at runtime and write them out as JSON configuration files.
 
 For more targeted discovery and testing, Spring Framework ships a dedicated module with core AOT testing utilities, `"org.springframework:spring-core-test"`.

@@ -1,6 +1,5 @@
 [[mvc-cors]]
 = CORS
-:doc-spring-security: {docs-site}/spring-security/reference
 [.small]#<<web-reactive.adoc#webflux-cors, WebFlux>>#
 
 Spring MVC lets you handle CORS (Cross-Origin Resource Sharing). This section
@@ -336,7 +335,7 @@ You can apply CORS support through the built-in
 {api-spring-framework}/web/filter/CorsFilter.html[`CorsFilter`].
 
 NOTE: If you try to use the `CorsFilter` with Spring Security, keep in mind that Spring
-Security has {doc-spring-security}/servlet/integrations/cors.html[built-in support] for
+Security has {docs-spring-security}/servlet/integrations/cors.html[built-in support] for
 CORS.
 
 To configure the filter, pass a `CorsConfigurationSource` to its constructor, as the
