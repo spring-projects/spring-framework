@@ -1634,7 +1634,7 @@ If you prefer XML-based configuration, you can use a
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			https://www.springframework.org/schema/beans/spring-beans.xsd>
+			https://www.springframework.org/schema/beans/spring-beans.xsd">
 
 		<bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
 			<property name="registerDefaultFormatters" value="false" />
