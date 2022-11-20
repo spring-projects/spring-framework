@@ -5200,6 +5200,7 @@ with specific arguments, narrowing the set of type matches so that a specific be
 chosen for each argument. In the simplest case, this can be a plain descriptive value, as
 shown in the following example:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5224,10 +5225,12 @@ shown in the following example:
 		// ...
 	}
 ----
+--
 
 You can also specify the `@Qualifier` annotation on individual constructor arguments or
 method parameters, as shown in the following example:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5266,9 +5269,11 @@ method parameters, as shown in the following example:
 		// ...
 	}
 ----
+--
 
 The following example shows corresponding bean definitions.
 
+--
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
@@ -5302,6 +5307,7 @@ The following example shows corresponding bean definitions.
 is qualified with the same value.
 <2> The bean with the `action` qualifier value is wired with the constructor argument that
 is qualified with the same value.
+--
 
 For a fallback match, the bean name is considered a default qualifier value. Thus, you
 can define the bean with an `id` of `main` instead of the nested qualifier element, leading
@@ -5379,6 +5385,7 @@ constructor or a multi-argument method.
 You can create your own custom qualifier annotations. To do so, define an annotation and
 provide the `@Qualifier` annotation within your definition, as the following example shows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5398,10 +5405,12 @@ provide the `@Qualifier` annotation within your definition, as the following exa
 	@Qualifier
 	annotation class Genre(val value: String)
 ----
+--
 
 Then you can provide the custom qualifier on autowired fields and parameters, as the
 following example shows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5440,6 +5449,7 @@ following example shows:
 		// ...
 	}
 ----
+--
 
 Next, you can provide the information for the candidate bean definitions. You can add
 `<qualifier/>` tags as sub-elements of the `<bean/>` tag and then specify the `type` and
@@ -5448,6 +5458,7 @@ fully-qualified class name of the annotation. Alternately, as a convenience if n
 conflicting names exists, you can use the short class name. The following example
 demonstrates both approaches:
 
+--
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
@@ -5475,6 +5486,7 @@ demonstrates both approaches:
 
 	</beans>
 ----
+--
 
 In <<beans-classpath-scanning>>, you can see an annotation-based alternative to
 providing the qualifier metadata in XML. Specifically, see <<beans-scanning-qualifiers>>.
@@ -5485,6 +5497,7 @@ several different types of dependencies. For example, you may provide an offline
 catalog that can be searched when no Internet connection is available. First, define
 the simple annotation, as the following example shows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5502,10 +5515,12 @@ the simple annotation, as the following example shows:
 	@Qualifier
 	annotation class Offline
 ----
+--
 
 Then add the annotation to the field or property to be autowired, as shown in the
 following example:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5533,9 +5548,11 @@ class MovieRecommender {
 }
 ----
 <1> This line adds the `@Offline` annotation.
+--
 
 Now the bean definition only needs a qualifier `type`, as shown in the following example:
 
+--
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean class="example.SimpleMovieCatalog">
@@ -5544,6 +5561,7 @@ Now the bean definition only needs a qualifier `type`, as shown in the following
 	</bean>
 ----
 <1> This element specifies the qualifier.
+--
 
 
 You can also define custom qualifier annotations that accept named attributes in
@@ -5552,6 +5570,7 @@ then specified on a field or parameter to be autowired, a bean definition must m
 all such attribute values to be considered an autowire candidate. As an example,
 consider the following annotation definition:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5573,9 +5592,11 @@ consider the following annotation definition:
 	@Qualifier
 	annotation class MovieQualifier(val genre: String, val format: Format)
 ----
+--
 
 In this case `Format` is an enum, defined as follows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5590,10 +5611,12 @@ In this case `Format` is an enum, defined as follows:
 		VHS, DVD, BLURAY
 	}
 ----
+--
 
 The fields to be autowired are annotated with the custom qualifier and include values
 for both attributes: `genre` and `format`, as the following example shows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5642,6 +5665,7 @@ for both attributes: `genre` and `format`, as the following example shows:
 		// ...
 	}
 ----
+--
 
 Finally, the bean definitions should contain matching qualifier values. This example
 also demonstrates that you can use bean meta attributes instead of the
@@ -5650,6 +5674,7 @@ precedence, but the autowiring mechanism falls back on the values provided withi
 `<meta/>` tags if no such qualifier is present, as in the last two bean definitions in
 the following example:
 
+--
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
@@ -5693,6 +5718,7 @@ the following example:
 
 	</beans>
 ----
+--
 
 
 
@@ -5824,6 +5850,7 @@ endpoints. Spring supports this pattern for Spring-managed objects as well.
 the bean name to be injected. In other words, it follows by-name semantics,
 as demonstrated in the following example:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5849,6 +5876,7 @@ class SimpleMovieLister {
 }
 ----
 <1> This line injects a `@Resource`.
+--
 
 
 If no name is explicitly specified, the default name is derived from the field name or
@@ -5856,6 +5884,7 @@ setter method. In case of a field, it takes the field name. In case of a setter 
 it takes the bean property name. The following example is going to have the bean
 named `movieFinder` injected into its setter method:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5879,6 +5908,7 @@ named `movieFinder` injected into its setter method:
 
 	}
 ----
+--
 
 NOTE: The name provided with the annotation is resolved as a bean name by the
 `ApplicationContext` of which the `CommonAnnotationBeanPostProcessor` is aware.
@@ -5897,6 +5927,7 @@ Thus, in the following example, the `customerPreferenceDao` field first looks fo
 named "customerPreferenceDao" and then falls back to a primary type match for the type
 `CustomerPreferenceDao`:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5934,6 +5965,7 @@ named "customerPreferenceDao" and then falls back to a primary type match for th
 ----
 <1> The `context` field is injected based on the known resolvable dependency type:
 `ApplicationContext`.
+--
 
 [[beans-value-annotations]]
 === Using `@Value`
@@ -9489,6 +9521,7 @@ annotation lets you indicate that a component is eligible for registration
 when one or more specified profiles are active. Using our preceding example, we
 can rewrite the `dataSource` configuration as follows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -9523,7 +9556,9 @@ can rewrite the `dataSource` configuration as follows:
 		}
 	}
 ----
+--
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -9555,6 +9590,7 @@ can rewrite the `dataSource` configuration as follows:
 	}
 ----
 <1> `@Bean(destroyMethod = "")` disables default destroy method inference.
+--
 
 NOTE: As mentioned earlier, with `@Bean` methods, you typically choose to use programmatic
 JNDI lookups, by using either Spring's `JndiTemplate`/`JndiLocatorDelegate` helpers or the
@@ -9579,6 +9615,7 @@ of creating a custom composed annotation. The following example defines a custom
 `@Production` annotation that you can use as a drop-in replacement for
 `@Profile("production")`:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -9596,6 +9633,7 @@ of creating a custom composed annotation. The following example defines a custom
 	@Profile("production")
 	annotation class Production
 ----
+--
 
 TIP: If a `@Configuration` class is marked with `@Profile`, all of the `@Bean` methods and
 `@Import` annotations associated with that class are bypassed unless one or more of
@@ -9610,6 +9648,7 @@ active. For example, given `@Profile({"p1", "!p2"})`, registration will occur if
 of a configuration class (for example, for alternative variants of a particular bean), as
 the following example shows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -9661,6 +9700,7 @@ the following example shows:
 ----
 <1> The `standaloneDataSource` method is available only in the `development` profile.
 <2> The `jndiDataSource` method is available only in the `production` profile.
+--
 
 [NOTE]
 ====
