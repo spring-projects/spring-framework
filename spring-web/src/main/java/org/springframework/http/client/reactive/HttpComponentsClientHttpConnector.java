@@ -159,9 +159,8 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector, C
 		@Override
 		public void failed(Exception ex) {
 			Throwable t = ex;
-			if (t instanceof HttpStreamResetException) {
-				HttpStreamResetException httpStreamResetException = (HttpStreamResetException) ex;
-				t = httpStreamResetException.getCause();
+			if (t instanceof HttpStreamResetException hsre) {
+				t = hsre.getCause();
 			}
 			this.sink.error(t);
 		}

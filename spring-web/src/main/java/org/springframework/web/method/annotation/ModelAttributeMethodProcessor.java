@@ -406,9 +406,9 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 			Object[] validationHints = ValidationAnnotationUtils.determineValidationHints(ann);
 			if (validationHints != null) {
 				for (Validator validator : binder.getValidators()) {
-					if (validator instanceof SmartValidator) {
+					if (validator instanceof SmartValidator smartValidator) {
 						try {
-							((SmartValidator) validator).validateValue(targetType, fieldName, value,
+							smartValidator.validateValue(targetType, fieldName, value,
 									binder.getBindingResult(), validationHints);
 						}
 						catch (IllegalArgumentException ex) {

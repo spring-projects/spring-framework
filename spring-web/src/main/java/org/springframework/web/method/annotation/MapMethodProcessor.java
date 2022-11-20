@@ -65,8 +65,8 @@ public class MapMethodProcessor implements HandlerMethodArgumentResolver, Handle
 	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
-		if (returnValue instanceof Map){
-			mavContainer.addAllAttributes((Map) returnValue);
+		if (returnValue instanceof Map returnValueMap) {
+			mavContainer.addAllAttributes(returnValueMap);
 		}
 		else if (returnValue != null) {
 			// should not happen

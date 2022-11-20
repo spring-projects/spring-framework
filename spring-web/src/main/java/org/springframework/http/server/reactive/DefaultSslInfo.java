@@ -100,8 +100,8 @@ final class DefaultSslInfo implements SslInfo {
 
 		List<X509Certificate> result = new ArrayList<>(certificates.length);
 		for (Certificate certificate : certificates) {
-			if (certificate instanceof X509Certificate) {
-				result.add((X509Certificate) certificate);
+			if (certificate instanceof X509Certificate x509Certificate) {
+				result.add(x509Certificate);
 			}
 		}
 		return (!result.isEmpty() ? result.toArray(new X509Certificate[0]) : null);

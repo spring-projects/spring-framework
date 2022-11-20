@@ -129,7 +129,7 @@ public class MultipartHttpMessageReader extends LoggingCodecSupport
 	}
 
 	private List<Part> toList(Collection<Part> collection) {
-		return collection instanceof List ? (List<Part>) collection : new ArrayList<>(collection);
+		return collection instanceof List<Part> partList ? partList : new ArrayList<>(collection);
 	}
 
 }

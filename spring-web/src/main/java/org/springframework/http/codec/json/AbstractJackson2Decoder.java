@@ -264,12 +264,12 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	}
 
 	private CodecException processException(IOException ex) {
-		if (ex instanceof InvalidDefinitionException) {
-			JavaType type = ((InvalidDefinitionException) ex).getType();
+		if (ex instanceof InvalidDefinitionException ide) {
+			JavaType type = ide.getType();
 			return new CodecException("Type definition error: " + type, ex);
 		}
-		if (ex instanceof JsonProcessingException) {
-			String originalMessage = ((JsonProcessingException) ex).getOriginalMessage();
+		if (ex instanceof JsonProcessingException jpe) {
+			String originalMessage = jpe.getOriginalMessage();
 			return new DecodingException("JSON decoding error: " + originalMessage, ex);
 		}
 		return new DecodingException("I/O error while parsing input stream", ex);

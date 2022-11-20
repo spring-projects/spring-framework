@@ -255,7 +255,7 @@ public abstract class Jackson2CodecSupport {
 
 	@Nullable
 	protected MethodParameter getParameter(ResolvableType type) {
-		return (type.getSource() instanceof MethodParameter ? (MethodParameter) type.getSource() : null);
+		return (type.getSource() instanceof MethodParameter methodParameter ? methodParameter : null);
 	}
 
 	@Nullable

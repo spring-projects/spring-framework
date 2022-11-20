@@ -74,8 +74,8 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 		Assert.notEmpty(strategies, "At least one ContentNegotiationStrategy is expected");
 		this.strategies.addAll(strategies);
 		for (ContentNegotiationStrategy strategy : this.strategies) {
-			if (strategy instanceof MediaTypeFileExtensionResolver) {
-				this.resolvers.add((MediaTypeFileExtensionResolver) strategy);
+			if (strategy instanceof MediaTypeFileExtensionResolver mediaTypeFileExtensionResolver) {
+				this.resolvers.add(mediaTypeFileExtensionResolver);
 			}
 		}
 	}
@@ -180,8 +180,8 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	public Map<String, MediaType> getMediaTypeMappings() {
 		Map<String, MediaType> result = null;
 		for (MediaTypeFileExtensionResolver resolver : this.resolvers) {
-			if (resolver instanceof MappingMediaTypeFileExtensionResolver) {
-				Map<String, MediaType> map = ((MappingMediaTypeFileExtensionResolver) resolver).getMediaTypes();
+			if (resolver instanceof MappingMediaTypeFileExtensionResolver mappingMediaTypeFileExtensionResolver) {
+				Map<String, MediaType> map = mappingMediaTypeFileExtensionResolver.getMediaTypes();
 				if (CollectionUtils.isEmpty(map)) {
 					continue;
 				}

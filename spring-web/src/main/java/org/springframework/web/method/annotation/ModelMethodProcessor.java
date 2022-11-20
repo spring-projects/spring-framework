@@ -65,8 +65,8 @@ public class ModelMethodProcessor implements HandlerMethodArgumentResolver, Hand
 		if (returnValue == null) {
 			return;
 		}
-		else if (returnValue instanceof Model) {
-			mavContainer.addAllAttributes(((Model) returnValue).asMap());
+		else if (returnValue instanceof Model model) {
+			mavContainer.addAllAttributes(model.asMap());
 		}
 		else {
 			// should not happen

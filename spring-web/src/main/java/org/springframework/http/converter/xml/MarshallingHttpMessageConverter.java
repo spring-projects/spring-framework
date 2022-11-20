@@ -69,8 +69,8 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 	public MarshallingHttpMessageConverter(Marshaller marshaller) {
 		Assert.notNull(marshaller, "Marshaller must not be null");
 		this.marshaller = marshaller;
-		if (marshaller instanceof Unmarshaller) {
-			this.unmarshaller = (Unmarshaller) marshaller;
+		if (marshaller instanceof Unmarshaller um) {
+			this.unmarshaller = um;
 		}
 	}
 

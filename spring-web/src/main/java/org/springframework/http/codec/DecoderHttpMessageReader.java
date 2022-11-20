@@ -67,10 +67,10 @@ public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 	}
 
 	private static void initLogger(Decoder<?> decoder) {
-		if (decoder instanceof AbstractDecoder &&
+		if (decoder instanceof AbstractDecoder<?> abstractDecoder &&
 				decoder.getClass().getName().startsWith("org.springframework.core.codec")) {
-			Log logger = HttpLogging.forLog(((AbstractDecoder<?>) decoder).getLogger());
-			((AbstractDecoder<?>) decoder).setLogger(logger);
+			Log logger = HttpLogging.forLog(abstractDecoder.getLogger());
+			abstractDecoder.setLogger(logger);
 		}
 	}
 
@@ -163,9 +163,8 @@ public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 	protected Map<String, Object> getReadHints(ResolvableType actualType,
 			ResolvableType elementType, ServerHttpRequest request, ServerHttpResponse response) {
 
-		if (this.decoder instanceof HttpMessageDecoder) {
-			HttpMessageDecoder<?> decoder = (HttpMessageDecoder<?>) this.decoder;
-			return decoder.getDecodeHints(actualType, elementType, request, response);
+		if (this.decoder instanceof HttpMessageDecoder<?> httpMethodDecoder) {
+			return httpMethodDecoder.getDecodeHints(actualType, elementType, request, response);
 		}
 		return Hints.none();
 	}

@@ -55,16 +55,16 @@ public abstract class FacesContextUtils {
 		if (attr == null) {
 			return null;
 		}
-		if (attr instanceof RuntimeException) {
-			throw (RuntimeException) attr;
+		if (attr instanceof RuntimeException re) {
+			throw re;
 		}
-		if (attr instanceof Error) {
-			throw (Error) attr;
+		if (attr instanceof Error error) {
+			throw error;
 		}
-		if (!(attr instanceof WebApplicationContext)) {
+		if (!(attr instanceof WebApplicationContext wac)) {
 			throw new IllegalStateException("Root context attribute is not of type WebApplicationContext: " + attr);
 		}
-		return (WebApplicationContext) attr;
+		return wac;
 	}
 
 	/**
