@@ -5233,9 +5233,9 @@ method parameters, as shown in the following example:
 ----
 	public class MovieRecommender {
 
-		private MovieCatalog movieCatalog;
+		private final MovieCatalog movieCatalog;
 
-		private CustomerPreferenceDao customerPreferenceDao;
+		private final CustomerPreferenceDao customerPreferenceDao;
 
 		@Autowired
 		public void prepare(@Qualifier("main") MovieCatalog movieCatalog,
@@ -5492,7 +5492,6 @@ the simple annotation, as the following example shows:
 	@Retention(RetentionPolicy.RUNTIME)
 	@Qualifier
 	public @interface Offline {
-
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -8094,7 +8093,7 @@ class AppConfig {
 By default, beans defined with Java configuration that have a public `close` or `shutdown`
 method are automatically enlisted with a destruction callback. If you have a public
 `close` or `shutdown` method and you do not wish for it to be called when the container
-shuts down, you can add `@Bean(destroyMethod="")` to your bean definition to disable the
+shuts down, you can add `@Bean(destroyMethod = "")` to your bean definition to disable the
 default `(inferred)` mode.
 
 You may want to do that by default for a resource that you acquire with JNDI, as its
@@ -8107,7 +8106,7 @@ The following example shows how to prevent an automatic destruction callback for
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@Bean(destroyMethod="")
+	@Bean(destroyMethod = "")
 	public DataSource dataSource() throws NamingException {
 		return (DataSource) jndiTemplate.lookup("MyDS");
 	}
@@ -9451,7 +9450,7 @@ now looks like the following listing:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@Bean(destroyMethod="")
+	@Bean(destroyMethod = "")
 	public DataSource dataSource() throws Exception {
 		Context ctx = new InitialContext();
 		return (DataSource) ctx.lookup("java:comp/env/jdbc/datasource");
@@ -9532,13 +9531,15 @@ can rewrite the `dataSource` configuration as follows:
 	@Profile("production")
 	public class JndiDataConfig {
 
-		@Bean(destroyMethod="")
+		@Bean(destroyMethod = "") // <1>
 		public DataSource dataSource() throws Exception {
 			Context ctx = new InitialContext();
 			return (DataSource) ctx.lookup("java:comp/env/jdbc/datasource");
 		}
 	}
 ----
+<1> `@Bean(destroyMethod = "")` disables default destroy method inference.
+
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
@@ -9546,13 +9547,14 @@ can rewrite the `dataSource` configuration as follows:
 	@Profile("production")
 	class JndiDataConfig {
 
-		@Bean(destroyMethod = "")
+		@Bean(destroyMethod = "") // <1>
 		fun dataSource(): DataSource {
 			val ctx = InitialContext()
 			return ctx.lookup("java:comp/env/jdbc/datasource") as DataSource
 		}
 	}
 ----
+<1> `@Bean(destroyMethod = "")` disables default destroy method inference.
 
 NOTE: As mentioned earlier, with `@Bean` methods, you typically choose to use programmatic
 JNDI lookups, by using either Spring's `JndiTemplate`/`JndiLocatorDelegate` helpers or the
@@ -9564,9 +9566,9 @@ profile expression. A profile expression allows for more complicated profile log
 expressed (for example, `production & us-east`). The following operators are supported in
 profile expressions:
 
-* `!`: A logical "`not`" of the profile
-* `&`: A logical "`and`" of the profiles
-* `|`: A logical "`or`" of the profiles
+* `!`: A logical `NOT` of the profile
+* `&`: A logical `AND` of the profiles
+* `|`: A logical `OR` of the profiles
 
 NOTE: You cannot mix the `&` and `|` operators without using parentheses. For example,
 `production & us-east | eu-central` is not a valid expression. It must be expressed as
@@ -9829,7 +9831,7 @@ activates multiple profiles:
 Declaratively, `spring.profiles.active` may accept a comma-separated list of profile names,
 as the following example shows:
 
-[literal,subs="verbatim,quotes"]
+[literal,indent=0,subs="verbatim,quotes"]
 ----
 	-Dspring.profiles.active="profile1,profile2"
 ----
@@ -10225,13 +10227,13 @@ handled in the JDK-standard way of resolving messages through `ResourceBundle` o
 purposes of the example, assume the contents of two of the above resource bundle files
 are as follows:
 
-[literal,subs="verbatim,quotes"]
+[source,properties,indent=0,subs="verbatim,quotes"]
 ----
 	# in format.properties
 	message=Alligators rock!
 ----
 
-[literal,subs="verbatim,quotes"]
+[source,properties,indent=0,subs="verbatim,quotes"]
 ----
 	# in exceptions.properties
 	argument.required=The {0} argument is required.
