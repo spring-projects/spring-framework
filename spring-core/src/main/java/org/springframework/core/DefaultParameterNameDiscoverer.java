@@ -16,11 +16,13 @@
 
 package org.springframework.core;
 
+import org.springframework.aot.AotDetector;
+
 /**
  * Default implementation of the {@link ParameterNameDiscoverer} strategy interface,
  * using the Java 8 standard reflection mechanism (if available), and falling back
- * to the ASM-based {@link LocalVariableTableParameterNameDiscoverer} for checking
- * debug information in the class file.
+ * to the ASM-based {@link LocalVariableTableParameterNameDiscoverer} (when not using
+ * AOT-processed optimizations) for checking debug information in the class file.
  *
  * <p>If a Kotlin reflection implementation is present,
  * {@link KotlinReflectionParameterNameDiscoverer} is added first in the list and
@@ -43,7 +45,9 @@ public class DefaultParameterNameDiscoverer extends PrioritizedParameterNameDisc
 			addDiscoverer(new KotlinReflectionParameterNameDiscoverer());
 		}
 		addDiscoverer(new StandardReflectionParameterNameDiscoverer());
-		addDiscoverer(new LocalVariableTableParameterNameDiscoverer());
+		if (!AotDetector.useGeneratedArtifacts()) {
+			addDiscoverer(new LocalVariableTableParameterNameDiscoverer());
+		}
 	}
 
 }
