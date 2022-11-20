@@ -66,8 +66,8 @@ class CaptureTheRestPathElement extends PathElement {
 			MultiValueMap<String,String> parametersCollector = null;
 			for (int i = pathIndex; i < matchingContext.pathLength; i++) {
 				Element element = matchingContext.pathElements.get(i);
-				if (element instanceof PathSegment) {
-					MultiValueMap<String, String> parameters = ((PathSegment) element).parameters();
+				if (element instanceof PathSegment pathSegment) {
+					MultiValueMap<String, String> parameters = pathSegment.parameters();
 					if (!parameters.isEmpty()) {
 						if (parametersCollector == null) {
 							parametersCollector = new LinkedMultiValueMap<>();
@@ -86,8 +86,8 @@ class CaptureTheRestPathElement extends PathElement {
 		StringBuilder sb = new StringBuilder();
 		for (int i = fromSegment, max = pathElements.size(); i < max; i++) {
 			Element element = pathElements.get(i);
-			if (element instanceof PathSegment) {
-				sb.append(((PathSegment)element).valueToMatch());
+			if (element instanceof PathSegment pathSegment) {
+				sb.append(pathSegment.valueToMatch());
 			}
 			else {
 				sb.append(element.value());

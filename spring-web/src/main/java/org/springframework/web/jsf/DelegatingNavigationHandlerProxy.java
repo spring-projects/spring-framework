@@ -110,8 +110,8 @@ public class DelegatingNavigationHandlerProxy extends NavigationHandler {
 	@Override
 	public void handleNavigation(FacesContext facesContext, String fromAction, String outcome) {
 		NavigationHandler handler = getDelegate(facesContext);
-		if (handler instanceof DecoratingNavigationHandler) {
-			((DecoratingNavigationHandler) handler).handleNavigation(
+		if (handler instanceof DecoratingNavigationHandler decoratingNavigationHandler) {
+			decoratingNavigationHandler.handleNavigation(
 					facesContext, fromAction, outcome, this.originalNavigationHandler);
 		}
 		else {

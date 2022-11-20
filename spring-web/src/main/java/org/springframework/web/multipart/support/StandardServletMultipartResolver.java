@@ -114,8 +114,8 @@ public class StandardServletMultipartResolver implements MultipartResolver {
 
 	@Override
 	public void cleanupMultipart(MultipartHttpServletRequest request) {
-		if (!(request instanceof AbstractMultipartHttpServletRequest) ||
-				((AbstractMultipartHttpServletRequest) request).isResolved()) {
+		if (!(request instanceof AbstractMultipartHttpServletRequest abstractMultipartHttpServletRequest) ||
+				abstractMultipartHttpServletRequest.isResolved()) {
 			// To be on the safe side: explicitly delete the parts,
 			// but only actual file parts (for Resin compatibility)
 			try {

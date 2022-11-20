@@ -335,8 +335,8 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 		private void releaseCachedItem() {
 			synchronized (this) {
 				Object item = this.item;
-				if (item instanceof DataBuffer) {
-					DataBufferUtils.release((DataBuffer) item);
+				if (item instanceof DataBuffer dataBuffer) {
+					DataBufferUtils.release(dataBuffer);
 				}
 				this.item = null;
 			}

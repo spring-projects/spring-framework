@@ -160,8 +160,8 @@ public class ControllerAdviceBean implements Ordered {
 		if (this.order == null) {
 			String beanName = null;
 			Object resolvedBean = null;
-			if (this.beanFactory != null && this.beanOrName instanceof String) {
-				beanName = (String) this.beanOrName;
+			if (this.beanFactory != null && this.beanOrName instanceof String stringBeanName) {
+				beanName = stringBeanName;
 				String targetBeanName = ScopedProxyUtils.getTargetBeanName(beanName);
 				boolean isScopedProxy = this.beanFactory.containsBean(targetBeanName);
 				// Avoid eager @ControllerAdvice bean resolution for scoped proxies,

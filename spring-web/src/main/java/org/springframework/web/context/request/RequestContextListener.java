@@ -51,11 +51,10 @@ public class RequestContextListener implements ServletRequestListener {
 
 	@Override
 	public void requestInitialized(ServletRequestEvent requestEvent) {
-		if (!(requestEvent.getServletRequest() instanceof HttpServletRequest)) {
+		if (!(requestEvent.getServletRequest() instanceof HttpServletRequest request)) {
 			throw new IllegalArgumentException(
 					"Request is not an HttpServletRequest: " + requestEvent.getServletRequest());
 		}
-		HttpServletRequest request = (HttpServletRequest) requestEvent.getServletRequest();
 		ServletRequestAttributes attributes = new ServletRequestAttributes(request);
 		request.setAttribute(REQUEST_ATTRIBUTES_ATTRIBUTE, attributes);
 		LocaleContextHolder.setLocale(request.getLocale());

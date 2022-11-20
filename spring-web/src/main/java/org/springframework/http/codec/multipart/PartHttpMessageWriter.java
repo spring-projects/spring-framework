@@ -81,7 +81,7 @@ public class PartHttpMessageWriter extends MultipartWriterSupport implements Htt
 		String name = part.name();
 		if (!headers.containsKey(HttpHeaders.CONTENT_DISPOSITION)) {
 			headers.setContentDispositionFormData(name,
-					(part instanceof FilePart ? ((FilePart) part).filename() : null));
+					(part instanceof FilePart filePart ? filePart.filename() : null));
 		}
 
 		return Flux.concat(

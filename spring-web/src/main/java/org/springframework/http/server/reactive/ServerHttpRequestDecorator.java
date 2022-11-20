@@ -123,11 +123,11 @@ public class ServerHttpRequestDecorator implements ServerHttpRequest {
 	 * @since 5.3.3
 	 */
 	public static <T> T getNativeRequest(ServerHttpRequest request) {
-		if (request instanceof AbstractServerHttpRequest) {
-			return ((AbstractServerHttpRequest) request).getNativeRequest();
+		if (request instanceof AbstractServerHttpRequest abstractServerHttpRequest) {
+			return abstractServerHttpRequest.getNativeRequest();
 		}
-		else if (request instanceof ServerHttpRequestDecorator) {
-			return getNativeRequest(((ServerHttpRequestDecorator) request).getDelegate());
+		else if (request instanceof ServerHttpRequestDecorator serverHttpRequestDecorator) {
+			return getNativeRequest(serverHttpRequestDecorator.getDelegate());
 		}
 		else {
 			throw new IllegalArgumentException(

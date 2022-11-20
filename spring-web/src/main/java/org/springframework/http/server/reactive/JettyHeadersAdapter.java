@@ -105,7 +105,7 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public boolean containsKey(Object key) {
-		return (key instanceof String && this.headers.contains((String) key));
+		return (key instanceof String headerName && this.headers.contains(headerName));
 	}
 
 	@Override
@@ -134,9 +134,9 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 	@Nullable
 	@Override
 	public List<String> remove(Object key) {
-		if (key instanceof String) {
+		if (key instanceof String headerName) {
 			List<String> oldValues = get(key);
-			this.headers.remove((String) key);
+			this.headers.remove(headerName);
 			return oldValues;
 		}
 		return null;

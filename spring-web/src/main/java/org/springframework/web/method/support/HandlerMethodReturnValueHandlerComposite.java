@@ -94,8 +94,8 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 
 	private boolean isAsyncReturnValue(@Nullable Object value, MethodParameter returnType) {
 		for (HandlerMethodReturnValueHandler handler : this.returnValueHandlers) {
-			if (handler instanceof AsyncHandlerMethodReturnValueHandler &&
-					((AsyncHandlerMethodReturnValueHandler) handler).isAsyncReturnValue(value, returnType)) {
+			if (handler instanceof AsyncHandlerMethodReturnValueHandler asyncHandlerMethodReturnValueHandler &&
+					asyncHandlerMethodReturnValueHandler.isAsyncReturnValue(value, returnType)) {
 				return true;
 			}
 		}

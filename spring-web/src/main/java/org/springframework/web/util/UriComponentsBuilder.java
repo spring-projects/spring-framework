@@ -726,8 +726,8 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	@Nullable
 	private String getQueryParamValue(@Nullable Object value) {
 		if (value != null) {
-			return (value instanceof Optional ?
-					((Optional<?>) value).map(Object::toString).orElse(null) :
+			return (value instanceof Optional<?> optionalValue ?
+					optionalValue.map(Object::toString).orElse(null) :
 					value.toString());
 		}
 		return null;
@@ -741,8 +741,8 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	@Override
 	public UriComponentsBuilder queryParamIfPresent(String name, Optional<?> value) {
 		value.ifPresent(o -> {
-			if (o instanceof Collection) {
-				queryParam(name, (Collection<?>) o);
+			if (o instanceof Collection<?> elements) {
+				queryParam(name, elements);
 			}
 			else {
 				queryParam(name, o);

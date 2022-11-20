@@ -202,8 +202,8 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		if (context.getAttribute(HttpClientContext.REQUEST_CONFIG) == null) {
 			// Use request configuration given by the user, when available
 			RequestConfig config = null;
-			if (httpRequest instanceof Configurable) {
-				config = ((Configurable) httpRequest).getConfig();
+			if (httpRequest instanceof Configurable configurable) {
+				config = configurable.getConfig();
 			}
 			if (config == null) {
 				config = createRequestConfig(client);
@@ -328,8 +328,8 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	@Override
 	public void destroy() throws Exception {
 		HttpClient httpClient = getHttpClient();
-		if (httpClient instanceof Closeable) {
-			((Closeable) httpClient).close();
+		if (httpClient instanceof Closeable closeable) {
+			closeable.close();
 		}
 	}
 

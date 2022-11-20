@@ -89,8 +89,8 @@ class MultipartFileResource extends AbstractResource {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other || (other instanceof MultipartFileResource &&
-				((MultipartFileResource) other).multipartFile.equals(this.multipartFile)));
+		return (this == other || (other instanceof MultipartFileResource multipartFileResource &&
+				multipartFileResource.multipartFile.equals(this.multipartFile)));
 	}
 
 	@Override

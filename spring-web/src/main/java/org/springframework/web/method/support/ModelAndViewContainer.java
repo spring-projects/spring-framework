@@ -106,7 +106,7 @@ public class ModelAndViewContainer {
 	 */
 	@Nullable
 	public String getViewName() {
-		return (this.view instanceof String ? (String) this.view : null);
+		return (this.view instanceof String stringView ? stringView : null);
 	}
 
 	/**

@@ -247,8 +247,9 @@ public final class WebHttpHandlerBuilder {
 
 		List<WebFilter> filtersToUse = this.filters.stream()
 				.peek(filter -> {
-					if (filter instanceof ForwardedHeaderTransformer && this.forwardedHeaderTransformer == null) {
-						this.forwardedHeaderTransformer = (ForwardedHeaderTransformer) filter;
+					if (filter instanceof ForwardedHeaderTransformer forwardedHeaderTransformerFilter
+							&& this.forwardedHeaderTransformer == null) {
+						this.forwardedHeaderTransformer = forwardedHeaderTransformerFilter;
 					}
 				})
 				.filter(filter -> !(filter instanceof ForwardedHeaderTransformer))

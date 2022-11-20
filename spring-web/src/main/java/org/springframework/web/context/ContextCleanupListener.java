@@ -65,9 +65,9 @@ public class ContextCleanupListener implements ServletContextListener {
 			String attrName = attrNames.nextElement();
 			if (attrName.startsWith("org.springframework.")) {
 				Object attrValue = servletContext.getAttribute(attrName);
-				if (attrValue instanceof DisposableBean) {
+				if (attrValue instanceof DisposableBean disposableBean) {
 					try {
-						((DisposableBean) attrValue).destroy();
+						disposableBean.destroy();
 					}
 					catch (Throwable ex) {
 						if (logger.isWarnEnabled()) {
