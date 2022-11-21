@@ -34,6 +34,7 @@ class PreComputeFieldFeature implements Feature {
 
 	private static Pattern[] patterns = {
 			Pattern.compile(Pattern.quote("org.springframework.core.NativeDetector#imageCode")),
+			Pattern.compile(Pattern.quote("org.springframework.cglib.core.AbstractClassGenerator#imageCode")),
 			Pattern.compile(Pattern.quote("org.springframework.") + ".*#.*Present"),
 			Pattern.compile(Pattern.quote("org.springframework.") + ".*#.*PRESENT"),
 			Pattern.compile(Pattern.quote("reactor.") + ".*#.*Available"),
