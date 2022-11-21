@@ -253,7 +253,7 @@ To configure a connection timeout:
 			.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);
 
 	val webClient = WebClient.builder()
-			.clientConnector(new ReactorClientHttpConnector(httpClient))
+			.clientConnector(ReactorClientHttpConnector(httpClient))
 			.build();
 ----
 
@@ -281,8 +281,8 @@ To configure a read or write timeout:
 
 	val httpClient = HttpClient.create()
 			.doOnConnected { conn -> conn
-					.addHandlerLast(new ReadTimeoutHandler(10))
-					.addHandlerLast(new WriteTimeoutHandler(10))
+					.addHandlerLast(ReadTimeoutHandler(10))
+					.addHandlerLast(WriteTimeoutHandler(10))
 			}
 
 	// Create WebClient...
@@ -392,7 +392,7 @@ The following example shows how to customize Jetty `HttpClient` settings:
 	httpClient.cookieStore = ...
 
 	val webClient = WebClient.builder()
-			.clientConnector(new JettyClientHttpConnector(httpClient))
+			.clientConnector(JettyClientHttpConnector(httpClient))
 			.build();
 ----
 
@@ -788,8 +788,8 @@ multipart request. The following example shows how to create a `MultiValueMap<St
 ----
 	val builder = MultipartBodyBuilder().apply {
 		part("fieldPart", "fieldValue")
-		part("filePart1", new FileSystemResource("...logo.png"))
-		part("jsonPart", new Person("Jason"))
+		part("filePart1", FileSystemResource("...logo.png"))
+		part("jsonPart", Person("Jason"))
 		part("myPart", part) // Part from a server request
 	}
 
