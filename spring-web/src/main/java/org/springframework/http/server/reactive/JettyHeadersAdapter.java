@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,8 +110,8 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public boolean containsValue(Object value) {
-		return (value instanceof String &&
-				this.headers.stream().anyMatch(field -> field.contains((String) value)));
+		return (value instanceof String searchString &&
+				this.headers.stream().anyMatch(field -> field.contains(searchString)));
 	}
 
 	@Nullable

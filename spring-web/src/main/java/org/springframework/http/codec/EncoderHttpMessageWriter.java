@@ -180,10 +180,10 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 	}
 
 	private boolean isStreamingMediaType(@Nullable MediaType mediaType) {
-		if (mediaType == null || !(this.encoder instanceof HttpMessageEncoder)) {
+		if (mediaType == null || !(this.encoder instanceof HttpMessageEncoder<?> httpMessageEncoder)) {
 			return false;
 		}
-		for (MediaType streamingMediaType : ((HttpMessageEncoder<?>) this.encoder).getStreamingMediaTypes()) {
+		for (MediaType streamingMediaType : httpMessageEncoder.getStreamingMediaTypes()) {
 			if (mediaType.isCompatibleWith(streamingMediaType) && matchParameters(mediaType, streamingMediaType)) {
 				return true;
 			}
