@@ -98,12 +98,18 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		return (info1, info2) -> info1.compareTo(info2, exchange);
 	}
 
-	@Override
-	public Mono<HandlerMethod> getHandlerInternal(ServerWebExchange exchange) {
-		exchange.getAttributes().remove(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
-		return super.getHandlerInternal(exchange)
-				.doOnTerminate(() -> ProducesRequestCondition.clearMediaTypesAttribute(exchange));
-	}
+	protected Mono<HandlerMethod> getHandlerAndCache(ServerWebExchange exchange) {
+        exchange.getAttributes().remove(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
+        return super.getHandlerInternal(exchange)
+            .doOnNext(handler -> exchange.getAttributes().put(BEST_MATCHING_HANDLER_ATTRIBUTE, handler))
+            .doOnTerminate(() -> ProducesRequestCondition.clearMediaTypesAttribute(exchange));
+    }
+
+    @Override
+    public Mono<HandlerMethod> getHandlerInternal(ServerWebExchange exchange) {
+        return Mono.justOrEmpty(exchange.<HandlerMethod>getAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE))
+            .switchIfEmpty(Mono.defer(() -> getHandlerAndCache(exchange)));
+    }
 
 	/**
 	 * Expose URI template variables, matrix variables, and producible media types in the request.
@@ -138,7 +144,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			matrixVariables = result.getMatrixVariables();
 		}
 
-		exchange.getAttributes().put(BEST_MATCHING_HANDLER_ATTRIBUTE, handlerMethod);
+		exchange.getAttributes().putIfAbsent(BEST_MATCHING_HANDLER_ATTRIBUTE, handlerMethod);
 		exchange.getAttributes().put(BEST_MATCHING_PATTERN_ATTRIBUTE, bestPattern);
 		ServerHttpObservationFilter.findObservationContext(exchange)
 				.ifPresent(context -> context.setPathPattern(bestPattern.toString()));
