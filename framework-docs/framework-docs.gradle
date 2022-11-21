@@ -1,6 +1,5 @@
 description = "Spring Framework Docs"
 
-apply plugin: 'java'
 apply plugin: 'kotlin'
 apply plugin: 'org.asciidoctor.jvm.convert'
 apply plugin: 'org.asciidoctor.jvm.pdf'
