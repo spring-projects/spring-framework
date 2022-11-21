@@ -55,34 +55,31 @@ import org.springframework.util.ReflectionUtils;
  */
 public final class CollectionFactory {
 
-	private static final Set<Class<?>> approximableCollectionTypes = new HashSet<>();
+	private static final Set<Class<?>> approximableCollectionTypes = Set.of(
+			// Standard collection interfaces
+			Collection.class,
+			List.class,
+			Set.class,
+			SortedSet.class,
+			NavigableSet.class,
+			// Common concrete collection classes
+			ArrayList.class,
+			LinkedList.class,
+			HashSet.class,
+			LinkedHashSet.class,
+			TreeSet.class,
+			EnumSet.class);
 
-	private static final Set<Class<?>> approximableMapTypes = new HashSet<>();
-
-
-	static {
-		// Standard collection interfaces
-		approximableCollectionTypes.add(Collection.class);
-		approximableCollectionTypes.add(List.class);
-		approximableCollectionTypes.add(Set.class);
-		approximableCollectionTypes.add(SortedSet.class);
-		approximableCollectionTypes.add(NavigableSet.class);
-		approximableMapTypes.add(Map.class);
-		approximableMapTypes.add(SortedMap.class);
-		approximableMapTypes.add(NavigableMap.class);
-
-		// Common concrete collection classes
-		approximableCollectionTypes.add(ArrayList.class);
-		approximableCollectionTypes.add(LinkedList.class);
-		approximableCollectionTypes.add(HashSet.class);
-		approximableCollectionTypes.add(LinkedHashSet.class);
-		approximableCollectionTypes.add(TreeSet.class);
-		approximableCollectionTypes.add(EnumSet.class);
-		approximableMapTypes.add(HashMap.class);
-		approximableMapTypes.add(LinkedHashMap.class);
-		approximableMapTypes.add(TreeMap.class);
-		approximableMapTypes.add(EnumMap.class);
-	}
+	private static final Set<Class<?>> approximableMapTypes = Set.of(
+			// Standard map interfaces
+			Map.class,
+			SortedMap.class,
+			NavigableMap.class,
+			// Common concrete map classes
+			HashMap.class,
+			LinkedHashMap.class,
+			TreeMap.class,
+			EnumMap.class);
 
 
 	private CollectionFactory() {

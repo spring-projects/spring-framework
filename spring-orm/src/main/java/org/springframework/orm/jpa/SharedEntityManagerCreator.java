@@ -23,7 +23,6 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -73,25 +72,22 @@ public abstract class SharedEntityManagerCreator {
 
 	private static final Map<Class<?>, Class<?>[]> cachedQueryInterfaces = new ConcurrentReferenceHashMap<>(4);
 
-	private static final Set<String> transactionRequiringMethods = new HashSet<>(8);
+	private static final Set<String> transactionRequiringMethods = Set.of(
+			"joinTransaction",
+			"flush",
+			"persist",
+			"merge",
+			"remove",
+			"refresh");
 
-	private static final Set<String> queryTerminatingMethods = new HashSet<>(8);
-
-	static {
-		transactionRequiringMethods.add("joinTransaction");
-		transactionRequiringMethods.add("flush");
-		transactionRequiringMethods.add("persist");
-		transactionRequiringMethods.add("merge");
-		transactionRequiringMethods.add("remove");
-		transactionRequiringMethods.add("refresh");
-
-		queryTerminatingMethods.add("execute");  // JPA 2.1 StoredProcedureQuery
-		queryTerminatingMethods.add("executeUpdate");
-		queryTerminatingMethods.add("getSingleResult");
-		queryTerminatingMethods.add("getResultStream");
-		queryTerminatingMethods.add("getResultList");
-		queryTerminatingMethods.add("list");  // Hibernate Query.list() method
-	}
+	private static final Set<String> queryTerminatingMethods = Set.of(
+			"execute",  // JPA 2.1 StoredProcedureQuery
+			"executeUpdate",
+			"getSingleResult",
+			"getResultStream",
+			"getResultList",
+			"list"  // Hibernate Query.list() method
+		);
 
 
 	/**
