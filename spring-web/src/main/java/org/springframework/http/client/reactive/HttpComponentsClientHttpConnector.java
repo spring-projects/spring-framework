@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,10 +158,7 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector, C
 
 		@Override
 		public void failed(Exception ex) {
-			Throwable t = ex;
-			if (t instanceof HttpStreamResetException hsre) {
-				t = hsre.getCause();
-			}
+			Throwable t = (ex instanceof HttpStreamResetException hsre ? hsre.getCause() : ex);
 			this.sink.error(t);
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,8 +180,8 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	public Map<String, MediaType> getMediaTypeMappings() {
 		Map<String, MediaType> result = null;
 		for (MediaTypeFileExtensionResolver resolver : this.resolvers) {
-			if (resolver instanceof MappingMediaTypeFileExtensionResolver mappingMediaTypeFileExtensionResolver) {
-				Map<String, MediaType> map = mappingMediaTypeFileExtensionResolver.getMediaTypes();
+			if (resolver instanceof MappingMediaTypeFileExtensionResolver mappingResolver) {
+				Map<String, MediaType> map = mappingResolver.getMediaTypes();
 				if (CollectionUtils.isEmpty(map)) {
 					continue;
 				}

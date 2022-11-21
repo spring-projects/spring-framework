@@ -321,8 +321,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * @since 4.3
 	 */
 	public void setDefaultUriVariables(Map<String, ?> uriVars) {
-		if (this.uriTemplateHandler instanceof DefaultUriBuilderFactory defaultUriVariables) {
-			defaultUriVariables.setDefaultUriVariables(uriVars);
+		if (this.uriTemplateHandler instanceof DefaultUriBuilderFactory factory) {
+			factory.setDefaultUriVariables(uriVars);
 		}
 		else {
 			throw new IllegalArgumentException(
@@ -1002,7 +1002,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 
 		private boolean canReadResponse(Type responseType, HttpMessageConverter<?> converter) {
-			Class<?> responseClass = (responseType instanceof Class<?> type ? type : null);
+			Class<?> responseClass = (responseType instanceof Class<?> clazz ? clazz : null);
 			if (responseClass != null) {
 				return converter.canRead(responseClass, null);
 			}
@@ -1052,7 +1052,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public void doWithRequest(ClientHttpRequest httpRequest) throws IOException {
 			super.doWithRequest(httpRequest);
 			Object requestBody = this.requestEntity.getBody();
@@ -1068,15 +1068,15 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			}
 			else {
 				Class<?> requestBodyClass = requestBody.getClass();
-				Type requestBodyType = (this.requestEntity instanceof RequestEntity<?> re ?
-						re.getType() : requestBodyClass);
+				// The following pattern variable cannot be named "requestEntity" due to lacking
+				// support in Checkstyle: https://github.com/checkstyle/checkstyle/issues/10969
+				Type requestBodyType = (this.requestEntity instanceof RequestEntity<?> _requestEntity ?
+						_requestEntity.getType() : requestBodyClass);
 				HttpHeaders httpHeaders = httpRequest.getHeaders();
 				HttpHeaders requestHeaders = this.requestEntity.getHeaders();
 				MediaType requestContentType = requestHeaders.getContentType();
 				for (HttpMessageConverter<?> messageConverter : getMessageConverters()) {
-					if (messageConverter instanceof GenericHttpMessageConverter) {
-						GenericHttpMessageConverter<Object> genericConverter =
-								(GenericHttpMessageConverter<Object>) messageConverter;
+					if (messageConverter instanceof GenericHttpMessageConverter genericConverter) {
 						if (genericConverter.canWrite(requestBodyType, requestBodyClass, requestContentType)) {
 							if (!requestHeaders.isEmpty()) {
 								requestHeaders.forEach((key, values) -> httpHeaders.put(key, new ArrayList<>(values)));

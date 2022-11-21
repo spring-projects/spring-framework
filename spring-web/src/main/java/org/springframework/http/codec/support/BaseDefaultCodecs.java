@@ -441,24 +441,26 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			if (codec instanceof AbstractDataBufferDecoder<?> abstractDataBufferDecoder) {
 				abstractDataBufferDecoder.setMaxInMemorySize(size);
 			}
+			// Pattern variables in the following if-blocks cannot be named the same as instance fields
+			// due to lacking support in Checkstyle: https://github.com/checkstyle/checkstyle/issues/10969
 			if (protobufPresent) {
-				if (codec instanceof ProtobufDecoder protobufDecoderCodec) {
-					protobufDecoderCodec.setMaxMessageSize(size);
+				if (codec instanceof ProtobufDecoder protobufDec) {
+					protobufDec.setMaxMessageSize(size);
 				}
 			}
 			if (kotlinSerializationCborPresent) {
-				if (codec instanceof KotlinSerializationCborDecoder kotlinSerializationCborDecoderCodec) {
-					kotlinSerializationCborDecoderCodec.setMaxInMemorySize(size);
+				if (codec instanceof KotlinSerializationCborDecoder kotlinSerializationCborDec) {
+					kotlinSerializationCborDec.setMaxInMemorySize(size);
 				}
 			}
 			if (kotlinSerializationJsonPresent) {
-				if (codec instanceof KotlinSerializationJsonDecoder kotlinSerializationJsonDecoderCodec) {
-					kotlinSerializationJsonDecoderCodec.setMaxInMemorySize(size);
+				if (codec instanceof KotlinSerializationJsonDecoder kotlinSerializationJsonDec) {
+					kotlinSerializationJsonDec.setMaxInMemorySize(size);
 				}
 			}
 			if (kotlinSerializationProtobufPresent) {
-				if (codec instanceof KotlinSerializationProtobufDecoder kotlinSerializationProtobufDecoderCodec) {
-					kotlinSerializationProtobufDecoderCodec.setMaxInMemorySize(size);
+				if (codec instanceof KotlinSerializationProtobufDecoder kotlinSerializationProtobufDec) {
+					kotlinSerializationProtobufDec.setMaxInMemorySize(size);
 				}
 			}
 			if (jackson2Present) {

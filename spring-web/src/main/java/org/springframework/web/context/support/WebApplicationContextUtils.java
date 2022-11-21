@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,14 +114,14 @@ public abstract class WebApplicationContextUtils {
 		if (attr == null) {
 			return null;
 		}
-		if (attr instanceof RuntimeException re) {
-			throw re;
+		if (attr instanceof RuntimeException runtimeException) {
+			throw runtimeException;
 		}
 		if (attr instanceof Error error) {
 			throw error;
 		}
-		if (attr instanceof Exception ex) {
-			throw new IllegalStateException(ex);
+		if (attr instanceof Exception exception) {
+			throw new IllegalStateException(exception);
 		}
 		if (!(attr instanceof WebApplicationContext wac)) {
 			throw new IllegalStateException("Context attribute is not of type WebApplicationContext: " + attr);
@@ -152,12 +152,12 @@ public abstract class WebApplicationContextUtils {
 			while (attrNames.hasMoreElements()) {
 				String attrName = attrNames.nextElement();
 				Object attrValue = sc.getAttribute(attrName);
-				if (attrValue instanceof WebApplicationContext) {
+				if (attrValue instanceof WebApplicationContext currentWac) {
 					if (wac != null) {
 						throw new IllegalStateException("No unique WebApplicationContext found: more than one " +
 								"DispatcherServlet registered with publishContext=true?");
 					}
-					wac = (WebApplicationContext) attrValue;
+					wac = currentWac;
 				}
 			}
 		}

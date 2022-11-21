@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,8 +55,8 @@ public abstract class FacesContextUtils {
 		if (attr == null) {
 			return null;
 		}
-		if (attr instanceof RuntimeException re) {
-			throw re;
+		if (attr instanceof RuntimeException runtimeException) {
+			throw runtimeException;
 		}
 		if (attr instanceof Error error) {
 			throw error;

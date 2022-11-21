@@ -150,9 +150,9 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 			if (data == null) {
 				result = Flux.just(encodeText(sb + "\n", mediaType, factory));
 			}
-			else if (data instanceof String dataString) {
-				dataString = StringUtils.replace(dataString, "\n", "\ndata:");
-				result = Flux.just(encodeText(sb + dataString + "\n\n", mediaType, factory));
+			else if (data instanceof String text) {
+				text = StringUtils.replace(text, "\n", "\ndata:");
+				result = Flux.just(encodeText(sb + text + "\n\n", mediaType, factory));
 			}
 			else {
 				result = encodeEvent(sb, data, dataType, mediaType, factory, hints);
