@@ -98,9 +98,15 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 	@Override
 	public Mono<HandlerMethod> getHandlerInternal(ServerWebExchange exchange) {
+		return Mono.justOrEmpty(exchange.<HandlerMethod>getAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE))
+			.switchIfEmpty(Mono.defer(() -> getHandlerAndCache(exchange)));
+	}
+	
+	protected Mono<HandlerMethod> getHandlerAndCache(ServerWebExchange exchange) {
 		exchange.getAttributes().remove(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 		return super.getHandlerInternal(exchange)
-				.doOnTerminate(() -> ProducesRequestCondition.clearMediaTypesAttribute(exchange));
+			.doOnNext(handler -> exchange.getAttributes().put(BEST_MATCHING_HANDLER_ATTRIBUTE, handler))
+			.doOnTerminate(() -> ProducesRequestCondition.clearMediaTypesAttribute(exchange));
 	}
 
 	/**
@@ -136,7 +142,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			matrixVariables = result.getMatrixVariables();
 		}
 
-		exchange.getAttributes().put(BEST_MATCHING_HANDLER_ATTRIBUTE, handlerMethod);
+		exchange.getAttributes().putIfAbsent(BEST_MATCHING_HANDLER_ATTRIBUTE, handlerMethod);
 		exchange.getAttributes().put(BEST_MATCHING_PATTERN_ATTRIBUTE, bestPattern);
 		exchange.getAttributes().put(URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriVariables);
 		exchange.getAttributes().put(MATRIX_VARIABLES_ATTRIBUTE, matrixVariables);
