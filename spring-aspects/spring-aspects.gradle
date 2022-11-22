@@ -11,10 +11,16 @@ sourceSets.test.java.srcDirs = files()
 compileAspectj {
 	sourceCompatibility "17"
 	targetCompatibility "17"
+	ajcOptions {
+		compilerArgs += "-parameters"
+	}
 }
 compileTestAspectj {
 	sourceCompatibility "17"
 	targetCompatibility "17"
+	ajcOptions {
+		compilerArgs += "-parameters"
+	}
 }
 
 dependencies {

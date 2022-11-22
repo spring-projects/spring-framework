@@ -54,8 +54,9 @@ import org.springframework.util.ClassUtils;
  * @author Sam Brannen
  * @since 2.0
  * @deprecated as of 6.0.1, in favor of {@link StandardReflectionParameterNameDiscoverer}
+ * (with the "-parameters" compiler flag)
  */
-@Deprecated
+@Deprecated(since = "6.0.1")
 public class LocalVariableTableParameterNameDiscoverer implements ParameterNameDiscoverer {
 
 	private static final Log logger = LogFactory.getLog(LocalVariableTableParameterNameDiscoverer.class);
