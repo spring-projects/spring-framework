@@ -231,8 +231,11 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	private boolean validateIfMatch(@Nullable String eTag) {
+		if (SAFE_METHODS.contains(getRequest().getMethod())) {
+			return false;
+		}
 		Enumeration<String> ifMatchHeaders = getRequest().getHeaders(HttpHeaders.IF_MATCH);
-		if (SAFE_METHODS.contains(getRequest().getMethod()) || !ifMatchHeaders.hasMoreElements()) {
+		if (!ifMatchHeaders.hasMoreElements()) {
 			return false;
 		}
 		this.notModified = matchRequestedETags(ifMatchHeaders, eTag, false);
