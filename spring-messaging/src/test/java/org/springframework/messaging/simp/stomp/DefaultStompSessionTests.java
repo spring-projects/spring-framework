@@ -597,7 +597,7 @@ public class DefaultStompSessionTests {
 		assertThat(received.get()).isNotNull();
 		assertThat(received.get()).isTrue();
 		assertThat(receivedHeaders.get()).isNotNull();
-		assertThat(receivedHeaders.get().get("foo").size()).isEqualTo(1);
+		assertThat(receivedHeaders.get().get("foo")).hasSize(1);
 		assertThat(receivedHeaders.get().get("foo").get(0)).isEqualTo("bar");
 	}
 
@@ -628,7 +628,7 @@ public class DefaultStompSessionTests {
 		assertThat(received.get()).isNotNull();
 		assertThat(received.get()).isTrue();
 		assertThat(receivedHeaders.get()).isNotNull();
-		assertThat(receivedHeaders.get().get("foo").size()).isEqualTo(1);
+		assertThat(receivedHeaders.get().get("foo")).hasSize(1);
 		assertThat(receivedHeaders.get().get("foo").get(0)).isEqualTo("bar");
 	}
 
@@ -688,7 +688,7 @@ public class DefaultStompSessionTests {
 		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 		headers = StompHeaders.readOnlyStompHeaders(accessor.getNativeHeaders());
 		assertThat(headers.size()).as(headers.toString()).isEqualTo(1);
-		assertThat(headers.get("foo").size()).isEqualTo(1);
+		assertThat(headers.get("foo")).hasSize(1);
 		assertThat(headers.get("foo").get(0)).isEqualTo("bar");
 
 		assertThat(this.session.isConnected()).isFalse();

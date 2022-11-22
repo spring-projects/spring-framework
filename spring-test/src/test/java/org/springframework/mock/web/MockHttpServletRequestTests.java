@@ -271,9 +271,9 @@ class MockHttpServletRequestTests {
 		params.put("key2", "value2");
 		params.put("key3", new String[] { "value3A", "value3B" });
 		request.addParameters(params);
-		assertThat(request.getParameterMap().size()).isEqualTo(3);
+		assertThat(request.getParameterMap()).hasSize(3);
 		request.removeAllParameters();
-		assertThat(request.getParameterMap().size()).isEqualTo(0);
+		assertThat(request.getParameterMap()).hasSize(0);
 	}
 
 	@Test

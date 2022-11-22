@@ -61,7 +61,7 @@ public class ExpressionEvaluatorTests {
 	@Test
 	public void testMultipleCachingSource() {
 		Collection<CacheOperation> ops = getOps("multipleCaching");
-		assertThat(ops.size()).isEqualTo(2);
+		assertThat(ops).hasSize(2);
 		Iterator<CacheOperation> it = ops.iterator();
 		CacheOperation next = it.next();
 		assertThat(next instanceof CacheableOperation).isTrue();

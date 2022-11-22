@@ -131,7 +131,7 @@ public class WebFluxConfigurationSupportTests {
 		assertThat(mapping).isNotNull();
 
 		Map<RequestMappingInfo, HandlerMethod> map = mapping.getHandlerMethods();
-		assertThat(map.size()).isEqualTo(1);
+		assertThat(map).hasSize(1);
 		assertThat(map.keySet().iterator().next().getPatternsCondition().getPatterns())
 				.isEqualTo(Collections.singleton(new PathPatternParser().parse("/api/user/{id}")));
 	}
@@ -145,7 +145,7 @@ public class WebFluxConfigurationSupportTests {
 		assertThat(adapter).isNotNull();
 
 		List<HttpMessageReader<?>> readers = adapter.getMessageReaders();
-		assertThat(readers.size()).isEqualTo(16);
+		assertThat(readers).hasSize(16);
 
 		ResolvableType multiValueMapType = forClassWithGenerics(MultiValueMap.class, String.class, String.class);
 
@@ -183,7 +183,7 @@ public class WebFluxConfigurationSupportTests {
 		assertThat(adapter).isNotNull();
 
 		List<HttpMessageReader<?>> messageReaders = adapter.getMessageReaders();
-		assertThat(messageReaders.size()).isEqualTo(2);
+		assertThat(messageReaders).hasSize(2);
 
 		assertHasMessageReader(messageReaders, forClass(String.class), TEXT_PLAIN);
 		assertHasMessageReader(messageReaders, forClass(TestBean.class), APPLICATION_XML);
@@ -200,7 +200,7 @@ public class WebFluxConfigurationSupportTests {
 		assertThat(handler.getOrder()).isEqualTo(0);
 
 		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
-		assertThat(writers.size()).isEqualTo(14);
+		assertThat(writers).hasSize(14);
 
 		assertHasMessageWriter(writers, forClass(byte[].class), APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, forClass(ByteBuffer.class), APPLICATION_OCTET_STREAM);
@@ -228,7 +228,7 @@ public class WebFluxConfigurationSupportTests {
 		assertThat(handler.getOrder()).isEqualTo(100);
 
 		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
-		assertThat(writers.size()).isEqualTo(14);
+		assertThat(writers).hasSize(14);
 
 		assertHasMessageWriter(writers, forClass(byte[].class), APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, forClass(ByteBuffer.class), APPLICATION_OCTET_STREAM);
@@ -256,11 +256,11 @@ public class WebFluxConfigurationSupportTests {
 		assertThat(handler.getOrder()).isEqualTo(Ordered.LOWEST_PRECEDENCE);
 
 		List<ViewResolver> resolvers = handler.getViewResolvers();
-		assertThat(resolvers.size()).isEqualTo(1);
+		assertThat(resolvers).hasSize(1);
 		assertThat(resolvers.get(0).getClass()).isEqualTo(FreeMarkerViewResolver.class);
 
 		List<View> views = handler.getDefaultViews();
-		assertThat(views.size()).isEqualTo(1);
+		assertThat(views).hasSize(1);
 
 		MimeType type = MimeTypeUtils.parseMimeType("application/json");
 		assertThat(views.get(0).getSupportedMediaTypes().get(0)).isEqualTo(type);

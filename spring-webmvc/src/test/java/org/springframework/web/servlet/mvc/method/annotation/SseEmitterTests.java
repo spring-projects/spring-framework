@@ -126,7 +126,7 @@ public class SseEmitterTests {
 
 
 		public void assertSentObjectCount(int size) {
-			assertThat(this.objects.size()).isEqualTo(size);
+			assertThat(this.objects).hasSize(size);
 		}
 
 		public void assertObject(int index, Object object) {

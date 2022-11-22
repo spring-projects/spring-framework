@@ -196,7 +196,7 @@ public class MessageHeadersTests {
 		}
 		MessageHeaders headers = new MyMH();
 		assertThat(headers.getId().toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
-		assertThat(headers.size()).isEqualTo(1);
+		assertThat(headers).hasSize(1);
 	}
 
 }

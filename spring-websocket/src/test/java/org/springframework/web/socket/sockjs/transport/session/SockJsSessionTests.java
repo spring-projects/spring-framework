@@ -186,7 +186,7 @@ class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSession> {
 		this.session.setActive(true);
 		this.session.close();
 
-		assertThat(this.session.getSockJsFramesWritten().size()).isEqualTo(1);
+		assertThat(this.session.getSockJsFramesWritten()).hasSize(1);
 		assertThat(this.session.getSockJsFramesWritten().get(0)).isEqualTo(SockJsFrame.closeFrameGoAway());
 
 		assertThat(this.session.getNumberOfLastActiveTimeUpdates()).isEqualTo(1);
@@ -235,7 +235,7 @@ class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSession> {
 	void writeFrame() {
 		this.session.writeFrame(SockJsFrame.openFrame());
 
-		assertThat(this.session.getSockJsFramesWritten().size()).isEqualTo(1);
+		assertThat(this.session.getSockJsFramesWritten()).hasSize(1);
 		assertThat(this.session.getSockJsFramesWritten().get(0)).isEqualTo(SockJsFrame.openFrame());
 	}
 
@@ -255,7 +255,7 @@ class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSession> {
 		this.session.setActive(true);
 		this.session.sendHeartbeat();
 
-		assertThat(this.session.getSockJsFramesWritten().size()).isEqualTo(1);
+		assertThat(this.session.getSockJsFramesWritten()).hasSize(1);
 		assertThat(this.session.getSockJsFramesWritten().get(0)).isEqualTo(SockJsFrame.heartbeatFrame());
 
 		verify(this.taskScheduler).schedule(any(Runnable.class), any(Instant.class));

@@ -317,7 +317,7 @@ public class StoredProcedureTests {
 		assertThat(rs1).containsExactly("Foo", "Bar");
 
 		List<Object> rs2 = (List<Object>) res.get("#result-set-2");
-		assertThat(rs2.size()).isEqualTo(1);
+		assertThat(rs2).hasSize(1);
 		Object o2 = rs2.get(0);
 		assertThat(o2).as("wron type returned for result set 2").isInstanceOf(Map.class);
 		Map<String, String> m2 = (Map<String, String>) o2;
@@ -362,7 +362,7 @@ public class StoredProcedureTests {
 
 		assertThat(res.size()).as("incorrect number of returns").isEqualTo(1);
 		List<String> rs1 = (List<String>) res.get("rs");
-		assertThat(rs1.size()).isEqualTo(2);
+		assertThat(rs1).hasSize(2);
 		assertThat(rs1.get(0)).isEqualTo("Foo");
 		assertThat(rs1.get(1)).isEqualTo("Bar");
 		verify(resultSet).close();

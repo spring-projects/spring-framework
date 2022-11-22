@@ -359,7 +359,7 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 
 		int result = this.tag.doStartTag();
 		assertThat(result).isEqualTo(Tag.SKIP_BODY);
-		assertThat(editor.allProcessedValues.size()).isEqualTo(3);
+		assertThat(editor.allProcessedValues).hasSize(3);
 
 		String output = getOutput();
 

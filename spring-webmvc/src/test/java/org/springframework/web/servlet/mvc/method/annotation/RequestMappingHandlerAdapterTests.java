@@ -277,9 +277,9 @@ public class RequestMappingHandlerAdapterTests {
 	}
 
 	private void assertMethodProcessorCount(int resolverCount, int initBinderResolverCount, int handlerCount) {
-		assertThat(this.handlerAdapter.getArgumentResolvers().size()).isEqualTo(resolverCount);
-		assertThat(this.handlerAdapter.getInitBinderArgumentResolvers().size()).isEqualTo(initBinderResolverCount);
-		assertThat(this.handlerAdapter.getReturnValueHandlers().size()).isEqualTo(handlerCount);
+		assertThat(this.handlerAdapter.getArgumentResolvers()).hasSize(resolverCount);
+		assertThat(this.handlerAdapter.getInitBinderArgumentResolvers()).hasSize(initBinderResolverCount);
+		assertThat(this.handlerAdapter.getReturnValueHandlers()).hasSize(handlerCount);
 	}
 
 

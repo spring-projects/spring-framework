@@ -237,7 +237,7 @@ class JmsTemplateTests {
 			tac.close();
 
 			List<TransactionSynchronization> synchs = TransactionSynchronizationManager.getSynchronizations();
-			assertThat(synchs.size()).isEqualTo(1);
+			assertThat(synchs).hasSize(1);
 			TransactionSynchronization synch = synchs.get(0);
 			synch.beforeCommit(false);
 			synch.beforeCompletion();

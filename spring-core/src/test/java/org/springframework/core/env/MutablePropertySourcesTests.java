@@ -39,7 +39,7 @@ class MutablePropertySourcesTests {
 		sources.addLast(new MockPropertySource("d").withProperty("p1", "dValue"));
 		sources.addLast(new MockPropertySource("f").withProperty("p1", "fValue"));
 
-		assertThat(sources.size()).isEqualTo(3);
+		assertThat(sources).hasSize(3);
 		assertThat(sources.contains("a")).isFalse();
 		assertThat(sources.contains("b")).isTrue();
 		assertThat(sources.contains("c")).isFalse();
@@ -56,7 +56,7 @@ class MutablePropertySourcesTests {
 		sources.addBefore("b", new MockPropertySource("a"));
 		sources.addAfter("b", new MockPropertySource("c"));
 
-		assertThat(sources.size()).isEqualTo(5);
+		assertThat(sources).hasSize(5);
 		assertThat(sources.precedenceOf(PropertySource.named("a"))).isEqualTo(0);
 		assertThat(sources.precedenceOf(PropertySource.named("b"))).isEqualTo(1);
 		assertThat(sources.precedenceOf(PropertySource.named("c"))).isEqualTo(2);
@@ -66,7 +66,7 @@ class MutablePropertySourcesTests {
 		sources.addBefore("f", new MockPropertySource("e"));
 		sources.addAfter("f", new MockPropertySource("g"));
 
-		assertThat(sources.size()).isEqualTo(7);
+		assertThat(sources).hasSize(7);
 		assertThat(sources.precedenceOf(PropertySource.named("a"))).isEqualTo(0);
 		assertThat(sources.precedenceOf(PropertySource.named("b"))).isEqualTo(1);
 		assertThat(sources.precedenceOf(PropertySource.named("c"))).isEqualTo(2);
@@ -76,7 +76,7 @@ class MutablePropertySourcesTests {
 		assertThat(sources.precedenceOf(PropertySource.named("g"))).isEqualTo(6);
 
 		sources.addLast(new MockPropertySource("a"));
-		assertThat(sources.size()).isEqualTo(7);
+		assertThat(sources).hasSize(7);
 		assertThat(sources.precedenceOf(PropertySource.named("b"))).isEqualTo(0);
 		assertThat(sources.precedenceOf(PropertySource.named("c"))).isEqualTo(1);
 		assertThat(sources.precedenceOf(PropertySource.named("d"))).isEqualTo(2);
@@ -86,7 +86,7 @@ class MutablePropertySourcesTests {
 		assertThat(sources.precedenceOf(PropertySource.named("a"))).isEqualTo(6);
 
 		sources.addFirst(new MockPropertySource("a"));
-		assertThat(sources.size()).isEqualTo(7);
+		assertThat(sources).hasSize(7);
 		assertThat(sources.precedenceOf(PropertySource.named("a"))).isEqualTo(0);
 		assertThat(sources.precedenceOf(PropertySource.named("b"))).isEqualTo(1);
 		assertThat(sources.precedenceOf(PropertySource.named("c"))).isEqualTo(2);
@@ -96,11 +96,11 @@ class MutablePropertySourcesTests {
 		assertThat(sources.precedenceOf(PropertySource.named("g"))).isEqualTo(6);
 
 		assertThat(PropertySource.named("a")).isEqualTo(sources.remove("a"));
-		assertThat(sources.size()).isEqualTo(6);
+		assertThat(sources).hasSize(6);
 		assertThat(sources.contains("a")).isFalse();
 
 		assertThat((Object) sources.remove("a")).isNull();
-		assertThat(sources.size()).isEqualTo(6);
+		assertThat(sources).hasSize(6);
 
 		String bogusPS = "bogus";
 		assertThatIllegalArgumentException().isThrownBy(() ->
@@ -108,13 +108,13 @@ class MutablePropertySourcesTests {
 			.withMessageContaining("does not exist");
 
 		sources.addFirst(new MockPropertySource("a"));
-		assertThat(sources.size()).isEqualTo(7);
+		assertThat(sources).hasSize(7);
 		assertThat(sources.precedenceOf(PropertySource.named("a"))).isEqualTo(0);
 		assertThat(sources.precedenceOf(PropertySource.named("b"))).isEqualTo(1);
 		assertThat(sources.precedenceOf(PropertySource.named("c"))).isEqualTo(2);
 
 		sources.replace("a", new MockPropertySource("a-replaced"));
-		assertThat(sources.size()).isEqualTo(7);
+		assertThat(sources).hasSize(7);
 		assertThat(sources.precedenceOf(PropertySource.named("a-replaced"))).isEqualTo(0);
 		assertThat(sources.precedenceOf(PropertySource.named("b"))).isEqualTo(1);
 		assertThat(sources.precedenceOf(PropertySource.named("c"))).isEqualTo(2);

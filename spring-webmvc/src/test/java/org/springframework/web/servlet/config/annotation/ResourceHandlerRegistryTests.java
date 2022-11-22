@@ -231,7 +231,7 @@ public class ResourceHandlerRegistryTests {
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
 		PathResourceResolver resolver = (PathResourceResolver) resolvers.get(resolvers.size()-1);
 		Map<Resource, Charset> locationCharsets = resolver.getLocationCharsets();
-		assertThat(locationCharsets.size()).isEqualTo(1);
+		assertThat(locationCharsets).hasSize(1);
 		assertThat(locationCharsets.values().iterator().next()).isEqualTo(StandardCharsets.ISO_8859_1);
 	}
 

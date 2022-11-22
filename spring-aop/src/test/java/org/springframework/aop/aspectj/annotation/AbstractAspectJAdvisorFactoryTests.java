@@ -366,7 +366,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 				new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable(), "someBean")),
 		CannotBeUnlocked.class).isEmpty()).isTrue();
 		assertThat(AopUtils.findAdvisorsThatCanApply(getFixture().getAdvisors(
-		new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable(),"someBean")), NotLockable.class).size()).isEqualTo(2);
+		new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable(),"someBean")), NotLockable.class)).hasSize(2);
 	}
 
 	@Test

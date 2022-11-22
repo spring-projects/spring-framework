@@ -122,7 +122,7 @@ public class RequestParamMapMethodArgumentResolverTests {
 		boolean condition = result instanceof Map;
 		assertThat(condition).isTrue();
 		Map<String, MultipartFile> resultMap = (Map<String, MultipartFile>) result;
-		assertThat(resultMap.size()).isEqualTo(2);
+		assertThat(resultMap).hasSize(2);
 		assertThat(resultMap.get("mfile")).isEqualTo(expected1);
 		assertThat(resultMap.get("other")).isEqualTo(expected2);
 	}
@@ -145,11 +145,11 @@ public class RequestParamMapMethodArgumentResolverTests {
 		boolean condition = result instanceof MultiValueMap;
 		assertThat(condition).isTrue();
 		MultiValueMap<String, MultipartFile> resultMap = (MultiValueMap<String, MultipartFile>) result;
-		assertThat(resultMap.size()).isEqualTo(2);
-		assertThat(resultMap.get("mfilelist").size()).isEqualTo(2);
+		assertThat(resultMap).hasSize(2);
+		assertThat(resultMap.get("mfilelist")).hasSize(2);
 		assertThat(resultMap.get("mfilelist").get(0)).isEqualTo(expected1);
 		assertThat(resultMap.get("mfilelist").get(1)).isEqualTo(expected2);
-		assertThat(resultMap.get("other").size()).isEqualTo(1);
+		assertThat(resultMap.get("other")).hasSize(1);
 		assertThat(resultMap.get("other").get(0)).isEqualTo(expected3);
 	}
 
@@ -170,7 +170,7 @@ public class RequestParamMapMethodArgumentResolverTests {
 		boolean condition = result instanceof Map;
 		assertThat(condition).isTrue();
 		Map<String, Part> resultMap = (Map<String, Part>) result;
-		assertThat(resultMap.size()).isEqualTo(2);
+		assertThat(resultMap).hasSize(2);
 		assertThat(resultMap.get("mfile")).isEqualTo(expected1);
 		assertThat(resultMap.get("other")).isEqualTo(expected2);
 	}
@@ -194,11 +194,11 @@ public class RequestParamMapMethodArgumentResolverTests {
 		boolean condition = result instanceof MultiValueMap;
 		assertThat(condition).isTrue();
 		MultiValueMap<String, Part> resultMap = (MultiValueMap<String, Part>) result;
-		assertThat(resultMap.size()).isEqualTo(2);
-		assertThat(resultMap.get("mfilelist").size()).isEqualTo(2);
+		assertThat(resultMap).hasSize(2);
+		assertThat(resultMap.get("mfilelist")).hasSize(2);
 		assertThat(resultMap.get("mfilelist").get(0)).isEqualTo(expected1);
 		assertThat(resultMap.get("mfilelist").get(1)).isEqualTo(expected2);
-		assertThat(resultMap.get("other").size()).isEqualTo(1);
+		assertThat(resultMap.get("other")).hasSize(1);
 		assertThat(resultMap.get("other").get(0)).isEqualTo(expected3);
 	}
 

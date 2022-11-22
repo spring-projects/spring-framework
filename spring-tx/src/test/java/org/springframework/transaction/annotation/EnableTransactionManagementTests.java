@@ -216,7 +216,7 @@ public class EnableTransactionManagementTests {
 	public void transactionalEventListenerRegisteredProperly() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(EnableTxConfig.class);
 		assertThat(ctx.containsBean(TransactionManagementConfigUtils.TRANSACTIONAL_EVENT_LISTENER_FACTORY_BEAN_NAME)).isTrue();
-		assertThat(ctx.getBeansOfType(TransactionalEventListenerFactory.class).size()).isEqualTo(1);
+		assertThat(ctx.getBeansOfType(TransactionalEventListenerFactory.class)).hasSize(1);
 		ctx.close();
 	}
 

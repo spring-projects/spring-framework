@@ -107,7 +107,7 @@ public class AnnotationTransactionNamespaceHandlerTests {
 	public void transactionalEventListenerRegisteredProperly() {
 		assertThat(this.context.containsBean(TransactionManagementConfigUtils
 				.TRANSACTIONAL_EVENT_LISTENER_FACTORY_BEAN_NAME)).isTrue();
-		assertThat(this.context.getBeansOfType(TransactionalEventListenerFactory.class).size()).isEqualTo(1);
+		assertThat(this.context.getBeansOfType(TransactionalEventListenerFactory.class)).hasSize(1);
 	}
 
 	private TransactionalTestBean getTestBean() {

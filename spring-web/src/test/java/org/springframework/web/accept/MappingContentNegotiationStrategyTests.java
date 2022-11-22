@@ -42,7 +42,7 @@ public class MappingContentNegotiationStrategyTests {
 
 		List<MediaType> mediaTypes = strategy.resolveMediaTypes(null);
 
-		assertThat(mediaTypes.size()).isEqualTo(1);
+		assertThat(mediaTypes).hasSize(1);
 		assertThat(mediaTypes.get(0).toString()).isEqualTo("application/json");
 	}
 
@@ -73,7 +73,7 @@ public class MappingContentNegotiationStrategyTests {
 
 		List<MediaType> mediaTypes = strategy.resolveMediaTypes(null);
 
-		assertThat(mediaTypes.size()).isEqualTo(1);
+		assertThat(mediaTypes).hasSize(1);
 		assertThat(mediaTypes.get(0).toString()).isEqualTo("application/xml");
 	}
 

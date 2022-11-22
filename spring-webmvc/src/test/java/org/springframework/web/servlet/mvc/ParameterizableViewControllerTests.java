@@ -66,7 +66,7 @@ public class ParameterizableViewControllerTests {
 	public void handleRequestWithFlashAttributes() throws Exception {
 		this.request.setAttribute(DispatcherServlet.INPUT_FLASH_MAP_ATTRIBUTE, new ModelMap("name", "value"));
 		ModelAndView mav = this.controller.handleRequest(this.request, new MockHttpServletResponse());
-		assertThat(mav.getModel().size()).isEqualTo(1);
+		assertThat(mav.getModel()).hasSize(1);
 		assertThat(mav.getModel().get("name")).isEqualTo("value");
 	}
 

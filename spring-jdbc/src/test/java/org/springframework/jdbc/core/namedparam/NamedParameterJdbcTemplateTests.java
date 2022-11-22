@@ -283,7 +283,7 @@ public class NamedParameterJdbcTemplateTests {
 			customers.add(cust);
 		});
 
-		assertThat(customers.size()).isEqualTo(1);
+		assertThat(customers).hasSize(1);
 		assertThat(customers.get(0).getId() == 1).as("Customer id was assigned correctly").isTrue();
 		assertThat(customers.get(0).getForename().equals("rod")).as("Customer forename was assigned correctly").isTrue();
 		verify(connection).prepareStatement(SELECT_NAMED_PARAMETERS_PARSED);
@@ -308,7 +308,7 @@ public class NamedParameterJdbcTemplateTests {
 			customers.add(cust);
 		});
 
-		assertThat(customers.size()).isEqualTo(1);
+		assertThat(customers).hasSize(1);
 		assertThat(customers.get(0).getId() == 1).as("Customer id was assigned correctly").isTrue();
 		assertThat(customers.get(0).getForename().equals("rod")).as("Customer forename was assigned correctly").isTrue();
 		verify(connection).prepareStatement(SELECT_NO_PARAMETERS);
@@ -333,7 +333,7 @@ public class NamedParameterJdbcTemplateTests {
 					return cust;
 				});
 
-		assertThat(customers.size()).isEqualTo(1);
+		assertThat(customers).hasSize(1);
 		assertThat(customers.get(0).getId() == 1).as("Customer id was assigned correctly").isTrue();
 		assertThat(customers.get(0).getForename().equals("rod")).as("Customer forename was assigned correctly").isTrue();
 		verify(connection).prepareStatement(SELECT_NAMED_PARAMETERS_PARSED);
@@ -358,7 +358,7 @@ public class NamedParameterJdbcTemplateTests {
 					return cust;
 				});
 
-		assertThat(customers.size()).isEqualTo(1);
+		assertThat(customers).hasSize(1);
 		assertThat(customers.get(0).getId() == 1).as("Customer id was assigned correctly").isTrue();
 		assertThat(customers.get(0).getForename().equals("rod")).as("Customer forename was assigned correctly").isTrue();
 		verify(connection).prepareStatement(SELECT_NO_PARAMETERS);

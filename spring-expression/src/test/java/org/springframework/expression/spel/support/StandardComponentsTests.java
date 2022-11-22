@@ -59,13 +59,13 @@ public class StandardComponentsTests {
 	public void testStandardTypeLocator() {
 		StandardTypeLocator tl = new StandardTypeLocator();
 		List<String> prefixes = tl.getImportPrefixes();
-		assertThat(prefixes.size()).isEqualTo(1);
+		assertThat(prefixes).hasSize(1);
 		tl.registerImport("java.util");
 		prefixes = tl.getImportPrefixes();
-		assertThat(prefixes.size()).isEqualTo(2);
+		assertThat(prefixes).hasSize(2);
 		tl.removeImport("java.util");
 		prefixes = tl.getImportPrefixes();
-		assertThat(prefixes.size()).isEqualTo(1);
+		assertThat(prefixes).hasSize(1);
 	}
 
 	@Test

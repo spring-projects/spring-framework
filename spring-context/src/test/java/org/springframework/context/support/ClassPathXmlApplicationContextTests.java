@@ -195,7 +195,7 @@ public class ClassPathXmlApplicationContextTests {
 	void factoryBeanAndApplicationListener() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(CONTEXT_WILDCARD);
 		ctx.getBeanFactory().registerSingleton("manualFBAAL", new FactoryBeanAndApplicationListener());
-		assertThat(ctx.getBeansOfType(ApplicationListener.class).size()).isEqualTo(2);
+		assertThat(ctx.getBeansOfType(ApplicationListener.class)).hasSize(2);
 		ctx.close();
 	}
 
@@ -312,16 +312,16 @@ public class ClassPathXmlApplicationContextTests {
 		assertThat(beanNamesForType[0]).isEqualTo("myMessageSource");
 
 		Map<?, StaticMessageSource> beansOfType = ctx.getBeansOfType(StaticMessageSource.class);
-		assertThat(beansOfType.size()).isEqualTo(1);
+		assertThat(beansOfType).hasSize(1);
 		assertThat(beansOfType.values().iterator().next()).isSameAs(myMessageSource);
 		beansOfType = ctx.getBeansOfType(StaticMessageSource.class, true, true);
-		assertThat(beansOfType.size()).isEqualTo(1);
+		assertThat(beansOfType).hasSize(1);
 		assertThat(beansOfType.values().iterator().next()).isSameAs(myMessageSource);
 		beansOfType = BeanFactoryUtils.beansOfTypeIncludingAncestors(ctx, StaticMessageSource.class);
-		assertThat(beansOfType.size()).isEqualTo(1);
+		assertThat(beansOfType).hasSize(1);
 		assertThat(beansOfType.values().iterator().next()).isSameAs(myMessageSource);
 		beansOfType = BeanFactoryUtils.beansOfTypeIncludingAncestors(ctx, StaticMessageSource.class, true, true);
-		assertThat(beansOfType.size()).isEqualTo(1);
+		assertThat(beansOfType).hasSize(1);
 		assertThat(beansOfType.values().iterator().next()).isSameAs(myMessageSource);
 	}
 

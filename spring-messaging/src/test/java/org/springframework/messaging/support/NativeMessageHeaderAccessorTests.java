@@ -67,7 +67,7 @@ public class NativeMessageHeaderAccessorTests {
 		NativeMessageHeaderAccessor headerAccessor = new NativeMessageHeaderAccessor(message);
 		Map<String, Object> actual = headerAccessor.toMap();
 
-		assertThat(actual.size()).isEqualTo(2);
+		assertThat(actual).hasSize(2);
 		assertThat(actual.get("a")).isEqualTo("b");
 		assertThat(actual.get(NativeMessageHeaderAccessor.NATIVE_HEADERS)).isNotNull();
 		assertThat(actual.get(NativeMessageHeaderAccessor.NATIVE_HEADERS)).isEqualTo(inputNativeHeaders);
@@ -79,7 +79,7 @@ public class NativeMessageHeaderAccessorTests {
 		NativeMessageHeaderAccessor headerAccessor = new NativeMessageHeaderAccessor((Message<?>) null);
 
 		Map<String, Object> actual = headerAccessor.toMap();
-		assertThat(actual.size()).isEqualTo(0);
+		assertThat(actual).hasSize(0);
 
 		Map<String, List<String>> actualNativeHeaders = headerAccessor.toNativeHeaderMap();
 		assertThat(actualNativeHeaders).isEqualTo(Collections.emptyMap());
@@ -104,7 +104,7 @@ public class NativeMessageHeaderAccessorTests {
 
 		Map<String, Object> actual = headerAccessor.toMap();
 
-		assertThat(actual.size()).isEqualTo(2);
+		assertThat(actual).hasSize(2);
 		assertThat(actual.get("a")).isEqualTo("B");
 
 		@SuppressWarnings("unchecked")

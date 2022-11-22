@@ -83,7 +83,7 @@ public class RowMapperTests {
 	@AfterEach
 	public void verifyResults() {
 		assertThat(result).isNotNull();
-		assertThat(result.size()).isEqualTo(2);
+		assertThat(result).hasSize(2);
 		TestBean testBean1 = result.get(0);
 		TestBean testBean2 = result.get(1);
 		assertThat(testBean1.getName()).isEqualTo("tb1");

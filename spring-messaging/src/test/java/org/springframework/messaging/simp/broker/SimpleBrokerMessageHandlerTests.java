@@ -230,7 +230,7 @@ public class SimpleBrokerMessageHandlerTests {
 
 		verify(this.clientOutChannel, atLeast(2)).send(this.messageCaptor.capture());
 		List<Message<?>> messages = this.messageCaptor.getAllValues();
-		assertThat(messages.size()).isEqualTo(2);
+		assertThat(messages).hasSize(2);
 
 		MessageHeaders headers = messages.get(0).getHeaders();
 		assertThat(headers.get(SimpMessageHeaderAccessor.MESSAGE_TYPE_HEADER)).isEqualTo(SimpMessageType.CONNECT_ACK);
@@ -261,7 +261,7 @@ public class SimpleBrokerMessageHandlerTests {
 
 		verify(this.clientOutChannel, times(2)).send(this.messageCaptor.capture());
 		List<Message<?>> messages = this.messageCaptor.getAllValues();
-		assertThat(messages.size()).isEqualTo(2);
+		assertThat(messages).hasSize(2);
 
 		MessageHeaders headers = messages.get(0).getHeaders();
 		assertThat(headers.get(SimpMessageHeaderAccessor.MESSAGE_TYPE_HEADER)).isEqualTo(SimpMessageType.CONNECT_ACK);
@@ -292,7 +292,7 @@ public class SimpleBrokerMessageHandlerTests {
 
 		verify(this.clientOutChannel, times(1)).send(this.messageCaptor.capture());
 		List<Message<?>> messages = this.messageCaptor.getAllValues();
-		assertThat(messages.size()).isEqualTo(1);
+		assertThat(messages).hasSize(1);
 		assertThat(messages.get(0).getHeaders().get(SimpMessageHeaderAccessor.MESSAGE_TYPE_HEADER)).isEqualTo(SimpMessageType.CONNECT_ACK);
 	}
 

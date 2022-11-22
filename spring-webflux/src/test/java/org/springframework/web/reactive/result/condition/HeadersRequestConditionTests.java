@@ -148,7 +148,7 @@ public class HeadersRequestConditionTests {
 
 		HeadersRequestCondition result = condition1.combine(condition2);
 		Collection<?> conditions = result.getContent();
-		assertThat(conditions.size()).isEqualTo(2);
+		assertThat(conditions).hasSize(2);
 	}
 
 	@Test

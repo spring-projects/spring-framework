@@ -1082,7 +1082,7 @@ public class JdbcTemplateTests {
 		given(this.resultSet.getObject(2)).willReturn("second value");
 
 		Map<String, Object> map = this.template.queryForMap("my query");
-		assertThat(map.size()).isEqualTo(1);
+		assertThat(map).hasSize(1);
 		assertThat(map.get("x")).isEqualTo("first value");
 	}
 

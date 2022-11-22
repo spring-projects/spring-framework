@@ -40,7 +40,7 @@ public class WebSocketExtensionTests {
 		WebSocketExtension extension = extensions.get(0);
 
 		assertThat(extension.getName()).isEqualTo("x-test-extension");
-		assertThat(extension.getParameters().size()).isEqualTo(2);
+		assertThat(extension.getParameters()).hasSize(2);
 		assertThat(extension.getParameters().get("foo")).isEqualTo("bar");
 		assertThat(extension.getParameters().get("bar")).isEqualTo("baz");
 	}

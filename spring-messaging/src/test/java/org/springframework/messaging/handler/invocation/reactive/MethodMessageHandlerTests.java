@@ -66,7 +66,7 @@ public class MethodMessageHandlerTests {
 		TestMethodMessageHandler messageHandler = initMethodMessageHandler(TestController.class);
 		Map<String, HandlerMethod> mappings = messageHandler.getHandlerMethods();
 
-		assertThat(mappings.keySet().size()).isEqualTo(5);
+		assertThat(mappings.keySet()).hasSize(5);
 		assertThat(mappings).containsOnlyKeys(
 				"/handleMessage", "/handleMessageWithArgument", "/handleMessageWithError",
 				"/handleMessageMatch1", "/handleMessageMatch2");

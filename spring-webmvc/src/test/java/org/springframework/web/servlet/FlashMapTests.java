@@ -78,7 +78,7 @@ public class FlashMapTests {
 		flashMap.addTargetRequestParam("empty", " ");
 		flashMap.addTargetRequestParam("null", null);
 
-		assertThat(flashMap.getTargetRequestParams().size()).isEqualTo(1);
+		assertThat(flashMap.getTargetRequestParams()).hasSize(1);
 		assertThat(flashMap.getTargetRequestParams().getFirst("text")).isEqualTo("abc");
 	}
 
@@ -92,8 +92,8 @@ public class FlashMapTests {
 		FlashMap flashMap = new FlashMap();
 		flashMap.addTargetRequestParams(params);
 
-		assertThat(flashMap.getTargetRequestParams().size()).isEqualTo(1);
-		assertThat(flashMap.getTargetRequestParams().get("key").size()).isEqualTo(1);
+		assertThat(flashMap.getTargetRequestParams()).hasSize(1);
+		assertThat(flashMap.getTargetRequestParams().get("key")).hasSize(1);
 		assertThat(flashMap.getTargetRequestParams().getFirst("key")).isEqualTo("abc");
 	}
 

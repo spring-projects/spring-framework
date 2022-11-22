@@ -65,7 +65,7 @@ public class CollectionMergingTests {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithListOfRefs");
 		List<?> list = bean.getSomeList();
 		assertThat(list).isNotNull();
-		assertThat(list.size()).isEqualTo(3);
+		assertThat(list).hasSize(3);
 		assertThat(list.get(2)).isNotNull();
 		boolean condition = list.get(2) instanceof TestBean;
 		assertThat(condition).isTrue();
@@ -85,7 +85,7 @@ public class CollectionMergingTests {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithSetOfRefs");
 		Set<?> set = bean.getSomeSet();
 		assertThat(set).isNotNull();
-		assertThat(set.size()).isEqualTo(2);
+		assertThat(set).hasSize(2);
 		Iterator it = set.iterator();
 		it.next();
 		Object o = it.next();
@@ -110,7 +110,7 @@ public class CollectionMergingTests {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithMapOfRefs");
 		Map<?, ?> map = bean.getSomeMap();
 		assertThat(map).isNotNull();
-		assertThat(map.size()).isEqualTo(2);
+		assertThat(map).hasSize(2);
 		assertThat(map.get("Rob")).isNotNull();
 		boolean condition = map.get("Rob") instanceof TestBean;
 		assertThat(condition).isTrue();
@@ -142,7 +142,7 @@ public class CollectionMergingTests {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithListOfRefsInConstructor");
 		List<?> list = bean.getSomeList();
 		assertThat(list).isNotNull();
-		assertThat(list.size()).isEqualTo(3);
+		assertThat(list).hasSize(3);
 		assertThat(list.get(2)).isNotNull();
 		boolean condition = list.get(2) instanceof TestBean;
 		assertThat(condition).isTrue();
@@ -162,7 +162,7 @@ public class CollectionMergingTests {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithSetOfRefsInConstructor");
 		Set<?> set = bean.getSomeSet();
 		assertThat(set).isNotNull();
-		assertThat(set.size()).isEqualTo(2);
+		assertThat(set).hasSize(2);
 		Iterator it = set.iterator();
 		it.next();
 		Object o = it.next();
@@ -187,7 +187,7 @@ public class CollectionMergingTests {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithMapOfRefsInConstructor");
 		Map<?, ?> map = bean.getSomeMap();
 		assertThat(map).isNotNull();
-		assertThat(map.size()).isEqualTo(2);
+		assertThat(map).hasSize(2);
 		assertThat(map.get("Rob")).isNotNull();
 		boolean condition = map.get("Rob") instanceof TestBean;
 		assertThat(condition).isTrue();

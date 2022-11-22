@@ -44,7 +44,7 @@ public class HeaderContentTypeResolverTests {
 		List<MediaType> mediaTypes = this.resolver.resolveMediaTypes(
 				MockServerWebExchange.from(MockServerHttpRequest.get("/").header("accept", header)));
 
-		assertThat(mediaTypes.size()).isEqualTo(4);
+		assertThat(mediaTypes).hasSize(4);
 		assertThat(mediaTypes.get(0).toString()).isEqualTo("text/html");
 		assertThat(mediaTypes.get(1).toString()).isEqualTo("text/x-c");
 		assertThat(mediaTypes.get(2).toString()).isEqualTo("text/x-dvi;q=0.8");

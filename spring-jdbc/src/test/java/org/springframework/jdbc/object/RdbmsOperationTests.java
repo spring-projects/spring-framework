@@ -167,7 +167,7 @@ public class RdbmsOperationTests {
 				new SqlParameter("two", Types.NUMERIC)});
 		operation.afterPropertiesSet();
 		operation.validateParameters(new Object[] { 1, "2" });
-		assertThat(operation.getDeclaredParameters().size()).isEqualTo(2);
+		assertThat(operation.getDeclaredParameters()).hasSize(2);
 	}
 
 

@@ -204,7 +204,7 @@ public abstract class AbstractCacheTests<T extends Cache> {
 		}
 		latch.await();
 
-		assertThat(results.size()).isEqualTo(10);
+		assertThat(results).hasSize(10);
 		results.forEach(r -> assertThat(r).isEqualTo(1)); // Only one method got invoked
 	}
 

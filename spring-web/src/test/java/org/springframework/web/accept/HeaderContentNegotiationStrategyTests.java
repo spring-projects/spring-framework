@@ -49,7 +49,7 @@ public class HeaderContentNegotiationStrategyTests {
 		this.servletRequest.addHeader("Accept", "text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c");
 		List<MediaType> mediaTypes = this.strategy.resolveMediaTypes(this.webRequest);
 
-		assertThat(mediaTypes.size()).isEqualTo(4);
+		assertThat(mediaTypes).hasSize(4);
 		assertThat(mediaTypes.get(0).toString()).isEqualTo("text/html");
 		assertThat(mediaTypes.get(1).toString()).isEqualTo("text/x-c");
 		assertThat(mediaTypes.get(2).toString()).isEqualTo("text/x-dvi;q=0.8");
@@ -62,7 +62,7 @@ public class HeaderContentNegotiationStrategyTests {
 		this.servletRequest.addHeader("Accept", "text/x-dvi; q=0.8, text/x-c");
 		List<MediaType> mediaTypes = this.strategy.resolveMediaTypes(this.webRequest);
 
-		assertThat(mediaTypes.size()).isEqualTo(4);
+		assertThat(mediaTypes).hasSize(4);
 		assertThat(mediaTypes.get(0).toString()).isEqualTo("text/html");
 		assertThat(mediaTypes.get(1).toString()).isEqualTo("text/x-c");
 		assertThat(mediaTypes.get(2).toString()).isEqualTo("text/x-dvi;q=0.8");

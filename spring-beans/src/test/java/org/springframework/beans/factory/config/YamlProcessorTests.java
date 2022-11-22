@@ -52,7 +52,7 @@ class YamlProcessorTests {
 	void arrayConvertedToIndexedBeanReference() {
 		setYaml("foo: bar\nbar: [1,2,3]");
 		this.processor.process((properties, map) -> {
-			assertThat(properties.size()).isEqualTo(4);
+			assertThat(properties).hasSize(4);
 			assertThat(properties.get("foo")).isEqualTo("bar");
 			assertThat(properties.getProperty("foo")).isEqualTo("bar");
 			assertThat(properties.get("bar[0]")).isEqualTo(1);

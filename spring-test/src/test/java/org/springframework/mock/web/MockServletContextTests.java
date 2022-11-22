@@ -180,7 +180,7 @@ class MockServletContextTests {
 		void getServletRegistrations() {
 			Map<String, ? extends ServletRegistration> servletRegistrations = servletContext.getServletRegistrations();
 			assertThat(servletRegistrations).isNotNull();
-			assertThat(servletRegistrations.size()).isEqualTo(0);
+			assertThat(servletRegistrations).hasSize(0);
 		}
 
 		/**
@@ -198,7 +198,7 @@ class MockServletContextTests {
 		void getFilterRegistrations() {
 			Map<String, ? extends FilterRegistration> filterRegistrations = servletContext.getFilterRegistrations();
 			assertThat(filterRegistrations).isNotNull();
-			assertThat(filterRegistrations.size()).isEqualTo(0);
+			assertThat(filterRegistrations).hasSize(0);
 		}
 
 	}

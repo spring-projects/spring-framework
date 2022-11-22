@@ -50,7 +50,7 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
 		interceptor.beforeHandshake(this.request, this.response, wsHandler, attributes);
 
-		assertThat(attributes.size()).isEqualTo(3);
+		assertThat(attributes).hasSize(3);
 		assertThat(attributes.get("foo")).isEqualTo("bar");
 		assertThat(attributes.get("bar")).isEqualTo("baz");
 		assertThat(attributes.get(HttpSessionHandshakeInterceptor.HTTP_SESSION_ID_ATTR_NAME)).isEqualTo("123");
@@ -66,7 +66,7 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor(names);
 		interceptor.beforeHandshake(this.request, this.response, wsHandler, attributes);
 
-		assertThat(attributes.size()).isEqualTo(2);
+		assertThat(attributes).hasSize(2);
 		assertThat(attributes.get("foo")).isEqualTo("bar");
 		assertThat(attributes.get(HttpSessionHandshakeInterceptor.HTTP_SESSION_ID_ATTR_NAME)).isEqualTo("123");
 	}
@@ -80,7 +80,7 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 		interceptor.setCopyHttpSessionId(false);
 		interceptor.beforeHandshake(this.request, this.response, wsHandler, attributes);
 
-		assertThat(attributes.size()).isEqualTo(1);
+		assertThat(attributes).hasSize(1);
 		assertThat(attributes.get("foo")).isEqualTo("bar");
 	}
 
@@ -94,7 +94,7 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 		interceptor.setCopyAllAttributes(false);
 		interceptor.beforeHandshake(this.request, this.response, wsHandler, attributes);
 
-		assertThat(attributes.size()).isEqualTo(1);
+		assertThat(attributes).hasSize(1);
 		assertThat(attributes.get(HttpSessionHandshakeInterceptor.HTTP_SESSION_ID_ATTR_NAME)).isEqualTo("123");
 	}
 

@@ -73,7 +73,7 @@ public class JmsListenerEndpointRegistrarTests {
 		this.registrar.registerEndpoint(endpoint, null);
 		this.registrar.afterPropertiesSet();
 		assertThat(this.registry.getListenerContainer("some id")).as("Container not created").isNotNull();
-		assertThat(this.registry.getListenerContainers().size()).isEqualTo(1);
+		assertThat(this.registry.getListenerContainers()).hasSize(1);
 		assertThat(this.registry.getListenerContainerIds().iterator().next()).isEqualTo("some id");
 	}
 
@@ -96,7 +96,7 @@ public class JmsListenerEndpointRegistrarTests {
 		this.registrar.registerEndpoint(endpoint);
 		this.registrar.afterPropertiesSet();
 		assertThat(this.registry.getListenerContainer("myEndpoint")).as("Container not created").isNotNull();
-		assertThat(this.registry.getListenerContainers().size()).isEqualTo(1);
+		assertThat(this.registry.getListenerContainers()).hasSize(1);
 		assertThat(this.registry.getListenerContainerIds().iterator().next()).isEqualTo("myEndpoint");
 	}
 

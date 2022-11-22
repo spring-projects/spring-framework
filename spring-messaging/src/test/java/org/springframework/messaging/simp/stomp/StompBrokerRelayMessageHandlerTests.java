@@ -92,7 +92,7 @@ class StompBrokerRelayMessageHandlerTests {
 		this.brokerRelay.start();
 		this.brokerRelay.handleMessage(connectMessage("sess1", "joe"));
 
-		assertThat(this.tcpClient.getSentMessages().size()).isEqualTo(2);
+		assertThat(this.tcpClient.getSentMessages()).hasSize(2);
 
 		StompHeaderAccessor headers1 = this.tcpClient.getSentHeaders(0);
 		assertThat(headers1.getCommand()).isEqualTo(StompCommand.CONNECT);
@@ -116,7 +116,7 @@ class StompBrokerRelayMessageHandlerTests {
 		this.brokerRelay.start();
 		this.brokerRelay.handleMessage(connectMessage("sess1", "joe"));
 
-		assertThat(this.tcpClient.getSentMessages().size()).isEqualTo(2);
+		assertThat(this.tcpClient.getSentMessages()).hasSize(2);
 
 		StompHeaderAccessor headers1 = this.tcpClient.getSentHeaders(0);
 		assertThat(headers1.getCommand()).isEqualTo(StompCommand.CONNECT);
@@ -143,7 +143,7 @@ class StompBrokerRelayMessageHandlerTests {
 		accessor.setDestination("/user/daisy/foo");
 		this.brokerRelay.handleMessage(MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders()));
 
-		assertThat(this.tcpClient.getSentMessages().size()).isEqualTo(2);
+		assertThat(this.tcpClient.getSentMessages()).hasSize(2);
 		StompHeaderAccessor headers = this.tcpClient.getSentHeaders(0);
 		assertThat(headers.getCommand()).isEqualTo(StompCommand.CONNECT);
 		assertThat(headers.getSessionId()).isEqualTo(StompBrokerRelayMessageHandler.SYSTEM_SESSION_ID);
@@ -174,7 +174,7 @@ class StompBrokerRelayMessageHandlerTests {
 		accessor.setDestination("/user/daisy/foo");
 		this.brokerRelay.handleMessage(MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders()));
 
-		assertThat(this.tcpClient.getSentMessages().size()).isEqualTo(3);
+		assertThat(this.tcpClient.getSentMessages()).hasSize(3);
 		assertThat(this.tcpClient.getSentHeaders(2).getMessageType()).isEqualTo(SimpMessageType.HEARTBEAT);
 	}
 
@@ -184,7 +184,7 @@ class StompBrokerRelayMessageHandlerTests {
 		this.brokerRelay.start();
 		this.brokerRelay.handleMessage(connectMessage("sess1", "joe"));
 
-		assertThat(this.tcpClient.getSentMessages().size()).isEqualTo(2);
+		assertThat(this.tcpClient.getSentMessages()).hasSize(2);
 		assertThat(this.tcpClient.getSentHeaders(0).getCommand()).isEqualTo(StompCommand.CONNECT);
 		assertThat(this.tcpClient.getSentHeaders(1).getCommand()).isEqualTo(StompCommand.CONNECT);
 
@@ -247,7 +247,7 @@ class StompBrokerRelayMessageHandlerTests {
 		MessageHeaders headers = accessor.getMessageHeaders();
 		this.tcpClient.handleMessage(MessageBuilder.createMessage(new byte[0], headers));
 
-		assertThat(this.tcpClient.getSentMessages().size()).isEqualTo(2);
+		assertThat(this.tcpClient.getSentMessages()).hasSize(2);
 		assertThat(this.tcpClient.getSentHeaders(0).getCommand()).isEqualTo(StompCommand.CONNECT);
 		assertThat(this.tcpClient.getSentHeaders(1).getCommand()).isEqualTo(StompCommand.SUBSCRIBE);
 		assertThat(this.tcpClient.getSentHeaders(1).getDestination()).isEqualTo("/topic/foo");
@@ -268,7 +268,7 @@ class StompBrokerRelayMessageHandlerTests {
 		Message<byte[]> connect = connectMessage("sess1", "joe");
 		this.brokerRelay.handleMessage(connect);
 
-		assertThat(this.tcpClient.getSentMessages().size()).isEqualTo(2);
+		assertThat(this.tcpClient.getSentMessages()).hasSize(2);
 
 		StompHeaderAccessor headers1 = this.tcpClient.getSentHeaders(0);
 		assertThat(headers1.getCommand()).isEqualTo(StompCommand.CONNECT);
@@ -280,7 +280,7 @@ class StompBrokerRelayMessageHandlerTests {
 
 		this.brokerRelay.handleMessage(connect);
 
-		assertThat(this.tcpClient.getSentMessages().size()).isEqualTo(2);
+		assertThat(this.tcpClient.getSentMessages()).hasSize(2);
 		assertThat(this.outboundChannel.getMessages()).isEmpty();
 	}
 

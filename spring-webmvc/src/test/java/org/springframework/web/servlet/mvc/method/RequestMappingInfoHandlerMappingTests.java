@@ -364,12 +364,12 @@ class RequestMappingInfoHandlerMappingTests {
 
 		assertThat(matrixVariables).isNotNull();
 		if (mapping.getPatternParser() != null) {
-			assertThat(matrixVariables.size()).isEqualTo(1);
+			assertThat(matrixVariables).hasSize(1);
 			assertThat(matrixVariables.getFirst("b")).isEqualTo("c");
 			assertThat(uriVariables.get("foo")).isEqualTo("a=42");
 		}
 		else {
-			assertThat(matrixVariables.size()).isEqualTo(2);
+			assertThat(matrixVariables).hasSize(2);
 			assertThat(matrixVariables.getFirst("a")).isEqualTo("42");
 			assertThat(matrixVariables.getFirst("b")).isEqualTo("c");
 			assertThat(uriVariables.get("foo")).isEqualTo("a=42");

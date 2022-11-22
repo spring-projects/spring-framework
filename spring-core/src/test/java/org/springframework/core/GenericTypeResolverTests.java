@@ -121,7 +121,7 @@ class GenericTypeResolverTests {
 		assertThat(map.toString()).isEqualTo("{T=class java.lang.Integer}");
 
 		map = GenericTypeResolver.getTypeVariableMap(TypedTopLevelClass.TypedNested.class);
-		assertThat(map.size()).isEqualTo(2);
+		assertThat(map).hasSize(2);
 		Type t = null;
 		Type x = null;
 		for (Map.Entry<TypeVariable, Type> entry : map.entrySet()) {

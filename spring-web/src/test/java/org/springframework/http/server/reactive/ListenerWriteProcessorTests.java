@@ -64,7 +64,7 @@ public class ListenerWriteProcessorTests {
 		this.processor.onError(new IllegalStateException());
 
 		assertThat(this.resultSubscriber.getError()).as("Error should flow to result publisher").isNotNull();
-		assertThat(this.processor.getDiscardedBuffers().size()).isEqualTo(1);
+		assertThat(this.processor.getDiscardedBuffers()).hasSize(1);
 		assertThat(this.processor.getDiscardedBuffers().get(0)).isSameAs(buffer);
 	}
 
@@ -80,7 +80,7 @@ public class ListenerWriteProcessorTests {
 		this.processor.onNext(buffer);
 
 		assertThat(this.resultSubscriber.getError()).as("Error should flow to result publisher").isNotNull();
-		assertThat(this.processor.getDiscardedBuffers().size()).isEqualTo(1);
+		assertThat(this.processor.getDiscardedBuffers()).hasSize(1);
 		assertThat(this.processor.getDiscardedBuffers().get(0)).isSameAs(buffer);
 	}
 
@@ -97,7 +97,7 @@ public class ListenerWriteProcessorTests {
 		this.processor.onNext(buffer2);
 
 		assertThat(this.resultSubscriber.getError()).as("Error should flow to result publisher").isNotNull();
-		assertThat(this.processor.getDiscardedBuffers().size()).isEqualTo(2);
+		assertThat(this.processor.getDiscardedBuffers()).hasSize(2);
 		assertThat(this.processor.getDiscardedBuffers().get(0)).isSameAs(buffer2);
 		assertThat(this.processor.getDiscardedBuffers().get(1)).isSameAs(buffer1);
 	}

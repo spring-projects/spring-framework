@@ -60,7 +60,7 @@ public class MultipartBodyBuilderTests {
 
 		MultiValueMap<String, HttpEntity<?>> result = builder.build();
 
-		assertThat(result.size()).isEqualTo(5);
+		assertThat(result).hasSize(5);
 		HttpEntity<?> resultEntity = result.getFirst("key");
 		assertThat(resultEntity).isNotNull();
 		assertThat(resultEntity.getBody()).isEqualTo(multipartData);

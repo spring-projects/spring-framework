@@ -208,7 +208,7 @@ class MultipartIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 					.flatMap(map -> {
 						Map<String, Part> parts = map.toSingleValueMap();
 						try {
-							assertThat(parts.size()).isEqualTo(2);
+							assertThat(parts).hasSize(2);
 							assertThat(((FilePart) parts.get("fooPart")).filename()).isEqualTo("foo.txt");
 							assertThat(((FormFieldPart) parts.get("barPart")).value()).isEqualTo("bar");
 							return Flux.fromIterable(parts.values())
@@ -225,7 +225,7 @@ class MultipartIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 			return request.body(BodyExtractors.toParts()).collectList()
 					.flatMap(parts -> {
 						try {
-							assertThat(parts.size()).isEqualTo(2);
+							assertThat(parts).hasSize(2);
 							assertThat(((FilePart) parts.get(0)).filename()).isEqualTo("foo.txt");
 							assertThat(((FormFieldPart) parts.get(1)).value()).isEqualTo("bar");
 							return Flux.fromIterable(parts)

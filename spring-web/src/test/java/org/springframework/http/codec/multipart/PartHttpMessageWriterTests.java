@@ -96,7 +96,7 @@ public class PartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 				.block(Duration.ofSeconds(5));
 
 		MultiValueMap<String, Part> requestParts = parse(this.response, hints);
-		assertThat(requestParts.size()).isEqualTo(2);
+		assertThat(requestParts).hasSize(2);
 
 		Part part = requestParts.getFirst("text part");
 		assertThat(part.name()).isEqualTo("text part");

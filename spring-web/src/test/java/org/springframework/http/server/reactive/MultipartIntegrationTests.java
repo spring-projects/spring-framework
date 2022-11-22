@@ -94,7 +94,7 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 			return exchange
 					.getMultipartData()
 					.doOnNext(parts -> {
-						assertThat(parts.size()).isEqualTo(2);
+						assertThat(parts).hasSize(2);
 						assertThat(parts.containsKey("fooPart")).isTrue();
 						assertFooPart(parts.getFirst("fooPart"));
 						assertThat(parts.containsKey("barPart")).isTrue();

@@ -110,7 +110,7 @@ public class InitializeDatabaseIntegrationTests {
 		context = new ClassPathXmlApplicationContext("org/springframework/jdbc/config/jdbc-initialize-cache-config.xml");
 		assertCorrectSetup(context.getBean("dataSource", DataSource.class));
 		CacheData cache = context.getBean(CacheData.class);
-		assertThat(cache.getCachedData().size()).isEqualTo(1);
+		assertThat(cache.getCachedData()).hasSize(1);
 	}
 
 	private void assertCorrectSetup(DataSource dataSource) {

@@ -67,7 +67,7 @@ class ServerHttpResponseTests {
 		assertThat(response.headersWritten).isTrue();
 		assertThat(response.cookiesWritten).isTrue();
 
-		assertThat(response.body.size()).isEqualTo(3);
+		assertThat(response.body).hasSize(3);
 		assertThat(new String(response.body.get(0).toByteBuffer().array(), StandardCharsets.UTF_8)).isEqualTo("a");
 		assertThat(new String(response.body.get(1).toByteBuffer().array(), StandardCharsets.UTF_8)).isEqualTo("b");
 		assertThat(new String(response.body.get(2).toByteBuffer().array(), StandardCharsets.UTF_8)).isEqualTo("c");
@@ -83,7 +83,7 @@ class ServerHttpResponseTests {
 		assertThat(response.headersWritten).isTrue();
 		assertThat(response.cookiesWritten).isTrue();
 
-		assertThat(response.body.size()).isEqualTo(1);
+		assertThat(response.body).hasSize(1);
 		assertThat(new String(response.body.get(0).toByteBuffer().array(), StandardCharsets.UTF_8)).isEqualTo("foo");
 	}
 
@@ -138,7 +138,7 @@ class ServerHttpResponseTests {
 		assertThat(response.cookiesWritten).isTrue();
 		assertThat(response.getCookies().getFirst("ID")).isSameAs(cookie);
 
-		assertThat(response.body.size()).isEqualTo(3);
+		assertThat(response.body).hasSize(3);
 		assertThat(new String(response.body.get(0).toByteBuffer().array(), StandardCharsets.UTF_8)).isEqualTo("a");
 		assertThat(new String(response.body.get(1).toByteBuffer().array(), StandardCharsets.UTF_8)).isEqualTo("b");
 		assertThat(new String(response.body.get(2).toByteBuffer().array(), StandardCharsets.UTF_8)).isEqualTo("c");

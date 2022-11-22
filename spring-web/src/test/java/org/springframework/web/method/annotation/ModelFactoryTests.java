@@ -177,7 +177,7 @@ public class ModelFactoryTests {
 		assertThat(container.getModel().get(commandName)).isEqualTo(command);
 		String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + commandName;
 		assertThat(container.getModel().get(bindingResultKey)).isSameAs(dataBinder.getBindingResult());
-		assertThat(container.getModel().size()).isEqualTo(2);
+		assertThat(container.getModel()).hasSize(2);
 	}
 
 	@Test
@@ -240,7 +240,7 @@ public class ModelFactoryTests {
 		modelFactory.updateModel(this.webRequest, container);
 
 		assertThat(container.getModel().get(queryParamName)).isEqualTo(queryParam);
-		assertThat(container.getModel().size()).isEqualTo(1);
+		assertThat(container.getModel()).hasSize(1);
 		assertThat(this.attributeStore.retrieveAttribute(this.webRequest, attributeName)).isEqualTo(attribute);
 	}
 

@@ -1049,7 +1049,7 @@ class ConfigurationClassPostProcessorTests {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(CollectionArgumentConfiguration.class, TestBean.class);
 		CollectionArgumentConfiguration bean = ctx.getBean(CollectionArgumentConfiguration.class);
 		assertThat(bean.testBeans).isNotNull();
-		assertThat(bean.testBeans.size()).isEqualTo(1);
+		assertThat(bean.testBeans).hasSize(1);
 		assertThat(bean.testBeans.get(0)).isSameAs(ctx.getBean(TestBean.class));
 		ctx.close();
 	}
@@ -1068,7 +1068,7 @@ class ConfigurationClassPostProcessorTests {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(MapArgumentConfiguration.class, DummyRunnable.class);
 		MapArgumentConfiguration bean = ctx.getBean(MapArgumentConfiguration.class);
 		assertThat(bean.testBeans).isNotNull();
-		assertThat(bean.testBeans.size()).isEqualTo(1);
+		assertThat(bean.testBeans).hasSize(1);
 		assertThat(bean.testBeans.values().iterator().next()).isSameAs(ctx.getBean(Runnable.class));
 		ctx.close();
 	}
@@ -1087,7 +1087,7 @@ class ConfigurationClassPostProcessorTests {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(CollectionInjectionConfiguration.class);
 		CollectionInjectionConfiguration bean = ctx.getBean(CollectionInjectionConfiguration.class);
 		assertThat(bean.testBeans).isNotNull();
-		assertThat(bean.testBeans.size()).isEqualTo(1);
+		assertThat(bean.testBeans).hasSize(1);
 		assertThat(bean.testBeans.get(0)).isSameAs(ctx.getBean(TestBean.class));
 		ctx.close();
 	}
@@ -1097,7 +1097,7 @@ class ConfigurationClassPostProcessorTests {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(MapInjectionConfiguration.class);
 		MapInjectionConfiguration bean = ctx.getBean(MapInjectionConfiguration.class);
 		assertThat(bean.testBeans).isNotNull();
-		assertThat(bean.testBeans.size()).isEqualTo(1);
+		assertThat(bean.testBeans).hasSize(1);
 		assertThat(bean.testBeans.get("testBean")).isSameAs(ctx.getBean(Runnable.class));
 		ctx.close();
 	}

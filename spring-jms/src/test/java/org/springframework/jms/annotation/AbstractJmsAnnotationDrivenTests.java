@@ -84,8 +84,8 @@ abstract class AbstractJmsAnnotationDrivenTests {
 				context.getBean("jmsListenerContainerFactory", JmsListenerContainerTestFactory.class);
 		JmsListenerContainerTestFactory simpleFactory =
 				context.getBean("simpleFactory", JmsListenerContainerTestFactory.class);
-		assertThat(defaultFactory.getListenerContainers().size()).isEqualTo(1);
-		assertThat(simpleFactory.getListenerContainers().size()).isEqualTo(1);
+		assertThat(defaultFactory.getListenerContainers()).hasSize(1);
+		assertThat(simpleFactory.getListenerContainers()).hasSize(1);
 	}
 
 	/**
@@ -96,7 +96,7 @@ abstract class AbstractJmsAnnotationDrivenTests {
 	protected void testFullConfiguration(ApplicationContext context) {
 		JmsListenerContainerTestFactory simpleFactory =
 				context.getBean("simpleFactory", JmsListenerContainerTestFactory.class);
-		assertThat(simpleFactory.getListenerContainers().size()).isEqualTo(1);
+		assertThat(simpleFactory.getListenerContainers()).hasSize(1);
 		MethodJmsListenerEndpoint endpoint = (MethodJmsListenerEndpoint)
 				simpleFactory.getListenerContainers().get(0).getEndpoint();
 		assertThat(endpoint.getId()).isEqualTo("listener1");
@@ -121,8 +121,8 @@ abstract class AbstractJmsAnnotationDrivenTests {
 				context.getBean("jmsListenerContainerFactory", JmsListenerContainerTestFactory.class);
 		JmsListenerContainerTestFactory customFactory =
 				context.getBean("customFactory", JmsListenerContainerTestFactory.class);
-		assertThat(defaultFactory.getListenerContainers().size()).isEqualTo(1);
-		assertThat(customFactory.getListenerContainers().size()).isEqualTo(1);
+		assertThat(defaultFactory.getListenerContainers()).hasSize(1);
+		assertThat(customFactory.getListenerContainers()).hasSize(1);
 		JmsListenerEndpoint endpoint = defaultFactory.getListenerContainers().get(0).getEndpoint();
 		assertThat(endpoint.getClass()).as("Wrong endpoint type").isEqualTo(SimpleJmsListenerEndpoint.class);
 		assertThat(((SimpleJmsListenerEndpoint) endpoint).getMessageListener()).as("Wrong listener set in custom endpoint").isEqualTo(context.getBean("simpleMessageListener"));
@@ -143,7 +143,7 @@ abstract class AbstractJmsAnnotationDrivenTests {
 	protected void testExplicitContainerFactoryConfiguration(ApplicationContext context) {
 		JmsListenerContainerTestFactory defaultFactory =
 				context.getBean("simpleFactory", JmsListenerContainerTestFactory.class);
-		assertThat(defaultFactory.getListenerContainers().size()).isEqualTo(1);
+		assertThat(defaultFactory.getListenerContainers()).hasSize(1);
 	}
 
 	/**
@@ -153,7 +153,7 @@ abstract class AbstractJmsAnnotationDrivenTests {
 	protected void testDefaultContainerFactoryConfiguration(ApplicationContext context) {
 		JmsListenerContainerTestFactory defaultFactory =
 				context.getBean("jmsListenerContainerFactory", JmsListenerContainerTestFactory.class);
-		assertThat(defaultFactory.getListenerContainers().size()).isEqualTo(1);
+		assertThat(defaultFactory.getListenerContainers()).hasSize(1);
 	}
 
 	/**
@@ -165,7 +165,7 @@ abstract class AbstractJmsAnnotationDrivenTests {
 	protected void testJmsHandlerMethodFactoryConfiguration(ApplicationContext context) throws JMSException {
 		JmsListenerContainerTestFactory simpleFactory =
 				context.getBean("defaultFactory", JmsListenerContainerTestFactory.class);
-		assertThat(simpleFactory.getListenerContainers().size()).isEqualTo(1);
+		assertThat(simpleFactory.getListenerContainers()).hasSize(1);
 		MethodJmsListenerEndpoint endpoint = (MethodJmsListenerEndpoint)
 				simpleFactory.getListenerContainers().get(0).getEndpoint();
 
@@ -182,7 +182,7 @@ abstract class AbstractJmsAnnotationDrivenTests {
 	protected void testJmsListenerRepeatable(ApplicationContext context) {
 		JmsListenerContainerTestFactory simpleFactory =
 				context.getBean("jmsListenerContainerFactory", JmsListenerContainerTestFactory.class);
-		assertThat(simpleFactory.getListenerContainers().size()).isEqualTo(2);
+		assertThat(simpleFactory.getListenerContainers()).hasSize(2);
 
 		MethodJmsListenerEndpoint first = (MethodJmsListenerEndpoint)
 				simpleFactory.getListenerContainer("first").getEndpoint();

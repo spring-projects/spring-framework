@@ -203,7 +203,7 @@ class XmlBeanFactoryTests {
 		assertThat(inner5.getBeanName()).isEqualTo("innerBean#2");
 
 		assertThat(hasInnerBeans.getSomeMap()).isNotNull();
-		assertThat(hasInnerBeans.getSomeMap().size()).isEqualTo(2);
+		assertThat(hasInnerBeans.getSomeMap()).hasSize(2);
 		TestBean inner3 = (TestBean) hasInnerBeans.getSomeMap().get("someKey");
 		assertThat(inner3.getName()).isEqualTo("Jenny");
 		assertThat(inner3.getAge()).isEqualTo(30);
@@ -410,7 +410,7 @@ class XmlBeanFactoryTests {
 
 		// abstract beans should not match
 		Map<?, ?> tbs = parent.getBeansOfType(TestBean.class);
-		assertThat(tbs.size()).isEqualTo(2);
+		assertThat(tbs).hasSize(2);
 		assertThat(tbs.containsKey("inheritedTestBeanPrototype")).isTrue();
 		assertThat(tbs.containsKey("inheritedTestBeanSingleton")).isTrue();
 
@@ -427,13 +427,13 @@ class XmlBeanFactoryTests {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(DEP_MATERIALIZE_CONTEXT);
 
-		assertThat(xbf.getBeansOfType(DummyBo.class, true, false).size()).isEqualTo(2);
-		assertThat(xbf.getBeansOfType(DummyBo.class, true, true).size()).isEqualTo(3);
-		assertThat(xbf.getBeansOfType(DummyBo.class, true, false).size()).isEqualTo(3);
-		assertThat(xbf.getBeansOfType(DummyBo.class).size()).isEqualTo(3);
-		assertThat(xbf.getBeansOfType(DummyBoImpl.class, true, true).size()).isEqualTo(2);
-		assertThat(xbf.getBeansOfType(DummyBoImpl.class, false, true).size()).isEqualTo(1);
-		assertThat(xbf.getBeansOfType(DummyBoImpl.class).size()).isEqualTo(2);
+		assertThat(xbf.getBeansOfType(DummyBo.class, true, false)).hasSize(2);
+		assertThat(xbf.getBeansOfType(DummyBo.class, true, true)).hasSize(3);
+		assertThat(xbf.getBeansOfType(DummyBo.class, true, false)).hasSize(3);
+		assertThat(xbf.getBeansOfType(DummyBo.class)).hasSize(3);
+		assertThat(xbf.getBeansOfType(DummyBoImpl.class, true, true)).hasSize(2);
+		assertThat(xbf.getBeansOfType(DummyBoImpl.class, false, true)).hasSize(1);
+		assertThat(xbf.getBeansOfType(DummyBoImpl.class)).hasSize(2);
 
 		DummyBoImpl bos = (DummyBoImpl) xbf.getBean("boSingleton");
 		DummyBoImpl bop = (DummyBoImpl) xbf.getBean("boPrototype");
@@ -1389,12 +1389,12 @@ class XmlBeanFactoryTests {
 		reader.loadBeanDefinitions(OVERRIDES_CONTEXT);
 
 		TestBean jenny1 = (TestBean) xbf.getBean("jennyChild");
-		assertThat(jenny1.getFriends().size()).isEqualTo(1);
+		assertThat(jenny1.getFriends()).hasSize(1);
 		Object friend1 = jenny1.getFriends().iterator().next();
 		assertThat(friend1 instanceof TestBean).isTrue();
 
 		TestBean jenny2 = (TestBean) xbf.getBean("jennyChild");
-		assertThat(jenny2.getFriends().size()).isEqualTo(1);
+		assertThat(jenny2.getFriends()).hasSize(1);
 		Object friend2 = jenny2.getFriends().iterator().next();
 		assertThat(friend2 instanceof TestBean).isTrue();
 

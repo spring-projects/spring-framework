@@ -64,7 +64,7 @@ public class DefaultMultipartHttpServletRequestTests {
 
 		Map<String, String[]> map = createMultipartRequest().getParameterMap();
 
-		assertThat(map.size()).isEqualTo(3);
+		assertThat(map).hasSize(3);
 		assertThat(map.get("key1")).isEqualTo(new String[] {"p1", "q1"});
 		assertThat(map.get("key2")).isEqualTo(new String[] {"p2"});
 		assertThat(map.get("key3")).isEqualTo(new String[] {"q3"});

@@ -70,9 +70,9 @@ public class DefaultClientRequestBuilderTests {
 
 		assertThat(result.url()).isEqualTo(DEFAULT_URL);
 		assertThat(result.method()).isEqualTo(GET);
-		assertThat(result.headers().size()).isEqualTo(1);
+		assertThat(result.headers()).hasSize(1);
 		assertThat(result.headers().getFirst("foo")).isEqualTo("baar");
-		assertThat(result.cookies().size()).isEqualTo(1);
+		assertThat(result.cookies()).hasSize(1);
 		assertThat(result.cookies().getFirst("baz")).isEqualTo("quux");
 		assertThat(result.httpRequest()).isNotNull();
 		assertThat(result.attributes().get("attributeKey")).isEqualTo("attributeValue");

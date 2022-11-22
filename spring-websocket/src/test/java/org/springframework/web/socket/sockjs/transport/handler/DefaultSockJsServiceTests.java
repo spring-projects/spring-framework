@@ -111,7 +111,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		DefaultSockJsService service = new DefaultSockJsService(mock(TaskScheduler.class));
 		Map<TransportType, TransportHandler> handlers = service.getTransportHandlers();
 
-		assertThat(handlers.size()).isEqualTo(6);
+		assertThat(handlers).hasSize(6);
 		assertThat(handlers.get(TransportType.WEBSOCKET)).isNotNull();
 		assertThat(handlers.get(TransportType.XHR)).isNotNull();
 		assertThat(handlers.get(TransportType.XHR_SEND)).isNotNull();
@@ -127,7 +127,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		DefaultSockJsService service = new DefaultSockJsService(mock(TaskScheduler.class), xhrHandler);
 		Map<TransportType, TransportHandler> handlers = service.getTransportHandlers();
 
-		assertThat(handlers.size()).isEqualTo(6);
+		assertThat(handlers).hasSize(6);
 		assertThat(handlers.get(xhrHandler.getTransportType())).isSameAs(xhrHandler);
 	}
 
@@ -143,7 +143,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 				mock(TaskScheduler.class), new XhrPollingTransportHandler(), new XhrReceivingTransportHandler());
 		Map<TransportType, TransportHandler> actualHandlers = service.getTransportHandlers();
 
-		assertThat(actualHandlers.size()).isEqualTo(2);
+		assertThat(actualHandlers).hasSize(2);
 	}
 
 	@Test

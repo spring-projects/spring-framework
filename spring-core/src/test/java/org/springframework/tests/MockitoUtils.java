@@ -50,7 +50,7 @@ public abstract class MockitoUtils {
 	private static void verifySameInvocations(List<Invocation> expectedInvocations, List<Invocation> actualInvocations,
 			InvocationArgumentsAdapter... argumentAdapters) {
 
-		assertThat(expectedInvocations.size()).isEqualTo(actualInvocations.size());
+		assertThat(expectedInvocations).hasSize(actualInvocations.size());
 		for (int i = 0; i < expectedInvocations.size(); i++) {
 			verifySameInvocation(expectedInvocations.get(i), actualInvocations.get(i), argumentAdapters);
 		}

@@ -189,7 +189,7 @@ class SelectionAndProjectionTests {
 
 		Expression exp = parser.parseExpression("colors.^[key.startsWith('b')]");
 		Map<String, String> colorsMap = (Map<String, String>) exp.getValue(context);
-		assertThat(colorsMap.size()).isEqualTo(1);
+		assertThat(colorsMap).hasSize(1);
 		assertThat(colorsMap.keySet().iterator().next()).isEqualTo("beige");
 	}
 
@@ -201,7 +201,7 @@ class SelectionAndProjectionTests {
 
 		Expression exp = parser.parseExpression("colors.$[key.startsWith('b')]");
 		Map<String, String> colorsMap = (Map<String, String>) exp.getValue(context);
-		assertThat(colorsMap.size()).isEqualTo(1);
+		assertThat(colorsMap).hasSize(1);
 		assertThat(colorsMap.keySet().iterator().next()).isEqualTo("brown");
 	}
 

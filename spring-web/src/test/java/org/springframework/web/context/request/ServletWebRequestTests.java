@@ -69,7 +69,7 @@ public class ServletWebRequestTests {
 		assertThat(request.getParameterValues("param2")[1]).isEqualTo("value2a");
 
 		Map<String, String[]> paramMap = request.getParameterMap();
-		assertThat(paramMap.size()).isEqualTo(2);
+		assertThat(paramMap).hasSize(2);
 		assertThat(paramMap.get("param1").length).isEqualTo(1);
 		assertThat(paramMap.get("param1")[0]).isEqualTo("value1");
 		assertThat(paramMap.get("param2").length).isEqualTo(2);

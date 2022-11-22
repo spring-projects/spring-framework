@@ -97,7 +97,7 @@ class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		List<Person> body = result.getBody();
-		assertThat(body.size()).isEqualTo(2);
+		assertThat(body).hasSize(2);
 		assertThat(body.get(0).getName()).isEqualTo("John");
 		assertThat(body.get(1).getName()).isEqualTo("Jane");
 	}
@@ -208,13 +208,13 @@ class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 			Map<String, String> pathVariables =
 					(Map<String, String>) request.attributes().get(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 			assertThat(pathVariables).isNotNull();
-			assertThat(pathVariables.size()).isEqualTo(1);
+			assertThat(pathVariables).hasSize(1);
 			assertThat(pathVariables.get("foo")).isEqualTo("bar");
 
 			pathVariables =
 					(Map<String, String>) request.attributes().get(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 			assertThat(pathVariables).isNotNull();
-			assertThat(pathVariables.size()).isEqualTo(1);
+			assertThat(pathVariables).hasSize(1);
 			assertThat(pathVariables.get("foo")).isEqualTo("bar");
 
 

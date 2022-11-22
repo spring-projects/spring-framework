@@ -1926,7 +1926,7 @@ class DataBinderTests {
 		List<Object> list = (List<Object>) form.getF().get("list");
 		assertThat(list.get(0)).isEqualTo("firstValue");
 		assertThat(list.get(1)).isEqualTo("secondValue");
-		assertThat(list.size()).isEqualTo(2);
+		assertThat(list).hasSize(2);
 	}
 
 	@Test
@@ -1959,7 +1959,7 @@ class DataBinderTests {
 		pvs.add("integerList[256]", "1");
 
 		binder.bind(pvs);
-		assertThat(tb.getIntegerList().size()).isEqualTo(257);
+		assertThat(tb.getIntegerList()).hasSize(257);
 		assertThat(tb.getIntegerList().get(256)).isEqualTo(Integer.valueOf(1));
 		assertThat(binder.getBindingResult().getFieldValue("integerList[256]")).isEqualTo(1);
 	}

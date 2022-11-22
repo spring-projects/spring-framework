@@ -86,7 +86,7 @@ public class ViewResolverRegistryTests {
 	@Test
 	public void noResolvers() {
 		assertThat(this.registry.getViewResolvers()).isNotNull();
-		assertThat(this.registry.getViewResolvers().size()).isEqualTo(0);
+		assertThat(this.registry.getViewResolvers()).hasSize(0);
 		assertThat(this.registry.hasRegistrations()).isFalse();
 	}
 
@@ -100,7 +100,7 @@ public class ViewResolverRegistryTests {
 	@Test
 	public void beanName() {
 		this.registry.beanName();
-		assertThat(this.registry.getViewResolvers().size()).isEqualTo(1);
+		assertThat(this.registry.getViewResolvers()).hasSize(1);
 		assertThat(registry.getViewResolvers().get(0).getClass()).isEqualTo(BeanNameViewResolver.class);
 	}
 
@@ -123,7 +123,7 @@ public class ViewResolverRegistryTests {
 		this.registry.jsp().viewNames("view1", "view2");
 		this.registry.jsp().viewNames("view3", "view4");
 		assertThat(this.registry.getViewResolvers()).isNotNull();
-		assertThat(this.registry.getViewResolvers().size()).isEqualTo(2);
+		assertThat(this.registry.getViewResolvers()).hasSize(2);
 		assertThat(this.registry.getViewResolvers().get(0).getClass()).isEqualTo(InternalResourceViewResolver.class);
 		assertThat(this.registry.getViewResolvers().get(1).getClass()).isEqualTo(InternalResourceViewResolver.class);
 	}
@@ -199,7 +199,7 @@ public class ViewResolverRegistryTests {
 	@SuppressWarnings("unchecked")
 	private <T extends ViewResolver> T checkAndGetResolver(Class<T> resolverType) {
 		assertThat(this.registry.getViewResolvers()).isNotNull();
-		assertThat(this.registry.getViewResolvers().size()).isEqualTo(1);
+		assertThat(this.registry.getViewResolvers()).hasSize(1);
 		assertThat(this.registry.getViewResolvers().get(0).getClass()).isEqualTo(resolverType);
 		return (T) registry.getViewResolvers().get(0);
 	}

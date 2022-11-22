@@ -107,11 +107,11 @@ public class CacheResultOperationTests extends AbstractCacheOperationTests<Cache
 		CacheInvocationParameter[] parameters = operation.getAllParameters(2L, "foo");
 
 		Set<Annotation> firstParameterAnnotations = parameters[0].getAnnotations();
-		assertThat(firstParameterAnnotations.size()).isEqualTo(1);
+		assertThat(firstParameterAnnotations).hasSize(1);
 		assertThat(firstParameterAnnotations.iterator().next().annotationType()).isEqualTo(CacheKey.class);
 
 		Set<Annotation> secondParameterAnnotations = parameters[1].getAnnotations();
-		assertThat(secondParameterAnnotations.size()).isEqualTo(1);
+		assertThat(secondParameterAnnotations).hasSize(1);
 		assertThat(secondParameterAnnotations.iterator().next().annotationType()).isEqualTo(Value.class);
 	}
 

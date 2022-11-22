@@ -199,7 +199,7 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 	private String extractSessionId(HttpHeaders headers) {
 		List<String> headerValues = headers.get("Set-Cookie");
 		assertThat(headerValues).isNotNull();
-		assertThat(headerValues.size()).isEqualTo(1);
+		assertThat(headerValues).hasSize(1);
 
 		for (String s : headerValues.get(0).split(";")){
 			if (s.startsWith("SESSION=")) {

@@ -123,7 +123,7 @@ public class RequestMethodsRequestConditionTests {
 		RequestMethodsRequestCondition condition2 = new RequestMethodsRequestCondition(POST);
 
 		RequestMethodsRequestCondition result = condition1.combine(condition2);
-		assertThat(result.getContent().size()).isEqualTo(2);
+		assertThat(result.getContent()).hasSize(2);
 	}
 
 

@@ -252,7 +252,7 @@ class MockHttpServletResponseTests {
 		response.addHeader(headerName, "value1");
 		Collection<String> responseHeaders = response.getHeaderNames();
 		assertThat(responseHeaders).isNotNull();
-		assertThat(responseHeaders.size()).isEqualTo(1);
+		assertThat(responseHeaders).hasSize(1);
 		assertThat(responseHeaders.iterator().next()).as("HTTP header casing not being preserved").isEqualTo(headerName);
 	}
 

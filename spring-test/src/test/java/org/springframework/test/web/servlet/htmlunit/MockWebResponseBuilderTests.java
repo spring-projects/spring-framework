@@ -110,7 +110,7 @@ public class MockWebResponseBuilderTests {
 		WebResponse webResponse = this.responseBuilder.build();
 
 		List<NameValuePair> responseHeaders = webResponse.getResponseHeaders();
-		assertThat(responseHeaders.size()).isEqualTo(3);
+		assertThat(responseHeaders).hasSize(3);
 		NameValuePair header = responseHeaders.get(0);
 		assertThat(header.getName()).isEqualTo("Content-Type");
 		assertThat(header.getValue()).isEqualTo("text/html");
@@ -132,7 +132,7 @@ public class MockWebResponseBuilderTests {
 		WebResponse webResponse = this.responseBuilder.build();
 
 		List<NameValuePair> responseHeaders = webResponse.getResponseHeaders();
-		assertThat(responseHeaders.size()).isEqualTo(1);
+		assertThat(responseHeaders).hasSize(1);
 		NameValuePair header = responseHeaders.get(0);
 		assertThat(header.getName()).isEqualTo("Set-Cookie");
 		assertThat(header.getValue()).isEqualTo("cookieA=valueA");

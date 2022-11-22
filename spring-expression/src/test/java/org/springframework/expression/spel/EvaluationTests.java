@@ -70,14 +70,14 @@ class EvaluationTests extends AbstractExpressionTests {
 			assertThat(o).isEqualTo("");
 			o = parser.parseExpression("list[3]").getValue(new StandardEvaluationContext(testClass));
 			assertThat(o).isEqualTo("");
-			assertThat(testClass.list.size()).isEqualTo(4);
+			assertThat(testClass.list).hasSize(4);
 
 			assertThatExceptionOfType(EvaluationException.class).isThrownBy(() ->
 			parser.parseExpression("list2[3]").getValue(new StandardEvaluationContext(testClass)));
 
 			o = parser.parseExpression("foo[3]").getValue(new StandardEvaluationContext(testClass));
 			assertThat(o).isEqualTo("");
-			assertThat(testClass.getFoo().size()).isEqualTo(4);
+			assertThat(testClass.getFoo()).hasSize(4);
 		}
 
 		@Test
@@ -319,7 +319,7 @@ class EvaluationTests extends AbstractExpressionTests {
 			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 			Expression e =  parser.parseExpression("listOfStrings[++index3]='def'");
 			e.getValue(ctx);
-			assertThat(instance.listOfStrings.size()).isEqualTo(2);
+			assertThat(instance.listOfStrings).hasSize(2);
 			assertThat(instance.listOfStrings.get(1)).isEqualTo("def");
 
 			// Check reference beyond end of collection
@@ -351,14 +351,14 @@ class EvaluationTests extends AbstractExpressionTests {
 			SpelExpressionParser parser = new SpelExpressionParser( new SpelParserConfiguration(true, true, 3));
 			Expression e = parser.parseExpression("foo[2]");
 			e.setValue(ctx, "2");
-			assertThat(instance.getFoo().size()).isEqualTo(3);
+			assertThat(instance.getFoo()).hasSize(3);
 			e = parser.parseExpression("foo[3]");
 			try {
 				e.setValue(ctx, "3");
 			}
 			catch (SpelEvaluationException see) {
 				assertThat(see.getMessageCode()).isEqualTo(SpelMessage.UNABLE_TO_GROW_COLLECTION);
-				assertThat(instance.getFoo().size()).isEqualTo(3);
+				assertThat(instance.getFoo()).hasSize(3);
 			}
 		}
 

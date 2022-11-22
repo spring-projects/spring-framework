@@ -240,7 +240,7 @@ class MapToMapConverterTests {
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("multiValueMapTarget"));
 
 		MultiValueMap<String, String> converted = (MultiValueMap<String, String>) conversionService.convert(source, targetType);
-		assertThat(converted.size()).isEqualTo(2);
+		assertThat(converted).hasSize(2);
 		assertThat(converted.get("a")).isEqualTo(Arrays.asList("1", "2", "3"));
 		assertThat(converted.get("b")).isEqualTo(Arrays.asList("4", "5", "6"));
 	}
@@ -255,7 +255,7 @@ class MapToMapConverterTests {
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("multiValueMapTarget"));
 
 		MultiValueMap<String, String> converted = (MultiValueMap<String, String>) conversionService.convert(source, targetType);
-		assertThat(converted.size()).isEqualTo(2);
+		assertThat(converted).hasSize(2);
 		assertThat(converted.get("a")).isEqualTo(Arrays.asList("1"));
 		assertThat(converted.get("b")).isEqualTo(Arrays.asList("2"));
 	}

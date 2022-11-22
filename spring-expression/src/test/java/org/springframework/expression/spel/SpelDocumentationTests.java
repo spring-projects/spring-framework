@@ -445,7 +445,7 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 		StandardEvaluationContext societyContext = new StandardEvaluationContext();
 		societyContext.setRootObject(new IEEE());
 		List<Inventor> list = (List<Inventor>) parser.parseExpression("Members2.?[nationality == 'Serbian']").getValue(societyContext);
-		assertThat(list.size()).isEqualTo(1);
+		assertThat(list).hasSize(1);
 		assertThat(list.get(0).getName()).isEqualTo("Nikola Tesla");
 	}
 

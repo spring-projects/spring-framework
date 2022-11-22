@@ -114,7 +114,7 @@ class AnnotationMetadataTests {
 		assertThat(metadata.getAnnotationAttributes(Component.class.getName())).isNull();
 		assertThat(metadata.getAnnotationAttributes(MetaAnnotation.class.getName(), false)).isNull();
 		assertThat(metadata.getAnnotationAttributes(MetaAnnotation.class.getName(), true)).isNull();
-		assertThat(metadata.getAnnotatedMethods(DirectAnnotation.class.getName()).size()).isEqualTo(0);
+		assertThat(metadata.getAnnotatedMethods(DirectAnnotation.class.getName())).hasSize(0);
 		assertThat(metadata.isAnnotated(IsAnnotatedAnnotation.class.getName())).isFalse();
 		assertThat(metadata.getAllAnnotationAttributes(DirectAnnotation.class.getName())).isNull();
 	}

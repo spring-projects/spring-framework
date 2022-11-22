@@ -199,7 +199,7 @@ public class FormHttpMessageConverterTests {
 		fileUpload.setFileItemFactory(new DiskFileItemFactory());
 		RequestContext requestContext = new MockHttpOutputMessageRequestContext(outputMessage);
 		List<FileItem> items = fileUpload.parseRequest(requestContext);
-		assertThat(items.size()).isEqualTo(6);
+		assertThat(items).hasSize(6);
 		FileItem item = items.get(0);
 		assertThat(item.isFormField()).isTrue();
 		assertThat(item.getFieldName()).isEqualTo("name 1");
@@ -281,7 +281,7 @@ public class FormHttpMessageConverterTests {
 		fileUpload.setFileItemFactory(new DiskFileItemFactory());
 		RequestContext requestContext = new MockHttpOutputMessageRequestContext(outputMessage);
 		List<FileItem> items = fileUpload.parseRequest(requestContext);
-		assertThat(items.size()).isEqualTo(6);
+		assertThat(items).hasSize(6);
 		FileItem item = items.get(0);
 		assertThat(item.isFormField()).isTrue();
 		assertThat(item.getFieldName()).isEqualTo("name 1");
@@ -341,7 +341,7 @@ public class FormHttpMessageConverterTests {
 		fileUpload.setFileItemFactory(new DiskFileItemFactory());
 		RequestContext requestContext = new MockHttpOutputMessageRequestContext(outputMessage);
 		List<FileItem> items = fileUpload.parseRequest(requestContext);
-		assertThat(items.size()).isEqualTo(2);
+		assertThat(items).hasSize(2);
 
 		FileItem item = items.get(0);
 		assertThat(item.isFormField()).isTrue();

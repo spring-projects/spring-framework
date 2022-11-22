@@ -403,7 +403,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getParameterMap().size()).isEqualTo(1);
+		assertThat(actualRequest.getParameterMap()).hasSize(1);
 		assertThat(actualRequest.getParameter("name")).isEqualTo("");
 	}
 
@@ -413,7 +413,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getParameterMap().size()).isEqualTo(1);
+		assertThat(actualRequest.getParameterMap()).hasSize(1);
 		assertThat(actualRequest.getParameter("name")).isEqualTo("");
 	}
 
@@ -423,7 +423,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getParameterMap().size()).isEqualTo(1);
+		assertThat(actualRequest.getParameterMap()).hasSize(1);
 		assertThat(actualRequest.getParameter("name")).isEqualTo(" ");
 	}
 

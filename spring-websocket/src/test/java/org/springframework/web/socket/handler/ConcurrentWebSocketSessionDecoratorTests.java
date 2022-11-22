@@ -50,7 +50,7 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 		TextMessage textMessage = new TextMessage("payload");
 		decorator.sendMessage(textMessage);
 
-		assertThat(session.getSentMessages().size()).isEqualTo(1);
+		assertThat(session.getSentMessages()).hasSize(1);
 		assertThat(session.getSentMessages().get(0)).isEqualTo(textMessage);
 
 		assertThat(decorator.getBufferSize()).isEqualTo(0);

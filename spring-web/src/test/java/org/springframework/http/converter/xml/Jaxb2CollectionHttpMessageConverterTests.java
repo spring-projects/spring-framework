@@ -145,7 +145,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 
 		try {
 			Collection<RootElement> result = converter.read(rootElementListType, null, inputMessage);
-			assertThat(result.size()).isEqualTo(1);
+			assertThat(result).hasSize(1);
 			assertThat(result.iterator().next().external).isEqualTo("");
 		}
 		catch (HttpMessageNotReadableException ex) {
@@ -173,7 +173,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 		};
 
 		Collection<RootElement> result = c.read(rootElementListType, null, inputMessage);
-		assertThat(result.size()).isEqualTo(1);
+		assertThat(result).hasSize(1);
 		assertThat(result.iterator().next().external).isEqualTo("Foo Bar");
 	}
 
