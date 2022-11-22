@@ -110,7 +110,7 @@ class HeadersAdaptersTests {
 		headers.add("TestHeader", "first");
 		assertThat(headers.keySet()).hasSize(1);
 		headers.keySet().removeIf("TestHeader"::equals);
-		assertThat(headers.keySet()).hasSize(0);
+		assertThat(headers.keySet()).isEmpty();
 	}
 
 	@ParameterizedHeadersTest

@@ -76,7 +76,7 @@ class MultipleComposedAnnotationsOnSingleAnnotatedElementTests {
 		Class<?> element = SubMultipleNoninheritedComposedCachesClass.class;
 		Set<Cacheable> cacheables = getAllMergedAnnotations(element, Cacheable.class);
 		assertThat(cacheables).isNotNull();
-		assertThat(cacheables).hasSize(0);
+		assertThat(cacheables).isEmpty();
 	}
 
 	@Test
@@ -89,7 +89,7 @@ class MultipleComposedAnnotationsOnSingleAnnotatedElementTests {
 		Class<MultipleComposedCachesOnInterfaceClass> element = MultipleComposedCachesOnInterfaceClass.class;
 		Set<Cacheable> cacheables = getAllMergedAnnotations(element, Cacheable.class);
 		assertThat(cacheables).isNotNull();
-		assertThat(cacheables).hasSize(0);
+		assertThat(cacheables).isEmpty();
 	}
 
 	@Test
@@ -109,7 +109,7 @@ class MultipleComposedAnnotationsOnSingleAnnotatedElementTests {
 	void getMultipleComposedAnnotationsOnBridgeMethod() throws Exception {
 		Set<Cacheable> cacheables = getAllMergedAnnotations(getBridgeMethod(), Cacheable.class);
 		assertThat(cacheables).isNotNull();
-		assertThat(cacheables).hasSize(0);
+		assertThat(cacheables).isEmpty();
 	}
 
 	@Test

@@ -762,7 +762,7 @@ class BeanFactoryGenericsTests {
 		assertThat(bf.getType("mock")).isNull();
 		assertThat(bf.getType("mock")).isNull();
 		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
-		assertThat(beans).hasSize(0);
+		assertThat(beans).isEmpty();
 	}
 
 	@Test
@@ -828,8 +828,8 @@ class BeanFactoryGenericsTests {
 		assertThat(numberStoreNames).hasSize(2);
 		assertThat(numberStoreNames[0]).isEqualTo("doubleStore");
 		assertThat(numberStoreNames[1]).isEqualTo("floatStore");
-		assertThat(doubleStoreNames).hasSize(0);
-		assertThat(floatStoreNames).hasSize(0);
+		assertThat(doubleStoreNames).isEmpty();
+		assertThat(floatStoreNames).isEmpty();
 	}
 
 	@Test

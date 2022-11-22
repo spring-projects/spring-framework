@@ -56,7 +56,7 @@ public class RequestMappingInfoTests {
 
 		PathPattern emptyPattern = (new PathPatternParser()).parse("");
 		assertThat(info.getPatternsCondition().getPatterns()).isEqualTo(Collections.singleton(emptyPattern));
-		assertThat(info.getMethodsCondition().getMethods()).hasSize(0);
+		assertThat(info.getMethodsCondition().getMethods()).isEmpty();
 		assertThat(info.getConsumesCondition().isEmpty()).isTrue();
 		assertThat(info.getProducesCondition().isEmpty()).isTrue();
 		assertThat(info.getParamsCondition()).isNotNull();

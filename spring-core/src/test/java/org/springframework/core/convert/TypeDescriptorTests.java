@@ -65,7 +65,7 @@ class TypeDescriptorTests {
 		assertThat(desc.getName()).isEqualTo("int");
 		assertThat(desc.toString()).isEqualTo("int");
 		assertThat(desc.isPrimitive()).isTrue();
-		assertThat(desc.getAnnotations()).hasSize(0);
+		assertThat(desc.getAnnotations()).isEmpty();
 		assertThat(desc.isCollection()).isFalse();
 		assertThat(desc.isMap()).isFalse();
 	}
@@ -78,7 +78,7 @@ class TypeDescriptorTests {
 		assertThat(desc.getName()).isEqualTo("java.lang.String");
 		assertThat(desc.toString()).isEqualTo("java.lang.String");
 		assertThat(!desc.isPrimitive()).isTrue();
-		assertThat(desc.getAnnotations()).hasSize(0);
+		assertThat(desc.getAnnotations()).isEmpty();
 		assertThat(desc.isCollection()).isFalse();
 		assertThat(desc.isArray()).isFalse();
 		assertThat(desc.isMap()).isFalse();
@@ -93,7 +93,7 @@ class TypeDescriptorTests {
 		assertThat(desc.getName()).isEqualTo("java.util.List");
 		assertThat(desc.toString()).isEqualTo("java.util.List<java.util.List<java.util.Map<java.lang.Integer, java.lang.Enum<?>>>>");
 		assertThat(!desc.isPrimitive()).isTrue();
-		assertThat(desc.getAnnotations()).hasSize(0);
+		assertThat(desc.getAnnotations()).isEmpty();
 		assertThat(desc.isCollection()).isTrue();
 		assertThat(desc.isArray()).isFalse();
 		assertThat(desc.getElementTypeDescriptor().getType()).isEqualTo(List.class);
@@ -114,7 +114,7 @@ class TypeDescriptorTests {
 		assertThat(desc.getName()).isEqualTo("java.util.List");
 		assertThat(desc.toString()).isEqualTo("java.util.List<?>");
 		assertThat(!desc.isPrimitive()).isTrue();
-		assertThat(desc.getAnnotations()).hasSize(0);
+		assertThat(desc.getAnnotations()).isEmpty();
 		assertThat(desc.isCollection()).isTrue();
 		assertThat(desc.isArray()).isFalse();
 		assertThat((Object) desc.getElementTypeDescriptor()).isNull();
@@ -130,7 +130,7 @@ class TypeDescriptorTests {
 		assertThat(desc.getName()).isEqualTo("java.lang.Integer[]");
 		assertThat(desc.toString()).isEqualTo("java.lang.Integer[]");
 		assertThat(!desc.isPrimitive()).isTrue();
-		assertThat(desc.getAnnotations()).hasSize(0);
+		assertThat(desc.getAnnotations()).isEmpty();
 		assertThat(desc.isCollection()).isFalse();
 		assertThat(desc.isArray()).isTrue();
 		assertThat(desc.getElementTypeDescriptor().getType()).isEqualTo(Integer.class);
@@ -147,7 +147,7 @@ class TypeDescriptorTests {
 		assertThat(desc.getName()).isEqualTo("java.util.Map");
 		assertThat(desc.toString()).isEqualTo("java.util.Map<java.lang.Integer, java.util.List<java.lang.String>>");
 		assertThat(!desc.isPrimitive()).isTrue();
-		assertThat(desc.getAnnotations()).hasSize(0);
+		assertThat(desc.getAnnotations()).isEmpty();
 		assertThat(desc.isCollection()).isFalse();
 		assertThat(desc.isArray()).isFalse();
 		assertThat(desc.isMap()).isTrue();
@@ -463,7 +463,7 @@ class TypeDescriptorTests {
 		assertThat(desc.getName()).isEqualTo("java.util.List");
 		assertThat(desc.toString()).isEqualTo("java.util.List<java.lang.Integer>");
 		assertThat(!desc.isPrimitive()).isTrue();
-		assertThat(desc.getAnnotations()).hasSize(0);
+		assertThat(desc.getAnnotations()).isEmpty();
 		assertThat(desc.isCollection()).isTrue();
 		assertThat(desc.isArray()).isFalse();
 		assertThat(desc.getElementTypeDescriptor().getType()).isEqualTo(Integer.class);
@@ -479,7 +479,7 @@ class TypeDescriptorTests {
 		assertThat(desc.getName()).isEqualTo("java.util.List");
 		assertThat(desc.toString()).isEqualTo("java.util.List<java.util.List<java.lang.Integer>>");
 		assertThat(!desc.isPrimitive()).isTrue();
-		assertThat(desc.getAnnotations()).hasSize(0);
+		assertThat(desc.getAnnotations()).isEmpty();
 		assertThat(desc.isCollection()).isTrue();
 		assertThat(desc.isArray()).isFalse();
 		assertThat(desc.getElementTypeDescriptor().getType()).isEqualTo(List.class);
@@ -495,7 +495,7 @@ class TypeDescriptorTests {
 		assertThat(desc.getName()).isEqualTo("java.util.Map");
 		assertThat(desc.toString()).isEqualTo("java.util.Map<java.lang.String, java.lang.Integer>");
 		assertThat(!desc.isPrimitive()).isTrue();
-		assertThat(desc.getAnnotations()).hasSize(0);
+		assertThat(desc.getAnnotations()).isEmpty();
 		assertThat(desc.isCollection()).isFalse();
 		assertThat(desc.isArray()).isFalse();
 		assertThat(desc.isMap()).isTrue();
@@ -512,7 +512,7 @@ class TypeDescriptorTests {
 		assertThat(desc.getName()).isEqualTo("java.util.Map");
 		assertThat(desc.toString()).isEqualTo("java.util.Map<java.lang.String, java.util.Map<java.lang.String, java.lang.Integer>>");
 		assertThat(!desc.isPrimitive()).isTrue();
-		assertThat(desc.getAnnotations()).hasSize(0);
+		assertThat(desc.getAnnotations()).isEmpty();
 		assertThat(desc.isCollection()).isFalse();
 		assertThat(desc.isArray()).isFalse();
 		assertThat(desc.isMap()).isTrue();

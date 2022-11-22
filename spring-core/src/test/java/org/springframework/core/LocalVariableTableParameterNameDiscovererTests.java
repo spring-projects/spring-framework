@@ -200,7 +200,7 @@ class LocalVariableTableParameterNameDiscovererTests {
 
 		m = clazz.getMethod("getDate");
 		names = discoverer.getParameterNames(m);
-		assertThat(names).hasSize(0);
+		assertThat(names).isEmpty();
 	}
 
 	@Disabled("Ignored because Ubuntu packages OpenJDK with debug symbols enabled. See SPR-8078.")

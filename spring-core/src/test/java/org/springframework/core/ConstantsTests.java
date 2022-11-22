@@ -217,7 +217,7 @@ class ConstantsTests {
 		assertThat(c.getSize()).isEqualTo(0);
 		final Set<?> values = c.getValues("");
 		assertThat(values).isNotNull();
-		assertThat(values).hasSize(0);
+		assertThat(values).isEmpty();
 	}
 
 	@Test

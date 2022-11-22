@@ -44,7 +44,7 @@ public class MessageHeaderAccessorTests {
 	@Test
 	public void newEmptyHeaders() {
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
-		assertThat(accessor.toMap()).hasSize(0);
+		assertThat(accessor.toMap()).isEmpty();
 	}
 
 	@Test

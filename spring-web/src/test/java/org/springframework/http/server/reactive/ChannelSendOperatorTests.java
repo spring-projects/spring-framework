@@ -66,7 +66,7 @@ class ChannelSendOperatorTests {
 		assertThat(signal).isNotNull();
 		assertThat(signal.isOnComplete()).as("Unexpected signal: " + signal).isTrue();
 
-		assertThat(this.writer.items).hasSize(0);
+		assertThat(this.writer.items).isEmpty();
 		assertThat(this.writer.completed).isTrue();
 	}
 

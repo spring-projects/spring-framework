@@ -72,7 +72,7 @@ public class WebMvcStompEndpointRegistryTests {
 	@Test
 	public void handlerMapping() {
 		SimpleUrlHandlerMapping hm = (SimpleUrlHandlerMapping) this.endpointRegistry.getHandlerMapping();
-		assertThat(hm.getUrlMap()).hasSize(0);
+		assertThat(hm.getUrlMap()).isEmpty();
 
 		UrlPathHelper pathHelper = new UrlPathHelper();
 		this.endpointRegistry.setUrlPathHelper(pathHelper);

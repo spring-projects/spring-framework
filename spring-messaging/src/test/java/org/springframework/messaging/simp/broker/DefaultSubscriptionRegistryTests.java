@@ -53,17 +53,17 @@ public class DefaultSubscriptionRegistryTests {
 		this.registry.registerSubscription(subscribeMessage(null, subsId, dest));
 		MultiValueMap<String, String> actual = this.registry.findSubscriptions(createMessage(dest));
 		assertThat(actual).isNotNull();
-		assertThat(actual).hasSize(0);
+		assertThat(actual).isEmpty();
 
 		this.registry.registerSubscription(subscribeMessage(sessId, null, dest));
 		actual = this.registry.findSubscriptions(createMessage(dest));
 		assertThat(actual).isNotNull();
-		assertThat(actual).hasSize(0);
+		assertThat(actual).isEmpty();
 
 		this.registry.registerSubscription(subscribeMessage(sessId, subsId, null));
 		actual = this.registry.findSubscriptions(createMessage(dest));
 		assertThat(actual).isNotNull();
-		assertThat(actual).hasSize(0);
+		assertThat(actual).isEmpty();
 	}
 
 	@Test
@@ -210,7 +210,7 @@ public class DefaultSubscriptionRegistryTests {
 
 		actual = this.registry.findSubscriptions(destNasdaqIbmMessage);
 		assertThat(actual).isNotNull();
-		assertThat(actual).hasSize(0);
+		assertThat(actual).isEmpty();
 	}
 
 	@Test  // SPR-11755
@@ -296,7 +296,7 @@ public class DefaultSubscriptionRegistryTests {
 
 		actual = this.registry.findSubscriptions(createMessage(destination));
 		assertThat(actual).isNotNull();
-		assertThat(actual).hasSize(0);
+		assertThat(actual).isEmpty();
 	}
 
 	@Test

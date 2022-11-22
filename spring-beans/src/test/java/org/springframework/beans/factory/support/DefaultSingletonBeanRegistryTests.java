@@ -51,7 +51,7 @@ public class DefaultSingletonBeanRegistryTests {
 
 		beanRegistry.destroySingletons();
 		assertThat(beanRegistry.getSingletonCount()).isEqualTo(0);
-		assertThat(beanRegistry.getSingletonNames()).hasSize(0);
+		assertThat(beanRegistry.getSingletonNames()).isEmpty();
 	}
 
 	@Test
@@ -72,7 +72,7 @@ public class DefaultSingletonBeanRegistryTests {
 
 		beanRegistry.destroySingletons();
 		assertThat(beanRegistry.getSingletonCount()).isEqualTo(0);
-		assertThat(beanRegistry.getSingletonNames()).hasSize(0);
+		assertThat(beanRegistry.getSingletonNames()).isEmpty();
 		assertThat(tb.wasDestroyed()).isTrue();
 	}
 

@@ -138,7 +138,7 @@ public class ConfigurationClassWithConditionTests {
 	@Test
 	public void conditionOnOverriddenMethodHonored() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithBeanSkipped.class);
-		assertThat(context.getBeansOfType(ExampleBean.class)).hasSize(0);
+		assertThat(context.getBeansOfType(ExampleBean.class)).isEmpty();
 	}
 
 	@Test

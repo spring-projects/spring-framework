@@ -79,7 +79,7 @@ public class NativeMessageHeaderAccessorTests {
 		NativeMessageHeaderAccessor headerAccessor = new NativeMessageHeaderAccessor((Message<?>) null);
 
 		Map<String, Object> actual = headerAccessor.toMap();
-		assertThat(actual).hasSize(0);
+		assertThat(actual).isEmpty();
 
 		Map<String, List<String>> actualNativeHeaders = headerAccessor.toNativeHeaderMap();
 		assertThat(actualNativeHeaders).isEqualTo(Collections.emptyMap());

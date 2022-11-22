@@ -53,7 +53,7 @@ public class ServerHttpRequestTests {
 	@Test
 	public void queryParamsNone() throws Exception {
 		MultiValueMap<String, String> params = createRequest("/path").getQueryParams();
-		assertThat(params).hasSize(0);
+		assertThat(params).isEmpty();
 	}
 
 	@Test

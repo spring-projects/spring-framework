@@ -79,7 +79,7 @@ public class ChannelInterceptorTests {
 
 		assertThat(interceptor1.getCounter().get()).isEqualTo(1);
 		assertThat(interceptor2.getCounter().get()).isEqualTo(1);
-		assertThat(this.messageHandler.getMessages()).hasSize(0);
+		assertThat(this.messageHandler.getMessages()).isEmpty();
 		assertThat(interceptor1.wasAfterCompletionInvoked()).isTrue();
 		assertThat(interceptor2.wasAfterCompletionInvoked()).isFalse();
 	}

@@ -144,7 +144,7 @@ public class BeanWrapperEnumTests {
 		bw.setAutoGrowNestedPaths(true);
 		assertThat(gb.getStandardEnumSet()).isNull();
 		bw.getPropertyValue("standardEnumSet.class");
-		assertThat(gb.getStandardEnumSet()).hasSize(0);
+		assertThat(gb.getStandardEnumSet()).isEmpty();
 	}
 
 	@Test

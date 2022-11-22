@@ -126,7 +126,7 @@ class ConcurrentReferenceHashMapTests {
 	@Test
 	void shouldPutAndGet() {
 		// NOTE we are using mock references so we don't need to worry about GC
-		assertThat(this.map).hasSize(0);
+		assertThat(this.map).isEmpty();
 		this.map.put(123, "123");
 		assertThat(this.map.get(123)).isEqualTo("123");
 		assertThat(this.map).hasSize(1);
@@ -327,7 +327,7 @@ class ConcurrentReferenceHashMapTests {
 
 	@Test
 	void shouldGetSize() {
-		assertThat(this.map).hasSize(0);
+		assertThat(this.map).isEmpty();
 		this.map.put(123, "123");
 		this.map.put(123, null);
 		this.map.put(456, "456");
@@ -400,7 +400,7 @@ class ConcurrentReferenceHashMapTests {
 		this.map.put(456, null);
 		this.map.put(null, "789");
 		this.map.clear();
-		assertThat(this.map).hasSize(0);
+		assertThat(this.map).isEmpty();
 		assertThat(this.map.containsKey(123)).isFalse();
 		assertThat(this.map.containsKey(456)).isFalse();
 		assertThat(this.map.containsKey(null)).isFalse();

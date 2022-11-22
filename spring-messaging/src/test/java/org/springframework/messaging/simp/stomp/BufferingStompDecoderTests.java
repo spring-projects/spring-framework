@@ -99,7 +99,7 @@ public class BufferingStompDecoderTests {
 		String chunk2 = "\nPayload2a";
 		messages = stompDecoder.decode(toByteBuffer(chunk2));
 
-		assertThat(messages).hasSize(0);
+		assertThat(messages).isEmpty();
 		assertThat(stompDecoder.getBufferSize()).isEqualTo(33);
 		assertThat((int) stompDecoder.getExpectedContentLength()).isEqualTo(contentLength);
 
@@ -127,7 +127,7 @@ public class BufferingStompDecoderTests {
 		String chunk2 = "\nPayload2a";
 		messages = stompDecoder.decode(toByteBuffer(chunk2));
 
-		assertThat(messages).hasSize(0);
+		assertThat(messages).isEmpty();
 		assertThat(stompDecoder.getBufferSize()).isEqualTo(23);
 		assertThat(stompDecoder.getExpectedContentLength()).isNull();
 
@@ -171,7 +171,7 @@ public class BufferingStompDecoderTests {
 		String chunk = "MESSAG";
 
 		List<Message<byte[]>> messages = stompDecoder.decode(toByteBuffer(chunk));
-		assertThat(messages).hasSize(0);
+		assertThat(messages).isEmpty();
 	}
 
 	// SPR-13416
@@ -182,7 +182,7 @@ public class BufferingStompDecoderTests {
 		String chunk = "SEND\na:long\\";
 
 		List<Message<byte[]>> messages = stompDecoder.decode(toByteBuffer(chunk));
-		assertThat(messages).hasSize(0);
+		assertThat(messages).isEmpty();
 	}
 
 	@Test

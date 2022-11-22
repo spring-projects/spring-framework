@@ -116,7 +116,7 @@ class DefaultLifecycleProcessorTests {
 		assertThat(bean.isRunning()).isFalse();
 		context.refresh();
 		assertThat(bean.isRunning()).isFalse();
-		assertThat(startedBeans).hasSize(0);
+		assertThat(startedBeans).isEmpty();
 		context.start();
 		assertThat(bean.isRunning()).isTrue();
 		assertThat(startedBeans).hasSize(1);

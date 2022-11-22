@@ -273,7 +273,7 @@ class MockHttpServletRequestTests {
 		request.addParameters(params);
 		assertThat(request.getParameterMap()).hasSize(3);
 		request.removeAllParameters();
-		assertThat(request.getParameterMap()).hasSize(0);
+		assertThat(request.getParameterMap()).isEmpty();
 	}
 
 	@Test

@@ -113,7 +113,7 @@ public class StandardEnvironmentTests {
 
 	@Test
 	void activeProfilesIsEmptyByDefault() {
-		assertThat(environment.getActiveProfiles()).hasSize(0);
+		assertThat(environment.getActiveProfiles()).isEmpty();
 	}
 
 	@Test
@@ -172,7 +172,7 @@ public class StandardEnvironmentTests {
 
 	@Test
 	void addActiveProfile() {
-		assertThat(environment.getActiveProfiles()).hasSize(0);
+		assertThat(environment.getActiveProfiles()).isEmpty();
 		environment.setActiveProfiles("local", "embedded");
 		assertThat(environment.getActiveProfiles()).contains("local", "embedded");
 		assertThat(environment.getActiveProfiles()).hasSize(2);
@@ -218,9 +218,9 @@ public class StandardEnvironmentTests {
 
 	@Test
 	void getActiveProfiles_systemPropertiesEmpty() {
-		assertThat(environment.getActiveProfiles()).hasSize(0);
+		assertThat(environment.getActiveProfiles()).isEmpty();
 		System.setProperty(ACTIVE_PROFILES_PROPERTY_NAME, "");
-		assertThat(environment.getActiveProfiles()).hasSize(0);
+		assertThat(environment.getActiveProfiles()).isEmpty();
 		System.clearProperty(ACTIVE_PROFILES_PROPERTY_NAME);
 	}
 
@@ -256,7 +256,7 @@ public class StandardEnvironmentTests {
 	@Test
 	void setDefaultProfiles() {
 		environment.setDefaultProfiles();
-		assertThat(environment.getDefaultProfiles()).hasSize(0);
+		assertThat(environment.getDefaultProfiles()).isEmpty();
 		environment.setDefaultProfiles("pd1");
 		assertThat(Arrays.asList(environment.getDefaultProfiles())).contains("pd1");
 		environment.setDefaultProfiles("pd2", "pd3");

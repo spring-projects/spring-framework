@@ -351,7 +351,7 @@ public class UrlTagTests extends AbstractTagTests {
 
 		String uri = tag.replaceUriTemplateParams("url/path", params, usedParams);
 		assertThat(uri).isEqualTo("url/path");
-		assertThat(usedParams).hasSize(0);
+		assertThat(usedParams).isEmpty();
 	}
 
 	@Test
@@ -361,7 +361,7 @@ public class UrlTagTests extends AbstractTagTests {
 
 		String uri = tag.replaceUriTemplateParams("url/{path}", params, usedParams);
 		assertThat(uri).isEqualTo("url/{path}");
-		assertThat(usedParams).hasSize(0);
+		assertThat(usedParams).isEmpty();
 	}
 
 	@Test

@@ -165,7 +165,7 @@ public class HandlerMethodMappingTests {
 		mapping1.setApplicationContext(new StaticApplicationContext(cxt));
 		mapping1.afterPropertiesSet();
 
-		assertThat(mapping1.getHandlerMethods()).hasSize(0);
+		assertThat(mapping1.getHandlerMethods()).isEmpty();
 
 		AbstractHandlerMethodMapping<String> mapping2 = new MyHandlerMethodMapping();
 		mapping2.setDetectHandlerMethodsInAncestorContexts(true);

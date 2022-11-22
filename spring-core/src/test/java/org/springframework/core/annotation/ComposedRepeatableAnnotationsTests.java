@@ -112,7 +112,7 @@ class ComposedRepeatableAnnotationsTests {
 		Class<?> element = SubNoninheritedRepeatableClass.class;
 		Set<Noninherited> annotations = getMergedRepeatableAnnotations(element, Noninherited.class);
 		assertThat(annotations).isNotNull();
-		assertThat(annotations).hasSize(0);
+		assertThat(annotations).isEmpty();
 	}
 
 	@Test

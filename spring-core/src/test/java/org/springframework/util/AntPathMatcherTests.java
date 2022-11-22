@@ -647,7 +647,7 @@ class AntPathMatcherTests {
 	@Test
 	void preventCreatingStringMatchersIfPathDoesNotStartsWithPatternPrefix() {
 		pathMatcher.setCachePatterns(true);
-		assertThat(pathMatcher.stringMatcherCache).hasSize(0);
+		assertThat(pathMatcher.stringMatcherCache).isEmpty();
 
 		pathMatcher.match("test?", "test");
 		assertThat(pathMatcher.stringMatcherCache).hasSize(1);
@@ -662,7 +662,7 @@ class AntPathMatcherTests {
 	@Test
 	void creatingStringMatchersIfPatternPrefixCannotDetermineIfPathMatch() {
 		pathMatcher.setCachePatterns(true);
-		assertThat(pathMatcher.stringMatcherCache).hasSize(0);
+		assertThat(pathMatcher.stringMatcherCache).isEmpty();
 
 		pathMatcher.match("test", "testian");
 		pathMatcher.match("test?", "testFf");

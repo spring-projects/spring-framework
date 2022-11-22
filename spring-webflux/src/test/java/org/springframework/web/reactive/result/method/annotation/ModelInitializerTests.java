@@ -141,7 +141,7 @@ public class ModelInitializerTests {
 
 		WebSession session = this.exchange.getSession().block(Duration.ZERO);
 		assertThat(session).isNotNull();
-		assertThat(session.getAttributes()).hasSize(0);
+		assertThat(session.getAttributes()).isEmpty();
 
 		context.saveModel();
 		assertThat(session.getAttributes()).hasSize(1);
@@ -198,7 +198,7 @@ public class ModelInitializerTests {
 		context.getSessionStatus().setComplete();
 		context.saveModel();
 
-		assertThat(session.getAttributes()).hasSize(0);
+		assertThat(session.getAttributes()).isEmpty();
 	}
 
 

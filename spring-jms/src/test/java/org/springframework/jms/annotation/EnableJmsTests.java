@@ -193,7 +193,7 @@ class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 				EnableJmsDefaultContainerFactoryConfig.class, LazyBean.class);
 		JmsListenerContainerTestFactory defaultFactory =
 				context.getBean("jmsListenerContainerFactory", JmsListenerContainerTestFactory.class);
-		assertThat(defaultFactory.getListenerContainers()).hasSize(0);
+		assertThat(defaultFactory.getListenerContainers()).isEmpty();
 
 		context.getBean(LazyBean.class);  // trigger lazy resolution
 		assertThat(defaultFactory.getListenerContainers()).hasSize(1);

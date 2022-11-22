@@ -44,7 +44,7 @@ public class ModelMapTests {
 
 	@Test
 	public void testNoArgCtorYieldsEmptyModel() throws Exception {
-		assertThat(new ModelMap()).hasSize(0);
+		assertThat(new ModelMap()).isEmpty();
 	}
 
 	/*
@@ -117,7 +117,7 @@ public class ModelMapTests {
 	public void testOneArgCtorWithEmptyCollection() throws Exception {
 		ModelMap model = new ModelMap(new HashSet<>());
 		// must not add if collection is empty...
-		assertThat(model).hasSize(0);
+		assertThat(model).isEmpty();
 	}
 
 	@Test
@@ -134,21 +134,21 @@ public class ModelMapTests {
 		assertThat(model).hasSize(1);
 		int[] ints = (int[]) model.get("intList");
 		assertThat(ints).isNotNull();
-		assertThat(ints).hasSize(0);
+		assertThat(ints).isEmpty();
 	}
 
 	@Test
 	public void testAddAllObjectsWithNullMap() throws Exception {
 		ModelMap model = new ModelMap();
 		model.addAllAttributes((Map<String, ?>) null);
-		assertThat(model).hasSize(0);
+		assertThat(model).isEmpty();
 	}
 
 	@Test
 	public void testAddAllObjectsWithNullCollection() throws Exception {
 		ModelMap model = new ModelMap();
 		model.addAllAttributes((Collection<Object>) null);
-		assertThat(model).hasSize(0);
+		assertThat(model).isEmpty();
 	}
 
 	@Test

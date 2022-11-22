@@ -296,7 +296,7 @@ public class WebMvcConfigurationSupportTests {
 		ViewResolverComposite resolver = context.getBean("mvcViewResolver", ViewResolverComposite.class);
 
 		assertThat(resolver).isNotNull();
-		assertThat(resolver.getViewResolvers()).hasSize(0);
+		assertThat(resolver.getViewResolvers()).isEmpty();
 		assertThat(resolver.getOrder()).isEqualTo(Ordered.LOWEST_PRECEDENCE);
 		assertThat(resolver.resolveViewName("anyViewName", Locale.ENGLISH)).isNull();
 	}

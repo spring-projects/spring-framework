@@ -682,10 +682,10 @@ class ConfigurationClassPostProcessorTests {
 		assertThat(beanNames).contains("stringRepo");
 
 		beanNames = beanFactory.getBeanNamesForType(ResolvableType.forClassWithGenerics(Repository.class, String.class));
-		assertThat(beanNames).hasSize(0);
+		assertThat(beanNames).isEmpty();
 
 		beanNames = beanFactory.getBeanNamesForType(ResolvableType.forClassWithGenerics(Repository.class, String.class));
-		assertThat(beanNames).hasSize(0);
+		assertThat(beanNames).isEmpty();
 	}
 
 	@Test
@@ -1040,7 +1040,7 @@ class ConfigurationClassPostProcessorTests {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(VarargConfiguration.class);
 		VarargConfiguration bean = ctx.getBean(VarargConfiguration.class);
 		assertThat(bean.testBeans).isNotNull();
-		assertThat(bean.testBeans).hasSize(0);
+		assertThat(bean.testBeans).isEmpty();
 		ctx.close();
 	}
 

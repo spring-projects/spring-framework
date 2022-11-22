@@ -103,7 +103,7 @@ public class BeanFactoryUtilsTests {
 	public void testHierarchicalNamesWithNoMatch() {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory, NoOp.class));
-		assertThat(names).hasSize(0);
+		assertThat(names).isEmpty();
 	}
 
 	@Test
@@ -278,7 +278,7 @@ public class BeanFactoryUtilsTests {
 	public void testHierarchicalNamesForAnnotationWithNoMatch() {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForAnnotationIncludingAncestors(this.listableBeanFactory, Override.class));
-		assertThat(names).hasSize(0);
+		assertThat(names).isEmpty();
 	}
 
 	@Test

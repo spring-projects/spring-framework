@@ -206,7 +206,7 @@ public class SQLErrorCodesFactoryTests {
 		// Should have failed to load without error
 		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();
 		assertThat(sf.getErrorCodes("XX").getBadSqlGrammarCodes().length == 0).isTrue();
-		assertThat(sf.getErrorCodes("Oracle").getBadSqlGrammarCodes()).hasSize(0);
+		assertThat(sf.getErrorCodes("Oracle").getBadSqlGrammarCodes()).isEmpty();
 	}
 
 	/**
@@ -371,8 +371,8 @@ public class SQLErrorCodesFactoryTests {
 	}
 
 	private void assertIsEmpty(SQLErrorCodes sec) {
-		assertThat(sec.getBadSqlGrammarCodes()).hasSize(0);
-		assertThat(sec.getDataIntegrityViolationCodes()).hasSize(0);
+		assertThat(sec.getBadSqlGrammarCodes()).isEmpty();
+		assertThat(sec.getDataIntegrityViolationCodes()).isEmpty();
 	}
 
 }

@@ -95,7 +95,7 @@ public class PersistenceXmlParsingTests {
 
 		assertThat(info[0].getMappingFileNames()).hasSize(1);
 		assertThat(info[0].getMappingFileNames().get(0)).isEqualTo("mappings.xml");
-		assertThat(info[0].getProperties().keySet()).hasSize(0);
+		assertThat(info[0].getProperties().keySet()).isEmpty();
 
 		assertThat(info[0].excludeUnlistedClasses()).as("Exclude unlisted should default false in 1.0.").isFalse();
 	}
@@ -115,7 +115,7 @@ public class PersistenceXmlParsingTests {
 		assertThat(info[0].getJarFileUrls().get(0)).isEqualTo(new ClassPathResource("order.jar").getURL());
 		assertThat(info[0].getJarFileUrls().get(1)).isEqualTo(new ClassPathResource("order-supplemental.jar").getURL());
 
-		assertThat(info[0].getProperties().keySet()).hasSize(0);
+		assertThat(info[0].getProperties().keySet()).isEmpty();
 		assertThat(info[0].getJtaDataSource()).isNull();
 		assertThat(info[0].getNonJtaDataSource()).isNull();
 
@@ -148,7 +148,7 @@ public class PersistenceXmlParsingTests {
 		assertThat(info[0].excludeUnlistedClasses()).as("Exclude unlisted should be true when no value.").isTrue();
 
 		assertThat(info[0].getTransactionType()).isSameAs(PersistenceUnitTransactionType.RESOURCE_LOCAL);
-		assertThat(info[0].getProperties().keySet()).hasSize(0);
+		assertThat(info[0].getProperties().keySet()).isEmpty();
 
 		builder.clear();
 	}
@@ -173,7 +173,7 @@ public class PersistenceXmlParsingTests {
 		assertThat(info[0].getJarFileUrls().get(1)).isEqualTo(new ClassPathResource("order-supplemental.jar").getURL());
 
 		assertThat(info[0].getPersistenceProviderClassName()).isEqualTo("com.acme.AcmePersistence");
-		assertThat(info[0].getProperties().keySet()).hasSize(0);
+		assertThat(info[0].getProperties().keySet()).isEmpty();
 
 		assertThat(info[0].excludeUnlistedClasses()).as("Exclude unlisted should default false in 1.0.").isFalse();
 	}
@@ -249,7 +249,7 @@ public class PersistenceXmlParsingTests {
 		PersistenceUnitInfo[] info = reader.readPersistenceUnitInfos(resource);
 		assertThat(info).hasSize(1);
 		assertThat(info[0].getPersistenceUnitName()).isEqualTo("pu");
-		assertThat(info[0].getProperties().keySet()).hasSize(0);
+		assertThat(info[0].getProperties().keySet()).isEmpty();
 
 		assertThat(info[0].excludeUnlistedClasses()).as("Exclude unlisted should default false in 1.0.").isFalse();
 	}

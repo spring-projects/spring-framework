@@ -45,8 +45,8 @@ public class StompDecoderTests {
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(frame);
 
 		assertThat(headers.getCommand()).isEqualTo(StompCommand.DISCONNECT);
-		assertThat(headers.toNativeHeaderMap()).hasSize(0);
-		assertThat(frame.getPayload()).hasSize(0);
+		assertThat(headers.toNativeHeaderMap()).isEmpty();
+		assertThat(frame.getPayload()).isEmpty();
 	}
 
 	@Test
@@ -55,8 +55,8 @@ public class StompDecoderTests {
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(frame);
 
 		assertThat(headers.getCommand()).isEqualTo(StompCommand.DISCONNECT);
-		assertThat(headers.toNativeHeaderMap()).hasSize(0);
-		assertThat(frame.getPayload()).hasSize(0);
+		assertThat(headers.toNativeHeaderMap()).isEmpty();
+		assertThat(frame.getPayload()).isEmpty();
 	}
 
 	@Test
@@ -73,7 +73,7 @@ public class StompDecoderTests {
 		assertThat(headers.getFirstNativeHeader("accept-version")).isEqualTo("1.1");
 		assertThat(headers.getHost()).isEqualTo("github.org");
 
-		assertThat(frame.getPayload()).hasSize(0);
+		assertThat(frame.getPayload()).isEmpty();
 	}
 
 	@Test
@@ -173,7 +173,7 @@ public class StompDecoderTests {
 		assertThat(headers.getFirstNativeHeader("accept-version")).isEqualTo("1.1");
 		assertThat(headers.getFirstNativeHeader("key")).isEqualTo("\\value");
 
-		assertThat(frame.getPayload()).hasSize(0);
+		assertThat(frame.getPayload()).isEmpty();
 	}
 
 	@Test
@@ -220,7 +220,7 @@ public class StompDecoderTests {
 		assertThat(headers.getFirstNativeHeader("accept-version")).isEqualTo("1.1");
 		assertThat(headers.getFirstNativeHeader("key")).isEqualTo("");
 
-		assertThat(frame.getPayload()).hasSize(0);
+		assertThat(frame.getPayload()).isEmpty();
 	}
 
 	@Test

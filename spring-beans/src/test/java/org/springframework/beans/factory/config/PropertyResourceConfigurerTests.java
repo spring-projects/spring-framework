@@ -577,7 +577,7 @@ public class PropertyResourceConfigurerTests {
 
 		TestBean tb = (TestBean) factory.getBean("tb");
 		assertThat(tb).isNotNull();
-		assertThat(factory.getAliases("tb")).hasSize(0);
+		assertThat(factory.getAliases("tb")).isEmpty();
 	}
 
 	@Test

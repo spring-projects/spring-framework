@@ -179,7 +179,7 @@ public class AnnotationConfigDispatcherServletInitializerTests {
 
 		initializer.onStartup(servletContext);
 
-		assertThat(filterRegistrations).hasSize(0);
+		assertThat(filterRegistrations).isEmpty();
 	}
 
 

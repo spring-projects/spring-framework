@@ -86,7 +86,7 @@ public class ViewResolverRegistryTests {
 	@Test
 	public void noResolvers() {
 		assertThat(this.registry.getViewResolvers()).isNotNull();
-		assertThat(this.registry.getViewResolvers()).hasSize(0);
+		assertThat(this.registry.getViewResolvers()).isEmpty();
 		assertThat(this.registry.hasRegistrations()).isFalse();
 	}
 

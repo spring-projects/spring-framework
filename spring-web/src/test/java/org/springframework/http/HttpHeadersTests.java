@@ -619,9 +619,9 @@ public class HttpHeadersTests {
 		// clear()
 		keySet.clear();
 		assertThat(keySet.isEmpty()).isTrue();
-		assertThat(keySet).hasSize(0);
+		assertThat(keySet).isEmpty();
 		assertThat(headers.isEmpty()).isTrue();
-		assertThat(headers).hasSize(0);
+		assertThat(headers).isEmpty();
 
 		// Unsupported operations
 		assertThatExceptionOfType(UnsupportedOperationException.class)

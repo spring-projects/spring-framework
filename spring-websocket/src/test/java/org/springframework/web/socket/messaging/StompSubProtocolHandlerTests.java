@@ -332,7 +332,7 @@ public class StompSubProtocolHandlerTests {
 		assertThat(stompAccessor.getPasscode()).isEqualTo("guest");
 		assertThat(stompAccessor.getHeartbeat()).isEqualTo(new long[] {10000, 10000});
 		assertThat(stompAccessor.getAcceptVersion()).isEqualTo(new HashSet<>(Arrays.asList("1.1","1.0")));
-		assertThat(this.session.getSentMessages()).hasSize(0);
+		assertThat(this.session.getSentMessages()).isEmpty();
 	}
 
 	@Test

@@ -414,7 +414,7 @@ class ResourceBundleMessageSourceTests {
 		assertThat(filenames.get(0)).isEqualTo("messages__UK_POSIX");
 
 		filenames = ms.calculateFilenamesForLocale("messages", new Locale("", "", "POSIX"));
-		assertThat(filenames).hasSize(0);
+		assertThat(filenames).isEmpty();
 	}
 
 	@Test

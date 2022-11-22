@@ -796,7 +796,7 @@ public abstract class AbstractAopProxyTests {
 		advised.removeAdvisor(0);
 		// Check it still works: proxy factory state shouldn't have been corrupted
 		assertThat(proxied.getAge()).isEqualTo(target.getAge());
-		assertThat(advised.getAdvisors()).hasSize(0);
+		assertThat(advised.getAdvisors()).isEmpty();
 	}
 
 	@Test

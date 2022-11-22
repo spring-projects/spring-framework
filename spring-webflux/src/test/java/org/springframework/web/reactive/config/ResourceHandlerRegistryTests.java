@@ -161,7 +161,7 @@ class ResourceHandlerRegistryTests {
 		assertThat(resolvers.get(1)).isInstanceOf(PathResourceResolver.class);
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
-		assertThat(transformers).hasSize(0);
+		assertThat(transformers).isEmpty();
 	}
 
 	@Test

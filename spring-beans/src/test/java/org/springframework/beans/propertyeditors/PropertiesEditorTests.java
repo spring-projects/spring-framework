@@ -139,7 +139,7 @@ public class PropertiesEditorTests {
 		PropertiesEditor pe= new PropertiesEditor();
 		pe.setAsText(null);
 		Properties p = (Properties) pe.getValue();
-		assertThat(p).hasSize(0);
+		assertThat(p).isEmpty();
 	}
 
 	@Test

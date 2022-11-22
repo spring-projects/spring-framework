@@ -1530,7 +1530,7 @@ class XmlBeanFactoryTests {
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("constructorArrayNoType");
 		assertThat(bean.array instanceof String[]).isTrue();
-		assertThat(((String[]) bean.array)).hasSize(0);
+		assertThat(((String[]) bean.array)).isEmpty();
 	}
 
 	@Test
@@ -1541,7 +1541,7 @@ class XmlBeanFactoryTests {
 		bd.setLenientConstructorResolution(false);
 		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("constructorArrayNoType");
 		assertThat(bean.array instanceof String[]).isTrue();
-		assertThat(((String[]) bean.array)).hasSize(0);
+		assertThat(((String[]) bean.array)).isEmpty();
 	}
 
 	@Test

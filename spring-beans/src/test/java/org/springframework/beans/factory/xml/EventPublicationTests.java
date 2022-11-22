@@ -90,7 +90,7 @@ class EventPublicationTests {
 		assertThat(componentDefinition1.getBeanDefinitions()).hasSize(1);
 		BeanDefinition beanDefinition2 = componentDefinition2.getBeanDefinitions()[0];
 		assertThat(beanDefinition2.getPropertyValues().getPropertyValue("name").getValue()).isEqualTo(new TypedStringValue("Juergen Hoeller"));
-		assertThat(componentDefinition2.getBeanReferences()).hasSize(0);
+		assertThat(componentDefinition2.getBeanReferences()).isEmpty();
 		assertThat(componentDefinition2.getInnerBeanDefinitions()).hasSize(1);
 		BeanDefinition innerBd2 = componentDefinition2.getInnerBeanDefinitions()[0];
 		assertThat(innerBd2.getPropertyValues().getPropertyValue("name").getValue()).isEqualTo(new TypedStringValue("Eva Schallmeiner"));

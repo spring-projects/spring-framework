@@ -706,17 +706,17 @@ class AnnotationUtilsTests {
 		// Java 8
 		MyRepeatable[] array = clazz.getDeclaredAnnotationsByType(MyRepeatable.class);
 		assertThat(array).isNotNull();
-		assertThat(array).hasSize(0);
+		assertThat(array).isEmpty();
 
 		// Spring
 		Set<MyRepeatable> set = getDeclaredRepeatableAnnotations(clazz, MyRepeatable.class, MyRepeatableContainer.class);
 		assertThat(set).isNotNull();
-		assertThat(set).hasSize(0);
+		assertThat(set).isEmpty();
 
 		// When container type is omitted and therefore inferred from @Repeatable
 		set = getDeclaredRepeatableAnnotations(clazz, MyRepeatable.class);
 		assertThat(set).isNotNull();
-		assertThat(set).hasSize(0);
+		assertThat(set).isEmpty();
 	}
 
 	@Test

@@ -130,7 +130,7 @@ class ClassPathScanningCandidateComponentProviderTests {
 		provider.setResourceLoader(new DefaultResourceLoader(
 				CandidateComponentsTestClassLoader.disableIndex(getClass().getClassLoader())));
 		Set<BeanDefinition> candidates = provider.findCandidateComponents("bogus");
-		assertThat(candidates).hasSize(0);
+		assertThat(candidates).isEmpty();
 	}
 
 	@Test
@@ -138,7 +138,7 @@ class ClassPathScanningCandidateComponentProviderTests {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(true);
 		provider.setResourceLoader(new DefaultResourceLoader(TEST_BASE_CLASSLOADER));
 		Set<BeanDefinition> candidates = provider.findCandidateComponents("bogus");
-		assertThat(candidates).hasSize(0);
+		assertThat(candidates).isEmpty();
 	}
 
 	@Test
@@ -279,7 +279,7 @@ class ClassPathScanningCandidateComponentProviderTests {
 	void withNoFilters() {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
-		assertThat(candidates).hasSize(0);
+		assertThat(candidates).isEmpty();
 	}
 
 	@Test
