@@ -163,7 +163,7 @@ public class WebMvcConfigurationSupportTests {
 		assertThat(chain).isNotNull();
 		HandlerInterceptor[] interceptors = chain.getInterceptors();
 		assertThat(interceptors).isNotNull();
-		assertThat(interceptors.length).isEqualTo(3);
+		assertThat(interceptors).hasSize(3);
 		assertThat(interceptors[1].getClass()).isEqualTo(ConversionServiceExposingInterceptor.class);
 		assertThat(interceptors[2].getClass()).isEqualTo(ResourceUrlProviderExposingInterceptor.class);
 	}

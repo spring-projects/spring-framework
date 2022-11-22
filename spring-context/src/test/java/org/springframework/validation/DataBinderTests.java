@@ -1724,7 +1724,7 @@ class DataBinderTests {
 		pvs.add("stringArray", new String[] {"a1", "b2"});
 		binder.bind(pvs);
 		assertThat(binder.getBindingResult().hasErrors()).isFalse();
-		assertThat(tb.getStringArray().length).isEqualTo(2);
+		assertThat(tb.getStringArray()).hasSize(2);
 		assertThat(tb.getStringArray()[0]).isEqualTo("Xa1");
 		assertThat(tb.getStringArray()[1]).isEqualTo("Xb2");
 	}

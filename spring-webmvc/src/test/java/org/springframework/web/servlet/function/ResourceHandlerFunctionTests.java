@@ -162,7 +162,7 @@ public class ResourceHandlerFunctionTests {
 
 		assertThat(servletResponse.getStatus()).isEqualTo(200);
 		byte[] actualBytes = servletResponse.getContentAsByteArray();
-		assertThat(actualBytes.length).isEqualTo(0);
+		assertThat(actualBytes).hasSize(0);
 		assertThat(servletResponse.getContentType()).isEqualTo(MediaType.TEXT_PLAIN_VALUE);
 		assertThat(servletResponse.getContentLength()).isEqualTo(this.resource.contentLength());
 	}
@@ -185,7 +185,7 @@ public class ResourceHandlerFunctionTests {
 		String[] methods = StringUtils.tokenizeToStringArray(allowHeader, ",");
 		assertThat(methods).containsExactlyInAnyOrder("GET","HEAD","OPTIONS");
 		byte[] actualBytes = servletResponse.getContentAsByteArray();
-		assertThat(actualBytes.length).isEqualTo(0);
+		assertThat(actualBytes).hasSize(0);
 	}
 
 }

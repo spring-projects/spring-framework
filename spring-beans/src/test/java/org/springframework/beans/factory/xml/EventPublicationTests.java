@@ -75,23 +75,23 @@ class EventPublicationTests {
 	void beanEventReceived() throws Exception {
 		ComponentDefinition componentDefinition1 = this.eventListener.getComponentDefinition("testBean");
 		assertThat(componentDefinition1).isInstanceOf(BeanComponentDefinition.class);
-		assertThat(componentDefinition1.getBeanDefinitions().length).isEqualTo(1);
+		assertThat(componentDefinition1.getBeanDefinitions()).hasSize(1);
 		BeanDefinition beanDefinition1 = componentDefinition1.getBeanDefinitions()[0];
 		assertThat(beanDefinition1.getConstructorArgumentValues().getGenericArgumentValue(String.class).getValue()).isEqualTo(new TypedStringValue("Rob Harrop"));
-		assertThat(componentDefinition1.getBeanReferences().length).isEqualTo(1);
+		assertThat(componentDefinition1.getBeanReferences()).hasSize(1);
 		assertThat(componentDefinition1.getBeanReferences()[0].getBeanName()).isEqualTo("testBean2");
-		assertThat(componentDefinition1.getInnerBeanDefinitions().length).isEqualTo(1);
+		assertThat(componentDefinition1.getInnerBeanDefinitions()).hasSize(1);
 		BeanDefinition innerBd1 = componentDefinition1.getInnerBeanDefinitions()[0];
 		assertThat(innerBd1.getConstructorArgumentValues().getGenericArgumentValue(String.class).getValue()).isEqualTo(new TypedStringValue("ACME"));
 		assertThat(componentDefinition1.getSource()).isInstanceOf(Element.class);
 
 		ComponentDefinition componentDefinition2 = this.eventListener.getComponentDefinition("testBean2");
 		assertThat(componentDefinition2).isInstanceOf(BeanComponentDefinition.class);
-		assertThat(componentDefinition1.getBeanDefinitions().length).isEqualTo(1);
+		assertThat(componentDefinition1.getBeanDefinitions()).hasSize(1);
 		BeanDefinition beanDefinition2 = componentDefinition2.getBeanDefinitions()[0];
 		assertThat(beanDefinition2.getPropertyValues().getPropertyValue("name").getValue()).isEqualTo(new TypedStringValue("Juergen Hoeller"));
-		assertThat(componentDefinition2.getBeanReferences().length).isEqualTo(0);
-		assertThat(componentDefinition2.getInnerBeanDefinitions().length).isEqualTo(1);
+		assertThat(componentDefinition2.getBeanReferences()).hasSize(0);
+		assertThat(componentDefinition2.getInnerBeanDefinitions()).hasSize(1);
 		BeanDefinition innerBd2 = componentDefinition2.getInnerBeanDefinitions()[0];
 		assertThat(innerBd2.getPropertyValues().getPropertyValue("name").getValue()).isEqualTo(new TypedStringValue("Eva Schallmeiner"));
 		assertThat(componentDefinition2.getSource()).isInstanceOf(Element.class);

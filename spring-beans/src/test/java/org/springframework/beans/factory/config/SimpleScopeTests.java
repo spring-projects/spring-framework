@@ -63,7 +63,7 @@ public class SimpleScopeTests {
 		beanFactory.registerScope("myScope", scope);
 
 		String[] scopeNames = beanFactory.getRegisteredScopeNames();
-		assertThat(scopeNames.length).isEqualTo(1);
+		assertThat(scopeNames).hasSize(1);
 		assertThat(scopeNames[0]).isEqualTo("myScope");
 		assertThat(beanFactory.getRegisteredScope("myScope")).isSameAs(scope);
 

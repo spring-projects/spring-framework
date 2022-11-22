@@ -151,7 +151,7 @@ class ObjectUtilsTests {
 	void toObjectArrayWithNull() {
 		Object[] objects = ObjectUtils.toObjectArray(null);
 		assertThat(objects).isNotNull();
-		assertThat(objects.length).isEqualTo(0);
+		assertThat(objects).hasSize(0);
 	}
 
 	@Test

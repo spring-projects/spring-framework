@@ -261,11 +261,11 @@ public class ClassPathXmlApplicationContextTests {
 		assertThat(myMs).isSameAs(someMs);
 
 		String[] aliases = child.getAliases("someMessageSource");
-		assertThat(aliases.length).isEqualTo(2);
+		assertThat(aliases).hasSize(2);
 		assertThat(aliases[0]).isEqualTo("myMessageSource");
 		assertThat(aliases[1]).isEqualTo("yourMessageSource");
 		aliases = child.getAliases("myMessageSource");
-		assertThat(aliases.length).isEqualTo(2);
+		assertThat(aliases).hasSize(2);
 		assertThat(aliases[0]).isEqualTo("someMessageSource");
 		assertThat(aliases[1]).isEqualTo("yourMessageSource");
 
@@ -299,16 +299,16 @@ public class ClassPathXmlApplicationContextTests {
 
 	private void assertOneMessageSourceOnly(ClassPathXmlApplicationContext ctx, Object myMessageSource) {
 		String[] beanNamesForType = ctx.getBeanNamesForType(StaticMessageSource.class);
-		assertThat(beanNamesForType.length).isEqualTo(1);
+		assertThat(beanNamesForType).hasSize(1);
 		assertThat(beanNamesForType[0]).isEqualTo("myMessageSource");
 		beanNamesForType = ctx.getBeanNamesForType(StaticMessageSource.class, true, true);
-		assertThat(beanNamesForType.length).isEqualTo(1);
+		assertThat(beanNamesForType).hasSize(1);
 		assertThat(beanNamesForType[0]).isEqualTo("myMessageSource");
 		beanNamesForType = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(ctx, StaticMessageSource.class);
-		assertThat(beanNamesForType.length).isEqualTo(1);
+		assertThat(beanNamesForType).hasSize(1);
 		assertThat(beanNamesForType[0]).isEqualTo("myMessageSource");
 		beanNamesForType = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(ctx, StaticMessageSource.class, true, true);
-		assertThat(beanNamesForType.length).isEqualTo(1);
+		assertThat(beanNamesForType).hasSize(1);
 		assertThat(beanNamesForType[0]).isEqualTo("myMessageSource");
 
 		Map<?, StaticMessageSource> beansOfType = ctx.getBeansOfType(StaticMessageSource.class);

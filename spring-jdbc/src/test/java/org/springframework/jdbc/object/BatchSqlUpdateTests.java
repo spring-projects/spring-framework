@@ -77,11 +77,11 @@ public class BatchSqlUpdateTests {
 
 		if (flushThroughBatchSize) {
 			assertThat(update.getQueueCount()).isEqualTo(0);
-			assertThat(update.getRowsAffected().length).isEqualTo(2);
+			assertThat(update.getRowsAffected()).hasSize(2);
 		}
 		else {
 			assertThat(update.getQueueCount()).isEqualTo(2);
-			assertThat(update.getRowsAffected().length).isEqualTo(0);
+			assertThat(update.getRowsAffected()).hasSize(0);
 		}
 
 		int[] actualRowsAffected = update.flush();
@@ -102,7 +102,7 @@ public class BatchSqlUpdateTests {
 		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
 
 		update.reset();
-		assertThat(update.getRowsAffected().length).isEqualTo(0);
+		assertThat(update.getRowsAffected()).hasSize(0);
 
 		verify(preparedStatement).setObject(1, ids[0], Types.INTEGER);
 		verify(preparedStatement).setObject(1, ids[1], Types.INTEGER);

@@ -140,7 +140,7 @@ public class DefaultRenderingResponseTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mav = result.writeTo(request, response, EMPTY_CONTEXT);
 		assertThat(mav).isNotNull();
-		assertThat(response.getCookies().length).isEqualTo(1);
+		assertThat(response.getCookies()).hasSize(1);
 		assertThat(response.getCookies()[0].getName()).isEqualTo("name");
 		assertThat(response.getCookies()[0].getValue()).isEqualTo("value");
 	}

@@ -108,7 +108,7 @@ public class ModelMapTests {
 		assertThat(model).hasSize(1);
 		String[] strings = (String[]) model.get("stringList");
 		assertThat(strings).isNotNull();
-		assertThat(strings.length).isEqualTo(2);
+		assertThat(strings).hasSize(2);
 		assertThat(strings[0]).isEqualTo("foo");
 		assertThat(strings[1]).isEqualTo("boing");
 	}
@@ -134,7 +134,7 @@ public class ModelMapTests {
 		assertThat(model).hasSize(1);
 		int[] ints = (int[]) model.get("intList");
 		assertThat(ints).isNotNull();
-		assertThat(ints.length).isEqualTo(0);
+		assertThat(ints).hasSize(0);
 	}
 
 	@Test

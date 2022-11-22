@@ -56,7 +56,7 @@ public abstract class AbstractRegexpMethodPointcutTests {
 	protected void noPatternSuppliedTests(AbstractRegexpMethodPointcut rpc) throws Exception {
 		assertThat(rpc.matches(Object.class.getMethod("hashCode"), String.class)).isFalse();
 		assertThat(rpc.matches(Object.class.getMethod("wait"), Object.class)).isFalse();
-		assertThat(rpc.getPatterns().length).isEqualTo(0);
+		assertThat(rpc.getPatterns()).hasSize(0);
 	}
 
 	@Test

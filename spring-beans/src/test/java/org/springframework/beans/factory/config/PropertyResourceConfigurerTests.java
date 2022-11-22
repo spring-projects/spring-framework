@@ -401,7 +401,7 @@ public class PropertyResourceConfigurerTests {
 		assertThat(tb1.getSpouse()).isEqualTo(tb2);
 		assertThat(tb1.getSomeMap()).hasSize(1);
 		assertThat(tb1.getSomeMap().get("myKey")).isEqualTo("myValue");
-		assertThat(tb2.getStringArray().length).isEqualTo(2);
+		assertThat(tb2.getStringArray()).hasSize(2);
 		assertThat(tb2.getStringArray()[0]).isEqualTo(System.getProperty("os.name"));
 		assertThat(tb2.getStringArray()[1]).isEqualTo("98");
 		assertThat(tb2.getFriends()).hasSize(2);
@@ -577,7 +577,7 @@ public class PropertyResourceConfigurerTests {
 
 		TestBean tb = (TestBean) factory.getBean("tb");
 		assertThat(tb).isNotNull();
-		assertThat(factory.getAliases("tb").length).isEqualTo(0);
+		assertThat(factory.getAliases("tb")).hasSize(0);
 	}
 
 	@Test

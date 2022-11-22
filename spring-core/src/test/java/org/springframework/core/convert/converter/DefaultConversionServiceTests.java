@@ -452,7 +452,7 @@ class DefaultConversionServiceTests {
 	@Test
 	void convertObjectToArray() {
 		Object[] result = conversionService.convert(3L, Object[].class);
-		assertThat(result.length).isEqualTo(1);
+		assertThat(result).hasSize(1);
 		assertThat(result[0]).isEqualTo(3L);
 	}
 

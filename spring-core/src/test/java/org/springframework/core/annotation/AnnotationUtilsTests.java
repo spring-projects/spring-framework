@@ -507,7 +507,7 @@ class AnnotationUtilsTests {
 	@Test
 	void getValueFromNonPublicAnnotation() throws Exception {
 		Annotation[] declaredAnnotations = NonPublicAnnotatedClass.class.getDeclaredAnnotations();
-		assertThat(declaredAnnotations.length).isEqualTo(1);
+		assertThat(declaredAnnotations).hasSize(1);
 		Annotation annotation = declaredAnnotations[0];
 		assertThat(annotation).isNotNull();
 		assertThat(annotation.annotationType().getSimpleName()).isEqualTo("NonPublicAnnotation");
@@ -527,7 +527,7 @@ class AnnotationUtilsTests {
 	@Test
 	void getDefaultValueFromNonPublicAnnotation() {
 		Annotation[] declaredAnnotations = NonPublicAnnotatedClass.class.getDeclaredAnnotations();
-		assertThat(declaredAnnotations.length).isEqualTo(1);
+		assertThat(declaredAnnotations).hasSize(1);
 		Annotation annotation = declaredAnnotations[0];
 		assertThat(annotation).isNotNull();
 		assertThat(annotation.annotationType().getSimpleName()).isEqualTo("NonPublicAnnotation");
@@ -706,7 +706,7 @@ class AnnotationUtilsTests {
 		// Java 8
 		MyRepeatable[] array = clazz.getDeclaredAnnotationsByType(MyRepeatable.class);
 		assertThat(array).isNotNull();
-		assertThat(array.length).isEqualTo(0);
+		assertThat(array).hasSize(0);
 
 		// Spring
 		Set<MyRepeatable> set = getDeclaredRepeatableAnnotations(clazz, MyRepeatable.class, MyRepeatableContainer.class);

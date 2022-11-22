@@ -203,7 +203,7 @@ public class UtilNamespaceHandlerTests {
 	void testNestedShortcutCollections() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("nestedShortcutCollections");
 
-		assertThat(bean.getStringArray().length).isEqualTo(1);
+		assertThat(bean.getStringArray()).hasSize(1);
 		assertThat(bean.getStringArray()[0]).isEqualTo("fooStr");
 
 		List<?> list = bean.getSomeList();

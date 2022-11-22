@@ -473,7 +473,7 @@ public class ClassPathBeanDefinitionScannerTests {
 		assertThat(fooService.eventPublisher).isSameAs(context);
 		assertThat(fooService.messageSource).isSameAs(ms);
 		assertThat(fooService.context).isSameAs(context);
-		assertThat(fooService.configurableContext.length).isEqualTo(1);
+		assertThat(fooService.configurableContext).hasSize(1);
 		assertThat(fooService.configurableContext[0]).isSameAs(context);
 		assertThat(fooService.genericContext).isSameAs(context);
 	}

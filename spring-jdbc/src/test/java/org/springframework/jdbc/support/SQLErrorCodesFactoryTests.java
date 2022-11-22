@@ -185,7 +185,7 @@ public class SQLErrorCodesFactoryTests {
 		// Should have loaded without error
 		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();
 		assertThat(sf.getErrorCodes("XX").getBadSqlGrammarCodes().length == 0).isTrue();
-		assertThat(sf.getErrorCodes("Oracle").getBadSqlGrammarCodes().length).isEqualTo(2);
+		assertThat(sf.getErrorCodes("Oracle").getBadSqlGrammarCodes()).hasSize(2);
 		assertThat(sf.getErrorCodes("Oracle").getBadSqlGrammarCodes()[0]).isEqualTo("1");
 		assertThat(sf.getErrorCodes("Oracle").getBadSqlGrammarCodes()[1]).isEqualTo("2");
 	}
@@ -206,7 +206,7 @@ public class SQLErrorCodesFactoryTests {
 		// Should have failed to load without error
 		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();
 		assertThat(sf.getErrorCodes("XX").getBadSqlGrammarCodes().length == 0).isTrue();
-		assertThat(sf.getErrorCodes("Oracle").getBadSqlGrammarCodes().length).isEqualTo(0);
+		assertThat(sf.getErrorCodes("Oracle").getBadSqlGrammarCodes()).hasSize(0);
 	}
 
 	/**
@@ -226,11 +226,11 @@ public class SQLErrorCodesFactoryTests {
 
 		// Should have loaded without error
 		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();
-		assertThat(sf.getErrorCodes("Oracle").getCustomTranslations().length).isEqualTo(1);
+		assertThat(sf.getErrorCodes("Oracle").getCustomTranslations()).hasSize(1);
 		CustomSQLErrorCodesTranslation translation =
 				sf.getErrorCodes("Oracle").getCustomTranslations()[0];
 		assertThat(translation.getExceptionClass()).isEqualTo(CustomErrorCodeException.class);
-		assertThat(translation.getErrorCodes().length).isEqualTo(1);
+		assertThat(translation.getErrorCodes()).hasSize(1);
 	}
 
 	@Test
@@ -371,8 +371,8 @@ public class SQLErrorCodesFactoryTests {
 	}
 
 	private void assertIsEmpty(SQLErrorCodes sec) {
-		assertThat(sec.getBadSqlGrammarCodes().length).isEqualTo(0);
-		assertThat(sec.getDataIntegrityViolationCodes().length).isEqualTo(0);
+		assertThat(sec.getBadSqlGrammarCodes()).hasSize(0);
+		assertThat(sec.getDataIntegrityViolationCodes()).hasSize(0);
 	}
 
 }

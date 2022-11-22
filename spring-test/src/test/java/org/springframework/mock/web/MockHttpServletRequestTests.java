@@ -236,11 +236,11 @@ class MockHttpServletRequestTests {
 		params.put("key3", new String[] { "value3A", "value3B" });
 		request.setParameters(params);
 		String[] values1 = request.getParameterValues("key1");
-		assertThat(values1.length).isEqualTo(1);
+		assertThat(values1).hasSize(1);
 		assertThat(request.getParameter("key1")).isEqualTo("newValue1");
 		assertThat(request.getParameter("key2")).isEqualTo("value2");
 		String[] values3 = request.getParameterValues("key3");
-		assertThat(values3.length).isEqualTo(2);
+		assertThat(values3).hasSize(2);
 		assertThat(values3[0]).isEqualTo("value3A");
 		assertThat(values3[1]).isEqualTo("value3B");
 	}
@@ -254,12 +254,12 @@ class MockHttpServletRequestTests {
 		params.put("key3", new String[] { "value3A", "value3B" });
 		request.addParameters(params);
 		String[] values1 = request.getParameterValues("key1");
-		assertThat(values1.length).isEqualTo(2);
+		assertThat(values1).hasSize(2);
 		assertThat(values1[0]).isEqualTo("value1");
 		assertThat(values1[1]).isEqualTo("newValue1");
 		assertThat(request.getParameter("key2")).isEqualTo("value2");
 		String[] values3 = request.getParameterValues("key3");
-		assertThat(values3.length).isEqualTo(2);
+		assertThat(values3).hasSize(2);
 		assertThat(values3[0]).isEqualTo("value3A");
 		assertThat(values3[1]).isEqualTo("value3B");
 	}

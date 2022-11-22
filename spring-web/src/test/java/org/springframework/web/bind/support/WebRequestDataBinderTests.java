@@ -269,7 +269,7 @@ public class WebRequestDataBinderTests {
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
 		request.addFile(new MockMultipartFile("stringArray", "Juergen".getBytes()));
 		binder.bind(new ServletWebRequest(request));
-		assertThat(target.getStringArray().length).isEqualTo(1);
+		assertThat(target.getStringArray()).hasSize(1);
 		assertThat(target.getStringArray()[0]).isEqualTo("Juergen");
 	}
 
@@ -283,7 +283,7 @@ public class WebRequestDataBinderTests {
 		request.addFile(new MockMultipartFile("stringArray", "Juergen".getBytes()));
 		request.addFile(new MockMultipartFile("stringArray", "Eva".getBytes()));
 		binder.bind(new ServletWebRequest(request));
-		assertThat(target.getStringArray().length).isEqualTo(2);
+		assertThat(target.getStringArray()).hasSize(2);
 		assertThat(target.getStringArray()[0]).isEqualTo("Juergen");
 		assertThat(target.getStringArray()[1]).isEqualTo("Eva");
 	}

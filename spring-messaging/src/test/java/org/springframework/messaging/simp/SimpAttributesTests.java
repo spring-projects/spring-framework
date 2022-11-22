@@ -82,7 +82,7 @@ public class SimpAttributesTests {
 		this.simpAttributes.registerDestructionCallback("name1", callback1);
 		this.simpAttributes.registerDestructionCallback("name2", callback2);
 
-		assertThat(this.simpAttributes.getAttributeNames().length).isEqualTo(2);
+		assertThat(this.simpAttributes.getAttributeNames()).hasSize(2);
 	}
 
 	@Test

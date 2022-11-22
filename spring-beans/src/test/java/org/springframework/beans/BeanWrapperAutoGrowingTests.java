@@ -63,7 +63,7 @@ public class BeanWrapperAutoGrowingTests {
 	@Test
 	public void getPropertyValueAutoGrowArray() {
 		assertNotNull(wrapper.getPropertyValue("array[0]"));
-		assertThat(bean.getArray().length).isEqualTo(1);
+		assertThat(bean.getArray()).hasSize(1);
 		assertThat(bean.getArray()[0]).isInstanceOf(Bean.class);
 	}
 
@@ -76,7 +76,7 @@ public class BeanWrapperAutoGrowingTests {
 	@Test
 	public void getPropertyValueAutoGrowArrayBySeveralElements() {
 		assertNotNull(wrapper.getPropertyValue("array[4]"));
-		assertThat(bean.getArray().length).isEqualTo(5);
+		assertThat(bean.getArray()).hasSize(5);
 		assertThat(bean.getArray()[0]).isInstanceOf(Bean.class);
 		assertThat(bean.getArray()[1]).isInstanceOf(Bean.class);
 		assertThat(bean.getArray()[2]).isInstanceOf(Bean.class);
@@ -91,7 +91,7 @@ public class BeanWrapperAutoGrowingTests {
 	@Test
 	public void getPropertyValueAutoGrow2dArray() {
 		assertNotNull(wrapper.getPropertyValue("multiArray[0][0]"));
-		assertThat(bean.getMultiArray()[0].length).isEqualTo(1);
+		assertThat(bean.getMultiArray()[0]).hasSize(1);
 		assertThat(bean.getMultiArray()[0][0]).isInstanceOf(Bean.class);
 	}
 

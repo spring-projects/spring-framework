@@ -45,7 +45,7 @@ class FastByteArrayOutputStreamTests {
 	@Test
 	void size() throws Exception {
 		this.os.write(this.helloBytes);
-		assertThat(this.helloBytes.length).isEqualTo(this.os.size());
+		assertThat(this.helloBytes).hasSize(this.os.size());
 	}
 
 	@Test
@@ -123,7 +123,7 @@ class FastByteArrayOutputStreamTests {
 	@Test
 	void getInputStreamAvailable() throws Exception {
 		this.os.write(this.helloBytes);
-		assertThat(this.helloBytes.length).isEqualTo(this.os.getInputStream().available());
+		assertThat(this.helloBytes).hasSize(this.os.getInputStream().available());
 	}
 
 	@Test

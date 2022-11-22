@@ -61,14 +61,14 @@ public class WebSocketHandlerRegistrationTests {
 		assertThat(m1.webSocketHandler).isEqualTo(handler);
 		assertThat(m1.path).isEqualTo("/foo");
 		assertThat(m1.interceptors).isNotNull();
-		assertThat(m1.interceptors.length).isEqualTo(1);
+		assertThat(m1.interceptors).hasSize(1);
 		assertThat(m1.interceptors[0].getClass()).isEqualTo(OriginHandshakeInterceptor.class);
 
 		Mapping m2 = mappings.get(1);
 		assertThat(m2.webSocketHandler).isEqualTo(handler);
 		assertThat(m2.path).isEqualTo("/bar");
 		assertThat(m2.interceptors).isNotNull();
-		assertThat(m2.interceptors.length).isEqualTo(1);
+		assertThat(m2.interceptors).hasSize(1);
 		assertThat(m2.interceptors[0].getClass()).isEqualTo(OriginHandshakeInterceptor.class);
 	}
 
@@ -86,7 +86,7 @@ public class WebSocketHandlerRegistrationTests {
 		assertThat(mapping.webSocketHandler).isEqualTo(handler);
 		assertThat(mapping.path).isEqualTo("/foo");
 		assertThat(mapping.interceptors).isNotNull();
-		assertThat(mapping.interceptors.length).isEqualTo(2);
+		assertThat(mapping.interceptors).hasSize(2);
 		assertThat(mapping.interceptors[0]).isEqualTo(interceptor);
 		assertThat(mapping.interceptors[1].getClass()).isEqualTo(OriginHandshakeInterceptor.class);
 	}
@@ -105,7 +105,7 @@ public class WebSocketHandlerRegistrationTests {
 		assertThat(mapping.webSocketHandler).isEqualTo(handler);
 		assertThat(mapping.path).isEqualTo("/foo");
 		assertThat(mapping.interceptors).isNotNull();
-		assertThat(mapping.interceptors.length).isEqualTo(2);
+		assertThat(mapping.interceptors).hasSize(2);
 		assertThat(mapping.interceptors[0]).isEqualTo(interceptor);
 		assertThat(mapping.interceptors[1].getClass()).isEqualTo(OriginHandshakeInterceptor.class);
 	}
@@ -127,7 +127,7 @@ public class WebSocketHandlerRegistrationTests {
 		assertThat(mapping.webSocketHandler).isEqualTo(handler);
 		assertThat(mapping.path).isEqualTo("/foo");
 		assertThat(mapping.interceptors).isNotNull();
-		assertThat(mapping.interceptors.length).isEqualTo(2);
+		assertThat(mapping.interceptors).hasSize(2);
 		assertThat(mapping.interceptors[0]).isEqualTo(interceptor);
 
 		OriginHandshakeInterceptor originInterceptor = (OriginHandshakeInterceptor) mapping.interceptors[1];

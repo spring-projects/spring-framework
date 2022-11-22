@@ -42,7 +42,7 @@ public class CacheRemoveOperationTests extends AbstractCacheOperationTests<Cache
 		CacheRemoveOperation operation = createSimpleOperation();
 
 		CacheInvocationParameter[] allParameters = operation.getAllParameters(2L);
-		assertThat(allParameters.length).isEqualTo(1);
+		assertThat(allParameters).hasSize(1);
 		assertCacheInvocationParameter(allParameters[0], Long.class, 2L, 0);
 	}
 

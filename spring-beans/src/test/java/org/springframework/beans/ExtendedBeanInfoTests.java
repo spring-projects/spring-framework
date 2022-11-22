@@ -200,11 +200,11 @@ class ExtendedBeanInfoTests {
 		}
 		{ // always passes
 			BeanInfo info = Introspector.getBeanInfo(Bean.class);
-			assertThat(info.getPropertyDescriptors().length).isEqualTo(2);
+			assertThat(info.getPropertyDescriptors()).hasSize(2);
 		}
 		{ // failed prior to fix for SPR-9453
 			BeanInfo info = new ExtendedBeanInfo(Introspector.getBeanInfo(Bean.class));
-			assertThat(info.getPropertyDescriptors().length).isEqualTo(2);
+			assertThat(info.getPropertyDescriptors()).hasSize(2);
 		}
 	}
 
@@ -585,7 +585,7 @@ class ExtendedBeanInfoTests {
 		assertThat(hasReadMethodForProperty(ebi, "foo")).isTrue();
 		assertThat(hasWriteMethodForProperty(ebi, "foo")).isTrue();
 
-		assertThat(ebi.getPropertyDescriptors().length).isEqualTo(bi.getPropertyDescriptors().length);
+		assertThat(ebi.getPropertyDescriptors()).hasSize(bi.getPropertyDescriptors().length);
 	}
 
 	@Test
@@ -711,7 +711,7 @@ class ExtendedBeanInfoTests {
 		BeanInfo bi = Introspector.getBeanInfo(TestBean.class);
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
-		assertThat(ebi.getPropertyDescriptors().length).isEqualTo(bi.getPropertyDescriptors().length);
+		assertThat(ebi.getPropertyDescriptors()).hasSize(bi.getPropertyDescriptors().length);
 	}
 
 	@Test
@@ -731,7 +731,7 @@ class ExtendedBeanInfoTests {
 			}
 		}
 		assertThat(found).isTrue();
-		assertThat(ebi.getPropertyDescriptors().length).isEqualTo(bi.getPropertyDescriptors().length+1);
+		assertThat(ebi.getPropertyDescriptors()).hasSize(bi.getPropertyDescriptors().length+1);
 	}
 
 	/**

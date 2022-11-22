@@ -168,7 +168,7 @@ class GenericTypeResolverTests {
 	void resolveIncompleteTypeVariables() {
 		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(IdFixingRepository.class, Repository.class);
 		assertThat(resolved).isNotNull();
-		assertThat(resolved.length).isEqualTo(2);
+		assertThat(resolved).hasSize(2);
 		assertThat(resolved[0]).isEqualTo(Object.class);
 		assertThat(resolved[1]).isEqualTo(Long.class);
 	}

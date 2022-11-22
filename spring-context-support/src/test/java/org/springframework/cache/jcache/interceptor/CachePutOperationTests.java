@@ -45,7 +45,7 @@ public class CachePutOperationTests extends AbstractCacheOperationTests<CachePut
 		CachePutOperation operation = createSimpleOperation();
 
 		CacheInvocationParameter[] allParameters = operation.getAllParameters(2L, sampleInstance);
-		assertThat(allParameters.length).isEqualTo(2);
+		assertThat(allParameters).hasSize(2);
 		assertCacheInvocationParameter(allParameters[0], Long.class, 2L, 0);
 		assertCacheInvocationParameter(allParameters[1], SampleObject.class, sampleInstance, 1);
 

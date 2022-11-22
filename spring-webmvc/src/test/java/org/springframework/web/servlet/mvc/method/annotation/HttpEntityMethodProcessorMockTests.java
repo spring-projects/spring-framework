@@ -832,7 +832,7 @@ public class HttpEntityMethodProcessorMockTests {
 			assertResponseBody(body);
 		}
 		else {
-			assertThat(servletResponse.getContentAsByteArray().length).isEqualTo(0);
+			assertThat(servletResponse.getContentAsByteArray()).hasSize(0);
 		}
 		if (etag != null) {
 			assertThat(servletResponse.getHeaderValues(HttpHeaders.ETAG)).hasSize(1);

@@ -535,7 +535,7 @@ class ResolvableTypeTests {
 	void getGenericsFromParameterizedType() throws Exception {
 		ResolvableType type = ResolvableType.forClass(List.class, ExtendsList.class);
 		ResolvableType[] generics = type.getGenerics();
-		assertThat(generics.length).isEqualTo(1);
+		assertThat(generics).hasSize(1);
 		assertThat(generics[0].resolve()).isEqualTo(CharSequence.class);
 	}
 
@@ -543,7 +543,7 @@ class ResolvableTypeTests {
 	void getGenericsFromClass() throws Exception {
 		ResolvableType type = ResolvableType.forClass(List.class);
 		ResolvableType[] generics = type.getGenerics();
-		assertThat(generics.length).isEqualTo(1);
+		assertThat(generics).hasSize(1);
 		assertThat(generics[0].getType().toString()).isEqualTo("E");
 	}
 
@@ -558,7 +558,7 @@ class ResolvableTypeTests {
 	void getResolvedGenerics() throws Exception {
 		ResolvableType type = ResolvableType.forClass(List.class, ExtendsList.class);
 		Class<?>[] generics = type.resolveGenerics();
-		assertThat(generics.length).isEqualTo(1);
+		assertThat(generics).hasSize(1);
 		assertThat(generics[0]).isEqualTo(CharSequence.class);
 	}
 
@@ -1307,7 +1307,7 @@ class ResolvableTypeTests {
 		Type type = resolvableType.getType();
 		assertThat(type).isInstanceOf(ParameterizedType.class);
 		assertThat(((ParameterizedType) type).getRawType()).isEqualTo(Callable.class);
-		assertThat(((ParameterizedType) type).getActualTypeArguments().length).isEqualTo(1);
+		assertThat(((ParameterizedType) type).getActualTypeArguments()).hasSize(1);
 		assertThat(((ParameterizedType) type).getActualTypeArguments()[0]).isEqualTo(String.class);
 	}
 

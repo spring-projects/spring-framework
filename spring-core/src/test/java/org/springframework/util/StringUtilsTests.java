@@ -441,7 +441,7 @@ class StringUtilsTests {
 		String[] input1 = new String[] {"myString2"};
 		String[] input2 = new String[] {"myString1", "myString2"};
 		String[] result = StringUtils.concatenateStringArrays(input1, input2);
-		assertThat(result.length).isEqualTo(3);
+		assertThat(result).hasSize(3);
 		assertThat(result[0]).isEqualTo("myString2");
 		assertThat(result[1]).isEqualTo("myString1");
 		assertThat(result[2]).isEqualTo("myString2");
@@ -490,21 +490,21 @@ class StringUtilsTests {
 	@Test
 	void tokenizeToStringArray() {
 		String[] sa = StringUtils.tokenizeToStringArray("a,b , ,c", ",");
-		assertThat(sa.length).isEqualTo(3);
+		assertThat(sa).hasSize(3);
 		assertThat(sa[0].equals("a") && sa[1].equals("b") && sa[2].equals("c")).as("components are correct").isTrue();
 	}
 
 	@Test
 	void tokenizeToStringArrayWithNotIgnoreEmptyTokens() {
 		String[] sa = StringUtils.tokenizeToStringArray("a,b , ,c", ",", true, false);
-		assertThat(sa.length).isEqualTo(4);
+		assertThat(sa).hasSize(4);
 		assertThat(sa[0].equals("a") && sa[1].equals("b") && sa[2].isEmpty() && sa[3].equals("c")).as("components are correct").isTrue();
 	}
 
 	@Test
 	void tokenizeToStringArrayWithNotTrimTokens() {
 		String[] sa = StringUtils.tokenizeToStringArray("a,b ,c", ",", false, true);
-		assertThat(sa.length).isEqualTo(3);
+		assertThat(sa).hasSize(3);
 		assertThat(sa[0].equals("a") && sa[1].equals("b ") && sa[2].equals("c")).as("components are correct").isTrue();
 	}
 
@@ -525,7 +525,7 @@ class StringUtilsTests {
 	@Test
 	void delimitedListToStringArrayWithComma() {
 		String[] sa = StringUtils.delimitedListToStringArray("a,b", ",");
-		assertThat(sa.length).isEqualTo(2);
+		assertThat(sa).hasSize(2);
 		assertThat(sa[0]).isEqualTo("a");
 		assertThat(sa[1]).isEqualTo("b");
 	}
@@ -533,7 +533,7 @@ class StringUtilsTests {
 	@Test
 	void delimitedListToStringArrayWithSemicolon() {
 		String[] sa = StringUtils.delimitedListToStringArray("a;b", ";");
-		assertThat(sa.length).isEqualTo(2);
+		assertThat(sa).hasSize(2);
 		assertThat(sa[0]).isEqualTo("a");
 		assertThat(sa[1]).isEqualTo("b");
 	}
@@ -541,7 +541,7 @@ class StringUtilsTests {
 	@Test
 	void delimitedListToStringArrayWithEmptyDelimiter() {
 		String[] sa = StringUtils.delimitedListToStringArray("a,b", "");
-		assertThat(sa.length).isEqualTo(3);
+		assertThat(sa).hasSize(3);
 		assertThat(sa[0]).isEqualTo("a");
 		assertThat(sa[1]).isEqualTo(",");
 		assertThat(sa[2]).isEqualTo("b");
@@ -550,7 +550,7 @@ class StringUtilsTests {
 	@Test
 	void delimitedListToStringArrayWithNullDelimiter() {
 		String[] sa = StringUtils.delimitedListToStringArray("a,b", null);
-		assertThat(sa.length).isEqualTo(1);
+		assertThat(sa).hasSize(1);
 		assertThat(sa[0]).isEqualTo("a,b");
 	}
 

@@ -203,7 +203,7 @@ public class RequestPartMethodArgumentResolverTests {
 		assertThat(actual).isNotNull();
 		assertThat(actual instanceof MultipartFile[]).isTrue();
 		MultipartFile[] parts = (MultipartFile[]) actual;
-		assertThat(parts.length).isEqualTo(2);
+		assertThat(parts).hasSize(2);
 		assertThat(multipartFile1).isEqualTo(parts[0]);
 		assertThat(multipartFile2).isEqualTo(parts[1]);
 	}
@@ -269,7 +269,7 @@ public class RequestPartMethodArgumentResolverTests {
 		Object result = resolver.resolveArgument(paramPartArray, null, webRequest, null);
 		assertThat(result instanceof Part[]).isTrue();
 		Part[] parts = (Part[]) result;
-		assertThat(parts.length).isEqualTo(2);
+		assertThat(parts).hasSize(2);
 		assertThat(part1).isEqualTo(parts[0]);
 		assertThat(part2).isEqualTo(parts[1]);
 	}

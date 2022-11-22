@@ -137,7 +137,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertThat(chain).isNotNull();
 		HandlerInterceptor[] interceptors = chain.getInterceptors();
 		assertThat(interceptors).isNotNull();
-		assertThat(interceptors.length).isEqualTo(4);
+		assertThat(interceptors).hasSize(4);
 		assertThat(interceptors[0].getClass().getSimpleName()).isEqualTo("CorsInterceptor");
 		assertThat(interceptors[1].getClass()).isEqualTo(LocaleChangeInterceptor.class);
 		assertThat(interceptors[2].getClass()).isEqualTo(ConversionServiceExposingInterceptor.class);
@@ -235,11 +235,11 @@ public class WebMvcConfigurationSupportExtensionTests {
 
 		CallableProcessingInterceptor[] callableInterceptors =
 				(CallableProcessingInterceptor[]) fieldAccessor.getPropertyValue("callableInterceptors");
-		assertThat(callableInterceptors.length).isEqualTo(1);
+		assertThat(callableInterceptors).hasSize(1);
 
 		DeferredResultProcessingInterceptor[] deferredResultInterceptors =
 				(DeferredResultProcessingInterceptor[]) fieldAccessor.getPropertyValue("deferredResultInterceptors");
-		assertThat(deferredResultInterceptors.length).isEqualTo(1);
+		assertThat(deferredResultInterceptors).hasSize(1);
 
 		assertThat(fieldAccessor.getPropertyValue("ignoreDefaultModelOnRedirect")).asInstanceOf(BOOLEAN).isTrue();
 	}

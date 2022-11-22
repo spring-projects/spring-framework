@@ -51,7 +51,7 @@ public class AtAspectJAnnotationBindingTests {
 	public void testAnnotationBindingInAroundAdvice() {
 		assertThat(testBean.doThis()).isEqualTo("this value doThis");
 		assertThat(testBean.doThat()).isEqualTo("that value doThat");
-		assertThat(testBean.doArray().length).isEqualTo(2);
+		assertThat(testBean.doArray()).hasSize(2);
 	}
 
 	@Test

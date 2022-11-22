@@ -262,7 +262,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.hasBody()).isTrue();
 		assertThat(response.getHeaders().getContentLength()).isEqualTo(951);
-		assertThat(response.getBody().length).isEqualTo(951);
+		assertThat(response.getBody()).hasSize(951);
 		assertThat(response.getHeaders().getContentType()).isEqualTo(new MediaType("image", "png"));
 	}
 

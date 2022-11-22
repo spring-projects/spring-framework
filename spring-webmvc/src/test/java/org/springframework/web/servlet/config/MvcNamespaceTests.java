@@ -775,11 +775,11 @@ public class MvcNamespaceTests {
 
 		CallableProcessingInterceptor[] callableInterceptors =
 				(CallableProcessingInterceptor[]) fieldAccessor.getPropertyValue("callableInterceptors");
-		assertThat(callableInterceptors.length).isEqualTo(1);
+		assertThat(callableInterceptors).hasSize(1);
 
 		DeferredResultProcessingInterceptor[] deferredResultInterceptors =
 				(DeferredResultProcessingInterceptor[]) fieldAccessor.getPropertyValue("deferredResultInterceptors");
-		assertThat(deferredResultInterceptors.length).isEqualTo(1);
+		assertThat(deferredResultInterceptors).hasSize(1);
 	}
 
 	@Test
@@ -907,7 +907,7 @@ public class MvcNamespaceTests {
 		loadBeanDefinitions("mvc-config-cors-minimal.xml");
 
 		String[] beanNames = appContext.getBeanNamesForType(AbstractHandlerMapping.class);
-		assertThat(beanNames.length).isEqualTo(2);
+		assertThat(beanNames).hasSize(2);
 		for (String beanName : beanNames) {
 			AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping)appContext.getBean(beanName);
 			assertThat(handlerMapping).isNotNull();
@@ -932,7 +932,7 @@ public class MvcNamespaceTests {
 		loadBeanDefinitions("mvc-config-cors.xml");
 
 		String[] beanNames = appContext.getBeanNamesForType(AbstractHandlerMapping.class);
-		assertThat(beanNames.length).isEqualTo(2);
+		assertThat(beanNames).hasSize(2);
 		for (String beanName : beanNames) {
 			AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping)appContext.getBean(beanName);
 			assertThat(handlerMapping).isNotNull();

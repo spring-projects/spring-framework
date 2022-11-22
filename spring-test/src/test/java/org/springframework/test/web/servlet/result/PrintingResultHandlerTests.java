@@ -190,7 +190,7 @@ class PrintingResultHandlerTests {
 
 		Map<String, Map<String, Object>> printedValues = this.handler.getPrinter().printedValues;
 		String[] cookies = (String[]) printedValues.get(heading).get("Cookies");
-		assertThat(cookies.length).isEqualTo(2);
+		assertThat(cookies).hasSize(2);
 		String cookie1 = cookies[0];
 		String cookie2 = cookies[1];
 		assertThat(cookie1.startsWith("[" + Cookie.class.getSimpleName())).isTrue();

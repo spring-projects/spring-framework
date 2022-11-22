@@ -190,7 +190,7 @@ class XmlBeanFactoryTests {
 
 		assertThat(hasInnerBeans.getFriends()).isNotNull();
 		Object[] friends = hasInnerBeans.getFriends().toArray();
-		assertThat(friends.length).isEqualTo(3);
+		assertThat(friends).hasSize(3);
 		DerivedTestBean inner2 = (DerivedTestBean) friends[0];
 		assertThat(inner2.getName()).isEqualTo("inner2");
 		assertThat(inner2.getBeanName().startsWith(DerivedTestBean.class.getName())).isTrue();
@@ -261,7 +261,7 @@ class XmlBeanFactoryTests {
 
 		assertThat(hasInnerBeans.getFriends()).isNotNull();
 		Object[] friends = hasInnerBeans.getFriends().toArray();
-		assertThat(friends.length).isEqualTo(3);
+		assertThat(friends).hasSize(3);
 		DerivedTestBean inner2 = (DerivedTestBean) friends[0];
 		assertThat(inner2.getName()).isEqualTo("inner2");
 		assertThat(inner2.getBeanName().startsWith(DerivedTestBean.class.getName())).isTrue();
@@ -1510,7 +1510,7 @@ class XmlBeanFactoryTests {
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("constructorArray");
 		assertThat(bean.array instanceof int[]).isTrue();
-		assertThat(((int[]) bean.array).length).isEqualTo(1);
+		assertThat(((int[]) bean.array)).hasSize(1);
 		assertThat(((int[]) bean.array)[0]).isEqualTo(1);
 	}
 
@@ -1520,7 +1520,7 @@ class XmlBeanFactoryTests {
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("indexedConstructorArray");
 		assertThat(bean.array instanceof int[]).isTrue();
-		assertThat(((int[]) bean.array).length).isEqualTo(1);
+		assertThat(((int[]) bean.array)).hasSize(1);
 		assertThat(((int[]) bean.array)[0]).isEqualTo(1);
 	}
 
@@ -1530,7 +1530,7 @@ class XmlBeanFactoryTests {
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("constructorArrayNoType");
 		assertThat(bean.array instanceof String[]).isTrue();
-		assertThat(((String[]) bean.array).length).isEqualTo(0);
+		assertThat(((String[]) bean.array)).hasSize(0);
 	}
 
 	@Test
@@ -1541,7 +1541,7 @@ class XmlBeanFactoryTests {
 		bd.setLenientConstructorResolution(false);
 		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("constructorArrayNoType");
 		assertThat(bean.array instanceof String[]).isTrue();
-		assertThat(((String[]) bean.array).length).isEqualTo(0);
+		assertThat(((String[]) bean.array)).hasSize(0);
 	}
 
 	@Test
@@ -1596,7 +1596,7 @@ class XmlBeanFactoryTests {
 
 		@Override
 		public Object reimplement(Object obj, Method method, Object[] args) throws Throwable {
-			assertThat(args.length).isEqualTo(1);
+			assertThat(args).hasSize(1);
 			assertThat(method.getName()).isEqualTo("doSomething");
 			lastArg = args[0];
 			return null;

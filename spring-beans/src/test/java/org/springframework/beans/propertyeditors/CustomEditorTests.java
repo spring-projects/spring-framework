@@ -1393,7 +1393,7 @@ class CustomEditorTests {
 			}
 		});
 		bw.setPropertyValue("array", new String[] {"a", "b"});
-		assertThat(tb.getArray().length).isEqualTo(2);
+		assertThat(tb.getArray()).hasSize(2);
 		assertThat(tb.getArray()[0].getName()).isEqualTo("a");
 		assertThat(tb.getArray()[1].getName()).isEqualTo("b");
 	}

@@ -62,7 +62,7 @@ public class BeanWrapperEnumTests {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("customEnumArray", "VALUE_1");
-		assertThat(gb.getCustomEnumArray().length).isEqualTo(1);
+		assertThat(gb.getCustomEnumArray()).hasSize(1);
 		assertThat(gb.getCustomEnumArray()[0]).isEqualTo(CustomEnum.VALUE_1);
 	}
 
@@ -71,7 +71,7 @@ public class BeanWrapperEnumTests {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("customEnumArray", new String[] {"VALUE_1", "VALUE_2"});
-		assertThat(gb.getCustomEnumArray().length).isEqualTo(2);
+		assertThat(gb.getCustomEnumArray()).hasSize(2);
 		assertThat(gb.getCustomEnumArray()[0]).isEqualTo(CustomEnum.VALUE_1);
 		assertThat(gb.getCustomEnumArray()[1]).isEqualTo(CustomEnum.VALUE_2);
 	}
@@ -81,7 +81,7 @@ public class BeanWrapperEnumTests {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("customEnumArray", "VALUE_1,VALUE_2");
-		assertThat(gb.getCustomEnumArray().length).isEqualTo(2);
+		assertThat(gb.getCustomEnumArray()).hasSize(2);
 		assertThat(gb.getCustomEnumArray()[0]).isEqualTo(CustomEnum.VALUE_1);
 		assertThat(gb.getCustomEnumArray()[1]).isEqualTo(CustomEnum.VALUE_2);
 	}
