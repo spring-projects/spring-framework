@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import java.util.Locale;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.messaging.Message;
@@ -81,7 +81,7 @@ public class PayloadMethodArgumentResolverTests {
 		this.paramAnnotatedRequired = new SynthesizingMethodParameter(payloadMethod, 2);
 		this.paramWithSpelExpression = new SynthesizingMethodParameter(payloadMethod, 3);
 		this.paramValidated = new SynthesizingMethodParameter(payloadMethod, 4);
-		this.paramValidated.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		this.paramValidated.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
 		this.paramValidatedNotAnnotated = new SynthesizingMethodParameter(payloadMethod, 5);
 		this.paramNotAnnotated = new SynthesizingMethodParameter(payloadMethod, 6);
 	}

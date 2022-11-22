@@ -1532,8 +1532,8 @@ register support for any other data type.
 See <<webflux-ann-typeconversion>> and <<webflux-ann-initbinder>>.
 
 URI variables can be named explicitly (for example, `@PathVariable("customId")`), but you can
-leave that detail out if the names are the same and you compile your code with debugging
-information or with the `-parameters` compiler flag on Java 8.
+leave that detail out if the names are the same and you compile your code with the `-parameters`
+compiler flag.
 
 The syntax `{*varName}` declares a URI variable that matches zero or more remaining path
 segments. For example `/resources/{*path}` matches all files under `/resources/`, and the

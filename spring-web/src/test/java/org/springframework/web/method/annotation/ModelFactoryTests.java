@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -252,7 +252,7 @@ public class ModelFactoryTests {
 		InvocableHandlerMethod modelMethod = createHandlerMethod(methodName, parameterTypes);
 		modelMethod.setHandlerMethodArgumentResolvers(resolvers);
 		modelMethod.setDataBinderFactory(null);
-		modelMethod.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
+		modelMethod.setParameterNameDiscoverer(new DefaultParameterNameDiscoverer());
 
 		return new ModelFactory(Collections.singletonList(modelMethod), null, this.attributeHandler);
 	}

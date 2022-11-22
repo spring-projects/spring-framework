@@ -1699,8 +1699,8 @@ register support for any other data type.
 See <<mvc-ann-typeconversion>> and <<mvc-ann-initbinder>>.
 
 You can explicitly name URI variables (for example, `@PathVariable("customId")`), but you can
-leave that detail out if the names are the same and your code is compiled with debugging
-information or with the `-parameters` compiler flag on Java 8.
+leave that detail out if the names are the same and your code is compiled with the `-parameters`
+compiler flag.
 
 The syntax `{varName:regex}` declares a URI variable with a regular expression that has
 syntax of `{varName:regex}`. For example, given URL `"/spring-web-3.0.5.jar"`, the following method
