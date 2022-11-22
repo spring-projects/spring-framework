@@ -24,7 +24,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * General interface that represents binding results. Extends the
- * {@link Errors interface} for error registration capabilities,
+ * {@link Errors} interface for error registration capabilities,
  * allowing for a {@link Validator} to be applied, and adds
  * binding-specific analysis and model building.
  *
