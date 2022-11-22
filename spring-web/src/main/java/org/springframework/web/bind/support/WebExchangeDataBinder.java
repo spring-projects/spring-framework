@@ -122,7 +122,7 @@ public class WebExchangeDataBinder extends WebDataBinder {
 	protected static void addBindValue(Map<String, Object> params, String key, List<?> values) {
 		if (!CollectionUtils.isEmpty(values)) {
 			values = values.stream()
-					.map(value -> value instanceof FormFieldPart ? ((FormFieldPart) value).value() : value)
+					.map(value -> value instanceof FormFieldPart formFieldPart ? formFieldPart.value() : value)
 					.toList();
 			params.put(key, values.size() == 1 ? values.get(0) : values);
 		}

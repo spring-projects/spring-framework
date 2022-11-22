@@ -40,7 +40,7 @@ import org.springframework.web.bind.support.SimpleSessionStatus;
  * <p>A default {@link Model} is automatically created at instantiation.
  * An alternate model instance may be provided via {@link #setRedirectModel}
  * for use in a redirect scenario. When {@link #setRedirectModelScenario} is set
- * to {@code true} signalling a redirect scenario, the {@link #getModel()}
+ * to {@code true} signaling a redirect scenario, the {@link #getModel()}
  * returns the redirect model instead of the default model.
  *
  * @author Rossen Stoyanchev
@@ -106,7 +106,7 @@ public class ModelAndViewContainer {
 	 */
 	@Nullable
 	public String getViewName() {
-		return (this.view instanceof String ? (String) this.view : null);
+		return (this.view instanceof String viewName ? viewName : null);
 	}
 
 	/**

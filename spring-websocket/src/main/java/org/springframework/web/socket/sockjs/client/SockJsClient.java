@@ -19,7 +19,6 @@ package org.springframework.web.socket.sockjs.client;
 import java.net.URI;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -67,14 +66,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 
 	private static final Log logger = LogFactory.getLog(SockJsClient.class);
 
-	private static final Set<String> supportedProtocols = new HashSet<>(4);
-
-	static {
-		supportedProtocols.add("ws");
-		supportedProtocols.add("wss");
-		supportedProtocols.add("http");
-		supportedProtocols.add("https");
-	}
+	private static final Set<String> supportedProtocols = Set.of("ws", "wss", "http", "https");
 
 
 	private final List<Transport> transports;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -726,8 +726,8 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	@Nullable
 	private String getQueryParamValue(@Nullable Object value) {
 		if (value != null) {
-			return (value instanceof Optional ?
-					((Optional<?>) value).map(Object::toString).orElse(null) :
+			return (value instanceof Optional<?> optional ?
+					optional.map(Object::toString).orElse(null) :
 					value.toString());
 		}
 		return null;
@@ -740,12 +740,12 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	@Override
 	public UriComponentsBuilder queryParamIfPresent(String name, Optional<?> value) {
-		value.ifPresent(o -> {
-			if (o instanceof Collection) {
-				queryParam(name, (Collection<?>) o);
+		value.ifPresent(v -> {
+			if (v instanceof Collection<?> values) {
+				queryParam(name, values);
 			}
 			else {
-				queryParam(name, o);
+				queryParam(name, v);
 			}
 		});
 		return this;

@@ -66,7 +66,6 @@ import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageC
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
-import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -172,13 +171,6 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
 		this.messageConverters.add(new StringHttpMessageConverter());
 		this.messageConverters.add(new ResourceHttpMessageConverter(false));
-
-		try {
-			this.messageConverters.add(new SourceHttpMessageConverter<>());
-		}
-		catch (Error err) {
-			// Ignore when no TransformerFactory implementation is available
-		}
 
 		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 
@@ -321,8 +313,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * @since 4.3
 	 */
 	public void setDefaultUriVariables(Map<String, ?> uriVars) {
-		if (this.uriTemplateHandler instanceof DefaultUriBuilderFactory) {
-			((DefaultUriBuilderFactory) this.uriTemplateHandler).setDefaultUriVariables(uriVars);
+		if (this.uriTemplateHandler instanceof DefaultUriBuilderFactory factory) {
+			factory.setDefaultUriVariables(uriVars);
 		}
 		else {
 			throw new IllegalArgumentException(
@@ -723,8 +715,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	}
 
 	private URI resolveUrl(RequestEntity<?> entity) {
-		if (entity instanceof RequestEntity.UriTemplateRequestEntity) {
-			RequestEntity.UriTemplateRequestEntity<?> ext = (RequestEntity.UriTemplateRequestEntity<?>) entity;
+		if (entity instanceof RequestEntity.UriTemplateRequestEntity<?> ext) {
 			if (ext.getVars() != null) {
 				return this.uriTemplateHandler.expand(ext.getUriTemplate(), ext.getVars());
 			}
@@ -1003,19 +994,18 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 
 		private boolean canReadResponse(Type responseType, HttpMessageConverter<?> converter) {
-			Class<?> responseClass = (responseType instanceof Class ? (Class<?>) responseType : null);
+			Class<?> responseClass = (responseType instanceof Class<?> clazz ? clazz : null);
 			if (responseClass != null) {
 				return converter.canRead(responseClass, null);
 			}
-			else if (converter instanceof GenericHttpMessageConverter) {
-				GenericHttpMessageConverter<?> genericConverter = (GenericHttpMessageConverter<?>) converter;
+			else if (converter instanceof GenericHttpMessageConverter<?> genericConverter) {
 				return genericConverter.canRead(responseType, null, null);
 			}
 			return false;
 		}
 
 		private Stream<MediaType> getSupportedMediaTypes(Type type, HttpMessageConverter<?> converter) {
-			Type rawType = (type instanceof ParameterizedType ? ((ParameterizedType) type).getRawType() : type);
+			Type rawType = (type instanceof ParameterizedType parameterizedType ? parameterizedType.getRawType() : type);
 			Class<?> clazz = (rawType instanceof Class ? (Class<?>) rawType : null);
 			return (clazz != null ? converter.getSupportedMediaTypes(clazz) : converter.getSupportedMediaTypes())
 					.stream()
@@ -1042,8 +1032,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 		public HttpEntityRequestCallback(@Nullable Object requestBody, @Nullable Type responseType) {
 			super(responseType);
-			if (requestBody instanceof HttpEntity) {
-				this.requestEntity = (HttpEntity<?>) requestBody;
+			if (requestBody instanceof HttpEntity<?> httpEntity) {
+				this.requestEntity = httpEntity;
 			}
 			else if (requestBody != null) {
 				this.requestEntity = new HttpEntity<>(requestBody);
@@ -1054,7 +1044,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public void doWithRequest(ClientHttpRequest httpRequest) throws IOException {
 			super.doWithRequest(httpRequest);
 			Object requestBody = this.requestEntity.getBody();
@@ -1070,15 +1060,15 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			}
 			else {
 				Class<?> requestBodyClass = requestBody.getClass();
-				Type requestBodyType = (this.requestEntity instanceof RequestEntity ?
-						((RequestEntity<?>)this.requestEntity).getType() : requestBodyClass);
+				// The following pattern variable cannot be named "requestEntity" due to lacking
+				// support in Checkstyle: https://github.com/checkstyle/checkstyle/issues/10969
+				Type requestBodyType = (this.requestEntity instanceof RequestEntity<?> _requestEntity ?
+						_requestEntity.getType() : requestBodyClass);
 				HttpHeaders httpHeaders = httpRequest.getHeaders();
 				HttpHeaders requestHeaders = this.requestEntity.getHeaders();
 				MediaType requestContentType = requestHeaders.getContentType();
 				for (HttpMessageConverter<?> messageConverter : getMessageConverters()) {
-					if (messageConverter instanceof GenericHttpMessageConverter) {
-						GenericHttpMessageConverter<Object> genericConverter =
-								(GenericHttpMessageConverter<Object>) messageConverter;
+					if (messageConverter instanceof GenericHttpMessageConverter genericConverter) {
 						if (genericConverter.canWrite(requestBodyType, requestBodyClass, requestContentType)) {
 							if (!requestHeaders.isEmpty()) {
 								requestHeaders.forEach((key, values) -> httpHeaders.put(key, new ArrayList<>(values)));

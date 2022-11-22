@@ -58,10 +58,9 @@ public final class PersistenceManagedTypesScanner {
 
 	private static final String PACKAGE_INFO_SUFFIX = ".package-info";
 
-	private static final Set<AnnotationTypeFilter> entityTypeFilters;
+	private static final Set<AnnotationTypeFilter> entityTypeFilters = new LinkedHashSet<>(4);
 
 	static {
-		entityTypeFilters = new LinkedHashSet<>(8);
 		entityTypeFilters.add(new AnnotationTypeFilter(Entity.class, false));
 		entityTypeFilters.add(new AnnotationTypeFilter(Embeddable.class, false));
 		entityTypeFilters.add(new AnnotationTypeFilter(MappedSuperclass.class, false));
