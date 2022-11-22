@@ -100,7 +100,8 @@ final class LogAdapter {
 			Class.forName(className, false, LogAdapter.class.getClassLoader());
 			return true;
 		}
-		catch (ClassNotFoundException ex) {
+		catch (Throwable ex) {
+			// Typically ClassNotFoundException or NoClassDefFoundError...
 			return false;
 		}
 	}
