@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -527,8 +527,8 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 		if (schedulerFactory == null) {
 			// Create local SchedulerFactory instance (typically a StdSchedulerFactory)
 			schedulerFactory = BeanUtils.instantiateClass(this.schedulerFactoryClass);
-			if (schedulerFactory instanceof StdSchedulerFactory) {
-				initSchedulerFactory((StdSchedulerFactory) schedulerFactory);
+			if (schedulerFactory instanceof StdSchedulerFactory stdSchedulerFactory) {
+				initSchedulerFactory(stdSchedulerFactory);
 			}
 			else if (this.configLocation != null || this.quartzProperties != null ||
 					this.taskExecutor != null || this.dataSource != null) {
@@ -622,11 +622,11 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 				this.jobFactory = new AdaptableJobFactory();
 			}
 			if (this.jobFactory != null) {
-				if (this.applicationContext != null && this.jobFactory instanceof ApplicationContextAware) {
-					((ApplicationContextAware) this.jobFactory).setApplicationContext(this.applicationContext);
+				if (this.applicationContext != null && this.jobFactory instanceof ApplicationContextAware applicationContextAware) {
+					applicationContextAware.setApplicationContext(this.applicationContext);
 				}
-				if (this.jobFactory instanceof SchedulerContextAware) {
-					((SchedulerContextAware) this.jobFactory).setSchedulerContext(scheduler.getContext());
+				if (this.jobFactory instanceof SchedulerContextAware schedulerContextAware) {
+					schedulerContextAware.setSchedulerContext(scheduler.getContext());
 				}
 				scheduler.setJobFactory(this.jobFactory);
 			}

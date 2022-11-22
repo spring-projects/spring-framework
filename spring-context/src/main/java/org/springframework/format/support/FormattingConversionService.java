@@ -99,8 +99,9 @@ public class FormattingConversionService extends GenericConversionService
 	@Override
 	public void addFormatterForFieldAnnotation(AnnotationFormatterFactory<? extends Annotation> annotationFormatterFactory) {
 		Class<? extends Annotation> annotationType = getAnnotationType(annotationFormatterFactory);
-		if (this.embeddedValueResolver != null && annotationFormatterFactory instanceof EmbeddedValueResolverAware) {
-			((EmbeddedValueResolverAware) annotationFormatterFactory).setEmbeddedValueResolver(this.embeddedValueResolver);
+		if (this.embeddedValueResolver != null &&
+				annotationFormatterFactory instanceof EmbeddedValueResolverAware embeddedValueResolverAware) {
+			embeddedValueResolverAware.setEmbeddedValueResolver(this.embeddedValueResolver);
 		}
 		Set<Class<?>> fieldTypes = annotationFormatterFactory.getFieldTypes();
 		for (Class<?> fieldType : fieldTypes) {
