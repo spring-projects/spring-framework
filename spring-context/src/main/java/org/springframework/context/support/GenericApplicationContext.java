@@ -272,8 +272,8 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 */
 	@Override
 	public Resource[] getResources(String locationPattern) throws IOException {
-		if (this.resourceLoader instanceof ResourcePatternResolver) {
-			return ((ResourcePatternResolver) this.resourceLoader).getResources(locationPattern);
+		if (this.resourceLoader instanceof ResourcePatternResolver resourcePatternResolver) {
+			return resourcePatternResolver.getResources(locationPattern);
 		}
 		return super.getResources(locationPattern);
 	}
