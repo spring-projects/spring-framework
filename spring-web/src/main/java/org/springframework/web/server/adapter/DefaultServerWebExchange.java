@@ -19,9 +19,9 @@ package org.springframework.web.server.adapter;
 import java.security.Principal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -62,7 +62,7 @@ import org.springframework.web.server.session.WebSessionManager;
  */
 public class DefaultServerWebExchange implements ServerWebExchange {
 
-	private static final List<HttpMethod> SAFE_METHODS = Arrays.asList(HttpMethod.GET, HttpMethod.HEAD);
+	private static final Set<HttpMethod> SAFE_METHODS = Set.of(HttpMethod.GET, HttpMethod.HEAD);
 
 	private static final ResolvableType FORM_DATA_TYPE =
 			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
@@ -281,7 +281,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 			if (SAFE_METHODS.contains(getRequest().getMethod())) {
 				return false;
 			}
-			if (CollectionUtils.isEmpty(getRequest().getHeaders().get(HttpHeaders.IF_MATCH))) {
+			if (CollectionUtils.isEmpty(getRequestHeaders().get(HttpHeaders.IF_MATCH))) {
 				return false;
 			}
 			this.notModified = matchRequestedETags(getRequestHeaders().getIfMatch(), eTag, false);
@@ -357,7 +357,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 
 	private boolean validateIfNoneMatch(@Nullable String eTag) {
 		try {
-			if (CollectionUtils.isEmpty(getRequest().getHeaders().get(HttpHeaders.IF_NONE_MATCH))) {
+			if (CollectionUtils.isEmpty(getRequestHeaders().get(HttpHeaders.IF_NONE_MATCH))) {
 				return false;
 			}
 			this.notModified = !matchRequestedETags(getRequestHeaders().getIfNoneMatch(), eTag, true);

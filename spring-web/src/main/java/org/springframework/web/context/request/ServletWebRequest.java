@@ -19,12 +19,11 @@ package org.springframework.web.context.request;
 import java.security.Principal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,7 +51,7 @@ import org.springframework.web.util.WebUtils;
  */
 public class ServletWebRequest extends ServletRequestAttributes implements NativeWebRequest {
 
-	private static final List<String> SAFE_METHODS = Arrays.asList("GET", "HEAD");
+	private static final Set<String> SAFE_METHODS = Set.of("GET", "HEAD");
 
 	/**
 	 * Pattern matching ETag multiple field values in headers such as "If-Match", "If-None-Match".
