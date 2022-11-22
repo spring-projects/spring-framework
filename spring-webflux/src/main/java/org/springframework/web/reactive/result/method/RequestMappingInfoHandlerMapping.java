@@ -101,7 +101,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		return Mono.justOrEmpty(exchange.<HandlerMethod>getAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE))
 			.switchIfEmpty(Mono.defer(() -> getHandlerAndCache(exchange)));
 	}
-	
+
 	protected Mono<HandlerMethod> getHandlerAndCache(ServerWebExchange exchange) {
 		exchange.getAttributes().remove(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 		return super.getHandlerInternal(exchange)
