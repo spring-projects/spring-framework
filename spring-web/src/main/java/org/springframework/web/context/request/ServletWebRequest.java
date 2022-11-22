@@ -316,8 +316,11 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	private boolean validateIfUnmodifiedSince(long lastModifiedTimestamp) {
+		if (lastModifiedTimestamp < 0) {
+			return false;
+		}
 		long ifUnmodifiedSince = parseDateHeader(HttpHeaders.IF_UNMODIFIED_SINCE);
-		if (lastModifiedTimestamp < 0 || ifUnmodifiedSince == -1) {
+		if (ifUnmodifiedSince == -1) {
 			return false;
 		}
 		this.notModified = (ifUnmodifiedSince < (lastModifiedTimestamp / 1000 * 1000));
@@ -325,8 +328,12 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	private void validateIfModifiedSince(long lastModifiedTimestamp) {
+		if (lastModifiedTimestamp < 0) {
+			return;
+		}
 		long ifModifiedSince = parseDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
-		if (lastModifiedTimestamp >= 0 && ifModifiedSince != -1) {
+		if (ifModifiedSince != -1) {
+			// We will perform this validation...
 			this.notModified = ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000);
 		}
 	}
