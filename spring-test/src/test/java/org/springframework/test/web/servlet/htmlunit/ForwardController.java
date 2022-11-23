@@ -31,4 +31,9 @@ public class ForwardController {
 		return "forward:/a";
 	}
 
+	@RequestMapping("/infiniteForward")
+	public String infiniteForward() {
+		return "forward:/infiniteForward";
+	}
+
 }

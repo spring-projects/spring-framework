@@ -81,6 +81,13 @@ public class MockMvcWebConnectionTests {
 	}
 
 	@Test
+	public void infiniteForward() throws IOException {
+		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient, ""));
+		Page page = this.webClient.getPage("http://localhost/infiniteForward");
+		assertThat(page.getWebResponse().getContentAsString()).isEmpty();
+	}
+
+	@Test
 	@SuppressWarnings("resource")
 	public void contextPathDoesNotStartWithSlash() throws IOException {
 		assertThatIllegalArgumentException().isThrownBy(() ->
