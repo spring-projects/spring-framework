@@ -21,7 +21,7 @@ import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.web.bind.WebDataBinder;
@@ -128,7 +128,7 @@ public class InitBinderDataBinderFactoryTests {
 		InvocableHandlerMethod handlerMethod = new InvocableHandlerMethod(handler, method);
 		handlerMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
 		handlerMethod.setDataBinderFactory(new DefaultDataBinderFactory(null));
-		handlerMethod.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
+		handlerMethod.setParameterNameDiscoverer(new DefaultParameterNameDiscoverer());
 
 		return new InitBinderDataBinderFactory(
 				Collections.singletonList(handlerMethod), this.bindingInitializer);
