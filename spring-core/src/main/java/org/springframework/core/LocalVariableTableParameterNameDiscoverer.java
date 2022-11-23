@@ -56,7 +56,7 @@ import org.springframework.util.ClassUtils;
  * @deprecated as of 6.0.1, in favor of {@link StandardReflectionParameterNameDiscoverer}
  * (with the "-parameters" compiler flag)
  */
-@Deprecated(since = "6.0.1")
+@Deprecated(since = "6.0.1", forRemoval = true)
 public class LocalVariableTableParameterNameDiscoverer implements ParameterNameDiscoverer {
 
 	private static final Log logger = LogFactory.getLog(LocalVariableTableParameterNameDiscoverer.class);
@@ -85,7 +85,12 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	private String[] doGetParameterNames(Executable executable) {
 		Class<?> declaringClass = executable.getDeclaringClass();
 		Map<Executable, String[]> map = this.parameterNamesCache.computeIfAbsent(declaringClass, this::inspectClass);
-		return (map != NO_DEBUG_INFO_MAP ? map.get(executable) : null);
+		String[] names = (map != NO_DEBUG_INFO_MAP ? map.get(executable) : null);
+		if (names != null && logger.isWarnEnabled()) {
+			logger.warn("Using deprecated '-debug' fallback for parameter name resolution. " +
+					"Compile the affected code with '-parameters' instead: " + executable);
+		}
+		return names;
 	}
 
 	/**

@@ -16,7 +16,6 @@
 
 package org.springframework.core;
 
-import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -28,7 +27,6 @@ import reactor.blockhound.BlockHound;
 import reactor.core.scheduler.ReactorBlockHoundIntegration;
 import reactor.core.scheduler.Schedulers;
 
-import org.springframework.tests.sample.objects.TestObject;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,11 +50,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @DisabledOnJre(value= {JRE.JAVA_18, JRE.JAVA_19}, disabledReason = "BlockHound is not compatible with Java 18+")
 class SpringCoreBlockHoundIntegrationTests {
 
-
 	@BeforeAll
-	static void setUp() {
+	static void setup() {
 		BlockHound.builder()
-				.with(new ReactorBlockHoundIntegration()) // Reactor non-blocking thread predicate
+				.with(new ReactorBlockHoundIntegration())  // Reactor non-blocking thread predicate
 				.with(new ReactiveAdapterRegistry.SpringCoreBlockHoundIntegration())
 				.install();
 	}
@@ -66,15 +63,6 @@ class SpringCoreBlockHoundIntegrationTests {
 	void blockHoundIsInstalled() {
 		assertThatThrownBy(() -> testNonBlockingTask(() -> Thread.sleep(10)))
 				.hasMessageContaining("Blocking call!");
-	}
-
-	@Test
-	void localVariableTableParameterNameDiscoverer() {
-		testNonBlockingTask(() -> {
-			Method setName = TestObject.class.getMethod("setName", String.class);
-			String[] names = new LocalVariableTableParameterNameDiscoverer().getParameterNames(setName);
-			assertThat(names).containsExactly("name");
-		});
 	}
 
 	@Test
