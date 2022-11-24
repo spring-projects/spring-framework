@@ -49,7 +49,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.MessageSource;
-import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.KotlinDetector;
+import org.springframework.core.KotlinReflectionParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
@@ -100,7 +101,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	private ConstraintValidatorFactory constraintValidatorFactory;
 
 	@Nullable
-	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+	private ParameterNameDiscoverer parameterNameDiscoverer;
 
 	@Nullable
 	private Resource[] mappingLocations;
@@ -115,6 +116,13 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 
 	@Nullable
 	private ValidatorFactory validatorFactory;
+
+
+	public LocalValidatorFactoryBean() {
+		if (KotlinDetector.isKotlinReflectPresent()) {
+			this.parameterNameDiscoverer = new KotlinReflectionParameterNameDiscoverer();
+		}
+	}
 
 
 	/**
@@ -188,7 +196,10 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	/**
 	 * Set the ParameterNameDiscoverer to use for resolving method and constructor
 	 * parameter names if needed for message interpolation.
-	 * <p>Default is a {@link org.springframework.core.DefaultParameterNameDiscoverer}.
+	 * <p>Default is Hibernate Validator's own internal use of standard Java reflection,
+	 * with an additional {@link KotlinReflectionParameterNameDiscoverer} if Kotlin
+	 * is present. This may be overridden with a custom subclass or a Spring-controlled
+	 * {@link org.springframework.core.DefaultParameterNameDiscoverer} if necessary,
 	 */
 	public void setParameterNameDiscoverer(ParameterNameDiscoverer parameterNameDiscoverer) {
 		this.parameterNameDiscoverer = parameterNameDiscoverer;
