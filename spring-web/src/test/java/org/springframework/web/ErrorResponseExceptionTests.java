@@ -316,7 +316,7 @@ public class ErrorResponseExceptionTests {
 		ServerErrorException ex = new ServerErrorException("Failure", null);
 
 		assertStatus(ex, HttpStatus.INTERNAL_SERVER_ERROR);
-		assertDetail(ex, null);
+		assertDetail(ex, "Failure");
 		assertDetailMessageCode(ex, null, new Object[] {ex.getReason()});
 
 		assertThat(ex.getHeaders()).isEmpty();

@@ -56,8 +56,7 @@ public class MethodNotAllowedException extends ResponseStatusException {
 		}
 		this.method = method;
 		this.httpMethods = Collections.unmodifiableSet(new LinkedHashSet<>(supportedMethods));
-		getBody().setDetail(this.httpMethods.isEmpty() ?
-				getReason() : "Supported methods: " + this.httpMethods);
+		setDetail(this.httpMethods.isEmpty() ? getReason() : "Supported methods: " + this.httpMethods);
 	}
 
 
