@@ -1141,9 +1141,10 @@ request with a simple request parameter.
 [.small]#<<web-reactive.adoc#webflux-multipart, WebFlux>>#
 
 `MultipartResolver` from the `org.springframework.web.multipart` package is a strategy
-for parsing multipart requests including file uploads. There is one implementation
-based on https://commons.apache.org/proper/commons-fileupload[Commons FileUpload] and
-another based on Servlet multipart request parsing.
+for parsing multipart requests including file uploads. There is a container-based
+`StandardServletMultipartResolver` implementation for Servlet multipart request parsing.
+Note that the outdated `CommonsMultipartResolver` based on Apache Commons FileUpload is
+not available anymore, as of Spring Framework 6.0 with its new Servlet 5.0+ baseline.
 
 To enable multipart handling, you need to declare a `MultipartResolver` bean in your
 `DispatcherServlet` Spring configuration with a name of `multipartResolver`.
@@ -1151,26 +1152,6 @@ The `DispatcherServlet` detects it and applies it to the incoming request. When 
 with a content type of `multipart/form-data` is received, the resolver parses the
 content wraps the current `HttpServletRequest` as a `MultipartHttpServletRequest` to
 provide access to resolved files in addition to exposing parts as request parameters.
-
-
-[[mvc-multipart-resolver-commons]]
-==== Apache Commons `FileUpload`
-
-To use Apache Commons `FileUpload`, you can configure a bean of type
-`CommonsMultipartResolver` with a name of `multipartResolver`. You also need to have
-the `commons-fileupload` jar as a dependency on your classpath.
-
-This resolver variant delegates to a local library within the application, providing
-maximum portability across Servlet containers. As an alternative, consider standard
-Servlet multipart resolution through the container's own parser as discussed below.
-
-[NOTE]
-====
-Commons FileUpload traditionally applies to POST requests only but accepts any
-`multipart/` content type. See the
-{api-spring-framework}/web/multipart/commons/CommonsMultipartResolver.html[`CommonsMultipartResolver`]
-javadoc for details and configuration options.
-====
 
 
 [[mvc-multipart-resolver-standard]]
