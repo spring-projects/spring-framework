@@ -85,12 +85,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	private String[] doGetParameterNames(Executable executable) {
 		Class<?> declaringClass = executable.getDeclaringClass();
 		Map<Executable, String[]> map = this.parameterNamesCache.computeIfAbsent(declaringClass, this::inspectClass);
-		String[] names = (map != NO_DEBUG_INFO_MAP ? map.get(executable) : null);
-		if (names != null && logger.isWarnEnabled()) {
-			logger.warn("Using deprecated '-debug' fallback for parameter name resolution. " +
-					"Compile the affected code with '-parameters' instead: " + executable);
-		}
-		return names;
+		return (map != NO_DEBUG_INFO_MAP ? map.get(executable) : null);
 	}
 
 	/**
@@ -115,6 +110,10 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			ClassReader classReader = new ClassReader(is);
 			Map<Executable, String[]> map = new ConcurrentHashMap<>(32);
 			classReader.accept(new ParameterNameDiscoveringVisitor(clazz, map), 0);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Using deprecated '-debug' fallback for parameter name resolution. Compile the " +
+						"affected code with '-parameters' instead or avoid its introspection: " + clazz.getName());
+			}
 			return map;
 		}
 		catch (IOException ex) {
