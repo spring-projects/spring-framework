@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,13 @@ import org.springframework.lang.Nullable;
  * {@link ParameterNameDiscoverer} implementation which uses Kotlin's reflection facilities
  * for introspecting parameter names.
  *
- * Compared to {@link StandardReflectionParameterNameDiscoverer}, it allows in addition to
+ * <p>Compared to {@link StandardReflectionParameterNameDiscoverer}, it allows in addition to
  * determine interface parameter names without requiring Java 8 -parameters compiler flag.
  *
  * @author Sebastien Deleuze
  * @since 5.0
+ * @see StandardReflectionParameterNameDiscoverer
+ * @see DefaultParameterNameDiscoverer
  */
 public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDiscoverer {
 
