@@ -65,6 +65,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 		upgradeStrategyConfigTypes.put(UndertowTestServer.class, UndertowUpgradeStrategyConfig.class);
 	}
 
+	@SuppressWarnings("removal")
 	static Stream<Arguments> argumentsFactory() {
 		return Stream.of(
 				arguments(named("Jetty", new JettyWebSocketTestServer()), named("Jetty", new JettyWebSocketClient())),

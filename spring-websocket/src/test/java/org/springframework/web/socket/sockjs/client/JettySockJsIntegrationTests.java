@@ -42,6 +42,7 @@ class JettySockJsIntegrationTests extends AbstractSockJsIntegrationTests {
 		return new JettyWebSocketTestServer();
 	}
 
+	@SuppressWarnings("removal")
 	@Override
 	protected Transport createWebSocketTransport() {
 		return new WebSocketTransport(new JettyWebSocketClient());
