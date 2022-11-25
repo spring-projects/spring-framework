@@ -56,6 +56,7 @@ import org.springframework.util.StringUtils;
  * Adapt {@link ServerHttpRequest} to the Servlet {@link HttpServletRequest}.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 5.0
  */
 class ServletServerHttpRequest extends AbstractServerHttpRequest {
@@ -64,6 +65,8 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 
 	private final HttpServletRequest request;
+
+	private final ServletInputStream inputStream;
 
 	private final RequestBodyPublisher bodyPublisher;
 
@@ -99,8 +102,8 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		this.asyncListener = new RequestAsyncListener();
 
 		// Tomcat expects ReadListener registration on initial thread
-		ServletInputStream inputStream = request.getInputStream();
-		this.bodyPublisher = new RequestBodyPublisher(inputStream);
+		this.inputStream = request.getInputStream();
+		this.bodyPublisher = new RequestBodyPublisher(this.inputStream);
 		this.bodyPublisher.registerReadListener();
 	}
 
@@ -232,6 +235,13 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	/**
+	 * Return the {@link ServletInputStream} for the current response.
+	 */
+	protected final ServletInputStream getInputStream() {
+		return this.inputStream;
+	}
+
+	/**
 	 * Read from the request body InputStream and return a DataBuffer.
 	 * Invoked only when {@link ServletInputStream#isReady()} returns "true".
 	 * @return a DataBuffer with data read, or
@@ -239,7 +249,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	 * or {@link #EOF_BUFFER} if the input stream returned -1.
 	 */
 	DataBuffer readFromInputStream() throws IOException {
-		int read = this.request.getInputStream().read(this.buffer);
+		int read = this.inputStream.read(this.buffer);
 		logBytesRead(read);
 
 		if (read > 0) {

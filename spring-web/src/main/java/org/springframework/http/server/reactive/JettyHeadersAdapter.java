@@ -18,7 +18,6 @@ package org.springframework.http.server.reactive;
 
 import java.util.AbstractSet;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -46,8 +45,8 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 	private final HttpFields.Mutable headers;
 
 
-	JettyHeadersAdapter(HttpFields.Mutable headers) {
-		this.headers = headers;
+	JettyHeadersAdapter(HttpFields headers) {
+		this.headers = (headers instanceof HttpFields.Mutable mutable ? mutable : HttpFields.build(headers));
 	}
 
 
@@ -170,7 +169,6 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 			public Iterator<Entry<String, List<String>>> iterator() {
 				return new EntryIterator();
 			}
-
 			@Override
 			public int size() {
 				return headers.size();
@@ -187,16 +185,16 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	private class EntryIterator implements Iterator<Entry<String, List<String>>> {
 
-		private final Enumeration<String> names = headers.getFieldNames();
+		private final Iterator<String> names = headers.getFieldNamesCollection().iterator();
 
 		@Override
 		public boolean hasNext() {
-			return this.names.hasMoreElements();
+			return this.names.hasNext();
 		}
 
 		@Override
 		public Entry<String, List<String>> next() {
-			return new HeaderEntry(this.names.nextElement());
+			return new HeaderEntry(this.names.next());
 		}
 	}
 

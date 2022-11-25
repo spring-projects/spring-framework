@@ -17,12 +17,13 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 import jakarta.servlet.AsyncContext;
-import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,8 +37,11 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link ServletHttpHandlerAdapter} extension that uses Jetty APIs for writing
@@ -49,6 +53,23 @@ import org.springframework.util.MultiValueMap;
  * @see org.springframework.web.server.adapter.AbstractReactiveWebInitializer
  */
 public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
+
+	private static final boolean jetty11Present = ClassUtils.isPresent(
+			"org.eclipse.jetty.server.HttpOutput", JettyHttpHandlerAdapter.class.getClassLoader());
+
+	/* Jetty 12: see spring-web.gradle
+	private static final boolean jetty12Present = ClassUtils.isPresent(
+			"org.eclipse.jetty.ee10.servlet.HttpOutput", JettyHttpHandlerAdapter.class.getClassLoader());
+	*/
+
+	@Nullable
+	private static final Method getRequestHeadersMethod =
+			ClassUtils.getMethodIfAvailable(Request.class, "getHeaders");
+
+	@Nullable
+	private static final Method getResponseHeadersMethod =
+			ClassUtils.getMethodIfAvailable(Response.class, "getHeaders");
+
 
 	public JettyHttpHandlerAdapter(HttpHandler httpHandler) {
 		super(httpHandler);
@@ -84,7 +105,13 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		private static MultiValueMap<String, String> createHeaders(HttpServletRequest servletRequest) {
 			Request request = getRequest(servletRequest);
-			HttpFields.Mutable fields = HttpFields.build(request.getHttpFields());
+			HttpFields fields;
+			if (getRequestHeadersMethod != null) {
+				fields = (HttpFields) ReflectionUtils.invokeMethod(getRequestHeadersMethod, request);
+			}
+			else {
+				fields = request.getHttpFields();
+			}
 			return new JettyHeadersAdapter(fields);
 		}
 
@@ -115,7 +142,13 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		private static HttpHeaders createHeaders(HttpServletResponse servletResponse) {
 			Response response = getResponse(servletResponse);
-			HttpFields.Mutable fields = response.getHttpFields();
+			HttpFields fields;
+			if (getResponseHeadersMethod != null) {
+				fields = (HttpFields) ReflectionUtils.invokeMethod(getResponseHeadersMethod, response);
+			}
+			else {
+				fields = response.getHttpFields();
+			}
 			return new HttpHeaders(new JettyHeadersAdapter(fields));
 		}
 
@@ -135,16 +168,32 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		@Override
 		protected int writeToOutputStream(DataBuffer dataBuffer) throws IOException {
-			ByteBuffer input = dataBuffer.toByteBuffer();
-			int len = input.remaining();
-			ServletResponse response = getNativeResponse();
-			((HttpOutput) response.getOutputStream()).write(input);
-			return len;
+			OutputStream output = getOutputStream();
+			if (jetty11Present) {
+				if (output instanceof HttpOutput httpOutput) {
+					ByteBuffer input = dataBuffer.toByteBuffer();
+					int len = input.remaining();
+					httpOutput.write(input);
+					return len;
+				}
+			}
+			/* Jetty 12: see spring-web.gradle
+			else if (jetty12Present) {
+				if (output instanceof org.eclipse.jetty.ee10.servlet.HttpOutput httpOutput) {
+					ByteBuffer input = dataBuffer.toByteBuffer();
+					int len = input.remaining();
+					httpOutput.write(input);
+					return len;
+				}
+			}
+			*/
+			return super.writeToOutputStream(dataBuffer);
 		}
 
 		@Override
 		protected void applyHeaders() {
 			HttpServletResponse response = getNativeResponse();
+
 			MediaType contentType = null;
 			try {
 				contentType = getHeaders().getContentType();
@@ -156,10 +205,12 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 			if (response.getContentType() == null && contentType != null) {
 				response.setContentType(contentType.toString());
 			}
+
 			Charset charset = (contentType != null ? contentType.getCharset() : null);
 			if (response.getCharacterEncoding() == null && charset != null) {
 				response.setCharacterEncoding(charset.name());
 			}
+
 			long contentLength = getHeaders().getContentLength();
 			if (contentLength != -1) {
 				response.setContentLengthLong(contentLength);

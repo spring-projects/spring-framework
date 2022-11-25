@@ -37,6 +37,12 @@ dependencies {
 	optional("org.eclipse.jetty:jetty-servlet") {
 		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
 	}
+	/* Jetty 12: see org.springframework.http.server.reactive.JettyHttpHandlerAdapter
+	optional("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.0.0.alpha2") {
+		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
+		exclude group: "org.eclipse.jetty", module: "jetty-session"
+	}
+	*/
 	optional("org.eclipse.jetty:jetty-reactive-httpclient")
 	optional('org.apache.httpcomponents.client5:httpclient5')
 	optional('org.apache.httpcomponents.core5:httpcore5-reactive')

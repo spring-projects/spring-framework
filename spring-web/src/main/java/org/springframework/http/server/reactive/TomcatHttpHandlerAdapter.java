@@ -23,9 +23,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 import jakarta.servlet.AsyncContext;
-import jakarta.servlet.ServletInputStream;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
@@ -56,7 +53,6 @@ import org.springframework.util.ReflectionUtils;
  * @see org.springframework.web.server.adapter.AbstractReactiveWebInitializer
  */
 public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
-
 
 	public TomcatHttpHandlerAdapter(HttpHandler httpHandler) {
 		super(httpHandler);
@@ -130,11 +126,11 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		@Override
 		protected DataBuffer readFromInputStream() throws IOException {
-			ServletInputStream inputStream = ((ServletRequest) getNativeRequest()).getInputStream();
-			if (!(inputStream instanceof CoyoteInputStream coyoteInputStream)) {
+			if (!(getInputStream() instanceof CoyoteInputStream coyoteInputStream)) {
 				// It's possible InputStream can be wrapped, preventing use of CoyoteInputStream
 				return super.readFromInputStream();
 			}
+
 			ByteBuffer byteBuffer = this.factory.isDirect() ?
 					ByteBuffer.allocateDirect(this.bufferSize) :
 					ByteBuffer.allocate(this.bufferSize);
@@ -198,6 +194,7 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 		@Override
 		protected void applyHeaders() {
 			HttpServletResponse response = getNativeResponse();
+
 			MediaType contentType = null;
 			try {
 				contentType = getHeaders().getContentType();
@@ -210,10 +207,12 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 				response.setContentType(contentType.toString());
 			}
 			getHeaders().remove(HttpHeaders.CONTENT_TYPE);
+
 			Charset charset = (contentType != null ? contentType.getCharset() : null);
 			if (response.getCharacterEncoding() == null && charset != null) {
 				response.setCharacterEncoding(charset.name());
 			}
+
 			long contentLength = getHeaders().getContentLength();
 			if (contentLength != -1) {
 				response.setContentLengthLong(contentLength);
@@ -223,10 +222,13 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		@Override
 		protected int writeToOutputStream(DataBuffer dataBuffer) throws IOException {
+			if (!(getOutputStream() instanceof CoyoteOutputStream coyoteOutputStream)) {
+				return super.writeToOutputStream(dataBuffer);
+			}
+
 			ByteBuffer input = dataBuffer.toByteBuffer();
 			int len = input.remaining();
-			ServletResponse response = getNativeResponse();
-			((CoyoteOutputStream) response.getOutputStream()).write(input);
+			coyoteOutputStream.write(input);
 			return len;
 		}
 	}
