@@ -18,10 +18,6 @@ dependencies {
 	implementation("org.assertj:assertj-core")
 }
 
-checkstyle {
-	sourceSets = []
-}
-
 jar {
 	enabled = false
 }
@@ -127,6 +123,8 @@ asciidoctor {
 		}
 	}
 }
+
+asciidoctor.mustRunAfter "check"
 
 /**
  * Generate the Spring Framework Reference documentation from "src/docs/asciidoc"

@@ -39,9 +39,8 @@ class SampleReflectionRuntimeHintsTests {
 	void shouldRegisterReflectionHints() {
 		RuntimeHints runtimeHints = new RuntimeHints();
 		// Call a RuntimeHintsRegistrar that contributes hints like:
-		runtimeHints.reflection().registerType(SpringVersion.class, typeHint -> {
-			typeHint.withMethod("getVersion", List.of(), ExecutableMode.INVOKE);
-		});
+		runtimeHints.reflection().registerType(SpringVersion.class, typeHint ->
+				typeHint.withMethod("getVersion", List.of(), ExecutableMode.INVOKE));
 
 		// Invoke the relevant piece of code we want to test within a recording lambda
 		RuntimeHintsInvocations invocations = RuntimeHintsRecorder.record(() -> {
