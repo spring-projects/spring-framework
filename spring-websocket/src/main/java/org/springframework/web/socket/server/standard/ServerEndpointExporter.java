@@ -37,7 +37,7 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
 
 /**
  * Detects beans of type {@link jakarta.websocket.server.ServerEndpointConfig} and registers
- * with the standard Java WebSocket runtime. Also detects beans annotated with
+ * with the standard Jakarta WebSocket runtime. Also detects beans annotated with
  * {@link ServerEndpoint} and registers them as well. Although not required, it is likely
  * annotated endpoints should have their {@code configurator} property set to
  * {@link SpringConfigurator}.

@@ -184,7 +184,7 @@ HTTP requests. It is also easy to integrate into other HTTP processing scenarios
 by invoking `WebSocketHttpRequestHandler`. This is convenient and easy to
 understand. However, special considerations apply with regards to JSR-356 runtimes.
 
-The Java WebSocket API (JSR-356) provides two deployment mechanisms. The first
+The Jakarta WebSocket API (JSR-356) provides two deployment mechanisms. The first
 involves a Servlet container classpath scan (a Servlet 3 feature) at startup.
 The other is a registration API to use at Servlet container initialization.
 Neither of these mechanism makes it possible to use a single "`front controller`"
@@ -193,17 +193,9 @@ requests -- such as Spring MVC's `DispatcherServlet`.
 
 This is a significant limitation of JSR-356 that Spring's WebSocket support addresses with
 server-specific `RequestUpgradeStrategy` implementations even when running in a JSR-356 runtime.
-Such strategies currently exist for Tomcat, Jetty, GlassFish, WebLogic, WebSphere, and
-Undertow (and WildFly).
-
-
-
-NOTE: A request to overcome the preceding limitation in the Java WebSocket API has been
-created and can be followed at
-https://github.com/eclipse-ee4j/websocket-api/issues/211[eclipse-ee4j/websocket-api#211].
-Tomcat, Undertow, and WebSphere provide their own API alternatives that
-make it possible to do this, and it is also possible with Jetty. We are hopeful
-that more servers will do the same.
+Such strategies currently exist for Tomcat, Jetty, GlassFish, WebLogic, WebSphere, and Undertow
+(and WildFly). As of Jakarta WebSocket 2.1, a standard request upgrade strategy is available
+which Spring chooses on Jakarta EE 10 based web containers such as Tomcat 10.1 and Jetty 12.
 
 A secondary consideration is that Servlet containers with JSR-356 support are expected
 to perform a `ServletContainerInitializer` (SCI) scan that can slow down application
