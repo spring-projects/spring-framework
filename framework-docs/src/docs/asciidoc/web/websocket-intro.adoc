@@ -1,4 +1,4 @@
-[[{chapter}.websocket-intro]]
+[id={chapter}.websocket-intro]
 = Introduction to WebSocket
 
 The WebSocket protocol, https://tools.ietf.org/html/rfc6455[RFC 6455], provides a standardized
@@ -54,7 +54,7 @@ instructions of the cloud provider related to WebSocket support.
 
 
 
-[[{chapter}.websocket-intro-architecture]]
+[id={chapter}.websocket-intro-architecture]
 == HTTP Versus WebSocket
 
 Even though WebSocket is designed to be HTTP-compatible and starts with an HTTP request,
@@ -80,7 +80,7 @@ In the absence of that, they need to come up with their own conventions.
 
 
 
-[[{chapter}.websocket-intro-when-to-use]]
+[id={chapter}.websocket-intro-when-to-use]
 == When to Use WebSockets
 
 WebSockets can make a web page be dynamic and interactive. However, in many cases,
