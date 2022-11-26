@@ -18,15 +18,12 @@ package org.springframework.context.support;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.TypeHint.Builder;
+import org.springframework.aot.hint.support.ClassHintUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -49,7 +46,6 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.metrics.ApplicationStartup;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
 /**
  * Generic ApplicationContext implementation that holds a single internal
@@ -72,7 +68,7 @@ import org.springframework.util.ClassUtils;
  * definitions on it. {@link #refresh()} may only be called once.
  *
  * <p>This ApplicationContext implementation is suitable for Ahead of Time
- * processing, using {@link #refreshForAotProcessing()} as an alternative to the
+ * processing, using {@link #refreshForAotProcessing} as an alternative to the
  * regular {@link #refresh()}.
  *
  * <p>Usage example:
@@ -88,16 +84,13 @@ import org.springframework.util.ClassUtils;
  * MyBean myBean = (MyBean) ctx.getBean("myBean");
  * ...</pre>
  *
- * For the typical case of XML bean definitions, simply use
+ * For the typical case of XML bean definitions, you may also use
  * {@link ClassPathXmlApplicationContext} or {@link FileSystemXmlApplicationContext},
  * which are easier to set up - but less flexible, since you can just use standard
  * resource locations for XML bean definitions, rather than mixing arbitrary bean
- * definition formats. The equivalent in a web environment is
- * {@link org.springframework.web.context.support.XmlWebApplicationContext}.
- *
- * <p>For custom application context implementations that are supposed to read
- * special bean definition formats in a refreshable manner, consider deriving
- * from the {@link AbstractRefreshableApplicationContext} base class.
+ * definition formats. For a custom application context implementation supposed to
+ * read a specific bean definition format in a refreshable manner, consider
+ * deriving from the {@link AbstractRefreshableApplicationContext} base class.
  *
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -110,15 +103,6 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.beans.factory.support.PropertiesBeanDefinitionReader
  */
 public class GenericApplicationContext extends AbstractApplicationContext implements BeanDefinitionRegistry {
-
-	private static final Consumer<Builder> asClassBasedProxy = hint ->
-			hint.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-					MemberCategory.INVOKE_DECLARED_METHODS,
-					MemberCategory.DECLARED_FIELDS);
-
-	private static final Consumer<Builder> asProxiedUserClass = hint ->
-			hint.withMembers(MemberCategory.INVOKE_PUBLIC_METHODS);
-
 
 	private final DefaultListableBeanFactory beanFactory;
 
@@ -442,30 +426,14 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 		for (String beanName : this.beanFactory.getBeanDefinitionNames()) {
 			Class<?> beanType = this.beanFactory.getType(beanName);
 			if (beanType != null) {
-				registerProxyHintIfNecessary(beanType, runtimeHints);
+				ClassHintUtils.registerProxyIfNecessary(beanType, runtimeHints);
 				for (SmartInstantiationAwareBeanPostProcessor bpp : bpps) {
 					Class<?> newBeanType = bpp.determineBeanType(beanType, beanName);
 					if (newBeanType != beanType) {
-						registerProxyHintIfNecessary(newBeanType, runtimeHints);
+						ClassHintUtils.registerProxyIfNecessary(newBeanType, runtimeHints);
 						beanType = newBeanType;
 					}
 				}
-			}
-		}
-	}
-
-	private void registerProxyHintIfNecessary(Class<?> beanType, RuntimeHints runtimeHints) {
-		if (Proxy.isProxyClass(beanType)) {
-			// A JDK proxy class needs an explicit hint
-			runtimeHints.proxies().registerJdkProxy(beanType.getInterfaces());
-		}
-		else {
-			// Potentially a CGLIB-generated subclass with reflection hints
-			Class<?> userClass = ClassUtils.getUserClass(beanType);
-			if (userClass != beanType) {
-				runtimeHints.reflection()
-						.registerType(beanType, asClassBasedProxy)
-						.registerType(userClass, asProxiedUserClass);
 			}
 		}
 	}

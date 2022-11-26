@@ -16,7 +16,6 @@
 
 package org.springframework.context.aot;
 
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.springframework.aot.generate.GeneratedFiles;
@@ -26,6 +25,7 @@ import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeHint.Builder;
 import org.springframework.aot.hint.TypeReference;
+import org.springframework.aot.hint.support.ClassHintUtils;
 import org.springframework.cglib.core.ReflectUtils;
 import org.springframework.core.io.ByteArrayResource;
 
@@ -34,8 +34,10 @@ import org.springframework.core.io.ByteArrayResource;
  * and register the necessary hints so that they can be instantiated.
  *
  * @author Stephane Nicoll
- * @see ReflectUtils#setGeneratedClassHandler(BiConsumer)
- * @see ReflectUtils#setLoadedClassHandler(Consumer)
+ * @since 6.0
+ * @see ReflectUtils#setGeneratedClassHandler
+ * @see ReflectUtils#setLoadedClassHandler
+ * @see ClassHintUtils#registerProxyIfNecessary
  */
 class CglibClassHandler {
 
@@ -46,10 +48,12 @@ class CglibClassHandler {
 
 	private final GeneratedFiles generatedFiles;
 
+
 	CglibClassHandler(GenerationContext generationContext) {
 		this.runtimeHints = generationContext.getRuntimeHints();
 		this.generatedFiles = generationContext.getGeneratedFiles();
 	}
+
 
 	/**
 	 * Handle the specified generated CGLIB class.
