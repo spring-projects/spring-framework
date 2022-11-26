@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -93,17 +92,9 @@ public class TestContextManager {
 
 	private final TestContext testContext;
 
-	private final ThreadLocal<TestContext> testContextHolder = ThreadLocal.withInitial(
-			// Implemented as an anonymous inner class instead of a lambda expression due to a bug
-			// in Eclipse IDE: "The blank final field testContext may not have been initialized"
-			new Supplier<TestContext>() {
-				@Override
-				public TestContext get() {
-					return copyTestContext(TestContextManager.this.testContext);
-				}
-			});
+	private final ThreadLocal<TestContext> testContextHolder;
 
-	private final List<TestExecutionListener> testExecutionListeners = new ArrayList<>();
+	private final List<TestExecutionListener> testExecutionListeners = new ArrayList<>(8);
 
 
 	/**
@@ -136,6 +127,7 @@ public class TestContextManager {
 	 */
 	public TestContextManager(TestContextBootstrapper testContextBootstrapper) {
 		this.testContext = testContextBootstrapper.buildTestContext();
+		this.testContextHolder = ThreadLocal.withInitial(() -> copyTestContext(this.testContext));
 		registerTestExecutionListeners(testContextBootstrapper.getTestExecutionListeners());
 	}
 
@@ -234,7 +226,7 @@ public class TestContextManager {
 	 * {@link TestExecutionListener} a chance to prepare the test instance. If a
 	 * listener throws an exception, however, the remaining registered listeners
 	 * will <strong>not</strong> be called.
-	 * @param testInstance the test instance to prepare (never {@code null})
+	 * @param testInstance the test instance to prepare
 	 * @throws Exception if a registered TestExecutionListener throws an exception
 	 * @see #getTestExecutionListeners()
 	 */
@@ -278,7 +270,7 @@ public class TestContextManager {
 	 * {@link TestExecutionListener} a chance to perform its pre-processing.
 	 * If a listener throws an exception, however, the remaining registered
 	 * listeners will <strong>not</strong> be called.
-	 * @param testInstance the current test instance (never {@code null})
+	 * @param testInstance the current test instance
 	 * @param testMethod the test method which is about to be executed on the
 	 * test instance
 	 * @throws Exception if a registered TestExecutionListener throws an exception
@@ -315,7 +307,7 @@ public class TestContextManager {
 	 * {@link TestExecutionListener} a chance to perform its pre-processing.
 	 * If a listener throws an exception, however, the remaining registered
 	 * listeners will <strong>not</strong> be called.
-	 * @param testInstance the current test instance (never {@code null})
+	 * @param testInstance the current test instance
 	 * @param testMethod the test method which is about to be executed on the
 	 * test instance
 	 * @throws Exception if a registered TestExecutionListener throws an exception
@@ -358,7 +350,7 @@ public class TestContextManager {
 	 * the first exception.
 	 * <p>Note that registered listeners will be executed in the opposite
 	 * order in which they were registered.
-	 * @param testInstance the current test instance (never {@code null})
+	 * @param testInstance the current test instance
 	 * @param testMethod the test method which has just been executed on the
 	 * test instance
 	 * @param exception the exception that was thrown during execution of the
@@ -422,7 +414,7 @@ public class TestContextManager {
 	 * subsequent exceptions {@linkplain Throwable#addSuppressed suppressed} in
 	 * the first exception.
 	 * <p>Note that registered listeners will be executed in the opposite
-	 * @param testInstance the current test instance (never {@code null})
+	 * @param testInstance the current test instance
 	 * @param testMethod the test method which has just been executed on the
 	 * test instance
 	 * @param exception the exception that was thrown during execution of the test
