@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.junit.runners.model.InitializationError;
 /**
  * {@code SpringRunner} is an <em>alias</em> for the {@link SpringJUnit4ClassRunner}.
  *
- * <p>To use this class, simply annotate a JUnit 4 based test class with
+ * <p>To use this class, annotate a JUnit 4 based test class with
  * {@code @RunWith(SpringRunner.class)}.
  *
  * <p>If you would like to use the Spring TestContext Framework with a runner other than

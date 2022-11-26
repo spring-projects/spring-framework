@@ -59,7 +59,7 @@ import org.springframework.util.ReflectionUtils;
  * <em>Spring TestContext Framework</em> to standard JUnit tests by means of the
  * {@link TestContextManager} and associated support classes and annotations.
  *
- * <p>To use this class, simply annotate a JUnit 4 based test class with
+ * <p>To use this class, annotate a JUnit 4 based test class with
  * {@code @RunWith(SpringJUnit4ClassRunner.class)} or {@code @RunWith(SpringRunner.class)}.
  *
  * <p>The following list constitutes all annotations currently supported directly
@@ -82,7 +82,7 @@ import org.springframework.util.ReflectionUtils;
  * <p>If you would like to use the Spring TestContext Framework with a runner
  * other than this one, use {@link SpringClassRule} and {@link SpringMethodRule}.
  *
- * <p><strong>NOTE:</strong> As of Spring Framework 4.3, this class requires JUnit 4.12 or higher.
+ * <p><strong>NOTE:</strong> This class requires JUnit 4.12 or higher.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
@@ -268,8 +268,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * JUnit-specified timeouts will work fine in combination with Spring
 	 * transactions. However, JUnit-specific timeouts still differ from
 	 * Spring-specific timeouts in that the former execute in a separate
-	 * thread while the latter simply execute in the main thread (like regular
-	 * tests).
+	 * thread while the latter execute in the main thread (like regular tests).
 	 * @see #methodInvoker(FrameworkMethod, Object)
 	 * @see #withBeforeTestExecutionCallbacks(FrameworkMethod, Object, Statement)
 	 * @see #withAfterTestExecutionCallbacks(FrameworkMethod, Object, Statement)
