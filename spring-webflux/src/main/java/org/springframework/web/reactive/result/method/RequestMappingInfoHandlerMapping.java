@@ -98,7 +98,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 	@Override
 	public Mono<HandlerMethod> getHandlerInternal(ServerWebExchange exchange) {
-		Object handler = exchange.getAttributes().get(BEST_MATCHING_HANDLER_ATTRIBUTE);
+		Object handler = exchange.getAttributes().get(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE);
 		if (handler instanceof HandlerMethod) {
 			return Mono.just((HandlerMethod) handler);
 		}
