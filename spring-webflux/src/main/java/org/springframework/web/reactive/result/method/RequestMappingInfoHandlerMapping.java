@@ -106,7 +106,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		return super.getHandlerInternal(exchange)
 			.doOnTerminate(() -> ProducesRequestCondition.clearMediaTypesAttribute(exchange));
 	}
-	
+
 	/**
 	 * Expose URI template variables, matrix variables, and producible media types in the request.
 	 * @see HandlerMapping#URI_TEMPLATE_VARIABLES_ATTRIBUTE
