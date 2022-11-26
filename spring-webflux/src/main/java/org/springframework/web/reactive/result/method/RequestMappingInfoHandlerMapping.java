@@ -98,17 +98,15 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 	@Override
 	public Mono<HandlerMethod> getHandlerInternal(ServerWebExchange exchange) {
-		return Mono.justOrEmpty(exchange.<HandlerMethod>getAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE))
-			.switchIfEmpty(Mono.defer(() -> getHandlerAndCache(exchange)));
-	}
-
-	protected Mono<HandlerMethod> getHandlerAndCache(ServerWebExchange exchange) {
+		Object handler = exchange.getAttributes().get(BEST_MATCHING_HANDLER_ATTRIBUTE);
+		if (handler instanceof HandlerMethod) {
+			return Mono.just((HandlerMethod) handler);
+		}
 		exchange.getAttributes().remove(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 		return super.getHandlerInternal(exchange)
-			.doOnNext(handler -> exchange.getAttributes().put(BEST_MATCHING_HANDLER_ATTRIBUTE, handler))
 			.doOnTerminate(() -> ProducesRequestCondition.clearMediaTypesAttribute(exchange));
 	}
-
+	
 	/**
 	 * Expose URI template variables, matrix variables, and producible media types in the request.
 	 * @see HandlerMapping#URI_TEMPLATE_VARIABLES_ATTRIBUTE
