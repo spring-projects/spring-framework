@@ -104,7 +104,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		}
 		exchange.getAttributes().remove(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 		return super.getHandlerInternal(exchange)
-			.doOnTerminate(() -> ProducesRequestCondition.clearMediaTypesAttribute(exchange));
+				.doOnTerminate(() -> ProducesRequestCondition.clearMediaTypesAttribute(exchange));
 	}
 
 	/**
