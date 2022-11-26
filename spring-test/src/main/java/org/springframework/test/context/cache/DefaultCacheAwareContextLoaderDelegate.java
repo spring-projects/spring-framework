@@ -21,6 +21,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aot.AotDetector;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -239,14 +240,23 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	 * unmodified.
 	 * <p>This allows for transparent {@link org.springframework.test.context.cache.ContextCache ContextCache}
 	 * support for AOT-optimized application contexts.
+	 * @param mergedConfig the original {@code MergedContextConfiguration}
+	 * @return {@code AotMergedContextConfiguration} or the original {@code MergedContextConfiguration}
+	 * @throws IllegalStateException if running in AOT mode and the test class does not
+	 * have an AOT-optimized {@code ApplicationContext}
 	 * @since 6.0
 	 */
 	@SuppressWarnings("unchecked")
 	private MergedContextConfiguration replaceIfNecessary(MergedContextConfiguration mergedConfig) {
-		Class<?> testClass = mergedConfig.getTestClass();
-		if (this.aotTestContextInitializers.isSupportedTestClass(testClass)) {
+		if (AotDetector.useGeneratedArtifacts()) {
+			Class<?> testClass = mergedConfig.getTestClass();
 			Class<? extends ApplicationContextInitializer<?>> contextInitializerClass =
 					this.aotTestContextInitializers.getContextInitializerClass(testClass);
+			Assert.state(contextInitializerClass != null, () -> """
+					Failed to load AOT ApplicationContextInitializer class for test class [%s]. \
+					This can occur if AOT processing has not taken place for the test suite. It \
+					can also occur if AOT processing failed for the test class, in which case you \
+					can consult the logs generated during AOT processing.""".formatted(testClass.getName()));
 			return new AotMergedContextConfiguration(testClass, contextInitializerClass, mergedConfig, this);
 		}
 		return mergedConfig;
