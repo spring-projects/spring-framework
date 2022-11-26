@@ -39,13 +39,13 @@ import org.springframework.util.ReflectionUtils;
  *
  * <ul>
  * <li>{@link #beforeTestClass() before test class execution}: prior to any
- * <em>before class callbacks</em> of a particular testing framework (e.g.,
- * JUnit 4's {@link org.junit.BeforeClass @BeforeClass})</li>
+ * <em>before class callbacks</em> of a particular testing framework &mdash; for
+ * example, JUnit Jupiter's {@link org.junit.jupiter.api.BeforeAll @BeforeAll}</li>
  * <li>{@link #prepareTestInstance test instance preparation}:
  * immediately following instantiation of the test class</li>
  * <li>{@link #beforeTestMethod before test setup}:
- * prior to any <em>before method callbacks</em> of a particular testing framework
- * (e.g., JUnit 4's {@link org.junit.Before @Before})</li>
+ * prior to any <em>before method callbacks</em> of a particular testing framework &mdash;
+ * for example, JUnit Jupiter's {@link org.junit.jupiter.api.BeforeEach @BeforeEach}</li>
  * <li>{@link #beforeTestExecution before test execution}:
  * immediately before execution of the {@linkplain java.lang.reflect.Method
  * test method} but after test setup</li>
@@ -53,11 +53,11 @@ import org.springframework.util.ReflectionUtils;
  * immediately after execution of the {@linkplain java.lang.reflect.Method
  * test method} but before test tear down</li>
  * <li>{@link #afterTestMethod(Object, Method, Throwable) after test tear down}:
- * after any <em>after method callbacks</em> of a particular testing
- * framework (e.g., JUnit 4's {@link org.junit.After @After})</li>
+ * after any <em>after method callbacks</em> of a particular testing framework &mdash;
+ * for example, JUnit Jupiter's {@link org.junit.jupiter.api.AfterEach @AfterEach}</li>
  * <li>{@link #afterTestClass() after test class execution}: after any
- * <em>after class callbacks</em> of a particular testing framework (e.g., JUnit 4's
- * {@link org.junit.AfterClass @AfterClass})</li>
+ * <em>after class callbacks</em> of a particular testing framework &mdash; for example,
+ * JUnit Jupiter's {@link org.junit.jupiter.api.AfterAll @AfterAll}</li>
  * </ul>
  *
  * <p>Support for loading and accessing
@@ -183,8 +183,8 @@ public class TestContextManager {
 	/**
 	 * Hook for pre-processing a test class <em>before</em> execution of any
 	 * tests within the class. Should be called prior to any framework-specific
-	 * <em>before class methods</em> (e.g., methods annotated with JUnit 4's
-	 * {@link org.junit.BeforeClass @BeforeClass}).
+	 * <em>before class methods</em> &mdash; for example, methods annotated with
+	 * JUnit Jupiter's {@link org.junit.jupiter.api.BeforeAll @BeforeAll}.
 	 * <p>An attempt will be made to give each registered
 	 * {@link TestExecutionListener} a chance to pre-process the test class
 	 * execution. If a listener throws an exception, however, the remaining
@@ -257,10 +257,10 @@ public class TestContextManager {
 	 * lifecycle callbacks of the underlying test framework &mdash; for example,
 	 * setting up test fixtures, starting a transaction, etc.
 	 * <p>This method <strong>must</strong> be called immediately prior to
-	 * framework-specific <em>before</em> lifecycle callbacks (e.g., methods
-	 * annotated with JUnit 4's {@link org.junit.Before @Before}). For historical
-	 * reasons, this method is named {@code beforeTestMethod}. Since the
-	 * introduction of {@link #beforeTestExecution}, a more suitable name for
+	 * framework-specific <em>before</em> lifecycle callbacks &mdash; for example, methods
+	 * annotated with JUnit Jupiter's {@link org.junit.jupiter.api.BeforeEach @BeforeEach}.
+	 * For historical reasons, this method is named {@code beforeTestMethod}. Since
+	 * the introduction of {@link #beforeTestExecution}, a more suitable name for
 	 * this method might be something like {@code beforeTestSetUp} or
 	 * {@code beforeEach}; however, it is unfortunately impossible to rename
 	 * this method due to backward compatibility concerns.
@@ -299,8 +299,8 @@ public class TestContextManager {
 	 * {@linkplain TestContext test context} &mdash; for example, for timing
 	 * or logging purposes.
 	 * <p>This method <strong>must</strong> be called after framework-specific
-	 * <em>before</em> lifecycle callbacks (e.g., methods annotated with JUnit 4's
-	 * {@link org.junit.Before @Before}).
+	 * <em>before</em> lifecycle callbacks &mdash; for example, methods annotated
+	 * with JUnit Jupiter's {@link org.junit.jupiter.api.BeforeEach @BeforeEach}.
 	 * <p>The managed {@link TestContext} will be updated with the supplied
 	 * {@code testInstance} and {@code testMethod}.
 	 * <p>An attempt will be made to give each registered
@@ -338,8 +338,8 @@ public class TestContextManager {
 	 * {@linkplain TestContext test context} &mdash; for example, for timing
 	 * or logging purposes.
 	 * <p>This method <strong>must</strong> be called before framework-specific
-	 * <em>after</em> lifecycle callbacks (e.g., methods annotated with JUnit 4's
-	 * {@link org.junit.After @After}).
+	 * <em>after</em> lifecycle callbacks &mdash; for example, methods annotated
+	 * with JUnit Jupiter's {@link org.junit.jupiter.api.AfterEach @AfterEach}.
 	 * <p>The managed {@link TestContext} will be updated with the supplied
 	 * {@code testInstance}, {@code testMethod}, and {@code exception}.
 	 * <p>Each registered {@link TestExecutionListener} will be given a chance
@@ -398,10 +398,10 @@ public class TestContextManager {
 	 * lifecycle callbacks of the underlying test framework &mdash; for example,
 	 * tearing down test fixtures, ending a transaction, etc.
 	 * <p>This method <strong>must</strong> be called immediately after
-	 * framework-specific <em>after</em> lifecycle callbacks (e.g., methods
-	 * annotated with JUnit 4's {@link org.junit.After @After}). For historical
-	 * reasons, this method is named {@code afterTestMethod}. Since the
-	 * introduction of {@link #afterTestExecution}, a more suitable name for
+	 * framework-specific <em>after</em> lifecycle callbacks &mdash; for example, methods
+	 * annotated with JUnit Jupiter's {@link org.junit.jupiter.api.AfterEach @AfterEach}.
+	 * For historical reasons, this method is named {@code afterTestMethod}. Since
+	 * the introduction of {@link #afterTestExecution}, a more suitable name for
 	 * this method might be something like {@code afterTestTearDown} or
 	 * {@code afterEach}; however, it is unfortunately impossible to rename
 	 * this method due to backward compatibility concerns.
@@ -458,8 +458,8 @@ public class TestContextManager {
 	/**
 	 * Hook for post-processing a test class <em>after</em> execution of all
 	 * tests within the class. Should be called after any framework-specific
-	 * <em>after class methods</em> (e.g., methods annotated with JUnit 4's
-	 * {@link org.junit.AfterClass @AfterClass}).
+	 * <em>after class methods</em> &mdash; for example, methods annotated with
+	 * JUnit Jupiter's {@link org.junit.jupiter.api.AfterAll @AfterAll}.
 	 * <p>Each registered {@link TestExecutionListener} will be given a chance
 	 * to perform its post-processing. If a listener throws an exception, the
 	 * remaining registered listeners will still be called. After all listeners
