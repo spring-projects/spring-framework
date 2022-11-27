@@ -98,6 +98,10 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 	@Override
 	public Mono<HandlerMethod> getHandlerInternal(ServerWebExchange exchange) {
+		Object handlerMethod = exchange.getAttributes().get(BEST_MATCHING_HANDLER_ATTRIBUTE);
+		if (handlerMethod instanceof HandlerMethod) {
+			return Mono.just((HandlerMethod) handlerMethod);
+		}
 		exchange.getAttributes().remove(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 		return super.getHandlerInternal(exchange)
 				.doOnTerminate(() -> ProducesRequestCondition.clearMediaTypesAttribute(exchange));
