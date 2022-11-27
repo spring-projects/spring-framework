@@ -203,11 +203,11 @@ public class WebClientResponseException extends WebClientException {
 	/**
 	 * Return the response content as a String using the charset of media type
 	 * for the response, if available, or otherwise falling back on
-	 * {@literal ISO-8859-1}. Use {@link #getResponseBodyAsString(Charset)} if
+	 * {@literal UTF_8}. Use {@link #getResponseBodyAsString(Charset)} if
 	 * you want to fall back on a different, default charset.
 	 */
 	public String getResponseBodyAsString() {
-		return getResponseBodyAsString(StandardCharsets.ISO_8859_1);
+		return getResponseBodyAsString(StandardCharsets.UTF_8);
 	}
 
 	/**
