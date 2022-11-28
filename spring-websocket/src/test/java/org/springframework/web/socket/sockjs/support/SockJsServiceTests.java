@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -238,15 +238,15 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		resetResponseAndHandleRequest("GET", "/echo/iframe.html", HttpStatus.OK);
 
 		assertThat(this.servletResponse.getContentType()).isEqualTo("text/html;charset=UTF-8");
-		assertThat(this.servletResponse.getContentAsString().startsWith("<!DOCTYPE html>\n")).isTrue();
-		assertThat(this.servletResponse.getContentLength()).isEqualTo(490);
+		assertThat(this.servletResponse.getContentAsString()).startsWith("<!DOCTYPE html>\n");
+		assertThat(this.servletResponse.getContentLength()).isEqualTo(521);
 		assertThat(this.response.getHeaders().getCacheControl()).isEqualTo("no-store, no-cache, must-revalidate, max-age=0");
-		assertThat(this.response.getHeaders().getETag()).isEqualTo("\"0096cbd37f2a5218c33bb0826a7c74cbf\"");
+		assertThat(this.response.getHeaders().getETag()).isEqualTo("\"0172bf7bc7472c0cc35c02f883e779485\"");
 	}
 
 	@Test
 	public void handleIframeRequestNotModified() {
-		this.servletRequest.addHeader("If-None-Match", "\"0096cbd37f2a5218c33bb0826a7c74cbf\"");
+		this.servletRequest.addHeader("If-None-Match", "\"0172bf7bc7472c0cc35c02f883e779485\"");
 		resetResponseAndHandleRequest("GET", "/echo/iframe.html", HttpStatus.NOT_MODIFIED);
 	}
 
