@@ -620,7 +620,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 				"<head>\n" +
 				"  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\n" +
 				"  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n" +
-				"  <title>SocketJS iframe</title>\n" +
+				"  <title>SockJS iframe</title>\n" +
 				"  <script>\n" +
 				"    document.domain = document.domain;\n" +
 				"    _sockjs_onload = function(){SockJS.bootstrap_iframe();};\n" +
