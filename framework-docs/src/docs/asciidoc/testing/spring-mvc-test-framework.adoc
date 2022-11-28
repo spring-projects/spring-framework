@@ -1429,6 +1429,7 @@ Now we can use WebDriver as we normally would but without the need to deploy our
 application to a Servlet container. For example, we can request the view to create a
 message with the following:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -1440,9 +1441,11 @@ message with the following:
 ----
 	val page = CreateMessagePage.to(driver)
 ----
+--
 
 We can then fill out the form and submit it to create a message, as follows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -1456,6 +1459,7 @@ We can then fill out the form and submit it to create a message, as follows:
 	val viewMessagePage =
 		page.createMessage(ViewMessagePage::class, expectedSummary, expectedText)
 ----
+--
 
 This improves on the design of our <<spring-mvc-test-server-htmlunit-mah-usage, HtmlUnit test>>
 by leveraging the Page Object Pattern. As we mentioned in
@@ -1463,6 +1467,7 @@ by leveraging the Page Object Pattern. As we mentioned in
 with HtmlUnit, but it is much easier with WebDriver. Consider the following
 `CreateMessagePage` implementation:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -1551,11 +1556,12 @@ by the `id` or `name` of the element within the HTML page.
 https://github.com/SeleniumHQ/selenium/wiki/PageFactory#making-the-example-work-using-annotations[`@FindBy` annotation]
 to override the default lookup behavior. Our example shows how to use the `@FindBy`
 annotation to look up our submit button with a `css` selector (*input[type=submit]*).
-
+--
 
 Finally, we can verify that a new message was created successfully. The following
 assertions use the https://assertj.github.io/doc/[AssertJ] assertion library:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -1568,10 +1574,12 @@ assertions use the https://assertj.github.io/doc/[AssertJ] assertion library:
 	assertThat(viewMessagePage.message).isEqualTo(expectedMessage)
 	assertThat(viewMessagePage.success).isEqualTo("Successfully created a new message")
 ----
+--
 
 We can see that our `ViewMessagePage` lets us interact with our custom domain model. For
 example, it exposes a method that returns a `Message` object:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -1589,12 +1597,14 @@ example, it exposes a method that returns a `Message` object:
 ----
 	fun getMessage() = Message(getId(), getCreated(), getSummary(), getText())
 ----
+--
 
 We can then use the rich domain objects in our assertions.
 
 Lastly, we must not forget to close the `WebDriver` instance when the test is complete,
 as follows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -1616,6 +1626,7 @@ as follows:
 		}
 	}
 ----
+--
 
 For additional information on using WebDriver, see the Selenium
 https://github.com/SeleniumHQ/selenium/wiki/Getting-Started[WebDriver documentation].

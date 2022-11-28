@@ -222,6 +222,7 @@ resource base path). The resource base path is used behind the scenes to create 
 
 The following example shows how to use the `@WebAppConfiguration` annotation:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -231,6 +232,7 @@ The following example shows how to use the `@WebAppConfiguration` annotation:
 		// class body...
 	}
 ----
+<1> The `@WebAppConfiguration` annotation.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -242,6 +244,7 @@ The following example shows how to use the `@WebAppConfiguration` annotation:
 	}
 ----
 <1> The `@WebAppConfiguration` annotation.
+--
 
 
 To override the default, you can specify a different base resource path by using the
@@ -249,6 +252,7 @@ implicit `value` attribute. Both `classpath:` and `file:` resource prefixes are
 supported. If no resource prefix is supplied, the path is assumed to be a file system
 resource. The following example shows how to specify a classpath resource:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -270,6 +274,7 @@ resource. The following example shows how to specify a classpath resource:
 	}
 ----
 <1> Specifying a classpath resource.
+--
 
 
 Note that `@WebAppConfiguration` must be used in conjunction with
@@ -1104,7 +1109,7 @@ annotation. The following example shows how to declare an SQL group:
 	@SqlGroup({ // <1>
 		@Sql(scripts = "/test-schema.sql", config = @SqlConfig(commentPrefix = "`")),
 		@Sql("/test-user-data.sql")
-	)}
+	})
 	void userTest() {
 		// run code that uses the test schema and test data
 	}

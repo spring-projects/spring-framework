@@ -644,7 +644,7 @@ path that represents a resource URL (i.e., a path prefixed with `classpath:`, `f
 	@ExtendWith(SpringExtension::class)
 	// ApplicationContext will be loaded from "/app-config.xml" and
 	// "/test-config.xml" in the root of the classpath
-	@ContextConfiguration("/app-config.xml", "/test-config.xml") // <1>
+	@ContextConfiguration(locations = ["/app-config.xml", "/test-config.xml"]) // <1>
 	class MyTest {
 		// class body...
 	}
@@ -667,7 +667,7 @@ demonstrated in the following example:
 		// class body...
 	}
 ----
-<1> Specifying XML files without using the `location` attribute.
+<1> Specifying XML files without using the `locations` attribute.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -678,7 +678,7 @@ demonstrated in the following example:
 		// class body...
 	}
 ----
-<1> Specifying XML files without using the `location` attribute.
+<1> Specifying XML files without using the `locations` attribute.
 
 
 If you omit both the `locations` and the `value` attributes from the
@@ -743,6 +743,7 @@ The following example shows how to specify Groovy configuration files:
 		// class body...
 	}
 ----
+<1> Specifying the location of Groovy configuration files.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
