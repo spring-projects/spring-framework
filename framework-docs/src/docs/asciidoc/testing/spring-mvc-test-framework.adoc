@@ -1466,15 +1466,13 @@ with HtmlUnit, but it is much easier with WebDriver. Consider the following
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	public class CreateMessagePage
-			extends AbstractPage { // <1>
+	public class CreateMessagePage extends AbstractPage { // <1>
 
 		// <2>
 		private WebElement summary;
 		private WebElement text;
 
-		// <3>
-		@FindBy(css = "input[type=submit]")
+		@FindBy(css = "input[type=submit]") // <3>
 		private WebElement submit;
 
 		public CreateMessagePage(WebDriver driver) {
@@ -1509,7 +1507,7 @@ by the `id` or `name` of the element within the HTML page.
 <3> We can use the
 https://github.com/SeleniumHQ/selenium/wiki/PageFactory#making-the-example-work-using-annotations[`@FindBy` annotation]
 to override the default lookup behavior. Our example shows how to use the `@FindBy`
-annotation to look up our submit button with a `css` selector (*input[type=submit]*).
+annotation to look up our submit button with a `css` selector (`input[type=submit]`).
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -1520,8 +1518,7 @@ annotation to look up our submit button with a `css` selector (*input[type=submi
 		private lateinit var summary: WebElement
 		private lateinit var text: WebElement
 
-		// <3>
-		@FindBy(css = "input[type=submit]")
+		@FindBy(css = "input[type=submit]") // <3>
 		private lateinit var submit: WebElement
 
 		fun <T> createMessage(resultPage: Class<T>, summary: String, details: String): T {

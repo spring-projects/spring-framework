@@ -631,7 +631,7 @@ path that represents a resource URL (i.e., a path prefixed with `classpath:`, `f
 	@ExtendWith(SpringExtension.class)
 	// ApplicationContext will be loaded from "/app-config.xml" and
 	// "/test-config.xml" in the root of the classpath
-	@ContextConfiguration(locations={"/app-config.xml", "/test-config.xml"}) // <1>
+	@ContextConfiguration(locations = {"/app-config.xml", "/test-config.xml"}) // <1>
 	class MyTest {
 		// class body...
 	}
@@ -898,8 +898,7 @@ class:
 .Java
 ----
 	@SpringJUnitConfig <1>
-	// ApplicationContext will be loaded from the
-	// static nested Config class
+	// ApplicationContext will be loaded from the static nested Config class
 	class OrderServiceTest {
 
 		@Configuration
