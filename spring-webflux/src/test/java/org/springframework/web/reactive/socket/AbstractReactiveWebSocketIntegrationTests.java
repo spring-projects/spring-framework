@@ -69,7 +69,7 @@ import org.springframework.web.testfixture.http.server.reactive.bootstrap.Tomcat
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.UndertowHttpServer;
 
 /**
- * Base class for WebSocket integration tests. Subclasses must implement
+ * Base class for reactive WebSocket integration tests. Subclasses must implement
  * {@link #getWebConfigClass()} to return Spring config class with (server-side)
  * handler mappings to {@code WebSocketHandler}'s.
  *
@@ -77,7 +77,7 @@ import org.springframework.web.testfixture.http.server.reactive.bootstrap.Undert
  * @author Sam Brannen
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
-abstract class AbstractWebSocketIntegrationTests {
+abstract class AbstractReactiveWebSocketIntegrationTests {
 
 	private static final File TMP_DIR = new File(System.getProperty("java.io.tmpdir"));
 

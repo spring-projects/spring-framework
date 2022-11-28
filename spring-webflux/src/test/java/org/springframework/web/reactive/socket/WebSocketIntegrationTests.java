@@ -50,7 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @author Brian Clozel
  */
-class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
+class WebSocketIntegrationTests extends AbstractReactiveWebSocketIntegrationTests {
 
 	private static final Log logger = LogFactory.getLog(WebSocketIntegrationTests.class);
 
