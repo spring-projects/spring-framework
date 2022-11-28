@@ -22,6 +22,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledForJreRange;
 import reactor.blockhound.BlockHound;
 import reactor.core.scheduler.ReactorBlockHoundIntegration;
 import reactor.core.scheduler.Schedulers;
@@ -31,6 +32,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.condition.JRE.JAVA_14;
 
 /**
  * Tests to verify the spring-core BlockHound integration rules.
@@ -38,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Rossen Stoyanchev
  * @since 5.2.4
  */
+@DisabledForJreRange(min = JAVA_14)
 public class SpringCoreBlockHoundIntegrationTests {
 
 	@BeforeAll

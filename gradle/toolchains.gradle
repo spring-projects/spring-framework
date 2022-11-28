@@ -81,6 +81,10 @@ plugins.withType(JavaPlugin) {
 			javaLauncher = javaToolchains.launcherFor {
 				languageVersion = testLanguageVersion
 			}
+			if(testLanguageVersion == JavaLanguageVersion.of(17)) {
+				jvmArgs(["--add-opens=java.base/java.lang=ALL-UNNAMED",
+						 "--add-opens=java.base/java.util=ALL-UNNAMED"])
+			}
 		}
 	}
 }
@@ -127,21 +131,6 @@ pluginManager.withPlugin("kotlin") {
 		compileTestKotlin {
 			kotlinOptions {
 				jvmTarget = '1.8'
-			}
-		}
-	}
-
-	if (testToolchainConfigured()) {
-		def testLanguageVersion = testToolchainLanguageVersion()
-		def compiler = javaToolchains.compilerFor {
-			languageVersion = testLanguageVersion
-		}
-		// See https://kotlinlang.org/docs/gradle.html#attributes-specific-for-jvm
-		def javaVersion = testLanguageVersion.toString() == '8' ? '1.8' : testLanguageVersion.toString()
-		compileTestKotlin {
-			kotlinOptions {
-				jvmTarget = javaVersion
-				jdkHome = compiler.get().metadata.installationPath.asFile.absolutePath
 			}
 		}
 	}
