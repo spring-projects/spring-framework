@@ -38,7 +38,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.socket.client.WebSocketClient;
-import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy;
@@ -68,7 +67,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	@SuppressWarnings("removal")
 	static Stream<Arguments> argumentsFactory() {
 		return Stream.of(
-				arguments(named("Jetty", new JettyWebSocketTestServer()), named("Jetty", new JettyWebSocketClient())),
+				arguments(named("Jetty", new JettyWebSocketTestServer()), named("Jetty", new org.springframework.web.socket.client.jetty.JettyWebSocketClient())),
 				arguments(named("Tomcat", new TomcatWebSocketTestServer()), named("Standard", new StandardWebSocketClient())),
 				arguments(named("Undertow", new UndertowTestServer()), named("Standard", new StandardWebSocketClient())));
 	}
