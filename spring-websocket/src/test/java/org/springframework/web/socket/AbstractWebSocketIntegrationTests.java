@@ -20,7 +20,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -56,13 +55,10 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
  */
 public abstract class AbstractWebSocketIntegrationTests {
 
-	private static Map<Class<?>, Class<?>> upgradeStrategyConfigTypes = new HashMap<>();
-
-	static {
-		upgradeStrategyConfigTypes.put(JettyWebSocketTestServer.class, JettyUpgradeStrategyConfig.class);
-		upgradeStrategyConfigTypes.put(TomcatWebSocketTestServer.class, TomcatUpgradeStrategyConfig.class);
-		upgradeStrategyConfigTypes.put(UndertowTestServer.class, UndertowUpgradeStrategyConfig.class);
-	}
+	private static Map<Class<?>, Class<?>> upgradeStrategyConfigTypes = Map.of(
+			JettyWebSocketTestServer.class, JettyUpgradeStrategyConfig.class, //
+			TomcatWebSocketTestServer.class, TomcatUpgradeStrategyConfig.class, //
+			UndertowTestServer.class, UndertowUpgradeStrategyConfig.class);
 
 	@SuppressWarnings("removal")
 	static Stream<Arguments> argumentsFactory() {
