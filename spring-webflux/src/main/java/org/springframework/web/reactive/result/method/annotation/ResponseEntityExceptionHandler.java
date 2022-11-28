@@ -75,6 +75,11 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 		this.messageSource = messageSource;
 	}
 
+	@Nullable
+	public MessageSource getMessageSource() {
+		return this.messageSource;
+	}
+
 
 	/**
 	 * Handle all exceptions raised within Spring MVC handling of the request .
