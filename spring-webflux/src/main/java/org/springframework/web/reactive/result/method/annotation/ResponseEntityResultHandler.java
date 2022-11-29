@@ -150,8 +150,8 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 				httpEntity = new ResponseEntity<>(headers, HttpStatus.OK);
 			}
 			else {
-				throw new IllegalArgumentException(
-						"HttpEntity or HttpHeaders expected but got: " + returnValue.getClass());
+				return Mono.error(() -> new IllegalArgumentException(
+						"HttpEntity or HttpHeaders expected but got: " + returnValue.getClass()));
 			}
 
 			if (httpEntity.getBody() instanceof ProblemDetail detail) {
@@ -175,8 +175,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 			HttpHeaders entityHeaders = httpEntity.getHeaders();
 			HttpHeaders responseHeaders = exchange.getResponse().getHeaders();
 			if (!entityHeaders.isEmpty()) {
-				entityHeaders.entrySet().stream()
-						.forEach(entry -> responseHeaders.put(entry.getKey(), entry.getValue()));
+				responseHeaders.putAll(entityHeaders);
 			}
 
 			if (httpEntity.getBody() == null || returnValue instanceof HttpHeaders) {
@@ -186,11 +185,9 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 			String etag = entityHeaders.getETag();
 			Instant lastModified = Instant.ofEpochMilli(entityHeaders.getLastModified());
 			HttpMethod httpMethod = exchange.getRequest().getMethod();
-			if (SAFE_METHODS.contains(httpMethod) && exchange.checkNotModified(etag, lastModified)) {
-				return exchange.getResponse().setComplete();
-			}
-
-			return writeBody(httpEntity.getBody(), bodyParameter, actualParameter, exchange);
+			return (SAFE_METHODS.contains(httpMethod) && exchange.checkNotModified(etag, lastModified)) ?
+					exchange.getResponse().setComplete()
+					: writeBody(httpEntity.getBody(), bodyParameter, actualParameter, exchange);
 		});
 	}
 
