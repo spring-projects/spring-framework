@@ -28,8 +28,10 @@ correct schema so that the elements in the `jee` namespace are available to you:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:jee="http://www.springframework.org/schema/jee"
 		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/jee https://www.springframework.org/schema/jee/spring-jee.xsd">
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/jee
+			https://www.springframework.org/schema/jee/spring-jee.xsd">
 
 		<!-- bean definitions here -->
 
@@ -287,8 +289,10 @@ are available to you:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:jms="http://www.springframework.org/schema/jms"
 		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/jms https://www.springframework.org/schema/jms/spring-jms.xsd">
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/jms
+			https://www.springframework.org/schema/jms/spring-jms.xsd">
 
 		<!-- bean definitions here -->
 
@@ -324,8 +328,10 @@ the correct schema so that the elements in the `cache` namespace are available t
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:cache="http://www.springframework.org/schema/cache"
 		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/cache https://www.springframework.org/schema/cache/spring-cache.xsd">
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/cache
+			https://www.springframework.org/schema/cache/spring-cache.xsd">
 
 		<!-- bean definitions here -->
 

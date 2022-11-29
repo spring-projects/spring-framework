@@ -5484,8 +5484,7 @@ example shows such a method:
 .Java
 ----
 	public List<Actor> searchForActors(int age, String namePattern) {
-		List<Actor> actors = actorSearchMappingQuery.execute(age, namePattern);
-		return actors;
+		return actorSearchMappingQuery.execute(age, namePattern);
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -8866,9 +8865,10 @@ preamble of the XML configuration file. The following example shows how to do so
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:oxm="http://www.springframework.org/schema/oxm" <1>
-    xsi:schemaLocation="http://www.springframework.org/schema/beans
-      https://www.springframework.org/schema/beans/spring-beans.xsd
-      http://www.springframework.org/schema/oxm https://www.springframework.org/schema/oxm/spring-oxm.xsd"> <2>
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/oxm
+			https://www.springframework.org/schema/oxm/spring-oxm.xsd"> <2>
 ----
 <1> Reference the `oxm` schema.
 <2> Specify the `oxm` schema location.

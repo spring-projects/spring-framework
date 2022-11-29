@@ -962,7 +962,7 @@ endpoints, over WebSocket with <<websocket-fallback>>, as the following example 
 
 		@Override
 		public void registerStompEndpoints(StompEndpointRegistry registry) {
-			registry.addEndpoint("/portfolio").withSockJS();  // <1>
+			registry.addEndpoint("/portfolio").withSockJS(); // <1>
 		}
 
 		@Override
