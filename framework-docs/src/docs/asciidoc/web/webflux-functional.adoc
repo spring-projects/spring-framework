@@ -317,6 +317,7 @@ ServerResponse.ok().hint(Jackson2CodecSupport.JSON_VIEW_HINT, MyJacksonView::cla
 
 We can write a handler function as a lambda, as the following example shows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -328,6 +329,7 @@ HandlerFunction<ServerResponse> helloWorld =
 ----
 val helloWorld = HandlerFunction<ServerResponse> { ServerResponse.ok().bodyValue("Hello World") }
 ----
+--
 
 That is convenient, but in an application we need multiple functions, and multiple inline
 lambda's can get messy.
@@ -335,6 +337,7 @@ Therefore, it is useful to group related handler functions together into a handl
 has a similar role as  `@Controller` in an annotation-based application.
 For example, the following class exposes a reactive `Person` repository:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -409,6 +412,7 @@ Note that `PersonRepository.savePerson(Person)` is a suspending function with no
 <3> `getPerson` is a handler function that returns a single person, identified by the `id` path
 variable. We retrieve that `Person` from the repository and create a JSON response, if it is
 found. If it is not found, we return a 404 Not Found response.
+--
 
 
 [[webflux-fn-handler-validation]]

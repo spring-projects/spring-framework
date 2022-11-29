@@ -156,6 +156,7 @@ application deployed as a WAR), you can declare a Spring-managed bean of type
 Netty global resources are shut down when the Spring `ApplicationContext` is closed,
 as the following example shows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -170,11 +171,13 @@ as the following example shows:
 	@Bean
 	fun reactorResourceFactory() = ReactorResourceFactory()
 ----
+--
 
 You can also choose not to participate in the global Reactor Netty resources. However,
 in this mode, the burden is on you to ensure that all Reactor Netty client and server
 instances use shared resources, as the following example shows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -225,6 +228,7 @@ instances use shared resources, as the following example shows:
 <1> Create resources independent of global ones.
 <2> Use the `ReactorClientHttpConnector` constructor with resource factory.
 <3> Plug the connector into the `WebClient.Builder`.
+--
 
 
 [[webflux-client-builder-reactor-timeout]]
@@ -375,6 +379,7 @@ The following example shows how to customize the JDK `HttpClient`:
 
 The following example shows how to customize Jetty `HttpClient` settings:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -395,6 +400,7 @@ The following example shows how to customize Jetty `HttpClient` settings:
 			.clientConnector(JettyClientHttpConnector(httpClient))
 			.build();
 ----
+--
 
 By default, `HttpClient` creates its own resources (`Executor`, `ByteBufferPool`, `Scheduler`),
 which remain active until the process exits or `stop()` is called.
@@ -404,6 +410,7 @@ ensure that the resources are shut down when the Spring `ApplicationContext` is 
 declaring a Spring-managed bean of type `JettyResourceFactory`, as the following example
 shows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -446,6 +453,7 @@ shows:
 ----
 <1> Use the `JettyClientHttpConnector` constructor with resource factory.
 <2> Plug the connector into the `WebClient.Builder`.
+--
 
 
 

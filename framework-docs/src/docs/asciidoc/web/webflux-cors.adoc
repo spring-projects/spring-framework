@@ -83,6 +83,7 @@ The {api-spring-framework}/web/bind/annotation/CrossOrigin.html[`@CrossOrigin`]
 annotation enables cross-origin requests on annotated controller methods, as the
 following example shows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -121,6 +122,7 @@ following example shows:
 		}
 	}
 ----
+--
 
 By default, `@CrossOrigin` allows:
 
@@ -139,6 +141,7 @@ the `allowOriginPatterns` property may be used to match to a dynamic set of orig
 `@CrossOrigin` is supported at the class level, too, and inherited by all methods.
 The following example specifies a certain domain and sets `maxAge` to an hour:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -177,10 +180,12 @@ The following example specifies a certain domain and sets `maxAge` to an hour:
 		}
 	}
 ----
+--
 
 You can use `@CrossOrigin` at both the class and the method level,
 as the following example shows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -226,6 +231,7 @@ as the following example shows:
 ----
 <1> Using `@CrossOrigin` at the class level.
 <2> Using `@CrossOrigin` at the method level.
+--
 
 
 
