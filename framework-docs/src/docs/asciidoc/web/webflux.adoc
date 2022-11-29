@@ -3398,6 +3398,7 @@ The following example uses the `@InitBinder` annotation:
 		// ...
 	}
 ----
+<1> Using the `@InitBinder` annotation.
 --
 
 Alternatively, when using a `Formatter`-based setup through a shared
