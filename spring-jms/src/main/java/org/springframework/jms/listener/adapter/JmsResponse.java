@@ -91,8 +91,8 @@ public class JmsResponse<T> {
 	public Destination resolveDestination(DestinationResolver destinationResolver, Session session)
 			throws JMSException {
 
-		if (this.destination instanceof Destination) {
-			return (Destination) this.destination;
+		if (this.destination instanceof Destination dest) {
+			return dest;
 		}
 		if (this.destination instanceof DestinationNameHolder nameHolder) {
 			return destinationResolver.resolveDestinationName(session,

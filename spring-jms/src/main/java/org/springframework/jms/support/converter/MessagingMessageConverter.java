@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,11 +101,10 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 
 	@Override
 	public jakarta.jms.Message toMessage(Object object, Session session) throws JMSException, MessageConversionException {
-		if (!(object instanceof Message)) {
+		if (!(object instanceof Message<?> input)) {
 			throw new IllegalArgumentException("Could not convert [" + object + "] - only [" +
 					Message.class.getName() + "] is handled by this converter");
 		}
-		Message<?> input = (Message<?>) object;
 		MessageHeaders headers = input.getHeaders();
 		Object conversionHint = headers.get(AbstractMessageSendingTemplate.CONVERSION_HINT_HEADER);
 		jakarta.jms.Message reply = createMessageForPayload(input.getPayload(), session, conversionHint);

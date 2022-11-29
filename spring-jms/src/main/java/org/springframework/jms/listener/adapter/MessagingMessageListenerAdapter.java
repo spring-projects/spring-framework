@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,9 +86,10 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 	@Override
 	protected Object preProcessResponse(Object result) {
 		MethodParameter returnType = getHandlerMethod().getReturnType();
-		if (result instanceof Message) {
-			return MessageBuilder.fromMessage((Message<?>) result)
-					.setHeader(AbstractMessageSendingTemplate.CONVERSION_HINT_HEADER, returnType).build();
+		if (result instanceof Message<?> message) {
+			return MessageBuilder.fromMessage(message)
+					.setHeader(AbstractMessageSendingTemplate.CONVERSION_HINT_HEADER, returnType)
+					.build();
 		}
 		return MessageBuilder.withPayload(result).setHeader(
 				AbstractMessageSendingTemplate.CONVERSION_HINT_HEADER, returnType).build();

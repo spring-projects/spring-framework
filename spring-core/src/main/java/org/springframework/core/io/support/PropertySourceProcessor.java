@@ -108,14 +108,14 @@ public class PropertySourceProcessor {
 			// We've already added a version, we need to extend it
 			org.springframework.core.env.PropertySource<?> existing = propertySources.get(name);
 			if (existing != null) {
-				PropertySource<?> newSource = (propertySource instanceof ResourcePropertySource ?
-						((ResourcePropertySource) propertySource).withResourceName() : propertySource);
-				if (existing instanceof CompositePropertySource) {
-					((CompositePropertySource) existing).addFirstPropertySource(newSource);
+				PropertySource<?> newSource = (propertySource instanceof ResourcePropertySource rps ?
+						rps.withResourceName() : propertySource);
+				if (existing instanceof CompositePropertySource cps) {
+					cps.addFirstPropertySource(newSource);
 				}
 				else {
-					if (existing instanceof ResourcePropertySource) {
-						existing = ((ResourcePropertySource) existing).withResourceName();
+					if (existing instanceof ResourcePropertySource rps) {
+						existing = rps.withResourceName();
 					}
 					CompositePropertySource composite = new CompositePropertySource(name);
 					composite.addPropertySource(newSource);

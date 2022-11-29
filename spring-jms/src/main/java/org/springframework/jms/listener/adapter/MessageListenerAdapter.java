@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,8 +208,8 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener imp
 				((SessionAwareMessageListener<Message>) delegate).onMessage(message, session);
 				return;
 			}
-			if (delegate instanceof MessageListener) {
-				((MessageListener) delegate).onMessage(message);
+			if (delegate instanceof MessageListener listener) {
+				listener.onMessage(message);
 				return;
 			}
 		}
@@ -232,8 +232,8 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener imp
 	@Override
 	public String getSubscriptionName() {
 		Object delegate = getDelegate();
-		if (delegate != this && delegate instanceof SubscriptionNameProvider) {
-			return ((SubscriptionNameProvider) delegate).getSubscriptionName();
+		if (delegate != this && delegate instanceof SubscriptionNameProvider provider) {
+			return provider.getSubscriptionName();
 		}
 		else {
 			return delegate.getClass().getName();
@@ -296,8 +296,8 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener imp
 		}
 		catch (InvocationTargetException ex) {
 			Throwable targetEx = ex.getTargetException();
-			if (targetEx instanceof JMSException) {
-				throw (JMSException) targetEx;
+			if (targetEx instanceof JMSException jmsException) {
+				throw jmsException;
 			}
 			else {
 				throw new ListenerExecutionFailedException(
