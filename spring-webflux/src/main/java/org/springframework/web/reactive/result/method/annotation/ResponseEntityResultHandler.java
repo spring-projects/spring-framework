@@ -137,8 +137,8 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 
 		return returnValueMono.flatMap(returnValue -> {
 			HttpEntity<?> httpEntity;
-			if (returnValue instanceof HttpEntity) {
-				httpEntity = (HttpEntity<?>) returnValue;
+			if (returnValue instanceof HttpEntity<?> httpEntityReturnValue) {
+				httpEntity = httpEntityReturnValue;
 			}
 			else if (returnValue instanceof ErrorResponse response) {
 				httpEntity = new ResponseEntity<>(response.getBody(), response.getHeaders(), response.getStatusCode());
@@ -146,12 +146,12 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 			else if (returnValue instanceof ProblemDetail detail) {
 				httpEntity = ResponseEntity.of(detail).build();
 			}
-			else if (returnValue instanceof HttpHeaders) {
-				httpEntity = new ResponseEntity<>((HttpHeaders) returnValue, HttpStatus.OK);
+			else if (returnValue instanceof HttpHeaders httpHeader) {
+				httpEntity = new ResponseEntity<>(httpHeader, HttpStatus.OK);
 			}
 			else {
-				throw new IllegalArgumentException(
-						"HttpEntity or HttpHeaders expected but got: " + returnValue.getClass());
+				return Mono.error(() -> new IllegalArgumentException(
+						"HttpEntity or HttpHeaders expected but got: " + returnValue.getClass()));
 			}
 
 			if (httpEntity.getBody() instanceof ProblemDetail detail) {
@@ -175,8 +175,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 			HttpHeaders entityHeaders = httpEntity.getHeaders();
 			HttpHeaders responseHeaders = exchange.getResponse().getHeaders();
 			if (!entityHeaders.isEmpty()) {
-				entityHeaders.entrySet().stream()
-						.forEach(entry -> responseHeaders.put(entry.getKey(), entry.getValue()));
+				responseHeaders.putAll(entityHeaders);
 			}
 
 			if (httpEntity.getBody() == null || returnValue instanceof HttpHeaders) {
@@ -186,11 +185,9 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 			String etag = entityHeaders.getETag();
 			Instant lastModified = Instant.ofEpochMilli(entityHeaders.getLastModified());
 			HttpMethod httpMethod = exchange.getRequest().getMethod();
-			if (SAFE_METHODS.contains(httpMethod) && exchange.checkNotModified(etag, lastModified)) {
-				return exchange.getResponse().setComplete();
-			}
-
-			return writeBody(httpEntity.getBody(), bodyParameter, actualParameter, exchange);
+			return (SAFE_METHODS.contains(httpMethod) && exchange.checkNotModified(etag, lastModified)) ?
+					exchange.getResponse().setComplete()
+					: writeBody(httpEntity.getBody(), bodyParameter, actualParameter, exchange);
 		});
 	}
 
