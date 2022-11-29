@@ -76,8 +76,7 @@ public class ResponseStatusException extends ErrorResponseException {
 	 * @param cause a nested exception (optional)
 	 */
 	public ResponseStatusException(HttpStatusCode status, @Nullable String reason, @Nullable Throwable cause) {
-		super(status, cause);
-		this.reason = reason;
+		this(status, reason, cause, null, null);
 	}
 
 	/**
