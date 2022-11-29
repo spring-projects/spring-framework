@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,8 +303,8 @@ public abstract class AbstractAdaptableMessageListener
 	 * @see #setMessageConverter
 	 */
 	protected Message buildMessage(Session session, Object result) throws JMSException {
-		Object content = preProcessResponse(result instanceof JmsResponse
-				? ((JmsResponse<?>) result).getResponse() : result);
+		Object content = preProcessResponse(result instanceof JmsResponse<?> jmsResponse ?
+				jmsResponse.getResponse() : result);
 
 		MessageConverter converter = getMessageConverter();
 		if (converter != null) {

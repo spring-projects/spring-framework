@@ -77,9 +77,8 @@ public class PropertySourceProcessor {
 		List<String> locations = descriptor.locations();
 		Assert.isTrue(locations.size() > 0, "At least one @PropertySource(value) location is required");
 		boolean ignoreResourceNotFound = descriptor.ignoreResourceNotFound();
-		PropertySourceFactory factory = (descriptor.propertySourceFactory() != null
-				? instantiateClass(descriptor.propertySourceFactory())
-				: DEFAULT_PROPERTY_SOURCE_FACTORY);
+		PropertySourceFactory factory = (descriptor.propertySourceFactory() != null ?
+				instantiateClass(descriptor.propertySourceFactory()) : DEFAULT_PROPERTY_SOURCE_FACTORY);
 
 		for (String location : locations) {
 			try {

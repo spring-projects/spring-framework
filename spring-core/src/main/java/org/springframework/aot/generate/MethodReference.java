@@ -94,8 +94,8 @@ public interface MethodReference {
 		 * @return a new {@link ArgumentCodeGenerator} instance
 		 */
 		static ArgumentCodeGenerator of(Class<?> argumentType, String argumentCode) {
-			return from(candidateType -> (candidateType.equals(ClassName.get(argumentType))
-					? CodeBlock.of(argumentCode) : null));
+			return from(candidateType -> candidateType.equals(ClassName.get(argumentType)) ?
+					CodeBlock.of(argumentCode) : null);
 		}
 
 		/**

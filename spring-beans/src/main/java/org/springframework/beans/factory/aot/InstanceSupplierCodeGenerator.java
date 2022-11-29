@@ -288,9 +288,9 @@ class InstanceSupplierCodeGenerator {
 	}
 
 	private CodeBlock generateWithGeneratorCode(boolean hasArguments, CodeBlock newInstance) {
-		CodeBlock lambdaArguments = (hasArguments
-				? CodeBlock.of("($L, $L)", REGISTERED_BEAN_PARAMETER_NAME, ARGS_PARAMETER_NAME)
-				: CodeBlock.of("($L)", REGISTERED_BEAN_PARAMETER_NAME));
+		CodeBlock lambdaArguments = (hasArguments ?
+				CodeBlock.of("($L, $L)", REGISTERED_BEAN_PARAMETER_NAME, ARGS_PARAMETER_NAME) :
+				CodeBlock.of("($L)", REGISTERED_BEAN_PARAMETER_NAME));
 		Builder code = CodeBlock.builder();
 		code.add("\n");
 		code.indent().indent();
