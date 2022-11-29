@@ -40,7 +40,7 @@ as the following example shows:
 	PersonRepository repository = ...
 	PersonHandler handler = new PersonHandler(repository);
 
-	RouterFunction<ServerResponse> route = route()
+	RouterFunction<ServerResponse> route = route() // <1>
 		.GET("/person/{id}", accept(APPLICATION_JSON), handler::getPerson)
 		.GET("/person", accept(APPLICATION_JSON), handler::listPeople)
 		.POST("/person", handler::createPerson)
@@ -64,6 +64,7 @@ as the following example shows:
 		}
 	}
 ----
+<1> Create router using `route()`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
