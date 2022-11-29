@@ -20,6 +20,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+          cache: 'gradle'
       - name: Download BackportBot
         run: wget https://github.com/spring-io/backport-bot/releases/download/latest/backport-bot-0.0.1-SNAPSHOT.jar
       - name: Backport
