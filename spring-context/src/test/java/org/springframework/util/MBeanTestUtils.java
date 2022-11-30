@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,21 +18,26 @@ package org.springframework.util;
 
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
+import java.util.EnumSet;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
+
+import org.junit.jupiter.api.condition.JRE;
 
 /**
  * Utilities for MBean tests.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  */
 public class MBeanTestUtils {
 
 	/**
-	 * Resets MBeanServerFactory and ManagementFactory to a known consistent state.
-	 * <p>This involves releasing all currently registered MBeanServers and resetting
-	 * the platformMBeanServer to null.
+	 * Resets {@link MBeanServerFactory} to a known consistent state. This involves
+	 * releasing all currently registered MBeanServers.
+	 * <p>On JDK 8 - JDK 16, this method also resets the platformMBeanServer field
+	 * in {@link ManagementFactory} to {@code null}.
 	 */
 	public static synchronized void resetMBeanServers() throws Exception {
 		for (MBeanServer server : MBeanServerFactory.findMBeanServer(null)) {
@@ -46,9 +51,15 @@ public class MBeanTestUtils {
 			}
 		}
 
-		Field field = ManagementFactory.class.getDeclaredField("platformMBeanServer");
-		field.setAccessible(true);
-		field.set(null, null);
+		if (!isCurrentJreWithinRange(JRE.JAVA_16, JRE.OTHER)) {
+			Field field = ManagementFactory.class.getDeclaredField("platformMBeanServer");
+			field.setAccessible(true);
+			field.set(null, null);
+		}
+	}
+
+	static boolean isCurrentJreWithinRange(JRE min, JRE max) {
+		return EnumSet.range(min, max).contains(JRE.currentVersion());
 	}
 
 }
