@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,8 @@ import javax.management.MBeanServerFactory;
 public class MBeanTestUtils {
 
 	/**
-	 * Resets MBeanServerFactory and ManagementFactory to a known consistent state.
-	 * <p>This involves releasing all currently registered MBeanServers and resetting
-	 * the platformMBeanServer to null.
+	 * Resets {@link MBeanServerFactory} to a known consistent state.
+	 * <p>This involves releasing all currently registered MBeanServers.
 	 */
 	public static synchronized void resetMBeanServers() throws Exception {
 		for (MBeanServer server : MBeanServerFactory.findMBeanServer(null)) {
