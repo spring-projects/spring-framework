@@ -412,6 +412,16 @@ public class MediaType extends MimeType implements Serializable {
 	 */
 	public static final String TEXT_XML_VALUE = "text/xml";
 
+	/**
+	 * Public constant media type for {@code text/csv}.
+	 */
+	public static final MediaType TEXT_CSV;
+
+	/**
+	 * A String equivalent of {@link MediaType#TEXT_CSV}.
+	 */
+	public static final String TEXT_CSV_VALUE = "text/csv";
+
 	private static final String PARAM_QUALITY_FACTOR = "q";
 
 
@@ -446,6 +456,7 @@ public class MediaType extends MimeType implements Serializable {
 		TEXT_MARKDOWN = new MediaType("text", "markdown");
 		TEXT_PLAIN = new MediaType("text", "plain");
 		TEXT_XML = new MediaType("text", "xml");
+		TEXT_CSV = new MediaType("text", "csv");
 	}
 
 
