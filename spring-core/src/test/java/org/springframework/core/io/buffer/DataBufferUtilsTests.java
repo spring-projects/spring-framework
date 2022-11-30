@@ -54,7 +54,6 @@ import org.springframework.core.testfixture.io.buffer.AbstractDataBufferAllocati
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willAnswer;
 import static org.mockito.Mockito.mock;
@@ -115,7 +114,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 				DataBufferUtils.readByteChannel(() -> channel, super.bufferFactory, 3);
 
 		StepVerifier.create(result)
-				.consumeNextWith(stringConsumer(""))
+				.consumeNextWith(stringConsumer("foo"))
 				.expectError(IOException.class)
 				.verify(Duration.ofSeconds(3));
 	}
@@ -172,18 +171,19 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 			byteBuffer.put("foo".getBytes(StandardCharsets.UTF_8));
 			long pos = invocation.getArgument(1);
 			assertThat(pos).isEqualTo(0);
-			CompletionHandler<Integer, ByteBuffer> completionHandler = invocation.getArgument(3);
-			completionHandler.completed(3, byteBuffer);
+			Object attachment = invocation.getArgument(2);
+			CompletionHandler<Integer, Object> completionHandler = invocation.getArgument(3);
+			completionHandler.completed(3, attachment);
 			return null;
 		}).willAnswer(invocation -> {
-			ByteBuffer byteBuffer = invocation.getArgument(0);
-			CompletionHandler<Integer, ByteBuffer> completionHandler = invocation.getArgument(3);
-			completionHandler.failed(new IOException(), byteBuffer);
+			Object attachment = invocation.getArgument(2);
+			CompletionHandler<Integer, Object> completionHandler = invocation.getArgument(3);
+			completionHandler.failed(new IOException(), attachment);
 			return null;
 		})
 		.given(channel).read(any(), anyLong(), any(), any());
 
-		Flux<DataBuffer> result =
+		Flux<DataBuffer> result=
 				DataBufferUtils.readAsynchronousFileChannel(() -> channel, super.bufferFactory, 3);
 
 		StepVerifier.create(result)
@@ -474,24 +474,21 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		willAnswer(invocation -> {
 			ByteBuffer buffer = invocation.getArgument(0);
 			long pos = invocation.getArgument(1);
-			CompletionHandler<Integer, ByteBuffer> completionHandler = invocation.getArgument(3);
-
 			assertThat(pos).isEqualTo(0);
-
+			Object attachment = invocation.getArgument(2);
+			CompletionHandler<Integer, Object> completionHandler = invocation.getArgument(3);
 			int written = buffer.remaining();
 			buffer.position(buffer.limit());
-			completionHandler.completed(written, buffer);
-
+			completionHandler.completed(written, attachment);
 			return null;
 		})
 		.willAnswer(invocation -> {
-			ByteBuffer buffer = invocation.getArgument(0);
-			CompletionHandler<Integer, ByteBuffer> completionHandler =
-					invocation.getArgument(3);
-			completionHandler.failed(new IOException(), buffer);
+			Object attachment = invocation.getArgument(2);
+			CompletionHandler<Integer, Object> completionHandler = invocation.getArgument(3);
+			completionHandler.failed(new IOException(), attachment);
 			return null;
 		})
-		.given(channel).write(isA(ByteBuffer.class), anyLong(), isA(ByteBuffer.class), isA(CompletionHandler.class));
+		.given(channel).write(any(), anyLong(), any(), any());
 
 		Flux<DataBuffer> writeResult = DataBufferUtils.write(flux, channel);
 		StepVerifier.create(writeResult)

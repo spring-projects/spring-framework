@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.resource;
 
 import java.io.StringWriter;
-import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -88,9 +87,8 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 							.read(outputResource, bufferFactory, StreamUtils.BUFFER_SIZE);
 					return DataBufferUtils.join(flux)
 							.flatMap(dataBuffer -> {
-								CharBuffer charBuffer = DEFAULT_CHARSET.decode(dataBuffer.asByteBuffer());
+								String cssContent = dataBuffer.toString(DEFAULT_CHARSET);
 								DataBufferUtils.release(dataBuffer);
-								String cssContent = charBuffer.toString();
 								return transformContent(cssContent, outputResource, transformerChain, exchange);
 							});
 				});

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.core.io.buffer;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -649,6 +650,71 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 		release(buffer);
 	}
 
+	@ParameterizedDataBufferAllocatingTest
+	void toByteBufferDestination(DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer buffer = createDataBuffer(4);
+		buffer.write(new byte[]{'a', 'b', 'c'});
+
+		ByteBuffer byteBuffer = createByteBuffer(2);
+		buffer.toByteBuffer(1, byteBuffer, 0, 2);
+		assertThat(byteBuffer.capacity()).isEqualTo(2);
+		assertThat(byteBuffer.remaining()).isEqualTo(2);
+
+		byte[] resultBytes = new byte[2];
+		byteBuffer.get(resultBytes);
+		assertThat(resultBytes).isEqualTo(new byte[]{'b', 'c'});
+
+		assertThatExceptionOfType(IndexOutOfBoundsException.class)
+				.isThrownBy(() -> buffer.toByteBuffer(0, byteBuffer, 0, 3));
+
+		release(buffer);
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void readableByteBuffers(DataBufferFactory bufferFactory) throws IOException {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer dataBuffer = this.bufferFactory.join(Arrays.asList(stringBuffer("a"),
+				stringBuffer("b"), stringBuffer("c")));
+
+		byte[] result = new byte[3];
+		try (var iterator = dataBuffer.readableByteBuffers()) {
+			assertThat(iterator).hasNext();
+			int i = 0;
+			while (iterator.hasNext()) {
+				ByteBuffer byteBuffer = iterator.next();
+				int len = byteBuffer.remaining();
+				byteBuffer.get(result, i, len);
+				i += len;
+				assertThatException().isThrownBy(() -> byteBuffer.put((byte) 'd'));
+			}
+		}
+
+		assertThat(result).containsExactly('a', 'b', 'c');
+
+		release(dataBuffer);
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void writableByteBuffers(DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer dataBuffer = this.bufferFactory.allocateBuffer(1);
+
+		try (DataBuffer.ByteBufferIterator iterator = dataBuffer.writableByteBuffers()) {
+			assertThat(iterator).hasNext();
+			ByteBuffer byteBuffer = iterator.next();
+			byteBuffer.put((byte) 'a');
+			dataBuffer.writePosition(1);
+
+			assertThat(iterator).isExhausted();
+		}
+		assertThat(dataBuffer.read()).isEqualTo((byte) 'a');
+
+		release(dataBuffer);
+	}
 
 	@ParameterizedDataBufferAllocatingTest
 	void indexOf(DataBufferFactory bufferFactory) {
@@ -738,6 +804,9 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 	@ParameterizedDataBufferAllocatingTest
 	@SuppressWarnings("deprecation")
 	void retainedSlice(DataBufferFactory bufferFactory) {
+		assumeFalse(bufferFactory instanceof Netty5DataBufferFactory,
+				"Netty 5 does not support retainedSlice");
+
 		super.bufferFactory = bufferFactory;
 
 		DataBuffer buffer = createDataBuffer(3);
@@ -757,12 +826,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 		result = new byte[2];
 		slice.read(result);
 
-		if (!(bufferFactory instanceof Netty5DataBufferFactory)) {
-			assertThat(result).isEqualTo(new byte[]{'b', 'c'});
-		}
-		else {
-			assertThat(result).isEqualTo(new byte[]{'b', 0});
-		}
+		assertThat(result).isEqualTo(new byte[]{'b', 'c'});
 
 		release(buffer, slice);
 	}
@@ -822,7 +886,6 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 
 		assertThat(bytes).isEqualTo(new byte[]{'b', 'c'});
 
-
 		DataBuffer buffer2 = createDataBuffer(1);
 		buffer2.write(new byte[]{'a'});
 		DataBuffer split2 = buffer2.split(1);
@@ -853,7 +916,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 		byte[] bytes = new byte[3];
 		composite.read(bytes);
 
-		assertThat(bytes).isEqualTo(new byte[] {'a','b','c'});
+		assertThat(bytes).isEqualTo(new byte[]{'a', 'b', 'c'});
 
 		release(composite);
 	}

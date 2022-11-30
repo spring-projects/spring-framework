@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.core.io.buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.NoSuchElementException;
 import java.util.function.IntPredicate;
 
 import org.springframework.lang.Nullable;
@@ -304,9 +305,14 @@ public class DefaultDataBuffer implements DataBuffer {
 	}
 
 	@Override
-	public DefaultDataBuffer write(DataBuffer... buffers) {
-		if (!ObjectUtils.isEmpty(buffers)) {
-			write(Arrays.stream(buffers).map(DataBuffer::toByteBuffer).toArray(ByteBuffer[]::new));
+	public DefaultDataBuffer write(DataBuffer... dataBuffers) {
+		if (!ObjectUtils.isEmpty(dataBuffers)) {
+			ByteBuffer[] byteBuffers = new ByteBuffer[dataBuffers.length];
+			for (int i = 0; i < dataBuffers.length; i++) {
+				byteBuffers[i] = ByteBuffer.allocate(dataBuffers[i].readableByteCount());
+				dataBuffers[i].toByteBuffer(byteBuffers[i]);
+			}
+			write(byteBuffers);
 		}
 		return this;
 	}
@@ -388,6 +394,7 @@ public class DefaultDataBuffer implements DataBuffer {
 	}
 
 	@Override
+	@Deprecated
 	public ByteBuffer toByteBuffer(int index, int length) {
 		checkIndex(index, length);
 
@@ -396,6 +403,29 @@ public class DefaultDataBuffer implements DataBuffer {
 		readOnly.clear().position(index).limit(index + length);
 		copy.put(readOnly);
 		return copy.flip();
+	}
+
+	@Override
+	public void toByteBuffer(int srcPos, ByteBuffer dest, int destPos, int length) {
+		checkIndex(srcPos, length);
+		Assert.notNull(dest, "Dest must not be null");
+
+		dest = dest.duplicate().clear();
+		dest.put(destPos, this.byteBuffer, srcPos, length);
+	}
+
+	@Override
+	public DataBuffer.ByteBufferIterator readableByteBuffers() {
+		ByteBuffer readOnly = this.byteBuffer.asReadOnlyBuffer();
+		readOnly.clear().position(this.readPosition).limit(this.writePosition - this.readPosition);
+		return new ByteBufferIterator(readOnly);
+	}
+
+	@Override
+	public DataBuffer.ByteBufferIterator writableByteBuffers() {
+		ByteBuffer duplicate = this.byteBuffer.duplicate();
+		duplicate.clear().position(this.writePosition).limit(this.capacity - this.writePosition);
+		return new ByteBufferIterator(duplicate);
 	}
 
 	@Override
@@ -509,6 +539,39 @@ public class DefaultDataBuffer implements DataBuffer {
 		@SuppressWarnings("deprecation")
 		public DefaultDataBuffer capacity(int newCapacity) {
 			throw new UnsupportedOperationException("Changing the capacity of a sliced buffer is not supported");
+		}
+	}
+
+
+	private static final class ByteBufferIterator implements DataBuffer.ByteBufferIterator {
+
+		private final ByteBuffer buffer;
+
+		private boolean hasNext = true;
+
+
+		public ByteBufferIterator(ByteBuffer buffer) {
+			this.buffer = buffer;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return this.hasNext;
+		}
+
+		@Override
+		public ByteBuffer next() {
+			if (!this.hasNext) {
+				throw new NoSuchElementException();
+			}
+			else {
+				this.hasNext = false;
+				return this.buffer;
+			}
+		}
+
+		@Override
+		public void close() {
 		}
 	}
 

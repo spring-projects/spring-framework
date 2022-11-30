@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,14 +122,20 @@ class JdkClientHttpRequest extends AbstractClientHttpRequest {
 
 	private HttpRequest.BodyPublisher toBodyPublisher(Publisher<? extends DataBuffer> body) {
 		Publisher<ByteBuffer> byteBufferBody = (body instanceof Mono ?
-				Mono.from(body).map(DataBuffer::toByteBuffer) :
-				Flux.from(body).map(DataBuffer::toByteBuffer));
+				Mono.from(body).map(this::toByteBuffer) :
+				Flux.from(body).map(this::toByteBuffer));
 
 		Flow.Publisher<ByteBuffer> bodyFlow = JdkFlowAdapter.publisherToFlowPublisher(byteBufferBody);
 
 		return (getHeaders().getContentLength() > 0 ?
 				HttpRequest.BodyPublishers.fromPublisher(bodyFlow, getHeaders().getContentLength()) :
 				HttpRequest.BodyPublishers.fromPublisher(bodyFlow));
+	}
+
+	private ByteBuffer toByteBuffer(DataBuffer dataBuffer) {
+		ByteBuffer byteBuffer = ByteBuffer.allocate(dataBuffer.readableByteCount());
+		dataBuffer.toByteBuffer(byteBuffer);
+		return byteBuffer;
 	}
 
 	@Override

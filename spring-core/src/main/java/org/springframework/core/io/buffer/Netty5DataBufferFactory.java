@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,7 +127,9 @@ public class Netty5DataBufferFactory implements DataBufferFactory {
 			return netty5DataBuffer.getNativeBuffer();
 		}
 		else {
-			return DefaultBufferAllocators.preferredAllocator().copyOf(buffer.toByteBuffer());
+			ByteBuffer byteBuffer = ByteBuffer.allocate(buffer.readableByteCount());
+			buffer.toByteBuffer(byteBuffer);
+			return DefaultBufferAllocators.preferredAllocator().copyOf(byteBuffer);
 		}
 	}
 

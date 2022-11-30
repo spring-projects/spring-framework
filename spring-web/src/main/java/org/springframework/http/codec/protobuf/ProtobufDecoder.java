@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,8 +151,9 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 
 		try {
 			Message.Builder builder = getMessageBuilder(targetType.toClass());
-			ByteBuffer buffer = dataBuffer.toByteBuffer();
-			builder.mergeFrom(CodedInputStream.newInstance(buffer), this.extensionRegistry);
+			ByteBuffer byteBuffer = ByteBuffer.allocate(dataBuffer.readableByteCount());
+			dataBuffer.toByteBuffer(byteBuffer);
+			builder.mergeFrom(CodedInputStream.newInstance(byteBuffer), this.extensionRegistry);
 			return builder.build();
 		}
 		catch (IOException ex) {
@@ -236,7 +237,9 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 					this.messageBytesToRead -= chunkBytesToRead;
 
 					if (this.messageBytesToRead == 0) {
-						CodedInputStream stream = CodedInputStream.newInstance(this.output.toByteBuffer());
+						ByteBuffer byteBuffer = ByteBuffer.allocate(this.output.readableByteCount());
+						this.output.toByteBuffer(byteBuffer);
+						CodedInputStream stream = CodedInputStream.newInstance(byteBuffer);
 						DataBufferUtils.release(this.output);
 						this.output = null;
 						Message message = getMessageBuilder(this.elementType.toClass())
