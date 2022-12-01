@@ -129,6 +129,11 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 				this.response.addHeader(headerName, headerValue);
 			}
 		});
+
+		adaptHeaders(false);
+	}
+
+	protected void adaptHeaders(boolean removeAdaptedHeaders) {
 		MediaType contentType = null;
 		try {
 			contentType = getHeaders().getContentType();
@@ -140,19 +145,25 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 		if (this.response.getContentType() == null && contentType != null) {
 			this.response.setContentType(contentType.toString());
 		}
+
 		Charset charset = (contentType != null ? contentType.getCharset() : null);
 		if (this.response.getCharacterEncoding() == null && charset != null) {
 			this.response.setCharacterEncoding(charset.name());
 		}
+
 		long contentLength = getHeaders().getContentLength();
 		if (contentLength != -1) {
 			this.response.setContentLengthLong(contentLength);
+		}
+
+		if (removeAdaptedHeaders) {
+			getHeaders().remove(HttpHeaders.CONTENT_TYPE);
+			getHeaders().remove(HttpHeaders.CONTENT_LENGTH);
 		}
 	}
 
 	@Override
 	protected void applyCookies() {
-
 		// Servlet Cookie doesn't support same site:
 		// https://github.com/eclipse-ee4j/servlet-api/issues/175
 

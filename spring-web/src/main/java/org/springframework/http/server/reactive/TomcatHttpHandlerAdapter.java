@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,7 +36,6 @@ import org.apache.coyote.Response;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
@@ -49,6 +47,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Violeta Georgieva
  * @author Brian Clozel
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 5.0
  * @see org.springframework.web.server.adapter.AbstractReactiveWebInitializer
  */
@@ -193,31 +192,7 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		@Override
 		protected void applyHeaders() {
-			HttpServletResponse response = getNativeResponse();
-
-			MediaType contentType = null;
-			try {
-				contentType = getHeaders().getContentType();
-			}
-			catch (Exception ex) {
-				String rawContentType = getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
-				response.setContentType(rawContentType);
-			}
-			if (response.getContentType() == null && contentType != null) {
-				response.setContentType(contentType.toString());
-			}
-			getHeaders().remove(HttpHeaders.CONTENT_TYPE);
-
-			Charset charset = (contentType != null ? contentType.getCharset() : null);
-			if (response.getCharacterEncoding() == null && charset != null) {
-				response.setCharacterEncoding(charset.name());
-			}
-
-			long contentLength = getHeaders().getContentLength();
-			if (contentLength != -1) {
-				response.setContentLengthLong(contentLength);
-			}
-			getHeaders().remove(HttpHeaders.CONTENT_LENGTH);
+			adaptHeaders(true);
 		}
 
 		@Override

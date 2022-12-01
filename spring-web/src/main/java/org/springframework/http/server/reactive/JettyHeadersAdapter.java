@@ -45,8 +45,8 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 	private final HttpFields.Mutable headers;
 
 
-	JettyHeadersAdapter(HttpFields headers) {
-		this.headers = (headers instanceof HttpFields.Mutable mutable ? mutable : HttpFields.build(headers));
+	JettyHeadersAdapter(HttpFields.Mutable headers) {
+		this.headers = headers;
 	}
 
 
