@@ -53,7 +53,7 @@ class DeclarativeRuntimeHintsTests extends AbstractAotTests {
 		// @Reflective
 		assertReflectionRegistered(testClass);
 
-		// @@RegisterReflectionForBinding
+		// @RegisterReflectionForBinding
 		assertReflectionRegistered(SampleClassWithGetter.class);
 		assertReflectionRegistered(String.class);
 		assertThat(reflection().onMethod(SampleClassWithGetter.class, "getName")).accepts(this.runtimeHints);

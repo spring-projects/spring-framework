@@ -17,11 +17,11 @@ If you are not familiar with Micrometer Observation, here's a quick summary of t
 * `Observation` is the actual recording of something happening in your application. This is processed by `ObservationHandler` implementations to produce metrics or traces.
 * Each observation has a corresponding `ObservationContext` implementation; this type holds all the relevant information for extracting metadata for it.
   In the case of an HTTP server observation, the context implementation could hold the HTTP request, the HTTP response, any Exception thrown during processing...
-* Each `Observation` holds `KeyValues` metadata. In the case of an server HTTP observation, this could be the HTTP request method, the HTTP response status...
+* Each `Observation` holds `KeyValues` metadata. In the case of a server HTTP observation, this could be the HTTP request method, the HTTP response status...
   This metadata is contributed by `ObservationConvention` implementations which should declare the type of `ObservationContext` they support.
-* `KeyValues` are said to be "low cardinality" if there is a low, bounded number of possible values for the `KeyValue` tuple (HTTP methods is a good example).
+* `KeyValues` are said to be "low cardinality" if there is a low, bounded number of possible values for the `KeyValue` tuple (HTTP method is a good example).
   Low cardinality values are contributed to metrics only.
-  "High cardinality" are on the other hand unbounded (for example, HTTP request URIs) and are only contributed to Traces.
+  High cardinality values are on the other hand unbounded (for example, HTTP request URIs) and are only contributed to Traces.
 * An `ObservationDocumentation` documents all observations in a particular domain, listing the expected key names and their meaning.
 
 
@@ -48,7 +48,7 @@ If you want full control, you can then implement the entire convention contract 
 
 include::code:CustomServerRequestObservationConvention[]
 
-You can also similar goals using a custom `ObservationFilter` - adding or removing key values for an observation.
+You can also achieve similar goals using a custom `ObservationFilter` - adding or removing key values for an observation.
 Filters do not replace the default convention and are used as a post-processing component.
 
 include::code:ServerRequestObservationFilter[]
@@ -74,7 +74,7 @@ By default, the following `KeyValues` are created:
 |===
 |Name | Description
 |`exception` _(required)_|Name of the exception thrown during the exchange, or `KeyValue#NONE_VALUE`} if no exception happened.
-|`method` _(required)_|Name of HTTP request method or `KeyValue#NONE_VALUE` if the request was not received properly.
+|`method` _(required)_|Name of HTTP request method or `"none"` if the request was not received properly.
 |`outcome` _(required)_|Outcome of the HTTP server exchange.
 |`status` _(required)_|HTTP response raw status code, or `"UNKNOWN"` if no response was created.
 |`uri` _(required)_|URI pattern for the matching handler if available, falling back to `REDIRECTION` for 3xx responses, `NOT_FOUND` for 404 responses, `root` for requests with no path info, and `UNKNOWN` for all other requests.
@@ -100,8 +100,8 @@ By default, the following `KeyValues` are created:
 [cols="a,a"]
 |===
 |Name | Description
-|`exception` _(required)_|Name of the exception thrown during the exchange, or `KeyValue#NONE_VALUE` if no exception happened.
-|`method` _(required)_|Name of HTTP request method or `KeyValue#NONE_VALUE` if the request was not received properly.
+|`exception` _(required)_|Name of the exception thrown during the exchange, or `"none"` if no exception happened.
+|`method` _(required)_|Name of HTTP request method or `"none"` if the request was not received properly.
 |`outcome` _(required)_|Outcome of the HTTP server exchange.
 |`status` _(required)_|HTTP response raw status code, or `"UNKNOWN"` if no response was created.
 |`uri` _(required)_|URI pattern for the matching handler if available, falling back to `REDIRECTION` for 3xx responses, `NOT_FOUND` for 404 responses, `root` for requests with no path info, and `UNKNOWN` for all other requests.
@@ -122,7 +122,7 @@ By default, the following `KeyValues` are created:
 HTTP client exchanges observations are created with the name `"http.client.requests"` for blocking and reactive clients.
 Unlike their server counterparts, the instrumentation is implemented directly in the client so the only required step is to configure an `ObservationRegistry` on the client.
 
-[[integration.observability.http-server.resttemplate]]
+[[integration.observability.http-client.resttemplate]]
 === RestTemplate
 
 Instrumentation is using the `org.springframework.http.client.observation.ClientRequestObservationConvention` by default, backed by the `ClientRequestObservationContext`.
@@ -131,11 +131,11 @@ Instrumentation is using the `org.springframework.http.client.observation.Client
 [cols="a,a"]
 |===
 |Name | Description
-|`exception` _(required)_|Name of the exception thrown during the exchange, or `KeyValue#NONE_VALUE` if no exception happened.
-|`method` _(required)_|Name of HTTP request method or `KeyValue#NONE_VALUE` if the request could not be created.
+|`exception` _(required)_|Name of the exception thrown during the exchange, or `"none"` if no exception happened.
+|`method` _(required)_|Name of HTTP request method or `"none"` if the request could not be created.
 |`outcome` _(required)_|Outcome of the HTTP client exchange.
 |`status` _(required)_|HTTP response raw status code, or `"IO_ERROR"` in case of `IOException`, or `"CLIENT_ERROR"` if no response was received.
-|`uri` _(required)_|URI template used for HTTP request, or `KeyValue#NONE_VALUE` if none was provided.
+|`uri` _(required)_|URI template used for HTTP request, or `"none"` if none was provided.
 |===
 
 .High cardinality Keys
@@ -148,7 +148,7 @@ Instrumentation is using the `org.springframework.http.client.observation.Client
 
 
 
-[[integration.observability.http-server.webclient]]
+[[integration.observability.http-client.webclient]]
 === WebClient
 
 Instrumentation is using the `org.springframework.web.reactive.function.client.ClientRequestObservationConvention` by default, backed by the `ClientRequestObservationContext`.
@@ -157,11 +157,11 @@ Instrumentation is using the `org.springframework.web.reactive.function.client.C
 [cols="a,a"]
 |===
 |Name | Description
-|`exception` _(required)_|Name of the exception thrown during the exchange, or `KeyValue#NONE_VALUE` if no exception happened.
-|`method` _(required)_|Name of HTTP request method or `KeyValue#NONE_VALUE` if the request could not be created.
+|`exception` _(required)_|Name of the exception thrown during the exchange, or `"none"` if no exception happened.
+|`method` _(required)_|Name of HTTP request method or `"none"` if the request could not be created.
 |`outcome` _(required)_|Outcome of the HTTP client exchange.
 |`status` _(required)_|HTTP response raw status code, or `"IO_ERROR"` in case of `IOException`, or `"CLIENT_ERROR"` if no response was received.
-|`uri` _(required)_|URI template used for HTTP request, or `KeyValue#NONE_VALUE` if none was provided.
+|`uri` _(required)_|URI template used for HTTP request, or `"none"` if none was provided.
 |===
 
 .High cardinality Keys
