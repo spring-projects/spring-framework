@@ -87,8 +87,7 @@ class BeanDefinitionMethodGeneratorFactory {
 	 * {@link BeanRegistrationAotProcessor} provided contributions.
 	 * @param registeredBean the registered bean
 	 * @param currentPropertyName the property name that this bean belongs to
-	 * @return a new {@link BeanDefinitionMethodGenerator} instance or
-	 * {@code null}
+	 * @return a new {@link BeanDefinitionMethodGenerator} instance or {@code null}
 	 */
 	@Nullable
 	BeanDefinitionMethodGenerator getBeanDefinitionMethodGenerator(
@@ -97,8 +96,7 @@ class BeanDefinitionMethodGeneratorFactory {
 		if (isExcluded(registeredBean)) {
 			return null;
 		}
-		List<BeanRegistrationAotContribution> contributions = getAotContributions(
-				registeredBean);
+		List<BeanRegistrationAotContribution> contributions = getAotContributions(registeredBean);
 		return new BeanDefinitionMethodGenerator(this, registeredBean,
 				currentPropertyName, contributions);
 	}
@@ -110,8 +108,7 @@ class BeanDefinitionMethodGeneratorFactory {
 	 * {@link BeanDefinitionMethodGenerator} will include all
 	 * {@link BeanRegistrationAotProcessor} provided contributions.
 	 * @param registeredBean the registered bean
-	 * @return a new {@link BeanDefinitionMethodGenerator} instance or
-	 * {@code null}
+	 * @return a new {@link BeanDefinitionMethodGenerator} instance or {@code null}
 	 */
 	@Nullable
 	BeanDefinitionMethodGenerator getBeanDefinitionMethodGenerator(RegisteredBean registeredBean) {
@@ -142,19 +139,16 @@ class BeanDefinitionMethodGeneratorFactory {
 		}
 		if (BeanRegistrationAotProcessor.class.isAssignableFrom(beanClass)) {
 			BeanRegistrationAotProcessor processor = this.aotProcessors.findByBeanName(registeredBean.getBeanName());
-			return (processor == null) || processor.isBeanExcludedFromAotProcessing();
+			return (processor == null || processor.isBeanExcludedFromAotProcessing());
 		}
 		return false;
 	}
 
-	private List<BeanRegistrationAotContribution> getAotContributions(
-			RegisteredBean registeredBean) {
-
+	private List<BeanRegistrationAotContribution> getAotContributions(RegisteredBean registeredBean) {
 		String beanName = registeredBean.getBeanName();
 		List<BeanRegistrationAotContribution> contributions = new ArrayList<>();
 		for (BeanRegistrationAotProcessor aotProcessor : this.aotProcessors) {
-			BeanRegistrationAotContribution contribution = aotProcessor
-					.processAheadOfTime(registeredBean);
+			BeanRegistrationAotContribution contribution = aotProcessor.processAheadOfTime(registeredBean);
 			if (contribution != null) {
 				logger.trace(LogMessage.format(
 						"Adding bean registration AOT contribution %S from %S to '%S'",
