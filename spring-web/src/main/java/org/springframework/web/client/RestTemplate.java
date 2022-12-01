@@ -79,14 +79,14 @@ import org.springframework.web.util.UriTemplateHandler;
  * method API over underlying HTTP client libraries such as the JDK
  * {@code HttpURLConnection}, Apache HttpComponents, and others. RestTemplate
  * offers templates for common scenarios by HTTP method, in addition to the
- * generalized {@code exchange} and {@code execute} methods that support of
+ * generalized {@code exchange} and {@code execute} methods that support
  * less frequent cases.
  *
  * <p>RestTemplate is typically used as a shared component. However, its
  * configuration does not support concurrent modification, and as such its
  * configuration is typically prepared on startup. If necessary, you can create
  * multiple, differently configured RestTemplate instances on startup. Such
- * instances may use the same the underlying {@link ClientHttpRequestFactory}
+ * instances may use the same underlying {@link ClientHttpRequestFactory}
  * if they need to share HTTP client resources.
  *
  * <p><strong>NOTE:</strong> As of 5.0 this class is in maintenance mode, with

@@ -199,7 +199,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	 * <p>Default is Hibernate Validator's own internal use of standard Java reflection,
 	 * with an additional {@link KotlinReflectionParameterNameDiscoverer} if Kotlin
 	 * is present. This may be overridden with a custom subclass or a Spring-controlled
-	 * {@link org.springframework.core.DefaultParameterNameDiscoverer} if necessary,
+	 * {@link org.springframework.core.DefaultParameterNameDiscoverer} if necessary.
 	 */
 	public void setParameterNameDiscoverer(ParameterNameDiscoverer parameterNameDiscoverer) {
 		this.parameterNameDiscoverer = parameterNameDiscoverer;

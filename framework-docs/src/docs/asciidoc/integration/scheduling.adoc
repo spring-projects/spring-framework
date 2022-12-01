@@ -724,7 +724,7 @@ The specified range is inclusive.
 * Following a range (or `*`) with `/` specifies the interval of the number's value through the range.
 * English names can also be used for the month and day-of-week fields.
 Use the first three letters of the particular day or month (case does not matter).
-* The day-of-month and day-of-week fields can contain a `L` character, which has a different meaning
+* The day-of-month and day-of-week fields can contain an `L` character, which has a different meaning.
 ** In the day-of-month field, `L` stands for _the last day of the month_.
 If followed by a negative offset (that is, `L-n`), it means _``n``th-to-last day of the month_.
 ** In the day-of-week field, `L` stands for _the last day of the week_.

@@ -48,20 +48,19 @@ public class CustomServerRequestObservationConvention implements ServerRequestOb
 		return KeyValues.of(httpUrl(context));
 	}
 
-
-	protected KeyValue method(ServerRequestObservationContext context) {
+	private KeyValue method(ServerRequestObservationContext context) {
 		// You should reuse as much as possible the corresponding ObservationDocumentation for key names
 		return KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.METHOD, context.getCarrier().getMethod());
 	}
 
 	// @fold:on // status(), exception(), httpUrl()...
+	private KeyValue status(ServerRequestObservationContext context) {
+		return KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.STATUS, String.valueOf(context.getResponse().getStatus()));
+	}
+
 	private KeyValue exception(ServerRequestObservationContext context) {
 		String exception = (context.getError() != null) ? context.getError().getClass().getSimpleName() : KeyValue.NONE_VALUE;
 		return KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.EXCEPTION, exception);
-	}
-
-	private KeyValue status(ServerRequestObservationContext context) {
-		return KeyValue.of(ServerHttpObservationDocumentation.LowCardinalityKeyNames.STATUS, String.valueOf(context.getResponse().getStatus()));
 	}
 
 	private KeyValue httpUrl(ServerRequestObservationContext context) {

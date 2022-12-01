@@ -30,7 +30,7 @@ public class ExtendedServerRequestObservationConvention extends DefaultServerReq
 		return super.getLowCardinalityKeyValues(context).and(custom(context));
 	}
 
-	protected KeyValue custom(ServerRequestObservationContext context) {
+	private KeyValue custom(ServerRequestObservationContext context) {
 		return KeyValue.of("custom.method", context.getCarrier().getMethod());
 	}
 
