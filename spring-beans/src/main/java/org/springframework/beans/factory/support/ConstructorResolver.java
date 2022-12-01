@@ -232,11 +232,14 @@ class ConstructorResolver {
 				Class<?>[] paramTypes = candidate.getParameterTypes();
 				if (resolvedValues != null) {
 					try {
-						String[] paramNames = ConstructorPropertiesChecker.evaluate(candidate, parameterCount);
-						if (paramNames == null) {
-							ParameterNameDiscoverer pnd = this.beanFactory.getParameterNameDiscoverer();
-							if (pnd != null) {
-								paramNames = pnd.getParameterNames(candidate);
+						String[] paramNames = null;
+						if (resolvedValues.containsNamedArgument()) {
+							paramNames = ConstructorPropertiesChecker.evaluate(candidate, parameterCount);
+							if (paramNames == null) {
+								ParameterNameDiscoverer pnd = this.beanFactory.getParameterNameDiscoverer();
+								if (pnd != null) {
+									paramNames = pnd.getParameterNames(candidate);
+								}
 							}
 						}
 						argsHolder = createArgumentArray(beanName, mbd, resolvedValues, bw, paramTypes, paramNames,
@@ -536,9 +539,11 @@ class ConstructorResolver {
 						// Resolved constructor arguments: type conversion and/or autowiring necessary.
 						try {
 							String[] paramNames = null;
-							ParameterNameDiscoverer pnd = this.beanFactory.getParameterNameDiscoverer();
-							if (pnd != null) {
-								paramNames = pnd.getParameterNames(candidate);
+							if (resolvedValues != null && resolvedValues.containsNamedArgument()) {
+								ParameterNameDiscoverer pnd = this.beanFactory.getParameterNameDiscoverer();
+								if (pnd != null) {
+									paramNames = pnd.getParameterNames(candidate);
+								}
 							}
 							argsHolder = createArgumentArray(beanName, mbd, resolvedValues, bw,
 									paramTypes, paramNames, candidate, autowiring, candidates.size() == 1);
