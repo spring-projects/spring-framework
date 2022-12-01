@@ -115,9 +115,9 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 		return setStatusCode(statusCode != null ? HttpStatusCode.valueOf(statusCode) : null);
 	}
 
+	@Deprecated
 	@Override
 	@Nullable
-	@Deprecated
 	public Integer getRawStatusCode() {
 		return this.statusCode != null ? this.statusCode.value() : null;
 	}

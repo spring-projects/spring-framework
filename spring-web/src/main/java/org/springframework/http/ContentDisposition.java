@@ -236,9 +236,9 @@ public final class ContentDisposition {
 		result = 31 * result + ObjectUtils.nullSafeHashCode(this.filename);
 		result = 31 * result + ObjectUtils.nullSafeHashCode(this.charset);
 		result = 31 * result + ObjectUtils.nullSafeHashCode(this.size);
-		result = 31 * result + (this.creationDate != null ? this.creationDate.hashCode() : 0);
-		result = 31 * result + (this.modificationDate != null ? this.modificationDate.hashCode() : 0);
-		result = 31 * result + (this.readDate != null ? this.readDate.hashCode() : 0);
+		result = 31 * result + ObjectUtils.nullSafeHashCode(this.creationDate);
+		result = 31 * result + ObjectUtils.nullSafeHashCode(this.modificationDate);
+		result = 31 * result + ObjectUtils.nullSafeHashCode(this.readDate);
 		return result;
 	}
 
