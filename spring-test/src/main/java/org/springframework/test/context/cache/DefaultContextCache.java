@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -203,8 +203,8 @@ public class DefaultContextCache implements ContextCache {
 		// Physically remove and close leaf nodes first (i.e., on the way back up the
 		// stack as opposed to prior to the recursive call).
 		ApplicationContext context = this.contextMap.remove(key);
-		if (context instanceof ConfigurableApplicationContext) {
-			((ConfigurableApplicationContext) context).close();
+		if (context instanceof ConfigurableApplicationContext cac) {
+			cac.close();
 		}
 		removedContexts.add(key);
 	}
