@@ -140,6 +140,21 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	}
 
 	/**
+	 * As of version 6.0, setting this property has no effect.
+	 * <p>To change the socket read timeout, use {@link SocketConfig.Builder#setSoTimeout(Timeout)},
+	 * supply the resulting {@link SocketConfig} to
+	 * {@link org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder#setDefaultSocketConfig(SocketConfig)},
+	 * use the resulting connection manager for
+	 * {@link org.apache.hc.client5.http.impl.classic.HttpClientBuilder#setConnectionManager(HttpClientConnectionManager)},
+	 * and supply the built {@link HttpClient} to {@link #HttpComponentsClientHttpRequestFactory(HttpClient)}.
+	 * @deprecated as of 6.0, in favor of {@link SocketConfig.Builder#setSoTimeout(Timeout)}, see above.
+	 */
+	@Deprecated(since = "6.0", forRemoval = true)
+	public void setReadTimeout(int timeout) {
+		logger.warn("HttpComponentsClientHttpRequestFactory.setReadTimeout has no effect");
+	}
+
+	/**
 	 * Indicates whether this request factory should buffer the request body internally.
 	 * <p>Default is {@code true}. When sending large amounts of data via POST or PUT, it is
 	 * recommended to change this property to {@code false}, so as not to run out of memory.

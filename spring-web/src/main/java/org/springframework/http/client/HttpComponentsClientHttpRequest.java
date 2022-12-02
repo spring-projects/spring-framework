@@ -84,6 +84,8 @@ final class HttpComponentsClientHttpRequest extends AbstractStreamingClientHttpR
 		return this.httpContext;
 	}
 
+
+	@SuppressWarnings("deprecation")  // execute(ClassicHttpRequest, HttpContext)
 	@Override
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, @Nullable Body body) throws IOException {
 		addHeaders(this.httpRequest, headers);
