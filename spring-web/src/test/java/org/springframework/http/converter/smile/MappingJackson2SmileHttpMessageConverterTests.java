@@ -30,37 +30,34 @@ import org.springframework.http.MockHttpOutputMessage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 /**
  * Jackson 2.x Smile converter tests.
  *
  * @author Sebastien Deleuze
  */
-public class MappingJackson2SmileHttpMessageConverterTests {
+class MappingJackson2SmileHttpMessageConverterTests {
 
 	private final MappingJackson2SmileHttpMessageConverter converter = new MappingJackson2SmileHttpMessageConverter();
 	private final ObjectMapper mapper = new ObjectMapper(new SmileFactory());
 
 
 	@Test
-	public void canRead() {
+	void canRead() {
 		assertThat(converter.canRead(MyBean.class, new MediaType("application", "x-jackson-smile"))).isTrue();
 		assertThat(converter.canRead(MyBean.class, new MediaType("application", "json"))).isFalse();
 		assertThat(converter.canRead(MyBean.class, new MediaType("application", "xml"))).isFalse();
 	}
 
 	@Test
-	public void canWrite() {
+	void canWrite() {
 		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "x-jackson-smile"))).isTrue();
 		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "json"))).isFalse();
 		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "xml"))).isFalse();
 	}
 
 	@Test
-	public void read() throws IOException {
+	void read() throws IOException {
 		MyBean body = new MyBean();
 		body.setString("Foo");
 		body.setNumber(42);
@@ -68,7 +65,7 @@ public class MappingJackson2SmileHttpMessageConverterTests {
 		body.setArray(new String[]{"Foo", "Bar"});
 		body.setBool(true);
 		body.setBytes(new byte[]{0x1, 0x2});
-		InputStream inputStream = spy(new ByteArrayInputStream(mapper.writeValueAsBytes(body)));
+		InputStream inputStream = new ByteArrayInputStream(mapper.writeValueAsBytes(body));
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(inputStream);
 		inputMessage.getHeaders().setContentType(new MediaType("application", "x-jackson-smile"));
 		MyBean result = (MyBean) converter.read(MyBean.class, inputMessage);
@@ -79,11 +76,10 @@ public class MappingJackson2SmileHttpMessageConverterTests {
 		assertThat(result.getArray()).isEqualTo(new String[]{"Foo", "Bar"});
 		assertThat(result.isBool()).isTrue();
 		assertThat(result.getBytes()).isEqualTo(new byte[]{0x1, 0x2});
-		verify(inputStream, never()).close();
 	}
 
 	@Test
-	public void write() throws IOException {
+	void write() throws IOException {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		MyBean body = new MyBean();
 		body.setString("Foo");
@@ -96,7 +92,6 @@ public class MappingJackson2SmileHttpMessageConverterTests {
 		assertThat(outputMessage.getBodyAsBytes()).isEqualTo(mapper.writeValueAsBytes(body));
 		assertThat(outputMessage.getHeaders().getContentType())
 				.as("Invalid content-type").isEqualTo(new MediaType("application", "x-jackson-smile"));
-		verify(outputMessage.getBody(), never()).close();
 	}
 
 

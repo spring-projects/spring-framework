@@ -16,8 +16,6 @@
 
 package org.springframework.http.converter.xml;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import javax.xml.transform.Result;
@@ -44,19 +42,16 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 /**
  * Tests for {@link MarshallingHttpMessageConverter}.
  *
  * @author Arjen Poutsma
  */
-public class MarshallingHttpMessageConverterTests {
+class MarshallingHttpMessageConverterTests {
 
 	@Test
-	public void canRead() {
+	void canRead() {
 		Unmarshaller unmarshaller = mock(Unmarshaller.class);
 
 		given(unmarshaller.supports(Integer.class)).willReturn(false);
@@ -71,7 +66,7 @@ public class MarshallingHttpMessageConverterTests {
 	}
 
 	@Test
-	public void canWrite() {
+	void canWrite() {
 		Marshaller marshaller = mock(Marshaller.class);
 
 		given(marshaller.supports(Integer.class)).willReturn(false);
@@ -86,10 +81,9 @@ public class MarshallingHttpMessageConverterTests {
 	}
 
 	@Test
-	public void read() throws Exception {
+	void read() throws Exception {
 		String body = "<root>Hello World</root>";
-		InputStream inputStream = spy(new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)));
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(inputStream);
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 
 		Unmarshaller unmarshaller = mock(Unmarshaller.class);
 		given(unmarshaller.unmarshal(isA(StreamSource.class))).willReturn(body);
@@ -99,11 +93,10 @@ public class MarshallingHttpMessageConverterTests {
 
 		String result = (String) converter.read(Object.class, inputMessage);
 		assertThat(result).as("Invalid result").isEqualTo(body);
-		verify(inputStream, never()).close();
 	}
 
 	@Test
-	public void readWithTypeMismatchException() throws Exception {
+	void readWithTypeMismatchException() throws Exception {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(new byte[0]);
 
 		Marshaller marshaller = mock(Marshaller.class);
@@ -117,7 +110,7 @@ public class MarshallingHttpMessageConverterTests {
 	}
 
 	@Test
-	public void readWithMarshallingFailureException() throws Exception {
+	void readWithMarshallingFailureException() throws Exception {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(new byte[0]);
 		UnmarshallingFailureException ex = new UnmarshallingFailureException("forced");
 
@@ -132,7 +125,7 @@ public class MarshallingHttpMessageConverterTests {
 	}
 
 	@Test
-	public void write() throws Exception {
+	void write() throws Exception {
 		String body = "<root>Hello World</root>";
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 
@@ -144,11 +137,10 @@ public class MarshallingHttpMessageConverterTests {
 
 		assertThat(outputMessage.getHeaders().getContentType())
 				.as("Invalid content-type").isEqualTo(new MediaType("application", "xml"));
-		verify(outputMessage.getBody(), never()).close();
 	}
 
 	@Test
-	public void writeWithMarshallingFailureException() throws Exception {
+	void writeWithMarshallingFailureException() throws Exception {
 		String body = "<root>Hello World</root>";
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		MarshallingFailureException ex = new MarshallingFailureException("forced");
@@ -162,8 +154,9 @@ public class MarshallingHttpMessageConverterTests {
 	}
 
 	@Test
-	public void supports() {
+	void supports() {
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
 				new MarshallingHttpMessageConverter().supports(Object.class));
 	}
+
 }

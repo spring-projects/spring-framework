@@ -16,9 +16,7 @@
 
 package org.springframework.http.converter.protobuf;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.Message;
@@ -34,8 +32,6 @@ import org.springframework.protobuf.SecondMsg;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -92,12 +88,10 @@ public class ProtobufJsonFormatHttpMessageConverterTests {
 	@Test
 	public void read() throws IOException {
 		byte[] body = this.testMsg.toByteArray();
-		InputStream inputStream = spy(new ByteArrayInputStream(body));
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
 		inputMessage.getHeaders().setContentType(ProtobufHttpMessageConverter.PROTOBUF);
 		Message result = this.converter.read(Msg.class, inputMessage);
 		assertThat(result).isEqualTo(this.testMsg);
-		verify(inputStream, never()).close();
 	}
 
 	@Test
@@ -124,7 +118,6 @@ public class ProtobufJsonFormatHttpMessageConverterTests {
 		String schemaHeader =
 				outputMessage.getHeaders().getFirst(ProtobufHttpMessageConverter.X_PROTOBUF_SCHEMA_HEADER);
 		assertThat(schemaHeader).isEqualTo("sample.proto");
-		verify(outputMessage.getBody(), never()).close();
 	}
 
 	@Test
