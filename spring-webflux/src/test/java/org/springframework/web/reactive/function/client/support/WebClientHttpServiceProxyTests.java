@@ -18,6 +18,7 @@ package org.springframework.web.reactive.function.client.support;
 
 
 import java.io.IOException;
+import java.net.URI;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +32,8 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.lang.Nullable;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.service.annotation.GetExchange;
@@ -77,7 +80,7 @@ public class WebClientHttpServiceProxyTests {
 	}
 
 	@Test
-	void greetingWithRequestAttribute() throws Exception {
+	void greetingWithRequestAttribute() {
 
 		Map<String, Object> attributes = new HashMap<>();
 
@@ -100,7 +103,19 @@ public class WebClientHttpServiceProxyTests {
 		assertThat(attributes).containsEntry("myAttribute", "myAttributeValue");
 	}
 
-	private TestHttpService initHttpService() throws Exception {
+	@Test // gh-29624
+	void uri() throws Exception {
+		String expectedBody = "hello";
+		prepareResponse(response -> response.setResponseCode(200).setBody(expectedBody));
+
+		URI dynamicUri = this.server.url("/greeting/123").uri();
+		String actualBody = initHttpService().getGreetingById(dynamicUri, "456");
+
+		assertThat(actualBody).isEqualTo(expectedBody);
+		assertThat(this.server.takeRequest().getRequestUrl().uri()).isEqualTo(dynamicUri);
+	}
+
+	private TestHttpService initHttpService() {
 		WebClient webClient = WebClient.builder().baseUrl(this.server.url("/").toString()).build();
 		return initHttpService(webClient);
 	}
@@ -127,7 +142,9 @@ public class WebClientHttpServiceProxyTests {
 		@GetExchange("/greeting")
 		Mono<String> getGreetingWithAttribute(@RequestAttribute String myAttribute);
 
-	}
+		@GetExchange("/greetings/{id}")
+		String getGreetingById(@Nullable URI uri, @PathVariable String id);
 
+	}
 
 }

@@ -115,9 +115,11 @@ public final class HttpRequestValues {
 	}
 
 	/**
-	 * Return the full URL to use, if set.
-	 * <p>This is mutually exclusive with {@link #getUriTemplate() uriTemplate}.
-	 * One of the two has a value but not both.
+	 * Return the URL to use.
+	 * <p>Typically, this comes from a {@link URI} method argument, which provides
+	 * the caller with the option to override the {@link #getUriTemplate()
+	 * uriTemplate} from class and method {@code HttpExchange} annotations.
+	 * annotation.
 	 */
 	@Nullable
 	public URI getUri() {
@@ -125,9 +127,8 @@ public final class HttpRequestValues {
 	}
 
 	/**
-	 * Return the URL template for the request, if set.
-	 * <p>This is mutually exclusive with a {@linkplain #getUri() full URL}.
-	 * One of the two has a value but not both.
+	 * Return the URL template for the request. This comes from the values in
+	 * class and method {@code HttpExchange} annotations.
 	 */
 	@Nullable
 	public String getUriTemplate() {
@@ -248,38 +249,29 @@ public final class HttpRequestValues {
 		}
 
 		/**
-		 * Set the request URL as a full URL.
-		 * <p>This is mutually exclusive with, and resets any previously set
-		 * {@linkplain #setUriTemplate(String) URI template} or
-		 * {@linkplain #setUriVariable(String, String) URI variables}.
+		 * Set the URL to use. When set, this overrides the
+		 * {@linkplain #setUriTemplate(String) URI template} from the
+		 * {@code HttpExchange} annotation.
 		 */
 		public Builder setUri(URI uri) {
 			this.uri = uri;
-			this.uriTemplate = null;
-			this.uriVars = null;
 			return this;
 		}
 
 		/**
 		 * Set the request URL as a String template.
-		 * <p>This is mutually exclusive with, and resets any previously set
-		 * {@linkplain #setUri(URI) full URI}.
 		 */
 		public Builder setUriTemplate(String uriTemplate) {
 			this.uriTemplate = uriTemplate;
-			this.uri = null;
 			return this;
 		}
 
 		/**
 		 * Add a URI variable name-value pair.
-		 * <p>This is mutually exclusive with, and resets any previously set
-		 * {@linkplain #setUri(URI) full URI}.
 		 */
 		public Builder setUriVariable(String name, String value) {
 			this.uriVars = (this.uriVars != null ? this.uriVars : new LinkedHashMap<>());
 			this.uriVars.put(name, value);
-			this.uri = null;
 			return this;
 		}
 
@@ -399,7 +391,7 @@ public final class HttpRequestValues {
 		public HttpRequestValues build() {
 
 			URI uri = this.uri;
-			String uriTemplate = (this.uriTemplate != null || uri != null ? this.uriTemplate : "");
+			String uriTemplate = (this.uriTemplate != null ? this.uriTemplate : "");
 			Map<String, String> uriVars = (this.uriVars != null ? new HashMap<>(this.uriVars) : Collections.emptyMap());
 
 			Object bodyValue = this.bodyValue;
