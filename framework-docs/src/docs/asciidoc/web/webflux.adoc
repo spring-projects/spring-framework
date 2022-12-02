@@ -387,7 +387,7 @@ The code snippets below show using the `HttpHandler` adapters with each server A
 ----
 	HttpHandler handler = ...
 	ReactorHttpHandlerAdapter adapter = new ReactorHttpHandlerAdapter(handler);
-	HttpServer.create().host(host).port(port).handle(adapter).bind().block();
+	HttpServer.create().host(host).port(port).handle(adapter).bindNow().onDispose().block();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
