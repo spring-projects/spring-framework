@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -502,7 +502,7 @@ class CustomEditorTests {
 		CharBean cb = new CharBean();
 		BeanWrapper bw = new BeanWrapperImpl(cb);
 
-		bw.setPropertyValue("myChar", new Character('c'));
+		bw.setPropertyValue("myChar", 'c');
 		assertThat(cb.getMyChar()).isEqualTo('c');
 
 		bw.setPropertyValue("myChar", "c");
@@ -526,16 +526,16 @@ class CustomEditorTests {
 		bw.registerCustomEditor(Character.class, new CharacterEditor(true));
 
 		bw.setPropertyValue("myCharacter", 'c');
-		assertThat(cb.getMyCharacter()).isEqualTo(Character.valueOf('c'));
+		assertThat(cb.getMyCharacter()).isEqualTo('c');
 
 		bw.setPropertyValue("myCharacter", "c");
-		assertThat(cb.getMyCharacter()).isEqualTo(Character.valueOf('c'));
+		assertThat(cb.getMyCharacter()).isEqualTo('c');
 
 		bw.setPropertyValue("myCharacter", "\u0041");
-		assertThat(cb.getMyCharacter()).isEqualTo(Character.valueOf('A'));
+		assertThat(cb.getMyCharacter()).isEqualTo('A');
 
 		bw.setPropertyValue("myCharacter", " ");
-		assertThat(cb.getMyCharacter()).isEqualTo(Character.valueOf(' '));
+		assertThat(cb.getMyCharacter()).isEqualTo(' ');
 
 		bw.setPropertyValue("myCharacter", "");
 		assertThat(cb.getMyCharacter()).isNull();
