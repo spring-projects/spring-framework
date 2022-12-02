@@ -34,27 +34,38 @@ import org.junit.jupiter.api.condition.JRE;
 public class MBeanTestUtils {
 
 	/**
-	 * Resets {@link MBeanServerFactory} to a known consistent state. This involves
-	 * releasing all currently registered MBeanServers.
+	 * Reset the {@link MBeanServerFactory} to a known consistent state. This involves
+	 * {@linkplain #releaseMBeanServer(MBeanServer) releasing} all currently registered
+	 * MBeanServers.
 	 * <p>On JDK 8 - JDK 16, this method also resets the platformMBeanServer field
 	 * in {@link ManagementFactory} to {@code null}.
 	 */
 	public static synchronized void resetMBeanServers() throws Exception {
 		for (MBeanServer server : MBeanServerFactory.findMBeanServer(null)) {
-			try {
-				MBeanServerFactory.releaseMBeanServer(server);
-			}
-			catch (IllegalArgumentException ex) {
-				if (!ex.getMessage().contains("not in list")) {
-					throw ex;
-				}
-			}
+			releaseMBeanServer(server);
 		}
 
 		if (!isCurrentJreWithinRange(JRE.JAVA_16, JRE.OTHER)) {
 			Field field = ManagementFactory.class.getDeclaredField("platformMBeanServer");
 			field.setAccessible(true);
 			field.set(null, null);
+		}
+	}
+
+	/**
+	 * Attempt to release the supplied {@link MBeanServer}.
+	 * <p>Ignores any {@link IllegalArgumentException} thrown by
+	 * {@link MBeanServerFactory#releaseMBeanServer(MBeanServer)} whose error
+	 * message contains the text "not in list".
+	 */
+	public static void releaseMBeanServer(MBeanServer server) {
+		try {
+			MBeanServerFactory.releaseMBeanServer(server);
+		}
+		catch (IllegalArgumentException ex) {
+			if (!ex.getMessage().contains("not in list")) {
+				throw ex;
+			}
 		}
 	}
 

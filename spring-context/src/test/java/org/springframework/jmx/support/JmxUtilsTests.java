@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.beans.PropertyDescriptor;
 
 import javax.management.DynamicMBean;
 import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
@@ -32,6 +31,7 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.TestDynamicMBean;
+import org.springframework.util.MBeanTestUtils;
 import org.springframework.util.ObjectUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 class JmxUtilsTests {
 
@@ -131,10 +132,11 @@ class JmxUtilsTests {
 		MBeanServer server = null;
 		try {
 			server = JmxUtils.locateMBeanServer();
+			assertThat(server).isNotNull();
 		}
 		finally {
 			if (server != null) {
-				MBeanServerFactory.releaseMBeanServer(server);
+				MBeanTestUtils.releaseMBeanServer(server);
 			}
 		}
 	}

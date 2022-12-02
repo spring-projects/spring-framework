@@ -21,21 +21,25 @@ import java.lang.reflect.Field;
 import javax.naming.spi.NamingManager;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledForJreRange;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-
+import static org.junit.jupiter.api.condition.JRE.JAVA_16;
 
 /**
  * Tests for {@link JndiLocatorDelegate}.
  *
  * @author Phillip Webb
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
-public class JndiLocatorDelegateTests {
+@DisabledForJreRange(
+	min = JAVA_16,
+	disabledReason = "Cannot use reflection to set private static field in javax.naming.spi.NamingManager")
+class JndiLocatorDelegateTests {
 
 	@Test
-	public void isDefaultJndiEnvironmentAvailableFalse() throws Exception {
+	void isDefaultJndiEnvironmentAvailableFalse() throws Exception {
 		Field builderField = NamingManager.class.getDeclaredField("initctx_factory_builder");
 		builderField.setAccessible(true);
 		Object oldBuilder = builderField.get(null);
