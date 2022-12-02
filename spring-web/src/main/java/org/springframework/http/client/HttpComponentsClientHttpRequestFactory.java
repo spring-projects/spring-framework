@@ -149,8 +149,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 	/**
 	 * As of version 6.0, setting this property has no effect.
-	 *
-	 * <p/>To change the socket read timeout, use {@link SocketConfig.Builder#setSoTimeout(Timeout)},
+	 * <p>To change the socket read timeout, use {@link SocketConfig.Builder#setSoTimeout(Timeout)},
 	 * supply the resulting {@link SocketConfig} to
 	 * {@link org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder#setDefaultSocketConfig(SocketConfig)},
 	 * use the resulting connection manager for
@@ -249,6 +248,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * @return the merged request config
 	 * @since 4.2
 	 */
+	@SuppressWarnings("deprecation")  // setConnectTimeout
 	protected RequestConfig mergeRequestConfig(RequestConfig clientConfig) {
 		if (this.connectTimeout == -1 && this.connectionRequestTimeout == -1) {  // nothing to merge
 			return clientConfig;

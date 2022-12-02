@@ -82,6 +82,7 @@ final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpR
 	}
 
 
+	@SuppressWarnings("deprecation")  // execute(ClassicHttpRequest, HttpContext)
 	@Override
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput) throws IOException {
 		addHeaders(this.httpRequest, headers);
