@@ -264,6 +264,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		this.allowRawInjectionDespiteWrapping = allowRawInjectionDespiteWrapping;
 	}
 
+	public Object getSingleton(String beanName) {
+		return getSingleton(beanName, this.allowCircularReferences);
+	}
+
 	/**
 	 * Return whether to allow the raw injection of a bean instance.
 	 * @since 5.3.10
