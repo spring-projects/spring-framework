@@ -23,22 +23,34 @@ import javax.management.MBeanServerFactory;
  * Utilities for MBean tests.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  */
 public class MBeanTestUtils {
 
 	/**
-	 * Resets {@link MBeanServerFactory} to a known consistent state.
-	 * <p>This involves releasing all currently registered MBeanServers.
+	 * Reset the {@link MBeanServerFactory} to a known consistent state. This involves
+	 * {@linkplain #releaseMBeanServer(MBeanServer) releasing} all currently registered
+	 * MBeanServers.
 	 */
 	public static synchronized void resetMBeanServers() throws Exception {
 		for (MBeanServer server : MBeanServerFactory.findMBeanServer(null)) {
-			try {
-				MBeanServerFactory.releaseMBeanServer(server);
-			}
-			catch (IllegalArgumentException ex) {
-				if (!ex.getMessage().contains("not in list")) {
-					throw ex;
-				}
+			releaseMBeanServer(server);
+		}
+	}
+
+	/**
+	 * Attempt to release the supplied {@link MBeanServer}.
+	 * <p>Ignores any {@link IllegalArgumentException} thrown by
+	 * {@link MBeanServerFactory#releaseMBeanServer(MBeanServer)} whose error
+	 * message contains the text "not in list".
+	 */
+	public static void releaseMBeanServer(MBeanServer server) {
+		try {
+			MBeanServerFactory.releaseMBeanServer(server);
+		}
+		catch (IllegalArgumentException ex) {
+			if (!ex.getMessage().contains("not in list")) {
+				throw ex;
 			}
 		}
 	}
