@@ -227,7 +227,7 @@ public interface ErrorResponse {
 		Builder detailMessageArguments(Object... messageArguments);
 
 		/**
-		 * Set the underlying {@link ProblemDetail#setTitle(String)} field.
+		 * Set the underlying {@link ProblemDetail#setType(URI)} field.
 		 * @return the same builder instance
 		 */
 		Builder type(URI type);
