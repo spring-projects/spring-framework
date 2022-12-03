@@ -75,16 +75,14 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 						match = mm.matches(method, actualClass);
 					}
 					if (match) {
-						MethodInterceptor[] interceptors = registry.getInterceptors(advisor);
+						MethodInterceptor interceptor = registry.getInterceptors(advisor)[0];
 						if (mm.isRuntime()) {
 							// Creating a new object instance in the getInterceptors() method
 							// isn't a problem as we normally cache created chains.
-							for (MethodInterceptor interceptor : interceptors) {
-								interceptorList.add(new InterceptorAndDynamicMethodMatcher(interceptor, mm));
-							}
+							interceptorList.add(new InterceptorAndDynamicMethodMatcher(interceptor, mm));
 						}
 						else {
-							interceptorList.addAll(Arrays.asList(interceptors));
+							interceptorList.add(interceptor);
 						}
 					}
 				}
